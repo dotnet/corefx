@@ -3,15 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace System.Net.Test.Common
 {
@@ -141,10 +140,34 @@ namespace System.Net.Test.Common
             // We'll close the connection after reading the request header and sending the response.
             await AcceptConnectionAsync(async connection =>
             {
-                lines = await connection.ReadRequestHeaderAndSendResponseAsync(statusCode, additionalHeaders, content);
+                lines = await connection.ReadRequestHeaderAndSendResponseAsync(statusCode, additionalHeaders + "Connection: close\r\n", content);
             });
 
             return lines;
+        }
+
+        public static string GetRequestHeaderValue(List<string> headers, string name)
+        {
+            var sep = new char[] { ':' };
+            foreach (string line in headers)
+            {
+                string[] tokens = line.Split(sep , 2);
+                if (name.Equals(tokens[0], StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return tokens[1].Trim();
+                }
+            }
+            return null;
+        }
+
+        public static string GetRequestMethod(List<string> headers)
+        {
+
+            if (headers != null && headers.Count > 1)
+            {
+                return headers[0].Split()[1].Trim();
+            }
+            return null;
         }
 
         // Stolen from HttpStatusDescription code in the product code
@@ -254,16 +277,45 @@ namespace System.Net.Test.Common
             return null;
         }
 
-        public static string GetHttpResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null) =>
+        public enum ContentMode
+        {
+            ContentLength,
+            SingleChunk,
+            BytePerChunk,
+            ConnectionClose
+        }
+
+        public static string GetContentModeResponse(ContentMode mode, string content, bool connectionClose = false)
+        {
+            switch (mode)
+            {
+                case ContentMode.ContentLength:
+                    return GetHttpResponse(content: content, connectionClose: connectionClose);
+                case ContentMode.SingleChunk:
+                    return GetSingleChunkHttpResponse(content: content, connectionClose: connectionClose);
+                case ContentMode.BytePerChunk:
+                    return GetBytePerChunkHttpResponse(content: content, connectionClose: connectionClose);
+                case ContentMode.ConnectionClose:
+                    Assert.True(connectionClose);
+                    return GetConnectionCloseResponse(content: content);
+                default:
+                    Assert.True(false, $"Unknown content mode: {mode}");
+                    return null;
+            }
+        }
+
+        public static string GetHttpResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null, bool connectionClose = false) =>
             $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
+            (connectionClose ? "Connection: close\r\n" : "") +
             $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
             $"Content-Length: {(content == null ? 0 : content.Length)}\r\n" +
             additionalHeaders +
             "\r\n" +
             content;
 
-        public static string GetSingleChunkHttpResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null) =>
+        public static string GetSingleChunkHttpResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null, bool connectionClose = false) =>
             $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
+            (connectionClose ? "Connection: close\r\n" : "") +
             $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
             "Transfer-Encoding: chunked\r\n" +
             additionalHeaders +
@@ -274,8 +326,9 @@ namespace System.Net.Test.Common
             $"0\r\n" +
             $"\r\n";
 
-        public static string GetBytePerChunkHttpResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null) =>
+        public static string GetBytePerChunkHttpResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null, bool connectionClose = false) =>
             $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
+            (connectionClose ? "Connection: close\r\n" : "") +
             $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
             "Transfer-Encoding: chunked\r\n" +
             additionalHeaders +
@@ -284,17 +337,30 @@ namespace System.Net.Test.Common
             $"0\r\n" +
             $"\r\n";
 
+        public static string GetConnectionCloseResponse(HttpStatusCode statusCode = HttpStatusCode.OK, string additionalHeaders = null, string content = null) =>
+            $"HTTP/1.1 {(int)statusCode} {GetStatusDescription(statusCode)}\r\n" +
+            "Connection: close\r\n" +
+            $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+            additionalHeaders +
+            "\r\n" +
+            content;
+
         public class Options
         {
             public IPAddress Address { get; set; } = IPAddress.Loopback;
             public int ListenBacklog { get; set; } = 1;
             public bool UseSsl { get; set; } = false;
-            public SslProtocols SslProtocols { get; set; } = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
+            public SslProtocols SslProtocols { get; set; } =
+#if !netstandard
+                SslProtocols.Tls13 |
+#endif
+                SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
             public bool WebSocketEndpoint { get; set; } = false;
             public Func<Stream, Stream> StreamWrapper { get; set; }
             public string Username { get; set; }
             public string Domain { get; set; }
             public string Password { get; set; }
+            public bool IsProxy  { get; set; } = false;
         }
 
         public sealed class Connection : IDisposable

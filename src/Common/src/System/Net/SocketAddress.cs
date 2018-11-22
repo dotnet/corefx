@@ -30,6 +30,7 @@ namespace System.Net.Internals
 
         private const int MinSize = 2;
         private const int MaxSize = 32; // IrDA requires 32 bytes
+        private const int DataOffset = 2;
         private bool _changed = true;
         private int _hash;
 
@@ -228,16 +229,18 @@ namespace System.Net.Internals
 
         public override string ToString()
         {
-            StringBuilder bytes = new StringBuilder();
-            for (int i = SocketAddressPal.DataOffset; i < this.Size; i++)
+            var sb = new StringBuilder().Append(Family.ToString()).Append(':').Append(Size).Append(":{");
+
+            for (int i = DataOffset; i < Size; i++)
             {
-                if (i > SocketAddressPal.DataOffset)
+                if (i > DataOffset)
                 {
-                    bytes.Append(",");
+                    sb.Append(',');
                 }
-                bytes.Append(this[i].ToString(NumberFormatInfo.InvariantInfo));
+                sb.Append(this[i]);
             }
-            return Family.ToString() + ":" + Size.ToString(NumberFormatInfo.InvariantInfo) + ":{" + bytes.ToString() + "}";
+
+            return sb.Append('}').ToString();
         }
     }
 }

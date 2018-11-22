@@ -17,7 +17,7 @@ namespace System.Security.Cryptography.Pkcs
             lookup.Add(Oids.DsaWithSha256, new DSACmsSignature(Oids.DsaWithSha256, HashAlgorithmName.SHA256));
             lookup.Add(Oids.DsaWithSha384, new DSACmsSignature(Oids.DsaWithSha384, HashAlgorithmName.SHA384));
             lookup.Add(Oids.DsaWithSha512, new DSACmsSignature(Oids.DsaWithSha512, HashAlgorithmName.SHA512));
-            lookup.Add(Oids.DsaPublicKey, new DSACmsSignature(null, default));
+            lookup.Add(Oids.Dsa, new DSACmsSignature(null, default));
         }
 
         private class DSACmsSignature : CmsSignature
@@ -31,9 +31,19 @@ namespace System.Security.Cryptography.Pkcs
                 _expectedDigest = expectedDigest;
             }
 
+            protected override bool VerifyKeyType(AsymmetricAlgorithm key)
+            {
+                return (key as DSA) != null;
+            }
+
             internal override bool VerifySignature(
+#if netcoreapp
                 ReadOnlySpan<byte> valueHash,
                 ReadOnlyMemory<byte> signature,
+#else
+                byte[] valueHash,
+                byte[] signature,
+#endif                
                 string digestAlgorithmOid,
                 HashAlgorithmName digestAlgorithmName,
                 ReadOnlyMemory<byte>? signatureParameters,
@@ -58,36 +68,47 @@ namespace System.Security.Cryptography.Pkcs
                 DSAParameters dsaParameters = dsa.ExportParameters(false);
                 int bufSize = 2 * dsaParameters.Q.Length;
 
+#if netcoreapp
                 ArrayPool<byte> pool = ArrayPool<byte>.Shared;
                 byte[] rented = pool.Rent(bufSize);
                 Span<byte> ieee = new Span<byte>(rented, 0, bufSize);
 
                 try
                 {
+#else
+                byte[] ieee = new byte[bufSize];
+#endif
                     if (!DsaDerToIeee(signature, ieee))
                     {
                         return false;
                     }
 
                     return dsa.VerifySignature(valueHash, ieee);
+#if netcoreapp
                 }
                 finally
                 {
                     ieee.Clear();
                     pool.Return(rented);
                 }
+#endif
             }
 
             protected override bool Sign(
+#if netcoreapp
                 ReadOnlySpan<byte> dataHash,
+#else
+                byte[] dataHash,
+#endif
                 HashAlgorithmName hashAlgorithmName,
                 X509Certificate2 certificate,
+                AsymmetricAlgorithm key,
                 bool silent,
                 out Oid signatureAlgorithm,
                 out byte[] signatureValue)
             {
                 // If there's no private key, fall back to the public key for a "no private key" exception.
-                DSA dsa =
+                DSA dsa = key as DSA ??
                     PkcsPal.Instance.GetPrivateKeyForSigning<DSA>(certificate, silent) ??
                     certificate.GetDSAPublicKey();
 
@@ -114,6 +135,7 @@ namespace System.Security.Cryptography.Pkcs
 
                 signatureAlgorithm = new Oid(oidValue, oidValue);
 
+#if netcoreapp
                 ArrayPool<byte> pool = ArrayPool<byte>.Shared;
                 // The Q size cannot be bigger than the KeySize.
                 byte[] rented = pool.Rent(dsa.KeySize / 8);
@@ -123,7 +145,16 @@ namespace System.Security.Cryptography.Pkcs
                 {
                     if (dsa.TryCreateSignature(dataHash, rented, out bytesWritten))
                     {
-                        signatureValue = DsaIeeeToDer(new ReadOnlySpan<byte>(rented, 0, bytesWritten));
+                        var signature = new ReadOnlySpan<byte>(rented, 0, bytesWritten);
+
+                        if (key != null && !certificate.GetDSAPublicKey().VerifySignature(dataHash, signature))
+                        {
+                            // key did not match certificate
+                            signatureValue = null;
+                            return false;
+                        }
+
+                        signatureValue = DsaIeeeToDer(signature);
                         return true;
                     }
                 }
@@ -135,6 +166,11 @@ namespace System.Security.Cryptography.Pkcs
 
                 signatureValue = null;
                 return false;
+#else
+                byte[] signature = dsa.CreateSignature(dataHash);
+                signatureValue = DsaIeeeToDer(new ReadOnlySpan<byte>(signature));
+                return true;
+#endif                
             }
         }
     }

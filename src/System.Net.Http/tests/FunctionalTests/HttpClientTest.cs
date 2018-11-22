@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Test.Common;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,7 +14,7 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public partial class HttpClientTest : HttpClientTestBase
+    public abstract partial class HttpClientTest : HttpClientTestBase
     {
         [Fact]
         public void Dispose_MultipleTimes_Success()
@@ -210,7 +212,16 @@ namespace System.Net.Http.Functional.Tests
             using (var client = new HttpClient(new CustomResponseHandler((r,c) => Task.FromResult(new HttpResponseMessage() { Content = null }))))
             {
                 Assert.Same(string.Empty, await client.GetStringAsync(CreateFakeUri()));
-                Assert.Same(Array.Empty<byte>(), await client.GetByteArrayAsync(CreateFakeUri()));
+
+                if (PlatformDetection.IsFullFramework)
+                {
+                    Assert.Equal(Array.Empty<byte>(), await client.GetByteArrayAsync(CreateFakeUri()));
+                }
+                else
+                {
+                    Assert.Same(Array.Empty<byte>(), await client.GetByteArrayAsync(CreateFakeUri()));
+                }
+
                 Assert.Same(Stream.Null, await client.GetStreamAsync(CreateFakeUri()));
             }
         }
@@ -267,11 +278,11 @@ namespace System.Net.Http.Functional.Tests
 
                 cts.Cancel();
 
-                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => t1);
-                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => t2);
-                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => t3);
-                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => t4);
-                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => t5);
+                await Assert.ThrowsAsync<TaskCanceledException>(() => t1);
+                await Assert.ThrowsAsync<TaskCanceledException>(() => t2);
+                await Assert.ThrowsAsync<TaskCanceledException>(() => t3);
+                await Assert.ThrowsAsync<TaskCanceledException>(() => t4);
+                await Assert.ThrowsAsync<TaskCanceledException>(() => t5);
             }
         }
 
@@ -340,6 +351,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework disposes request content after send")]
         public async Task SendAsync_RequestContentNotDisposed()
         {
             var content = new ByteArrayContent(new byte[1]);
@@ -383,7 +395,7 @@ namespace System.Net.Http.Functional.Tests
                 }
                 Task<HttpResponseMessage>[] tasks = Enumerable.Range(0, 3).Select(_ => client.GetAsync(CreateFakeUri())).ToArray();
                 client.CancelPendingRequests();
-                Assert.All(tasks, task => Assert.ThrowsAny<OperationCanceledException>(() => task.GetAwaiter().GetResult()));
+                Assert.All(tasks, task => Assert.Throws<TaskCanceledException>(() => task.GetAwaiter().GetResult()));
             }
         }
 
@@ -394,8 +406,28 @@ namespace System.Net.Http.Functional.Tests
             {
                 client.Timeout = TimeSpan.FromMilliseconds(1);
                 Task<HttpResponseMessage>[] tasks = Enumerable.Range(0, 3).Select(_ => client.GetAsync(CreateFakeUri())).ToArray();
-                Assert.All(tasks, task => Assert.ThrowsAny<OperationCanceledException>(() => task.GetAwaiter().GetResult()));
+                Assert.All(tasks, task => Assert.Throws<TaskCanceledException>(() => task.GetAwaiter().GetResult()));
             }
+        }
+
+        [Fact]
+        public async Task SendAsync_UserAgent_CorrectlyWritten()
+        {
+            string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.18 Safari/537.36";
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var client = CreateHttpClient())
+                {
+                    var message = new HttpRequestMessage(HttpMethod.Get, uri);
+                    message.Headers.TryAddWithoutValidation("User-Agent", userAgent);
+                    (await client.SendAsync(message).ConfigureAwait(false)).Dispose();
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"User-Agent: {userAgent}", headers);
+            }));
         }
 
         [Fact]

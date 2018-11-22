@@ -32,7 +32,7 @@ namespace System.Globalization
             this.String = value;
         }
 
-        public override bool Equals(Object value)
+        public override bool Equals(object value)
         {
             StringInfo that = value as StringInfo;
             if (that != null)
@@ -266,7 +266,7 @@ namespace System.Globalization
             {
                 if (index == len)
                 {
-                    return (String.Empty);
+                    return (string.Empty);
                 }
                 throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
             }

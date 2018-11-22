@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
@@ -634,7 +635,7 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void GetExportOfT1_AskingForContractWithOneExport_ShouldReturnExport()
         {
-            var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(String)), "Value"));
+            var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(string)), "Value"));
 
             var export = container.GetExport<string>();
 
@@ -654,7 +655,7 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void GetExportOfTTMetadataView1_AskingForContractWithOneExport_ShouldReturnExport()
         {
-            var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(String)), "Value"));
+            var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(string)), "Value"));
 
             var export = container.GetExport<string, object>();
 
@@ -820,7 +821,7 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void GetExportOfT1_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
         {
-            var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(String)), "Value1", "Value2"));
+            var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(string)), "Value1", "Value2"));
 
             ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
              {
@@ -842,7 +843,7 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void GetExportOfTTMetadataView1_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
         {
-            var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(String)), "Value1", "Value2"));
+            var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(string)), "Value1", "Value2"));
 
             ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
             {
@@ -909,7 +910,7 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void GetExportsOfT1_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
         {
-            var container = ContainerFactory.Create(new MicroExport(typeof(String), "Value1", "Value2"));
+            var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
 
             var exports = container.GetExports<string>();
 
@@ -2830,7 +2831,7 @@ namespace System.ComponentModel.Composition
         {
             var expectations = new List<string>();
             expectations.Add((string)null);
-            expectations.Add(String.Empty);
+            expectations.Add(string.Empty);
             expectations.Add("Value");
 
             foreach (var expectation in expectations)
@@ -2848,7 +2849,7 @@ namespace System.ComponentModel.Composition
         {
             var expectations = new List<string>();
             expectations.Add((string)null);
-            expectations.Add(String.Empty);
+            expectations.Add(string.Empty);
             expectations.Add("Value");
 
             foreach (var expectation in expectations)
@@ -2866,7 +2867,7 @@ namespace System.ComponentModel.Composition
         {
             var expectations = new List<object>();
             expectations.Add((string)null);
-            expectations.Add(String.Empty);
+            expectations.Add(string.Empty);
             expectations.Add("Value");
             expectations.Add(42);
             expectations.Add(new object());
@@ -2942,7 +2943,7 @@ namespace System.ComponentModel.Composition
         {
             var container = CreateCompositionContainer();
             Assert.Throws<ArgumentException>("contractName", () =>
-                container.ComposeExportedValue<string>(String.Empty, "Value"));
+                container.ComposeExportedValue<string>(string.Empty, "Value"));
         }
 
         [Fact]
@@ -2950,10 +2951,10 @@ namespace System.ComponentModel.Composition
         {
             var expectations = new List<Tuple<string, string>>();
             expectations.Add(new Tuple<string, string>(" ", (string)null));
-            expectations.Add(new Tuple<string, string>(" ", String.Empty));
+            expectations.Add(new Tuple<string, string>(" ", string.Empty));
             expectations.Add(new Tuple<string, string>(" ", "Value"));
             expectations.Add(new Tuple<string, string>("ContractName", (string)null));
-            expectations.Add(new Tuple<string, string>("ContractName", String.Empty));
+            expectations.Add(new Tuple<string, string>("ContractName", string.Empty));
             expectations.Add(new Tuple<string, string>("ContractName", "Value"));
 
             foreach (var expectation in expectations)
@@ -3021,6 +3022,23 @@ namespace System.ComponentModel.Composition
             // Exported value should have been cached and so it shouldn't change
             Assert.Null(container.GetExportedValue<string>("Property"));
         }
+
+        [Fact]
+        public void TestExportedValueUsingWhereClause_ExportSuccessful()
+        {
+            CompositionContainer container = new CompositionContainer(new TypeCatalog(typeof(MefCollection<,>)));
+            IMefCollection<DerivedClass, BaseClass> actualValue = container.GetExportedValue<IMefCollection<DerivedClass, BaseClass>>("UsingWhereClause");
+            Assert.NotNull(actualValue);
+            Assert.IsType<MefCollection<DerivedClass, BaseClass>>(actualValue);
+        }
+
+        public interface IMefCollection { }
+        public interface IMefCollection<TC, TP> : IList<TC>, IMefCollection where TC : TP { }
+        public class BaseClass { }
+        public class DerivedClass : BaseClass { }
+
+        [Export("UsingWhereClause", typeof(IMefCollection<,>))]
+        public class MefCollection<TC, TP> : ObservableCollection<TC>, IMefCollection<TC, TP> where TC : TP { }
 
         public class ExportsMutableProperty
         {

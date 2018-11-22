@@ -1,7 +1,7 @@
 Performance Tests
 ======================
 
-This document contains instructions for building, running, and adding Performance tests. 
+This document contains instructions for building, running, and adding Performance tests.
 
 Building and Running Tests
 -----------
@@ -12,16 +12,20 @@ Performance test files (if present) are stored within a library's ```tests/Perfo
 **Step # 2:** Change directory to the performance tests directory: ```cd path/to/library/tests/Performance```
 
 **Step # 3:** Build and run the tests:
- - Windows (using admin command shell): ```msbuild /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release /p:TargetOS=Windows_NT```
- - Linux: ```<repo-root>/Tools/msbuild.sh /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release /p:TargetOS=Linux```
+ - Windows ```dotnet msbuild /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release```
+ - Linux: ```dotnet msbuild /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release```
 
-**Note: Because build-tests.cmd/sh runs tests concurrently, do not use it for executing performance tests.**
+**Note: Because test build runs tests concurrently, do not use it for executing performance tests. If you still want to run them concurrently you need to pass the flag `/p:Performance=true` to it: `build -test -release /p:Performance=true`.**
 
-The results files will be dropped in corefx/bin/tests/FLAVOR/TESTLIBRARY/TARGETFRAMEWORK.  The console output will also specify the location of these files. 
+The results files will be dropped in corefx/artifacts/bin/tests/TESTLIBRARY/FLAVOR/.  The console output will also specify the location of these files.
+
+**Getting memory usage**
+
+To see memory usage as well as time, add the following property to the command lines above: `/p:CollectFlags=stopwatch+gcapi`.
 
 Adding New Performance Tests
 -----------
-Performance tests for CoreFX are built on top of xunit and [the Microsoft xunit-performance framework](https://github.com/Microsoft/xunit-performance/). 
+Performance tests for CoreFX are built on top of xunit and [the Microsoft xunit-performance framework](https://github.com/Microsoft/xunit-performance/).
 
 Performance tests should reside within their own "Performance" folder within the tests directory of a library (e.g. [corefx/src/System.IO.FileSystem/tests/Performance](https://github.com/dotnet/corefx/tree/master/src/System.IO.FileSystem/tests/Performance) contains perf tests for FileSystem).
 

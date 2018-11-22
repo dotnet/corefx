@@ -1,6 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{1B528B61-14F9-4BFC-A79A-F0BDB3339150}</ProjectGuid>
     <AssemblyName>System.IO.FileSystem</AssemblyName>
@@ -8,17 +6,13 @@
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <UWPCompatible Condition="'$(TargetGroup)' == 'uap' or '$(TargetGroup)' == 'uapaot'">true</UWPCompatible>
     <ILLinkClearInitLocals>true</ILLinkClearInitLocals>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetsUnix)' == 'true'">
     <NoWarn>$(NoWarn);414</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="System\IO\Enumeration\FileSystemEntry.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerable.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerableFactory.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerator.cs" />
@@ -42,8 +36,8 @@
     <Compile Include="$(CommonPath)\System\IO\PathInternal.CaseSensitivity.cs">
       <Link>Common\System\IO\PathInternal.CaseSensitivity.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\StreamHelpers.CopyValidation.cs">
-      <Link>Common\System\IO\StreamHelpers.CopyValidation.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\StreamHelpers.CopyValidation.cs">
+      <Link>Common\CoreLib\System\IO\StreamHelpers.CopyValidation.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.cs">
       <Link>Common\CoreLib\System\IO\PathInternal.cs</Link>
@@ -52,7 +46,9 @@
   <!-- Windows -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="System\IO\Enumeration\FileSystemEnumerator.Windows.cs" />
-    <Compile Include="System\IO\DisableMediaInsertionPrompt.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\DisableMediaInsertionPrompt.cs">
+      <Link>Common\System\IO\DisableMediaInsertionPrompt.cs</Link>
+    </Compile>
     <Compile Include="System\IO\FileSystemInfo.Windows.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEntry.Windows.cs" />
     <Compile Include="System\IO\FileSystem.Windows.cs" />
@@ -60,13 +56,13 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CloseHandle.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs">
       <Link>Common\Interop\Windows\Interop.CloseHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
       <Link>Common\Interop\Windows\Interop.Errors.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FormatMessage.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
       <Link>Common\Interop\Windows\Interop.FormatMessage.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\HResults.cs">
@@ -78,14 +74,17 @@
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Windows.cs">
       <Link>Common\CoreLib\System\IO\PathInternal.Windows.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\Win32Marshal.cs">
-      <Link>Common\System\IO\Win32Marshal.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\Win32Marshal.cs">
+      <Link>Common\CoreLib\System\IO\Win32Marshal.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Interop.BOOL.cs">
-      <Link>Common\Interop\Windows\Interop.BOOL.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Interop.BOOL.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.BOOL.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SECURITY_ATTRIBUTES.cs">
-      <Link>Common\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetVolumeInformation.cs">
+      <Link>Common\Interop\Windows\Interop.GetVolumeInformation.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.SECURITY_ATTRIBUTES.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.SECURITY_ATTRIBUTES.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SetFileInformationByHandle.cs">
       <Link>Common\Interop\Windows\Interop.SetFileInformationByHandle.cs</Link>
@@ -93,13 +92,13 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FindNextFile.cs">
       <Link>Common\Interop\Windows\Interop.FindNextFile.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FindClose.cs">
-      <Link>Common\Interop\Windows\Interop.FindClose.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.FindClose.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.FindClose.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FileOperations.cs">
       <Link>Common\Interop\Windows\Interop.FileOperations.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FileAttributes.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FileAttributes.cs">
       <Link>Common\Interop\Windows\Interop.FileAttributes.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GenericOperations.cs">
@@ -114,20 +113,14 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FILE_TIME.cs">
       <Link>Common\Interop\Windows\Interop.FILE_TIME.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FINDEX_INFO_LEVELS.cs">
-      <Link>Common\Interop\Windows\Interop.FINDEX_INFO_LEVELS.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FINDEX_SEARCH_OPS.cs">
-      <Link>Common\Interop\Windows\Interop.FINDEX_SEARCH_OPS.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.WIN32_FILE_ATTRIBUTE_DATA.cs">
       <Link>Common\Interop\Windows\Interop.WIN32_FILE_ATTRIBUTE_DATA.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GET_FILEEX_INFO_LEVELS.cs">
       <Link>Common\Interop\Windows\Interop.GET_FILEEX_INFO_LEVELS.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.SetThreadErrorMode.cs">
-      <Link>Common\Interop\Windows\Interop.SetThreadErrorMode.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.SetThreadErrorMode.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.SetThreadErrorMode.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetLogicalDrive.cs">
       <Link>Common\Interop\Windows\Interop.GetLogicalDrive.cs</Link>
@@ -159,8 +152,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.RemoveDirectory.cs">
       <Link>Common\Interop\Windows\Interop.RemoveDirectory.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FindFirstFileEx.cs">
-      <Link>Common\Interop\Windows\Interop.FindFirstFileEx.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.FindFirstFileEx.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.FindFirstFileEx.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.ReplaceFile.cs">
       <Link>Common\Interop\Windows\Interop.ReplaceFile.cs</Link>
@@ -183,9 +176,13 @@
   </ItemGroup>
   <!-- Windows : Win32 only -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(UWPCompatible)' != 'true'">
+    <Compile Include="System\IO\FileSystem.Win32.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerator.Win32.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFile.cs">
       <Link>Common\Interop\Windows\Interop.CreateFile.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.EncryptDecrypt.cs">
+      <Link>Common\Interop\Windows\Interop.EncryptDecrypt.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.UNICODE_STRING.cs">
       <Link>Common\Interop\Windows\Interop.UNICODE_STRING.cs</Link>
@@ -214,6 +211,7 @@
   </ItemGroup>
   <!-- Windows : UAP - Win32 + WinRT -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' and '$(UWPCompatible)' == 'true'">
+    <Compile Include="System\IO\FileSystem.WinRT.cs" />
     <Compile Include="System\IO\Enumeration\FileSystemEnumerator.WinRT.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFile2.cs">
       <Link>Common\Interop\Windows\Interop.CreateFile2.cs</Link>
@@ -235,14 +233,15 @@
     <Compile Include="System\IO\Enumeration\FileSystemEnumerator.Unix.cs" />
     <Compile Include="System\IO\FileSystemInfo.Unix.cs" />
     <Compile Include="System\IO\FileSystem.Unix.cs" />
+    <Compile Include="System\IO\FileSystem.Exists.Unix.cs" />
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
-      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.Errors.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.IOErrors.cs">
-      <Link>Common\Interop\Unix\Interop.IOErrors.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.IOErrors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.IOErrors.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ChMod.cs">
       <Link>Common\Interop\Unix\Interop.ChMod.cs</Link>
@@ -253,10 +252,10 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.MkDir.cs">
       <Link>Common\Interop\Unix\Interop.MkDir.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Permissions.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Permissions.cs">
       <Link>Common\Interop\Unix\Interop.Permissions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Unlink.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Unlink.cs">
       <Link>Common\Interop\Unix\Interop.Unlink.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetEGid.cs">
@@ -265,7 +264,7 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetEUid.cs">
       <Link>Common\Interop\Unix\Interop.GetEUid.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Stat.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Stat.cs">
       <Link>Common\Interop\Unix\Interop.Stat.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Stat.Span.cs">
@@ -280,7 +279,7 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.MountPoints.cs">
       <Link>Common\Interop\Unix\Interop.MountPoints.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Read.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Read.cs">
       <Link>Common\Interop\Unix\Interop.Read.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Rename.cs">
@@ -289,8 +288,8 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.RmDir.cs">
       <Link>Common\Interop\Unix\Interop.RmDir.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.UTime.cs">
-      <Link>Common\Interop\Unix\Interop.UTime.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.UTimensat.cs">
+      <Link>Common\Interop\Unix\Interop.UTimensat.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Unix.cs">
       <Link>Common\CoreLib\System\IO\PathInternal.Unix.cs</Link>
@@ -321,5 +320,4 @@
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
     <Reference Include="System.Threading" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

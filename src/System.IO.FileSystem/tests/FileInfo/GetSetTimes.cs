@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Xunit;
 
 namespace System.IO.Tests
@@ -17,7 +18,27 @@ namespace System.IO.Tests
             return new FileInfo(path);
         }
 
+        public FileInfo GetNonZeroMilliSec()
+        {
+            FileInfo fileinfo = new FileInfo(GetTestFilePath());
+            for (int i = 0; i < 5; i++)
+            {
+                fileinfo.Create().Dispose();
+                if (fileinfo.LastWriteTime.Millisecond != 0)
+                    break;
+
+                // This case should only happen 1/1000 times, unless the OS/Filesystem does
+                // not support millisecond granularity.
+
+                // If it's 1/1000, or low granularity, this may help:
+                Thread.Sleep(1234);
+            }
+            return fileinfo;
+        }
+
         public override FileInfo GetMissingItem() => new FileInfo(GetTestFilePath());
+
+        public override string GetItemPath(FileInfo item) => item.FullName;
 
         public override void InvokeCreate(FileInfo item) => item.Create();
 
@@ -64,6 +85,55 @@ namespace System.IO.Tests
                 DateTimeKind.Utc);
         }
 
+        [ConditionalFact(nameof(isNotHFS))]
+        public void CopyToMillisecondPresent()
+        {
+            FileInfo input = GetNonZeroMilliSec();
+            FileInfo output = new FileInfo(Path.Combine(GetTestFilePath(), input.Name));
+
+            Assert.Equal(0, output.LastWriteTime.Millisecond);
+            output.Directory.Create();
+            output = input.CopyTo(output.FullName, true);
+
+            Assert.NotEqual(0, input.LastWriteTime.Millisecond);
+            Assert.NotEqual(0, output.LastWriteTime.Millisecond);
+        }
+
+        [ConditionalFact(nameof(isHFS))]
+        public void MoveToMillisecondPresent_HFS()
+        {
+            FileInfo input = new FileInfo(GetTestFilePath());
+            input.Create().Dispose();
+
+            string dest = Path.Combine(input.DirectoryName, GetTestFileName());
+            input.MoveTo(dest);
+            FileInfo output = new FileInfo(dest);
+            Assert.Equal(0, output.LastWriteTime.Millisecond);
+        }
+
+        [ConditionalFact(nameof(isNotHFS))]
+        public void MoveToMillisecondPresent()
+        {
+            FileInfo input = GetNonZeroMilliSec();
+            string dest = Path.Combine(input.DirectoryName, GetTestFileName());
+
+            input.MoveTo(dest);
+            FileInfo output = new FileInfo(dest);
+            Assert.NotEqual(0, output.LastWriteTime.Millisecond);
+        }
+
+        [ConditionalFact(nameof(isHFS))]
+        public void CopyToMillisecondPresent_HFS()
+        {
+            FileInfo input = new FileInfo(GetTestFilePath());
+            input.Create().Dispose();
+            FileInfo output = new FileInfo(Path.Combine(GetTestFilePath(), input.Name));
+            output.Directory.Create();
+            output = input.CopyTo(output.FullName, true);
+            Assert.Equal(0, input.LastWriteTime.Millisecond);
+            Assert.Equal(0, output.LastWriteTime.Millisecond);
+        }
+
         [Fact]
         public void DeleteAfterEnumerate_TimesStillSet()
         {
@@ -97,6 +167,22 @@ namespace System.IO.Tests
 
             // Assert.InRange is inclusive
             Assert.InRange(fi.CreationTimeUtc, before, fi.LastWriteTimeUtc);
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotInAppContainer))] // Can't read root in appcontainer
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void PageFileHasTimes()
+        {
+            // Typically there is a page file on the C: drive, if not, don't bother trying to track it down.
+            string pageFilePath = Directory.EnumerateFiles(@"C:\", "pagefile.sys").FirstOrDefault();
+            if (pageFilePath != null)
+            {
+                Assert.All(TimeFunctions(), (item) =>
+                {
+                    var time = item.Getter(new FileInfo(pageFilePath));
+                    Assert.NotEqual(DateTime.FromFileTime(0), time);
+                });
+            }
         }
     }
 }

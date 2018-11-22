@@ -158,6 +158,7 @@ namespace Microsoft.SqlServer.Server
         public SqlMetaData(string name, System.Data.SqlDbType dbType, long maxLength, long locale, System.Data.SqlTypes.SqlCompareOptions compareOptions, bool useServerDefault, bool isUniqueKey, System.Data.SqlClient.SortOrder columnSortOrder, int sortOrdinal) { }
         public SqlMetaData(string name, System.Data.SqlDbType dbType, string database, string owningSchema, string objectName) { }
         public SqlMetaData(string name, System.Data.SqlDbType dbType, string database, string owningSchema, string objectName, bool useServerDefault, bool isUniqueKey, System.Data.SqlClient.SortOrder columnSortOrder, int sortOrdinal) { }
+        public SqlMetaData(string name, System.Data.SqlDbType dbType, System.Type userDefinedType) { }
         public SqlMetaData(string name, System.Data.SqlDbType dbType, System.Type userDefinedType, string serverTypeName) { }
         public SqlMetaData(string name, System.Data.SqlDbType dbType, System.Type userDefinedType, string serverTypeName, bool useServerDefault, bool isUniqueKey, System.Data.SqlClient.SortOrder columnSortOrder, int sortOrdinal) { }
 
@@ -459,6 +460,7 @@ namespace System.Data.SqlClient
     {
         public SqlConnection() { }
         public SqlConnection(string connectionString) { }
+        public SqlConnection(string connectionString, System.Data.SqlClient.SqlCredential credential) { }
         public System.Guid ClientConnectionId { get { throw null; } }
         object ICloneable.Clone() { throw null; }
         public override string ConnectionString { get { throw null; } set { } }
@@ -471,6 +473,7 @@ namespace System.Data.SqlClient
         public override System.Data.ConnectionState State { get { throw null; } }
         public bool StatisticsEnabled { get { throw null; } set { } }
         public string WorkstationId { get { throw null; } }
+        public System.Data.SqlClient.SqlCredential Credential { get { throw null; } set { } }
         public event System.Data.SqlClient.SqlInfoMessageEventHandler InfoMessage { add { } remove { } }
         protected override System.Data.Common.DbTransaction BeginDbTransaction(System.Data.IsolationLevel isolationLevel) { throw null; }
         public new System.Data.SqlClient.SqlTransaction BeginTransaction() { throw null; }
@@ -490,6 +493,10 @@ namespace System.Data.SqlClient
         public override System.Threading.Tasks.Task OpenAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         public void ResetStatistics() { }
         public System.Collections.IDictionary RetrieveStatistics() { throw null; }
+        public static void ChangePassword(string connectionString, string newPassword) { throw null; }
+        public static void ChangePassword(string connectionString, System.Data.SqlClient.SqlCredential credential, System.Security.SecureString newPassword) { throw null; }
+        public string AccessToken { get { throw null; } set { } }
+
     }
     public sealed partial class SqlConnectionStringBuilder : System.Data.Common.DbConnectionStringBuilder
     {

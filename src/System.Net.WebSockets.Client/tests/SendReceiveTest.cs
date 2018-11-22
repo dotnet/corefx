@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Threading;
@@ -34,28 +32,29 @@ namespace System.Net.WebSockets.Client.Tests
 
         public SendReceiveTest(ITestOutputHelper output) : base(output) { }
 
-        [OuterLoop] // TODO: Issue #11345
-        [ActiveIssue(9296)]
+        [OuterLoop("Uses external server")]
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendReceive_PartialMessageDueToSmallReceiveBuffer_Success(Uri server)
         {
-            var sendBuffer = new byte[1024];
+            const int SendBufferSize = 10;
+            var sendBuffer = new byte[SendBufferSize];
             var sendSegment = new ArraySegment<byte>(sendBuffer);
 
-            var receiveBuffer = new byte[1024];
+            var receiveBuffer = new byte[SendBufferSize / 2];
             var receiveSegment = new ArraySegment<byte>(receiveBuffer);
 
             using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
             {
                 var ctsDefault = new CancellationTokenSource(TimeOutMilliseconds);
 
-                // The server will read buffers and aggregate it up to 64KB before echoing back a complete message.
-                // But since this test uses a receive buffer that is small, we will get back partial message fragments
-                // as we read them until we read the complete message payload.
-                for (int i = 0; i < 63; i++)
+                // The server will read buffers and aggregate it before echoing back a complete message.
+                // But since this test uses a receive buffer that is smaller than the complete message, we will get
+                // back partial message fragments as we read them until we read the complete message payload.
+                for (int i = 0; i < SendBufferSize * 5; i++)
                 {
                     await SendAsync(cws, sendSegment, WebSocketMessageType.Binary, false, ctsDefault.Token);
                 }
+
                 await SendAsync(cws, sendSegment, WebSocketMessageType.Binary, true, ctsDefault.Token);
 
                 WebSocketReceiveResult recvResult = await ReceiveAsync(cws, receiveSegment, ctsDefault.Token);
@@ -140,6 +139,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [ActiveIssue(33401, TargetFrameworkMonikers.NetFramework)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendAsync_MultipleOutstandingSendOperations_Throws(Uri server)
@@ -162,7 +162,7 @@ namespace System.Net.WebSockets.Client.Tests
                             cts.Token);
                     }
 
-                    Task.WaitAll(tasks);
+                    await Task.WhenAll(tasks);
 
                     Assert.Equal(WebSocketState.Open, cws.State);
                 }
@@ -226,41 +226,38 @@ namespace System.Net.WebSockets.Client.Tests
                         tasks[i] = ReceiveAsync(cws, recvSegment, cts.Token);
                     }
 
-                    Task.WaitAll(tasks);
+                    await Task.WhenAll(tasks);
                     Assert.Equal(WebSocketState.Open, cws.State);
                 }
-                catch (AggregateException ag)
+                catch (Exception ex)
                 {
-                    foreach (var ex in ag.InnerExceptions)
+                    if (ex is InvalidOperationException)
                     {
-                        if (ex is InvalidOperationException)
-                        {
-                            Assert.Equal(
-                                ResourceHelper.GetExceptionMessage(
-                                    "net_Websockets_AlreadyOneOutstandingOperation",
-                                    "ReceiveAsync"),
-                                ex.Message);
+                        Assert.Equal(
+                            ResourceHelper.GetExceptionMessage(
+                                "net_Websockets_AlreadyOneOutstandingOperation",
+                                "ReceiveAsync"),
+                            ex.Message);
 
-                            Assert.Equal(WebSocketState.Aborted, cws.State);
-                        }
-                        else if (ex is WebSocketException)
-                        {
-                            // Multiple cases.
-                            Assert.Equal(WebSocketState.Aborted, cws.State);
+                        Assert.Equal(WebSocketState.Aborted, cws.State);
+                    }
+                    else if (ex is WebSocketException)
+                    {
+                        // Multiple cases.
+                        Assert.Equal(WebSocketState.Aborted, cws.State);
 
-                            WebSocketError errCode = (ex as WebSocketException).WebSocketErrorCode;
-                            Assert.True(
-                                (errCode == WebSocketError.InvalidState) || (errCode == WebSocketError.Success),
-                                "WebSocketErrorCode");
-                        }
-                        else if (ex is OperationCanceledException)
-                        {
-                            Assert.Equal(WebSocketState.Aborted, cws.State);
-                        }
-                        else
-                        {
-                            Assert.True(false, "Unexpected exception: " + ex.Message);
-                        }
+                        WebSocketError errCode = (ex as WebSocketException).WebSocketErrorCode;
+                        Assert.True(
+                            (errCode == WebSocketError.InvalidState) || (errCode == WebSocketError.Success),
+                            "WebSocketErrorCode");
+                    }
+                    else if (ex is OperationCanceledException)
+                    {
+                        Assert.Equal(WebSocketState.Aborted, cws.State);
+                    }
+                    else
+                    {
+                        Assert.True(false, "Unexpected exception: " + ex.Message);
                     }
                 }
             }
@@ -305,7 +302,6 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
-        [ActiveIssue(23765, TestPlatforms.AnyUnix)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task SendReceive_VaryingLengthBuffers_Success(Uri server)
@@ -383,7 +379,7 @@ namespace System.Net.WebSockets.Client.Tests
 
             Func<ClientWebSocket, LoopbackServer, Uri, Task> connectToServerThatAbortsConnection = async (clientSocket, server, url) =>
             {
-                AutoResetEvent pendingReceiveAsyncPosted =  new AutoResetEvent(false);
+                var pendingReceiveAsyncPosted = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                 // Start listening for incoming connections on the server side.
                 Task acceptTask = server.AcceptConnectionAsync(async connection =>
@@ -392,7 +388,7 @@ namespace System.Net.WebSockets.Client.Tests
                     Assert.True(await LoopbackHelper.WebSocketHandshakeAsync(connection));
 
                     // Wait for client-side ConnectAsync to complete and for a pending ReceiveAsync to be posted.
-                    pendingReceiveAsyncPosted.WaitOne(TimeOutMilliseconds);
+                    await pendingReceiveAsyncPosted.Task.TimeoutAfter(TimeOutMilliseconds);
 
                     // Close the underlying connection prematurely (without sending a WebSocket Close frame).
                     connection.Socket.Shutdown(SocketShutdown.Both);
@@ -407,10 +403,10 @@ namespace System.Net.WebSockets.Client.Tests
                 var recvBuffer = new byte[100];
                 var recvSegment = new ArraySegment<byte>(recvBuffer);
                 Task pendingReceiveAsync = ReceiveAsync(clientSocket, recvSegment, cts.Token);
-                pendingReceiveAsyncPosted.Set();
+                pendingReceiveAsyncPosted.SetResult(true);
 
                 // Wait for the server to close the underlying connection.
-                acceptTask.Wait(cts.Token);
+                await acceptTask.WithCancellation(cts.Token);
 
                 WebSocketException pendingReceiveException = await Assert.ThrowsAsync<WebSocketException>(() => pendingReceiveAsync);
 
@@ -442,6 +438,49 @@ namespace System.Net.WebSockets.Client.Tests
                     await connectToServerThatAbortsConnection(clientSocket, server, url);
                 }
             }, options);
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
+        public async Task ZeroByteReceive_CompletesWhenDataAvailable(Uri server)
+        {
+            using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(server, TimeOutMilliseconds, _output))
+            {
+                var rand = new Random();
+                var ctsDefault = new CancellationTokenSource(TimeOutMilliseconds);
+
+                // Do a 0-byte receive.  It shouldn't complete yet.
+                Task<WebSocketReceiveResult> t = ReceiveAsync(cws, new ArraySegment<byte>(Array.Empty<byte>()), ctsDefault.Token);
+                Assert.False(t.IsCompleted);
+
+                // Send a packet to the echo server.
+                await SendAsync(cws, new ArraySegment<byte>(new byte[1] { 42 }), WebSocketMessageType.Binary, true, ctsDefault.Token);
+
+                // Now the 0-byte receive should complete, but without reading any data.
+                WebSocketReceiveResult r = await t;
+                Assert.Equal(WebSocketMessageType.Binary, r.MessageType);
+                Assert.Equal(0, r.Count);
+                Assert.False(r.EndOfMessage);
+
+                // Now do a receive to get the payload.
+                var receiveBuffer = new byte[1];
+                t = ReceiveAsync(cws, new ArraySegment<byte>(receiveBuffer), ctsDefault.Token);
+
+                // Skip synchronous completion check on UAP since it uses WinRT APIs underneath.
+                if (!PlatformDetection.IsUap)
+                {
+                    Assert.Equal(TaskStatus.RanToCompletion, t.Status);
+                }
+
+                r = await t;
+                Assert.Equal(WebSocketMessageType.Binary, r.MessageType);
+                Assert.Equal(1, r.Count);
+                Assert.True(r.EndOfMessage);
+                Assert.Equal(42, receiveBuffer[0]);
+
+                // Clean up.
+                await cws.CloseAsync(WebSocketCloseStatus.NormalClosure, nameof(ZeroByteReceive_CompletesWhenDataAvailable), ctsDefault.Token);
+            }
         }
     }
 }

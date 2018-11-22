@@ -51,7 +51,7 @@ namespace System.Net.WebSockets.Client.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
-        public async Task NullProxySet_ConnectsSuccessfully(Uri server)
+        public async Task Proxy_SetNull_ConnectsSuccessfully(Uri server)
         {
             for (int i = 0; i < 3; i++) // Connect and disconnect multiple times to exercise shared handler on netcoreapp
             {
@@ -64,6 +64,43 @@ namespace System.Net.WebSockets.Client.Tests
                 });
                 await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, default);
                 ws.Dispose();
+            }
+        }
+
+        [ActiveIssue(28027)]
+        [OuterLoop] // TODO: Issue #11345
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
+        public async Task Proxy_ConnectThruProxy_Success(Uri server)
+        {
+            string proxyServerUri = System.Net.Test.Common.Configuration.WebSockets.ProxyServerUri;
+            if (string.IsNullOrEmpty(proxyServerUri))
+            {
+                _output.WriteLine("Skipping test...no proxy server defined.");
+                return;
+            }
+            
+            _output.WriteLine($"ProxyServer: {proxyServerUri}");
+            
+            IWebProxy proxy = new WebProxy(new Uri(proxyServerUri));
+            using (ClientWebSocket cws = await WebSocketHelper.GetConnectedWebSocket(
+                server,
+                TimeOutMilliseconds,
+                _output,
+                default(TimeSpan),
+                proxy))
+            {
+                var cts = new CancellationTokenSource(TimeOutMilliseconds);
+                Assert.Equal(WebSocketState.Open, cws.State);
+
+                var closeStatus = WebSocketCloseStatus.NormalClosure;
+                string closeDescription = "Normal Closure";
+
+                await cws.CloseAsync(closeStatus, closeDescription, cts.Token);
+
+                // Verify a clean close frame handshake.
+                Assert.Equal(WebSocketState.Closed, cws.State);
+                Assert.Equal(closeStatus, cws.CloseStatus);
+                Assert.Equal(closeDescription, cws.CloseStatusDescription);
             }
         }
 
@@ -104,38 +141,6 @@ namespace System.Net.WebSockets.Client.Tests
             Assert.Equal(Timeout.InfiniteTimeSpan, cws.Options.KeepAliveInterval);
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => cws.Options.KeepAliveInterval = TimeSpan.MinValue);
-        }
-
-        [OuterLoop("Connects to remote service")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Lacks RemoteCertificateValidationCallback to enable loopback testing")]
-        [ConditionalFact(nameof(WebSocketsSupported), nameof(ClientCertificatesSupported))]
-        public async Task ClientCertificates_ValidCertificate_ServerReceivesCertificateAndConnectAsyncSucceeds()
-        {
-            using (X509Certificate2 clientCert = Test.Common.Configuration.Certificates.GetClientCertificate())
-            {
-                await LoopbackServer.CreateClientAndServerAsync(async uri =>
-                {
-                    using (var clientSocket = new ClientWebSocket())
-                    using (var cts = new CancellationTokenSource(TimeOutMilliseconds))
-                    {
-                        clientSocket.Options.ClientCertificates.Add(clientCert);
-                        clientSocket.Options.GetType().GetProperty("RemoteCertificateValidationCallback", BindingFlags.NonPublic | BindingFlags.Instance)
-                            .SetValue(clientSocket.Options, new RemoteCertificateValidationCallback(delegate { return true; })); // TODO: #12038: Simplify once property is public.
-                        await clientSocket.ConnectAsync(uri, cts.Token);
-                    }
-                }, server => server.AcceptConnectionAsync(async connection =>
-                {
-                    // Validate that the client certificate received by the server matches the one configured on
-                    // the client-side socket.
-                    SslStream sslStream = Assert.IsType<SslStream>(connection.Stream);
-                    Assert.NotNull(sslStream.RemoteCertificate);
-                    Assert.Equal(clientCert, new X509Certificate2(sslStream.RemoteCertificate));
-
-                    // Complete the WebSocket upgrade over the secure channel. After this is done, the client-side
-                    // ConnectAsync should complete.
-                    Assert.True(await LoopbackHelper.WebSocketHandshakeAsync(connection));
-                }), new LoopbackServer.Options { UseSsl = true, WebSocketEndpoint = true });
-            }
         }
     }
 }

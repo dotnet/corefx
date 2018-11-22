@@ -85,7 +85,11 @@ namespace System.Security.Cryptography.Pkcs
 
             try
             {
-                resp = AsnSerializer.Deserialize<Rfc3161TimeStampResp>(source, AsnEncodingRules.DER, out bytesConsumed);
+                AsnReader reader = new AsnReader(source, AsnEncodingRules.DER);
+                int localBytesRead = reader.PeekEncodedValue().Length;
+
+                Rfc3161TimeStampResp.Decode(reader, out resp);
+                bytesConsumed = localBytesRead;
             }
             catch (CryptographicException) when (!shouldThrow)
             {
@@ -206,7 +210,7 @@ namespace System.Security.Cryptography.Pkcs
             bool requestSignerCertificates = false,
             X509ExtensionCollection extensions = null)
         {
-            string oidStr = Helpers.GetOidFromHashAlgorithm(hashAlgorithm);
+            string oidStr = PkcsHelpers.GetOidFromHashAlgorithm(hashAlgorithm);
             
             return CreateFromHash(
                 hash,
@@ -250,6 +254,39 @@ namespace System.Security.Cryptography.Pkcs
             bool requestSignerCertificates = false,
             X509ExtensionCollection extensions = null)
         {
+            // Normalize the nonce:
+            if (nonce.HasValue)
+            {
+                ReadOnlyMemory<byte> nonceMemory = nonce.Value;
+                ReadOnlySpan<byte> nonceSpan = nonceMemory.Span;
+
+                // If it's empty, or it would be negative, insert the requisite byte.
+                if (nonceSpan.Length == 0 || nonceSpan[0] >= 0x80)
+                {
+                    byte[] temp = new byte[nonceSpan.Length + 1];
+                    nonceSpan.CopyTo(temp.AsSpan(1));
+                    nonce = temp;
+                }
+                else
+                {
+                    int slice = 0;
+
+                    // Find all extra leading 0x00 values and trim them off.
+                    while (slice < nonceSpan.Length && nonceSpan[slice] == 0)
+                    {
+                        slice++;
+                    }
+
+                    // Back up one if it was all zero, or we turned the number negative.
+                    if (slice == nonceSpan.Length || nonceSpan[slice] >= 0x80)
+                    {
+                        slice--;
+                    }
+
+                    nonce = nonceMemory.Slice(slice);
+                }
+            }
+
             var req = new Rfc3161TimeStampReq
             {
                 Version = 1,
@@ -277,17 +314,21 @@ namespace System.Security.Cryptography.Pkcs
             // The RFC implies DER (see TryParse), and DER is the most widely understood given that
             // CER isn't specified.
             const AsnEncodingRules ruleSet = AsnEncodingRules.DER;
-            AsnWriter writer = AsnSerializer.Serialize(req, ruleSet);
-            byte[] encodedBytes = writer.Encode();
-
-            // Make sure everything normalizes
-            req = AsnSerializer.Deserialize<Rfc3161TimeStampReq>(encodedBytes, ruleSet);
-            
-            return new Rfc3161TimestampRequest
+            using (AsnWriter writer = new AsnWriter(ruleSet))
             {
-                _encodedBytes = writer.Encode(),
-                _parsedData = req,
-            };
+                req.Encode(writer);
+
+                byte[] encodedBytes = writer.Encode();
+
+                // Make sure everything normalizes
+                req = Rfc3161TimeStampReq.Decode(encodedBytes, ruleSet);
+
+                return new Rfc3161TimestampRequest
+                {
+                    _encodedBytes = writer.Encode(),
+                    _parsedData = req,
+                };
+            }
         }
 
         public static bool TryDecode(
@@ -308,7 +349,7 @@ namespace System.Security.Cryptography.Pkcs
                 AsnReader reader = new AsnReader(encodedBytes, RuleSet);
                 ReadOnlyMemory<byte> firstElement = reader.PeekEncodedValue();
 
-                var req = AsnSerializer.Deserialize<Rfc3161TimeStampReq>(firstElement, RuleSet);
+                Rfc3161TimeStampReq.Decode(reader, out Rfc3161TimeStampReq req);
 
                 request = new Rfc3161TimestampRequest
                 {

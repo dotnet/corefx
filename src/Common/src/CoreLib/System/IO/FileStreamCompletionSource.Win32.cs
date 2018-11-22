@@ -87,7 +87,7 @@ namespace System.IO
                     long packedResult = Interlocked.CompareExchange(ref _result, RegisteringCancellation, NoResult);
                     if (packedResult == NoResult)
                     {
-                        _cancellationRegistration = cancellationToken.Register(cancelCallback, this);
+                        _cancellationRegistration = cancellationToken.UnsafeRegister(cancelCallback, this);
 
                         // Switch the result, just in case IO completed while we were setting the registration
                         packedResult = Interlocked.Exchange(ref _result, NoResult);
@@ -246,7 +246,7 @@ namespace System.IO
             internal MemoryFileStreamCompletionSource(FileStream stream, int numBufferedBytes, ReadOnlyMemory<byte> memory) :
                 base(stream, numBufferedBytes, bytes: null) // this type handles the pinning, so null is passed for bytes
             {
-                _handle = memory.Retain(pin: true);
+                _handle = memory.Pin();
             }
 
             internal override void ReleaseNativeResource()

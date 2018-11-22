@@ -68,12 +68,10 @@ namespace Internal.Cryptography.Pal
 
             public void Remove(ICertificatePal cert)
             {
-                if (_readonly)
-                    throw new CryptographicException(SR.Cryptography_X509_StoreReadOnly);
-
                 AppleCertificatePal applePal = (AppleCertificatePal)cert;
 
-                Interop.AppleCrypto.X509StoreRemoveCertificate(applePal.CertificateHandle, _keychainHandle);
+                var handle = (SafeKeychainItemHandle)applePal.IdentityHandle ?? applePal.CertificateHandle;
+                Interop.AppleCrypto.X509StoreRemoveCertificate(handle, _keychainHandle, _readonly);
             }
 
             public SafeHandle SafeHandle => _keychainHandle;
@@ -87,6 +85,11 @@ namespace Internal.Cryptography.Pal
             {
                 const string SharedSystemKeychainPath = "/Library/Keychains/System.keychain";
                 return OpenKeychain(SharedSystemKeychainPath, openFlags);
+            }
+
+            public static AppleKeychainStore CreateOrOpenKeychain(string keychainPath, OpenFlags openFlags)
+            {
+                return new AppleKeychainStore(Interop.AppleCrypto.CreateOrOpenKeychain(keychainPath, !openFlags.HasFlag(OpenFlags.OpenExistingOnly)), openFlags);
             }
 
             private static AppleKeychainStore OpenKeychain(string keychainPath, OpenFlags openFlags)

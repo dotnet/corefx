@@ -66,15 +66,26 @@ internal static partial class Interop
             return keySize;
         }
 
-        internal static bool DsaSign(SafeDsaHandle dsa, ReadOnlySpan<byte> hash, int hashLength, ReadOnlySpan<byte> refSignature, out int outSignatureLength) =>
-            DsaSign(dsa, ref MemoryMarshal.GetReference(hash), hashLength, ref MemoryMarshal.GetReference(refSignature), out outSignatureLength);
+        internal static bool DsaSign(SafeDsaHandle dsa, ReadOnlySpan<byte> hash, Span<byte> refSignature, out int outSignatureLength) =>
+            DsaSign(dsa, ref MemoryMarshal.GetReference(hash), hash.Length, ref MemoryMarshal.GetReference(refSignature), out outSignatureLength);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_DsaSign")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool DsaSign(SafeDsaHandle dsa, ref byte hash, int hashLength, ref byte refSignature, out int outSignatureLength);
 
-        internal static bool DsaVerify(SafeDsaHandle dsa, ReadOnlySpan<byte> hash, int hashLength, ReadOnlySpan<byte> signature, int signatureLength) =>
-            DsaVerify(dsa, ref MemoryMarshal.GetReference(hash), hashLength, ref MemoryMarshal.GetReference(signature), signatureLength);
+        internal static bool DsaVerify(SafeDsaHandle dsa, ReadOnlySpan<byte> hash, ReadOnlySpan<byte> signature)
+        {
+            bool ret = DsaVerify(
+                dsa,
+                ref MemoryMarshal.GetReference(hash),
+                hash.Length,
+                ref MemoryMarshal.GetReference(signature),
+                signature.Length);
+
+            // Error queue already cleaned on the native function.
+
+            return ret;
+        }
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_DsaVerify")]
         [return: MarshalAs(UnmanagedType.Bool)]

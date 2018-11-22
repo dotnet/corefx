@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Xml;
-using System.Runtime.CompilerServices;
 
 namespace System.ServiceModel.Syndication
 {
@@ -11,47 +11,29 @@ namespace System.ServiceModel.Syndication
     public class UrlSyndicationContent : SyndicationContent
     {
         private string _mediaType;
-        private Uri _url;
 
         public UrlSyndicationContent(Uri url, string mediaType) : base()
         {
-            if (url == null)
-            {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("url");
-            }
-            _url = url;
+            Url = url ?? throw new ArgumentNullException(nameof(url));
             _mediaType = mediaType;
         }
 
-        protected UrlSyndicationContent(UrlSyndicationContent source)
-            : base(source)
+        protected UrlSyndicationContent(UrlSyndicationContent source) : base(source)
         {
-            if (source == null)
-            {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("source");
-            }
-            _url = source._url;
+            Debug.Assert(source != null, "The base constructor already checks if source is valid.");
+            Url = source.Url;
             _mediaType = source._mediaType;
         }
 
-        public override string Type
-        {
-            get { return _mediaType; }
-        }
+        public override string Type => _mediaType;
 
-        public Uri Url
-        {
-            get { return _url; }
-        }
+        public Uri Url { get; }
 
-        public override SyndicationContent Clone()
-        {
-            return new UrlSyndicationContent(this);
-        }
+        public override SyndicationContent Clone() => new UrlSyndicationContent(this);
 
         protected override void WriteContentsTo(XmlWriter writer)
         {
-            writer.WriteAttributeString(Atom10Constants.SourceTag, string.Empty, FeedUtils.GetUriString(_url));
+            writer.WriteAttributeString(Atom10Constants.SourceTag, string.Empty, FeedUtils.GetUriString(Url));
         }
     }
 }

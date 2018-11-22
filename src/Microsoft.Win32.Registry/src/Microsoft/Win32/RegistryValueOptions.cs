@@ -7,12 +7,7 @@ using System;
 namespace Microsoft.Win32
 {
     [Flags]
-#if REGISTRY_ASSEMBLY
-    public
-#else
-    internal
-#endif
-    enum RegistryValueOptions
+    public enum RegistryValueOptions
     {
         None = 0,
         DoNotExpandEnvironmentNames = 1

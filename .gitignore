@@ -4,6 +4,8 @@ syntax: glob
 
 # Tool Runtime Dir
 /[Tt]ools/
+.dotnet/
+.packages/
 
 # User-specific files
 *.suo
@@ -12,13 +14,12 @@ syntax: glob
 *.sln.docstates
 
 # Build results
+artifacts/
 .idea/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-x64/
-x86/
 build/
 bld/
 [Bb]in/
@@ -27,12 +28,15 @@ msbuild.log
 msbuild.err
 msbuild.wrn
 msbuild.binlog
+.deps/
+.dirstamp
+.libs/
+*.lo
+*.o
 
 # Cross building rootfs
 cross/rootfs/
 cross/android-rootfs/
-# add x86 as it is ignored in 'Build results'
-!cross/x86
 
 # Visual Studio 2015
 .vs/
@@ -273,3 +277,6 @@ Session.vim
 # Private test configuration and binaries.
 config.ps1
 **/IISApplications
+
+# VS debug support files
+launchSettings.json

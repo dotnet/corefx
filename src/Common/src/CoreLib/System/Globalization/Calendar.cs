@@ -206,7 +206,7 @@ namespace System.Globalization
             if (ticks < minValue.Ticks || ticks > maxValue.Ticks)
             {
                 throw new ArgumentException(
-                    String.Format(CultureInfo.InvariantCulture, SR.Format(SR.Argument_ResultCalendarRange,
+                    string.Format(CultureInfo.InvariantCulture, SR.Format(SR.Argument_ResultCalendarRange,
                         minValue, maxValue)));
             }
         }
@@ -736,7 +736,7 @@ namespace System.Globalization
 
         public abstract DateTime ToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int era);
 
-        internal virtual Boolean TryToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int era, out DateTime result)
+        internal virtual bool TryToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int era, out DateTime result)
         {
             result = DateTime.MinValue;
             try
@@ -818,7 +818,7 @@ namespace System.Globalization
                 {
                     throw new ArgumentOutOfRangeException(
                                 nameof(millisecond),
-                                String.Format(
+                                string.Format(
                                     CultureInfo.InvariantCulture,
                                     SR.Format(SR.ArgumentOutOfRange_Range, 0, MillisPerSecond - 1)));
                 }

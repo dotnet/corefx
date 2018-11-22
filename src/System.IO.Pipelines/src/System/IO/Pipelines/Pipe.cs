@@ -48,6 +48,8 @@ namespace System.IO.Pipelines
         private readonly DefaultPipeReader _reader;
         private readonly DefaultPipeWriter _writer;
 
+        private readonly bool _useSynchronizationContext;
+
         private long _length;
         private long _currentWriteLength;
 
@@ -105,9 +107,9 @@ namespace System.IO.Pipelines
             _resumeWriterThreshold = options.ResumeWriterThreshold;
             _readerScheduler = options.ReaderScheduler;
             _writerScheduler = options.WriterScheduler;
-            var useSynchronizationContext = options.UseSynchronizationContext;
-            _readerAwaitable = new PipeAwaitable(completed: false, useSynchronizationContext);
-            _writerAwaitable = new PipeAwaitable(completed: true, useSynchronizationContext);
+            _useSynchronizationContext = options.UseSynchronizationContext;
+            _readerAwaitable = new PipeAwaitable(completed: false, _useSynchronizationContext);
+            _writerAwaitable = new PipeAwaitable(completed: true, _useSynchronizationContext);
             _reader = new DefaultPipeReader(this);
             _writer = new DefaultPipeWriter(this);
         }
@@ -116,6 +118,8 @@ namespace System.IO.Pipelines
         {
             _readerCompletion.Reset();
             _writerCompletion.Reset();
+            _readerAwaitable = new PipeAwaitable(completed: false, _useSynchronizationContext);
+            _writerAwaitable = new PipeAwaitable(completed: true, _useSynchronizationContext);
             _commitHeadIndex = 0;
             _currentWriteLength = 0;
             _length = 0;
@@ -135,7 +139,46 @@ namespace System.IO.Pipelines
 
             lock (_sync)
             {
-                BufferSegment segment = _writingHead ?? AllocateWriteHeadUnsynchronized(sizeHint);
+                AllocateWriteHeadUnsynchronized(sizeHint);
+            }
+
+            // Slice the AvailableMemory to the WritableBytes size
+            int end = _writingHead.End;
+            Memory<byte> availableMemory = _writingHead.AvailableMemory;
+            availableMemory = availableMemory.Slice(end);
+            return availableMemory;
+        }
+
+        internal Span<byte> GetSpan(int sizeHint)
+        {
+            if (_writerCompletion.IsCompleted)
+            {
+                ThrowHelper.ThrowInvalidOperationException_NoWritingAllowed();
+            }
+
+            if (sizeHint < 0)
+            {
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.minimumSize);
+            }
+
+            lock (_sync)
+            {
+                AllocateWriteHeadUnsynchronized(sizeHint);
+            }
+
+            // Slice the AvailableMemory to the WritableBytes size
+            int end = _writingHead.End;
+            Span<byte> availableSpan = _writingHead.AvailableMemory.Span;
+            availableSpan = availableSpan.Slice(end);
+            return availableSpan;
+        }
+
+        private void AllocateWriteHeadUnsynchronized(int sizeHint)
+        {
+            BufferSegment segment = null;
+            if (_writingHead != null)
+            {
+                segment = _writingHead;
 
                 int bytesLeftInBuffer = segment.WritableBytes;
 
@@ -150,57 +193,51 @@ namespace System.IO.Pipelines
                     _writingHead = nextSegment;
                 }
             }
-
-            return _writingHead.AvailableMemory.Slice(_writingHead.End, _writingHead.WritableBytes);
-        }
-
-        private BufferSegment AllocateWriteHeadUnsynchronized(int sizeHint)
-        {
-            BufferSegment segment = null;
-
-            if (_commitHead != null && !_commitHead.ReadOnly)
+            else
             {
-                // Try to return the tail so the calling code can append to it
-                int remaining = _commitHead.WritableBytes;
-
-                if (sizeHint <= remaining && remaining > 0)
+                if (_commitHead != null && !_commitHead.ReadOnly)
                 {
-                    // Free tail space of the right amount, use that
-                    segment = _commitHead;
-                }
-            }
+                    // Try to return the tail so the calling code can append to it
+                    int remaining = _commitHead.WritableBytes;
 
-            if (segment == null)
-            {
+                    if (sizeHint <= remaining && remaining > 0)
+                    {
+                        // Free tail space of the right amount, use that
+                        segment = _commitHead;
+
+                        // Set write head to assigned segment
+                        _writingHead = segment;
+                        return;
+                    }
+                }
+
                 // No free tail space, allocate a new segment
                 segment = CreateSegmentUnsynchronized();
                 segment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
-            }
 
-            if (_commitHead == null)
-            {
-                // No previous writes have occurred
-                _commitHead = segment;
-            }
-            else if (segment != _commitHead && _commitHead.Next == null)
-            {
-                // Append the segment to the commit head if writes have been committed
-                // and it isn't the same segment (unused tail space)
-                _commitHead.SetNext(segment);
-            }
+                if (_commitHead == null)
+                {
+                    // No previous writes have occurred
+                    _commitHead = segment;
+                }
+                else if (segment != _commitHead && _commitHead.Next == null)
+                {
+                    // Append the segment to the commit head if writes have been committed
+                    // and it isn't the same segment (unused tail space)
+                    _commitHead.SetNext(segment);
+                }
 
-            // Set write head to assigned segment
-            _writingHead = segment;
-
-            return segment;
+                // Set write head to assigned segment
+                _writingHead = segment;
+            }
         }
 
         private int GetSegmentSize(int sizeHint)
         {
             // First we need to handle case where hint is smaller than minimum segment size
-            var adjustedToMinimumSize = Math.Max(_minimumSegmentSize, sizeHint);
+            sizeHint = Math.Max(_minimumSegmentSize, sizeHint);
             // After that adjust it to fit into pools max buffer size
-            var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, adjustedToMinimumSize);
+            var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, sizeHint);
             return adjustedToMaximumSize;
         }
 
@@ -224,12 +261,12 @@ namespace System.IO.Pipelines
             }
         }
 
-        internal void CommitUnsynchronized()
+        internal bool CommitUnsynchronized()
         {
             if (_writingHead == null)
             {
                 // Nothing written to commit
-                return;
+                return true;
             }
 
             if (_readHead == null)
@@ -241,9 +278,10 @@ namespace System.IO.Pipelines
             }
 
             // Always move the commit head to the write head
+            var bytesWritten = _currentWriteLength;
             _commitHead = _writingHead;
             _commitHeadIndex = _writingHead.End;
-            _length += _currentWriteLength;
+            _length += bytesWritten;
 
             // Do not reset if reader is complete
             if (_pauseWriterThreshold > 0 &&
@@ -256,6 +294,8 @@ namespace System.IO.Pipelines
             // Clear the writing state
             _writingHead = null;
             _currentWriteLength = 0;
+
+            return bytesWritten == 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -266,7 +306,7 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowInvalidOperationException_NotWritingNoAlloc();
             }
 
-            if (bytesWritten > 0)
+            if (bytesWritten >= 0)
             {
                 Debug.Assert(!_writingHead.ReadOnly);
                 Debug.Assert(_writingHead.Next == null);
@@ -278,15 +318,14 @@ namespace System.IO.Pipelines
                     ThrowHelper.ThrowInvalidOperationException_AdvancingPastBufferSize();
                 }
 
+                // if bytesWritten is zero, these do nothing
                 _writingHead.End += bytesWritten;
                 _currentWriteLength += bytesWritten;
             }
-            else if (bytesWritten < 0)
+            else
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.bytesWritten);
             }
-
-            // and if zero, just do nothing; don't need to validate tail etc
         }
 
         internal ValueTask<FlushResult> FlushAsync(CancellationToken cancellationToken)
@@ -296,13 +335,12 @@ namespace System.IO.Pipelines
             ValueTask<FlushResult> result;
             lock (_sync)
             {
-                CommitUnsynchronized();
+                var wasEmpty = CommitUnsynchronized();
 
-                _readerAwaitable.Complete(out completionData);
-
+                // AttachToken before completing reader awaiter in case cancellationToken is already completed
                 cancellationTokenRegistration = _writerAwaitable.AttachToken(cancellationToken, s_signalWriterAwaitable, this);
 
-                // If the writer is completed (which it will be most of the time) the return a completed ValueTask
+                // If the writer is completed (which it will be most of the time) then return a completed ValueTask
                 if (_writerAwaitable.IsCompleted)
                 {
                     var flushResult = new FlushResult();
@@ -314,6 +352,22 @@ namespace System.IO.Pipelines
                     // Otherwise it's async
                     result = new ValueTask<FlushResult>(_writer, token: 0);
                 }
+
+                // Complete reader only if new data was pushed into the pipe
+                // Avoid throwing in between completing the reader and scheduling the callback
+                // if the intent is to allow pipe to continue reading the data
+                if (!wasEmpty)
+                {
+                    _readerAwaitable.Complete(out completionData);
+                }
+                else
+                {
+                    completionData = default;
+                }
+
+                // I couldn't find a way for flush to induce backpressure deadlock
+                // if it always adds new data to pipe and wakes up the reader but assert anyway
+                Debug.Assert(_writerAwaitable.IsCompleted || _readerAwaitable.IsCompleted);
             }
 
             cancellationTokenRegistration.Dispose();
@@ -564,8 +618,7 @@ namespace System.IO.Pipelines
                 // If the awaitable is already complete then return the value result directly
                 if (_readerAwaitable.IsCompleted)
                 {
-                    var readResult = new ReadResult();
-                    GetReadResult(ref readResult);
+                    GetReadResult(out ReadResult readResult);
                     result = new ValueTask<ReadResult>(readResult);
                 }
                 else
@@ -588,10 +641,9 @@ namespace System.IO.Pipelines
                     ThrowHelper.ThrowInvalidOperationException_NoReadingAllowed();
                 }
 
-                result = new ReadResult();
                 if (_length > 0 || _readerAwaitable.IsCompleted)
                 {
-                    GetReadResult(ref result);
+                    GetReadResult(out result);
                     return true;
                 }
 
@@ -599,6 +651,7 @@ namespace System.IO.Pipelines
                 {
                     ThrowHelper.ThrowInvalidOperationException_AlreadyReading();
                 }
+                result = default;
                 return false;
             }
         }
@@ -731,34 +784,29 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowInvalidOperationException_GetResultNotCompleted();
             }
 
-            var result = new ReadResult();
             lock (_sync)
             {
-                GetReadResult(ref result);
+                GetReadResult(out ReadResult result);
+                return result;
             }
-            return result;
         }
 
-        private void GetReadResult(ref ReadResult result)
+        private void GetReadResult(out ReadResult result)
         {
-            if (_writerCompletion.IsCompletedOrThrow())
-            {
-                result._resultFlags |= ResultFlags.Completed;
-            }
-
+            bool isCompleted = _writerCompletion.IsCompletedOrThrow();
             bool isCanceled = _readerAwaitable.ObserveCancelation();
-            if (isCanceled)
-            {
-                result._resultFlags |= ResultFlags.Canceled;
-            }
-
+           
             // No need to read end if there is no head
             BufferSegment head = _readHead;
-
             if (head != null)
             {
                 // Reading commit head shared with writer
-                result._resultBuffer = new ReadOnlySequence<byte>(head, _readHeadIndex, _commitHead, _commitHeadIndex - _commitHead.Start);
+                var readOnlySequence = new ReadOnlySequence<byte>(head, _readHeadIndex, _commitHead, _commitHeadIndex - _commitHead.Start);
+                result = new ReadResult(readOnlySequence, isCanceled, isCompleted);
+            }
+            else
+            {
+                result = new ReadResult(default, isCanceled, isCompleted);
             }
 
             if (isCanceled)

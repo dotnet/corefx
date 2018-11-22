@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Security;
+using System.Runtime.CompilerServices;
 
 namespace System.Text
 {
@@ -105,7 +106,9 @@ namespace System.Text
 
                 // Get our mapped section (bytes to allocate = 2 bytes per 65536 Unicode chars + 2 bytes per 65536 DBCS chars)
                 // Plus 4 byte to remember CP # when done loading it. (Don't want to get IA64 or anything out of alignment)
-                byte* pNativeMemory = GetNativeMemory(65536 * 2 * 2 + 4 + iExtraBytes);
+                int sizeToAllocate = 65536 * 2 * 2 + 4 + iExtraBytes;
+                byte* pNativeMemory = GetNativeMemory(sizeToAllocate);
+                Unsafe.InitBlockUnaligned(pNativeMemory, 0, (uint)sizeToAllocate);
 
                 mapBytesToUnicode = (char*)pNativeMemory;
                 mapUnicodeToBytes = (ushort*)(pNativeMemory + 65536 * 2);
@@ -209,14 +212,14 @@ namespace System.Text
         }
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static Object s_InternalSyncObject;
-        private static Object InternalSyncObject
+        private static object s_InternalSyncObject;
+        private static object InternalSyncObject
         {
             get
             {
                 if (s_InternalSyncObject == null)
                 {
-                    Object o = new Object();
+                    object o = new object();
                     Interlocked.CompareExchange<Object>(ref s_InternalSyncObject, o, null);
                 }
                 return s_InternalSyncObject;
@@ -536,7 +539,7 @@ namespace System.Text
             // We may have a left over character from last time, try and process it.
             if (charLeftOver > 0)
             {
-                Debug.Assert(Char.IsHighSurrogate(charLeftOver), "[DBCSCodePageEncoding.GetByteCount]leftover character should be high surrogate");
+                Debug.Assert(char.IsHighSurrogate(charLeftOver), "[DBCSCodePageEncoding.GetByteCount]leftover character should be high surrogate");
                 Debug.Assert(encoder != null,
                     "[DBCSCodePageEncoding.GetByteCount]Expect to have encoder if we have a charLeftOver");
 
@@ -627,7 +630,7 @@ namespace System.Text
             if (encoder != null)
             {
                 charLeftOver = encoder.charLeftOver;
-                Debug.Assert(charLeftOver == 0 || Char.IsHighSurrogate(charLeftOver),
+                Debug.Assert(charLeftOver == 0 || char.IsHighSurrogate(charLeftOver),
                     "[DBCSCodePageEncoding.GetBytes]leftover character should be high surrogate");
 
                 // Go ahead and get the fallback buffer (need leftover fallback if converting)

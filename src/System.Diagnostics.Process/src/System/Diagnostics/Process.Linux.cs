@@ -64,34 +64,39 @@ namespace System.Diagnostics
         /// <returns>The converted time.</returns>
         internal static DateTime BootTimeToDateTime(TimeSpan timespanAfterBoot)
         {
-            // Use the uptime and the current time to determine the absolute boot time.
-            DateTime bootTime = DateTime.UtcNow - Uptime;
-
             // And use that to determine the absolute time for timespan.
-            DateTime dt = bootTime + timespanAfterBoot;
+            DateTime dt = BootTime + timespanAfterBoot;
 
             // The return value is expected to be in the local time zone.
             // It is converted here (rather than starting with DateTime.Now) to avoid DST issues.
             return dt.ToLocalTime();
         }
 
-        /// <summary>Gets the elapsed time since the system was booted.</summary>
-        private static TimeSpan Uptime
+        /// <summary>Gets the system boot time.</summary>
+        private static DateTime BootTime
         {
             get
             {
-                // '/proc/uptime' accounts time a device spends in sleep mode.
-                const string UptimeFile = Interop.procfs.ProcUptimeFilePath;
-                string text = File.ReadAllText(UptimeFile);
-
-                double uptimeSeconds = 0;
-                int length = text.IndexOf(' ');
-                if (length != -1)
+                // '/proc/stat -> btime' gets the boot time.
+                // btime is the time of system boot in seconds since the Unix epoch.
+                // It includes suspended time and is updated based on the system time (settimeofday).
+                const string StatFile = Interop.procfs.ProcStatFilePath;
+                string text = File.ReadAllText(StatFile);
+                int btimeLineStart = text.IndexOf("\nbtime ");
+                if (btimeLineStart >= 0)
                 {
-                    Double.TryParse(text.AsSpan(0, length), NumberStyles.AllowDecimalPoint, NumberFormatInfo.InvariantInfo, out uptimeSeconds);
+                    int btimeStart = btimeLineStart + "\nbtime ".Length;
+                    int btimeEnd = text.IndexOf('\n', btimeStart);
+                    if (btimeEnd > btimeStart)
+                    {
+                        if (long.TryParse(text.AsSpan(btimeStart, btimeEnd - btimeStart), out long bootTimeSeconds))
+                        {
+                            return DateTime.UnixEpoch + TimeSpan.FromSeconds(bootTimeSeconds);
+                        }
+                    }
                 }
 
-                return TimeSpan.FromSeconds(uptimeSeconds);
+                return DateTime.UtcNow;
             }
         }
 
@@ -140,6 +145,11 @@ namespace System.Diagnostics
         {
             if (_processInfo.HandleCount <= 0 && _haveProcessId)
             {
+                // Don't get information for a PID that exited and has possibly been recycled.
+                if (GetWaitState().GetExited(out _, refresh: false))
+                {
+                    return;
+                }
                 string path = Interop.procfs.GetFileDescriptorDirectoryPathForProcess(_processId);
                 if (Directory.Exists(path))
                 {
@@ -161,7 +171,7 @@ namespace System.Diagnostics
         {
             get
             {
-                EnsureState(State.HaveId);
+                EnsureState(State.HaveNonExitedId);
 
                 IntPtr set;
                 if (Interop.Sys.SchedGetAffinity(_processId, out set) != 0)
@@ -173,7 +183,7 @@ namespace System.Diagnostics
             }
             set
             {
-                EnsureState(State.HaveId);
+                EnsureState(State.HaveNonExitedId);
 
                 if (Interop.Sys.SchedSetAffinity(_processId, ref value) != 0)
                 {
@@ -242,7 +252,7 @@ namespace System.Diagnostics
         /// <summary>Reads the stats information for this process from the procfs file system.</summary>
         private Interop.procfs.ParsedStat GetStat()
         {
-            EnsureState(State.HaveId);
+            EnsureState(State.HaveNonExitedId);
             Interop.procfs.ParsedStat stat;
             if (!Interop.procfs.TryReadStatFile(_processId, out stat, new ReusableTextReader()))
             {

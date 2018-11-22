@@ -76,8 +76,14 @@
   <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
     <value>Non-negative number required.</value>
   </data>
+  <data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
+    <value>Positive number required.</value>
+  </data>
   <data name="Cryptography_CryptoStream_FlushFinalBlockTwice" xml:space="preserve">
     <value>FlushFinalBlock() method was called twice on a CryptoStream. It can only be called once.</value>
+  </data>
+  <data name="Cryptography_DefaultAlgorithm_NotSupported" xml:space="preserve">
+    <value>This platform does not allow the automatic selection of an algorithm.</value>
   </data>
   <data name="Cryptography_HashNotYetFinalized" xml:space="preserve">
     <value>Hash must be finalized before the hash value is retrieved.</value>
@@ -99,6 +105,9 @@
   </data>
   <data name="Cryptography_InvalidPaddingMode" xml:space="preserve">
     <value>Specified padding mode is not valid for this algorithm.</value>
+  </data>
+  <data name="NotSupported_SubclassOverride" xml:space="preserve">
+    <value>Method not supported. Derived class must override.</value>
   </data>
   <data name="NotSupported_UnreadableStream" xml:space="preserve">
     <value>Stream does not support reading.</value>

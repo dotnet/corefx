@@ -101,24 +101,46 @@ namespace System.Security.Cryptography
         // cs.FlushFinalBlock() // which can only be called once
         // byte[] ciphertext = ms.ToArray();
         // cs.Close();
-        public void FlushFinalBlock()
+        public void FlushFinalBlock() =>
+            FlushFinalBlockAsync(useAsync: false).GetAwaiter().GetResult();
+
+        private async Task FlushFinalBlockAsync(bool useAsync)
         {
             if (_finalBlockTransformed)
                 throw new NotSupportedException(SR.Cryptography_CryptoStream_FlushFinalBlockTwice);
+            
             // We have to process the last block here.  First, we have the final block in _InputBuffer, so transform it
 
             byte[] finalBytes = _transform.TransformFinalBlock(_inputBuffer, 0, _inputBufferIndex);
 
             _finalBlockTransformed = true;
-            // Now, write out anything sitting in the _OutputBuffer...
+
+            // Now, write out anything sitting in the _outputBuffer...
             if (_canWrite && _outputBufferIndex > 0)
             {
-                _stream.Write(_outputBuffer, 0, _outputBufferIndex);
+                if (useAsync)
+                {
+                    await _stream.WriteAsync(new ReadOnlyMemory<byte>(_outputBuffer, 0, _outputBufferIndex)).ConfigureAwait(false);
+                }
+                else
+                {
+                    _stream.Write(_outputBuffer, 0, _outputBufferIndex);
+                }
                 _outputBufferIndex = 0;
             }
+
             // Write out finalBytes
             if (_canWrite)
-                _stream.Write(finalBytes, 0, finalBytes.Length);
+            {
+                if (useAsync)
+                {
+                    await _stream.WriteAsync(new ReadOnlyMemory<byte>(finalBytes)).ConfigureAwait(false);
+                }
+                else
+                {
+                    _stream.Write(finalBytes, 0, finalBytes.Length);
+                }
+            }
 
             // If the inner stream is a CryptoStream, then we want to call FlushFinalBlock on it too, otherwise just Flush.
             CryptoStream innerCryptoStream = _stream as CryptoStream;
@@ -126,19 +148,26 @@ namespace System.Security.Cryptography
             {
                 if (!innerCryptoStream.HasFlushedFinalBlock)
                 {
-                    innerCryptoStream.FlushFinalBlock();
+                    await innerCryptoStream.FlushFinalBlockAsync(useAsync).ConfigureAwait(false);
                 }
             }
             else
             {
-                _stream.Flush();
+                if (useAsync)
+                {
+                    await _stream.FlushAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    _stream.Flush();
+                }
             }
+
             // zeroize plain text material before returning
             if (_inputBuffer != null)
                 Array.Clear(_inputBuffer, 0, _inputBuffer.Length);
             if (_outputBuffer != null)
                 Array.Clear(_outputBuffer, 0, _outputBuffer.Length);
-            return;
         }
 
         public override void Flush()
@@ -194,7 +223,7 @@ namespace System.Security.Cryptography
             await semaphore.WaitAsync().ForceAsync();
             try
             {
-                return await ReadAsyncCore(buffer, offset, count, cancellationToken, useAsync: true);
+                return await ReadAsyncCore(buffer, offset, count, cancellationToken, useAsync: true); // ConfigureAwait not needed as ForceAsync was used
             }
             finally
             {
@@ -312,7 +341,7 @@ namespace System.Security.Cryptography
                 try
                 {
                     amountRead = useAsync ?
-                        await _stream.ReadAsync(new Memory<byte>(tempInputBuffer, _inputBufferIndex, numWholeBlocksInBytes - _inputBufferIndex), cancellationToken) :
+                        await _stream.ReadAsync(new Memory<byte>(tempInputBuffer, _inputBufferIndex, numWholeBlocksInBytes - _inputBufferIndex), cancellationToken) : // ConfigureAwait not needed, as useAsync is only true if we're already on a TP thread
                         _stream.Read(tempInputBuffer, _inputBufferIndex, numWholeBlocksInBytes - _inputBufferIndex);
 
                     int totalInput = _inputBufferIndex + amountRead;
@@ -378,7 +407,7 @@ namespace System.Security.Cryptography
                 while (_inputBufferIndex < _inputBlockSize)
                 {
                     amountRead = useAsync ?
-                        await _stream.ReadAsync(new Memory<byte>(_inputBuffer, _inputBufferIndex, _inputBlockSize - _inputBufferIndex), cancellationToken) :
+                        await _stream.ReadAsync(new Memory<byte>(_inputBuffer, _inputBufferIndex, _inputBlockSize - _inputBufferIndex), cancellationToken) : // ConfigureAwait not needed, as useAsync is only true if we're already on a TP thread
                         _stream.Read(_inputBuffer, _inputBufferIndex, _inputBlockSize - _inputBufferIndex);
 
                     // first, check to see if we're at the end of the input stream
@@ -461,7 +490,7 @@ namespace System.Security.Cryptography
             await semaphore.WaitAsync().ForceAsync();
             try
             {
-                await WriteAsyncCore(buffer, offset, count, cancellationToken, useAsync: true);
+                await WriteAsyncCore(buffer, offset, count, cancellationToken, useAsync: true); // ConfigureAwait not needed due to earlier ForceAsync
             }
             finally
             {
@@ -520,7 +549,7 @@ namespace System.Security.Cryptography
             if (_outputBufferIndex > 0)
             {
                 if (useAsync)
-                    await _stream.WriteAsync(new ReadOnlyMemory<byte>(_outputBuffer, 0, _outputBufferIndex), cancellationToken);
+                    await _stream.WriteAsync(new ReadOnlyMemory<byte>(_outputBuffer, 0, _outputBufferIndex), cancellationToken); // ConfigureAwait not needed, as useAsync is only true if we're already on a TP thread
                 else
                     _stream.Write(_outputBuffer, 0, _outputBufferIndex);
                 _outputBufferIndex = 0;
@@ -533,7 +562,7 @@ namespace System.Security.Cryptography
                 numOutputBytes = _transform.TransformBlock(_inputBuffer, 0, _inputBlockSize, _outputBuffer, 0);
                 // write out the bytes we just got
                 if (useAsync)
-                    await _stream.WriteAsync(new ReadOnlyMemory<byte>(_outputBuffer, 0, numOutputBytes), cancellationToken);
+                    await _stream.WriteAsync(new ReadOnlyMemory<byte>(_outputBuffer, 0, numOutputBytes), cancellationToken); // ConfigureAwait not needed, as useAsync is only true if we're already on a TP thread
                 else
                     _stream.Write(_outputBuffer, 0, numOutputBytes);
 
@@ -561,7 +590,7 @@ namespace System.Security.Cryptography
 
                             if (useAsync)
                             {
-                                await _stream.WriteAsync(new ReadOnlyMemory<byte>(tempOutputBuffer, 0, numOutputBytes), cancellationToken);
+                                await _stream.WriteAsync(new ReadOnlyMemory<byte>(tempOutputBuffer, 0, numOutputBytes), cancellationToken); // ConfigureAwait not needed, as useAsync is only true if we're already on a TP thread
                             }
                             else
                             {
@@ -584,7 +613,7 @@ namespace System.Security.Cryptography
                         numOutputBytes = _transform.TransformBlock(buffer, currentInputIndex, _inputBlockSize, _outputBuffer, 0);
 
                         if (useAsync)
-                            await _stream.WriteAsync(new ReadOnlyMemory<byte>(_outputBuffer, 0, numOutputBytes), cancellationToken);
+                            await _stream.WriteAsync(new ReadOnlyMemory<byte>(_outputBuffer, 0, numOutputBytes), cancellationToken); // ConfigureAwait not needed, as useAsync is only true if we're already on a TP thread
                         else
                             _stream.Write(_outputBuffer, 0, numOutputBytes);
 
@@ -647,6 +676,52 @@ namespace System.Security.Cryptography
                 {
                     base.Dispose(disposing);
                 }
+            }
+        }
+
+        public override ValueTask DisposeAsync()
+        {
+            return GetType() != typeof(CryptoStream) ?
+                base.DisposeAsync() :
+                DisposeAsyncCore();
+        }
+
+        private async ValueTask DisposeAsyncCore()
+        {
+            // Same logic as in Dispose, but with async counterparts
+            try
+            {
+                if (!_finalBlockTransformed)
+                {
+                    await FlushFinalBlockAsync(useAsync: true).ConfigureAwait(false);
+                }
+
+                if (!_leaveOpen)
+                {
+                    await _stream.DisposeAsync().ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                // Ensure we don't try to transform the final block again if we get disposed twice
+                // since it's null after this
+                _finalBlockTransformed = true;
+
+                // we need to clear all the internal buffers
+                if (_inputBuffer != null)
+                {
+                    Array.Clear(_inputBuffer, 0, _inputBuffer.Length);
+                }
+
+                if (_outputBuffer != null)
+                {
+                    Array.Clear(_outputBuffer, 0, _outputBuffer.Length);
+                }
+
+                _inputBuffer = null;
+                _outputBuffer = null;
+                _canRead = false;
+                _canWrite = false;
             }
         }
 

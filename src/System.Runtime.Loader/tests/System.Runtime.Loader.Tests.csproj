@@ -1,22 +1,35 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <ProjectGuid>{701CB3BC-00DC-435D-BDE4-C5FC29A708A7}</ProjectGuid>
     <RootNamespace>System.Runtime.Loader.Tests</RootNamespace>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Debug;uap-Release</Configurations>
+    <TestRuntime>true</TestRuntime>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="AssemblyLoadContextTest.cs" />
+    <Compile Include="CollectibleAssemblyLoadContextTest.cs" />
+    <Compile Include="CollectibleAssemblyLoadContextTest.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="CustomTPALoadContext.cs" />
     <Compile Include="ResourceAssemblyLoadContext.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="System.Runtime.Loader.Test.Assembly.dll" />
+    <ProjectReference Include="System.Runtime.Loader.Test.Assembly\System.Runtime.Loader.Test.Assembly.csproj">
+      <Project>{b402782f-de0a-41fa-b364-60612a786fb2}</Project>
+      <Name>System.Runtime.Loader.Test.Assembly</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>EmbeddedResource</OutputItemType>
+    </ProjectReference>
+    <ProjectReference Include="System.Runtime.Loader.Test.Assembly2\System.Runtime.Loader.Test.Assembly2.csproj">
+      <Project>{b402782f-de0a-41fa-b364-60612a786fb2}</Project>
+      <Name>System.Runtime.Loader.Test.Assembly2</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>EmbeddedResource</OutputItemType>
+    </ProjectReference>
+    <ProjectReference Include="System.Runtime.Loader.Test.AssemblyNotSupported\System.Runtime.Loader.Test.AssemblyNotSupported.csproj">
+      <Project>{b402782f-de0a-41fa-b364-60612a786fb2}</Project>
+      <Name>System.Runtime.Loader.Test.AssemblyNotSupported</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>EmbeddedResource</OutputItemType>
+    </ProjectReference>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

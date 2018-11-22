@@ -96,6 +96,11 @@ namespace System.Net.Http
             get => _winHttpHandler != null ? _winHttpHandler.CookieContainer : _socketsHttpHandler.CookieContainer;
             set
             {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
                 if (_winHttpHandler != null)
                 {
                     _winHttpHandler.CookieContainer = value;
@@ -427,7 +432,6 @@ namespace System.Net.Http
                 }
                 else
                 {
-                    SecurityProtocol.ThrowOnNotAllowed(value, allowNone: true);
                     ThrowForModifiedManagedSslOptionsIfStarted();
                     _socketsHttpHandler.SslOptions.EnabledSslProtocols = value;
                 }

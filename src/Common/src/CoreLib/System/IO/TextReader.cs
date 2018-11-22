@@ -109,7 +109,7 @@ namespace System.IO
             try
             {
                 int numRead = Read(array, 0, buffer.Length);
-                if ((uint)numRead > buffer.Length)
+                if ((uint)numRead > (uint)buffer.Length)
                 {
                     throw new IOException(SR.IO_InvalidReadLength);
                 }
@@ -159,7 +159,7 @@ namespace System.IO
             try
             {
                 int numRead = ReadBlock(array, 0, buffer.Length);
-                if ((uint)numRead > buffer.Length)
+                if ((uint)numRead > (uint)buffer.Length)
                 {
                     throw new IOException(SR.IO_InvalidReadLength);
                 }
@@ -207,7 +207,7 @@ namespace System.IO
         #region Task based Async APIs
         public virtual Task<string> ReadLineAsync()
         {
-            return Task<String>.Factory.StartNew(state =>
+            return Task<string>.Factory.StartNew(state =>
             {
                 return ((TextReader)state).ReadLine();
             },
@@ -251,7 +251,7 @@ namespace System.IO
             return ReadAsyncInternal(new Memory<char>(buffer, index, count), default).AsTask();
         }
 
-        public virtual ValueTask<int> ReadAsync(Memory<char> buffer, CancellationToken cancellationToken = default(CancellationToken)) =>
+        public virtual ValueTask<int> ReadAsync(Memory<char> buffer, CancellationToken cancellationToken = default) =>
             new ValueTask<int>(MemoryMarshal.TryGetArray(buffer, out ArraySegment<char> array) ?
                 ReadAsync(array.Array, array.Offset, array.Count) :
                 Task<int>.Factory.StartNew(state =>
@@ -289,7 +289,7 @@ namespace System.IO
             return ReadBlockAsyncInternal(new Memory<char>(buffer, index, count), default).AsTask();
         }
 
-        public virtual ValueTask<int> ReadBlockAsync(Memory<char> buffer, CancellationToken cancellationToken = default(CancellationToken)) =>
+        public virtual ValueTask<int> ReadBlockAsync(Memory<char> buffer, CancellationToken cancellationToken = default) =>
             new ValueTask<int>(MemoryMarshal.TryGetArray(buffer, out ArraySegment<char> array) ?
                 ReadBlockAsync(array.Array, array.Offset, array.Count) :
                 Task<int>.Factory.StartNew(state =>

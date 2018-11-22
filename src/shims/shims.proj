@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="dir.props" />
+  <Import Project="Directory.Build.props" />
+
+  <PropertyGroup>
+    <PackageConfigurations>
+      netcoreapp2.0;
+    </PackageConfigurations>
+    <BuildConfigurations>
+      $(BuildConfigurations);
+      $(PackageConfigurations);
+    </BuildConfigurations>
+  </PropertyGroup>
 
   <Target Name="GetGenFacadesInputs">
     <ItemGroup>
@@ -15,7 +25,6 @@
   </Target>
 
   <PropertyGroup>
-    <GenFacadesResponseFile>$(IntermediateOutputPath)genfacades.rsp</GenFacadesResponseFile>
     <GenFacadesSemaphoreFile>$(IntermediateOutputPath)genfacades.sempahore</GenFacadesSemaphoreFile>
   </PropertyGroup>
 
@@ -26,53 +35,48 @@
           Outputs="$(GenFacadesSemaphoreFile)">
 
     <PropertyGroup>
-      <!--<GenFacadesArgs>$(GenFacadesArgs) -contracts:"@(GenFacadesContracts, ',')"</GenFacadesArgs>-->
-      <GenFacadesArgs>$(GenFacadesArgs) -seeds:"@(GenFacadesSeeds, ',')"</GenFacadesArgs>
-      <GenFacadesArgs>$(GenFacadesArgs) -facadePath:"$(GenFacadesOutputPath)"</GenFacadesArgs>
-      <GenFacadesArgs>$(GenFacadesArgs) -producePdb:false</GenFacadesArgs>
-      <GenFacadesArgs>$(GenFacadesArgs) -assemblyFileVersion:$(AssemblyFileVersion)</GenFacadesArgs>
-      <GenFacadesArgs>$(GenFacadesArgs) -forceZeroVersionSeeds</GenFacadesArgs>
-      <!-- TODO: We should remove this flag once we have all the types for netstandard -->
-      <GenFacadesArgs>$(GenFacadesArgs) -ignoreMissingTypes</GenFacadesArgs>
+      <ProducePdb>false</ProducePdb>
+      <GenFacadesIgnoreMissingTypes>true</GenFacadesIgnoreMissingTypes>
+      <GenFacadesIgnoreBuildAndRevisionMismatch>false</GenFacadesIgnoreBuildAndRevisionMismatch>
+      <GenFacadesForceZeroVersionSeeds>true</GenFacadesForceZeroVersionSeeds>
+      <GenFacadesBuildPartialReferenceFacade>false</GenFacadesBuildPartialReferenceFacade>
     </PropertyGroup>
+
+    <GenFacadesTask
+      Condition="'@(NetFxContracts)' != ''"
+      Contracts="@(NetFxContracts)"
+      Seeds="@(GenFacadesSeeds, ',')"
+      FacadePath="$(GenFacadesOutputPath)"
+      ProducePdb="$(ProducePdb)"
+      IgnoreMissingTypes="$(GenFacadesIgnoreMissingTypes)"
+      IgnoreBuildAndRevisionMismatch="$(GenFacadesIgnoreBuildAndRevisionMismatch)"
+      ForceZeroVersionSeeds="$(GenFacadesForceZeroVersionSeeds)"
+      BuildPartialReferenceFacade="$(GenFacadesBuildPartialReferenceFacade)"
+    />
+
+    <GenFacadesTask
+      Condition="'@(NETStandardContracts)' != ''"
+      Contracts="@(NETStandardContracts)"
+      Seeds="@(GenFacadesSeeds, ',')"
+      FacadePath="$(GenFacadesOutputPath)"
+      ProducePdb="$(ProducePdb)"
+      IgnoreMissingTypes="$(GenFacadesIgnoreMissingTypes)"
+      IgnoreBuildAndRevisionMismatch="$(GenFacadesIgnoreBuildAndRevisionMismatch)"
+      ForceZeroVersionSeeds="$(GenFacadesForceZeroVersionSeeds)"
+      BuildPartialReferenceFacade="$(GenFacadesBuildPartialReferenceFacade)"
+    />
 
     <MakeDir Directories="$(IntermediateOutputPath)" />
-    <WriteLinesToFile File="$(GenFacadesResponseFile)" Lines="$(GenFacadesArgs)" Overwrite="true" />
-
-    <PropertyGroup>
-      <GenFacadesCmd>$(ToolHostCmd) "$(ToolsDir)GenFacades.exe"</GenFacadesCmd>
-    </PropertyGroup>
-
-    <Exec Condition="'@(NetFxContracts)' != ''"
-          Command="$(GenFacadesCmd) -contracts:&quot;@(NetFxContracts)&quot; @&quot;$(GenFacadesResponseFile)&quot;"
-          WorkingDirectory="$(ToolRuntimePath)" />
-
-    <Exec Condition="'@(NETStandardContracts)' != ''"
-          Command="$(GenFacadesCmd) -contracts:&quot;@(NETStandardContracts)&quot; @&quot;$(GenFacadesResponseFile)&quot;"
-          WorkingDirectory="$(ToolRuntimePath)" />
-
-    <WriteSigningRequired
-        Condition="'@(NetFxContracts)' != '' and '$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
-        AuthenticodeSig="Microsoft"
-        StrongNameSig="%(NetFxContracts.StrongNameSig)"
-        MarkerFile="$(GenFacadesOutputPath)%(NetFxContracts.Filename)%(NetFxContracts.Extension).requires_signing" />
-
-    <WriteSigningRequired
-        Condition="'@(NETStandardContracts)' != '' and '$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
-        AuthenticodeSig="Microsoft"
-        StrongNameSig="Open"
-        MarkerFile="$(GenFacadesOutputPath)%(NETStandardContracts.Filename)%(NETStandardContracts.Extension).requires_signing" />
-
     <Touch Files="$(GenFacadesSemaphoreFile)" AlwaysCreate="true" />
   </Target>
 
   <Target Name="Build" DependsOnTargets="RunGenFacades;BinPlace" />
   <Target Name="Clean">
-    <RemoveDir Directories="$(IntermediateOutputPath);$(GenFacadesOutputPath)" />
+    <RemoveDir Directories="$(BaseIntermediateOutputPath);$(GenFacadesOutputPath)" />
   </Target>
   <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
 
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 
   <Target Name="SwitchItemNameForRuntimeBinplaceConfigs" AfterTargets="GetBinPlaceConfiguration">
     <ItemGroup>
@@ -94,6 +98,25 @@
       <FileWrites Include="@(BinPlaceItem)" />
     </ItemGroup>
   </Target>
+
+  <Target Name="GetCompatibilityShimsToPackage"
+          BeforeTargets="GetFilesToPackage">
+    <ItemGroup>
+      <!-- All the shims defined in netfxreference.props produced by this project need to be included in the ref path. -->
+      <FilesToPackage Include="@(NetFxReference->'$(GenFacadesOutputPath)%(Identity).dll')">
+        <TargetFramework>netcoreapp2.0</TargetFramework>
+        <TargetPath>/ref/netcoreapp2.0</TargetPath>
+      </FilesToPackage>
+
+      <!-- For the implementation path in the package we only want to include the non-manual shims produced by this project
+      and the manual shims that we produce against the 2.0.0 implementation will be included to the shims package through
+      a project reference, therefore we need to exclude them here.     -->
+      <_manualShimProjects Include="manual\*.csproj" />
+      <_manualShims Include="@(_manualShimProjects->'%(FileName)')" />
+      <_libShims Include="@(NetFxReference)" Exclude="@(_manualShims)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <TargetPath>@(_libShims->'$(GenFacadesOutputPath)%(Identity).dll')</TargetPath>
+    </PropertyGroup>
+  </Target>
 </Project>
-
-

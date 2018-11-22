@@ -27,6 +27,14 @@ namespace System.ComponentModel.Composition
         }
     }
 
+    public class TestAssemblyOne { }
+
+    public class TestAssemblyTwo { }
+
+    public class TestAssemblyThree { }
+
+    public class TestAssemblyFour { }
+
     public class AssemblyCatalogTestsHelper
     {
         protected string GetAttributedAssemblyCodeBase()
@@ -78,7 +86,14 @@ namespace System.ComponentModel.Composition
             string filename = Path.GetTempFileName();
             using (FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.None))
             {
-                Assert.Throws<FileLoadException>(() => catalogCreator(filename));
+                if (PlatformDetection.IsWindows) // File locking is Windows specific.
+                {
+                    Assert.Throws<FileLoadException>(() => catalogCreator(filename));
+                }
+                else
+                {
+                    Assert.Throws<BadImageFormatException>(() => catalogCreator(filename));
+                }
             }
         }
 
@@ -163,7 +178,6 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // Unix doesn't (and doesn't need) to check for locking
         [Fact]
         public void Constructor1_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad()
         {
@@ -274,7 +288,6 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // Unix doesn't (and doesn't need) to check for locking
         [Fact]
         public void Constructor2_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad()
         {
@@ -384,7 +397,6 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // Unix doesn't (and doesn't need) to check for locking
         [Fact]
         public void Constructor3_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad()
         {
@@ -493,7 +505,6 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)] // Unix doesn't (and doesn't need) to check for locking
         [Fact]
         public void Constructor4_LockedFileAsCodeBaseArgument_ShouldThrowFileLoad()
         {
@@ -1077,6 +1088,19 @@ namespace System.ComponentModel.Composition
 
                 Assert.Equal(catalog.DisplayName, catalog.ToString());
             }
+        }
+
+        [Fact]                       
+        public void NonStaticallyReferencedAssembly()
+        {
+            string testAssembly = "System.ComponentModel.Composition.Noop.Assembly.dll";
+            var directory = TemporaryFileCopier.GetNewTemporaryDirectory();
+            Directory.CreateDirectory(directory);
+            var finalPath = Path.Combine(directory, testAssembly);
+            var sourcePath = Path.Combine(Directory.GetCurrentDirectory(), testAssembly);
+            File.Copy(sourcePath, finalPath);
+            var assemblyCatalog = new AssemblyCatalog(finalPath);
+            Assert.NotEmpty(assemblyCatalog);
         }
     }
 }

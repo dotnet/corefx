@@ -59,7 +59,7 @@ namespace System.Threading.Tasks.Tests
             // Throw a curveball here and loop from just-under-Int32.MaxValue to 
             // just-over-Int32.MaxValue.  Make sure that 64-bit indices are being
             // handled correctly.
-            long loopbase = (long)Int32.MaxValue - 10;
+            long loopbase = (long)int.MaxValue - 10;
             Parallel.For(loopbase, loopbase + loopsize, delegate(long i, ParallelLoopState ps)
             {
                 complete[i - loopbase] = true;
@@ -141,7 +141,7 @@ namespace System.Threading.Tasks.Tests
             Parallel.ForEach(mop, delegate(int item, ParallelLoopState ps, long index)
             {
                 //break does not imply that the other iterations will not be run
-                //http://msdn.microsoft.com/en-us/library/system.threading.tasks.parallelloopstate.break.aspx 
+                //https://docs.microsoft.com/en-us/dotnet/api/system.threading.tasks.parallelloopstate.break#System_Threading_Tasks_ParallelLoopState_Break 
                 //execute the test with high loop size and low break index
                 complete[index] = true;
                 if (index >= breakpoint) ps.Break();

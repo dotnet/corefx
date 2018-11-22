@@ -433,7 +433,7 @@ namespace System.Data.Tests
             }
 
             //The following two cases fail on mono. MS.net evaluates the expression
-            //immediatly upon assignment. We don't do this yet hence we don't throw
+            //immediately upon assignment. We don't do this yet hence we don't throw
             //an exception at this point.
             try
             {
@@ -956,6 +956,32 @@ namespace System.Data.Tests
             var c2 = t.Columns.Add("c2");
             c2.Expression = "TRIM(ISNULL(c1,' '))";
             c2.Expression = "SUBSTRING(ISNULL(c1,' '), 1, 10)";
+        }
+
+        [Fact]
+        public void NonSqlNullableType_RequiresPublicStaticNull()
+        {
+            var t = new DataTable();
+            var c1 = t.Columns.Add("c1", typeof(NullableTypeWithNullProperty));
+            var c2 = t.Columns.Add("c2", typeof(NullableTypeWithNullField));
+            Assert.Throws<ArgumentException>(() => t.Columns.Add("c3", typeof(NullableTypeWithoutNullMember)));
+        }
+
+        private sealed class NullableTypeWithNullProperty : INullable
+        {
+            public bool IsNull => true;
+            public static NullableTypeWithNullProperty Null { get; } = new NullableTypeWithNullProperty();
+        }
+
+        private sealed class NullableTypeWithNullField : INullable
+        {
+            public bool IsNull => true;
+            public static readonly NullableTypeWithNullField Null = new NullableTypeWithNullField();
+        }
+
+        private sealed class NullableTypeWithoutNullMember : INullable
+        {
+            public bool IsNull => true;
         }
 
         private DataColumn MakeColumn(string col, string test)

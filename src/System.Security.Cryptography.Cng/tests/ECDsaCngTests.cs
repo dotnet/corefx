@@ -75,7 +75,6 @@ namespace System.Security.Cryptography.Cng.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "dotnet/corefx #18719")]
         public static void TestVerify521_EcdhKey()
         {
             byte[] keyBlob = (byte[])TestData.s_ECDsa521KeyBlob.Clone();
@@ -149,6 +148,13 @@ namespace System.Security.Cryptography.Cng.Tests
                 Assert.Equal(256, key1.KeySize);
                 VerifyKey(key1);
             }
+        }
+
+        [Fact]
+        public static void HashAlgorithm_DefaultsToSha256()
+        {
+            using (var cng = new ECDsaCng())
+               Assert.Equal(CngAlgorithm.Sha256, cng.HashAlgorithm);
         }
 
 #if netcoreapp

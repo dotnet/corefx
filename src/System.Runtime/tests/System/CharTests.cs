@@ -71,7 +71,6 @@ namespace System.Tests
         {
             yield return new object[] { "\uD800\uDC00", 0, 0x10000 };
             yield return new object[] { "\uDBBF\uDFFF", 0, 0xFFFFF };
-            yield return new object[] { "\uDBBF\uDFFF", 0, 0xFFFFF };
             yield return new object[] { "\uDBFF\uDC00", 0, 0x10FC00 };
             yield return new object[] { "\uDBFF\uDFFF", 0, 0x10FFFF };
             yield return new object[] { "\u0000\u0001", 0, 0 };
@@ -118,7 +117,6 @@ namespace System.Tests
 
         public static IEnumerable<object[]> ConvertToUtf32_Char_Char_TestData()
         {
-            yield return new object[] { '\uD800', '\uDC00', 0x10000 };
             yield return new object[] { '\uD800', '\uDC00', 0x10000 };
             yield return new object[] { '\uD800', '\uDFFF', 0x103FF };
             yield return new object[] { '\uDBBF', '\uDFFF', 0xFFFFF };
@@ -1079,8 +1077,8 @@ namespace System.Tests
 
             for (int i=0; i < latineString.Length; i++)
             {
-                Assert.Equal(s_categoryForLatin1[i], Char.GetUnicodeCategory(latineString[i]));
-                Assert.Equal(s_categoryForLatin1[i], Char.GetUnicodeCategory(latineString, i));
+                Assert.Equal(s_categoryForLatin1[i], char.GetUnicodeCategory(latineString[i]));
+                Assert.Equal(s_categoryForLatin1[i], char.GetUnicodeCategory(latineString, i));
             }
         }
 
@@ -1089,14 +1087,14 @@ namespace System.Tests
         {
             for (int i=256; i <= 0xFFFF; i++)
             {
-                Assert.Equal(CharUnicodeInfo.GetUnicodeCategory((char)i), Char.GetUnicodeCategory((char)i));
+                Assert.Equal(CharUnicodeInfo.GetUnicodeCategory((char)i), char.GetUnicodeCategory((char)i));
             }
 
             string nonLatinString = "\u0100\u0200\u0300\u0400\u0500\u0600\u0700\u0800\u0900\u0A00\u0B00\u0C00\u0D00\u0E00\u0F00" + 
                                     "\u1000\u2000\u3000\u4000\u5000\u6000\u7000\u8000\u9000\uA000\uB000\uC000\uD000\uE000\uF000";
             for (int i=0; i < nonLatinString.Length; i++)
             {
-                Assert.Equal(CharUnicodeInfo.GetUnicodeCategory(nonLatinString[i]), Char.GetUnicodeCategory(nonLatinString, i));
+                Assert.Equal(CharUnicodeInfo.GetUnicodeCategory(nonLatinString[i]), char.GetUnicodeCategory(nonLatinString, i));
             }
         }
 

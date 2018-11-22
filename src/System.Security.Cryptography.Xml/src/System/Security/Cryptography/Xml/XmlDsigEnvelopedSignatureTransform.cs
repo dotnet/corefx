@@ -52,7 +52,11 @@ namespace System.Security.Cryptography.Xml
         }
 
         // An enveloped signature has no inner XML elements
-        public override void LoadInnerXml(XmlNodeList nodeList) { }
+        public override void LoadInnerXml(XmlNodeList nodeList)
+        {
+            if (nodeList != null && nodeList.Count > 0)
+                throw new CryptographicException(SR.Cryptography_Xml_UnknownTransform);
+        }
 
         // An enveloped signature has no inner XML elements
         protected override XmlNodeList GetInnerXml()
@@ -151,7 +155,7 @@ namespace System.Security.Cryptography.Xml
                                 position++;
                                 if (node1 == result) break;
                             }
-                            if (result == null || (result != null && position != _signaturePosition))
+                            if (result == null || position != _signaturePosition)
                             {
                                 resultNodeList.Add(node);
                             }

@@ -32,7 +32,7 @@ namespace System.ComponentModel.Composition.Hosting
         public CompositionScopeDefinition(ComposablePartCatalog catalog, IEnumerable<CompositionScopeDefinition> children)
         {
             Requires.NotNull(catalog, nameof(catalog));
-            Requires.NullOrNotNullElements(children, "children");
+            Requires.NullOrNotNullElements(children, nameof(children));
 
             InitializeCompositionScopeDefinition(catalog, children, null);
         }
@@ -46,8 +46,8 @@ namespace System.ComponentModel.Composition.Hosting
         public CompositionScopeDefinition(ComposablePartCatalog catalog, IEnumerable<CompositionScopeDefinition> children, IEnumerable<ExportDefinition> publicSurface)
         {
             Requires.NotNull(catalog, nameof(catalog));
-            Requires.NullOrNotNullElements(children, "children");
-            Requires.NullOrNotNullElements(publicSurface, "publicSurface");
+            Requires.NullOrNotNullElements(children, nameof(children));
+            Requires.NullOrNotNullElements(publicSurface, nameof(publicSurface));
 
             InitializeCompositionScopeDefinition(catalog, children, publicSurface);
         }
@@ -87,7 +87,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (disposing)
                 {
-                    // NOTE : According to http://msdn.microsoft.com/en-us/library/4bw5ewxy.aspx, the warning is bogus when used with Interlocked API.
+                    // NOTE : According to https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs0420, the warning is bogus when used with Interlocked API.
 #pragma warning disable 420
                     if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
 #pragma warning restore 420
@@ -189,7 +189,10 @@ namespace System.ComponentModel.Composition.Hosting
 
         internal IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExportsFromPublicSurface(ImportDefinition definition)
         {
-            Assumes.NotNull(definition, "definition");
+            if (definition == null)
+            {
+                throw new ArgumentNullException(nameof(definition));
+            }
 
             var exports = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
 

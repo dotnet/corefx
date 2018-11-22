@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <EnableBinPlacing>false</EnableBinPlacing>
+    <RuntimeIdentifier>$(ToolRuntimeRID)</RuntimeIdentifier>
+    <NoWarn>$(NoWarn);NU1603;NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.ILAsm">
+      <Version>$(MicrosoftNetCoreIlasmPackageVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETCore.ILDAsm">
+      <Version>$(MicrosoftNetCoreIlasmPackageVersion)</Version>
+    </PackageReference>
+  </ItemGroup>
+</Project>

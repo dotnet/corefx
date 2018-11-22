@@ -10,9 +10,7 @@ namespace System.Security.Cryptography.Rsa.Tests
 {
     public partial class ImportExport
     {
-        private static bool EphemeralKeysAreExportable => !PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer;
-
-        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
+        [Fact]
         public static void ExportAutoKey()
         {
             RSAParameters privateParams;
@@ -42,8 +40,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             Assert.Equal(privateParams.Exponent, publicParams.Exponent);
         }
 
-        [ActiveIssue(20214, TargetFrameworkMonikers.NetFramework)]
-        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
+        [Fact]
         public static void PaddedExport()
         {
             // OpenSSL's numeric type for the storage of RSA key parts disregards zero-valued
@@ -67,11 +64,10 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             // DP is the most likely to fail, the rest just otherwise ensure that Export
             // isn't losing data.
-            AssertKeyEquals(ref diminishedDPParameters, ref exported);
+            AssertKeyEquals(diminishedDPParameters, exported);
         }
 
-        [ActiveIssue(20214, TargetFrameworkMonikers.NetFramework)]
-        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
+        [Fact]
         public static void LargeKeyImportExport()
         {
             RSAParameters imported = TestData.RSA16384Params;
@@ -96,12 +92,11 @@ namespace System.Security.Cryptography.Rsa.Tests
 
                 exported = rsa.ExportParameters(true);
 
-                AssertKeyEquals(ref imported, ref exported);
+                AssertKeyEquals(imported, exported);
             }
         }
 
-        [ActiveIssue(20214, TargetFrameworkMonikers.NetFramework)]
-        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
+        [Fact]
         public static void UnusualExponentImportExport()
         {
             // Most choices for the Exponent value in an RSA key use a Fermat prime.
@@ -122,11 +117,10 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             // Exponent is the most likely to fail, the rest just otherwise ensure that Export
             // isn't losing data.
-            AssertKeyEquals(ref unusualExponentParameters, ref exported);
+            AssertKeyEquals(unusualExponentParameters, exported);
         }
 
-        [ActiveIssue(20214, TargetFrameworkMonikers.NetFramework)]
-        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
+        [Fact]
         public static void ImportExport1032()
         {
             RSAParameters imported = TestData.RSA1032Parameters;
@@ -140,15 +134,14 @@ namespace System.Security.Cryptography.Rsa.Tests
                 exportedPublic = rsa.ExportParameters(false);
             }
 
-            AssertKeyEquals(ref imported, ref exported);
+            AssertKeyEquals(imported, exported);
 
             Assert.Equal(exportedPublic.Modulus, imported.Modulus);
             Assert.Equal(exportedPublic.Exponent, imported.Exponent);
             Assert.Null(exportedPublic.D);
         }
 
-        [ActiveIssue(20214, TargetFrameworkMonikers.NetFramework)]
-        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
+        [Fact]
         public static void ImportReset()
         {
             using (RSA rsa = RSAFactory.Create())
@@ -174,7 +167,7 @@ namespace System.Security.Cryptography.Rsa.Tests
                 Assert.Equal(imported.Modulus.Length * 8, rsa.KeySize);
 
                 exported = rsa.ExportParameters(true);
-                AssertKeyEquals(ref imported, ref exported);
+                AssertKeyEquals(imported, exported);
             }
         }
 
@@ -196,8 +189,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        [ActiveIssue(20214, TargetFrameworkMonikers.NetFramework)]
-        [ConditionalFact(nameof(EphemeralKeysAreExportable))]
+        [Fact]
         public static void MultiExport()
         {
             RSAParameters imported = TestData.RSA1024Params;
@@ -213,18 +205,18 @@ namespace System.Security.Cryptography.Rsa.Tests
                 RSAParameters exportedPrivate3 = rsa.ExportParameters(true);
                 RSAParameters exportedPublic3 = rsa.ExportParameters(false);
 
-                AssertKeyEquals(ref imported, ref exportedPrivate);
+                AssertKeyEquals(imported, exportedPrivate);
 
                 Assert.Equal(imported.Modulus, exportedPublic.Modulus);
                 Assert.Equal(imported.Exponent, exportedPublic.Exponent);
                 Assert.Null(exportedPublic.D);
                 ValidateParameters(ref exportedPublic);
 
-                AssertKeyEquals(ref exportedPrivate, ref exportedPrivate2);
-                AssertKeyEquals(ref exportedPrivate, ref exportedPrivate3);
+                AssertKeyEquals(exportedPrivate, exportedPrivate2);
+                AssertKeyEquals(exportedPrivate, exportedPrivate3);
 
-                AssertKeyEquals(ref exportedPublic, ref exportedPublic2);
-                AssertKeyEquals(ref exportedPublic, ref exportedPublic3);
+                AssertKeyEquals(exportedPublic, exportedPublic2);
+                AssertKeyEquals(exportedPublic, exportedPublic3);
             }
         }
 
@@ -295,7 +287,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        internal static void AssertKeyEquals(ref RSAParameters expected, ref RSAParameters actual)
+        internal static void AssertKeyEquals(in RSAParameters expected, in RSAParameters actual)
         {
             Assert.Equal(expected.Modulus, actual.Modulus);
             Assert.Equal(expected.Exponent, actual.Exponent);
@@ -318,7 +310,7 @@ namespace System.Security.Cryptography.Rsa.Tests
                 // If it didn't, we'll test that the value is at least legal.
                 if (!expected.D.SequenceEqual(actual.D))
                 {
-                    VerifyDValue(ref actual);
+                    VerifyDValue(actual);
                 }
             }
         }
@@ -352,7 +344,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        private static void VerifyDValue(ref RSAParameters rsaParams)
+        private static void VerifyDValue(in RSAParameters rsaParams)
         {
             if (rsaParams.P == null)
             {

@@ -213,7 +213,7 @@ namespace System.Net.Http
             Debug.Assert(_chunkedMode);
             Debug.Assert(count > 0);
 
-            string chunkSizeString = String.Format("{0:x}\r\n", count);
+            string chunkSizeString = string.Format("{0:x}\r\n", count);
             byte[] chunkSize = Encoding.UTF8.GetBytes(chunkSizeString);
 
             await InternalWriteDataAsync(chunkSize, 0, chunkSize.Length, token).ConfigureAwait(false);
@@ -249,7 +249,7 @@ namespace System.Net.Http
                     IntPtr.Zero))
                 {
                     _state.TcsInternalWriteDataToRequestStream.TrySetException(
-                        new IOException(SR.net_http_io_write, WinHttpException.CreateExceptionUsingLastError()));
+                        new IOException(SR.net_http_io_write, WinHttpException.CreateExceptionUsingLastError(nameof(Interop.WinHttp.WinHttpWriteData))));
                 }
             }
 

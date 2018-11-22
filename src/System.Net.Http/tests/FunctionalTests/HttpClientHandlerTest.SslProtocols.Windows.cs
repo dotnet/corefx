@@ -5,10 +5,8 @@
 
 namespace System.Net.Http.Functional.Tests
 {
-    public partial class HttpClientHandler_SslProtocols_Test
+    public abstract partial class HttpClientHandler_SslProtocols_Test
     {
         private static bool BackendSupportsSslConfiguration => true;
-
-        private static bool SSLv3DisabledByDefault => true;
     }
 }

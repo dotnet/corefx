@@ -73,20 +73,20 @@ namespace System.Diagnostics.Tracing
             collector.AddScalar(value);
         }
 
-        public static TraceLoggingTypeInfo Boolean() { return new ScalarTypeInfo(typeof(Boolean), Statics.Format8, TraceLoggingDataType.Boolean8); }
-        public static TraceLoggingTypeInfo Byte() { return new ScalarTypeInfo(typeof(Byte), Statics.Format8, TraceLoggingDataType.UInt8); }
-        public static TraceLoggingTypeInfo SByte() { return new ScalarTypeInfo(typeof(SByte), Statics.Format8, TraceLoggingDataType.Int8); }
-        public static TraceLoggingTypeInfo Char() { return new ScalarTypeInfo(typeof(Char), Statics.Format16, TraceLoggingDataType.Char16); }
-        public static TraceLoggingTypeInfo Int16() { return new ScalarTypeInfo(typeof(Int16), Statics.Format16, TraceLoggingDataType.Int16); }
-        public static TraceLoggingTypeInfo UInt16() { return new ScalarTypeInfo(typeof(UInt16), Statics.Format16, TraceLoggingDataType.UInt16); }
-        public static TraceLoggingTypeInfo Int32() { return new ScalarTypeInfo(typeof(Int32), Statics.Format32, TraceLoggingDataType.Int32); }
-        public static TraceLoggingTypeInfo UInt32() { return new ScalarTypeInfo(typeof(UInt32), Statics.Format32, TraceLoggingDataType.UInt32); }
-        public static TraceLoggingTypeInfo Int64() { return new ScalarTypeInfo(typeof(Int64), Statics.Format64, TraceLoggingDataType.Int64); }
-        public static TraceLoggingTypeInfo UInt64() { return new ScalarTypeInfo(typeof(UInt64), Statics.Format64, TraceLoggingDataType.UInt64); }
+        public static TraceLoggingTypeInfo Boolean() { return new ScalarTypeInfo(typeof(bool), Statics.Format8, TraceLoggingDataType.Boolean8); }
+        public static TraceLoggingTypeInfo Byte() { return new ScalarTypeInfo(typeof(byte), Statics.Format8, TraceLoggingDataType.UInt8); }
+        public static TraceLoggingTypeInfo SByte() { return new ScalarTypeInfo(typeof(sbyte), Statics.Format8, TraceLoggingDataType.Int8); }
+        public static TraceLoggingTypeInfo Char() { return new ScalarTypeInfo(typeof(char), Statics.Format16, TraceLoggingDataType.Char16); }
+        public static TraceLoggingTypeInfo Int16() { return new ScalarTypeInfo(typeof(short), Statics.Format16, TraceLoggingDataType.Int16); }
+        public static TraceLoggingTypeInfo UInt16() { return new ScalarTypeInfo(typeof(ushort), Statics.Format16, TraceLoggingDataType.UInt16); }
+        public static TraceLoggingTypeInfo Int32() { return new ScalarTypeInfo(typeof(int), Statics.Format32, TraceLoggingDataType.Int32); }
+        public static TraceLoggingTypeInfo UInt32() { return new ScalarTypeInfo(typeof(uint), Statics.Format32, TraceLoggingDataType.UInt32); }
+        public static TraceLoggingTypeInfo Int64() { return new ScalarTypeInfo(typeof(long), Statics.Format64, TraceLoggingDataType.Int64); }
+        public static TraceLoggingTypeInfo UInt64() { return new ScalarTypeInfo(typeof(ulong), Statics.Format64, TraceLoggingDataType.UInt64); }
         public static TraceLoggingTypeInfo IntPtr() { return new ScalarTypeInfo(typeof(IntPtr), Statics.FormatPtr, Statics.IntPtrType); }
         public static TraceLoggingTypeInfo UIntPtr() { return new ScalarTypeInfo(typeof(UIntPtr), Statics.FormatPtr, Statics.UIntPtrType); }
-        public static TraceLoggingTypeInfo Single() { return new ScalarTypeInfo(typeof(Single), Statics.Format32, TraceLoggingDataType.Float); }
-        public static TraceLoggingTypeInfo Double() { return new ScalarTypeInfo(typeof(Double), Statics.Format64, TraceLoggingDataType.Double); }
+        public static TraceLoggingTypeInfo Single() { return new ScalarTypeInfo(typeof(float), Statics.Format32, TraceLoggingDataType.Float); }
+        public static TraceLoggingTypeInfo Double() { return new ScalarTypeInfo(typeof(double), Statics.Format64, TraceLoggingDataType.Double); }
         public static TraceLoggingTypeInfo Guid() { return new ScalarTypeInfo(typeof(Guid), (f, t) => Statics.MakeDataType(TraceLoggingDataType.Guid, f), TraceLoggingDataType.Guid); }
     }
 
@@ -122,20 +122,20 @@ namespace System.Diagnostics.Tracing
             collector.AddArray(value, elementSize);
         }
 
-        public static TraceLoggingTypeInfo Boolean() { return new ScalarArrayTypeInfo(typeof(Boolean[]), Statics.Format8, TraceLoggingDataType.Boolean8, sizeof(Boolean)); }
-        public static TraceLoggingTypeInfo Byte() { return new ScalarArrayTypeInfo(typeof(Byte[]), Statics.Format8, TraceLoggingDataType.UInt8, sizeof(Byte)); }
-        public static TraceLoggingTypeInfo SByte() { return new ScalarArrayTypeInfo(typeof(SByte[]), Statics.Format8, TraceLoggingDataType.Int8, sizeof(SByte)); }
-        public static TraceLoggingTypeInfo Char() { return new ScalarArrayTypeInfo(typeof(Char[]), Statics.Format16, TraceLoggingDataType.Char16, sizeof(Char)); }
-        public static TraceLoggingTypeInfo Int16() { return new ScalarArrayTypeInfo(typeof(Int16[]), Statics.Format16, TraceLoggingDataType.Int16, sizeof(Int16)); }
-        public static TraceLoggingTypeInfo UInt16() { return new ScalarArrayTypeInfo(typeof(UInt16[]), Statics.Format16, TraceLoggingDataType.UInt16, sizeof(UInt16)); }
-        public static TraceLoggingTypeInfo Int32() { return new ScalarArrayTypeInfo(typeof(Int32[]), Statics.Format32, TraceLoggingDataType.Int32, sizeof(Int32)); }
-        public static TraceLoggingTypeInfo UInt32() { return new ScalarArrayTypeInfo(typeof(UInt32[]), Statics.Format32, TraceLoggingDataType.UInt32, sizeof(UInt32)); }
-        public static TraceLoggingTypeInfo Int64() { return new ScalarArrayTypeInfo(typeof(Int64[]), Statics.Format64, TraceLoggingDataType.Int64, sizeof(Int64)); }
-        public static TraceLoggingTypeInfo UInt64() { return new ScalarArrayTypeInfo(typeof(UInt64[]), Statics.Format64, TraceLoggingDataType.UInt64, sizeof(UInt64)); }
+        public static TraceLoggingTypeInfo Boolean() { return new ScalarArrayTypeInfo(typeof(bool[]), Statics.Format8, TraceLoggingDataType.Boolean8, sizeof(bool)); }
+        public static TraceLoggingTypeInfo Byte() { return new ScalarArrayTypeInfo(typeof(byte[]), Statics.Format8, TraceLoggingDataType.UInt8, sizeof(byte)); }
+        public static TraceLoggingTypeInfo SByte() { return new ScalarArrayTypeInfo(typeof(sbyte[]), Statics.Format8, TraceLoggingDataType.Int8, sizeof(sbyte)); }
+        public static TraceLoggingTypeInfo Char() { return new ScalarArrayTypeInfo(typeof(char[]), Statics.Format16, TraceLoggingDataType.Char16, sizeof(char)); }
+        public static TraceLoggingTypeInfo Int16() { return new ScalarArrayTypeInfo(typeof(short[]), Statics.Format16, TraceLoggingDataType.Int16, sizeof(short)); }
+        public static TraceLoggingTypeInfo UInt16() { return new ScalarArrayTypeInfo(typeof(ushort[]), Statics.Format16, TraceLoggingDataType.UInt16, sizeof(ushort)); }
+        public static TraceLoggingTypeInfo Int32() { return new ScalarArrayTypeInfo(typeof(int[]), Statics.Format32, TraceLoggingDataType.Int32, sizeof(int)); }
+        public static TraceLoggingTypeInfo UInt32() { return new ScalarArrayTypeInfo(typeof(uint[]), Statics.Format32, TraceLoggingDataType.UInt32, sizeof(uint)); }
+        public static TraceLoggingTypeInfo Int64() { return new ScalarArrayTypeInfo(typeof(long[]), Statics.Format64, TraceLoggingDataType.Int64, sizeof(long)); }
+        public static TraceLoggingTypeInfo UInt64() { return new ScalarArrayTypeInfo(typeof(ulong[]), Statics.Format64, TraceLoggingDataType.UInt64, sizeof(ulong)); }
         public static TraceLoggingTypeInfo IntPtr() { return new ScalarArrayTypeInfo(typeof(IntPtr[]), Statics.FormatPtr, Statics.IntPtrType, System.IntPtr.Size); }
         public static TraceLoggingTypeInfo UIntPtr() { return new ScalarArrayTypeInfo(typeof(UIntPtr[]), Statics.FormatPtr, Statics.UIntPtrType, System.IntPtr.Size); }
-        public static TraceLoggingTypeInfo Single() { return new ScalarArrayTypeInfo(typeof(Single[]), Statics.Format32, TraceLoggingDataType.Float, sizeof(Single)); }
-        public static TraceLoggingTypeInfo Double() { return new ScalarArrayTypeInfo(typeof(Double[]), Statics.Format64, TraceLoggingDataType.Double, sizeof(Double)); }
+        public static TraceLoggingTypeInfo Single() { return new ScalarArrayTypeInfo(typeof(float[]), Statics.Format32, TraceLoggingDataType.Float, sizeof(float)); }
+        public static TraceLoggingTypeInfo Double() { return new ScalarArrayTypeInfo(typeof(double[]), Statics.Format64, TraceLoggingDataType.Double, sizeof(double)); }
         public static unsafe TraceLoggingTypeInfo Guid() { return new ScalarArrayTypeInfo(typeof(Guid), (f, t) => Statics.MakeDataType(TraceLoggingDataType.Guid, f), TraceLoggingDataType.Guid, sizeof(Guid)); }
     }
 
@@ -243,11 +243,11 @@ namespace System.Diagnostics.Tracing
     }
 
     /// <summary>
-    /// TraceLogging: Type handler for Decimal. (Note: not full-fidelity, exposed as Double.)
+    /// TraceLogging: Type handler for decimal. (Note: not full-fidelity, exposed as Double.)
     /// </summary>
     internal sealed class DecimalTypeInfo : TraceLoggingTypeInfo
     {
-        public DecimalTypeInfo() : base(typeof(Decimal)) { }
+        public DecimalTypeInfo() : base(typeof(decimal)) { }
 
         public override void WriteMetadata(
             TraceLoggingMetadataCollector collector,
@@ -269,7 +269,6 @@ namespace System.Diagnostics.Tracing
     internal sealed class NullableTypeInfo : TraceLoggingTypeInfo
     {
         private readonly TraceLoggingTypeInfo valueInfo;
-        private readonly Func<PropertyValue, PropertyValue> hasValueGetter;
         private readonly Func<PropertyValue, PropertyValue> valueGetter;
 
         public NullableTypeInfo(Type type, List<Type> recursionCheck)
@@ -278,7 +277,6 @@ namespace System.Diagnostics.Tracing
             var typeArgs = type.GenericTypeArguments;
             Debug.Assert(typeArgs.Length == 1);
             this.valueInfo = TraceLoggingTypeInfo.GetInstance(typeArgs[0], recursionCheck);
-            this.hasValueGetter = PropertyValue.GetPropertyGetter(type.GetTypeInfo().GetDeclaredProperty("HasValue"));
             this.valueGetter = PropertyValue.GetPropertyGetter(type.GetTypeInfo().GetDeclaredProperty("Value"));
         }
 
@@ -294,9 +292,11 @@ namespace System.Diagnostics.Tracing
 
         public override void WriteData(TraceLoggingDataCollector collector, PropertyValue value)
         {
-            var hasValue = hasValueGetter(value);
+            // It's not currently possible to get the HasValue property of a nullable type through reflection when the
+            // value is null. Instead, we simply check that the nullable is not null.
+            var hasValue = value.ReferenceValue != null;
             collector.AddScalar(hasValue);
-            var val = hasValue.ScalarValue.AsBoolean ? valueGetter(value) : valueInfo.PropertyValueFactory(Activator.CreateInstance(valueInfo.DataType));
+            var val = hasValue ? valueGetter(value) : valueInfo.PropertyValueFactory(Activator.CreateInstance(valueInfo.DataType));
             this.valueInfo.WriteData(collector, val);
         }
     }

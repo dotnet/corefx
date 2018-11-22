@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -44,18 +45,20 @@ namespace System.IO
         // We don't guarantee thread safety on StreamWriter, but we should at 
         // least prevent users from trying to write anything while an Async
         // write from the same thread is in progress.
-        private volatile Task _asyncWriteTask;
+        private Task _asyncWriteTask = Task.CompletedTask;
 
         private void CheckAsyncTaskInProgress()
         {
             // We are not locking the access to _asyncWriteTask because this is not meant to guarantee thread safety. 
             // We are simply trying to deter calling any Write APIs while an async Write from the same thread is in progress.
-
-            Task t = _asyncWriteTask;
-
-            if (t != null && !t.IsCompleted)
-                throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
+            if (!_asyncWriteTask.IsCompleted)
+            {
+                ThrowAsyncIOInProgress();
+            }
         }
+
+        private static void ThrowAsyncIOInProgress() =>
+            throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
 
         // The high level goal is to be tolerant of encoding errors when we read and very strict 
         // when we write. Hence, default StreamWriter encoding will throw on encoding error.   
@@ -192,33 +195,60 @@ namespace System.IO
             }
             finally
             {
-                // Dispose of our resources if this StreamWriter is closable. 
-                // Note: Console.Out and other such non closable streamwriters should be left alone 
-                if (!LeaveOpen && _stream != null)
+                CloseStreamFromDispose(disposing);
+            }
+        }
+
+        private void CloseStreamFromDispose(bool disposing)
+        {
+            // Dispose of our resources if this StreamWriter is closable. 
+            if (!LeaveOpen && _stream != null)
+            {
+                try
                 {
-                    try
+                    // Attempt to close the stream even if there was an IO error from Flushing.
+                    // Note that Stream.Close() can potentially throw here (may or may not be
+                    // due to the same Flush error). In this case, we still need to ensure 
+                    // cleaning up internal resources, hence the finally block.  
+                    if (disposing)
                     {
-                        // Attempt to close the stream even if there was an IO error from Flushing.
-                        // Note that Stream.Close() can potentially throw here (may or may not be
-                        // due to the same Flush error). In this case, we still need to ensure 
-                        // cleaning up internal resources, hence the finally block.  
-                        if (disposing)
-                        {
-                            _stream.Close();
-                        }
-                    }
-                    finally
-                    {
-                        _stream = null;
-                        _byteBuffer = null;
-                        _charBuffer = null;
-                        _encoding = null;
-                        _encoder = null;
-                        _charLen = 0;
-                        base.Dispose(disposing);
+                        _stream.Close();
                     }
                 }
+                finally
+                {
+                    _stream = null;
+                    _byteBuffer = null;
+                    _charBuffer = null;
+                    _encoding = null;
+                    _encoder = null;
+                    _charLen = 0;
+                    base.Dispose(disposing);
+                }
             }
+        }
+
+        public override ValueTask DisposeAsync() =>
+            GetType() != typeof(StreamWriter) ?
+                base.DisposeAsync() :
+                DisposeAsyncCore();
+
+        private async ValueTask DisposeAsyncCore()
+        {
+            // Same logic as in Dispose(), but with async flushing.
+            Debug.Assert(GetType() == typeof(StreamWriter));
+            try
+            {
+                if (_stream != null)
+                {
+                    await FlushAsync().ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                CloseStreamFromDispose(disposing: true);
+            }
+            GC.SuppressFinalize(this);
         }
 
         public override void Flush()
@@ -323,14 +353,13 @@ namespace System.IO
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)] // prevent WriteSpan from bloating call sites
         public override void Write(char[] buffer)
         {
-            if (buffer != null)
-            {
-                WriteCore(buffer, _autoFlush);
-            }
+            WriteSpan(buffer, appendNewLine: false);
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)] // prevent WriteSpan from bloating call sites
         public override void Write(char[] buffer, int index, int count)
         {
             if (buffer == null)
@@ -350,14 +379,15 @@ namespace System.IO
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             }
 
-            WriteCore(new ReadOnlySpan<char>(buffer, index, count), _autoFlush);
+            WriteSpan(buffer.AsSpan(index, count), appendNewLine: false);
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)] // prevent WriteSpan from bloating call sites
         public override void Write(ReadOnlySpan<char> buffer)
         {
             if (GetType() == typeof(StreamWriter))
             {
-                WriteCore(buffer, _autoFlush);
+                WriteSpan(buffer, appendNewLine: false);
             }
             else
             {
@@ -367,7 +397,8 @@ namespace System.IO
             }
         }
 
-        private unsafe void WriteCore(ReadOnlySpan<char> buffer, bool autoFlush)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private unsafe void WriteSpan(ReadOnlySpan<char> buffer, bool appendNewLine)
         {
             CheckAsyncTaskInProgress();
 
@@ -422,47 +453,170 @@ namespace System.IO
                 }
             }
 
-            if (autoFlush)
+            if (appendNewLine)
+            {
+                char[] coreNewLine = CoreNewLine;
+                for (int i = 0; i < coreNewLine.Length; i++) // Generally 1 (\n) or 2 (\r\n) iterations
+                {
+                    if (_charPos == _charLen)
+                    {
+                        Flush(false, false);
+                    }
+
+                    _charBuffer[_charPos] = coreNewLine[i];
+                    _charPos++;
+                }
+            }
+
+            if (_autoFlush)
             {
                 Flush(true, false);
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)] // prevent WriteSpan from bloating call sites
         public override void Write(string value)
         {
-            if (value != null)
-            {
-                WriteCore(value.AsSpan(), _autoFlush);
-            }
+            WriteSpan(value, appendNewLine: false);
         }
 
-        //
-        // Optimize the most commonly used WriteLine overload. This optimization is important for System.Console in particular
-        // because of it will make one WriteLine equal to one call to the OS instead of two in the common case.
-        //
+        [MethodImpl(MethodImplOptions.NoInlining)] // prevent WriteSpan from bloating call sites
         public override void WriteLine(string value)
         {
             CheckAsyncTaskInProgress();
-            if (value != null)
-            {
-                WriteCore(value.AsSpan(), autoFlush: false);
-            }
-            WriteCore(new ReadOnlySpan<char>(CoreNewLine), autoFlush: true);
+            WriteSpan(value, appendNewLine: true);
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)] // prevent WriteSpan from bloating call sites
         public override void WriteLine(ReadOnlySpan<char> value)
         {
             if (GetType() == typeof(StreamWriter))
             {
                 CheckAsyncTaskInProgress();
-                WriteCore(value, autoFlush: false);
-                WriteCore(new ReadOnlySpan<char>(CoreNewLine), autoFlush: true);
+                WriteSpan(value, appendNewLine: true);
             }
             else
             {
                 // If a derived class may have overridden existing WriteLine behavior,
                 // we need to make sure we use it.
                 base.WriteLine(value);
+            }
+        }
+
+        private void WriteFormatHelper(string format, ParamsArray args, bool appendNewLine)
+        {
+            StringBuilder sb =
+                StringBuilderCache.Acquire(format.Length + args.Length * 8)
+                .AppendFormatHelper(null, format, args);
+
+            StringBuilder.ChunkEnumerator chunks = sb.GetChunks();
+
+            bool more = chunks.MoveNext();
+            while (more)
+            {
+                ReadOnlySpan<char> current = chunks.Current.Span;
+                more = chunks.MoveNext();
+
+                // If final chunk, include the newline if needed
+                WriteSpan(current, appendNewLine: more ? false : appendNewLine);
+            }
+
+            StringBuilderCache.Release(sb);
+        }
+
+        public override void Write(string format, object arg0)
+        {
+            if (GetType() == typeof(StreamWriter))
+            {
+                WriteFormatHelper(format, new ParamsArray(arg0), appendNewLine: false);
+            }
+            else
+            {
+                base.Write(format, arg0);
+            }
+        }
+
+        public override void Write(string format, object arg0, object arg1)
+        {
+            if (GetType() == typeof(StreamWriter))
+            {
+                WriteFormatHelper(format, new ParamsArray(arg0, arg1), appendNewLine: false);
+            }
+            else
+            {
+                base.Write(format, arg0, arg1);
+            }
+        }
+
+        public override void Write(string format, object arg0, object arg1, object arg2)
+        {
+            if (GetType() == typeof(StreamWriter))
+            {
+                WriteFormatHelper(format, new ParamsArray(arg0, arg1, arg2), appendNewLine: false);
+            }
+            else
+            {
+                base.Write(format, arg0, arg1, arg2);
+            }
+        }
+
+        public override void Write(string format, params object[] arg)
+        {
+            if (GetType() == typeof(StreamWriter))
+            {
+                WriteFormatHelper(format, new ParamsArray(arg), appendNewLine: false);
+            }
+            else
+            {
+                base.Write(format, arg);
+            }
+        }
+
+        public override void WriteLine(string format, object arg0)
+        {
+            if (GetType() == typeof(StreamWriter))
+            {
+                WriteFormatHelper(format, new ParamsArray(arg0), appendNewLine: true);
+            }
+            else
+            {
+                base.WriteLine(format, arg0);
+            }
+        }
+
+        public override void WriteLine(string format, object arg0, object arg1)
+        {
+            if (GetType() == typeof(StreamWriter))
+            {
+                WriteFormatHelper(format, new ParamsArray(arg0, arg1), appendNewLine: true);
+            }
+            else
+            {
+                base.WriteLine(format, arg0, arg1);
+            }
+        }
+
+        public override void WriteLine(string format, object arg0, object arg1, object arg2)
+        {
+            if (GetType() == typeof(StreamWriter))
+            {
+                WriteFormatHelper(format, new ParamsArray(arg0, arg1, arg2), appendNewLine: true);
+            }
+            else
+            {
+                base.WriteLine(format, arg0, arg1, arg2);
+            }
+        }
+
+        public override void WriteLine(string format, params object[] arg)
+        {
+            if (GetType() == typeof(StreamWriter))
+            {
+                WriteFormatHelper(format, new ParamsArray(arg), appendNewLine: true);
+            }
+            else
+            {
+                base.WriteLine(format, arg);
             }
         }
 
@@ -955,7 +1109,7 @@ namespace System.IO
         // to ensure performant access inside the state machine that corresponds this async method.
         private static async Task FlushAsyncInternal(StreamWriter _this, bool flushStream, bool flushEncoder,
                                                      char[] charBuffer, int charPos, bool haveWrittenPreamble,
-                                                     Encoding encoding, Encoder encoder, Byte[] byteBuffer, Stream stream, CancellationToken cancellationToken)
+                                                     Encoding encoding, Encoder encoder, byte[] byteBuffer, Stream stream, CancellationToken cancellationToken)
         {
             if (!haveWrittenPreamble)
             {

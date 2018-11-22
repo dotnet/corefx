@@ -17,7 +17,7 @@
     <LibFileTargetPath Condition="'$(LibFileTargetPath)' == '' AND '$(PackageTargetRuntime)' != ''">runtimes/$(PackageTargetRuntime)/lib/$(TargetFramework)</LibFileTargetPath>
 
     <NativeFileTargetPath Condition="'$(NativeFileTargetPath)' == '' AND '$(PackageTargetRuntime)' != ''">runtimes/$(PackageTargetRuntime)/native</NativeFileTargetPath>
-    <NativeBinDir Condition="'$(PackageTargetRuntimeSuffix)' == 'aot'">$(NativeBinDir)_aot</NativeBinDir>
+    <NativeBinDir Condition="'$(PackageTargetRuntimeSuffix)' == 'aot'">$(NativeBinDir)-aot</NativeBinDir>
   </PropertyGroup>
 
   <!-- Bring in ref content from binplaced ref props -->
@@ -109,7 +109,7 @@
 
   <Target Name="VerifyClosure"
           DependsOnTargets="GetClosureFiles"
-          AfterTargets="Build"
+          AfterTargets="ValidatePackage"
           Inputs="%(ClosureFile.FileSet)"
           Outputs="batching-on-FileSet-metadata">
     <ItemGroup>
@@ -129,7 +129,7 @@
 
   <Target Name="VerifyDuplicateTypes"
           DependsOnTargets="GetClosureFiles"
-          AfterTargets="Build"
+          AfterTargets="ValidatePackage"
           Inputs="%(ClosureFile.FileSet)"
           Outputs="batching-on-FileSet-metadata">
     <PropertyGroup>
@@ -154,7 +154,7 @@
 
   <Target Name="VerifyNETStandard"
           DependsOnTargets="GetClosureFiles"
-          AfterTargets="Build"
+          AfterTargets="ValidatePackage"
           Inputs="%(ClosureFile.FileSet)"
           Outputs="batching-on-FileSet-metadata">
 

@@ -112,16 +112,16 @@ namespace System.Text.RegularExpressions
             internalMatchTimeout = matchTimeout;
 
             // Cache handling. Try to look up this regex in the cache.
-            string cultureKey = (options & RegexOptions.CultureInvariant) != 0 ?
-                    CultureInfo.InvariantCulture.ToString() :
-                    CultureInfo.CurrentCulture.ToString();                        
-            var key = new CachedCodeEntryKey(options, cultureKey, pattern);
-            CachedCodeEntry cached = LookupCachedAndUpdate(key);
+            CultureInfo culture = (options & RegexOptions.CultureInvariant) != 0 ?
+                CultureInfo.InvariantCulture :
+                CultureInfo.CurrentCulture;
+            var key = new CachedCodeEntryKey(options, culture.ToString(), pattern);
+            CachedCodeEntry cached = GetCachedCode(key, false);
 
             if (cached == null)
             {
                 // Parse the input
-                RegexTree tree = RegexParser.Parse(pattern, roptions);
+                RegexTree tree = RegexParser.Parse(pattern, roptions, culture);
 
                 // Extract the relevant information
                 capnames = tree.CapNames;
@@ -134,22 +134,22 @@ namespace System.Text.RegularExpressions
 
                 tree = null;
                 if (addToCache)
-                    cached = CacheCode(key);
+                    cached = GetCachedCode(key, true);
             }
             else
             {
-                caps = cached._caps;
-                capnames = cached._capnames;
-                capslist = cached._capslist;
-                capsize = cached._capsize;
-                _code = cached._code;
+                caps = cached.Caps;
+                capnames = cached.Capnames;
+                capslist = cached.Capslist;
+                capsize = cached.Capsize;
+                _code = cached.Code;
 #if FEATURE_COMPILED
-                factory = cached._factory;
+                factory = cached.Factory;
 #endif
 
                 // Cache runner and replacement
-                _runnerref = cached._runnerref;
-                _replref = cached._replref;
+                _runnerref = cached.Runnerref;
+                _replref = cached.ReplRef;
                 _refsInitialized = true;
             }
 
@@ -212,7 +212,9 @@ namespace System.Text.RegularExpressions
         {
             return RegexCompiler.Compile(code, roptions);
         }
+#endif
 
+#if FEATURE_COMPILEAPIS
         public static void CompileToAssembly(RegexCompilationInfo[] regexinfos, AssemblyName assemblyname)
         {
             throw new PlatformNotSupportedException(SR.PlatformNotSupported_CompileToAssembly);
@@ -227,7 +229,7 @@ namespace System.Text.RegularExpressions
         {
             throw new PlatformNotSupportedException(SR.PlatformNotSupported_CompileToAssembly);
         }
-#endif
+#endif // FEATURE_COMPILEAPIS
 
         /// <summary>
         /// Escapes a minimal set of metacharacters (\, *, +, ?, |, {, [, (, ), ^, $, ., #, and

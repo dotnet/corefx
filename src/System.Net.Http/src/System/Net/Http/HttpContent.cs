@@ -143,7 +143,12 @@ namespace System.Net.Http
 
         internal bool TryGetBuffer(out ArraySegment<byte> buffer)
         {
-            return _bufferedContent != null && _bufferedContent.TryGetBuffer(out buffer);
+            if (_bufferedContent != null)
+            {
+                return _bufferedContent.TryGetBuffer(out buffer);
+            }
+            buffer = default;
+            return false;
         }
 
         protected HttpContent()
@@ -191,13 +196,25 @@ namespace System.Net.Http
             Encoding encoding = null;
             int bomLength = -1;
 
+            string charset = headers.ContentType?.CharSet;
+
             // If we do have encoding information in the 'Content-Type' header, use that information to convert
             // the content to a string.
-            if ((headers.ContentType != null) && (headers.ContentType.CharSet != null))
+            if (charset != null)
             {
                 try
                 {
-                    encoding = Encoding.GetEncoding(headers.ContentType.CharSet);
+                    // Remove at most a single set of quotes.
+                    if (charset.Length > 2 &&
+                        charset[0] == '\"' &&
+                        charset[charset.Length - 1] == '\"')
+                    {
+                        encoding = Encoding.GetEncoding(charset.Substring(1, charset.Length - 2));
+                    }
+                    else
+                    {
+                        encoding = Encoding.GetEncoding(charset);
+                    }
 
                     // Byte-order-mark (BOM) characters may be present even if a charset was specified.
                     bomLength = GetPreambleLength(buffer, encoding);
@@ -731,10 +748,10 @@ namespace System.Net.Http
                 return base.WriteAsync(buffer, offset, count, cancellationToken);
             }
 
-            public override ValueTask WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+            public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
             {
-                CheckSize(source.Length);
-                return base.WriteAsync(source, cancellationToken);
+                CheckSize(buffer.Length);
+                return base.WriteAsync(buffer, cancellationToken);
             }
 
             public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
@@ -869,11 +886,11 @@ namespace System.Net.Http
                 _length += count;
             }
 
-            public override void Write(ReadOnlySpan<byte> source)
+            public override void Write(ReadOnlySpan<byte> buffer)
             {
-                EnsureCapacity(_length + source.Length);
-                source.CopyTo(new Span<byte>(_buffer, _length, source.Length));
-                _length += source.Length;
+                EnsureCapacity(_length + buffer.Length);
+                buffer.CopyTo(new Span<byte>(_buffer, _length, buffer.Length));
+                _length += buffer.Length;
             }
 
             public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
@@ -882,9 +899,9 @@ namespace System.Net.Http
                 return Task.CompletedTask;
             }
 
-            public override ValueTask WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default)
+            public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
             {
-                Write(source.Span);
+                Write(buffer.Span);
                 return default;
             }
 

@@ -62,10 +62,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                     data = contents.Span;
                 }
 
-                if (reader.HasData)
-                {
-                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-                }
+                reader.ThrowIfNotEmpty();
 
                 return data.ToArray();
             }
@@ -81,23 +78,31 @@ namespace Internal.Cryptography.Pal.AnyOS
 
         public override byte[] EncodeUtcTime(DateTime utcTime)
         {
+            const int minLegalYear = 1950;
             // Write using DER to support the most readers.
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
-                // Sending the DateTime through ToLocalTime here will cause the right normalization
-                // of DateTimeKind.Unknown.
-                //
-                // Unknown => Local (adjust) => UTC (adjust "back", add Z marker; matches Windows)
-                if (utcTime.Kind == DateTimeKind.Unspecified)
+                try 
                 {
-                    writer.WriteUtcTime(utcTime.ToLocalTime());
-                }
-                else
-                {
-                    writer.WriteUtcTime(utcTime);
-                }
+                    // Sending the DateTime through ToLocalTime here will cause the right normalization
+                    // of DateTimeKind.Unknown.
+                    //
+                    // Unknown => Local (adjust) => UTC (adjust "back", add Z marker; matches Windows)
+                    if (utcTime.Kind == DateTimeKind.Unspecified)
+                    {
+                        writer.WriteUtcTime(utcTime.ToLocalTime(), minLegalYear);
+                    }
+                    else
+                    {
+                        writer.WriteUtcTime(utcTime, minLegalYear);
+                    }
 
-                return writer.Encode();
+                    return writer.Encode();
+                }
+                catch (ArgumentException ex)
+                {
+                    throw new CryptographicException(ex.Message, ex);
+                }
             }
         }
 
@@ -106,12 +111,7 @@ namespace Internal.Cryptography.Pal.AnyOS
             // Read using BER because the CMS specification says the encoding is BER.
             AsnReader reader = new AsnReader(encodedUtcTime, AsnEncodingRules.BER);
             DateTimeOffset value = reader.GetUtcTime();
-
-            if (reader.HasData)
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-
+            reader.ThrowIfNotEmpty();
             return value.UtcDateTime;
         }
 
@@ -126,12 +126,7 @@ namespace Internal.Cryptography.Pal.AnyOS
             // Read using BER because the CMS specification says the encoding is BER.
             AsnReader reader = new AsnReader(encodedOid, AsnEncodingRules.BER);
             string value = reader.ReadObjectIdentifierAsString();
-
-            if (reader.HasData)
-            {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
-            }
-
+            reader.ThrowIfNotEmpty();
             return value;
         }
 
@@ -139,11 +134,20 @@ namespace Internal.Cryptography.Pal.AnyOS
         {
             AsnReader reader = new AsnReader(encodedMessage, AsnEncodingRules.BER);
 
-            ContentInfoAsn contentInfo = AsnSerializer.Deserialize<ContentInfoAsn>(
-                reader.GetEncodedValue(),
-                AsnEncodingRules.BER);
+            ContentInfoAsn.Decode(reader, out ContentInfoAsn contentInfo);
 
-            return new Oid(contentInfo.ContentType);
+            switch (contentInfo.ContentType)
+            {
+                case Oids.Pkcs7Data:
+                case Oids.Pkcs7Signed:
+                case Oids.Pkcs7Enveloped:
+                case Oids.Pkcs7SignedEnveloped:
+                case Oids.Pkcs7Hashed:
+                case Oids.Pkcs7Encrypted:
+                    return new Oid(contentInfo.ContentType);
+            }
+
+            throw new CryptographicException(SR.Cryptography_Cms_InvalidMessageType);
         }
     }
 }

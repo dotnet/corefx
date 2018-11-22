@@ -32,16 +32,23 @@ namespace System
         public static T Throws<T>(string paramName, System.Action action) where T : System.ArgumentException { throw null; }
         public static T Throws<T>(string paramName, System.Func<object> testCode) where T : System.ArgumentException { throw null; }
         public static void Throws<T>(string netCoreParamName, string netFxParamName, System.Action action) where T : System.ArgumentException { }
+        public static void Throws<T>(string netCoreParamName, string netFxParamName, Func<object> testCode) where T : System.ArgumentException { }
         public static void Throws<TNetCoreExceptionType, TNetFxExceptionType>(string paramName, System.Action action) where TNetCoreExceptionType : System.ArgumentException where TNetFxExceptionType : System.ArgumentException { }
         public static Exception Throws<TNetCoreExceptionType, TNetFxExceptionType>(Action action) where TNetCoreExceptionType : Exception where TNetFxExceptionType : Exception { throw null; }
+        public static Exception Throws(Type netCoreExceptionType, Type netFxExceptionType, Action action) { throw null; }
         public static void Throws<TNetCoreExceptionType, TNetFxExceptionType>(string netCoreParamName, string netFxParamName, System.Action action) where TNetCoreExceptionType : System.ArgumentException where TNetFxExceptionType : System.ArgumentException { }
     }
     public static partial class PlatformDetection
     {
         public static bool IsReflectionEmitSupported;
+        public static bool SupportsAlpn { get { throw null; } }
+        public static bool SupportsClientAlpn { get { throw null; } }
         public static bool ClientWebSocketPartialMessagesSupported { get { throw null; } }
         public static bool HasWindowsShell { get { throw null; } }
         public static bool IsArmProcess { get { throw null; } }
+        public static bool IsArm64Process { get { throw null; } }
+        public static bool IsAlpine { get { throw null; } }
+        public static bool IsArgIteratorSupported { get { throw null; } }
         public static bool IsCentos6 { get { throw null; } }
         public static bool IsDebian { get { throw null; } }
         public static bool IsDebian8 { get { throw null; } }
@@ -56,14 +63,20 @@ namespace System
         public static bool IsNetfx462OrNewer { get { throw null; } }
         public static bool IsNetfx470OrNewer { get { throw null; } }
         public static bool IsNetfx471OrNewer { get { throw null; } }
+        public static bool IsNetfx472OrNewer { get { throw null; } }
         public static bool IsNetNative { get { throw null; } }
         public static bool IsNonZeroLowerBoundArraySupported { get { throw null; } }
+        public static bool IsNotIntMaxValueArrayIndexSupported { get { throw null; } }
+        public static bool IsArgIteratorNotSupported { get { throw null; } }
         public static bool IsNotArmProcess { get { throw null; } }
+        public static bool IsNotArm64Process { get { throw null; } }
         public static bool IsNotFedoraOrRedHatFamily { get { throw null; } }
         public static bool IsNotMacOsHighSierraOrHigher { get { throw null; } }
+        public static bool IsNotNetNative { get { throw null; } }
         public static bool IsNotNetNativeRunningAsConsoleApp { get { throw null; } }
         public static bool IsNotOneCoreUAP { get { throw null; } }
         public static bool IsNotWindows8x { get { throw null; } }
+        public static bool IsNotWindowsHomeEdition { get { throw null; } }
         public static bool IsNotWindowsIoTCore { get { throw null; } }
         public static bool IsNotWindowsNanoServer { get { throw null; } }
         public static bool IsNotWindowsServerCore { get { throw null; } }
@@ -89,13 +102,17 @@ namespace System
         public static bool IsUbuntu1710 { get { throw null; } }
         public static bool IsUbuntu1710OrHigher { get { throw null; } }
         public static bool IsUbuntu1804 { get { throw null; } }
+        public static bool IsUbuntu1810OrHigher { get { throw null; } }
         public static bool IsWindows { get { throw null; } }
         public static bool IsWindows10Version1607OrGreater { get { throw null; } } // >= Windows 10 Anniversary Update
         public static bool IsWindows10Version1703OrGreater { get { throw null; } } // >= Windows 10 Creators Update
         public static bool IsWindows10Version1709OrGreater { get { throw null; } } // >= Windows 10 Fall Creators Update
+        public static bool IsWindows10Version1803OrGreater { get { throw null; } } // >= Windows 10 April 2018 Update
         public static bool IsWindows7 { get { throw null; } }
         public static bool IsWindows8x { get { throw null; } }
+        public static bool IsWindows8xOrLater { get { throw null; } }
         public static bool IsWindowsAndElevated { get { throw null; } }
+        public static bool IsWindowsHomeEdition { get { throw null; } }
         public static bool IsWindowsIoTCore { get { throw null; } }
         public static bool IsWindowsNanoServer { get { throw null; } }
         public static bool IsWindowsServerCore { get { throw null; } }
@@ -132,6 +149,10 @@ namespace System.Diagnostics
         protected static readonly string TestConsoleApp;
         protected RemoteExecutorTestBase() { }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action method, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string> method, string arg1, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string, string> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string, string, string> method, string arg1, string arg2, string arg3, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string, string, string, string> method, string arg1, string arg2, string arg3, string arg4, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<int> method, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, int> method, string arg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, int> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
@@ -145,6 +166,7 @@ namespace System.Diagnostics
         public sealed partial class RemoteInvokeHandle : System.IDisposable
         {
             public RemoteInvokeHandle(System.Diagnostics.Process process, System.Diagnostics.RemoteInvokeOptions options, string assemblyName, string className, string methodName) { }
+            public int ExitCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
             public System.Diagnostics.RemoteInvokeOptions Options { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
             public System.Diagnostics.Process Process { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
             public void Dispose() { }

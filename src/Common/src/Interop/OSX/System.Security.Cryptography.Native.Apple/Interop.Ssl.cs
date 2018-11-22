@@ -4,7 +4,10 @@
 
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using Microsoft.Win32.SafeHandles;
@@ -14,6 +17,8 @@ internal static partial class Interop
 {
     internal static partial class AppleCrypto
     {
+        private static readonly IdnMapping s_idnMapping = new IdnMapping();
+
         // Read data from connection (or an instance delegate captured context) and write it to data
         // dataLength comes in as the capacity of data, goes out as bytes written.
         // Note: the true type of dataLength is `size_t*`, but on macOS that's most equal to `void**`
@@ -23,6 +28,17 @@ internal static partial class Interop
         // Read *dataLength from data and write it to connection (or an instance delegate captured context),
         // and set *dataLength to the number of bytes actually transferred.
         internal unsafe delegate int SSLWriteFunc(void* connection, byte* data, void** dataLength);
+
+        private static readonly SafeCreateHandle s_cfHttp2Str = CoreFoundation.CFStringCreateWithCString("h2");
+        private static readonly SafeCreateHandle s_cfHttp11Str = CoreFoundation.CFStringCreateWithCString("http/1.1");
+
+        private static readonly IntPtr[] s_cfAlpnHttp2Protocol = new IntPtr[] { s_cfHttp2Str.DangerousGetHandle() };
+        private static readonly IntPtr[] s_cfAlpnHttp11Protocol = new IntPtr[] { s_cfHttp11Str.DangerousGetHandle() };
+        private static readonly IntPtr[] s_cfAlpnHttp211Protocol = new IntPtr[] { s_cfHttp2Str.DangerousGetHandle(), s_cfHttp11Str.DangerousGetHandle() };
+
+        private static readonly SafeCreateHandle s_cfAlpnHttp11Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp11Protocol, (UIntPtr)1);
+        private static readonly SafeCreateHandle s_cfAlpnHttp2Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp2Protocol, (UIntPtr)1);
+        private static readonly SafeCreateHandle s_cfAlpnHttp211Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp211Protocol , (UIntPtr)2);
 
         internal enum PAL_TlsHandshakeState
         {
@@ -385,6 +401,12 @@ internal static partial class Interop
             int cbTargetName,
             out int osStatus);
 
+        [DllImport(Interop.Libraries.AppleCryptoNative, EntryPoint = "AppleCryptoNative_SSLSetALPNProtocols")]
+        internal static extern int SSLSetALPNProtocols(SafeSslHandle ctx, SafeCreateHandle cfProtocolsRefs, out int osStatus);
+
+        [DllImport(Interop.Libraries.AppleCryptoNative, EntryPoint = "AppleCryptoNative_SslGetAlpnSelected")]
+        internal static extern int SslGetAlpnSelected(SafeSslHandle ssl, out SafeCFDataHandle protocol);
+
         [DllImport(Interop.Libraries.AppleCryptoNative, EntryPoint = "AppleCryptoNative_SslHandshake")]
         internal static extern PAL_TlsHandshakeState SslHandshake(SafeSslHandle sslHandle);
 
@@ -566,20 +588,93 @@ internal static partial class Interop
             throw new SslException();
         }
 
+        internal static unsafe void SslCtxSetAlpnProtos(SafeSslHandle ctx, List<SslApplicationProtocol> protocols)
+        {
+            SafeCreateHandle cfProtocolsRefs = null;
+            SafeCreateHandle[] cfProtocolsArrayRef = null;
+            try
+            {
+                if (protocols.Count == 1 && protocols[0] == SslApplicationProtocol.Http2)
+                {
+                    cfProtocolsRefs = s_cfAlpnHttp211Protocols;
+                }
+                else if (protocols.Count == 1 && protocols[0] == SslApplicationProtocol.Http11)
+                {
+                    cfProtocolsRefs = s_cfAlpnHttp11Protocols;
+                }
+                else if (protocols.Count == 2 && protocols[0] == SslApplicationProtocol.Http2 && protocols[1] == SslApplicationProtocol.Http11)
+                {
+                    cfProtocolsRefs = s_cfAlpnHttp211Protocols;
+                }
+                else
+                {
+                    // we did not match common case. This is more expensive path allocating Core Foundation objects.
+                    cfProtocolsArrayRef = new SafeCreateHandle[protocols.Count];
+                    IntPtr[] protocolsPtr = new System.IntPtr[protocols.Count];
+
+                    for (int i = 0; i < protocols.Count; i++)
+                    {
+                        cfProtocolsArrayRef[i] = CoreFoundation.CFStringCreateWithCString(protocols[i].ToString());
+                        protocolsPtr[i] = cfProtocolsArrayRef[i].DangerousGetHandle();
+                    }
+
+                    cfProtocolsRefs = CoreFoundation.CFArrayCreate(protocolsPtr, (UIntPtr)protocols.Count);
+                }
+
+                int osStatus;
+                int result = SSLSetALPNProtocols(ctx, cfProtocolsRefs, out osStatus);
+                if (result != 1)
+                {
+                    throw CreateExceptionForOSStatus(osStatus);
+                }
+            }
+            finally
+            {
+                if (cfProtocolsArrayRef != null)
+                {
+                    for (int i = 0; i < cfProtocolsArrayRef.Length ; i++)
+                    {
+                        cfProtocolsArrayRef[i]?.Dispose();
+                    }
+
+                    cfProtocolsRefs?.Dispose();
+                }
+            }
+        }
+
+        internal static byte[] SslGetAlpnSelected(SafeSslHandle ssl)
+        {
+            SafeCFDataHandle protocol;
+
+            if (SslGetAlpnSelected(ssl, out protocol) != 1 || protocol == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                byte[] result = Interop.CoreFoundation.CFGetData(protocol);
+                return result;
+            }
+            finally
+            {
+                protocol.Dispose();
+            }
+        }
+
         public static bool SslCheckHostnameMatch(SafeSslHandle handle, string hostName, DateTime notBefore)
         {
             int result;
             // The IdnMapping converts Unicode input into the IDNA punycode sequence.
             // It also does host case normalization.  The bypass logic would be something
             // like "all characters being within [a-z0-9.-]+"
-            // Since it's not documented as being thread safe, create a new one each time.
             //
             // The SSL Policy (SecPolicyCreateSSL) has been verified as not inherently supporting
             // IDNA as of macOS 10.12.1 (Sierra).  If it supports low-level IDNA at a later date,
             // this code could be removed.
             //
             // It was verified as supporting case invariant match as of 10.12.1 (Sierra).
-            string matchName = new System.Globalization.IdnMapping().GetAscii(hostName);
+            string matchName = s_idnMapping.GetAscii(hostName);
 
             using (SafeCFDateHandle cfNotBefore = CoreFoundation.CFDateCreate(notBefore))
             using (SafeCreateHandle cfHostname = CoreFoundation.CFStringCreateWithCString(matchName))

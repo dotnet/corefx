@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Text
 {
-    internal ref struct ValueStringBuilder
+    internal ref partial struct ValueStringBuilder
     {
         private char[] _arrayToReturnToPool;
         private Span<char> _chars;
@@ -22,11 +22,19 @@ namespace System.Text
             _pos = 0;
         }
 
+        public ValueStringBuilder(int initialCapacity)
+        {
+            _arrayToReturnToPool = ArrayPool<char>.Shared.Rent(initialCapacity);
+            _chars = _arrayToReturnToPool;
+            _pos = 0;
+        }
+
         public int Length
         {
             get => _pos;
             set
             {
+                Debug.Assert(value >= 0);
                 Debug.Assert(value <= _chars.Length);
                 _pos = value;
             }
@@ -40,7 +48,30 @@ namespace System.Text
                 Grow(capacity - _chars.Length);
         }
 
-        public ref char GetPinnableReference() => ref MemoryMarshal.GetReference(_chars);
+        /// <summary>
+        /// Get a pinnable reference to the builder.
+        /// Does not ensure there is a null char after <see cref="Length"/>
+        /// This overload is pattern matched in the C# 7.3+ compiler so you can omit
+        /// the explicit method call, and write eg "fixed (char* c = builder)"
+        /// </summary>
+        public ref char GetPinnableReference()
+        {
+            return ref MemoryMarshal.GetReference(_chars);
+        }
+
+        /// <summary>
+        /// Get a pinnable reference to the builder.
+        /// </summary>
+        /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
+        public ref char GetPinnableReference(bool terminate)
+        {
+            if (terminate)
+            {
+                EnsureCapacity(Length + 1);
+                _chars[Length] = '\0';
+            }
+            return ref MemoryMarshal.GetReference(_chars);
+        }
 
         public ref char this[int index]
         {
@@ -53,9 +84,26 @@ namespace System.Text
 
         public override string ToString()
         {
-            var s = new string(_chars.Slice(0, _pos));
+            var s = _chars.Slice(0, _pos).ToString();
             Dispose();
             return s;
+        }
+
+        /// <summary>Returns the underlying storage of the builder.</summary>
+        public Span<char> RawChars => _chars;
+
+        /// <summary>
+        /// Returns a span around the contents of the builder.
+        /// </summary>
+        /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
+        public ReadOnlySpan<char> AsSpan(bool terminate)
+        {
+            if (terminate)
+            {
+                EnsureCapacity(Length + 1);
+                _chars[Length] = '\0';
+            }
+            return _chars.Slice(0, _pos);
         }
 
         public ReadOnlySpan<char> AsSpan() => _chars.Slice(0, _pos);
@@ -91,11 +139,26 @@ namespace System.Text
             _pos += count;
         }
 
+        public void Insert(int index, string s)
+        {
+            int count = s.Length;
+
+            if (_pos > (_chars.Length - count))
+            {
+                Grow(count);
+            }
+
+            int remaining = _pos - index;
+            _chars.Slice(index, remaining).CopyTo(_chars.Slice(index + count));
+            s.AsSpan().CopyTo(_chars.Slice(index));
+            _pos += count;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Append(char c)
         {
             int pos = _pos;
-            if (pos < _chars.Length)
+            if ((uint)pos < (uint)_chars.Length)
             {
                 _chars[pos] = c;
                 _pos = pos + 1;
@@ -110,7 +173,7 @@ namespace System.Text
         public void Append(string s)
         {
             int pos = _pos;
-            if (s.Length == 1 && pos < _chars.Length) // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
+            if (s.Length == 1 && (uint)pos < (uint)_chars.Length) // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
             {
                 _chars[pos] = s[0];
                 _pos = pos + 1;

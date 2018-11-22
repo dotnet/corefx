@@ -13,7 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Security;
 using Xunit;
-using Xunit.NetCore.Extensions;
+using Microsoft.DotNet.XUnitExtensions;
 
 namespace System.Diagnostics.Tests
 {
@@ -155,7 +155,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Theory, InlineData("nano"), InlineData("vi")]
+        [Theory, InlineData("vi")]
         [PlatformSpecific(TestPlatforms.Linux)]
         [OuterLoop("Opens program")]
         public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram(string programToOpenWith)
@@ -165,6 +165,31 @@ namespace System.Diagnostics.Tests
                 string fileToOpen = GetTestFilePath() + ".txt";
                 File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram)}");
                 using (var px = Process.Start(programToOpenWith, fileToOpen))
+                {
+                    Assert.Equal(programToOpenWith, px.ProcessName);
+                    px.Kill();
+                    px.WaitForExit();
+                    Assert.True(px.HasExited);
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Program specified to open file with {programToOpenWith} is not installed on this machine.");
+            }
+        }
+
+        [Theory, InlineData("vi")]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        [OuterLoop("Opens program")]
+        public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList(string programToOpenWith)
+        {
+            if (IsProgramInstalled(programToOpenWith))
+            {
+                string fileToOpen = GetTestFilePath() + ".txt";
+                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList)}");
+                ProcessStartInfo psi = new ProcessStartInfo(programToOpenWith);
+                psi.ArgumentList.Add(fileToOpen);
+                using (var px = Process.Start(psi))
                 {
                     Assert.Equal(programToOpenWith, px.ProcessName);
                     px.Kill();
@@ -215,6 +240,34 @@ namespace System.Diagnostics.Tests
         public void ProcessStart_UseShellExecuteTrue_OpenUrl_SuccessfullyReadsArgument(string arguments)
         {
             var startInfo = new ProcessStartInfo { UseShellExecute = true, FileName = "https://github.com/dotnet/corefx", Arguments = arguments };
+            using (var px = Process.Start(startInfo))
+            {
+                Assert.NotNull(px);
+                px.Kill();
+                px.WaitForExit();
+                Assert.True(px.HasExited);
+            }
+        }
+
+        public static TheoryData<string[]> StartOSXProcessWithArgumentList => new TheoryData<string[]>
+        {
+            { new string[] { "-a", "Safari" } },
+            { new string[] { "-a", "\"Google Chrome\"" } }
+        };
+
+        [Theory,
+            MemberData(nameof(StartOSXProcessWithArgumentList))]
+        [PlatformSpecific(TestPlatforms.OSX)]
+        [OuterLoop("Opens browser")]
+        public void ProcessStart_UseShellExecuteTrue_OpenUrl_SuccessfullyReadsArgument(string[] argumentList)
+        {
+            var startInfo = new ProcessStartInfo { UseShellExecute = true, FileName = "https://github.com/dotnet/corefx"};
+
+            foreach (string item in argumentList)
+            {
+                startInfo.ArgumentList.Add(item);
+            }
+
             using (var px = Process.Start(startInfo))
             {
                 Assert.NotNull(px);
@@ -296,7 +349,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
         public void TestStartOnUnixWithBadFormat()
         {
             string path = GetTestFilePath();
@@ -310,28 +362,26 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.OSX)] // OSX doesn't support throwing on Process.Start
-        public void TestStartOnOSXWithBadFormat()
-        {
-            string path = GetTestFilePath();
-            File.Create(path).Dispose();
-            int mode = Convert.ToInt32("744", 8);
-
-            Assert.Equal(0, chmod(path, mode)); // execute permissions
-
-            using (Process p = Process.Start(path))
-            {
-                p.WaitForExit();
-                Assert.NotEqual(0, p.ExitCode);
-            }
-        }
-
-        [Fact]
         public void TestStartWithNonExistingUserThrows()
         {
             Process p = CreateProcessPortable(RemotelyInvokable.Dummy);
             p.StartInfo.UserName = "DoesNotExist";
             Assert.Throws<Win32Exception>(() => p.Start());
+        }
+
+        [Fact]
+        public void TestExitCodeKilledChild()
+        {
+            using (Process p = CreateProcessLong())
+            {
+                p.Start();
+                p.Kill();
+                p.WaitForExit();
+
+                // SIGKILL may change per platform
+                const int SIGKILL = 9; // Linux, macOS, FreeBSD, ...
+                Assert.Equal(128 + SIGKILL, p.ExitCode);
+            }
         }
 
         /// <summary>
@@ -534,6 +584,45 @@ namespace System.Diagnostics.Tests
                 Assert.False(GetWaitStateDictionary(childDictionary: false).Contains(processId));
                 Assert.False(GetWaitStateDictionary(childDictionary: true).Contains(processId));
             }
+        }
+
+        /// <summary>
+        /// Verifies a new Process instance can refer to a process with a recycled pid for which
+        /// there is still an existing Process instance. Operations on the existing instance will
+        /// throw since that process has exited.
+        /// </summary>
+        [ConditionalFact(typeof(TestEnvironment), nameof(TestEnvironment.IsStressModeEnabled))]
+        public void TestProcessRecycledPid()
+        {
+            const int LinuxPidMaxDefault = 32768;
+            var processes = new Dictionary<int, Process>(LinuxPidMaxDefault);
+            bool foundRecycled = false;
+            for (int i = 0; i < int.MaxValue; i++)
+            {
+                var process = CreateProcessLong();
+                process.Start();
+
+                Process recycled;
+                foundRecycled = processes.TryGetValue(process.Id, out recycled);
+                if (foundRecycled)
+                {
+                    Assert.Throws<InvalidOperationException>(() => recycled.Kill());
+                }
+
+                process.Kill();
+                process.WaitForExit();
+
+                if (foundRecycled)
+                {
+                    break;
+                }
+                else
+                {
+                    processes.Add(process.Id, process);
+                }
+            }
+
+            Assert.True(foundRecycled);
         }
 
         private static IDictionary GetWaitStateDictionary(bool childDictionary)

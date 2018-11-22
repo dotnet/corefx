@@ -6,8 +6,6 @@ using Xunit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-#pragma warning disable 0649 //Field 'SpanTests.InnerStruct.J' is never assigned to, and will always have its default value 0
-
 namespace System.SpanTests
 {
     public static partial class ReadOnlySpanTests
@@ -60,20 +58,8 @@ namespace System.SpanTests
                 new ReadOnlySpan<int>((void*)null, 0);
                 new ReadOnlySpan<int?>((void*)null, 0);
                 AssertExtensions.Throws<ArgumentException>(null, () => new ReadOnlySpan<object>((void*)null, 0).DontBox());
-                AssertExtensions.Throws<ArgumentException>(null, () => new ReadOnlySpan<StructWithReferences>((void*)null, 0).DontBox());
+                AssertExtensions.Throws<ArgumentException>(null, () => new ReadOnlySpan<TestHelpers.StructWithReferences>((void*)null, 0).DontBox());
             }
-        }
-
-        private struct StructWithReferences
-        {
-            public int I;
-            public InnerStruct Inner;
-        }
-
-        private struct InnerStruct
-        {
-            public int J;
-            public object O;
         }
     }
 }

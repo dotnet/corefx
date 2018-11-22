@@ -2,12 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
-using System.Drawing.Imaging;
 using System.Drawing.Internal;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
+using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing
 {
@@ -22,10 +19,10 @@ namespace System.Drawing
             }
 
             IntPtr bitmap = IntPtr.Zero;
-            int status = SafeNativeMethods.Gdip.GdipCreateBitmapFromStream(new GPStream(stream), out bitmap);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipCreateBitmapFromStream(new GPStream(stream), out bitmap);
+            Gdip.CheckStatus(status);
 
-            ValidateBitmap(bitmap);
+            ValidateImage(bitmap);
 
             SetNativeImage(bitmap);
             EnsureSave(this, null, stream);
@@ -43,28 +40,18 @@ namespace System.Drawing
 
             if (useIcm)
             {
-                status = SafeNativeMethods.Gdip.GdipCreateBitmapFromStreamICM(new GPStream(stream), out bitmap);
+                status = Gdip.GdipCreateBitmapFromStreamICM(new GPStream(stream), out bitmap);
             }
             else
             {
-                status = SafeNativeMethods.Gdip.GdipCreateBitmapFromStream(new GPStream(stream), out bitmap);
+                status = Gdip.GdipCreateBitmapFromStream(new GPStream(stream), out bitmap);
             }
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            Gdip.CheckStatus(status);
 
-            ValidateBitmap(bitmap);
+            ValidateImage(bitmap);
 
             SetNativeImage(bitmap);
             EnsureSave(this, null, stream);
-        }
-
-        private void ValidateBitmap(IntPtr bitmap)
-        {
-            int status = SafeNativeMethods.Gdip.GdipImageForceValidation(new HandleRef(null, bitmap));
-            if (status != SafeNativeMethods.Gdip.Ok)
-            {
-                SafeNativeMethods.Gdip.GdipDisposeImage(new HandleRef(null, bitmap));
-                throw SafeNativeMethods.Gdip.StatusException(status);
-            }
         }
     }
 }

@@ -1,23 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{8DEA82EF-2214-4295-8CC1-9FFB9B18838F}</ProjectGuid>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
-    <!-- We must pin the netstandard2.0 version to match what was shipped in netcoreapp2.0
-         If we decided to add more Apis to that version of the library we need to also start
-         producing the netcoreapp2.0 src library again instead of harvesting it.
-     -->
-    <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard'">4.1.0.0</AssemblyVersion>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="System.Security.Cryptography.OpenSsl.cs" />
-    <!-- ApiCompat requires an object reference to determine the core assembly. -->
-    <AssemblyInfoSource Include="internal class ObjectMarker { }" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
@@ -26,5 +13,4 @@
     <ProjectReference Include="..\..\System.Security.Cryptography.Algorithms\ref\System.Security.Cryptography.Algorithms.csproj" />
     <ProjectReference Include="..\..\System.Security.Cryptography.Primitives\ref\System.Security.Cryptography.Primitives.csproj" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

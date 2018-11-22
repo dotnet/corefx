@@ -359,7 +359,7 @@ namespace Internal.Cryptography.Pal.Windows
                 throw new CryptographicException();
             }
 
-            int provType = BinaryPrimitives.ReadMachineEndian<int>(stackSpan.Slice(0, size));
+            int provType = MemoryMarshal.Read<int>(stackSpan.Slice(0, size));
 
             size = stackSpan.Length;
             if (!Interop.Advapi32.CryptGetProvParam(handle, CryptProvParam.PP_KEYSET_TYPE, stackSpan, ref size))
@@ -373,7 +373,7 @@ namespace Internal.Cryptography.Pal.Windows
                 throw new CryptographicException();
             }
 
-            int keysetType = BinaryPrimitives.ReadMachineEndian<int>(stackSpan.Slice(0, size));
+            int keysetType = MemoryMarshal.Read<int>(stackSpan.Slice(0, size));
 
             // Only CRYPT_MACHINE_KEYSET is described as coming back, but be defensive.
             CspProviderFlags provFlags =
@@ -467,7 +467,7 @@ namespace Internal.Cryptography.Pal.Windows
             for (int i = 0; i < pCryptAttribute->cValue; i++)
             {
                 byte[] encodedAttribute = pCryptAttribute->rgValue[i].ToByteArray();
-                AsnEncodedData attributeObject = Helpers.CreateBestPkcs9AttributeObjectAvailable(oid, encodedAttribute);
+                AsnEncodedData attributeObject = PkcsHelpers.CreateBestPkcs9AttributeObjectAvailable(oid, encodedAttribute);
                 attributeCollection.Add(attributeObject);
             }
 

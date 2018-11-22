@@ -31,7 +31,7 @@ namespace System.SpanTests
             {
                 int[] a = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
 
-                ReadOnlySpan<int> source = a.AsReadOnlySpan().Slice(7, 5);
+                ReadOnlySpan<int> source = a.AsSpan(7, 5);
 
                 Span<int> expected = new int[a.Length].AsSpan(i, 5);
                 Span<int> actual = a.AsSpan(i, 5);
@@ -50,9 +50,8 @@ namespace System.SpanTests
             {
                 int[] a = new int[] { 1, 2, 3, 4, 5, 6 };
 
-                ReadOnlySpan<int> source = MemoryMarshal.Cast<byte, int>(
-                    a.AsReadOnlySpan().AsBytes()
-                    .Slice(2, 5 * sizeof(int)));
+                ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes<int>(a);
+                ReadOnlySpan<int> source = MemoryMarshal.Cast<byte, int>(bytes.Slice(2, 5 * sizeof(int)));
 
                 Span<int> actual = a.AsSpan(0, 5);
 
@@ -63,9 +62,8 @@ namespace System.SpanTests
             {
                 int[] a = new int[] { 1, 2, 3, 4, 5, 6 };
 
-                ReadOnlySpan<int> source = MemoryMarshal.Cast<byte, int>(
-                    a.AsReadOnlySpan().AsBytes()
-                    .Slice(2, 5 * sizeof(int)));
+                ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes<int>(a);
+                ReadOnlySpan<int> source = MemoryMarshal.Cast<byte, int>(bytes.Slice(2, 5 * sizeof(int)));
 
                 Span<int> actual = a.AsSpan(1, 5);
 
@@ -95,7 +93,7 @@ namespace System.SpanTests
             {
                 int[] a = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
 
-                ReadOnlySpan<int> source = a.AsReadOnlySpan().Slice(7, 5);
+                ReadOnlySpan<int> source = a.AsSpan(7, 5);
 
                 Span<int> expected = new int[a.Length].AsSpan(i, 5);
                 Span<int> actual = a.AsSpan(i, 5);
@@ -114,8 +112,8 @@ namespace System.SpanTests
             {
                 int[] a = new int[] { 1, 2, 3, 4, 5, 6 };
 
-                ReadOnlySpan<int> source = MemoryMarshal.Cast<byte, int>(
-                    a.AsReadOnlySpan().AsBytes().Slice(2, 5 * sizeof(int)));
+                ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes<int>(a);
+                ReadOnlySpan<int> source = MemoryMarshal.Cast<byte, int>(bytes.Slice(2, 5 * sizeof(int)));
 
                 Span<int> actual = a.AsSpan(0, 5);
 
@@ -126,8 +124,8 @@ namespace System.SpanTests
             {
                 int[] a = new int[] { 1, 2, 3, 4, 5, 6 };
 
-                ReadOnlySpan<int> source = MemoryMarshal.Cast<byte, int>(
-                    a.AsReadOnlySpan().AsBytes().Slice(2, 5 * sizeof(int)));
+                ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes<int>(a);
+                ReadOnlySpan<int> source = MemoryMarshal.Cast<byte, int>(bytes.Slice(2, 5 * sizeof(int)));
 
                 Span<int> actual = a.AsSpan(1, 5);
 
@@ -140,7 +138,10 @@ namespace System.SpanTests
         {
             byte[] a = new byte[16];
 
-            Assert.True(a.AsReadOnlySpan().Slice(0, 12).Overlaps(a.AsReadOnlySpan().Slice(8, 8), out int elementOffset));
+            ReadOnlySpan<byte> span1 = a.AsSpan(0, 12);
+            ReadOnlySpan<byte> span2 = a.AsSpan(8, 8);
+
+            Assert.True(span1.Overlaps(span2, out int elementOffset));
             Assert.Equal(8, elementOffset);
         }
 
@@ -149,7 +150,10 @@ namespace System.SpanTests
         {
             Guid[] a = new Guid[16];
 
-            Assert.True(a.AsReadOnlySpan().Slice(0, 12).Overlaps(a.AsReadOnlySpan().Slice(8, 8), out int elementOffset));
+            ReadOnlySpan<Guid> span1 = a.AsSpan(0, 12);
+            ReadOnlySpan<Guid> span2 = a.AsSpan(8, 8);
+
+            Assert.True(span1.Overlaps(span2, out int elementOffset));
             Assert.Equal(8, elementOffset);
         }
 

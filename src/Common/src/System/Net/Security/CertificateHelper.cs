@@ -5,6 +5,7 @@
 using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace System.Net.Security
@@ -33,39 +34,76 @@ namespace System.Net.Security
                 return null;
             }
 
-            // Build a new collection with certs that have a private key. We need to do this manually because there is
-            // no X509FindType to match this criteria.
-            // Find(...) returns a collection of clones instead of a filtered collection, so do this before calling
-            // Find(...) to minimize the number of unnecessary allocations and finalizations.
-            var eligibleCerts = new X509Certificate2Collection();
             foreach (X509Certificate2 cert in candidateCerts)
             {
-                if (cert.HasPrivateKey)
+                if (!cert.HasPrivateKey)
                 {
-                    eligibleCerts.Add(cert);
+                    if (NetEventSource.IsEnabled)
+                    {
+                        NetEventSource.Info(candidateCerts, $"Skipping current X509Certificate2 {cert.GetHashCode()} since it doesn't have private key. Certificate Subject: {cert.Subject}, Thumbprint: {cert.Thumbprint}.");
+                    }
+                    continue;
+                }
+                
+                if (IsValidClientCertificate(cert))
+                {
+                    if (NetEventSource.IsEnabled)
+                    {
+                        NetEventSource.Info(candidateCerts, $"Choosing X509Certificate2 {cert.GetHashCode()} as the Client Certificate. Certificate Subject: {cert.Subject}, Thumbprint: {cert.Thumbprint}.");
+                    }
+                    return cert;
                 }
             }
 
-            // Don't call Find(...) if we don't need to.
-            if (eligibleCerts.Count == 0)
+            if (NetEventSource.IsEnabled)
             {
-                return null;
+                NetEventSource.Info(candidateCerts, "No eligible client certificate found.");
+            }
+            return null;
+        }
+
+        private static bool IsValidClientCertificate(X509Certificate2 cert)
+        {
+            foreach (X509Extension extension in cert.Extensions)
+            {
+                if ((extension is X509EnhancedKeyUsageExtension eku) && !IsValidForClientAuthenticationEKU(eku))
+                {
+                    if (NetEventSource.IsEnabled)
+                    {
+                        NetEventSource.Info(cert, $"For Certificate {cert.GetHashCode()} - current X509EnhancedKeyUsageExtension {eku.GetHashCode()} is not valid for Client Authentication.");
+                    }
+                    return false;
+                }
+                else if ((extension is X509KeyUsageExtension ku) && !IsValidForDigitalSignatureUsage(ku))
+                {
+                    if (NetEventSource.IsEnabled)
+                    {
+                        NetEventSource.Info(cert, $"For Certificate {cert.GetHashCode()} - current X509KeyUsageExtension {ku.GetHashCode()} is not valid for Digital Signature.");
+                    }
+                    return false;
+                }
             }
 
-            // Reduce the set of certificates to match the proper 'Client Authentication' criteria.
-            // Client EKU is probably more rare than the DigitalSignature KU. Filter by ClientAuthOid first to reduce
-            // the candidate space as quickly as possible.
-            eligibleCerts = eligibleCerts.Find(X509FindType.FindByApplicationPolicy, ClientAuthenticationOID, false);
-            eligibleCerts = eligibleCerts.Find(X509FindType.FindByKeyUsage, X509KeyUsageFlags.DigitalSignature, false);
+            return true;
+        }
 
-            if (eligibleCerts.Count > 0)
+        private static bool IsValidForClientAuthenticationEKU(X509EnhancedKeyUsageExtension eku)
+        {
+            foreach (Oid oid in eku.EnhancedKeyUsages)
             {
-                return eligibleCerts[0];
+                if (oid.Value == ClientAuthenticationOID)
+                {
+                    return true;
+                }
             }
-            else
-            {
-                return null;
-            }
+            
+            return false;
+        }
+
+        private static bool IsValidForDigitalSignatureUsage(X509KeyUsageExtension ku)
+        {
+            const X509KeyUsageFlags RequiredUsages = X509KeyUsageFlags.DigitalSignature;
+            return (ku.KeyUsages & RequiredUsages) == RequiredUsages;
         }
     }
 }

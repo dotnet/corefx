@@ -108,7 +108,7 @@ namespace System.Xml.Serialization
 
         internal static string FromChar(char value)
         {
-            return XmlConvert.ToString((UInt16)value);
+            return XmlConvert.ToString((ushort)value);
         }
 
         internal static string FromXmlName(string name)
@@ -130,7 +130,7 @@ namespace System.Xml.Serialization
         {
             if (nmTokens == null)
                 return null;
-            if (nmTokens.IndexOf(' ') < 0)
+            if (!nmTokens.Contains(' '))
                 return FromXmlNmToken(nmTokens);
             else
             {

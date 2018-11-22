@@ -7,13 +7,6 @@ SET (CMAKE_C_FLAGS_RELEASE_INIT             "/Ox")
 SET (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT      "/O2 /Zi")
 SET (CMAKE_ASM_MASM_FLAGS                   "${CMAKE_ASM_MASM_FLAGS} /ZH:SHA_256")
 
-# CXX Compiler flags
-SET (CMAKE_CXX_FLAGS                        "-std=c++11")
-SET (CMAKE_CXX_FLAGS_INIT                   "/W0 /FC")
-SET (CMAKE_CXX_FLAGS_DEBUG_INIT             "/Od /Zi")
-SET (CMAKE_CXX_FLAGS_RELEASE_INIT           "/Ox")
-SET (CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT    "/O2 /Zi")
-
 # Configuration of our libray specs and our directories
 SET (CMAKE_INSTALL_PREFIX                   $ENV{__CMakeBinDir})
 SET (CMAKE_INCLUDE_CURRENT_DIR              ON)
@@ -55,11 +48,11 @@ if ($ENV{__BuildArch} STREQUAL "x86")
     add_compile_options(/Gz)
 endif ()
 
-if ($ENV{__BuildArch} STREQUAL "arm")
+if (($ENV{__BuildArch} STREQUAL "arm") OR ($ENV{__BuildArch} STREQUAL "arm64"))
     if(NOT DEFINED CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION OR CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION STREQUAL "" )
-	      message(FATAL_ERROR "Windows SDK is required for the Arm32 build.")
+          message(FATAL_ERROR "Windows SDK is required for the ARM32 or ARM64 build.")
       else()
-	      message("Using Windows SDK version ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+          message("Using Windows SDK version ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
       endif()
 endif ()
 
@@ -89,18 +82,6 @@ else()
     set(DYNAMIC_UCRT_LIB "ucrtd.lib")
 endif()
 
-# App-Container builds require a more specific linking to ensure the APIs imported pass WACK
-if ($ENV{__appContainer} STREQUAL true AND UPPERCASE_CMAKE_BUILD_TYPE STREQUAL "RELEASE")
-    set(__LinkCustomCRT true)
-    set(__LinkArgs "${__LinkArgs} /LTCG")
-endif()
-
-if (__LinkCustomCRT STREQUAL "true" AND $ENV{__BuildArch} STREQUAL "arm" )
-    set(__LinkArgs "${__LinkArgs} /DEFAULTLIB:ole32.lib")
-elseif(__LinkCustomCRT STREQUAL "true" AND NOT $ENV{__BuildArch} STREQUAL "arm" )
-    set(__LinkArgs "${__LinkArgs} /NODEFAULTLIB")
-endif()
-
 # Linker flags
 set(__LinkArgs "${__LinkArgs} /INCREMENTAL:NO")
 set(__LinkArgs "${__LinkArgs} /MANIFEST:NO")            #Do not create Side-by-Side Assembly Manifest
@@ -113,17 +94,13 @@ set(__LinkArgs "${__LinkArgs} /PDBCOMPRESS")            #shrink pdb size
 set(__LinkArgs "${__LinkArgs} /DEBUG")
 set(__LinkArgs "${__LinkArgs} /IGNORE:4197,4013,4254,4070,4221")
 
-if ($ENV{__BuildArch} STREQUAL "x86" OR $ENV{__BuildArch} STREQUAL "x86_64" )
-    set(__LinkArgs "${__LinkArgs} /SUBSYSTEM:WINDOWS,6.00") #windows subsystem
-endif()
-
 if (UPPERCASE_CMAKE_BUILD_TYPE STREQUAL "RELEASE")
     # Release build specific flags
     set(__LinkArgs "${__LinkArgs} /LTCG /OPT:REF /OPT:ICF /INCREMENTAL:NO")
     
     # Force uCRT to be dynamically linked for Release build (unless env variable CLR_CMAKE_WIN32_FORCE_STATIC_LINK is set to true)
     set(CLR_CMAKE_WIN32_FORCE_STATIC_LINK $ENV{CLR_CMAKE_WIN32_FORCE_STATIC_LINK})
-    if(NOT CLR_CMAKE_WIN32_FORCE_STATIC_LINK)	
+    if(NOT CLR_CMAKE_WIN32_FORCE_STATIC_LINK)
       set(__LinkArgs "${__LinkArgs} /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib")
     endif()
     
@@ -133,11 +110,6 @@ if (UPPERCASE_CMAKE_BUILD_TYPE STREQUAL "RELEASE")
 else()
     # Debug build specific flags
     set(__LinkArgs "/NOVCFEATURE ${__LinkArgs}")
-endif()
-
-# Temporary until cmake has VS generators for arm64
-if($ENV{__BuildArch} STREQUAL "arm64")
-    set(__LinkArgs "${__LinkArgs} /machine:arm64")
 endif()
 
 if ($ENV{__BuildArch} STREQUAL "x86_64" OR $ENV{__BuildArch} STREQUAL "amd64")

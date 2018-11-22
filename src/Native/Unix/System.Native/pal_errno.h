@@ -3,10 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 #pragma once
+
 #include "pal_compiler.h"
-
-BEGIN_EXTERN_C
-
 #include "pal_types.h"
 
 /**
@@ -28,7 +26,7 @@ BEGIN_EXTERN_C
  * the same value so that callers cannot not take a dependency on
  * being able to distinguish between them.
  */
-enum Error
+typedef enum
 {
     Error_SUCCESS = 0,
 
@@ -113,6 +111,9 @@ enum Error
     Error_EHOSTDOWN = 0x10070,       // Host is down.
     Error_ENODATA = 0x10071,         // No data available.
 
+    // Error codes to track errors beyond kernel.
+    Error_EHOSTNOTFOUND = 0x20001,   // Name lookup failed.
+
     // POSIX permits these to have the same value and we make them
     // always equal so that we cannot introduce a dependency on
     // distinguishing between them that would not work on all
@@ -123,7 +124,7 @@ enum Error
     // This one is not part of POSIX, but is a catch-all for the case
     // where we cannot convert the raw errno value to something above.
     Error_ENONSTANDARD = 0x1FFFF,
-};
+} Error;
 
 /**
  * Converts the given raw numeric value obtained via errno ->
@@ -131,14 +132,14 @@ enum Error
  * Error above. If the value is not recognized, returns
  * Error_ENONSTANDARD.
  */
-int32_t SystemNative_ConvertErrorPlatformToPal(int32_t platformErrno);
+DLLEXPORT int32_t SystemNative_ConvertErrorPlatformToPal(int32_t platformErrno);
 
 /**
  * Converts the given PAL Error value to a platform-specific errno
  * value. This is to be used when we want to synthesize a given error
  * and obtain the appropriate error message via StrErrorR.
  */
-int32_t SystemNative_ConvertErrorPalToPlatform(int32_t error);
+DLLEXPORT int32_t SystemNative_ConvertErrorPalToPlatform(int32_t error);
 
 /**
  * Obtains the system error message for the given raw numeric value
@@ -161,6 +162,4 @@ int32_t SystemNative_ConvertErrorPalToPlatform(int32_t error);
  * returned and the buffer is filled with as much of the message
  * as possible and null-terminated.
  */
-const char* SystemNative_StrErrorR(int32_t platformErrno, char* buffer, int32_t bufferSize);
-
-END_EXTERN_C
+DLLEXPORT const char* SystemNative_StrErrorR(int32_t platformErrno, char* buffer, int32_t bufferSize);

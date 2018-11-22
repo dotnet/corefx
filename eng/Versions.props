@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0">
+  <PropertyGroup>
+    <!-- We need to move to 4.7 as part of our versioning change when we switch to arcade to avoid downgrading versions -->
+    <MajorVersion>4</MajorVersion>
+    <MinorVersion>7</MinorVersion>
+    <!-- Always use shipping version instead of dummy version -->
+    <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <!-- Opt-out repo features -->
+    <UsingToolXliff>false</UsingToolXliff>
+  </PropertyGroup>
+  <!-- Package names if they are used in more then one location in the repo -->
+  <PropertyGroup>
+    <MicrosoftDotNetXUnitExtensionsPackage>Microsoft.DotNet.XUnitExtensions</MicrosoftDotNetXUnitExtensionsPackage>
+  </PropertyGroup>
+  <!--
+    DARC doesn't currently update properties that end in PackageVersion yet but that is the convention
+    we want to use for our properties so for now we will define both and set the PackageVersion properties
+    to the set that DARC updates automatically.
+
+    see issue https://github.com/dotnet/arcade/issues/1114
+  -->
+  <PropertyGroup>
+    <MicrosoftDotNetApiCompatVersion>1.0.0-beta.18565.8</MicrosoftDotNetApiCompatVersion>
+    <MicrosoftDotNetCodeAnalysisVersion>1.0.0-beta.18565.8</MicrosoftDotNetCodeAnalysisVersion>
+    <MicrosoftDotNetGenAPIVersion>1.0.0-beta.18565.8</MicrosoftDotNetGenAPIVersion>
+    <MicrosoftDotNetGenFacadesVersion>1.0.0-beta.18565.8</MicrosoftDotNetGenFacadesVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>2.4.0-beta.18562.25</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetBuildTasksPackagingVersion>1.0.0-beta.18565.8</MicrosoftDotNetBuildTasksPackagingVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <MicrosoftDotNetApiCompatPackageVersion>$(MicrosoftDotNetApiCompatVersion)</MicrosoftDotNetApiCompatPackageVersion>
+    <MicrosoftDotNetCodeAnalysisPackageVersion>$(MicrosoftDotNetCodeAnalysisVersion)</MicrosoftDotNetCodeAnalysisPackageVersion>
+    <MicrosoftDotNetGenApiPackageVersion>$(MicrosoftDotNetGenApiVersion)</MicrosoftDotNetGenApiPackageVersion>
+    <MicrosoftDotNetGenFacadesPackageVersion>$(MicrosoftDotNetGenFacadesVersion)</MicrosoftDotNetGenFacadesPackageVersion>
+    <MicrosoftDotNetXUnitExtensionsPackageVersion>$(MicrosoftDotNetXUnitExtensionsVersion)</MicrosoftDotNetXUnitExtensionsPackageVersion>
+    <MicrosoftDotNetBuildTasksPackagingPackageVersion>$(MicrosoftDotNetBuildTasksPackagingVersion)</MicrosoftDotNetBuildTasksPackagingPackageVersion>
+  </PropertyGroup>
+</Project>

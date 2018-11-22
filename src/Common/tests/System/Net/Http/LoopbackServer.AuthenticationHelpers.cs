@@ -24,9 +24,15 @@ namespace System.Net.Test.Common
             List<string> lines = null;
             await AcceptConnectionAsync(async connection =>
             {
-                await connection.ReadRequestHeaderAndSendResponseAsync(HttpStatusCode.Unauthorized, authenticateHeaders);
-
+                string headerName = _options.IsProxy ? "Proxy-Authorization" : "Authorization";
                 lines = await connection.ReadRequestHeaderAsync();
+                if (GetRequestHeaderValue(lines, headerName) == null)
+                {
+                    await connection.SendResponseAsync( _options.IsProxy ?
+                                    HttpStatusCode.ProxyAuthenticationRequired : HttpStatusCode.Unauthorized, authenticateHeaders);
+
+                    lines = await connection.ReadRequestHeaderAsync();
+                }
                 Debug.Assert(lines.Count > 0);
 
                 int index = lines[0] != null ? lines[0].IndexOf(' ') : -1;
@@ -41,7 +47,7 @@ namespace System.Net.Test.Common
                 string clientResponse = null;
                 for (int i = 1; i < lines.Count; i++)
                 {
-                    if (lines[i].StartsWith("Authorization"))
+                    if (lines[i].StartsWith(headerName))
                     {
                         clientResponse = lines[i];
                         if (lines[i].Contains(nameof(AuthenticationProtocols.Basic)))
@@ -72,11 +78,11 @@ namespace System.Net.Test.Common
 
                 if (success)
                 {
-                    await connection.SendResponseAsync();
+                    await connection.SendResponseAsync(additionalHeaders: "Connection: close\r\n");
                 }
                 else
                 {
-                    await connection.SendResponseAsync(HttpStatusCode.Unauthorized, authenticateHeaders);
+                    await connection.SendResponseAsync(HttpStatusCode.Unauthorized, "Connection: close\r\n" + authenticateHeaders);
                 }
             });
 
@@ -242,11 +248,11 @@ namespace System.Net.Test.Common
             }
 
             if (string.IsNullOrEmpty(algorithm))
-                algorithm = "sha-256";
+                algorithm = "MD5";
 
             // Calculate response and compare with the client response hash.
             string a1 = options.Username + ":" + realm + ":" + options.Password;
-            if (algorithm.Contains("sess"))
+            if (algorithm.EndsWith("sess", StringComparison.OrdinalIgnoreCase))
             {
                 a1 = ComputeHash(a1, algorithm) + ":" + nonce;
 
@@ -282,7 +288,7 @@ namespace System.Net.Test.Common
         {
             // Disable MD5 insecure warning.
 #pragma warning disable CA5351
-            using (HashAlgorithm hash = algorithm.Contains("SHA-256") ? SHA256.Create() : (HashAlgorithm)MD5.Create())
+            using (HashAlgorithm hash = algorithm.StartsWith("SHA-256", StringComparison.OrdinalIgnoreCase) ? SHA256.Create() : (HashAlgorithm)MD5.Create())
 #pragma warning restore CA5351
             {
                 Encoding enc = Encoding.UTF8;

@@ -14,17 +14,21 @@ namespace System
     public static partial class PlatformDetection
     {
         public static bool IsWindowsIoTCore => false;
+        public static bool IsWindowsHomeEdition => false;
         public static bool IsWindows => false;
         public static bool IsWindows7 => false;
         public static bool IsWindows8x => false;
+        public static bool IsWindows8xOrLater => false;
         public static bool IsWindows10Version1607OrGreater => false;
         public static bool IsWindows10Version1703OrGreater => false;
         public static bool IsWindows10Version1709OrGreater => false;
+        public static bool IsWindows10Version1803OrGreater => false;
         public static bool IsNotOneCoreUAP =>  true;
         public static bool IsInAppContainer => false;
         public static int WindowsVersion => -1;
 
         public static bool IsCentos6 => IsDistroAndVersion("centos", 6);
+        public static bool IsAlpine => IsDistroAndVersion("alpine");
         public static bool IsOpenSUSE => IsDistroAndVersion("opensuse");
         public static bool IsUbuntu => IsDistroAndVersion("ubuntu");
         public static bool IsDebian => IsDistroAndVersion("debian");
@@ -35,6 +39,7 @@ namespace System
         public static bool IsUbuntu1710 => IsDistroAndVersion("ubuntu", 17, 10);
         public static bool IsUbuntu1710OrHigher => IsDistroAndVersionOrHigher("ubuntu", 17, 10);
         public static bool IsUbuntu1804 => IsDistroAndVersion("ubuntu", 18, 04);
+        public static bool IsUbuntu1810OrHigher => IsDistroAndVersionOrHigher("ubuntu", 18, 10);
         public static bool IsTizen => IsDistroAndVersion("tizen");
         public static bool IsFedora => IsDistroAndVersion("fedora");
         public static bool IsWindowsNanoServer => false;
@@ -49,9 +54,41 @@ namespace System
         public static bool IsRedHatFamily7 => IsRedHatFamilyAndVersion(7);
         public static bool IsNotFedoraOrRedHatFamily => !IsFedora && !IsRedHatFamily;
 
+        public static bool TargetsNetFx452OrLower => false;
+        public static bool IsNetfx462OrNewer => false;
+        public static bool IsNetfx470OrNewer => false;
+        public static bool IsNetfx471OrNewer => false;
+        public static bool IsNetfx472OrNewer => false;
+
+        public static bool IsDrawingSupported { get; } = GetGdiplusIsAvailable();
+
+        [DllImport("libdl")]
+        private static extern IntPtr dlopen(string libName, int flags);
+        public const int RTLD_NOW = 0x002;
+
+        private static bool GetGdiplusIsAvailable()
+        {
+            IntPtr nativeLib;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                nativeLib = dlopen("libgdiplus.dylib", RTLD_NOW);
+            }
+            else
+            {
+                nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
+                if (nativeLib == IntPtr.Zero)
+                {
+                    nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
+                }
+            }
+
+            return nativeLib != IntPtr.Zero;
+        }
+
         public static Version OSXVersion { get; } = ToVersion(Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion);
 
-        public static Version OpenSslVersion => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? Interop.OpenSsl.OpenSslVersion : throw new PlatformNotSupportedException();
+        public static Version OpenSslVersion => !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? GetOpenSslVersion() : throw new PlatformNotSupportedException();
 
         public static string GetDistroVersionString()
         {
@@ -63,6 +100,44 @@ namespace System
             DistroInfo v = GetDistroInfo();
 
             return "Distro=" + v.Id + " VersionId=" + v.VersionId;
+        }
+
+        /// <summary>
+        /// If gnulibc is available, returns the release, such as "stable".
+        /// Otherwise returns "glibc_not_found".
+        /// </summary>
+        public static string LibcRelease
+        {
+            get
+            {
+                try
+                {
+                    return Marshal.PtrToStringUTF8(gnu_get_libc_release());
+                }
+                catch (Exception e) when (e is DllNotFoundException || e is EntryPointNotFoundException)
+                {
+                    return "glibc_not_found";
+                }
+            }
+        }
+
+        /// <summary>
+        /// If gnulibc is available, returns the version, such as "2.22".
+        /// Otherwise returns "glibc_not_found". (In future could run "ldd -version" for musl)
+        /// </summary>
+        public static string LibcVersion
+        {
+            get
+            {
+                try
+                {
+                    return Marshal.PtrToStringUTF8(gnu_get_libc_version());
+                }
+                catch (Exception e) when (e is DllNotFoundException || e is EntryPointNotFoundException)
+                {
+                    return "glibc_not_found";
+                }
+            }
         }
 
         private static readonly Version s_osxProductVersion = GetOSXProductVersion();
@@ -166,10 +241,10 @@ namespace System
             return
                 VersionEquivalentTo(major, minor, build, revision, actualVersionId) ||
                     (actualVersionId.Major > major ||
-                        (actualVersionId.Major == major && actualVersionId.Minor > minor ||
-                            (actualVersionId.Minor == minor && actualVersionId.Build > build ||
-                                (actualVersionId.Build == build && actualVersionId.Revision > revision ||
-                                    (actualVersionId.Revision == revision)))));
+                        (actualVersionId.Major == major && (actualVersionId.Minor > minor ||
+                            (actualVersionId.Minor == minor && (actualVersionId.Build > build ||
+                                (actualVersionId.Build == build && (actualVersionId.Revision > revision ||
+                                    (actualVersionId.Revision == revision))))))));
         }
 
         private static Version GetOSXProductVersion()
@@ -222,11 +297,41 @@ namespace System
             return new Version(0, 0, 0);
         }
 
+        private static Version s_opensslVersion;
+        private static Version GetOpenSslVersion()
+        {
+            if (s_opensslVersion == null)
+            {
+                // OpenSSL version numbers are encoded as
+                // 0xMNNFFPPS: major (one nybble), minor (one byte, unaligned),
+                // "fix" (one byte, unaligned), patch (one byte, unaligned), status (one nybble)
+                //
+                // e.g. 1.0.2a final is 0x1000201F
+                //
+                // Currently they don't exceed 29-bit values, but we use long here to account
+                // for the expanded range on their 64-bit C-long return value.
+                long versionNumber = Interop.OpenSsl.OpenSslVersionNumber();
+                int major = (int)((versionNumber >> 28) & 0xF);
+                int minor = (int)((versionNumber >> 20) & 0xFF);
+                int fix = (int)((versionNumber >> 12) & 0xFF);
+
+                s_opensslVersion = new Version(major, minor, fix);
+            }
+
+            return s_opensslVersion;
+        }
+
         [DllImport("libc", SetLastError = true)]
         private static extern int sysctlbyname(string ctlName, byte[] oldp, ref IntPtr oldpLen, byte[] newp, IntPtr newpLen);
 
         [DllImport("libc", SetLastError = true)]
         internal static extern unsafe uint geteuid();
+
+        [DllImport("libc", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr gnu_get_libc_release();
+
+        [DllImport("libc", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr gnu_get_libc_version();
 
         [DllImport("System.Globalization.Native", SetLastError = true)]
         private static extern int GlobalizationNative_GetICUVersion();

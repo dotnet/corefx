@@ -49,7 +49,7 @@ namespace System.Net.Sockets
         }
 
         // Initiailizes a new instance of the TcpListener class that listens on the specified port.
-        [Obsolete("This method has been deprecated. Please use TcpListener(IPAddress localaddr, int port) instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated. Please use TcpListener(IPAddress localaddr, int port) instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public TcpListener(int port)
         {
             if (!TcpValidationHelpers.ValidatePortNumber(port))
@@ -316,8 +316,18 @@ namespace System.Net.Sockets
                 throw new ArgumentOutOfRangeException(nameof(port));
             }
 
-            TcpListener listener = new TcpListener(IPAddress.IPv6Any, port);
-            listener.Server.DualMode = true;
+            TcpListener listener;
+            if (Socket.OSSupportsIPv6)
+            {
+                // If OS supports IPv6 use dual mode so both address families work.
+                listener = new TcpListener(IPAddress.IPv6Any, port);
+                listener.Server.DualMode = true;
+            }
+            else
+            {
+                // If not, fall-back to old IPv4.
+                listener = new TcpListener(IPAddress.Any , port);
+            }
 
             if (NetEventSource.IsEnabled) NetEventSource.Exit(null, port);
 

@@ -84,18 +84,21 @@ def osShortName = ['Windows 10': 'win10',
                 def runType = isPR ? 'private' : 'rolling'
 
                 if (os == 'Windows_NT') {
+                    def python = "C:\\Python35\\python.exe"
                     def benchViewName = isPR ? 'corefx private %BenchviewCommitName%' : 'corefx rolling %GIT_BRANCH_WITHOUT_ORIGIN% %GIT_COMMIT%'
                     steps {
                         //We need to specify the max cpu count to be one as we do not want to be executing performance tests in parallel
-                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build.cmd -release")
+                        batchFile("build.cmd -release")
                         batchFile("C:\\Tools\\nuget.exe install Microsoft.BenchView.JSONFormat -Source http://benchviewtestfeed.azurewebsites.net/nuget -OutputDirectory \"%WORKSPACE%\\Tools\" -Prerelease -ExcludeVersion")
                         //Do this here to remove the origin but at the front of the branch name as this is a problem for BenchView
                         //we have to do it all as one statement because cmd is called each time and we lose the set environment variable
                         batchFile("if [%GIT_BRANCH:~0,7%] == [origin/] (set GIT_BRANCH_WITHOUT_ORIGIN=%GIT_BRANCH:origin/=%) else (set GIT_BRANCH_WITHOUT_ORIGIN=%GIT_BRANCH%)\n" +
-                        "py \"%WORKSPACE%\\Tools\\Microsoft.BenchView.JSONFormat\\tools\\submission-metadata.py\" --name " + "\"" + benchViewName + "\"" + " --user-email " + "\"dotnet-bot@microsoft.com\"\n" +
-                        "py \"%WORKSPACE%\\Tools\\Microsoft.BenchView.JSONFormat\\tools\\build.py\" git --branch %GIT_BRANCH_WITHOUT_ORIGIN% --type " + runType)
-                        batchFile("py \"%WORKSPACE%\\Tools\\Microsoft.BenchView.JSONFormat\\tools\\machinedata.py\"")
-                        batchFile("call \"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat\" x86 && build-managed.cmd -release -tests -- /p:Performance=true /p:TargetOS=${osGroup} /m:1 /p:LogToBenchview=true /p:BenchviewRunType=${runType}")
+                        "${python} \"%WORKSPACE%\\Tools\\Microsoft.BenchView.JSONFormat\\tools\\submission-metadata.py\" --name " + "\"" + benchViewName + "\"" + " --user-email " + "\"dotnet-bot@microsoft.com\"\n" +
+                        "${python} \"%WORKSPACE%\\Tools\\Microsoft.BenchView.JSONFormat\\tools\\build.py\" git --branch %GIT_BRANCH_WITHOUT_ORIGIN% --type " + runType)
+                        batchFile("${python} \"%WORKSPACE%\\Tools\\Microsoft.BenchView.JSONFormat\\tools\\machinedata.py\"")
+
+                        batchFile("build.cmd -release -includetests /p:BuildNative=false /p:Performance=true /p:TargetOS=${osGroup} /m:1 /p:LogToBenchview=true /p:BenchviewRunType=${runType} /p:PerformanceType=Profile")
+                        batchFile("build.cmd -release -includetests /p:BuildNative=false /p:Performance=true /p:TargetOS=${osGroup} /m:1 /p:LogToBenchview=true /p:BenchviewRunType=${runType} /p:PerformanceType=Diagnostic")
                     }
                 }
                 else {
@@ -113,27 +116,41 @@ def osShortName = ['Windows 10': 'win10',
                         "python3.5 \"\${WORKSPACE}/Tools/Microsoft.BenchView.JSONFormat/tools/submission-metadata.py\" --name " + "\"" + benchViewName + "\"" + " --user-email " + "\"dotnet-bot@microsoft.com\"\n" +
                         "python3.5 \"\${WORKSPACE}/Tools/Microsoft.BenchView.JSONFormat/tools/build.py\" git --branch \$GIT_BRANCH_WITHOUT_ORIGIN --type " + runType)
                         shell("python3.5 \"\${WORKSPACE}/Tools/Microsoft.BenchView.JSONFormat/tools/machinedata.py\"")
-                        shell("bash ./build-managed.sh -release -tests -- /p:Performance=true /p:TargetOS=${osGroup} /m:1 /p:LogToBenchview=true /p:BenchviewRunType=${runType}")
+
+                        shell("bash ./build.sh -release -includetests /p:BuildNative=false /p:Performance=true /p:TargetOS=${osGroup} /m:1 /p:LogToBenchview=true /p:BenchviewRunType=${runType} /p:PerformanceType=Profile")
                     }
                 }
             }
+
+            // Add the unit test results
+            def archiveSettings = new ArchivalSettings()
+            archiveSettings.addFiles('msbuild.log')
+            archiveSettings.addFiles('machinedata.json')
+            archiveSettings.addFiles('bin/**/Perf-*Performance.Tests.csv')
+            archiveSettings.addFiles('bin/**/Perf-*Performance.Tests.etl')
+            archiveSettings.addFiles('bin/**/Perf-*Performance.Tests.md')
+            archiveSettings.addFiles('bin/**/Perf-*Performance.Tests.xml')
+            archiveSettings.setAlwaysArchive()
+
+            // Add archival for the built data.
+            Utilities.addArchival(newJob, archiveSettings)
 
             // Set up standard options.
             Utilities.standardJobSetup(newJob, project, isPR, "*/${branch}")
-            //Set timeout to non-default
             newJob.with {
+                logRotator {
+                    artifactDaysToKeep(14)
+                    daysToKeep(14)
+                    artifactNumToKeep(100)
+                    numToKeep(100)
+                }
                 wrappers {
                     timeout {
-                        absolute(240)
+                        absolute(360)
                     }
                 }
             }
-            // Add the unit test results
-            Utilities.addXUnitDotNETResults(newJob, 'bin/**/Perf-*.xml')
-            def archiveContents = "msbuild.log"
 
-            // Add archival for the built data.
-            Utilities.addArchival(newJob, archiveContents)
             // Set up triggers
             if (isPR) {
                 TriggerBuilder builder = TriggerBuilder.triggerOnPullRequest()

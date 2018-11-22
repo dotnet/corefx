@@ -19,7 +19,6 @@ namespace System.Diagnostics
     /// </devdoc>
     public class DefaultTraceListener : TraceListener
     {
-        private const int InternalWriteSize = 16384;
         private bool _assertUIEnabled; 
         private bool _settingsInitialized;
         private string _logFileName;
@@ -41,7 +40,7 @@ namespace System.Diagnostics
                 return _assertUIEnabled; 
             }
             set 
-            { 
+            {
                 if (!_settingsInitialized) InitializeSettings();
                 _assertUIEnabled = value; 
             }
@@ -81,12 +80,24 @@ namespace System.Diagnostics
         /// </devdoc>
         public override void Fail(string message, string detailMessage)
         {
-            // UIAssert is not enabled.
-            WriteAssert(String.Empty, message, detailMessage);
+            string stackTrace;
+            try
+            {
+                stackTrace = new StackTrace(fNeedFileInfo:true).ToString();
+            }
+            catch
+            {
+                stackTrace = "";
+            }
+            WriteAssert(stackTrace, message, detailMessage);
+            if (AssertUiEnabled)
+            {
+                DebugProvider.FailCore(stackTrace, message, detailMessage, "Assertion Failed");
+            }
         }
 
-         private void InitializeSettings() 
-         {
+        private void InitializeSettings() 
+        {
             // don't use the property setters here to avoid infinite recursion.
             _assertUIEnabled = DiagnosticsConfiguration.AssertUIEnabled;
             _logFileName = DiagnosticsConfiguration.LogFileName;
@@ -95,17 +106,12 @@ namespace System.Diagnostics
 
         private void WriteAssert(string stackTrace, string message, string detailMessage)
         {
-            string assertMessage = SR.DebugAssertBanner + Environment.NewLine
-                                            + SR.DebugAssertShortMessage + Environment.NewLine
-                                            + message + Environment.NewLine
-                                            + SR.DebugAssertLongMessage + Environment.NewLine +
-                                            detailMessage + Environment.NewLine
-                                            + stackTrace;
-            WriteLine(assertMessage);
-
-            // In case the debugger is attached we break the debugger.
-            if (Debugger.IsAttached)
-                Debugger.Break();
+            WriteLine(SR.DebugAssertBanner + Environment.NewLine
+                   + SR.DebugAssertShortMessage + Environment.NewLine
+                   + message + Environment.NewLine
+                   + SR.DebugAssertLongMessage + Environment.NewLine
+                   + detailMessage + Environment.NewLine
+                   + stackTrace);
         }
 
         /// <devdoc>
@@ -140,27 +146,22 @@ namespace System.Diagnostics
 
         private void Write(string message, bool useLogFile)
         {
-            if (NeedIndent) 
-                WriteIndent();
+            if (message == null)
+            {
+                message = string.Empty;
+            }
 
-            // really huge messages mess up both VS and dbmon, so we chop it up into 
-            // reasonable chunks if it's too big
-            if (message == null || message.Length <= InternalWriteSize)
+            if (NeedIndent && message.Length != 0)
             {
-                Debug.Write(message);
+                WriteIndent();
             }
-            else
-            {
-                int offset;
-                for (offset = 0; offset < message.Length - InternalWriteSize; offset += InternalWriteSize)
-                {
-                    Debug.Write(message.Substring(offset, InternalWriteSize));
-                }
-                Debug.Write(message.Substring(offset));
-            }
+
+            DebugProvider.WriteCore(message);
 
             if (useLogFile && !string.IsNullOrEmpty(LogFileName))
+            {
                 WriteToLogFile(message);
+            }
         }
 
         private void WriteToLogFile(string message)

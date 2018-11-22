@@ -1,6 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -11,17 +9,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);HTTP_DLL</DefineConstants>
     <ILLinkClearInitLocals>true</ILLinkClearInitLocals>
+    <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-OSX-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-OSX-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup Condition="'$(TargetGroup)' == 'uap'">
-    <DefineConstants>$(DefineConstants);uap</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsOSX)' == 'true' ">
@@ -55,7 +45,6 @@
     <Compile Include="System\Net\Http\MultipartFormDataContent.cs" />
     <Compile Include="System\Net\Http\NetEventSource.Http.cs" />
     <Compile Include="System\Net\Http\ReadOnlyMemoryContent.cs" />
-    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionKind.cs" />
     <Compile Include="System\Net\Http\StreamContent.cs" />
     <Compile Include="System\Net\Http\StreamToStreamCopy.cs" />
     <Compile Include="System\Net\Http\StringContent.cs" />
@@ -101,11 +90,8 @@
     <Compile Include="System\Net\Http\Headers\UriHeaderParser.cs" />
     <Compile Include="System\Net\Http\Headers\ViaHeaderValue.cs" />
     <Compile Include="System\Net\Http\Headers\WarningHeaderValue.cs" />
-    <Compile Include="$(CommonPath)\System\IO\StreamHelpers.CopyValidation.cs">
-      <Link>Common\System\IO\StreamHelpers.CopyValidation.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\HttpVersionInternal.cs">
-      <Link>Common\System\Net\HttpVersionInternal.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\StreamHelpers.CopyValidation.cs">
+      <Link>Common\CoreLib\System\IO\StreamHelpers.CopyValidation.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Security\SslClientAuthenticationOptionsExtensions.cs">
       <Link>Common\System\Net\Security\SslClientAuthenticationOptionsExtensions.cs</Link>
@@ -116,19 +102,34 @@
     <Compile Include="$(CommonPath)\System\IO\ReadOnlyMemoryStream.cs">
       <Link>Common\System\IO\ReadOnlyMemoryStream.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
-      <Link>Common\System\IO\StringBuilderCache.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Text\StringBuilderCache.cs">
+      <Link>Common\System\Text\StringBuilderCache.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.Common.cs">
       <Link>Common\System\Net\Logging\NetEventSource.Common.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Net\HttpDateParser.cs">
+      <Link>Common\System\Net\HttpDateParser.cs</Link>
+    </Compile>
   </ItemGroup>
   <!-- SocketsHttpHandler implementation -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\DynamicTable.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HeaderField.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackDecoder.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackDecodingException.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackEncoder.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\Huffman.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HuffmanDecodingException.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\IntegerDecoder.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\IntegerEncoder.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\StaticTable.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\ArrayBuffer.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\AuthenticationHelper.cs" />
-    <Compile Include="System\Net\Http\SocketsHttpHandler\AuthenticationHelper.Basic.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\AuthenticationHelper.Digest.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\AuthenticationHelper.NtAuth.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\BaseAsyncStream.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\CancellationHelper.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\ChunkedEncodingReadStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\ChunkedEncodingWriteStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\ConnectHelper.cs" />
@@ -138,20 +139,29 @@
     <Compile Include="System\Net\Http\SocketsHttpHandler\CookieHelper.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\DecompressionHandler.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\EmptyReadStream.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\Http2Connection.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\Http2Stream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpAuthenticatedConnectionHandler.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnection.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionBase.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionHandler.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionKind.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionPool.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionPoolManager.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionResponseContent.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpConnectionSettings.cs" />
-    <Compile Include="System\Net\Http\SocketsHttpHandler\HttpContentDuplexStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpContentReadStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpContentStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HttpContentWriteStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\SocketsHttpHandler.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\RawConnectionStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\RedirectHandler.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Collections\Concurrent\ConcurrentQueueSegment.cs">
+      <Link>Common\CoreLib\System\Collections\Concurrent\ConcurrentQueueSegment.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Internal\Padding.cs">
+      <Link>Common\Internal\Padding.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Net\NTAuthentication.Common.cs">
       <Link>Common\System\Net\NTAuthentication.Common.cs</Link>
     </Compile>
@@ -181,9 +191,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\ExceptionCheck.cs">
       <Link>Common\System\Net\ExceptionCheck.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\IntPtrHelper.cs">
-      <Link>Common\System\Net\IntPtrHelper.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Collections\Generic\BidirectionalDictionary.cs">
       <Link>Common\System\Collections\Generic\BidirectionalDictionary.cs</Link>
@@ -278,8 +285,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\Interop.SECURITY_STATUS.cs">
       <Link>Common\Interop\Windows\SChannel\Interop.SECURITY_STATUS.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CloseHandle.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.CloseHandle.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs">
+      <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\sspicli\SecPkgContext_StreamSizes.cs">
       <Link>Common\Interop\Windows\sspicli\SecPkgContext_StreamSizes.cs</Link>
@@ -399,23 +406,23 @@
     <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
       <Link>Common\System\Net\UriScheme.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
-      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.Errors.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.IOErrors.cs">
-      <Link>Common\Interop\Unix\Interop.IOErrors.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.IOErrors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.IOErrors.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Close.cs">
-      <Link>Common\Interop\Unix\System.Native\Interop.Close.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Close.cs">
+      <Link>Common\CoreLib\Interop\Unix\System.Native\Interop.Close.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Open.cs">
-      <Link>Common\Interop\Unix\System.Native\Interop.Open.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Open.cs">
+      <Link>Common\CoreLib\Interop\Unix\System.Native\Interop.Open.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.OpenFlags.cs">
-      <Link>Common\Interop\Unix\System.Native\Interop.OpenFlags.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.OpenFlags.cs">
+      <Link>Common\CoreLib\Interop\Unix\System.Native\Interop.OpenFlags.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Pipe.cs">
       <Link>Common\Interop\Unix\System.Native\Interop.Pipe.cs</Link>
@@ -426,10 +433,10 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PrintF.cs">
       <Link>Common\Interop\Unix\libc\Interop.PrintF.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Read.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Read.cs">
       <Link>Common\Interop\Unix\libc\Interop.Read.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Write.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Write.cs">
       <Link>Common\Interop\Unix\libc\Interop.Write.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Http.Native\Interop.CURLcode.cs">
@@ -480,8 +487,8 @@
     <Compile Include="$(CommonPath)\System\Net\Security\CertificateHelper.Unix.cs">
       <Link>Common\System\Net\Security\CertificateHelper.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
-      <Link>Common\System\Threading\Tasks\TaskToApm.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Threading\Tasks\TaskToApm.cs">
+      <Link>Common\CoreLib\System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' AND '$(TargetsOSX)' != 'true' ">
@@ -499,6 +506,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Crypto.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Crypto.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.OpenSslVersion.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.OpenSslVersion.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Ssl.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Ssl.cs</Link>
@@ -529,9 +539,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeX509Handles.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeX509Handles.Unix.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeX509NameHandle.Unix.cs">
-      <Link>Common\Microsoft\Win32\SafeHandles\SafeX509NameHandle.Unix.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\X509ExtensionSafeHandles.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\X509ExtensionSafeHandles.Unix.cs</Link>
@@ -582,8 +589,8 @@
     <Compile Include="$(CommonPath)\System\StringExtensions.cs">
       <Link>Common\System\StringExtensions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Threading\Tasks\TaskToApm.cs">
-      <Link>Common\System\Threading\Tasks\TaskToApm.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Threading\Tasks\TaskToApm.cs">
+      <Link>Common\CoreLib\System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
     <Compile Include="uap\System\Net\cookie.cs" />
     <Compile Include="uap\System\Net\cookieexception.cs" />
@@ -592,7 +599,10 @@
     <Compile Include="System\Net\Http\HttpClientHandler.Core.cs" />
     <Compile Include="uap\System\Net\HttpClientHandler.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Reference Include="System.Net.NameResolution" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'netcoreappaot' OR '$(TargetGroup)' == 'uap'">
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Buffers" />
     <Reference Include="System.Collections" />
@@ -606,6 +616,7 @@
     <Reference Include="System.Diagnostics.Tracing" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Memory" />
+    <Reference Include="System.Net.NetworkInformation" />
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.Net.Security" />
     <Reference Include="System.Net.Sockets" />
@@ -617,25 +628,26 @@
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.Csp" />
     <Reference Include="System.Security.Cryptography.Encoding" />
-    <Reference Include="System.Security.Cryptography.OpenSsl" />
     <Reference Include="System.Security.Cryptography.Primitives" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />
     <Reference Include="System.Security.Principal.Windows" />
     <Reference Include="System.Text.Encoding" />
     <Reference Include="System.Text.Encoding.Extensions" />
+    <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.Tasks.Extensions" />
     <Reference Include="System.Threading.Timer" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Reference Include="System.IO.Compression.Brotli" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Reference Include="System.IO.FileSystem" />
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.Encoding" />
+    <Reference Include="System.Security.Cryptography.OpenSsl" />
     <Reference Include="System.Security.Cryptography.Primitives" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Common\System\Threading\Tasks\" />
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

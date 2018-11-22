@@ -21,14 +21,14 @@ namespace System.Diagnostics
         public const int WAIT_OBJECT_0 = 0x00000000;
         public const int WAIT_ABANDONED = 0x00000080;
 
-        private static Object s_InternalSyncObject;
-        private static Object InternalSyncObject
+        private static object s_InternalSyncObject;
+        private static object InternalSyncObject
         {
             get
             {
                 if (s_InternalSyncObject == null)
                 {
-                    Object o = new Object();
+                    object o = new object();
                     Interlocked.CompareExchange(ref s_InternalSyncObject, o, null);
                 }
                 return s_InternalSyncObject;
@@ -163,7 +163,11 @@ namespace System.Diagnostics
 
             try
             {
-                baseKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, machineName);
+                if (machineName == ".")
+                    baseKey = Registry.LocalMachine;
+                else
+                    baseKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, machineName);
+
                 if (baseKey == null)
                     throw new InvalidOperationException(SR.Format(SR.RegKeyMissingShort, "HKEY_LOCAL_MACHINE", machineName));
 
@@ -214,7 +218,7 @@ namespace System.Diagnostics
                                         string majorVersion = majorVersions[i];
 
                                         // If this looks like a key of the form v{something}.{something}, we should see if it's a usable build.
-                                        if (majorVersion.Length > 1 && majorVersion[0] == 'v' && majorVersion.Contains("."))
+                                        if (majorVersion.Length > 1 && majorVersion[0] == 'v' && majorVersion.Contains(".")) // string.Contains(char) is .NetCore2.1+ specific
                                         {
                                             int[] currentVersion = new int[] { -1, -1, -1 };
 
@@ -225,7 +229,7 @@ namespace System.Diagnostics
                                                 continue;
                                             }
 
-                                            if (!Int32.TryParse(splitVersion[0], out currentVersion[0]) || !Int32.TryParse(splitVersion[1], out currentVersion[1]))
+                                            if (!int.TryParse(splitVersion[0], out currentVersion[0]) || !int.TryParse(splitVersion[1], out currentVersion[1]))
                                             {
                                                 continue;
                                             }
@@ -298,7 +302,7 @@ namespace System.Diagnostics
             for (int i = 0; i < minorVersions.Length; i++)
             {
                 int o;
-                if (Int32.TryParse(minorVersions[i], out o))
+                if (int.TryParse(minorVersions[i], out o))
                 {
                     largestBuild = (largestBuild > o) ? largestBuild : o;
                 }

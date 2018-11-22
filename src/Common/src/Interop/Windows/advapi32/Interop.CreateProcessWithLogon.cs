@@ -16,13 +16,13 @@ internal partial class Interop
             string domain,
             IntPtr password,
             LogonFlags logonFlags,
-            [MarshalAs(UnmanagedType.LPTStr)] string appName,
+            string appName,
             StringBuilder cmdLine,
             int creationFlags,
             IntPtr environmentBlock,
-            [MarshalAs(UnmanagedType.LPTStr)] string lpCurrentDirectory,
-            Interop.Kernel32.STARTUPINFO lpStartupInfo,
-            Interop.Kernel32.PROCESS_INFORMATION lpProcessInformation);
+            string lpCurrentDirectory,
+            ref Interop.Kernel32.STARTUPINFO lpStartupInfo,
+            ref Interop.Kernel32.PROCESS_INFORMATION lpProcessInformation);
 
         [Flags]
         internal enum LogonFlags

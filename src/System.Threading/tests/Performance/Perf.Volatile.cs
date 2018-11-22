@@ -8,7 +8,9 @@ namespace System.Threading.Tests
 {
     public class Perf_Volatile
     {
-        [Benchmark(InnerIterationCount = 2000)]
+        private const int IterationCount = 100_000_000;
+
+        [Benchmark(InnerIterationCount = IterationCount)]
         public void Read_double()
         {
             double location = 0;
@@ -17,7 +19,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         Volatile.Read(ref location);
                     }
@@ -25,7 +27,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = 2000)]
+        [Benchmark(InnerIterationCount = IterationCount)]
         public void Write_double()
         {
             double location = 0;
@@ -35,7 +37,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         Volatile.Write(ref location, newValue);
                     }

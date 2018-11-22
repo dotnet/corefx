@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using Interlocked = System.Threading.Interlocked;
 
 #if ES_BUILD_STANDALONE
@@ -75,5 +76,50 @@ namespace System.Diagnostics.Tracing
             }
             return result;
         }
+
+#if FEATURE_PERFTRACING
+        public IntPtr GetOrCreateEventHandle(EventProvider provider, TraceLoggingEventHandleTable eventHandleTable, EventDescriptor descriptor, TraceLoggingEventTypes eventTypes)
+        {
+            IntPtr eventHandle;
+            if ((eventHandle = eventHandleTable[descriptor.EventId]) == IntPtr.Zero)
+            {
+                lock (eventHandleTable)
+                {
+                    if ((eventHandle = eventHandleTable[descriptor.EventId]) == IntPtr.Zero)
+                    {
+                        byte[] metadataBlob = EventPipeMetadataGenerator.Instance.GenerateEventMetadata(
+                            descriptor.EventId,
+                            name,
+                            (EventKeywords)descriptor.Keywords,
+                            (EventLevel)descriptor.Level,
+                            descriptor.Version,
+                            eventTypes);
+                        uint metadataLength = (metadataBlob != null) ? (uint)metadataBlob.Length : 0;
+
+                        unsafe
+                        {
+                            fixed (byte* pMetadataBlob = metadataBlob)
+                            {
+                                // Define the event.
+                                eventHandle = provider.m_eventProvider.DefineEventHandle(
+                                    (uint)descriptor.EventId,
+                                    name,
+                                    descriptor.Keywords,
+                                    descriptor.Version,
+                                    descriptor.Level,
+                                    pMetadataBlob,
+                                    metadataLength);
+                            }
+                        }
+
+                        // Cache the event handle.
+                        eventHandleTable.SetEventHandle(descriptor.EventId, eventHandle);
+                    }
+                }
+            }
+
+            return eventHandle;
+        }
+#endif
     }
 }

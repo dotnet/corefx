@@ -238,9 +238,8 @@ namespace System.Drawing
         public static bool operator ==(System.Drawing.CharacterRange cr1, System.Drawing.CharacterRange cr2) { throw null; }
         public static bool operator !=(System.Drawing.CharacterRange cr1, System.Drawing.CharacterRange cr2) { throw null; }
     }
-    public sealed partial class ColorTranslator
+    public static partial class ColorTranslator
     {
-        internal ColorTranslator() { }
         public static System.Drawing.Color FromHtml(string htmlColor) { throw null; }
         public static System.Drawing.Color FromOle(int oleColor) { throw null; }
         public static System.Drawing.Color FromWin32(int win32Color) { throw null; }
@@ -280,6 +279,9 @@ namespace System.Drawing
         SourcePaint = 15597702,
         Whiteness = 16711778,
     }
+#if netcoreapp
+    [System.ComponentModel.TypeConverter("System.Drawing.FontConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public sealed partial class Font : System.MarshalByRefObject, System.ICloneable, System.IDisposable, System.Runtime.Serialization.ISerializable
     {
         public Font(System.Drawing.Font prototype, System.Drawing.FontStyle newStyle) { }
@@ -638,6 +640,9 @@ namespace System.Drawing
         Point = 3,
         World = 0,
     }
+#if netcoreapp
+    [System.ComponentModel.TypeConverter("System.Drawing.IconConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public sealed partial class Icon : System.MarshalByRefObject, System.ICloneable, System.IDisposable, System.Runtime.Serialization.ISerializable
     {
         public Icon(System.Drawing.Icon original, System.Drawing.Size size) { }
@@ -671,6 +676,9 @@ namespace System.Drawing
         System.IntPtr GetHdc();
         void ReleaseHdc();
     }
+#if netcoreapp
+    [System.ComponentModel.TypeConverter("System.Drawing.ImageConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     [System.ComponentModel.ImmutableObjectAttribute(true)]
     public abstract partial class Image : System.MarshalByRefObject, System.ICloneable, System.IDisposable, System.Runtime.Serialization.ISerializable
     {
@@ -2155,7 +2163,7 @@ namespace System.Drawing.Imaging
         public EncoderParameter(System.Drawing.Imaging.Encoder encoder, short[] value) { }
         public EncoderParameter(System.Drawing.Imaging.Encoder encoder, int numberValues, System.Drawing.Imaging.EncoderParameterValueType type, System.IntPtr value) { }
         public EncoderParameter(System.Drawing.Imaging.Encoder encoder, int numerator, int denominator) { }
-        [System.ObsoleteAttribute("This constructor has been deprecated. Use EncoderParameter(Encoder encoder, int numberValues, EncoderParameterValueType type, IntPtr value) instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("This constructor has been deprecated. Use EncoderParameter(Encoder encoder, int numberValues, EncoderParameterValueType type, IntPtr value) instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public EncoderParameter(System.Drawing.Imaging.Encoder encoder, int NumberOfValues, int Type, int Value) { }
         public EncoderParameter(System.Drawing.Imaging.Encoder encoder, int numerator1, int demoninator1, int numerator2, int demoninator2) { }
         public EncoderParameter(System.Drawing.Imaging.Encoder encoder, int[] numerator, int[] denominator) { }
@@ -2327,6 +2335,9 @@ namespace System.Drawing.Imaging
         ReadOnly = 65536,
         Scalable = 1,
     }
+#if netcoreapp
+    [System.ComponentModel.TypeConverter("System.Drawing.ImageFormatConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public sealed partial class ImageFormat
     {
         public ImageFormat(System.Guid guid) { }
@@ -2988,164 +2999,3 @@ namespace System.Drawing.Text
         SystemDefault = 0,
     }
 }
-
-// Removed stuff:
-/*
-namespace System.Drawing.Design
-{
-    public delegate System.Drawing.Design.ToolboxItem ToolboxItemCreatorCallback(object serializedObject, string format);
-    public partial class PropertyValueUIItem
-    {
-        public PropertyValueUIItem(System.Drawing.Image uiItemImage, System.Drawing.Design.PropertyValueUIItemInvokeHandler handler, string tooltip) { }
-        public virtual System.Drawing.Image Image { get { throw null; } }
-        public virtual System.Drawing.Design.PropertyValueUIItemInvokeHandler InvokeHandler { get { throw null; } }
-        public virtual string ToolTip { get { throw null; } }
-        public virtual void Reset() { }
-    }
-    public partial interface IPropertyValueUIService
-    {
-        event System.EventHandler PropertyUIValueItemsChanged;
-        void AddPropertyValueUIHandler(System.Drawing.Design.PropertyValueUIHandler newHandler);
-        System.Drawing.Design.PropertyValueUIItem[] GetPropertyUIValueItems(System.ComponentModel.ITypeDescriptorContext context, System.ComponentModel.PropertyDescriptor propDesc);
-        void NotifyPropertyValueUIItemsChanged();
-        void RemovePropertyValueUIHandler(System.Drawing.Design.PropertyValueUIHandler newHandler);
-    }
-    public partial class PaintValueEventArgs : System.EventArgs
-    {
-        public PaintValueEventArgs(System.ComponentModel.ITypeDescriptorContext context, object value, System.Drawing.Graphics graphics, System.Drawing.Rectangle bounds) { }
-        public System.Drawing.Rectangle Bounds { get { throw null; } }
-        public System.ComponentModel.ITypeDescriptorContext Context { get { throw null; } }
-        public System.Drawing.Graphics Graphics { get { throw null; } }
-        public object Value { get { throw null; } }
-    }
-    public delegate void PropertyValueUIHandler(System.ComponentModel.ITypeDescriptorContext context, System.ComponentModel.PropertyDescriptor propDesc, System.Collections.ArrayList valueUIItemList);
-    public delegate void PropertyValueUIItemInvokeHandler(System.ComponentModel.ITypeDescriptorContext context, System.ComponentModel.PropertyDescriptor descriptor, System.Drawing.Design.PropertyValueUIItem invokedItem);
-    public partial class UITypeEditor
-    {
-        public UITypeEditor() { }
-        public virtual bool IsDropDownResizable { get { throw null; } }
-        public virtual object EditValue(System.ComponentModel.ITypeDescriptorContext context, System.IServiceProvider provider, object value) { throw null; }
-        public object EditValue(System.IServiceProvider provider, object value) { throw null; }
-        public System.Drawing.Design.UITypeEditorEditStyle GetEditStyle() { throw null; }
-        public virtual System.Drawing.Design.UITypeEditorEditStyle GetEditStyle(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
-        public bool GetPaintValueSupported() { throw null; }
-        public virtual bool GetPaintValueSupported(System.ComponentModel.ITypeDescriptorContext context) { throw null; }
-        public virtual void PaintValue(System.Drawing.Design.PaintValueEventArgs e) { }
-        public void PaintValue(object value, System.Drawing.Graphics canvas, System.Drawing.Rectangle rectangle) { }
-    }
-    public enum UITypeEditorEditStyle
-    {
-        DropDown = 3,
-        Modal = 2,
-        None = 1,
-    }
-    [System.Runtime.InteropServices.GuidAttribute("4BACD258-DE64-4048-BC4E-FEDBEF9ACB76")]
-    [System.Runtime.InteropServices.InterfaceTypeAttribute((System.Runtime.InteropServices.ComInterfaceType)(1))]
-    public partial interface IToolboxService
-    {
-        System.Drawing.Design.CategoryNameCollection CategoryNames { get; }
-        string SelectedCategory { get; set; }
-        void AddCreator(System.Drawing.Design.ToolboxItemCreatorCallback creator, string format);
-        void AddCreator(System.Drawing.Design.ToolboxItemCreatorCallback creator, string format, System.ComponentModel.Design.IDesignerHost host);
-        void AddLinkedToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem, System.ComponentModel.Design.IDesignerHost host);
-        void AddLinkedToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem, string category, System.ComponentModel.Design.IDesignerHost host);
-        void AddToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem);
-        void AddToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem, string category);
-        System.Drawing.Design.ToolboxItem DeserializeToolboxItem(object serializedObject);
-        System.Drawing.Design.ToolboxItem DeserializeToolboxItem(object serializedObject, System.ComponentModel.Design.IDesignerHost host);
-        System.Drawing.Design.ToolboxItem GetSelectedToolboxItem();
-        System.Drawing.Design.ToolboxItem GetSelectedToolboxItem(System.ComponentModel.Design.IDesignerHost host);
-        System.Drawing.Design.ToolboxItemCollection GetToolboxItems();
-        System.Drawing.Design.ToolboxItemCollection GetToolboxItems(System.ComponentModel.Design.IDesignerHost host);
-        System.Drawing.Design.ToolboxItemCollection GetToolboxItems(string category);
-        System.Drawing.Design.ToolboxItemCollection GetToolboxItems(string category, System.ComponentModel.Design.IDesignerHost host);
-        bool IsSupported(object serializedObject, System.Collections.ICollection filterAttributes);
-        bool IsSupported(object serializedObject, System.ComponentModel.Design.IDesignerHost host);
-        bool IsToolboxItem(object serializedObject);
-        bool IsToolboxItem(object serializedObject, System.ComponentModel.Design.IDesignerHost host);
-        void Refresh();
-        void RemoveCreator(string format);
-        void RemoveCreator(string format, System.ComponentModel.Design.IDesignerHost host);
-        void RemoveToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem);
-        void RemoveToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem, string category);
-        void SelectedToolboxItemUsed();
-        object SerializeToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem);
-        bool SetCursor();
-        void SetSelectedToolboxItem(System.Drawing.Design.ToolboxItem toolboxItem);
-    }
-    public partial class ToolboxItem : System.Runtime.Serialization.ISerializable
-    {
-        public ToolboxItem() { }
-        public ToolboxItem(System.Type toolType) { }
-        public System.Reflection.AssemblyName AssemblyName { get { throw null; } set { } }
-        public System.Drawing.Bitmap Bitmap { get { throw null; } set { } }
-        public string Company { get { throw null; } set { } }
-        public virtual string ComponentType { get { throw null; } }
-        public System.Reflection.AssemblyName[] DependentAssemblies { get { throw null; } set { } }
-        public string Description { get { throw null; } set { } }
-        public string DisplayName { get { throw null; } set { } }
-        public System.Collections.ICollection Filter { get { throw null; } set { } }
-        public bool IsTransient { get { throw null; } set { } }
-        public virtual bool Locked { get { throw null; } }
-        public System.Drawing.Bitmap OriginalBitmap { get { throw null; } set { } }
-        public System.Collections.IDictionary Properties { get { throw null; } }
-        public string TypeName { get { throw null; } set { } }
-        public virtual string Version { get { throw null; } }
-        public event System.Drawing.Design.ToolboxComponentsCreatedEventHandler ComponentsCreated { add { } remove { } }
-        public event System.Drawing.Design.ToolboxComponentsCreatingEventHandler ComponentsCreating { add { } remove { } }
-        protected void CheckUnlocked() { }
-        public System.ComponentModel.IComponent[] CreateComponents() { throw null; }
-        public System.ComponentModel.IComponent[] CreateComponents(System.ComponentModel.Design.IDesignerHost host) { throw null; }
-        public System.ComponentModel.IComponent[] CreateComponents(System.ComponentModel.Design.IDesignerHost host, System.Collections.IDictionary defaultValues) { throw null; }
-        protected virtual System.ComponentModel.IComponent[] CreateComponentsCore(System.ComponentModel.Design.IDesignerHost host) { throw null; }
-        protected virtual System.ComponentModel.IComponent[] CreateComponentsCore(System.ComponentModel.Design.IDesignerHost host, System.Collections.IDictionary defaultValues) { throw null; }
-        protected virtual void Deserialize(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public override bool Equals(object obj) { throw null; }
-        protected virtual object FilterPropertyValue(string propertyName, object value) { throw null; }
-        public override int GetHashCode() { throw null; }
-        public System.Type GetType(System.ComponentModel.Design.IDesignerHost host) { throw null; }
-        protected virtual System.Type GetType(System.ComponentModel.Design.IDesignerHost host, System.Reflection.AssemblyName assemblyName, string typeName, bool reference) { throw null; }
-        public virtual void Initialize(System.Type type) { }
-        public virtual void Lock() { }
-        protected virtual void OnComponentsCreated(System.Drawing.Design.ToolboxComponentsCreatedEventArgs args) { }
-        protected virtual void OnComponentsCreating(System.Drawing.Design.ToolboxComponentsCreatingEventArgs args) { }
-        protected virtual void Serialize(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public override string ToString() { throw null; }
-        protected void ValidatePropertyType(string propertyName, object value, System.Type expectedType, bool allowNull) { }
-        protected virtual object ValidatePropertyValue(string propertyName, object value) { throw null; }
-    }
-    public partial interface IToolboxItemProvider
-    {
-        System.Drawing.Design.ToolboxItemCollection Items { get; }
-    }
-    public partial interface IToolboxUser
-    {
-        bool GetToolSupported(System.Drawing.Design.ToolboxItem tool);
-        void ToolPicked(System.Drawing.Design.ToolboxItem tool);
-    }
-    public sealed partial class ToolboxItemCollection : System.Collections.ReadOnlyCollectionBase
-    {
-        public ToolboxItemCollection(System.Drawing.Design.ToolboxItemCollection value) { }
-        public ToolboxItemCollection(System.Drawing.Design.ToolboxItem[] value) { }
-        public System.Drawing.Design.ToolboxItem this[int index] { get { throw null; } }
-        public bool Contains(System.Drawing.Design.ToolboxItem value) { throw null; }
-        public void CopyTo(System.Drawing.Design.ToolboxItem[] array, int index) { }
-        public int IndexOf(System.Drawing.Design.ToolboxItem value) { throw null; }
-    }
-    public partial class ToolboxComponentsCreatedEventArgs : System.EventArgs
-    {
-        public ToolboxComponentsCreatedEventArgs(System.ComponentModel.IComponent[] components) { }
-        public System.ComponentModel.IComponent[] Components { get { throw null; } }
-    }
-    public delegate void ToolboxComponentsCreatedEventHandler(object sender, System.Drawing.Design.ToolboxComponentsCreatedEventArgs e);
-    public partial class ToolboxComponentsCreatingEventArgs : System.EventArgs
-    {
-        public ToolboxComponentsCreatingEventArgs(System.ComponentModel.Design.IDesignerHost host) { }
-        public System.ComponentModel.Design.IDesignerHost DesignerHost { get { throw null; } }
-    }
-    public delegate void ToolboxComponentsCreatingEventHandler(object sender, System.Drawing.Design.ToolboxComponentsCreatingEventArgs e);
-
-}
-
-*/

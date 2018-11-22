@@ -29,6 +29,8 @@ namespace System.IO.Pipelines
             _canceledState = CanceledState.NotCanceled;
             _completion = completed ? s_awaitableIsCompleted : s_awaitableIsNotCompleted;
             _completionState = null;
+            _cancellationToken = CancellationToken.None;
+            _cancellationTokenRegistration = default;
             _synchronizationContext = null;
             _executionContext = null;
             _useSynchronizationContext = useSynchronizationContext;
@@ -41,7 +43,7 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CancellationTokenRegistration AttachToken(CancellationToken cancellationToken, Action<object> callback, object state)
         {
-            CancellationTokenRegistration oldRegistration;
+            CancellationTokenRegistration oldRegistration = default;
             if (!cancellationToken.Equals(_cancellationToken))
             {
                 oldRegistration = _cancellationTokenRegistration;
@@ -49,7 +51,7 @@ namespace System.IO.Pipelines
                 if (_cancellationToken.CanBeCanceled)
                 {
                     _cancellationToken.ThrowIfCancellationRequested();
-                    _cancellationTokenRegistration = _cancellationToken.Register(callback, state);
+                    _cancellationTokenRegistration = _cancellationToken.UnsafeRegister(callback, state);
                 }
             }
             return oldRegistration;
@@ -59,14 +61,23 @@ namespace System.IO.Pipelines
         public void Complete(out CompletionData completionData)
         {
             Action<object> currentCompletion = _completion;
+            object currentState = _completionState;
+
             _completion = s_awaitableIsCompleted;
+            _completionState = null;
 
             completionData = default;
 
             if (!ReferenceEquals(currentCompletion, s_awaitableIsCompleted) &&
                 !ReferenceEquals(currentCompletion, s_awaitableIsNotCompleted))
             {
-                completionData = new CompletionData(currentCompletion, _completionState, _executionContext, _synchronizationContext);
+                completionData = new CompletionData(currentCompletion, currentState, _executionContext, _synchronizationContext);
+            }
+            else if (_canceledState == CanceledState.CancellationRequested)
+            {
+                // Make sure we won't reset the awaitable in ObserveCancellation
+                // If Complete happens in between Cancel and ObserveCancellation
+                _canceledState = CanceledState.CancellationPreRequested;
             }
         }
 

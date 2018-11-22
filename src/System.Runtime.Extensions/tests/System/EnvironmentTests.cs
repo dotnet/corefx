@@ -7,11 +7,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Xunit.NetCore.Extensions;
+using Microsoft.DotNet.XUnitExtensions;
 
 namespace System.Tests
 {
@@ -132,6 +133,28 @@ namespace System.Tests
             Assert.Contains(RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Windows" : "Unix", versionString);
         }
 
+        // On Unix, we must parse the version from uname -r
+        [Theory]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [InlineData("2.6.19-1.2895.fc6", 2, 6, 19, 1)]
+        [InlineData("xxx1yyy2zzz3aaa4bbb", 1, 2, 3, 4)]
+        [InlineData("2147483647.2147483647.2147483647.2147483647", int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue)]
+        [InlineData("0.0.0.0", 0, 0, 0, 0)]
+        [InlineData("-1.-1.-1.-1", 1, 1, 1, 1)]
+        [InlineData("nelknet 4.15.0-10000000000-generic", 4, 15, 0, int.MaxValue)] // integer overflow
+        [InlineData("nelknet 4.15.0-24201807041620-generic", 4, 15, 0, int.MaxValue)] // integer overflow
+        [InlineData("", 0, 0, 0, 0)]
+        [InlineData("1abc", 1, 0, 0, 0)]
+        public void OSVersion_ParseVersion(string input, int major, int minor, int build, int revision)
+        {
+            var getOSMethod = typeof(Environment).GetMethod("GetOperatingSystem", BindingFlags.Static | BindingFlags.NonPublic);
+
+            var expected = new Version(major, minor, build, revision);
+            var actual = ((OperatingSystem)getOSMethod.Invoke(null, new object[] { input })).Version;
+
+            Assert.Equal(expected, actual);
+        }
+
         [Fact]
         public void SystemPageSize_Valid()
         {
@@ -146,25 +169,6 @@ namespace System.Tests
         public void UserInteractive_True()
         {
             Assert.True(Environment.UserInteractive);
-        }
-
-        [Fact]
-        public void UserName_Valid()
-        {
-            Assert.False(string.IsNullOrWhiteSpace(Environment.UserName));
-        }
-
-        [Fact]
-        public void UserDomainName_Valid()
-        {
-            Assert.False(string.IsNullOrWhiteSpace(Environment.UserDomainName));
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests OS-specific environment
-        public void UserDomainName_Unix_MatchesMachineName()
-        {
-            Assert.Equal(Environment.MachineName, Environment.UserDomainName);
         }
 
         [Fact]
@@ -190,7 +194,7 @@ namespace System.Tests
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
         [OuterLoop]
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/21404", TargetFrameworkMonikers.Uap)]
+        [ActiveIssue("21404", TargetFrameworkMonikers.Uap)]
         public void FailFast_ExpectFailureExitCode()
         {
             using (RemoteInvokeHandle handle = RemoteInvoke(() => { Environment.FailFast("message"); return SuccessExitCode; }))
@@ -207,6 +211,82 @@ namespace System.Tests
                 handle.Process = null;
                 p.WaitForExit();
                 Assert.NotEqual(SuccessExitCode, p.ExitCode);
+            }
+        }
+
+        [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have dotnet/coreclr#16622")]
+        [ActiveIssue("29869", TargetFrameworkMonikers.Uap)]
+        [Fact]
+        public void FailFast_ExceptionStackTrace_ArgumentException()
+        {
+            var psi = new ProcessStartInfo();
+            psi.RedirectStandardError = true;
+            psi.RedirectStandardOutput = true;
+
+            using (RemoteInvokeHandle handle = RemoteInvoke(
+                () => { Environment.FailFast("message", new ArgumentException("bad arg")); return SuccessExitCode; },
+                new RemoteInvokeOptions { StartInfo = psi }))
+            {
+                Process p = handle.Process;
+                handle.Process = null;
+                p.WaitForExit();
+                string consoleOutput = p.StandardError.ReadToEnd();
+                Assert.Contains("Exception details:", consoleOutput);
+                Assert.Contains("ArgumentException:", consoleOutput);
+                Assert.Contains("bad arg", consoleOutput);
+            }
+        }
+
+        [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have dotnet/coreclr#16622")]
+        [ActiveIssue("29869", TargetFrameworkMonikers.Uap)]
+        [Fact]
+        public void FailFast_ExceptionStackTrace_StackOverflowException()
+        {
+            // Test using another type of exception
+            var psi = new ProcessStartInfo();
+            psi.RedirectStandardError = true;
+            psi.RedirectStandardOutput = true;
+
+            using (RemoteInvokeHandle handle = RemoteInvoke(
+                () => { Environment.FailFast("message", new StackOverflowException("SO exception")); return SuccessExitCode; },
+                new RemoteInvokeOptions { StartInfo = psi }))
+            {
+                Process p = handle.Process;
+                handle.Process = null;
+                p.WaitForExit();
+                string consoleOutput = p.StandardError.ReadToEnd();
+                Assert.Contains("Exception details:", consoleOutput);
+                Assert.Contains("StackOverflowException", consoleOutput);
+                Assert.Contains("SO exception", consoleOutput);
+            }
+        }
+
+        [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have dotnet/coreclr#16622")]
+        [ActiveIssue("29869", TargetFrameworkMonikers.Uap)]
+        [Fact]
+        public void FailFast_ExceptionStackTrace_InnerException()
+        {
+            // Test if inner exception details are also logged
+            var psi = new ProcessStartInfo();
+            psi.RedirectStandardError = true;
+            psi.RedirectStandardOutput = true;
+
+            using (RemoteInvokeHandle handle = RemoteInvoke(
+                () => { Environment.FailFast("message", new ArgumentException("first exception", new NullReferenceException("inner exception"))); return SuccessExitCode; },
+                new RemoteInvokeOptions { StartInfo = psi }))
+            {
+                Process p = handle.Process;
+                handle.Process = null;
+                p.WaitForExit();
+                string consoleOutput = p.StandardError.ReadToEnd();
+                Assert.Contains("Exception details:", consoleOutput);
+                Assert.Contains("first exception", consoleOutput);
+                Assert.Contains("inner exception", consoleOutput);
+                Assert.Contains("ArgumentException", consoleOutput);
+                Assert.Contains("NullReferenceException", consoleOutput);
             }
         }
 
@@ -377,7 +457,7 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.StartMenu)]
         [InlineData(Environment.SpecialFolder.Startup)]
         [InlineData(Environment.SpecialFolder.System)]
-        [InlineData(Environment.SpecialFolder.Templates)]
+        //[InlineData(Environment.SpecialFolder.Templates)]
         [InlineData(Environment.SpecialFolder.DesktopDirectory)]
         [InlineData(Environment.SpecialFolder.Personal)]
         [InlineData(Environment.SpecialFolder.ProgramFiles)]
@@ -396,7 +476,7 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.CommonTemplates)]
         [InlineData(Environment.SpecialFolder.CommonVideos)]
         [InlineData(Environment.SpecialFolder.Fonts)]
-        [InlineData(Environment.SpecialFolder.NetworkShortcuts)]
+        //[InlineData(Environment.SpecialFolder.NetworkShortcuts)]
         // [InlineData(Environment.SpecialFolder.PrinterShortcuts)]
         [InlineData(Environment.SpecialFolder.UserProfile)]
         [InlineData(Environment.SpecialFolder.CommonProgramFilesX86)]

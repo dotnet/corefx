@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Globalization;
 using System.Security;
+using System.Runtime.CompilerServices;
 
 namespace System.Text
 {
@@ -30,28 +31,6 @@ namespace System.Text
 
         public SBCSCodePageEncoding(int codePage, int dataCodePage) : base(codePage, dataCodePage)
         {
-        }
-
-        // Method assumes that memory pointer is aligned
-        private static unsafe void ZeroMemAligned(byte* buffer, int count)
-        {
-            long* pLong = (long*)buffer;
-            long* pLongEnd = (long*)(buffer + count - sizeof(long));
-
-            while (pLong < pLongEnd)
-            {
-                *pLong = 0;
-                pLong++;
-            }
-
-            byte* pByte = (byte*)pLong;
-            byte* pEnd = buffer + count;
-
-            while (pByte < pEnd)
-            {
-                *pByte = 0;
-                pByte++;
-            }
         }
 
         // We have a managed code page entry, so load our tables
@@ -92,7 +71,7 @@ namespace System.Text
                 const int CodePageNumberSize = 4;
                 int bytesToAllocate = UnicodeToBytesMappingSize + BytesToUnicodeMappingSize + CodePageNumberSize + iExtraBytes;
                 byte* pNativeMemory = GetNativeMemory(bytesToAllocate);
-                ZeroMemAligned(pNativeMemory, bytesToAllocate);
+                Unsafe.InitBlockUnaligned(pNativeMemory, 0, (uint)bytesToAllocate);
 
                 char* mapBytesToUnicode = (char*)pNativeMemory;
                 byte* mapUnicodeToBytes = (byte*)(pNativeMemory + 256 * 2);
@@ -130,21 +109,21 @@ namespace System.Text
                         }
                     }
                 }
-                
+
                 _mapBytesToUnicode = mapBytesToUnicode;
                 _mapUnicodeToBytes = mapUnicodeToBytes;
             }
         }
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static Object s_InternalSyncObject;
-        private static Object InternalSyncObject
+        private static object s_InternalSyncObject;
+        private static object InternalSyncObject
         {
             get
             {
                 if (s_InternalSyncObject == null)
                 {
-                    Object o = new Object();
+                    object o = new object();
                     Interlocked.CompareExchange<Object>(ref s_InternalSyncObject, o, null);
                 }
                 return s_InternalSyncObject;
@@ -186,7 +165,7 @@ namespace System.Text
                         ushort byteTemp;
                         while ((byteTemp = *((ushort*)pData)) != 0)
                         {
-                            Debug.Assert(arrayTemp[byteTemp] == UNKNOWN_CHAR, String.Format(CultureInfo.InvariantCulture,
+                            Debug.Assert(arrayTemp[byteTemp] == UNKNOWN_CHAR, string.Format(CultureInfo.InvariantCulture,
                                 "[SBCSCodePageEncoding::ReadBestFitTable] Expected unallocated byte (not 0x{2:X2}) for best fit byte at 0x{0:X2} for code page {1}",
                                 byteTemp, CodePage, (int)arrayTemp[byteTemp]));
                             pData += 2;
@@ -288,7 +267,7 @@ namespace System.Text
 
                                     // This won't work if it won't round trip.
                                     Debug.Assert(arrayTemp[iBestFitCount - 1] != (char)0,
-                                        String.Format(CultureInfo.InvariantCulture,
+                                        string.Format(CultureInfo.InvariantCulture,
                                         "[SBCSCodePageEncoding.ReadBestFitTable] No valid Unicode value {0:X4} for round trip bytes {1:X4}, encoding {2}",
                                         (int)_mapBytesToUnicode[input], (int)input, CodePage));
                                 }
@@ -325,7 +304,7 @@ namespace System.Text
             if (encoder != null)
             {
                 charLeftOver = encoder.charLeftOver;
-                Debug.Assert(charLeftOver == 0 || Char.IsHighSurrogate(charLeftOver),
+                Debug.Assert(charLeftOver == 0 || char.IsHighSurrogate(charLeftOver),
                     "[SBCSCodePageEncoding.GetByteCount]leftover character should be high surrogate");
                 fallback = encoder.Fallback as EncoderReplacementFallback;
 
@@ -452,7 +431,7 @@ namespace System.Text
             if (encoder != null)
             {
                 charLeftOver = encoder.charLeftOver;
-                Debug.Assert(charLeftOver == 0 || Char.IsHighSurrogate(charLeftOver),
+                Debug.Assert(charLeftOver == 0 || char.IsHighSurrogate(charLeftOver),
                     "[SBCSCodePageEncoding.GetBytes]leftover character should be high surrogate");
                 fallback = encoder.Fallback as EncoderReplacementFallback;
 

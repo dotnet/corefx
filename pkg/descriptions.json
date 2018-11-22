@@ -64,6 +64,11 @@
     "CommonTypes": []
   },
   {
+    "Name": "Microsoft.NETCore.Platforms.Future",
+    "Description": "Provides runtime information required to resolve target framework, platform, and runtime specific implementations of .NETCore packages.  This package represents future platforms not yet supported in .NETCore stable release and is subject to change.",
+    "CommonTypes": []
+  },
+  {
     "Name": "Microsoft.NETCore.Portable.Compatibility",
     "Description": "Enables compatibility with portable libraries targeting previous .NET releases like .NET Framework 4.0 and Silverlight.\nThis package supports retargeting references to classic reference assemblies (mscorlib.dll, system.dll, etc) to new contract assemblies (System.Runtime.dll, System.IO, etc).  It does this in a pay-for-play way to prevent consuming assemblies from having to reference all of the contracts that happen to overlap with mscorlib.  As such, when using this package you may encounter errors like\n\terror CS0012: The type 'WebRequest' is defined in an assembly that is not referenced. You must add a reference to assembly 'System.Net.Requests, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.\nTo resolve these errors install the package with the same name as the missing assembly.",
     "CommonTypes": []
@@ -370,6 +375,18 @@
       "System.ComponentModel.Composition.Primitives.ExportDefinition",
       "System.ComponentModel.Composition.Primitives.ImportDefinition",
       "System.ComponentModel.Composition.ReflectionModel.ReflectionModelServices"
+    ]
+  },
+  {
+    "Name": "System.ComponentModel.Composition.Registration",
+    "Description": "This namespace provides classes that constitute the core of the Managed Extensibility Framework, or MEF.",
+    "CommonTypes": [
+      "System.ComponentModel.Composition.Registration.RegistrationBuilder",
+      "System.ComponentModel.Composition.Registration.PartBuilder",
+      "System.ComponentModel.Composition.Registration.PartBuilder<T>",
+      "System.ComponentModel.Composition.Registration.ParameterImportBuilder",
+      "System.ComponentModel.Composition.Registration.ImportBuilder",
+      "System.ComponentModel.Composition.Registration.ExportBuilder"
     ]
   },
   {
@@ -1012,13 +1029,17 @@
   },
   {
     "Name": "System.Memory",
-    "Description": "Provides types for efficient low-allocation access to memory.",
+    "Description": "Provides types for efficient representation and pooling of managed, stack, and native memory segments and sequences of such segments, along with primitives to parse and format UTF-8 encoded text stored in those memory segments.",
     "CommonTypes": [
         "System.Span",
         "System.ReadOnlySpan",
         "System.Memory",
         "System.ReadOnlyMemory",
-        "System.MemoryExtensions"
+        "System.Buffers.MemoryPool",
+        "System.Buffers.ReadOnlySequence",
+        "System.Buffers.SequenceReader",
+        "System.Buffers.Text.Utf8Parser",
+        "System.Buffers.Text.Utf8Formatter"
     ]
   },
   {
@@ -1215,6 +1236,16 @@
     ]
   },
   {
+    "Name": "System.Numerics.Tensors",
+    "Description": "Tensor class which represents and extends multi-dimensional arrays.",
+    "CommonTypes": [
+      "System.Numerics.Tensors.Tensor<T>",
+      "System.Numerics.Tensors.CompressedSparseTensor<T>",
+      "System.Numerics.Tensors.DenseTensor<T>",
+      "System.Numerics.Tensors.SparseTensor<T>"
+    ]
+  },
+  {
     "Name": "System.Numerics.Vectors",
     "Description": "Provides hardware-accelerated numeric types, suitable for high-performance processing and graphics applications.",
     "CommonTypes": [
@@ -1354,6 +1385,14 @@
       "System.Reflection.Metadata.Ecma335.MetadataBuilder",
       "System.Reflection.PortableExecutable.PEBuilder",
       "System.Reflection.PortableExecutable.ManagedPEBuilder"
+    ]
+  },
+  {
+    "Name": "System.Reflection.MetadataLoadContext",
+    "Description": "Provides read-only reflection on assemblies in an isolated context with support for assemblies that have different architectures and runtimes.",
+    "CommonTypes": [
+        "System.Reflection.MetadataLoadContext",
+        "System.Reflection.MetadataAssemblyResolver"
     ]
   },
   {
@@ -1523,14 +1562,6 @@
       "System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute",
       "System.Runtime.InteropServices.WindowsRuntime.WriteOnlyArrayAttribute",
       "System.Runtime.InteropServices.WindowsRuntime.ReturnValueNameAttribute"
-    ]
-  },
-  {
-    "Name": "System.Runtime.Intrinsics.Experimental",
-    "Description": "Provides APIs to processor specific instructions.",
-    "CommonTypes": [
-        "System.Runtime.Intrinsics.Vector128<>",
-        "System.Runtime.Intrinsics.Vector256<>"
     ]
   },
   {
@@ -1938,6 +1969,13 @@
     ]
   },
   {
+    "Name": "System.Text.Json",
+    "Description": "Provides a fast, non-cached, forward-only way to read UTF-8 encoded JavaScript Object Notation (JSON) text.",
+    "CommonTypes": [
+      "System.Text.Json.Utf8JsonReader"
+    ]
+  },
+  {
     "Name": "System.Text.RegularExpressions",
     "Description": "Provides the System.Text.RegularExpressions.Regex class, an implementation of a regular expression engine.",
     "CommonTypes": [
@@ -2105,6 +2143,14 @@
     ]
   },
   {
+    "Name": "System.Windows.Extensions",
+    "Description": "Provides miscellaneous Windows-specific types",
+    "CommonTypes":[
+      "System.Security.Cryptography.X509Certificates.X509Certificate2UI",
+      "System.Security.Cryptography.X509Certificates.X509SelectionFlag"
+    ]
+  },
+  {
     "Name": "System.Private.Xml",
     "Description": "Provides a fast, non-cached, forward-only way to read and write Extensible Markup Language (XML) data.",
     "CommonTypes": [
@@ -2228,5 +2274,10 @@
     "CommonTypes": [
       "System.Xml.XPath.XmlDocumentExtensions"
     ]
+  },
+  {
+    "Name": "Microsoft.IO.Redist",
+    "Description": "Downlevel support package for System.IO classes.",
+    "CommonTypes": []
   }
 ]

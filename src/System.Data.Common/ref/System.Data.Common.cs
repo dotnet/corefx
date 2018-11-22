@@ -531,10 +531,10 @@ namespace System.Data
         Utc = 4,
     }
     [System.AttributeUsageAttribute((System.AttributeTargets)(32767))]
-    [System.ObsoleteAttribute("DataSysDescriptionAttribute has been deprecated.  http://go.microsoft.com/fwlink/?linkid=14202", false)]
+    [System.ObsoleteAttribute("DataSysDescriptionAttribute has been deprecated.  https://go.microsoft.com/fwlink/?linkid=14202", false)]
     public partial class DataSysDescriptionAttribute : System.ComponentModel.DescriptionAttribute
     {
-        [System.ObsoleteAttribute("DataSysDescriptionAttribute has been deprecated.  http://go.microsoft.com/fwlink/?linkid=14202", false)]
+        [System.ObsoleteAttribute("DataSysDescriptionAttribute has been deprecated.  https://go.microsoft.com/fwlink/?linkid=14202", false)]
         public DataSysDescriptionAttribute(string description) { }
         public override string Description { get { throw null; } }
     }
@@ -927,6 +927,7 @@ namespace System.Data
         OriginalRows = 42,
         Unchanged = 2,
     }
+    [System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]
     public partial class DataViewSetting
     {
         internal DataViewSetting() { }
@@ -1505,7 +1506,7 @@ namespace System.Data.Common
         [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(2))]
         public System.Data.Common.DataTableMappingCollection TableMappings { get { throw null; } }
         public event System.Data.FillErrorEventHandler FillError { add { } remove { } }
-        [System.ObsoleteAttribute("CloneInternals() has been deprecated.  Use the DataAdapter(DataAdapter from) constructor.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("CloneInternals() has been deprecated.  Use the DataAdapter(DataAdapter from) constructor.  https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual System.Data.Common.DataAdapter CloneInternals() { throw null; }
         protected virtual System.Data.Common.DataTableMappingCollection CreateTableMappings() { throw null; }
         protected override void Dispose(bool disposing) { }
@@ -3313,3 +3314,26 @@ namespace System.Data.SqlTypes
         UnmanagedBuffer = 2,
     }
 }
+namespace System.Xml
+{
+    [Obsolete("XmlDataDocument class will be removed in a future release.")]
+    public partial class XmlDataDocument : System.Xml.XmlDocument
+    {
+        public XmlDataDocument() { }
+        public XmlDataDocument(System.Data.DataSet dataset) { }
+        public System.Data.DataSet DataSet { get { throw null; } }
+        public override System.Xml.XmlNode CloneNode(bool deep) { throw null; }
+        public override System.Xml.XmlElement CreateElement(string prefix, string localName, string namespaceURI) { throw null; }
+        public override System.Xml.XmlEntityReference CreateEntityReference(string name) { throw null; }
+        protected override System.Xml.XPath.XPathNavigator CreateNavigator(System.Xml.XmlNode node) { throw null; }
+        public override System.Xml.XmlElement GetElementById(string elemId) { throw null; }
+        public System.Xml.XmlElement GetElementFromRow(System.Data.DataRow r) { throw null; }
+        public override System.Xml.XmlNodeList GetElementsByTagName(string name) { throw null; }
+        public System.Data.DataRow GetRowFromElement(System.Xml.XmlElement e) { throw null; }
+        public override void Load(System.IO.Stream inStream) { }
+        public override void Load(System.IO.TextReader txtReader) { }
+        public override void Load(string filename) { }
+        public override void Load(System.Xml.XmlReader reader) { }
+    }
+}
+

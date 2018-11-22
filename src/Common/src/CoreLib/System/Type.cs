@@ -346,6 +346,8 @@ namespace System
         public virtual Type MakeGenericType(params Type[] typeArguments) { throw new NotSupportedException(SR.NotSupported_SubclassOverride); }
         public virtual Type MakePointerType() { throw new NotSupportedException(); }
 
+        public static Type MakeGenericSignatureType(Type genericTypeDefinition, params Type[] typeArguments) => new SignatureConstructedGenericType(genericTypeDefinition, typeArguments);
+
         public static Type MakeGenericMethodParameter(int position)
         {
             if (position < 0)
@@ -387,8 +389,8 @@ namespace System
         public static readonly object Missing = System.Reflection.Missing.Value;
 
         public static readonly MemberFilter FilterAttribute = FilterAttributeImpl;
-        public static readonly MemberFilter FilterName = FilterNameImpl;
-        public static readonly MemberFilter FilterNameIgnoreCase = FilterNameIgnoreCaseImpl;
+        public static readonly MemberFilter FilterName = (m, c) => FilterNameImpl(m, c, StringComparison.Ordinal);
+        public static readonly MemberFilter FilterNameIgnoreCase = (m, c) => FilterNameImpl(m, c, StringComparison.OrdinalIgnoreCase);
 
         private const BindingFlags DefaultLookup = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public;
     }

@@ -2,12 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Runtime.Serialization;
-using System.Xml.Serialization;
-using System.Collections.Generic;
 using System.Xml;
-using System.Runtime.CompilerServices;
 
 namespace System.ServiceModel.Syndication
 {
@@ -19,22 +16,15 @@ namespace System.ServiceModel.Syndication
         protected ServiceDocumentFormatter()
         {
         }
+
         protected ServiceDocumentFormatter(ServiceDocument documentToWrite)
         {
-            if (documentToWrite == null)
-            {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("documentToWrite");
-            }
-            _document = documentToWrite;
+            _document = documentToWrite ?? throw new ArgumentNullException(nameof(documentToWrite));
         }
 
-        public ServiceDocument Document
-        {
-            get { return _document; }
-        }
+        public ServiceDocument Document => _document;
 
-        public abstract string Version
-        { get; }
+        public abstract string Version { get; }
 
         public abstract bool CanRead(XmlReader reader);
         public abstract void ReadFrom(XmlReader reader);
@@ -42,31 +32,25 @@ namespace System.ServiceModel.Syndication
 
         internal static void LoadElementExtensions(XmlBuffer buffer, XmlDictionaryWriter writer, CategoriesDocument categories)
         {
-            if (categories == null)
-            {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("categories");
-            }
-            Atom10FeedFormatter.CloseBuffer(buffer, writer);
+            Debug.Assert(categories != null);
+
+            SyndicationFeedFormatter.CloseBuffer(buffer, writer);
             categories.LoadElementExtensions(buffer);
         }
 
         internal static void LoadElementExtensions(XmlBuffer buffer, XmlDictionaryWriter writer, ResourceCollectionInfo collection)
         {
-            if (collection == null)
-            {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("collection");
-            }
-            Atom10FeedFormatter.CloseBuffer(buffer, writer);
+            Debug.Assert(collection != null);
+
+            SyndicationFeedFormatter.CloseBuffer(buffer, writer);
             collection.LoadElementExtensions(buffer);
         }
 
         internal static void LoadElementExtensions(XmlBuffer buffer, XmlDictionaryWriter writer, Workspace workspace)
         {
-            if (workspace == null)
-            {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("workspace");
-            }
-            Atom10FeedFormatter.CloseBuffer(buffer, writer);
+            Debug.Assert(workspace != null);
+
+            SyndicationFeedFormatter.CloseBuffer(buffer, writer);
             workspace.LoadElementExtensions(buffer);
         }
 
@@ -74,9 +58,10 @@ namespace System.ServiceModel.Syndication
         {
             if (document == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("document");
+                throw new ArgumentNullException(nameof(document));
             }
-            Atom10FeedFormatter.CloseBuffer(buffer, writer);
+
+            SyndicationFeedFormatter.CloseBuffer(buffer, writer);
             document.LoadElementExtensions(buffer);
         }
 
@@ -84,8 +69,9 @@ namespace System.ServiceModel.Syndication
         {
             if (inlineCategories == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("inlineCategories");
+                throw new ArgumentNullException(nameof(inlineCategories));
             }
+
             return inlineCategories.CreateCategory();
         }
 
@@ -93,8 +79,9 @@ namespace System.ServiceModel.Syndication
         {
             if (workspace == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("workspace");
+                throw new ArgumentNullException(nameof(workspace));
             }
+
             return workspace.CreateResourceCollection();
         }
 
@@ -112,8 +99,9 @@ namespace System.ServiceModel.Syndication
         {
             if (document == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("document");
+                throw new ArgumentNullException(nameof(document));
             }
+
             return document.CreateWorkspace();
         }
 
@@ -121,8 +109,9 @@ namespace System.ServiceModel.Syndication
         {
             if (categories == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("categories");
+                throw new ArgumentNullException(nameof(categories));
             }
+
             categories.LoadElementExtensions(reader, maxExtensionSize);
         }
 
@@ -130,8 +119,9 @@ namespace System.ServiceModel.Syndication
         {
             if (collection == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
+
             collection.LoadElementExtensions(reader, maxExtensionSize);
         }
 
@@ -139,8 +129,9 @@ namespace System.ServiceModel.Syndication
         {
             if (workspace == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("workspace");
+                throw new ArgumentNullException(nameof(workspace));
             }
+
             workspace.LoadElementExtensions(reader, maxExtensionSize);
         }
 
@@ -148,8 +139,9 @@ namespace System.ServiceModel.Syndication
         {
             if (document == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("document");
+                throw new ArgumentNullException(nameof(document));
             }
+
             document.LoadElementExtensions(reader, maxExtensionSize);
         }
 
@@ -157,8 +149,9 @@ namespace System.ServiceModel.Syndication
         {
             if (document == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("document");
+                throw new ArgumentNullException(nameof(document));
             }
+
             return document.TryParseAttribute(name, ns, value, version);
         }
 
@@ -166,8 +159,9 @@ namespace System.ServiceModel.Syndication
         {
             if (collection == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
+
             return collection.TryParseAttribute(name, ns, value, version);
         }
 
@@ -175,8 +169,9 @@ namespace System.ServiceModel.Syndication
         {
             if (categories == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("categories");
+                throw new ArgumentNullException(nameof(categories));
             }
+
             return categories.TryParseAttribute(name, ns, value, version);
         }
 
@@ -184,8 +179,9 @@ namespace System.ServiceModel.Syndication
         {
             if (workspace == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("workspace");
+                throw new ArgumentNullException(nameof(workspace));
             }
+
             return workspace.TryParseAttribute(name, ns, value, version);
         }
 
@@ -193,8 +189,9 @@ namespace System.ServiceModel.Syndication
         {
             if (collection == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
+
             return collection.TryParseElement(reader, version);
         }
 
@@ -202,8 +199,9 @@ namespace System.ServiceModel.Syndication
         {
             if (document == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("document");
+                throw new ArgumentNullException(nameof(document));
             }
+
             return document.TryParseElement(reader, version);
         }
 
@@ -211,8 +209,9 @@ namespace System.ServiceModel.Syndication
         {
             if (workspace == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("workspace");
+                throw new ArgumentNullException(nameof(workspace));
             }
+
             return workspace.TryParseElement(reader, version);
         }
 
@@ -220,8 +219,9 @@ namespace System.ServiceModel.Syndication
         {
             if (categories == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("categories");
+                throw new ArgumentNullException(nameof(categories));
             }
+
             return categories.TryParseElement(reader, version);
         }
 
@@ -229,8 +229,9 @@ namespace System.ServiceModel.Syndication
         {
             if (document == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("document");
+                throw new ArgumentNullException(nameof(document));
             }
+
             document.WriteAttributeExtensions(writer, version);
         }
 
@@ -238,8 +239,9 @@ namespace System.ServiceModel.Syndication
         {
             if (workspace == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("workspace");
+                throw new ArgumentNullException(nameof(workspace));
             }
+
             workspace.WriteAttributeExtensions(writer, version);
         }
 
@@ -247,8 +249,9 @@ namespace System.ServiceModel.Syndication
         {
             if (collection == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
+
             collection.WriteAttributeExtensions(writer, version);
         }
 
@@ -256,8 +259,9 @@ namespace System.ServiceModel.Syndication
         {
             if (categories == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("categories");
+                throw new ArgumentNullException(nameof(categories));
             }
+
             categories.WriteAttributeExtensions(writer, version);
         }
 
@@ -265,8 +269,9 @@ namespace System.ServiceModel.Syndication
         {
             if (document == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("document");
+                throw new ArgumentNullException(nameof(document));
             }
+
             document.WriteElementExtensions(writer, version);
         }
 
@@ -274,8 +279,9 @@ namespace System.ServiceModel.Syndication
         {
             if (workspace == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("workspace");
+                throw new ArgumentNullException(nameof(workspace));
             }
+
             workspace.WriteElementExtensions(writer, version);
         }
 
@@ -283,8 +289,9 @@ namespace System.ServiceModel.Syndication
         {
             if (collection == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("collection");
+                throw new ArgumentNullException(nameof(collection));
             }
+
             collection.WriteElementExtensions(writer, version);
         }
 
@@ -292,19 +299,14 @@ namespace System.ServiceModel.Syndication
         {
             if (categories == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("categories");
+                throw new ArgumentNullException(nameof(categories));
             }
+
             categories.WriteElementExtensions(writer, version);
         }
 
-        protected virtual ServiceDocument CreateDocumentInstance()
-        {
-            return new ServiceDocument();
-        }
+        protected virtual ServiceDocument CreateDocumentInstance() => new ServiceDocument();
 
-        protected virtual void SetDocument(ServiceDocument document)
-        {
-            _document = document;
-        }
+        protected virtual void SetDocument(ServiceDocument document) => _document = document;
     }
 }

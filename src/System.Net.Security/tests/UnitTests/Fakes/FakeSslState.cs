@@ -21,11 +21,11 @@ namespace System.Net.Security
         {
         }
 
-        internal void ValidateCreateContext(SslClientAuthenticationOptions sslClientAuthenticationOptions)
+        internal void ValidateCreateContext(SslClientAuthenticationOptions sslClientAuthenticationOptions, RemoteCertValidationCallback remoteCallback, LocalCertSelectionCallback localCallback)
         {
         }
 
-        internal void ValidateCreateContext(SslServerAuthenticationOptions sslServerAuthenticationOptions)
+        internal void ValidateCreateContext(SslAuthenticationOptions sslAuthenticationOptions)
         {
         }
 

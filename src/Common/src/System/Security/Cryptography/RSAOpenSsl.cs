@@ -5,7 +5,8 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.IO;
-
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.Asn1;
 using Microsoft.Win32.SafeHandles;
 using Internal.Cryptography;
 
@@ -70,15 +71,12 @@ namespace System.Security.Cryptography
         {
             get
             {
-                // OpenSSL seems to accept answers of all sizes.
-                // Choosing a non-multiple of 8 would make some calculations misalign
-                // (like assertions of (output.Length * 8) == KeySize).
-                // Choosing a number too small is insecure.
-                // Choosing a number too large will cause GenerateKey to take much
-                // longer than anyone would be willing to wait.
+                // While OpenSSL 1.0.x and 1.1.0 will generate RSA-384 keys,
+                // OpenSSL 1.1.1 has lifted the minimum to RSA-512.
                 //
-                // So, copying the values from RSACryptoServiceProvider
-                return new[] { new KeySizes(384, 16384, 8) };
+                // Rather than make the matrix even more complicated,
+                // the low limit now is 512 on all OpenSSL-based RSA.
+                return new[] { new KeySizes(512, 16384, 8) };
             }
         }
 
@@ -153,6 +151,11 @@ namespace System.Security.Cryptography
             Debug.Assert(!key.IsInvalid);
 
             int rsaSize = Interop.Crypto.RsaSize(key);
+
+            if (data.Length != rsaSize)
+            {
+                throw new CryptographicException(SR.Cryptography_RSA_DecryptWrongSize);
+            }
 
             if (destination.Length < rsaSize)
             {
@@ -350,7 +353,7 @@ namespace System.Security.Cryptography
 
             try
             {
-                Interop.Crypto.SetRsaParameters(
+                if (!Interop.Crypto.SetRsaParameters(
                     key,
                     parameters.Modulus,
                     parameters.Modulus != null ? parameters.Modulus.Length : 0,
@@ -367,7 +370,10 @@ namespace System.Security.Cryptography
                     parameters.DQ, 
                     parameters.DQ != null ? parameters.DQ.Length : 0,
                     parameters.InverseQ,
-                    parameters.InverseQ != null ? parameters.InverseQ.Length : 0);
+                    parameters.InverseQ != null ? parameters.InverseQ.Length : 0))
+                {
+                    throw Interop.Crypto.CreateOpenSslCryptographicException();
+                }
 
                 imported = true;
             }
@@ -385,6 +391,31 @@ namespace System.Security.Cryptography
             // Use ForceSet instead of the property setter to ensure that LegalKeySizes doesn't interfere
             // with the already loaded key.
             ForceSetKeySize(BitsPerByte * Interop.Crypto.RsaSize(key));
+        }
+
+        public override unsafe void ImportRSAPublicKey(ReadOnlySpan<byte> source, out int bytesRead)
+        {
+            fixed (byte* ptr = &MemoryMarshal.GetReference(source))
+            {
+                using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
+                {
+                    AsnReader reader = new AsnReader(manager.Memory, AsnEncodingRules.BER);
+                    ReadOnlyMemory<byte> firstElement = reader.PeekEncodedValue();
+
+                    SafeRsaHandle key = Interop.Crypto.DecodeRsaPublicKey(firstElement.Span);
+
+                    Interop.Crypto.CheckValidOpenSslHandle(key);
+
+                    FreeKey();
+                    _key = new Lazy<SafeRsaHandle>(key);
+
+                    // Use ForceSet instead of the property setter to ensure that LegalKeySizes doesn't interfere
+                    // with the already loaded key.
+                    ForceSetKeySize(BitsPerByte * Interop.Crypto.RsaSize(key));
+
+                    bytesRead = firstElement.Length;
+                }
+            }
         }
 
         protected override void Dispose(bool disposing)
@@ -689,7 +720,7 @@ namespace System.Security.Cryptography
             {
                 int algorithmNid = GetAlgorithmNid(hashAlgorithm);
                 SafeRsaHandle rsa = _key.Value;
-                return Interop.Crypto.RsaVerify(algorithmNid, hash, hash.Length, signature, signature.Length, rsa);
+                return Interop.Crypto.RsaVerify(algorithmNid, hash, signature, rsa);
             }
             else if (padding == RSASignaturePadding.Pss)
             {
@@ -743,6 +774,7 @@ namespace System.Security.Cryptography
 
             if (nid == Interop.Crypto.NID_undef)
             {
+                Interop.Crypto.ErrClearError();
                 throw new CryptographicException(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithmName.Name);
             }
 

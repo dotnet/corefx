@@ -195,13 +195,51 @@ namespace System.ComponentModel
         public virtual string PropertyName { get { throw null; } }
     }
     public delegate void PropertyChangingEventHandler(object sender, System.ComponentModel.PropertyChangingEventArgs e);
+    [System.AttributeUsageAttribute((System.AttributeTargets)(32767))]
+    public sealed partial class TypeConverterAttribute : System.Attribute
+    {
+        public static readonly System.ComponentModel.TypeConverterAttribute Default;
+        public TypeConverterAttribute() { }
+        public TypeConverterAttribute(string typeName) { }
+        public TypeConverterAttribute(System.Type type) { }
+        public string ConverterTypeName { get { throw null; } }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = true)]
+    public sealed partial class TypeDescriptionProviderAttribute : System.Attribute
+    {
+        public TypeDescriptionProviderAttribute(string typeName) { }
+        public TypeDescriptionProviderAttribute(System.Type type) { }
+        public string TypeName { get { throw null; } }
+    }
+}
+namespace System.Reflection
+{
+    public interface ICustomTypeProvider
+    {
+        Type GetCustomType();
+    }
 }
 namespace System.Windows.Input
 {
+    [System.ComponentModel.TypeConverterAttribute("System.Windows.Input.CommandConverter, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, Custom=null")]
+    [System.Windows.Markup.ValueSerializerAttribute("System.Windows.Input.CommandValueSerializer, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, Custom=null")]
     public partial interface ICommand
     {
         event System.EventHandler CanExecuteChanged;
         bool CanExecute(object parameter);
         void Execute(object parameter);
+    }
+}
+namespace System.Windows.Markup
+{
+    [System.AttributeUsageAttribute((System.AttributeTargets)(1244), AllowMultiple=false, Inherited=true)]
+    public sealed partial class ValueSerializerAttribute : System.Attribute
+    {
+        public ValueSerializerAttribute(string valueSerializerTypeName) { }
+        public ValueSerializerAttribute(System.Type valueSerializerType) { }
+        public System.Type ValueSerializerType { get { throw null; } }
+        public string ValueSerializerTypeName { get { throw null; } }
     }
 }

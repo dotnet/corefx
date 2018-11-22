@@ -243,14 +243,12 @@ namespace System.Drawing.Printing
         }
 
 
-        [MonoTODO("PageSettings.CopyToHdevmode")]
         public void CopyToHdevmode(IntPtr hdevmode)
         {
             throw new NotImplementedException();
         }
 
 
-        [MonoTODO("PageSettings.SetHdevmode")]
         public void SetHdevmode(IntPtr hdevmode)
         {
             throw new NotImplementedException();
@@ -266,7 +264,7 @@ namespace System.Drawing.Printing
             ret += ", PrinterResolution={5}";
             ret += "]";
 
-            return String.Format(ret, this.color, this.landscape, this.margins, this.paperSize, this.paperSource, this.printerResolution);
+            return string.Format(ret, this.color, this.landscape, this.margins, this.paperSize, this.paperSource, this.printerResolution);
         }
     }
 }

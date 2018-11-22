@@ -4,17 +4,18 @@
 
 #pragma once
 
+#include "pal_compiler.h"
 #include "pal_types.h"
 
-extern "C" const char* SystemNative_GetUnixName();
+DLLEXPORT const char* SystemNative_GetUnixName(void);
 
-extern "C" char* SystemNative_GetUnixRelease();
+DLLEXPORT char* SystemNative_GetUnixRelease(void);
 
-extern "C" int32_t SystemNative_GetUnixVersion(char* version, int* capacity);
+DLLEXPORT int32_t SystemNative_GetUnixVersion(char* version, int* capacity);
 
-extern "C" int32_t SystemNative_GetOSArchitecture();
+DLLEXPORT int32_t SystemNative_GetOSArchitecture(void);
 
-extern "C" int32_t SystemNative_GetProcessArchitecture();
+DLLEXPORT int32_t SystemNative_GetProcessArchitecture(void);
 
 enum 
 {

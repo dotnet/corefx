@@ -1,21 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{E62B874D-1A0D-41BC-8CFC-9E09D0860A77}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <OutputType>exe</OutputType>
+    <OutputType>Exe</OutputType>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="Helpers.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="TestServiceInstaller.cs" />
     <Compile Include="TestService.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="..\..\src\Microsoft\Win32\SafeHandles\SafeServiceHandle.cs">
+      <Link>Microsoft\Win32\SafeHandles\SafeServiceHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
@@ -51,10 +49,4 @@
       <Link>Common\System\Threading\Tasks\TaskTimeoutExtensions.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="System.ServiceProcess.ServiceController.TestService.runtimeconfig.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -52,17 +52,29 @@ namespace System.IO
         private PreAllocatedOverlapped _preallocatedOverlapped;     // optimization for async ops to avoid per-op allocations
         private FileStreamCompletionSource _currentOverlappedOwner; // async op currently using the preallocated overlapped
 
-        private void Init(FileMode mode, FileShare share)
+        private void Init(FileMode mode, FileShare share, string originalPath)
         {
-            // Disallow access to all non-file devices from the Win32FileStream
-            // constructors that take a String.  Everyone else can call 
-            // CreateFile themselves then use the constructor that takes an 
-            // IntPtr.  Disallows "con:", "com1:", "lpt1:", etc.
-            int fileType = Interop.Kernel32.GetFileType(_fileHandle);
-            if (fileType != Interop.Kernel32.FileTypes.FILE_TYPE_DISK)
+            if (!PathInternal.IsExtended(originalPath))
             {
-                _fileHandle.Dispose();
-                throw new NotSupportedException(SR.NotSupported_FileStreamOnNonFiles);
+                // To help avoid stumbling into opening COM/LPT ports by accident, we will block on non file handles unless
+                // we were explicitly passed a path that has \\?\. GetFullPath() will turn paths like C:\foo\con.txt into
+                // \\.\CON, so we'll only allow the \\?\ syntax.
+
+                int fileType = Interop.Kernel32.GetFileType(_fileHandle);
+                if (fileType != Interop.Kernel32.FileTypes.FILE_TYPE_DISK)
+                {
+                    int errorCode = fileType == Interop.Kernel32.FileTypes.FILE_TYPE_UNKNOWN
+                        ? Marshal.GetLastWin32Error()
+                        : Interop.Errors.ERROR_SUCCESS;
+
+                    _fileHandle.Dispose();
+
+                    if (errorCode != Interop.Errors.ERROR_SUCCESS)
+                    {
+                        throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+                    }
+                    throw new NotSupportedException(SR.NotSupported_FileStreamOnNonFiles);
+                }
             }
 
             // This is necessary for async IO using IO Completion ports via our 
@@ -161,8 +173,7 @@ namespace System.IO
             }
             else if (!useAsyncIO)
             {
-                if (handleType != Interop.Kernel32.FileTypes.FILE_TYPE_PIPE)
-                    VerifyHandleIsSync(handle, access);
+                VerifyHandleIsSync(handle, handleType, access);
             }
 
             if (_canSeek)
@@ -173,73 +184,29 @@ namespace System.IO
 
         private static unsafe Interop.Kernel32.SECURITY_ATTRIBUTES GetSecAttrs(FileShare share)
         {
-            Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = default(Interop.Kernel32.SECURITY_ATTRIBUTES);
+            Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = default;
             if ((share & FileShare.Inheritable) != 0)
             {
-                secAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES();
-                secAttrs.nLength = (uint)sizeof(Interop.Kernel32.SECURITY_ATTRIBUTES);
-
-                secAttrs.bInheritHandle = Interop.BOOL.TRUE;
+                secAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES
+                {
+                    nLength = (uint)sizeof(Interop.Kernel32.SECURITY_ATTRIBUTES),
+                    bInheritHandle = Interop.BOOL.TRUE
+                };
             }
             return secAttrs;
         }
 
-        // Verifies that this handle supports synchronous IO operations (unless you
-        // didn't open it for either reading or writing).
-        private static unsafe void VerifyHandleIsSync(SafeFileHandle handle, FileAccess access)
-        {
-            // Do NOT use this method on pipes.  Reading or writing to a pipe may
-            // cause an app to block incorrectly, introducing a deadlock (depending
-            // on whether a write will wake up an already-blocked thread or this
-            // Win32FileStream's thread).
-            Debug.Assert(Interop.Kernel32.GetFileType(handle) != Interop.Kernel32.FileTypes.FILE_TYPE_PIPE);
-
-            byte* bytes = stackalloc byte[1];
-            int numBytesReadWritten;
-            int r = -1;
-
-            // If the handle is a pipe, ReadFile will block until there
-            // has been a write on the other end.  We'll just have to deal with it,
-            // For the read end of a pipe, you can mess up and 
-            // accidentally read synchronously from an async pipe.
-            if ((access & FileAccess.Read) != 0) // don't use the virtual CanRead or CanWrite, as this may be used in the ctor
-            {
-                r = Interop.Kernel32.ReadFile(handle, bytes, 0, out numBytesReadWritten, IntPtr.Zero);
-            }
-            else if ((access & FileAccess.Write) != 0) // don't use the virtual CanRead or CanWrite, as this may be used in the ctor
-            {
-                r = Interop.Kernel32.WriteFile(handle, bytes, 0, out numBytesReadWritten, IntPtr.Zero);
-            }
-
-            if (r == 0)
-            {
-                int errorCode = Marshal.GetLastWin32Error();
-                switch (errorCode)
-                {
-                    case Interop.Errors.ERROR_INVALID_PARAMETER:
-                        throw new ArgumentException(SR.Arg_HandleNotSync, "handle");
-                    case Interop.Errors.ERROR_INVALID_HANDLE:
-                        throw Win32Marshal.GetExceptionForWin32Error(errorCode);
-                }
-            }
-        }
-
         private bool HasActiveBufferOperation
-        {
-            get { return _activeBufferOperation != null && !_activeBufferOperation.IsCompleted; }
-        }
+            => _activeBufferOperation != null && !_activeBufferOperation.IsCompleted;
 
-        public override bool CanSeek
-        {
-            get { return _canSeek; }
-        }
+        public override bool CanSeek => _canSeek;
 
         private unsafe long GetLengthInternal()
         {
             Interop.Kernel32.FILE_STANDARD_INFO info = new Interop.Kernel32.FILE_STANDARD_INFO();
 
             if (!Interop.Kernel32.GetFileInformationByHandleEx(_fileHandle, Interop.Kernel32.FILE_INFO_BY_HANDLE_CLASS.FileStandardInfo, out info, (uint)sizeof(Interop.Kernel32.FILE_STANDARD_INFO)))
-                throw Win32Marshal.GetExceptionForLastWin32Error();
+                throw Win32Marshal.GetExceptionForLastWin32Error(_path);
             long len = info.EndOfFile;
             // If we're writing near the end of the file, we must include our
             // internal buffer in our Length calculation.  Don't flush because
@@ -259,24 +226,21 @@ namespace System.IO
             // finalized.
             try
             {
-                if (_fileHandle != null && !_fileHandle.IsClosed)
+                if (_fileHandle != null && !_fileHandle.IsClosed && _writePos > 0)
                 {
                     // Flush data to disk iff we were writing.  After 
                     // thinking about this, we also don't need to flush
                     // our read position, regardless of whether the handle
                     // was exposed to the user.  They probably would NOT 
                     // want us to do this.
-                    if (_writePos > 0)
+                    try
                     {
-                        try
-                        {
-                            FlushWriteBuffer(!disposing);
-                        }
-                        catch (Exception e) when (IsIoRelatedException(e) && !disposing)
-                        {
-                            // On finalization, ignore failures from trying to flush the write buffer,
-                            // e.g. if this stream is wrapping a pipe and the pipe is now broken.
-                        }
+                        FlushWriteBuffer(!disposing);
+                    }
+                    catch (Exception e) when (IsIoRelatedException(e) && !disposing)
+                    {
+                        // On finalization, ignore failures from trying to flush the write buffer,
+                        // e.g. if this stream is wrapping a pipe and the pipe is now broken.
                     }
                 }
             }
@@ -284,22 +248,46 @@ namespace System.IO
             {
                 if (_fileHandle != null && !_fileHandle.IsClosed)
                 {
-                    if (_fileHandle.ThreadPoolBinding != null)
-                        _fileHandle.ThreadPoolBinding.Dispose();
-
+                    _fileHandle.ThreadPoolBinding?.Dispose();
                     _fileHandle.Dispose();
                 }
 
-                if (_preallocatedOverlapped != null)
-                    _preallocatedOverlapped.Dispose();
-
+                _preallocatedOverlapped?.Dispose();
                 _canSeek = false;
 
                 // Don't set the buffer to null, to avoid a NullReferenceException
                 // when users have a race condition in their code (i.e. they call
                 // Close when calling another method on Stream like Read).
-                //_buffer = null;
-                base.Dispose(disposing);
+            }
+        }
+
+        public override ValueTask DisposeAsync() =>
+            GetType() == typeof(FileStream) ?
+                DisposeAsyncCore() :
+                base.DisposeAsync();
+
+        private async ValueTask DisposeAsyncCore()
+        {
+            // Same logic as in Dispose(), except with async counterparts.
+            // TODO: https://github.com/dotnet/corefx/issues/32837: FlushAsync does synchronous work.
+            try
+            {
+                if (_fileHandle != null && !_fileHandle.IsClosed && _writePos > 0)
+                {
+                    await FlushAsyncInternal(default).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                if (_fileHandle != null && !_fileHandle.IsClosed)
+                {
+                    _fileHandle.ThreadPoolBinding?.Dispose();
+                    _fileHandle.Dispose();
+                }
+
+                _preallocatedOverlapped?.Dispose();
+                _canSeek = false;
+                GC.SuppressFinalize(this); // the handle is closed; nothing further for the finalizer to do
             }
         }
 
@@ -307,7 +295,7 @@ namespace System.IO
         {
             if (!Interop.Kernel32.FlushFileBuffers(_fileHandle))
             {
-                throw Win32Marshal.GetExceptionForLastWin32Error();
+                throw Win32Marshal.GetExceptionForLastWin32Error(_path);
             }
         }
 
@@ -404,7 +392,7 @@ namespace System.IO
                 int errorCode = Marshal.GetLastWin32Error();
                 if (errorCode == Interop.Errors.ERROR_INVALID_PARAMETER)
                     throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_FileLengthTooBig);
-                throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+                throw Win32Marshal.GetExceptionForWin32Error(errorCode, _path);
             }
             // Return file pointer to where it was before setting length
             if (origPos != value)
@@ -506,8 +494,7 @@ namespace System.IO
             // Make sure we are reading from the right spot
             VerifyOSHandlePosition();
 
-            int errorCode = 0;
-            int r = ReadFileNative(_fileHandle, buffer, null, out errorCode);
+            int r = ReadFileNative(_fileHandle, buffer, null, out int errorCode);
 
             if (r == -1)
             {
@@ -521,7 +508,7 @@ namespace System.IO
                     if (errorCode == ERROR_INVALID_PARAMETER)
                         throw new ArgumentException(SR.Arg_HandleNotSync, "_fileHandle");
 
-                    throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+                    throw Win32Marshal.GetExceptionForWin32Error(errorCode, _path);
                 }
             }
             Debug.Assert(r >= 0, "FileStream's ReadNative is likely broken.");
@@ -621,17 +608,15 @@ namespace System.IO
             Debug.Assert(!fileHandle.IsClosed && _canSeek, "!fileHandle.IsClosed && _canSeek");
             Debug.Assert(origin >= SeekOrigin.Begin && origin <= SeekOrigin.End, "origin >= SeekOrigin.Begin && origin <= SeekOrigin.End");
 
-            long ret = 0;
-
-            if (!Interop.Kernel32.SetFilePointerEx(fileHandle, offset, out ret, (uint)origin))
+            if (!Interop.Kernel32.SetFilePointerEx(fileHandle, offset, out long ret, (uint)origin))
             {
                 if (closeInvalidHandle)
                 {
-                    throw Win32Marshal.GetExceptionForWin32Error(GetLastWin32ErrorAndDisposeHandleIfInvalid(throwIfInvalidHandle: false));
+                    throw Win32Marshal.GetExceptionForWin32Error(GetLastWin32ErrorAndDisposeHandleIfInvalid(), _path);
                 }
                 else
                 {
-                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+                    throw Win32Marshal.GetExceptionForLastWin32Error(_path);
                 }
             }
 
@@ -739,7 +724,7 @@ namespace System.IO
                     // to a handle opened asynchronously.
                     if (errorCode == ERROR_INVALID_PARAMETER)
                         throw new IOException(SR.IO_FileTooLongOrHandleNotSync);
-                    throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+                    throw Win32Marshal.GetExceptionForWin32Error(errorCode, _path);
                 }
             }
             Debug.Assert(r >= 0, "FileStream's WriteCore is likely broken.");
@@ -875,7 +860,7 @@ namespace System.IO
                     }
                     else
                     {
-                        destination = default(Memory<byte>);
+                        destination = default;
                     }
                 }
 
@@ -938,7 +923,7 @@ namespace System.IO
                     }
                     else
                     {
-                        throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+                        throw Win32Marshal.GetExceptionForWin32Error(errorCode, _path);
                     }
                 }
                 else if (cancellationToken.CanBeCanceled) // ERROR_IO_PENDING
@@ -1141,7 +1126,7 @@ namespace System.IO
                     }
                     else
                     {
-                        throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+                        throw Win32Marshal.GetExceptionForWin32Error(errorCode, _path);
                     }
                 }
                 else if (cancellationToken.CanBeCanceled) // ERROR_IO_PENDING
@@ -1238,7 +1223,7 @@ namespace System.IO
             }
         }
 
-        private int GetLastWin32ErrorAndDisposeHandleIfInvalid(bool throwIfInvalidHandle = false)
+        private int GetLastWin32ErrorAndDisposeHandleIfInvalid()
         {
             int errorCode = Marshal.GetLastWin32Error();
 
@@ -1262,9 +1247,6 @@ namespace System.IO
             if (errorCode == Interop.Errors.ERROR_INVALID_HANDLE)
             {
                 _fileHandle.Dispose();
-
-                if (throwIfInvalidHandle)
-                    throw Win32Marshal.GetExceptionForWin32Error(errorCode);
             }
 
             return errorCode;
@@ -1357,7 +1339,7 @@ namespace System.IO
                 // in the read/write copy loop.
                 if (cancellationToken.CanBeCanceled)
                 {
-                    cancellationReg = cancellationToken.Register(s =>
+                    cancellationReg = cancellationToken.UnsafeRegister(s =>
                     {
                         var innerAwaitable = (AsyncCopyToAwaitable)s;
                         unsafe
@@ -1418,7 +1400,7 @@ namespace System.IO
                                     break;
                                 default:
                                     // Everything else is an error (and there won't be a callback).
-                                    throw Win32Marshal.GetExceptionForWin32Error(errorCode);
+                                    throw Win32Marshal.GetExceptionForWin32Error(errorCode, _path);
                             }
                         }
 
@@ -1436,7 +1418,7 @@ namespace System.IO
                             case Interop.Errors.ERROR_OPERATION_ABORTED: // canceled
                                 throw new OperationCanceledException(cancellationToken.IsCancellationRequested ? cancellationToken : new CancellationToken(true));
                             default: // error
-                                throw Win32Marshal.GetExceptionForWin32Error((int)readAwaitable._errorCode);
+                                throw Win32Marshal.GetExceptionForWin32Error((int)readAwaitable._errorCode, _path);
                         }
 
                         // Successful operation.  If we got zero bytes, we're done: exit the read/write loop.
@@ -1583,6 +1565,7 @@ namespace System.IO
             if (_fileHandle.IsClosed)
                 throw Error.GetFileNotOpen();
 
+            // TODO: https://github.com/dotnet/corefx/issues/32837 (stop doing this synchronous work).
             // The always synchronous data transfer between the OS and the internal buffer is intentional 
             // because this is needed to allow concurrent async IO requests. Concurrent data transfer
             // between the OS and the internal buffer will result in race conditions. Since FlushWrite and
@@ -1623,7 +1606,7 @@ namespace System.IO
 
             if (!Interop.Kernel32.LockFile(_fileHandle, positionLow, positionHigh, lengthLow, lengthHigh))
             {
-                throw Win32Marshal.GetExceptionForLastWin32Error();
+                throw Win32Marshal.GetExceptionForLastWin32Error(_path);
             }
         }
 
@@ -1636,9 +1619,10 @@ namespace System.IO
 
             if (!Interop.Kernel32.UnlockFile(_fileHandle, positionLow, positionHigh, lengthLow, lengthHigh))
             {
-                throw Win32Marshal.GetExceptionForLastWin32Error();
+                throw Win32Marshal.GetExceptionForLastWin32Error(_path);
             }
         }
+
         private SafeFileHandle ValidateFileHandle(SafeFileHandle fileHandle)
         {
             if (fileHandle.IsInvalid)

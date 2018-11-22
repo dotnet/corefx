@@ -152,6 +152,11 @@ namespace System.Net
 
         private bool IsLocal(Uri host)
         {
+            if (host.IsLoopback)
+            {
+                return true;
+            }
+
             string hostString = host.Host;
 
             IPAddress hostAddress;
@@ -200,7 +205,6 @@ namespace System.Net
 
             return
                 Address == null ||
-                host.IsLoopback ||
                 (BypassProxyOnLocal && IsLocal(host)) ||
                 IsMatchInBypassList(host);
         }
@@ -220,7 +224,7 @@ namespace System.Net
             throw new PlatformNotSupportedException();
         }
 
-        [Obsolete("This method has been deprecated. Please use the proxy selected for you by default. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated. Please use the proxy selected for you by default. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static WebProxy GetDefaultProxy()
         {
             // The .NET Framework here returns a proxy that fetches IE settings and

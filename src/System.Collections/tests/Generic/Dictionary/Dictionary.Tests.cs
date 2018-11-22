@@ -4,17 +4,23 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using Xunit;
 
 namespace System.Collections.Tests
 {
-    public class Dictionary_IDictionary_NonGeneric_Tests : IDictionary_NonGeneric_Tests
+    public partial class Dictionary_IDictionary_NonGeneric_Tests : IDictionary_NonGeneric_Tests
     {
         protected override IDictionary NonGenericIDictionaryFactory()
         {
             return new Dictionary<string, string>();
         }
+
+        protected override ModifyOperation ModifyEnumeratorThrows => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorThrows : ModifyOperation.Add | ModifyOperation.Insert;
+
+        protected override ModifyOperation ModifyEnumeratorAllowed => PlatformDetection.IsFullFramework ? base.ModifyEnumeratorAllowed : ModifyOperation.Remove | ModifyOperation.Clear;
 
         /// <summary>
         /// Creates an object that is dependent on the seed given. The object may be either
@@ -122,6 +128,20 @@ namespace System.Collections.Tests
             }
         }
 
+        [Fact]
+        public void Clear_OnEmptyCollection_DoesNotInvalidateEnumerator()
+        {
+            if (ModifyEnumeratorAllowed.HasFlag(ModifyOperation.Clear))
+            {
+                IDictionary dictionary = new Dictionary<string, string>();
+                IEnumerator valuesEnum = dictionary.GetEnumerator();
+
+                dictionary.Clear();
+                Assert.Empty(dictionary);
+                Assert.False(valuesEnum.MoveNext());
+            }
+        }
+
         #endregion
 
         #region ICollection tests
@@ -162,6 +182,100 @@ namespace System.Collections.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new Dictionary<int, int>(new NegativeCountDictionary<int, int>()));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new Dictionary<int, int>(new NegativeCountDictionary<int, int>(), null));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new Dictionary<int, int>(new NegativeCountDictionary<int, int>(), EqualityComparer<int>.Default));
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(101)]
+        public void ICollection_NonGeneric_CopyTo_NonContiguousDictionary(int count)
+        {
+            ICollection collection = (ICollection)CreateDictionary(count, k => k.ToString());
+            KeyValuePair<string, string>[] array = new KeyValuePair<string, string>[count];
+            collection.CopyTo(array, 0);
+            int i = 0;
+            foreach (object obj in collection)
+                Assert.Equal(array[i++], obj);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(101)]
+        public void ICollection_Generic_CopyTo_NonContiguousDictionary(int count)
+        {
+            ICollection<KeyValuePair<string, string>> collection = CreateDictionary(count, k => k.ToString());
+            KeyValuePair<string, string>[] array = new KeyValuePair<string, string>[count];
+            collection.CopyTo(array, 0);
+            int i = 0;
+            foreach (KeyValuePair<string, string> obj in collection)
+                Assert.Equal(array[i++], obj);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(101)]
+        public void IDictionary_Generic_CopyTo_NonContiguousDictionary(int count)
+        {
+            IDictionary<string, string> collection = CreateDictionary(count, k => k.ToString());
+            KeyValuePair<string, string>[] array = new KeyValuePair<string, string>[count];
+            collection.CopyTo(array, 0);
+            int i = 0;
+            foreach (KeyValuePair<string, string> obj in collection)
+                Assert.Equal(array[i++], obj);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(101)]
+        public void CopyTo_NonContiguousDictionary(int count)
+        {
+            Dictionary<string, string> collection = (Dictionary<string, string>)CreateDictionary(count, k => k.ToString());
+            string[] array = new string[count];
+            collection.Keys.CopyTo(array, 0);
+            int i = 0;
+            foreach (KeyValuePair<string, string> obj in collection)
+                Assert.Equal(array[i++], obj.Key);
+
+            collection.Values.CopyTo(array, 0);
+            i = 0;
+            foreach (KeyValuePair<string, string> obj in collection)
+                Assert.Equal(array[i++], obj.Key);
+        }
+
+        [Fact]
+        public void Remove_NonExistentEntries_DoesNotPreventEnumeration()
+        {
+            const string SubKey = "-sub-key";
+            var dictionary = new Dictionary<string, string>();
+            dictionary.Add("a", "b");
+            dictionary.Add("c", "d");
+            foreach (string key in dictionary.Keys)
+            {
+                if (dictionary.Remove(key + SubKey))
+                    break;
+            }
+
+            dictionary.Add("c" + SubKey, "d");
+            foreach (string key in dictionary.Keys)
+            {
+                if (dictionary.Remove(key + SubKey))
+                    break;
+            }
+        }
+
+        [Fact]
+        public void TryAdd_ItemAlreadyExists_DoesNotInvalidateEnumerator()
+        {
+            var dictionary = new Dictionary<string, string>();
+            dictionary.Add("a", "b");
+
+            IEnumerator valuesEnum = dictionary.GetEnumerator();
+            Assert.False(dictionary.TryAdd("a", "c"));
+
+            Assert.True(valuesEnum.MoveNext());
         }
 
         [Theory]
@@ -287,7 +401,56 @@ namespace System.Collections.Tests
 
         private static IDictionary<T, T> CreateDictionary<T>(int size, Func<int, T> keyValueSelector, IEqualityComparer<T> comparer = null)
         {
-            return Enumerable.Range(1, size).ToDictionary(keyValueSelector, keyValueSelector, comparer);
+            Dictionary<T, T> dict = Enumerable.Range(0, size + 1).ToDictionary(keyValueSelector, keyValueSelector, comparer);
+            // Remove first item to reduce Count to size and alter the contiguity of the dictionary
+            dict.Remove(keyValueSelector(0));
+            return dict;
+        }
+
+        [Fact]
+        public void ComparerSerialization()
+        {
+            // Strings switch between randomized and non-randomized comparers, 
+            // however this should never be observable externally.
+            TestComparerSerialization(EqualityComparer<string>.Default);
+            // OrdinalCaseSensitiveComparer is internal and (de)serializes as OrdinalComparer
+            TestComparerSerialization(StringComparer.Ordinal, "System.OrdinalComparer");
+            // OrdinalIgnoreCaseComparer is internal and (de)serializes as OrdinalComparer
+            TestComparerSerialization(StringComparer.OrdinalIgnoreCase, "System.OrdinalComparer");
+            TestComparerSerialization(StringComparer.CurrentCulture);
+            TestComparerSerialization(StringComparer.CurrentCultureIgnoreCase);
+            TestComparerSerialization(StringComparer.InvariantCulture);
+            TestComparerSerialization(StringComparer.InvariantCultureIgnoreCase);
+
+            // Check other types while here, IEquatable valuetype, nullable valuetype, and non IEquatable object
+            TestComparerSerialization(EqualityComparer<int>.Default);
+            TestComparerSerialization(EqualityComparer<int?>.Default);
+            TestComparerSerialization(EqualityComparer<object>.Default);
+        }
+
+        private static void TestComparerSerialization<T>(IEqualityComparer<T> equalityComparer, string internalTypeName = null)
+        {
+            var bf = new BinaryFormatter();
+            var s = new MemoryStream();
+
+            var dict = new Dictionary<T, T>(equalityComparer);
+
+            Assert.Same(equalityComparer, dict.Comparer);
+
+            bf.Serialize(s, dict);
+            s.Position = 0;
+            dict = (Dictionary<T, T>)bf.Deserialize(s);
+
+            if (internalTypeName == null)
+            {
+                Assert.IsType(equalityComparer.GetType(), dict.Comparer);
+            }
+            else
+            {
+                Assert.Equal(internalTypeName, dict.Comparer.GetType().ToString());
+            }
+
+            Assert.True(equalityComparer.Equals(dict.Comparer));
         }
 
         private sealed class DictionarySubclass<TKey, TValue> : Dictionary<TKey, TValue>

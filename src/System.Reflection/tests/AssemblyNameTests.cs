@@ -32,6 +32,7 @@ namespace System.Reflection.Tests
             yield return new object[] { "name with spaces", "name with spaces" };
             yield return new object[] { "\uD800\uDC00", "\uD800\uDC00" };
             yield return new object[] { "\u043F\u0440\u0438\u0432\u0435\u0442", "\u043F\u0440\u0438\u0432\u0435\u0442" };
+            yield return new object[] { "\uD83D\uDC3B\uD83D\uDC3B\uD83D\uDC3B\uD83D\uDC3B\uD83D\uDC3B", "\uD83D\uDC3B\uD83D\uDC3B\uD83D\uDC3B\uD83D\uDC3B\uD83D\uDC3B" };
         }
 
         [Fact]
@@ -158,6 +159,122 @@ namespace System.Reflection.Tests
             var assemblyName = new AssemblyName("Test");
             Assert.Throws<CultureNotFoundException>(() => new AssemblyName("Test, Culture=NotAValidCulture"));
             Assert.Throws<CultureNotFoundException>(() => assemblyName.CultureName = "NotAValidCulture");
+        }
+
+        [Fact]
+        public void Verify_CultureName()
+        {
+            AssemblyName an = new AssemblyName("MyAssemblyName");
+            Assert.Null(an.CultureName);
+        }
+
+        [Fact]
+        public void Verify_CodeBase()
+        {
+            AssemblyName n = new AssemblyName("MyAssemblyName");
+            Assert.Null(n.CodeBase);
+
+            n.CodeBase = System.IO.Directory.GetCurrentDirectory();
+            Assert.NotNull(n.CodeBase);
+        }        
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "AssemblyName.CodeBase and EscapedCodeBase not supported on UapAot")]
+        public static void Verify_EscapedCodeBase()
+        {
+            AssemblyName n = new AssemblyName("MyAssemblyName");
+            Assert.Null(n.EscapedCodeBase);
+
+            n.CodeBase = @"file:///d:/temp/MyAssemblyName1.dll";
+            Assert.NotNull(n.EscapedCodeBase);
+            Assert.Equal(n.EscapedCodeBase, n.CodeBase);
+
+            n.CodeBase = @"file:///c:/program files/MyAssemblyName.dll";
+            Assert.Equal(n.EscapedCodeBase, Uri.EscapeUriString(n.CodeBase));
+        }
+
+        [Fact]
+        public static void Verify_HashAlgorithm()
+        {
+            AssemblyName an = new AssemblyName("MyAssemblyName");
+            Assert.Equal(System.Configuration.Assemblies.AssemblyHashAlgorithm.None, an.HashAlgorithm);
+
+            an.HashAlgorithm = System.Configuration.Assemblies.AssemblyHashAlgorithm.SHA1;
+            Assert.Equal(System.Configuration.Assemblies.AssemblyHashAlgorithm.SHA1, an.HashAlgorithm);
+        }
+
+        [Fact]
+        public static void Verify_VersionCompatibility()
+        {
+            AssemblyName an = new AssemblyName("MyAssemblyName");
+            Assert.Equal(System.Configuration.Assemblies.AssemblyVersionCompatibility.SameMachine, an.VersionCompatibility);
+
+            an.VersionCompatibility = System.Configuration.Assemblies.AssemblyVersionCompatibility.SameProcess;
+            Assert.Equal(System.Configuration.Assemblies.AssemblyVersionCompatibility.SameProcess, an.VersionCompatibility);
+        }
+              
+        [Fact]
+        public static void Clone()
+        {
+            AssemblyName an1 = new AssemblyName("MyAssemblyName");
+            an1.Flags = AssemblyNameFlags.PublicKey | AssemblyNameFlags.EnableJITcompileOptimizer;
+
+            object an2 = an1.Clone();
+            Assert.Equal(an1.FullName, ((AssemblyName)an2).FullName);
+            Assert.Equal(AssemblyNameFlags.PublicKey | AssemblyNameFlags.EnableJITcompileOptimizer, ((AssemblyName)an2).Flags);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "AssemblyName.GetAssemblyName() not supported on UapAot")]
+        public static void GetAssemblyName()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("assemblyFile", () => AssemblyName.GetAssemblyName(null));
+            AssertExtensions.Throws<ArgumentException>("path", null, () => AssemblyName.GetAssemblyName(string.Empty));
+            Assert.Throws<System.IO.FileNotFoundException>(() => AssemblyName.GetAssemblyName("IDontExist"));
+
+            using (var tempFile = new TempFile(Path.GetTempFileName(), 0)) // Zero-size file
+            {
+                Assert.Throws<System.BadImageFormatException>(() => AssemblyName.GetAssemblyName(tempFile.Path));
+            }
+
+            using (var tempFile = new TempFile(Path.GetTempFileName(), 42))
+            {
+                Assert.Throws<System.BadImageFormatException>(() => AssemblyName.GetAssemblyName(tempFile.Path));
+            }
+
+            Assembly a = typeof(AssemblyNameTests).Assembly;
+            Assert.Equal(new AssemblyName(a.FullName).ToString(), AssemblyName.GetAssemblyName(a.Location).ToString());
+        }        
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "AssemblyName.GetAssemblyName() not supported on UapAot")]
+        public static void GetAssemblyName_LockedFile()
+        {
+            using (var tempFile = new TempFile(Path.GetTempFileName(), 100))
+            using (var fileStream = new FileStream(tempFile.Path, FileMode.Append, FileAccess.Write, FileShare.None))
+            {
+                if (PlatformDetection.IsWindows) // File locking is Windows specific.
+                {
+                    Assert.Throws<System.IO.FileLoadException>(() => AssemblyName.GetAssemblyName(tempFile.Path));
+                }
+                else
+                {
+                    Assert.Throws<System.BadImageFormatException>(() => AssemblyName.GetAssemblyName(tempFile.Path));
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> ReferenceMatchesDefinition_TestData()
+        {
+            yield return new object[] { new AssemblyName(typeof(AssemblyNameTests).Assembly.FullName), new AssemblyName(typeof(AssemblyNameTests).Assembly.FullName), true };
+            yield return new object[] { new AssemblyName(typeof(AssemblyNameTests).Assembly.FullName), new AssemblyName("System.Runtime"), false };
+        }
+
+        [Theory]
+        [MemberData(nameof(ReferenceMatchesDefinition_TestData))]
+        public static void ReferenceMatchesDefinition(AssemblyName a1, AssemblyName a2, bool expected)
+        {
+            Assert.Equal(expected, AssemblyName.ReferenceMatchesDefinition(a1, a2));
         }
 
         [Theory]
@@ -428,6 +545,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [ActiveIssue(33249)]
         [SkipOnTargetFramework(
             TargetFrameworkMonikers.NetFramework,
             ".NET Core behavior differs from .NET Framework since it does not want to replicate some bugs")]
@@ -436,22 +554,35 @@ namespace System.Reflection.Tests
             string assemblyNamePrefix = "System.Reflection.Tests.Assembly_";
 
             // Requested version 1.0 does not load 0.0.0.0, but loads 1.2.0.0, 3.0.0.0
-            Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "0_0_0_0, Version=1.0")));
+            if (PlatformDetection.IsUap)
+                Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "0_0_0_0, Version=1.0")));
+            else
+                Assert.Throws<FileNotFoundException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "0_0_0_0, Version=1.0")));
+
             Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_2_0_0, Version=1.0")));
             Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "3_0_0_0, Version=1.0")));
 
             // Requested version 1.1 does not load 1.0.0.0, but loads 1.1.2.0, 1.3.0.0
-            Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_0_0_0, Version=1.1")));
+            if (PlatformDetection.IsUap)
+                Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_0_0_0, Version=1.1")));
+            else
+                Assert.Throws<FileNotFoundException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_0_0_0, Version=1.1")));
             Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_2_0, Version=1.1")));
             Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_3_0_0, Version=1.1")));
 
             // Requested version 1.1.1 does not load 1.1.0.0, but loads 1.1.1.2, 1.1.3.0
-            Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_0_0, Version=1.1.1")));
+            if (PlatformDetection.IsUap)
+                Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_0_0, Version=1.1.1")));
+            else
+                Assert.Throws<FileNotFoundException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_0_0, Version=1.1.1")));
             Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_2, Version=1.1.1")));
             Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_3_0, Version=1.1.1")));
 
             // Requested version 1.1.1.1 does not load 1.1.1.0, but loads 1.1.1.3
-            Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_0, Version=1.1.1.1")));
+            if (PlatformDetection.IsUap)
+                Assert.Throws<FileLoadException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_0, Version=1.1.1.1")));
+            else
+                Assert.Throws<FileNotFoundException>(() => Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_0, Version=1.1.1.1")));
             Assert.NotNull(Assembly.Load(new AssemblyName(assemblyNamePrefix + "1_1_1_3, Version=1.1.1.1")));
 
             Constructor_String_LoadVersionTest_ReferenceVersionAssemblies();

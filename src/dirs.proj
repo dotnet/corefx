@@ -1,5 +1,5 @@
 <Project ToolsVersion="14.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="dir.props" />
+  <Import Project="Directory.Build.props" />
 
   <!-- required to build the projects in their specified order -->
   <PropertyGroup>
@@ -24,7 +24,7 @@
       <ExceptionForDepsJson Include="microsoft.netcore.app" />
 
       <!-- TODO: We should see about generating this from scratch instead of relying on a previous deps file as a template -->
-      <_sharedFrameworkDepsJson Include="$(ToolsDir)dotnetcli\shared\Microsoft.NETCore.App\*\Microsoft.NETCore.App.deps.json" />
+      <_sharedFrameworkDepsJson Include="$(DotNetRoot)shared\Microsoft.NETCore.App\*\Microsoft.NETCore.App.deps.json" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -43,7 +43,7 @@
     <Project Include="$(DirectoryToBuild)/**/*.csproj" />
   </ItemGroup>
 
-  <Import Project="..\dir.targets" />
+  <Import Project="..\Directory.Build.targets" />
   <Import Project="..\dir.traversal.targets" />
 
   <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
@@ -67,6 +67,23 @@
   <Target Name="GenerateSharedLibraryForILC" AfterTargets="BuildAllProjects" Condition="'$(EnableMultiFileILCTests)' == 'true'">
     <Message Importance="High" Text="Generating shared library for running ILC tests." Condition="Exists('$(TestHostRootPath)\TestILC\ilc.exe')" />
     <Exec Command="$(TestHostRootPath)\TestILC\ilc.exe -buildSharedAssemblies -buildType ret -frameworkPath &quot;$(ILCFXInputFolder)&quot;" StandardOutputImportance="Low" Condition="Exists('$(TestHostRootPath)\TestILC\ilc.exe')" />
+  </Target>
+
+    <!-- Generate launch settings support files to enable VS debugging. -->
+  <Target Name="GenerateLaunchSettingsFiles" BeforeTargets="BuildAllProjects" Condition="'$(GenerateLaunchSettings)' == 'true'">
+    <PropertyGroup>
+      <_TestProjectRootDir>$(SourceDir)</_TestProjectRootDir>
+      <_TestProjectRootDir Condition="'$(DirectoryToBuild)'!=''">$(DirectoryToBuild)</_TestProjectRootDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <!-- Keep in sync with pattern for test projects in tests.builds -->
+      <TestProjects Include="$(_TestProjectRootDir)*\tests\**\*.Tests.csproj" />
+      <TestProjects Include="$(_TestProjectRootDir)*\tests\**\*.Tests.vbproj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(TestProjects)"
+             Targets="GenerateLaunchSettingsFile"
+             ContinueOnError="ErrorAndContinue" />
   </Target>
 
 </Project>

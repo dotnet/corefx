@@ -268,18 +268,17 @@ namespace System.Numerics
         {
             // This compare order is very important!!!
             // We must follow HLSL behavior in the case user specified min value is bigger than max value.
-
             float x = value1.X;
-            x = (x > max.X) ? max.X : x;
-            x = (x < min.X) ? min.X : x;
+            x = (min.X > x) ? min.X : x;  // max(x, minx)
+            x = (max.X < x) ? max.X : x;  // min(x, maxx)
 
             float y = value1.Y;
-            y = (y > max.Y) ? max.Y : y;
-            y = (y < min.Y) ? min.Y : y;
+            y = (min.Y > y) ? min.Y : y;  // max(y, miny)
+            y = (max.Y < y) ? max.Y : y;  // min(y, maxy)
 
             float z = value1.Z;
-            z = (z > max.Z) ? max.Z : z;
-            z = (z < min.Z) ? min.Z : z;
+            z = (min.Z > z) ? min.Z : z;  // max(z, minz)
+            z = (max.Z < z) ? max.Z : z;  // min(z, maxz)
 
             return new Vector3(x, y, z);
         }
@@ -417,7 +416,7 @@ namespace System.Numerics
         /// <param name="right">The scalar value.</param>
         /// <returns>The scaled vector.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Multiply(Vector3 left, Single right)
+        public static Vector3 Multiply(Vector3 left, float right)
         {
             return left * right;
         }
@@ -429,7 +428,7 @@ namespace System.Numerics
         /// <param name="right">The source vector.</param>
         /// <returns>The scaled vector.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Multiply(Single left, Vector3 right)
+        public static Vector3 Multiply(float left, Vector3 right)
         {
             return left * right;
         }
@@ -453,7 +452,7 @@ namespace System.Numerics
         /// <param name="divisor">The scalar value.</param>
         /// <returns>The result of the division.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Divide(Vector3 left, Single divisor)
+        public static Vector3 Divide(Vector3 left, float divisor)
         {
             return left / divisor;
         }

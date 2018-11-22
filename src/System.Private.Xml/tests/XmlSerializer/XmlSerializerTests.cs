@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -684,6 +684,40 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
         Assert.NotNull(deserializedObj);
         Assert.Equal(obj.TimeSpanProperty, deserializedObj.TimeSpanProperty);
         Assert.Equal(obj.TimeSpanProperty2, deserializedObj.TimeSpanProperty2);
+    }
+
+    [Fact]
+    public static void Xml_DeserializeTypeWithEmptyTimeSpanProperty()
+    {
+        string xml = 
+            @"<?xml version=""1.0""?>
+            <TypeWithTimeSpanProperty xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
+            <TimeSpanProperty />
+            </TypeWithTimeSpanProperty>";
+        XmlSerializer serializer = new XmlSerializer(typeof(TypeWithTimeSpanProperty));
+
+        using (StringReader reader = new StringReader(xml))
+        {
+            TypeWithTimeSpanProperty deserializedObj = (TypeWithTimeSpanProperty)serializer.Deserialize(reader);
+            Assert.NotNull(deserializedObj);
+            Assert.Equal(default(TimeSpan), deserializedObj.TimeSpanProperty);
+        }
+    }
+
+    [Fact]
+    public static void Xml_DeserializeEmptyTimeSpanType()
+    {
+        string xml =
+    @"<?xml version=""1.0""?>
+     <TimeSpan />";
+        XmlSerializer serializer = new XmlSerializer(typeof(TimeSpan));
+
+        using (StringReader reader = new StringReader(xml))
+        {
+            TimeSpan deserializedObj = (TimeSpan)serializer.Deserialize(reader);
+            Assert.NotNull(deserializedObj);
+            Assert.Equal(default(TimeSpan), deserializedObj);
+        }
     }
 
     [Fact]
@@ -1541,7 +1575,7 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 
         attrOverrides = new XmlAttributeOverrides();
         attrs = new XmlAttributes();
-        Object defaultAnimal = "Cat";
+        object defaultAnimal = "Cat";
         attrs.XmlDefaultValue = defaultAnimal;
         attrOverrides.Add(typeof(Pet), "Animal", attrs);
         attrs = new XmlAttributes();
@@ -1611,6 +1645,113 @@ string.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 </DefaultValuesSetToNaN>");
         Assert.NotNull(actual);
         Assert.Equal(value, actual);
+    }
+
+    [Fact]
+    public static void Xml_DefaultValueAttributeSetToPositiveInfinityTest()
+    {
+        var value = new DefaultValuesSetToPositiveInfinity();
+        var actual = SerializeAndDeserialize(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToPositiveInfinity xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+  <DoubleField>0</DoubleField>
+  <SingleField>0</SingleField>
+  <DoubleProp>0</DoubleProp>
+  <FloatProp>0</FloatProp>
+</DefaultValuesSetToPositiveInfinity>");
+        Assert.NotNull(actual);
+        Assert.Equal(value, actual);
+    }
+
+    [Fact]
+    public static void Xml_DefaultValueAttributeSetToNegativeInfinityTest()
+    {
+        var value = new DefaultValuesSetToNegativeInfinity();
+        var actual = SerializeAndDeserialize(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToNegativeInfinity xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+  <DoubleField>0</DoubleField>
+  <SingleField>0</SingleField>
+  <DoubleProp>0</DoubleProp>
+  <FloatProp>0</FloatProp>
+</DefaultValuesSetToNegativeInfinity>");
+        Assert.NotNull(actual);
+        Assert.Equal(value, actual);
+    }
+
+    [ActiveIssue(28321)]
+    [Fact]
+    public static void SerializeWithDefaultValueSetToNaNTest()
+    {
+        var value = new DefaultValuesSetToNaN();
+        value.DoubleField = double.NaN;
+        value.SingleField = float.NaN;
+        value.FloatProp = float.NaN;
+        value.DoubleProp = double.NaN;
+
+        bool result=SerializeWithDefaultValue(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToNaN xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" />");
+        Assert.True(result);
+    }
+
+    [Fact]
+    public static void SerializeWithDefaultValueSetToPositiveInfinityTest()
+    {
+        var value = new DefaultValuesSetToPositiveInfinity();
+        value.DoubleField = double.PositiveInfinity;
+        value.SingleField = float.PositiveInfinity;
+        value.FloatProp = float.PositiveInfinity;
+        value.DoubleProp = double.PositiveInfinity;
+
+        bool result = SerializeWithDefaultValue(value,
+@"<?xml version=""1.0""?>
+<DefaultValuesSetToPositiveInfinity xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" />");
+        Assert.True(result);
+    }
+
+    [Fact]
+    public static void SerializeWithDefaultValueSetToNegativeInfinityTest()
+    {
+        var value = new DefaultValuesSetToNegativeInfinity();
+        value.DoubleField = double.NegativeInfinity;
+        value.SingleField = float.NegativeInfinity;
+        value.FloatProp = float.NegativeInfinity;
+        value.DoubleProp = double.NegativeInfinity;
+
+        bool result = SerializeWithDefaultValue(value,
+        @"<?xml version=""1.0""?>
+<DefaultValuesSetToNegativeInfinity xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" />");
+        Assert.True(result);
+    }
+
+    [Fact]
+    public static void DeserializeIDREFSIntoStringTest()
+    {
+        string xmlstring = @"<?xml version = ""1.0"" encoding = ""utf-8"" ?><Document xmlns = ""http://example.com"" id = ""ID1"" refs=""ID1 ID2 ID3"" ></Document>";
+        Stream ms = GenerateStreamFromString(xmlstring);
+        XmlSerializer ser = new XmlSerializer(typeof(MsgDocumentType));
+        var value = (MsgDocumentType)ser.Deserialize(ms);
+        Assert.NotNull(value);
+        Assert.Equal("ID1", value.Id);
+        Assert.NotNull(value.Refs);
+        Assert.Equal(3, value.Refs.Count());
+        Assert.Equal("ID1", value.Refs[0]);
+        Assert.Equal("ID2", value.Refs[1]);
+        Assert.Equal("ID3", value.Refs[2]);
+    }
+
+    private static bool SerializeWithDefaultValue<T>(T value, string baseline)
+    {
+        XmlSerializer serializer = new XmlSerializer(typeof(T));
+        using (MemoryStream ms = new MemoryStream())
+        {
+            serializer.Serialize(ms, value);
+            ms.Position = 0;
+            string output = new StreamReader(ms).ReadToEnd();
+            Utils.CompareResult result = Utils.Compare(baseline, output);
+            return result.Equal;
+        }
     }
 
     [Fact]

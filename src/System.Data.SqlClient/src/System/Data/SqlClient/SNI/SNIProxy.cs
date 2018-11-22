@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+#if !netcoreapp
 using System.Linq;
+#endif
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -97,7 +99,7 @@ namespace System.Data.SqlClient.SNI
             }
             else
             {
-                inSecurityBufferArray = new SecurityBuffer[] { };
+                inSecurityBufferArray = Array.Empty<SecurityBuffer>();
             }
 
             int tokenSize = NegotiateStreamPal.QueryMaxTokenSize(securityPackage);
@@ -189,11 +191,11 @@ namespace System.Data.SqlClient.SNI
         }
 
         /// <summary>
-        /// Get packet data
+        /// Copies data in SNIPacket to given byte array parameter
         /// </summary>
-        /// <param name="packet">SNI packet</param>
-        /// <param name="inBuff">Buffer</param>
-        /// <param name="dataSize">Data size</param>
+        /// <param name="packet">SNIPacket object containing data packets</param>
+        /// <param name="inBuff">Destination byte array where data packets are copied to</param>
+        /// <param name="dataSize">Length of data packets</param>
         /// <returns>SNI error status</returns>
         public uint PacketGetData(SNIPacket packet, byte[] inBuff, ref uint dataSize)
         {
@@ -238,14 +240,19 @@ namespace System.Data.SqlClient.SNI
         /// <returns>SNI error status</returns>
         public uint WritePacket(SNIHandle handle, SNIPacket packet, bool sync)
         {
+            SNIPacket clonedPacket = packet.Clone();
+            uint result;
             if (sync)
             {
-                return handle.Send(packet.Clone());
+                result = handle.Send(clonedPacket);
+                clonedPacket.Dispose();
             }
             else
             {
-                return handle.SendAsync(packet.Clone());
+                result = handle.SendAsync(clonedPacket, true);
             }
+            
+            return result;
         }
 
         /// <summary>
@@ -339,8 +346,22 @@ namespace System.Data.SqlClient.SNI
         private static byte[] GetSqlServerSPN(string hostNameOrAddress, string portOrInstanceName)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(hostNameOrAddress));
-            IPHostEntry hostEntry = Dns.GetHostEntry(hostNameOrAddress);
-            string fullyQualifiedDomainName = hostEntry.HostName;
+            IPHostEntry hostEntry = null;
+            string fullyQualifiedDomainName;
+            try
+            {
+                hostEntry = Dns.GetHostEntry(hostNameOrAddress);
+            }
+            catch (SocketException)
+            {
+                // A SocketException can occur while resolving the hostname.
+                // We will fallback on using hostname from the connection string in the finally block
+            }
+            finally
+            {
+                // If the DNS lookup failed, then resort to using the user provided hostname to construct the SPN.
+                fullyQualifiedDomainName = hostEntry?.HostName ?? hostNameOrAddress;
+            }
             string serverSpn = SqlServerSpnHeader + "/" + fullyQualifiedDomainName;
             if (!string.IsNullOrWhiteSpace(portOrInstanceName))
             {
@@ -424,10 +445,9 @@ namespace System.Data.SqlClient.SNI
         /// <param name="handle">SNI handle</param>
         /// <param name="packet">Packet</param>
         /// <returns>SNI error status</returns>
-        public uint ReadAsync(SNIHandle handle, out SNIPacket packet, bool isMars = false)
+        public uint ReadAsync(SNIHandle handle, out SNIPacket packet)
         {
-            packet = new SNIPacket(null);
-
+            packet = null;
             return handle.ReceiveAsync(ref packet);
         }
 
@@ -566,7 +586,12 @@ namespace System.Data.SqlClient.SNI
             _dataSourceAfterTrimmingProtocol = (firstIndexOfColon > -1) && ConnectionProtocol != DataSource.Protocol.None
                 ? _workingDataSource.Substring(firstIndexOfColon + 1).Trim() : _workingDataSource;
 
-            if (_dataSourceAfterTrimmingProtocol.Contains("/")) // Pipe paths only allow back slashes
+            // Pipe paths only allow back slashes
+#if netcoreapp
+            if (_dataSourceAfterTrimmingProtocol.Contains('/')) // string.Contains(char) is .NetCore2.1+ specific
+#else
+            if (_dataSourceAfterTrimmingProtocol.Contains("/"))
+#endif
             {
                 if (ConnectionProtocol == DataSource.Protocol.None)
                     ReportSNIError(SNIProviders.INVALID_PROV);
@@ -762,7 +787,7 @@ namespace System.Data.SqlClient.SNI
             if (_dataSourceAfterTrimmingProtocol.StartsWith(PipeBeginning) || ConnectionProtocol == Protocol.NP)
             {
                 // If the data source is "np:servername"
-                if (!_dataSourceAfterTrimmingProtocol.Contains(BackSlashSeparator))
+                if (!_dataSourceAfterTrimmingProtocol.Contains(BackSlashSeparator)) // string.Contains(char) is .NetCore2.1+ specific. Else uses Linq (perf warning)
                 {
                     PipeHostName = ServerName = _dataSourceAfterTrimmingProtocol;
                     InferLocalServerName();

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using Xunit;
@@ -232,28 +233,104 @@ namespace System.Tests
                         testString.Substring(startIndex, length);
         }
 
-        [Benchmark]
-        [MemberData(nameof(TestStringSizes))]
-        public void ToLower(int size)
+        [Flags]
+        public enum ChangeCaseOptions
         {
-            PerfUtils utils = new PerfUtils();
-            string testString = utils.CreateString(size);
-            foreach (var iteration in Benchmark.Iterations)
-                using (iteration.StartMeasurement())
-                    for (int i = 0; i < 10000; i++)
-                        testString.ToLower();
+            None = 0,
+            UniqueString = 0x1,
+
+            MiddleTurkishI = 0x2,
+            MiddleDifferentCase = 0x4,
+            AllDifferentCase = 0x8,
         }
 
-        [Benchmark]
-        [MemberData(nameof(TestStringSizes))]
-        public void ToUpper(int size)
+        public static IEnumerable<object[]> ChangeCaseMemberData() =>
+            from size in new[] { 1, 10, 500 }
+            from culture in new[] { "en-US" }
+            from options in new[]
+            {
+                ChangeCaseOptions.None,
+                ChangeCaseOptions.MiddleTurkishI,
+                ChangeCaseOptions.MiddleDifferentCase,
+                ChangeCaseOptions.AllDifferentCase,
+
+                ChangeCaseOptions.UniqueString,
+                ChangeCaseOptions.UniqueString | ChangeCaseOptions.MiddleTurkishI,
+                ChangeCaseOptions.UniqueString | ChangeCaseOptions.MiddleDifferentCase,
+                ChangeCaseOptions.UniqueString | ChangeCaseOptions.AllDifferentCase,
+            }
+            select new object[] { size, options, culture };
+
+        private static string CreateChangeCaseString(int size, ChangeCaseOptions options, bool upper)
         {
-            PerfUtils utils = new PerfUtils();
-            string testString = utils.CreateString(size);
+            Span<char> chars = new char[size];
+
+            bool differentCase = (options & ChangeCaseOptions.AllDifferentCase) != 0;
+            chars.Fill(upper != differentCase ? 'S' : 's');
+
+            if ((options & ChangeCaseOptions.MiddleTurkishI) != 0)
+            {
+                chars[chars.Length / 2] = '\u0131';
+            }
+            else if ((options & ChangeCaseOptions.MiddleDifferentCase) != 0)
+            {
+                char c = chars[chars.Length / 2];
+                chars[chars.Length / 2] = char.IsUpper(c) ? char.ToLower(c) : char.ToUpper(c);
+            }
+
+            return chars.ToString();
+        }
+
+        [Benchmark, MeasureGCAllocations]
+        [MemberData(nameof(ChangeCaseMemberData))]
+        public void ToLower(int size, ChangeCaseOptions options, string cultureName)
+        {
+            const int Iters = 10_000;
+            var strings = new string[Iters];
+            var culture = new CultureInfo(cultureName); // Benchmark doesn't support CultureInfo as argument
+            string target = CreateChangeCaseString(size, options, upper: false);
+
             foreach (var iteration in Benchmark.Iterations)
+            {
+                for (int i = 0; i < strings.Length; i++)
+                {
+                    strings[i] = (options & ChangeCaseOptions.UniqueString) != 0 ? string.Copy(target) : target;
+                }
+
                 using (iteration.StartMeasurement())
-                    for (int i = 0; i < 10000; i++)
-                        testString.ToUpper();
+                {
+                    for (int i = 0; i < Iters; i++)
+                    {
+                        strings[i].ToLower(culture);
+                    }
+                }
+            }
+        }
+
+        [Benchmark, MeasureGCAllocations]
+        [MemberData(nameof(ChangeCaseMemberData))]
+        public void ToUpper(int size, ChangeCaseOptions options, string cultureName)
+        {
+            const int Iters = 10_000;
+            var strings = new string[Iters];
+            var culture = new CultureInfo(cultureName); // Benchmark doesn't support CultureInfo as argument
+            string target = CreateChangeCaseString(size, options, upper: true);
+
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                for (int i = 0; i < strings.Length; i++)
+                {
+                    strings[i] = (options & ChangeCaseOptions.UniqueString) != 0 ? string.Copy(target) : target;
+                }
+
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Iters; i++)
+                    {
+                        strings[i].ToUpper(culture);
+                    }
+                }
+            }
         }
 
         [Benchmark]
@@ -355,7 +432,7 @@ namespace System.Tests
 
         private static readonly object[] s_getHashCodeStrings = new object[]
         {
-            String.Empty,
+            string.Empty,
             "  ",
             "TeSt!",
             "I think Turkish i \u0131s TROUBL\u0130NG",
@@ -557,7 +634,7 @@ namespace System.Tests
         {
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    String.Format(s, o);
+                    string.Format(s, o);
         }
 
         [Benchmark]
@@ -565,7 +642,7 @@ namespace System.Tests
         {
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    String.Format("More testing: {0} {1} {2} {3} {4} {5}{6} {7}", '1', "Foo", "Foo", "Foo", "Foo", "Foo", "Foo", "Foo");
+                    string.Format("More testing: {0} {1} {2} {3} {4} {5}{6} {7}", '1', "Foo", "Foo", "Foo", "Foo", "Foo", "Foo", "Foo");
         }
 
         [Benchmark]
@@ -602,7 +679,7 @@ namespace System.Tests
         [Benchmark]
         public static int IndexerCheckLengthHoisting()
         {
-            String s1 = "ddsz dszdsz \t  dszdsz  a\u0300\u00C0 \t Te st \u0400Te \u0400st\u0020\u00A0\u2000\u2001\u2002\u2003\u2004\u2005\t Te\t \tst \t\r\n\u0020\u00A0\u2000\u2001\u2002\u2003\u2004\u2005";
+            string s1 = "ddsz dszdsz \t  dszdsz  a\u0300\u00C0 \t Te st \u0400Te \u0400st\u0020\u00A0\u2000\u2001\u2002\u2003\u2004\u2005\t Te\t \tst \t\r\n\u0020\u00A0\u2000\u2001\u2002\u2003\u2004\u2005";
 
             int counter = 0;
 
@@ -623,7 +700,7 @@ namespace System.Tests
         [Benchmark]
         public static int IndexerCheckPathLength()
         {
-            String s1 = "ddsz dszdsz \t  dszdsz  a\u0300\u00C0 \t Te st \u0400Te \u0400st\u0020\u00A0\u2000\u2001\u2002\u2003\u2004\u2005\t Te\t \tst \t\r\n\u0020\u00A0\u2000\u2001\u2002\u2003\u2004\u2005";
+            string s1 = "ddsz dszdsz \t  dszdsz  a\u0300\u00C0 \t Te st \u0400Te \u0400st\u0020\u00A0\u2000\u2001\u2002\u2003\u2004\u2005\t Te\t \tst \t\r\n\u0020\u00A0\u2000\u2001\u2002\u2003\u2004\u2005";
 
             int counter = 0;
 
@@ -675,7 +752,7 @@ namespace System.Tests
         [InlineData(2142)]
         public static void PadLeft(int n)
         {
-            String s1 = "a";
+            string s1 = "a";
 
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
@@ -906,7 +983,7 @@ namespace System.Tests
             string s2 = strings[1];
             foreach (var iteration in Benchmark.Iterations)
                 using (iteration.StartMeasurement())
-                    String.Compare(s1, s2, comparison);
+                    string.Compare(s1, s2, comparison);
         }
 
         [Benchmark]

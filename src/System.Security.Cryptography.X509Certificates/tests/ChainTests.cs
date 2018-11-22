@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -632,6 +633,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        public static void BuildChainInvalidValues()
+        {
+            using (var chain = X509Chain.Create())
+            {
+                AssertExtensions.Throws<ArgumentException>("certificate", () => chain.Build(null));
+                AssertExtensions.Throws<ArgumentException>("certificate", () => chain.Build(new X509Certificate2()));
+            }
+        }
+
+        [Fact]
         public static void InvalidSelfSignedSignature()
         {
             X509ChainStatusFlags expectedFlags;
@@ -642,7 +653,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                expectedFlags = X509ChainStatusFlags.UntrustedRoot;
+                // For OSX alone expectedFlags here means OR instead of AND.
+                // Because the error code changed in 10.13.4 from UntrustedRoot to PartialChain
+                // and we handle that later in this test.
+                expectedFlags =
+                    X509ChainStatusFlags.UntrustedRoot |
+                    X509ChainStatusFlags.PartialChain;
             }
             else
             {
@@ -670,7 +686,39 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                         X509ChainStatusFlags.NoError,
                         (a, b) => a | b);
 
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    // If we're on 10.13.3 or older we get UntrustedRoot.
+                    // If we're on 10.13.4 or newer we get PartialChain.
+                    //
+                    // So make the expectedValue be whichever of those two is set.
+                    expectedFlags = (expectedFlags & allFlags);
+                    // One of them has to be set.
+                    Assert.NotEqual(X509ChainStatusFlags.NoError, expectedFlags);
+                    // Continue executing now to ensure that no other unexpected flags were set.
+                }
+
                 Assert.Equal(expectedFlags, allFlags);
+            }
+        }
+
+        [Fact]
+        public static void ChainWithEmptySubject()
+        {
+            using (var cert = new X509Certificate2(TestData.EmptySubjectCertificate))
+            using (var issuer = new X509Certificate2(TestData.EmptySubjectIssuerCertificate))
+            using (ChainHolder chainHolder = new ChainHolder())
+            {
+                X509Chain chain = chainHolder.Chain;
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.VerificationFlags |= X509VerificationFlags.AllowUnknownCertificateAuthority;
+                chain.ChainPolicy.ExtraStore.Add(issuer);
+
+                Assert.True(chain.Build(cert), "chain.Build(cert)");
+                Assert.Equal(2, chain.ChainElements.Count);
+                Assert.Equal(string.Empty, cert.Subject);
+                Assert.Equal(cert.RawData, chain.ChainElements[0].Certificate.RawData);
+                Assert.Equal(issuer.RawData, chain.ChainElements[1].Certificate.RawData);
             }
         }
     }

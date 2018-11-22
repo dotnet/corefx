@@ -13,33 +13,7 @@ namespace System.IO
     {
         private static string NormalizeDriveName(string driveName)
         {
-            Debug.Assert(driveName != null);
-
-            string name;
-
-            if (driveName.Length == 1)
-                name = driveName + ":\\";
-            else
-            {
-                name = Path.GetPathRoot(driveName);
-                // Disallow null or empty drive letters and UNC paths
-                if (name == null || name.Length == 0 || name.StartsWith("\\\\", StringComparison.Ordinal))
-                    throw new ArgumentException(SR.Arg_MustBeDriveLetterOrRootDir, nameof(driveName));
-            }
-            // We want to normalize to have a trailing backslash so we don't have two equivalent forms and
-            // because some Win32 API don't work without it.
-            if (name.Length == 2 && name[1] == ':')
-            {
-                name = name + "\\";
-            }
-
-            // Now verify that the drive letter could be a real drive name.
-            // On Windows this means it's between A and Z, ignoring case.
-            char letter = driveName[0];
-            if (!((letter >= 'A' && letter <= 'Z') || (letter >= 'a' && letter <= 'z')))
-                throw new ArgumentException(SR.Arg_MustBeDriveLetterOrRootDir, nameof(driveName));
-
-            return name;
+            return DriveInfoInternal.NormalizeDriveName(driveName);
         }
 
         public DriveType DriveType
@@ -51,32 +25,20 @@ namespace System.IO
             }
         }
 
-        public String DriveFormat
+        public unsafe string DriveFormat
         {
             get
             {
-                const int volNameLen = 50;
-                StringBuilder volumeName = new StringBuilder(volNameLen);
-                const int fileSystemNameLen = 50;
-                StringBuilder fileSystemName = new StringBuilder(fileSystemNameLen);
-                int serialNumber, maxFileNameLen, fileSystemFlags;
+                char* fileSystemName = stackalloc char[Interop.Kernel32.MAX_PATH + 1];
 
-                uint oldMode;
-                bool success = Interop.Kernel32.SetThreadErrorMode(Interop.Kernel32.SEM_FAILCRITICALERRORS, out oldMode);
-                try
+                using (DisableMediaInsertionPrompt.Create())
                 {
-                    bool r = Interop.Kernel32.GetVolumeInformation(Name, volumeName, volNameLen, out serialNumber, out maxFileNameLen, out fileSystemFlags, fileSystemName, fileSystemNameLen);
-                    if (!r)
+                    if (!Interop.Kernel32.GetVolumeInformation(Name, null, 0, null, null, out int fileSystemFlags, fileSystemName, Interop.Kernel32.MAX_PATH + 1))
                     {
                         throw Error.GetExceptionForLastWin32DriveError(Name);
                     }
                 }
-                finally
-                {
-                    if (success)
-                        Interop.Kernel32.SetThreadErrorMode(oldMode, out oldMode);
-                }
-                return fileSystemName.ToString();
+                return new string(fileSystemName);
             }
         }
 
@@ -159,39 +121,21 @@ namespace System.IO
         }
 
         // Null is a valid volume label.
-        public String VolumeLabel
+        public unsafe string VolumeLabel
         {
             get
             {
-                // NTFS uses a limit of 32 characters for the volume label,
-                // as of Windows Server 2003.
-                const int volNameLen = 50;
-                StringBuilder volumeName = new StringBuilder(volNameLen);
-                const int fileSystemNameLen = 50;
-                StringBuilder fileSystemName = new StringBuilder(fileSystemNameLen);
-                int serialNumber, maxFileNameLen, fileSystemFlags;
+                char* volumeName = stackalloc char[Interop.Kernel32.MAX_PATH + 1];
 
-                uint oldMode;
-                bool success = Interop.Kernel32.SetThreadErrorMode(Interop.Kernel32.SEM_FAILCRITICALERRORS, out oldMode);
-                try
+                using (DisableMediaInsertionPrompt.Create())
                 {
-                    bool r = Interop.Kernel32.GetVolumeInformation(Name, volumeName, volNameLen, out serialNumber, out maxFileNameLen, out fileSystemFlags, fileSystemName, fileSystemNameLen);
-                    if (!r)
+                    if (!Interop.Kernel32.GetVolumeInformation(Name, volumeName, Interop.Kernel32.MAX_PATH + 1, null, null, out int fileSystemFlags, null, 0))
                     {
-                        int errorCode = Marshal.GetLastWin32Error();
-                        // Win9x appears to return ERROR_INVALID_DATA when a
-                        // drive doesn't exist.
-                        if (errorCode == Interop.Errors.ERROR_INVALID_DATA)
-                            errorCode = Interop.Errors.ERROR_INVALID_DRIVE;
-                        throw Error.GetExceptionForWin32DriveError(errorCode, Name);
+                        throw Error.GetExceptionForLastWin32DriveError(Name);
                     }
                 }
-                finally
-                {
-                    if (success)
-                        Interop.Kernel32.SetThreadErrorMode(oldMode, out oldMode);
-                }
-                return volumeName.ToString();
+
+                return new string(volumeName);
             }
             set
             {

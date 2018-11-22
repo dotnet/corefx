@@ -708,20 +708,25 @@ namespace System.Tests
         [MemberData(nameof(StandardFormatSpecifiers))]
         public static void ParseExact_ToStringThenParseExactRoundtrip_Success(string standardFormat)
         {
-            DateTime dt = DateTime.Now;
-            string expected = dt.ToString(standardFormat);
+            var r = new Random(42);
+            for (int i = 0; i < 200; i++) // test with a bunch of random dates
+            {
+                DateTime dt = new DateTime(DateTime.MinValue.Ticks + (long)(r.NextDouble() * (DateTime.MaxValue.Ticks - DateTime.MinValue.Ticks)), DateTimeKind.Unspecified);
+                string expected = dt.ToString(standardFormat);
 
-            Assert.Equal(expected, DateTime.ParseExact(expected, standardFormat, null).ToString(standardFormat));
-            Assert.Equal(expected, DateTime.ParseExact(expected, standardFormat, null, DateTimeStyles.None).ToString(standardFormat));
-            Assert.Equal(expected, DateTime.ParseExact(expected, new[] { standardFormat }, null, DateTimeStyles.None).ToString(standardFormat));
+                Assert.Equal(expected, DateTime.ParseExact(expected, standardFormat, null).ToString(standardFormat));
+                Assert.Equal(expected, DateTime.ParseExact(expected, standardFormat, null, DateTimeStyles.None).ToString(standardFormat));
+                Assert.Equal(expected, DateTime.ParseExact(expected, new[] { standardFormat }, null, DateTimeStyles.None).ToString(standardFormat));
+                Assert.Equal(expected, DateTime.ParseExact(expected, new[] { standardFormat }, null, DateTimeStyles.AllowWhiteSpaces).ToString(standardFormat));
 
-            Assert.True(DateTime.TryParseExact(expected, standardFormat, null, DateTimeStyles.None, out DateTime actual));
-            Assert.Equal(expected, actual.ToString(standardFormat));
-            Assert.True(DateTime.TryParseExact(expected, new[] { standardFormat }, null, DateTimeStyles.None, out actual));
-            Assert.Equal(expected, actual.ToString(standardFormat));
+                Assert.True(DateTime.TryParseExact(expected, standardFormat, null, DateTimeStyles.None, out DateTime actual));
+                Assert.Equal(expected, actual.ToString(standardFormat));
+                Assert.True(DateTime.TryParseExact(expected, new[] { standardFormat }, null, DateTimeStyles.None, out actual));
+                Assert.Equal(expected, actual.ToString(standardFormat));
 
-            // Should also parse with Parse, though may not round trip exactly
-            DateTime.Parse(expected);
+                // Should also parse with Parse, though may not round trip exactly
+                DateTime.Parse(expected);
+            }
         }
 
         public static IEnumerable<object[]> InvalidFormatSpecifierRoundtripPairs()
@@ -746,29 +751,275 @@ namespace System.Tests
             Assert.False(DateTime.TryParseExact(expected, new[] { parseFormat }, null, DateTimeStyles.None, out result));
         }
 
-        public static IEnumerable<object[]> Format_String_TestData_O()
+        [Theory]
+        [MemberData(nameof(ParseExact_TestData_R))]
+        public static void ParseExact_String_String_FormatProvider_DateTimeStyles_R(DateTime dt, string input)
         {
-            yield return new object[] { DateTime.MaxValue, "9999-12-31T23:59:59.9999999" };
-            yield return new object[] { DateTime.MinValue, "0001-01-01T00:00:00.0000000" };
-            yield return new object[] { new DateTime(1906, 8, 15, 7, 24, 5, 300), "1906-08-15T07:24:05.3000000" };
+            Assert.Equal(DateTimeKind.Unspecified, DateTime.ParseExact(input, "r", null).Kind);
+
+            Assert.Equal(dt.ToString("r"), DateTime.ParseExact(input, "r", null).ToString("r"));
+            Assert.Equal(dt.ToString("r"), DateTime.ParseExact(input, "r", null, DateTimeStyles.None).ToString("r"));
+
+            const string Whitespace = " \t\r\n ";
+            Assert.Equal(dt.ToString("r"), DateTime.ParseExact(Whitespace + input, "r", null, DateTimeStyles.AllowLeadingWhite).ToString("r"));
+            Assert.Equal(dt.ToString("r"), DateTime.ParseExact(input + Whitespace, "r", null, DateTimeStyles.AllowTrailingWhite).ToString("r"));
+            Assert.Equal(dt.ToString("r"), DateTime.ParseExact(
+                Whitespace +
+                input +
+                Whitespace, "r", null, DateTimeStyles.AllowLeadingWhite | DateTimeStyles.AllowTrailingWhite).ToString("r"));
+            Assert.Equal(dt.ToString("r"), DateTime.ParseExact(
+                input.Substring(0, 4) +
+                Whitespace +
+                input.Substring(4), "r", null, DateTimeStyles.AllowInnerWhite).ToString("r"));
+            Assert.Equal(dt.ToString("r"), DateTime.ParseExact(
+                Whitespace +
+                input.Substring(0, 4) +
+                Whitespace +
+                input.Substring(4) +
+                Whitespace, "r", null, DateTimeStyles.AllowWhiteSpaces).ToString("r"));
         }
 
-        [Theory] 
-        [MemberData(nameof(Format_String_TestData_R))]
-        public static void ParseExact_String_String_FormatProvider_DateTimeStyles_R(DateTime dt, string expected)
+        public static IEnumerable<object[]> ParseExact_TestData_R()
         {
-            string actual = dt.ToString("r");
-            Assert.Equal(expected, actual);
+            // Lowest, highest, and random DateTime in lower, upper, and normal casing
+            var pairs = new(DateTime, string)[]
+            {
+                (DateTime.MaxValue, "Fri, 31 Dec 9999 23:59:59"),
+                (DateTime.MinValue, "Mon, 01 Jan 0001 00:00:00"),
+                (new DateTime(1906, 8, 15, 7, 24, 5, 300), "Wed, 15 Aug 1906 07:24:05"),
+            };
+            foreach ((DateTime, string) pair in pairs)
+            {
+                yield return new object[] { pair.Item1, pair.Item2 + " GMT" };
+                yield return new object[] { pair.Item1, pair.Item2.ToLowerInvariant() + " GMT" };
+                yield return new object[] { pair.Item1, pair.Item2.ToUpperInvariant() + " GMT" };
+            }
 
-            DateTime result = DateTime.ParseExact(actual, "r", null, DateTimeStyles.None);
-            Assert.Equal(expected, result.ToString("r"));
+            // All months
+            DateTime dt = DateTime.UtcNow;
+            for (int i = 0; i < 12; i++)
+            {
+                dt = dt.AddMonths(1);
+                yield return new object[] { dt, dt.ToString("R") };
+            }
+
+            // All days
+            for (int i = 0; i < 7; i++)
+            {
+                dt = dt.AddDays(1);
+                yield return new object[] { dt, dt.ToString("R") };
+            }
         }
 
-        public static IEnumerable<object[]> Format_String_TestData_R()
+        [Theory]
+        [MemberData(nameof(ParseExact_TestData_InvalidData_R))]
+        public static void ParseExact_InvalidData_R(string invalidString)
         {
-            yield return new object[] { DateTime.MaxValue, "Fri, 31 Dec 9999 23:59:59 GMT" };
-            yield return new object[] { DateTime.MinValue, "Mon, 01 Jan 0001 00:00:00 GMT" };
-            yield return new object[] { new DateTime(1906, 8, 15, 7, 24, 5, 300), "Wed, 15 Aug 1906 07:24:05 GMT" };
+            Assert.Throws<FormatException>(() => DateTime.ParseExact(invalidString, "r", null));
+            Assert.Throws<FormatException>(() => DateTime.ParseExact(invalidString, "r", null, DateTimeStyles.None));
+            Assert.Throws<FormatException>(() => DateTime.ParseExact(invalidString, new string[] { "r" }, null, DateTimeStyles.None));
+        }
+
+        public static IEnumerable<object[]> ParseExact_TestData_InvalidData_R()
+        {
+            yield return new object[] { "Thu, 15 Aug 1906 07:24:05 GMT" }; // invalid day of week
+            yield return new object[] { "Ste, 15 Aug 1906 07:24:05 GMT" }; // invalid day of week
+            yield return new object[] { "We, 15 Aug 1906 07:24:05 GMT" }; // too short day of week
+            yield return new object[] { "Wedn, 15 Aug 1906 07:24:05 GMT" }; // too long day of week
+
+            yield return new object[] { "Wed, 32 Aug 1906 07:24:05 GMT" }; // too large day
+            yield return new object[] { "Wed, -1 Aug 1906 07:24:05 GMT" }; // too small day
+
+            yield return new object[] { "Wed, 15 Au 1906 07:24:05 GMT" }; // too small month
+            yield return new object[] { "Wed, 15 August 1906 07:24:05 GMT" }; // too large month
+
+            yield return new object[] { "Wed, 15 Aug -1 07:24:05 GMT" }; // too small year
+            yield return new object[] { "Wed, 15 Aug 10000 07:24:05 GMT" }; // too large year
+
+            yield return new object[] { "Wed, 15 Aug 1906 24:24:05 GMT" }; // too large hour
+            yield return new object[] { "Wed, 15 Aug 1906 07:60:05 GMT" }; // too large minute
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:60 GMT" }; // too large second
+
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:05 STE" }; // invalid timezone
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:05 GM" }; // too short timezone
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:05 GMTT" }; // too long timezone
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:05 gmt" }; // wrong casing
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:05 Z" }; // zulu invalid
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:05 UTC" }; // UTC invalid
+
+            yield return new object[] { " Wed, 15 Aug 1906 07:24:05 GMT" }; // whitespace before
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:05 GMT " }; // whitespace after
+            yield return new object[] { "Wed, 15 Aug 1906  07:24:05 GMT" }; // extra whitespace middle
+            yield return new object[] { "Wed, 15 Aug 1906 07: 24:05 GMT" }; // extra whitespace middle
+
+            yield return new object[] { "Wed,\t15 Aug 1906 07:24:05 GMT" }; // wrong whitespace for first space
+            yield return new object[] { "Wed, 15\tAug 1906 07:24:05 GMT" }; // wrong whitespace for second space
+            yield return new object[] { "Wed, 15 Aug\t1906 07:24:05 GMT" }; // wrong whitespace for third space
+            yield return new object[] { "Wed, 15 Aug 1906\t07:24:05 GMT" }; // wrong whitespace for fourth space
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:05\tGMT" }; // wrong whitespace for fifth space
+            yield return new object[] { "Wed; 15 Aug 1906 07:24:05 GMT" }; // wrong comma
+            yield return new object[] { "Wed\x642C 15 Aug 1906 07:24:05 GMT" }; // wrong comma
+            yield return new object[] { "Wed, 15 Aug 1906 07;24:05 GMT" }; // wrong first colon
+            yield return new object[] { "Wed, 15 Aug 1906 07:24;05 GMT" }; // wrong second colon
+
+            yield return new object[] { "\x2057ed, 15 Aug 1906 07:24:05 GMT" }; // invalid characters to validate ASCII checks on day of week
+            yield return new object[] { "W\x5765d, 15 Aug 1906 07:24:05 GMT" }; // invalid characters to validate ASCII checks on day of week
+            yield return new object[] { "We\x6564, 15 Aug 1906 07:24:05 GMT" }; // invalid characters to validate ASCII checks on day of week
+
+            yield return new object[] { "Wed, 15 \x2041ug 1906 07:24:05 GMT" }; // invalid characters to validate ASCII checks on month
+            yield return new object[] { "Wed, 15 A\x4175g 1906 07:24:05 GMT" }; // invalid characters to validate ASCII checks on month
+            yield return new object[] { "Wed, 15 Au\x7567 1906 07:24:05 GMT" }; // invalid characters to validate ASCII checks on month
+
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:05 \x2047MT" }; // invalid characters to validate ASCII checks on GMT
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:05 G\x474DT" }; // invalid characters to validate ASCII checks on GMT
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:05 GM\x4D54" }; // invalid characters to validate ASCII checks on GMT
+
+            yield return new object[] { "Wed, A5 Aug 1906 07:24:05 GMT" }; // invalid digits
+            yield return new object[] { "Wed, 1A Aug 1906 07:24:05 GMT" }; // invalid digits
+            yield return new object[] { "Wed, 15 Aug A906 07:24:05 GMT" }; // invalid digits
+            yield return new object[] { "Wed, 15 Aug 1A06 07:24:05 GMT" }; // invalid digits
+            yield return new object[] { "Wed, 15 Aug 19A6 07:24:05 GMT" }; // invalid digits
+            yield return new object[] { "Wed, 15 Aug 190A 07:24:05 GMT" }; // invalid digits
+            yield return new object[] { "Wed, 15 Aug 1906 A7:24:05 GMT" }; // invalid digits
+            yield return new object[] { "Wed, 15 Aug 1906 0A:24:05 GMT" }; // invalid digits
+            yield return new object[] { "Wed, 15 Aug 1906 07:A4:05 GMT" }; // invalid digits
+            yield return new object[] { "Wed, 15 Aug 1906 07:2A:05 GMT" }; // invalid digits
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:A5 GMT" }; // invalid digits
+            yield return new object[] { "Wed, 15 Aug 1906 07:24:0A GMT" }; // invalid digits
+        }
+
+        [Theory]
+        [MemberData(nameof(ParseExact_TestData_O))]
+        public static void ParseExact_String_String_FormatProvider_DateTimeStyles_O(DateTime dt, string input)
+        {
+            string expectedString;
+            if (input.Length == 27) // no timezone
+            {
+                Assert.Equal(DateTimeKind.Unspecified, DateTime.ParseExact(input, "o", null).Kind);
+                expectedString = dt.ToString("o");
+            }
+            else // "Z" or +/- offset
+            {
+                Assert.Equal(DateTimeKind.Local, DateTime.ParseExact(input, "o", null).Kind);
+                expectedString = dt.ToLocalTime().ToString("o");
+            }
+
+            Assert.Equal(expectedString, DateTime.ParseExact(input, "o", null).ToString("o"));
+            Assert.Equal(expectedString, DateTime.ParseExact(input, "o", null, DateTimeStyles.None).ToString("o"));
+
+            const string Whitespace = " \t\r\n ";
+            Assert.Equal(expectedString, DateTime.ParseExact(Whitespace + input, "o", null, DateTimeStyles.AllowLeadingWhite).ToString("o"));
+            Assert.Equal(expectedString, DateTime.ParseExact(input + Whitespace, "o", null, DateTimeStyles.AllowTrailingWhite).ToString("o"));
+            Assert.Equal(expectedString, DateTime.ParseExact(
+                Whitespace +
+                input +
+                Whitespace, "o", null, DateTimeStyles.AllowLeadingWhite | DateTimeStyles.AllowTrailingWhite).ToString("o"));
+            Assert.Equal(expectedString, DateTime.ParseExact(
+                input.Substring(0, 27) +
+                Whitespace +
+                input.Substring(27), "o", null, DateTimeStyles.AllowInnerWhite).ToString("o"));
+            Assert.Equal(expectedString, DateTime.ParseExact(
+                Whitespace +
+                input.Substring(0, 27) +
+                Whitespace +
+                input.Substring(27) +
+                Whitespace, "o", null, DateTimeStyles.AllowWhiteSpaces).ToString("o"));
+        }
+
+        public static IEnumerable<object[]> ParseExact_TestData_O()
+        {
+            // Arbitrary DateTime in each of Unspecified, Utc, and Local kinds.
+            foreach (DateTimeKind kind in new[] { DateTimeKind.Unspecified, DateTimeKind.Utc, DateTimeKind.Local })
+            {
+                var dt = new DateTime(1234567891234567891, kind);
+                yield return new object[] { dt, dt.ToString("o") };
+            }
+
+            // Min and max in each of Unspecified, Utc, and Local kinds.
+            foreach (DateTime dt in new[] { DateTime.MinValue, DateTime.MaxValue })
+            {
+                yield return new object[] { dt, dt.ToString("o") };
+                yield return new object[] { dt.ToUniversalTime(), dt.ToUniversalTime().ToString("o") };
+                yield return new object[] { dt.ToLocalTime(), dt.ToLocalTime().ToString("o") };
+            }
+
+            // 1-digit offset hour is accepted due to legacy/compat
+            yield return new object[] { new DateTime(636664076235238523, DateTimeKind.Utc), "2018-07-05T18:36:43.5238523+1:23" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ParseExact_TestData_InvalidData_O))]
+        public static void ParseExact_InvalidData_O(string invalidString)
+        {
+            Assert.Throws<FormatException>(() => DateTime.ParseExact(invalidString, "o", null));
+            Assert.Throws<FormatException>(() => DateTime.ParseExact(invalidString, "o", null, DateTimeStyles.None));
+            Assert.Throws<FormatException>(() => DateTime.ParseExact(invalidString, new string[] { "o" }, null, DateTimeStyles.None));
+        }
+
+        public static IEnumerable<object[]> ParseExact_TestData_InvalidData_O()
+        {
+            yield return new object[] { " 2018-07-05T18:36:43.5238523" }; // whitespace before
+            yield return new object[] { " 2018-07-05T18:36:43.5238523Z" }; // whitespace before
+            yield return new object[] { " 2018-07-05T18:36:43.5238523+00:00" }; // whitespace before
+            yield return new object[] { "2018-07-05T18:36:43.5238523 " }; // whitespace after
+            yield return new object[] { "2018-07-05T18:36:43.5238523Z " }; // whitespace after
+            yield return new object[] { "2018-07-05T18:36:43.5238523+00:00 " }; // whitespace after
+            yield return new object[] { "2018-07-05T18:36:43.5238523 Z" }; // whitespace inside
+            yield return new object[] { "2018-07-05T18:36:43.5238523 +00:00" }; // whitespace inside
+
+            yield return new object[] { "201-07-05T18:36:43.5238523" }; // too short year
+            yield return new object[] { "20181-07-05T18:36:43.5238523" }; // too long year
+            yield return new object[] { "2018-7-05T18:36:43.5238523" }; // too short month
+            yield return new object[] { "2018-017-05T18:36:43.5238523" }; // too long month
+            yield return new object[] { "2018-07-5T18:36:43.5238523" }; // too short day
+            yield return new object[] { "2018-07-015T18:36:43.5238523" }; // too long day
+            yield return new object[] { "2018-07-05T018:36:43.5238523" }; // too long hour
+            yield return new object[] { "2018-07-05T8:36:43.5238523" }; // too short hour
+            yield return new object[] { "2018-07-05T18:6:43.5238523" }; // too short minute
+            yield return new object[] { "2018-07-05T18:036:43.5238523" }; // too long minute
+            yield return new object[] { "2018-07-05T18:06:3.5238523" }; // too short second
+            yield return new object[] { "2018-07-05T18:36:043.5238523" }; // too long second
+            yield return new object[] { "2018-07-05T18:06:03.238523" }; // too short fraction
+            yield return new object[] { "2018-07-05T18:36:43.15238523" }; // too long fraction
+            yield return new object[] { "2018-07-05T18:36:43.5238523+001:00" }; // too long offset hour
+            yield return new object[] { "2018-07-05T18:36:43.5238523+01:0" }; // too short offset minute
+            yield return new object[] { "2018-07-05T18:36:43.5238523+01:000" }; // too long offset minute
+
+            yield return new object[] { "2018=07-05T18:36:43.5238523" }; // invalid first hyphen
+            yield return new object[] { "2018-07=05T18:36:43.5238523" }; // invalid second hyphen
+            yield return new object[] { "2018-07-05A18:36:43.5238523" }; // invalid T
+            yield return new object[] { "2018-07-05T18;36:43.5238523" }; // invalid first colon
+            yield return new object[] { "2018-07-05T18:36;43.5238523" }; // invalid second colon
+            yield return new object[] { "2018-07-05T18:36:43,5238523" }; // invalid period
+            yield return new object[] { "2018-07-05T18:36:43.5238523,00:00" }; // invalid +/-/Z
+            yield return new object[] { "2018-07-05T18:36:43.5238523+00;00" }; // invalid third colon
+            yield return new object[] { "2018-07-05T18:36:43.5238523+1;00" }; // invalid colon with 1-digit offset hour
+
+            yield return new object[] { "a018-07-05T18:36:43.5238523" }; // invalid digits
+            yield return new object[] { "2a18-07-05T18:36:43.5238523" }; // invalid digits
+            yield return new object[] { "20a8-07-05T18:36:43.5238523" }; // invalid digits
+            yield return new object[] { "201a-07-05T18:36:43.5238523" }; // invalid digits
+            yield return new object[] { "2018-a7-05T18:36:43.5238523" }; // invalid digits
+            yield return new object[] { "2018-0a-05T18:36:43.5238523" }; // invalid digits
+            yield return new object[] { "2018-07-a5T18:36:43.5238523" }; // invalid digits
+            yield return new object[] { "2018-07-0aT18:36:43.5238523" }; // invalid digits
+            yield return new object[] { "2018-07-05Ta8:36:43.5238523" }; // invalid digits
+            yield return new object[] { "2018-07-05T1a:36:43.5238523" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:a6:43.5238523" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:3a:43.5238523" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:a3.5238523" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:4a.5238523" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:43.a238523" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:43.5a38523" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:43.52a8523" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:43.523a523" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:43.5238a23" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:43.52385a3" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:43.523852a" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:43.5238523+a0:00" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:43.5238523+0a:00" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:43.5238523+00:a0" }; // invalid digits
+            yield return new object[] { "2018-07-05T18:36:43.5238523+00:0a" }; // invalid digits
         }
 
         [Fact]
@@ -871,7 +1122,7 @@ namespace System.Tests
             }
             else
             {
-                // When the date separator and time separator are the same, DateTime.TryParse cannot 
+                // When the date separator and time separator are the same, DateTime.TryParse cannot
                 // tell the difference between a short date like dd.MM.yy and a short time
                 // like HH.mm.ss. So it assumes that if it gets 03.04.11, that must be a time
                 // and uses the current date to construct the date time.
@@ -978,7 +1229,25 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentException>("style", () => DateTime.ParseExact(strDateTime, formats, provider, style));
         }
 
-        public static IEnumerable<object[]> Parse_ValidInput_Suceeds_MemberData()
+        [Fact]
+        public static void TestTryParseAtBoundaries()
+        {
+            Assert.True(DateTime.TryParse("9999-12-31T23:59:59.9999999", out var maxDateTime),
+                        "DateTime parsing expected to succeed at the boundary DateTime.MaxValue");
+            Assert.Equal(DateTime.MaxValue, maxDateTime);
+
+            if (PlatformDetection.IsFullFramework)
+            {
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.TryParse("9999-12-31T23:59:59.999999999Z", out var dateTime)); // exceeded DateTime.MaxValue
+            }
+            else
+            {
+                Assert.False(DateTime.TryParse("9999-12-31T23:59:59.999999999Z", out var dateTime),
+                         "DateTime parsing expected to throw with any dates greater than DateTime.MaxValue");
+            }
+        }
+
+        public static IEnumerable<object[]> Parse_ValidInput_Succeeds_MemberData()
         {
             yield return new object[] { "1234 12", CultureInfo.InvariantCulture, new DateTime(1234, 12, 1, 0, 0, 0) };
             yield return new object[] { "12 1234", CultureInfo.InvariantCulture, new DateTime(1234, 12, 1, 0, 0, 0) };
@@ -999,45 +1268,47 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Parse_ValidInput_Suceeds_MemberData))]
-        public static void Parse_ValidInput_Suceeds(string input, CultureInfo culture, DateTime? expected)
+        [MemberData(nameof(Parse_ValidInput_Succeeds_MemberData))]
+        public static void Parse_ValidInput_Succeeds(string input, CultureInfo culture, DateTime? expected)
         {
             Assert.Equal(expected, DateTime.Parse(input, culture));
         }
 
         public static IEnumerable<object[]> ParseExact_ValidInput_Succeeds_MemberData()
         {
-            yield return new object[] { "9", "%d", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(DateTime.Now.Year, 1, 9, 0, 0, 0) };
-            yield return new object[] { "15", "dd", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(DateTime.Now.Year, 1, 15, 0, 0, 0) };
+            foreach (DateTimeStyles style in new[] { DateTimeStyles.None, DateTimeStyles.AllowWhiteSpaces })
+            {
+                yield return new object[] { "9", "%d", CultureInfo.InvariantCulture, style, new DateTime(DateTime.Now.Year, 1, 9, 0, 0, 0) };
+                yield return new object[] { "15", "dd", CultureInfo.InvariantCulture, style, new DateTime(DateTime.Now.Year, 1, 15, 0, 0, 0) };
 
-            yield return new object[] { "9", "%M", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
-            yield return new object[] { "09", "MM", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
-            yield return new object[] { "Sep", "MMM", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
-            yield return new object[] { "September", "MMMM", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
+                yield return new object[] { "9", "%M", CultureInfo.InvariantCulture, style, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
+                yield return new object[] { "09", "MM", CultureInfo.InvariantCulture, style, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
+                yield return new object[] { "Sep", "MMM", CultureInfo.InvariantCulture, style, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
+                yield return new object[] { "September", "MMMM", CultureInfo.InvariantCulture, style, new DateTime(DateTime.Now.Year, 9, 1, 0, 0, 0) };
 
-            yield return new object[] { "1", "%y", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2001, 1, 1, 0, 0, 0) };
-            yield return new object[] { "01", "yy", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2001, 1, 1, 0, 0, 0) };
-            yield return new object[] { "2001", "yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2001, 1, 1, 0, 0, 0) };
+                yield return new object[] { "1", "%y", CultureInfo.InvariantCulture, style, new DateTime(2001, 1, 1, 0, 0, 0) };
+                yield return new object[] { "01", "yy", CultureInfo.InvariantCulture, style, new DateTime(2001, 1, 1, 0, 0, 0) };
+                yield return new object[] { "2001", "yyyy", CultureInfo.InvariantCulture, style, new DateTime(2001, 1, 1, 0, 0, 0) };
 
-            yield return new object[] { "3", "%H", CultureInfo.InvariantCulture, DateTimeStyles.None, DateTime.Today + TimeSpan.FromHours(3) };
-            yield return new object[] { "03", "HH", CultureInfo.InvariantCulture, DateTimeStyles.None, DateTime.Today + TimeSpan.FromHours(3) };
+                yield return new object[] { "3", "%H", CultureInfo.InvariantCulture, style, DateTime.Today + TimeSpan.FromHours(3) };
+                yield return new object[] { "03", "HH", CultureInfo.InvariantCulture, style, DateTime.Today + TimeSpan.FromHours(3) };
 
-            yield return new object[] { "3A", "ht", CultureInfo.InvariantCulture, DateTimeStyles.None, DateTime.Today + TimeSpan.FromHours(3) };
-            yield return new object[] { "03A", "hht", CultureInfo.InvariantCulture, DateTimeStyles.None, DateTime.Today + TimeSpan.FromHours(3) };
-            yield return new object[] { "3P", "ht", CultureInfo.InvariantCulture, DateTimeStyles.None, DateTime.Today + TimeSpan.FromHours(12 + 3) };
-            yield return new object[] { "03P", "hht", CultureInfo.InvariantCulture, DateTimeStyles.None, DateTime.Today + TimeSpan.FromHours(12 + 3) };
+                yield return new object[] { "3A", "ht", CultureInfo.InvariantCulture, style, DateTime.Today + TimeSpan.FromHours(3) };
+                yield return new object[] { "03A", "hht", CultureInfo.InvariantCulture, style, DateTime.Today + TimeSpan.FromHours(3) };
+                yield return new object[] { "3P", "ht", CultureInfo.InvariantCulture, style, DateTime.Today + TimeSpan.FromHours(12 + 3) };
+                yield return new object[] { "03P", "hht", CultureInfo.InvariantCulture, style, DateTime.Today + TimeSpan.FromHours(12 + 3) };
 
-            yield return new object[] { "2017-10-11 01:23:45Z", "u", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2017, 10, 11, 1, 23, 45) };
-            yield return new object[] { "9/8/2017 10:11:12 AM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2017, 9, 8, 10, 11, 12) };
-            yield return new object[] { "9/8/2017 20:11:12 PM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(2017, 9, 8, 20, 11, 12) };
-            yield return new object[] { "Fri, 08 Sep 2017 11:18:19 -0000", "ddd, d MMM yyyy H:m:s zzz", new CultureInfo("en-US"), DateTimeStyles.AllowInnerWhite, new DateTime(2017, 9, 8, 11, 18, 19, DateTimeKind.Utc) };
-            yield return new object[] { "1234-05-06T07:00:00.8Z", "yyyy-MM-dd'T'HH:mm:ss.FFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(1234, 5, 6, 7, 0, 0, 800) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ss.FFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFF'Z'", CultureInfo.InvariantCulture, DateTimeStyles.None, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
-            yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, DateTimeStyles.None, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
-            yield return new object[] { "1234-05-06T07:00:00GMT", "yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, DateTimeStyles.None, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
-
+                yield return new object[] { "2017-10-11 01:23:45Z", "u", CultureInfo.InvariantCulture, style, new DateTime(2017, 10, 11, 1, 23, 45) };
+                yield return new object[] { "9/8/2017 10:11:12 AM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, style, new DateTime(2017, 9, 8, 10, 11, 12) };
+                yield return new object[] { "9/8/2017 20:11:12 PM", "M/d/yyyy HH':'mm':'ss tt", CultureInfo.InvariantCulture, style, new DateTime(2017, 9, 8, 20, 11, 12) };
+                yield return new object[] { "Fri, 08 Sep 2017 11:18:19 -0000", "ddd, d MMM yyyy H:m:s zzz", new CultureInfo("en-US"), DateTimeStyles.AllowInnerWhite, new DateTime(2017, 9, 8, 11, 18, 19, DateTimeKind.Utc) };
+                yield return new object[] { "1234-05-06T07:00:00.8Z", "yyyy-MM-dd'T'HH:mm:ss.FFF'Z'", CultureInfo.InvariantCulture, style, new DateTime(1234, 5, 6, 7, 0, 0, 800) };
+                yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ss.FFF'Z'", CultureInfo.InvariantCulture, style, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
+                yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFF'Z'", CultureInfo.InvariantCulture, style, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
+                yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFF'Z'", CultureInfo.InvariantCulture, style, new DateTime(1234, 5, 6, 7, 0, 0, 0) };
+                yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, style, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
+                yield return new object[] { "1234-05-06T07:00:00GMT", "yyyy-MM-dd'T'HH:mm:ssFFFZ", CultureInfo.InvariantCulture, style, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
+            }
 
             yield return new object[] { "9", "\"  \"%d", CultureInfo.InvariantCulture, DateTimeStyles.AllowLeadingWhite, new DateTime(DateTime.Now.Year, 1, 9, 0, 0, 0) };
             yield return new object[] { "15", "\' \'dd", CultureInfo.InvariantCulture, DateTimeStyles.AllowLeadingWhite, new DateTime(DateTime.Now.Year, 1, 15, 0, 0, 0) };
@@ -1100,6 +1371,13 @@ namespace System.Tests
             yield return new object[] { "1234-05-06T07:00:00Z", "yyyy-MM-dd'T'HH:mm:ssFFFZ\" \"", CultureInfo.InvariantCulture, DateTimeStyles.AllowTrailingWhite, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
             yield return new object[] { "1234-05-06T07:00:00GMT", "yyyy-MM-dd'T'HH:mm:ssFFFZ\"  \"", CultureInfo.InvariantCulture, DateTimeStyles.AllowTrailingWhite, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(1234, 5, 6, 7, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
 
+            yield return new object[] { "9/8/2017 10:11:12 AM                                          ", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+            yield return new object[] { "9/8/2017 10:11:12 AM       ", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+            yield return new object[] { "9/ 8    /2017    10:11:12 AM       ", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+            yield return new object[] { "   9   /8/2017       10:11:12 AM", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+            yield return new object[] { "9/8/2017 10 : 11 : 12 AM", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+            yield return new object[] { " 9 / 8 / 2017    10 : 11 : 12 AM", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+            yield return new object[] { "   9   /   8   /   2017    10  :   11  :   12  AM", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
 
             var hebrewCulture = new CultureInfo("he-IL");
             hebrewCulture.DateTimeFormat.Calendar = new HebrewCalendar();
@@ -1194,6 +1472,91 @@ namespace System.Tests
 
             Assert.False(DateTime.TryParseExact(input, format, culture, style, out DateTime result));
             Assert.False(DateTime.TryParseExact(input, new[] { format }, culture, style, out result));
+        }
+
+        public static IEnumerable<object[]> ToString_MatchesExpected_MemberData()
+        {
+            // Randomly generated data on netfx with:
+            //     using System;
+            //     class Program
+            //     {
+            //         static void Main()
+            //         {
+            //             var rand = new Random(42);
+            //             var bytes = new byte[8];
+            //             int i = 0;
+            //             while (i < 40)
+            //             {
+            //                 DateTimeKind kind = rand.Next(2) == 0 ? DateTimeKind.Utc : DateTimeKind.Unspecified;
+            //                 string format;
+            //                 switch (rand.Next(4))
+            //                 {
+            //                     case 0: format = "o"; break;
+            //                     case 1: format = "O"; break;
+            //                     case 2: format = "r"; break;
+            //                     default: format = "R"; break;
+            //                 }
+            //
+            //                 try
+            //                 {
+            //                     rand.NextBytes(bytes);
+            //                     long seed = BitConverter.ToInt64(bytes, 0);
+            //                     var dt = new DateTime(seed, kind);
+            //                     Console.WriteLine($"yield return new object[] {{ new DateTime({seed}, DateTimeKind.{kind}), \"{format}\", \"{dt.ToString(format)}\" }};");
+            //                     i++;
+            //                 }
+            //                 catch { }
+            //             }
+            //         }
+            //}
+
+            yield return new object[] { new DateTime(2688006240964947440, DateTimeKind.Utc), "O", "8518-12-15T08:01:36.4947440Z" };
+            yield return new object[] { new DateTime(2461197105169450509, DateTimeKind.Utc), "r", "Sun, 23 Mar 7800 18:15:16 GMT" };
+            yield return new object[] { new DateTime(71363981510699949, DateTimeKind.Unspecified), "R", "Fri, 23 Feb 0227 04:49:11 GMT" };
+            yield return new object[] { new DateTime(1678426538898407093, DateTimeKind.Unspecified), "R", "Fri, 22 Sep 5319 07:24:49 GMT" };
+            yield return new object[] { new DateTime(2689041307785948711, DateTimeKind.Utc), "o", "8522-03-27T07:52:58.5948711Z" };
+            yield return new object[] { new DateTime(996610247053299209, DateTimeKind.Unspecified), "r", "Thu, 19 Feb 3159 01:58:25 GMT" };
+            yield return new object[] { new DateTime(3105391438361510074, DateTimeKind.Unspecified), "R", "Fri, 06 Aug 9841 01:17:16 GMT" };
+            yield return new object[] { new DateTime(946433487657072106, DateTimeKind.Utc), "R", "Mon, 17 Feb 3000 03:06:05 GMT" };
+            yield return new object[] { new DateTime(2521748413631767931, DateTimeKind.Unspecified), "R", "Sat, 08 Feb 7992 07:02:43 GMT" };
+            yield return new object[] { new DateTime(49349519375012969, DateTimeKind.Utc), "R", "Fri, 20 May 0157 11:58:57 GMT" };
+            yield return new object[] { new DateTime(796677276139881359, DateTimeKind.Utc), "o", "2525-07-28T04:20:13.9881359Z" };
+            yield return new object[] { new DateTime(3022911536338429542, DateTimeKind.Unspecified), "R", "Mon, 24 Mar 9580 04:53:53 GMT" };
+            yield return new object[] { new DateTime(1144652135553351618, DateTimeKind.Utc), "R", "Tue, 04 Apr 3628 20:39:15 GMT" };
+            yield return new object[] { new DateTime(2570858096011770291, DateTimeKind.Unspecified), "o", "8147-09-23T04:53:21.1770291" };
+            yield return new object[] { new DateTime(15695724649124585, DateTimeKind.Unspecified), "R", "Tue, 27 Sep 0050 08:21:04 GMT" };
+            yield return new object[] { new DateTime(1503933934291527034, DateTimeKind.Unspecified), "O", "4766-10-12T06:37:09.1527034" };
+            yield return new object[] { new DateTime(2688603665097410101, DateTimeKind.Unspecified), "r", "Tue, 05 Nov 8520 19:08:29 GMT" };
+            yield return new object[] { new DateTime(1310336900529542610, DateTimeKind.Unspecified), "r", "Tue, 17 Apr 4153 15:14:12 GMT" };
+            yield return new object[] { new DateTime(2313720085584182693, DateTimeKind.Unspecified), "O", "7332-11-20T18:22:38.4182693" };
+            yield return new object[] { new DateTime(2291958603891779335, DateTimeKind.Unspecified), "o", "7263-12-05T20:46:29.1779335" };
+            yield return new object[] { new DateTime(262036413643976979, DateTimeKind.Unspecified), "o", "0831-05-12T21:16:04.3976979" };
+            yield return new object[] { new DateTime(684781207384421044, DateTimeKind.Utc), "O", "2170-12-26T20:12:18.4421044Z" };
+            yield return new object[] { new DateTime(1444462249169683325, DateTimeKind.Utc), "r", "Mon, 27 Apr 4578 07:21:56 GMT" };
+            yield return new object[] { new DateTime(1155518137384061537, DateTimeKind.Unspecified), "r", "Sun, 10 Sep 3662 06:02:18 GMT" };
+            yield return new object[] { new DateTime(2333390479532380569, DateTimeKind.Unspecified), "O", "7395-03-22T10:12:33.2380569" };
+            yield return new object[] { new DateTime(2217528014591554502, DateTimeKind.Unspecified), "R", "Sat, 26 Jan 7028 08:24:19 GMT" };
+            yield return new object[] { new DateTime(2764551324904480205, DateTimeKind.Utc), "O", "8761-07-08T04:21:30.4480205Z" };
+            yield return new object[] { new DateTime(2880903932678729712, DateTimeKind.Utc), "O", "9130-03-23T13:14:27.8729712Z" };
+            yield return new object[] { new DateTime(507699902578704433, DateTimeKind.Utc), "O", "1609-11-02T15:04:17.8704433Z" };
+            yield return new object[] { new DateTime(2429953022324426129, DateTimeKind.Utc), "O", "7701-03-20T15:03:52.4426129Z" };
+            yield return new object[] { new DateTime(603147512164908366, DateTimeKind.Unspecified), "O", "1912-04-20T09:33:36.4908366" };
+            yield return new object[] { new DateTime(2900400428644841236, DateTimeKind.Utc), "R", "Thu, 02 Jan 9192 22:34:24 GMT" };
+            yield return new object[] { new DateTime(1710845568474490805, DateTimeKind.Utc), "O", "5422-06-16T08:00:47.4490805Z" };
+            yield return new object[] { new DateTime(2988999715803714268, DateTimeKind.Utc), "r", "Sun, 06 Oct 9472 09:53:00 GMT" };
+            yield return new object[] { new DateTime(1068133489112689365, DateTimeKind.Utc), "r", "Wed, 12 Oct 3385 14:41:51 GMT" };
+            yield return new object[] { new DateTime(798784044525059284, DateTimeKind.Unspecified), "R", "Mon, 31 Mar 2532 13:40:52 GMT" };
+            yield return new object[] { new DateTime(2561736813034040593, DateTimeKind.Utc), "O", "8118-10-28T03:55:03.4040593Z" };
+            yield return new object[] { new DateTime(1677975383149674547, DateTimeKind.Utc), "o", "5318-04-18T03:18:34.9674547Z" };
+            yield return new object[] { new DateTime(1101778442151366156, DateTimeKind.Utc), "O", "3492-05-25T12:43:35.1366156Z" };
+            yield return new object[] { new DateTime(221550163152616218, DateTimeKind.Utc), "r", "Sun, 25 Jan 0703 19:11:55 GMT" };
+        }
+
+        [Theory]
+        [MemberData(nameof(ToString_MatchesExpected_MemberData))]
+        public static void ToString_MatchesExpected(DateTime dateTime, string format, string expected)
+        {
+            Assert.Equal(expected, dateTime.ToString(format));
         }
     }
 }

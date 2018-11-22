@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace System.IO.Tests
@@ -74,6 +75,81 @@ namespace System.IO.Tests
                 ((path, time) => File.SetLastWriteTimeUtc(path, time)),
                 ((path) => File.GetLastWriteTimeUtc(path)),
                 DateTimeKind.Utc);
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotInAppContainer))] // Can't read root in appcontainer
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void PageFileHasTimes()
+        {
+            // Typically there is a page file on the C: drive, if not, don't bother trying to track it down.
+            string pageFilePath = Directory.EnumerateFiles(@"C:\", "pagefile.sys").FirstOrDefault();
+            if (pageFilePath != null)
+            {
+                Assert.All(TimeFunctions(), (item) =>
+                {
+                    var time = item.Getter(pageFilePath);
+                    Assert.NotEqual(DateTime.FromFileTime(0), time);
+                });
+            }
+        }
+
+        [Fact]
+        public void SetLastWriteTimeTicks()
+        {
+            string firstFile = GetTestFilePath();
+            string secondFile = GetTestFilePath();
+
+            File.WriteAllText(firstFile, "");
+            File.WriteAllText(secondFile, "");
+
+            File.SetLastAccessTimeUtc(secondFile, DateTime.UtcNow);
+            long firstFileTicks = File.GetLastWriteTimeUtc(firstFile).Ticks;
+            long secondFileTicks = File.GetLastWriteTimeUtc(secondFile).Ticks;
+            Assert.True(firstFileTicks <= secondFileTicks, $"First File Ticks\t{firstFileTicks}\nSecond File Ticks\t{secondFileTicks}");
+        }
+
+        [ConditionalFact(nameof(isNotHFS))] // OSX HFS driver format does not support nanosecond granularity.
+        public void SetUptoNanoseconds()
+        {
+            string file = GetTestFilePath();
+            File.WriteAllText(file, "");
+
+            DateTime dateTime = DateTime.UtcNow;
+            File.SetLastWriteTimeUtc(file, dateTime);
+            long ticks = File.GetLastWriteTimeUtc(file).Ticks;
+
+            Assert.Equal(dateTime, File.GetLastWriteTimeUtc(file));
+            Assert.Equal(ticks, dateTime.Ticks);
+        }
+
+        [Fact]
+        [PlatformSpecific(~TestPlatforms.OSX)] // OSX has the limitation of setting upto 2262-04-11T23:47:16 (long.Max) date.
+        public void SetDateTimeMax()
+        {
+            string file = GetTestFilePath();
+            File.WriteAllText(file, "");
+
+            DateTime dateTime = new DateTime(9999, 4, 11, 23, 47, 17, 21, DateTimeKind.Utc);
+            File.SetLastWriteTimeUtc(file, dateTime);
+            long ticks = File.GetLastWriteTimeUtc(file).Ticks;
+
+            Assert.Equal(dateTime, File.GetLastWriteTimeUtc(file));
+            Assert.Equal(ticks, dateTime.Ticks);
+        }
+
+        [Fact]
+        public void SetLastAccessTimeTicks()
+        {
+            string firstFile = GetTestFilePath();
+            string secondFile = GetTestFilePath();
+
+            File.WriteAllText(firstFile, "");
+            File.WriteAllText(secondFile, "");
+
+            File.SetLastWriteTimeUtc(secondFile, DateTime.UtcNow);
+            long firstFileTicks = File.GetLastAccessTimeUtc(firstFile).Ticks;
+            long secondFileTicks = File.GetLastAccessTimeUtc(secondFile).Ticks;
+            Assert.True(firstFileTicks <= secondFileTicks, $"First File Ticks\t{firstFileTicks}\nSecond File Ticks\t{secondFileTicks}");
         }
     }
 }

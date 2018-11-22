@@ -79,7 +79,12 @@ Namespace Microsoft.VisualBasic.CompilerServices
         '  Param: Args - An array of params used to replace placeholders.
         'Returns: The resource string if found or an error message string
         '*****************************************************************************
-        Public Shared Function GetResourceString(ByVal resourceKey As String, ByVal ParamArray args() As String) As String
+        Friend Shared Function GetResourceString(ByVal ResourceId As vbErrors) As String
+            Dim id as String = "ID" & CStr(ResourceId)
+            Return SR.GetResourceString(id, id)
+        End Function
+
+        Friend Shared Function GetResourceString(ByVal resourceKey As String, ByVal ParamArray args() As String) As String
             Return SR.Format(resourceKey, args)
         End Function
 
@@ -388,7 +393,7 @@ GetSpecialValue:
             Return resultString
         End Function
 
-        Public Shared Function MethodToString(ByVal method As Reflection.MethodBase) As String
+        Friend Shared Function MethodToString(ByVal method As Reflection.MethodBase) As String
 
             Dim returnType As System.Type = Nothing
             Dim first As Boolean

@@ -64,6 +64,27 @@ internal static partial class Interop
                     throw CreateSslException(SR.net_allocate_ssl_context_failed);
                 }
 
+                // TLS 1.3 uses different ciphersuite restrictions than previous versions.
+                // It has no equivalent to a NoEncryption option.
+                if (policy == EncryptionPolicy.NoEncryption)
+                {
+                    if (protocols == SslProtocols.None)
+                    {
+                        protocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
+                    }
+                    else
+                    {
+                        protocols &= ~SslProtocols.Tls13;
+
+                        if (protocols == SslProtocols.None)
+                        {
+                            throw new SslException(
+                                SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
+                        }
+                    }
+                }
+
+
                 // Configure allowed protocols. It's ok to use DangerousGetHandle here without AddRef/Release as we just
                 // create the handle, it's rooted by the using, no one else has a reference to it, etc.
                 Ssl.SetProtocolOptions(innerContext.DangerousGetHandle(), protocols);
@@ -79,6 +100,7 @@ internal static partial class Interop
 
                 if (!Ssl.SetEncryptionPolicy(innerContext, policy))
                 {
+                    Crypto.ErrClearError();
                     throw new PlatformNotSupportedException(SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
                 }
 
@@ -129,7 +151,10 @@ internal static partial class Interop
                         string punyCode = s_idnMapping.GetAscii(sslAuthenticationOptions.TargetHost);
 
                         // Similar to windows behavior, set SNI on openssl by default for client context, ignore errors.
-                        Ssl.SslSetTlsExtHostName(context, punyCode);
+                        if (!Ssl.SslSetTlsExtHostName(context, punyCode))
+                        {
+                            Crypto.ErrClearError();
+                        }
                     }
 
                     if (hasCertificateAndKey)
@@ -210,7 +235,7 @@ internal static partial class Interop
                     if (sendCount <= 0)
                     {
                         // Make sure we clear out the error that is stored in the queue
-                        Crypto.ErrGetError();
+                        Crypto.ErrClearError();
                         sendBuf = null;
                         sendCount = 0;
                     }
@@ -227,12 +252,16 @@ internal static partial class Interop
 
         internal static int Encrypt(SafeSslHandle context, ReadOnlyMemory<byte> input, ref byte[] output, out Ssl.SslErrorCode errorCode)
         {
+#if DEBUG
+            ulong assertNoError = Crypto.ErrPeekError();
+            Debug.Assert(assertNoError == 0, "OpenSsl error queue is not empty, run: 'openssl errstr " + assertNoError.ToString("X") + "' for original error.");
+#endif
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
 
             int retVal;
             unsafe
             {
-                using (MemoryHandle handle = input.Retain(pin: true))
+                using (MemoryHandle handle = input.Pin())
                 {
                     retVal = Ssl.SslWrite(context, (byte*)handle.Pointer, input.Length);
                 }
@@ -267,7 +296,7 @@ internal static partial class Interop
                 if (retVal <= 0)
                 {
                     // Make sure we clear out the error that is stored in the queue
-                    Crypto.ErrGetError();
+                    Crypto.ErrClearError();
                 }
             }
 
@@ -276,6 +305,10 @@ internal static partial class Interop
 
         internal static int Decrypt(SafeSslHandle context, byte[] outBuffer, int offset, int count, out Ssl.SslErrorCode errorCode)
         {
+#if DEBUG
+            ulong assertNoError = Crypto.ErrPeekError();
+            Debug.Assert(assertNoError == 0, "OpenSsl error queue is not empty, run: 'openssl errstr " + assertNoError.ToString("X") + "' for original error.");
+#endif
             errorCode = Ssl.SslErrorCode.SSL_ERROR_NONE;
 
             int retVal = BioWrite(context.InputBio, outBuffer, offset, count);
@@ -463,7 +496,7 @@ internal static partial class Interop
                     break;
 
                 case Ssl.SslErrorCode.SSL_ERROR_SSL:
-                    // OpenSSL failure occurred.  The error queue contains more details.
+                    // OpenSSL failure occurred.  The error queue contains more details, when building the exception the queue will be cleared.
                     innerError = Interop.Crypto.CreateOpenSslCryptographicException();
                     break;
 
@@ -505,7 +538,9 @@ internal static partial class Interop
 
         internal static SslException CreateSslException(string message)
         {
-            ulong errorVal = Crypto.ErrGetError();
+            // Capture last error to be consistent with CreateOpenSslCryptographicException
+            ulong errorVal = Crypto.ErrPeekLastError();
+            Crypto.ErrClearError();
             string msg = SR.Format(message, Marshal.PtrToStringAnsi(Crypto.ErrReasonErrorString(errorVal)));
             return new SslException(msg, (int)errorVal);
         }

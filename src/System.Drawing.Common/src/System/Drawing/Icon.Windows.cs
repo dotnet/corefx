@@ -13,6 +13,11 @@ using System.Text;
 
 namespace System.Drawing
 {
+    [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+#if netcoreapp
+    [TypeConverter("System.Drawing.IconConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public sealed partial class Icon : MarshalByRefObject, ICloneable, IDisposable, ISerializable
     {
 #if FINALIZATION_WATCH
@@ -129,6 +134,29 @@ namespace System.Drawing
             Initialize(width, height);
         }
 
+        private Icon(SerializationInfo info, StreamingContext context)
+        {
+            _iconData = (byte[])info.GetValue("IconData", typeof(byte[])); // Do not rename (binary serialization)
+            _iconSize = (Size)info.GetValue("IconSize", typeof(Size)); // Do not rename (binary serialization)
+            Initialize(_iconSize.Width, _iconSize.Height);
+        }
+
+        void ISerializable.GetObjectData(SerializationInfo si, StreamingContext context)
+        {
+            if (_iconData != null)
+            {
+                si.AddValue("IconData", _iconData, typeof(byte[])); // Do not rename (binary serialization)
+            }
+            else
+            {
+                MemoryStream stream = new MemoryStream();
+                Save(stream);
+                si.AddValue("IconData", stream.ToArray(), typeof(byte[])); // Do not rename (binary serialization)
+            }
+
+            si.AddValue("IconSize", _iconSize, typeof(Size)); // Do not rename (binary serialization)
+        }
+
         public static Icon ExtractAssociatedIcon(string filePath) => ExtractAssociatedIcon(filePath, 0);
 
         private static Icon ExtractAssociatedIcon(string filePath, int index)
@@ -152,7 +180,7 @@ namespace System.Drawing
 
             if (uri.IsUnc)
             {
-                throw new ArgumentException(SR.Format(SR.InvalidArgument, nameof(filePath), filePath));
+                throw new ArgumentException(SR.Format(SR.InvalidArgumentValue, nameof(filePath), filePath));
             }
 
             if (!uri.IsFile)
@@ -637,15 +665,19 @@ namespace System.Drawing
                 // converting them to DIBS and saving them into the file.
                 // But, in the interest of simplicity, we just call to 
                 // OLE to do it for us.
-                SafeNativeMethods.PICTDESC pictdesc = SafeNativeMethods.PICTDESC.CreateIconPICTDESC(Handle);
-                Guid g = typeof(SafeNativeMethods.IPicture).GUID;
-                SafeNativeMethods.IPicture picture = SafeNativeMethods.OleCreatePictureIndirect(pictdesc, ref g, false);
+                PICTDESC pictdesc = PICTDESC.CreateIconPICTDESC(Handle);
+                Guid g = typeof(IPicture).GUID;
+                IPicture picture = OleCreatePictureIndirect(pictdesc, ref g, false);
 
                 if (picture != null)
                 {
                     try
                     {
-                        picture.SaveAsFile(new UnsafeNativeMethods.ComStreamFromDataStream(outputStream), -1, out int temp);
+                        // We threw this way on NetFX
+                        if (outputStream == null)
+                            throw new ArgumentNullException("dataStream");
+
+                        picture.SaveAsFile(new GPStream(outputStream, makeSeekable: false), -1, out int temp);
                     }
                     finally
                     {
@@ -896,5 +928,76 @@ namespace System.Drawing
         }
 
         public override string ToString() => SR.toStringIcon;
+
+        [DllImport(ExternDll.Oleaut32, PreserveSig = false)]
+        internal static extern IPicture OleCreatePictureIndirect(PICTDESC pictdesc, [In]ref Guid refiid, bool fOwn);
+
+        [ComImport()]
+        [Guid("7BF80980-BF32-101A-8BBB-00AA00300CAB")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        internal interface IPicture
+        {
+            IntPtr GetHandle();
+
+            IntPtr GetHPal();
+
+            [return: MarshalAs(UnmanagedType.I2)]
+            short GetPictureType();
+
+            int GetWidth();
+
+            int GetHeight();
+
+            void Render();
+
+            void SetHPal([In] IntPtr phpal);
+
+            IntPtr GetCurDC();
+
+            void SelectPicture([In] IntPtr hdcIn,
+                               [Out, MarshalAs(UnmanagedType.LPArray)] int[] phdcOut,
+                               [Out, MarshalAs(UnmanagedType.LPArray)] int[] phbmpOut);
+
+            [return: MarshalAs(UnmanagedType.Bool)]
+            bool GetKeepOriginalFormat();
+
+            void SetKeepOriginalFormat([In, MarshalAs(UnmanagedType.Bool)] bool pfkeep);
+
+            void PictureChanged();
+
+            [PreserveSig]
+            int SaveAsFile([In, MarshalAs(UnmanagedType.Interface)] Interop.Ole32.IStream pstm,
+                           [In] int fSaveMemCopy,
+                           [Out] out int pcbSize);
+
+            int GetAttributes();
+
+            void SetHdc([In] IntPtr hdc);
+        }
+
+        internal class Ole
+        {
+            public const int PICTYPE_ICON = 3;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal class PICTDESC
+        {
+            internal int cbSizeOfStruct;
+            public int picType;
+            internal IntPtr union1;
+            internal int union2;
+            internal int union3;
+
+            public static PICTDESC CreateIconPICTDESC(IntPtr hicon)
+            {
+                return new PICTDESC()
+                {
+                    cbSizeOfStruct = 12,
+                    picType = Ole.PICTYPE_ICON,
+                    union1 = hicon
+                };
+            }
+        }
     }
 }

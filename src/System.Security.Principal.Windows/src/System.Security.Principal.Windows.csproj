@@ -1,31 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{F9E9894E-2513-4085-9046-311AD49D8AE6}</ProjectGuid>
     <AssemblyName>System.Security.Principal.Windows</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
-    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'netfx'">None</ResourcesSourceOutputDirectory>
+    <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
+    <OmitResources Condition="'$(TargetsNetFx)' == 'true'">true</OmitResources>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetsWindows)' != 'true'">SR.PlatformNotSupported_Principal</GeneratePlatformNotSupportedAssemblyMessage>
+    <Configurations>net461-Windows_NT-Debug;net461-Windows_NT-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.0-Unix-Debug;netcoreapp2.0-Unix-Release;netcoreapp2.0-Windows_NT-Debug;netcoreapp2.0-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetGroup)' == 'uap'">
-    <DefineConstants>$(DefineConstants);uap</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp2.0-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp2.0-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp2.0-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp2.0-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
   <ItemGroup Condition="($(TargetGroup.StartsWith('netcoreapp')) or '$(TargetGroup)' == 'uap') AND '$(TargetsWindows)' == 'true'">
     <Compile Include="Microsoft\Win32\SafeHandles\SafeAccessTokenHandle.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeSecurityHandles.cs" />
@@ -68,6 +50,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCurrentThread.cs">
       <Link>Common\Interop\Interop.GetCurrentThread.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ClaimSecurityAttributes.cs">
+      <Link>Common\Interop\Interop.ClaimSecurityAttributes.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.OpenProcessToken_SafeAccessTokenHandle.cs">
       <Link>Common\Interop\Interop.OpenProcessToken.cs</Link>
     </Compile>
@@ -80,7 +65,7 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.DuplicateHandle.cs">
       <Link>Common\Interop\Interop.DuplicateHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CloseHandle.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs">
       <Link>Common\Interop\Interop.CloseHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\sspicli\Interop.LsaGetLogonSessionData.cs">
@@ -196,10 +181,10 @@
       <Link>Common\Interop\Interop.CheckTokenMembershipEx.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Debug" />
@@ -212,5 +197,4 @@
     <Reference Include="System.Security.Principal" />
     <Reference Include="System.Threading" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

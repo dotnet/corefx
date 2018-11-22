@@ -70,20 +70,20 @@ namespace System.IO
         // We don't guarantee thread safety on StreamReader, but we should at 
         // least prevent users from trying to read anything while an Async
         // read from the same thread is in progress.
-        private volatile Task _asyncReadTask;
+        private Task _asyncReadTask = Task.CompletedTask;
 
         private void CheckAsyncTaskInProgress()
         {
             // We are not locking the access to _asyncReadTask because this is not meant to guarantee thread safety. 
             // We are simply trying to deter calling any Read APIs while an async Read from the same thread is in progress.
-
-            Task t = _asyncReadTask;
-
-            if (t != null && !t.IsCompleted)
+            if (!_asyncReadTask.IsCompleted)
             {
-                throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
+                ThrowAsyncIOInProgress();
             }
         }
+
+        private static void ThrowAsyncIOInProgress() =>
+            throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
 
         // StreamReader by default will ignore illegal UTF8 characters. We don't want to 
         // throw here because we want to be able to read ill-formed data without choking. 
@@ -1059,7 +1059,7 @@ namespace System.IO
             // data read in, let's try writing directly to the user's buffer.
             bool readToUserBuffer = false;
 
-            Byte[] tmpByteBuffer = _byteBuffer;
+            byte[] tmpByteBuffer = _byteBuffer;
             Stream tmpStream = _stream;
 
             int count = buffer.Length;
@@ -1290,7 +1290,7 @@ namespace System.IO
         {
             _charLen = 0;
             _charPos = 0;
-            Byte[] tmpByteBuffer = _byteBuffer;
+            byte[] tmpByteBuffer = _byteBuffer;
             Stream tmpStream = _stream;
 
             if (!_checkPreamble)

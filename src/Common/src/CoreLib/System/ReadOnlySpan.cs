@@ -5,9 +5,8 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-#if !FEATURE_PORTABLE_SPAN
+
 using System.Runtime.Versioning;
-#endif // !FEATURE_PORTABLE_SPAN
 
 #pragma warning disable 0809  //warning CS0809: Obsolete member 'Span<T>.Equals(object)' overrides non-obsolete member 'object.Equals(object)'
 
@@ -26,9 +25,7 @@ namespace System
         /// </summary>
         public int Length
         {
-#if !FEATURE_PORTABLE_SPAN
             [NonVersionable]
-#endif // !FEATURE_PORTABLE_SPAN
             get
             {
                 return _length;
@@ -40,12 +37,11 @@ namespace System
         /// </summary>
         public bool IsEmpty
         {
-#if !FEATURE_PORTABLE_SPAN
             [NonVersionable]
-#endif // !FEATURE_PORTABLE_SPAN
             get
             {
-                return _length == 0;
+                // Workaround for https://github.com/dotnet/coreclr/issues/19620
+                return 0 >= (uint)_length;
             }
         }
         /// <summary>
@@ -88,13 +84,13 @@ namespace System
         /// <summary>
         /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="ReadOnlySpan{T}"/>
         /// </summary>
-        public static implicit operator ReadOnlySpan<T>(ArraySegment<T> arraySegment)
-            => new ReadOnlySpan<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+        public static implicit operator ReadOnlySpan<T>(ArraySegment<T> segment)
+            => new ReadOnlySpan<T>(segment.Array, segment.Offset, segment.Count);
 
         /// <summary>
         /// Returns a 0-length read-only span whose base is the null pointer.
         /// </summary>
-        public static ReadOnlySpan<T> Empty => default(ReadOnlySpan<T>);
+        public static ReadOnlySpan<T> Empty => default;
 
         /// <summary>Gets an enumerator for this span.</summary>
         public Enumerator GetEnumerator() => new Enumerator(this);

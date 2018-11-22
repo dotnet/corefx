@@ -179,7 +179,8 @@ namespace System.Linq.Parallel.Tests
                     yield return new object[] { element, count };
                     yield return new object[] { (long)element, count };
                     yield return new object[] { (double)element, count };
-                    yield return new object[] { (decimal)element, count };
+                    // [ActiveIssue("https://github.com/xunit/xunit/issues/1771")]
+                    //yield return new object[] { (decimal)element, count };
                     yield return new object[] { "" + element, count };
                 }
                 yield return new object[] { (object)null, count };
@@ -252,14 +253,14 @@ namespace System.Linq.Parallel.Tests
             yield return new object[] { default(int) };
             yield return new object[] { default(long) };
             yield return new object[] { default(double) };
-            yield return new object[] { default(decimal) };
+            // [ActiveIssue("https://github.com/xunit/xunit/issues/1771")]
+            //yield return new object[] { default(decimal) };
             yield return new object[] { default(string) };
             yield return new object[] { default(object) };
         }
 
         [Theory]
         [MemberData(nameof(EmptyData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "This causes assertion failure on UAPAoT")]
         public static void Empty<T>(T def)
         {
             Assert.Empty(ParallelEnumerable.Empty<T>());

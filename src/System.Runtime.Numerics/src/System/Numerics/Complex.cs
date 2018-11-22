@@ -19,6 +19,8 @@ namespace System.Numerics
         public static readonly Complex Zero = new Complex(0.0, 0.0);
         public static readonly Complex One = new Complex(1.0, 0.0);
         public static readonly Complex ImaginaryOne = new Complex(0.0, 1.0);
+        public static readonly Complex NaN = new Complex(double.NaN, double.NaN);
+        public static readonly Complex Infinity = new Complex(double.PositiveInfinity, double.PositiveInfinity);
 
         private const double InverseOfLog10 = 0.43429448190325; // 1 / Log(10)
 
@@ -62,7 +64,27 @@ namespace System.Numerics
             return left + right;
         }
 
+        public static Complex Add(Complex left, double right)
+        {
+            return left + right;
+        }
+
+        public static Complex Add(double left, Complex right)
+        {
+            return left + right;
+        }
+
         public static Complex Subtract(Complex left, Complex right)
+        {
+            return left - right;
+        }
+
+        public static Complex Subtract(Complex left, double right)
+        {
+            return left - right;
+        }
+
+        public static Complex Subtract(double left, Complex right)
         {
             return left - right;
         }
@@ -72,11 +94,31 @@ namespace System.Numerics
             return left * right;
         }
 
+        public static Complex Multiply(Complex left, double right)
+        {
+            return left * right;
+        }
+
+        public static Complex Multiply(double left, Complex right)
+        {
+            return left * right;
+        }
+
         public static Complex Divide(Complex dividend, Complex divisor)
         {
             return dividend / divisor;
         }
-        
+
+        public static Complex Divide(Complex dividend, double divisor)
+        {
+            return dividend / divisor;
+        }
+
+        public static Complex Divide(double dividend, Complex divisor)
+        {
+            return dividend / divisor;
+        }
+
         public static Complex operator -(Complex value)  /* Unary negation of a complex number */
         {
             return new Complex(-value.m_real, -value.m_imaginary);
@@ -86,10 +128,30 @@ namespace System.Numerics
         {
             return new Complex(left.m_real + right.m_real, left.m_imaginary + right.m_imaginary);
         }
+        
+        public static Complex operator +(Complex left, double right)
+        {
+            return new Complex(left.m_real + right, left.m_imaginary);
+        }
+        
+        public static Complex operator +(double left, Complex right)
+        {
+            return new Complex(left + right.m_real, right.m_imaginary);
+        }
 
         public static Complex operator -(Complex left, Complex right)
         {
             return new Complex(left.m_real - right.m_real, left.m_imaginary - right.m_imaginary);
+        }
+
+        public static Complex operator -(Complex left, double right)
+        {
+            return new Complex(left.m_real - right, left.m_imaginary);
+        }
+
+        public static Complex operator -(double left, Complex right)
+        {
+            return new Complex(left - right.m_real, -right.m_imaginary);
         }
 
         public static Complex operator *(Complex left, Complex right)
@@ -100,6 +162,46 @@ namespace System.Numerics
             return new Complex(result_realpart, result_imaginarypart);
         }
 
+        public static Complex operator *(Complex left, double right)
+        {
+            if (!double.IsFinite(left.m_real))
+            {
+                if (!double.IsFinite(left.m_imaginary))
+                {
+                    return new Complex(double.NaN, double.NaN);
+                }
+
+                return new Complex(left.m_real * right, double.NaN);
+            }
+
+            if (!double.IsFinite(left.m_imaginary))
+            {
+                return new Complex(double.NaN, left.m_imaginary * right);
+            }
+
+            return new Complex(left.m_real * right, left.m_imaginary * right);
+        }
+
+        public static Complex operator *(double left, Complex right)
+        {
+            if (!double.IsFinite(right.m_real))
+            {
+                if (!double.IsFinite(right.m_imaginary))
+                {
+                    return new Complex(double.NaN, double.NaN);
+                }
+
+                return new Complex(left * right.m_real, double.NaN);
+            }
+
+            if (!double.IsFinite(right.m_imaginary))
+            {
+                return new Complex(double.NaN, left * right.m_imaginary);
+            }
+
+            return new Complex(left * right.m_real, left * right.m_imaginary);
+        }
+
         public static Complex operator /(Complex left, Complex right)
         {
             // Division : Smith's formula.
@@ -108,6 +210,7 @@ namespace System.Numerics
             double c = right.m_real;
             double d = right.m_imaginary;
 
+            // Computing c * c + d * d will overflow even in cases where the actual result of the division does not overflow.
             if (Math.Abs(d) < Math.Abs(c))
             {
                 double doc = d / c;
@@ -117,6 +220,55 @@ namespace System.Numerics
             {
                 double cod = c / d;
                 return new Complex((b + a * cod) / (d + c * cod), (-a + b * cod) / (d + c * cod));
+            }
+        }
+
+        public static Complex operator /(Complex left, double right)
+        {
+            // IEEE prohibit optimizations which are value changing
+            // so we make sure that behaviour for the simplified version exactly match
+            // full version.
+            if (right == 0)
+            {
+                return new Complex(double.NaN, double.NaN);
+            }
+
+            if (!double.IsFinite(left.m_real))
+            {
+                if (!double.IsFinite(left.m_imaginary))
+                {
+                    return new Complex(double.NaN, double.NaN);
+                }
+
+                return new Complex(left.m_real / right, double.NaN);
+            }
+
+            if (!double.IsFinite(left.m_imaginary))
+            {
+                return new Complex(double.NaN, left.m_imaginary / right);
+            }
+
+            // Here the actual optimized version of code.
+            return new Complex(left.m_real / right, left.m_imaginary / right);
+        }
+
+        public static Complex operator /(double left, Complex right)
+        {
+            // Division : Smith's formula.
+            double a = left;
+            double c = right.m_real;
+            double d = right.m_imaginary;
+
+            // Computing c * c + d * d will overflow even in cases where the actual result of the division does not overflow.
+            if (Math.Abs(d) < Math.Abs(c))
+            {
+                double doc = d / c;
+                return new Complex(a / (c + d * doc), (-a * doc) / (c + d * doc));
+            }
+            else
+            {
+                double cod = c / d;
+                return new Complex(a * cod / (d + c * cod), -a / (d + c * cod));
             }
         }
 
@@ -497,6 +649,11 @@ namespace System.Numerics
             }
         }
 
+        public static bool IsFinite(Complex value) => double.IsFinite(value.m_real) && double.IsFinite(value.m_imaginary);
+
+        public static bool IsInfinity(Complex value) => double.IsInfinity(value.m_real) || double.IsInfinity(value.m_imaginary);
+
+        public static bool IsNaN(Complex value) => !IsInfinity(value) && !IsFinite(value);
 
         public static Complex Log(Complex value)
         {

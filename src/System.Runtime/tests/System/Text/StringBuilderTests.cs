@@ -979,6 +979,40 @@ namespace System.Text.Tests
             Assert.Same(string.Empty, builder.ToString());
         }
 
+        [Fact]
+        public static void Clear_Empty_CapacityNotZero()
+        {
+            var builder = new StringBuilder();
+            builder.Clear();
+            Assert.NotEqual(0, builder.Capacity);
+        }
+
+        [Fact]
+        public static void Clear_Empty_CapacityStaysUnchanged()
+        {
+            var sb = new StringBuilder(14);
+            sb.Clear();
+            Assert.Equal(14, sb.Capacity);
+        }
+
+        [Fact]
+        public static void Clear_Full_CapacityStaysUnchanged()
+        {
+            var sb = new StringBuilder(14);
+            sb.Append("Hello World!!!");
+            sb.Clear();
+            Assert.Equal(14, sb.Capacity);
+        }
+
+        [Fact]
+        public static void Clear_AtMaxCapacity_CapacityStaysUnchanged()
+        {
+            var builder = new StringBuilder(14, 14);
+            builder.Append("Hello World!!!");
+            builder.Clear();
+            Assert.Equal(14, builder.Capacity);
+        }
+
         [Theory]
         [InlineData("Hello", 0, new char[] { '\0', '\0', '\0', '\0', '\0' }, 0, 5, new char[] { 'H', 'e', 'l', 'l', 'o' })]
         [InlineData("Hello", 0, new char[] { '\0', '\0', '\0', '\0', '\0', '\0' }, 1, 5, new char[] { '\0', 'H', 'e', 'l', 'l', 'o' })]
@@ -1052,26 +1086,19 @@ namespace System.Text.Tests
 
             var sb4 = new StringBuilder(10, 20);
             var sb5 = new StringBuilder(10, 20);
-            var sb6 = new StringBuilder(10, 21);
-            var sb7 = new StringBuilder(11, 20);
 
-            var sb8 = new StringBuilder(10, 20);
-            sb8.Append("Hello");
-            var sb9 = new StringBuilder(10, 20);
-            sb9.Append("Hello");
-            var sb10 = new StringBuilder(10, 20);
-            sb10.Append("HelloX");
+            var sb6 = new StringBuilder(10, 20).Append("Hello");
+            var sb7 = new StringBuilder(10, 20).Append("Hello");
+            var sb8 = new StringBuilder(10, 20).Append("HelloX");
 
             yield return new object[] { sb1, sb1, true };
             yield return new object[] { sb1, sb2, true };
             yield return new object[] { sb1, sb3, false };
 
             yield return new object[] { sb4, sb5, true };
-            yield return new object[] { sb4, sb6, false };
-            yield return new object[] { sb4, sb7, false };
 
-            yield return new object[] { sb8, sb9, true };
-            yield return new object[] { sb8, sb10, false };
+            yield return new object[] { sb6, sb7, true };
+            yield return new object[] { sb6, sb8, false };
 
             yield return new object[] { sb1, null, false };
 

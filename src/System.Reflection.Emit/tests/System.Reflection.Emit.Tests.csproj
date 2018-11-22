@@ -1,13 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{1104A263-331A-4CA0-B541-759BD20F7B1D}</ProjectGuid>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
+    <TestRuntime>true</TestRuntime>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="AssemblyBuilderTests.cs" />
+    <Compile Include="OpCodesTests.cs" />
     <Compile Include="ConstructorBuilder\ConstructorBuilderDefineParameter.cs" />
     <Compile Include="ConstructorBuilder\ConstructorBuilderGetILGenerator.cs" />
     <Compile Include="ConstructorBuilder\ConstructorBuilderInitLocals.cs" />
@@ -55,10 +54,12 @@
     <Compile Include="ModuleBuilder\ModuleBuilderCreateGlobalFunctions.cs" />
     <Compile Include="ModuleBuilder\ModuleBuilderDefineEnum.cs" />
     <Compile Include="ModuleBuilder\ModuleBuilderDefineInitializedData.cs" />
+    <Compile Include="ModuleBuilder\ModuleBuilderDefinePInvokeMethod.cs" />
     <Compile Include="ModuleBuilder\ModuleBuilderDefineType.cs" />
     <Compile Include="ModuleBuilder\ModuleBuilderDefineUninitializedData.cs" />
     <Compile Include="ModuleBuilder\ModuleBuilderGetArrayMethod.cs" />
     <Compile Include="ModuleBuilder\ModuleBuilderSetCustomAttribute.cs" />
+    <Compile Include="ParameterBuilder\ParameterBuilderSetConstant.cs" />
     <Compile Include="PropertyBuilder\PropertyBuilderAddOtherMethod.cs" />
     <Compile Include="PropertyBuilder\PropertyBuilderAttributes.cs" />
     <Compile Include="PropertyBuilder\PropertyBuilderCanRead.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="TypeBuilder\TypeBuilderDeclaringMethod.cs" />
     <Compile Include="TypeBuilder\TypeBuilderDefineConstructor.cs" />
     <Compile Include="TypeBuilder\TypeBuilderDefineDefaultConstructor.cs" />
+    <Compile Include="TypeBuilder\TypeBuilderDefinePInvokeMethod.cs" />
     <Compile Include="TypeBuilder\TypeBuilderDefineMethod.cs" />
     <Compile Include="TypeBuilder\TypeBuilderDefineField.cs" />
     <Compile Include="TypeBuilder\TypeBuilderDefineGenericParameters.cs" />
@@ -110,5 +112,5 @@
     <Compile Include="TypeBuilder\TypeBuilderToString.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>
+

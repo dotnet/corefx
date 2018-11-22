@@ -222,6 +222,9 @@
   <data name="GraphicsBufferQueryFail" xml:space="preserve">
     <value>Screen-compatible bitmap cannot be created. The screen bitmap format cannot be determined.</value>
   </data>
+  <data name="IconInvalidMaskLength" xml:space="preserve">
+    <value>'{0}' data length expected {1}, read {2}</value>
+  </data>
   <data name="ToolboxItemLocked" xml:space="preserve">
     <value>Toolbox item cannot be modified.</value>
   </data>
@@ -258,7 +261,7 @@
   <data name="InterpolationColorsLengthsDiffer" xml:space="preserve">
     <value>Colors and positions do not have the same number of elements.</value>
   </data>
-  <data name="InvalidArgument" xml:space="preserve">
+  <data name="InvalidArgumentValue" xml:space="preserve">
     <value>Value of '{1}' is not valid for '{0}'.</value>
   </data>
   <data name="InvalidBoundArgument" xml:space="preserve">

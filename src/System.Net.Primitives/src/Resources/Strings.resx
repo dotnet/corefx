@@ -110,6 +110,9 @@
     <value>Collection was modified after the enumerator was instantiated.</value>
   </data>
   <data name="InvalidOperation_EnumOpCantHappen" xml:space="preserve">
-    <value>Enumerator is positioned before the first element or after the last element of the collection.</value>
+    <value>Enumeration has either not started or has already finished.</value>
+  </data>
+  <data name="bad_endpoint_string" xml:space="preserve">
+    <value>An invalid IPEndPoint was specified.</value>
   </data>
 </root>

@@ -66,20 +66,23 @@ namespace System.IO.Enumeration
             }
         }
 
-        private bool InternalContinueOnError(int error)
-            => (_options.IgnoreInaccessible && IsAccessError(error)) || ContinueOnError(error);
+        private bool InternalContinueOnError(Interop.ErrorInfo info, bool ignoreNotFound = false)
+            => (ignoreNotFound && IsDirectoryNotFound(info)) || (_options.IgnoreInaccessible && IsAccessError(info)) || ContinueOnError(info.RawErrno);
 
-        private static bool IsAccessError(int error)
-            => error == (int)Interop.Error.EACCES || error == (int)Interop.Error.EBADF
-                || error == (int)Interop.Error.EPERM;
+        private static bool IsDirectoryNotFound(Interop.ErrorInfo info)
+            => info.Error == Interop.Error.ENOTDIR || info.Error == Interop.Error.ENOENT;
 
-        private IntPtr CreateDirectoryHandle(string path)
+        private static bool IsAccessError(Interop.ErrorInfo info)
+            => info.Error == Interop.Error.EACCES || info.Error == Interop.Error.EBADF
+                || info.Error == Interop.Error.EPERM;
+
+        private IntPtr CreateDirectoryHandle(string path, bool ignoreNotFound = false)
         {
             IntPtr handle = Interop.Sys.OpenDir(path);
             if (handle == IntPtr.Zero)
             {
                 Interop.ErrorInfo info = Interop.Sys.GetLastErrorInfo();
-                if (InternalContinueOnError(info.RawErrno))
+                if (InternalContinueOnError(info, ignoreNotFound))
                 {
                     return IntPtr.Zero;
                 }
@@ -107,60 +110,66 @@ namespace System.IO.Enumeration
                 if (_lastEntryFound)
                     return false;
 
-                do
+                // If HAVE_READDIR_R is defined for the platform FindNextEntry depends on _entryBuffer being fixed since
+                // _entry will point to a string in the middle of the array. If the array is not fixed GC can move it after
+                // the native call and _entry will point to a bogus file name. 
+                fixed (byte* _ = _entryBuffer)
                 {
-                    FindNextEntry();
-                    if (_lastEntryFound)
-                        return false;
-
-                    FileAttributes attributes = FileSystemEntry.Initialize(
-                        ref entry, _entry, _currentPath, _rootDirectory, _originalRootDirectory, new Span<char>(_pathBuffer));
-                    bool isDirectory = (attributes & FileAttributes.Directory) != 0;
-
-                    bool isSpecialDirectory = false;
-                    if (isDirectory)
+                    do
                     {
-                        // Subdirectory found
-                        if (_entry.Name[0] == '.' && (_entry.Name[1] == 0 || (_entry.Name[1] == '.' && _entry.Name[2] == 0)))
+                        FindNextEntry();
+                        if (_lastEntryFound)
+                            return false;
+
+                        FileAttributes attributes = FileSystemEntry.Initialize(
+                            ref entry, _entry, _currentPath, _rootDirectory, _originalRootDirectory, new Span<char>(_pathBuffer));
+                        bool isDirectory = (attributes & FileAttributes.Directory) != 0;
+
+                        bool isSpecialDirectory = false;
+                        if (isDirectory)
                         {
-                            // "." or "..", don't process unless the option is set
-                            if (!_options.ReturnSpecialDirectories)
+                            // Subdirectory found
+                            if (_entry.Name[0] == '.' && (_entry.Name[1] == 0 || (_entry.Name[1] == '.' && _entry.Name[2] == 0)))
+                            {
+                                // "." or "..", don't process unless the option is set
+                                if (!_options.ReturnSpecialDirectories)
+                                    continue;
+                                isSpecialDirectory = true;
+                            }
+                        }
+
+                        if (!isSpecialDirectory && _options.AttributesToSkip != 0)
+                        {
+                            if ((_options.AttributesToSkip & FileAttributes.ReadOnly) != 0)
+                            {
+                                // ReadOnly is the only attribute that requires hitting entry.Attributes (which hits the disk)
+                                attributes = entry.Attributes;
+                            }
+
+                            if ((_options.AttributesToSkip & attributes) != 0)
+                            {
                                 continue;
-                            isSpecialDirectory = true;
+                            }
                         }
-                    }
 
-                    if (!isSpecialDirectory && _options.AttributesToSkip != 0)
-                    {
-                        if ((_options.AttributesToSkip & FileAttributes.ReadOnly) != 0)
+                        if (isDirectory && !isSpecialDirectory)
                         {
-                            // ReadOnly is the only attribute that requires hitting entry.Attributes (which hits the disk)
-                            attributes = entry.Attributes;
+                            if (_options.RecurseSubdirectories && ShouldRecurseIntoEntry(ref entry))
+                            {
+                                // Recursion is on and the directory was accepted, Queue it
+                                if (_pending == null)
+                                    _pending = new Queue<string>();
+                                _pending.Enqueue(Path.Join(_currentPath, entry.FileName));
+                            }
                         }
 
-                        if ((_options.AttributesToSkip & attributes) != 0)
+                        if (ShouldIncludeEntry(ref entry))
                         {
-                            continue;
+                            _current = TransformEntry(ref entry);
+                            return true;
                         }
-                    }
-
-                    if (isDirectory && !isSpecialDirectory)
-                    {
-                        if (_options.RecurseSubdirectories && ShouldRecurseIntoEntry(ref entry))
-                        {
-                            // Recursion is on and the directory was accepted, Queue it
-                            if (_pending == null)
-                                _pending = new Queue<string>();
-                            _pending.Enqueue(Path.Join(_currentPath, entry.FileName));
-                        }
-                    }
-
-                    if (ShouldIncludeEntry(ref entry))
-                    {
-                        _current = TransformEntry(ref entry);
-                        return true;
-                    }
-                } while (true);
+                    } while (true);
+                }
             }
         }
 
@@ -179,7 +188,7 @@ namespace System.IO.Enumeration
                     break;
                 default:
                     // Error
-                    if (InternalContinueOnError(result))
+                    if (InternalContinueOnError(new Interop.ErrorInfo(result)))
                     {
                         DirectoryFinished();
                         break;
@@ -191,10 +200,29 @@ namespace System.IO.Enumeration
             }
         }
 
-        private void DequeueNextDirectory()
+        private bool DequeueNextDirectory()
         {
-            _currentPath = _pending.Dequeue();
-            _directoryHandle = CreateDirectoryHandle(_currentPath);
+            // In Windows we open handles before we queue them, not after. If we fail to create the handle
+            // but are ok with it (IntPtr.Zero), we don't queue them. Unix can't handle having a lot of
+            // open handles, so we open after the fact.
+            //
+            // Doing the same on Windows would create a performance hit as we would no longer have the context
+            // of the parent handle to open from. Keeping the parent handle open would increase the amount of
+            // data we're maintaining, the number of active handles (they're not infinite), and the length
+            // of time we have handles open (preventing some actions such as renaming/deleting/etc.).
+
+            _directoryHandle = IntPtr.Zero;
+
+            while (_directoryHandle == IntPtr.Zero)
+            {
+                if (_pending == null || _pending.Count == 0)
+                    return false;
+
+                _currentPath = _pending.Dequeue();
+                _directoryHandle = CreateDirectoryHandle(_currentPath, ignoreNotFound: true);
+            }
+
+            return true;
         }
 
         private void InternalDispose(bool disposing)
@@ -202,7 +230,7 @@ namespace System.IO.Enumeration
             // It is possible to fail to allocate the lock, but the finalizer will still run
             if (_lock != null)
             {
-                lock(_lock)
+                lock (_lock)
                 {
                     _lastEntryFound = true;
                     _pending = null;

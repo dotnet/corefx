@@ -29,7 +29,7 @@ namespace System.IO.Pipelines
     }
     public partial class PipeOptions
     {
-        public PipeOptions(System.Buffers.MemoryPool<byte> pool = null, System.IO.Pipelines.PipeScheduler readerScheduler = null, System.IO.Pipelines.PipeScheduler writerScheduler = null, long pauseWriterThreshold = (long)0, long resumeWriterThreshold = (long)0, int minimumSegmentSize = 2048, bool useSynchronizationContext = true) { }
+        public PipeOptions(System.Buffers.MemoryPool<byte> pool = null, System.IO.Pipelines.PipeScheduler readerScheduler = null, System.IO.Pipelines.PipeScheduler writerScheduler = null, long pauseWriterThreshold = (long)32768, long resumeWriterThreshold = (long)16384, int minimumSegmentSize = 2048, bool useSynchronizationContext = true) { }
         public static System.IO.Pipelines.PipeOptions Default { get { throw null; } }
         public int MinimumSegmentSize { get { throw null; } }
         public long PauseWriterThreshold { get { throw null; } }
@@ -69,9 +69,9 @@ namespace System.IO.Pipelines
         public abstract void OnReaderCompleted(System.Action<System.Exception, object> callback, object state);
         public virtual System.Threading.Tasks.ValueTask<System.IO.Pipelines.FlushResult> WriteAsync(System.ReadOnlyMemory<byte> source, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
     }
-    public partial struct ReadResult
+    public readonly partial struct ReadResult
     {
-        private object _dummy;
+        private readonly object _dummy;
         public ReadResult(System.Buffers.ReadOnlySequence<byte> buffer, bool isCanceled, bool isCompleted) { throw null; }
         public System.Buffers.ReadOnlySequence<byte> Buffer { get { throw null; } }
         public bool IsCanceled { get { throw null; } }

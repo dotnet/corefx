@@ -12,7 +12,6 @@ namespace System.Xml.Serialization
     using System.Globalization;
     using System.Threading;
     using System.Diagnostics;
-    using System.Linq;
     using System.Collections.Generic;
     using System.Xml.Extensions;
     using System.Xml;
@@ -76,7 +75,7 @@ namespace System.Xml.Serialization
         public XmlReflectionImporter(XmlAttributeOverrides attributeOverrides, string defaultNamespace)
         {
             if (defaultNamespace == null)
-                defaultNamespace = String.Empty;
+                defaultNamespace = string.Empty;
             if (attributeOverrides == null)
                 attributeOverrides = new XmlAttributeOverrides();
             _attributeOverrides = attributeOverrides;
@@ -946,7 +945,7 @@ namespace System.Xml.Serialization
             if (a.XmlType != null && a.XmlType.TypeName.Length > 0)
                 typeName = a.XmlType.TypeName;
 
-            if (type.IsGenericType && typeName.IndexOf('{') >= 0)
+            if (type.IsGenericType && typeName.Contains('{'))
             {
                 Type genType = type.GetGenericTypeDefinition();
                 Type[] names = genType.GetGenericArguments();
@@ -958,7 +957,7 @@ namespace System.Xml.Serialization
                     if (typeName.Contains(argument))
                     {
                         typeName = typeName.Replace(argument, XsdTypeName(types[i]));
-                        if (typeName.IndexOf('{') < 0)
+                        if (!typeName.Contains('{'))
                         {
                             break;
                         }
@@ -1371,7 +1370,7 @@ namespace System.Xml.Serialization
         internal static XmlReflectionMember FindSpecifiedMember(string memberName, XmlReflectionMember[] reflectionMembers)
         {
             for (int i = 0; i < reflectionMembers.Length; i++)
-                if (string.Compare(reflectionMembers[i].MemberName, memberName + "Specified", StringComparison.Ordinal) == 0)
+                if (string.Equals(reflectionMembers[i].MemberName, memberName + "Specified", StringComparison.Ordinal))
                     return reflectionMembers[i];
             return null;
         }
@@ -1528,7 +1527,7 @@ namespace System.Xml.Serialization
                 accessor.ChoiceIdentifier = new ChoiceIdentifierAccessor();
                 accessor.ChoiceIdentifier.MemberName = a.XmlChoiceIdentifier.MemberName;
                 accessor.ChoiceIdentifier.MemberInfo = a.XmlChoiceIdentifier.GetMemberInfo();
-                accessor.ChoiceIdentifier.Mapping = ImportTypeMapping(_modelScope.GetTypeModel(choiceIdentifierType), ns, ImportContext.Element, String.Empty, null, limiter);
+                accessor.ChoiceIdentifier.Mapping = ImportTypeMapping(_modelScope.GetTypeModel(choiceIdentifierType), ns, ImportContext.Element, string.Empty, null, limiter);
                 CheckChoiceIdentifierMapping((EnumMapping)accessor.ChoiceIdentifier.Mapping);
             }
 
@@ -1672,7 +1671,7 @@ namespace System.Xml.Serialization
                         TypeModel typeModel = _modelScope.GetTypeModel(targetType);
                         if (element.Name.Length > 0)
                             typeModel.TypeDesc.IsMixed = true;
-                        element.Mapping = ImportTypeMapping(typeModel, element.Namespace, ImportContext.Element, String.Empty, null, limiter);
+                        element.Mapping = ImportTypeMapping(typeModel, element.Namespace, ImportContext.Element, string.Empty, null, limiter);
                         element.Default = GetDefaultValue(model.FieldTypeDesc, model.FieldType, a);
                         element.IsNullable = false;
                         element.Form = elementFormDefault;
@@ -1917,7 +1916,7 @@ namespace System.Xml.Serialization
 
                         if (element.Name.Length > 0)
                             typeModel.TypeDesc.IsMixed = true;
-                        element.Mapping = ImportTypeMapping(typeModel, element.Namespace, ImportContext.Element, String.Empty, null, false, openModel, limiter);
+                        element.Mapping = ImportTypeMapping(typeModel, element.Namespace, ImportContext.Element, string.Empty, null, false, openModel, limiter);
                         element.Default = GetDefaultValue(model.FieldTypeDesc, model.FieldType, a);
                         element.IsNullable = false;
                         element.Form = elementFormDefault;

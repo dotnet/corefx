@@ -1,6 +1,8 @@
-project(System.Net.Security.Native)
+project(System.Net.Security.Native C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+add_compile_options(-Wno-incompatible-pointer-types-discards-qualifiers)
 
 add_definitions(-DPIC=1)
 
@@ -24,7 +26,7 @@ else()
 endif()
 
 set(NATIVEGSS_SOURCES
-    pal_gssapi.cpp
+    pal_gssapi.c
 )
 
 add_library(System.Net.Security.Native

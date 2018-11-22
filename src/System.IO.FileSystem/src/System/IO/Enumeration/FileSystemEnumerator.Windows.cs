@@ -2,13 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.IO;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Threading;
 
+#if MS_IO_REDIST
+namespace Microsoft.IO.Enumeration
+#else
 namespace System.IO.Enumeration
+#endif
 {
     public unsafe abstract partial class FileSystemEnumerator<TResult> : CriticalFinalizerObject, IEnumerator<TResult>
     {
@@ -87,7 +94,7 @@ namespace System.IO.Enumeration
         /// <summary>
         /// Simple wrapper to allow creating a file handle for an existing directory.
         /// </summary>
-        private IntPtr CreateDirectoryHandle(string path)
+        private IntPtr CreateDirectoryHandle(string path, bool ignoreNotFound = false)
         {
             IntPtr handle = Interop.Kernel32.CreateFile_IntPtr(
                 path,
@@ -100,8 +107,7 @@ namespace System.IO.Enumeration
             {
                 int error = Marshal.GetLastWin32Error();
 
-                if ((error == Interop.Errors.ERROR_ACCESS_DENIED &&
-                    _options.IgnoreInaccessible) || ContinueOnError(error))
+                if (ContinueOnDirectoryError(error, ignoreNotFound))
                 {
                     return IntPtr.Zero;
                 }
@@ -116,6 +122,17 @@ namespace System.IO.Enumeration
             }
 
             return handle;
+        }
+
+        private bool ContinueOnDirectoryError(int error, bool ignoreNotFound)
+        {
+            // Directories can be removed (ERROR_FILE_NOT_FOUND) or replaced with a file of the same name (ERROR_DIRECTORY) while
+            // we are enumerating. The only reasonable way to handle this is to simply move on. There is no such thing as a "true"
+            // snapshot of filesystem state- our "snapshot" will consider the name non-existent in this rare case.
+
+            return (ignoreNotFound && (error == Interop.Errors.ERROR_FILE_NOT_FOUND || error == Interop.Errors.ERROR_PATH_NOT_FOUND || error == Interop.Errors.ERROR_DIRECTORY))
+                || (error == Interop.Errors.ERROR_ACCESS_DENIED && _options.IgnoreInaccessible)
+                || ContinueOnError(error);
         }
 
         public bool MoveNext()
@@ -137,7 +154,7 @@ namespace System.IO.Enumeration
                         return false;
 
                     // Calling the constructor inside the try block would create a second instance on the stack.
-                    FileSystemEntry.Initialize(ref entry, _entry, _currentPath, _rootDirectory, _originalRootDirectory);
+                    FileSystemEntry.Initialize(ref entry, _entry, _currentPath.AsSpan(), _rootDirectory.AsSpan(), _originalRootDirectory.AsSpan());
 
                     // Skip specified attributes
                     if ((_entry->FileAttributes & _options.AttributesToSkip) != 0)
@@ -155,7 +172,7 @@ namespace System.IO.Enumeration
                         else if (_options.RecurseSubdirectories && ShouldRecurseIntoEntry(ref entry))
                         {
                             // Recursion is on and the directory was accepted, Queue it
-                            string subDirectory = Path.Join(_currentPath, _entry->FileName);
+                            string subDirectory = Path.Join(_currentPath.AsSpan(), _entry->FileName);
                             IntPtr subDirectoryHandle = CreateRelativeDirectoryHandle(_entry->FileName, subDirectory);
                             if (subDirectoryHandle != IntPtr.Zero)
                             {
@@ -195,9 +212,13 @@ namespace System.IO.Enumeration
                 _entry = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)_pinnedBuffer.AddrOfPinnedObject();
         }
 
-        private void DequeueNextDirectory()
+        private bool DequeueNextDirectory()
         {
+            if (_pending == null || _pending.Count == 0)
+                return false;
+
             (_directoryHandle, _currentPath) = _pending.Dequeue();
+            return true;
         }
 
         private void InternalDispose(bool disposing)

@@ -18,8 +18,8 @@ namespace System.Net.WebSockets.Client.Tests
         public CloseTest(ITestOutputHelper output) : base(output) { }
 
         [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
-        public async Task CloseAsync_ServerInitiatedClose_Success(Uri server)
+        [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServersAndBoolean))]
+        public async Task CloseAsync_ServerInitiatedClose_Success(Uri server, bool useCloseOutputAsync)
         {
             const string closeWebSocketMetaCommand = ".close";
 
@@ -50,9 +50,11 @@ namespace System.Net.WebSockets.Client.Tests
                 Assert.Equal(closeWebSocketMetaCommand, cws.CloseStatusDescription);
 
                 // Send back close message to acknowledge server-initiated close.
-                _output.WriteLine("CloseAsync starting.");
-                await cws.CloseAsync(WebSocketCloseStatus.InvalidMessageType, string.Empty, cts.Token);
-                _output.WriteLine("CloseAsync done.");
+                _output.WriteLine("Close starting.");
+                await (useCloseOutputAsync ?
+                    cws.CloseOutputAsync(WebSocketCloseStatus.InvalidMessageType, string.Empty, cts.Token) :
+                    cws.CloseAsync(WebSocketCloseStatus.InvalidMessageType, string.Empty, cts.Token));
+                _output.WriteLine("Close done.");
                 Assert.Equal(WebSocketState.Closed, cws.State);
 
                 // Verify that there is no follow-up echo close message back from the server by
@@ -152,7 +154,7 @@ namespace System.Net.WebSockets.Client.Tests
 
                 await cws.CloseAsync(closeStatus, closeDescription, cts.Token);
                 Assert.Equal(closeStatus, cws.CloseStatus);
-                Assert.Equal(true, String.IsNullOrEmpty(cws.CloseStatusDescription));
+                Assert.Equal(true, string.IsNullOrEmpty(cws.CloseStatusDescription));
             }
         }
 

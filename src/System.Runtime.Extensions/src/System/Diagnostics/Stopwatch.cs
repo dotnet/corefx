@@ -4,8 +4,8 @@
 
 namespace System.Diagnostics
 {
-    // This class uses high-resolution performance counter if installed hardware 
-    // does not support it. Otherwise, the class will fall back to DateTime class
+    // This class uses high-resolution performance counter if the installed
+    // hardware supports it. Otherwise, the class will fall back to DateTime
     // and uses ticks as a measurement.
 
     public partial class Stopwatch
@@ -81,7 +81,7 @@ namespace System.Diagnostics
 
                 if (_elapsed < 0)
                 {
-                    // When measuring small time periods the StopWatch.Elapsed* 
+                    // When measuring small time periods the Stopwatch.Elapsed* 
                     // properties can return negative values.  This is due to 
                     // bugs in the basic input/output system (BIOS) or the hardware
                     // abstraction layer (HAL) on machines with variable-speed CPUs
@@ -148,7 +148,7 @@ namespace System.Diagnostics
 
             if (_isRunning)
             {
-                // If the StopWatch is running, add elapsed time since
+                // If the Stopwatch is running, add elapsed time since
                 // the Stopwatch is started last time. 
                 long currentTimeStamp = GetTimestamp();
                 long elapsedUntilNow = currentTimeStamp - _startTimeStamp;

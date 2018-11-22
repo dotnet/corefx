@@ -286,6 +286,7 @@ namespace System.IO.Tests
         public static void GetEncoding()
         {
             var sw = new StringWriter();
+            Assert.Equal(new UnicodeEncoding(false, false), sw.Encoding);
             Assert.Equal(Encoding.Unicode.WebName, sw.Encoding.WebName);
         }
 
@@ -315,7 +316,7 @@ namespace System.IO.Tests
         public static void TestWriteObject()
         {
             var sw = new StringWriter();
-            sw.Write(new Object());
+            sw.Write(new object());
             Assert.Equal("System.Object", sw.ToString());
         }
 
@@ -344,7 +345,7 @@ namespace System.IO.Tests
         public static void TestWriteLineObject()
         {
             var sw = new StringWriter();
-            sw.WriteLine(new Object());
+            sw.WriteLine(new object());
             Assert.Equal("System.Object" + Environment.NewLine, sw.ToString());
         }
     

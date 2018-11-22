@@ -22,8 +22,11 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_RsaDestroy")]
         internal static extern void RsaDestroy(IntPtr rsa);
 
+        internal static SafeRsaHandle DecodeRsaPublicKey(ReadOnlySpan<byte> buf) =>
+            DecodeRsaPublicKey(ref MemoryMarshal.GetReference(buf), buf.Length);
+
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_DecodeRsaPublicKey")]
-        internal static extern SafeRsaHandle DecodeRsaPublicKey(byte[] buf, int len);
+        private static extern SafeRsaHandle DecodeRsaPublicKey(ref byte buf, int len);
 
         internal static int RsaPublicEncrypt(
             int flen,
@@ -96,8 +99,24 @@ internal static partial class Interop
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool RsaSign(int type, ref byte m, int m_len, ref byte sigret, out int siglen, SafeRsaHandle rsa);
 
-        internal static bool RsaVerify(int type, ReadOnlySpan<byte> m, int m_len, ReadOnlySpan<byte> sigbuf, int siglen, SafeRsaHandle rsa) =>
-            RsaVerify(type, ref MemoryMarshal.GetReference(m), m_len, ref MemoryMarshal.GetReference(sigbuf), siglen, rsa);
+        internal static bool RsaVerify(int type, ReadOnlySpan<byte> m, ReadOnlySpan<byte> sigbuf, SafeRsaHandle rsa)
+        {
+            bool ret = RsaVerify(
+                type,
+                ref MemoryMarshal.GetReference(m),
+                m.Length,
+                ref MemoryMarshal.GetReference(sigbuf),
+                sigbuf.Length,
+                rsa);
+
+            if (!ret)
+            {
+                ErrClearError();
+            }
+
+            return ret;
+        }
+            
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_RsaVerify")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -171,7 +190,8 @@ internal static partial class Interop
             out IntPtr iqmp);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SetRsaParameters")]
-        internal static extern void SetRsaParameters(
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool SetRsaParameters(
             SafeRsaHandle key,
             byte[] n,
             int nLength,

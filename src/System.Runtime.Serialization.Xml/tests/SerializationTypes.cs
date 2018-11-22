@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -1146,15 +1146,73 @@ public class DefaultValuesSetToNaN
     [DefaultValue(float.NaN)]
     public float FloatProp { get; set; }
 
-    [DefaultValue(Double.NaN)]
-    public Double DoubleField;
+    [DefaultValue(double.NaN)]
+    public double DoubleField;
 
-    [DefaultValue(Single.NaN)]
-    public Single SingleField;
+    [DefaultValue(float.NaN)]
+    public float SingleField;
 
     public override bool Equals(object obj)
     {
         var other = obj as DefaultValuesSetToNaN;
+        return other == null ? false :
+            other.DoubleProp == this.DoubleProp && other.FloatProp == this.FloatProp &&
+            other.DoubleField == this.DoubleField && other.SingleField == this.SingleField;
+    }
+
+    public override int GetHashCode()
+    {
+        return this.DoubleProp.GetHashCode() ^ this.FloatProp.GetHashCode() ^
+            this.DoubleField.GetHashCode() ^ this.SingleField.GetHashCode();
+    }
+}
+
+public class DefaultValuesSetToPositiveInfinity
+{
+    [DefaultValue(double.PositiveInfinity)]
+    public double DoubleProp { get; set; }
+
+    [DefaultValue(float.PositiveInfinity)]
+    public float FloatProp { get; set; }
+
+    [DefaultValue(double.PositiveInfinity)]
+    public double DoubleField;
+
+    [DefaultValue(float.PositiveInfinity)]
+    public float SingleField;
+
+    public override bool Equals(object obj)
+    {
+        var other = obj as DefaultValuesSetToPositiveInfinity;
+        return other == null ? false :
+            other.DoubleProp == this.DoubleProp && other.FloatProp == this.FloatProp &&
+            other.DoubleField == this.DoubleField && other.SingleField == this.SingleField;
+    }
+
+    public override int GetHashCode()
+    {
+        return this.DoubleProp.GetHashCode() ^ this.FloatProp.GetHashCode() ^
+            this.DoubleField.GetHashCode() ^ this.SingleField.GetHashCode();
+    }
+}
+
+public class DefaultValuesSetToNegativeInfinity
+{
+    [DefaultValue(double.NegativeInfinity)]
+    public double DoubleProp { get; set; }
+
+    [DefaultValue(float.NegativeInfinity)]
+    public float FloatProp { get; set; }
+
+    [DefaultValue(double.NegativeInfinity)]
+    public double DoubleField;
+
+    [DefaultValue(float.NegativeInfinity)]
+    public float SingleField;
+
+    public override bool Equals(object obj)
+    {
+        var other = obj as DefaultValuesSetToNegativeInfinity;
         return other == null ? false :
             other.DoubleProp == this.DoubleProp && other.FloatProp == this.FloatProp &&
             other.DoubleField == this.DoubleField && other.SingleField == this.SingleField;
@@ -1184,4 +1242,25 @@ public class TypeWithMismatchBetweenAttributeAndPropertyType
             _intValue = value;
         }
     }
+}
+
+[DataContract(IsReference = true)]
+public class TypeWithLinkedProperty
+{
+    [DataMember]
+    public TypeWithLinkedProperty Child { get; set; }
+    [DataMember]
+    public List<TypeWithLinkedProperty> Children { get; set; }
+}
+
+[Serializable()]
+[System.Xml.Serialization.XmlType("MsgDocumentType", Namespace = "http://example.com")]
+[System.Xml.Serialization.XmlRoot("Document", Namespace = "http://example.com")]
+public partial class MsgDocumentType
+{
+    [System.Xml.Serialization.XmlAttribute("id", DataType = "ID")]
+    public string Id { get; set; }
+
+    [System.Xml.Serialization.XmlAttribute("refs", DataType = "IDREFS")]
+    public string[] Refs { get; set; }
 }

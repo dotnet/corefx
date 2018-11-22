@@ -18,7 +18,7 @@ usage()
     echo "-staticLibLink - Optional argument to statically link any native library."
     echo "-portable - Optional argument to build native libraries portable over GLIBC based Linux distros."
     echo "-stripSymbols - Optional argument to strip native symbols during the build."
-    echo "-generateversion - Pass this in to get a version on the build output."
+    echo "-skipgenerateversion - Pass this in to skip getting a version on the build output."
     echo "-cmakeargs - user-settable additional arguments passed to CMake."
     exit 1
 }
@@ -40,8 +40,11 @@ initHostDistroRid()
                __HostDistroRid="rhel.6-$__HostArch"
             fi
         fi
+    elif  [ "$__HostOS" == "OSX" ]; then
+        _osx_version=`sw_vers -productVersion | cut -f1-2 -d'.'`
+        __HostDistroRid="osx.$_osx_version-x64"
     elif [ "$__HostOS" == "FreeBSD" ]; then
-      __freebsd_version=`sysctl -n kern.osrelease | cut -f1 -d'.'`
+      __freebsd_version=`sysctl -n kern.osrelease | cut -f1 -d'-'`
       __HostDistroRid="freebsd.$__freebsd_version-x64"
     fi
 
@@ -109,14 +112,10 @@ prepare_native_build()
     fi
 
     # Generate version.c if specified, else have an empty one.
-    __versionSourceFile=$__rootRepo/bin/obj/version.c
+    __versionSourceFile=$__artifactsDir/obj/_version.c
     if [ ! -e "${__versionSourceFile}" ]; then
-        if [ $__generateversionsource == true ]; then
-            $__rootRepo/Tools/msbuild.sh "$__rootRepo/build.proj" /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true /v:minimal
-        else
-            __versionSourceLine="static char sccsid[] __attribute__((used)) = \"@(#)No version information produced\";"
-            echo $__versionSourceLine > $__versionSourceFile
-        fi
+        __versionSourceLine="static char sccsid[] __attribute__((used)) = \"@(#)No version information produced\";"
+        echo "${__versionSourceLine}" > ${__versionSourceFile}
     fi
 }
 
@@ -152,17 +151,15 @@ build_native()
 __scriptpath=$(cd "$(dirname "$0")"; pwd -P)
 __nativeroot=$__scriptpath/Unix
 __rootRepo="$__scriptpath/../.."
-__rootbinpath="$__scriptpath/../../bin"
+__artifactsDir="$__rootRepo/artifacts"
 
 # Set the various build properties here so that CMake and MSBuild can pick them up
 __CMakeExtraArgs=""
 __MakeExtraArgs=""
-__generateversionsource=false
 __BuildArch=x64
 __BuildType=Debug
 __CMakeArgs=DEBUG
 __BuildOS=Linux
-__TargetGroup=netcoreapp
 __NumProc=1
 __UnprocessedBuildArgs=
 __CrossBuild=0
@@ -173,13 +170,8 @@ __ClangMinorVersion=0
 __StaticLibLink=0
 __PortableBuild=0
 
-CPUName=$(uname -p)
-# Some Linux platforms report unknown for platform, but the arch for machine.
-if [ $CPUName == "unknown" ]; then
-    CPUName=$(uname -m)
-fi
-
-if [ $CPUName == "i686" ]; then
+CPUName=$(uname -m)
+if [ "$CPUName" == "i686" ]; then
     __BuildArch=x86
 fi
 
@@ -256,6 +248,10 @@ while :; do
             __BuildType=Release
             __CMakeArgs=RELEASE
             ;;
+        outconfig|-outconfig)
+            __outConfig=$2
+            shift
+            ;;
         freebsd|FreeBSD|-freebsd|-FreeBSD)
             __BuildOS=FreeBSD
             ;;
@@ -270,10 +266,6 @@ while :; do
             ;;
         stripsymbols|-stripsymbols)
             __CMakeExtraArgs="$__CMakeExtraArgs -DSTRIP_SYMBOLS=true"
-            ;;
-        --targetgroup)
-            shift
-            __TargetGroup=$1
             ;;
         --numproc|-numproc|numproc)
             shift
@@ -290,9 +282,6 @@ while :; do
             if [ "$__HostOS" == "Linux" ]; then
                 __PortableBuild=1
             fi
-            ;;
-        generateversion|-generateversion)
-            __generateversionsource=true
             ;;
         --clang*)
                 # clangx.y or clang-x.y
@@ -381,8 +370,9 @@ if [[ $__ClangMajorVersion == 0 && $__ClangMinorVersion == 0 ]]; then
 fi
 
 # Set the remaining variables based upon the determined build configuration
-__IntermediatesDir="$__rootbinpath/obj/$__BuildOS.$__BuildArch.$__BuildType/native"
-__BinDir="$__rootbinpath/$__BuildOS.$__BuildArch.$__BuildType/native"
+__outConfig=${__outConfig:-"$__BuildOS-$__BuildArch-$__BuildType"}
+__IntermediatesDir="$__artifactsDir/obj/native/$__outConfig"
+__BinDir="$__artifactsDir/bin/native/$__outConfig"
 
 # Make the directories necessary for build if they don't exist
 setup_dirs

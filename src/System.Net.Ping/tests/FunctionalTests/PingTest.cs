@@ -12,6 +12,7 @@ using Xunit;
 
 namespace System.Net.NetworkInformation.Tests
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Ping class not supported on UWP. See dotnet/corefx #19583")]
     public class PingTest
     {
         private class FinalizingPing : Ping
@@ -51,7 +52,7 @@ namespace System.Net.NetworkInformation.Tests
         [Fact]
         public async Task SendPingAsync_InvalidArgs()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
             Ping p = new Ping();
 
             // Null address
@@ -95,11 +96,37 @@ namespace System.Net.NetworkInformation.Tests
             AssertExtensions.Throws<ArgumentException>("buffer", () => { p.Send(TestSettings.LocalHost, 1, new byte[65501]); });
         }
 
-        [Fact]
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
-        public async Task SendPingAsyncWithIPAddress()
+        [Theory]
+        [InlineData(AddressFamily.InterNetwork)]
+        [InlineData(AddressFamily.InterNetworkV6)]
+        public void SendPingWithIPAddress(AddressFamily addressFamily)
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress(addressFamily);
+            if (localIpAddress == null)
+            {
+                // No local address for given address family.
+                return;
+            }
+
+            SendBatchPing(
+                (ping) => ping.Send(localIpAddress),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+                });
+        }
+
+        [Theory]
+        [InlineData(AddressFamily.InterNetwork)]
+        [InlineData(AddressFamily.InterNetworkV6)]
+        public async Task SendPingAsyncWithIPAddress(AddressFamily addressFamily)
+        {
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync(addressFamily);
+            if (localIpAddress == null)
+            {
+                // No local address for given address family.
+                return;
+            }
 
             await SendBatchPingAsync(
                 (ping) => ping.SendPingAsync(localIpAddress),
@@ -109,11 +136,30 @@ namespace System.Net.NetworkInformation.Tests
                 });
         }
 
+        [Theory]
+        [InlineData(AddressFamily.InterNetwork)]
+        [InlineData(AddressFamily.InterNetworkV6)]
+        public void SendPingWithIPAddress_AddressAsString(AddressFamily addressFamily)
+        {
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress(addressFamily);
+            if (localIpAddress == null)
+            {
+                // No local address for given address family.
+                return;
+            }
+
+            SendBatchPing(
+                (ping) => ping.Send(localIpAddress.ToString()),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+                });
+        }
+
         [Fact]
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
         public async Task SendPingAsyncWithIPAddress_AddressAsString()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             await SendBatchPingAsync(
                 (ping) => ping.SendPingAsync(localIpAddress.ToString()),
@@ -125,9 +171,23 @@ namespace System.Net.NetworkInformation.Tests
 
         [Fact]
         [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
+        public void SendPingWithIPAddressAndTimeout()
+        {
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+
+            SendBatchPing(
+                (ping) => ping.Send(localIpAddress, TestSettings.PingTimeout),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+                });
+        }
+
+        [Fact]
+        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
         public async Task SendPingAsyncWithIPAddressAndTimeout()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             await SendBatchPingAsync(
                 (ping) => ping.SendPingAsync(localIpAddress, TestSettings.PingTimeout),
@@ -138,12 +198,27 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
+        [Fact]
+        public void SendPingWithIPAddressAndTimeoutAndBuffer()
+        {
+            byte[] buffer = TestSettings.PayloadAsBytes;
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+
+            SendBatchPing(
+                (ping) => ping.Send(localIpAddress, TestSettings.PingTimeout, buffer),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+                    Assert.Equal(buffer, pingReply.Buffer);
+                });
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeoutAndBuffer()
         {
             byte[] buffer = TestSettings.PayloadAsBytes;
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             await SendBatchPingAsync(
                 (ping) => ping.SendPingAsync(localIpAddress, TestSettings.PingTimeout, buffer),
@@ -156,10 +231,35 @@ namespace System.Net.NetworkInformation.Tests
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
+        public void SendPingWithIPAddressAndTimeoutAndBuffer_Unix()
+        {
+            byte[] buffer = TestSettings.PayloadAsBytes;
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+
+            SendBatchPing(
+                (ping) => ping.Send(localIpAddress, TestSettings.PingTimeout, buffer),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+
+                    // Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
+                    if (Capability.CanUseRawSockets(localIpAddress.AddressFamily))
+                    {
+                        Assert.Equal(buffer, pingReply.Buffer);
+                    }
+                    else
+                    {
+                        Assert.Equal(Array.Empty<byte>(), pingReply.Buffer);
+                    }
+                });
+        }
+
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
+        [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeoutAndBuffer_Unix()
         {
             byte[] buffer = TestSettings.PayloadAsBytes;
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             await SendBatchPingAsync(
                 (ping) => ping.SendPingAsync(localIpAddress, TestSettings.PingTimeout, buffer),
@@ -180,11 +280,28 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
+        [Fact]
+        public void SendPingWithIPAddressAndTimeoutAndBufferAndPingOptions()
+        {
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+
+            var options = new PingOptions();
+            byte[] buffer = TestSettings.PayloadAsBytes;
+            SendBatchPing(
+                (ping) => ping.Send(localIpAddress, TestSettings.PingTimeout, buffer, options),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+                    Assert.Equal(buffer, pingReply.Buffer);
+                    Assert.InRange(pingReply.RoundtripTime, 0, long.MaxValue);
+                });
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
         public async Task SendPingAsyncWithIPAddressAndTimeoutAndBufferAndPingOptions()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             var options = new PingOptions();
             byte[] buffer = TestSettings.PayloadAsBytes;
@@ -199,10 +316,49 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-        [Fact]
-        public async Task SendPingAsyncWithIPAddressAndTimeoutAndBufferAndPingOptions_Unix()
+        [Theory]
+        [InlineData(AddressFamily.InterNetwork)]
+        [InlineData(AddressFamily.InterNetworkV6)]
+        public void SendPingWithIPAddressAndTimeoutAndBufferAndPingOptions_Unix(AddressFamily addressFamily)
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress(addressFamily);
+            if (localIpAddress == null)
+            {
+                // No local address for given address family.
+                return;
+            }
+
+            byte[] buffer = TestSettings.PayloadAsBytes;
+            SendBatchPing(
+                (ping) => ping.Send(localIpAddress, TestSettings.PingTimeout, buffer, new PingOptions()),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+
+                    // Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
+                    if (Capability.CanUseRawSockets(localIpAddress.AddressFamily))
+                    {
+                        Assert.Equal(buffer, pingReply.Buffer);
+                    }
+                    else
+                    {
+                        Assert.Equal(Array.Empty<byte>(), pingReply.Buffer);
+                    }
+                });
+        }
+
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
+        [Theory]
+        [InlineData(AddressFamily.InterNetwork)]
+        [InlineData(AddressFamily.InterNetworkV6)]
+        public async Task SendPingAsyncWithIPAddressAndTimeoutAndBufferAndPingOptions_Unix(AddressFamily addressFamily)
+        {
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync(addressFamily);
+            if (localIpAddress == null)
+            {
+                // No local address for given address family.
+                return;
+            }
 
             byte[] buffer = TestSettings.PayloadAsBytes;
             await SendBatchPingAsync(
@@ -224,10 +380,22 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
+        public void SendPingWithHost()
+        {
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+
+            SendBatchPing(
+                (ping) => ping.Send(TestSettings.LocalHost),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+                });
+        }
+
+        [Fact]
         public async Task SendPingAsyncWithHost()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             await SendBatchPingAsync(
                 (ping) => ping.SendPingAsync(TestSettings.LocalHost),
@@ -238,10 +406,22 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
+        public void SendPingWithHostAndTimeout()
+        {
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+
+            SendBatchPing(
+                (ping) => ping.Send(TestSettings.LocalHost, TestSettings.PingTimeout),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+                });
+        }
+
+        [Fact]
         public async Task SendPingAsyncWithHostAndTimeout()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             await SendBatchPingAsync(
                 (ping) => ping.SendPingAsync(TestSettings.LocalHost, TestSettings.PingTimeout),
@@ -252,11 +432,26 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
+        [Fact]
+        public void SendPingWithHostAndTimeoutAndBuffer()
+        {
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+
+            byte[] buffer = TestSettings.PayloadAsBytes;
+            SendBatchPing(
+                (ping) => ping.Send(TestSettings.LocalHost, TestSettings.PingTimeout, buffer),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+                    Assert.Equal(buffer, pingReply.Buffer);
+                });
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBuffer()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             byte[] buffer = TestSettings.PayloadAsBytes;
             await SendBatchPingAsync(
@@ -270,9 +465,34 @@ namespace System.Net.NetworkInformation.Tests
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
+        public void SendPingWithHostAndTimeoutAndBuffer_Unix()
+        {
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+
+            byte[] buffer = TestSettings.PayloadAsBytes;
+            SendBatchPing(
+                (ping) => ping.Send(TestSettings.LocalHost, TestSettings.PingTimeout, buffer),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+
+                    // Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
+                    if (Capability.CanUseRawSockets(localIpAddress.AddressFamily))
+                    {
+                        Assert.Equal(buffer, pingReply.Buffer);
+                    }
+                    else
+                    {
+                        Assert.Equal(Array.Empty<byte>(), pingReply.Buffer);
+                    }
+                });
+        }
+
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
+        [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBuffer_Unix()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             byte[] buffer = TestSettings.PayloadAsBytes;
             await SendBatchPingAsync(
@@ -294,11 +514,27 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [PlatformSpecific(TestPlatforms.Windows)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
+        [Fact]
+        public void SendPingWithHostAndTimeoutAndBufferAndPingOptions()
+        {
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+
+            byte[] buffer = TestSettings.PayloadAsBytes;
+            SendBatchPing(
+                (ping) => ping.Send(TestSettings.LocalHost, TestSettings.PingTimeout, buffer, new PingOptions()),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+
+                    Assert.Equal(buffer, pingReply.Buffer);
+                });
+        }
+
+        [PlatformSpecific(TestPlatforms.Windows)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBufferAndPingOptions()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             byte[] buffer = TestSettings.PayloadAsBytes;
             await SendBatchPingAsync(
@@ -313,9 +549,34 @@ namespace System.Net.NetworkInformation.Tests
 
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
         [Fact]
+        public void SendPingWithHostAndTimeoutAndBufferAndPingOptions_Unix()
+        {
+            IPAddress localIpAddress = TestSettings.GetLocalIPAddress();
+
+            byte[] buffer = TestSettings.PayloadAsBytes;
+            SendBatchPing(
+                (ping) => ping.Send(TestSettings.LocalHost, TestSettings.PingTimeout, buffer, new PingOptions()),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+
+                    // Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
+                    if (Capability.CanUseRawSockets(localIpAddress.AddressFamily))
+                    {
+                        Assert.Equal(buffer, pingReply.Buffer);
+                    }
+                    else
+                    {
+                        Assert.Equal(Array.Empty<byte>(), pingReply.Buffer);
+                    }
+                });
+        }
+
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // On Unix, Non-root pings cannot send arbitrary data in the buffer, and do not receive it back in the PingReply.
+        [Fact]
         public async Task SendPingAsyncWithHostAndTimeoutAndBufferAndPingOptions_Unix()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             byte[] buffer = TestSettings.PayloadAsBytes;
             await SendBatchPingAsync(
@@ -337,10 +598,9 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
         public static async Task SendPings_ReuseInstance_Hostname()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             using (Ping p = new Ping())
             {
@@ -353,10 +613,9 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
         public static async Task Sends_ReuseInstance_Hostname()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             using (Ping p = new Ping())
             {
@@ -369,10 +628,9 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
         public static async Task SendAsyncs_ReuseInstance_Hostname()
         {
-            IPAddress localIpAddress = await TestSettings.GetLocalIPAddress();
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
 
             using (Ping p = new Ping())
             {
@@ -420,8 +678,15 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
-        public static async Task Ping_DisposeAfterSend_Success()
+        public static void Ping_DisposeAfterSend_Success()
+        {
+            Ping p = new Ping();
+            p.Send(TestSettings.LocalHost);
+            p.Dispose();
+        }
+
+        [Fact]
+        public static async Task PingAsync_DisposeAfterSend_Success()
         {
             Ping p = new Ping();
             await p.SendPingAsync(TestSettings.LocalHost);
@@ -429,7 +694,6 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
         public static void Ping_DisposeMultipletimes_Success()
         {
             Ping p = new Ping();
@@ -438,8 +702,15 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
-        [ActiveIssue(19583, TargetFrameworkMonikers.Uap)]
         public static void Ping_SendAfterDispose_ThrowsSynchronously()
+        {
+            Ping p = new Ping();
+            p.Dispose();
+            Assert.Throws<ObjectDisposedException>(() => { p.Send(TestSettings.LocalHost); });
+        }
+
+        [Fact]
+        public static void PingAsync_SendAfterDispose_ThrowsSynchronously()
         {
             Ping p = new Ping();
             p.Dispose();
@@ -447,6 +718,14 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         private static readonly int s_pingcount = 4;
+
+        private static void SendBatchPing(Func<Ping, PingReply> sendPing, Action<PingReply> pingResultValidator)
+        {
+            for (int i = 0; i < s_pingcount; i++)
+            {
+                SendPing(sendPing, pingResultValidator);
+            }
+        }
 
         private static Task SendBatchPingAsync(Func<Ping, Task<PingReply>> sendPing, Action<PingReply> pingResultValidator)
         {
@@ -457,6 +736,12 @@ namespace System.Net.NetworkInformation.Tests
                 pingTasks[i] = SendPingAsync(sendPing, pingResultValidator);
             }
             return Task.WhenAll(pingTasks);
+        }
+
+        private static void SendPing(Func<Ping, PingReply> sendPing, Action<PingReply> pingResultValidator)
+        {
+            var pingResult = sendPing(new Ping());
+            pingResultValidator(pingResult);
         }
 
         private static async Task SendPingAsync(Func<Ping, Task<PingReply>> sendPing, Action<PingReply> pingResultValidator)

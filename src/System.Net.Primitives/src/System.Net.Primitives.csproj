@@ -1,24 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>System.Net.Primitives</AssemblyName>
     <OutputType>Library</OutputType>
     <ProjectGuid>{8772BC91-7B55-49B9-94FA-4B1BE5BEAB55}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ILLinkClearInitLocals>true</ILLinkClearInitLocals>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='uap-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='netcoreapp-Windows_NT-Release|AnyCPU'" />
   <PropertyGroup>
     <!-- SYSTEM_NET_PRIMITIVES_DLL is required to allow source-level code sharing for types defined within the
          System.Net.Internals namespace. -->
     <DefineConstants>$(DefineConstants);SYSTEM_NET_PRIMITIVES_DLL</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'uap'">$(DefineConstants);uap</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Net\AuthenticationSchemes.cs" />
@@ -38,7 +30,13 @@
     <Compile Include="System\Net\IPAddressParser.cs" />
     <Compile Include="System\Net\IPEndPoint.cs" />
     <Compile Include="System\Net\IPv4AddressHelper.cs" />
+    <Compile Include="$(CommonPath)\System\Net\IPv4AddressHelper.Common.cs">
+      <Link>System\Net\IPv4AddressHelper.Common.cs</Link>
+    </Compile>
     <Compile Include="System\Net\IPv6AddressHelper.cs" />
+    <Compile Include="$(CommonPath)\System\Net\IPv6AddressHelper.Common.cs">
+      <Link>System\Net\IPv6AddressHelper.Common.cs</Link>
+    </Compile>
     <Compile Include="System\Net\IWebProxy.cs" />
     <Compile Include="System\Net\NetEventSource.Primitives.cs" />
     <Compile Include="System\Net\NetworkCredential.cs" />
@@ -93,15 +91,12 @@
     <Compile Include="$(CommonPath)\System\Marvin.cs">
       <Link>Common\System\Marvin.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\IO\StringBuilderCache.cs">
-      <Link>Common\System\IO\StringBuilderCache.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\System\Text\StringBuilderCache.cs">
+      <Link>Common\System\Text\StringBuilderCache.cs</Link>
     </Compile>
     <!-- Logging -->
     <Compile Include="$(CommonPath)\System\Net\Logging\NetEventSource.Common.cs">
       <Link>Common\System\Net\Logging\NetEventSource.Common.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Net\InternalException.cs">
-      <Link>Common\System\Net\InternalException.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
@@ -133,9 +128,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.NtStatus.cs">
-      <Link>Common\Interop\Windows\NtDll\Interop.NtStatus.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Net\NetworkInformation\HostInformationPal.Windows.cs">
       <Link>Common\System\Net\NetworkInformation\HostInformationPal.Windows.cs</Link>
     </Compile>
@@ -166,8 +158,8 @@
     <Compile Include="$(CommonPath)\System\Net\Sockets\SocketErrorPal.Unix.cs">
       <Link>Common\System\Net\Sockets\SocketErrorPal.Unix.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Errors.cs">
-      <Link>Common\Interop\Unix\Interop.Errors.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\Interop.Errors.cs">
+      <Link>Common\CoreLib\Interop\Unix\Interop.Errors.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
@@ -208,5 +200,4 @@
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Threading" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -3,7 +3,7 @@
 ' See the LICENSE file in the project root for more information.
 
 Namespace Microsoft.VisualBasic
-    ' Contants for the Control Characters
+    ' Constants for the Control Characters
     Public NotInheritable Class ControlChars
 
         Public Const CrLf As String = ChrW(13) & ChrW(10)

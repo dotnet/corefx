@@ -20,7 +20,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public ImportingMember(ContractBasedImportDefinition definition, ReflectionWritableMember member, ImportType importType)
             : base(definition, importType)
         {
-            Assumes.NotNull(definition, member);
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
 
             _member = member;
         }
@@ -69,7 +72,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 // leak out as a 'raw' unhandled exception, instead,
                 // we'll add some context and rethrow.
                 throw new ComposablePartException(
-                    String.Format(CultureInfo.CurrentCulture,
+                    string.Format(CultureInfo.CurrentCulture,
                         SR.ReflectionModel_ImportThrewException,
                         _member.GetDisplayName()),
                     Definition.ToElement(),
@@ -81,7 +84,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 // this is not supported in MEF currently.  Ideally we would validate against it, however, we already shipped
                 // so we will turn it into a ComposablePartException instead, that they should already be prepared for
                 throw new ComposablePartException(
-                    String.Format(CultureInfo.CurrentCulture,
+                    string.Format(CultureInfo.CurrentCulture,
                         SR.ImportNotValidOnIndexers,
                         _member.GetDisplayName()),
                     Definition.ToElement(),
@@ -96,7 +99,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 // field is marked as read-only.
 
                 throw new ComposablePartException(
-                    String.Format(CultureInfo.CurrentCulture,
+                    string.Format(CultureInfo.CurrentCulture,
                         SR.ReflectionModel_ImportNotWritable,
                         _member.GetDisplayName()),
                         Definition.ToElement());
@@ -105,7 +108,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private void SetCollectionMemberValue(object instance, IEnumerable values)
         {
-            Assumes.NotNull(values);
+            if (values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
 
             ICollection<object> collection = null;
             Type itemType = CollectionServices.GetCollectionElementType(ImportType.ActualType);
@@ -120,7 +126,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private ICollection<object> GetNormalizedCollection(Type itemType, object instance)
         {
-            Assumes.NotNull(itemType);
+            if (itemType == null)
+            {
+                throw new ArgumentNullException(nameof(itemType));
+            }
 
             object collectionObject = null;
 
@@ -133,7 +142,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 catch (TargetInvocationException exception)
                 {
                     throw new ComposablePartException(
-                        String.Format(CultureInfo.CurrentCulture,
+                        string.Format(CultureInfo.CurrentCulture,
                             SR.ReflectionModel_ImportCollectionGetThrewException,
                             _member.GetDisplayName()),
                         Definition.ToElement(),
@@ -155,7 +164,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     catch (TargetInvocationException exception)
                     {
                         throw new ComposablePartException(
-                            String.Format(CultureInfo.CurrentCulture,
+                            string.Format(CultureInfo.CurrentCulture,
                                 SR.ReflectionModel_ImportCollectionConstructionThrewException,
                                 _member.GetDisplayName(),
                                 ImportType.ActualType.FullName),
@@ -170,7 +179,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             if (collectionObject == null)
             {
                 throw new ComposablePartException(
-                    String.Format(CultureInfo.CurrentCulture,
+                    string.Format(CultureInfo.CurrentCulture,
                         SR.ReflectionModel_ImportCollectionNull,
                         _member.GetDisplayName()),
                     Definition.ToElement());
@@ -194,7 +203,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             catch (Exception exception)
             {
                 throw new ComposablePartException(
-                    String.Format(CultureInfo.CurrentCulture,
+                    string.Format(CultureInfo.CurrentCulture,
                         SR.ReflectionModel_ImportCollectionIsReadOnlyThrewException,
                         _member.GetDisplayName(),
                         collection.GetType().FullName),
@@ -205,7 +214,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             if (isReadOnly)
             {
                 throw new ComposablePartException(
-                    String.Format(CultureInfo.CurrentCulture,
+                    string.Format(CultureInfo.CurrentCulture,
                         SR.ReflectionModel_ImportCollectionNotWritable,
                         _member.GetDisplayName()),
                     Definition.ToElement());
@@ -215,7 +224,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void PopulateCollection(ICollection<object> collection, IEnumerable values)
         {
-            Assumes.NotNull(collection, values);
+            if (collection == null)
+            {
+                throw new ArgumentNullException(nameof(collection));
+            }
+
+            if (values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
 
             try
             {
@@ -224,7 +241,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             catch (Exception exception)
             {
                 throw new ComposablePartException(
-                    String.Format(CultureInfo.CurrentCulture,
+                    string.Format(CultureInfo.CurrentCulture,
                         SR.ReflectionModel_ImportCollectionClearThrewException,
                         _member.GetDisplayName(),
                         collection.GetType().FullName),
@@ -241,7 +258,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 catch (Exception exception)
                 {
                     throw new ComposablePartException(
-                        String.Format(CultureInfo.CurrentCulture,
+                        string.Format(CultureInfo.CurrentCulture,
                             SR.ReflectionModel_ImportCollectionAddThrewException,
                             _member.GetDisplayName(),
                             collection.GetType().FullName),

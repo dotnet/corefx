@@ -39,7 +39,7 @@ namespace System.Net.Sockets
                 }
             }
 
-            public bool TryRegister(SafeCloseSocket socket, out Interop.Error error)
+            public bool TryRegister(SafeSocketHandle socket, out Interop.Error error)
             {
                 Debug.Assert(WasAllocated, "Expected WasAllocated to be true");
                 return _engine.TryRegister(socket, _handle, out error);
@@ -257,13 +257,15 @@ namespace System.Net.Sockets
                 //
                 // Create the event port and buffer
                 //
-                if (Interop.Sys.CreateSocketEventPort(out _port) != Interop.Error.SUCCESS)
+                Interop.Error err = Interop.Sys.CreateSocketEventPort(out _port);
+                if (err != Interop.Error.SUCCESS)
                 {
-                    throw new InternalException();
+                    throw new InternalException(err);
                 }
-                if (Interop.Sys.CreateSocketEventBuffer(EventBufferCount, out _buffer) != Interop.Error.SUCCESS)
+                err = Interop.Sys.CreateSocketEventBuffer(EventBufferCount, out _buffer);
+                if (err != Interop.Error.SUCCESS)
                 {
-                    throw new InternalException();
+                    throw new InternalException(err);
                 }
 
                 //
@@ -271,26 +273,38 @@ namespace System.Net.Sockets
                 // to the pipe will send an event to the event loop.
                 //
                 int* pipeFds = stackalloc int[2];
-                if (Interop.Sys.Pipe(pipeFds, Interop.Sys.PipeFlags.O_CLOEXEC) != 0)
+                int pipeResult = Interop.Sys.Pipe(pipeFds, Interop.Sys.PipeFlags.O_CLOEXEC);
+                if (pipeResult != 0)
                 {
-                    throw new InternalException();
+                    throw new InternalException(pipeResult);
                 }
                 _shutdownReadPipe = pipeFds[Interop.Sys.ReadEndOfPipe];
                 _shutdownWritePipe = pipeFds[Interop.Sys.WriteEndOfPipe];
 
-                if (Interop.Sys.TryChangeSocketEventRegistration(_port, (IntPtr)_shutdownReadPipe, Interop.Sys.SocketEvents.None, Interop.Sys.SocketEvents.Read, ShutdownHandle) != Interop.Error.SUCCESS)
+                err = Interop.Sys.TryChangeSocketEventRegistration(_port, (IntPtr)_shutdownReadPipe, Interop.Sys.SocketEvents.None, Interop.Sys.SocketEvents.Read, ShutdownHandle);
+                if (err != Interop.Error.SUCCESS)
                 {
-                    throw new InternalException();
+                    throw new InternalException(err);
                 }
 
                 //
                 // Start the event loop on its own thread.
                 //
-                Task.Factory.StartNew(
-                    EventLoop,
-                    CancellationToken.None,
-                    TaskCreationOptions.LongRunning,
-                    TaskScheduler.Default);
+                bool suppressFlow = !ExecutionContext.IsFlowSuppressed();
+                try
+                {
+                    if (suppressFlow) ExecutionContext.SuppressFlow();
+                    Task.Factory.StartNew(
+                        s => ((SocketAsyncEngine)s).EventLoop(),
+                        this,
+                        CancellationToken.None,
+                        TaskCreationOptions.LongRunning,
+                        TaskScheduler.Default);
+                }
+                finally
+                {
+                    if (suppressFlow) ExecutionContext.RestoreFlow();
+                }
             }
             catch
             {
@@ -310,7 +324,7 @@ namespace System.Net.Sockets
                     Interop.Error err = Interop.Sys.WaitForSocketEvents(_port, _buffer, &numEvents);
                     if (err != Interop.Error.SUCCESS)
                     {
-                        throw new InternalException();
+                        throw new InternalException(err);
                     }
 
                     // The native shim is responsible for ensuring this condition.
@@ -351,7 +365,7 @@ namespace System.Net.Sockets
             int bytesWritten = Interop.Sys.Write(_shutdownWritePipe, &b, 1);
             if (bytesWritten != 1)
             {
-                throw new InternalException();
+                throw new InternalException(bytesWritten);
             }
         }
 
@@ -375,7 +389,7 @@ namespace System.Net.Sockets
             }
         }
 
-        private bool TryRegister(SafeCloseSocket socket, IntPtr handle, out Interop.Error error)
+        private bool TryRegister(SafeSocketHandle socket, IntPtr handle, out Interop.Error error)
         {
             error = Interop.Sys.TryChangeSocketEventRegistration(_port, socket, Interop.Sys.SocketEvents.None, 
                 Interop.Sys.SocketEvents.Read | Interop.Sys.SocketEvents.Write, handle);

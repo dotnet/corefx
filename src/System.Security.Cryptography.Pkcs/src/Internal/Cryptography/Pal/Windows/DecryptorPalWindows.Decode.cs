@@ -3,9 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
 
@@ -41,12 +41,15 @@ namespace Internal.Cryptography.Pal.Windows
 
             contentInfo = hCryptMsg.GetContentInfo();
 
+            AlgorithmIdentifierAsn contentEncryptionAlgorithmAsn;
             using (SafeHandle sh = hCryptMsg.GetMsgParamAsMemory(CryptMsgParamType.CMSG_ENVELOPE_ALGORITHM_PARAM))
             {
                 unsafe
                 {
                     CRYPT_ALGORITHM_IDENTIFIER* pCryptAlgorithmIdentifier = (CRYPT_ALGORITHM_IDENTIFIER*)(sh.DangerousGetHandle());
                     contentEncryptionAlgorithm = (*pCryptAlgorithmIdentifier).ToAlgorithmIdentifier();
+                    contentEncryptionAlgorithmAsn.Algorithm = contentEncryptionAlgorithm.Oid;
+                    contentEncryptionAlgorithmAsn.Parameters = (*pCryptAlgorithmIdentifier).Parameters.ToByteArray();
                 }
             }
 
@@ -54,7 +57,7 @@ namespace Internal.Cryptography.Pal.Windows
             unprotectedAttributes = hCryptMsg.GetUnprotectedAttributes();
 
             RecipientInfoCollection recipientInfos = CreateRecipientInfos(hCryptMsg);
-            return new DecryptorPalWindows(hCryptMsg, recipientInfos);
+            return new DecryptorPalWindows(hCryptMsg, recipientInfos, contentEncryptionAlgorithmAsn);
         }
     }
 }

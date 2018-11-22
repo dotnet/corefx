@@ -29,27 +29,8 @@ internal partial class Interop
             ushort serverPort,
             uint reserved);
 
-        // NOTE: except for the return type, this refers to the same function as WinHttpConnect.
-        [DllImport(Interop.Libraries.WinHttp, EntryPoint = "WinHttpConnect", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern SafeWinHttpHandleWithCallback WinHttpConnectWithCallback(
-            SafeWinHttpHandle sessionHandle,
-            string serverName,
-            ushort serverPort,
-            uint reserved);
-
         [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern SafeWinHttpHandle WinHttpOpenRequest(
-            SafeWinHttpHandle connectHandle,
-            string verb,
-            string objectName,
-            string version,
-            string referrer,
-            string acceptTypes,
-            uint flags);
-
-        // NOTE: except for the return type, this refers to the same function as WinHttpOpenRequest.
-        [DllImport(Interop.Libraries.WinHttp, EntryPoint = "WinHttpOpenRequest", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern SafeWinHttpHandleWithCallback WinHttpOpenRequestWithCallback(
             SafeWinHttpHandle connectHandle,
             string verb,
             string objectName,
@@ -95,21 +76,7 @@ internal partial class Interop
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool WinHttpQueryDataAvailable(
             SafeWinHttpHandle requestHandle,
-            out uint bytesAvailable);
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool WinHttpQueryDataAvailable(
-            SafeWinHttpHandle requestHandle,
             IntPtr parameterIgnoredAndShouldBeNullForAsync);
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool WinHttpReadData(
-            SafeWinHttpHandle requestHandle,
-            IntPtr buffer,
-            uint bufferSize,
-            out uint bytesRead);
 
         [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -177,14 +144,6 @@ internal partial class Interop
             SafeWinHttpHandle requestHandle,
             IntPtr buffer,
             uint bufferSize,
-            out uint bytesWritten);
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool WinHttpWriteData(
-            SafeWinHttpHandle requestHandle,
-            IntPtr buffer,
-            uint bufferSize,
             IntPtr parameterIgnoredAndShouldBeNullForAsync);
 
         [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
@@ -194,14 +153,6 @@ internal partial class Interop
             uint option,
             ref uint optionData,
             uint optionLength = sizeof(uint));
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool WinHttpSetOption(
-            SafeWinHttpHandle handle,
-            uint option,
-            string optionData,
-            uint optionLength);
 
         [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -256,61 +207,5 @@ internal partial class Interop
             WINHTTP_STATUS_CALLBACK callback,
             uint notificationFlags,
             IntPtr reserved);
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern SafeWinHttpHandleWithCallback WinHttpWebSocketCompleteUpgrade(
-            SafeWinHttpHandle requestHandle,
-            IntPtr context);
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = false)]
-        public static extern uint WinHttpWebSocketSend(
-            SafeWinHttpHandle webSocketHandle,
-            WINHTTP_WEB_SOCKET_BUFFER_TYPE bufferType,
-            IntPtr buffer,
-            uint bufferLength);
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = false)]
-        public static extern uint WinHttpWebSocketReceive(
-            SafeWinHttpHandle webSocketHandle,
-            IntPtr buffer,
-            uint bufferLength,
-            out uint bytesRead,
-            out WINHTTP_WEB_SOCKET_BUFFER_TYPE bufferType);
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = false)]
-        public static extern uint WinHttpWebSocketShutdown(
-            SafeWinHttpHandle webSocketHandle,
-            ushort status,
-            byte[] reason,
-            uint reasonLength);
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = false)]
-        public static extern uint WinHttpWebSocketShutdown(
-            SafeWinHttpHandle webSocketHandle,
-            ushort status,
-            IntPtr reason,
-            uint reasonLength);
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = false)]
-        public static extern uint WinHttpWebSocketClose(
-            SafeWinHttpHandle webSocketHandle,
-            ushort status,
-            byte[] reason,
-            uint reasonLength);
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = false)]
-        public static extern uint WinHttpWebSocketClose(
-            SafeWinHttpHandle webSocketHandle,
-            ushort status,
-            IntPtr reason,
-            uint reasonLength);
-
-        [DllImport(Interop.Libraries.WinHttp, CharSet = CharSet.Unicode, SetLastError = false)]
-        public static extern uint WinHttpWebSocketQueryCloseStatus(
-            SafeWinHttpHandle webSocketHandle,
-            out ushort status,
-            byte[] reason,
-            uint reasonLength,
-            out uint reasonLengthConsumed);
     }
 }

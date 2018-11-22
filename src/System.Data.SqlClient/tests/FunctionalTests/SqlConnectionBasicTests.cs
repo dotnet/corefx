@@ -2,11 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Diagnostics;
 using System.Reflection;
-using System.Threading;
+using System.Security;
 using Xunit;
 
 namespace System.Data.SqlClient.Tests
@@ -106,35 +104,6 @@ namespace System.Data.SqlClient.Tests
             Assert.Equal(expected, conn.WorkstationId);
         }
 
-        [Fact]
-        public void ConnectionTimeoutTestWithThread()
-        {
-            int timeoutSec = 5;
-            string connStrNotAvailable = $"Server=tcp:fakeServer,1433;uid=fakeuser;pwd=fakepwd;Connection Timeout={timeoutSec}";
-
-            List<ConnectionWorker> list = new List<ConnectionWorker>();
-            for (int i = 0; i < 10; ++i)
-            {
-                list.Add(new ConnectionWorker(connStrNotAvailable));
-            }
-
-            ConnectionWorker.Start();
-            ConnectionWorker.Stop();
-
-            double theMax = 0;
-            foreach (ConnectionWorker w in list)
-            {
-                if (theMax < w.MaxTimeElapsed)
-                {
-                    theMax = w.MaxTimeElapsed;
-                }
-            }
-
-            int threshold = (timeoutSec + 1) * 1000;
-
-            Console.WriteLine($"ConnectionTimeoutTestWithThread: Elapsed Time {theMax} and threshold {threshold}");
-        }
-
         [OuterLoop("Can take up to 4 seconds")]
         [Fact]
         public void ExceptionsWithMinPoolSizeCanBeHandled()
@@ -150,68 +119,49 @@ namespace System.Data.SqlClient.Tests
             }
         }
 
-        public class ConnectionWorker
+        [Fact]
+        public void ConnectionTestInvalidCredentialCombination()
         {
-            private static ManualResetEventSlim startEvent = new ManualResetEventSlim(false);
-            private static List<ConnectionWorker> workerList = new List<ConnectionWorker>();
-            private ManualResetEventSlim doneEvent = new ManualResetEventSlim(false);
-            private double maxTimeElapsed;
-            private Thread thread;
-            private string connectionString;
+            var cleartextCredsConnStr = "User=test;Password=test;";
+            var sspiConnStr = "Integrated Security=true;";
+            var testPassword = new SecureString();
+            testPassword.MakeReadOnly();
+            var sqlCredential = new SqlCredential(string.Empty, testPassword);
 
-            public ConnectionWorker(string connectionString)
+            // Verify that SSPI and cleartext username/password are not in the connection string.
+            Assert.Throws<ArgumentException>(() => { new SqlConnection(cleartextCredsConnStr, sqlCredential); });
+
+            Assert.Throws<ArgumentException>(() => { new SqlConnection(sspiConnStr, sqlCredential); });
+
+            // Verify that credential may not be set with cleartext username/password or SSPI.
+            using (var conn = new SqlConnection(cleartextCredsConnStr))
             {
-                workerList.Add(this);
-                this.connectionString = connectionString;
-                thread = new Thread(new ThreadStart(SqlConnectionOpen));
-                thread.Start();
+                Assert.Throws<InvalidOperationException>(() => { conn.Credential = sqlCredential; });
             }
 
-            public double MaxTimeElapsed
+            using (var conn = new SqlConnection(sspiConnStr))
             {
-                get
-                {
-                    return maxTimeElapsed;
-                }
+                Assert.Throws<InvalidOperationException>(() => { conn.Credential = sqlCredential; });
             }
 
-            public static void Start()
+            // Verify that connection string with username/password or SSPI may not be set with credential present.
+            using (var conn = new SqlConnection(string.Empty, sqlCredential))
             {
-                startEvent.Set();
+                Assert.Throws<InvalidOperationException>(() => { conn.ConnectionString = cleartextCredsConnStr; });
+
+                Assert.Throws<InvalidOperationException>(() => { conn.ConnectionString = sspiConnStr; });
             }
+        }
 
-            public static void Stop()
-            {
-                foreach (ConnectionWorker w in workerList)
-                {
-                    w.doneEvent.Wait();
-                }
-            }
+        [Fact]
+        public void ConnectionTestValidCredentialCombination()
+        {
+            var testPassword = new SecureString();
+            testPassword.MakeReadOnly();
+            var sqlCredential = new SqlCredential(string.Empty, testPassword);
+            var conn = new SqlConnection(string.Empty, sqlCredential);
 
-            public void SqlConnectionOpen()
-            {
-                startEvent.Wait();
-
-                Stopwatch sw = new Stopwatch();
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    sw.Start();
-                    try
-                    {
-                        con.Open();
-                    }
-                    catch { }
-                    sw.Stop();
-                }
-
-                double elapsed = sw.Elapsed.TotalMilliseconds;
-                if (maxTimeElapsed < elapsed)
-                {
-                    maxTimeElapsed = elapsed;
-                }
-
-                doneEvent.Set();
-            }
+            Assert.Equal(sqlCredential, conn.Credential);
         }
     }
 }

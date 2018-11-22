@@ -16,7 +16,7 @@ You may need to supply a path to load SOS. It can be found next to libcoreclr.so
 error: no such file
 (lldb) image list libcoreclr.so
 [  0] ..... /home/dan/dotnet/shared/Microsoft.NETCoreApp/2.0.4/libcoreclr.so
-(lldb) plugin load /home/dan/dotnet/shared/Microsoft.NETCoreApp/2.0.4/libcoreclr.so
+(lldb) plugin load /home/dan/dotnet/shared/Microsoft.NETCoreApp/2.0.4/libsosplugin.so
 ```
 
 ## Debugging core dumps with lldb
@@ -75,6 +75,6 @@ lldb-3.9 -O "settings set target.exec-search-paths /home/parallels/Downloads/Sys
   - set `cwd` to the test bin directory.
     - using the System.Net.Sockets example, it should be something like `corefx/bin/tests/System.Net.Sockets.Tests/netcoreapp-Linux-{Configuration}-{Architecture}`, plus the full path to your corefx directory.
   - set `args` to the command line arguments to pass to the test
-    - something like: `[ "xunit.console.netcore.exe", "<test>.dll", "-notrait", .... ]`
+    - something like: `[ "xunit.console.dll", "<test>.dll", "-notrait", .... ]`
     - to run a specific test, you can append something like: `[ "method", "System.Net.Sockets.Tests.{ClassName}.{TestMethodName}", ...]`
 - Set a breakpoint and launch the debugger, inspecting variables and call stacks will now work

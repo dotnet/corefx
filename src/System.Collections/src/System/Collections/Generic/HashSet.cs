@@ -257,14 +257,23 @@ namespace System.Collections.Generic
         {
             if (_buckets != null)
             {
+                int collisionCount = 0;
                 int hashCode = InternalGetHashCode(item);
+                Slot[] slots = _slots;
                 // see note at "HashSet" level describing why "- 1" appears in for loop
-                for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].next)
+                for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = slots[i].next)
                 {
-                    if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, item))
+                    if (slots[i].hashCode == hashCode && _comparer.Equals(slots[i].value, item))
                     {
                         return true;
                     }
+
+                    if (collisionCount >= slots.Length)
+                    {
+                        // The chain of entries forms a loop, which means a concurrent update has happened.
+                        throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                    }
+                    collisionCount++;
                 }
             }
             // either _buckets is null or wasn't found
@@ -293,26 +302,28 @@ namespace System.Collections.Generic
                 int hashCode = InternalGetHashCode(item);
                 int bucket = hashCode % _buckets.Length;
                 int last = -1;
-                for (int i = _buckets[bucket] - 1; i >= 0; last = i, i = _slots[i].next)
+                int collisionCount = 0;
+                Slot[] slots = _slots;
+                for (int i = _buckets[bucket] - 1; i >= 0; last = i, i = slots[i].next)
                 {
-                    if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, item))
+                    if (slots[i].hashCode == hashCode && _comparer.Equals(slots[i].value, item))
                     {
                         if (last < 0)
                         {
                             // first iteration; update buckets
-                            _buckets[bucket] = _slots[i].next + 1;
+                            _buckets[bucket] = slots[i].next + 1;
                         }
                         else
                         {
                             // subsequent iterations; update 'next' pointers
-                            _slots[last].next = _slots[i].next;
+                            slots[last].next = slots[i].next;
                         }
-                        _slots[i].hashCode = -1;
+                        slots[i].hashCode = -1;
                         if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                         {
-                            _slots[i].value = default(T);
+                            slots[i].value = default(T);
                         }
-                        _slots[i].next = _freeList;
+                        slots[i].next = _freeList;
 
                         _count--;
                         _version++;
@@ -327,6 +338,13 @@ namespace System.Collections.Generic
                         }
                         return true;
                     }
+
+                    if (collisionCount >= slots.Length)
+                    {
+                        // The chain of entries forms a loop, which means a concurrent update has happened.
+                        throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                    }
+                    collisionCount++;
                 }
             }
             // either _buckets is null or wasn't found
@@ -380,7 +398,7 @@ namespace System.Collections.Generic
             }
 
             info.AddValue(VersionName, _version); // need to serialize version to avoid problems with serializing while enumerating
-            info.AddValue(ComparerName, _comparer, typeof(IComparer<T>));
+            info.AddValue(ComparerName, _comparer, typeof(IEqualityComparer<T>));
             info.AddValue(CapacityName, _buckets == null ? 0 : _buckets.Length);
 
             if (_buckets != null)
@@ -395,7 +413,7 @@ namespace System.Collections.Generic
 
         #region IDeserializationCallback methods
 
-        public virtual void OnDeserialization(Object sender)
+        public virtual void OnDeserialization(object sender)
         {
             if (_siInfo == null)
             {
@@ -1162,6 +1180,7 @@ namespace System.Collections.Generic
         /// </summary>
         private void SetCapacity(int newSize)
         {
+            Debug.Assert(HashHelpers.IsPrime(newSize), "New size is not prime!");
             Debug.Assert(_buckets != null, "SetCapacity called on a set with no elements");
 
             Slot[] newSlots = new Slot[newSize];
@@ -1196,35 +1215,44 @@ namespace System.Collections.Generic
 
             int hashCode = InternalGetHashCode(value);
             int bucket = hashCode % _buckets.Length;
-
-            for (int i = _buckets[bucket] - 1; i >= 0; i = _slots[i].next)
+            int collisionCount = 0;
+            Slot[] slots = _slots;
+            for (int i = _buckets[bucket] - 1; i >= 0; i = slots[i].next)
             {
-                if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, value))
+                if (slots[i].hashCode == hashCode && _comparer.Equals(slots[i].value, value))
                 {
                     return false;
                 }
+
+                if (collisionCount >= slots.Length)
+                {
+                    // The chain of entries forms a loop, which means a concurrent update has happened.
+                    throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                }
+                collisionCount++;
             }
 
             int index;
             if (_freeList >= 0)
             {
                 index = _freeList;
-                _freeList = _slots[index].next;
+                _freeList = slots[index].next;
             }
             else
             {
-                if (_lastIndex == _slots.Length)
+                if (_lastIndex == slots.Length)
                 {
                     IncreaseCapacity();
                     // this will change during resize
+                    slots = _slots;
                     bucket = hashCode % _buckets.Length;
                 }
                 index = _lastIndex;
                 _lastIndex++;
             }
-            _slots[index].hashCode = hashCode;
-            _slots[index].value = value;
-            _slots[index].next = _buckets[bucket] - 1;
+            slots[index].hashCode = hashCode;
+            slots[index].value = value;
+            slots[index].next = _buckets[bucket] - 1;
             _buckets[bucket] = index + 1;
             _count++;
             _version++;
@@ -1376,13 +1404,22 @@ namespace System.Collections.Generic
         {
             Debug.Assert(_buckets != null, "_buckets was null; callers should check first");
 
+            int collisionCount = 0;
             int hashCode = InternalGetHashCode(item);
-            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].next)
+            Slot[] slots = _slots;
+            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = slots[i].next)
             {
-                if ((_slots[i].hashCode) == hashCode && _comparer.Equals(_slots[i].value, item))
+                if ((slots[i].hashCode) == hashCode && _comparer.Equals(slots[i].value, item))
                 {
                     return i;
                 }
+
+                if (collisionCount >= slots.Length)
+                {
+                    // The chain of entries forms a loop, which means a concurrent update has happened.
+                    throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                }
+                collisionCount++;
             }
             // wasn't found
             return -1;
@@ -1500,34 +1537,44 @@ namespace System.Collections.Generic
 
             int hashCode = InternalGetHashCode(value);
             int bucket = hashCode % _buckets.Length;
-            for (int i = _buckets[bucket] - 1; i >= 0; i = _slots[i].next)
+            int collisionCount = 0;
+            Slot[] slots = _slots;
+            for (int i = _buckets[bucket] - 1; i >= 0; i = slots[i].next)
             {
-                if (_slots[i].hashCode == hashCode && _comparer.Equals(_slots[i].value, value))
+                if (slots[i].hashCode == hashCode && _comparer.Equals(slots[i].value, value))
                 {
                     location = i;
                     return false; //already present
                 }
+
+                if (collisionCount >= slots.Length)
+                {
+                    // The chain of entries forms a loop, which means a concurrent update has happened.
+                    throw new InvalidOperationException(SR.InvalidOperation_ConcurrentOperationsNotSupported);
+                }
+                collisionCount++;
             }
             int index;
             if (_freeList >= 0)
             {
                 index = _freeList;
-                _freeList = _slots[index].next;
+                _freeList = slots[index].next;
             }
             else
             {
-                if (_lastIndex == _slots.Length)
+                if (_lastIndex == slots.Length)
                 {
                     IncreaseCapacity();
                     // this will change during resize
+                    slots = _slots;
                     bucket = hashCode % _buckets.Length;
                 }
                 index = _lastIndex;
                 _lastIndex++;
             }
-            _slots[index].hashCode = hashCode;
-            _slots[index].value = value;
-            _slots[index].next = _buckets[bucket] - 1;
+            slots[index].hashCode = hashCode;
+            slots[index].value = value;
+            slots[index].next = _buckets[bucket] - 1;
             _buckets[bucket] = index + 1;
             _count++;
             _version++;

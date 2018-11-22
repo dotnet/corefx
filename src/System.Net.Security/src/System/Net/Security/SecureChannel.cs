@@ -526,6 +526,10 @@ namespace System.Net.Security
                 {
                     NetEventSource.Log.FindingMatchingCerts(this);
                 }
+                else
+                {
+                    NetEventSource.Info(this, "No client certificate to choose from");
+                }
             }
 
             //
@@ -624,7 +628,7 @@ namespace System.Net.Security
         //
         // Acquire Server Side Certificate information and set it on the class.
         //
-        private bool AcquireServerCredentials(ref byte[] thumbPrint)
+        private bool AcquireServerCredentials(ref byte[] thumbPrint, byte[] clientHello)
         {
             if (NetEventSource.IsEnabled)
                 NetEventSource.Enter(this);
@@ -632,10 +636,25 @@ namespace System.Net.Security
             X509Certificate localCertificate = null;
             bool cachedCred = false;
 
-            if (_sslAuthenticationOptions.CertSelectionDelegate != null)
+            // There are three options for selecting the server certificate. When 
+            // selecting which to use, we prioritize the new ServerCertSelectionDelegate
+            // API. If the new API isn't used we call LocalCertSelectionCallback (for compat
+            // with .NET Framework), and if neither is set we fall back to using ServerCertificate.
+            if (_sslAuthenticationOptions.ServerCertSelectionDelegate != null)
+            {
+                string serverIdentity = SniHelper.GetServerName(clientHello);
+                localCertificate = _sslAuthenticationOptions.ServerCertSelectionDelegate(serverIdentity);
+
+                if (localCertificate == null)
+                {
+                    throw new AuthenticationException(SR.net_ssl_io_no_server_cert);
+                }
+            }
+            else if (_sslAuthenticationOptions.CertSelectionDelegate != null)
             {
                 X509CertificateCollection tempCollection = new X509CertificateCollection();
                 tempCollection.Add(_sslAuthenticationOptions.ServerCertificate);
+                // We pass string.Empty here to maintain strict compatability with .NET Framework.
                 localCertificate = _sslAuthenticationOptions.CertSelectionDelegate(string.Empty, tempCollection, null, Array.Empty<string>());
                 if (NetEventSource.IsEnabled)
                     NetEventSource.Info(this, "Use delegate selected Cert");
@@ -719,8 +738,16 @@ namespace System.Net.Security
             }
 
             ProtocolToken token = new ProtocolToken(nextmsg, status);
+
             if (NetEventSource.IsEnabled)
+            {
+                if (token.Failed)
+                {
+                    NetEventSource.Error(this, $"Authentication failed. Status: {status.ToString()}, Exception message: {token.GetException().Message}");
+                }
+
                 NetEventSource.Exit(this, token);
+            }
             return token;
         }
 
@@ -741,9 +768,7 @@ namespace System.Net.Security
         --*/
         private SecurityStatusPal GenerateToken(byte[] input, int offset, int count, ref byte[] output)
         {
-#if TRACE_VERBOSE
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, $"_refreshCredentialNeeded = {_refreshCredentialNeeded}");
-#endif
 
             if (offset < 0 || offset > (input == null ? 0 : input.Length))
             {
@@ -786,7 +811,7 @@ namespace System.Net.Security
                     if (_refreshCredentialNeeded)
                     {
                         cachedCreds = _sslAuthenticationOptions.IsServer
-                                        ? AcquireServerCredentials(ref thumbPrint)
+                                        ? AcquireServerCredentials(ref thumbPrint, input)
                                         : AcquireClientCredentials(ref thumbPrint);
                     }
 
@@ -851,9 +876,17 @@ namespace System.Net.Security
             }
 
             output = outgoingSecurity.token;
+            if (_negotiatedApplicationProtocol == default)
+            {
+                // try to get ALPN info unless we already have it. (this function can be called multiple times)
+                byte[] alpnResult = SslStreamPal.GetNegotiatedApplicationProtocol(_securityContext);
+                _negotiatedApplicationProtocol = alpnResult == null ? default : new SslApplicationProtocol(alpnResult, false);
+            }
 
-            byte[] alpnResult = SslStreamPal.GetNegotiatedApplicationProtocol(_securityContext);
-            _negotiatedApplicationProtocol = alpnResult == null ? default : new SslApplicationProtocol(alpnResult, false);
+            if (NetEventSource.IsEnabled)
+            {
+                NetEventSource.Exit(this);
+            }
 
             return status;
         }
@@ -870,24 +903,20 @@ namespace System.Net.Security
             if (NetEventSource.IsEnabled)
                 NetEventSource.Enter(this);
 
-            StreamSizes streamSizes;
-            SslStreamPal.QueryContextStreamSizes(_securityContext, out streamSizes);
+            SslStreamPal.QueryContextStreamSizes(_securityContext, out StreamSizes streamSizes);
 
-            if (streamSizes != null)
+            try
             {
-                try
-                {
-                    _headerSize = streamSizes.Header;
-                    _trailerSize = streamSizes.Trailer;
-                    _maxDataSize = checked(streamSizes.MaximumMessage - (_headerSize + _trailerSize));
+                _headerSize = streamSizes.Header;
+                _trailerSize = streamSizes.Trailer;
+                _maxDataSize = checked(streamSizes.MaximumMessage - (_headerSize + _trailerSize));
 
-                    Debug.Assert(_maxDataSize > 0, "_maxDataSize > 0");
-                }
-                catch (Exception e) when (!ExceptionCheck.IsFatal(e))
-                {
-                    NetEventSource.Fail(this, "StreamSizes out of range.");
-                    throw;
-                }
+                Debug.Assert(_maxDataSize > 0, "_maxDataSize > 0");
+            }
+            catch (Exception e) when (!ExceptionCheck.IsFatal(e))
+            {
+                NetEventSource.Fail(this, "StreamSizes out of range.");
+                throw;
             }
 
             SslStreamPal.QueryContextConnectionInfo(_securityContext, out _connectionInfo);
@@ -995,7 +1024,7 @@ namespace System.Net.Security
                 if (remoteCertificateEx == null)
                 {
                     if (NetEventSource.IsEnabled)
-                        NetEventSource.Exit(this, "(no remote cert)", !_sslAuthenticationOptions.RemoteCertRequired);
+                        NetEventSource.Exit(this, $"No remote certificate received. RemoteCertRequired: {RemoteCertRequired}");
                     sslPolicyErrors |= SslPolicyErrors.RemoteCertificateNotAvailable;
                 }
                 else

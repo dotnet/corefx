@@ -23,9 +23,9 @@ namespace System.Data.SqlClient
         // The password exchange during Login phase happens over a secure channel i.e. SSL/TLS 
         // Note: The same logic is used in SNIPacketSetData (SniManagedWrapper) to encrypt passwords stored in SecureString
         //       If this logic changed, SNIPacketSetData needs to be changed as well
-        internal static Byte[] ObfuscatePassword(string password)
+        internal static byte[] ObfuscatePassword(string password)
         {
-            Byte[] bObfuscated = new Byte[password.Length << 1];
+            byte[] bObfuscated = new byte[password.Length << 1];
             int s;
             byte bLo;
             byte bHi;
@@ -35,10 +35,24 @@ namespace System.Data.SqlClient
                 s = (int)password[i];
                 bLo = (byte)(s & 0xff);
                 bHi = (byte)((s >> 8) & 0xff);
-                bObfuscated[i << 1] = (Byte)((((bLo & 0x0f) << 4) | (bLo >> 4)) ^ 0xa5);
-                bObfuscated[(i << 1) + 1] = (Byte)((((bHi & 0x0f) << 4) | (bHi >> 4)) ^ 0xa5);
+                bObfuscated[i << 1] = (byte)((((bLo & 0x0f) << 4) | (bLo >> 4)) ^ 0xa5);
+                bObfuscated[(i << 1) + 1] = (byte)((((bHi & 0x0f) << 4) | (bHi >> 4)) ^ 0xa5);
             }
             return bObfuscated;
+        }
+
+        internal static byte[] ObfuscatePassword(byte[] password)
+        {
+            byte bLo;
+            byte bHi;
+
+            for (int i = 0; i < password.Length; i++)
+            {
+                bLo = (byte)(password[i] & 0x0f);
+                bHi = (byte)(password[i] & 0xf0);
+                password[i] = (byte)(((bHi >> 4) | (bLo << 4)) ^ 0xa5);
+            }
+            return password;
         }
 
         private const int NoProcessId = -1;
@@ -47,18 +61,20 @@ namespace System.Data.SqlClient
         {
             if (s_currentProcessId == NoProcessId)
             {
-                // In ProjectK\CoreCLR we don't want to take a dependency on an assembly
-                // just to grab the real Process Id that the server doesn't really use
-                // So, instead, pick a random number and use that for all connections
-                Random rand = new Random();
-                int processId = rand.Next();
-                Threading.Interlocked.CompareExchange(ref s_currentProcessId, processId, NoProcessId);
+                // Pick up the process Id from the current process instead of randomly generating it.
+                // This would be helpful while tracing application related issues.
+                int processId;
+                using (System.Diagnostics.Process p = System.Diagnostics.Process.GetCurrentProcess())
+                {
+                    processId = p.Id;
+                }
+                System.Threading.Volatile.Write(ref s_currentProcessId, processId);
             }
             return s_currentProcessId;
         }
 
 
-        internal static Int32 GetCurrentThreadIdForTdsLoginOnly()
+        internal static int GetCurrentThreadIdForTdsLoginOnly()
         {
             return Environment.CurrentManagedThreadId;
         }
@@ -81,7 +97,7 @@ namespace System.Data.SqlClient
         }
 
         // translates remaining time in stateObj (from user specified timeout) to timeout value for SNI
-        internal static Int32 GetTimeoutMilliseconds(long timeoutTime)
+        internal static int GetTimeoutMilliseconds(long timeoutTime)
         {
             // User provided timeout t | timeout value for SNI | meaning
             // ------------------------+-----------------------+------------------------------
@@ -89,7 +105,7 @@ namespace System.Data.SqlClient
             //   t>0 && t<int.MaxValue |                     t |
             //          t>int.MaxValue |          int.MaxValue | must not exceed int.MaxValue
 
-            if (Int64.MaxValue == timeoutTime)
+            if (long.MaxValue == timeoutTime)
             {
                 return -1;  // infinite timeout
             }
@@ -100,11 +116,11 @@ namespace System.Data.SqlClient
             {
                 return 0;
             }
-            if (msecRemaining > (long)Int32.MaxValue)
+            if (msecRemaining > (long)int.MaxValue)
             {
-                return Int32.MaxValue;
+                return int.MaxValue;
             }
-            return (Int32)msecRemaining;
+            return (int)msecRemaining;
         }
 
 
@@ -113,7 +129,7 @@ namespace System.Data.SqlClient
             long result;
             if (timeoutMilliseconds <= 0)
             {
-                result = Int64.MaxValue; // no timeout...
+                result = long.MaxValue; // no timeout...
             }
             else
             {
@@ -124,7 +140,7 @@ namespace System.Data.SqlClient
                 catch (OverflowException)
                 {
                     // In case of overflow, set to 'infinite' timeout
-                    result = Int64.MaxValue;
+                    result = long.MaxValue;
                 }
             }
             return result;
@@ -134,7 +150,7 @@ namespace System.Data.SqlClient
         {
             bool result = false;
 
-            if (0 != timeoutTime && Int64.MaxValue != timeoutTime)
+            if (0 != timeoutTime && long.MaxValue != timeoutTime)
             {
                 result = ADP.TimerHasExpired(timeoutTime);
             }

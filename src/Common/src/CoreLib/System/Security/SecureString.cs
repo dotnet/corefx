@@ -139,7 +139,7 @@ namespace System.Security
                 {
                     throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_IndexString);
                 }
-                Debug.Assert(index <= Int32.MaxValue / sizeof(char));
+                Debug.Assert(index <= int.MaxValue / sizeof(char));
 
                 EnsureNotDisposed();
                 EnsureNotReadOnly();
@@ -153,6 +153,23 @@ namespace System.Security
             if (_readOnly)
             {
                 throw new InvalidOperationException(SR.InvalidOperation_ReadOnly);
+            }
+        }
+
+        private void EnsureNotDisposed()
+        {
+            if (_buffer == null)
+            {
+                throw new ObjectDisposedException(GetType().Name);
+            }
+        }
+
+        internal IntPtr MarshalToBSTR()
+        {
+            lock (_methodLock)
+            {
+                EnsureNotDisposed();
+                return MarshalToBSTRCore();
             }
         }
 

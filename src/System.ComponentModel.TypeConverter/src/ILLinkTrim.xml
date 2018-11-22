@@ -1,0 +1,14 @@
+<linker>
+  <assembly fullname="System.ComponentModel.TypeConverter">
+    <type fullname="MS.Internal.Xml.Linq.ComponentModel.*" />
+    <type fullname="System.ComponentModel.TypeDescriptor">
+      <!-- called through reflection by System.ComponentModel.DefaultValueAttribute -->
+      <method name="ConvertFromInvariantString" />
+    </type>
+    <type fullname="System.ComponentModel.LicenseManager">
+      <!-- supports the CLR's IClassFactory2 marshaling -->
+      <method name="GetLicenseInteropHelperType" />
+    </type>
+    <type fullname="System.ComponentModel.LicenseManager/LicenseInteropHelper" />
+  </assembly>
+</linker>

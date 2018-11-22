@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Data.Common;
 using System.Data.SqlTypes;
 using System.Diagnostics;
+using System.Security;
 using System.Text;
 using Microsoft.SqlServer.Server;
 
@@ -45,6 +46,7 @@ namespace System.Data.SqlClient
         THREADID,
         MARS,
         TRACEID,
+        FEDAUTHREQUIRED,
         NUMOPT,
         LASTOPT = 255
     }
@@ -63,6 +65,16 @@ namespace System.Data.SqlClient
         OpenNotLoggedIn,
         OpenLoggedIn,
         Broken,
+    }
+
+    /// <summary>
+    /// Struct encapsulating the data to be sent to the server as part of Federated Authentication Feature Extension.
+    /// </summary>
+    internal struct FederatedAuthenticationFeatureExtensionData
+    {
+        internal TdsEnums.FedAuthLibrary libraryType;
+        internal bool fedAuthRequiredPreLoginResponse;
+        internal byte[] accessToken;
     }
 
     sealed internal class SqlCollation
@@ -209,10 +221,10 @@ namespace System.Data.SqlClient
     internal class RoutingInfo
     {
         internal byte Protocol { get; private set; }
-        internal UInt16 Port { get; private set; }
+        internal ushort Port { get; private set; }
         internal string ServerName { get; private set; }
 
-        internal RoutingInfo(byte protocol, UInt16 port, string servername)
+        internal RoutingInfo(byte protocol, ushort port, string servername)
         {
             Protocol = protocol;
             Port = port;
@@ -250,9 +262,12 @@ namespace System.Data.SqlClient
         internal string database = "";                                      // initial database
         internal string attachDBFilename = "";                                      // DB filename to be attached
         internal bool useReplication = false;                                   // user login for replication
+        internal string newPassword = "";                                   // new password for reset password
         internal bool useSSPI = false;                                   // use integrated security
         internal int packetSize = SqlConnectionString.DEFAULT.Packet_Size; // packet size
         internal bool readOnlyIntent = false;                                   // read-only intent
+        internal SqlCredential credential;                                      // user id and password in SecureString
+        internal SecureString newSecurePassword;
     }
 
     sealed internal class SqlLoginAck
@@ -260,7 +275,7 @@ namespace System.Data.SqlClient
         internal byte majorVersion;
         internal byte minorVersion;
         internal short buildNum;
-        internal UInt32 tdsVersion;
+        internal uint tdsVersion;
     }
 
     sealed internal class _SqlMetaData : SqlMetaDataPriv
@@ -326,7 +341,7 @@ namespace System.Data.SqlClient
         {
             get
             {
-                return type == SqlDbType.Udt && length == Int32.MaxValue;
+                return type == SqlDbType.Udt && length == int.MaxValue;
             }
         }
 

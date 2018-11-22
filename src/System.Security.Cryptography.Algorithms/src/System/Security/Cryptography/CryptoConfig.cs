@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace System.Security.Cryptography
 {
@@ -29,6 +30,8 @@ namespace System.Security.Cryptography
         private const string OID_OIWSEC_SHA512 = "2.16.840.1.101.3.4.2.3";
         private const string OID_OIWSEC_RIPEMD160 = "1.3.36.3.2.1";
 
+        private const string ECDsaIdentifier = "ECDsa";
+
         private static volatile Dictionary<string, string> s_defaultOidHT = null;
         private static volatile Dictionary<string, object> s_defaultNameHT = null;
         private static volatile Dictionary<string, Type> appNameHT = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
@@ -40,7 +43,7 @@ namespace System.Security.Cryptography
         public static bool AllowOnlyFipsAlgorithms => false;
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static Object s_InternalSyncObject = new Object();
+        private static object s_InternalSyncObject = new object();
 
         private static Dictionary<string, string> DefaultOidHT
         {
@@ -184,7 +187,12 @@ namespace System.Security.Cryptography
                 ht.Add("DSA", DSACryptoServiceProviderType);
                 ht.Add("System.Security.Cryptography.DSA", DSACryptoServiceProviderType);
 
-                ht.Add("ECDsa", ECDsaCngType);
+                // Windows will register the public ECDsaCng type.  Non-Windows gets a special handler.
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    ht.Add(ECDsaIdentifier, ECDsaCngType);
+                }
+
                 ht.Add("ECDsaCng", ECDsaCngType);
                 ht.Add("System.Security.Cryptography.ECDsaCng", ECDsaCngType);
 
@@ -301,7 +309,7 @@ namespace System.Security.Cryptography
             // throw an exception if we find an invalid name partway through the list.
             foreach (string name in algorithmNames)
             {
-                if (String.IsNullOrEmpty(name))
+                if (string.IsNullOrEmpty(name))
                 {
                     throw new ArgumentException(SR.Cryptography_AddNullOrEmptyName);
                 }
@@ -357,6 +365,15 @@ namespace System.Security.Cryptography
                 }
             }
 
+            // Special case asking for "ECDsa" since the default map from .NET Framework uses
+            // a Windows-only type.
+            if (retvalType == null &&
+                (args == null || args.Length == 1) &&
+                name == ECDsaIdentifier)
+            {
+                return ECDsa.Create();
+            }
+
             // Maybe they gave us a classname.
             if (retvalType == null)
             {
@@ -382,7 +399,7 @@ namespace System.Security.Cryptography
 
             if (args == null)
             {
-                args = new object[] { };
+                args = Array.Empty<object>();
             }
 
             List<MethodBase> candidates = new List<MethodBase>();
@@ -450,7 +467,7 @@ namespace System.Security.Cryptography
             // exception if an invalid name is found further down the array. 
             foreach (string name in oidNames)
             {
-                if (String.IsNullOrEmpty(name))
+                if (string.IsNullOrEmpty(name))
                 {
                     throw new ArgumentException(SR.Cryptography_AddNullOrEmptyName);
                 }

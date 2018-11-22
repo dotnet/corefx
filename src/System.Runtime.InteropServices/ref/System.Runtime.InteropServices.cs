@@ -108,12 +108,14 @@ namespace System.IO
         public override int Read(byte[] buffer, int offset, int count) { throw null; }
         public override int Read(System.Span<byte> destination) { throw null; }
         public override System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public override System.Threading.Tasks.ValueTask<int> ReadAsync(Memory<byte> buffer, System.Threading.CancellationToken cancellationToken = default) { throw null; }
         public override int ReadByte() { throw null; }
         public override long Seek(long offset, System.IO.SeekOrigin loc) { throw null; }
         public override void SetLength(long value) { }
         public override void Write(byte[] buffer, int offset, int count) { }
         public override void Write(System.ReadOnlySpan<byte> source) { }
         public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> buffer, System.Threading.CancellationToken cancellationToken = default) { throw null; }
         public override void WriteByte(byte value) { }
     }
 }
@@ -123,6 +125,12 @@ namespace System.Runtime.CompilerServices
     public sealed partial class IUnknownConstantAttribute : System.Runtime.CompilerServices.CustomConstantAttribute
     {
         public IUnknownConstantAttribute() { }
+        public override object Value { get { throw null; } }
+    }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(2304), Inherited = false)]
+    public sealed partial class IDispatchConstantAttribute : System.Runtime.CompilerServices.CustomConstantAttribute
+    {
+        public IDispatchConstantAttribute() { }
         public override object Value { get { throw null; } }
     }
 }
@@ -413,9 +421,9 @@ namespace System.Runtime.InteropServices
         public void Add() { }
         public void Remove() { }
     }
-    public struct HandleRef
+    public readonly struct HandleRef
     {
-        private object _dummy;
+        private readonly object _dummy;
         public HandleRef(object wrapper, System.IntPtr handle) : this() { }
         public System.IntPtr Handle { get; }
         public object Wrapper { get; }
@@ -535,6 +543,7 @@ namespace System.Runtime.InteropServices
         public static int GetExceptionCode() { throw null; }
         public static System.Exception GetExceptionForHR(int errorCode) { throw null; }
         public static System.Exception GetExceptionForHR(int errorCode, System.IntPtr errorInfo) { throw null; }
+        public static IntPtr GetExceptionPointers() { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static System.IntPtr GetFunctionPointerForDelegate(System.Delegate d) { throw null; }
         public static System.IntPtr GetFunctionPointerForDelegate<TDelegate>(TDelegate d) { throw null; }
@@ -564,6 +573,7 @@ namespace System.Runtime.InteropServices
         [System.ObsoleteAttribute("GetObjectsForNativeVariants<T>(IntPtr, Int32) may be unavailable in future releases.")]
         public static T[] GetObjectsForNativeVariants<T>(System.IntPtr aSrcNativeVariant, int cVars) { throw null; }
         public static int GetStartComSlot(System.Type t) { throw null; }
+        public static int GetEndComSlot(System.Type t) { throw null; }
         public static object GetTypedObjectForIUnknown(System.IntPtr pUnk, System.Type t) { throw null; }         
         public static System.Type GetTypeFromCLSID(System.Guid clsid) { throw null; }
         public static string GetTypeInfoName(System.Runtime.InteropServices.ComTypes.ITypeInfo typeInfo) { throw null; }
@@ -589,6 +599,7 @@ namespace System.Runtime.InteropServices
         public static object PtrToStructure(System.IntPtr ptr, System.Type structureType) { throw null; }
         public static T PtrToStructure<T>(System.IntPtr ptr) { throw null; }
         public static void PtrToStructure<T>(System.IntPtr ptr, T structure) { }
+        public static bool IsTypeVisibleFromCom(Type t) { throw null;}
         public static int QueryInterface(System.IntPtr pUnk, ref System.Guid iid, out System.IntPtr ppv) { throw null; }
         public static byte ReadByte(System.IntPtr ptr) { throw null; }
         public static byte ReadByte(System.IntPtr ptr, int ofs) { throw null; }
@@ -689,7 +700,7 @@ namespace System.Runtime.InteropServices
         public static void ZeroFreeGlobalAllocUnicode(System.IntPtr s) { }
         public static void ZeroFreeCoTaskMemUTF8(System.IntPtr s) { }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(64), Inherited=false)]
+    [System.AttributeUsageAttribute((System.AttributeTargets)(64), Inherited=false, AllowMultiple=false)]
     public sealed partial class ManagedToNativeComInteropStubAttribute : System.Attribute
     {
         public ManagedToNativeComInteropStubAttribute(System.Type classType, string methodName) { }
@@ -764,6 +775,10 @@ namespace System.Runtime.InteropServices
         protected SafeArrayTypeMismatchException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public SafeArrayTypeMismatchException(string message) { }
         public SafeArrayTypeMismatchException(string message, System.Exception inner) { }
+    }
+    public partial class StandardOleMarshalObject : MarshalByRefObject
+    {
+        protected StandardOleMarshalObject() { }
     }
     public abstract partial class SafeBuffer : Microsoft.Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid
     {

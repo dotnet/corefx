@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.Pkcs;
@@ -49,7 +50,7 @@ namespace Internal.Cryptography.Pal.AnyOS
             }
         }
 
-        private static byte[] Encrypt(
+        private byte[] Encrypt(
             CmsRecipientCollection recipients,
             ContentInfo contentInfo,
             AlgorithmIdentifier contentEncryptionAlgorithm,
@@ -79,7 +80,7 @@ namespace Internal.Cryptography.Pal.AnyOS
             {
                 List<AttributeAsn> attrList = CmsSigner.BuildAttributes(unprotectedAttributes);
 
-                envelopedData.UnprotectedAttributes = Helpers.NormalizeSet(attrList.ToArray());
+                envelopedData.UnprotectedAttributes = PkcsHelpers.NormalizeAttributeSet(attrList.ToArray());
             }
 
             if (originatorCerts != null && originatorCerts.Count > 0)
@@ -144,7 +145,11 @@ namespace Internal.Cryptography.Pal.AnyOS
                 envelopedData.Version = 2;
             }
 
-            return Helpers.EncodeContentInfo(envelopedData, Oids.Pkcs7Enveloped);
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                envelopedData.Encode(writer);
+                return PkcsHelpers.EncodeContentInfo(writer.Encode(), Oids.Pkcs7Enveloped);
+            }
         }
 
         private byte[] EncryptContent(
@@ -162,8 +167,9 @@ namespace Internal.Cryptography.Pal.AnyOS
                 {
                     Rc2CbcParameters rc2Params = new Rc2CbcParameters(alg.IV, alg.KeySize);
 
-                    using (AsnWriter writer = AsnSerializer.Serialize(rc2Params, AsnEncodingRules.DER))
+                    using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
                     {
+                        rc2Params.Encode(writer);
                         parameterBytes = writer.Encode();
                     }
                 }
@@ -177,9 +183,20 @@ namespace Internal.Cryptography.Pal.AnyOS
                 if (contentInfo.ContentType.Value == Oids.Pkcs7Data)
                 {
                     toEncrypt = EncodeOctetString(toEncrypt);
+                    return encryptor.OneShot(toEncrypt);
                 }
-
-                return encryptor.OneShot(toEncrypt);
+                else
+                {
+                    if (contentInfo.Content.Length == 0)
+                    {
+                        return encryptor.OneShot(contentInfo.Content);
+                    }
+                    else
+                    {
+                        AsnReader reader = new AsnReader(contentInfo.Content, AsnEncodingRules.BER);
+                        return encryptor.OneShot(reader.PeekContentBytes().ToArray());
+                    }
+                }
             }
         }
     }

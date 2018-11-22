@@ -20,8 +20,8 @@ namespace System.Security.Cryptography
         public CryptographicAttributeObjectCollection(System.Security.Cryptography.CryptographicAttributeObject attribute) { }
         public int Count { get { throw null; } }
         public System.Security.Cryptography.CryptographicAttributeObject this[int index] { get { throw null; } }
-        bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
-        object System.Collections.ICollection.SyncRoot { get { throw null; } }
+        public bool IsSynchronized { get { throw null; } }
+        public object SyncRoot { get { throw null; } }
         public int Add(System.Security.Cryptography.AsnEncodedData asnEncodedData) { throw null; }
         public int Add(System.Security.Cryptography.CryptographicAttributeObject attribute) { throw null; }
         public void CopyTo(System.Security.Cryptography.CryptographicAttributeObject[] array, int index) { }
@@ -48,6 +48,7 @@ namespace System.Security.Cryptography.Pkcs
         public AlgorithmIdentifier(System.Security.Cryptography.Oid oid, int keyLength) { }
         public int KeyLength { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.Security.Cryptography.Oid Oid { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public byte[] Parameters { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     public sealed partial class CmsRecipient
     {
@@ -63,8 +64,8 @@ namespace System.Security.Cryptography.Pkcs
         public CmsRecipientCollection(System.Security.Cryptography.Pkcs.SubjectIdentifierType recipientIdentifierType, System.Security.Cryptography.X509Certificates.X509Certificate2Collection certificates) { }
         public int Count { get { throw null; } }
         public System.Security.Cryptography.Pkcs.CmsRecipient this[int index] { get { throw null; } }
-        bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
-        object System.Collections.ICollection.SyncRoot { get { throw null; } }
+        public bool IsSynchronized { get { throw null; } }
+        public object SyncRoot { get { throw null; } }
         public int Add(System.Security.Cryptography.Pkcs.CmsRecipient recipient) { throw null; }
         public void CopyTo(System.Array array, int index) { }
         public void CopyTo(System.Security.Cryptography.Pkcs.CmsRecipient[] array, int index) { }
@@ -91,9 +92,9 @@ namespace System.Security.Cryptography.Pkcs
         public SubjectIdentifierType SignerIdentifierType { get => throw null; set => throw null; }
         public System.Security.Cryptography.X509Certificates.X509Certificate2 Certificate { get => throw null; set => throw null; }
         public Oid DigestAlgorithm { get => throw null; set => throw null; }
-        public CryptographicAttributeObjectCollection SignedAttributes { get => throw null; set => throw null; }
-        public CryptographicAttributeObjectCollection UnsignedAttributes { get => throw null; set => throw null; }
-        public System.Security.Cryptography.X509Certificates.X509Certificate2Collection Certificates { get => throw null; set => throw null; }
+        public CryptographicAttributeObjectCollection SignedAttributes { get => throw null; }
+        public CryptographicAttributeObjectCollection UnsignedAttributes { get => throw null; }
+        public System.Security.Cryptography.X509Certificates.X509Certificate2Collection Certificates { get => throw null; }
         public System.Security.Cryptography.X509Certificates.X509IncludeOption IncludeOption { get => throw null; set => throw null; }
     }
     public sealed partial class ContentInfo
@@ -208,8 +209,8 @@ namespace System.Security.Cryptography.Pkcs
         internal RecipientInfoCollection() { }
         public int Count { get { throw null; } }
         public System.Security.Cryptography.Pkcs.RecipientInfo this[int index] { get { throw null; } }
-        bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
-        object System.Collections.ICollection.SyncRoot { get { throw null; } }
+        public bool IsSynchronized { get { throw null; } }
+        public object SyncRoot { get { throw null; } }
         public void CopyTo(System.Array array, int index) { }
         public void CopyTo(System.Security.Cryptography.Pkcs.RecipientInfo[] array, int index) { }
         public System.Security.Cryptography.Pkcs.RecipientInfoEnumerator GetEnumerator() { throw null; }

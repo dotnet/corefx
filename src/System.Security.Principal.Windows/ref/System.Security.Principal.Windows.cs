@@ -318,16 +318,28 @@ namespace System.Security.Principal
         SystemOperator = 549,
         User = 545,
     }
+    [System.Runtime.InteropServices.ComVisible(true)]
+    public enum WindowsAccountType
+    {
+        Normal = 0,
+        Guest = 1,
+        System = 2,
+        Anonymous = 3
+    }
     public partial class WindowsIdentity : System.Security.Claims.ClaimsIdentity, System.IDisposable, System.Runtime.Serialization.ISerializable, System.Runtime.Serialization.IDeserializationCallback
     {
         public new const string DefaultIssuer = "AD AUTHORITY";
         public WindowsIdentity(System.IntPtr userToken) { }
         public WindowsIdentity(System.IntPtr userToken, string type) { }
+        public WindowsIdentity(System.IntPtr userToken, string type, WindowsAccountType acctType){ }
+        public WindowsIdentity(System.IntPtr userToken, string type, WindowsAccountType acctType, bool isAuthenticated) { }
         public WindowsIdentity(string sUserPrincipalName) { }
         public WindowsIdentity(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        protected WindowsIdentity(System.Security.Principal.WindowsIdentity identity) { }
         public Microsoft.Win32.SafeHandles.SafeAccessTokenHandle AccessToken { get { throw null; } }
         public sealed override string AuthenticationType { get { throw null; } }
         public override System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> Claims { get { throw null; } }
+        public virtual System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> DeviceClaims { get { throw null; } }
         public System.Security.Principal.IdentityReferenceCollection Groups { get { throw null; } }
         public System.Security.Principal.TokenImpersonationLevel ImpersonationLevel { get { throw null; } }
         public virtual bool IsAnonymous { get { throw null; } }
@@ -338,6 +350,7 @@ namespace System.Security.Principal
         public System.Security.Principal.SecurityIdentifier Owner { get { throw null; } }
         public virtual IntPtr Token { get { throw null; } }
         public System.Security.Principal.SecurityIdentifier User { get { throw null; } }
+        public virtual System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> UserClaims { get { throw null; } }
         public override System.Security.Claims.ClaimsIdentity Clone() { throw null; }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
@@ -353,10 +366,12 @@ namespace System.Security.Principal
     public partial class WindowsPrincipal : System.Security.Claims.ClaimsPrincipal
     {
         public WindowsPrincipal(System.Security.Principal.WindowsIdentity ntIdentity) { }
+        public virtual System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> DeviceClaims { get { throw null; } }
         public override System.Security.Principal.IIdentity Identity { get { throw null; } }
         public virtual bool IsInRole(int rid) { throw null; }
         public virtual bool IsInRole(System.Security.Principal.SecurityIdentifier sid) { throw null; }
         public virtual bool IsInRole(System.Security.Principal.WindowsBuiltInRole role) { throw null; }
         public override bool IsInRole(string role) { throw null; }
+        public virtual System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> UserClaims { get { throw null; } }
     }
 }

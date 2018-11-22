@@ -46,7 +46,6 @@ using System.ComponentModel;
 
 namespace System.Drawing
 {
-    [Serializable]
 #if !NETCORE
     [Editor ("System.Drawing.Design.BitmapEditor, " + Consts.AssemblySystem_Drawing_Design, typeof (System.Drawing.Design.UITypeEditor))]
 #endif
@@ -65,13 +64,13 @@ namespace System.Drawing
         public Bitmap(Stream stream, bool useIcm)
         {
             // false: stream is owned by user code
-            nativeImage = InitFromStream(stream);
+            nativeImage = InitializeFromStream(stream);
         }
 
         public Bitmap(Type type, string resource)
         {
             if (resource == null)
-                throw new ArgumentException("resource");
+                throw new ArgumentException(nameof(resource));
 
             // For compatibility with the .NET Framework
             if (type == null)
@@ -84,18 +83,8 @@ namespace System.Drawing
                 throw new FileNotFoundException(msg);
             }
 
-            nativeImage = InitFromStream(s);
-        }
-
-        private Bitmap(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
+            nativeImage = InitializeFromStream(s);
         }
         #endregion
-
-        private void ValidateBitmap(IntPtr bitmap)
-        {
-            // No validation is performed on Unix.
-        }
     }
 }

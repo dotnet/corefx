@@ -24,7 +24,8 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Point(4, 6), new Point(1, 2), Color.Black, Color.Wheat, new RectangleF(1, 2, 3, 4) };
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ActiveIssue(32706, TestPlatforms.AnyUnix)] 
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Ctor_Point_TestData))]
         public void Ctor_PointF_PointF_Color_Color(Point point1, Point point2, Color color1, Color color2, RectangleF expectedRectangle)
         {
@@ -43,7 +44,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_PointF_PointF_Color_Color_FloatRanges()
         {
             var brush = new LinearGradientBrush(new PointF(float.NaN, float.NaN), new PointF(float.PositiveInfinity, float.NegativeInfinity), Color.Plum, Color.Red);
@@ -53,7 +54,8 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(float.NaN, brush.Rectangle.Height);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ActiveIssue(32706, TestPlatforms.AnyUnix)] 
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Ctor_Point_TestData))]
         public void Ctor_Point_Point_Color_Color(Point point1, Point point2, Color color1, Color color2, RectangleF expectedRectangle)
         {
@@ -72,7 +74,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0, 0)]
         [InlineData(1, 1)]
         public void Ctor_EqualPoints_ThrowsOutOfMemoryException(int x, int y)
@@ -89,7 +91,7 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Rectangle(1, 2, 3, 4), Color.Red, Color.Plum, LinearGradientMode.Vertical };
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Ctor_Rectangle_LinearGradientMode_TestData))]
         public void Ctor_Rectangle_Color_Color_LinearGradientMode(Rectangle rectangle, Color color1, Color color2, LinearGradientMode linearGradientMode)
         {
@@ -107,7 +109,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(linearGradientMode == LinearGradientMode.Horizontal, brush.Transform.IsIdentity);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Ctor_Rectangle_LinearGradientMode_TestData))]
         public void Ctor_RectangleF_Color_Color_LinearGradientMode(Rectangle rectangle, Color color1, Color color2, LinearGradientMode linearGradientMode)
         {
@@ -134,7 +136,7 @@ namespace System.Drawing.Drawing2D.Tests
             yield return new object[] { new Rectangle(1, 2, 3, 4), Color.Red, Color.Plum, 90 };
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Ctor_Rectangle_Angle_TestData))]
         public void Ctor_Rectangle_Color_Color_Angle(Rectangle rectangle, Color color1, Color color2, float angle)
         {
@@ -152,7 +154,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal((angle % 360) == 0, brush.Transform.IsIdentity);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Ctor_Rectangle_Angle_TestData))]
         public void Ctor_RectangleF_Color_Color_Angle(Rectangle rectangle, Color color1, Color color2, float angle)
         {
@@ -178,7 +180,7 @@ namespace System.Drawing.Drawing2D.Tests
                 yield return new object[] { testData[0], testData[1], testData[2], testData[3], false };
             }
         }
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Ctor_Rectangle_Angle_IsAngleScalable_TestData))]
         public void Ctor_Rectangle_Color_Color_Angle_IsAngleScalable(Rectangle rectangle, Color color1, Color color2, float angle, bool isAngleScalable)
         {
@@ -196,7 +198,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal((angle % 360) == 0, brush.Transform.IsIdentity);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [MemberData(nameof(Ctor_Rectangle_Angle_IsAngleScalable_TestData))]
         public void Ctor_RectangleF_Color_Color_Angle_IsAngleScalable(Rectangle rectangle, Color color1, Color color2, float angle, bool isAngleScalable)
         {
@@ -214,7 +216,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal((angle % 360) == 0, brush.Transform.IsIdentity);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_ZeroWidth_ThrowsArgumentException()
         {
             AssertExtensions.Throws<ArgumentException>(null, () => new LinearGradientBrush(new Rectangle(1, 2, 0, 4), Color.Empty, Color.Empty, 0f));
@@ -225,7 +227,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => new LinearGradientBrush(new RectangleF(1, 2, 0, 4), Color.Empty, Color.Empty, 0, true));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Ctor_ZeroHeight_ThrowsArgumentException()
         {
             AssertExtensions.Throws<ArgumentException>(null, () => new LinearGradientBrush(new Rectangle(1, 2, 3, 0), Color.Empty, Color.Empty, 0f));
@@ -236,7 +238,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => new LinearGradientBrush(new RectangleF(1, 2, 3, 0), Color.Empty, Color.Empty, 0, true));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(LinearGradientMode.Horizontal - 1)]
         [InlineData(LinearGradientMode.BackwardDiagonal + 1)]
         public void Ctor_InvalidLinearGradientMode_ThrowsEnumArgumentException(LinearGradientMode linearGradientMode)
@@ -245,7 +247,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.ThrowsAny<ArgumentException>(() => new LinearGradientBrush(new RectangleF(1, 2, 3, 4), Color.Empty, Color.Empty, linearGradientMode));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Clone_Brush_ReturnsClone()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -259,7 +261,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(brush.Transform, clone.Transform);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Clone_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -269,7 +271,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Blend_GetWithInterpolationColorsSet_ReturnsNull()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -284,7 +286,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(new float[] { 1 }, new float[] { 1 })]
         [InlineData(new float[] { 0 }, new float[] { 0 })]
         [InlineData(new float[] { float.MaxValue }, new float[] { float.MaxValue })]
@@ -308,7 +310,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(factors.Length, brush.Blend.Positions.Length);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(new float[] { 1, 2 }, new float[] { 1, 2 })]
         [InlineData(new float[] { 1, 2 }, new float[] { 1, 1 })]
         [InlineData(new float[] { 1, 2 }, new float[] { 1, 0 })]
@@ -324,42 +326,42 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Blend = blend);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Blend_SetNullBlend_ThrowsNullReferenceException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             Assert.Throws<NullReferenceException>(() => brush.Blend = null);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Blend_SetNullBlendFactors_ThrowsNullReferenceException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             Assert.Throws<NullReferenceException>(() => brush.Blend = new Blend { Factors = null });
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Blend_SetNullBlendPositions_ThrowsArgumentNullException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             AssertExtensions.Throws<ArgumentNullException>("source", () => brush.Blend = new Blend { Factors = new float[2], Positions = null });
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Blend_SetFactorsLengthGreaterThanPositionsLength_ThrowsArgumentOutOfRangeException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             AssertExtensions.Throws<ArgumentOutOfRangeException>(null, () => brush.Blend = new Blend { Factors = new float[2], Positions = new float[1] });
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Blend_SetInvalidBlendFactorsLength_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Blend = new Blend { Factors = new float[0], Positions = new float[0] });
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Blend_GetSetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -369,7 +371,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Blend = new Blend());
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(true)]
         [InlineData(false)]
         public void GammaCorrection_Set_GetReturnsExpected(bool gammaCorrection)
@@ -378,7 +380,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(gammaCorrection, brush.GammaCorrection);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void GammaCorrection_GetSetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -388,7 +390,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.GammaCorrection = true);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(float.PositiveInfinity)]
         [InlineData(1)]
         [InlineData(0.5f)]
@@ -408,7 +410,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(blend.Positions, brush.InterpolationColors.Positions);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_SetWithExistingInterpolationColors_OverwritesInterpolationColors()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true)
@@ -430,21 +432,21 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(blend.Positions, brush.InterpolationColors.Positions);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_SetNullBlend_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors = null);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_SetBlendWithNullColors_ThrowsNullReferenceException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             Assert.Throws<NullReferenceException>(() => brush.InterpolationColors = new ColorBlend { Colors = null });
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0)]
         [InlineData(1)]
         public void InterpolationColors_SetBlendWithTooFewColors_ThrowsArgumentException(int colorsLength)
@@ -453,14 +455,14 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors = new ColorBlend { Colors = new Color[colorsLength] });
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_SetNullBlendPositions_ThrowsNullReferenceException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             Assert.Throws<NullReferenceException>(() => brush.InterpolationColors = new ColorBlend { Colors = new Color[2], Positions = null });
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(3)]
@@ -474,7 +476,7 @@ namespace System.Drawing.Drawing2D.Tests
             });
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(new float[] { 1, 0, 1 })]
         [InlineData(new float[] { 0, 0, 0 })]
         public void InterpolationColors_InvalidPositions_ThrowsArgumentException(float[] positions)
@@ -487,7 +489,7 @@ namespace System.Drawing.Drawing2D.Tests
             });
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_GetSetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true)
@@ -508,7 +510,7 @@ namespace System.Drawing.Drawing2D.Tests
             });
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_SetBlendTriangularShape_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true)
@@ -526,7 +528,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void InterpolationColors_SetBlend_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true)
@@ -547,7 +549,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.InterpolationColors);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void LinearColors_SetValid_GetReturnsExpected()
         {
             Color[] colors = new Color[] { Color.Red, Color.Blue, Color.AntiqueWhite };
@@ -555,14 +557,14 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(colors.Take(2).Select(c => Color.FromArgb(c.ToArgb())), brush.LinearColors);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void LinearColors_SetNull_ThrowsNullReferenceException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             Assert.Throws<NullReferenceException>(() => brush.LinearColors = null);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0)]
         [InlineData(1)]
         public void LinearColors_SetInvalidLength_ThrowsIndexOutOfRangeException(int length)
@@ -571,7 +573,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Throws<IndexOutOfRangeException>(() => brush.LinearColors = new Color[length]);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void LinearColors_GetSetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -582,7 +584,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Rectangle_GetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -591,7 +593,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Rectangle);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_SetValid_GetReturnsExpected()
         {
             var transform = new Matrix(1, 2, 3, 4, 5, 6);
@@ -599,14 +601,14 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(transform, brush.Transform);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_SetNull_ThrowsArgumentNullException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             AssertExtensions.Throws<ArgumentNullException>("value", "matrix", () => brush.Transform = null);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Transform_GetSetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -616,7 +618,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.Transform = new Matrix());
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(WrapMode.Tile)]
         [InlineData(WrapMode.TileFlipX)]
         [InlineData(WrapMode.TileFlipXY)]
@@ -627,7 +629,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(wrapMode, brush.WrapMode);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(WrapMode.Tile - 1)]
         [InlineData(WrapMode.Clamp + 1)]
         public void WrapMode_SetInvalid_ThrowsInvalidEnumArgumentException(WrapMode wrapMode)
@@ -636,14 +638,14 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.ThrowsAny<ArgumentException>(() => brush.WrapMode = wrapMode);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void WrapMode_Clamp_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
             AssertExtensions.Throws<ArgumentException>(null, () => brush.WrapMode = WrapMode.Clamp);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void WrapMode_GetSetDisposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -653,7 +655,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.WrapMode = WrapMode.TileFlipX);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ResetTransform_Invoke_SetsTransformToIdentity()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -663,7 +665,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.True(brush.Transform.IsIdentity);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ResetTransform_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -672,7 +674,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.ResetTransform());
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_NoOrder_Success()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -685,7 +687,7 @@ namespace System.Drawing.Drawing2D.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend)]
         [InlineData(MatrixOrder.Append)]
         [InlineData(MatrixOrder.Prepend - 1)]
@@ -710,7 +712,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_NullMatrix_ThrowsArgumentNullException()
         {
             using (var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true))
@@ -720,7 +722,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_DisposedMatrix_Nop()
         {
             using (var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true))
@@ -736,7 +738,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_NonInvertibleMatrix_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -746,7 +748,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.MultiplyTransform(matrix, MatrixOrder.Append));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void MultiplyTransform_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -756,7 +758,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.MultiplyTransform(new Matrix(), MatrixOrder.Prepend));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1, -2)]
         [InlineData(0, 0)]
         [InlineData(1, 2)]
@@ -770,7 +772,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(1, 1, MatrixOrder.Prepend)]
         [InlineData(1, 1, MatrixOrder.Append)]
         [InlineData(0, 0, MatrixOrder.Prepend)]
@@ -787,7 +789,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void TranslateTransform_InvalidOrder_ThrowsArgumentException(MatrixOrder order)
@@ -796,7 +798,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.TranslateTransform(0, 0, order));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TranslateTransform_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -806,7 +808,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.TranslateTransform(0, 0, MatrixOrder.Append));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1, -2)]
         [InlineData(0, 0)]
         [InlineData(1, 2)]
@@ -820,7 +822,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(1, 1, MatrixOrder.Prepend)]
         [InlineData(1, 1, MatrixOrder.Append)]
         [InlineData(0, 0, MatrixOrder.Prepend)]
@@ -837,7 +839,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void ScaleTransform_InvalidOrder_ThrowsArgumentException(MatrixOrder order)
@@ -846,7 +848,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.ScaleTransform(0, 0, order));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ScaleTransform_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -856,7 +858,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.ScaleTransform(0, 0, MatrixOrder.Append));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-1)]
         [InlineData(0)]
         [InlineData(1)]
@@ -871,7 +873,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(1, MatrixOrder.Prepend)]
         [InlineData(1, MatrixOrder.Append)]
         [InlineData(0, MatrixOrder.Prepend)]
@@ -888,7 +890,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedTransform, brush.Transform);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(MatrixOrder.Prepend - 1)]
         [InlineData(MatrixOrder.Append + 1)]
         public void RotateTransform_InvalidOrder_ThrowsArgumentException(MatrixOrder order)
@@ -897,7 +899,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.RotateTransform(0, order));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void RotateTransform_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -907,7 +909,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.RotateTransform(0, MatrixOrder.Append));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0)]
         [InlineData(0.5)]
         [InlineData(1)]
@@ -918,7 +920,7 @@ namespace System.Drawing.Drawing2D.Tests
             brush.SetSigmaBellShape(focus);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-0.1)]
         [InlineData(1.1)]
         [InlineData(float.PositiveInfinity)]
@@ -930,7 +932,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>("focus", null, () => brush.SetSigmaBellShape(focus, 1));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-0.1)]
         [InlineData(1.1)]
         [InlineData(float.PositiveInfinity)]
@@ -941,7 +943,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>("scale", null, () => brush.SetSigmaBellShape(0.1f, scale));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SetSigmalBellShape_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -951,7 +953,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.SetSigmaBellShape(0, 1));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0, new float[] { 1, 0 }, new float[] { 0, 1 })]
         [InlineData(0.5, new float[] { 0, 1, 0 }, new float[] { 0, 0.5f, 1 })]
         [InlineData(1, new float[] { 0, 1 }, new float[] { 0, 1 })]
@@ -964,7 +966,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedPositions, brush.Blend.Positions);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(0, 1, new float[] { 1, 0 }, new float[] { 0, 1 })]
         [InlineData(0.5, 0, new float[] { 0, 0, 0 }, new float[] { 0, 0.5f, 1 })]
         [InlineData(0.5, 1, new float[] { 0, 1, 0 }, new float[] { 0, 0.5f, 1 })]
@@ -978,7 +980,7 @@ namespace System.Drawing.Drawing2D.Tests
             Assert.Equal(expectedPositions, brush.Blend.Positions);
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-0.1)]
         [InlineData(1.1)]
         [InlineData(float.PositiveInfinity)]
@@ -990,7 +992,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>("focus", null, () => brush.SetBlendTriangularShape(focus, 1));
         }
 
-        [ConditionalTheory(Helpers.GdiplusIsAvailable)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
         [InlineData(-0.1)]
         [InlineData(1.1)]
         [InlineData(float.PositiveInfinity)]
@@ -1001,7 +1003,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>("scale", null, () => brush.SetBlendTriangularShape(0.1f, scale));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void SetBlendTriangularShape_Disposed_ThrowsArgumentException()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);
@@ -1011,7 +1013,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => brush.SetBlendTriangularShape(0, 1));
         }
 
-        [ConditionalFact(Helpers.GdiplusIsAvailable)]
+        [ConditionalFact(Helpers.IsDrawingSupported)]
         public void Dispose_MultipleTimes_Success()
         {
             var brush = new LinearGradientBrush(new Rectangle(1, 2, 3, 4), Color.Plum, Color.Red, 45, true);

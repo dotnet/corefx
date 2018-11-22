@@ -10,15 +10,29 @@ internal static partial class Interop
 {
     internal static partial class Crypto
     {
-        internal static bool EcDsaSign(ReadOnlySpan<byte> dgst, int dlen, Span<byte> sig, [In, Out] ref int siglen, SafeEcKeyHandle ecKey) =>
-            EcDsaSign(ref MemoryMarshal.GetReference(dgst), dlen, ref MemoryMarshal.GetReference(sig), ref siglen, ecKey);
+        internal static bool EcDsaSign(ReadOnlySpan<byte> dgst, Span<byte> sig, [In, Out] ref int siglen, SafeEcKeyHandle ecKey) =>
+            EcDsaSign(ref MemoryMarshal.GetReference(dgst), dgst.Length, ref MemoryMarshal.GetReference(sig), ref siglen, ecKey);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EcDsaSign")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool EcDsaSign(ref byte dgst, int dlen, ref byte sig, [In, Out] ref int siglen, SafeEcKeyHandle ecKey);
 
-        internal static unsafe int EcDsaVerify(ReadOnlySpan<byte> dgst, int dgst_len, ReadOnlySpan<byte> sigbuf, int sig_len, SafeEcKeyHandle ecKey) =>
-            EcDsaVerify(ref MemoryMarshal.GetReference(dgst), dgst_len, ref MemoryMarshal.GetReference(sigbuf), sig_len, ecKey);
+        internal static int EcDsaVerify(ReadOnlySpan<byte> dgst, ReadOnlySpan<byte> sigbuf, SafeEcKeyHandle ecKey)
+        {
+            int ret = EcDsaVerify(
+                ref MemoryMarshal.GetReference(dgst),
+                dgst.Length,
+                ref MemoryMarshal.GetReference(sigbuf),
+                sigbuf.Length,
+                ecKey);
+
+            if (ret < 0)
+            {
+                ErrClearError();
+            }
+
+            return ret;
+        }
 
         /*-
          * returns
@@ -31,6 +45,18 @@ internal static partial class Interop
 
         // returns the maximum length of a DER encoded ECDSA signature created with this key.
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_EcDsaSize")]
-        internal static extern int EcDsaSize(SafeEcKeyHandle ecKey);
+        private static extern int CryptoNative_EcDsaSize(SafeEcKeyHandle ecKey);
+
+        internal static int EcDsaSize(SafeEcKeyHandle ecKey)
+        {
+            int ret = CryptoNative_EcDsaSize(ecKey);
+
+            if (ret == 0)
+            {
+                throw CreateOpenSslCryptographicException();
+            }
+
+            return ret;
+        }
     }
 }

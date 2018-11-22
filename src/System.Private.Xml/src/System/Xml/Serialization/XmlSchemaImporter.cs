@@ -37,19 +37,6 @@ namespace System.Xml.Serialization
         /// </devdoc>
         public XmlSchemaImporter(XmlSchemas schemas, CodeIdentifiers typeIdentifiers) : base(schemas, CodeGenerationOptions.GenerateProperties, new ImportContext(typeIdentifiers, false)) { }
 
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.XmlSchemaImporter2"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        public XmlSchemaImporter(XmlSchemas schemas, CodeIdentifiers typeIdentifiers, CodeGenerationOptions options) : base(schemas, options, new ImportContext(typeIdentifiers, false)) { }
-
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.XmlSchemaImporter3"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        public XmlSchemaImporter(XmlSchemas schemas, CodeGenerationOptions options, ImportContext context) : base(schemas, options, context) { }
-
-
         /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.ImportDerivedTypeMapping"]/*' />
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
@@ -1820,7 +1807,7 @@ namespace System.Xml.Serialization
             {
                 ElementAccessor e1 = (ElementAccessor)o1;
                 ElementAccessor e2 = (ElementAccessor)o2;
-                return String.Compare(e1.ToString(string.Empty), e2.ToString(string.Empty), StringComparison.Ordinal);
+                return string.Compare(e1.ToString(string.Empty), e2.ToString(string.Empty), StringComparison.Ordinal);
             }
         }
 

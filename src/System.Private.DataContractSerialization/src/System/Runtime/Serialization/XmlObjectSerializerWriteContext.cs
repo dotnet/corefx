@@ -271,7 +271,7 @@ namespace System.Runtime.Serialization
             {
                 if (!IsKnownType(dataContract, declaredType))
                 {
-                    DataContract knownContract = ResolveDataContractFromKnownTypes(dataContract.StableName.Name, dataContract.StableName.Namespace, null /*memberTypeContract*/);
+                    DataContract knownContract = ResolveDataContractFromKnownTypes(dataContract.StableName.Name, dataContract.StableName.Namespace, null /*memberTypeContract*/, declaredType);
                     if (knownContract == null || knownContract.UnderlyingType != dataContract.UnderlyingType)
                     {
                         throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.Format(SR.DcTypeNotFoundOnSerialize, DataContract.GetClrTypeFullName(dataContract.UnderlyingType), dataContract.StableName.Name, dataContract.StableName.Namespace)));
@@ -860,7 +860,7 @@ namespace System.Runtime.Serialization
                     for (int i = 0; i < members.Count; i++)
                     {
                         ISerializableDataMember member = members[i];
-                        xmlWriter.WriteStartElement(member.Name, String.Empty);
+                        xmlWriter.WriteStartElement(member.Name, string.Empty);
                         WriteExtensionDataValue(xmlWriter, member.Value);
                         xmlWriter.WriteEndElement();
                     }

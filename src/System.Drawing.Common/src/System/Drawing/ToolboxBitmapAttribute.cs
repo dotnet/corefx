@@ -5,6 +5,7 @@
 using System.Diagnostics;
 using System.IO;
 using DpiHelper = System.Windows.Forms.DpiHelper;
+using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing
 {
@@ -119,6 +120,13 @@ namespace System.Drawing
                 if (img == null)
                 {
                     img = s_defaultComponent.GetImage(type, large);
+
+                    // We don't want to hand out the static shared image 
+                    // because otherwise it might get disposed. 
+                    if (img != null)
+                    {
+                        img = (Image)img.Clone();
+                    }
                 }
 
                 if (large)
@@ -331,7 +339,7 @@ namespace System.Drawing
         static ToolboxBitmapAttribute()
         {
             // When we call Gdip.DummyFunction, JIT will make sure Gdip..cctor will be called.
-            SafeNativeMethods.Gdip.DummyFunction();
+            Gdip.DummyFunction();
             
             Stream stream = BitmapSelector.GetResourceStream(typeof(ToolboxBitmapAttribute), "DefaultComponent.bmp");
             Debug.Assert(stream != null, "DefaultComponent.bmp must be present as an embedded resource.");

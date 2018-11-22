@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Internal.Cryptography;
+
 namespace System.Security.Cryptography
 {
     public abstract class SymmetricAlgorithm : IDisposable
@@ -12,15 +14,11 @@ namespace System.Security.Cryptography
             PaddingValue = PaddingMode.PKCS7;
         }
 
-        public static SymmetricAlgorithm Create()
-        {
-            return Create("System.Security.Cryptography.SymmetricAlgorithm");
-        }
+        public static SymmetricAlgorithm Create() =>
+            throw new PlatformNotSupportedException(SR.Cryptography_DefaultAlgorithm_NotSupported);
 
-        public static SymmetricAlgorithm Create(string algName)
-        {
-            throw new PlatformNotSupportedException();
-        }
+        public static SymmetricAlgorithm Create(string algName) =>
+            (SymmetricAlgorithm)CryptoConfigForwarder.CreateFromName(algName);
 
         public virtual int FeedbackSize
         {

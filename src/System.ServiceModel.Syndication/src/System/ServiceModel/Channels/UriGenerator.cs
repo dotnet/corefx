@@ -10,25 +10,26 @@ namespace System.ServiceModel.Channels
     internal class UriGenerator
     {
         private long _id;
-        private string _prefix;
+        private readonly string _prefix;
 
-        public UriGenerator()
-            : this("uuid")
+        public UriGenerator() : this("uuid")
         {
         }
 
-        public UriGenerator(string scheme)
-            : this(scheme, ";")
+        public UriGenerator(string scheme) : this(scheme, ";")
         {
         }
 
         public UriGenerator(string scheme, string delimiter)
         {
             if (scheme == null)
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("scheme"));
-
+            {
+                throw new ArgumentNullException(nameof(scheme));
+            }
             if (scheme.Length == 0)
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(SR.Format(SR.UriGeneratorSchemeMustNotBeEmpty), "scheme"));
+            {
+                throw new ArgumentException(SR.UriGeneratorSchemeMustNotBeEmpty, nameof(scheme));
+            }
 
             _prefix = string.Concat(scheme, ":", Guid.NewGuid().ToString(), delimiter, "id=");
         }

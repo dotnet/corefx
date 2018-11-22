@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -28,7 +28,7 @@ namespace System.Data.Odbc
         // Copy Constructor
         private void CopyFrom(OdbcConnection connection)
         { // V1.2.3300
-            ADP.CheckArgumentNull(connection, "connection");
+            ADP.CheckArgumentNull(connection, nameof(connection));
             _userConnectionOptions = connection.UserConnectionOptions;
             _poolGroup = connection.PoolGroup;
 
@@ -175,6 +175,22 @@ namespace System.Data.Odbc
 
         partial void RepairInnerConnection();
 
+        override public DataTable GetSchema()
+        {
+            return this.GetSchema(DbMetaDataCollectionNames.MetaDataCollections, null);
+        }
+
+        override public DataTable GetSchema(string collectionName)
+        {
+            return this.GetSchema(collectionName, null);
+        }
+
+        override public DataTable GetSchema(string collectionName, string[] restrictionValues)
+        {
+            // NOTE: This is virtual because not all providers may choose to support
+            //       returning schema data
+            return InnerConnection.GetSchema(ConnectionFactory, PoolGroup, this, collectionName, restrictionValues);
+        }
 
         internal void NotifyWeakReference(int message)
         {

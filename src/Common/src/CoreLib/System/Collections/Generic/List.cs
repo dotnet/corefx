@@ -5,6 +5,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace System.Collections.Generic
 {
@@ -17,8 +18,8 @@ namespace System.Collections.Generic
     [DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
-    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public class List<T> : IList<T>, System.Collections.IList, IReadOnlyList<T>
+    [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+    public class List<T> : IList<T>, IList, IReadOnlyList<T>
     {
         private const int DefaultCapacity = 4;
 
@@ -63,8 +64,7 @@ namespace System.Collections.Generic
             if (collection == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
 
-            ICollection<T> c = collection as ICollection<T>;
-            if (c != null)
+            if (collection is ICollection<T> c)
             {
                 int count = c.Count;
                 if (count == 0)
@@ -82,7 +82,13 @@ namespace System.Collections.Generic
             {
                 _size = 0;
                 _items = s_emptyArray;
-                AddEnumerable(collection);
+                using (IEnumerator<T> en = collection.GetEnumerator())
+                {
+                    while (en.MoveNext())
+                    {
+                        Add(en.Current);
+                    }
+                }
             }
         }
 
@@ -123,44 +129,26 @@ namespace System.Collections.Generic
         }
 
         // Read-only property describing how many elements are in the List.
-        public int Count
-        {
-            get
-            {
-                return _size;
-            }
-        }
+        public int Count => _size;
 
-        bool System.Collections.IList.IsFixedSize
-        {
-            get { return false; }
-        }
+        bool IList.IsFixedSize => false;
 
         // Is this List read-only?
-        bool ICollection<T>.IsReadOnly
-        {
-            get { return false; }
-        }
+        bool ICollection<T>.IsReadOnly => false;
 
-        bool System.Collections.IList.IsReadOnly
-        {
-            get { return false; }
-        }
+        bool IList.IsReadOnly => false;
 
         // Is this List synchronized (thread-safe)?
-        bool System.Collections.ICollection.IsSynchronized
-        {
-            get { return false; }
-        }
+        bool ICollection.IsSynchronized => false;
 
         // Synchronization root for this object.
-        object System.Collections.ICollection.SyncRoot
+        object ICollection.SyncRoot
         {
             get
             {
                 if (_syncRoot == null)
                 {
-                    System.Threading.Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
+                    Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
                 }
                 return _syncRoot;
             }
@@ -197,7 +185,7 @@ namespace System.Collections.Generic
             return ((value is T) || (value == null && default(T) == null));
         }
 
-        object System.Collections.IList.this[int index]
+        object IList.this[int index]
         {
             get
             {
@@ -225,9 +213,9 @@ namespace System.Collections.Generic
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(T item)
         {
-            var array = _items;
-            var size = _size;
             _version++;
+            T[] array = _items;
+            int size = _size;
             if ((uint)size < (uint)array.Length)
             {
                 _size = size + 1;
@@ -243,13 +231,13 @@ namespace System.Collections.Generic
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void AddWithResize(T item)
         {
-            var size = _size;
+            int size = _size;
             EnsureCapacity(size + 1);
             _size = size + 1;
             _items[size] = item;
         }
 
-        int System.Collections.IList.Add(Object item)
+        int IList.Add(object item)
         {
             ThrowHelper.IfNullAndNullsAreIllegalThenThrow<T>(item, ExceptionArgument.item);
 
@@ -270,14 +258,10 @@ namespace System.Collections.Generic
         // capacity or the new size, whichever is larger.
         //
         public void AddRange(IEnumerable<T> collection)
-        {
-            InsertRange(_size, collection);
-        }
+            => InsertRange(_size, collection);
 
         public ReadOnlyCollection<T> AsReadOnly()
-        {
-            return new ReadOnlyCollection<T>(this);
-        }
+            => new ReadOnlyCollection<T>(this);
 
         // Searches a section of the list for a given element using a binary search
         // algorithm. Elements of the list are compared to the search value using
@@ -312,25 +296,20 @@ namespace System.Collections.Generic
         }
 
         public int BinarySearch(T item)
-        {
-            return BinarySearch(0, Count, item, null);
-        }
+            => BinarySearch(0, Count, item, null);
 
         public int BinarySearch(T item, IComparer<T> comparer)
-        {
-            return BinarySearch(0, Count, item, comparer);
-        }
-
+            => BinarySearch(0, Count, item, comparer);
 
         // Clears the contents of List.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
+            _version++;
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
                 int size = _size;
                 _size = 0;
-                _version++;
                 if (size > 0)
                 {
                     Array.Clear(_items, 0, size); // Clear the elements so that the gc can reclaim the references.
@@ -339,7 +318,6 @@ namespace System.Collections.Generic
             else
             {
                 _size = 0;
-                _version++;
             }
         }
 
@@ -360,7 +338,7 @@ namespace System.Collections.Generic
             return _size != 0 && IndexOf(item) != -1;
         }
 
-        bool System.Collections.IList.Contains(object item)
+        bool IList.Contains(object item)
         {
             if (IsCompatibleObject(item))
             {
@@ -388,13 +366,11 @@ namespace System.Collections.Generic
         // Copies this List into array, which must be of a 
         // compatible array type.  
         public void CopyTo(T[] array)
-        {
-            CopyTo(array, 0);
-        }
+            => CopyTo(array, 0);
 
         // Copies this List into array, which must be of a 
         // compatible array type.  
-        void System.Collections.ICollection.CopyTo(Array array, int arrayIndex)
+        void ICollection.CopyTo(Array array, int arrayIndex)
         {
             if ((array != null) && (array.Rank != 1))
             {
@@ -452,9 +428,7 @@ namespace System.Collections.Generic
         }
 
         public bool Exists(Predicate<T> match)
-        {
-            return FindIndex(match) != -1;
-        }
+            => FindIndex(match) != -1;
 
         public T Find(Predicate<T> match)
         {
@@ -470,7 +444,7 @@ namespace System.Collections.Generic
                     return _items[i];
                 }
             }
-            return default(T);
+            return default;
         }
 
         public List<T> FindAll(Predicate<T> match)
@@ -492,14 +466,10 @@ namespace System.Collections.Generic
         }
 
         public int FindIndex(Predicate<T> match)
-        {
-            return FindIndex(0, _size, match);
-        }
+            => FindIndex(0, _size, match);
 
         public int FindIndex(int startIndex, Predicate<T> match)
-        {
-            return FindIndex(startIndex, _size - startIndex, match);
-        }
+            => FindIndex(startIndex, _size - startIndex, match);
 
         public int FindIndex(int startIndex, int count, Predicate<T> match)
         {
@@ -540,18 +510,14 @@ namespace System.Collections.Generic
                     return _items[i];
                 }
             }
-            return default(T);
+            return default;
         }
 
         public int FindLastIndex(Predicate<T> match)
-        {
-            return FindLastIndex(_size - 1, _size, match);
-        }
+            => FindLastIndex(_size - 1, _size, match);
 
         public int FindLastIndex(int startIndex, Predicate<T> match)
-        {
-            return FindLastIndex(startIndex, startIndex + 1, match);
-        }
+            => FindLastIndex(startIndex, startIndex + 1, match);
 
         public int FindLastIndex(int startIndex, int count, Predicate<T> match)
         {
@@ -622,19 +588,13 @@ namespace System.Collections.Generic
         // GetObject methods of the enumerator will throw an exception.
         //
         public Enumerator GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
+            => new Enumerator(this);
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
+            => new Enumerator(this);
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
+        IEnumerator IEnumerable.GetEnumerator()
+            => new Enumerator(this);
 
         public List<T> GetRange(int index, int count)
         {
@@ -669,11 +629,9 @@ namespace System.Collections.Generic
         // search.
         // 
         public int IndexOf(T item)
-        {
-            return Array.IndexOf(_items, item, 0, _size);
-        }
+            => Array.IndexOf(_items, item, 0, _size);
 
-        int System.Collections.IList.IndexOf(object item)
+        int IList.IndexOf(object item)
         {
             if (IsCompatibleObject(item))
             {
@@ -739,7 +697,7 @@ namespace System.Collections.Generic
             _version++;
         }
 
-        void System.Collections.IList.Insert(int index, Object item)
+        void IList.Insert(int index, object item)
         {
             ThrowHelper.IfNullAndNullsAreIllegalThenThrow<T>(item, ExceptionArgument.item);
 
@@ -770,9 +728,8 @@ namespace System.Collections.Generic
                 ThrowHelper.ThrowArgumentOutOfRange_IndexException();
             }
 
-            ICollection<T> c = collection as ICollection<T>;
-            if (c != null)
-            {    // if collection is ICollection<T>
+            if (collection is ICollection<T> c)
+            {
                 int count = c.Count;
                 if (count > 0)
                 {
@@ -797,9 +754,8 @@ namespace System.Collections.Generic
                     _size += count;
                 }
             }
-            else if (index < _size)
+            else
             {
-                // We're inserting a lazy enumerable. Call Insert on each of the constituent items.
                 using (IEnumerator<T> en = collection.GetEnumerator())
                 {
                     while (en.MoveNext())
@@ -807,11 +763,6 @@ namespace System.Collections.Generic
                         Insert(index++, en.Current);
                     }
                 }
-            }
-            else
-            {
-                // We're adding a lazy enumerable because the index is at the end of this list.
-                AddEnumerable(collection);
             }
             _version++;
         }
@@ -905,7 +856,7 @@ namespace System.Collections.Generic
             return false;
         }
 
-        void System.Collections.IList.Remove(object item)
+        void IList.Remove(object item)
         {
             if (IsCompatibleObject(item))
             {
@@ -967,7 +918,7 @@ namespace System.Collections.Generic
             }
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
             {
-                _items[_size] = default(T);
+                _items[_size] = default;
             }
             _version++;
         }
@@ -990,7 +941,6 @@ namespace System.Collections.Generic
 
             if (count > 0)
             {
-                int i = _size;
                 _size -= count;
                 if (index < _size)
                 {
@@ -1007,9 +957,7 @@ namespace System.Collections.Generic
 
         // Reverses the elements in this list.
         public void Reverse()
-        {
-            Reverse(0, Count);
-        }
+            => Reverse(0, Count);
 
         // Reverses the elements in a range of this list. Following a call to this
         // method, an element in the range given by index and count
@@ -1041,16 +989,12 @@ namespace System.Collections.Generic
         // Sorts the elements in this list.  Uses the default comparer and 
         // Array.Sort.
         public void Sort()
-        {
-            Sort(0, Count, null);
-        }
+            => Sort(0, Count, null);
 
         // Sorts the elements in this list.  Uses Array.Sort with the
         // provided comparer.
         public void Sort(IComparer<T> comparer)
-        {
-            Sort(0, Count, comparer);
-        }
+            => Sort(0, Count, comparer);
 
         // Sorts the elements in a section of this list. The sort compares the
         // elements to each other using the given IComparer interface. If
@@ -1145,36 +1089,11 @@ namespace System.Collections.Generic
             return true;
         }
 
-        private void AddEnumerable(IEnumerable<T> enumerable)
+        public struct Enumerator : IEnumerator<T>, IEnumerator
         {
-            Debug.Assert(enumerable != null);
-            Debug.Assert(!(enumerable is ICollection<T>), "We should have optimized for this beforehand.");
-
-            using (IEnumerator<T> en = enumerable.GetEnumerator())
-            {
-                _version++; // Even if the enumerable has no items, we can update _version.
-
-                while (en.MoveNext())
-                {
-                    // Capture Current before doing anything else. If this throws
-                    // an exception, we want to make a clean break.
-                    T current = en.Current;
-
-                    if (_size == _items.Length)
-                    {
-                        EnsureCapacity(_size + 1);
-                    }
-
-                    _items[_size++] = current;
-                }
-            }
-        }
-
-        public struct Enumerator : IEnumerator<T>, System.Collections.IEnumerator
-        {
-            private List<T> _list;
+            private readonly List<T> _list;
             private int _index;
-            private int _version;
+            private readonly int _version;
             private T _current;
 
             internal Enumerator(List<T> list)
@@ -1182,7 +1101,7 @@ namespace System.Collections.Generic
                 _list = list;
                 _index = 0;
                 _version = list._version;
-                _current = default(T);
+                _current = default;
             }
 
             public void Dispose()
@@ -1210,19 +1129,13 @@ namespace System.Collections.Generic
                 }
 
                 _index = _list._size + 1;
-                _current = default(T);
+                _current = default;
                 return false;
             }
 
-            public T Current
-            {
-                get
-                {
-                    return _current;
-                }
-            }
+            public T Current => _current;
 
-            object System.Collections.IEnumerator.Current
+            object IEnumerator.Current
             {
                 get
                 {
@@ -1234,7 +1147,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            void System.Collections.IEnumerator.Reset()
+            void IEnumerator.Reset()
             {
                 if (_version != _list._version)
                 {
@@ -1242,7 +1155,7 @@ namespace System.Collections.Generic
                 }
 
                 _index = 0;
-                _current = default(T);
+                _current = default;
             }
         }
     }

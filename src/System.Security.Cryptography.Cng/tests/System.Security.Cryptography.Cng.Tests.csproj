@@ -1,19 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{FF53459F-66F7-4F00-8D36-DF440CE18419}</ProjectGuid>
-    <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp'">$(DefineConstants);netcoreapp</DefineConstants>
     <DefineConstants>$(DefineConstants);TESTING_CNG_IMPLEMENTATION</DefineConstants>
+    <Configurations>net462-Windows_NT-Debug;net462-Windows_NT-Release;net47-Windows_NT-Debug;net47-Windows_NT-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net462-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net462-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net47-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net47-Windows_NT-Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="CreateTests.cs" />
     <Compile Include="HandleTests.cs" />
@@ -103,8 +93,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
+    <Compile Include="CngPkcs8Tests.cs" />
+    <Compile Include="DSACngPkcs8Tests.cs" />
     <Compile Include="DSACngProvider.cs" />
     <Compile Include="DSACngTests.cs" />
+    <Compile Include="ECDHCngPkcs8Tests.cs" />
+    <Compile Include="ECDsaCngPkcs8Tests.cs" />
+    <Compile Include="RSACngPkcs8Tests.cs" />
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AsymmetricSignatureFormatter.cs">
       <Link>CommonTest\System\Security\Cryptography\AsymmetricSignatureFormatter.cs</Link>
     </Compile>
@@ -116,6 +111,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\DSA\DSAKeyGeneration.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\DSA\DSAKeyGeneration.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\DSA\DSAKeyFileTests.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\DSA\DSAKeyFileTests.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\DSA\DSASignatureFormatter.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\DSA\DSASignatureFormatter.cs</Link>
@@ -129,8 +127,17 @@
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\DSA\DSAXml.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\DSA\DSAXml.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\EC\ECKeyFileTests.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\EC\ECKeyFileTests.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDhKeyFileTests.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDiffieHellman\ECDhKeyFileTests.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDsa\ECDsaTests.netcoreapp.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDsa\ECDsaTests.netcoreapp.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDsa\ECDsaKeyFileTests.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDsa\ECDsaKeyFileTests.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\ECDsa\ECDsaXml.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\ECDsa\ECDsaXml.cs</Link>
@@ -140,6 +147,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\RSA\RSAKeyExchangeFormatter.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\RSA\RSAKeyExchangeFormatter.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\RSA\RSAKeyFileTests.cs">
+      <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\RSA\RSAKeyFileTests.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Security\Cryptography\AlgorithmImplementations\RSA\RSASignatureFormatter.cs">
       <Link>CommonTest\System\Security\Cryptography\AlgorithmImplementations\RSA\RSASignatureFormatter.cs</Link>
@@ -199,5 +209,4 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

@@ -21,39 +21,27 @@ namespace System
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class DuplicateWaitObjectException : ArgumentException
     {
-        private static volatile String s_duplicateWaitObjectMessage = null;
-
-        private static String DuplicateWaitObjectMessage
-        {
-            get
-            {
-                if (s_duplicateWaitObjectMessage == null)
-                    s_duplicateWaitObjectMessage = SR.Arg_DuplicateWaitObjectException;
-                return s_duplicateWaitObjectMessage;
-            }
-        }
-
         // Creates a new DuplicateWaitObjectException with its message 
         // string set to a default message.
         public DuplicateWaitObjectException()
-            : base(DuplicateWaitObjectMessage)
+            : base(SR.Arg_DuplicateWaitObjectException)
         {
             HResult = HResults.COR_E_DUPLICATEWAITOBJECT;
         }
 
-        public DuplicateWaitObjectException(String parameterName)
-            : base(DuplicateWaitObjectMessage, parameterName)
+        public DuplicateWaitObjectException(string parameterName)
+            : base(SR.Arg_DuplicateWaitObjectException, parameterName)
         {
             HResult = HResults.COR_E_DUPLICATEWAITOBJECT;
         }
 
-        public DuplicateWaitObjectException(String parameterName, String message)
+        public DuplicateWaitObjectException(string parameterName, string message)
             : base(message, parameterName)
         {
             HResult = HResults.COR_E_DUPLICATEWAITOBJECT;
         }
 
-        public DuplicateWaitObjectException(String message, Exception innerException)
+        public DuplicateWaitObjectException(string message, Exception innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_DUPLICATEWAITOBJECT;

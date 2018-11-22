@@ -22,14 +22,17 @@ namespace System.ComponentModel.Composition
 
         public CatalogReflectionContextAttribute(Type reflectionContextType)
         {
-            Requires.NotNull(reflectionContextType, "reflectionContextType");
+            Requires.NotNull(reflectionContextType, nameof(reflectionContextType));
 
             _reflectionContextType = reflectionContextType;
         }
 
         public ReflectionContext CreateReflectionContext()
         {
-            Assumes.NotNull<Type>(_reflectionContextType);
+            if (_reflectionContextType == null)
+            {
+                throw new ArgumentNullException(nameof(_reflectionContextType));
+            }
 
             if (!_reflectionContextType.IsPublic)
             {

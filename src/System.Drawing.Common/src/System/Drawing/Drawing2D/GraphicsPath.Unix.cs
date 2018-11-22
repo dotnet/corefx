@@ -35,6 +35,7 @@
 
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing.Drawing2D
 {
@@ -43,23 +44,23 @@ namespace System.Drawing.Drawing2D
         // 1/4 is the FlatnessDefault as defined in GdiPlusEnums.h
         private const float FlatnessDefault = 1.0f / 4.0f;
 
-        internal IntPtr nativePath = IntPtr.Zero;
+        internal IntPtr _nativePath = IntPtr.Zero;
 
         GraphicsPath(IntPtr ptr)
         {
-            nativePath = ptr;
+            _nativePath = ptr;
         }
 
         public GraphicsPath()
         {
-            int status = SafeNativeMethods.Gdip.GdipCreatePath(FillMode.Alternate, out nativePath);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipCreatePath(FillMode.Alternate, out _nativePath);
+            Gdip.CheckStatus(status);
         }
 
         public GraphicsPath(FillMode fillMode)
         {
-            int status = SafeNativeMethods.Gdip.GdipCreatePath(fillMode, out nativePath);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipCreatePath(fillMode, out _nativePath);
+            Gdip.CheckStatus(status);
         }
 
         public GraphicsPath(Point[] pts, byte[] types)
@@ -75,31 +76,31 @@ namespace System.Drawing.Drawing2D
         public GraphicsPath(Point[] pts, byte[] types, FillMode fillMode)
         {
             if (pts == null)
-                throw new ArgumentNullException("pts");
+                throw new ArgumentNullException(nameof(pts));
             if (pts.Length != types.Length)
                 throw new ArgumentException("Invalid parameter passed. Number of points and types must be same.");
 
-            int status = SafeNativeMethods.Gdip.GdipCreatePath2I(pts, types, pts.Length, fillMode, out nativePath);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipCreatePath2I(pts, types, pts.Length, fillMode, out _nativePath);
+            Gdip.CheckStatus(status);
         }
 
         public GraphicsPath(PointF[] pts, byte[] types, FillMode fillMode)
         {
             if (pts == null)
-                throw new ArgumentNullException("pts");
+                throw new ArgumentNullException(nameof(pts));
             if (pts.Length != types.Length)
                 throw new ArgumentException("Invalid parameter passed. Number of points and types must be same.");
 
-            int status = SafeNativeMethods.Gdip.GdipCreatePath2(pts, types, pts.Length, fillMode, out nativePath);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipCreatePath2(pts, types, pts.Length, fillMode, out _nativePath);
+            Gdip.CheckStatus(status);
         }
 
         public object Clone()
         {
             IntPtr clone;
 
-            int status = SafeNativeMethods.Gdip.GdipClonePath(nativePath, out clone);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipClonePath(_nativePath, out clone);
+            Gdip.CheckStatus(status);
 
             return new GraphicsPath(clone);
         }
@@ -118,12 +119,12 @@ namespace System.Drawing.Drawing2D
         void Dispose(bool disposing)
         {
             int status;
-            if (nativePath != IntPtr.Zero)
+            if (_nativePath != IntPtr.Zero)
             {
-                status = SafeNativeMethods.Gdip.GdipDeletePath(nativePath);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                status = Gdip.GdipDeletePath(_nativePath);
+                Gdip.CheckStatus(status);
 
-                nativePath = IntPtr.Zero;
+                _nativePath = IntPtr.Zero;
             }
         }
 
@@ -132,8 +133,8 @@ namespace System.Drawing.Drawing2D
             get
             {
                 FillMode mode;
-                int status = SafeNativeMethods.Gdip.GdipGetPathFillMode(nativePath, out mode);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetPathFillMode(_nativePath, out mode);
+                Gdip.CheckStatus(status);
 
                 return mode;
             }
@@ -142,8 +143,8 @@ namespace System.Drawing.Drawing2D
                 if ((value < FillMode.Alternate) || (value > FillMode.Winding))
                     throw new InvalidEnumArgumentException("FillMode", (int)value, typeof(FillMode));
 
-                int status = SafeNativeMethods.Gdip.GdipSetPathFillMode(nativePath, value);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipSetPathFillMode(_nativePath, value);
+                Gdip.CheckStatus(status);
             }
         }
 
@@ -152,8 +153,8 @@ namespace System.Drawing.Drawing2D
             get
             {
                 int count;
-                int status = SafeNativeMethods.Gdip.GdipGetPointCount(nativePath, out count);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetPointCount(_nativePath, out count);
+                Gdip.CheckStatus(status);
 
                 PointF[] points = new PointF[count];
                 byte[] types = new byte[count];
@@ -162,11 +163,11 @@ namespace System.Drawing.Drawing2D
                 // anyway that would only mean two unrequired unmanaged calls
                 if (count > 0)
                 {
-                    status = SafeNativeMethods.Gdip.GdipGetPathPoints(nativePath, points, count);
-                    SafeNativeMethods.Gdip.CheckStatus(status);
+                    status = Gdip.GdipGetPathPoints(_nativePath, points, count);
+                    Gdip.CheckStatus(status);
 
-                    status = SafeNativeMethods.Gdip.GdipGetPathTypes(nativePath, types, count);
-                    SafeNativeMethods.Gdip.CheckStatus(status);
+                    status = Gdip.GdipGetPathTypes(_nativePath, types, count);
+                    Gdip.CheckStatus(status);
                 }
 
                 PathData pdata = new PathData();
@@ -181,14 +182,14 @@ namespace System.Drawing.Drawing2D
             get
             {
                 int count;
-                int status = SafeNativeMethods.Gdip.GdipGetPointCount(nativePath, out count);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetPointCount(_nativePath, out count);
+                Gdip.CheckStatus(status);
                 if (count == 0)
                     throw new ArgumentException("PathPoints");
 
                 PointF[] points = new PointF[count];
-                status = SafeNativeMethods.Gdip.GdipGetPathPoints(nativePath, points, count);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                status = Gdip.GdipGetPathPoints(_nativePath, points, count);
+                Gdip.CheckStatus(status);
 
                 return points;
             }
@@ -199,14 +200,14 @@ namespace System.Drawing.Drawing2D
             get
             {
                 int count;
-                int status = SafeNativeMethods.Gdip.GdipGetPointCount(nativePath, out count);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetPointCount(_nativePath, out count);
+                Gdip.CheckStatus(status);
                 if (count == 0)
                     throw new ArgumentException("PathTypes");
 
                 byte[] types = new byte[count];
-                status = SafeNativeMethods.Gdip.GdipGetPathTypes(nativePath, types, count);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                status = Gdip.GdipGetPathTypes(_nativePath, types, count);
+                Gdip.CheckStatus(status);
 
                 return types;
             }
@@ -217,8 +218,8 @@ namespace System.Drawing.Drawing2D
             get
             {
                 int count;
-                int status = SafeNativeMethods.Gdip.GdipGetPointCount(nativePath, out count);
-                SafeNativeMethods.Gdip.CheckStatus(status);
+                int status = Gdip.GdipGetPointCount(_nativePath, out count);
+                Gdip.CheckStatus(status);
 
                 return count;
             }
@@ -228,11 +229,11 @@ namespace System.Drawing.Drawing2D
         {
             get
             {
-                return nativePath;
+                return _nativePath;
             }
             set
             {
-                nativePath = value;
+                _nativePath = value;
             }
         }
 
@@ -241,26 +242,26 @@ namespace System.Drawing.Drawing2D
         //
         public void AddArc(Rectangle rect, float startAngle, float sweepAngle)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathArcI(nativePath, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathArcI(_nativePath, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
+            Gdip.CheckStatus(status);
         }
 
         public void AddArc(RectangleF rect, float startAngle, float sweepAngle)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathArc(nativePath, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathArc(_nativePath, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
+            Gdip.CheckStatus(status);
         }
 
         public void AddArc(int x, int y, int width, int height, float startAngle, float sweepAngle)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathArcI(nativePath, x, y, width, height, startAngle, sweepAngle);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathArcI(_nativePath, x, y, width, height, startAngle, sweepAngle);
+            Gdip.CheckStatus(status);
         }
 
         public void AddArc(float x, float y, float width, float height, float startAngle, float sweepAngle)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathArc(nativePath, x, y, width, height, startAngle, sweepAngle);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathArc(_nativePath, x, y, width, height, startAngle, sweepAngle);
+            Gdip.CheckStatus(status);
         }
 
         //
@@ -268,30 +269,30 @@ namespace System.Drawing.Drawing2D
         //
         public void AddBezier(Point pt1, Point pt2, Point pt3, Point pt4)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathBezierI(nativePath, pt1.X, pt1.Y,
+            int status = Gdip.GdipAddPathBezierI(_nativePath, pt1.X, pt1.Y,
                             pt2.X, pt2.Y, pt3.X, pt3.Y, pt4.X, pt4.Y);
 
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            Gdip.CheckStatus(status);
         }
 
         public void AddBezier(PointF pt1, PointF pt2, PointF pt3, PointF pt4)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathBezier(nativePath, pt1.X, pt1.Y,
+            int status = Gdip.GdipAddPathBezier(_nativePath, pt1.X, pt1.Y,
                             pt2.X, pt2.Y, pt3.X, pt3.Y, pt4.X, pt4.Y);
 
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            Gdip.CheckStatus(status);
         }
 
         public void AddBezier(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathBezierI(nativePath, x1, y1, x2, y2, x3, y3, x4, y4);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathBezierI(_nativePath, x1, y1, x2, y2, x3, y3, x4, y4);
+            Gdip.CheckStatus(status);
         }
 
         public void AddBezier(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathBezier(nativePath, x1, y1, x2, y2, x3, y3, x4, y4);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathBezier(_nativePath, x1, y1, x2, y2, x3, y3, x4, y4);
+            Gdip.CheckStatus(status);
         }
 
         //
@@ -300,17 +301,17 @@ namespace System.Drawing.Drawing2D
         public void AddBeziers(params Point[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
-            int status = SafeNativeMethods.Gdip.GdipAddPathBeziersI(nativePath, points, points.Length);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+                throw new ArgumentNullException(nameof(points));
+            int status = Gdip.GdipAddPathBeziersI(_nativePath, points, points.Length);
+            Gdip.CheckStatus(status);
         }
 
         public void AddBeziers(PointF[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
-            int status = SafeNativeMethods.Gdip.GdipAddPathBeziers(nativePath, points, points.Length);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+                throw new ArgumentNullException(nameof(points));
+            int status = Gdip.GdipAddPathBeziers(_nativePath, points, points.Length);
+            Gdip.CheckStatus(status);
         }
 
         //
@@ -318,26 +319,26 @@ namespace System.Drawing.Drawing2D
         //
         public void AddEllipse(RectangleF rect)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathEllipse(nativePath, rect.X, rect.Y, rect.Width, rect.Height);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathEllipse(_nativePath, rect.X, rect.Y, rect.Width, rect.Height);
+            Gdip.CheckStatus(status);
         }
 
         public void AddEllipse(float x, float y, float width, float height)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathEllipse(nativePath, x, y, width, height);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathEllipse(_nativePath, x, y, width, height);
+            Gdip.CheckStatus(status);
         }
 
         public void AddEllipse(Rectangle rect)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathEllipseI(nativePath, rect.X, rect.Y, rect.Width, rect.Height);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathEllipseI(_nativePath, rect.X, rect.Y, rect.Width, rect.Height);
+            Gdip.CheckStatus(status);
         }
 
         public void AddEllipse(int x, int y, int width, int height)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathEllipseI(nativePath, x, y, width, height);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathEllipseI(_nativePath, x, y, width, height);
+            Gdip.CheckStatus(status);
         }
 
 
@@ -346,30 +347,30 @@ namespace System.Drawing.Drawing2D
         //
         public void AddLine(Point pt1, Point pt2)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathLineI(nativePath, pt1.X, pt1.Y, pt2.X, pt2.Y);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathLineI(_nativePath, pt1.X, pt1.Y, pt2.X, pt2.Y);
+            Gdip.CheckStatus(status);
         }
 
         public void AddLine(PointF pt1, PointF pt2)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathLine(nativePath, pt1.X, pt1.Y, pt2.X,
+            int status = Gdip.GdipAddPathLine(_nativePath, pt1.X, pt1.Y, pt2.X,
                             pt2.Y);
 
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            Gdip.CheckStatus(status);
         }
 
         public void AddLine(int x1, int y1, int x2, int y2)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathLineI(nativePath, x1, y1, x2, y2);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathLineI(_nativePath, x1, y1, x2, y2);
+            Gdip.CheckStatus(status);
         }
 
         public void AddLine(float x1, float y1, float x2, float y2)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathLine(nativePath, x1, y1, x2,
+            int status = Gdip.GdipAddPathLine(_nativePath, x1, y1, x2,
                             y2);
 
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            Gdip.CheckStatus(status);
         }
 
         //
@@ -378,23 +379,23 @@ namespace System.Drawing.Drawing2D
         public void AddLines(Point[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
             if (points.Length == 0)
-                throw new ArgumentException("points");
+                throw new ArgumentException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathLine2I(nativePath, points, points.Length);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathLine2I(_nativePath, points, points.Length);
+            Gdip.CheckStatus(status);
         }
 
         public void AddLines(PointF[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
             if (points.Length == 0)
-                throw new ArgumentException("points");
+                throw new ArgumentException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathLine2(nativePath, points, points.Length);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathLine2(_nativePath, points, points.Length);
+            Gdip.CheckStatus(status);
         }
 
         //
@@ -402,21 +403,21 @@ namespace System.Drawing.Drawing2D
         //
         public void AddPie(Rectangle rect, float startAngle, float sweepAngle)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathPie(
-                    nativePath, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathPie(
+                    _nativePath, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
+            Gdip.CheckStatus(status);
         }
 
         public void AddPie(int x, int y, int width, int height, float startAngle, float sweepAngle)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathPieI(nativePath, x, y, width, height, startAngle, sweepAngle);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathPieI(_nativePath, x, y, width, height, startAngle, sweepAngle);
+            Gdip.CheckStatus(status);
         }
 
         public void AddPie(float x, float y, float width, float height, float startAngle, float sweepAngle)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathPie(nativePath, x, y, width, height, startAngle, sweepAngle);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathPie(_nativePath, x, y, width, height, startAngle, sweepAngle);
+            Gdip.CheckStatus(status);
         }
 
         //
@@ -425,19 +426,19 @@ namespace System.Drawing.Drawing2D
         public void AddPolygon(Point[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathPolygonI(nativePath, points, points.Length);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathPolygonI(_nativePath, points, points.Length);
+            Gdip.CheckStatus(status);
         }
 
         public void AddPolygon(PointF[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathPolygon(nativePath, points, points.Length);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathPolygon(_nativePath, points, points.Length);
+            Gdip.CheckStatus(status);
         }
 
         //
@@ -445,14 +446,14 @@ namespace System.Drawing.Drawing2D
         //
         public void AddRectangle(Rectangle rect)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathRectangleI(nativePath, rect.X, rect.Y, rect.Width, rect.Height);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathRectangleI(_nativePath, rect.X, rect.Y, rect.Width, rect.Height);
+            Gdip.CheckStatus(status);
         }
 
         public void AddRectangle(RectangleF rect)
         {
-            int status = SafeNativeMethods.Gdip.GdipAddPathRectangle(nativePath, rect.X, rect.Y, rect.Width, rect.Height);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathRectangle(_nativePath, rect.X, rect.Y, rect.Width, rect.Height);
+            Gdip.CheckStatus(status);
         }
 
         //
@@ -461,23 +462,23 @@ namespace System.Drawing.Drawing2D
         public void AddRectangles(Rectangle[] rects)
         {
             if (rects == null)
-                throw new ArgumentNullException("rects");
+                throw new ArgumentNullException(nameof(rects));
             if (rects.Length == 0)
-                throw new ArgumentException("rects");
+                throw new ArgumentException(nameof(rects));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathRectanglesI(nativePath, rects, rects.Length);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathRectanglesI(_nativePath, rects, rects.Length);
+            Gdip.CheckStatus(status);
         }
 
         public void AddRectangles(RectangleF[] rects)
         {
             if (rects == null)
-                throw new ArgumentNullException("rects");
+                throw new ArgumentNullException(nameof(rects));
             if (rects.Length == 0)
-                throw new ArgumentException("rects");
+                throw new ArgumentException(nameof(rects));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathRectangles(nativePath, rects, rects.Length);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathRectangles(_nativePath, rects, rects.Length);
+            Gdip.CheckStatus(status);
         }
 
         //
@@ -486,17 +487,17 @@ namespace System.Drawing.Drawing2D
         public void AddPath(GraphicsPath addingPath, bool connect)
         {
             if (addingPath == null)
-                throw new ArgumentNullException("addingPath");
+                throw new ArgumentNullException(nameof(addingPath));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathPath(nativePath, addingPath.nativePath, connect);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathPath(_nativePath, addingPath._nativePath, connect);
+            Gdip.CheckStatus(status);
         }
 
         public PointF GetLastPoint()
         {
             PointF pt;
-            int status = SafeNativeMethods.Gdip.GdipGetPathLastPoint(nativePath, out pt);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipGetPathLastPoint(_nativePath, out pt);
+            Gdip.CheckStatus(status);
 
             return pt;
         }
@@ -507,37 +508,37 @@ namespace System.Drawing.Drawing2D
         public void AddClosedCurve(Point[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathClosedCurveI(nativePath, points, points.Length);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathClosedCurveI(_nativePath, points, points.Length);
+            Gdip.CheckStatus(status);
         }
 
         public void AddClosedCurve(PointF[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathClosedCurve(nativePath, points, points.Length);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathClosedCurve(_nativePath, points, points.Length);
+            Gdip.CheckStatus(status);
         }
 
         public void AddClosedCurve(Point[] points, float tension)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathClosedCurve2I(nativePath, points, points.Length, tension);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathClosedCurve2I(_nativePath, points, points.Length, tension);
+            Gdip.CheckStatus(status);
         }
 
         public void AddClosedCurve(PointF[] points, float tension)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathClosedCurve2(nativePath, points, points.Length, tension);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathClosedCurve2(_nativePath, points, points.Length, tension);
+            Gdip.CheckStatus(status);
         }
 
         //
@@ -546,83 +547,82 @@ namespace System.Drawing.Drawing2D
         public void AddCurve(Point[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathCurveI(nativePath, points, points.Length);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathCurveI(_nativePath, points, points.Length);
+            Gdip.CheckStatus(status);
         }
 
         public void AddCurve(PointF[] points)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathCurve(nativePath, points, points.Length);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathCurve(_nativePath, points, points.Length);
+            Gdip.CheckStatus(status);
         }
 
         public void AddCurve(Point[] points, float tension)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathCurve2I(nativePath, points, points.Length, tension);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathCurve2I(_nativePath, points, points.Length, tension);
+            Gdip.CheckStatus(status);
         }
 
         public void AddCurve(PointF[] points, float tension)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathCurve2(nativePath, points, points.Length, tension);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathCurve2(_nativePath, points, points.Length, tension);
+            Gdip.CheckStatus(status);
         }
 
         public void AddCurve(Point[] points, int offset, int numberOfSegments, float tension)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathCurve3I(nativePath, points, points.Length,
+            int status = Gdip.GdipAddPathCurve3I(_nativePath, points, points.Length,
                             offset, numberOfSegments, tension);
 
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            Gdip.CheckStatus(status);
         }
 
         public void AddCurve(PointF[] points, int offset, int numberOfSegments, float tension)
         {
             if (points == null)
-                throw new ArgumentNullException("points");
+                throw new ArgumentNullException(nameof(points));
 
-            int status = SafeNativeMethods.Gdip.GdipAddPathCurve3(nativePath, points, points.Length,
+            int status = Gdip.GdipAddPathCurve3(_nativePath, points, points.Length,
                             offset, numberOfSegments, tension);
 
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            Gdip.CheckStatus(status);
         }
 
         public void Reset()
         {
-            int status = SafeNativeMethods.Gdip.GdipResetPath(nativePath);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipResetPath(_nativePath);
+            Gdip.CheckStatus(status);
         }
 
         public void Reverse()
         {
-            int status = SafeNativeMethods.Gdip.GdipReversePath(nativePath);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipReversePath(_nativePath);
+            Gdip.CheckStatus(status);
         }
 
         public void Transform(Matrix matrix)
         {
             if (matrix == null)
-                throw new ArgumentNullException("matrix");
+                throw new ArgumentNullException(nameof(matrix));
 
-            int status = SafeNativeMethods.Gdip.GdipTransformPath(nativePath, matrix.nativeMatrix);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipTransformPath(_nativePath, matrix.NativeMatrix);
+            Gdip.CheckStatus(status);
         }
 
-        [MonoTODO("The StringFormat parameter is ignored when using libgdiplus.")]
         public void AddString(string s, FontFamily family, int style, float emSize, Point origin, StringFormat format)
         {
             Rectangle layout = new Rectangle();
@@ -631,7 +631,6 @@ namespace System.Drawing.Drawing2D
             AddString(s, family, style, emSize, layout, format);
         }
 
-        [MonoTODO("The StringFormat parameter is ignored when using libgdiplus.")]
         public void AddString(string s, FontFamily family, int style, float emSize, PointF origin, StringFormat format)
         {
             RectangleF layout = new RectangleF();
@@ -640,49 +639,47 @@ namespace System.Drawing.Drawing2D
             AddString(s, family, style, emSize, layout, format);
         }
 
-        [MonoTODO("The layoutRect and StringFormat parameters are ignored when using libgdiplus.")]
         public void AddString(string s, FontFamily family, int style, float emSize, Rectangle layoutRect, StringFormat format)
         {
             if (family == null)
-                throw new ArgumentException("family");
+                throw new ArgumentException(nameof(family));
 
             IntPtr sformat = (format == null) ? IntPtr.Zero : format.nativeFormat;
             // note: the NullReferenceException on s.Length is the expected (MS) exception
-            int status = SafeNativeMethods.Gdip.GdipAddPathStringI(nativePath, s, s.Length, family.NativeFamily, style, emSize, ref layoutRect, sformat);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathStringI(_nativePath, s, s.Length, family.NativeFamily, style, emSize, ref layoutRect, sformat);
+            Gdip.CheckStatus(status);
         }
 
-        [MonoTODO("The layoutRect and StringFormat parameters are ignored when using libgdiplus.")]
         public void AddString(string s, FontFamily family, int style, float emSize, RectangleF layoutRect, StringFormat format)
         {
             if (family == null)
-                throw new ArgumentException("family");
+                throw new ArgumentException(nameof(family));
 
             IntPtr sformat = (format == null) ? IntPtr.Zero : format.nativeFormat;
             // note: the NullReferenceException on s.Length is the expected (MS) exception
-            int status = SafeNativeMethods.Gdip.GdipAddPathString(nativePath, s, s.Length, family.NativeFamily, style, emSize, ref layoutRect, sformat);
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            int status = Gdip.GdipAddPathString(_nativePath, s, s.Length, family.NativeFamily, style, emSize, ref layoutRect, sformat);
+            Gdip.CheckStatus(status);
         }
 
         public void ClearMarkers()
         {
-            int s = SafeNativeMethods.Gdip.GdipClearPathMarkers(nativePath);
+            int s = Gdip.GdipClearPathMarkers(_nativePath);
 
-            SafeNativeMethods.Gdip.CheckStatus(s);
+            Gdip.CheckStatus(s);
         }
 
         public void CloseAllFigures()
         {
-            int s = SafeNativeMethods.Gdip.GdipClosePathFigures(nativePath);
+            int s = Gdip.GdipClosePathFigures(_nativePath);
 
-            SafeNativeMethods.Gdip.CheckStatus(s);
+            Gdip.CheckStatus(s);
         }
 
         public void CloseFigure()
         {
-            int s = SafeNativeMethods.Gdip.GdipClosePathFigure(nativePath);
+            int s = Gdip.GdipClosePathFigure(_nativePath);
 
-            SafeNativeMethods.Gdip.CheckStatus(s);
+            Gdip.CheckStatus(s);
         }
 
         public void Flatten()
@@ -697,10 +694,10 @@ namespace System.Drawing.Drawing2D
 
         public void Flatten(Matrix matrix, float flatness)
         {
-            IntPtr m = (matrix == null) ? IntPtr.Zero : matrix.nativeMatrix;
-            int status = SafeNativeMethods.Gdip.GdipFlattenPath(nativePath, m, flatness);
+            IntPtr m = (matrix == null) ? IntPtr.Zero : matrix.NativeMatrix;
+            int status = Gdip.GdipFlattenPath(_nativePath, m, flatness);
 
-            SafeNativeMethods.Gdip.CheckStatus(status);
+            Gdip.CheckStatus(status);
         }
 
         public RectangleF GetBounds()
@@ -716,12 +713,12 @@ namespace System.Drawing.Drawing2D
         public RectangleF GetBounds(Matrix matrix, Pen pen)
         {
             RectangleF retval;
-            IntPtr m = (matrix == null) ? IntPtr.Zero : matrix.nativeMatrix;
+            IntPtr m = (matrix == null) ? IntPtr.Zero : matrix.NativeMatrix;
             IntPtr p = (pen == null) ? IntPtr.Zero : pen.NativePen;
 
-            int s = SafeNativeMethods.Gdip.GdipGetPathWorldBounds(nativePath, out retval, m, p);
+            int s = Gdip.GdipGetPathWorldBounds(_nativePath, out retval, m, p);
 
-            SafeNativeMethods.Gdip.CheckStatus(s);
+            Gdip.CheckStatus(s);
 
             return retval;
         }
@@ -759,13 +756,13 @@ namespace System.Drawing.Drawing2D
         public bool IsOutlineVisible(int x, int y, Pen pen, Graphics graphics)
         {
             if (pen == null)
-                throw new ArgumentNullException("pen");
+                throw new ArgumentNullException(nameof(pen));
 
             bool result;
-            IntPtr g = (graphics == null) ? IntPtr.Zero : graphics.nativeObject;
+            IntPtr g = (graphics == null) ? IntPtr.Zero : graphics.NativeGraphics;
 
-            int s = SafeNativeMethods.Gdip.GdipIsOutlineVisiblePathPointI(nativePath, x, y, pen.NativePen, g, out result);
-            SafeNativeMethods.Gdip.CheckStatus(s);
+            int s = Gdip.GdipIsOutlineVisiblePathPointI(_nativePath, x, y, pen.NativePen, g, out result);
+            Gdip.CheckStatus(s);
 
             return result;
         }
@@ -773,13 +770,13 @@ namespace System.Drawing.Drawing2D
         public bool IsOutlineVisible(float x, float y, Pen pen, Graphics graphics)
         {
             if (pen == null)
-                throw new ArgumentNullException("pen");
+                throw new ArgumentNullException(nameof(pen));
 
             bool result;
-            IntPtr g = (graphics == null) ? IntPtr.Zero : graphics.nativeObject;
+            IntPtr g = (graphics == null) ? IntPtr.Zero : graphics.NativeGraphics;
 
-            int s = SafeNativeMethods.Gdip.GdipIsOutlineVisiblePathPoint(nativePath, x, y, pen.NativePen, g, out result);
-            SafeNativeMethods.Gdip.CheckStatus(s);
+            int s = Gdip.GdipIsOutlineVisiblePathPoint(_nativePath, x, y, pen.NativePen, g, out result);
+            Gdip.CheckStatus(s);
 
             return result;
         }
@@ -818,11 +815,11 @@ namespace System.Drawing.Drawing2D
         {
             bool retval;
 
-            IntPtr g = (graphics == null) ? IntPtr.Zero : graphics.nativeObject;
+            IntPtr g = (graphics == null) ? IntPtr.Zero : graphics.NativeGraphics;
 
-            int s = SafeNativeMethods.Gdip.GdipIsVisiblePathPointI(nativePath, x, y, g, out retval);
+            int s = Gdip.GdipIsVisiblePathPointI(_nativePath, x, y, g, out retval);
 
-            SafeNativeMethods.Gdip.CheckStatus(s);
+            Gdip.CheckStatus(s);
 
             return retval;
         }
@@ -831,84 +828,77 @@ namespace System.Drawing.Drawing2D
         {
             bool retval;
 
-            IntPtr g = (graphics == null) ? IntPtr.Zero : graphics.nativeObject;
+            IntPtr g = (graphics == null) ? IntPtr.Zero : graphics.NativeGraphics;
 
-            int s = SafeNativeMethods.Gdip.GdipIsVisiblePathPoint(nativePath, x, y, g, out retval);
+            int s = Gdip.GdipIsVisiblePathPoint(_nativePath, x, y, g, out retval);
 
-            SafeNativeMethods.Gdip.CheckStatus(s);
+            Gdip.CheckStatus(s);
 
             return retval;
         }
 
         public void SetMarkers()
         {
-            int s = SafeNativeMethods.Gdip.GdipSetPathMarker(nativePath);
+            int s = Gdip.GdipSetPathMarker(_nativePath);
 
-            SafeNativeMethods.Gdip.CheckStatus(s);
+            Gdip.CheckStatus(s);
         }
 
         public void StartFigure()
         {
-            int s = SafeNativeMethods.Gdip.GdipStartPathFigure(nativePath);
+            int s = Gdip.GdipStartPathFigure(_nativePath);
 
-            SafeNativeMethods.Gdip.CheckStatus(s);
+            Gdip.CheckStatus(s);
         }
 
-        [MonoTODO("GdipWarpPath isn't implemented in libgdiplus")]
         public void Warp(PointF[] destPoints, RectangleF srcRect)
         {
             Warp(destPoints, srcRect, null, WarpMode.Perspective, FlatnessDefault);
         }
 
-        [MonoTODO("GdipWarpPath isn't implemented in libgdiplus")]
         public void Warp(PointF[] destPoints, RectangleF srcRect, Matrix matrix)
         {
             Warp(destPoints, srcRect, matrix, WarpMode.Perspective, FlatnessDefault);
         }
 
-        [MonoTODO("GdipWarpPath isn't implemented in libgdiplus")]
         public void Warp(PointF[] destPoints, RectangleF srcRect, Matrix matrix, WarpMode warpMode)
         {
             Warp(destPoints, srcRect, matrix, warpMode, FlatnessDefault);
         }
 
-        [MonoTODO("GdipWarpPath isn't implemented in libgdiplus")]
         public void Warp(PointF[] destPoints, RectangleF srcRect, Matrix matrix, WarpMode warpMode, float flatness)
         {
             if (destPoints == null)
-                throw new ArgumentNullException("destPoints");
+                throw new ArgumentNullException(nameof(destPoints));
 
-            IntPtr m = (matrix == null) ? IntPtr.Zero : matrix.nativeMatrix;
+            IntPtr m = (matrix == null) ? IntPtr.Zero : matrix.NativeMatrix;
 
-            int s = SafeNativeMethods.Gdip.GdipWarpPath(nativePath, m, destPoints, destPoints.Length,
+            int s = Gdip.GdipWarpPath(_nativePath, m, destPoints, destPoints.Length,
                             srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, warpMode, flatness);
 
-            SafeNativeMethods.Gdip.CheckStatus(s);
+            Gdip.CheckStatus(s);
         }
 
-        [MonoTODO("GdipWidenPath isn't implemented in libgdiplus")]
         public void Widen(Pen pen)
         {
             Widen(pen, null, FlatnessDefault);
         }
 
-        [MonoTODO("GdipWidenPath isn't implemented in libgdiplus")]
         public void Widen(Pen pen, Matrix matrix)
         {
             Widen(pen, matrix, FlatnessDefault);
         }
 
-        [MonoTODO("GdipWidenPath isn't implemented in libgdiplus")]
         public void Widen(Pen pen, Matrix matrix, float flatness)
         {
             if (pen == null)
-                throw new ArgumentNullException("pen");
+                throw new ArgumentNullException(nameof(pen));
             if (PointCount == 0)
                 return;
-            IntPtr m = (matrix == null) ? IntPtr.Zero : matrix.nativeMatrix;
+            IntPtr m = (matrix == null) ? IntPtr.Zero : matrix.NativeMatrix;
 
-            int s = SafeNativeMethods.Gdip.GdipWidenPath(nativePath, pen.NativePen, m, flatness);
-            SafeNativeMethods.Gdip.CheckStatus(s);
+            int s = Gdip.GdipWidenPath(_nativePath, pen.NativePen, m, flatness);
+            Gdip.CheckStatus(s);
         }
     }
 }

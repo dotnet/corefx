@@ -20,8 +20,14 @@ namespace System.Globalization
         public const int ADEra = 1;
 
         //
-        // This is the max Gregorian year can be represented by DateTime class.  The limitation
-        // is derived from DateTime class.
+        // This is the min Gregorian year can be represented by the DateTime class.
+        // The limitation is derived from the DateTime class.
+        //
+        internal const int MinYear = 1;
+
+        //
+        // This is the max Gregorian year can be represented by the DateTime class.
+        // The limitation is derived from the DateTime class.
         //
         internal const int MaxYear = 9999;
 
@@ -206,7 +212,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             nameof(months),
-                            String.Format(
+                            string.Format(
                                 CultureInfo.CurrentCulture,
                                 SR.ArgumentOutOfRange_Range,
                                 -120000,
@@ -317,7 +323,7 @@ namespace System.Globalization
                 }
                 throw new ArgumentOutOfRangeException(
                             nameof(year),
-                            String.Format(
+                            string.Format(
                                 CultureInfo.CurrentCulture,
                                 SR.ArgumentOutOfRange_Range,
                                 1,
@@ -364,7 +370,7 @@ namespace System.Globalization
                 }
                 throw new ArgumentOutOfRangeException(
                             nameof(year),
-                            String.Format(
+                            string.Format(
                                 CultureInfo.CurrentCulture,
                                 SR.ArgumentOutOfRange_Range,
                                 1,
@@ -451,7 +457,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             nameof(year),
-                            String.Format(
+                            string.Format(
                                 CultureInfo.CurrentCulture,
                                 SR.ArgumentOutOfRange_Range, 1, MaxYear));
             }
@@ -473,7 +479,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             nameof(year),
-                            String.Format(
+                            string.Format(
                                 CultureInfo.CurrentCulture,
                                 SR.ArgumentOutOfRange_Range, 1, MaxYear));
             }
@@ -501,7 +507,7 @@ namespace System.Globalization
 
                 throw new ArgumentOutOfRangeException(
                             nameof(year),
-                            String.Format(
+                            string.Format(
                                 CultureInfo.CurrentCulture,
                                 SR.ArgumentOutOfRange_Range, 1, MaxYear));
             }
@@ -551,7 +557,7 @@ namespace System.Globalization
                 {
                     throw new ArgumentOutOfRangeException(
                                 "year",
-                                String.Format(
+                                string.Format(
                                     CultureInfo.CurrentCulture,
                                     SR.ArgumentOutOfRange_Range,
                                     99,
@@ -574,7 +580,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             nameof(year),
-                            String.Format(
+                            string.Format(
                                 CultureInfo.CurrentCulture,
                                 SR.ArgumentOutOfRange_Range, 1, MaxYear));
             }

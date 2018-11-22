@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -52,7 +52,7 @@ namespace System.Diagnostics.Tests
         {
             using (EventLog eventLog = new EventLog("Application"))
             {
-                Assert.InRange(Helpers.RetryOnWin7((() => eventLog.Entries.Count)), 1, Int32.MaxValue);
+                Assert.InRange(Helpers.RetryOnWin7((() => eventLog.Entries.Count)), 1, int.MaxValue);
             }
         }
 
@@ -80,7 +80,9 @@ namespace System.Diagnostics.Tests
         {
             using (EventLog eventLog = new EventLog("Application"))
             {
-                Assert.Equal("Application", eventLog.LogDisplayName);
+                Assert.False(string.IsNullOrEmpty(eventLog.LogDisplayName));
+                if (CultureInfo.CurrentCulture.Name.Split('-')[0] == "en" )
+                    Assert.Equal("Application", eventLog.LogDisplayName);
             }
         }
 
@@ -109,7 +111,10 @@ namespace System.Diagnostics.Tests
             using (EventLog eventLog = new EventLog())
             {
                 eventLog.Log = "Application";
-                Assert.Equal("Application", eventLog.LogDisplayName);
+
+                Assert.False(string.IsNullOrEmpty(eventLog.LogDisplayName));
+                if (CultureInfo.CurrentCulture.Name.Split('-')[0] == "en" )
+                    Assert.Equal("Application", eventLog.LogDisplayName);
             }
         }
 
@@ -341,9 +346,7 @@ namespace System.Diagnostics.Tests
             using (EventLog eventlog = new EventLog("Security"))
             {
                 eventlog.Source = "Security";
-                EventLogEntry eventLogEntry;
-                eventLogEntry = Helpers.RetryOnWin7(() => eventlog.Entries[0]);
-                Assert.Contains("", eventLogEntry.Message);
+                Assert.Contains("", eventlog.Entries.LastOrDefault()?.Message ?? "");
             }
         }
     }

@@ -12,7 +12,7 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public class HttpRetryProtocolTests : HttpClientTestBase
+    public abstract class HttpRetryProtocolTests : HttpClientTestBase
     {
         private static readonly string s_simpleContent = "Hello World\r\n";
 
@@ -61,6 +61,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WinRT HTTP stack doesn't support Expect: 100-continue")]
         [Fact]
         public async Task PostAsyncExpect100Continue_FailsAfterContentSendStarted_Throws()
         {
@@ -117,6 +118,9 @@ namespace System.Net.Http.Functional.Tests
             private readonly Task _connectionClosed;
             private readonly TaskCompletionSource<bool> _sendingContent;
 
+            // The content needs to be large enough to force Expect: 100-Continue behavior in libcurl.
+            private readonly string _longContent = new String('a', 1025);
+
             public SynchronizedSendContent(TaskCompletionSource<bool> sendingContent, Task connectionClosed)
             {
                 _connectionClosed = connectionClosed;
@@ -127,12 +131,12 @@ namespace System.Net.Http.Functional.Tests
             {
                 _sendingContent.SetResult(true);
                 await _connectionClosed;
-                await stream.WriteAsync(Encoding.UTF8.GetBytes(s_simpleContent));
+                await stream.WriteAsync(Encoding.UTF8.GetBytes(_longContent));
             }
 
             protected override bool TryComputeLength(out long length)
             {
-                length = s_simpleContent.Length;
+                length = _longContent.Length;
                 return true;
             }
         }

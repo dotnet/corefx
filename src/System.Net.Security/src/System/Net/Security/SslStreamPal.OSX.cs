@@ -16,8 +16,6 @@ namespace System.Net.Security
 {
     internal static class SslStreamPal
     {
-        private static readonly StreamSizes s_streamSizes = new StreamSizes();
-
         public static Exception GetException(SecurityStatusPal status)
         {
             return status.Exception ?? new Win32Exception((int)status.ErrorCode);
@@ -105,8 +103,10 @@ namespace System.Net.Security
 
         internal static byte[] GetNegotiatedApplicationProtocol(SafeDeleteContext context)
         {
-            // OSX SecureTransport does not export APIs to support ALPN, no-op.
-            return null;
+            if (context == null)
+                return null;
+
+            return Interop.AppleCrypto.SslGetAlpnSelected(((SafeDeleteSslContext)context).SslContext);
         }
 
         public static SecurityStatusPal EncryptMessage(
@@ -128,7 +128,7 @@ namespace System.Net.Security
 
                 unsafe
                 {
-                    MemoryHandle memHandle = input.Retain(pin: true);
+                    MemoryHandle memHandle = input.Pin();
                     try
                     {
                         PAL_TlsIo status;
@@ -259,7 +259,7 @@ namespace System.Net.Security
             SafeDeleteContext securityContext,
             out StreamSizes streamSizes)
         {
-            streamSizes = s_streamSizes;
+            streamSizes = StreamSizes.Default;
         }
 
         public static void QueryContextConnectionInfo(

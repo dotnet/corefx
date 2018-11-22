@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <errno.h>
+#include <sys/socket.h>
 #include <net/route.h>
 #include <net/if.h>
 
@@ -26,7 +27,13 @@
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
+#if HAVE_NET_IFMEDIA_H
+#include <net/if_media.h>
+#include <sys/ioctl.h>
+#endif
 #include <sys/socketvar.h>
+#include <netinet/in.h>
+#include <netinet/in_pcb.h>
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <netinet/ip_var.h>
@@ -38,7 +45,7 @@
 #include <netinet/icmp6.h>
 #include <netinet/icmp_var.h>
 
-int32_t SystemNative_GetTcpGlobalStatistics(struct TcpGlobalStatistics* retStats)
+int32_t SystemNative_GetTcpGlobalStatistics(TcpGlobalStatistics* retStats)
 {
     size_t oldlenp;
 
@@ -48,7 +55,7 @@ int32_t SystemNative_GetTcpGlobalStatistics(struct TcpGlobalStatistics* retStats
     oldlenp = sizeof(systemStats);
     if (sysctlbyname("net.inet.tcp.stats", &systemStats, &oldlenp, NULL, 0))
     {
-        memset(retStats, 0, sizeof(struct TcpGlobalStatistics)); // out parameter must be initialized.
+        memset(retStats, 0, sizeof(TcpGlobalStatistics)); // out parameter must be initialized.
         return -1;
     }
 
@@ -71,7 +78,7 @@ int32_t SystemNative_GetTcpGlobalStatistics(struct TcpGlobalStatistics* retStats
     return 0;
 }
 
-int32_t SystemNative_GetIPv4GlobalStatistics(struct IPv4GlobalStatistics* retStats)
+int32_t SystemNative_GetIPv4GlobalStatistics(IPv4GlobalStatistics* retStats)
 {
     size_t oldlenp;
 
@@ -81,7 +88,7 @@ int32_t SystemNative_GetIPv4GlobalStatistics(struct IPv4GlobalStatistics* retSta
     oldlenp = sizeof(systemStats);
     if (sysctlbyname("net.inet.ip.stats", &systemStats, &oldlenp, NULL, 0))
     {
-        memset(retStats, 0, sizeof(struct IPv4GlobalStatistics)); // out parameter must be initialized.
+        memset(retStats, 0, sizeof(IPv4GlobalStatistics)); // out parameter must be initialized.
         return -1;
     }
 
@@ -115,7 +122,7 @@ int32_t SystemNative_GetIPv4GlobalStatistics(struct IPv4GlobalStatistics* retSta
     return 0;
 }
 
-int32_t SystemNative_GetUdpGlobalStatistics(struct UdpGlobalStatistics* retStats)
+int32_t SystemNative_GetUdpGlobalStatistics(UdpGlobalStatistics* retStats)
 {
     size_t oldlenp;
 
@@ -125,7 +132,7 @@ int32_t SystemNative_GetUdpGlobalStatistics(struct UdpGlobalStatistics* retStats
     oldlenp = sizeof(systemStats);
     if (sysctlbyname("net.inet.udp.stats", &systemStats, &oldlenp, NULL, 0))
     {
-        memset(retStats, 0, sizeof(struct UdpGlobalStatistics)); // out parameter must be initialized.
+        memset(retStats, 0, sizeof(UdpGlobalStatistics)); // out parameter must be initialized.
         return -1;
     }
 
@@ -134,6 +141,10 @@ int32_t SystemNative_GetUdpGlobalStatistics(struct UdpGlobalStatistics* retStats
     retStats->IncomingDiscarded = systemStats.udps_noport;
     retStats->IncomingErrors = systemStats.udps_hdrops + systemStats.udps_badsum + systemStats.udps_badlen;
 
+#if defined(__FreeBSD__)
+    // FreeBSD does not have net.inet.udp.pcbcount
+    retStats->UdpListeners = 0;
+#else
     // This may contain both UDP4 and UDP6 listeners.
     oldlenp = sizeof(retStats->UdpListeners);
     if (sysctlbyname("net.inet.udp.pcbcount", &retStats->UdpListeners, &oldlenp, NULL, 0))
@@ -141,11 +152,12 @@ int32_t SystemNative_GetUdpGlobalStatistics(struct UdpGlobalStatistics* retStats
         retStats->UdpListeners = 0;
         return -1;
     }
+#endif
 
     return 0;
 }
 
-int32_t SystemNative_GetIcmpv4GlobalStatistics(struct Icmpv4GlobalStatistics* retStats)
+int32_t SystemNative_GetIcmpv4GlobalStatistics(Icmpv4GlobalStatistics* retStats)
 {
     size_t oldlenp;
 
@@ -155,12 +167,12 @@ int32_t SystemNative_GetIcmpv4GlobalStatistics(struct Icmpv4GlobalStatistics* re
     oldlenp = sizeof(systemStats);
     if (sysctlbyname("net.inet.icmp.stats", &systemStats, &oldlenp, NULL, 0))
     {
-        memset(retStats, 0, sizeof(struct Icmpv4GlobalStatistics));
+        memset(retStats, 0, sizeof(Icmpv4GlobalStatistics));
         return -1;
     }
 
-    u_int32_t* inHist = systemStats.icps_inhist;
-    u_int32_t* outHist = systemStats.icps_outhist;
+    __typeof(systemStats.icps_inhist[0])* inHist = systemStats.icps_inhist;
+    __typeof(systemStats.icps_outhist[0])* outHist = systemStats.icps_outhist;
 
     retStats->AddressMaskRepliesReceived = inHist[ICMP_MASKREPLY];
     retStats->AddressMaskRepliesSent = outHist[ICMP_MASKREPLY];
@@ -188,7 +200,7 @@ int32_t SystemNative_GetIcmpv4GlobalStatistics(struct Icmpv4GlobalStatistics* re
     return 0;
 }
 
-int32_t SystemNative_GetIcmpv6GlobalStatistics(struct Icmpv6GlobalStatistics* retStats)
+int32_t SystemNative_GetIcmpv6GlobalStatistics(Icmpv6GlobalStatistics* retStats)
 {
     size_t oldlenp;
 
@@ -198,7 +210,7 @@ int32_t SystemNative_GetIcmpv6GlobalStatistics(struct Icmpv6GlobalStatistics* re
     oldlenp = sizeof(systemStats);
     if (sysctlbyname("net.inet6.icmp6.stats", &systemStats, &oldlenp, NULL, 0))
     {
-        memset(retStats, 0, sizeof(struct Icmpv6GlobalStatistics));
+        memset(retStats, 0, sizeof(Icmpv6GlobalStatistics));
         return -1;
     }
 
@@ -245,7 +257,7 @@ int32_t SystemNative_GetEstimatedTcpConnectionCount()
     return count;
 }
 
-size_t GetEstimatedTcpPcbSize()
+static size_t GetEstimatedTcpPcbSize()
 {
     void* oldp = NULL;
     void* newp = NULL;
@@ -255,13 +267,13 @@ size_t GetEstimatedTcpPcbSize()
     return oldlenp;
 }
 
-int32_t SystemNative_GetActiveTcpConnectionInfos(struct NativeTcpConnectionInformation* infos, int32_t* infoCount)
+int32_t SystemNative_GetActiveTcpConnectionInfos(NativeTcpConnectionInformation* infos, int32_t* infoCount)
 {
     assert(infos != NULL);
     assert(infoCount != NULL);
 
     size_t estimatedSize = GetEstimatedTcpPcbSize();
-    uint8_t* buffer = malloc(estimatedSize * sizeof(uint8_t));
+    uint8_t* buffer = (uint8_t*)malloc(estimatedSize * sizeof(uint8_t));
     if (buffer == NULL)
     {
         errno = ENOMEM;
@@ -310,27 +322,27 @@ int32_t SystemNative_GetActiveTcpConnectionInfos(struct NativeTcpConnectionInfor
         tcp_pcb = head_xtcpb->xt_tp;
         in_pcb = head_xtcpb->xt_inp;
 
-        struct NativeTcpConnectionInformation* ntci = &infos[connectionIndex];
+        NativeTcpConnectionInformation* ntci = &infos[connectionIndex];
         ntci->State = SystemNative_MapTcpState(tcp_pcb.t_state);
 
         uint8_t vflag = in_pcb.inp_vflag; // INP_IPV4 or INP_IPV6
         if ((vflag & INP_IPV4) == INP_IPV4)
         {
-            memcpy_s(&ntci->LocalEndPoint.AddressBytes, sizeof_member(struct IPEndPointInfo, AddressBytes), &in_pcb.inp_laddr.s_addr, 4);
-            memcpy_s(&ntci->RemoteEndPoint.AddressBytes, sizeof_member(struct IPEndPointInfo, AddressBytes), &in_pcb.inp_faddr.s_addr, 4);
+            memcpy_s(&ntci->LocalEndPoint.AddressBytes, sizeof_member(IPEndPointInfo, AddressBytes), &in_pcb.inp_laddr.s_addr, 4);
+            memcpy_s(&ntci->RemoteEndPoint.AddressBytes, sizeof_member(IPEndPointInfo, AddressBytes), &in_pcb.inp_faddr.s_addr, 4);
             ntci->LocalEndPoint.NumAddressBytes = 4;
             ntci->RemoteEndPoint.NumAddressBytes = 4;
         }
         else
         {
-            memcpy_s(&ntci->LocalEndPoint.AddressBytes, sizeof_member(struct IPEndPointInfo, AddressBytes), &in_pcb.in6p_laddr.s6_addr, 16);
-            memcpy_s(&ntci->RemoteEndPoint.AddressBytes, sizeof_member(struct IPEndPointInfo, AddressBytes), &in_pcb.in6p_faddr.s6_addr, 16);
+            memcpy_s(&ntci->LocalEndPoint.AddressBytes, sizeof_member(IPEndPointInfo, AddressBytes), &in_pcb.in6p_laddr.s6_addr, 16);
+            memcpy_s(&ntci->RemoteEndPoint.AddressBytes, sizeof_member(IPEndPointInfo, AddressBytes), &in_pcb.in6p_faddr.s6_addr, 16);
             ntci->LocalEndPoint.NumAddressBytes = 16;
             ntci->RemoteEndPoint.NumAddressBytes = 16;
         }
 
-        ntci->LocalEndPoint.Port = in_pcb.inp_lport;
-        ntci->RemoteEndPoint.Port = in_pcb.inp_fport;
+        ntci->LocalEndPoint.Port = ntohs(in_pcb.inp_lport);
+        ntci->RemoteEndPoint.Port = ntohs(in_pcb.inp_fport);
     }
 
     free(buffer);
@@ -345,7 +357,7 @@ int32_t SystemNative_GetEstimatedUdpListenerCount()
     return count;
 }
 
-size_t GetEstimatedUdpPcbSize()
+static size_t GetEstimatedUdpPcbSize()
 {
     void* oldp = NULL;
     void* newp = NULL;
@@ -355,13 +367,13 @@ size_t GetEstimatedUdpPcbSize()
     return oldlenp;
 }
 
-int32_t SystemNative_GetActiveUdpListeners(struct IPEndPointInfo* infos, int32_t* infoCount)
+int32_t SystemNative_GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCount)
 {
     assert(infos != NULL);
     assert(infoCount != NULL);
 
     size_t estimatedSize = GetEstimatedUdpPcbSize();
-    uint8_t* buffer = malloc(estimatedSize * sizeof(uint8_t));
+    uint8_t* buffer = (uint8_t*)malloc(estimatedSize * sizeof(uint8_t));
     if (buffer == NULL)
     {
         errno = ENOMEM;
@@ -376,7 +388,7 @@ int32_t SystemNative_GetActiveUdpListeners(struct IPEndPointInfo* infos, int32_t
         free(buffer);
         size_t tmpEstimatedSize;
         if (!multiply_s(estimatedSize, (size_t)2, &tmpEstimatedSize) ||
-            (buffer = malloc(estimatedSize * sizeof(uint8_t))) == NULL)
+            (buffer = (uint8_t*)malloc(estimatedSize * sizeof(uint8_t))) == NULL)
         {
             errno = ENOMEM;
             return -1;
@@ -404,28 +416,28 @@ int32_t SystemNative_GetActiveUdpListeners(struct IPEndPointInfo* infos, int32_t
         connectionIndex++;
         struct xinpcb* head_xinpcb = (struct xinpcb*)xHeadPtr;
         in_pcb = head_xinpcb->xi_inp;
-        struct IPEndPointInfo* iepi = &infos[connectionIndex];
+        IPEndPointInfo* iepi = &infos[connectionIndex];
 
         uint8_t vflag = in_pcb.inp_vflag; // INP_IPV4 or INP_IPV6
         if ((vflag & INP_IPV4) == INP_IPV4)
         {
-            memcpy_s(iepi->AddressBytes, sizeof_member(struct IPEndPointInfo, AddressBytes), &in_pcb.inp_laddr.s_addr, 4);
+            memcpy_s(iepi->AddressBytes, sizeof_member(IPEndPointInfo, AddressBytes), &in_pcb.inp_laddr.s_addr, 4);
             iepi->NumAddressBytes = 4;
         }
         else
         {
-            memcpy_s(iepi->AddressBytes, sizeof_member(struct IPEndPointInfo, AddressBytes), &in_pcb.in6p_laddr.s6_addr, 16);
+            memcpy_s(iepi->AddressBytes, sizeof_member(IPEndPointInfo, AddressBytes), &in_pcb.in6p_laddr.s6_addr, 16);
             iepi->NumAddressBytes = 16;
         }
 
-        iepi->Port = in_pcb.inp_lport;
+        iepi->Port = ntohs(in_pcb.inp_lport);
     }
 
     free(buffer);
     return 0;
 }
 
-int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, struct NativeIPInterfaceStatistics* retStats)
+int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPInterfaceStatistics* retStats)
 {
     assert(interfaceName != NULL && retStats != NULL);
     unsigned int interfaceIndex = if_nametoindex(interfaceName);
@@ -434,18 +446,21 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, struct 
         // An invalid interface name was given (doesn't exist).
         return -1;
     }
-
-    int statisticsMib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, 0};
+#if HAVE_IF_MSGHDR2
+    int statisticsMib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST2, (int)interfaceIndex};
+#else
+    int statisticsMib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST, (int)interfaceIndex};
+#endif
 
     size_t len;
     // Get estimated data length
     if (sysctl(statisticsMib, 6, NULL, &len, NULL, 0) == -1)
     {
-        memset(retStats, 0, sizeof(struct NativeIPInterfaceStatistics));
+        memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
         return -1;
     }
 
-    uint8_t* buffer = malloc(len * sizeof(uint8_t));
+    uint8_t* buffer = (uint8_t*)malloc(len * sizeof(uint8_t));
     if (buffer == NULL)
     {
         errno = ENOMEM;
@@ -456,7 +471,7 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, struct 
     {
         // Not enough space.
         free(buffer);
-        memset(retStats, 0, sizeof(struct NativeIPInterfaceStatistics));
+        memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
         return -1;
     }
 
@@ -464,12 +479,21 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, struct 
          headPtr += ((struct if_msghdr*)headPtr)->ifm_msglen)
     {
         struct if_msghdr* ifHdr = (struct if_msghdr*)headPtr;
+#if HAVE_IF_MSGHDR2
         if (ifHdr->ifm_index == interfaceIndex && ifHdr->ifm_type == RTM_IFINFO2)
         {
             struct if_msghdr2* ifHdr2 = (struct if_msghdr2*)ifHdr;
             retStats->SendQueueLength = (uint64_t)ifHdr2->ifm_snd_maxlen;
 
             struct if_data64 systemStats = ifHdr2->ifm_data;
+#else
+        if (ifHdr->ifm_index == interfaceIndex && ifHdr->ifm_type == RTM_IFINFO)
+        {
+            struct if_msghdr* ifHdr2 = (struct if_msghdr*)ifHdr;
+            retStats->SendQueueLength = 0;
+
+            struct if_data systemStats = ifHdr2->ifm_data;
+#endif
             retStats->Mtu = systemStats.ifi_mtu;
             retStats->Speed = systemStats.ifi_baudrate; // bits per second.
             retStats->InPackets = systemStats.ifi_ipackets;
@@ -482,6 +506,58 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, struct 
             retStats->OutMulticastPackets = systemStats.ifi_omcasts;
             retStats->InDrops = systemStats.ifi_iqdrops;
             retStats->InNoProto = systemStats.ifi_noproto;
+
+            retStats->Flags = 0;
+            if (ifHdr->ifm_flags & IFF_UP)
+            {
+                retStats->Flags |= InterfaceUp;
+#if HAVE_NET_IFMEDIA_H
+                int fd =  socket(AF_INET, SOCK_DGRAM, 0);
+                if (fd < 0) {
+                    retStats->Flags |= InterfaceError;
+                }
+                else
+                {
+                    struct ifmediareq ifmr;
+                    memset(&ifmr, 0, sizeof(ifmr));
+                    strncpy(ifmr.ifm_name, interfaceName, sizeof(ifmr.ifm_name));
+
+                    if (ioctl(fd, SIOCGIFMEDIA, (caddr_t)&ifmr) < 0)
+                    {
+                        if (errno == EOPNOTSUPP || errno == EINVAL)
+                        {
+                            // Virtual interfaces like loopback do not have media.
+                            // Assume they are up when administrative state is up.
+                            retStats->Flags |= InterfaceHasLink;
+                        }
+                        else
+                        {
+                            retStats->Flags |= InterfaceError;
+                        }
+                    }
+                    else if ((ifmr.ifm_status & IFM_AVALID) == 0)
+                    {
+                        retStats->Flags |= InterfaceError;
+                    }
+                    else
+                    {
+                        if (ifmr.ifm_status & IFM_ACTIVE)
+                        {
+                            retStats->Flags |= InterfaceHasLink;
+                        }
+                    }
+                    close(fd);
+                }
+#else
+                retStats->Flags |= InterfaceError;
+#endif
+            }
+
+            if (ifHdr->ifm_flags & (IFF_MULTICAST | IFF_ALLMULTI))
+            {
+                retStats->Flags |= InterfaceSupportsMulticast;
+            }
+
             free(buffer);
             return 0;
         }
@@ -489,12 +565,13 @@ int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, struct 
 
     // No statistics were found with the given interface index; shouldn't happen.
     free(buffer);
-    memset(retStats, 0, sizeof(struct NativeIPInterfaceStatistics));
+    memset(retStats, 0, sizeof(NativeIPInterfaceStatistics));
     return -1;
 }
-
 int32_t SystemNative_GetNumRoutes()
 {
+    int32_t count = 0;
+#if HAVE_RT_MSGHDR2
     int routeDumpMib[] = {CTL_NET, PF_ROUTE, 0, 0, NET_RT_DUMP, 0};
 
     size_t len;
@@ -503,7 +580,7 @@ int32_t SystemNative_GetNumRoutes()
         return -1;
     }
 
-    uint8_t* buffer = malloc(len * sizeof(uint8_t));
+    uint8_t* buffer = (uint8_t*)malloc(len * sizeof(uint8_t));
     if (buffer == NULL)
     {
         errno = ENOMEM;
@@ -518,7 +595,6 @@ int32_t SystemNative_GetNumRoutes()
 
     uint8_t* headPtr = buffer;
     struct rt_msghdr2* rtmsg;
-    int32_t count = 0;
 
     for (size_t i = 0; i < len; i += rtmsg->rtm_msglen)
     {
@@ -532,7 +608,7 @@ int32_t SystemNative_GetNumRoutes()
     }
 
     free(buffer);
+#endif // HAVE_RT_MSGHDR2
     return count;
 }
-
 #endif // HAVE_TCP_VAR_H

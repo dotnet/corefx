@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -21,14 +21,13 @@ namespace System.Data.Common
 
         // differences between OleDb and Odbc
         // ODBC:
-        //     http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/odbcsqldriverconnect.asp
-        //     http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbcsql/od_odbc_d_4x4k.asp
+        //     https://docs.microsoft.com/en-us/sql/odbc/reference/syntax/sqldriverconnect-function
         //     do not support == -> = in keywords
         //     first key-value pair wins
         //     quote values using \{ and \}, only driver= and pwd= appear to generically allow quoting
         //     do not strip quotes from value, or add quotes except for driver keyword
         // OLEDB:
-        //     http://msdn.microsoft.com/library/default.asp?url=/library/en-us/oledb/htm/oledbconnectionstringsyntax.asp
+        //     https://docs.microsoft.com/en-us/dotnet/framework/data/adonet/connection-string-syntax#oledb-connection-string-syntax
         //     support == -> = in keywords
         //     last key-value pair wins
         //     quote values using \" or \'
@@ -119,8 +118,8 @@ namespace System.Data.Common
 
         internal static void AppendKeyValuePairBuilder(StringBuilder builder, string keyName, string keyValue, bool useOdbcRules)
         {
-            ADP.CheckArgumentNull(builder, "builder");
-            ADP.CheckArgumentLength(keyName, "keyName");
+            ADP.CheckArgumentNull(builder, nameof(builder));
+            ADP.CheckArgumentLength(keyName, nameof(keyName));
 
             if ((null == keyName) || !s_connectionStringValidKeyRegex.IsMatch(keyName))
             {
@@ -151,7 +150,8 @@ namespace System.Data.Common
                 if (useOdbcRules)
                 {
                     if ((0 < keyValue.Length) &&
-                        (('{' == keyValue[0]) || (0 <= keyValue.IndexOf(';')) || (0 == String.Compare(DbConnectionStringKeywords.Driver, keyName, StringComparison.OrdinalIgnoreCase))) &&
+                        // string.Contains(char) is .NetCore2.1+ specific
+                        (('{' == keyValue[0]) || (0 <= keyValue.IndexOf(';')) || (0 == string.Compare(DbConnectionStringKeywords.Driver, keyName, StringComparison.OrdinalIgnoreCase))) &&
                         !s_connectionStringQuoteOdbcValueRegex.IsMatch(keyValue))
                     {
                         // always quote Driver value (required for ODBC Version 2.65 and earlier)
@@ -168,6 +168,7 @@ namespace System.Data.Common
                     // <value> -> <value>
                     builder.Append(keyValue);
                 }
+                // string.Contains(char) is .NetCore2.1+ specific
                 else if ((-1 != keyValue.IndexOf('\"')) && (-1 == keyValue.IndexOf('\'')))
                 {
                     // <val"ue> -> <'val"ue'>
@@ -235,7 +236,7 @@ namespace System.Data.Common
         {
             try
             {
-                return System.Int32.Parse(stringValue, System.Globalization.NumberStyles.Integer, CultureInfo.InvariantCulture);
+                return int.Parse(stringValue, System.Globalization.NumberStyles.Integer, CultureInfo.InvariantCulture);
             }
             catch (FormatException e)
             {
@@ -262,8 +263,6 @@ namespace System.Data.Common
         // * this method queries "DataDirectory" value from the current AppDomain.
         //   This string is used for to replace "!DataDirectory!" values in the connection string, it is not considered as an "exposed resource".
         // * This method uses GetFullPath to validate that root path is valid, the result is not exposed out.
-        [ResourceExposure(ResourceScope.None)]
-        [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         internal static string ExpandDataDirectory(string keyword, string value, ref string datadir)
         {
             string fullPath = null;

@@ -14,6 +14,7 @@ using Microsoft.SqlServer.Server;
 using System.Reflection;
 using System.IO;
 using System.Globalization;
+using System.Security;
 
 namespace System.Data.SqlClient
 {
@@ -30,8 +31,10 @@ namespace System.Data.SqlClient
         // root task associated with current async invocation
         private Tuple<TaskCompletionSource<DbConnectionInternal>, Task> _currentCompletion;
 
+        private SqlCredential _credential;
         private string _connectionString;
         private int _connectRetryCount;
+        private string _accessToken; // Access Token to be used for token based authententication
 
         // connection resiliency
         private object _reconnectLock = new object();
@@ -57,12 +60,45 @@ namespace System.Data.SqlClient
             CacheConnectionStringProperties();
         }
 
+        public SqlConnection(string connectionString, SqlCredential credential) : this()
+        {
+            ConnectionString = connectionString;
+            if (credential != null)
+            {
+                // The following checks are necessary as setting Credential property will call CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential
+                //  CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential it will throw InvalidOperationException rather than Arguemtn exception
+                //  Need to call setter on Credential property rather than setting _credential directly as pool groups need to be checked
+                SqlConnectionString connectionOptions = (SqlConnectionString)ConnectionOptions;
+                if (UsesClearUserIdOrPassword(connectionOptions))
+                {
+                    throw ADP.InvalidMixedArgumentOfSecureAndClearCredential();
+                }
+
+                if (UsesIntegratedSecurity(connectionOptions))
+                {
+                    throw ADP.InvalidMixedArgumentOfSecureCredentialAndIntegratedSecurity();
+                }
+                Credential = credential;
+            }
+            // else
+            //      credential == null:  we should not set "Credential" as this will do additional validation check and
+            //      checking pool groups which is not necessary. All necessary operation is already done by calling "ConnectionString = connectionString"
+            CacheConnectionStringProperties();
+        }
+
         private SqlConnection(SqlConnection connection)
         {
             GC.SuppressFinalize(this);
             CopyFrom(connection);
             _connectionString = connection._connectionString;
+            if (connection._credential != null)
+            {
+                SecureString password = connection._credential.Password.Copy();
+                password.MakeReadOnly();
+                _credential = new SqlCredential(connection._credential.UserId, password);
+            }
 
+            _accessToken = connection._accessToken;
             CacheConnectionStringProperties();
         }
 
@@ -143,6 +179,23 @@ namespace System.Data.SqlClient
             set => _AsyncCommandInProgress = value;
         }
 
+        // Does this connection use Integrated Security?
+        private bool UsesIntegratedSecurity(SqlConnectionString opt)
+        {
+            return opt != null ? opt.IntegratedSecurity : false;
+        }
+
+        // Does this connection use old style of clear userID or Password in connection string?
+        private bool UsesClearUserIdOrPassword(SqlConnectionString opt)
+        {
+            bool result = false;
+            if (null != opt)
+            {
+                result = (!string.IsNullOrEmpty(opt.UserID) || !string.IsNullOrEmpty(opt.Password));
+            }
+            return result;
+        }
+
         internal SqlConnectionString.TransactionBindingEnum TransactionBinding
         {
             get => ((SqlConnectionString)ConnectionOptions).TransactionBinding;
@@ -171,7 +224,19 @@ namespace System.Data.SqlClient
             }
             set
             {
-                ConnectionString_Set(new SqlConnectionPoolKey(value));
+                if (_credential != null || _accessToken != null)
+                {
+                    SqlConnectionString connectionOptions = new SqlConnectionString(value);
+                    if (_credential != null)
+                    {
+                        CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential(connectionOptions);
+                    }
+                    else
+                    {
+                        CheckAndThrowOnInvalidCombinationOfConnectionOptionAndAccessToken(connectionOptions);
+                    }
+                }
+                ConnectionString_Set(new SqlConnectionPoolKey(value, _credential, _accessToken));
                 _connectionString = value;  // Change _connectionString value only after value is validated
                 CacheConnectionStringProperties();
             }
@@ -183,6 +248,37 @@ namespace System.Data.SqlClient
             {
                 SqlConnectionString constr = (SqlConnectionString)ConnectionOptions;
                 return ((null != constr) ? constr.ConnectTimeout : SqlConnectionString.DEFAULT.Connect_Timeout);
+            }
+        }
+
+        // AccessToken: To be used for token based authentication
+        public string AccessToken
+        {
+            get
+            {
+                string result = _accessToken;
+                // When a connection is connecting or is ever opened, make AccessToken available only if "Persist Security Info" is set to true
+                // otherwise, return null
+                SqlConnectionString connectionOptions = (SqlConnectionString)UserConnectionOptions;
+                return InnerConnection.ShouldHidePassword && connectionOptions != null && !connectionOptions.PersistSecurityInfo ? null : _accessToken;
+            }
+            set
+            {
+                // If a connection is connecting or is ever opened, AccessToken cannot be set
+                if (!InnerConnection.AllowSetConnectionString)
+                {
+                    throw ADP.OpenConnectionPropertySet("AccessToken", InnerConnection.State);
+                }
+
+                if (value != null)
+                {
+                    // Check if the usage of AccessToken has any conflict with the keys used in connection string and credential
+                    CheckAndThrowOnInvalidCombinationOfConnectionOptionAndAccessToken((SqlConnectionString)ConnectionOptions);
+                }
+
+                // Need to call ConnectionString_Set to do proper pool group check
+                ConnectionString_Set(new SqlConnectionPoolKey(_connectionString, credential: _credential, accessToken: value));
+                _accessToken = value;
             }
         }
 
@@ -308,6 +404,88 @@ namespace System.Data.SqlClient
                 SqlConnectionString constr = (SqlConnectionString)ConnectionOptions;
                 string result = constr?.WorkstationId ?? Environment.MachineName;
                 return result;
+            }
+        }
+
+        public SqlCredential Credential
+        {
+            get
+            {
+                SqlCredential result = _credential;
+
+                // When a connection is connecting or is ever opened, make credential available only if "Persist Security Info" is set to true
+                //  otherwise, return null
+                SqlConnectionString connectionOptions = (SqlConnectionString)UserConnectionOptions;
+                if (InnerConnection.ShouldHidePassword && connectionOptions != null && !connectionOptions.PersistSecurityInfo)
+                {
+                    result = null;
+                }
+
+                return result;
+            }
+
+            set
+            {
+                // If a connection is connecting or is ever opened, user id/password cannot be set
+                if (!InnerConnection.AllowSetConnectionString)
+                {
+                    throw ADP.OpenConnectionPropertySet(nameof(Credential), InnerConnection.State);
+                }
+
+                // check if the usage of credential has any conflict with the keys used in connection string
+                if (value != null)
+                {
+                    CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential((SqlConnectionString)ConnectionOptions);
+                    if (_accessToken != null)
+                    {
+                        throw ADP.InvalidMixedUsageOfCredentialAndAccessToken();
+                    }
+                }
+
+                _credential = value;
+
+                // Need to call ConnectionString_Set to do proper pool group check
+                ConnectionString_Set(new SqlConnectionPoolKey(_connectionString, _credential, accessToken: _accessToken));
+            }
+        }
+
+        // CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential: check if the usage of credential has any conflict
+        //  with the keys used in connection string
+        //  If there is any conflict, it throws InvalidOperationException
+        //  This is used in the setter of ConnectionString and Credential properties.
+        private void CheckAndThrowOnInvalidCombinationOfConnectionStringAndSqlCredential(SqlConnectionString connectionOptions)
+        {
+            if (UsesClearUserIdOrPassword(connectionOptions))
+            {
+                throw ADP.InvalidMixedUsageOfSecureAndClearCredential();
+            }
+
+            if (UsesIntegratedSecurity(connectionOptions))
+            {
+                throw ADP.InvalidMixedUsageOfSecureCredentialAndIntegratedSecurity();
+            }
+        }
+
+        // CheckAndThrowOnInvalidCombinationOfConnectionOptionAndAccessToken: check if the usage of AccessToken has any conflict
+        //  with the keys used in connection string and credential
+        //  If there is any conflict, it throws InvalidOperationException
+        //  This is to be used setter of ConnectionString and AccessToken properties
+        private void CheckAndThrowOnInvalidCombinationOfConnectionOptionAndAccessToken(SqlConnectionString connectionOptions)
+        {
+            if (UsesClearUserIdOrPassword(connectionOptions))
+            {
+                throw ADP.InvalidMixedUsageOfAccessTokenAndUserIDPassword();
+            }
+
+            if (UsesIntegratedSecurity(connectionOptions))
+            {
+                throw ADP.InvalidMixedUsageOfAccessTokenAndIntegratedSecurity();
+            }
+
+            // Check if the usage of AccessToken has the conflict with credential
+            if (_credential != null)
+            {
+                throw ADP.InvalidMixedUsageOfCredentialAndAccessToken();
             }
         }
 
@@ -542,6 +720,9 @@ namespace System.Data.SqlClient
 
         private void DisposeMe(bool disposing)
         {
+            _credential = null;
+            _accessToken = null;
+
             if (!disposing)
             {
                 // For non-pooled connections we need to make sure that if the SqlConnection was not closed, 
@@ -1231,6 +1412,108 @@ namespace System.Data.SqlClient
             }
         }
 
+
+        public static void ChangePassword(string connectionString, string newPassword)
+        {
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw SQL.ChangePasswordArgumentMissing(nameof(newPassword));
+            }
+            if (string.IsNullOrEmpty(newPassword))
+            {
+                throw SQL.ChangePasswordArgumentMissing(nameof(newPassword));
+            }
+            if (TdsEnums.MAXLEN_NEWPASSWORD < newPassword.Length)
+            {
+                throw ADP.InvalidArgumentLength(nameof(newPassword), TdsEnums.MAXLEN_NEWPASSWORD);
+            }
+
+            SqlConnectionPoolKey key = new SqlConnectionPoolKey(connectionString, credential: null, accessToken: null);
+
+            SqlConnectionString connectionOptions = SqlConnectionFactory.FindSqlConnectionOptions(key);
+            if (connectionOptions.IntegratedSecurity)
+            {
+                throw SQL.ChangePasswordConflictsWithSSPI();
+            }
+            if (!string.IsNullOrEmpty(connectionOptions.AttachDBFilename))
+            {
+                throw SQL.ChangePasswordUseOfUnallowedKey(SqlConnectionString.KEY.AttachDBFilename);
+            }
+
+            ChangePassword(connectionString, connectionOptions, null, newPassword, null);
+        }
+
+        public static void ChangePassword(string connectionString, SqlCredential credential, SecureString newSecurePassword)
+        {
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw SQL.ChangePasswordArgumentMissing(nameof(connectionString));
+            }
+
+            // check credential; not necessary to check the length of password in credential as the check is done by SqlCredential class
+            if (credential == null)
+            {
+                throw SQL.ChangePasswordArgumentMissing(nameof(credential));
+            }
+
+            if (newSecurePassword == null || newSecurePassword.Length == 0)
+            {
+                throw SQL.ChangePasswordArgumentMissing(nameof(newSecurePassword));
+            }
+
+            if (!newSecurePassword.IsReadOnly())
+            {
+                throw ADP.MustBeReadOnly(nameof(newSecurePassword));
+            }
+
+            if (TdsEnums.MAXLEN_NEWPASSWORD < newSecurePassword.Length)
+            {
+                throw ADP.InvalidArgumentLength(nameof(newSecurePassword), TdsEnums.MAXLEN_NEWPASSWORD);
+            }
+
+            SqlConnectionPoolKey key = new SqlConnectionPoolKey(connectionString, credential: null, accessToken: null);
+
+            SqlConnectionString connectionOptions = SqlConnectionFactory.FindSqlConnectionOptions(key);
+
+            // Check for connection string values incompatible with SqlCredential
+            if (!string.IsNullOrEmpty(connectionOptions.UserID) || !string.IsNullOrEmpty(connectionOptions.Password))
+            {
+                throw ADP.InvalidMixedArgumentOfSecureAndClearCredential();
+            }
+
+            if (connectionOptions.IntegratedSecurity)
+            {
+                throw SQL.ChangePasswordConflictsWithSSPI();
+            }
+
+            if (!string.IsNullOrEmpty(connectionOptions.AttachDBFilename))
+            {
+                throw SQL.ChangePasswordUseOfUnallowedKey(SqlConnectionString.KEY.AttachDBFilename);
+            }
+
+            ChangePassword(connectionString, connectionOptions, credential, null, newSecurePassword);
+        }
+
+        private static void ChangePassword(string connectionString, SqlConnectionString connectionOptions, SqlCredential credential, string newPassword, SecureString newSecurePassword)
+        {
+            // note: This is the only case where we directly construct the internal connection, passing in the new password.
+            // Normally we would simply create a regular connection and open it, but there is no other way to pass the
+            // new password down to the constructor. This would have an unwanted impact on the connection pool.
+            SqlInternalConnectionTds con = null;
+            try
+            {
+                con = new SqlInternalConnectionTds(null, connectionOptions, credential, null, newPassword, newSecurePassword, false);
+            }
+            finally
+            {
+                if (con != null)
+                    con.Dispose();
+            }
+            SqlConnectionPoolKey key = new SqlConnectionPoolKey(connectionString, credential: null, accessToken: null);
+
+            SqlConnectionFactory.SingletonInstance.ClearPool(key);
+        }
+
         //
         // SQL DEBUGGING SUPPORT
         //
@@ -1308,7 +1591,7 @@ namespace System.Data.SqlClient
         private Assembly ResolveTypeAssembly(AssemblyName asmRef, bool throwOnError)
         {
             Debug.Assert(TypeSystemAssemblyVersion != null, "TypeSystemAssembly should be set !");
-            if (string.Compare(asmRef.Name, "Microsoft.SqlServer.Types", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(asmRef.Name, "Microsoft.SqlServer.Types", StringComparison.OrdinalIgnoreCase))
             {
                 asmRef.Version = TypeSystemAssemblyVersion;
             }
@@ -1359,7 +1642,7 @@ namespace System.Data.SqlClient
             {
                 Type t = metaData.udtType;
                 Debug.Assert(t != null, "Unexpected null of udtType on GetUdtValue!");
-                o = t.InvokeMember("Null", BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Static, null, null, new object[] { }, CultureInfo.InvariantCulture);
+                o = t.InvokeMember("Null", BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.Static, null, null, Array.Empty<object>(), CultureInfo.InvariantCulture);
                 Debug.Assert(o != null);
                 return o;
             }

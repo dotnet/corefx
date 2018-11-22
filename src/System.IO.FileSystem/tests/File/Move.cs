@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace System.IO.Tests
 {
-    public class File_Move : FileSystemTest
+    public partial class File_Move : FileSystemTest
     {
         #region Utilities
 
@@ -62,9 +62,20 @@ namespace System.IO.Tests
             testFile.Create().Dispose();
 
             if (invalidPath.Contains('\0'.ToString()))
+            {
                 Assert.Throws<ArgumentException>(() => Move(testFile.FullName, invalidPath));
+            }
             else
-                Assert.ThrowsAny<IOException>(() => Move(testFile.FullName, invalidPath));
+            {
+                if (PlatformDetection.IsInAppContainer)
+                {
+                    AssertExtensions.ThrowsAny<IOException, UnauthorizedAccessException>(() => Move(testFile.FullName, invalidPath));
+                }
+                else
+                {
+                    Assert.ThrowsAny<IOException>(() => Move(testFile.FullName, invalidPath));
+                }
+            }
         }
 
         [Fact]
@@ -186,6 +197,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
+        [ActiveIssue(32167, TargetFrameworkMonikers.NetFramework)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Path longer than max path limit
         public void OverMaxPathWorks_Windows()
         {
@@ -246,7 +258,10 @@ namespace System.IO.Tests
             }
             else
             {
-                Assert.Throws<NotSupportedException>(() => Move(testFile.FullName, invalidPath));
+                if (invalidPath.Contains('|'))
+                    Assert.Throws<ArgumentException>(() => Move(testFile.FullName, invalidPath));
+                else
+                    Assert.Throws<NotSupportedException>(() => Move(testFile.FullName, invalidPath));
             }
         }
 

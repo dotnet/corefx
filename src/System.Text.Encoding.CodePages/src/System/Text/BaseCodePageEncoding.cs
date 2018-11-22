@@ -43,7 +43,7 @@ namespace System.Text
     //   }
     internal abstract class BaseCodePageEncoding : EncodingNLS, ISerializable
     {
-        internal const String CODE_PAGE_DATA_FILE_NAME = "codepages.nlp";
+        internal const string CODE_PAGE_DATA_FILE_NAME = "codepages.nlp";
 
         protected int dataTableCodePage;
 
@@ -81,7 +81,7 @@ namespace System.Text
             throw new PlatformNotSupportedException();
         }
 
-        // Just a helper as we cannot use 'this' when calling 'base(...)' 
+        // Just a helper as we cannot use 'this' when calling 'base(...)'
         private void SetFallbackEncoding()
         {
             (EncoderFallback as InternalEncoderBestFitFallback).encoding = this;
@@ -146,7 +146,7 @@ namespace System.Text
         // Initialize our global stuff
         private static byte[] s_codePagesDataHeader = new byte[CODEPAGE_DATA_FILE_HEADER_SIZE];
         protected static Stream s_codePagesEncodingDataStream = GetEncodingDataStream(CODE_PAGE_DATA_FILE_NAME);
-        protected static readonly Object s_streamLock = new Object(); // this lock used when reading from s_codePagesEncodingDataStream
+        protected static readonly object s_streamLock = new object(); // this lock used when reading from s_codePagesEncodingDataStream
 
         // Real variables
         protected byte[] m_codePageHeader = new byte[CODEPAGE_HEADER_SIZE];
@@ -156,7 +156,7 @@ namespace System.Text
         // Safe handle wrapper around section map view
         protected SafeAllocHHandle safeNativeMemoryHandle = null;
 
-        internal static Stream GetEncodingDataStream(String tableName)
+        internal static Stream GetEncodingDataStream(string tableName)
         {
             Debug.Assert(tableName != null, "table name can not be null");
 
@@ -329,8 +329,8 @@ namespace System.Text
             return arrayBytesBestFit;
         }
 
-        // During the AppDomain shutdown the Encoding class may have already finalized, making the memory section 
-        // invalid. We detect that by validating the memory section handle then re-initializing the memory 
+        // During the AppDomain shutdown the Encoding class may have already finalized, making the memory section
+        // invalid. We detect that by validating the memory section handle then re-initializing the memory
         // section by calling LoadManagedCodePage() method and eventually the mapped file handle and
         // the memory section pointer will get finalized one more time.
         internal unsafe void CheckMemorySection()

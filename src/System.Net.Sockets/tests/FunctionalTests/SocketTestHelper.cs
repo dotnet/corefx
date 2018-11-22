@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -30,6 +31,7 @@ namespace System.Net.Sockets.Tests
         public virtual bool ConnectAfterDisconnectResultsInInvalidOperationException => false;
         public virtual bool SupportsMultiConnect => true;
         public virtual bool SupportsAcceptIntoExistingSocket => true;
+        public virtual void Listen(Socket s, int backlog)  { s.Listen(backlog); }
     }
 
     public class SocketHelperArraySync : SocketHelperBase
@@ -71,9 +73,14 @@ namespace System.Net.Sockets.Tests
     public sealed class SocketHelperSyncForceNonBlocking : SocketHelperArraySync
     {
         public override Task<Socket> AcceptAsync(Socket s) =>
-            Task.Run(() => { s.ForceNonBlocking(true); Socket accepted = s.Accept(); accepted.ForceNonBlocking(true); return accepted; });
+            Task.Run(() => { Socket accepted = s.Accept(); accepted.ForceNonBlocking(true); return accepted; });
         public override Task ConnectAsync(Socket s, EndPoint endPoint) =>
             Task.Run(() => { s.ForceNonBlocking(true); s.Connect(endPoint); });
+        public override void Listen(Socket s, int backlog)
+        {
+            s.Listen(backlog);
+            s.ForceNonBlocking(true);
+        }
     }
 
     public sealed class SocketHelperApm : SocketHelperBase
@@ -125,8 +132,6 @@ namespace System.Net.Sockets.Tests
 
     public class SocketHelperTask : SocketHelperBase
     {
-        public override bool DisposeDuringOperationResultsInDisposedException =>
-            PlatformDetection.IsFullFramework; // due to SocketTaskExtensions.netfx implementation wrapping APM rather than EAP
         public override Task<Socket> AcceptAsync(Socket s) =>
             s.AcceptAsync();
         public override Task<Socket> AcceptAsync(Socket s, Socket acceptSocket) =>
@@ -263,13 +268,14 @@ namespace System.Net.Sockets.Tests
         public bool ConnectAfterDisconnectResultsInInvalidOperationException => _socketHelper.ConnectAfterDisconnectResultsInInvalidOperationException;
         public bool SupportsMultiConnect => _socketHelper.SupportsMultiConnect;
         public bool SupportsAcceptIntoExistingSocket => _socketHelper.SupportsAcceptIntoExistingSocket;
+        public void Listen(Socket s, int backlog) => _socketHelper.Listen(s, backlog);
     }
 
     //
     // MemberDatas that are generally useful
     //
 
-    public abstract class MemberDatas
+    public abstract class MemberDatas : RemoteExecutorTestBase
     {
         public static readonly object[][] Loopbacks = new[]
         {

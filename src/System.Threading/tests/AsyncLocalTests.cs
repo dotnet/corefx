@@ -154,6 +154,56 @@ namespace System.Threading.Tests
         }
 
         [Fact]
+        public static async Task NotifyCountOnObjectValueChange()
+        {
+            var obj0 = new object();
+            var obj1 = new object();
+            var obj2 = new object();
+
+            int asyncLocal0ChangeCount = 0;
+            int asyncLocal1ChangeCount = 0;
+            void VerifyChangeCounts(int expectedAsyncLocal0ChangeCount, int expectedAsyncLocal1ChangeCount)
+            {
+                Assert.Equal(expectedAsyncLocal0ChangeCount, asyncLocal0ChangeCount);
+                Assert.Equal(expectedAsyncLocal1ChangeCount, asyncLocal1ChangeCount);
+            }
+
+            Action<AsyncLocalValueChangedArgs<object>> onAsyncLocal0Changed = e =>
+            {
+                Assert.True(e.PreviousValue == null || e.CurrentValue == null);
+                object nonNullValue = e.PreviousValue ?? e.CurrentValue;
+                Assert.Same(obj0, nonNullValue);
+                ++asyncLocal0ChangeCount;
+            };
+            VerifyChangeCounts(0, 0);
+            var asyncLocal0 = new AsyncLocal<object>(onAsyncLocal0Changed);
+            VerifyChangeCounts(0, 0);
+            asyncLocal0.Value = obj0;
+            VerifyChangeCounts(1, 0);
+            var executionContext = ExecutionContext.Capture();
+
+            Action<AsyncLocalValueChangedArgs<object>> onAsyncLocal1Changed = e =>
+            {
+                Assert.True(e.PreviousValue == null || e.CurrentValue == null);
+                object nonNullValue = e.PreviousValue ?? e.CurrentValue;
+                Assert.True(nonNullValue == obj1 || nonNullValue == obj2);
+                ++asyncLocal1ChangeCount;
+            };
+            VerifyChangeCounts(1, 0);
+            var asyncLocal1 = new AsyncLocal<object>(onAsyncLocal1Changed);
+            VerifyChangeCounts(1, 0);
+            asyncLocal1.Value = obj1;
+            VerifyChangeCounts(1, 1);
+            asyncLocal1.Value = null;
+            VerifyChangeCounts(1, 2);
+            asyncLocal1.Value = obj2;
+            VerifyChangeCounts(1, 3);
+
+            ExecutionContext.Run(executionContext, data => VerifyChangeCounts(1, 4), null);
+            VerifyChangeCounts(1, 5);
+        }
+
+        [Fact]
         public static async Task NotifyOnThreadContextChange()
         {
             bool expectThreadContextChange = false;
@@ -466,6 +516,61 @@ namespace System.Threading.Tests
             {
                 locals[i].Value = null;
                 Assert.Null(locals[i].Value);
+                for (int j = i + 1; j < locals.Length; j++)
+                {
+                    Assert.Equal(j.ToString(), locals[j].Value);
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetCounts))]
+        public static async Task AddUpdateAndRemoveManyLocals_ReferenceType_NotifyOnChange(int count)
+        {
+            string valueChangedLog = string.Empty;
+            string expectedValueChangedLog = string.Empty;
+            string GetValueChangedLogLine(string previousValue, string currentValue) =>
+                $"{previousValue ?? "(null)"} => {currentValue ?? "(null)"}{Environment.NewLine}";
+            Action<AsyncLocalValueChangedArgs<string>> valueChangedHandler =
+                args => valueChangedLog += GetValueChangedLogLine(args.PreviousValue, args.CurrentValue);
+            void VerifyValueChangedLog()
+            {
+                Assert.Equal(expectedValueChangedLog, valueChangedLog);
+                valueChangedLog = string.Empty;
+                expectedValueChangedLog = string.Empty;
+            }
+
+            var locals = new AsyncLocal<string>[count];
+
+            for (int i = 0; i < locals.Length; i++)
+            {
+                locals[i] = new AsyncLocal<string>(valueChangedHandler);
+                expectedValueChangedLog += GetValueChangedLogLine(locals[i].Value, i.ToString());
+                locals[i].Value = i.ToString();
+                VerifyValueChangedLog();
+
+                for (int j = 0; j <= i; j++)
+                {
+                    Assert.Equal(j.ToString(), locals[j].Value);
+
+                    expectedValueChangedLog += GetValueChangedLogLine(locals[j].Value, (j + 1).ToString());
+                    locals[j].Value = (j + 1).ToString();
+                    Assert.Equal((j + 1).ToString(), locals[j].Value);
+                    VerifyValueChangedLog();
+
+                    expectedValueChangedLog += GetValueChangedLogLine(locals[j].Value, j.ToString());
+                    locals[j].Value = j.ToString();
+                    Assert.Equal(j.ToString(), locals[j].Value);
+                    VerifyValueChangedLog();
+                }
+            }
+
+            for (int i = 0; i < locals.Length; i++)
+            {
+                expectedValueChangedLog += GetValueChangedLogLine(locals[i].Value, null);
+                locals[i].Value = null;
+                Assert.Null(locals[i].Value);
+                VerifyValueChangedLog();
                 for (int j = i + 1; j < locals.Length; j++)
                 {
                     Assert.Equal(j.ToString(), locals[j].Value);

@@ -13,7 +13,7 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public class HttpClientHandler_MaxResponseHeadersLength_Test : HttpClientTestBase
+    public abstract class HttpClientHandler_MaxResponseHeadersLength_Test : HttpClientTestBase
     {
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
         [Theory]
@@ -53,6 +53,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
         [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task InfiniteSingleHeader_ThrowsException()

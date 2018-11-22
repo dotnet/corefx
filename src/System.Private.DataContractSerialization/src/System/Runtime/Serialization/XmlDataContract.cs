@@ -14,6 +14,7 @@ namespace System.Runtime.Serialization
     using System.Xml.Schema;
     using System.Security;
     using System.Linq;
+    using System.Runtime.CompilerServices;
 
 #if uapaot
     public delegate IXmlSerializable CreateXmlSerializableDelegate();
@@ -325,7 +326,7 @@ namespace System.Runtime.Serialization
                         MethodInfo XName_op_Implicit = xName.GetMethod(
                             "op_Implicit",
                             BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public,
-                            new Type[] { typeof(String) }
+                            new Type[] { typeof(string) }
                             );
                         ConstructorInfo XElement_ctor = type.GetConstructor(
                             BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
@@ -379,6 +380,7 @@ namespace System.Runtime.Serialization
         }
 #endif
 
+        [RemovableFeature(ReflectionBasedSerializationFeature.Name)]
         internal IXmlSerializable ReflectionCreateXmlSerializable(Type type)
         {
             if (type.IsValueType)
@@ -395,7 +397,7 @@ namespace System.Runtime.Serialization
                 else
                 {
                     ConstructorInfo ctor = GetConstructor();
-                    o = ctor.Invoke(new object[] { });
+                    o = ctor.Invoke(Array.Empty<object>());
                 }
 
                 return (IXmlSerializable)o;

@@ -14,14 +14,9 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public partial class HttpClientHandler_SslProtocols_Test
+    public abstract partial class HttpClientHandler_SslProtocols_Test
     {
         private bool BackendSupportsSslConfiguration =>
-            UseSocketsHttpHandler ||
-            (Interop.Http.GetSslVersionDescription()?.StartsWith(Interop.Http.OpenSsl10Description, StringComparison.OrdinalIgnoreCase) ?? false);
-
-        private bool SSLv3DisabledByDefault =>
-            BackendSupportsSslConfiguration ||
-            Version.Parse(Interop.Http.GetVersionDescription()) >= new Version(7, 39); // libcurl disables SSLv3 by default starting in v7.39
+            UseSocketsHttpHandler || TestHelper.NativeHandlerSupportsSslConfiguration();
     }
 }

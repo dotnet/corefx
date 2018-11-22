@@ -31,6 +31,11 @@ namespace System.Security.Cryptography.Pkcs
                 _expectedDigest = expectedDigest;
             }
 
+            protected override bool VerifyKeyType(AsymmetricAlgorithm key)
+            {
+                return (key as ECDsa) != null;
+            }
+
             internal override bool VerifySignature(
 #if netcoreapp
                 ReadOnlySpan<byte> valueHash,
@@ -60,8 +65,13 @@ namespace System.Security.Cryptography.Pkcs
                     return false;
                 }
 
-                // 2 * KeySizeBytes => 2 * KeySizeBits / 8 => KeySizeBits / 4
-                int bufSize = key.KeySize / 4;
+                int bufSize;
+                checked
+                {
+                    // fieldSize = ceil(KeySizeBits / 8);
+                    int fieldSize = (key.KeySize + 7) / 8;
+                    bufSize = 2 * fieldSize;
+                }
 
 #if netcoreapp
                 ArrayPool<byte> pool = ArrayPool<byte>.Shared;
@@ -97,12 +107,13 @@ namespace System.Security.Cryptography.Pkcs
 #endif
                 HashAlgorithmName hashAlgorithmName,
                 X509Certificate2 certificate,
+                AsymmetricAlgorithm certKey,
                 bool silent,
                 out Oid signatureAlgorithm,
                 out byte[] signatureValue)
             {
                 // If there's no private key, fall back to the public key for a "no private key" exception.
-                ECDsa key =
+                ECDsa key = certKey as ECDsa ??
                     PkcsPal.Instance.GetPrivateKeyForSigning<ECDsa>(certificate, silent) ??
                     certificate.GetECDsaPublicKey();
 
@@ -131,16 +142,32 @@ namespace System.Security.Cryptography.Pkcs
 
 #if netcoreapp
                 ArrayPool<byte> pool = ArrayPool<byte>.Shared;
-                // The signature size is twice the KeySize.
-                // 2 * KeySizeInBytes => 2 * KeySizeInBits / 8 => KeySizeInBits / 4
-                byte[] rented = pool.Rent(key.KeySize / 4);
+
+                int bufSize;
+                checked
+                {
+                    // fieldSize = ceil(KeySizeBits / 8);
+                    int fieldSize = (key.KeySize + 7) / 8;
+                    bufSize = 2 * fieldSize;
+                }
+
+                byte[] rented = pool.Rent(bufSize);
                 int bytesWritten = 0;
 
                 try
                 {
                     if (key.TrySignHash(dataHash, rented, out bytesWritten))
                     {
-                        signatureValue = DsaIeeeToDer(new ReadOnlySpan<byte>(rented, 0, bytesWritten));
+                        var signedHash = new ReadOnlySpan<byte>(rented, 0, bytesWritten);
+
+                        if (key != null && !certificate.GetECDsaPublicKey().VerifyHash(dataHash, signedHash))
+                        {
+                            // key did not match certificate
+                            signatureValue = null;
+                            return false;
+                        }
+
+                        signatureValue = DsaIeeeToDer(signedHash);
                         return true;
                     }
                 }

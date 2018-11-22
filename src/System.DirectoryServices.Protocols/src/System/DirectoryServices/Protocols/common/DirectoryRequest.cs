@@ -62,7 +62,7 @@ namespace System.DirectoryServices.Protocols
 
             var objClassAttr = new DirectoryAttribute()
             {
-                Name = "objectClass"
+                Name = nameof(objectClass)
             };
             objClassAttr.Add(objectClass);
             Attributes.Add(objClassAttr);
@@ -311,7 +311,7 @@ namespace System.DirectoryServices.Protocols
             {
                 if (value < TimeSpan.Zero)
                 {
-                    throw new ArgumentException(SR.NoNegativeTime, nameof(value));
+                    throw new ArgumentException(SR.NoNegativeTimeLimit, nameof(value));
                 }
 
                 // Prevent integer overflow.

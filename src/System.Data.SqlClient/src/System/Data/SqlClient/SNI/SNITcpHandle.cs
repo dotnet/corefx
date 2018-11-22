@@ -223,6 +223,8 @@ namespace System.Data.SqlClient.SNI
                     if (ipAddresses[i] != null)
                     {
                         sockets[i] = new Socket(ipAddresses[i].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                        // enable keep-alive on socket
+                        SNITcpHandle.SetKeepAliveValues(ref sockets[i]);                      
                         sockets[i].Connect(ipAddresses[i], port);
                         if (sockets[i] != null) // sockets[i] can be null if cancel callback is executed during connect()
                         {
@@ -381,7 +383,6 @@ namespace System.Data.SqlClient.SNI
             _sslStream = null;
             _sslOverTdsStream.Dispose();
             _sslOverTdsStream = null;
-
             _stream = _tcpStream;
         }
 
@@ -469,8 +470,7 @@ namespace System.Data.SqlClient.SNI
                         return TdsEnums.SNI_WAIT_TIMEOUT;
                     }
 
-                    packet = new SNIPacket(null);
-                    packet.Allocate(_bufferSize);
+                    packet = new SNIPacket(_bufferSize);
                     packet.ReadFromStream(_stream);
 
                     if (packet.Length == 0)
@@ -524,12 +524,12 @@ namespace System.Data.SqlClient.SNI
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
         /// <returns>SNI error code</returns>
-        public override uint SendAsync(SNIPacket packet, SNIAsyncCallback callback = null)
+        public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null)
         {
             SNIAsyncCallback cb = callback ?? _sendCallback;
-            lock(this)
+            lock (this)
             {
-                packet.WriteToStreamAsync(_stream, cb, SNIProviders.TCP_PROV);
+                packet.WriteToStreamAsync(_stream, cb, SNIProviders.TCP_PROV, disposePacketAfterSendAsync);
             }
             return TdsEnums.SNI_SUCCESS_IO_PENDING;
         }
@@ -539,14 +539,13 @@ namespace System.Data.SqlClient.SNI
         /// </summary>
         /// <param name="packet">SNI packet</param>
         /// <returns>SNI error code</returns>
-        public override uint ReceiveAsync(ref SNIPacket packet, bool isMars = false)
+        public override uint ReceiveAsync(ref SNIPacket packet)
         {
-            packet = new SNIPacket(null);
-            packet.Allocate(_bufferSize);
+            packet = new SNIPacket(_bufferSize);
 
             try
             {
-                packet.ReadFromStreamAsync(_stream, _receiveCallback, isMars);
+                packet.ReadFromStreamAsync(_stream, _receiveCallback);
                 return TdsEnums.SNI_SUCCESS_IO_PENDING;
             }
             catch (Exception e) when (e is ObjectDisposedException || e is SocketException || e is IOException)
@@ -564,7 +563,17 @@ namespace System.Data.SqlClient.SNI
         {
             try
             {
-                if (!_socket.Connected || _socket.Poll(0, SelectMode.SelectError))
+                // _socket.Poll method with argument SelectMode.SelectRead returns 
+                //      True : if Listen has been called and a connection is pending, or
+                //      True : if data is available for reading, or
+                //      True : if the connection has been closed, reset, or terminated, i.e no active connection.
+                //      False : otherwise.
+                // _socket.Available property returns the number of bytes of data available to read.
+                //
+                // Since _socket.Connected alone doesn't guarantee if the connection is still active, we use it in 
+                // combination with _socket.Poll method and _socket.Available == 0 check. When both of them 
+                // return true we can safely determine that the connection is no longer active.
+                if (!_socket.Connected || (_socket.Poll(100, SelectMode.SelectRead) && _socket.Available == 0))
                 {
                     return TdsEnums.SNI_ERROR;
                 }
@@ -619,6 +628,6 @@ namespace System.Data.SqlClient.SNI
         {
             _socket.Shutdown(SocketShutdown.Both);
         }
-#endif		
+#endif
     }
 }

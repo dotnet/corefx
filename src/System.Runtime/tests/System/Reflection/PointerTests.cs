@@ -23,6 +23,10 @@ namespace System.Reflection.Tests
         }
     }
 
+    unsafe delegate void MethodDelegate(byte* ptr, int expected);
+
+    unsafe delegate bool* ReturnDelegate(int expected);
+
     public unsafe class PointerTests
     {
         [Fact]
@@ -90,6 +94,15 @@ namespace System.Reflection.Tests
             Assert.Equal(value, unchecked((int)obj.field));
         }
 
+        [Fact]
+        public void PointerFieldSetNullValue()
+        {
+            var obj = new PointerHolder();
+            FieldInfo field = typeof(PointerHolder).GetField("field");
+            field.SetValue(obj, null);
+            Assert.Equal(0, unchecked((int)obj.field));
+        }
+
         [Theory]
         [MemberData(nameof(Pointers))]
         public void IntPtrFieldSetValue(int value)
@@ -127,7 +140,6 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Pointers through Invoke not implemented: https://github.com/dotnet/corert/issues/2113")]
         public void PointerPropertySetValue(int value)
         {
             var obj = new PointerHolder();
@@ -138,7 +150,6 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Pointers through Invoke not implemented: https://github.com/dotnet/corert/issues/2113")]
         public void IntPtrPropertySetValue(int value)
         {
             var obj = new PointerHolder();
@@ -149,7 +160,6 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Pointers through Invoke not implemented: https://github.com/dotnet/corert/issues/2113")]
         public void PointerPropertySetValue_InvalidType(int value)
         {
             var obj = new PointerHolder();
@@ -162,7 +172,6 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Pointers through Invoke not implemented: https://github.com/dotnet/corert/issues/2113")]
         public void PointerPropertyGetValue(int value)
         {
             var obj = new PointerHolder();
@@ -176,7 +185,6 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Pointers through Invoke not implemented: https://github.com/dotnet/corert/issues/2113")]
         public void PointerMethodParameter(int value)
         {
             var obj = new PointerHolder();
@@ -184,9 +192,16 @@ namespace System.Reflection.Tests
             method.Invoke(obj, new[] { Pointer.Box(unchecked((void*)value), typeof(byte*)), value });
         }
 
+        [Fact]
+        public void PointerNullMethodParameter()
+        {
+            var obj = new PointerHolder();
+            MethodInfo method = typeof(PointerHolder).GetMethod("Method");
+            method.Invoke(obj, new object[] { null, 0 });
+        }
+
         [Theory]
         [MemberData(nameof(Pointers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Pointers through Invoke not implemented: https://github.com/dotnet/corert/issues/2113")]
         public void IntPtrMethodParameter(int value)
         {
             var obj = new PointerHolder();
@@ -196,7 +211,6 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Pointers through Invoke not implemented: https://github.com/dotnet/corert/issues/2113")]
         public void PointerMethodParameter_InvalidType(int value)
         {
             var obj = new PointerHolder();
@@ -209,12 +223,61 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Pointers through Invoke not implemented: https://github.com/dotnet/corert/issues/2113")]
         public void PointerMethodReturn(int value)
         {
             var obj = new PointerHolder();
             MethodInfo method = typeof(PointerHolder).GetMethod("Return");
             object actualValue = method.Invoke(obj, new object[] { value });
+            Assert.IsType<Pointer>(actualValue);
+            void* actualPointer = Pointer.Unbox(actualValue);
+            Assert.Equal(value, unchecked((int)actualPointer));
+        }
+
+        [Theory]
+        [MemberData(nameof(Pointers))]
+        public void PointerMethodDelegateParameter(int value)
+        {
+            var obj = new PointerHolder();
+            MethodDelegate d = obj.Method;
+            d.DynamicInvoke(Pointer.Box(unchecked((void*)value), typeof(byte*)), value);
+        }
+
+        [Fact]
+        public void PointerNullMethodDelegateParameter()
+        {
+            var obj = new PointerHolder();
+            MethodDelegate d = obj.Method;
+            d.DynamicInvoke(null, 0);
+        }
+
+        [Theory]
+        [MemberData(nameof(Pointers))]
+        public void IntPtrMethodDelegateParameter(int value)
+        {
+            var obj = new PointerHolder();
+            MethodDelegate d = obj.Method;
+            d.DynamicInvoke((IntPtr)value, value);
+        }
+
+        [Theory]
+        [MemberData(nameof(Pointers))]
+        public void PointerMethodDelegateParameter_InvalidType(int value)
+        {
+            var obj = new PointerHolder();
+            MethodDelegate d = obj.Method;
+            AssertExtensions.Throws<ArgumentException>(null, () =>
+            {
+                d.DynamicInvoke(Pointer.Box(unchecked((void*)value), typeof(long*)), value);
+            });
+        }
+
+        [Theory]
+        [MemberData(nameof(Pointers))]
+        public void PointerMethodDelegateReturn(int value)
+        {
+            var obj = new PointerHolder();
+            ReturnDelegate d = obj.Return;
+            object actualValue = d.DynamicInvoke(value);
             Assert.IsType<Pointer>(actualValue);
             void* actualPointer = Pointer.Unbox(actualValue);
             Assert.Equal(value, unchecked((int)actualPointer));

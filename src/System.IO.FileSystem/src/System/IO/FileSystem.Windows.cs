@@ -3,11 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.IO;
 using System.Text;
 
+#if MS_IO_REDIST
+namespace Microsoft.IO
+#else
 namespace System.IO
+#endif
 {
     internal static partial class FileSystem
     {
@@ -75,10 +82,10 @@ namespace System.IO
             int length = fullPath.Length;
 
             // We need to trim the trailing slash or the code will try to create 2 directories of the same name.
-            if (length >= 2 && PathInternal.EndsInDirectorySeparator(fullPath))
+            if (length >= 2 && PathInternal.EndsInDirectorySeparator(fullPath.AsSpan()))
                 length--;
 
-            int lengthRoot = PathInternal.GetRootLength(fullPath);
+            int lengthRoot = PathInternal.GetRootLength(fullPath.AsSpan());
 
             if (length > lengthRoot)
             {
@@ -200,12 +207,35 @@ namespace System.IO
                 if (!Interop.Kernel32.GetFileAttributesEx(path, Interop.Kernel32.GET_FILEEX_INFO_LEVELS.GetFileExInfoStandard, ref data))
                 {
                     errorCode = Marshal.GetLastWin32Error();
-                    if (errorCode == Interop.Errors.ERROR_ACCESS_DENIED)
+                    if (errorCode != Interop.Errors.ERROR_FILE_NOT_FOUND
+                        && errorCode != Interop.Errors.ERROR_PATH_NOT_FOUND
+                        && errorCode != Interop.Errors.ERROR_NOT_READY
+                        && errorCode != Interop.Errors.ERROR_INVALID_NAME
+                        && errorCode != Interop.Errors.ERROR_BAD_PATHNAME
+                        && errorCode != Interop.Errors.ERROR_BAD_NETPATH
+                        && errorCode != Interop.Errors.ERROR_BAD_NET_NAME
+                        && errorCode != Interop.Errors.ERROR_INVALID_PARAMETER
+                        && errorCode != Interop.Errors.ERROR_NETWORK_UNREACHABLE
+                        && errorCode != Interop.Errors.ERROR_NETWORK_ACCESS_DENIED
+                        && errorCode != Interop.Errors.ERROR_INVALID_HANDLE  // eg from \\.\CON
+                        )
                     {
+                        // Assert so we can track down other cases (if any) to add to our test suite
+                        Debug.Assert(errorCode == Interop.Errors.ERROR_ACCESS_DENIED || errorCode == Interop.Errors.ERROR_SHARING_VIOLATION,
+                            $"Unexpected error code getting attributes {errorCode}");
+
                         // Files that are marked for deletion will not let you GetFileAttributes,
                         // ERROR_ACCESS_DENIED is given back without filling out the data struct.
                         // FindFirstFile, however, will. Historically we always gave back attributes
                         // for marked-for-deletion files.
+                        //
+                        // Another case where enumeration works is with special system files such as
+                        // pagefile.sys that give back ERROR_SHARING_VIOLATION on GetAttributes.
+                        //
+                        // Ideally we'd only try again for known cases due to the potential performance
+                        // hit. The last attempt to do so baked for nearly a year before we found the
+                        // pagefile.sys case. As such we're probably stuck filtering out specific 
+                        // cases that we know we don't want to retry on.
 
                         var findData = new Interop.Kernel32.WIN32_FIND_DATA();
                         using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(path, ref findData))
@@ -298,7 +328,7 @@ namespace System.IO
 
         public static void MoveDirectory(string sourceFullPath, string destFullPath)
         {
-            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath))
+            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath, overwrite: false))
             {
                 int errorCode = Marshal.GetLastWin32Error();
 
@@ -313,9 +343,9 @@ namespace System.IO
             }
         }
 
-        public static void MoveFile(string sourceFullPath, string destFullPath)
+        public static void MoveFile(string sourceFullPath, string destFullPath, bool overwrite)
         {
-            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath))
+            if (!Interop.Kernel32.MoveFile(sourceFullPath, destFullPath, overwrite))
             {
                 throw Win32Marshal.GetExceptionForLastWin32Error();
             }
@@ -323,7 +353,7 @@ namespace System.IO
 
         private static SafeFileHandle OpenHandle(string fullPath, bool asDirectory)
         {
-            string root = fullPath.Substring(0, PathInternal.GetRootLength(fullPath));
+            string root = fullPath.Substring(0, PathInternal.GetRootLength(fullPath.AsSpan()));
             if (root == fullPath && root[1] == Path.VolumeSeparatorChar)
             {
                 // intentionally not fullpath, most upstack public APIs expose this as path.
@@ -355,9 +385,17 @@ namespace System.IO
 
         public static void RemoveDirectory(string fullPath, bool recursive)
         {
-            // Do not recursively delete through reparse points.
-            if (!recursive || IsReparsePoint(fullPath))
+            if (!recursive)
             {
+                RemoveDirectoryInternal(fullPath, topLevel: true);
+                return;
+            }
+
+            Interop.Kernel32.WIN32_FIND_DATA findData = new Interop.Kernel32.WIN32_FIND_DATA();
+            GetFindData(fullPath, ref findData);
+            if (IsNameSurrogateReparsePoint(ref findData))
+            {
+                // Don't recurse
                 RemoveDirectoryInternal(fullPath, topLevel: true);
                 return;
             }
@@ -365,24 +403,38 @@ namespace System.IO
             // We want extended syntax so we can delete "extended" subdirectories and files
             // (most notably ones with trailing whitespace or periods)
             fullPath = PathInternal.EnsureExtendedPrefix(fullPath);
-
-            Interop.Kernel32.WIN32_FIND_DATA findData = new Interop.Kernel32.WIN32_FIND_DATA();
             RemoveDirectoryRecursive(fullPath, ref findData, topLevel: true);
         }
 
-        private static bool IsReparsePoint(string fullPath)
+        private static void GetFindData(string fullPath, ref Interop.Kernel32.WIN32_FIND_DATA findData)
         {
-            Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data = new Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA();
-            int errorCode = FillAttributeInfo(fullPath, ref data, returnErrorOnNotFound: true);
-            if (errorCode != Interop.Errors.ERROR_SUCCESS)
+            using (SafeFindHandle handle = Interop.Kernel32.FindFirstFile(PathInternal.TrimEndingDirectorySeparator(fullPath), ref findData))
             {
-                // File not found doesn't make much sense coming from a directory delete.
-                if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND)
-                    errorCode = Interop.Errors.ERROR_PATH_NOT_FOUND;
-                throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
+                if (handle.IsInvalid)
+                {
+                    int errorCode = Marshal.GetLastWin32Error();
+                    // File not found doesn't make much sense coming from a directory delete.
+                    if (errorCode == Interop.Errors.ERROR_FILE_NOT_FOUND)
+                        errorCode = Interop.Errors.ERROR_PATH_NOT_FOUND;
+                    throw Win32Marshal.GetExceptionForWin32Error(errorCode, fullPath);
+                }
             }
+        }
 
-            return (((FileAttributes)data.dwFileAttributes & FileAttributes.ReparsePoint) != 0);
+        private static bool IsNameSurrogateReparsePoint(ref Interop.Kernel32.WIN32_FIND_DATA data)
+        {
+            // Name surrogates are reparse points that point to other named entities local to the file system.
+            // Reparse points can be used for other types of files, notably OneDrive placeholder files. We
+            // should treat reparse points that are not name surrogates as any other directory, e.g. recurse
+            // into them. Surrogates should just be detached.
+            // 
+            // See
+            // https://github.com/dotnet/corefx/issues/24250
+            // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365511.aspx
+            // https://msdn.microsoft.com/en-us/library/windows/desktop/aa365197.aspx
+
+            return ((FileAttributes)data.dwFileAttributes & FileAttributes.ReparsePoint) != 0
+                && (data.dwReserved0 & 0x20000000) != 0; // IsReparseTagNameSurrogate
         }
 
         private static void RemoveDirectoryRecursive(string fullPath, ref Interop.Kernel32.WIN32_FIND_DATA findData, bool topLevel)
@@ -419,9 +471,10 @@ namespace System.IO
                             continue;
 
                         string fileName = findData.cFileName.GetStringFromFixedBuffer();
-                        if ((findData.dwFileAttributes & (int)FileAttributes.ReparsePoint) == 0)
+
+                        if (!IsNameSurrogateReparsePoint(ref findData))
                         {
-                            // Not a reparse point, recurse.
+                            // Not a reparse point, or the reparse point isn't a name surrogate, recurse.
                             try
                             {
                                 RemoveDirectoryRecursive(
@@ -437,7 +490,8 @@ namespace System.IO
                         }
                         else
                         {
-                            // Reparse point, don't recurse, just remove. (dwReserved0 is documented for this flag)
+                            // Name surrogate reparse point, don't recurse, simply remove the directory.
+                            // If a mount point, we have to delete the mount point first.
                             if (findData.dwReserved0 == Interop.Kernel32.IOReparseOptions.IO_REPARSE_TAG_MOUNT_POINT)
                             {
                                 // Mount point. Unmount using full path plus a trailing '\'.

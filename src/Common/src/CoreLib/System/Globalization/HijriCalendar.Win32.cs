@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32;
+using Internal.Win32;
 
 namespace System.Globalization
 {
@@ -10,7 +10,7 @@ namespace System.Globalization
     {
         private int GetHijriDateAdjustment()
         {
-            if (_hijriAdvance == Int32.MinValue)
+            if (_hijriAdvance == int.MinValue)
             {
                 // Never been set before.  Use the system value from registry.
                 _hijriAdvance = GetAdvanceHijriDate();
@@ -18,8 +18,8 @@ namespace System.Globalization
             return (_hijriAdvance);
         }
 
-        private const String InternationalRegKey = "Control Panel\\International";
-        private const String HijriAdvanceRegKeyEntry = "AddHijriDate";
+        private const string InternationalRegKey = "Control Panel\\International";
+        private const string HijriAdvanceRegKeyEntry = "AddHijriDate";
 
         /*=================================GetAdvanceHijriDate==========================
         **Action: Gets the AddHijriDate value from the registry.
@@ -39,56 +39,45 @@ namespace System.Globalization
         ============================================================================*/
         private static int GetAdvanceHijriDate()
         {
-            int hijriAdvance = 0;
-            Microsoft.Win32.RegistryKey key = null;
-
-            try
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(InternationalRegKey))
             {
-                // Open in read-only mode.
-                key = RegistryKey.GetBaseKey(RegistryKey.HKEY_CURRENT_USER).OpenSubKey(InternationalRegKey, false);
-            }
-            //If this fails for any reason, we'll just return 0.
-            catch (ObjectDisposedException) { return 0; }
-            catch (ArgumentException) { return 0; }
-
-            if (key != null)
-            {
-                try
+                // Abort if we didn't find anything
+                if (key == null)
                 {
-                    Object value = key.InternalGetValue(HijriAdvanceRegKeyEntry, null, false, false);
-                    if (value == null)
+                    return 0;
+                }
+
+                object value = key.GetValue(HijriAdvanceRegKeyEntry);
+                if (value == null)
+                {
+                    return 0;
+                }
+
+                int hijriAdvance = 0;
+                string str = value.ToString();
+                if (string.Compare(str, 0, HijriAdvanceRegKeyEntry, 0, HijriAdvanceRegKeyEntry.Length, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    if (str.Length == HijriAdvanceRegKeyEntry.Length)
+                        hijriAdvance = -1;
+                    else
                     {
-                        return (0);
-                    }
-                    String str = value.ToString();
-                    if (String.Compare(str, 0, HijriAdvanceRegKeyEntry, 0, HijriAdvanceRegKeyEntry.Length, StringComparison.OrdinalIgnoreCase) == 0)
-                    {
-                        if (str.Length == HijriAdvanceRegKeyEntry.Length)
-                            hijriAdvance = -1;
-                        else
+                        try
                         {
-                            try
+                            int advance = int.Parse(str.AsSpan(HijriAdvanceRegKeyEntry.Length), provider:CultureInfo.InvariantCulture);
+                            if ((advance >= MinAdvancedHijri) && (advance <= MaxAdvancedHijri))
                             {
-                                int advance = Int32.Parse(str.AsSpan(HijriAdvanceRegKeyEntry.Length), provider:CultureInfo.InvariantCulture);
-                                if ((advance >= MinAdvancedHijri) && (advance <= MaxAdvancedHijri))
-                                {
-                                    hijriAdvance = advance;
-                                }
+                                hijriAdvance = advance;
                             }
-                            // If we got garbage from registry just ignore it.
-                            // hijriAdvance = 0 because of declaraction assignment up above.
-                            catch (ArgumentException) { }
-                            catch (FormatException) { }
-                            catch (OverflowException) { }
                         }
+                        // If we got garbage from registry just ignore it.
+                        // hijriAdvance = 0 because of declaraction assignment up above.
+                        catch (ArgumentException) { }
+                        catch (FormatException) { }
+                        catch (OverflowException) { }
                     }
                 }
-                finally
-                {
-                    key.Close();
-                }
+                return hijriAdvance;
             }
-            return (hijriAdvance);
         }
     }
 }

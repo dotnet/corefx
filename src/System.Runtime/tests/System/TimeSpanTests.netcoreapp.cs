@@ -111,11 +111,27 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentException>("divisor", () => TimeSpan.FromDays(1).Divide(double.NaN));
         }
 
-        [Theory]
-        [MemberData(nameof(Parse_Valid_TestData))]
-        public static void Parse_Span(string inputString, IFormatProvider provider, TimeSpan expected)
+        public static IEnumerable<object[]> Parse_ValidWithOffsetCount_TestData()
         {
-            ReadOnlySpan<char> input = inputString.AsSpan();
+            foreach (object[] inputs in Parse_Valid_TestData())
+            {
+                yield return new object[] { inputs[0], 0, ((string)inputs[0]).Length, inputs[1], inputs[2] };
+            }
+
+            yield return new object[] { "     12:24:02      ", 5, 8, null, new TimeSpan(0, 12, 24, 2, 0) };
+            yield return new object[] { "     12:24:02      ", 6, 7, null, new TimeSpan(0, 2, 24, 2, 0) };
+            yield return new object[] { "     12:24:02      ", 6, 6, null, new TimeSpan(0, 2, 24, 0, 0) };
+            yield return new object[] { "12:24:02.01", 0, 8, CultureInfo.InvariantCulture, new TimeSpan(0, 12, 24, 2, 0) };
+            yield return new object[] { "1:1:1.00000001", 0, 7, CultureInfo.InvariantCulture, new TimeSpan(1, 1, 1) };
+            yield return new object[] { "1:1:.00000001", 0, 6, CultureInfo.InvariantCulture, new TimeSpan(36600000000) };
+            yield return new object[] { "24:00:00", 1, 7, null, new TimeSpan(4, 0, 0) };
+        }
+
+        [Theory]
+        [MemberData(nameof(Parse_ValidWithOffsetCount_TestData))]
+        public static void Parse_Span(string inputString, int offset, int count, IFormatProvider provider, TimeSpan expected)
+        {
+            ReadOnlySpan<char> input = inputString.AsSpan(offset, count);
             TimeSpan result;
 
             Assert.Equal(expected, TimeSpan.Parse(input, provider));
@@ -125,7 +141,7 @@ namespace System.Tests
             // Also negate
             if (!char.IsWhiteSpace(input[0]))
             {
-                input = ("-" + inputString).AsSpan();
+                input = ("-" + inputString.Substring(offset, count)).AsSpan();
                 expected = -expected;
 
                 Assert.Equal(expected, TimeSpan.Parse(input, provider));
@@ -213,22 +229,22 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(ToString_MemberData))]
-        public static void TryFormat_Valid(TimeSpan input, string format, string expected)
+        public static void TryFormat_Valid(TimeSpan input, string format, CultureInfo info, string expected)
         {
             int charsWritten;
             Span<char> dst;
 
             dst = new char[expected.Length - 1];
-            Assert.False(input.TryFormat(dst, out charsWritten, format, CultureInfo.InvariantCulture));
+            Assert.False(input.TryFormat(dst, out charsWritten, format, info));
             Assert.Equal(0, charsWritten);
 
             dst = new char[expected.Length];
-            Assert.True(input.TryFormat(dst, out charsWritten, format, CultureInfo.InvariantCulture));
+            Assert.True(input.TryFormat(dst, out charsWritten, format, info));
             Assert.Equal(expected.Length, charsWritten);
             Assert.Equal(expected, new string(dst));
 
             dst = new char[expected.Length + 1];
-            Assert.True(input.TryFormat(dst, out charsWritten, format, CultureInfo.InvariantCulture));
+            Assert.True(input.TryFormat(dst, out charsWritten, format, info));
             Assert.Equal(expected.Length, charsWritten);
             Assert.Equal(expected, new string(dst.Slice(0, dst.Length - 1)));
             Assert.Equal(0, dst[dst.Length - 1]);

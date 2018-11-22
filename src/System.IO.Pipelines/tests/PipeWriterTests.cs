@@ -1,5 +1,6 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System.Buffers;
 using System.Collections.Generic;
@@ -77,18 +78,6 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void CanWriteEmpty()
-        {
-            PipeWriter writer = Pipe.Writer;
-            var array = new byte[] { };
-
-            writer.Write(array);
-            writer.Write(new Span<byte>(array, 0, array.Length));
-
-            Assert.Equal(array, Read());
-        }
-
-        [Fact]
         public void CanWriteIntoHeadlessBuffer()
         {
             PipeWriter writer = Pipe.Writer;
@@ -130,6 +119,8 @@ namespace System.IO.Pipelines.Tests
             var span = writer.GetSpan(10);
 
             Assert.True(span.Length >= 10);
+            // 0 byte Flush would not complete the reader so we complete.
+            Pipe.Writer.Complete();
             Assert.Equal(new byte[] { }, Read());
         }
 

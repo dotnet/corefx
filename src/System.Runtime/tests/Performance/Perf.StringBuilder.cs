@@ -65,16 +65,16 @@ namespace System.Tests
         public const int NUM_ITERS_APPEND = 1000;
         public const int NUM_ITERS_TOSTRING = 1000;
 
-        public static String s1 = "12345";
-        public static String s2 = "1234567890";
-        public static String s3 = "1234567890abcde";
-        public static String s4 = "1234567890abcdefghij";
-        public static String s5 = "1234567890abcdefghijklmno";
-        public static String s6 = "1234567890abcdefghijklmnopqrst";
-        public static String s7 = "1234567890abcdefghijklmnopqrstuvwxy";
-        public static String s8 = "1234567890abcdefghijklmnopqrstuvwxyzABCD";
-        public static String s9 = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHI";
-        public static String s10 = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN";
+        public static string s1 = "12345";
+        public static string s2 = "1234567890";
+        public static string s3 = "1234567890abcde";
+        public static string s4 = "1234567890abcdefghij";
+        public static string s5 = "1234567890abcdefghijklmno";
+        public static string s6 = "1234567890abcdefghijklmnopqrst";
+        public static string s7 = "1234567890abcdefghijklmnopqrstuvwxy";
+        public static string s8 = "1234567890abcdefghijklmnopqrstuvwxyzABCD";
+        public static string s9 = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHI";
+        public static string s10 = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMN";
 
         [Benchmark]
         public static void StringConcat()
@@ -142,6 +142,48 @@ namespace System.Tests
                 {
                     sb.ToString();
                 }
+            }
+        }
+
+        [Benchmark(InnerIterationCount = 1000)]
+        [InlineData(20)]
+        [InlineData(200)]
+        [InlineData(1000)]
+        public void AppendMemoryAsMemory(int length)
+        {
+            PerfUtils utils = new PerfUtils();
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                // Setup - Create a string of the specified length
+                string builtString = utils.CreateString(length);
+                ReadOnlyMemory<char> memory = builtString.AsMemory();
+                StringBuilder empty = new StringBuilder();
+
+                // Actual perf testing
+                using (iteration.StartMeasurement())
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                        empty.Append(memory); // Appends a string of length "length" to an increasingly large StringBuilder
+            }
+        }
+
+        [Benchmark(InnerIterationCount = 1000)]
+        [InlineData(20)]
+        [InlineData(200)]
+        [InlineData(1000)]
+        public void AppendMemoryAsObject(int length)
+        {
+            PerfUtils utils = new PerfUtils();
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                // Setup - Create a string of the specified length
+                string builtString = utils.CreateString(length);
+                object memoryObject = builtString.AsMemory(); // deliberately uses object to force use of memory.ToString() for comparison to AppendAsReadOnlyMemory
+                StringBuilder empty = new StringBuilder();
+
+                // Actual perf testing
+                using (iteration.StartMeasurement())
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                        empty.Append(memoryObject); 
             }
         }
     }

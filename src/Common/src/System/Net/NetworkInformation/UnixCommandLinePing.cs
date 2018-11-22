@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System.Net.NetworkInformation
@@ -16,6 +18,7 @@ namespace System.Net.NetworkInformation
 
         private static readonly string s_discoveredPing4UtilityPath = GetPingUtilityPath(ipv4: true);
         private static readonly string s_discoveredPing6UtilityPath = GetPingUtilityPath(ipv4: false);
+        private static readonly bool s_isOSX = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
         // We don't want to pick up an arbitrary or malicious ping
         // command, so that's why we do the path probing ourselves.
@@ -50,8 +53,9 @@ namespace System.Net.NetworkInformation
         /// <param name="packetSize">The packet size to use in the ping. Exact packet payload cannot be specified.</param>
         /// <param name="address">A string representation of the IP address to ping.</param>
         /// <returns>The constructed command line arguments, which can be passed to ping or ping6.</returns>
-        public static string ConstructCommandLine(int packetSize, string address, bool ipv4)
+        public static string ConstructCommandLine(int packetSize, string address, bool ipv4, int ttl = 0)
         {
+
             StringBuilder sb = new StringBuilder();
             sb.Append("-c 1"); // Just send a single ping ("count = 1")
 
@@ -60,6 +64,22 @@ namespace System.Net.NetworkInformation
 
             // The ping utility is not flexible enough to specify an exact payload.
             // But we can at least send the right number of bytes.
+
+            if (ttl > 0)
+            {
+                if (!ipv4 && s_isOSX)
+                {
+                    // OSX uses -h to set hop limit for IPv6
+                    sb.Append(" -h ");
+                }
+                else
+                {
+                    // Linux uses -t ttl for both IPv4 & IPv6
+                    sb.Append(" -t ");
+                }
+
+                sb.Append(ttl);
+            }
 
             // ping and ping6 do not report timing information unless at least 16 bytes are sent.
             if (packetSize < 16)
@@ -88,7 +108,7 @@ namespace System.Net.NetworkInformation
             int msIndex = pingOutput.IndexOf("ms", afterTime);
             int numLength = msIndex - afterTime - 1;
             string timeSubstring = pingOutput.Substring(afterTime, numLength);
-            double parsedRtt = double.Parse(timeSubstring);
+            double parsedRtt = double.Parse(timeSubstring, CultureInfo.InvariantCulture);
             return (long)Math.Round(parsedRtt);
         }
     }

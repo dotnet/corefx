@@ -47,7 +47,7 @@ namespace System.SpanTests
         [Fact]
         public static unsafe void CastSpanOverflow()
         {
-            Span<TestHelpers.TestStructExplicit> span = new Span<TestHelpers.TestStructExplicit>(null, Int32.MaxValue);
+            Span<TestHelpers.TestStructExplicit> span = new Span<TestHelpers.TestStructExplicit>(null, int.MaxValue);
 
             TestHelpers.AssertThrows<OverflowException, TestHelpers.TestStructExplicit>(span, (_span) => MemoryMarshal.Cast<TestHelpers.TestStructExplicit, byte>(_span).DontBox());
             TestHelpers.AssertThrows<OverflowException, TestHelpers.TestStructExplicit>(span, (_span) => MemoryMarshal.Cast<TestHelpers.TestStructExplicit, ulong>(_span).DontBox());
@@ -57,14 +57,14 @@ namespace System.SpanTests
         public static void CastSpanToTypeContainsReferences()
         {
             Span<uint> span = new Span<uint>(Array.Empty<uint>());
-            TestHelpers.AssertThrows<ArgumentException, uint>(span, (_span) => MemoryMarshal.Cast<uint, SpanTests.StructWithReferences>(_span).DontBox());
+            TestHelpers.AssertThrows<ArgumentException, uint>(span, (_span) => MemoryMarshal.Cast<uint, TestHelpers.StructWithReferences>(_span).DontBox());
         }
 
         [Fact]
         public static void CastSpanFromTypeContainsReferences()
         {
-            Span<SpanTests.StructWithReferences> span = new Span<SpanTests.StructWithReferences>(Array.Empty<SpanTests.StructWithReferences>());
-            TestHelpers.AssertThrows<ArgumentException, SpanTests.StructWithReferences>(span, (_span) => MemoryMarshal.Cast<SpanTests.StructWithReferences, uint>(_span).DontBox());
+            Span<TestHelpers.StructWithReferences> span = new Span<TestHelpers.StructWithReferences>(Array.Empty<TestHelpers.StructWithReferences>());
+            TestHelpers.AssertThrows<ArgumentException, TestHelpers.StructWithReferences>(span, (_span) => MemoryMarshal.Cast<TestHelpers.StructWithReferences, uint>(_span).DontBox());
         }
     }
 }

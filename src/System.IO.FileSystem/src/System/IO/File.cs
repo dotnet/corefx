@@ -2,19 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+#if MS_IO_REDIST
+namespace Microsoft.IO
+#else
 namespace System.IO
+#endif
 {
     // Class for creating FileStream objects, and some basic file management
     // routines such as Delete, etc.
     public static class File
     {
+        private const int MaxByteArrayLength = 0x7FFFFFC7;
         private static Encoding s_UTF8NoBOM;
 
         internal const int DefaultBufferSize = 4096;
@@ -324,7 +331,17 @@ namespace System.IO
             {
                 long fileLength = fs.Length;
                 if (fileLength > int.MaxValue)
+                {
                     throw new IOException(SR.IO_FileTooLong2GB);
+                }
+                else if (fileLength == 0)
+                {
+#if !MS_IO_REDIST
+                    // Some file systems (e.g. procfs on Linux) return 0 for length even when there's content.
+                    // Thus we need to assume 0 doesn't mean empty.
+                    return ReadAllBytesUnknownLength(fs);
+#endif
+                }
 
                 int index = 0;
                 int count = (int)fileLength;
@@ -340,6 +357,52 @@ namespace System.IO
                 return bytes;
             }
         }
+
+#if !MS_IO_REDIST
+        private static byte[] ReadAllBytesUnknownLength(FileStream fs)
+        {
+            byte[] rentedArray = null;
+            Span<byte> buffer = stackalloc byte[512];
+            try
+            {
+                int bytesRead = 0;
+                while (true)
+                {
+                    if (bytesRead == buffer.Length)
+                    {
+                        uint newLength = (uint)buffer.Length * 2;
+                        if (newLength > MaxByteArrayLength)
+                        {
+                            newLength = (uint)Math.Max(MaxByteArrayLength, buffer.Length + 1);
+                        }
+
+                        byte[] tmp = ArrayPool<byte>.Shared.Rent((int)newLength);
+                        buffer.CopyTo(tmp);
+                        if (rentedArray != null)
+                        {
+                            ArrayPool<byte>.Shared.Return(rentedArray);
+                        }
+                        buffer = rentedArray = tmp;
+                    }
+
+                    Debug.Assert(bytesRead < buffer.Length);
+                    int n = fs.Read(buffer.Slice(bytesRead));
+                    if (n == 0)
+                    {
+                        return buffer.Slice(0, bytesRead).ToArray();
+                    }
+                    bytesRead += n;
+                }
+            }
+            finally
+            {
+                if (rentedArray != null)
+                {
+                    ArrayPool<byte>.Shared.Return(rentedArray);
+                }
+            }
+        }
+#endif
 
         public static void WriteAllBytes(string path, byte[] bytes)
         {
@@ -557,6 +620,11 @@ namespace System.IO
         // 
         public static void Move(string sourceFileName, string destFileName)
         {
+            Move(sourceFileName, destFileName, false);
+        }
+
+        public static void Move(string sourceFileName, string destFileName, bool overwrite)
+        {
             if (sourceFileName == null)
                 throw new ArgumentNullException(nameof(sourceFileName), SR.ArgumentNull_FileName);
             if (destFileName == null)
@@ -574,33 +642,17 @@ namespace System.IO
                 throw new FileNotFoundException(SR.Format(SR.IO_FileNotFound_FileName, fullSourceFileName), fullSourceFileName);
             }
 
-            FileSystem.MoveFile(fullSourceFileName, fullDestFileName);
+            FileSystem.MoveFile(fullSourceFileName, fullDestFileName, overwrite);
         }
 
         public static void Encrypt(string path)
         {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-
-            // TODO: Not supported on Unix or in WinRt, and the EncryptFile API isn't currently
-            // available in OneCore.  For now, we just throw PNSE everywhere.  When the API is
-            // available, we can put this into the FileSystem abstraction and implement it
-            // properly for Win32.
-
-            throw new PlatformNotSupportedException(SR.PlatformNotSupported_FileEncryption);
+            FileSystem.Encrypt(path ?? throw new ArgumentNullException(nameof(path)));
         }
 
         public static void Decrypt(string path)
         {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-
-            // TODO: Not supported on Unix or in WinRt, and the EncryptFile API isn't currently
-            // available in OneCore.  For now, we just throw PNSE everywhere.  When the API is
-            // available, we can put this into the FileSystem abstraction and implement it
-            // properly for Win32.
-
-            throw new PlatformNotSupportedException(SR.PlatformNotSupported_FileEncryption);
+            FileSystem.Decrypt(path ?? throw new ArgumentNullException(nameof(path)));
         }
 
         // UTF-8 without BOM and with error detection. Same as the default encoding for StreamWriter.
@@ -657,7 +709,11 @@ namespace System.IO
                 StringBuilder sb = new StringBuilder();
                 for (;;)
                 {
+#if MS_IO_REDIST
+                    int read = await sr.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+#else
                     int read = await sr.ReadAsync(new Memory<char>(buffer), cancellationToken).ConfigureAwait(false);
+#endif
                     if (read == 0)
                     {
                         return sb.ToString();
@@ -709,31 +765,23 @@ namespace System.IO
                 return Task.FromCanceled<byte[]>(cancellationToken);
             }
 
-            FileStream fs = new FileStream(
-                path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize,
+            var fs = new FileStream(
+                path, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1, // bufferSize == 1 used to avoid unnecessary buffer in FileStream
                 FileOptions.Asynchronous | FileOptions.SequentialScan);
 
             bool returningInternalTask = false;
             try
             {
                 long fileLength = fs.Length;
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    return Task.FromCanceled<byte[]>(cancellationToken);
-                }
-
                 if (fileLength > int.MaxValue)
                 {
                     return Task.FromException<byte[]>(new IOException(SR.IO_FileTooLong2GB));
                 }
 
-                if (fileLength == 0)
-                {
-                    return Task.FromResult(Array.Empty<byte>());
-                }
-
                 returningInternalTask = true;
-                return InternalReadAllBytesAsync(fs, (int)fileLength, cancellationToken);
+                return fileLength > 0 ?
+                    InternalReadAllBytesAsync(fs, (int)fileLength, cancellationToken) :
+                    InternalReadAllBytesUnknownLengthAsync(fs, cancellationToken);
             }
             finally
             {
@@ -752,7 +800,11 @@ namespace System.IO
                 byte[] bytes = new byte[count];
                 do
                 {
+#if MS_IO_REDIST
+                    int n = await fs.ReadAsync(bytes, index, count - index, cancellationToken).ConfigureAwait(false);
+#else
                     int n = await fs.ReadAsync(new Memory<byte>(bytes, index, count - index), cancellationToken).ConfigureAwait(false);
+#endif
                     if (n == 0)
                     {
                         throw Error.GetEndOfFile();
@@ -762,6 +814,48 @@ namespace System.IO
                 } while (index < count);
 
                 return bytes;
+            }
+        }
+
+        private static async Task<byte[]> InternalReadAllBytesUnknownLengthAsync(FileStream fs, CancellationToken cancellationToken)
+        {
+            byte[] rentedArray = ArrayPool<byte>.Shared.Rent(512);
+            try
+            {
+                int bytesRead = 0;
+                while (true)
+                {
+                    if (bytesRead == rentedArray.Length)
+                    {
+                        uint newLength = (uint)rentedArray.Length * 2;
+                        if (newLength > MaxByteArrayLength)
+                        {
+                            newLength = (uint)Math.Max(MaxByteArrayLength, rentedArray.Length + 1);
+                        }
+
+                        byte[] tmp = ArrayPool<byte>.Shared.Rent((int)newLength);
+                        Buffer.BlockCopy(rentedArray, 0, tmp, 0, bytesRead);
+                        ArrayPool<byte>.Shared.Return(rentedArray);
+                        rentedArray = tmp;
+                    }
+
+                    Debug.Assert(bytesRead < rentedArray.Length);
+#if MS_IO_REDIST
+                    int n = await fs.ReadAsync(rentedArray, bytesRead, rentedArray.Length - bytesRead, cancellationToken).ConfigureAwait(false);
+#else
+                    int n = await fs.ReadAsync(rentedArray.AsMemory(bytesRead), cancellationToken).ConfigureAwait(false);
+#endif
+                    if (n == 0)
+                    {
+                        return rentedArray.AsSpan(0, bytesRead).ToArray();
+                    }
+                    bytesRead += n;
+                }
+            }
+            finally
+            {
+                fs.Dispose();
+                ArrayPool<byte>.Shared.Return(rentedArray);
             }
         }
 
@@ -786,7 +880,11 @@ namespace System.IO
 
             using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous | FileOptions.SequentialScan))
             {
+#if MS_IO_REDIST
+                await fs.WriteAsync(bytes, 0, bytes.Length, cancellationToken).ConfigureAwait(false);
+#else
                 await fs.WriteAsync(new ReadOnlyMemory<byte>(bytes), cancellationToken).ConfigureAwait(false);
+#endif
                 await fs.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
         }
@@ -879,7 +977,11 @@ namespace System.IO
                 {
                     int batchSize = Math.Min(DefaultBufferSize, count - index);
                     contents.CopyTo(index, buffer, 0, batchSize);
+#if MS_IO_REDIST
+                    await sw.WriteAsync(buffer, 0, batchSize).ConfigureAwait(false);
+#else
                     await sw.WriteAsync(new ReadOnlyMemory<char>(buffer, 0, batchSize), cancellationToken).ConfigureAwait(false);
+#endif
                     index += batchSize;
                 }
 

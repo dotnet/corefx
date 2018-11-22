@@ -14,8 +14,8 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "dotnet/corefx #20010")]
-    public class HttpClientHandler_MaxConnectionsPerServer_Test : HttpClientTestBase
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP connection management behavior is different due to WinRT")]
+    public abstract class HttpClientHandler_MaxConnectionsPerServer_Test : HttpClientTestBase
     {
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "MaxConnectionsPerServer either returns two or int.MaxValue depending if ctor of HttpClientHandlerTest executed first. Disabling cause of random xunit execution order.")]
@@ -30,6 +30,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NETFX doesn't throw on invalid values")]
         public void Set_InvalidValues_Throws(int invalidValue)
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())

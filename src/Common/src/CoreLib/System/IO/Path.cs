@@ -6,7 +6,14 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#if MS_IO_REDIST
+using System;
+using System.IO;
+
+namespace Microsoft.IO
+#else
 namespace System.IO
+#endif
 {
     // Provides methods for processing file system strings in a cross-platform manner.
     // Most of the methods don't do a complete parsing (such as examining a UNC hostname), 
@@ -79,10 +86,10 @@ namespace System.IO
         /// </remarks>
         public static string GetDirectoryName(string path)
         {
-            if (path == null || PathInternal.IsEffectivelyEmpty(path))
+            if (path == null || PathInternal.IsEffectivelyEmpty(path.AsSpan()))
                 return null;
 
-            int end = GetDirectoryNameOffset(path);
+            int end = GetDirectoryNameOffset(path.AsSpan());
             return end >= 0 ? PathInternal.NormalizeDirectorySeparators(path.Substring(0, end)) : null;
         }
 
@@ -130,7 +137,7 @@ namespace System.IO
             if (path == null)
                 return null;
 
-            return new string(GetExtension(path.AsSpan()));
+            return GetExtension(path.AsSpan()).ToString();
         }
 
         /// <summary>
@@ -173,7 +180,7 @@ namespace System.IO
             if (path.Length == result.Length)
                 return path;
 
-            return new string(result);
+            return result.ToString();
         }
 
         /// <summary>
@@ -204,7 +211,7 @@ namespace System.IO
             if (path.Length == result.Length)
                 return path;
 
-            return new string(result);
+            return result.ToString();
         }
 
         /// <summary>
@@ -388,9 +395,9 @@ namespace System.IO
         public static string Join(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2)
         {
             if (path1.Length == 0)
-                return new string(path2);
+                return path2.ToString();
             if (path2.Length == 0)
-                return new string(path1);
+                return path1.ToString();
 
             return JoinInternal(path1, path2);
         }
@@ -407,6 +414,16 @@ namespace System.IO
                 return Join(path1, path2);
 
             return JoinInternal(path1, path2, path3);
+        }
+
+        public static string Join(string path1, string path2)
+        {
+            return Join(path1.AsSpan(), path2.AsSpan());
+        }
+
+        public static string Join(string path1, string path2, string path3)
+        {
+            return Join(path1.AsSpan(), path2.AsSpan(), path3.AsSpan());
         }
 
         public static bool TryJoin(ReadOnlySpan<char> path1, ReadOnlySpan<char> path2, Span<char> destination, out int charsWritten)
@@ -488,7 +505,7 @@ namespace System.IO
             if (IsPathRooted(second.AsSpan()))
                 return second;
 
-            return JoinInternal(first, second);
+            return JoinInternal(first.AsSpan(), second.AsSpan());
         }
 
         private static string CombineInternal(string first, string second, string third)
@@ -505,7 +522,7 @@ namespace System.IO
             if (IsPathRooted(second.AsSpan()))
                 return CombineInternal(second, third);
 
-            return JoinInternal(first, second, third);
+            return JoinInternal(first.AsSpan(), second.AsSpan(), third.AsSpan());
         }
 
         private static string CombineInternal(string first, string second, string third, string fourth)
@@ -526,7 +543,7 @@ namespace System.IO
             if (IsPathRooted(second.AsSpan()))
                 return CombineInternal(second, third, fourth);
 
-            return JoinInternal(first, second, third, fourth);
+            return JoinInternal(first.AsSpan(), second.AsSpan(), third.AsSpan(), fourth.AsSpan());
         }
 
         private static unsafe string JoinInternal(ReadOnlySpan<char> first, ReadOnlySpan<char> second)
@@ -538,7 +555,11 @@ namespace System.IO
 
             fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second))
             {
+#if MS_IO_REDIST
+                return StringExtensions.Create(
+#else
                 return string.Create(
+#endif
                     first.Length + second.Length + (hasSeparator ? 0 : 1),
                     (First: (IntPtr)f, FirstLength: first.Length, Second: (IntPtr)s, SecondLength: second.Length, HasSeparator: hasSeparator),
                     (destination, state) =>
@@ -562,7 +583,11 @@ namespace System.IO
 
             fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second), t = &MemoryMarshal.GetReference(third))
             {
+#if MS_IO_REDIST
+                return StringExtensions.Create(
+#else
                 return string.Create(
+#endif
                     first.Length + second.Length + third.Length + (firstHasSeparator ? 0 : 1) + (thirdHasSeparator ? 0 : 1),
                     (First: (IntPtr)f, FirstLength: first.Length, Second: (IntPtr)s, SecondLength: second.Length,
                         Third: (IntPtr)t, ThirdLength: third.Length, FirstHasSeparator: firstHasSeparator, ThirdHasSeparator: thirdHasSeparator),
@@ -592,7 +617,12 @@ namespace System.IO
 
             fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second), t = &MemoryMarshal.GetReference(third), u = &MemoryMarshal.GetReference(fourth))
             {
+
+#if MS_IO_REDIST
+                return StringExtensions.Create(
+#else
                 return string.Create(
+#endif
                     first.Length + second.Length + third.Length + fourth.Length + (firstHasSeparator ? 0 : 1) + (thirdHasSeparator ? 0 : 1) + (fourthHasSeparator ? 0 : 1),
                     (First: (IntPtr)f, FirstLength: first.Length, Second: (IntPtr)s, SecondLength: second.Length,
                         Third: (IntPtr)t, ThirdLength: third.Length, Fourth: (IntPtr)u, FourthLength:fourth.Length,
@@ -687,7 +717,7 @@ namespace System.IO
         private static string GetRelativePath(string relativeTo, string path, StringComparison comparisonType)
         {
             if (string.IsNullOrEmpty(relativeTo)) throw new ArgumentNullException(nameof(relativeTo));
-            if (PathInternal.IsEffectivelyEmpty(path)) throw new ArgumentNullException(nameof(path));
+            if (PathInternal.IsEffectivelyEmpty(path.AsSpan())) throw new ArgumentNullException(nameof(path));
             Debug.Assert(comparisonType == StringComparison.Ordinal || comparisonType == StringComparison.OrdinalIgnoreCase);
 
             relativeTo = GetFullPath(relativeTo);
@@ -705,10 +735,10 @@ namespace System.IO
 
             // Trailing separators aren't significant for comparison
             int relativeToLength = relativeTo.Length;
-            if (PathInternal.EndsInDirectorySeparator(relativeTo))
+            if (PathInternal.EndsInDirectorySeparator(relativeTo.AsSpan()))
                 relativeToLength--;
 
-            bool pathEndsInSeparator = PathInternal.EndsInDirectorySeparator(path);
+            bool pathEndsInSeparator = PathInternal.EndsInDirectorySeparator(path.AsSpan());
             int pathLength = path.Length;
             if (pathEndsInSeparator)
                 pathLength--;
@@ -731,13 +761,14 @@ namespace System.IO
             // Add parent segments for segments past the common on the "from" path
             if (commonLength < relativeToLength)
             {
-                sb.Append(PathInternal.ParentDirectoryPrefix);
+                sb.Append("..");
 
-                for (int i = commonLength; i < relativeToLength; i++)
+                for (int i = commonLength + 1; i < relativeToLength; i++)
                 {
                     if (PathInternal.IsDirectorySeparator(relativeTo[i]))
                     {
-                        sb.Append(PathInternal.ParentDirectoryPrefix);
+                        sb.Append(DirectorySeparatorChar);
+                        sb.Append("..");
                     }
                 }
             }
@@ -749,11 +780,20 @@ namespace System.IO
             }
 
             // Now add the rest of the "to" path, adding back the trailing separator
-            int count = pathLength - commonLength;
+            int differenceLength = pathLength - commonLength;
             if (pathEndsInSeparator)
-                count++;
+                differenceLength++;
 
-            sb.Append(path, commonLength, count);
+            if (differenceLength > 0)
+            {
+                if (sb.Length > 0)
+                {
+                    sb.Append(DirectorySeparatorChar);
+                }
+
+                sb.Append(path, commonLength, differenceLength);
+            }
+
             return StringBuilderCache.GetStringAndRelease(sb);
         }
 

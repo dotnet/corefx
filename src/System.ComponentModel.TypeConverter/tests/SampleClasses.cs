@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
-using Xunit;
 
 namespace System.ComponentModel.Tests
 {
@@ -35,6 +34,20 @@ namespace System.ComponentModel.Tests
         Option1 = 1,
         Option2 = 2,
         Option3 = 4
+    }
+
+    [Flags]
+    public enum ULongFlagsEnum : ulong
+    {
+        Bit62 = 1UL << 62,
+        Bit63 = 1UL << 63
+    }
+
+    [Flags]
+    public enum LongFlagsEnum : long
+    {
+        Bit62 = 1L << 62,
+        Bit63 = 1L << 63
     }
 
     public class FormattableClass : IFormattable
@@ -83,9 +96,9 @@ namespace System.ComponentModel.Tests
     }
 
 #if FUNCTIONAL_TESTS
-    [TypeConverter("System.ComponentModel.Tests.BaseClassConverter, System.ComponentModel.TypeConverter.Tests, Version=9.9.9.9, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb")]
+    [TypeConverter("System.ComponentModel.Tests.BaseClassConverter, System.ComponentModel.TypeConverter.Tests, Version=9.9.9.9, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #elif PERFORMANCE_TESTS
-    [TypeConverter("System.ComponentModel.Tests.BaseClassConverter, System.ComponentModel.TypeConverter.Performance.Tests, Version=9.9.9.9, Culture=neutral, PublicKeyToken=9d77cc7ad39b68eb")]
+    [TypeConverter("System.ComponentModel.Tests.BaseClassConverter, System.ComponentModel.TypeConverter.Performance.Tests, Version=9.9.9.9, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #else
 #error Define FUNCTIONAL_TESTS or PERFORMANCE_TESTS
 #endif

@@ -49,7 +49,7 @@ namespace Microsoft.Test.Data.SqlClient
             hostName = hostName.Trim();
 
             if ((hostName == ".") ||
-                 (String.Compare("(local)", hostName, StringComparison.OrdinalIgnoreCase) == 0))
+                 (string.Compare("(local)", hostName, StringComparison.OrdinalIgnoreCase) == 0))
             {
                 hostName = Dns.GetHostName();
             }
@@ -205,21 +205,5 @@ namespace Microsoft.Test.Data.SqlClient
 
             return sb;
         }
-
-        // 
-        private const string TcpParametersKeyInRegistry = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters";
-        private const string MaxUserPortName = @"MaxUserPort";
-
-        // according to Win2003 articles, the default max user port value is 5K
-        // according to http://support.microsoft.com/kb/929851, this default had been changed to 16K starting from Vista
-        private const int MaxUserPortDefaultValuePriorToVista = 5000;
-        private const int MaxUserPortDefaultValueAfterVista = 16384;
-
-        private const string TcpTimedWaitDelayName = @"TcpTimedWaitDelay";
-        // according to http://msdn.microsoft.com/en-us/library/ms819739.aspx and http://msdn.microsoft.com/en-us/library/ee377084(BTS.10).aspx, 
-        // the default value of tcp timed wait delay is 4 minutes
-        // it seems like on the Windows Server 2008 this value has been changed to 2 minutes, but I could not find an official KB article for this.
-        // to stay on the safe side, assuming that the max wait time is still 4 minutes
-        private const int TcpTimedWaitDelayDefaultValue = 240; // 4 minutes
     }
 }

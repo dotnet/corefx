@@ -1,23 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OSGroup Condition="'$(OSGroup)' == ''">Windows_NT</OSGroup>
+    <Configurations>net461-Windows_NT-Debug;net461-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
   <PropertyGroup>
     <ProjectGuid>{FB39F994-1504-4B96-9588-E0385D3B73F1}</ProjectGuid>
     <AssemblyName>System.Security.Cryptography.ProtectedData</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'netfx'">true</IsPartialFacadeAssembly>
-    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'netfx'">None</ResourcesSourceOutputDirectory>
+    <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
+    <OmitResources Condition="'$(TargetsNetFx)' == 'true'">true</OmitResources>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetGroup)' == 'netstandard' AND '$(TargetsWindows)' != 'true'">SR.PlatformNotSupported_CryptographyProtectedData</GeneratePlatformNotSupportedAssemblyMessage>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Windows_NT-Release|AnyCPU'" />
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND ('$(TargetGroup)' != 'netstandard' OR '$(TargetsWindows)' == 'true')">
     <Compile Include="System\Security\Cryptography\DataProtectionScope.cs" />
     <Compile Include="System\Security\Cryptography\ProtectedData.cs" />
@@ -39,23 +32,23 @@
     <Compile Include="$(CommonPath)\Internal\Cryptography\Windows\CryptoThrowHelper.cs">
       <Link>Internal\Cryptography\Windows\CryptoThrowHelper.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FormatMessage.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
       <Link>Internal\Windows\kernel32\Interop.FormatMessage.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System.Security" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx'">
+  <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
     <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Security.Cryptography.Primitives" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

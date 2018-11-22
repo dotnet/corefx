@@ -4,8 +4,6 @@
 
 using System.Collections.ObjectModel;
 using System.Xml;
-using System.Xml.Serialization;
-using System.Runtime.Serialization;
 using System.Globalization;
 
 namespace System.ServiceModel.Syndication
@@ -17,7 +15,7 @@ namespace System.ServiceModel.Syndication
             IXmlLineInfo lineInfo = reader as IXmlLineInfo;
             if (lineInfo != null && lineInfo.HasLineInfo())
             {
-                error = String.Format(CultureInfo.InvariantCulture, "{0} {1}", SR.Format(SR.ErrorInLine, lineInfo.LineNumber, lineInfo.LinePosition), SR.Format(error));
+                error = string.Format(CultureInfo.InvariantCulture, "{0} {1}", SR.Format(SR.ErrorInLine, lineInfo.LineNumber, lineInfo.LinePosition), SR.Format(error));
             }
             return error;
         }

@@ -1,14 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
 
   <PropertyGroup>
     <TargetFrameworkName>netcoreapp</TargetFrameworkName>
-    <TargetFrameworkVersion>2.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>3.0</TargetFrameworkVersion>
     <TargetFramework>$(TargetFrameworkName)$(TargetFrameworkVersion)</TargetFramework>
 
     <RefBinDir>$(NETCoreAppPackageRefPath)</RefBinDir>
     <LibBinDir>$(NETCoreAppPackageRuntimePath)</LibBinDir>
+    <LibBinDir Condition="$(PackageTargetRuntime.EndsWith('-aot'))">$(NETCoreAppAotPackageRuntimePath)</LibBinDir>
 
     <IsFrameworkPackage>true</IsFrameworkPackage>
 
@@ -18,7 +19,9 @@
 
   <ItemGroup>
     <IgnoredReference Include="System.Private.CoreLib" />
+    <IgnoredReference Include="Windows" />
 
+    <IgnoredReference Condition="$(PackageTargetRuntime.EndsWith('-aot'))" Include="System.Private.Interop" />
     <!-- Exclude shims from the closure verification -->
     <ExcludeFromClosure Include="mscorlib" />
     <ExcludeFromClosure Include="System" />
@@ -44,6 +47,8 @@
         System.Private.Uri;
         System.Private.Xml;
         System.Private.Xml.Linq;
+        System.Runtime.WindowsRuntime;
+        System.Runtime.WindowsRuntime.UI.Xaml;
         System.Security.AccessControl;
         System.Security.Cryptography.Cng;
         System.Security.Cryptography.OpenSsl;
@@ -58,5 +63,5 @@
     </ValidatePackageSuppression>
   </ItemGroup>
 
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -14,7 +14,7 @@ namespace System.PrivateUri.Tests
     /// </summary>
     public class IriTest
     {
-        // List built based on http://msdn.microsoft.com/en-us/library/aa292086(v=vs.71).aspx
+        // List built based on https://www.microsoft.com/en-us/download/details.aspx?id=55979
         private string[] _testedLocales =
         {
             "en-us",
@@ -335,7 +335,7 @@ namespace System.PrivateUri.Tests
                     {
                         Assert.Equal(
                             0,
-                            String.CompareOrdinal(results1[i], results2[i]));
+                            string.CompareOrdinal(results1[i], results2[i]));
                     }
                 }
             }
@@ -349,37 +349,37 @@ namespace System.PrivateUri.Tests
             switch (component)
             {
                 case UriComponents.Fragment:
-                    uriString = String.Format(
+                    uriString = string.Format(
                         "http://userInfo@server:80/path/resource.ext?query=qvalue#{0}",
                         uriInput);
                     break;
                 case UriComponents.Host:
-                    uriString = String.Format(
+                    uriString = string.Format(
                         "http://userInfo@{0}:80/path/resource.ext?query=qvalue#fragment",
                         uriInput);
                     break;
                 case UriComponents.Path:
-                    uriString = String.Format(
+                    uriString = string.Format(
                         "http://userInfo@server:80/{0}/{0}/resource.ext?query=qvalue#fragment",
                         uriInput);
                     break;
                 case UriComponents.Port:
-                    uriString = String.Format(
+                    uriString = string.Format(
                         "http://userInfo@server:{0}/path/resource.ext?query=qvalue#fragment",
                         uriInput);
                     break;
                 case UriComponents.Query:
-                    uriString = String.Format(
+                    uriString = string.Format(
                         "http://userInfo@server:80/path/resource.ext?query{0}=qvalue{0}#fragment",
                         uriInput);
                     break;
                 case UriComponents.Scheme:
-                    uriString = String.Format(
+                    uriString = string.Format(
                         "{0}://userInfo@server:80/path/resource.ext?query=qvalue#fragment",
                         uriInput);
                     break;
                 case UriComponents.UserInfo:
-                    uriString = String.Format(
+                    uriString = string.Format(
                         "http://{0}@server:80/path/resource.ext?query=qvalue#fragment",
                         uriInput);
                     break;
@@ -539,6 +539,33 @@ namespace System.PrivateUri.Tests
 
             Assert.Equal(authority, fileTwoSlashes.Authority); // Two slashes must be followed by an authority
             Assert.Equal(authority, fileFourSlashes.Authority); // More than three slashes looks like a UNC share
+        }
+
+        [Theory]
+        [InlineData(@"c:/path/with/unicode/ö/test.xml")]
+        [InlineData(@"file://c:/path/with/unicode/ö/test.xml")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
+        public void Iri_WindowsPathWithUnicode_DoesRemoveScheme(string uriString)
+        {
+            var uri = new Uri(uriString);
+            Assert.False(uri.LocalPath.StartsWith("file:"));
+        }
+
+        [Theory]
+        [InlineData("http:%C3%A8")]
+        [InlineData("http:\u00E8")]
+        [InlineData("%C3%A8")]
+        [InlineData("\u00E8")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Requires fix shipping in .NET 4.7.2")]
+        public void Iri_RelativeUriCreation_ShouldNotNormalize(string uriString)
+        {
+            Uri href;
+            Uri hrefAbsolute;
+            Uri baseIri = new Uri("http://www.contoso.com");
+
+            Assert.True(Uri.TryCreate(uriString, UriKind.RelativeOrAbsolute, out href));
+            Assert.True(Uri.TryCreate(baseIri, href, out hrefAbsolute));
+            Assert.Equal("http://www.contoso.com/%C3%A8", hrefAbsolute.AbsoluteUri);
         }
     }
 }

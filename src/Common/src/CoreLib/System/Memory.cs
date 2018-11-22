@@ -8,9 +8,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
-#if !FEATURE_PORTABLE_SPAN
+
 using Internal.Runtime.CompilerServices;
-#endif // FEATURE_PORTABLE_SPAN
 
 namespace System
 {
@@ -25,17 +24,13 @@ namespace System
         // NOTE: With the current implementation, Memory<T> and ReadOnlyMemory<T> must have the same layout,
         // as code uses Unsafe.As to cast between them.
 
-        // The highest order bit of _index is used to discern whether _object is an array/string or an owned memory
-        // if (_index >> 31) == 1, object _object is an OwnedMemory<T>
-        // else, object _object is a T[] or a string. It can only be a string if the Memory<T> was created by
-        // using unsafe / marshaling code to reinterpret a ReadOnlyMemory<char> wrapped around a string as
-        // a Memory<T>.
+        // The highest order bit of _index is used to discern whether _object is a pre-pinned array.
+        // (_index < 0) => _object is a pre-pinned array, so Pin() will not allocate a new GCHandle
+        //       (else) => Pin() needs to allocate a new GCHandle to pin the object.
         private readonly object _object;
         private readonly int _index;
         private readonly int _length;
-
-        private const int RemoveOwnedFlagBitMask = 0x7FFFFFFF;
-
+        
         /// <summary>
         /// Creates a new memory over the entirety of the target array.
         /// </summary>
@@ -102,30 +97,77 @@ namespace System
             }
             if (default(T) == null && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException();
+#if BIT64
+            // See comment in Span<T>.Slice for how this works.
+            if ((ulong)(uint)start + (ulong)(uint)length > (ulong)(uint)array.Length)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+#else
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException();
+#endif
 
             _object = array;
             _index = start;
             _length = length;
         }
 
-        // Constructor for internal use only.
+        /// <summary>
+        /// Creates a new memory from a memory manager that provides specific method implementations beginning
+        /// at 0 index and ending at 'end' index (exclusive).
+        /// </summary>
+        /// <param name="manager">The memory manager.</param>
+        /// <param name="length">The number of items in the memory.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Thrown when the specified <paramref name="length"/> is negative.
+        /// </exception>
+        /// <remarks>For internal infrastructure only</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Memory(OwnedMemory<T> owner, int index, int length)
+        internal Memory(MemoryManager<T> manager, int length)
         {
-            // No validation performed; caller must provide any necessary validation.
-            _object = owner;
-            _index = index | (1 << 31); // Before using _index, check if _index < 0, then 'and' it with RemoveOwnedFlagBitMask
+            Debug.Assert(manager != null);
+
+            if (length < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+
+            _object = manager;
+            _index = 0;
+            _length = length;
+        }
+
+        /// <summary>
+        /// Creates a new memory from a memory manager that provides specific method implementations beginning
+        /// at 'start' index and ending at 'end' index (exclusive).
+        /// </summary>
+        /// <param name="manager">The memory manager.</param>
+        /// <param name="start">The index at which to begin the memory.</param>
+        /// <param name="length">The number of items in the memory.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Thrown when the specified <paramref name="start"/> or <paramref name="length"/> is negative.
+        /// </exception>
+        /// <remarks>For internal infrastructure only</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal Memory(MemoryManager<T> manager, int start, int length)
+        {
+            Debug.Assert(manager != null);
+
+            if (length < 0 || start < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+
+            _object = manager;
+            _index = start;
             _length = length;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Memory(object obj, int index, int length)
+        internal Memory(object obj, int start, int length)
         {
-            // No validation performed; caller must provide any necessary validation.
+            // No validation performed in release builds; caller must provide any necessary validation.
+
+            // 'obj is T[]' below also handles things like int[] <-> uint[] being convertible
+            Debug.Assert((obj == null) || (typeof(T) == typeof(char) && obj is string) || (obj is T[]) || (obj is MemoryManager<T>));
+
             _object = obj;
-            _index = index;
+            _index = start;
             _length = length;
         }
 
@@ -137,7 +179,7 @@ namespace System
         /// <summary>
         /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="Memory{T}"/>
         /// </summary>
-        public static implicit operator Memory<T>(ArraySegment<T> arraySegment) => new Memory<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+        public static implicit operator Memory<T>(ArraySegment<T> segment) => new Memory<T>(segment.Array, segment.Offset, segment.Count);
 
         /// <summary>
         /// Defines an implicit conversion of a <see cref="Memory{T}"/> to a <see cref="ReadOnlyMemory{T}"/>
@@ -188,6 +230,7 @@ namespace System
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
             }
 
+            // It is expected for _index + start to be negative if the memory is already pre-pinned.
             return new Memory<T>(_object, _index + start, _length - start);
         }
 
@@ -202,47 +245,103 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Memory<T> Slice(int start, int length)
         {
-            if ((uint)start > (uint)_length || (uint)length > (uint)(_length - start))
-            {
+#if BIT64
+            // See comment in Span<T>.Slice for how this works.
+            if ((ulong)(uint)start + (ulong)(uint)length > (ulong)(uint)_length)
                 ThrowHelper.ThrowArgumentOutOfRangeException();
-            }
+#else
+            if ((uint)start > (uint)_length || (uint)length > (uint)(_length - start))
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+#endif
 
+            // It is expected for _index + start to be negative if the memory is already pre-pinned.
             return new Memory<T>(_object, _index + start, length);
         }
 
         /// <summary>
         /// Returns a span from the memory.
         /// </summary>
-        public Span<T> Span
+        public unsafe Span<T> Span
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (_index < 0)
+                // This property getter has special support for returning a mutable Span<char> that wraps
+                // an immutable String instance. This is obviously a dangerous feature and breaks type safety.
+                // However, we need to handle the case where a ReadOnlyMemory<char> was created from a string
+                // and then cast to a Memory<T>. Such a cast can only be done with unsafe or marshaling code,
+                // in which case that's the dangerous operation performed by the dev, and we're just following
+                // suit here to make it work as best as possible.
+
+                ref T refToReturn = ref Unsafe.AsRef<T>(null);
+                int lengthOfUnderlyingSpan = 0;
+
+                // Copy this field into a local so that it can't change out from under us mid-operation.
+
+                object tmpObject = _object;
+                if (tmpObject != null)
                 {
-                    return ((OwnedMemory<T>)_object).Span.Slice(_index & RemoveOwnedFlagBitMask, _length);
-                }
-                else if (typeof(T) == typeof(char) && _object is string s)
-                {
-                    // This is dangerous, returning a writable span for a string that should be immutable.
-                    // However, we need to handle the case where a ReadOnlyMemory<char> was created from a string
-                    // and then cast to a Memory<T>. Such a cast can only be done with unsafe or marshaling code,
-                    // in which case that's the dangerous operation performed by the dev, and we're just following
-                    // suit here to make it work as best as possible.
-#if FEATURE_PORTABLE_SPAN
-                    return new Span<T>(Unsafe.As<Pinnable<T>>(s), MemoryExtensions.StringAdjustment, s.Length).Slice(_index, _length);
+                    if (typeof(T) == typeof(char) && tmpObject.GetType() == typeof(string))
+                    {
+                        // Special-case string since it's the most common for ROM<char>.
+
+                        refToReturn = ref Unsafe.As<char, T>(ref Unsafe.As<string>(tmpObject).GetRawStringData());
+                        lengthOfUnderlyingSpan = Unsafe.As<string>(tmpObject).Length;
+                    }
+                    else if (RuntimeHelpers.ObjectHasComponentSize(tmpObject))
+                    {
+                        // We know the object is not null, it's not a string, and it is variable-length. The only
+                        // remaining option is for it to be a T[] (or a U[] which is blittable to T[], like int[]
+                        // and uint[]). Otherwise somebody used private reflection to set this field, and we're not
+                        // too worried about type safety violations at this point.
+
+                        // 'tmpObject is T[]' below also handles things like int[] <-> uint[] being convertible
+                        Debug.Assert(tmpObject is T[]);
+
+                        refToReturn = ref Unsafe.As<byte, T>(ref Unsafe.As<T[]>(tmpObject).GetRawSzArrayData());
+                        lengthOfUnderlyingSpan = Unsafe.As<T[]>(tmpObject).Length;
+                    }
+                    else
+                    {
+                        // We know the object is not null, and it's not variable-length, so it must be a MemoryManager<T>.
+                        // Otherwise somebody used private reflection to set this field, and we're not too worried about
+                        // type safety violations at that point. Note that it can't be a MemoryManager<U>, even if U and
+                        // T are blittable (e.g., MemoryManager<int> to MemoryManager<uint>), since there exists no
+                        // constructor or other public API which would allow such a conversion.
+
+                        Debug.Assert(tmpObject is MemoryManager<T>);
+                        Span<T> memoryManagerSpan = Unsafe.As<MemoryManager<T>>(tmpObject).GetSpan();
+                        refToReturn = ref MemoryMarshal.GetReference(memoryManagerSpan);
+                        lengthOfUnderlyingSpan = memoryManagerSpan.Length;
+                    }
+
+                    // If the Memory<T> or ReadOnlyMemory<T> instance is torn, this property getter has undefined behavior.
+                    // We try to detect this condition and throw an exception, but it's possible that a torn struct might
+                    // appear to us to be valid, and we'll return an undesired span. Such a span is always guaranteed at
+                    // least to be in-bounds when compared with the original Memory<T> instance, so using the span won't
+                    // AV the process.
+
+                    int desiredStartIndex = _index & ReadOnlyMemory<T>.RemoveFlagsBitMask;
+                    int desiredLength = _length;
+
+#if BIT64
+                    // See comment in Span<T>.Slice for how this works.
+                    if ((ulong)(uint)desiredStartIndex + (ulong)(uint)desiredLength > (ulong)(uint)lengthOfUnderlyingSpan)
+                    {
+                        ThrowHelper.ThrowArgumentOutOfRangeException();
+                    }
 #else
-                    return new Span<T>(ref Unsafe.As<char, T>(ref s.GetRawStringData()), s.Length).Slice(_index, _length);
-#endif // FEATURE_PORTABLE_SPAN
+                    if ((uint)desiredStartIndex > (uint)lengthOfUnderlyingSpan || (uint)desiredLength > (uint)(lengthOfUnderlyingSpan - desiredStartIndex))
+                    {
+                        ThrowHelper.ThrowArgumentOutOfRangeException();
+                    }
+#endif
+                    
+                    refToReturn = ref Unsafe.Add(ref refToReturn, desiredStartIndex);
+                    lengthOfUnderlyingSpan = desiredLength;
                 }
-                else if (_object != null)
-                {
-                    return new Span<T>((T[])_object, _index, _length);
-                }
-                else
-                {
-                    return default;
-                }
+
+                return new Span<T>(ref refToReturn, lengthOfUnderlyingSpan);
             }
         }
 
@@ -270,53 +369,61 @@ namespace System
         public bool TryCopyTo(Memory<T> destination) => Span.TryCopyTo(destination.Span);
 
         /// <summary>
-        /// Returns a handle for the array.
-        /// <param name="pin">If pin is true, the GC will not move the array and hence its address can be taken</param>
+        /// Creates a handle for the memory.
+        /// The GC will not move the memory until the returned <see cref="MemoryHandle"/>
+        /// is disposed, enabling taking and using the memory's address.
+        /// <exception cref="System.ArgumentException">
+        /// An instance with nonprimitive (non-blittable) members cannot be pinned.
+        /// </exception>
         /// </summary>
-        public unsafe MemoryHandle Retain(bool pin = false)
+        public unsafe MemoryHandle Pin()
         {
-            MemoryHandle memoryHandle = default;
-            if (pin)
+            // Just like the Span property getter, we have special support for a mutable Memory<char>
+            // that wraps an immutable String instance. This might happen if a caller creates an
+            // immutable ROM<char> wrapping a String, then uses Unsafe.As to create a mutable M<char>.
+            // This needs to work, however, so that code that uses a single Memory<char> field to store either
+            // a readable ReadOnlyMemory<char> or a writable Memory<char> can still be pinned and
+            // used for interop purposes.
+
+            // It's possible that the below logic could result in an AV if the struct
+            // is torn. This is ok since the caller is expecting to use raw pointers,
+            // and we're not required to keep this as safe as the other Span-based APIs.
+
+            object tmpObject = _object;
+            if (tmpObject != null)
             {
-                if (_index < 0)
+                if (typeof(T) == typeof(char) && tmpObject is string s)
                 {
-                    memoryHandle = ((OwnedMemory<T>)_object).Pin((_index & RemoveOwnedFlagBitMask) * Unsafe.SizeOf<T>());
+                    GCHandle handle = GCHandle.Alloc(tmpObject, GCHandleType.Pinned);
+                    ref char stringData = ref Unsafe.Add(ref s.GetRawStringData(), _index);
+                    return new MemoryHandle(Unsafe.AsPointer(ref stringData), handle);
                 }
-                else if (typeof(T) == typeof(char) && _object is string s)
+                else if (RuntimeHelpers.ObjectHasComponentSize(tmpObject))
                 {
-                    // This case can only happen if a ReadOnlyMemory<char> was created around a string
-                    // and then that was cast to a Memory<char> using unsafe / marshaling code.  This needs
-                    // to work, however, so that code that uses a single Memory<char> field to store either
-                    // a readable ReadOnlyMemory<char> or a writable Memory<char> can still be pinned and
-                    // used for interop purposes.
-                    GCHandle handle = GCHandle.Alloc(s, GCHandleType.Pinned);
-#if FEATURE_PORTABLE_SPAN
-                    void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
-#else
-                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref s.GetRawStringData()), _index);
-#endif // FEATURE_PORTABLE_SPAN
-                    memoryHandle = new MemoryHandle(null, pointer, handle);
+                    // 'tmpObject is T[]' below also handles things like int[] <-> uint[] being convertible
+                    Debug.Assert(tmpObject is T[]);
+
+                    // Array is already pre-pinned
+                    if (_index < 0)
+                    {
+                        void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref Unsafe.As<T[]>(tmpObject).GetRawSzArrayData()), _index & ReadOnlyMemory<T>.RemoveFlagsBitMask);
+                        return new MemoryHandle(pointer);
+                    }
+                    else
+                    {
+                        GCHandle handle = GCHandle.Alloc(tmpObject, GCHandleType.Pinned);
+                        void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref Unsafe.As<T[]>(tmpObject).GetRawSzArrayData()), _index);
+                        return new MemoryHandle(pointer, handle);
+                    }
                 }
-                else if (_object is T[] array)
+                else
                 {
-                    var handle = GCHandle.Alloc(array, GCHandleType.Pinned);
-#if FEATURE_PORTABLE_SPAN
-                    void* pointer = Unsafe.Add<T>((void*)handle.AddrOfPinnedObject(), _index);
-#else
-                    void* pointer = Unsafe.Add<T>(Unsafe.AsPointer(ref array.GetRawSzArrayData()), _index);
-#endif // FEATURE_PORTABLE_SPAN
-                    memoryHandle = new MemoryHandle(null, pointer, handle);
+                    Debug.Assert(tmpObject is MemoryManager<T>);
+                    return Unsafe.As<MemoryManager<T>>(tmpObject).Pin(_index);
                 }
             }
-            else
-            {
-                if (_index < 0)
-                {
-                    ((OwnedMemory<T>)_object).Retain();
-                    memoryHandle = new MemoryHandle((OwnedMemory<T>)_object);
-                }
-            }
-            return memoryHandle;
+
+            return default;
         }
 
         /// <summary>
@@ -365,18 +472,9 @@ namespace System
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override int GetHashCode()
         {
-            return _object != null ? CombineHashCodes(_object.GetHashCode(), _index.GetHashCode(), _length.GetHashCode()) : 0;
+            // We use RuntimeHelpers.GetHashCode instead of Object.GetHashCode because the hash
+            // code is based on object identity and referential equality, not deep equality (as common with string).
+            return (_object != null) ? HashCode.Combine(RuntimeHelpers.GetHashCode(_object), _index, _length) : 0;
         }
-
-        private static int CombineHashCodes(int left, int right)
-        {
-            return ((left << 5) + left) ^ right;
-        }
-
-        private static int CombineHashCodes(int h1, int h2, int h3)
-        {
-            return CombineHashCodes(CombineHashCodes(h1, h2), h3);
-        }
-
     }
 }

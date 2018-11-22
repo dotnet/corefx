@@ -24,6 +24,7 @@ namespace System.Net.Security
         public bool LeaveInnerStreamOpen { get { throw null; } }
         protected System.IO.Stream InnerStream { get { throw null; } }
         protected override void Dispose(bool disposing) { }
+        public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
     }
     public enum EncryptionPolicy
     {
@@ -32,6 +33,8 @@ namespace System.Net.Security
         RequireEncryption = 0,
     }
     public delegate System.Security.Cryptography.X509Certificates.X509Certificate LocalCertificateSelectionCallback(object sender, string targetHost, System.Security.Cryptography.X509Certificates.X509CertificateCollection localCertificates, System.Security.Cryptography.X509Certificates.X509Certificate remoteCertificate, string[] acceptableIssuers);
+    public delegate System.Security.Cryptography.X509Certificates.X509Certificate ServerCertificateSelectionCallback(object sender, string hostName);
+
     public partial class NegotiateStream : AuthenticatedStream
     {
         public NegotiateStream(System.IO.Stream innerStream) : base(innerStream, false) { }
@@ -81,6 +84,7 @@ namespace System.Net.Security
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) { throw null; }
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) { throw null; }
         protected override void Dispose(bool disposing) { }
+        public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public virtual void EndAuthenticateAsClient(System.IAsyncResult asyncResult) { }
         public virtual void EndAuthenticateAsServer(System.IAsyncResult asyncResult) { }
         public override int EndRead(IAsyncResult asyncResult) { throw null; }
@@ -108,6 +112,7 @@ namespace System.Net.Security
         public X509RevocationMode CertificateRevocationCheckMode { get { throw null;  } set { } }
         public List<SslApplicationProtocol> ApplicationProtocols { get { throw null; } set { } }
         public RemoteCertificateValidationCallback RemoteCertificateValidationCallback { get { throw null;  } set { } }
+        public ServerCertificateSelectionCallback ServerCertificateSelectionCallback { get { throw null; } set { } }
         public EncryptionPolicy EncryptionPolicy { get { throw null;  } set { } }
     }
     public partial class SslClientAuthenticationOptions
@@ -196,6 +201,7 @@ namespace System.Net.Security
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) { throw null; }
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) { throw null; }
         protected override void Dispose(bool disposing) { }
+        public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public virtual void EndAuthenticateAsClient(IAsyncResult asyncResult) { }
         public virtual void EndAuthenticateAsServer(IAsyncResult asyncResult) { }
         public override int EndRead(IAsyncResult asyncResult) { throw null; }
@@ -203,11 +209,16 @@ namespace System.Net.Security
         public override void Flush() { }
         public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         public override int Read(byte[] buffer, int offset, int count) { throw null; }
+        public override int ReadByte() { throw null; }
+        public override System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) { throw null; }
+        public override System.Threading.Tasks.ValueTask<int> ReadAsync(System.Memory<byte> buffer, CancellationToken cancellationToken = default) { throw null; }
         public override long Seek(long offset, System.IO.SeekOrigin origin) { throw null; }
         public override void SetLength(long value) { }
         public virtual System.Threading.Tasks.Task ShutdownAsync() { throw null; }
         public void Write(byte[] buffer) { }
         public override void Write(byte[] buffer, int offset, int count) { }
+        public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> buffer, System.Threading.CancellationToken cancellationToken = default) { throw null; }
     }
 }
 namespace System.Security.Authentication

@@ -169,11 +169,7 @@ namespace Internal.Cryptography.Pal.Native
         CERT_KEY_IDENTIFIER_PROP_ID  = 20,
         CERT_PUBKEY_ALG_PARA_PROP_ID = 22,
         CERT_NCRYPT_KEY_HANDLE_PROP_ID = 78,
-
-        // CERT_DELETE_KEYSET_PROP_ID is not defined by Windows. It's a custom property set by the framework
-        // as a backchannel message from the portion of X509Certificate2Collection.Import() that loads up the PFX
-        // to the X509Certificate2..ctor(IntPtr) call that creates the managed wrapper.
-        CERT_DELETE_KEYSET_PROP_ID = 101,
+        CERT_CLR_DELETE_KEY_PROP_ID = 125,
     }
 
     [Flags]
@@ -750,13 +746,6 @@ namespace Internal.Cryptography.Pal.Native
 
         // Following is updated with unique Id when the chain context is logged.
         public Guid ChainId;
-    }
-
-    [Flags]
-    internal enum FormatMessageFlags : int
-    {
-        FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000,
-        FORMAT_MESSAGE_IGNORE_INSERTS = 0x00000200,
     }
 
     [StructLayout(LayoutKind.Sequential)]

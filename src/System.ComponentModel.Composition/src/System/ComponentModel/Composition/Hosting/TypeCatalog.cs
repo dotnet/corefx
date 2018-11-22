@@ -130,8 +130,8 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public TypeCatalog(IEnumerable<Type> types, ReflectionContext reflectionContext)
         {
-            Requires.NotNull(types, "types");
-            Requires.NotNull(reflectionContext, "reflectionContext");
+            Requires.NotNull(types, nameof(types));
+            Requires.NotNull(reflectionContext, nameof(reflectionContext));
 
             InitializeTypeCatalog(types, reflectionContext);
 
@@ -162,9 +162,9 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public TypeCatalog(IEnumerable<Type> types, ReflectionContext reflectionContext, ICompositionElement definitionOrigin)
         {
-            Requires.NotNull(types, "types");
-            Requires.NotNull(reflectionContext, "reflectionContext");
-            Requires.NotNull(definitionOrigin, "definitionOrigin");
+            Requires.NotNull(types, nameof(types));
+            Requires.NotNull(reflectionContext, nameof(reflectionContext));
+            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             InitializeTypeCatalog(types, reflectionContext);
 
@@ -179,11 +179,11 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (type == null)
                 {
-                    throw ExceptionBuilder.CreateContainsNullElement("types");
+                    throw ExceptionBuilder.CreateContainsNullElement(nameof(types));
                 }
                 if (type.Assembly.ReflectionOnly)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ElementReflectionOnlyType, "types"), "types");
+                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ElementReflectionOnlyType, nameof(types)), nameof(types));
                 }
                 var typeInfo = type.GetTypeInfo();
                 var lclType = (reflectionContext != null) ? reflectionContext.MapType(typeInfo) : typeInfo;
@@ -194,7 +194,7 @@ namespace System.ComponentModel.Composition.Hosting
                     // The final mapped type may be activated so we check to see if it is in a reflect only assembly
                     if (lclType.Assembly.ReflectionOnly)
                     {
-                        throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ReflectionContextReturnsReflectionOnlyType, "reflectionContext"), "reflectionContext");
+                        throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ReflectionContextReturnsReflectionOnlyType, nameof(reflectionContext)), nameof(reflectionContext));
                     }
                     typesList.Add(lclType);
                 }
@@ -208,11 +208,11 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (type == null)
                 {
-                    throw ExceptionBuilder.CreateContainsNullElement("types");
+                    throw ExceptionBuilder.CreateContainsNullElement(nameof(types));
                 }
                 else if (type.Assembly.ReflectionOnly)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ElementReflectionOnlyType, "types"), "types");
+                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ElementReflectionOnlyType, nameof(types)), nameof(types));
                 }
             }
             _types = types.ToArray();
@@ -258,7 +258,10 @@ namespace System.ComponentModel.Composition.Hosting
                     {
                         if (_parts == null)
                         {
-                            Assumes.NotNull(_types);
+                            if (_types == null)
+                            {
+                                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+                            }
 
                             var collection = new List<ComposablePartDefinition>();
                             foreach (Type type in _types)
@@ -283,7 +286,10 @@ namespace System.ComponentModel.Composition.Hosting
 
         internal override IEnumerable<ComposablePartDefinition> GetCandidateParts(ImportDefinition definition)
         {
-            Assumes.NotNull(definition);
+            if (definition == null)
+            {
+                throw new ArgumentNullException(nameof(definition));
+            }
 
             string contractName = definition.ContractName;
             if (string.IsNullOrEmpty(contractName))
@@ -354,7 +360,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private string GetDisplayName()
         {
-            return String.Format(CultureInfo.CurrentCulture,
+            return string.Format(CultureInfo.CurrentCulture,
                                 SR.TypeCatalog_DisplayNameFormat,
                                 GetType().Name,
                                 GetTypesDisplay());

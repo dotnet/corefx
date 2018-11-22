@@ -2,12 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO.Enumeration;
 using System.Linq;
 
+#if MS_IO_REDIST
+using Microsoft.IO.Enumeration;
+
+namespace Microsoft.IO
+#else
+using System.IO.Enumeration;
+
 namespace System.IO
+#endif
 {
     public sealed partial class DirectoryInfo : FileSystemInfo
     {
@@ -31,8 +40,8 @@ namespace System.IO
             fullPath = fullPath ?? originalPath;
             fullPath = isNormalized ? fullPath : Path.GetFullPath(fullPath);
 
-            _name = fileName ?? (PathInternal.IsRoot(fullPath) ?
-                    fullPath :
+            _name = fileName ?? (PathInternal.IsRoot(fullPath.AsSpan()) ?
+                    fullPath.AsSpan() :
                     Path.GetFileName(PathInternal.TrimEndingDirectorySeparator(fullPath.AsSpan()))).ToString();
 
             FullPath = fullPath;
@@ -45,9 +54,9 @@ namespace System.IO
                 // FullPath might end in either "parent\child" or "parent\child\", and in either case we want 
                 // the parent of child, not the child. Trim off an ending directory separator if there is one,
                 // but don't mangle the root.
-                string parentName = Path.GetDirectoryName(PathInternal.IsRoot(FullPath) ? FullPath : PathInternal.TrimEndingDirectorySeparator(FullPath));
+                string parentName = Path.GetDirectoryName(PathInternal.IsRoot(FullPath.AsSpan()) ? FullPath : PathInternal.TrimEndingDirectorySeparator(FullPath));
                 return parentName != null ? 
-                    new DirectoryInfo(parentName, null) :
+                    new DirectoryInfo(parentName, isNormalized: true) :
                     null;
             }
         }
@@ -56,22 +65,27 @@ namespace System.IO
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
-            if (PathInternal.IsEffectivelyEmpty(path))
+            if (PathInternal.IsEffectivelyEmpty(path.AsSpan()))
                 throw new ArgumentException(SR.Argument_PathEmpty, nameof(path));
             if (Path.IsPathRooted(path))
                 throw new ArgumentException(SR.Arg_Path2IsRooted, nameof(path));
 
-            string fullPath = Path.GetFullPath(Path.Combine(FullPath, path));
+            string newPath = Path.GetFullPath(Path.Combine(FullPath, path));
 
-            if (fullPath.Length < FullPath.Length 
-                || (fullPath.Length > FullPath.Length && !PathInternal.IsDirectorySeparator(fullPath[FullPath.Length]))
-                || string.Compare(FullPath, 0, fullPath, 0, FullPath.Length, PathInternal.StringComparison) != 0)
+            ReadOnlySpan<char> trimmedNewPath = PathInternal.TrimEndingDirectorySeparator(newPath.AsSpan());
+            ReadOnlySpan<char> trimmedCurrentPath = PathInternal.TrimEndingDirectorySeparator(FullPath.AsSpan());
+
+            // We want to make sure the requested directory is actually under the subdirectory.
+            if (trimmedNewPath.StartsWith(trimmedCurrentPath, PathInternal.StringComparison)
+                // Allow the exact same path, but prevent allowing "..\FooBar" through when the directory is "Foo"
+                && ((trimmedNewPath.Length == trimmedCurrentPath.Length) || PathInternal.IsDirectorySeparator(newPath[trimmedCurrentPath.Length])))
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidSubPath, path, FullPath), nameof(path));
+                FileSystem.CreateDirectory(newPath);
+                return new DirectoryInfo(newPath);
             }
 
-            FileSystem.CreateDirectory(fullPath);
-            return new DirectoryInfo(fullPath);
+            // We weren't nested
+            throw new ArgumentException(SR.Format(SR.Argument_InvalidSubPath, path, FullPath), nameof(path));
         }
 
         public void Create() => FileSystem.CreateDirectory(FullPath);
@@ -211,7 +225,7 @@ namespace System.IO
 
             Init(originalPath: destDirName,
                  fullPath: destinationWithSeparator,
-                 fileName: _name,
+                 fileName: null,
                  isNormalized: true);
 
             // Flush any cached information about the directory.

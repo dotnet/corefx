@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if FEATURE_APPX
+using Internal.Resources;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -140,7 +143,7 @@ namespace System.Resources
 
             for (int i = 0; i < languages.Count; i++)
             {
-                if (CultureData.GetCultureData(languages[i], true) != null)
+                if (WindowsRuntimeResourceManagerBase.IsValidCulture(languages[i]))
                 {
                     return new CultureInfo(languages[i]);
                 }
@@ -149,7 +152,7 @@ namespace System.Resources
                 {
                     string localeName = localeNameBuffer.ToString();
 
-                    if (CultureData.GetCultureData(localeName, true) != null)
+                    if (WindowsRuntimeResourceManagerBase.IsValidCulture(localeName))
                     {
                         return new CultureInfo(localeName);
                     }
@@ -393,8 +396,8 @@ namespace System.Resources
                                 if (_resourceMap == null)
                                 {
                                     exceptionInfo = new PRIExceptionInfo();
-                                    exceptionInfo._PackageSimpleName = packageSimpleName;
-                                    exceptionInfo._ResWFile = reswFilename;
+                                    exceptionInfo.PackageSimpleName = packageSimpleName;
+                                    exceptionInfo.ResWFile = reswFilename;
                                 }
                                 else
                                 {

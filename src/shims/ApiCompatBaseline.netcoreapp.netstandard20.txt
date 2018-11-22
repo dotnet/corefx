@@ -24,3 +24,23 @@ TypesMustExist : Type 'System.ValueTuple<T1, T2, T3, T4, T5, T6>' does not exist
 TypesMustExist : Type 'System.ValueTuple<T1, T2, T3, T4, T5, T6, T7>' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>' does not exist in the implementation but it does exist in the contract.
 
+# As part of https://github.com/dotnet/corefx/pull/30233 these setters were removed. We need to baseline these until we can start harvesting the newer package that has them removed.
+MembersMustExist : Member 'System.Security.Cryptography.Pkcs.CmsSigner.Certificates.set(System.Security.Cryptography.X509Certificates.X509Certificate2Collection)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Security.Cryptography.Pkcs.CmsSigner.SignedAttributes.set(System.Security.Cryptography.CryptographicAttributeObjectCollection)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Security.Cryptography.Pkcs.CmsSigner.UnsignedAttributes.set(System.Security.Cryptography.CryptographicAttributeObjectCollection)' does not exist in the implementation but it does exist in the contract.
+
+CannotRemoveAttribute : Attribute 'System.ComponentModel.DefaultEventAttribute' exists on 'System.ComponentModel.BackgroundWorker' in the contract but not the implementation.
+CannotRemoveAttribute : Attribute 'System.ComponentModel.DefaultEventAttribute' exists on 'System.Diagnostics.Process' in the contract but not the implementation.
+CannotRemoveAttribute : Attribute 'System.ComponentModel.DefaultPropertyAttribute' exists on 'System.Diagnostics.Process' in the contract but not the implementation.
+CannotRemoveAttribute : Attribute 'System.ComponentModel.DefaultEventAttribute' exists on 'System.IO.FileSystemWatcher' in the contract but not the implementation.
+CannotRemoveAttribute : Attribute 'System.ComponentModel.DefaultEventAttribute' exists on 'System.ComponentModel.BackgroundWorker' in the contract but not the implementation.
+CannotRemoveAttribute : Attribute 'System.ComponentModel.DefaultEventAttribute' exists on 'System.Diagnostics.Process' in the contract but not the implementation.
+CannotRemoveAttribute : Attribute 'System.ComponentModel.DefaultPropertyAttribute' exists on 'System.Diagnostics.Process' in the contract but not the implementation.
+CannotRemoveAttribute : Attribute 'System.ComponentModel.DefaultEventAttribute' exists on 'System.IO.FileSystemWatcher' in the contract but not the implementation.
+CannotRemoveAttribute : Attribute 'System.ComponentModel.DefaultEventAttribute' exists on 'System.ComponentModel.BackgroundWorker' in the contract but not the implementation.
+CannotRemoveAttribute : Attribute 'System.ComponentModel.DefaultEventAttribute' exists on 'System.Diagnostics.Process' in the contract but not the implementation.
+CannotRemoveAttribute : Attribute 'System.ComponentModel.DefaultPropertyAttribute' exists on 'System.Diagnostics.Process' in the contract but not the implementation.
+CannotRemoveAttribute : Attribute 'System.ComponentModel.DefaultEventAttribute' exists on 'System.IO.FileSystemWatcher' in the contract but not the implementation.
+
+# AttributeTargets.Assembly was added
+CannotChangeAttribute : Attribute 'System.AttributeUsageAttribute' on 'System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute' changed from '[AttributeUsageAttribute(AttributeTargets.Class | AttributeTargets.Constructor | AttributeTargets.Event | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Struct, Inherited=false, AllowMultiple=false)]' in the contract to '[AttributeUsageAttribute(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Constructor | AttributeTargets.Event | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Struct, Inherited=false, AllowMultiple=false)]' in the implementation.

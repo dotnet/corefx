@@ -6,13 +6,17 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.X509Certificates.Asn1;
 using Microsoft.Win32.SafeHandles;
 
 namespace Internal.Cryptography.Pal
 {
     internal static class CrlCache
     {
+        private const ulong X509_R_CERT_ALREADY_IN_HASH_TABLE = 0x0B07D065;
+
         public static void AddCrlForCertificate(
             X509Certificate2 cert,
             SafeX509StoreHandle store,
@@ -50,6 +54,7 @@ namespace Internal.Cryptography.Pal
             {
                 if (bio.IsInvalid)
                 {
+                    Interop.Crypto.ErrClearError();
                     return false;
                 }
 
@@ -59,6 +64,7 @@ namespace Internal.Cryptography.Pal
                 {
                     if (crl.IsInvalid)
                     {
+                        Interop.Crypto.ErrClearError();
                         return false;
                     }
 
@@ -83,9 +89,18 @@ namespace Internal.Cryptography.Pal
                         return false;
                     }
 
-                    // TODO (#3063): Check the return value of X509_STORE_add_crl, and throw on any error other
-                    // than X509_R_CERT_ALREADY_IN_HASH_TABLE
-                    Interop.Crypto.X509StoreAddCrl(store, crl);
+                    if (!Interop.Crypto.X509StoreAddCrl(store, crl))
+                    {
+                        // Ignore error "cert already in store", throw on anything else. In any case the error queue will be cleared.
+                        if (X509_R_CERT_ALREADY_IN_HASH_TABLE == Interop.Crypto.ErrPeekLastError())
+                        {
+                            Interop.Crypto.ErrClearError();
+                        }
+                        else
+                        {
+                            throw Interop.Crypto.CreateOpenSslCryptographicException();
+                        }
+                    }
 
                     return true;
                 }
@@ -111,9 +126,18 @@ namespace Internal.Cryptography.Pal
                 // null is a valid return (e.g. no remainingDownloadTime)
                 if (crl != null && !crl.IsInvalid)
                 {
-                    // TODO (#3063): Check the return value of X509_STORE_add_crl, and throw on any error other
-                    // than X509_R_CERT_ALREADY_IN_HASH_TABLE
-                    Interop.Crypto.X509StoreAddCrl(store, crl);
+                    if (!Interop.Crypto.X509StoreAddCrl(store, crl))
+                    {
+                        // Ignore error "cert already in store", throw on anything else. In any case the error queue will be cleared.
+                        if (X509_R_CERT_ALREADY_IN_HASH_TABLE == Interop.Crypto.ErrPeekLastError())
+                        {
+                            Interop.Crypto.ErrClearError();
+                        }
+                        else
+                        {
+                            throw Interop.Crypto.CreateOpenSslCryptographicException();
+                        }
+                    }
 
                     // Saving the CRL to the disk is just a performance optimization for later requests to not
                     // need to use the network again, so failure to save shouldn't throw an exception or mark
@@ -124,9 +148,10 @@ namespace Internal.Cryptography.Pal
 
                         using (SafeBioHandle bio = Interop.Crypto.BioNewFile(crlFile, "wb"))
                         {
-                            if (!bio.IsInvalid)
+                            if (bio.IsInvalid || Interop.Crypto.PemWriteBioX509Crl(bio, crl) == 0)
                             {
-                                Interop.Crypto.PemWriteBioX509Crl(bio, crl);
+                                // No bio, or write failed
+                                Interop.Crypto.ErrClearError();
                             }
                         }
                     }
@@ -147,6 +172,11 @@ namespace Internal.Cryptography.Pal
             // X509_issuer_name_hash returns "unsigned long", which is marshalled as ulong.
             // But it only sets 32 bits worth of data, so force it down to uint just... in case.
             ulong persistentHashLong = Interop.Crypto.X509IssuerNameHash(pal.SafeHandle);
+            if (persistentHashLong == 0)
+            {
+                Interop.Crypto.ErrClearError();
+            }
+
             uint persistentHash = unchecked((uint)persistentHashLong);
 
             // OpenSSL's hashed filename algorithm is the 8-character hex version of the 32-bit value
@@ -181,82 +211,28 @@ namespace Internal.Cryptography.Pal
                 return null;
             }
 
-            // CRLDistributionPoints ::= SEQUENCE SIZE (1..MAX) OF DistributionPoint
-            //
-            // DistributionPoint ::= SEQUENCE {
-            //    distributionPoint       [0]     DistributionPointName OPTIONAL,
-            //    reasons                 [1]     ReasonFlags OPTIONAL,
-            //    cRLIssuer               [2]     GeneralNames OPTIONAL }
-            //
-            // DistributionPointName ::= CHOICE {
-            //    fullName                [0]     GeneralNames,
-            //    nameRelativeToCRLIssuer [1]     RelativeDistinguishedName }
-            //
-            // GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
-            //
-            // GeneralName ::= CHOICE {
-            //    otherName                       [0]     OtherName,
-            //    rfc822Name                      [1]     IA5String,
-            //    dNSName                         [2]     IA5String,
-            //    x400Address                     [3]     ORAddress,
-            //    directoryName                   [4]     Name,
-            //    ediPartyName                    [5]     EDIPartyName,
-            //    uniformResourceIdentifier       [6]     IA5String,
-            //    iPAddress                       [7]     OCTET STRING,
-            //    registeredID                    [8]     OBJECT IDENTIFIER }
+            AsnReader reader = new AsnReader(crlDistributionPoints, AsnEncodingRules.DER);
+            AsnReader sequenceReader = reader.ReadSequence();
+            reader.ThrowIfNotEmpty();
 
-            DerSequenceReader cdpSequence = new DerSequenceReader(crlDistributionPoints);
-
-            while (cdpSequence.HasData)
+            while (sequenceReader.HasData)
             {
-                const byte ContextSpecificFlag = 0x80;
-                const byte ContextSpecific0 = ContextSpecificFlag;
-                const byte ConstructedFlag = 0x20;
-                const byte ContextSpecificConstructed0 = ContextSpecific0 | ConstructedFlag;
-                const byte GeneralNameUri = ContextSpecificFlag | 0x06;
-
-                DerSequenceReader distributionPointReader = cdpSequence.ReadSequence();
-                byte tag = distributionPointReader.PeekTag();
+                DistributionPointAsn.Decode(sequenceReader, out DistributionPointAsn distributionPoint);
 
                 // Only distributionPoint is supported
-                if (tag != ContextSpecificConstructed0)
+                // Only fullName is supported, nameRelativeToCRLIssuer is for LDAP-based lookup.
+                if (distributionPoint.DistributionPoint.HasValue &&
+                    distributionPoint.DistributionPoint.Value.FullName != null)
                 {
-                    continue;
-                }
-
-                // The DistributionPointName is a CHOICE, not a SEQUENCE, but the reader is the same.
-                DerSequenceReader dpNameReader = distributionPointReader.ReadSequence();
-                tag = dpNameReader.PeekTag();
-
-                // Only fullName is supported,
-                // nameRelativeToCRLIssuer is for LDAP-based lookup.
-                if (tag != ContextSpecificConstructed0)
-                {
-                    continue;
-                }
-
-                DerSequenceReader fullNameReader = dpNameReader.ReadSequence();
-
-                while (fullNameReader.HasData)
-                {
-                    tag = fullNameReader.PeekTag();
-
-                    if (tag != GeneralNameUri)
+                    foreach (GeneralNameAsn name in distributionPoint.DistributionPoint.Value.FullName)
                     {
-                        fullNameReader.SkipValue();
-                        continue;
+                        if (name.Uri != null &&
+                            Uri.TryCreate(name.Uri, UriKind.Absolute, out Uri uri) &&
+                            uri.Scheme == "http")
+                        {
+                            return name.Uri;
+                        }
                     }
-
-                    string uri = fullNameReader.ReadIA5String();
-
-                    Uri parsedUri = new Uri(uri);
-
-                    if (!StringComparer.Ordinal.Equals(parsedUri.Scheme, "http"))
-                    {
-                        continue;
-                    }
-
-                    return uri;
                 }
             }
 

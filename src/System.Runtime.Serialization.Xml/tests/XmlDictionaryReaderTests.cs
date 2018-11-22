@@ -103,6 +103,18 @@ namespace System.Runtime.Serialization.Xml.Tests
         }
 
         [Fact]
+        public static void ReadElementContentAsBinHexTest()
+        {
+            string xmlFileContent = @"<data>540068006500200071007500690063006B002000620072006F0077006E00200066006F00780020006A0075006D007000730020006F00760065007200200074006800650020006C0061007A007900200064006F0067002E00</data>";
+            Stream sm = GenerateStreamFromString(xmlFileContent);
+            XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(sm, XmlDictionaryReaderQuotas.Max);
+            reader.ReadToFollowing("data");
+            byte[] bytes = reader.ReadElementContentAsBinHex();
+            byte[] expected = Encoding.Unicode.GetBytes("The quick brown fox jumps over the lazy dog.");
+            Assert.Equal(expected, bytes);
+        }
+
+        [Fact]
         public static void GetNonAtomizedNamesTest()
         {
             string localNameTest = "localNameTest";
@@ -182,6 +194,41 @@ namespace System.Runtime.Serialization.Xml.Tests
             }
 
             return sb.ToString();
+        }
+
+        [Fact]
+        public static void Close_DerivedReader_Success()
+        {
+            new NotImplementedXmlDictionaryReader().Close();
+        }
+
+        private sealed class NotImplementedXmlDictionaryReader : XmlDictionaryReader
+        {
+            public override ReadState ReadState => ReadState.Initial;
+
+            public override int AttributeCount => throw new NotImplementedException();
+            public override string BaseURI => throw new NotImplementedException();
+            public override int Depth => throw new NotImplementedException();
+            public override bool EOF => throw new NotImplementedException();
+            public override bool IsEmptyElement => throw new NotImplementedException();
+            public override string LocalName => throw new NotImplementedException();
+            public override string NamespaceURI => throw new NotImplementedException();
+            public override XmlNameTable NameTable => throw new NotImplementedException();
+            public override XmlNodeType NodeType => throw new NotImplementedException();
+            public override string Prefix => throw new NotImplementedException();
+            public override string Value => throw new NotImplementedException();
+            public override string GetAttribute(int i) => throw new NotImplementedException();
+            public override string GetAttribute(string name) => throw new NotImplementedException();
+            public override string GetAttribute(string name, string namespaceURI) => throw new NotImplementedException();
+            public override string LookupNamespace(string prefix) => throw new NotImplementedException();
+            public override bool MoveToAttribute(string name) => throw new NotImplementedException();
+            public override bool MoveToAttribute(string name, string ns) => throw new NotImplementedException();
+            public override bool MoveToElement() => throw new NotImplementedException();
+            public override bool MoveToFirstAttribute() => throw new NotImplementedException();
+            public override bool MoveToNextAttribute() => throw new NotImplementedException();
+            public override bool Read() => throw new NotImplementedException();
+            public override bool ReadAttributeValue() => throw new NotImplementedException();
+            public override void ResolveEntity() => throw new NotImplementedException();
         }
     }
 }

@@ -5,9 +5,8 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-#if !FEATURE_PORTABLE_SPAN
+
 using System.Runtime.Versioning;
-#endif // !FEATURE_PORTABLE_SPAN
 
 #pragma warning disable 0809  //warning CS0809: Obsolete member 'Span<T>.Equals(object)' overrides non-obsolete member 'object.Equals(object)'
 
@@ -26,9 +25,7 @@ namespace System
         /// </summary>
         public int Length
         {
-#if !FEATURE_PORTABLE_SPAN
             [NonVersionable]
-#endif // !FEATURE_PORTABLE_SPAN
             get
             {
                 return _length;
@@ -40,12 +37,11 @@ namespace System
         /// </summary>
         public bool IsEmpty
         {
-#if !FEATURE_PORTABLE_SPAN
             [NonVersionable]
-#endif // !FEATURE_PORTABLE_SPAN
             get
             {
-                return _length == 0;
+                // Workaround for https://github.com/dotnet/coreclr/issues/19620
+                return 0 >= (uint)_length;
             }
         }
 
@@ -89,13 +85,13 @@ namespace System
         /// <summary>
         /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="Span{T}"/>
         /// </summary>
-        public static implicit operator Span<T>(ArraySegment<T> arraySegment)
-            => new Span<T>(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+        public static implicit operator Span<T>(ArraySegment<T> segment)
+            => new Span<T>(segment.Array, segment.Offset, segment.Count);
 
         /// <summary>
         /// Returns an empty <see cref="Span{T}"/>
         /// </summary>
-        public static Span<T> Empty => default(Span<T>);
+        public static Span<T> Empty => default;
 
         /// <summary>Gets an enumerator for this span.</summary>
         public Enumerator GetEnumerator() => new Enumerator(this);

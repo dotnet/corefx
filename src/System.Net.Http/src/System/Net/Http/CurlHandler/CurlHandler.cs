@@ -151,7 +151,7 @@ namespace System.Net.Http
         private Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> _serverCertificateValidationCallback;
         private bool _checkCertificateRevocationList = HttpHandlerDefaults.DefaultCheckCertificateRevocationList;
         private SslProtocols _sslProtocols = SslProtocols.None; // use default
-        private IDictionary<String, Object> _properties; // Only create dictionary when required.
+        private IDictionary<string, object> _properties; // Only create dictionary when required.
 
         private object LockObject { get { return _agent; } }
 
@@ -164,7 +164,7 @@ namespace System.Net.Http
             Interop.Http.CurlFeatures features = Interop.Http.GetSupportedFeatures();
             s_supportsSSL = (features & Interop.Http.CurlFeatures.CURL_VERSION_SSL) != 0;
             s_supportsAutomaticDecompression = (features & Interop.Http.CurlFeatures.CURL_VERSION_LIBZ) != 0;
-            s_supportsHttp2Multiplexing = (features & Interop.Http.CurlFeatures.CURL_VERSION_HTTP2) != 0 && Interop.Http.GetSupportsHttp2Multiplexing();
+            s_supportsHttp2Multiplexing = (features & Interop.Http.CurlFeatures.CURL_VERSION_HTTP2) != 0 && Interop.Http.GetSupportsHttp2Multiplexing() && !UseSingletonMultiAgent;
 
             if (NetEventSource.IsEnabled)
             {
@@ -308,7 +308,6 @@ namespace System.Net.Http
             get { return _sslProtocols; }
             set
             {
-                SecurityProtocol.ThrowOnNotAllowed(value, allowNone: true);
                 CheckDisposedOrStarted();
                 _sslProtocols = value;
             }
@@ -421,7 +420,7 @@ namespace System.Net.Http
             {
                 if (_properties == null)
                 {
-                    _properties = new Dictionary<String, object>();
+                    _properties = new Dictionary<string, object>();
                 }
 
                 return _properties;

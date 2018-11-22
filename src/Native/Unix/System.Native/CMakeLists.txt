@@ -1,30 +1,30 @@
-project(System.Native)
+project(System.Native C)
 
 set(NATIVE_SOURCES
-    pal_console.cpp
+    pal_console.c
     pal_errno.c
-    pal_interfaceaddresses.cpp
+    pal_interfaceaddresses.c
     pal_io.c
     pal_maphardwaretype.c
     pal_memory.c
-    pal_mount.cpp
+    pal_mount.c
     pal_networking.c
     pal_networkstatistics.c
-    pal_process.cpp
-    pal_random.cpp
-    pal_runtimeinformation.cpp
-    pal_runtimeextensions.cpp
+    pal_process.c
+    pal_random.c
+    pal_runtimeinformation.c
+    pal_runtimeextensions.c
     pal_signal.c
-    pal_string.cpp
+    pal_string.c
     pal_tcpstate.c
-    pal_time.cpp
-    pal_uid.cpp
-    pal_datetime.cpp
-    pal_sysctl.cpp
+    pal_time.c
+    pal_uid.c
+    pal_datetime.c
+    pal_sysctl.c
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    set(NATIVE_SOURCES ${NATIVE_SOURCES} pal_networkchange.cpp)
+    set(NATIVE_SOURCES ${NATIVE_SOURCES} pal_networkchange.c)
 
     if (!HAVE_LINUX_RTNETLINK_H)
         message(FATAL_ERROR "Could not find linux/rtnetlink.h")

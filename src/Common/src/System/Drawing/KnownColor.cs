@@ -7,7 +7,13 @@ using System.Diagnostics.CodeAnalysis;
 namespace System.Drawing
 {
     [SuppressMessage("Microsoft.Design", "CA1008:EnumsShouldHaveZeroValue")]
-    public  enum KnownColor
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+#if netcoreapp20
+    internal
+#else
+    public
+#endif
+    enum KnownColor
     {
         // This enum is order dependant!!!
         //

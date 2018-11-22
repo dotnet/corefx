@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Xml.Serialization;
 using System.Xml;
 
 namespace System.ServiceModel.Syndication
@@ -42,26 +39,12 @@ namespace System.ServiceModel.Syndication
 
         public Dictionary<XmlQualifiedName, string> AttributeExtensions
         {
-            get
-            {
-                if (_attributeExtensions == null)
-                {
-                    _attributeExtensions = new Dictionary<XmlQualifiedName, string>();
-                }
-                return _attributeExtensions;
-            }
+            get => _attributeExtensions ?? (_attributeExtensions = new Dictionary<XmlQualifiedName, string>());
         }
 
         public SyndicationElementExtensionCollection ElementExtensions
         {
-            get
-            {
-                if (_elementExtensions == null)
-                {
-                    _elementExtensions = new SyndicationElementExtensionCollection();
-                }
-                return _elementExtensions;
-            }
+            get => _elementExtensions ?? (_elementExtensions = new SyndicationElementExtensionCollection());
         }
 
         private static XmlBuffer CreateXmlBuffer(XmlDictionaryReader unparsedExtensionsReader, int maxExtensionSize)
@@ -85,12 +68,13 @@ namespace System.ServiceModel.Syndication
         {
             if (readerOverUnparsedExtensions == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("readerOverUnparsedExtensions");
+                throw new ArgumentNullException(nameof(readerOverUnparsedExtensions));
             }
             if (maxExtensionSize < 0)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("maxExtensionSize"));
+                throw new ArgumentOutOfRangeException(nameof(maxExtensionSize));
             }
+
             XmlDictionaryReader r = XmlDictionaryReader.CreateDictionaryReader(readerOverUnparsedExtensions);
             _elementExtensions = new SyndicationElementExtensionCollection(CreateXmlBuffer(r, maxExtensionSize));
         }
@@ -105,8 +89,9 @@ namespace System.ServiceModel.Syndication
         {
             if (writer == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("writer");
+                throw new ArgumentNullException(nameof(writer));
             }
+
             if (_attributeExtensions != null)
             {
                 foreach (XmlQualifiedName qname in _attributeExtensions.Keys)
@@ -121,17 +106,15 @@ namespace System.ServiceModel.Syndication
         {
             if (writer == null)
             {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("writer");
+                throw new ArgumentNullException(nameof(writer));
             }
+
             if (_elementExtensions != null)
             {
                 _elementExtensions.WriteTo(writer, shouldSkipElement);
             }
         }
 
-        public ExtensibleSyndicationObject Clone()
-        {
-            return new ExtensibleSyndicationObject(this);
-        }
+        public ExtensibleSyndicationObject Clone() => new ExtensibleSyndicationObject(this);
     }
 }

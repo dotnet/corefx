@@ -195,7 +195,7 @@ namespace Microsoft.Win32
         /// <devdoc>
         ///    <para>Occurs when the system is running out of available RAM.</para>
         /// </devdoc>
-        [Obsolete("This event has been deprecated. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This event has been deprecated. https://go.microsoft.com/fwlink/?linkid=14202")]
         [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         public static event EventHandler LowMemory
         {
@@ -518,7 +518,7 @@ namespace Microsoft.Win32
         {
             if (interval <= 0)
             {
-                throw new ArgumentException(SR.Format(SR.InvalidLowBoundArgument, "interval", interval.ToString(System.Threading.Thread.CurrentThread.CurrentCulture), "0"));
+                throw new ArgumentException(SR.Format(SR.InvalidLowBoundArgument, nameof(interval), interval.ToString(System.Threading.Thread.CurrentThread.CurrentCulture), "0"));
             }
 
             EnsureSystemEvents(true, true);
@@ -846,7 +846,7 @@ namespace Microsoft.Win32
                     }
                     else
                     {
-                        current.DynamicInvoke(new object[0]);
+                        current.DynamicInvoke(Array.Empty<object>());
                     }
                 }
                 catch (Exception t)

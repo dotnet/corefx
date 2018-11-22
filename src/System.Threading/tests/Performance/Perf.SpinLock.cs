@@ -8,7 +8,9 @@ namespace System.Threading.Tests
 {
     public class Perf_SpinLock
     {
-        [Benchmark(InnerIterationCount = 100)]
+        private const int IterationCount = 1_000_000;
+
+        [Benchmark(InnerIterationCount = IterationCount)]
         public void EnterExit()
         {
             SpinLock spinLock = new SpinLock();
@@ -17,7 +19,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         bool lockTaken = false;
 
@@ -28,7 +30,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [Benchmark(InnerIterationCount = 100)]
+        [Benchmark(InnerIterationCount = IterationCount)]
         public void TryEnterExit()
         {
             SpinLock spinLock = new SpinLock();
@@ -37,7 +39,7 @@ namespace System.Threading.Tests
             {
                 using (iteration.StartMeasurement())
                 {
-                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    for (int i = 0; i < IterationCount; i++)
                     {
                         bool lockTaken = false;
 

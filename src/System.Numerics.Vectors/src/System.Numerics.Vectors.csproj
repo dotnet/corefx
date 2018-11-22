@@ -1,32 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{53134B0C-0D57-481B-B84E-D1991E8D54FF}</ProjectGuid>
     <RootNamespace>System.Numerics</RootNamespace>
     <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsTargetingNetFx Condition="'$(TargetGroup)'=='netfx' OR '$(TargetGroup)'=='net46'">true</IsTargetingNetFx>
-    <IsTargetingNetCoreApp Condition="'$(TargetGroup)'=='netcoreapp' OR '$(TargetGroup)'=='uap' OR '$(TargetGroup)'=='uapaot'">true</IsTargetingNetCoreApp>
-    <IsPartialFacadeAssembly Condition="'$(IsTargetingNetFx)'=='true' OR '$(IsTargetingNetCoreApp)'=='true'">true</IsPartialFacadeAssembly>
+    <TargetsNetCoreAppOrUap Condition="'$(TargetsNetCoreApp)'=='true' OR '$(TargetsUap)' == 'true'">true</TargetsNetCoreAppOrUap>
+    <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)'=='true' OR '$(TargetsNetCoreAppOrUap)'=='true'">true</IsPartialFacadeAssembly>
+    <HasIntrinsics Condition="'$(TargetsNetCoreApp)'=='true'">true</HasIntrinsics>
+    <DefineConstants Condition="'$(HasIntrinsics)'=='true'">$(DefineConstants);HAS_INTRINSICS</DefineConstants>
     <PackageTargetFramework Condition="'$(TargetGroup)' == 'netstandard1.0'">netstandard1.0;portable-net45+win8+wp8+wpa81</PackageTargetFramework>
+    <Configurations>net46-Debug;net46-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreappaot-Windows_NT-Debug;netcoreappaot-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard1.0-Debug;netstandard1.0-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net46-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Unix-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netcoreapp-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netfx-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.0-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'netstandard1.0-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uap-Windows_NT-Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'uapaot-Windows_NT-Release|AnyCPU'" />
   <!-- Shared -->
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\Numerics\Hashing\HashHelpers.cs">
@@ -37,7 +21,7 @@
     </Compile>
   </ItemGroup>
   <!-- On .NET Core, Vector<T> is in System.Private.CoreLib -->
-  <ItemGroup Condition="'$(IsTargetingNetCoreApp)' != 'true'">
+  <ItemGroup Condition="'$(TargetsNetCoreAppOrUap)' != 'true'">
     <Compile Include="$(CommonPath)\CoreLib\System\Numerics\ConstantHelper.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -61,13 +45,13 @@
     </Compile>
   </ItemGroup>
   <!-- Carry a copy of MathF where not available -->
-  <ItemGroup Condition="'$(IsTargetingNetFx)' == 'true' OR $(TargetGroup.StartsWith('netstandard'))">
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true' OR $(TargetGroup.StartsWith('netstandard'))">
     <Compile Include="$(CommonPath)\System\MathF.netstandard.cs">
       <Link>System\MathF.netstandard.cs</Link>
     </Compile>
   </ItemGroup>
   <!-- Portable version only -->
-  <ItemGroup Condition="'$(IsTargetingNetFx)' != 'true'">
+  <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
     <Compile Include="System\Numerics\Matrix3x2.cs" />
     <Compile Include="System\Numerics\Matrix4x4.cs" />
     <Compile Include="System\Numerics\Plane.cs" />
@@ -79,7 +63,10 @@
     <Compile Include="System\Numerics\Vector4.cs" />
     <Compile Include="System\Numerics\Vector4_Intrinsics.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsTargetingNetFx)' == 'true'">
+  <ItemGroup Condition="'$(HasIntrinsics)' == 'true'">
+    <Compile Include="System\Numerics\VectorMath.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="System.Numerics" />
   </ItemGroup>
@@ -103,10 +90,10 @@
       <Link>System\Numerics\Vector.tt</Link>
     </Content>
   </ItemGroup>
-  <ItemGroup Condition="'$(IsTargetingNetCoreApp)' == 'true'">
+  <ItemGroup Condition="'$(TargetsNetCoreAppOrUap)' == 'true'">
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsTargetingNetCoreApp)' != 'true'">
+  <ItemGroup Condition="'$(TargetsNetCoreAppOrUap)' != 'true'">
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Globalization" />
     <Reference Include="System.Resources.ResourceManager" />
@@ -116,5 +103,4 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

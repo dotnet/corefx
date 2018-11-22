@@ -207,9 +207,6 @@
   <data name="ArgumentOutOfRange_ConsoleKey" xml:space="preserve">
     <value>Console key values must be between 0 and 255 inclusive.</value>
   </data>
-  <data name="ArgumentOutOfRange_ConsoleTitleTooLong" xml:space="preserve">
-    <value>The console title is too long.</value>
-  </data>
   <data name="ArgumentOutOfRange_ConsoleBufferBoundaries" xml:space="preserve">
     <value>The value must be greater than or equal to zero and less than the console's buffer size in that dimension.</value>
   </data>
@@ -257,5 +254,8 @@
   </data>
   <data name="IO_PathTooLong_Path" xml:space="preserve">
     <value>The path '{0}' is too long, or a component of the specified path is too long.</value>
+  </data>
+  <data name="IO_TermInfoInvalidMagicNumber" xml:space="preserve">
+    <value>The terminfo database has an invalid magic number: '{0}'.</value>
   </data>
 </root>

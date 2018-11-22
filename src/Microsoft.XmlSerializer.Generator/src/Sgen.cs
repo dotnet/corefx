@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 using System;
@@ -8,6 +8,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Serialization;
 
@@ -20,6 +22,9 @@ namespace Microsoft.XmlSerializer.Generator
             Sgen sgen = new Sgen();
             return sgen.Run(args);
         }
+
+        private static string s_references = string.Empty;
+        private static Dictionary<string, string> s_referencedic = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private int Run(string[] args)
         {
@@ -35,27 +40,15 @@ namespace Microsoft.XmlSerializer.Generator
             bool silent = false;
             bool warnings = false;
 
+            AppDomain.CurrentDomain.AssemblyResolve += SgenAssemblyResolver;
+
             try
             {
                 for (int i = 0; i < args.Length; i++)
                 {
                     string arg = args[i];
-                    string value = string.Empty;
-
-                    if (arg.StartsWith("/") || arg.StartsWith("-"))
-                    {
-                        int colonPos = arg.IndexOf(":");
-                        if (colonPos != -1)
-                        {
-                            value = arg.Substring(colonPos + 1).Trim();
-                            arg = arg.Substring(0, colonPos).Trim();
-                        }
-                    }
-
-                    string originalArg = arg;
-                    arg = arg.ToLower(CultureInfo.InvariantCulture);
-
-                    if (ArgumentMatch(arg, "?") || ArgumentMatch(arg, "help"))
+  
+                    if (ArgumentMatch(arg, "help") || ShortNameArgumentMatch(arg, "h"))
                     {
                         WriteHeader();
                         WriteHelp();
@@ -69,34 +62,45 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         proxyOnly = true;
                     }
-                    else if (ArgumentMatch(arg, "out"))
+                    else if (ArgumentMatch(arg, "out") || ShortNameArgumentMatch(arg, "o"))
                     {
-                        if (codePath != null)
-                        {
-                            errs.Add(SR.Format(SR.ErrInvalidArgument, "/out", arg));
+                        i++;
+                        if(i >= args.Length || codePath != null )
+                        {                         
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                         }
-
-                        codePath = value;
+                        else
+                        {
+                            codePath = args[i];
+                        }
                     }
                     else if (ArgumentMatch(arg, "type"))
                     {
-                        if (value != string.Empty)
+                        i++;
+                        if (i >= args.Length)
                         {
-                            string[] typelist = value.Split(';');
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
+                        }
+                        else
+                        {
+                            string[] typelist = args[i].Split(';');
                             foreach (var type in typelist)
                             {
                                 types.Add(type);
                             }
                         }
                     }
-                    else if (ArgumentMatch(arg, "assembly"))
+                    else if (ArgumentMatch(arg, "assembly") || ShortNameArgumentMatch(arg, "a"))
                     {
-                        if (assembly != null)
+                        i++;
+                        if (i >= args.Length || assembly != null)
                         {
-                            errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                         }
-
-                        assembly = value;
+                        else
+                        {
+                            assembly = args[i];
+                        }
                     }
                     else if (ArgumentMatch(arg, "quiet"))
                     {
@@ -118,16 +122,32 @@ namespace Microsoft.XmlSerializer.Generator
                     {
                         warnings = true;
                     }
+                    else if (ArgumentMatch(arg, "reference"))
+                    {
+                        i++;
+                        if (i >= args.Length)
+                        {
+                            errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
+                        }
+                        else
+                        {
+                            s_references = args[i];
+                            if (!string.IsNullOrEmpty(s_references))
+                            {
+                                ParseReferences();
+                            }
+                        }                        
+                    }
                     else
                     {
-                        if (arg.EndsWith(".dll") || arg.EndsWith(".exe"))
+                        if (arg.EndsWith(".dll", StringComparison.InvariantCultureIgnoreCase) || arg.EndsWith(".exe", StringComparison.InvariantCultureIgnoreCase))
                         {
                             if (assembly != null)
                             {
-                                errs.Add(SR.Format(SR.ErrInvalidArgument, "/assembly", arg));
+                                errs.Add(SR.Format(SR.ErrInvalidArgument, arg));
                             }
 
-                            assembly = originalArg;
+                            assembly = arg;
                         }
                         else
                         {
@@ -278,23 +298,31 @@ namespace Microsoft.XmlSerializer.Generator
 
                 bool gac = assembly.GlobalAssemblyCache;
                 outputDirectory = outputDirectory == null ? (gac ? Environment.CurrentDirectory : Path.GetDirectoryName(assembly.Location)) : outputDirectory;
+
+                if (!Directory.Exists(outputDirectory))
+                {
+                    //We need double quote the path to escpate the space in the path. 
+                    //However when a path ending with backslash, if followed by double quote, it becomes an escapte sequence 
+                    //e.g. "obj\Debug\netcoreapp2.0\", it will be converted as obj\Debug\netcoreapp2.0", which is not valid and not exist
+                    //We need remove the ending quote for this situation
+                    if (!outputDirectory.EndsWith("\"") || !Directory.Exists(outputDirectory = outputDirectory.Remove(outputDirectory.Length - 1)))
+                    {
+                        throw new ArgumentException(SR.Format(SR.ErrDirectoryNotExists, outputDirectory));
+                    }
+                }
+
                 string serializerName = GetXmlSerializerAssemblyName(serializableTypes[0], null);
                 string codePath = Path.Combine(outputDirectory, serializerName + ".cs");
 
                 if (!force)
                 {
                     if (File.Exists(codePath))
-                        throw new InvalidOperationException(SR.Format(SR.ErrSerializerExists, codePath, "force"));
+                        throw new InvalidOperationException(SR.Format(SR.ErrSerializerExists, codePath, nameof(force)));
                 }
 
                 if (Directory.Exists(codePath))
                 {
                     throw new InvalidOperationException(SR.Format(SR.ErrDirectoryExists, codePath));
-                }
-
-                if (!Directory.Exists(outputDirectory))
-                {
-                    throw new ArgumentException(SR.Format(SR.ErrDirectoryNotExists, codePath, outputDirectory));
                 }
 
                 bool success = false;
@@ -352,16 +380,27 @@ namespace Microsoft.XmlSerializer.Generator
             }
         }
 
-        // assumes all same case.        
+       
         private bool ArgumentMatch(string arg, string formal)
         {
-            if (arg[0] != '/' && arg[0] != '-')
+            // Full name format, eg: --assembly
+            if (arg.Length < 3 || arg[0] != '-' || arg[1] != '-' )
             {
                 return false;
             }
+            arg = arg.Substring(2);
+            return arg.Equals(formal, StringComparison.InvariantCultureIgnoreCase);
+        }
 
+        private bool ShortNameArgumentMatch(string arg, string shortName)
+        {
+            // Short name format, eg: -a 
+            if (arg.Length < 2 || arg[0] != '-')
+            {
+                return false;
+            }
             arg = arg.Substring(1);
-            return (arg == formal || (arg.Length == 1 && arg[0] == formal[0]));
+            return arg.Equals(shortName, StringComparison.InvariantCultureIgnoreCase);
         }
 
         private void ImportType(Type type, ArrayList mappings, ArrayList importedTypes, bool verbose, XmlReflectionImporter importer, bool parsableerrors)
@@ -411,23 +450,23 @@ namespace Microsoft.XmlSerializer.Generator
         private void WriteHeader()
         {
             // do not localize Copyright header
-            Console.WriteLine(String.Format(CultureInfo.CurrentCulture, "[Microsoft (R) .NET Core Xml Serialization Generation Utility, Version {0}]", ThisAssembly.InformationalVersion));
+            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "[Microsoft (R) .NET Core Xml Serialization Generation Utility, Version {0}]", ThisAssembly.InformationalVersion));
             Console.WriteLine("Copyright (C) Microsoft Corporation. All rights reserved.");
         }
 
         private void WriteHelp()
         {
             Console.Out.WriteLine(SR.Format(SR.HelpDescription));
-            Console.Out.WriteLine(SR.Format(SR.HelpUsage, this.GetType().Assembly.GetName().Name));
+            Console.Out.WriteLine(SR.Format(SR.HelpUsage, this.GetType().Assembly.GetName().Name.Substring("dotnet-".Length)));
             Console.Out.WriteLine(SR.Format(SR.HelpDevOptions));
-            Console.Out.WriteLine(SR.Format(SR.HelpAssembly, "/assembly:", "/a:"));
-            Console.Out.WriteLine(SR.Format(SR.HelpType, "/type:", "/t:"));
-            Console.Out.WriteLine(SR.Format(SR.HelpProxy, "/proxytypes", "/p"));
-            Console.Out.WriteLine(SR.Format(SR.HelpForce, "/force", "/f"));
-            Console.Out.WriteLine(SR.Format(SR.HelpOut, "/out:", "/o:"));
+            Console.Out.WriteLine(SR.Format(SR.HelpAssembly, "-a", "--assembly"));
+            Console.Out.WriteLine(SR.Format(SR.HelpType, "--type"));
+            Console.Out.WriteLine(SR.Format(SR.HelpProxy, "--proxytypes"));
+            Console.Out.WriteLine(SR.Format(SR.HelpForce, "--force"));
+            Console.Out.WriteLine(SR.Format(SR.HelpOut, "-o", "--out"));
 
             Console.Out.WriteLine(SR.Format(SR.HelpMiscOptions));
-            Console.Out.WriteLine(SR.Format(SR.HelpHelp, "/?", "/help"));
+            Console.Out.WriteLine(SR.Format(SR.HelpHelp, "-h", "--help"));
         }
 
         private static string FormatMessage(bool parsableerrors, bool warning, string message)
@@ -472,7 +511,7 @@ namespace Microsoft.XmlSerializer.Generator
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
             return GetTempAssemblyName(type.Assembly.GetName(), defaultNamespace);
         }
@@ -480,6 +519,101 @@ namespace Microsoft.XmlSerializer.Generator
         private static string GetTempAssemblyName(AssemblyName parent, string ns)
         {
             return parent.Name + ".XmlSerializers" + (ns == null || ns.Length == 0 ? "" : "." + ns.GetHashCode());
+        }
+
+        private static void ParseReferences()
+        {
+            var referencelist = new List<string>();
+            if (s_references.Length > 0)
+            {
+                foreach(var entry in s_references.Split(';'))
+                {
+                    string trimentry = entry.Trim();
+                    if (string.IsNullOrEmpty(trimentry))
+                        continue;
+                    referencelist.Add(trimentry);
+                }
+            }
+
+            foreach (var reference in referencelist)
+            {
+                if (reference.EndsWith(".dll") || reference.EndsWith(".exe"))
+                {
+                    if (File.Exists(reference))
+                    {
+                        string filename = Path.GetFileNameWithoutExtension(reference);
+                        if (!string.IsNullOrEmpty(filename))
+                        {
+                            s_referencedic.Add(filename, reference);
+                        }
+                    }
+                }
+
+            }
+        }
+
+        private static Assembly SgenAssemblyResolver(object source, ResolveEventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(e.Name) || e.Name.Split(',').Length == 0)
+                {
+                    return null;
+                }
+
+                string assemblyname = e.Name.Split(',')[0];
+                if (string.IsNullOrEmpty(assemblyname))
+                {
+                    return null;
+                }
+
+                if (s_referencedic.ContainsKey(assemblyname))
+                {
+                    string reference = s_referencedic[assemblyname];
+
+                    // For System.ServiceModel.Primitives, we need to load its runtime assembly rather than reference assembly
+                    if (assemblyname.Equals("System.ServiceModel.Primitives"))
+                    {
+                        // Replace "ref" with "lib" in the assembly's path, the path looks like:
+                        // dir\.nuget\packages\system.servicemodel.primitives\4.5.3\ref\netstandard2.0\System.ServiceModel.Primitives.dll;
+                        string pattern = @"\\ref\\netstandard\d*\.?\d*\.?\d*\\System.ServiceModel.Primitives.dll";
+                        Match match = null;
+                        try
+                        {
+                            match = Regex.Match(reference, pattern);
+                        }
+                        catch { }
+
+                        if (match != null && match.Success)
+                        {
+                            int index = match.Index + 1;
+                            StringBuilder sb = new StringBuilder(reference);
+                            sb.Remove(index, "ref".Length);
+                            sb.Insert(index, "lib");
+                            reference = sb.ToString();
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(reference))
+                    {
+                        if (File.Exists(reference))
+                        {
+                            return Assembly.LoadFrom(reference);
+                        }
+                    }
+                }
+            }
+            catch (Exception exp)
+            {
+                if (exp is ThreadAbortException || exp is StackOverflowException || exp is OutOfMemoryException)
+                {
+                    throw;
+                }
+
+                WriteWarning(exp, true);
+            }
+
+            return null;
         }
     }
 }

@@ -213,7 +213,7 @@ namespace System.Management
             { 
                 //Timespan allows for negative values, but we want to make sure it's positive here...
                 if (value.Ticks < 0)
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 timeout = value;
                 FireIdentifierChanged();
@@ -350,7 +350,7 @@ namespace System.Management
             set { 
                 //Unfortunately BlockSize was defined as int, but valid values are only  > 0
                 if (value <= 0)
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 blockSize = value;
             }
@@ -506,7 +506,7 @@ namespace System.Management
         
 
         
-        //Constructor that specifies flags as individual values - we need to set the flags acordingly !
+        //Constructor that specifies flags as individual values - we need to set the flags accordingly !
         /// <summary>
         /// <para>Initializes a new instance of the <see cref='System.Management.EnumerationOptions'/> class to be used for queries or enumerations, 
         ///    allowing the user to specify values for the different options.</para>
@@ -1276,7 +1276,7 @@ namespace System.Management
         /// </value>
         public string Locale 
         {
-            get { return (null != locale) ? locale : String.Empty; } 
+            get { return (null != locale) ? locale : string.Empty; } 
             set { 
                 if (locale != value)
                 {
@@ -1420,7 +1420,7 @@ namespace System.Management
         /// </remarks>
         public string Authority 
         {
-            get { return (null != authority) ? authority : String.Empty; } 
+            get { return (null != authority) ? authority : string.Empty; } 
             set {
                 if (authority != value)
                 {

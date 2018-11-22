@@ -2,19 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Xml;
+using System.Runtime.Serialization;
+
 namespace System.ServiceModel.Syndication
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Xml;
-    using System.Runtime.Serialization;
-    using System.Globalization;
-    using System.Xml.Serialization;
-    using System.Xml.Schema;
-    using System.Diagnostics.CodeAnalysis;
-    using DiagnosticUtility = System.ServiceModel.DiagnosticUtility;
-    using System.Runtime.CompilerServices;
-
     [DataContract]
     public abstract class SyndicationItemFormatter
     {
@@ -27,42 +19,24 @@ namespace System.ServiceModel.Syndication
 
         protected SyndicationItemFormatter(SyndicationItem itemToWrite)
         {
-            if (itemToWrite == null)
-            {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("itemToWrite");
-            }
-            _item = itemToWrite;
+            _item = itemToWrite ?? throw new ArgumentNullException(nameof(itemToWrite));
         }
 
-        public SyndicationItem Item
-        {
-            get
-            {
-                return _item;
-            }
-        }
+        public SyndicationItem Item => _item;
 
-        public abstract String Version
-        { get; }
+        public abstract string Version { get; }
 
         public abstract bool CanRead(XmlReader reader);
 
         public abstract void ReadFrom(XmlReader reader);
 
-        public override string ToString()
-        {
-            return String.Format(CultureInfo.CurrentCulture, "{0}, SyndicationVersion={1}", this.GetType(), this.Version);
-        }
+        public override string ToString() => $"{GetType()}, SyndicationVersion={Version}";
 
         public abstract void WriteTo(XmlWriter writer);
 
         internal protected virtual void SetItem(SyndicationItem item)
         {
-            if (item == null)
-            {
-                throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("item");
-            }
-            _item = item;
+            _item = item ?? throw new ArgumentNullException(nameof(item));
         }
 
         internal static void CreateBufferIfRequiredAndWriteNode(ref XmlBuffer buffer, ref XmlDictionaryWriter extWriter, XmlDictionaryReader reader, int maxExtensionSize)
@@ -82,40 +56,11 @@ namespace System.ServiceModel.Syndication
             }
         }
 
-        internal static void LoadElementExtensions(XmlBuffer buffer, XmlDictionaryWriter writer, SyndicationItem item)
-        {
-            SyndicationFeedFormatter.LoadElementExtensions(buffer, writer, item);
-        }
+        protected static SyndicationCategory CreateCategory(SyndicationItem item) => SyndicationFeedFormatter.CreateCategory(item);
 
-        internal static void LoadElementExtensions(XmlBuffer buffer, XmlDictionaryWriter writer, SyndicationCategory category)
-        {
-            SyndicationFeedFormatter.LoadElementExtensions(buffer, writer, category);
-        }
+        protected static SyndicationLink CreateLink(SyndicationItem item) => SyndicationFeedFormatter.CreateLink(item);
 
-        internal static void LoadElementExtensions(XmlBuffer buffer, XmlDictionaryWriter writer, SyndicationLink link)
-        {
-            SyndicationFeedFormatter.LoadElementExtensions(buffer, writer, link);
-        }
-
-        internal static void LoadElementExtensions(XmlBuffer buffer, XmlDictionaryWriter writer, SyndicationPerson person)
-        {
-            SyndicationFeedFormatter.LoadElementExtensions(buffer, writer, person);
-        }
-
-        protected static SyndicationCategory CreateCategory(SyndicationItem item)
-        {
-            return SyndicationFeedFormatter.CreateCategory(item);
-        }
-
-        protected static SyndicationLink CreateLink(SyndicationItem item)
-        {
-            return SyndicationFeedFormatter.CreateLink(item);
-        }
-
-        protected static SyndicationPerson CreatePerson(SyndicationItem item)
-        {
-            return SyndicationFeedFormatter.CreatePerson(item);
-        }
+        protected static SyndicationPerson CreatePerson(SyndicationItem item) => SyndicationFeedFormatter.CreatePerson(item);
 
         protected static void LoadElementExtensions(XmlReader reader, SyndicationItem item, int maxExtensionSize)
         {
@@ -157,12 +102,10 @@ namespace System.ServiceModel.Syndication
             return SyndicationFeedFormatter.TryParseAttribute(name, ns, value, person, version);
         }
 
-
         protected static bool TryParseContent(XmlReader reader, SyndicationItem item, string contentType, string version, out SyndicationContent content)
         {
             return SyndicationFeedFormatter.TryParseContent(reader, item, contentType, version, out content);
         }
-
 
         protected static bool TryParseElement(XmlReader reader, SyndicationItem item, string version)
         {

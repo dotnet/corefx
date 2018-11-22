@@ -181,7 +181,6 @@ namespace System.Net.Sockets.Tests
         {
             // An exception will happen on send if this file doesn't exist
             SendPacketsElement element = new SendPacketsElement(string.Empty);
-            Assert.Null(element.FileStream);
             Assert.Null(element.Buffer);
             Assert.Equal(0, element.Offset);
             Assert.Equal(0, element.Count);

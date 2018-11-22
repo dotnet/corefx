@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -958,9 +958,9 @@ public static partial class DataContractSerializerTests
         Assert.StrictEqual(y.WithEnums[MyEnum.One], MyEnum.One);
         Assert.StrictEqual(y.WithStructs[new StructNotSerializable() { value = 10 }], new StructNotSerializable() { value = 12 });
         Assert.StrictEqual(y.WithStructs[new StructNotSerializable() { value = int.MaxValue }], new StructNotSerializable() { value = int.MinValue });
-        Assert.StrictEqual(y.WithNullables[Int16.MinValue], true);
+        Assert.StrictEqual(y.WithNullables[short.MinValue], true);
         Assert.StrictEqual(y.WithNullables[0], false);
-        Assert.StrictEqual(y.WithNullables[Int16.MaxValue], null);
+        Assert.StrictEqual(y.WithNullables[short.MaxValue], null);
     }
 
     [Fact]
@@ -1120,6 +1120,7 @@ public static partial class DataContractSerializerTests
 
         Assert.True(myresolver.ResolveNameInvoked, "myresolver.ResolveNameInvoked is false");
         Assert.True(myresolver.TryResolveTypeInvoked, "myresolver.TryResolveTypeInvoked is false");
+        Assert.True(myresolver.DeclaredTypeIsNotNull, "myresolver.DeclaredTypeIsNotNull is false");
         Assert.True(input.OnSerializingMethodInvoked, "input.OnSerializingMethodInvoked is false");
         Assert.True(input.OnSerializedMethodInvoked, "input.OnSerializedMethodInvoked is false");
         Assert.True(output.OnDeserializingMethodInvoked, "output.OnDeserializingMethodInvoked is false");
@@ -1760,7 +1761,7 @@ public static partial class DataContractSerializerTests
         dcs.WriteObject(ms, list);
         ms.Seek(0L, SeekOrigin.Begin);
         List<Invalid_Class_No_Parameterless_Ctor> list2 = (List<Invalid_Class_No_Parameterless_Ctor>)dcs.ReadObject(ms);
-        Assert.True(list2.Count == 0, String.Format("Unexpected length {0}", list.Count));
+        Assert.True(list2.Count == 0, string.Format("Unexpected length {0}", list.Count));
     }
 
     [Fact]
@@ -4015,9 +4016,6 @@ public static partial class DataContractSerializerTests
     }
 
     [Fact]
-#if !ReflectionOnly
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "dotnet-corefx #24265")]
-#endif
     public static void DCS_TypeWithPrimitiveKnownTypes()
     {
         var list = new TypeWithPrimitiveKnownTypes();
@@ -4054,6 +4052,22 @@ public static partial class DataContractSerializerTests
         list.Clear();
         list.Add(new object());
         actual = DataContractSerializerHelper.SerializeAndDeserialize(list, "<TypeWithPrimitiveKnownTypes xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><anyType/></TypeWithPrimitiveKnownTypes>");
+        Assert.NotNull(actual);
+    }
+
+    [ActiveIssue(33317, TestPlatforms.OSX)]
+    [Fact]
+    public static void DCS_DeeplyLinkedData()
+    {
+        TypeWithLinkedProperty head = new TypeWithLinkedProperty();
+        TypeWithLinkedProperty cur = head;
+        for (int i = 0; i < 513; i++)
+        {
+            cur.Child = new TypeWithLinkedProperty();
+            cur = cur.Child;
+        }
+        cur.Children = new List<TypeWithLinkedProperty> { new TypeWithLinkedProperty() };
+        TypeWithLinkedProperty actual = DataContractSerializerHelper.SerializeAndDeserialize(head, baseline: null, skipStringCompare: true);
         Assert.NotNull(actual);
     }
 

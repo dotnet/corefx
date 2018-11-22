@@ -174,7 +174,7 @@ namespace System.Collections.Specialized
         {
             if (maxValue < 1)
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidValue, nameof(maxValue), 1), nameof(maxValue));
+                throw new ArgumentException(SR.Format(SR.Argument_InvalidValue_TooSmall, nameof(maxValue), 1), nameof(maxValue));
             }
 
             short offset = (short)(priorOffset + CountBitsSet(priorMask));
@@ -202,23 +202,20 @@ namespace System.Collections.Specialized
 
         public static string ToString(BitVector32 value)
         {
-            StringBuilder sb = new StringBuilder(/*"BitVector32{".Length*/12 + /*32 bits*/32 + /*"}".Length"*/1);
-            sb.Append("BitVector32{");
-            int locdata = unchecked((int)value._data);
-            for (int i = 0; i < 32; i++)
+            return string.Create(/*"BitVector32{".Length*/12 + /*32 bits*/32 + /*"}".Length"*/1, value, (dst, v) =>
             {
-                if ((locdata & 0x80000000) != 0)
+                ReadOnlySpan<char> prefix = "BitVector32{";
+                prefix.CopyTo(dst);
+                dst[dst.Length - 1] = '}';
+
+                int locdata = unchecked((int)v._data);
+                dst = dst.Slice(prefix.Length, 32);
+                for (int i = 0; i < dst.Length; i++)
                 {
-                    sb.Append('1');
+                    dst[i] = (locdata & 0x80000000) != 0 ? '1' : '0';
+                    locdata <<= 1;
                 }
-                else
-                {
-                    sb.Append('0');
-                }
-                locdata <<= 1;
-            }
-            sb.Append('}');
-            return sb.ToString();
+            });
         }
 
         public override string ToString()
