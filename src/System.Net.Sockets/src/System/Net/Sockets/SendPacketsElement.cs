@@ -62,6 +62,10 @@ namespace System.Net.Sockets
             {
                 throw new ArgumentNullException(nameof(fileStream));
             }
+            if (!fileStream.IsAsync)
+            {
+                throw new ArgumentException(nameof(fileStream), SR.GetResourceString("net_sockets_sendpackelement_FileStreamMustBeAsync"));
+            }
             // The native API will validate the file length on send.
             if (offset < 0)
             {

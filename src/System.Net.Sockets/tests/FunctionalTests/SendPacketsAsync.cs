@@ -401,7 +401,7 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         public void SendPacketsElement_FileStream_Success(SocketImplementationType type)
         {
-            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync:true))
             {
                 stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream), s_testFileSize); // Whole File
@@ -419,7 +419,7 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         public void SendPacketsElement_FileStreamZeroCount_Success(SocketImplementationType type)
         {
-            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true))
             {
                 stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream, 0, 0), s_testFileSize); // Whole File
@@ -437,7 +437,7 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         public void SendPacketsElement_FileStreamSizeCount_Success(SocketImplementationType type)
         {
-            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true))
             {
                 stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream, 0, s_testFileSize), s_testFileSize); // Whole File
@@ -455,7 +455,7 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         public void SendPacketsElement_FileStreamPart_Success(SocketImplementationType type)
         {
-            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true))
             {
                 stream.Seek(s_testFileSize - 10, SeekOrigin.Begin);
                 SendPackets(type, new SendPacketsElement(stream, 0, 20), 20);
@@ -477,7 +477,7 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         public void SendPacketsElement_FileStreamMultiPart_Success(SocketImplementationType type)
         {
-            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true))
             {
                 var elements = new[]
                 {
@@ -527,7 +527,7 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         public void SendPacketsElement_FileStreamLargeOffset_Throws(SocketImplementationType type)
         {
-            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true))
             {
                 stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 // Length is validated on Send
@@ -540,7 +540,7 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         public void SendPacketsElement_FileStreamLargeCount_Throws(SocketImplementationType type)
         {
-            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true))
             {
                 stream.Seek(s_testFileSize / 2, SeekOrigin.Begin);
                 // Length is validated on Send
