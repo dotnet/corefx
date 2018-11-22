@@ -107,7 +107,7 @@ namespace System.Net.Sockets
             FilePath = filePath;
             FileStream = fileStream;
             Buffer = buffer;
-            LongOffset = offset;
+            OffsetLong = offset;
             Count = count;
             EndOfPacket = endOfPacket;
         }
@@ -120,9 +120,9 @@ namespace System.Net.Sockets
 
         public int Count { get; private set; }
 
-        public int Offset => checked((int)LongOffset);
+        public int Offset => checked((int)OffsetLong);
 
-        public long LongOffset { get; private set; }
+        public long OffsetLong { get; private set; }
 
         public bool EndOfPacket { get; private set; }
     }

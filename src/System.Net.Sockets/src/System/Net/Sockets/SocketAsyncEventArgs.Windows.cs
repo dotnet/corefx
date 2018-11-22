@@ -1016,7 +1016,7 @@ namespace System.Net.Sockets
                     {
                         // This element is a file.
                         sendPacketsDescriptor[descriptorIndex].fileHandle = _sendPacketsFileStreams[fileIndex].SafeFileHandle.DangerousGetHandle();
-                        sendPacketsDescriptor[descriptorIndex].fileOffset = spe.LongOffset;
+                        sendPacketsDescriptor[descriptorIndex].fileOffset = spe.OffsetLong;
                         sendPacketsDescriptor[descriptorIndex].length = (uint)spe.Count;
                         sendPacketsDescriptor[descriptorIndex].flags =
                             Interop.Winsock.TransmitPacketsElementFlags.File | (spe.EndOfPacket
@@ -1029,10 +1029,10 @@ namespace System.Net.Sockets
                     {
                         // This element is a file stream.
                         sendPacketsDescriptor[descriptorIndex].fileHandle = spe.FileStream.SafeFileHandle.DangerousGetHandle();
-                        sendPacketsDescriptor[descriptorIndex].fileOffset = spe.LongOffset;
+                        sendPacketsDescriptor[descriptorIndex].fileOffset = spe.OffsetLong;
 
                         // Workaround from synchronous reading stream from current position if packet offset equals 0
-                        if (spe.LongOffset == 0 && !spe.FileStream.IsAsync)
+                        if (spe.OffsetLong == 0 && !spe.FileStream.IsAsync)
                             spe.FileStream.Seek(0, SeekOrigin.Begin);
 
                         sendPacketsDescriptor[descriptorIndex].length = (uint)spe.Count;

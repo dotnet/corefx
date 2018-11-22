@@ -213,7 +213,7 @@ namespace System.Net.Sockets
         public SendPacketsElement(System.IO.FileStream fileStream, long offset, int count, bool endOfPacket) { }
         public byte[] Buffer { get { throw null; } }
         public int Count { get { throw null; } }
-        public long LongOffset { get { throw null; } }
+        public long OffsetLong { get { throw null; } }
         public bool EndOfPacket { get { throw null; } }
         public string FilePath { get { throw null; } }
         public System.IO.FileStream FileStream { get { throw null; } }
