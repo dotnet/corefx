@@ -44,6 +44,11 @@ namespace System.Text.RegularExpressions
         public string Value => Text.Substring(Index, Length);
 
         /// <summary>
+        /// Returns a span representing the value of this Regex Capture.
+        /// </summary>
+        public ReadOnlySpan<char> Span => Text.AsSpan(Index, Length);
+
+        /// <summary>
         /// Returns the substring that was matched.
         /// </summary>
         public override string ToString() => Value;
