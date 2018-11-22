@@ -585,13 +585,8 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("  \"h\u6F22\u5B57ello\"  ")]   // "\u6F22\u5B57" is Chinese for "Chinese character" (from the Han script)
-        [InlineData("  \"he\\r\\n\\\"l\\\\\\\"lo\\\\\"  ")]
-        [InlineData("  12345  ")]
-        [InlineData("  null  ")]
-        [InlineData("  true  ")]
-        [InlineData("  false  ")]
-        public static void SingleJsonValue(string jsonString)
+        [MemberData(nameof(SingleValueJson))]
+        public static void SingleJsonValue(string jsonString, string expectedString)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
@@ -602,13 +597,21 @@ namespace System.Text.Json.Tests
                     var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
                     var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), false, state);
                     while (json.Read())
-                        ;
+                    {
+                        // Check if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
+                        Assert.True(json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null);
+                        Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan));
+                    }
 
                     long consumed = json.BytesConsumed;
                     Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                     json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), true, json.CurrentState);
                     while (json.Read())
-                        ;
+                    {
+                        // Check if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
+                        Assert.True(json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null);
+                        Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan));
+                    }
                     Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
                     Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                 }
@@ -1715,6 +1718,22 @@ namespace System.Text.Json.Tests
                     new object[] {"   false   ", false, "False"},
                     new object[] {"   null   ", false, "null"},
                     new object[] {"   \" Test string with \\\"nested quotes \\\" and hex: \\uABCD values! \"   ", false, " Test string with \\\"nested quotes \\\" and hex: \\uABCD values! "},
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> SingleValueJson
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] {"  \"h\u6F22\u5B57ello\"  ", "h\u6F22\u5B57ello"},    // "\u6F22\u5B57" is Chinese for "Chinese character" (from the Han script)
+                    new object[] {"  \"he\\r\\n\\\"l\\\\\\\"lo\\\\\"  ", "he\\r\\n\\\"l\\\\\\\"lo\\\\"},
+                    new object[] {"  12345  ", "12345"},
+                    new object[] {"  null  ", "null"},
+                    new object[] {"  true  ", "true"},
+                    new object[] {"  false  ", "false"},
                 };
             }
         }
