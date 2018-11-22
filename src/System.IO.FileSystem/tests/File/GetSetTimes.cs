@@ -48,8 +48,8 @@ namespace System.IO.Tests
 
             // Set CreationTime to some time in the past, after the file was created.
             // This causes us to set mtime to a value past ctime.
-            await Task.Delay(300);
-            DateTime newCreationTimeUTC = System.DateTime.UtcNow.Subtract(TimeSpan.FromMilliseconds(600));
+            await Task.Delay(600);
+            DateTime newCreationTimeUTC = System.DateTime.UtcNow.Subtract(TimeSpan.FromMilliseconds(300));
             File.SetCreationTimeUtc(path, newCreationTimeUTC);
 
             Assert.Equal(newCreationTimeUTC, File.GetLastWriteTimeUtc(path));
