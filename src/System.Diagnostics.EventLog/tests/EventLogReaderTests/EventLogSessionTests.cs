@@ -16,6 +16,9 @@ namespace System.Diagnostics.Tests
             var session = new EventLogSession();
             Assert.NotEmpty(session.GetProviderNames());
             Assert.NotEmpty(session.GetLogNames());
+            session.ExportLog("Application", PathType.LogName, "Application", Guid.NewGuid().ToString("N"));
+            session.ExportLogAndMessages("Application", PathType.LogName, "Application", Guid.NewGuid().ToString("N"));
+            session.GetLogInformation("Application", PathType.LogName);
             session.CancelCurrentOperations();
             session.Dispose();
         }

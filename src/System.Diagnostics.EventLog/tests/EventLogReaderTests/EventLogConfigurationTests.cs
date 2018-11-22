@@ -14,6 +14,7 @@ namespace System.Diagnostics.Tests
         public void Properties_DoNotThrow()
         {
             var configuration = new EventLogConfiguration("Application");
+
             var LogName = configuration.LogName;
             var LogType = configuration.LogType;
             var LogIsolation = configuration.LogIsolation;
@@ -24,6 +25,14 @@ namespace System.Diagnostics.Tests
             var MaximumSizeInBytes = configuration.MaximumSizeInBytes;
             var LogMode = configuration.LogMode;
             var OwningProviderName = configuration.OwningProviderName;
+            var ProviderNames = configuration.ProviderNames;
+            var ProviderLevel = configuration.ProviderLevel;
+            var ProviderKeywords = configuration.ProviderKeywords;
+            var ProviderBufferSize = configuration.ProviderBufferSize;
+            var ProviderMinimumNumberOfBuffers = configuration.ProviderMinimumNumberOfBuffers;
+            var ProviderMaximumNumberOfBuffers = configuration.ProviderMaximumNumberOfBuffers;
+            var ProviderLatency = configuration.ProviderLatency;
+            var ProviderControlGuid = configuration.ProviderControlGuid;
         }
     }
 }

@@ -9,6 +9,7 @@
     <Compile Include="EventLogReaderTests\EventLogRecordTests.cs" />
     <Compile Include="EventLogReaderTests\EventLogConfigurationTests.cs" />
     <Compile Include="EventLogReaderTests\EventLogSessionTests.cs" />
+    <Compile Include="EventLogReaderTests\ProviderMetadataTests.cs" />
     <Compile Include="EventLogTraceListenerTests.cs" />
     <Compile Include="EventLogReaderTests\EventLogReaderTests.cs" />
     <Compile Include="EventLogReaderTests\EventLogWatcherTests.cs" />
