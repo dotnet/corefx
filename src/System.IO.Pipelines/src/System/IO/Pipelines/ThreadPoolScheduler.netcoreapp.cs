@@ -11,6 +11,11 @@ namespace System.IO.Pipelines
     {
         public override void Schedule(Action<object> action, object state)
         {
+            System.Threading.ThreadPool.QueueUserWorkItem(action, state, preferLocal: false);
+        }
+
+        internal override void ScheduleInternal(Action<object> action, object state)
+        {
             System.Threading.ThreadPool.UnsafeQueueUserWorkItem(action, state, preferLocal: false);
         }
     }

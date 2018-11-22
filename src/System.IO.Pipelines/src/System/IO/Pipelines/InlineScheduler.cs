@@ -10,5 +10,8 @@ namespace System.IO.Pipelines
         {
             action(state);
         }
+
+        internal override void ScheduleInternal(Action<object> action, object state)
+            => action(state);
     }
 }
