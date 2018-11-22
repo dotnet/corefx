@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.IO.Tests
@@ -36,22 +37,24 @@ namespace System.IO.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Linux)]
-        public void CreationTimeSet_GetReturnsExpected_WhenNotInFuture()
+        public async Task CreationTimeSet_GetReturnsExpected_WhenNotInFuture()
         {
             // On Linux, we synthesize CreationTime from the oldest of status changed time (ctime) and write time (mtime).
             // Changing the CreationTime, updates mtime and causes ctime to change to the current time.
             // When setting CreationTime to a value that isn't in the future, getting the CreationTime should return the same value.
 
-            string fileName = Path.GetTempFileName();
-            File.WriteAllText(fileName, "");
+            string path = GetTestFilePath();
+            File.WriteAllText(path, "");
 
-            FileInfo fileInfo = new System.IO.FileInfo(fileName);
-            DateTime newCreationTimeUTC = System.DateTime.UtcNow.Subtract(TimeSpan.FromDays(1));
-            fileInfo.CreationTimeUtc = newCreationTimeUTC;
+            // Set CreationTime to some time in the past, after the file was created.
+            // This causes us to set mtime to a value past ctime.
+            await Task.Delay(300);
+            DateTime newCreationTimeUTC = System.DateTime.UtcNow.Subtract(TimeSpan.FromMilliseconds(600));
+            File.SetCreationTimeUtc(path, newCreationTimeUTC);
 
-            Assert.Equal(newCreationTimeUTC, fileInfo.LastWriteTimeUtc);
+            Assert.Equal(newCreationTimeUTC, File.GetLastWriteTimeUtc(path));
 
-            Assert.Equal(newCreationTimeUTC, fileInfo.CreationTimeUtc);
+            Assert.Equal(newCreationTimeUTC, File.GetCreationTimeUtc(path));
         }
 
         public override IEnumerable<TimeFunction> TimeFunctions(bool requiresRoundtripping = false)
