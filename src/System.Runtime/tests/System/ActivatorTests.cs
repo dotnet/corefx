@@ -151,8 +151,8 @@ namespace System.Tests
             yield return new object[] { typeof(void) };
             yield return new object[] { typeof(void).MakeArrayType() };
             yield return new object[] { Type.GetType("System.ArgIterator") };
-            // Fails with TypeLoadException in .NET Core.
-            // [ActiveIssue(33572, TargetFrameworkMonikers.Netcoreapp)]
+            // Fails with TypeLoadException in .NET Core as array types of ref structs
+            // are not supported.
             if (!PlatformDetection.IsNetCore)
             {
                 yield return new object[] { Type.GetType("System.ArgIterator").MakeArrayType() };
