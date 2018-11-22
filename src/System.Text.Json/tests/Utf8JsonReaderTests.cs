@@ -469,29 +469,39 @@ namespace System.Text.Json.Tests
         {
             byte[] data = Encoding.UTF8.GetBytes(jsonString);
 
-            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
-            var json = new Utf8JsonReader(data, isFinalBlock: true, state);
-
-            var builder = new StringBuilder();
-            while (json.Read())
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
-                    builder.Append(Encoding.UTF8.GetString(json.ValueSpan));
+                if (commentHandling == JsonCommentHandling.Disallow)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < data.Length; i++)
+                {
+                    var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                    var json = new Utf8JsonReader(data.AsSpan(0, i), false, state);
+
+                    var builder = new StringBuilder();
+                    while (json.Read())
+                    {
+                        if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
+                            builder.Append(Encoding.UTF8.GetString(json.ValueSpan));
+                    }
+
+                    long consumed = json.BytesConsumed;
+                    Assert.Equal(consumed, json.CurrentState.BytesConsumed);
+                    json = new Utf8JsonReader(data.AsSpan((int)consumed), true, json.CurrentState);
+                    while (json.Read())
+                    {
+                        if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
+                            builder.Append(Encoding.UTF8.GetString(json.ValueSpan));
+                    }
+                    Assert.Equal(data.Length - consumed, json.BytesConsumed);
+                    Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+
+                    Assert.Equal(commentHandling == JsonCommentHandling.Allow ? expectedWithComments : expectedWithoutComments, builder.ToString());
+                }
             }
-
-            Assert.Equal(expectedWithComments, builder.ToString());
-
-            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
-            json = new Utf8JsonReader(data, isFinalBlock: true, state);
-
-            builder = new StringBuilder();
-            while (json.Read())
-            {
-                if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
-                    builder.Append(Encoding.UTF8.GetString(json.ValueSpan));
-            }
-
-            Assert.Equal(expectedWithoutComments, builder.ToString());
         }
 
         [Theory]
