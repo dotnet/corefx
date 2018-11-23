@@ -1027,13 +1027,11 @@ namespace System.Net.Sockets
                     }
                     else if (spe.FileStream != null)
                     {
-                        // This element is a file stream.
+                        // This element is a file stream. SendPacketsElement throws if the FileStream is not opened asynchronously;
+                        // Synchronously opened FileStream can't be used concurrently (e.g. multiple SendPacketsElements with the same
+                        // FileStream).
                         sendPacketsDescriptor[descriptorIndex].fileHandle = spe.FileStream.SafeFileHandle.DangerousGetHandle();
                         sendPacketsDescriptor[descriptorIndex].fileOffset = spe.OffsetLong;
-
-                        // Workaround from synchronous reading stream from current position if packet offset equals 0
-                        if (spe.OffsetLong == 0 && !spe.FileStream.IsAsync)
-                            spe.FileStream.Seek(0, SeekOrigin.Begin);
 
                         sendPacketsDescriptor[descriptorIndex].length = (uint)spe.Count;
                         sendPacketsDescriptor[descriptorIndex].flags =
