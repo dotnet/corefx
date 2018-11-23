@@ -445,7 +445,7 @@ namespace System.Text.RegularExpressions
             }
 
 #if DEBUG
-            if (roptions.IsDebug() && match != null)
+            if (Debug && match != null)
                 match.Dump();
 #endif
             return match;

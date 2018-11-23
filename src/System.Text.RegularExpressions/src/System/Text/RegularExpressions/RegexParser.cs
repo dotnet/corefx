@@ -154,10 +154,10 @@ namespace System.Text.RegularExpressions
                 // move past all of the normal characters.  We'll stop when we hit some kind of control character,
                 // or if IgnorePatternWhiteSpace is on, we'll stop when we see some whitespace.
                 if (_options.UseOptionX())
-                    while (CharsRight() > 0 && (!RegexCharCategory.IsStopperX(ch = RightChar()) || (ch == '{' && !IsTrueQuantifier())))
+                    while (CharsRight() > 0 && (!CharCategory.IsStopperX(ch = RightChar()) || (ch == '{' && !IsTrueQuantifier())))
                         MoveRight();
                 else
-                    while (CharsRight() > 0 && (!RegexCharCategory.IsSpecial(ch = RightChar()) || (ch == '{' && !IsTrueQuantifier())))
+                    while (CharsRight() > 0 && (!CharCategory.IsSpecial(ch = RightChar()) || (ch == '{' && !IsTrueQuantifier())))
                         MoveRight();
 
                 int endpos = Textpos();
@@ -166,9 +166,9 @@ namespace System.Text.RegularExpressions
 
                 if (CharsRight() == 0)
                     ch = '!'; // nonspecial, means at end
-                else if (RegexCharCategory.IsSpecial(ch = RightChar()))
+                else if (CharCategory.IsSpecial(ch = RightChar()))
                 {
-                    isQuantifier = RegexCharCategory.IsQuantifier(ch);
+                    isQuantifier = CharCategory.IsQuantifier(ch);
                     MoveRight();
                 }
                 else
@@ -845,7 +845,7 @@ namespace System.Text.RegularExpressions
             {
                 for (; ;)
                 {
-                    while (CharsRight() > 0 && RegexCharCategory.IsSpace(RightChar()))
+                    while (CharsRight() > 0 && CharCategory.IsSpace(RightChar()))
                         MoveRight();
 
                     if (CharsRight() == 0)
@@ -1801,7 +1801,7 @@ namespace System.Text.RegularExpressions
             int startpos = Textpos();
             char ch = CharAt(startpos);
             if (ch != '{')
-                return RegexCharCategory.IsQuantifier(ch);
+                return CharCategory.IsQuantifier(ch);
 
             int pos = startpos;
             int nChars = CharsRight();

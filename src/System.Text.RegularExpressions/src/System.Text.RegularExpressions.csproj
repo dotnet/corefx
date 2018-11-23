@@ -14,6 +14,7 @@
     <Compile Include="System\Collections\HashtableExtensions.cs" />
     <Compile Include="System\Text\RegularExpressions\Capture.cs" />
     <Compile Include="System\Text\RegularExpressions\CaptureCollection.cs" />
+    <Compile Include="System\Text\RegularExpressions\CharCategory.cs" />
     <Compile Include="System\Text\RegularExpressions\CollectionDebuggerProxy.cs" />
     <Compile Include="System\Text\RegularExpressions\Group.cs" />
     <Compile Include="System\Text\RegularExpressions\GroupCollection.cs" />
@@ -29,7 +30,6 @@
     <Compile Include="System\Text\RegularExpressions\Regex.Split.cs" />
     <Compile Include="System\Text\RegularExpressions\Regex.Timeout.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexBoyerMoore.cs" />
-    <Compile Include="System\Text\RegularExpressions\RegexCharCategory.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexCharClass.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexCode.cs" />
     <Compile Include="System\Text\RegularExpressions\RegexCompilationInfo.cs" />

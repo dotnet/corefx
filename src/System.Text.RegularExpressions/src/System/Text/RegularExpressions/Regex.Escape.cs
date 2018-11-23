@@ -24,7 +24,7 @@ namespace System.Text.RegularExpressions
             if (str == null)
                 throw new ArgumentNullException(nameof(str));
 
-            return Escape(targetSpan: false, str.AsSpan(), Span<char>.Empty, out _, out _);
+            return EscapeImpl(targetSpan: false, str.AsSpan(), Span<char>.Empty, out _, out _);
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace System.Text.RegularExpressions
         /// <returns>Returns the amount of chars written into the output Span.</returns>
         public static bool TryEscape(ReadOnlySpan<char> str, Span<char> destination, out int charsWritten)
         {
-            Escape(targetSpan: true, str, destination, out charsWritten, out bool spanSuccess);
+            EscapeImpl(targetSpan: true, str, destination, out charsWritten, out bool spanSuccess);
 
             return spanSuccess;
         }
@@ -52,7 +52,7 @@ namespace System.Text.RegularExpressions
             if (str == null)
                 throw new ArgumentNullException(nameof(str));
 
-            return Unescape(targetSpan: false, str.AsSpan(), Span<char>.Empty, out _, out _);
+            return UnescapeImpl(targetSpan: false, str.AsSpan(), Span<char>.Empty, out _, out _);
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace System.Text.RegularExpressions
         /// </summary>
         public static bool TryUnescape(ReadOnlySpan<char> str, Span<char> destination, out int charsWritten)
         {
-            Unescape(targetSpan: true, str, destination, out charsWritten, out bool spanSuccess);
+            UnescapeImpl(targetSpan: true, str, destination, out charsWritten, out bool spanSuccess);
 
             return spanSuccess;
         }
@@ -68,11 +68,11 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// Escapes all metacharacters (including |,(,),[,{,|,^,$,*,+,?,\, spaces and #)
         /// </summary>
-        private static string Escape(bool targetSpan, ReadOnlySpan<char> input, Span<char> destination, out int charsWritten, out bool spanSuccess)
+        private static string EscapeImpl(bool targetSpan, ReadOnlySpan<char> input, Span<char> destination, out int charsWritten, out bool spanSuccess)
         {
             for (int i = 0; i < input.Length; i++)
             {
-                if (RegexCharCategory.IsMetachar(input[i]))
+                if (CharCategory.IsMetachar(input[i]))
                 {
                     return EscapeImpl(targetSpan, input, i, destination, out charsWritten, out spanSuccess);
                 }
@@ -122,7 +122,7 @@ namespace System.Text.RegularExpressions
                 while (i < input.Length)
                 {
                     ch = input[i];
-                    if (RegexCharCategory.IsMetachar(ch))
+                    if (CharCategory.IsMetachar(ch))
                         break;
 
                     i++;
@@ -137,7 +137,7 @@ namespace System.Text.RegularExpressions
         /// <summary>
         /// Unescapes all metacharacters (including (,),[,],{,},|,^,$,*,+,?,\, spaces and #)
         /// </summary>
-        private static string Unescape(bool targetSpan, ReadOnlySpan<char> input, Span<char> destination, out int charsWritten, out bool spanSuccess)
+        private static string UnescapeImpl(bool targetSpan, ReadOnlySpan<char> input, Span<char> destination, out int charsWritten, out bool spanSuccess)
         {
             for (int i = 0; i < input.Length; i++)
             {
@@ -151,7 +151,7 @@ namespace System.Text.RegularExpressions
             return input.CopyInput(targetSpan, destination, out charsWritten, out spanSuccess);
         }
 
-        public static string UnescapeImpl(bool targetSpan, ReadOnlySpan<char> input, int i, Span<char> destination, out int charsWritten, out bool spanSuccess)
+        private static string UnescapeImpl(bool targetSpan, ReadOnlySpan<char> input, int i, Span<char> destination, out int charsWritten, out bool spanSuccess)
         {
             var parser = new ParserMin(input);
 
