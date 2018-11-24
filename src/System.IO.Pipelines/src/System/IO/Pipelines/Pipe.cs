@@ -660,7 +660,7 @@ namespace System.IO.Pipelines
         {
             if (action != null)
             {
-                scheduler.ScheduleInternal(action, state);
+                scheduler.UnsafeSchedule(action, state);
             }
         }
 
@@ -684,13 +684,13 @@ namespace System.IO.Pipelines
                 if (completionData.ExecutionContext == null)
                 {
                     // We can run directly, this should be the default fast path
-                    scheduler.ScheduleInternal(completionData.Completion, completionData.CompletionState);
+                    scheduler.UnsafeSchedule(completionData.Completion, completionData.CompletionState);
                     return;
                 }
 
                 // We also have to run on the specified execution context so run the scheduler and execute the
                 // delegate on the execution context
-                scheduler.ScheduleInternal(s_scheduleWithExecutionContextCallback, completionData);
+                scheduler.UnsafeSchedule(s_scheduleWithExecutionContextCallback, completionData);
             }
             else
             {
