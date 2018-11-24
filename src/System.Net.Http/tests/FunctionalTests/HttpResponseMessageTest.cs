@@ -265,7 +265,7 @@ namespace System.Net.Http.Functional.Tests
                 var expected = "StatusCode: 400, ReasonPhrase: 'Bad Request', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
                     "{\r\n" +
                     "  Content-Type: text/plain; charset=utf-8\r\n" +
-#if (netcoreapp && !uap)
+#if netcoreapp
                     "  Content-Length: 7\r\n" +
 #endif
                     "}";
@@ -282,7 +282,7 @@ namespace System.Net.Http.Functional.Tests
                     "  Accept-Ranges: pages\r\n" +
                     "  Custom-Response-Header: value1\r\n" +
                     "  Content-Type: text/plain; charset=utf-8\r\n" +
-#if (netcoreapp && !uap)
+#if netcoreapp
                     "  Content-Length: 7\r\n" +
 #endif
                     "  Custom-Content-Header: value2\r\n" +

@@ -157,7 +157,7 @@ namespace System.Net.Http.Functional.Tests
                 "someHeaderName: andSomeHeaderValue\r\n" +
                 "someOtherHeaderName: withNotOne, ButTwoValues\r\n" +
                 "oneMoreHeader: withNotOne, AndNotTwo, butThreeValues\r\n" +
-#if (netcoreapp && !uap)
+#if netcoreapp
                 "Content-Length: 26\r\n" +
 #endif
                 "\r\n" +
@@ -176,14 +176,14 @@ namespace System.Net.Http.Functional.Tests
             mc.Add(new StringContent("This is a StringContent"));
 
             var expected = "--theBoundary\r\n" +
-#if (netcoreapp && !uap)
+#if netcoreapp
                 "Content-Length: 26\r\n" +
 #endif
                 "\r\n" +
                 "This is a ByteArrayContent\r\n" +
                 "--theBoundary\r\n" +
                 "Content-Type: text/plain; charset=utf-8\r\n" +
-#if (netcoreapp && !uap)
+#if netcoreapp
                 "Content-Length: 23\r\n" +
 #endif
                 "\r\n" +
