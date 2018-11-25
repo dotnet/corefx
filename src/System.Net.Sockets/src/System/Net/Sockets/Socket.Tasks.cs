@@ -1010,6 +1010,8 @@ namespace System.Net.Sockets
 
             private void InvokeContinuation(Action<object> continuation, object state, bool forceAsync)
             {
+                Debug.Assert(_executionContext == null);
+
                 object scheduler = _scheduler;
                 _scheduler = null;
 
@@ -1031,7 +1033,7 @@ namespace System.Net.Sockets
                 }
                 else if (forceAsync)
                 {
-                    ThreadPool.QueueUserWorkItem(continuation, state, preferLocal: true);
+                    ThreadPool.UnsafeQueueUserWorkItem(continuation, state, preferLocal: true);
                 }
                 else
                 {
