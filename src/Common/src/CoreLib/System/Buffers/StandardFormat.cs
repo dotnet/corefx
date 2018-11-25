@@ -71,8 +71,30 @@ namespace System.Buffers
         /// </summary>
         public static StandardFormat Parse(ReadOnlySpan<char> format)
         {
+            ParseHelper(format, out StandardFormat standardFormat, true);
+
+            return standardFormat;
+        }
+
+        /// <summary>
+        /// Converts a classic .NET format string into a StandardFormat
+        /// </summary>
+        [System.Obsolete]public static StandardFormat Parse(string format) => format == null ? default : Parse(format.AsSpan());
+
+        /// <summary>
+        /// Tries to convert a classic .NET format string into a StandardFormat. A return value indicates whether the conversion succeeded or failed.
+        /// </summary>
+        public static bool TryParse(ReadOnlySpan<char> format, out StandardFormat result)
+        {
+            return ParseHelper(format, out standardFormat, false);
+        }
+
+        private static bool ParseHelper(ReadOnlySpan<char> format, out StandardFormat standardFormat, bool throws)
+        {
+            standardFormat = default;
+
             if (format.Length == 0)
-                return default;
+                return true;
 
             char symbol = format[0];
             byte precision;
@@ -87,23 +109,19 @@ namespace System.Buffers
                 {
                     uint digit = format[srcIndex] - 48u; // '0'
                     if (digit > 9)
-                        throw new FormatException(SR.Format(SR.Argument_CannotParsePrecision, MaxPrecision));
+                        return throws ? throw new FormatException(SR.Format(SR.Argument_CannotParsePrecision, MaxPrecision)) : false;
 
                     parsedPrecision = parsedPrecision * 10 + digit;
                     if (parsedPrecision > MaxPrecision)
-                        throw new FormatException(SR.Format(SR.Argument_PrecisionTooLarge, MaxPrecision));
+                        return throws ? throw new FormatException(SR.Format(SR.Argument_PrecisionTooLarge, MaxPrecision)) : false;
                 }
 
                 precision = (byte)parsedPrecision;
             }
 
-            return new StandardFormat(symbol, precision);
+            standardFormat = new StandardFormat(symbol, precision);
+            return true;
         }
-
-        /// <summary>
-        /// Converts a classic .NET format string into a StandardFormat
-        /// </summary>
-        public static StandardFormat Parse(string format) => format == null ? default : Parse(format.AsSpan());
 
         /// <summary>
         /// Returns true if both the Symbol and Precision are equal.
