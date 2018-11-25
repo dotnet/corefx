@@ -30,25 +30,6 @@ namespace System.IO.Pipelines
         public abstract void Schedule(Action<object> action, object state);
 
         internal virtual void UnsafeSchedule(Action<object> action, object state)
-        {
-            bool restoreFlow = false;
-            try
-            {
-                if (!ExecutionContext.IsFlowSuppressed())
-                {
-                    ExecutionContext.SuppressFlow();
-                    restoreFlow = true;
-                }
-
-                Schedule(action, state);
-            }
-            finally
-            {
-                if (restoreFlow)
-                {
-                    ExecutionContext.RestoreFlow();
-                }
-            }
-        }
+            => Schedule(action, state);
     }
 }
