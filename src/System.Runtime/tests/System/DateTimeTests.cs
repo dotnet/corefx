@@ -869,7 +869,6 @@ namespace System.Tests
         [Theory]
         [InlineData(3155378976000000000)]
         [InlineData(long.MaxValue)]
-        [InlineData(3155378976000000000 | ((long)DateTimeKind.Local << 62))]
         [InlineData(3155378976000000000 | ((long)DateTimeKind.Utc << 62))]
         [InlineData(long.MaxValue | ((long)DateTimeKind.Utc << 62))]
         public void FromBinary_OutOfRangeTicks_ThrowsArgumentException(long dateData)
@@ -890,7 +889,7 @@ namespace System.Tests
         [MemberData(nameof(ToFileTime_TestData))]
         public void ToFileTime_Invoke_ReturnsExpected(DateTime date)
         {
-            Assert.Equal(date, DateTime.FromFileTime(date.ToFileTime()));
+            Assert.Equal(date, DateTime.FromFileTime(date.ToFileTime()).ToLocalTime());
         }
 
         public static IEnumerable<object[]> ToFileTime_Overflow_TestData()
