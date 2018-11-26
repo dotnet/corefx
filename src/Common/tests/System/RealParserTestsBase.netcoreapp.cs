@@ -288,6 +288,32 @@ namespace System.Tests
             CheckOneDouble(s, expectedBits);
         }
 
+        [Theory]
+        [InlineData("-0", 0x8000000000000000ul)]
+        [InlineData("-0.0", 0x8000000000000000ul)]
+        [InlineData("-infinity", 0xFFF0000000000000ul)]
+        [InlineData("-iNfInItY", 0xFFF0000000000000ul)]
+        [InlineData("-INFINITY", 0xFFF0000000000000ul)]
+        [InlineData("infinity", 0x7FF0000000000000)]
+        [InlineData("InFiNiTy", 0x7FF0000000000000)]
+        [InlineData("INFINITY", 0x7FF0000000000000)]
+        [InlineData("+infinity", 0x7FF0000000000000)]
+        [InlineData("+InFiNiTy", 0x7FF0000000000000)]
+        [InlineData("+INFINITY", 0x7FF0000000000000)]
+        [InlineData("-nan", 0xFFF8000000000000ul)]
+        [InlineData("-nAn", 0xFFF8000000000000ul)]
+        [InlineData("-NAN", 0xFFF8000000000000ul)]
+        [InlineData("nan", 0xFFF8000000000000ul)]
+        [InlineData("Nan", 0xFFF8000000000000ul)]
+        [InlineData("NAN", 0xFFF8000000000000ul)]
+        [InlineData("+nan", 0xFFF8000000000000ul)]
+        [InlineData("+NaN", 0xFFF8000000000000ul)]
+        [InlineData("+NAN", 0xFFF8000000000000ul)]
+        public void TestParserDouble_SpecialValues(string s, ulong expectedBits)
+        {
+            CheckOneDouble(s, expectedBits);
+        }
+
         /// <summary>
         /// Test round tripping for some specific floating-point values constructed to test the edge cases of conversion implementations.
         /// </summary>
@@ -396,6 +422,32 @@ namespace System.Tests
         //                          ^
         [InlineData("0.99999992549419403076171875", 0x3f7fffff)]
         public void TestParserSingle_SpecificValues(string s, uint expectedBits)
+        {
+            CheckOneSingle(s, expectedBits);
+        }
+
+        [Theory]
+        [InlineData("-0", 0x80000000u)]
+        [InlineData("-0.0", 0x80000000u)]
+        [InlineData("-infinity", 0xFF800000u)]
+        [InlineData("-iNfInItY", 0xFF800000u)]
+        [InlineData("-INFINITY", 0xFF800000u)]
+        [InlineData("infinity", 0x7F800000)]
+        [InlineData("InFiNiTy", 0x7F800000)]
+        [InlineData("INFINITY", 0x7F800000)]
+        [InlineData("+infinity", 0x7F800000)]
+        [InlineData("+InFiNiTy", 0x7F800000)]
+        [InlineData("+INFINITY", 0x7F800000)]
+        [InlineData("-nan", 0xFFC00000u)]
+        [InlineData("-nAn", 0xFFC00000u)]
+        [InlineData("-NAN", 0xFFC00000u)]
+        [InlineData("nan", 0xFFC00000u)]
+        [InlineData("Nan", 0xFFC00000u)]
+        [InlineData("NAN", 0xFFC00000u)]
+        [InlineData("+nan", 0xFFC00000u)]
+        [InlineData("+NaN", 0xFFC00000u)]
+        [InlineData("+NAN", 0xFFC00000u)]
+        public void TestParserSingle_SpecialValues(string s, uint expectedBits)
         {
             CheckOneSingle(s, expectedBits);
         }
