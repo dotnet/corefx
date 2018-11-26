@@ -79,7 +79,7 @@ namespace System.Buffers
         /// <summary>
         /// Converts a classic .NET format string into a StandardFormat
         /// </summary>
-        [System.Obsolete]public static StandardFormat Parse(string format) => format == null ? default : Parse(format.AsSpan());
+        public static StandardFormat Parse(string format) => format == null ? default : Parse(format.AsSpan());
 
         /// <summary>
         /// Tries to convert a classic .NET format string into a StandardFormat. A return value indicates whether the conversion succeeded or failed.
