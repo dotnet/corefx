@@ -95,25 +95,50 @@ namespace System.Drawing.Printing.Tests
             // try once with then once without context
             for (var context = new MyTypeDescriptorContext(); context != null; context = null)
             {
+                object result;
                 if (PlatformDetection.IsFullFramework)
                 {
                     Assert.Throws<Exception>(() => mc.ConvertFrom(context, culture, "1;2;3;4"));
-                    return;
+                    // uses CultureInfo.InvariantCulture.TextInfo.ListSeparator[0] as separator, which is: ","
+                    result = mc.ConvertFrom(context, culture, "1,2,3,4");
                 }
-                object result = mc.ConvertFrom(context, culture, "1;2;3;4");
+                else
+                {
+                    result = mc.ConvertFrom(context, culture, "1;2;3;4");
+                }
                 Assert.IsType<Margins>(result);
                 Margins margins = result as Margins;
                 Assert.Equal(1, margins.Left);
                 Assert.Equal(2, margins.Right);
                 Assert.Equal(3, margins.Top);
                 Assert.Equal(4, margins.Bottom);
+            }
+        }
 
+        [Fact]
+        public void ConvertFrom_Throws()
+        {
+
+            MarginsConverter mc = new MarginsConverter();
+            CultureInfo culture = CultureInfo.InvariantCulture;
+
+            // try once with then once without context
+            for (var context = new MyTypeDescriptorContext(); context != null; context = null)
+            {
                 Assert.Throws<NotSupportedException>(() => mc.ConvertFrom(context, null, null));
                 Assert.Throws<NotSupportedException>(() => mc.ConvertFrom(context, culture, null));
                 Assert.Throws<NotSupportedException>(() => mc.ConvertFrom(context, culture, Guid.NewGuid()));
 
-                Assert.Throws<ArgumentException>(() => mc.ConvertFrom(context, null, "wrong string format"));
-                Assert.Throws<ArgumentException>(() => mc.ConvertFrom(context, culture, "wrong string format"));
+                if (PlatformDetection.IsFullFramework)
+                {
+                    Assert.Throws<Exception>(() => mc.ConvertFrom(context, null, "wrong string format"));
+                    Assert.Throws<Exception>(() => mc.ConvertFrom(context, culture, "wrong string format"));
+                }
+                else
+                {
+                    Assert.Throws<ArgumentException>(() => mc.ConvertFrom(context, null, "wrong string format"));
+                    Assert.Throws<ArgumentException>(() => mc.ConvertFrom(context, culture, "wrong string format"));
+                }
             }
         }
 
@@ -134,6 +159,7 @@ namespace System.Drawing.Printing.Tests
                 Assert.IsType<string>(converted);
                 if (PlatformDetection.IsFullFramework)
                 {
+                    // uses CultureInfo.InvariantCulture.TextInfo.ListSeparator[0] as separator, which is: ","
                     Assert.Equal("1, 2, 3, 4", converted);
                 }
                 else
