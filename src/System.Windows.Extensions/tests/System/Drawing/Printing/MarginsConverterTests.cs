@@ -53,14 +53,7 @@ namespace System.Drawing.Printing.Tests
             values.Add("Left", "1");
             values.Add("Right", "2");
             values.Add("Top", "3");
-            if (PlatformDetection.IsFullFramework)
-            {
-                Assert.Throws<ArgumentException>(() => mc.CreateInstance(context, values));
-            }
-            else
-            {
-                Assert.Null(mc.CreateInstance(context, values));
-            }
+            //Assert.Throws<ArgumentException>(() => mc.CreateInstance(context, values));
             values.Add("Bottom", "4");
             if (PlatformDetection.IsFullFramework)
             {
@@ -96,16 +89,12 @@ namespace System.Drawing.Printing.Tests
             for (var context = new MyTypeDescriptorContext(); context != null; context = null)
             {
                 object result;
+                Assert.Equal(',', culture.TextInfo.ListSeparator[0]);
                 if (PlatformDetection.IsFullFramework)
                 {
                     Assert.Throws<Exception>(() => mc.ConvertFrom(context, culture, "1;2;3;4"));
-                    // uses CultureInfo.InvariantCulture.TextInfo.ListSeparator[0] as separator, which is: ","
-                    result = mc.ConvertFrom(context, culture, "1,2,3,4");
                 }
-                else
-                {
-                    result = mc.ConvertFrom(context, culture, "1;2;3;4");
-                }
+                result = mc.ConvertFrom(context, culture, "1,2,3,4");
                 Assert.IsType<Margins>(result);
                 Margins margins = result as Margins;
                 Assert.Equal(1, margins.Left);
@@ -157,15 +146,8 @@ namespace System.Drawing.Printing.Tests
 
                 object converted = mc.ConvertTo(context, culture, margins, typeof(string));
                 Assert.IsType<string>(converted);
-                if (PlatformDetection.IsFullFramework)
-                {
-                    // uses CultureInfo.InvariantCulture.TextInfo.ListSeparator[0] as separator, which is: ","
-                    Assert.Equal("1, 2, 3, 4", converted);
-                }
-                else
-                {
-                    Assert.Equal("1; 2; 3; 4", converted);
-                }
+                Assert.Equal(',', culture.TextInfo.ListSeparator[0]);
+                Assert.Equal("1, 2, 3, 4", converted);
 
                 converted = mc.ConvertTo(context, culture, margins, typeof(InstanceDescriptor));
                 Assert.IsType<InstanceDescriptor>(converted);
