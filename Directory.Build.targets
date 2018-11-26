@@ -149,6 +149,8 @@
 
   <Import Project="$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets" Condition="Exists('$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets')" />
 
+  <Import Project="C:\git\arcade\src\Microsoft.DotNet.CoreFxTesting\build\Microsoft.DotNet.CoreFxTesting.targets" />
+
   <!-- permit a wrapping build system to contribute targets to this build -->
   <Import Condition="Exists('$(MSBuildThisFileDirectory)..\open.targets')" Project="$(MSBuildThisFileDirectory)..\open.targets" />
 

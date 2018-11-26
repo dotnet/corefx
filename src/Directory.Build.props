@@ -18,4 +18,24 @@
     -->
     <AssemblySearchPaths>$(AssemblySearchPaths);$(RefPath);{RawFileName}</AssemblySearchPaths>
   </PropertyGroup>
+
+  <!-- 
+    We need to filter the data to only the assembly being tested. Otherwise we will gather tons of data about other assemblies.
+    If the code being tested is part of the runtime itself, it requires special treatment.
+  -->
+  <PropertyGroup Condition="'$(AssemblyBeingTested)' == ''">
+    <_ProjectDirectoryUnderSourceDir>$(MSBuildProjectDirectory.SubString($(SourceDir.Length)))</_ProjectDirectoryUnderSourceDir>
+    <AssemblyBeingTested>$(_ProjectDirectoryUnderSourceDir.SubString(0, $(_ProjectDirectoryUnderSourceDir.IndexOfAny("\\/"))))</AssemblyBeingTested>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <CoverageExcludeFile Include="$(SourceDir)Common/src/System/SR.*" />
+    <CoverageExcludeFile Include="$(SourceDir)Common/src/System/NotImplemented.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Use IL version of System.Private.CoreLib and link to the testhost folder to probe additional assemblies. -->
+    <CoverageProbePath Include="shared\Microsoft.NETCore.App\9.9.9\il" />
+    <CoverageProbePath Include="shared\Microsoft.NETCore.App\9.9.9" />
+  </ItemGroup>
 </Project>

@@ -5,8 +5,7 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
     <TestRuntime>true</TestRuntime>
     <!-- Overriding the runtime config file to include "Switch.System.Globalization.EnforceJapaneseEraYearRanges": true -->
-    <TestRuntimeConfigPath Condition="'$(UseCoverageDedicatedRuntime)' != 'true'">$(AppDesignerFolder)/xunit.console.runtimeconfig.json</TestRuntimeConfigPath>
-    <TestRuntimeConfigPath Condition="'$(UseCoverageDedicatedRuntime)' == 'true'">$(AppDesignerFolder)/coverage.runtimeconfig.json</TestRuntimeConfigPath>
+    <TestRuntimeConfigPath>$(AppDesignerFolder)/runtimeconfig.json</TestRuntimeConfigPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CalendarTests.cs" />

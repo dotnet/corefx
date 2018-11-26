@@ -39,7 +39,7 @@
     <ReferenceFromRuntime Include="netstandard" />
   </ItemGroup>
   <ItemGroup>
-    <AdditionalCodeCoverageAssemblies Include="Microsoft.CSharp" />
+    <AssembliesBeingTested Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CompilerTests.cs" />

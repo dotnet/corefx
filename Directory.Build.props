@@ -50,12 +50,15 @@
     <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' == 'unused'"></ProjectAssetsFile>
   </PropertyGroup>
 
+  <Import Project="C:\git\arcade\src\Microsoft.DotNet.CoreFxTesting\build\Microsoft.DotNet.CoreFxTesting.props" />
+
   <!-- Common repo directories -->
   <PropertyGroup>
     <!-- Properties to remove with buildtools removal -->
     <ProjectDir>$(RepoRoot)</ProjectDir>
-    <SourceDir>$(ProjectDir)src\</SourceDir>
     <BinDir>$(ProjectDir)artifacts\bin\</BinDir>
+
+    <SourceDir>$(ProjectDir)src\</SourceDir>
 
     <!-- CoreFx sepcific paths -->
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
@@ -435,14 +438,7 @@
 
   <PropertyGroup>
     <!-- Don't run tests if we're building another platform's binaries on Windows -->
-    <SkipTests Condition="'$(SkipTests)'=='' and ('$(OsEnvironment)'=='Windows_NT' and '$(TargetsWindows)'!='true' and '$(OSGroup)'!='AnyOS')">true</SkipTests>
-
-    <!--
-      Set these properties early as they are consumed by some test projects.
-      TODO: Remove when https://github.com/dotnet/corefx/issues/32421 is fixed.
-    -->
-    <CodeCoverageEnabled Condition="'$(IsTestProject)' == 'true' AND '$(IsPerformanceTestProject)' != 'true' AND '$(SkipTests)' != 'true' AND '$(Coverage)' == 'true'">true</CodeCoverageEnabled>
-    <UseCoverageDedicatedRuntime Condition="'$(UseCoverageDedicatedRuntime)' == '' AND '$(CodeCoverageEnabled)' == 'true'">true</UseCoverageDedicatedRuntime>
+    <SkipTests Condition="'$(SkipTests)' == '' and ('$(OsEnvironment)'=='Windows_NT' and '$(TargetsWindows)'!='true' and '$(OSGroup)'!='AnyOS')">true</SkipTests>
 
     <!-- F5 and debugging support for netcoreapp and netfx inside VS. -->
     <EnableLaunchSettings Condition="'$(EnableLaunchSettings)' == ''">true</EnableLaunchSettings>
