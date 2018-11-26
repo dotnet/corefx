@@ -53,7 +53,7 @@ namespace System.Drawing.Printing.Tests
             values.Add("Left", "1");
             values.Add("Right", "2");
             values.Add("Top", "3");
-            //Assert.Throws<ArgumentException>(() => mc.CreateInstance(context, values));
+            Assert.Throws<ArgumentException>(() => mc.CreateInstance(context, values));
             values.Add("Bottom", "4");
             if (PlatformDetection.IsFullFramework)
             {
