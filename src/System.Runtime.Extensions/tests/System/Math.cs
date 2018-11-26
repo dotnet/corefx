@@ -1456,25 +1456,30 @@ namespace System.Tests
             AssertEqual(expectedResult, Math.Pow(x, y), allowedVariance);
         }
 
-        [Fact]
-        public static void Round_Decimal()
+        public static IEnumerable<object[]> Round_Digits_TestData
         {
-            Assert.Equal(0.0m, Math.Round(0.0m));
-            Assert.Equal(1.0m, Math.Round(1.4m));
-            Assert.Equal(2.0m, Math.Round(1.5m));
-            Assert.Equal(2e16m, Math.Round(2e16m));
-            Assert.Equal(0.0m, Math.Round(-0.0m));
-            Assert.Equal(-1.0m, Math.Round(-1.4m));
-            Assert.Equal(-2.0m, Math.Round(-1.5m));
-            Assert.Equal(-2e16m, Math.Round(-2e16m));
-        }
+            get 
+            {
+                yield return new object[] {0, 0, 3, MidpointRounding.ToEven};
+                yield return new object[] {3.42156, 3.422, 3, MidpointRounding.ToEven};
+                yield return new object[] {-3.42156, -3.422, 3, MidpointRounding.ToEven};
 
-        [Fact]
-        public static void Round_Decimal_Digits()
-        {
-            Assert.Equal(3.422m, Math.Round(3.42156m, 3, MidpointRounding.AwayFromZero));
-            Assert.Equal(-3.422m, Math.Round(-3.42156m, 3, MidpointRounding.AwayFromZero));
-            Assert.Equal(decimal.Zero, Math.Round(decimal.Zero, 3, MidpointRounding.AwayFromZero));
+                yield return new object[] {0, 0, 3, MidpointRounding.AwayFromZero};
+                yield return new object[] {3.42156, 3.422, 3, MidpointRounding.AwayFromZero};
+                yield return new object[] {-3.42156, -3.422, 3, MidpointRounding.AwayFromZero};
+
+                yield return new object[] {0, 0, 3, MidpointRounding.ToZero};
+                yield return new object[] {3.42156, 3.421, 3, MidpointRounding.ToZero};
+                yield return new object[] {-3.42156, -3.421, 3, MidpointRounding.ToZero};
+
+                yield return new object[] {0, 0, 3, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {3.42156, 3.421, 3, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {-3.42156, -3.422, 3, MidpointRounding.ToNegativeInfinity};
+
+                yield return new object[] {0, 0, 3, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {3.42156, 3.422, 3, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {-3.42156, -3.421, 3, MidpointRounding.ToPositiveInfinity};
+              }
         }
 
         [Fact]
@@ -1490,150 +1495,120 @@ namespace System.Tests
             Assert.Equal(-2e16, Math.Round(-2e16));
         }
 
-        [Fact]
-        public static void Round_Double_Digits()
+        [Theory]
+        [InlineData(MidpointRounding.ToEven)]
+        [InlineData(MidpointRounding.AwayFromZero)]
+        [InlineData(MidpointRounding.ToZero)]
+        [InlineData(MidpointRounding.ToNegativeInfinity)]
+        [InlineData(MidpointRounding.ToPositiveInfinity)]
+        public static void Round_Double_Digits(MidpointRounding mode)
         {
-            Assert.Equal(3.422, Math.Round(3.42156, 3, MidpointRounding.AwayFromZero), 10);
-            Assert.Equal(-3.422, Math.Round(-3.42156, 3, MidpointRounding.AwayFromZero), 10);
-            Assert.Equal(0.0, Math.Round(0.0, 3, MidpointRounding.AwayFromZero));
-            Assert.Equal(double.NaN, Math.Round(double.NaN, 3, MidpointRounding.AwayFromZero));
-            Assert.Equal(double.PositiveInfinity, Math.Round(double.PositiveInfinity, 3, MidpointRounding.AwayFromZero));
-            Assert.Equal(double.NegativeInfinity, Math.Round(double.NegativeInfinity, 3, MidpointRounding.AwayFromZero));
+            Assert.Equal(double.NaN, Math.Round(double.NaN, 3, mode));
+            Assert.Equal(double.PositiveInfinity, Math.Round(double.PositiveInfinity, 3, mode));
+            Assert.Equal(double.NegativeInfinity, Math.Round(double.NegativeInfinity, 3, mode));
         }
 
         [Theory]
-        [InlineData(11, 11, MidpointRounding.ToEven)]
-        [InlineData(11.4, 11, MidpointRounding.ToEven)]
-        [InlineData(11.5, 12, MidpointRounding.ToEven)]
-        [InlineData(11.6, 12, MidpointRounding.ToEven)]
-        [InlineData(-11, -11, MidpointRounding.ToEven)]
-        [InlineData(-11.4, -11, MidpointRounding.ToEven)]
-        [InlineData(-11.5, -12, MidpointRounding.ToEven)]
-        [InlineData(-11.6, -12, MidpointRounding.ToEven)]
-        [InlineData(11, 11, MidpointRounding.AwayFromZero)]
-        [InlineData(11.4, 11, MidpointRounding.AwayFromZero)]
-        [InlineData(11.5, 12, MidpointRounding.AwayFromZero)]
-        [InlineData(11.6, 12, MidpointRounding.AwayFromZero)]
-        [InlineData(-11, -11, MidpointRounding.AwayFromZero)]
-        [InlineData(-11.4, -11, MidpointRounding.AwayFromZero)]
-        [InlineData(-11.5, -12, MidpointRounding.AwayFromZero)]
-        [InlineData(-11.6, -12, MidpointRounding.AwayFromZero)]
-        [InlineData(11, 11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(11.4, 12, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(11.5, 12, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(11.6, 12, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(-11, -11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(-11.4, -11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(-11.5, -11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(-11.6, -11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(11.0, 11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(11.4, 11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(11.5, 11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(11.6, 11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(-11.0, -11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(-11.4, -12, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(-11.5, -12, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(-11.6, -12, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(11.0, 11, MidpointRounding.ToZero)]
-        [InlineData(11.4, 11, MidpointRounding.ToZero)]
-        [InlineData(11.5, 11, MidpointRounding.ToZero)]
-        [InlineData(11.6, 11, MidpointRounding.ToZero)]
-        [InlineData(-11.0, -11, MidpointRounding.ToZero)]
-        [InlineData(-11.4, -11, MidpointRounding.ToZero)]
-        [InlineData(-11.5, -11, MidpointRounding.ToZero)]
-        [InlineData(-11.6, -11, MidpointRounding.ToZero)]
+        [MemberData(nameof(Round_Digits_TestData))]
+        public static void Round_Double_Digits(double x, double expected, int digits, MidpointRounding mode)
+        {
+            Assert.Equal(expected, Math.Round(x, digits, mode));
+        }
+        
+        [Fact]
+        public static void Round_Decimal()
+        {
+            Assert.Equal(0.0m, Math.Round(0.0m));
+            Assert.Equal(1.0m, Math.Round(1.4m));
+            Assert.Equal(2.0m, Math.Round(1.5m));
+            Assert.Equal(2e16m, Math.Round(2e16m));
+            Assert.Equal(0.0m, Math.Round(-0.0m));
+            Assert.Equal(-1.0m, Math.Round(-1.4m));
+            Assert.Equal(-2.0m, Math.Round(-1.5m));
+            Assert.Equal(-2e16m, Math.Round(-2e16m));
+        }
+        
+        [Theory]
+        [MemberData(nameof(Round_Digits_TestData))]
+        public static void Round_Decimal_Digits(decimal x, decimal expected, int digits, MidpointRounding mode)
+        {
+            Assert.Equal(expected, Math.Round(x, digits, mode));
+        }
+
+        [Theory]
+        [InlineData(MidpointRounding.ToEven)]
+        [InlineData(MidpointRounding.AwayFromZero)]
+        [InlineData(MidpointRounding.ToZero)]
+        [InlineData(MidpointRounding.ToNegativeInfinity)]
+        [InlineData(MidpointRounding.ToPositiveInfinity)]
+        public static void Round_Decimal_Digits(MidpointRounding mode)
+        {
+            Assert.Equal(decimal.Zero, Math.Round(decimal.Zero, 3, mode));
+        }
+
+        public static IEnumerable<object[]> Round_Modes_TestData
+        {
+            get 
+            {
+                yield return new object[] {11, 11, MidpointRounding.ToEven};
+                yield return new object[] {11.4, 11, MidpointRounding.ToEven};
+                yield return new object[] {11.5, 12, MidpointRounding.ToEven};
+                yield return new object[] {11.6, 12, MidpointRounding.ToEven};
+                yield return new object[] {-11, -11, MidpointRounding.ToEven};
+                yield return new object[] {-11.4, -11, MidpointRounding.ToEven};
+                yield return new object[] {-11.5, -12, MidpointRounding.ToEven};
+                yield return new object[] {-11.6, -12, MidpointRounding.ToEven};
+                yield return new object[] {11, 11, MidpointRounding.AwayFromZero};
+                yield return new object[] {11.4, 11, MidpointRounding.AwayFromZero};
+                yield return new object[] {11.5, 12, MidpointRounding.AwayFromZero};
+                yield return new object[] {11.6, 12, MidpointRounding.AwayFromZero};
+                yield return new object[] {-11, -11, MidpointRounding.AwayFromZero};
+                yield return new object[] {-11.4, -11, MidpointRounding.AwayFromZero};
+                yield return new object[] {-11.5, -12, MidpointRounding.AwayFromZero};
+                yield return new object[] {-11.6, -12, MidpointRounding.AwayFromZero};
+                yield return new object[] {11, 11, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {11.4, 12, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {11.5, 12, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {11.6, 12, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {-11, -11, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {-11.4, -11, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {-11.5, -11, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {-11.6, -11, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {11.0, 11, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {11.4, 11, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {11.5, 11, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {11.6, 11, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {-11.0, -11, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {-11.4, -12, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {-11.5, -12, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {-11.6, -12, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {11.0, 11, MidpointRounding.ToZero};
+                yield return new object[] {11.4, 11, MidpointRounding.ToZero};
+                yield return new object[] {11.5, 11, MidpointRounding.ToZero};
+                yield return new object[] {11.6, 11, MidpointRounding.ToZero};
+                yield return new object[] {-11.0, -11, MidpointRounding.ToZero};
+                yield return new object[] {-11.4, -11, MidpointRounding.ToZero};
+                yield return new object[] {-11.5, -11, MidpointRounding.ToZero};
+                yield return new object[] {-11.6, -11, MidpointRounding.ToZero};
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(Round_Modes_TestData))]
         public static void Round_Double_Modes(double x, double expected, MidpointRounding mode)
         {
             Assert.Equal(expected, Math.Round(x, 0, mode));
         }
 
         [Theory]
-        [InlineData(11, 11, MidpointRounding.ToEven)]
-        [InlineData(11.4, 11, MidpointRounding.ToEven)]
-        [InlineData(11.5, 12, MidpointRounding.ToEven)]
-        [InlineData(11.6, 12, MidpointRounding.ToEven)]
-        [InlineData(-11, -11, MidpointRounding.ToEven)]
-        [InlineData(-11.4, -11, MidpointRounding.ToEven)]
-        [InlineData(-11.5, -12, MidpointRounding.ToEven)]
-        [InlineData(-11.6, -12, MidpointRounding.ToEven)]
-        [InlineData(11, 11, MidpointRounding.AwayFromZero)]
-        [InlineData(11.4, 11, MidpointRounding.AwayFromZero)]
-        [InlineData(11.5, 12, MidpointRounding.AwayFromZero)]
-        [InlineData(11.6, 12, MidpointRounding.AwayFromZero)]
-        [InlineData(-11, -11, MidpointRounding.AwayFromZero)]
-        [InlineData(-11.4, -11, MidpointRounding.AwayFromZero)]
-        [InlineData(-11.5, -12, MidpointRounding.AwayFromZero)]
-        [InlineData(-11.6, -12, MidpointRounding.AwayFromZero)]
-        [InlineData(11, 11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(11.4, 12, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(11.5, 12, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(11.6, 12, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(-11, -11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(-11.4, -11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(-11.5, -11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(-11.6, -11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(11.0, 11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(11.4, 11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(11.5, 11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(11.6, 11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(-11.0, -11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(-11.4, -12, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(-11.5, -12, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(-11.6, -12, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(11.0, 11, MidpointRounding.ToZero)]
-        [InlineData(11.4, 11, MidpointRounding.ToZero)]
-        [InlineData(11.5, 11, MidpointRounding.ToZero)]
-        [InlineData(11.6, 11, MidpointRounding.ToZero)]
-        [InlineData(-11.0, -11, MidpointRounding.ToZero)]
-        [InlineData(-11.4, -11, MidpointRounding.ToZero)]
-        [InlineData(-11.5, -11, MidpointRounding.ToZero)]
-        [InlineData(-11.6, -11, MidpointRounding.ToZero)]
+        [MemberData(nameof(Round_Modes_TestData))]
         public static void Round_Float_Modes(float x, float expected, MidpointRounding mode)
         {
             Assert.Equal(expected, MathF.Round(x, 0, mode));
         }
 
         [Theory]
-        [InlineData(11, 11, MidpointRounding.ToEven)]
-        [InlineData(11.4, 11, MidpointRounding.ToEven)]
-        [InlineData(11.5, 12, MidpointRounding.ToEven)]
-        [InlineData(11.6, 12, MidpointRounding.ToEven)]
-        [InlineData(-11, -11, MidpointRounding.ToEven)]
-        [InlineData(-11.4, -11, MidpointRounding.ToEven)]
-        [InlineData(-11.5, -12, MidpointRounding.ToEven)]
-        [InlineData(-11.6, -12, MidpointRounding.ToEven)]
-        [InlineData(11, 11, MidpointRounding.AwayFromZero)]
-        [InlineData(11.4, 11, MidpointRounding.AwayFromZero)]
-        [InlineData(11.5, 12, MidpointRounding.AwayFromZero)]
-        [InlineData(11.6, 12, MidpointRounding.AwayFromZero)]
-        [InlineData(-11, -11, MidpointRounding.AwayFromZero)]
-        [InlineData(-11.4, -11, MidpointRounding.AwayFromZero)]
-        [InlineData(-11.5, -12, MidpointRounding.AwayFromZero)]
-        [InlineData(-11.6, -12, MidpointRounding.AwayFromZero)]
-        [InlineData(11, 11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(11.4, 12, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(11.5, 12, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(11.6, 12, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(-11, -11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(-11.4, -11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(-11.5, -11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(-11.6, -11, MidpointRounding.ToPositiveInfinity)]
-        [InlineData(11.0, 11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(11.4, 11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(11.5, 11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(11.6, 11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(-11.0, -11, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(-11.4, -12, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(-11.5, -12, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(-11.6, -12, MidpointRounding.ToNegativeInfinity)]
-        [InlineData(11.0, 11, MidpointRounding.ToZero)]
-        [InlineData(11.4, 11, MidpointRounding.ToZero)]
-        [InlineData(11.5, 11, MidpointRounding.ToZero)]
-        [InlineData(11.6, 11, MidpointRounding.ToZero)]
-        [InlineData(-11.0, -11, MidpointRounding.ToZero)]
-        [InlineData(-11.4, -11, MidpointRounding.ToZero)]
-        [InlineData(-11.5, -11, MidpointRounding.ToZero)]
-        [InlineData(-11.6, -11, MidpointRounding.ToZero)]
+        [MemberData(nameof(Round_Modes_TestData))]
         public static void Round_Decimal_Modes(decimal x, decimal expected, MidpointRounding mode)
         {
             Assert.Equal(expected, Math.Round(x, 0, mode));
