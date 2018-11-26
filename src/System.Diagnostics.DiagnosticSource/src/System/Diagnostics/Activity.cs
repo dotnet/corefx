@@ -314,7 +314,8 @@ namespace System.Diagnostics
                     StartTimeUtc = GetUtcNow();
                 }
 
-                if (IdFormat == ActivityIdFormat.W3C || (ParentId == null && DefaultIdFormat == ActivityIdFormat.W3C))
+                var defaultFormat = DefaultIdFormat;
+                if (IdFormat == ActivityIdFormat.W3C || defaultFormat == ActivityIdFormat.ForceW3C || (ParentId == null && defaultFormat == ActivityIdFormat.W3C))
                 {
                     Id = GenerateW3CId();
                     IdFormat = ActivityIdFormat.W3C;
@@ -607,5 +608,6 @@ namespace System.Diagnostics
         Unknown,      // ID format is not known.     
         Hierarchical, //|XXXX.XX.X_X ... see https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format
         W3C,          // 00-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX see https://w3c.github.io/trace-context/
+        ForceW3C,     // This value is only used by DefaultIdFormat.   It indicate the W3C format bit it also indicate W3C should be preferred over the parent ID format.  
     };
 }
