@@ -794,5 +794,22 @@ namespace System.Globalization.Tests
             string turkishString = "i\u0130";
             Assert.Equal(ordinalComparer.GetHashCode(turkishString), cultureComparer.GetHashCode(turkishString));
         }
+
+        [Theory]
+        [InlineData((int)'a', (int)'A', (int)'a')]
+        [InlineData((int)'A', (int)'A', (int)'a')]
+        [InlineData(0x00C1, 0x00C1, 0x00C1)] // U+00C1 LATIN CAPITAL LETTER A WITH ACUTE
+        [InlineData(0x00E1, 0x00E1, 0x00E1)] // U+00E1 LATIN SMALL LETTER A WITH ACUTE
+        [InlineData(0x00D7, 0x00D7, 0x00D7)] // U+00D7 MULTIPLICATION SIGN
+        public void TestRune(int original, int expectedToUpper, int expectedToLower)
+        {
+            Rune originalRune = new Rune(original);
+
+            Assert.Equal(expectedToUpper, Rune.ToUpperInvariant(originalRune).Value);
+            Assert.Equal(expectedToUpper, Rune.ToUpper(originalRune, CultureInfo.InvariantCulture).Value);
+
+            Assert.Equal(expectedToLower, Rune.ToLowerInvariant(originalRune).Value);
+            Assert.Equal(expectedToLower, Rune.ToLower(originalRune, CultureInfo.InvariantCulture).Value);
+        }
     }
 }
