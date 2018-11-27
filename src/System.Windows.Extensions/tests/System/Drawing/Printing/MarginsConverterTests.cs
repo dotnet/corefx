@@ -94,6 +94,10 @@ namespace System.Drawing.Printing.Tests
                 {
                     Assert.Throws<Exception>(() => mc.ConvertFrom(context, culture, "1;2;3;4"));
                 }
+                else
+                {
+                    Assert.Throws<ArgumentException>(() => mc.ConvertFrom(context, culture, "1;2;3;4"));
+                }
                 result = mc.ConvertFrom(context, culture, "1,2,3,4");
                 Assert.IsType<Margins>(result);
                 Margins margins = result as Margins;
