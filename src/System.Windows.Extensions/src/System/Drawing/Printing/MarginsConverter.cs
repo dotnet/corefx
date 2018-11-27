@@ -45,7 +45,6 @@ namespace System.Drawing.Printing
         /// <summary>
         /// Converts the given object to the converter's native type.
         /// </summary>
-        [SuppressMessage("Microsoft.Performance", "CA1808:AvoidCallsThatBoxValueTypes")]
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string strValue)
@@ -89,7 +88,6 @@ namespace System.Drawing.Printing
         /// type is string. If this cannot convert to the desitnation type, this will
         /// throw a NotSupportedException.
         /// </summary>
-        [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == null)
@@ -143,8 +141,6 @@ namespace System.Drawing.Printing
         /// for the object.  This is useful for objects that are immutable, but still
         /// want to provide changable properties.
         /// </summary>
-        [SuppressMessage("Microsoft.Performance", "CA1808:AvoidCallsThatBoxValueTypes")]
-        [SuppressMessage("Microsoft.Security", "CA2102:CatchNonClsCompliantExceptionsInGeneralHandlers")]
         public override object CreateInstance(ITypeDescriptorContext context, IDictionary propertyValues)
         {
             if (propertyValues == null)
