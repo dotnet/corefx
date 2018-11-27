@@ -72,6 +72,9 @@ namespace System.IO.Enumeration
 
             try
             {
+                // NtQueryDirectoryFile needs its buffer to be 64bit aligned to work
+                // successfully with FileFullDirectoryInformation on ARM32. AllocHGlobal
+                // will return pointers aligned as such, new byte[] does not.
                 _buffer = Marshal.AllocHGlobal(_bufferLength);
             }
             catch
@@ -208,7 +211,7 @@ namespace System.IO.Enumeration
 
             // We need more data
             if (GetData())
-                _entry = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)_buffer.ToPointer();
+                _entry = (Interop.NtDll.FILE_FULL_DIR_INFORMATION*)_buffer;
         }
 
         private bool DequeueNextDirectory()
