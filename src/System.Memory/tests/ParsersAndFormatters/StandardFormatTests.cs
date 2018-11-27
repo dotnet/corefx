@@ -64,12 +64,12 @@ namespace System.Buffers.Text.Tests
         [InlineData("G$", default(char), default(byte), false)]
         [InlineData("Ga", default(char), default(byte), false)]
         [InlineData("G100", default(char), default(byte), false)]
-        public static void StandardFormatTryParse(string formatString, char expectedSymbol, byte expectedPrecision, bool expectedSuccess)
+        public static void StandardFormatTryParse(string formatString, char expectedSymbol, byte expectedPrecision, bool expectedResult)
         {
-            bool success = StandardFormat.TryParse(formatString, out StandardFormat format);
+            bool result = StandardFormat.TryParse(formatString, out StandardFormat format);
             Assert.Equal(expectedSymbol, format.Symbol);
             Assert.Equal(expectedPrecision, format.Precision);
-            Assert.Equal(expectedSuccess, success);
+            Assert.Equal(expectedResult, result);
         }
 
         [Theory]
