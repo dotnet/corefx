@@ -147,19 +147,22 @@ namespace System.Drawing.Printing
             {
                 throw new ArgumentNullException(nameof(propertyValues));
             }
-            try
-            {
-                Margins margins = new Margins();
-                margins.Left = int.Parse(propertyValues["Left"].ToString());
-                margins.Right = int.Parse(propertyValues["Right"].ToString());
-                margins.Top = int.Parse(propertyValues["Top"].ToString());
-                margins.Bottom = int.Parse(propertyValues["Bottom"].ToString());
-                return margins;
-            }
-            catch (Exception)
+
+            object left = propertyValues["Left"];
+            object right = propertyValues["Right"];
+            object top = propertyValues["Top"];
+            object bottom = propertyValues["Bottom"];
+
+            if (left == null || right == null || bottom == null || top == null ||
+                !(left is int) || !(right is int) || !(bottom is int) || !(top is int))
             {
                 throw new ArgumentException(SR.Format(SR.PropertyValueInvalidEntry));
             }
+
+            return new Margins((int)left,
+                                (int)right,
+                                (int)top,
+                                (int)bottom);
         }
     }
 }

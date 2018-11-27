@@ -49,17 +49,13 @@ namespace System.Drawing.Printing.Tests
             MarginsConverter mc = new MarginsConverter();
             MyTypeDescriptorContext context = new MyTypeDescriptorContext();
 
-            IDictionary values = new Dictionary<string, string>();
-            values.Add("Left", "1");
-            values.Add("Right", "2");
-            values.Add("Top", "3");
+            IDictionary values = new Dictionary<string, int>();
+            values.Add("Left", 1);
+            values.Add("Right", 2);
+            values.Add("Top", 3);
             Assert.Throws<ArgumentException>(() => mc.CreateInstance(context, values));
-            values.Add("Bottom", "4");
-            if (PlatformDetection.IsFullFramework)
-            {
-                Assert.Throws<ArgumentException>(() => mc.CreateInstance(context, values));
-                return;
-            }
+            values.Add("Bottom", 4);
+
             object result = mc.CreateInstance(context, values);
             Assert.NotNull(result);
 
