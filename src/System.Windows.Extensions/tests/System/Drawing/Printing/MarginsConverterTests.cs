@@ -90,14 +90,7 @@ namespace System.Drawing.Printing.Tests
             {
                 object result;
                 Assert.Equal(',', culture.TextInfo.ListSeparator[0]);
-                if (PlatformDetection.IsFullFramework)
-                {
-                    Assert.Throws<Exception>(() => mc.ConvertFrom(context, culture, "1;2;3;4"));
-                }
-                else
-                {
-                    Assert.Throws<ArgumentException>(() => mc.ConvertFrom(context, culture, "1;2;3;4"));
-                }
+                AssertExtensions.Throws<ArgumentException, Exception>(() => mc.ConvertFrom(context, culture, "1;2;3;4"));
                 result = mc.ConvertFrom(context, culture, "1,2,3,4");
                 Assert.IsType<Margins>(result);
                 Margins margins = result as Margins;
@@ -121,17 +114,8 @@ namespace System.Drawing.Printing.Tests
                 Assert.Throws<NotSupportedException>(() => mc.ConvertFrom(context, null, null));
                 Assert.Throws<NotSupportedException>(() => mc.ConvertFrom(context, culture, null));
                 Assert.Throws<NotSupportedException>(() => mc.ConvertFrom(context, culture, Guid.NewGuid()));
-
-                if (PlatformDetection.IsFullFramework)
-                {
-                    Assert.Throws<Exception>(() => mc.ConvertFrom(context, null, "wrong string format"));
-                    Assert.Throws<Exception>(() => mc.ConvertFrom(context, culture, "wrong string format"));
-                }
-                else
-                {
-                    Assert.Throws<ArgumentException>(() => mc.ConvertFrom(context, null, "wrong string format"));
-                    Assert.Throws<ArgumentException>(() => mc.ConvertFrom(context, culture, "wrong string format"));
-                }
+                AssertExtensions.Throws<ArgumentException, Exception>(() => mc.ConvertFrom(context, null, "wrong string format"));
+                AssertExtensions.Throws<ArgumentException, Exception>(() => mc.ConvertFrom(context, culture, "wrong string format"));
             }
         }
 
