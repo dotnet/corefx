@@ -4,7 +4,6 @@
 
 using System;
 using System.ComponentModel;
-using System.DirectoryServices.AccountManagement;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Principal;
@@ -291,53 +290,67 @@ public sealed class WindowsTestAccount : IDisposable
 
             // Add special chars to ensure it satisfies password requirements.
             testAccountPassword = Convert.ToBase64String(randomBytes) + "_-As@!%*(1)4#2";
-            DateTime accountExpirationDate = DateTime.Now.AddMinutes(2);
-            using (var principalCtx = new PrincipalContext(ContextType.Machine))
+
+            USER_INFO_1 userInfo = new USER_INFO_1
             {
-                bool needToCreate = false;
-                using (var foundUserPrincipal = UserPrincipal.FindByIdentity(principalCtx, _userName))
+                usri1_name = _userName,
+                usri1_password = testAccountPassword,
+                usri1_priv = 1
+            };
+
+            // Create user and remove/create if already exists
+            uint result = NetUserAdd(null, 1, ref userInfo, out uint param_err);
+
+            // error codes https://docs.microsoft.com/en-us/windows/desktop/netmgmt/network-management-error-codes
+            // 0 == NERR_Success
+            if (result == 2224) // NERR_UserExists
+            {
+                result = NetUserDel(null, userInfo.usri1_name);
+                if (result != 0)
                 {
-                    if (foundUserPrincipal == null)
-                    {
-                        needToCreate = true;
-                    }
-                    else
-                    {
-                        // Somehow the account leaked from previous runs, however, password is lost, reset it.
-                        foundUserPrincipal.SetPassword(testAccountPassword);
-                        foundUserPrincipal.AccountExpirationDate = accountExpirationDate;
-                        foundUserPrincipal.Save();
-                    }
+                    throw new Win32Exception((int)result);
                 }
-
-                if (needToCreate)
+                result = NetUserAdd(null, 1, ref userInfo, out param_err);
+                if (result != 0)
                 {
-                    using (var userPrincipal = new UserPrincipal(principalCtx))
-                    {
-                        userPrincipal.SetPassword(testAccountPassword);
-                        userPrincipal.AccountExpirationDate = accountExpirationDate;
-                        userPrincipal.Name = _userName;
-                        userPrincipal.DisplayName = _userName;
-                        userPrincipal.Description = _userName;
-                        userPrincipal.Save();
-                    }
-                }
-
-                const int LOGON32_PROVIDER_DEFAULT = 0;
-                const int LOGON32_LOGON_INTERACTIVE = 2;
-
-                if (!LogonUser(_userName, ".", testAccountPassword, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, out _accountTokenHandle))
-                {
-                    _accountTokenHandle = null;
-                    throw new Exception($"Failed to get SafeAccessTokenHandle for test account {_userName}", new Win32Exception());
+                    throw new Win32Exception((int)result);
                 }
             }
+
+            const int LOGON32_PROVIDER_DEFAULT = 0;
+            const int LOGON32_LOGON_INTERACTIVE = 2;
+
+            if (!LogonUser(_userName, ".", testAccountPassword, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, out _accountTokenHandle))
+            {
+                _accountTokenHandle = null;
+                throw new Exception($"Failed to get SafeAccessTokenHandle for test account {_userName}", new Win32Exception());
+            }
+
         }
 
     }
 
     [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern bool LogonUser(string userName, string domain, string password, int logonType, int logonProvider, out SafeAccessTokenHandle safeAccessTokenHandle);
+
+    [DllImport("netapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    internal static extern uint NetUserAdd([MarshalAs(UnmanagedType.LPWStr)]string servername, uint level, ref USER_INFO_1 buf, out uint parm_err);
+
+    [DllImport("netapi32.dll")]
+    internal static extern uint NetUserDel([MarshalAs(UnmanagedType.LPWStr)]string servername, [MarshalAs(UnmanagedType.LPWStr)]string username);
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    internal struct USER_INFO_1
+    {
+        public string usri1_name;
+        public string usri1_password;
+        public uint usri1_password_age;
+        public uint usri1_priv;
+        public string usri1_home_dir;
+        public string usri1_comment;
+        public uint usri1_flags;
+        public string usri1_script_path;
+    }
 
     public void Dispose()
     {
@@ -349,22 +362,10 @@ public sealed class WindowsTestAccount : IDisposable
         _accountTokenHandle.Dispose();
         _accountTokenHandle = null;
 
-        using (var principalCtx = new PrincipalContext(ContextType.Machine))
-        using (var userPrincipal = UserPrincipal.FindByIdentity(principalCtx, AccountName))
+        uint result = NetUserDel(null, _userName);
+        if (result != 0)
         {
-            if (userPrincipal == null)
-            {
-                throw new Exception($"Failed to get user principal to delete test account {AccountName}");
-            }
-
-            try
-            {
-                userPrincipal.Delete();
-            }
-            catch (InvalidOperationException)
-            {
-                // TODO: Investigate, it always throw this exception with "Can't delete object already deleted", but it actually deletes it.
-            }
+            throw new Win32Exception((int)result);
         }
     }
 }
