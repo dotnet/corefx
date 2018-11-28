@@ -16,6 +16,7 @@ namespace System
     {
         public static Version OSXVersion => throw new PlatformNotSupportedException();
         public static Version OpenSslVersion => throw new PlatformNotSupportedException();
+        public static bool IsDrawingSupported => IsNotWindowsNanoServer && IsNotWindowsServerCore;
         public static bool IsSuperUser => throw new PlatformNotSupportedException();
         public static bool IsCentos6 => false;
         public static bool IsOpenSUSE => false;
@@ -29,6 +30,7 @@ namespace System
         public static bool IsUbuntu1710 => false;
         public static bool IsUbuntu1710OrHigher => false;
         public static bool IsUbuntu1804 => false;
+        public static bool IsUbuntu1810OrHigher => false;
         public static bool IsTizen => false;
         public static bool IsNotFedoraOrRedHatFamily => true;
         public static bool IsFedora => false;
@@ -95,6 +97,7 @@ namespace System
         public static bool IsWindows => true;
         public static bool IsWindows7 => GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
         public static bool IsWindows8x => GetWindowsVersion() == 6 && (GetWindowsMinorVersion() == 2 || GetWindowsMinorVersion() == 3);
+        public static bool IsWindows8xOrLater => new Version((int)GetWindowsVersion(), (int)GetWindowsMinorVersion()) >= new Version(6, 2);
 
         public static string LibcRelease => "glibc_not_found";
         public static string LibcVersion => "glibc_not_found";

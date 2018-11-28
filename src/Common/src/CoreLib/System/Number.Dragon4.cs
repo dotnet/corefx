@@ -129,15 +129,11 @@ namespace System
 
             if (k > 0)
             {
-                BigInteger poweredValue = new BigInteger(0);
-                BigInteger.Pow10((uint)(k), ref poweredValue);
-                s.Multiply(ref poweredValue);
+                s.MultiplyPow10((uint)(k));
             }
             else if (k < 0)
             {
-                BigInteger poweredValue = new BigInteger(0);
-                BigInteger.Pow10((uint)(-k), ref poweredValue);
-                r.Multiply(ref poweredValue);
+                r.MultiplyPow10((uint)(-k));
             }
 
             if (BigInteger.Compare(ref r, ref s) >= 0)
@@ -172,7 +168,7 @@ namespace System
                     break;
                 }
 
-                number.Digits[digitsNum] = (char)('0' + currentDigit);
+                number.Digits[digitsNum] = (byte)('0' + currentDigit);
                 digitsNum++;
 
                 r.Multiply10();
@@ -200,12 +196,12 @@ namespace System
 
             if (isRoundDown)
             {
-                number.Digits[digitsNum] = (char)('0' + currentDigit);
+                number.Digits[digitsNum] = (byte)('0' + currentDigit);
                 digitsNum++;
             }
             else
             {
-                char* pCurrentDigit = (number.GetDigitsPointer() + digitsNum);
+                byte* pCurrentDigit = (number.GetDigitsPointer() + digitsNum);
 
                 // Rounding up for 9 is special.
                 if (currentDigit == 9)
@@ -217,7 +213,7 @@ namespace System
                         if (pCurrentDigit == number.GetDigitsPointer())
                         {
                             // Output 1 at the next highest exponent
-                            *pCurrentDigit = '1';
+                            *pCurrentDigit = (byte)('1');
                             digitsNum++;
                             number.Scale += 1;
                             break;
@@ -229,7 +225,7 @@ namespace System
                         if (*pCurrentDigit != '9')
                         {
                             // increment the digit
-                            *pCurrentDigit += (char)(1);
+                            *pCurrentDigit += 1;
                             digitsNum++;
                             break;
                         }
@@ -238,21 +234,21 @@ namespace System
                 else
                 {
                     // It's simple if the digit is not 9.
-                    *pCurrentDigit = (char)('0' + currentDigit + 1);
+                    *pCurrentDigit = (byte)('0' + currentDigit + 1);
                     digitsNum++;
                 }
             }
 
             while (digitsNum < precision)
             {
-                number.Digits[digitsNum] = '0';
+                number.Digits[digitsNum] = (byte)('0');
                 digitsNum++;
             }
 
-            number.Digits[precision] = '\0';
+            number.Digits[precision] = (byte)('\0');
 
             number.Scale++;
-            number.Sign = double.IsNegative(value);
+            number.IsNegative = double.IsNegative(value);
         }
     }
 }

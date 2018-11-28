@@ -32,11 +32,12 @@ namespace System
         public static bool IsNotWindowsServerCore => !IsWindowsServerCore;
         public static bool IsNotWindowsIoTCore => !IsWindowsIoTCore;
         public static bool IsNotWindowsHomeEdition => !IsWindowsHomeEdition;
-        public static bool IsDrawingSupported => (IsNotWindowsNanoServer && IsNotWindowsIoTCore);
         public static bool IsArmProcess => RuntimeInformation.ProcessArchitecture == Architecture.Arm;
         public static bool IsNotArmProcess => !IsArmProcess;
         public static bool IsArm64Process => RuntimeInformation.ProcessArchitecture == Architecture.Arm64;
         public static bool IsNotArm64Process => !IsArm64Process;
+        public static bool IsArgIteratorSupported => IsWindows && (IsNotArmProcess || IsArm64Process);
+        public static bool IsArgIteratorNotSupported => !IsArgIteratorSupported;
 
         public static bool IsNotInAppContainer => !IsInAppContainer;
         public static bool IsWinRTSupported => IsWindows && !IsWindows7;
@@ -51,7 +52,7 @@ namespace System
         // Linux - OpenSsl supports alpn from openssl 1.0.2 and higher.
         // OSX - SecureTransport doesn't expose alpn APIs. #30492
         public static bool SupportsAlpn => (IsWindows && !IsWindows7) ||
-            (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
+            ((!IsOSX && !IsWindows) &&
             (OpenSslVersion.Major >= 1 && (OpenSslVersion.Minor >= 1 || OpenSslVersion.Build >= 2)));
         public static bool SupportsClientAlpn => SupportsAlpn ||
             (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && PlatformDetection.OSXVersion > new Version(10, 12));

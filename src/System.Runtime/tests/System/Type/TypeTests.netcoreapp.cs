@@ -218,19 +218,20 @@ namespace System.Tests
             {
                 Type theT = typeof(Outside<>).GetTypeInfo().GenericTypeParameters[0];
 
-                yield return new object[] { typeof(TypedReference), true };
-                yield return new object[] { typeof(RuntimeArgumentHandle), true };
-                yield return new object[] { typeof(Span<>), true };
-                yield return new object[] { typeof(Span<int>), true };
-                yield return new object[] { typeof(Span<>).MakeGenericType(theT), true };
+                yield return new object[] { typeof(ArgIterator), true };
                 yield return new object[] { typeof(ByRefLikeStruct), true };
                 yield return new object[] { typeof(RegularStruct), false };
-                yield return new object[] { typeof(object), false };
+                yield return new object[] { typeof(RuntimeArgumentHandle), true };
+                yield return new object[] { typeof(Span<>), true };
+                yield return new object[] { typeof(Span<>).MakeGenericType(theT), true };
+                yield return new object[] { typeof(Span<int>), true };
                 yield return new object[] { typeof(Span<int>).MakeByRefType(), false };
                 yield return new object[] { typeof(Span<int>).MakePointerType(), false };
+                yield return new object[] { typeof(TypedReference), true };
                 yield return new object[] { theT, false };
                 yield return new object[] { typeof(int[]), false };
                 yield return new object[] { typeof(int[,]), false };
+                yield return new object[] { typeof(object), false };
                 if (PlatformDetection.IsWindows) // GetTypeFromCLSID is Windows only
                 {
                     yield return new object[] { Type.GetTypeFromCLSID(default(Guid)), false };
@@ -272,8 +273,8 @@ namespace System.Tests
                 yield return new object[] { typeof(int[,]), false, false, false };
                 yield return new object[] { typeof(int).MakeByRefType(), false, false, false };
                 yield return new object[] { typeof(int).MakePointerType(), false, false, false };
-                yield return new object[] { typeof(G<>), false, false, false };
-                yield return new object[] { typeof(G<int>), false, false, false };
+                yield return new object[] { typeof(DummyGenericClassForTypeTestsNetcore<>), false, false, false };
+                yield return new object[] { typeof(DummyGenericClassForTypeTestsNetcore<int>), false, false, false };
                 if (PlatformDetection.IsWindows) // GetTypeFromCLSID is Windows only
                 {
                     yield return new object[] { Type.GetTypeFromCLSID(default(Guid)), false, false, false };
@@ -290,3 +291,5 @@ namespace System.Tests
         private static void GenericMethod<M>() { }
     }
 }
+
+internal class DummyGenericClassForTypeTestsNetcore<T> { }

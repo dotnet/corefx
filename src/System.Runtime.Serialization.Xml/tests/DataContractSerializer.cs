@@ -1120,6 +1120,7 @@ public static partial class DataContractSerializerTests
 
         Assert.True(myresolver.ResolveNameInvoked, "myresolver.ResolveNameInvoked is false");
         Assert.True(myresolver.TryResolveTypeInvoked, "myresolver.TryResolveTypeInvoked is false");
+        Assert.True(myresolver.DeclaredTypeIsNotNull, "myresolver.DeclaredTypeIsNotNull is false");
         Assert.True(input.OnSerializingMethodInvoked, "input.OnSerializingMethodInvoked is false");
         Assert.True(input.OnSerializedMethodInvoked, "input.OnSerializedMethodInvoked is false");
         Assert.True(output.OnDeserializingMethodInvoked, "output.OnDeserializingMethodInvoked is false");
@@ -4051,6 +4052,22 @@ public static partial class DataContractSerializerTests
         list.Clear();
         list.Add(new object());
         actual = DataContractSerializerHelper.SerializeAndDeserialize(list, "<TypeWithPrimitiveKnownTypes xmlns=\"http://schemas.datacontract.org/2004/07/\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><anyType/></TypeWithPrimitiveKnownTypes>");
+        Assert.NotNull(actual);
+    }
+
+    [ActiveIssue(33317, TestPlatforms.OSX)]
+    [Fact]
+    public static void DCS_DeeplyLinkedData()
+    {
+        TypeWithLinkedProperty head = new TypeWithLinkedProperty();
+        TypeWithLinkedProperty cur = head;
+        for (int i = 0; i < 513; i++)
+        {
+            cur.Child = new TypeWithLinkedProperty();
+            cur = cur.Child;
+        }
+        cur.Children = new List<TypeWithLinkedProperty> { new TypeWithLinkedProperty() };
+        TypeWithLinkedProperty actual = DataContractSerializerHelper.SerializeAndDeserialize(head, baseline: null, skipStringCompare: true);
         Assert.NotNull(actual);
     }
 

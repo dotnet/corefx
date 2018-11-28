@@ -48,6 +48,8 @@ namespace System.IO.Pipelines
         private readonly DefaultPipeReader _reader;
         private readonly DefaultPipeWriter _writer;
 
+        private readonly bool _useSynchronizationContext;
+
         private long _length;
         private long _currentWriteLength;
 
@@ -105,9 +107,9 @@ namespace System.IO.Pipelines
             _resumeWriterThreshold = options.ResumeWriterThreshold;
             _readerScheduler = options.ReaderScheduler;
             _writerScheduler = options.WriterScheduler;
-            var useSynchronizationContext = options.UseSynchronizationContext;
-            _readerAwaitable = new PipeAwaitable(completed: false, useSynchronizationContext);
-            _writerAwaitable = new PipeAwaitable(completed: true, useSynchronizationContext);
+            _useSynchronizationContext = options.UseSynchronizationContext;
+            _readerAwaitable = new PipeAwaitable(completed: false, _useSynchronizationContext);
+            _writerAwaitable = new PipeAwaitable(completed: true, _useSynchronizationContext);
             _reader = new DefaultPipeReader(this);
             _writer = new DefaultPipeWriter(this);
         }
@@ -116,6 +118,8 @@ namespace System.IO.Pipelines
         {
             _readerCompletion.Reset();
             _writerCompletion.Reset();
+            _readerAwaitable = new PipeAwaitable(completed: false, _useSynchronizationContext);
+            _writerAwaitable = new PipeAwaitable(completed: true, _useSynchronizationContext);
             _commitHeadIndex = 0;
             _currentWriteLength = 0;
             _length = 0;
@@ -614,8 +618,7 @@ namespace System.IO.Pipelines
                 // If the awaitable is already complete then return the value result directly
                 if (_readerAwaitable.IsCompleted)
                 {
-                    var readResult = new ReadResult();
-                    GetReadResult(ref readResult);
+                    GetReadResult(out ReadResult readResult);
                     result = new ValueTask<ReadResult>(readResult);
                 }
                 else
@@ -638,10 +641,9 @@ namespace System.IO.Pipelines
                     ThrowHelper.ThrowInvalidOperationException_NoReadingAllowed();
                 }
 
-                result = new ReadResult();
                 if (_length > 0 || _readerAwaitable.IsCompleted)
                 {
-                    GetReadResult(ref result);
+                    GetReadResult(out result);
                     return true;
                 }
 
@@ -649,6 +651,7 @@ namespace System.IO.Pipelines
                 {
                     ThrowHelper.ThrowInvalidOperationException_AlreadyReading();
                 }
+                result = default;
                 return false;
             }
         }
@@ -657,7 +660,7 @@ namespace System.IO.Pipelines
         {
             if (action != null)
             {
-                scheduler.Schedule(action, state);
+                scheduler.UnsafeSchedule(action, state);
             }
         }
 
@@ -681,13 +684,13 @@ namespace System.IO.Pipelines
                 if (completionData.ExecutionContext == null)
                 {
                     // We can run directly, this should be the default fast path
-                    scheduler.Schedule(completionData.Completion, completionData.CompletionState);
+                    scheduler.UnsafeSchedule(completionData.Completion, completionData.CompletionState);
                     return;
                 }
 
                 // We also have to run on the specified execution context so run the scheduler and execute the
                 // delegate on the execution context
-                scheduler.Schedule(s_scheduleWithExecutionContextCallback, completionData);
+                scheduler.UnsafeSchedule(s_scheduleWithExecutionContextCallback, completionData);
             }
             else
             {
@@ -781,34 +784,29 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowInvalidOperationException_GetResultNotCompleted();
             }
 
-            var result = new ReadResult();
             lock (_sync)
             {
-                GetReadResult(ref result);
+                GetReadResult(out ReadResult result);
+                return result;
             }
-            return result;
         }
 
-        private void GetReadResult(ref ReadResult result)
+        private void GetReadResult(out ReadResult result)
         {
-            if (_writerCompletion.IsCompletedOrThrow())
-            {
-                result._resultFlags |= ResultFlags.Completed;
-            }
-
+            bool isCompleted = _writerCompletion.IsCompletedOrThrow();
             bool isCanceled = _readerAwaitable.ObserveCancelation();
-            if (isCanceled)
-            {
-                result._resultFlags |= ResultFlags.Canceled;
-            }
-
+           
             // No need to read end if there is no head
             BufferSegment head = _readHead;
-
             if (head != null)
             {
                 // Reading commit head shared with writer
-                result._resultBuffer = new ReadOnlySequence<byte>(head, _readHeadIndex, _commitHead, _commitHeadIndex - _commitHead.Start);
+                var readOnlySequence = new ReadOnlySequence<byte>(head, _readHeadIndex, _commitHead, _commitHeadIndex - _commitHead.Start);
+                result = new ReadResult(readOnlySequence, isCanceled, isCompleted);
+            }
+            else
+            {
+                result = new ReadResult(default, isCanceled, isCompleted);
             }
 
             if (isCanceled)
