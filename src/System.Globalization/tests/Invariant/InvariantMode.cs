@@ -796,8 +796,10 @@ namespace System.Globalization.Tests
         }
 
         [Theory]
-        [InlineData((int)'a', (int)'A', (int)'a')]
-        [InlineData((int)'A', (int)'A', (int)'a')]
+        [InlineData('a', 'A', 'a')]
+        [InlineData('A', 'A', 'a')]
+        [InlineData('i', 'I', 'i')] // to verify that we don't special-case the Turkish I in the invariant globalization mode
+        [InlineData('I', 'I', 'i')]
         [InlineData(0x00C1, 0x00C1, 0x00C1)] // U+00C1 LATIN CAPITAL LETTER A WITH ACUTE
         [InlineData(0x00E1, 0x00E1, 0x00E1)] // U+00E1 LATIN SMALL LETTER A WITH ACUTE
         [InlineData(0x00D7, 0x00D7, 0x00D7)] // U+00D7 MULTIPLICATION SIGN
@@ -806,10 +808,10 @@ namespace System.Globalization.Tests
             Rune originalRune = new Rune(original);
 
             Assert.Equal(expectedToUpper, Rune.ToUpperInvariant(originalRune).Value);
-            Assert.Equal(expectedToUpper, Rune.ToUpper(originalRune, CultureInfo.InvariantCulture).Value);
+            Assert.Equal(expectedToUpper, Rune.ToUpper(originalRune, CultureInfo.GetCultureInfo("tr-TR")).Value);
 
             Assert.Equal(expectedToLower, Rune.ToLowerInvariant(originalRune).Value);
-            Assert.Equal(expectedToLower, Rune.ToLower(originalRune, CultureInfo.InvariantCulture).Value);
+            Assert.Equal(expectedToLower, Rune.ToLower(originalRune, CultureInfo.GetCultureInfo("tr-TR")).Value);
         }
     }
 }
