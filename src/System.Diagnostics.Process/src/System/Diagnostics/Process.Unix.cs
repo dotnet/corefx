@@ -429,8 +429,8 @@ namespace System.Diagnostics
                 }
                 else
                 {
-                    if ((throwOnNoExec == false)
-                        && (Interop.Sys.ConvertErrorPlatformToPal(errno) == Interop.Error.ENOEXEC))
+                    if (!throwOnNoExec &&
+                        new Interop.ErrorInfo(errno).Error == Interop.Error.ENOEXEC)
                     {
                         return false;
                     }
@@ -461,7 +461,6 @@ namespace System.Diagnostics
         /// <returns>The argv array.</returns>
         private static string[] ParseArgv(ProcessStartInfo psi, string resolvedExe = null, bool ignoreArguments = false)
         {
-            // Avoid building List<string>.
             if (string.IsNullOrEmpty(resolvedExe) &&
                 (ignoreArguments || (string.IsNullOrEmpty(psi.Arguments) && psi.ArgumentList.Count == 0)))
             {

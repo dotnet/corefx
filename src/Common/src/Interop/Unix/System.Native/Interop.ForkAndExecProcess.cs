@@ -29,14 +29,7 @@ internal static partial class Interop
                     redirectStdin ? 1 : 0, redirectStdout ? 1 : 0, redirectStderr ? 1 :0,
                     setUser ? 1 : 0, userId, groupId,
                     out lpChildPid, out stdinFd, out stdoutFd, out stderrFd);
-                if (result != 0)
-                {
-                    return Marshal.GetLastWin32Error();
-                }
-                else
-                {
-                    return 0;
-                }
+                return result == 0 ? 0 : Marshal.GetLastWin32Error();
             }
             finally
             {

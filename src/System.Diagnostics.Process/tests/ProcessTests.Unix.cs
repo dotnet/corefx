@@ -826,11 +826,24 @@ namespace System.Diagnostics.Tests
         }
 
         [DllImport("libc")]
+        private static extern int chmod(string path, int mode);
+
+        [DllImport("libc")]
         private static extern uint geteuid();
 
         [DllImport("libc")]
         private static extern int seteuid(uint euid);
 
         private static readonly string[] s_allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
+
+        private string WriteScriptFile(string directory, string name, int returnValue)
+        {
+            string filename = Path.Combine(directory, name);
+            File.WriteAllText(filename, $"#!/bin/sh\nexit {returnValue}\n");
+            // set x-bit
+            int mode = Convert.ToInt32("744", 8);
+            Assert.Equal(0, chmod(filename, mode));
+            return filename;
+        }
     }
 }

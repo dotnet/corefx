@@ -304,24 +304,6 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        private string WriteScriptFile(string directory, string name, int returnValue)
-        {
-            string filename = Path.Combine(directory, name);
-            if (PlatformDetection.IsWindows)
-            {
-                filename += ".bat";
-                File.WriteAllText(filename, $"exit {returnValue}");
-            }
-            else
-            {
-                File.WriteAllText(filename, $"#!/bin/sh\nexit {returnValue}\n");
-                // set x-bit
-                int mode = Convert.ToInt32("744", 8);
-                Assert.Equal(0, chmod(filename, mode));
-            }
-            return filename;
-        }
-
         [Fact]
         [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestExitCode()
@@ -1836,8 +1818,5 @@ namespace System.Diagnostics.Tests
 
             return secureString;
         }
-
-        [DllImport("libc")]
-        private static extern int chmod(string path, int mode);
     }
 }
