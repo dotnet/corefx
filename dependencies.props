@@ -30,7 +30,7 @@
   <PropertyGroup>
 
     <CoreFxExpectedPrerelease>servicing-27120-07</CoreFxExpectedPrerelease>
-    <MicrosoftNETCorePlatformsPackageVersion>2.1.2</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>2.1.0</MicrosoftNETCorePlatformsPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.3-uwp62-26926-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <ProjectNTfsExpectedPrerelease>rel-27026-00</ProjectNTfsExpectedPrerelease>
     <ProjectNTfsTestILCExpectedPrerelease>rel-27026-00</ProjectNTfsTestILCExpectedPrerelease>
