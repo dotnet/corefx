@@ -172,11 +172,15 @@
       <TestILCFolder Condition="'$(TestILCFolder)' == ''">$(PackagesDir)$(TestILCToolsPackageName)\$(ProjectNTfsTestILCPackageVersion)\TestILC</TestILCFolder>
     </PropertyGroup>
 
-    <Warning Text="Could not find the TestILC Tools at '$(TestILCFolder)'. Please run sync." Condition="('$(TestILCFolder)' == '' or !Exists('$(TestILCFolder)')) AND '$(BuildAllConfigurations)' != 'true'" />
+    <Warning Text="Could not find the TestILC Tools at '$(TestILCFolder)'. Please run sync." Condition="('$(TestILCFolder)' == '' OR !Exists('$(TestILCFolder)')) AND '$(BuildAllConfigurations)' != 'true'" />
 
-    <Copy Condition="'$(TestILCFolder)' != ''"
-          SourceFiles="$(TestILCFolder)"
-          DestinationFolder="$(InternalTestILCFolder)"
+    <ItemGroup Condition="Exists('$(TestILCFolder)')">
+      <TestILCFolderContents Include="$(TestILCFolder)\**\*" />
+    </ItemGroup>
+
+    <Copy Condition="Exists('$(TestILCFolder)')"
+          SourceFiles="@(TestILCFolderContents)"
+          DestinationFolder="$(InternalTestILCFolder)\%(RecursiveDir)"
           SkipUnchangedFiles="true" />
 
   </Target>
