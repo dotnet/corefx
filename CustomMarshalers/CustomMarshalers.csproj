@@ -5,6 +5,7 @@
     <RootNamespace>System.Runtime.InteropServices.CustomMarshalers</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>CS0618</NoWarn>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
 </Project>

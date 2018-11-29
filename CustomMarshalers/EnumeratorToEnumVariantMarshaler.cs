@@ -62,23 +62,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
                 return comObject as IEnumerator;
             }
 
-            IEnumVARIANT enumVariant = (IEnumVARIANT)comObject;
-
-            object key = typeof(EnumeratorViewOfEnumVariant);
-
-            if (Marshal.GetComObjectData(comObject, key) is EnumeratorViewOfEnumVariant managedView)
-            {
-                return managedView;
-            }
-            else
-            {
-                managedView = new EnumeratorViewOfEnumVariant(enumVariant);
-                if (!Marshal.SetComObjectData(comObject, key, managedView))
-                {
-                    managedView = (EnumeratorViewOfEnumVariant)Marshal.GetComObjectData(comObject, key);
-                }
-            }
-            return managedView;
+            return ComDataHelpers.GetOrCreateManagedViewFromComData<IEnumVARIANT, EnumeratorViewOfEnumVariant>(comObject, var => new EnumeratorViewOfEnumVariant(var));
         }
     }
 }
