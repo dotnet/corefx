@@ -47,7 +47,7 @@ namespace System.Reflection
 
                     // We do not add to the _binds list because the binding list is only for assemblies that have been resolved through
                     // the Resolve method. This allows the resolver to have complete control over selecting the appropriate assembly
-                    // based on Version, CultureName and publicKeyToken.
+                    // based on Version, CultureName and PublicKeyToken.
 
                     return winner;
                 }

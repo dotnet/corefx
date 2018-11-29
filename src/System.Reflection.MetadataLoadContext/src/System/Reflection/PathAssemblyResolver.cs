@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 
@@ -12,19 +11,18 @@ namespace System.Reflection
     /// An assembly resolver that uses paths to every assembly that may be loaded.
     /// The file name is expected to be the same as the assembly's simple name.
     /// Multiple assemblies can exist on disk with the same name but in different directories.
+    /// A single instance of PathAssemblyResolver can be used with multiple MetadataAssemblyResolver instances.
     /// </summary>
     /// <remarks>
     /// In order for an AssemblyName to match to a loaded assembly, AssemblyName.Name must be equal (casing ignored).
     /// - If AssemblyName.PublicKeyToken is specified, it must be equal.
-    /// - If AssemblyName.PublicKeyToken is not specified, the first assembly matching by Name will be returned.
-    /// - If there is more than one assembly with the same Name and PublicKeyToken, the assembly with the highest Version is returned.
+    /// - If AssemblyName.PublicKeyToken is not specified, assemblies with no PublicKeyToken are selected over those with a PublicKeyToken.
+    /// - If more than one assembly matches, the assembly with the highest Version is returned.
     /// - CultureName is ignored.
     /// </remarks>
     public class PathAssemblyResolver : MetadataAssemblyResolver
     {
-        private static readonly Version s_Version0000 = new Version(0, 0, 0, 0);
-
-        private ConcurrentDictionary<string, List<string>> _fileToPaths = new ConcurrentDictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, List<string>> _fileToPaths = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Initializes a new instance of the cref="System.Reflection.PathAssemblyResolver"> class.
@@ -56,63 +54,43 @@ namespace System.Reflection
 
         public override Assembly Resolve(MetadataLoadContext context, AssemblyName assemblyName)
         {
-            // On the first access to this assembly name, load each assembly from the provided path(s).
-            LoadMatchingAssembliesFromPaths(context, assemblyName.Name);
-
-            Assembly candidate = null;
-
-            foreach (Assembly a in context.GetAssemblies())
+            Assembly candidateWithSamePkt = null;
+            Assembly candidateIgnoringPkt = null;
+            List<string> paths;
+            if (_fileToPaths.TryGetValue(assemblyName.Name, out paths))
             {
-                if (assemblyName.Name.Equals(a.GetName().Name, StringComparison.OrdinalIgnoreCase) && IsPublicKeyTokenCompatible(assemblyName, a))
+                byte[] pktFromName = assemblyName.GetPublicKeyToken() ?? Array.Empty<byte>();
+
+                foreach (string path in paths)
                 {
-                    // Pick the highest version.
-                    if (candidate == null || NormalizeVersion(a.GetName().Version) > NormalizeVersion(candidate.GetName().Version))
+                    Assembly a = context.LoadFromAssemblyPath(path);
+                    if (assemblyName.Name.Equals(a.GetName().Name, StringComparison.OrdinalIgnoreCase))
                     {
-                        candidate = a;
+                        byte[] pktFromAssembly = a.GetName().GetPublicKeyToken() ?? Array.Empty<byte>();
+
+                        // Find exact match on PublicKeyToken including treating no PublicKeyToken as its own entry.
+                        if (((ReadOnlySpan<byte>)pktFromName).SequenceEqual(pktFromAssembly))
+                        {
+                            // Pick the highest version.
+                            if (candidateWithSamePkt == null || a.GetName().Version > candidateWithSamePkt.GetName().Version)
+                            {
+                                candidateWithSamePkt = a;
+                            }
+                        }
+                        // If assemblyName does not specify a PublicKeyToken, then still consider those with a PublicKeyToken.
+                        else if (candidateWithSamePkt == null && ((ReadOnlySpan<byte>)pktFromName).SequenceEqual(Array.Empty<byte>()))
+                        {
+                            // Pick the highest version.
+                            if (candidateIgnoringPkt == null || a.GetName().Version > candidateIgnoringPkt.GetName().Version)
+                            {
+                                candidateIgnoringPkt = a;
+                            }
+                        }
                     }
                 }
             }
 
-            return candidate;
-        }
-
-        private void LoadMatchingAssembliesFromPaths(MetadataLoadContext context, string simpleName)
-        {
-            List<string> paths;
-            if (_fileToPaths.TryGetValue(simpleName, out paths))
-            {
-                foreach (string path in paths)
-                {
-                    context.LoadFromAssemblyPath(path);
-                }
-
-                // Remove the path so we don't process it again.
-                _fileToPaths.TryRemove(simpleName, out paths);
-            }
-        }
-
-        private bool IsPublicKeyTokenCompatible(AssemblyName name, Assembly a)
-        {
-            byte[] pktFromName = name.GetPublicKeyToken();
-            if (pktFromName == null)
-                return true;
-
-            byte[] pktFromAssembly = a.GetName().GetPublicKeyToken();
-            if (pktFromAssembly == null)
-                return ((ReadOnlySpan<byte>)pktFromName).SequenceEqual(Array.Empty<byte>());
-
-            if (((ReadOnlySpan<byte>)pktFromName).SequenceEqual(Array.Empty<byte>()))
-                return true;
-
-            return ((ReadOnlySpan<byte>)pktFromName).SequenceEqual(pktFromAssembly);
-        }
-
-        private Version NormalizeVersion(Version v)
-        {
-            if (v == null)
-                return s_Version0000;
-
-            return v;
+            return candidateWithSamePkt ?? candidateIgnoringPkt;
         }
     }
 }
