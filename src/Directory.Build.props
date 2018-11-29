@@ -19,15 +19,6 @@
     <AssemblySearchPaths>$(AssemblySearchPaths);$(RefPath);{RawFileName}</AssemblySearchPaths>
   </PropertyGroup>
 
-  <!-- 
-    We need to filter the data to only the assembly being tested. Otherwise we will gather tons of data about other assemblies.
-    If the code being tested is part of the runtime itself, it requires special treatment.
-  -->
-  <PropertyGroup Condition="'$(AssemblyBeingTested)' == ''">
-    <_ProjectDirectoryUnderSourceDir>$(MSBuildProjectDirectory.SubString($(SourceDir.Length)))</_ProjectDirectoryUnderSourceDir>
-    <AssemblyBeingTested>$(_ProjectDirectoryUnderSourceDir.SubString(0, $(_ProjectDirectoryUnderSourceDir.IndexOfAny("\\/"))))</AssemblyBeingTested>
-  </PropertyGroup>
-
   <ItemGroup>
     <CoverageExcludeFile Include="$(SourceDir)Common/src/System/SR.*" />
     <CoverageExcludeFile Include="$(SourceDir)Common/src/System/NotImplemented.cs" />

@@ -21,6 +21,7 @@
     <XUnitAdapter Condition="'$(TargetGroup)' == 'netfx'">xunit.runner.visualstudio.testadapter</XUnitAdapter>
     <MicrosoftNetTestSdkPackageName>Microsoft.NET.Test.Sdk</MicrosoftNetTestSdkPackageName>
     <TestPlatformHostPackageId>microsoft.testplatform.testhost</TestPlatformHostPackageId>
+    <MicrosoftDiagnosticsTracingTraceEventPackageName>Microsoft.Diagnostics.Tracing.TraceEvent</MicrosoftDiagnosticsTracingTraceEventPackageName>
     <TestPlatformHost>testhost</TestPlatformHost>
     <!-- Explicitly set Language to c# to handle the analyzer resolution in nuget -->
     <Language Condition="'$(Language)' == ''">c#</Language>

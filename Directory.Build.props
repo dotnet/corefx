@@ -61,11 +61,8 @@
     <SourceDir>$(ProjectDir)src\</SourceDir>
 
     <!-- CoreFx sepcific paths -->
+    <GlobalToolsDir>$(ProjectDir)artifacts/tools/</GlobalToolsDir>
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
-
-    <TestArchiveRoot>$(ProjectDir)artifacts/helix/</TestArchiveRoot>
-    <TestArchiveTestsDir>$(TestArchiveRoot)tests/</TestArchiveTestsDir>
-    <TestArchiveRuntimeDir>$(TestArchiveRoot)runtime/</TestArchiveRuntimeDir>
 
     <!-- Input Directories -->
     <PackagesDir>$(DotNetRestorePackagesPath)</PackagesDir>
@@ -80,6 +77,8 @@
     <DotNetRoot Condition="!HasTrailingSlash('$(DotNetRoot)')">$(DotNetRoot)\</DotNetRoot>
     <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(DotNetRoot)</DotnetCliPath>
     <ToolHostCmd Condition="'$(ToolHostCmd)'==''">"$(DotNetRoot)dotnet"</ToolHostCmd>
+    <DotNetCmd>$(DotNetRoot)dotnet</DotNetCmd>
+    <DotNetCmd Condition="'$(OS)' == 'Windows_NT'">$(DotNetCmd).exe</DotNetCmd>
   </PropertyGroup>
 
   <!-- Choose .targets files that come from Arcade rather than from buildtools -->
@@ -373,6 +372,9 @@
     <RefPath Condition="$(TargetGroup.EndsWith('aot'))">$(RefRootPath)$(TargetGroup.TrimEnd('t').TrimEnd('o').TrimEnd('a'))/</RefPath>
     <NetStandardRefPath>$(RefRootPath)netstandard/</NetStandardRefPath>
     <NetFxRefPath>$(RefRootPath)netfx/</NetFxRefPath>
+    <TestArchiveRoot>$(ProjectDir)artifacts/helix/</TestArchiveRoot>
+    <TestArchiveTestsDir>$(TestArchiveRoot)tests/</TestArchiveTestsDir>
+    <TestArchiveRuntimeDir>$(TestArchiveRoot)runtime/$(BuildConfiguration)/</TestArchiveRuntimeDir>
 
     <!-- project file to use when resolving ReferenceFromRuntime items -->
     <RuntimeProjectFile Condition="'$(RuntimeProjectFile)' == ''">$(ProjectDir)\external\runtime\runtime.depproj</RuntimeProjectFile>

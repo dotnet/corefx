@@ -53,6 +53,10 @@
     <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
     <UAPToolsPackageVersion>1.0.23</UAPToolsPackageVersion>
 
+    <!-- Code coverage package version -->
+    <CoverletConsolePackageVersion>1.3.0</CoverletConsolePackageVersion>
+    <DotNetReportGeneratorGlobalToolPackageVersion>4.0.4</DotNetReportGeneratorGlobalToolPackageVersion>
+
     <!-- Roslyn optimization data package version -->
     <MicrosoftDotNetIBCMergePackageVersion>4.6.0-alpha-00001</MicrosoftDotNetIBCMergePackageVersion>
     <TestILCAmd64retPackageVersion>$(ProjectNTfsTestILCPackageVersion)</TestILCAmd64retPackageVersion>
