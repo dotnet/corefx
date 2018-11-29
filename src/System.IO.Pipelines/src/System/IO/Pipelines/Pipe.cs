@@ -794,7 +794,7 @@ namespace System.IO.Pipelines
         private void GetReadResult(out ReadResult result)
         {
             bool isCompleted = _writerCompletion.IsCompletedOrThrow();
-            bool isCanceled = _readerAwaitable.ObserveCancelation();
+            bool isCanceled = _readerAwaitable.ObserveCancellation();
 
             // No need to read end if there is no head
             BufferSegment head = _readHead;
@@ -852,7 +852,7 @@ namespace System.IO.Pipelines
         private void GetFlushResult(ref FlushResult result)
         {
             // Change the state from to be canceled -> observed
-            if (_writerAwaitable.ObserveCancelation())
+            if (_writerAwaitable.ObserveCancellation())
             {
                 result._resultFlags |= ResultFlags.Canceled;
             }

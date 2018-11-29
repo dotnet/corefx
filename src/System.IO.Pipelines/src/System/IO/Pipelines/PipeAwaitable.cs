@@ -19,23 +19,22 @@ namespace System.IO.Pipelines
         private CancellationTokenRegistration _cancellationTokenRegistration;
         private SynchronizationContext _synchronizationContext;
         private ExecutionContext _executionContext;
-        private readonly bool _useSynchronizationContext;
 
         public PipeAwaitable(bool completed, bool useSynchronizationContext)
         {
-            _awaitableState = completed ? AwaitableState.Completed : AwaitableState.None;
+            _awaitableState = (completed ? AwaitableState.Completed : AwaitableState.None) |
+                              (useSynchronizationContext ? AwaitableState.UseSynchronizationContext : AwaitableState.None);
             _completion = null;
             _completionState = null;
             _cancellationToken = CancellationToken.None;
             _cancellationTokenRegistration = default;
             _synchronizationContext = null;
             _executionContext = null;
-            _useSynchronizationContext = useSynchronizationContext;
         }
 
-        public bool IsCompleted => (_awaitableState & (AwaitableState.Completed | AwaitableState.Canceled)) > 0;
+        public bool IsCompleted => (_awaitableState & (AwaitableState.Completed | AwaitableState.Canceled)) != 0;
 
-        public bool IsRunning => (_awaitableState & AwaitableState.Running) == AwaitableState.Running;
+        public bool IsRunning => (_awaitableState & AwaitableState.Running) != 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CancellationTokenRegistration BeginOperation(CancellationToken cancellationToken, Action<object> callback, object state)
@@ -104,7 +103,8 @@ namespace System.IO.Pipelines
             _completionState = state;
 
             // Capture the SynchronizationContext if there's any and we're allowing capture (from pipe options)
-            if (_useSynchronizationContext && (flags & ValueTaskSourceOnCompletedFlags.UseSchedulingContext) != 0)
+            if ((_awaitableState & AwaitableState.UseSynchronizationContext) != 0 &&
+                (flags & ValueTaskSourceOnCompletedFlags.UseSchedulingContext) != 0)
             {
                 SynchronizationContext sc = SynchronizationContext.Current;
                 if (sc != null && sc.GetType() != typeof(SynchronizationContext))
@@ -148,7 +148,8 @@ namespace System.IO.Pipelines
             // Marks that operation is running. Set in *Async reset in  ObserveCancellation (GetResult)
             Running = 2,
             // Marks that operation is canceled. Set in Cancel reset in ObserveCancellation (GetResult)
-            Canceled = 4
+            Canceled = 4,
+            UseSynchronizationContext = 8
         }
     }
 }
