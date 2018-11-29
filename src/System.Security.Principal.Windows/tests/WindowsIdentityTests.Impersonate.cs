@@ -60,13 +60,13 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
         }
     }
 
-    [Fact]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public void Impersonate_WindowsIdentityObject()
     {
         Impersonate(() => new WindowsIdentity(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()).Impersonate(), _fixture.TestAccount1);
     }
 
-    [Fact]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public void Impersonate_UserTokenObject()
     {
         Impersonate(() => WindowsIdentity.Impersonate(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()), _fixture.TestAccount1);
@@ -103,13 +103,13 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
         Assert.Equal(previous.Name, WindowsIdentity.GetCurrent().Name, ignoreCase: true);
     }
 
-    [Fact]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public void Impersonate_WindowsIdentityObject_InvalidToken()
     {
         Assert.Throws<ArgumentException>(() => new WindowsIdentity(SafeAccessTokenHandle.InvalidHandle.DangerousGetHandle()).Impersonate());
     }
 
-    [Fact]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public void Impersonate_UserTokenObject_ZeroToken_NOP()
     {
         // Users on same machine could return different case for machine/domain name for WindowsIdentity.Name
@@ -125,7 +125,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
         Assert.Equal(previous.Name, WindowsIdentity.GetCurrent().Name, ignoreCase: true);
     }
 
-    [Fact]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public void Impersonate_IsImpersonating_UserTokenObject_ZeroToken_ClearThreadToken()
     {
         // Users on same machine could return different case for machine/domain name for WindowsIdentity.Name
@@ -149,7 +149,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
         Assert.Equal(previous.Name, WindowsIdentity.GetCurrent().Name, ignoreCase: true);
     }
 
-    [Fact]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public void Impersonate_IsImpersonating_WindowsIdentityObject()
     {
         Impersonate_IsImpersonating(
@@ -157,7 +157,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
             () => (_fixture.TestAccount2, () => new WindowsIdentity(_fixture.TestAccount2.AccountTokenHandle.DangerousGetHandle()).Impersonate()));
     }
 
-    [Fact]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public void Impersonate_IsImpersonating_UserTokenObject()
     {
         Impersonate_IsImpersonating(
@@ -221,7 +221,9 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
 
     // Impersonate doesn't behave like RunImpersonated, 
     // RunImpersonated reverts ExecutionContext
-    [Fact]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    // On full framework 'RunImpersonate' doesn't capture/revert Execution context
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
     public void Impersonate_ExcutionContext_NotReverted()
     {
         AsyncLocal<string> impersonatedContextValue = new AsyncLocal<string>();
