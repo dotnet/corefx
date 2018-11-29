@@ -331,14 +331,13 @@ namespace System.IO.Pipelines
         internal ValueTask<FlushResult> FlushAsync(CancellationToken cancellationToken)
         {
             CompletionData completionData;
-            CancellationTokenRegistration cancellationTokenRegistration;
             ValueTask<FlushResult> result;
             lock (_sync)
             {
                 var wasEmpty = CommitUnsynchronized();
 
                 // AttachToken before completing reader awaiter in case cancellationToken is already completed
-                cancellationTokenRegistration = _writerAwaitable.BeginOperation(cancellationToken, s_signalWriterAwaitable, this);
+                _writerAwaitable.BeginOperation(cancellationToken, s_signalWriterAwaitable, this);
 
                 // If the writer is completed (which it will be most of the time) then return a completed ValueTask
                 if (_writerAwaitable.IsCompleted)
@@ -369,8 +368,6 @@ namespace System.IO.Pipelines
                 // if it always adds new data to pipe and wakes up the reader but assert anyway
                 Debug.Assert(_writerAwaitable.IsCompleted || _readerAwaitable.IsCompleted);
             }
-
-            cancellationTokenRegistration.Dispose();
 
             TrySchedule(_readerScheduler, completionData);
 
@@ -604,7 +601,6 @@ namespace System.IO.Pipelines
 
         internal ValueTask<ReadResult> ReadAsync(CancellationToken token)
         {
-            CancellationTokenRegistration cancellationTokenRegistration;
             if (_readerCompletion.IsCompleted)
             {
                 ThrowHelper.ThrowInvalidOperationException_NoReadingAllowed();
@@ -613,7 +609,7 @@ namespace System.IO.Pipelines
             ValueTask<ReadResult> result;
             lock (_sync)
             {
-                cancellationTokenRegistration = _readerAwaitable.BeginOperation(token, s_signalReaderAwaitable, this);
+                _readerAwaitable.BeginOperation(token, s_signalReaderAwaitable, this);
 
                 // If the awaitable is already complete then return the value result directly
                 if (_readerAwaitable.IsCompleted)
@@ -627,7 +623,6 @@ namespace System.IO.Pipelines
                     result = new ValueTask<ReadResult>(_reader, token: 0);
                 }
             }
-            cancellationTokenRegistration.Dispose();
 
             return result;
         }
@@ -784,11 +779,18 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowInvalidOperationException_GetResultNotCompleted();
             }
 
+            CancellationTokenRegistration cancellationTokenRegistration;
+            ReadResult result;
+
             lock (_sync)
             {
-                GetReadResult(out ReadResult result);
-                return result;
+                GetReadResult(out result);
+
+                cancellationTokenRegistration = _readerAwaitable.ReleaseCancellationTokenRegistration();
             }
+
+            cancellationTokenRegistration.Dispose();
+            return result;
         }
 
         private void GetReadResult(out ReadResult result)
@@ -836,6 +838,7 @@ namespace System.IO.Pipelines
         internal FlushResult GetFlushAsyncResult()
         {
             var result = new FlushResult();
+            CancellationTokenRegistration cancellationTokenRegistration;
             lock (_sync)
             {
                 if (!_writerAwaitable.IsCompleted)
@@ -844,7 +847,11 @@ namespace System.IO.Pipelines
                 }
 
                 GetFlushResult(ref result);
+
+                cancellationTokenRegistration = _writerAwaitable.ReleaseCancellationTokenRegistration();
             }
+
+            cancellationTokenRegistration.Dispose();
 
             return result;
         }

@@ -20,13 +20,14 @@ namespace System.IO.Pipelines
         private SynchronizationContext _synchronizationContext;
         private ExecutionContext _executionContext;
 
+
         public PipeAwaitable(bool completed, bool useSynchronizationContext)
         {
             _awaitableState = (completed ? AwaitableState.Completed : AwaitableState.None) |
                               (useSynchronizationContext ? AwaitableState.UseSynchronizationContext : AwaitableState.None);
             _completion = null;
             _completionState = null;
-            _cancellationToken = CancellationToken.None;
+            _cancellationToken = default;
             _cancellationTokenRegistration = default;
             _synchronizationContext = null;
             _executionContext = null;
@@ -36,23 +37,24 @@ namespace System.IO.Pipelines
 
         public bool IsRunning => (_awaitableState & AwaitableState.Running) != 0;
 
+        public CancellationTokenRegistration CancellationTokenRegistration => _cancellationTokenRegistration;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public CancellationTokenRegistration BeginOperation(CancellationToken cancellationToken, Action<object> callback, object state)
+        public void BeginOperation(CancellationToken cancellationToken, Action<object> callback, object state)
         {
             _awaitableState |= AwaitableState.Running;
 
-            CancellationTokenRegistration oldRegistration = default;
-            if (!cancellationToken.Equals(_cancellationToken))
+            if (cancellationToken.CanBeCanceled)
             {
-                oldRegistration = _cancellationTokenRegistration;
+                cancellationToken.ThrowIfCancellationRequested();
                 _cancellationToken = cancellationToken;
-                if (_cancellationToken.CanBeCanceled)
+
+                // Don't register if already completed, we would immediately unregistered in ObserveCancellation
+                if (!IsCompleted)
                 {
-                    _cancellationToken.ThrowIfCancellationRequested();
-                    _cancellationTokenRegistration = _cancellationToken.UnsafeRegister(callback, state);
+                    _cancellationTokenRegistration = cancellationToken.UnsafeRegister(callback, state);
                 }
             }
-            return oldRegistration;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -134,9 +136,22 @@ namespace System.IO.Pipelines
 
             _awaitableState &= ~(AwaitableState.Canceled | AwaitableState.Running);
 
-            _cancellationToken.ThrowIfCancellationRequested();
-
             return isCanceled;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public CancellationTokenRegistration ReleaseCancellationTokenRegistration()
+        {
+
+            CancellationToken cancellationToken = _cancellationToken;
+            CancellationTokenRegistration cancellationTokenRegistration = _cancellationTokenRegistration;
+
+            _cancellationTokenRegistration = default;
+            _cancellationToken = default;
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return cancellationTokenRegistration;
         }
 
         [Flags]
