@@ -55,8 +55,6 @@ Note that you will need to adjust the install path to reflect your version, "Com
 
 For the best possible experience make sure to have the latest version of Visual Studio 2017 installed.
 
-
-
 ## Building From the Command Line
 
 From a (non-admin) Command Prompt window:
