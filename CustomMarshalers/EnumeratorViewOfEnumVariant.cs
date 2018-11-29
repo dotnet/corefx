@@ -7,7 +7,7 @@ using System.Text;
 namespace System.Runtime.InteropServices.CustomMarshalers
 {
     [Serializable]
-    class EnumeratorViewOfEnumVariant : ICustomAdapter, IEnumerator
+    internal class EnumeratorViewOfEnumVariant : ICustomAdapter, IEnumerator
     {
         private readonly IEnumVARIANT m_enumVariantObject;
         private bool m_fetchedLastObject;

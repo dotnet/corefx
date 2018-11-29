@@ -5,7 +5,7 @@ using System.Runtime.InteropServices.ComTypes;
 namespace System.Runtime.InteropServices.CustomMarshalers
 {
     [Serializable]
-    public class EnumVariantViewOfEnumerator : IEnumVARIANT, ICustomAdapter, ICustomQueryInterface
+    internal class EnumVariantViewOfEnumerator : IEnumVARIANT, ICustomAdapter, ICustomQueryInterface
     {
         private static readonly Guid IID_IManagedObject = new Guid("C3FCC19E-A970-11d2-8B5A-00A0C9B7C9C4");
 
