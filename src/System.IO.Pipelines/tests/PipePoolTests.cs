@@ -212,24 +212,5 @@ namespace System.IO.Pipelines.Tests
 
             Assert.Equal(1, pool.CurrentlyRentedBlocks);
         }
-
-        [Fact]
-        public async Task PipeCancellation()
-        {
-            var pipe = new Pipe();
-            ValueTask<ReadResult> readTask = pipe.Reader.ReadAsync();
-            pipe.Reader.CancelPendingRead();
-            var readResult = await readTask;
-            Assert.True(readResult.IsCanceled);
-            //pipe.Reader.AdvanceTo(readResult.Buffer.End);
-
-            readTask = pipe.Reader.ReadAsync();
-            await pipe.Writer.WriteAsync(new byte[] { 1, 2, 3 });
-            readResult = await readTask;
-            Assert.False(readResult.IsCanceled);
-            Assert.False(readResult.IsCompleted);
-            Assert.Equal(3, readResult.Buffer.Length);
-            pipe.Reader.AdvanceTo(readResult.Buffer.End);
-        }
     }
 }

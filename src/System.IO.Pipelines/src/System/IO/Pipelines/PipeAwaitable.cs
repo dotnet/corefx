@@ -33,7 +33,7 @@ namespace System.IO.Pipelines
             _useSynchronizationContext = useSynchronizationContext;
         }
 
-        public bool IsCompleted => (_awaitableState & (AwaitableState.Completed | AwaitableState.Cancelled)) > 0;
+        public bool IsCompleted => (_awaitableState & (AwaitableState.Completed | AwaitableState.Canceled)) > 0;
 
         public bool IsRunning => (_awaitableState & AwaitableState.Running) == AwaitableState.Running;
 
@@ -64,6 +64,7 @@ namespace System.IO.Pipelines
             _awaitableState |= AwaitableState.Completed;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ExtractCompletion(out CompletionData completionData)
         {
             Action<object> currentCompletion = _completion;
@@ -72,14 +73,9 @@ namespace System.IO.Pipelines
             _completion = null;
             _completionState = null;
 
-            if (currentCompletion != null)
-            {
-                completionData = new CompletionData(currentCompletion, currentState, _executionContext, _synchronizationContext);
-            }
-            else
-            {
-                completionData = default;
-            }
+            completionData = currentCompletion != null ?
+                new CompletionData(currentCompletion, currentState, _executionContext, _synchronizationContext) :
+                default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,18 +92,10 @@ namespace System.IO.Pipelines
         public void OnCompleted(Action<object> continuation, object state, ValueTaskSourceOnCompletedFlags flags, out CompletionData completionData, out bool doubleCompletion)
         {
             completionData = default;
+            doubleCompletion = _completion != null;
 
-            doubleCompletion = false;
-
-            if (IsCompleted)
+            if (IsCompleted || doubleCompletion)
             {
-                completionData = new CompletionData(continuation, state, _executionContext, _synchronizationContext);
-                return;
-            }
-
-            if (_completion != null)
-            {
-                doubleCompletion = true;
                 completionData = new CompletionData(continuation, state, _executionContext, _synchronizationContext);
                 return;
             }
@@ -136,32 +124,31 @@ namespace System.IO.Pipelines
         {
             ExtractCompletion(out completionData);
 
-            _awaitableState |= AwaitableState.Cancelled;
+            _awaitableState |= AwaitableState.Canceled;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool ObserveCancelation()
+        public bool ObserveCancellation()
         {
-            bool isCancelled = (_awaitableState & AwaitableState.Cancelled) == AwaitableState.Cancelled;
+            bool isCanceled = (_awaitableState & AwaitableState.Canceled) == AwaitableState.Canceled;
 
-            _awaitableState &= ~AwaitableState.Cancelled;
-            _awaitableState &= ~AwaitableState.Running;
+            _awaitableState &= ~(AwaitableState.Canceled | AwaitableState.Running);
 
             _cancellationToken.ThrowIfCancellationRequested();
 
-            return isCancelled;
+            return isCanceled;
         }
 
         [Flags]
         private enum AwaitableState
         {
             None = 0,
-            // Set in Complete reset in Reset
+            // Marks that if logical operation (backpressure/waiting for data) is completed. Set in Complete reset in Reset
             Completed = 1,
-            // Set in *Async reset in  ObserveCancellation (GetResult)
+            // Marks that operation is running. Set in *Async reset in  ObserveCancellation (GetResult)
             Running = 2,
-            // Set in Cancel reset in ObserveCancellation (GetResult)
-            Cancelled = 4,
+            // Marks that operation is canceled. Set in Cancel reset in ObserveCancellation (GetResult)
+            Canceled = 4
         }
     }
 }
