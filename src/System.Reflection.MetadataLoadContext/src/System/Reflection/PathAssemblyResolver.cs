@@ -23,7 +23,6 @@ namespace System.Reflection
     public class PathAssemblyResolver : MetadataAssemblyResolver
     {
         private static readonly Version s_Version0000 = new Version(0, 0, 0, 0);
-        private static readonly byte[] s_EmptyArray = Array.Empty<byte>();
 
         private ConcurrentDictionary<string, List<string>> _fileToPaths = new ConcurrentDictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
@@ -94,16 +93,18 @@ namespace System.Reflection
 
         private bool IsPublicKeyTokenCompatible(AssemblyName name, Assembly a)
         {
-            if (name.GetPublicKeyToken() == null)
+            byte[] pktFromName = name.GetPublicKeyToken();
+            if (pktFromName == null)
                 return true;
 
-            if (a.GetName().GetPublicKeyToken() == null)
-                return ((ReadOnlySpan<byte>)name.GetPublicKeyToken()).SequenceEqual(s_EmptyArray);
+            byte[] pktFromAssembly = a.GetName().GetPublicKeyToken();
+            if (pktFromAssembly == null)
+                return ((ReadOnlySpan<byte>)pktFromName).SequenceEqual(Array.Empty<byte>());
 
-            if (((ReadOnlySpan<byte>)name.GetPublicKeyToken()).SequenceEqual(s_EmptyArray))
+            if (((ReadOnlySpan<byte>)pktFromName).SequenceEqual(Array.Empty<byte>()))
                 return true;
 
-            return ((ReadOnlySpan<byte>)name.GetPublicKeyToken()).SequenceEqual(a.GetName().GetPublicKeyToken());
+            return ((ReadOnlySpan<byte>)pktFromName).SequenceEqual(pktFromAssembly);
         }
 
         private Version NormalizeVersion(Version v)

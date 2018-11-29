@@ -18,8 +18,9 @@ namespace System.Reflection.Tests
             if (name.Equals("mscorlib", StringComparison.OrdinalIgnoreCase) ||
                 name.Equals("System.Private.CoreLib", StringComparison.OrdinalIgnoreCase) ||
                 name.Equals("System.Runtime", StringComparison.OrdinalIgnoreCase) ||
-                name.Equals("System.Runtime.InteropServices", StringComparison.OrdinalIgnoreCase) ||
-                name.Equals("netstandard", StringComparison.OrdinalIgnoreCase))
+                name.Equals("netstandard", StringComparison.OrdinalIgnoreCase) ||
+                // For interop attributes such as DllImport and Guid:
+                name.Equals("System.Runtime.InteropServices", StringComparison.OrdinalIgnoreCase))
             {
                 if (_coreAssembly == null)
                     _coreAssembly = context.LoadFromStream(TestUtils.CreateStreamForCoreAssembly());

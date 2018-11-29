@@ -11,7 +11,6 @@ namespace System.Reflection.Tests
     public class SimpleAssemblyResolver : CoreMetadataAssemblyResolver
     {
         private static readonly Version s_Version0000 = new Version(0, 0, 0, 0);
-        private static readonly byte[] s_EmptyArray = Array.Empty<byte>();
 
         public SimpleAssemblyResolver() { }
 
@@ -36,7 +35,7 @@ namespace System.Reflection.Tests
         private ReadOnlySpan<byte> NormalizePublicKeyToken(ReadOnlySpan<byte> publicKeyToken)
         {
             if (publicKeyToken == null)
-                return s_EmptyArray;
+                return Array.Empty<byte>();
 
             return publicKeyToken;
         }
