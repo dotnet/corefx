@@ -6,7 +6,8 @@ using System.Text;
 
 namespace System.Runtime.InteropServices.CustomMarshalers
 {
-    class EnumerableViewOfDispatch : ICustomAdapter, IEnumerable
+    [Serializable]
+    internal class EnumerableViewOfDispatch : ICustomAdapter, IEnumerable
     {
         private const int DispId_NewEnum = -4;
         private readonly object dispatch;
