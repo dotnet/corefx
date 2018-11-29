@@ -338,7 +338,7 @@ namespace System.IO.Pipelines
                 var wasEmpty = CommitUnsynchronized();
 
                 // AttachToken before completing reader awaiter in case cancellationToken is already completed
-                cancellationTokenRegistration = _writerAwaitable.AttachToken(cancellationToken, s_signalWriterAwaitable, this);
+                cancellationTokenRegistration = _writerAwaitable.BeginOperation(cancellationToken, s_signalWriterAwaitable, this);
 
                 // If the writer is completed (which it will be most of the time) then return a completed ValueTask
                 if (_writerAwaitable.IsCompleted)
@@ -613,7 +613,7 @@ namespace System.IO.Pipelines
             ValueTask<ReadResult> result;
             lock (_sync)
             {
-                cancellationTokenRegistration = _readerAwaitable.AttachToken(token, s_signalReaderAwaitable, this);
+                cancellationTokenRegistration = _readerAwaitable.BeginOperation(token, s_signalReaderAwaitable, this);
 
                 // If the awaitable is already complete then return the value result directly
                 if (_readerAwaitable.IsCompleted)
@@ -647,7 +647,7 @@ namespace System.IO.Pipelines
                     return true;
                 }
 
-                if (_readerAwaitable.HasContinuation)
+                if (_readerAwaitable.IsRunning)
                 {
                     ThrowHelper.ThrowInvalidOperationException_AlreadyReading();
                 }
@@ -795,7 +795,7 @@ namespace System.IO.Pipelines
         {
             bool isCompleted = _writerCompletion.IsCompletedOrThrow();
             bool isCanceled = _readerAwaitable.ObserveCancelation();
-           
+
             // No need to read end if there is no head
             BufferSegment head = _readHead;
             if (head != null)
