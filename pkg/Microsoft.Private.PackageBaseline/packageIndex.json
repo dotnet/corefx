@@ -3016,7 +3016,8 @@
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.5.1",
-        "4.0.0.1": "4.5.2"
+        "4.0.0.1": "4.5.2",
+        "4.0.0.2": "4.5.3"
       }
     },
     "System.Numerics": {
