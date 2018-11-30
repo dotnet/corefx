@@ -11,9 +11,9 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 {
     public class EnumeratorToEnumVariantMarshaler : ICustomMarshaler
     {
-        private static readonly EnumeratorToEnumVariantMarshaler Instance = new EnumeratorToEnumVariantMarshaler();
+        private static readonly EnumeratorToEnumVariantMarshaler s_enumeratorToEnumVariantMarshaler = new EnumeratorToEnumVariantMarshaler();
 
-        public static ICustomMarshaler GetInstance(string cookie) => Instance;
+        public static ICustomMarshaler GetInstance(string cookie) => s_enumeratorToEnumVariantMarshaler;
 
         private EnumeratorToEnumVariantMarshaler()
         {

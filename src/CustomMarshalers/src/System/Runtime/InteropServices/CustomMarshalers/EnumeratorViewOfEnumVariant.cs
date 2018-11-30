@@ -11,22 +11,21 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 {
     internal class EnumeratorViewOfEnumVariant : ICustomAdapter, IEnumerator
     {
-        private readonly IEnumVARIANT m_enumVariantObject;
-        private bool m_fetchedLastObject;
+        private readonly IEnumVARIANT _enumVariantObject;
+        private bool _fetchedLastObject;
 
         public EnumeratorViewOfEnumVariant(IEnumVARIANT enumVariantObject)
         {
-            m_enumVariantObject = enumVariantObject;
-            m_fetchedLastObject = false;
+            _enumVariantObject = enumVariantObject;
+            _fetchedLastObject = false;
             Current = null;
-
         }
 
         public object Current { get; private set; }
 
         public unsafe bool MoveNext()
         {
-            if (m_fetchedLastObject)
+            if (_fetchedLastObject)
             {
                 Current = null;
                 return false;
@@ -35,9 +34,9 @@ namespace System.Runtime.InteropServices.CustomMarshalers
             object[] next = new object[1];
             int numFetched = 0;
 
-            if (m_enumVariantObject.Next(1, next, (IntPtr)(&numFetched)) == HResults.S_FALSE)
+            if (_enumVariantObject.Next(1, next, (IntPtr)(&numFetched)) == HResults.S_FALSE)
             {
-                m_fetchedLastObject = true;
+                _fetchedLastObject = true;
 
                 if (numFetched == 0)
                 {
@@ -53,7 +52,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 
         public void Reset()
         {
-            int hr = m_enumVariantObject.Reset();
+            int hr = _enumVariantObject.Reset();
             if (hr < 0)
             {
                 Marshal.ThrowExceptionForHR(hr);
@@ -62,7 +61,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 
         public object GetUnderlyingObject()
         {
-            return m_enumVariantObject;
+            return _enumVariantObject;
         }
 
     }

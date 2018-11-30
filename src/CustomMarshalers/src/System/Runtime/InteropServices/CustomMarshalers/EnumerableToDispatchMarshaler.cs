@@ -10,9 +10,9 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 {
     public class EnumerableToDispatchMarshaler : ICustomMarshaler
     {
-        private static readonly EnumerableToDispatchMarshaler Instance = new EnumerableToDispatchMarshaler();
+        private static readonly EnumerableToDispatchMarshaler s_enumerableToDispatchMarshaler = new EnumerableToDispatchMarshaler();
 
-        public static ICustomMarshaler GetInstance(string cookie) => Instance;
+        public static ICustomMarshaler GetInstance(string cookie) => s_enumerableToDispatchMarshaler;
 
         private EnumerableToDispatchMarshaler()
         {}
