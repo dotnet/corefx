@@ -7,11 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E9D942E3-D65
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{88142883-B4AF-4C3B-9B8F-4501407A824E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C2EF5F7F-25C7-4588-A292-7DA0F78CA0F9}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Runtime.InteropServices.CustomMarshalers", "src\System.Runtime.InteropServices.CustomMarshalers.csproj", "{E55E513E-152E-48D1-82B6-DDC9A993D779}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Runtime.InteropServices.CustomMarshalers.Tests", "System.Runtime.InteropServices.CustomMarshalers.Tests\System.Runtime.InteropServices.CustomMarshalers.Tests.csproj", "{2058E929-3C42-4C7C-AA25-91ED3C086B10}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,17 +19,12 @@ Global
 		{E55E513E-152E-48D1-82B6-DDC9A993D779}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E55E513E-152E-48D1-82B6-DDC9A993D779}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E55E513E-152E-48D1-82B6-DDC9A993D779}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2058E929-3C42-4C7C-AA25-91ED3C086B10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2058E929-3C42-4C7C-AA25-91ED3C086B10}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2058E929-3C42-4C7C-AA25-91ED3C086B10}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2058E929-3C42-4C7C-AA25-91ED3C086B10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{E55E513E-152E-48D1-82B6-DDC9A993D779} = {E9D942E3-D65A-44F8-835E-831066E41788}
-		{2058E929-3C42-4C7C-AA25-91ED3C086B10} = {C2EF5F7F-25C7-4588-A292-7DA0F78CA0F9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1E97E31B-E25A-4D93-9C14-A596B402911D}
