@@ -177,6 +177,12 @@
   <data name="InvalidHexCharacterWithinString" xml:space="preserve">
     <value>'{0}' is not a hex digit following '\u' within a JSON string. The string should be correctly escaped.</value>
   </data>
+  <data name="JsonDocumentDoesNotSupportComments" xml:space="preserve">
+    <value>Comments cannot be incorporated into JsonDocument, only the Skip and Allow comment handling modes are supported.</value>
+  </data>
+  <data name="JsonElementHasWrongType" xml:space="preserve">
+    <value>The requested operation requires an element of type '{0}', but the target element has type '{1}'.</value>
+  </data>
   <data name="MaxDepthMustBePositive" xml:space="preserve">
     <value>Max depth must be positive.</value>
   </data>

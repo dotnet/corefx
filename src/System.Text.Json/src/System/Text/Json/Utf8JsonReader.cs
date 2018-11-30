@@ -71,6 +71,8 @@ namespace System.Text.Json
         /// </summary>
         public int CurrentDepth => _bitStack.CurrentDepth;
 
+        internal bool IsInArray => !_inObject;
+
         /// <summary>
         /// Gets the type of the last processed JSON token in the UTF-8 encoded JSON text.
         /// </summary>
@@ -199,6 +201,7 @@ namespace System.Text.Json
 
             _bitStack.PushTrue();
 
+            ValueSpan = _buffer.Slice(_consumed, 1);
             _consumed++;
             _bytePositionInLine++;
             _tokenType = JsonTokenType.StartObject;
@@ -211,6 +214,7 @@ namespace System.Text.Json
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBrace);
 
             _tokenType = JsonTokenType.EndObject;
+            ValueSpan = _buffer.Slice(_consumed, 1);
 
             UpdateBitStackOnEndToken();
         }
@@ -222,6 +226,7 @@ namespace System.Text.Json
 
             _bitStack.PushFalse();
 
+            ValueSpan = _buffer.Slice(_consumed, 1);
             _consumed++;
             _bytePositionInLine++;
             _tokenType = JsonTokenType.StartArray;
@@ -234,7 +239,7 @@ namespace System.Text.Json
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBracket);
 
             _tokenType = JsonTokenType.EndArray;
-
+            ValueSpan = _buffer.Slice(_consumed, 1);
             UpdateBitStackOnEndToken();
         }
 
@@ -393,6 +398,7 @@ namespace System.Text.Json
             {
                 _bitStack.SetFirstBit();
                 _tokenType = JsonTokenType.StartObject;
+                ValueSpan = _buffer.Slice(_consumed, 1);
                 _consumed++;
                 _bytePositionInLine++;
                 _inObject = true;
@@ -402,6 +408,7 @@ namespace System.Text.Json
             {
                 _bitStack.ResetFirstBit();
                 _tokenType = JsonTokenType.StartArray;
+                ValueSpan = _buffer.Slice(_consumed, 1);
                 _consumed++;
                 _bytePositionInLine++;
                 _isNotPrimitive = true;

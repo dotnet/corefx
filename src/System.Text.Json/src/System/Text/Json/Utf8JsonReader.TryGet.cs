@@ -11,7 +11,7 @@ namespace System.Text.Json
     public ref partial struct Utf8JsonReader
     {
         // Reject any invalid UTF-8 data rather than silently replacing.
-        private static readonly UTF8Encoding s_utf8Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+        internal static readonly UTF8Encoding Utf8Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
         /// <summary>
         /// Reads the next JSON token value from the source transcoded as a <see cref="string"/>.
@@ -34,7 +34,7 @@ namespace System.Text.Json
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
 
             // TODO: https://github.com/dotnet/corefx/issues/33292
-            return s_utf8Encoding.GetString(span);
+            return Utf8Encoding.GetString(span);
         }
 
         /// <summary>
@@ -129,6 +129,12 @@ namespace System.Text.Json
             return Utf8Parser.TryParse(span, out value, out int bytesConsumed, standardFormat) && span.Length == bytesConsumed;
         }
 
+        internal static bool TryGetSingleValue(ReadOnlySpan<byte> span, out float value)
+        {
+            char standardFormat = span.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            return Utf8Parser.TryParse(span, out value, out int bytesConsumed, standardFormat) && span.Length == bytesConsumed;
+        }
+
         /// <summary>
         /// Reads the next JSON token value from the source and parses it to a <see cref="double"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
@@ -151,6 +157,12 @@ namespace System.Text.Json
             return Utf8Parser.TryParse(span, out value, out int bytesConsumed, standardFormat) && span.Length == bytesConsumed;
         }
 
+        internal static bool TryGetDoubleValue(ReadOnlySpan<byte> span, out double value)
+        {
+            char standardFormat = span.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            return Utf8Parser.TryParse(span, out value, out int bytesConsumed, standardFormat) && span.Length == bytesConsumed;
+        }
+
         /// <summary>
         /// Reads the next JSON token value from the source and parses it to a <see cref="decimal"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
@@ -169,6 +181,12 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
+            char standardFormat = span.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            return Utf8Parser.TryParse(span, out value, out int bytesConsumed, standardFormat) && span.Length == bytesConsumed;
+        }
+
+        internal static bool TryGetDecimalValue(ReadOnlySpan<byte> span, out decimal value)
+        {
             char standardFormat = span.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
             return Utf8Parser.TryParse(span, out value, out int bytesConsumed, standardFormat) && span.Length == bytesConsumed;
         }
