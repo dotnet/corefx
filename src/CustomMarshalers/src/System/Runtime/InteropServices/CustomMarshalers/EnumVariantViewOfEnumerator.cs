@@ -42,7 +42,8 @@ namespace System.Runtime.InteropServices.CustomMarshalers
             {
                 if (celt > 0 && rgVar == null)
                 {
-                    return Marshal.GetHRForException(new ArgumentException());
+                    var ex = new ArgumentException();
+                    return ex.HResult;
                 }
 
                 while ((numElements < celt) && Enumerator.MoveNext())
@@ -57,7 +58,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
             }
             catch (Exception e)
             {
-                return Marshal.GetHRForException(e);
+                return e.HResult;
             }
 
             return numElements == celt ? HResults.S_OK : HResults.S_FALSE;
@@ -71,7 +72,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
             }
             catch (Exception e)
             {
-                Marshal.GetHRForException(e);
+                return e.HResult;
             }
 
             return HResults.S_OK;
@@ -88,7 +89,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
             }
             catch (Exception e)
             {
-                return Marshal.GetHRForException(e);
+                return e.HResult;
             }
 
             return numElements == celt ? HResults.S_OK : HResults.S_FALSE;
@@ -107,14 +108,12 @@ namespace System.Runtime.InteropServices.CustomMarshalers
                     IntPtr pUnk = Marshal.GetIUnknownForObject(Enumerator);
                     try
                     {
-                        if (Marshal.QueryInterface(pUnk, ref iid, out IntPtr pManagedObj) == HResults.S_OK)
-                        {
-                            Marshal.Release(pManagedObj);
-                        }
-                        else
+                        if (Marshal.QueryInterface(pUnk, ref iid, out IntPtr pManagedObj) != HResults.S_OK)
                         {
                             return CustomQueryInterfaceResult.Failed;
                         }
+
+                        Marshal.Release(pManagedObj);
                     }
                     finally
                     {
@@ -123,8 +122,8 @@ namespace System.Runtime.InteropServices.CustomMarshalers
                 }
                 catch (Exception)
                 {
-                // Swallow all exceptions so we don't impact cases where the the underlying
-                // enumerator is not COM visible and thus cannot be QIed.
+                    // Swallow all exceptions so we don't impact cases where the the underlying
+                    // enumerator is not COM visible and thus cannot be QIed.
                 }
             }
 

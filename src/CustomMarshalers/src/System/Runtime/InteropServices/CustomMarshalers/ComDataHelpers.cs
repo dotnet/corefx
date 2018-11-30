@@ -18,13 +18,11 @@ namespace System.Runtime.InteropServices.CustomMarshalers
             {
                 return managedView;
             }
-            else
+            
+            managedView = createCallback((T)comObject);
+            if (!Marshal.SetComObjectData(comObject, key, managedView))
             {
-                managedView = createCallback((T)comObject);
-                if (!Marshal.SetComObjectData(comObject, key, managedView))
-                {
-                    managedView = (TView)Marshal.GetComObjectData(comObject, key);
-                }
+                managedView = (TView)Marshal.GetComObjectData(comObject, key);
             }
             return managedView;
         }

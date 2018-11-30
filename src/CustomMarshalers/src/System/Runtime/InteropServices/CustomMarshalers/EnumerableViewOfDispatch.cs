@@ -12,14 +12,14 @@ namespace System.Runtime.InteropServices.CustomMarshalers
     internal class EnumerableViewOfDispatch : ICustomAdapter, IEnumerable
     {
         private const int DispId_NewEnum = -4;
-        private readonly object dispatch;
+        private readonly object _dispatch;
 
         public EnumerableViewOfDispatch(object dispatch)
         {
-            this.dispatch = dispatch;
+            this._dispatch = dispatch;
         }
 
-        private IDispatch Dispatch => (IDispatch)dispatch;
+        private IDispatch Dispatch => (IDispatch)_dispatch;
 
         public IEnumerator GetEnumerator()
         {
@@ -45,7 +45,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 
         public object GetUnderlyingObject()
         {
-            return dispatch;
+            return _dispatch;
         }
     }
 }
