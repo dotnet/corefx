@@ -774,22 +774,27 @@ namespace System.IO.Pipelines
 
         internal ReadResult GetReadAsyncResult()
         {
-            if (!_readerAwaitable.IsCompleted)
-            {
-                ThrowHelper.ThrowInvalidOperationException_GetResultNotCompleted();
-            }
-
             ReadResult result;
-            CancellationTokenRegistration cancellationTokenRegistration;
+            CancellationTokenRegistration cancellationTokenRegistration = default;
 
-            lock (_sync)
+            try
             {
-                GetReadResult(out result);
+                lock (_sync)
+                {
+                    if (!_readerAwaitable.IsCompleted)
+                    {
+                        ThrowHelper.ThrowInvalidOperationException_GetResultNotCompleted();
+                    }
 
-                cancellationTokenRegistration = _readerAwaitable.ReleaseCancellationTokenRegistration();
+                    cancellationTokenRegistration = _readerAwaitable.ReleaseCancellationTokenRegistration();
+                    GetReadResult(out result);
+                }
+            }
+            finally
+            {
+                DisposeAndThrow(cancellationTokenRegistration);
             }
 
-            DisposeAndThrow(cancellationTokenRegistration);
             return result;
         }
 
@@ -838,21 +843,26 @@ namespace System.IO.Pipelines
         internal FlushResult GetFlushAsyncResult()
         {
             FlushResult result = default;
-            CancellationTokenRegistration cancellationTokenRegistration;
+            CancellationTokenRegistration cancellationTokenRegistration = default;
 
-            lock (_sync)
+            try
             {
-                if (!_writerAwaitable.IsCompleted)
+                lock (_sync)
                 {
-                    ThrowHelper.ThrowInvalidOperationException_GetResultNotCompleted();
+                    if (!_writerAwaitable.IsCompleted)
+                    {
+                        ThrowHelper.ThrowInvalidOperationException_GetResultNotCompleted();
+                    }
+
+                    GetFlushResult(ref result);
+
+                    cancellationTokenRegistration = _writerAwaitable.ReleaseCancellationTokenRegistration();
                 }
-
-                GetFlushResult(ref result);
-
-                cancellationTokenRegistration = _writerAwaitable.ReleaseCancellationTokenRegistration();
             }
-
-            DisposeAndThrow(cancellationTokenRegistration);
+            finally
+            {
+                DisposeAndThrow(cancellationTokenRegistration);
+            }
 
             return result;
         }
