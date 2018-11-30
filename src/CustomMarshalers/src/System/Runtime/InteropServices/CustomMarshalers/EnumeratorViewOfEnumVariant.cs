@@ -13,6 +13,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
     {
         private readonly IEnumVARIANT _enumVariantObject;
         private bool _fetchedLastObject;
+        private object[] _nextArray = new object[1];
 
         public EnumeratorViewOfEnumVariant(IEnumVARIANT enumVariantObject)
         {
@@ -31,10 +32,9 @@ namespace System.Runtime.InteropServices.CustomMarshalers
                 return false;
             }
 
-            object[] next = new object[1];
             int numFetched = 0;
 
-            if (_enumVariantObject.Next(1, next, (IntPtr)(&numFetched)) == HResults.S_FALSE)
+            if (_enumVariantObject.Next(1, _nextArray, (IntPtr)(&numFetched)) == HResults.S_FALSE)
             {
                 _fetchedLastObject = true;
 
@@ -45,7 +45,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
                 }
             }
 
-            Current = next[0];
+            Current = _nextArray[0];
 
             return true;
         }
