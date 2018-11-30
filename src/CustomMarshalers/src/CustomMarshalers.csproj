@@ -10,6 +10,9 @@
 
   <ItemGroup>
       <Compile Include="**/*.cs" />
+      <Compile Include="$(CommonPath)/CoreLib/System/Runtime/InteropServices/IDispatch.cs">
+          <Link>IDispatch.cs</Link>
+      </Compile>
   </ItemGroup>
   
   <ItemGroup>
