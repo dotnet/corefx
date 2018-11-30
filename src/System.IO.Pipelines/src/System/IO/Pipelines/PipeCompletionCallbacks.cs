@@ -42,11 +42,10 @@ namespace System.IO.Pipelines
                     for (var i = 0; i < _count - 1; i++)
                     {
                         var callback = _callbacks[i];
-                        exceptions = Execute(callback, ref exceptions);
+                        Execute(callback, ref exceptions);
                     }
                 }
                 finally
-
                 {
                     _pool.Return(_callbacks, clearArray: true);
                 }
@@ -58,7 +57,7 @@ namespace System.IO.Pipelines
             }
         }
 
-        private List<Exception> Execute(PipeCompletionCallback callback, ref List<Exception> exceptions)
+        private void Execute(PipeCompletionCallback callback, ref List<Exception> exceptions)
         {
             try
             {
@@ -73,8 +72,6 @@ namespace System.IO.Pipelines
 
                 exceptions.Add(ex);
             }
-
-            return exceptions;
         }
     }
 }
