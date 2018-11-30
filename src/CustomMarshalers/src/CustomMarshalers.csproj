@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>CustomMarshalers</AssemblyName>
     <ProjectGuid>{5D93E179-F49C-4B7F-8291-81A47A032523}</ProjectGuid>
-    <Configurations>netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>CS0618</NoWarn> <!-- To match .NET Framework API, need to use obseleted interfaces. -->
   </PropertyGroup>
