@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -29,7 +30,12 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 
         public IntPtr MarshalManagedToNative(object ManagedObj)
         {
-            throw new NotImplementedException();
+            if (ManagedObj == null)
+            {
+                throw new ArgumentNullException(nameof(ManagedObj));
+            }
+
+            return Marshal.GetComInterfaceForObject<object, IEnumerable>(ManagedObj);
         }
 
         public object MarshalNativeToManaged(IntPtr pNativeData)
