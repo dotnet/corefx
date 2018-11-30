@@ -789,7 +789,7 @@ namespace System.IO.Pipelines
                 cancellationTokenRegistration = _readerAwaitable.ReleaseCancellationTokenRegistration();
             }
 
-            cancellationTokenRegistration.Dispose();
+            DisposeAndThrow(cancellationTokenRegistration);
             return result;
         }
 
@@ -852,7 +852,7 @@ namespace System.IO.Pipelines
                 cancellationTokenRegistration = _writerAwaitable.ReleaseCancellationTokenRegistration();
             }
 
-            cancellationTokenRegistration.Dispose();
+            DisposeAndThrow(cancellationTokenRegistration);
 
             return result;
         }
@@ -903,6 +903,12 @@ namespace System.IO.Pipelines
                 _writerAwaitable.CancellationTokenFired(out completionData);
             }
             TrySchedule(_writerScheduler, completionData);
+        }
+
+        private void DisposeAndThrow(CancellationTokenRegistration cancellationTokenRegistration)
+        {
+            cancellationTokenRegistration.Dispose();
+            cancellationTokenRegistration.Token.ThrowIfCancellationRequested();
         }
 
         /// <summary>

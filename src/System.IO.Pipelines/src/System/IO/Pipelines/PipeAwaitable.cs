@@ -151,9 +151,6 @@ namespace System.IO.Pipelines
         {
             CancellationTokenRegistration cancellationTokenRegistration = _cancellationTokenRegistration;
             _cancellationTokenRegistration = default;
-
-            cancellationTokenRegistration.Token.ThrowIfCancellationRequested();
-
             return cancellationTokenRegistration;
         }
 
