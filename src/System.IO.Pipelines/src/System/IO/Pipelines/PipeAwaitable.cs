@@ -129,11 +129,10 @@ namespace System.IO.Pipelines
 
         public void CancellationTokenFired(out CompletionData completionData)
         {
-            CancellationToken cancellationToken;
 #if netcoreapp
-            cancellationToken = _cancellationTokenRegistration.Token;
+            CancellationToken cancellationToken = _cancellationTokenRegistration.Token;
 #else
-            cancellationToken = _cancellationToken;
+            CancellationToken cancellationToken = _cancellationToken;
 #endif
             // We might be getting stale callbacks that we already unsubscribed from
             if (cancellationToken.IsCancellationRequested)
