@@ -59,6 +59,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
         [Theory]
         [InlineData(typeof(CustomValidator), "SomeMethod")]
+        [InlineData(typeof(CustomValidator), nameof(CustomValidator.ValidationMethodDerivedReturnTypeReturnsSomeError))]
         [InlineData(null, null)]
         [InlineData(typeof(string), "")]
         [InlineData(typeof(int), " \t\r\n")]
@@ -173,6 +174,14 @@ namespace System.ComponentModel.DataAnnotations.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => attribute.Validate(new IConvertibleImplementor(), s_testValidationContext));
         }
 
+        [Fact]
+        public static void Validate_MethodReturnDerivedValidationResult_ReturnsExpected()
+        {
+            CustomValidationAttribute attribute = GetAttribute(nameof(CustomValidator.ValidationMethodDerivedReturnTypeReturnsSomeError));
+            var validationResult = attribute.Validate(new object(), s_testValidationContext);
+            Assert.Equal(DerivedValidationResult.SomeError, validationResult);
+        }
+
         internal class NonPublicCustomValidator
         {
             public static ValidationResult ValidationMethodOneArg(object o) => ValidationResult.Success;
@@ -204,6 +213,9 @@ namespace System.ComponentModel.DataAnnotations.Tests
             {
                 return ValidationResult.Success;
             }
+
+            public static DerivedValidationResult ValidationMethodDerivedReturnTypeReturnsSomeError(object o) =>
+                DerivedValidationResult.SomeError;
 
             public static ValidationResult CorrectValidationMethodOneArg(object o)
             {
@@ -259,6 +271,14 @@ namespace System.ComponentModel.DataAnnotations.Tests
         public struct TestStruct
         {
             public string Value { get; set; }
+        }
+
+        public class DerivedValidationResult : ValidationResult
+        {
+            public static readonly DerivedValidationResult SomeError =
+                new DerivedValidationResult("Some Error") { AdditionalData = "Additional Data" }; 
+
+            public string AdditionalData { get; set; }
         }
     }
 }

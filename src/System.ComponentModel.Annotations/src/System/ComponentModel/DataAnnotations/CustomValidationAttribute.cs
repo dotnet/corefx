@@ -248,7 +248,7 @@ namespace System.ComponentModel.DataAnnotations
             }
 
             // Method must return a ValidationResult
-            if (methodInfo.ReturnType != typeof(ValidationResult))
+            if (!typeof(ValidationResult).IsAssignableFrom(methodInfo.ReturnType))
             {
                 return string.Format(CultureInfo.CurrentCulture,
                     SR.CustomValidationAttribute_Method_Must_Return_ValidationResult, Method,
