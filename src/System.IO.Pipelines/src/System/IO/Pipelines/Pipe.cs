@@ -776,7 +776,7 @@ namespace System.IO.Pipelines
         {
             ReadResult result;
             CancellationTokenRegistration cancellationTokenRegistration = default;
-
+            CancellationToken cancellationToken = default;
             try
             {
                 lock (_sync)
@@ -786,13 +786,14 @@ namespace System.IO.Pipelines
                         ThrowHelper.ThrowInvalidOperationException_GetResultNotCompleted();
                     }
 
-                    cancellationTokenRegistration = _readerAwaitable.ReleaseCancellationTokenRegistration();
+                    cancellationTokenRegistration = _readerAwaitable.ReleaseCancellationTokenRegistration(out cancellationToken);
                     GetReadResult(out result);
                 }
             }
             finally
             {
-                DisposeAndThrow(cancellationTokenRegistration);
+                cancellationTokenRegistration.Dispose();
+                cancellationToken.ThrowIfCancellationRequested();
             }
 
             return result;
@@ -843,6 +844,7 @@ namespace System.IO.Pipelines
         internal FlushResult GetFlushAsyncResult()
         {
             FlushResult result = default;
+            CancellationToken cancellationToken = default;
             CancellationTokenRegistration cancellationTokenRegistration = default;
 
             try
@@ -856,12 +858,13 @@ namespace System.IO.Pipelines
 
                     GetFlushResult(ref result);
 
-                    cancellationTokenRegistration = _writerAwaitable.ReleaseCancellationTokenRegistration();
+                    cancellationTokenRegistration = _writerAwaitable.ReleaseCancellationTokenRegistration(out cancellationToken);
                 }
             }
             finally
             {
-                DisposeAndThrow(cancellationTokenRegistration);
+                cancellationTokenRegistration.Dispose();
+                cancellationToken.ThrowIfCancellationRequested();
             }
 
             return result;
@@ -913,12 +916,6 @@ namespace System.IO.Pipelines
                 _writerAwaitable.CancellationTokenFired(out completionData);
             }
             TrySchedule(_writerScheduler, completionData);
-        }
-
-        private void DisposeAndThrow(CancellationTokenRegistration cancellationTokenRegistration)
-        {
-            cancellationTokenRegistration.Dispose();
-            cancellationTokenRegistration.Token.ThrowIfCancellationRequested();
         }
 
         /// <summary>

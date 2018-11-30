@@ -19,6 +19,10 @@ namespace System.IO.Pipelines
         private SynchronizationContext _synchronizationContext;
         private ExecutionContext _executionContext;
 
+#if !netcoreapp
+        private CancellationTokenRegistration _cancellationToken;
+#endif
+
         public PipeAwaitable(bool completed, bool useSynchronizationContext)
         {
             _awaitableState = (completed ? AwaitableState.Completed : AwaitableState.None) |
@@ -28,6 +32,9 @@ namespace System.IO.Pipelines
             _cancellationTokenRegistration = default;
             _synchronizationContext = null;
             _executionContext = null;
+#if !netcoreapp
+            _cancellationToken = CancellationToken.None;
+#endif
         }
 
         public bool IsCompleted => (_awaitableState & (AwaitableState.Completed | AwaitableState.Canceled)) != 0;
@@ -102,7 +109,7 @@ namespace System.IO.Pipelines
                 SynchronizationContext sc = SynchronizationContext.Current;
                 if (sc != null && sc.GetType() != typeof(SynchronizationContext))
                 {
-                    _synchronizationContext = SynchronizationContext.Current;
+                    _synchronizationContext = sc;
                 }
             }
 
@@ -144,10 +151,16 @@ namespace System.IO.Pipelines
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public CancellationTokenRegistration ReleaseCancellationTokenRegistration()
+        public CancellationTokenRegistration ReleaseCancellationTokenRegistration(out CancellationToken cancellationToken)
         {
+
             CancellationTokenRegistration cancellationTokenRegistration = _cancellationTokenRegistration;
             _cancellationTokenRegistration = default;
+#if netcoreapp
+            cancellationToken = cancellationTokenRegistration.Token;
+#else
+            cancellationToken = _cancellationToken;
+#endif
             return cancellationTokenRegistration;
         }
 
