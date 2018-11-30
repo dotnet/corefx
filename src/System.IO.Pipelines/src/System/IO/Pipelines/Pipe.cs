@@ -890,7 +890,7 @@ namespace System.IO.Pipelines
             CompletionData completionData;
             lock (_sync)
             {
-                _readerAwaitable.Cancel(out completionData);
+                _readerAwaitable.CancellationTokenFired(out completionData);
             }
             TrySchedule(_readerScheduler, completionData);
         }
@@ -900,7 +900,7 @@ namespace System.IO.Pipelines
             CompletionData completionData;
             lock (_sync)
             {
-                _writerAwaitable.Cancel(out completionData);
+                _writerAwaitable.CancellationTokenFired(out completionData);
             }
             TrySchedule(_writerScheduler, completionData);
         }

@@ -15,7 +15,6 @@ namespace System.IO.Pipelines
         private AwaitableState _awaitableState;
         private Action<object> _completion;
         private object _completionState;
-        private CancellationToken _cancellationToken;
         private CancellationTokenRegistration _cancellationTokenRegistration;
         private SynchronizationContext _synchronizationContext;
         private ExecutionContext _executionContext;
@@ -26,7 +25,6 @@ namespace System.IO.Pipelines
                               (useSynchronizationContext ? AwaitableState.UseSynchronizationContext : AwaitableState.None);
             _completion = null;
             _completionState = null;
-            _cancellationToken = CancellationToken.None;
             _cancellationTokenRegistration = default;
             _synchronizationContext = null;
             _executionContext = null;
@@ -45,7 +43,6 @@ namespace System.IO.Pipelines
             if (cancellationToken.CanBeCanceled)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                _cancellationToken = cancellationToken;
 
                 // Don't register if already completed, we would immediately unregistered in ObserveCancellation
                 if (!IsCompleted)
@@ -127,6 +124,19 @@ namespace System.IO.Pipelines
             _awaitableState |= AwaitableState.Canceled;
         }
 
+        public void CancellationTokenFired(out CompletionData completionData)
+        {
+            // We might be getting stale callbacks that we already unsubscribed from
+            if (_cancellationTokenRegistration.Token.IsCancellationRequested)
+            {
+                Cancel(out completionData);
+            }
+            else
+            {
+                completionData = default;
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool ObserveCancellation()
         {
@@ -140,12 +150,10 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CancellationTokenRegistration ReleaseCancellationTokenRegistration()
         {
-            CancellationToken cancellationToken = _cancellationToken;
             CancellationTokenRegistration cancellationTokenRegistration = _cancellationTokenRegistration;
             _cancellationTokenRegistration = default;
-            _cancellationToken = default;
 
-            cancellationToken.ThrowIfCancellationRequested();
+            cancellationTokenRegistration.Token.ThrowIfCancellationRequested();
 
             return cancellationTokenRegistration;
         }
