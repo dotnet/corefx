@@ -14,21 +14,22 @@ namespace System.Runtime.InteropServices.CustomMarshalers
         private readonly IEnumVARIANT _enumVariantObject;
         private bool _fetchedLastObject;
         private object[] _nextArray = new object[1];
+        private object _current;
 
         public EnumeratorViewOfEnumVariant(IEnumVARIANT enumVariantObject)
         {
             _enumVariantObject = enumVariantObject;
             _fetchedLastObject = false;
-            Current = null;
+            _current = null;
         }
 
-        public object Current { get; private set; }
+        public object Current => _current;
 
         public unsafe bool MoveNext()
         {
             if (_fetchedLastObject)
             {
-                Current = null;
+                _current = null;
                 return false;
             }
 
@@ -40,12 +41,12 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 
                 if (numFetched == 0)
                 {
-                    Current = null;
+                    _current = null;
                     return false;
                 }
             }
 
-            Current = _nextArray[0];
+            _current = _nextArray[0];
 
             return true;
         }

@@ -16,7 +16,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 
         public EnumerableViewOfDispatch(object dispatch)
         {
-            this._dispatch = dispatch;
+            _dispatch = dispatch;
         }
 
         private IDispatch Dispatch => (IDispatch)_dispatch;
