@@ -5,10 +5,11 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Threading;
-
+using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 using Xunit;
 
@@ -243,6 +244,133 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
 
         Assert.Equal("", impersonatedContextValue.Value);
         Assert.NotEqual("NewValue", impersonatedContextValue.Value);
+    }
+
+    [Fact]
+    async public Task Impersonate_FlowExecutionContext()
+    {
+        string current = InteropHelper.GetCurrentUser();
+
+        using (WindowsIdentity.Impersonate(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()))
+        {
+            Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUser());
+            await Task.Run(async() => 
+            {
+                Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUser());
+                await Task.Run(async() =>
+                {
+                    Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUser());
+                    await Task.Run(() =>
+                    {
+                        Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUser());
+                    });
+                });
+            });
+        }
+
+        Assert.Equal(current, InteropHelper.GetCurrentUser());
+    }
+
+
+}
+
+public static class InteropHelper
+{
+    public static string GetCurrentUser()
+    {
+        SafeAccessTokenHandle current = GetCurrentToken(TokenAccessLevels.MaximumAllowed, false, out bool isImpersonating, out int hr);
+        SafeLocalAllocHandle tokenOwner = GetTokenInformation(current, TokenInformationClass.TokenOwner);
+        var user = new SecurityIdentifier(tokenOwner.Read<IntPtr>(0));
+        NTAccount ntAccount = user.Translate(typeof(NTAccount)) as NTAccount;
+        return ntAccount.ToString();
+    }
+
+    private static SafeLocalAllocHandle GetTokenInformation(SafeAccessTokenHandle tokenHandle, TokenInformationClass tokenInformationClass, bool nullOnInvalidParam = false)
+    {
+        SafeLocalAllocHandle safeLocalAllocHandle = SafeLocalAllocHandle.InvalidHandle;
+        uint dwLength = (uint)sizeof(uint);
+        bool result = Interop.Advapi32.GetTokenInformation(tokenHandle,
+                                                      (uint)tokenInformationClass,
+                                                      safeLocalAllocHandle,
+                                                      0,
+                                                      out dwLength);
+        int dwErrorCode = Marshal.GetLastWin32Error();
+        switch (dwErrorCode)
+        {
+            case Interop.Errors.ERROR_BAD_LENGTH:
+            // special case for TokenSessionId. Falling through
+            case Interop.Errors.ERROR_INSUFFICIENT_BUFFER:
+                // ptrLength is an [In] param to LocalAlloc 
+                UIntPtr ptrLength = new UIntPtr(dwLength);
+                safeLocalAllocHandle.Dispose();
+                safeLocalAllocHandle = Interop.Kernel32.LocalAlloc(0, ptrLength);
+                if (safeLocalAllocHandle == null || safeLocalAllocHandle.IsInvalid)
+                    throw new OutOfMemoryException();
+                safeLocalAllocHandle.Initialize(dwLength);
+
+                result = Interop.Advapi32.GetTokenInformation(tokenHandle,
+                                                         (uint)tokenInformationClass,
+                                                         safeLocalAllocHandle,
+                                                         dwLength,
+                                                         out dwLength);
+                if (!result)
+                    throw new SecurityException(new Win32Exception().Message);
+                break;
+            case Interop.Errors.ERROR_INVALID_HANDLE:
+                throw new ArgumentException("Argument_InvalidImpersonationToken");
+            case Interop.Errors.ERROR_INVALID_PARAMETER:
+                if (nullOnInvalidParam)
+                {
+                    safeLocalAllocHandle.Dispose();
+                    return null;
+                }
+
+                // Throw the exception.
+                goto default;
+            default:
+                throw new SecurityException(new Win32Exception(dwErrorCode).Message);
+        }
+        return safeLocalAllocHandle;
+    }
+
+    internal enum TokenInformationClass : int
+    {
+        TokenOwner = 4
+    }
+
+    private static SafeAccessTokenHandle GetCurrentToken(TokenAccessLevels desiredAccess, bool threadOnly, out bool isImpersonating, out int hr)
+    {
+        isImpersonating = true;
+        SafeAccessTokenHandle safeTokenHandle;
+        hr = 0;
+        bool success = Interop.Advapi32.OpenThreadToken(desiredAccess, WinSecurityContext.Both, out safeTokenHandle);
+        if (!success)
+            hr = Marshal.GetHRForLastWin32Error();
+        if (!success && hr == GetHRForWin32Error(Interop.Errors.ERROR_NO_TOKEN))
+        {
+            // No impersonation
+            isImpersonating = false;
+            if (!threadOnly)
+                safeTokenHandle = GetCurrentProcessToken(desiredAccess, out hr);
+        }
+        return safeTokenHandle;
+    }
+
+    private static SafeAccessTokenHandle GetCurrentProcessToken(TokenAccessLevels desiredAccess, out int hr)
+    {
+        hr = 0;
+        SafeAccessTokenHandle safeTokenHandle;
+        if (!Interop.Advapi32.OpenProcessToken(Interop.Kernel32.GetCurrentProcess(), desiredAccess, out safeTokenHandle))
+            hr = GetHRForWin32Error(Marshal.GetLastWin32Error());
+        return safeTokenHandle;
+    }
+
+    private static int GetHRForWin32Error(int dwLastError)
+    {
+        if ((dwLastError & 0x80000000) == 0x80000000)
+            return dwLastError;
+        else
+            return (dwLastError & 0x0000FFFF) | unchecked((int)0x80070000);
     }
 }
 
