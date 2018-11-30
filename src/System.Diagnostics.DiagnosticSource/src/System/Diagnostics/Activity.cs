@@ -360,7 +360,7 @@ namespace System.Diagnostics
         /* W3C support functionality (see https://w3c.github.io/trace-context) */
 
         /// <summary>
-        /// Holds the W3C 'tracestate' header.   
+        /// Holds the W3C 'tracestate' header as a string.   
         /// 
         /// Tracestate is intended to carry information supplemental to trace identity contained 
         /// in traceparent. List of key value pairs carried by tracestate convey information 
@@ -372,7 +372,7 @@ namespace System.Diagnostics
         /// it is expected to be special cased (it has its own HTTP header), it is more 
         /// convenient/efficient if it is not lumped in with other baggage.   
         /// </summary>
-        public string TraceState
+        public string TraceStateString
         {
             get
             {
@@ -387,6 +387,42 @@ namespace System.Diagnostics
             set
             {
                 _traceState = value;
+            }
+        }
+
+        /// <summary>
+        /// If the Activity has the W3C format, this returns the ID for the SPAN part of the Id.  
+        /// Otherwise it returns a zero SpanId. 
+        /// </summary>
+        public ref SpanId SpanId
+        {
+            get
+            {
+                if (!_spanIdSet)
+                {
+                    if (IdFormat == ActivityIdFormat.W3C)
+                        _spanId = new SpanId(Id.subString(35, 16));
+                    _spanIdSet = true;
+                }
+                return ref _spanId;
+            }
+        }
+
+        /// <summary>
+        /// If the Activity has the W3C format, this returns the ID for the TraceId part of the Id.  
+        /// Otherwise it returns a zero TraceId. 
+        /// </summary>
+        public ref TraceId TraceId
+        {
+            get
+            {
+                if (!_traceIdSet)
+                {
+                    if (IdFormat == ActivityIdFormat.W3C)
+                        _traceId = new SpanId(RootId);
+                    _traceIdSet = true;
+                }
+                return ref _spanId;
             }
         }
 
@@ -602,6 +638,10 @@ namespace System.Diagnostics
         private KeyValueListNode _tags;
         private KeyValueListNode _baggage;
         private string _traceState;
+        private SpanId _spanId;
+        private bool _spanIdSet;
+        private TraceId _traceId;
+        private bool _traceIdSet;
         private bool isFinished;
         #endregion // private
     }
@@ -615,4 +655,138 @@ namespace System.Diagnostics
         Hierarchical, //|XXXX.XX.X_X ... see https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format
         W3C,          // 00-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX see https://w3c.github.io/trace-context/
     };
+
+    /// <summary>
+    /// A TraceId is the format the W3C standard requires for its ID for the entire trace. 
+    /// It represents 16 binary bytes of information, typically displayed as 32 characters
+    /// of Hexadecimal.  A TraceId is a STRUCT, and does contain the 16 bytes of binary information
+    /// so there is value in passing it by reference.   It does know how to convert to and
+    /// from its Hexadecimal string representation, tries to avoid changing formats until
+    /// it has to, and caches the string representation after it was created.   
+    /// It is mostly useful as an exchange type.  
+    /// </summary>
+    public unsafe struct TraceId
+    {
+        /// <summary>
+        /// Creates a TraceId from a 32 character hexadecimal string representation 'hexString'
+        /// </summary>
+        public TraceId(string hexString)
+        {
+            _asHexString = hexString;
+        }
+        /// <summary>
+        /// Creates a TraceId from a 16 byte span 'idBytes'.  
+        /// </summary>
+        public TraceId(Span<byte> idBytes)
+        {
+            _asHexString = null;
+            fixed (ulong* idPtr = _id)
+                idBytes.CopyTo(new Span<byte>(idPtr, sizeof(ulong) * 2));
+        }
+
+        /// <summary>
+        /// Copies the 16 byte binary trace Id int 'outputBuffer'. 
+        /// </summary>
+        public void CopyToAsBinary(Span<byte> outputBuffer)
+        {
+            if (_asHexString != null && _id[0] == 0 && _id[1] == 0)
+            {
+                UInt64.TryParse(_asHexString, out _id[0]);
+                UInt64.TryParse(_asHexString.Substring(8), out _id[1]);
+            }
+            fixed (ulong* idBytes = _id)
+                new Span<byte>(idBytes, sizeof(ulong) * 2).CopyTo(outputBuffer);
+        }
+        /// <summary>
+        /// Returns the TraceId as a 32 character hexadecimal string.  
+        /// </summary>
+        public string AsHexString
+        {
+            get
+            {
+                if (_asHexString == null)
+                {
+                    // TODO figure out endian-ness
+                    _asHexString = _id[0].ToString("X8") + _id[1].ToString("X8");
+                }
+                return _asHexString;
+            }
+        }
+
+        /// <summary>
+        /// Returns the TraceId as a 32 character hexadecimal string.  
+        /// </summary>
+        public override string ToString() => AsHexString;
+
+        #region private
+        fixed ulong _id[2];
+        string _asHexString;  // ultimately change to object, and allow several representations based on type.  
+        #endregion
+    }
+
+    /// <summary>
+    /// A SpanId is the format the W3C standard requires for its ID for a single span in a trace.  
+    /// It represents 8 binary bytes of information, typically displayed as 16 characters
+    /// of Hexadecimal.  A SpanId is a STRUCT, and does contain the 8 bytes of binary information
+    /// so there is value in passing it by reference.  It does know how to convert to and
+    /// from its Hexadecimal string representation, tries to avoid changing formats until
+    /// it has to, and caches the string representation after it was created.   
+    /// It is mostly useful as an exchange type.  
+    /// </summary>
+    public struct SpanId
+    {
+        /// <summary>
+        /// Creates a SpanId from a 16 character hexadecimal string representation 'hexString'
+        /// </summary>
+        public SpanId(string hexId)
+        {
+            _asULong = 0;
+            _asHexString = hexId;
+        }
+        /// <summary>
+        /// Creates a SpanId from a ulong id.  
+        /// </summary>
+        /// <param name="id"></param>
+        public SpanId(ulong id)
+        {
+            _asULong = id;
+            _asHexString = null;
+        }
+
+        /// <summary>
+        /// Returns the SpanId as a 8 byte ulong.  
+        /// </summary>
+        public ulong AsULong
+        {
+            get
+            {
+                if (_asHexString != null && _asULong == 0)
+                    UInt64.TryParse(_asHexString, out _asULong);
+                return _asULong;
+            }
+        }
+        /// <summary>
+        /// Returns the TraceId as a 16 character hexadecimal string.  
+        /// </summary>
+        /// <returns></returns>
+        public string AsHexString
+        {
+            get
+            {
+                if (_asHexString == null)
+                    _asHexString = _asULong.ToString("X8");
+                return _asHexString;
+            }
+        }
+
+        /// <summary>
+        /// Returns SpanId as a hex string. 
+        /// </summary>
+        public override string ToString() => AsHexString;
+
+        #region private
+        ulong _asULong;
+        string _asHexString;   // ultimately change to object, and allow several representations based on type.   
+        #endregion
+    }
 }
