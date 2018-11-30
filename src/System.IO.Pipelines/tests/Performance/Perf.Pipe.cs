@@ -10,7 +10,7 @@ namespace System.IO.Pipelines.Tests
 {
     public sealed class Perf_Pipe
     {
-        private const int InnerIterationCount = 10000;
+        private const int InnerIterationCount = 10_000;
 
         [Benchmark(InnerIterationCount = InnerIterationCount)]
         public async void SyncReadAsync()
@@ -18,20 +18,20 @@ namespace System.IO.Pipelines.Tests
             // Setup
             var pipe = new Pipe(new PipeOptions(pool: null, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
-            var writer = pipe.Writer;
-            var reader = pipe.Reader;
+            PipeWriter writer = pipe.Writer;
+            PipeReader reader = pipe.Reader;
 
             await writer.WriteAsync(new ReadOnlyMemory<byte>(new byte[] { 0, 0, 0, 0 }));
             await writer.FlushAsync();
 
             // Actual perf testing
-            foreach (var iteration in Benchmark.Iterations)
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var result = await reader.ReadAsync();
+                        ReadResult result = await reader.ReadAsync();
                         reader.AdvanceTo(result.Buffer.Start);
                     }
                 }
@@ -44,13 +44,13 @@ namespace System.IO.Pipelines.Tests
             // Setup
             var pipe = new Pipe(new PipeOptions(pool: null, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
-            var writer = pipe.Writer;
-            var reader = pipe.Reader;
+            PipeWriter writer = pipe.Writer;
+            PipeReader reader = pipe.Reader;
 
             var data = new byte[] { 0 };
 
             // Actual perf testing
-            foreach (var iteration in Benchmark.Iterations)
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
@@ -61,7 +61,7 @@ namespace System.IO.Pipelines.Tests
                         await writer.WriteAsync(data);
                         await writer.FlushAsync();
 
-                        var result = await task;
+                        ReadResult result = await task;
                         reader.AdvanceTo(result.Buffer.End);
                     }
                 }
@@ -74,21 +74,21 @@ namespace System.IO.Pipelines.Tests
             // Setup
             var pipe = new Pipe(new PipeOptions(pool: null, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
-            var writer = pipe.Writer;
-            var reader = pipe.Reader;
-            var cts = new CancellationTokenSource();
+            PipeWriter writer = pipe.Writer;
+            PipeReader reader = pipe.Reader;
+            CancellationTokenSource cts = new CancellationTokenSource();
 
             await writer.WriteAsync(new ReadOnlyMemory<byte>(new byte[] { 0, 0, 0, 0 }));
             await writer.FlushAsync();
 
             // Actual perf testing
-            foreach (var iteration in Benchmark.Iterations)
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
                     for (int i = 0; i < Benchmark.InnerIterationCount; i++)
                     {
-                        var result = await reader.ReadAsync(cts.Token);
+                        ReadResult result = await reader.ReadAsync(cts.Token);
                         reader.AdvanceTo(result.Buffer.Start);
                     }
                 }
@@ -101,15 +101,15 @@ namespace System.IO.Pipelines.Tests
             // Setup
             var pipe = new Pipe(new PipeOptions(pool: null, readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
 
-            var writer = pipe.Writer;
-            var reader = pipe.Reader;
+            PipeWriter writer = pipe.Writer;
+            PipeReader reader = pipe.Reader;
 
             var data = new byte[] { 0 };
 
-            var cts = new CancellationTokenSource();
+            CancellationTokenSource cts = new CancellationTokenSource();
 
             // Actual perf testing
-            foreach (var iteration in Benchmark.Iterations)
+            foreach (BenchmarkIteration iteration in Benchmark.Iterations)
             {
                 using (iteration.StartMeasurement())
                 {
@@ -120,7 +120,7 @@ namespace System.IO.Pipelines.Tests
                         await writer.WriteAsync(data);
                         await writer.FlushAsync();
 
-                        var result = await task;
+                        ReadResult result = await task;
                         reader.AdvanceTo(result.Buffer.End);
                     }
                 }

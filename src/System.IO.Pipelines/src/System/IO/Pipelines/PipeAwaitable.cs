@@ -39,7 +39,6 @@ namespace System.IO.Pipelines
         {
             _awaitableState |= AwaitableState.Running;
 
-
             if (cancellationToken.CanBeCanceled)
             {
                 cancellationToken.ThrowIfCancellationRequested();
