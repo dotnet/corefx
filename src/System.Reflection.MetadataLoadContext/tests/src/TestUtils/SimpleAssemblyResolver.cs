@@ -20,32 +20,26 @@ namespace System.Reflection.Tests
             if (core != null)
                 return core;
 
-            foreach(Assembly a in context.GetAssemblies())
+            ReadOnlySpan<byte> pktFromAssemblyName = assemblyName.GetPublicKeyToken();
+            foreach (Assembly assembly in context.GetAssemblies())
             {
-                if (assemblyName.Name.Equals(a.GetName().Name, StringComparison.OrdinalIgnoreCase) &&
-                    NormalizeVersion(assemblyName.Version).Equals(NormalizeVersion(a.GetName().Version)) &&
-                    NormalizePublicKeyToken(assemblyName.GetPublicKeyToken()).SequenceEqual(NormalizePublicKeyToken(a.GetName().GetPublicKeyToken())) &&
-                    NormalizeCultureName(assemblyName.CultureName).Equals(NormalizeCultureName(a.GetName().CultureName)))
-                    return a;
+                AssemblyName assemblyNameFromContext = assembly.GetName();
+                if (assemblyName.Name.Equals(assemblyNameFromContext.Name, StringComparison.OrdinalIgnoreCase) &&
+                    NormalizeVersion(assemblyName.Version).Equals(assemblyNameFromContext.Version) &&
+                    pktFromAssemblyName.SequenceEqual(assemblyNameFromContext.GetPublicKeyToken()) &&
+                    NormalizeCultureName(assemblyName.CultureName).Equals(NormalizeCultureName(assemblyNameFromContext.CultureName)))
+                    return assembly;
             }
 
             return null;
         }
 
-        private ReadOnlySpan<byte> NormalizePublicKeyToken(ReadOnlySpan<byte> publicKeyToken)
+        private Version NormalizeVersion(Version version)
         {
-            if (publicKeyToken == null)
-                return Array.Empty<byte>();
-
-            return publicKeyToken;
-        }
-
-        private Version NormalizeVersion(Version v)
-        {
-            if (v == null)
+            if (version == null)
                 return s_Version0000;
 
-            return v;
+            return version;
         }
 
         private string NormalizeCultureName(string cultureName)

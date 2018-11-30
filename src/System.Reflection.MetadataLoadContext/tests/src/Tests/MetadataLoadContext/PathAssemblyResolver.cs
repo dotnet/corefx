@@ -88,14 +88,14 @@ namespace System.Reflection.Tests
                 {
                     Assert.Equal(1, lc.GetAssemblies().Count());
 
-                    Assembly a = lc.LoadFromAssemblyName(TestData.s_SimpleVersionedShortName);
-                    Assert.NotNull(a);
+                    Assembly assembly = lc.LoadFromAssemblyName(TestData.s_SimpleVersionedShortName);
+                    Assert.NotNull(assembly);
 
                     // Name
 
                     {
-                        Assembly aAgain = lc.LoadFromAssemblyName(TestData.s_SimpleVersionedShortName.ToUpper());
-                        Assert.NotNull(aAgain);
+                        Assembly assemblyAgain = lc.LoadFromAssemblyName(TestData.s_SimpleVersionedShortName.ToUpper());
+                        Assert.NotNull(assemblyAgain);
                     }
 
                     AssemblyName assemblyName = new AssemblyName(TestData.s_SimpleVersionedShortName);
@@ -110,43 +110,43 @@ namespace System.Reflection.Tests
 
                     {
                         assemblyName.Version = null;
-                        Assembly aAgain = lc.LoadFromAssemblyName(assemblyName);
-                        Assert.Same(a, aAgain);
+                        Assembly assemblyAgain = lc.LoadFromAssemblyName(assemblyName);
+                        Assert.Same(assembly, assemblyAgain);
                     }
 
                     {
                         assemblyName.Version = new Version(0, 0, 0, 0);
-                        Assembly aAgain = lc.LoadFromAssemblyName(assemblyName);
-                        Assert.Same(a, aAgain);
+                        Assembly assemblyAgain = lc.LoadFromAssemblyName(assemblyName);
+                        Assert.Same(assembly, assemblyAgain);
                     }
 
                     {
-                        assemblyName.Version = a.GetName().Version;
-                        Assembly aAgain = lc.LoadFromAssemblyName(assemblyName);
-                        Assert.Same(a, aAgain);
+                        assemblyName.Version = assembly.GetName().Version;
+                        Assembly assemblyAgain = lc.LoadFromAssemblyName(assemblyName);
+                        Assert.Same(assembly, assemblyAgain);
                     }
 
                     // CultureName; match not required
 
                     {
                         assemblyName.CultureName = "en";
-                        Assembly aAgain = lc.LoadFromAssemblyName(assemblyName);
-                        Assert.Same(a, aAgain);
+                        Assembly assemblyAgain = lc.LoadFromAssemblyName(assemblyName);
+                        Assert.Same(assembly, assemblyAgain);
                     }
 
                     {
                         assemblyName.CultureName = "";
-                        Assembly aAgain = lc.LoadFromAssemblyName(assemblyName);
-                        Assert.Same(a, aAgain);
+                        Assembly assemblyAgain = lc.LoadFromAssemblyName(assemblyName);
+                        Assert.Same(assembly, assemblyAgain);
                     }
 
                     {
                         assemblyName.CultureName = null;
-                        Assembly aAgain = lc.LoadFromAssemblyName(assemblyName);
-                        Assert.Same(a, aAgain);
+                        Assembly assemblyAgain = lc.LoadFromAssemblyName(assemblyName);
+                        Assert.Same(assembly, assemblyAgain);
                     }
 
-                    assemblyName.CultureName = a.GetName().CultureName;
+                    assemblyName.CultureName = assembly.GetName().CultureName;
 
                     // PublicKeyToken
 
@@ -155,20 +155,20 @@ namespace System.Reflection.Tests
 
                     {
                         assemblyName.SetPublicKeyToken(null);
-                        Assembly aAgain = lc.LoadFromAssemblyName(assemblyName);
-                        Assert.Same(a, aAgain);
+                        Assembly assemblyAgain = lc.LoadFromAssemblyName(assemblyName);
+                        Assert.Same(assembly, assemblyAgain);
                     }
 
                     {
                         assemblyName.SetPublicKeyToken(Array.Empty<byte>());
-                        Assembly aAgain = lc.LoadFromAssemblyName(assemblyName);
-                        Assert.Same(a, aAgain);
+                        Assembly assemblyAgain = lc.LoadFromAssemblyName(assemblyName);
+                        Assert.Same(assembly, assemblyAgain);
                     }
 
                     {
-                        assemblyName.SetPublicKeyToken(a.GetName().GetPublicKeyToken());
-                        Assembly aAgain = lc.LoadFromAssemblyName(assemblyName);
-                        Assert.Same(a, aAgain);
+                        assemblyName.SetPublicKeyToken(assembly.GetName().GetPublicKeyToken());
+                        Assembly assemblyAgain = lc.LoadFromAssemblyName(assemblyName);
+                        Assert.Same(assembly, assemblyAgain);
                     }
 
                     // None of the above should have affected the number of loaded assemblies.
