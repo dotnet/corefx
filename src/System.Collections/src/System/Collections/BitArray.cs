@@ -4,6 +4,7 @@
 
 using System.Buffers.Binary;
 using System.Diagnostics;
+using System.Runtime.Intrinsics.X86;
 
 namespace System.Collections
 {
@@ -264,17 +265,28 @@ namespace System.Collections
         ** Exceptions: ArgumentException if value == null or
         **             value.Length != this.Length.
         =========================================================================*/
-        public BitArray And(BitArray value)
+        public unsafe BitArray And(BitArray value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            for (int i = 0; i < m_array.Length; i++)
+            int i = 0;
+            if (Sse2.IsSupported && m_array.Length >= 4)
             {
-                m_array[i] &= value.m_array[i];
+                fixed (int* leftPtr = m_array)
+                fixed (int* rightPtr = value.m_array)
+                for (; i < m_array.Length - 4; i += 4)
+                {
+                    var leftVec = Sse2.LoadVector128(leftPtr + i);
+                    var rightVec = Sse2.LoadVector128(rightPtr + i);
+                    Sse2.Store(leftPtr + i, Sse2.And(leftVec, rightVec));
+                }
             }
+
+            for (; i < m_array.Length; i++)
+                m_array[i] &= value.m_array[i];
 
             _version++;
             return this;
@@ -286,17 +298,28 @@ namespace System.Collections
         ** Exceptions: ArgumentException if value == null or
         **             value.Length != this.Length.
         =========================================================================*/
-        public BitArray Or(BitArray value)
+        public unsafe BitArray Or(BitArray value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            for (int i = 0; i < m_array.Length; i++)
+            int i = 0;
+            if (Sse2.IsSupported && m_array.Length >= 4)
             {
-                m_array[i] |= value.m_array[i];
+                fixed (int* leftPtr = m_array)
+                fixed (int* rightPtr = value.m_array)
+                for (; i < m_array.Length - 4; i += 4)
+                {
+                    var leftVec = Sse2.LoadVector128(leftPtr + i);
+                    var rightVec = Sse2.LoadVector128(rightPtr + i);
+                    Sse2.Store(leftPtr + i, Sse2.Or(leftVec, rightVec));
+                }
             }
+
+            for (; i < m_array.Length; i++)
+                m_array[i] |= value.m_array[i];
 
             _version++;
             return this;
@@ -308,17 +331,28 @@ namespace System.Collections
         ** Exceptions: ArgumentException if value == null or
         **             value.Length != this.Length.
         =========================================================================*/
-        public BitArray Xor(BitArray value)
+        public unsafe BitArray Xor(BitArray value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            for (int i = 0; i < m_array.Length; i++)
+            int i = 0;
+            if (Sse2.IsSupported && m_array.Length >= 4)
             {
-                m_array[i] ^= value.m_array[i];
+                fixed (int* leftPtr = m_array)
+                fixed (int* rightPtr = value.m_array)
+                for (; i < m_array.Length - 4; i += 4)
+                {
+                    var leftVec = Sse2.LoadVector128(leftPtr + i);
+                    var rightVec = Sse2.LoadVector128(rightPtr + i);
+                    Sse2.Store(leftPtr + i, Sse2.Xor(leftVec, rightVec));
+                }
             }
+
+            for (; i < m_array.Length; i++)
+                m_array[i] ^= value.m_array[i];
 
             _version++;
             return this;
