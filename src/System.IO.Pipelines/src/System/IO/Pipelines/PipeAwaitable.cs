@@ -140,7 +140,6 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CancellationTokenRegistration ReleaseCancellationTokenRegistration()
         {
-
             CancellationToken cancellationToken = _cancellationToken;
             CancellationTokenRegistration cancellationTokenRegistration = _cancellationTokenRegistration;
             _cancellationTokenRegistration = default;
