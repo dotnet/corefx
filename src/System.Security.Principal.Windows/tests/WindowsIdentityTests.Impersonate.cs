@@ -3,7 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
@@ -40,7 +43,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
         Assert.Equal(expectedName, windowsIdentity.Name);
         using (windowsIdentity.Impersonate())
         {
-            Assert.Equal(expectedName, WindowsIdentity.GetCurrent().Name);
+            Assert.Equal(expectedName, InteropHelper.GetCurrentUserName());
             Assert.Equal(TokenImpersonationLevel.Identification, WindowsIdentity.GetCurrent().ImpersonationLevel);
         }
     }
@@ -56,7 +59,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
         Assert.Equal(expectedName, windowsIdentity.Name);
         using (windowsIdentity.Impersonate())
         {
-            Assert.Equal(expectedName, WindowsIdentity.GetCurrent().Name);
+            Assert.Equal(expectedName, InteropHelper.GetCurrentUserName());
             Assert.Equal(TokenImpersonationLevel.Impersonation, WindowsIdentity.GetCurrent().ImpersonationLevel);
         }
     }
@@ -77,31 +80,31 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     {
         // Users on same machine could return different case for machine/domain name for WindowsIdentity.Name
 
-        WindowsIdentity previous = WindowsIdentity.GetCurrent();
+        string previous = InteropHelper.GetCurrentUserName();
 
         // Assert.NotEqual() lacks ignoreCase overload
-        Assert.False(previous.Name.Equals(impersonatedAccount.AccountName, StringComparison.InvariantCultureIgnoreCase));
+        Assert.False(previous.Equals(impersonatedAccount.AccountName, StringComparison.InvariantCultureIgnoreCase));
 
         // test with explicit Undo() call
         WindowsImpersonationContext ctx = ctxFactory();
         try
         {
-            Assert.Equal(impersonatedAccount.AccountName, WindowsIdentity.GetCurrent().Name, ignoreCase: true);
+            Assert.Equal(impersonatedAccount.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
         }
         finally
         {
             ctx.Undo();
         }
 
-        Assert.Equal(previous.Name, WindowsIdentity.GetCurrent().Name, ignoreCase: true);
+        Assert.Equal(previous, InteropHelper.GetCurrentUserName(), ignoreCase: true);
 
         // test with Dispose pattern
         using (ctx = ctxFactory())
         {
-            Assert.Equal(impersonatedAccount.AccountName, WindowsIdentity.GetCurrent().Name, ignoreCase: true);
+            Assert.Equal(impersonatedAccount.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
         }
 
-        Assert.Equal(previous.Name, WindowsIdentity.GetCurrent().Name, ignoreCase: true);
+        Assert.Equal(previous, InteropHelper.GetCurrentUserName(), ignoreCase: true);
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -113,41 +116,41 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public void Impersonate_UserTokenObject_ZeroToken_NOP()
     {
-        // Users on same machine could return different case for machine/domain name for WindowsIdentity.Name
+        // Users on same machine could return different case for machine/domain name
 
-        WindowsIdentity previous = WindowsIdentity.GetCurrent();
+        string previous = InteropHelper.GetCurrentUserName();
 
         // impersonating a zero token means clear the token on the thread in this case NOP
         using (WindowsIdentity.Impersonate(SafeAccessTokenHandle.InvalidHandle.DangerousGetHandle()))
         {
-            Assert.Equal(previous.Name, WindowsIdentity.GetCurrent().Name, ignoreCase: true);
+            Assert.Equal(previous, InteropHelper.GetCurrentUserName(), ignoreCase: true);
         }
 
-        Assert.Equal(previous.Name, WindowsIdentity.GetCurrent().Name, ignoreCase: true);
+        Assert.Equal(previous, InteropHelper.GetCurrentUserName(), ignoreCase: true);
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     public void Impersonate_IsImpersonating_UserTokenObject_ZeroToken_ClearThreadToken()
     {
-        // Users on same machine could return different case for machine/domain name for WindowsIdentity.Name
+        // Users on same machine could return different case for machine/domain name
 
-        WindowsIdentity previous = WindowsIdentity.GetCurrent();
+        string previous = InteropHelper.GetCurrentUserName();
 
         // Assert.NotEqual() lacks ignoreCase overload
-        Assert.False(previous.Name.Equals(_fixture.TestAccount1.AccountName, StringComparison.InvariantCultureIgnoreCase));
+        Assert.False(previous.Equals(_fixture.TestAccount1.AccountName, StringComparison.InvariantCultureIgnoreCase));
 
         using (WindowsImpersonationContext ctx = WindowsIdentity.Impersonate(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()))
         {
-            Assert.Equal(WindowsIdentity.GetCurrent().Name, _fixture.TestAccount1.AccountName, ignoreCase: true);
+            Assert.Equal(InteropHelper.GetCurrentUserName(), _fixture.TestAccount1.AccountName, ignoreCase: true);
 
             // impersonating a zero token means clear the token on the thread
             using (WindowsIdentity.Impersonate(SafeAccessTokenHandle.InvalidHandle.DangerousGetHandle()))
             {
-                Assert.Equal(previous.Name, WindowsIdentity.GetCurrent().Name, ignoreCase: true);
+                Assert.Equal(previous, InteropHelper.GetCurrentUserName(), ignoreCase: true);
             }
         }
 
-        Assert.Equal(previous.Name, WindowsIdentity.GetCurrent().Name, ignoreCase: true);
+        Assert.Equal(previous, InteropHelper.GetCurrentUserName(), ignoreCase: true);
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -168,56 +171,56 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
 
     public void Impersonate_IsImpersonating(Func<(WindowsTestAccount, Func<WindowsImpersonationContext>)> user1Data, Func<(WindowsTestAccount, Func<WindowsImpersonationContext>)> user2Data)
     {
-        // Users on same machine could return different case for machine/domain name for WindowsIdentity.Name
+        // Users on same machine could return different case for machine/domain name
 
-        WindowsIdentity previous = WindowsIdentity.GetCurrent();
+        string previous = InteropHelper.GetCurrentUserName();
 
         // test with explicit Undo() call
         (WindowsTestAccount TestAccountUser1, Func<WindowsImpersonationContext> CtxFactoryUser1) = user1Data();
 
         // Assert.NotEqual() lacks ignoreCase overload
-        Assert.False(previous.Name.Equals(TestAccountUser1.AccountName, StringComparison.InvariantCultureIgnoreCase));
+        Assert.False(previous.Equals(TestAccountUser1.AccountName, StringComparison.InvariantCultureIgnoreCase));
 
         WindowsImpersonationContext user1ctx = CtxFactoryUser1();
         try
         {
-            Assert.Equal(WindowsIdentity.GetCurrent().Name, TestAccountUser1.AccountName, ignoreCase: true);
+            Assert.Equal(InteropHelper.GetCurrentUserName(), TestAccountUser1.AccountName, ignoreCase: true);
 
             (WindowsTestAccount TestAccountUser2, Func<WindowsImpersonationContext> CtxFactoryUser2) = user2Data();
             WindowsImpersonationContext user2ctx = CtxFactoryUser2();
             try
             {
-                Assert.Equal(WindowsIdentity.GetCurrent().Name, TestAccountUser2.AccountName, ignoreCase: true);
+                Assert.Equal(InteropHelper.GetCurrentUserName(), TestAccountUser2.AccountName, ignoreCase: true);
             }
             finally
             {
                 user2ctx.Undo();
             }
 
-            Assert.Equal(WindowsIdentity.GetCurrent().Name, TestAccountUser1.AccountName, ignoreCase: true);
+            Assert.Equal(InteropHelper.GetCurrentUserName(), TestAccountUser1.AccountName, ignoreCase: true);
         }
         finally
         {
             user1ctx.Undo();
         }
 
-        Assert.Equal(previous.Name, WindowsIdentity.GetCurrent().Name);
+        Assert.Equal(previous, InteropHelper.GetCurrentUserName());
 
         // test with Dispose pattern
         using (WindowsImpersonationContext ctxUser1 = CtxFactoryUser1())
         {
-            Assert.Equal(WindowsIdentity.GetCurrent().Name, TestAccountUser1.AccountName, ignoreCase: true);
+            Assert.Equal(InteropHelper.GetCurrentUserName(), TestAccountUser1.AccountName, ignoreCase: true);
 
             (WindowsTestAccount TestAccountUser2, Func<WindowsImpersonationContext> CtxFactoryUser2) = user2Data();
             using (WindowsImpersonationContext ctxUser2 = CtxFactoryUser2())
             {
-                Assert.Equal(WindowsIdentity.GetCurrent().Name, TestAccountUser2.AccountName, ignoreCase: true);
+                Assert.Equal(InteropHelper.GetCurrentUserName(), TestAccountUser2.AccountName, ignoreCase: true);
             }
 
-            Assert.Equal(WindowsIdentity.GetCurrent().Name, TestAccountUser1.AccountName, ignoreCase: true);
+            Assert.Equal(InteropHelper.GetCurrentUserName(), TestAccountUser1.AccountName, ignoreCase: true);
         }
 
-        Assert.Equal(previous.Name, WindowsIdentity.GetCurrent().Name);
+        Assert.Equal(previous, InteropHelper.GetCurrentUserName());
     }
 
     // Impersonate doesn't behave like RunImpersonated, 
@@ -227,9 +230,10 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
     public void Impersonate_ExcutionContext_NotReverted()
     {
-        AsyncLocal<string> impersonatedContextValue = new AsyncLocal<string>();
-
-        impersonatedContextValue.Value = "";
+        AsyncLocal<string> impersonatedContextValue = new AsyncLocal<string>
+        {
+            Value = ""
+        };
 
         using (WindowsIdentity.Impersonate(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()))
         {
@@ -246,37 +250,83 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
         Assert.NotEqual("NewValue", impersonatedContextValue.Value);
     }
 
-    [Fact]
-    async public Task Impersonate_FlowExecutionContext()
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    public async Task Impersonate_FlowExecutionContext()
     {
-        string current = InteropHelper.GetCurrentUser();
+        CustomTaskScheduler customTaskScheduler = new CustomTaskScheduler();
+        TaskFactory customFactory = new TaskFactory(customTaskScheduler);
+        List<bool> checkResult = new List<bool>();
+        string current = InteropHelper.GetCurrentUserName();
 
         using (WindowsIdentity.Impersonate(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()))
         {
-            Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUser());
-            await Task.Run(async() => 
+            checkResult.Add(_fixture.TestAccount1.AccountName.Equals(InteropHelper.GetCurrentUserName(), StringComparison.InvariantCultureIgnoreCase));
+            await customFactory.StartNew(async () =>
             {
-                Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUser());
-                await Task.Run(async() =>
+                checkResult.Add(_fixture.TestAccount1.AccountName.Equals(InteropHelper.GetCurrentUserName(), StringComparison.InvariantCultureIgnoreCase));
+                await customFactory.StartNew(async () =>
                 {
-                    Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUser());
-                    await Task.Run(() =>
+                    checkResult.Add(_fixture.TestAccount1.AccountName.Equals(InteropHelper.GetCurrentUserName(), StringComparison.InvariantCultureIgnoreCase));
+                    await customFactory.StartNew(() =>
                     {
-                        Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUser());
+                        checkResult.Add(_fixture.TestAccount1.AccountName.Equals(InteropHelper.GetCurrentUserName(), StringComparison.InvariantCultureIgnoreCase));
                     });
                 });
             });
         }
 
-        Assert.Equal(current, InteropHelper.GetCurrentUser());
+        Assert.Equal(current, InteropHelper.GetCurrentUserName());
+        Assert.False(checkResult.Exists(check => !check), $"At least one context doesn't flow impersonation, {checkResult.Count(check => !check)} of 3");
+
+        // Verify if all thread are clean
+        foreach (string afterInvocationThreadIdentity in customTaskScheduler.ThreadIdentity)
+        {
+            Assert.Equal(current, afterInvocationThreadIdentity);
+        }
     }
-
-
 }
 
+// For context flow tests we use custom task scheduler to be sure that 
+// we're using "clean identity token thread". 
+// If we do bug it's possible return impersonated thread to thread pool
+// and pick up the same for continuation task generating false positive.
+public class CustomTaskScheduler : TaskScheduler
+{
+    public ConcurrentBag<string> ThreadIdentity { get; } = new ConcurrentBag<string>();
+
+    protected override IEnumerable<Task> GetScheduledTasks()
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override bool TryDequeue(Task task)
+    {
+        throw new NotImplementedException();
+    }
+
+    protected override void QueueTask(Task task)
+    {
+        new Thread(_ =>
+        {
+            TryExecuteTask(task);
+
+            // we verify if thread is "clean"
+            ThreadIdentity.Add(InteropHelper.GetCurrentUserName());
+        }).Start();
+    }
+
+    protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
+    {
+        return false;
+    }
+}
+
+// We need an helper to get current thread user identity name because WindowsIdentity.Name
+// has side effects, it uses `RunImpersonate` that setup a static AsyncLocal state, this local state
+// disturb assertions in case of context flow
 public static class InteropHelper
 {
-    public static string GetCurrentUser()
+    public static string GetCurrentUserName()
     {
         SafeAccessTokenHandle current = GetCurrentToken(TokenAccessLevels.MaximumAllowed, false, out bool isImpersonating, out int hr);
         SafeLocalAllocHandle tokenOwner = GetTokenInformation(current, TokenInformationClass.TokenOwner);
@@ -288,7 +338,7 @@ public static class InteropHelper
     private static SafeLocalAllocHandle GetTokenInformation(SafeAccessTokenHandle tokenHandle, TokenInformationClass tokenInformationClass, bool nullOnInvalidParam = false)
     {
         SafeLocalAllocHandle safeLocalAllocHandle = SafeLocalAllocHandle.InvalidHandle;
-        uint dwLength = (uint)sizeof(uint);
+        uint dwLength = sizeof(uint);
         bool result = Interop.Advapi32.GetTokenInformation(tokenHandle,
                                                       (uint)tokenInformationClass,
                                                       safeLocalAllocHandle,
@@ -305,7 +355,10 @@ public static class InteropHelper
                 safeLocalAllocHandle.Dispose();
                 safeLocalAllocHandle = Interop.Kernel32.LocalAlloc(0, ptrLength);
                 if (safeLocalAllocHandle == null || safeLocalAllocHandle.IsInvalid)
+                {
                     throw new OutOfMemoryException();
+                }
+
                 safeLocalAllocHandle.Initialize(dwLength);
 
                 result = Interop.Advapi32.GetTokenInformation(tokenHandle,
@@ -314,10 +367,13 @@ public static class InteropHelper
                                                          dwLength,
                                                          out dwLength);
                 if (!result)
+                {
                     throw new SecurityException(new Win32Exception().Message);
+                }
+
                 break;
             case Interop.Errors.ERROR_INVALID_HANDLE:
-                throw new ArgumentException("Argument_InvalidImpersonationToken");
+                throw new ArgumentException("Invalid token for impersonation - it cannot be duplicated.");
             case Interop.Errors.ERROR_INVALID_PARAMETER:
                 if (nullOnInvalidParam)
                 {
@@ -333,7 +389,7 @@ public static class InteropHelper
         return safeLocalAllocHandle;
     }
 
-    internal enum TokenInformationClass : int
+    private enum TokenInformationClass : int
     {
         TokenOwner = 4
     }
@@ -341,17 +397,21 @@ public static class InteropHelper
     private static SafeAccessTokenHandle GetCurrentToken(TokenAccessLevels desiredAccess, bool threadOnly, out bool isImpersonating, out int hr)
     {
         isImpersonating = true;
-        SafeAccessTokenHandle safeTokenHandle;
         hr = 0;
-        bool success = Interop.Advapi32.OpenThreadToken(desiredAccess, WinSecurityContext.Both, out safeTokenHandle);
+        bool success = Interop.Advapi32.OpenThreadToken(desiredAccess, WinSecurityContext.Both, out SafeAccessTokenHandle safeTokenHandle);
         if (!success)
+        {
             hr = Marshal.GetHRForLastWin32Error();
+        }
+
         if (!success && hr == GetHRForWin32Error(Interop.Errors.ERROR_NO_TOKEN))
         {
             // No impersonation
             isImpersonating = false;
             if (!threadOnly)
+            {
                 safeTokenHandle = GetCurrentProcessToken(desiredAccess, out hr);
+            }
         }
         return safeTokenHandle;
     }
@@ -359,18 +419,24 @@ public static class InteropHelper
     private static SafeAccessTokenHandle GetCurrentProcessToken(TokenAccessLevels desiredAccess, out int hr)
     {
         hr = 0;
-        SafeAccessTokenHandle safeTokenHandle;
-        if (!Interop.Advapi32.OpenProcessToken(Interop.Kernel32.GetCurrentProcess(), desiredAccess, out safeTokenHandle))
+        if (!Interop.Advapi32.OpenProcessToken(Interop.Kernel32.GetCurrentProcess(), desiredAccess, out SafeAccessTokenHandle safeTokenHandle))
+        {
             hr = GetHRForWin32Error(Marshal.GetLastWin32Error());
+        }
+
         return safeTokenHandle;
     }
 
     private static int GetHRForWin32Error(int dwLastError)
     {
         if ((dwLastError & 0x80000000) == 0x80000000)
+        {
             return dwLastError;
+        }
         else
+        {
             return (dwLastError & 0x0000FFFF) | unchecked((int)0x80070000);
+        }
     }
 }
 
