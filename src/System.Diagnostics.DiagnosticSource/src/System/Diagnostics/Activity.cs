@@ -314,8 +314,7 @@ namespace System.Diagnostics
                     StartTimeUtc = GetUtcNow();
                 }
 
-                var defaultFormat = DefaultIdFormat;
-                if (IdFormat == ActivityIdFormat.W3C || defaultFormat == ActivityIdFormat.ForceW3C || (ParentId == null && defaultFormat == ActivityIdFormat.W3C))
+                if (IdFormat == ActivityIdFormat.W3C || (DefaultIdFormat == ActivityIdFormat.W3C && (ParentId == null || ForceDefaultIdFormat)))
                 {
                     Id = GenerateW3CId();
                     IdFormat = ActivityIdFormat.W3C;
@@ -413,6 +412,14 @@ namespace System.Diagnostics
 
             }
         }
+
+        /// <summary>
+        /// Normally if the ParentID is defined, the format of that is used to determine the
+        /// format used by the Activity.   However if ForceDefaultFormat is set to true, the
+        /// ID format will always be the DefaultIdFormat even if the ParentID is define and is
+        /// a different format. 
+        /// </summary>
+        public bool ForceDefaultIdFormat { get; set; }
 
         #region private 
         /// <summary>
@@ -591,7 +598,6 @@ namespace System.Diagnostics
         }
 
         private static ActivityIdFormat s_DefaultIdFormat;
-        private static Sampling s_sampling = new Sampling();
 
         private KeyValueListNode _tags;
         private KeyValueListNode _baggage;
@@ -608,6 +614,5 @@ namespace System.Diagnostics
         Unknown,      // ID format is not known.     
         Hierarchical, //|XXXX.XX.X_X ... see https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format
         W3C,          // 00-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX-XXXXXXXXXXXXXXXX-XX see https://w3c.github.io/trace-context/
-        ForceW3C,     // This value is only used by DefaultIdFormat.   It indicate the W3C format bit it also indicate W3C should be preferred over the parent ID format.  
     };
 }
