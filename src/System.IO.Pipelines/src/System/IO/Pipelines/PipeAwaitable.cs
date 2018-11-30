@@ -20,7 +20,7 @@ namespace System.IO.Pipelines
         private ExecutionContext _executionContext;
 
 #if !netcoreapp
-        private CancellationTokenRegistration _cancellationToken;
+        private CancellationToken _cancellationToken;
 #endif
 
         public PipeAwaitable(bool completed, bool useSynchronizationContext)
@@ -129,8 +129,14 @@ namespace System.IO.Pipelines
 
         public void CancellationTokenFired(out CompletionData completionData)
         {
+            CancellationToken cancellationToken;
+#if netcoreapp
+            cancellationToken = _cancellationTokenRegistration.Token;
+#else
+            cancellationToken = _cancellationToken;
+#endif
             // We might be getting stale callbacks that we already unsubscribed from
-            if (_cancellationTokenRegistration.Token.IsCancellationRequested)
+            if (cancellationToken.IsCancellationRequested)
             {
                 Cancel(out completionData);
             }
@@ -160,6 +166,7 @@ namespace System.IO.Pipelines
             cancellationToken = cancellationTokenRegistration.Token;
 #else
             cancellationToken = _cancellationToken;
+            _cancellationToken = default;
 #endif
             return cancellationTokenRegistration;
         }
