@@ -609,7 +609,7 @@ namespace System.IO.Pipelines
             ValueTask<ReadResult> result;
             lock (_sync)
             {
-                cancellationTokenRegistration = _readerAwaitable.AttachToken(token, s_signalReaderAwaitable, this);
+                _readerAwaitable.BeginOperation(token, s_signalReaderAwaitable, this);
 
                 // If the awaitable is already complete then return the value result directly
                 if (_readerAwaitable.IsCompleted)
