@@ -161,7 +161,6 @@
     <ApiCompatExcludeAttributeList>$(RepositoryEngineeringDir)DefaultGenApiDocIds.txt</ApiCompatExcludeAttributeList>
     <!-- Build as portable by default -->
     <PortableBuild Condition="'$(PortableBuild)' == ''">true</PortableBuild>
-    <Performance Condition="'$(Performance)' == ''">false</Performance>
     <!-- Used for launchSettings.json and runtime config files. -->
     <AppDesignerFolder>Properties</AppDesignerFolder>
   </PropertyGroup>
@@ -448,6 +447,12 @@
     <!-- Disable VS Test SDK references if the .NET Native toolchain is used. -->
     <EnableVSTestReferences Condition="'$(UseDotNetNativeToolchain)' == 'true'">false</EnableVSTestReferences>
     <EnableVSTestReferences Condition="'$(EnableVSTestReferences)' == ''">true</EnableVSTestReferences>
+  </PropertyGroup>
+
+  <!-- Test properties for full build. -->
+  <PropertyGroup Condition="'$(BuildAllProjects)' == 'true'">
+    <GenerateFullCoverageReport Condition="'$(GenerateFullCoverageReport)' == ''">true</GenerateFullCoverageReport>
+    <Performance Condition="'$(Performance)' == ''">false</Performance>
   </PropertyGroup>
 
   <!-- TODO: Fix VB test project reference to Test SDK. -->
