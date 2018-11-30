@@ -43,6 +43,15 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(SocketImplementationType.APM)]
         [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileLargeOffset__OffsetLong_Throws(SocketImplementationType type)
+        {
+            // Length is validated on Send
+            SendPackets(type, new SendPacketsElement(TestFileName, (long)uint.MaxValue + 11000, 1), SocketError.InvalidArgument, 0);
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
         public void SendPacketsElement_FileLargeCount__OffsetLong_Throws(SocketImplementationType type)
         {
             // Length is validated on Send

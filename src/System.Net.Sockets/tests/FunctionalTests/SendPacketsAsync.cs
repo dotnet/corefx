@@ -373,7 +373,6 @@ namespace System.Net.Sockets.Tests
         {
             // Length is validated on Send
             SendPackets(type, new SendPacketsElement(TestFileName, 11000, 1), SocketError.InvalidArgument, 0);
-            SendPackets(type, new SendPacketsElement(TestFileName, (long)uint.MaxValue + 11000, 1), SocketError.InvalidArgument, 0);
         }
 
         [Theory]
@@ -388,7 +387,6 @@ namespace System.Net.Sockets.Tests
         #endregion Files
 
         #region Helpers
-
         private void SendPackets(SocketImplementationType type, SendPacketsElement element, TransmitFileOptions flags, int bytesExpected)
         {
             Assert.True(Capability.IPv6Support());

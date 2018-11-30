@@ -204,14 +204,6 @@ namespace System.Net.Sockets.Tests
             Assert.Equal(0, element.Count);
             Assert.False(element.EndOfPacket);
             Assert.Equal("SomeFileName", element.FilePath);
-
-            // An exception will happen on send if this file doesn't exist
-            element = new SendPacketsElement("SomeFileName", 0L, 0); // Send whole file
-            Assert.Null(element.Buffer);
-            Assert.Equal(0, element.Offset);
-            Assert.Equal(0, element.Count);
-            Assert.False(element.EndOfPacket);
-            Assert.Equal("SomeFileName", element.FilePath);
         }
 
         [Fact]
