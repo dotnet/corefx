@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E9D942E3-D65
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{88142883-B4AF-4C3B-9B8F-4501407A824E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Runtime.InteropServices.CustomMarshalers", "src\System.Runtime.InteropServices.CustomMarshalers.csproj", "{E55E513E-152E-48D1-82B6-DDC9A993D779}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomMarshalers", "src\CustomMarshalers.csproj", "{E55E513E-152E-48D1-82B6-DDC9A993D779}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

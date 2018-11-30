@@ -28,7 +28,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
             }
             else
             {
-                throw new COMException("Arg_EnumNotCloneable", HResults.E_FAIL);
+                throw new COMException(SR.Arg_EnumNotCloneable, HResults.E_FAIL);
             }
         }
 

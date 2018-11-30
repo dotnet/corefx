@@ -14,7 +14,8 @@
     },
     "CustomMarshalers": {
       "InboxOn": {
-        "net45": "4.0.0.0"
+        "net45": "4.0.0.0",
+        "netcoreapp3.0" : "4.5.0.0"
       }
     },
     "ISymWrapper": {

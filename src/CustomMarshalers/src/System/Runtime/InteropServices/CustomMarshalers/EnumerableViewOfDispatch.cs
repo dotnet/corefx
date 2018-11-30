@@ -21,7 +21,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 
         public IEnumerator GetEnumerator()
         {
-            DISPPARAMS dispParams = default;
+            DISPPARAMS dispParams = new DISPPARAMS();
             Guid guid = Guid.Empty;
             Dispatch.Invoke(
                 DispId_NewEnum,
@@ -35,7 +35,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 
             if (!(result is IEnumVARIANT enumVariant))
             {
-                throw new InvalidOperationException("InvalidOp_InvalidNewEnumVariant");
+                throw new InvalidOperationException(SR.InvalidOp_InvalidNewEnumVariant);
             }
 
             return (IEnumerator)EnumeratorToEnumVariantMarshaler.GetInstance(null).MarshalNativeToManaged(Marshal.GetIUnknownForObject(enumVariant));
