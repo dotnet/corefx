@@ -9,7 +9,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 {
     internal class EnumVariantViewOfEnumerator : IEnumVARIANT, ICustomAdapter, ICustomQueryInterface
     {
-        private static readonly Guid IID_IManagedObject = new Guid("C3FCC19E-A970-11d2-8B5A-00A0C9B7C9C4");
+        private static readonly Guid s_IID_IManagedObject = new Guid("C3FCC19E-A970-11d2-8B5A-00A0C9B7C9C4");
 
         public EnumVariantViewOfEnumerator(IEnumerator enumerator)
         {
@@ -42,8 +42,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
             {
                 if (celt > 0 && rgVar == null)
                 {
-                    var ex = new ArgumentException();
-                    return ex.HResult;
+                    return HResults.E_INVALIDARG;
                 }
 
                 while ((numElements < celt) && Enumerator.MoveNext())
@@ -101,7 +100,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
             // This is to give user code a chance to get COM semantics either by implementing ICustomQI
             // or aggregating with an unmanaged COM object.
             ppv = IntPtr.Zero;
-            if (iid == IID_IManagedObject)
+            if (iid == s_IID_IManagedObject)
             {
                 try
                 {
