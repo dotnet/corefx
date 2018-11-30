@@ -22,5 +22,7 @@
     <MicrosoftDotNetXUnitExtensionsPackageVersion>2.4.0-beta.18578.2</MicrosoftDotNetXUnitExtensionsPackageVersion>
     <MicrosoftDotNetBuildTasksPackagingPackageVersion>1.0.0-beta.18578.2</MicrosoftDotNetBuildTasksPackagingPackageVersion>
     <MicrosoftDotNetCoreFxTestingPackageVersion>1.0.0-beta.18605.7</MicrosoftDotNetCoreFxTestingPackageVersion>
+    <!-- TODO: Replace with actual build -->
+    <MicrosoftDotNetConfigurationPackageVersion>1.0.0-dev-ericstj.18580.0</MicrosoftDotNetConfigurationPackageVersion>
   </PropertyGroup>
 </Project>

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <!-- TODO: remove before submission -->
     <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
       https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;
       https://dotnet.myget.org/F/sourcelink/api/v3/index.json;
+      https://www.myget.org/F/ericstj-staging/api/v3/index.json;
       $(RestoreSources)
     </RestoreSources>
     <MSBuildTreatWarningsAsErrors>false</MSBuildTreatWarningsAsErrors>
@@ -28,6 +30,7 @@
     <PackageReference Include="Microsoft.DotNet.GenFacades" Version="$(MicrosoftDotNetGenFacadesPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.Build.Tasks.Packaging" Version="$(MicrosoftDotNetBuildTasksPackagingPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.CoreFxTesting" Version="$(MicrosoftDotNetCoreFxTestingPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.Configuration" Version="$(MicrosoftDotNetConfigurationPackageVersion)" />
 
     <!-- Include the SourceLink packages -->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="$(MicrosoftSourceLinkVersion)" PrivateAssets="all" IsImplicitlyDefined="true" />
