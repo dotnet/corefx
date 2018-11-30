@@ -779,8 +779,8 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowInvalidOperationException_GetResultNotCompleted();
             }
 
-            CancellationTokenRegistration cancellationTokenRegistration;
             ReadResult result;
+            CancellationTokenRegistration cancellationTokenRegistration;
 
             lock (_sync)
             {
@@ -837,8 +837,9 @@ namespace System.IO.Pipelines
 
         internal FlushResult GetFlushAsyncResult()
         {
-            var result = new FlushResult();
+            FlushResult result = default;
             CancellationTokenRegistration cancellationTokenRegistration;
+
             lock (_sync)
             {
                 if (!_writerAwaitable.IsCompleted)

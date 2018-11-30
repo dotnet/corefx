@@ -20,14 +20,13 @@ namespace System.IO.Pipelines
         private SynchronizationContext _synchronizationContext;
         private ExecutionContext _executionContext;
 
-
         public PipeAwaitable(bool completed, bool useSynchronizationContext)
         {
             _awaitableState = (completed ? AwaitableState.Completed : AwaitableState.None) |
                               (useSynchronizationContext ? AwaitableState.UseSynchronizationContext : AwaitableState.None);
             _completion = null;
             _completionState = null;
-            _cancellationToken = default;
+            _cancellationToken = CancellationToken.None;
             _cancellationTokenRegistration = default;
             _synchronizationContext = null;
             _executionContext = null;
@@ -36,8 +35,6 @@ namespace System.IO.Pipelines
         public bool IsCompleted => (_awaitableState & (AwaitableState.Completed | AwaitableState.Canceled)) != 0;
 
         public bool IsRunning => (_awaitableState & AwaitableState.Running) != 0;
-
-        public CancellationTokenRegistration CancellationTokenRegistration => _cancellationTokenRegistration;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BeginOperation(CancellationToken cancellationToken, Action<object> callback, object state)
