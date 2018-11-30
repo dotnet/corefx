@@ -44,6 +44,7 @@ namespace System.IO.Pipelines
         {
             _awaitableState |= AwaitableState.Running;
 
+
             if (cancellationToken.CanBeCanceled)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -145,7 +146,6 @@ namespace System.IO.Pipelines
 
             CancellationToken cancellationToken = _cancellationToken;
             CancellationTokenRegistration cancellationTokenRegistration = _cancellationTokenRegistration;
-
             _cancellationTokenRegistration = default;
             _cancellationToken = default;
 
