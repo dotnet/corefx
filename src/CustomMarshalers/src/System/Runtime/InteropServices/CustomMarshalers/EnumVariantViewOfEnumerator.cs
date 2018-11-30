@@ -7,10 +7,8 @@ using System.Runtime.InteropServices.ComTypes;
 
 namespace System.Runtime.InteropServices.CustomMarshalers
 {
-    internal class EnumVariantViewOfEnumerator : IEnumVARIANT, ICustomAdapter, ICustomQueryInterface
+    internal class EnumVariantViewOfEnumerator : IEnumVARIANT, ICustomAdapter
     {
-        private static readonly Guid s_IID_IManagedObject = new Guid("C3FCC19E-A970-11d2-8B5A-00A0C9B7C9C4");
-
         public EnumVariantViewOfEnumerator(IEnumerator enumerator)
         {
             if (enumerator is null)
@@ -92,41 +90,6 @@ namespace System.Runtime.InteropServices.CustomMarshalers
             }
 
             return numElements == celt ? HResults.S_OK : HResults.S_FALSE;
-        }
-
-        public CustomQueryInterfaceResult GetInterface(ref Guid iid, out IntPtr ppv)
-        {
-            // We fail the QI for IManagedObject if the underlying enumerator does not support it.
-            // This is to give user code a chance to get COM semantics either by implementing ICustomQI
-            // or aggregating with an unmanaged COM object.
-            ppv = IntPtr.Zero;
-            if (iid == s_IID_IManagedObject)
-            {
-                try
-                {
-                    IntPtr pUnk = Marshal.GetIUnknownForObject(Enumerator);
-                    try
-                    {
-                        if (Marshal.QueryInterface(pUnk, ref iid, out IntPtr pManagedObj) != HResults.S_OK)
-                        {
-                            return CustomQueryInterfaceResult.Failed;
-                        }
-
-                        Marshal.Release(pManagedObj);
-                    }
-                    finally
-                    {
-                        Marshal.Release(pUnk);
-                    }
-                }
-                catch (Exception)
-                {
-                    // Swallow all exceptions so we don't impact cases where the the underlying
-                    // enumerator is not COM visible and thus cannot be QIed.
-                }
-            }
-
-            return CustomQueryInterfaceResult.NotHandled;
         }
 
         public object GetUnderlyingObject()
