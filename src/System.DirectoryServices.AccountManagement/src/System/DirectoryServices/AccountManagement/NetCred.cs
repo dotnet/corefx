@@ -55,7 +55,7 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        private void SplitUsername(string username, ref string parsedUserName, ref string parsedDomainName)
+        private unsafe void SplitUsername(string username, ref string parsedUserName, ref string parsedDomainName)
         {
             // If the user has passed null creds then parsed components should also be null.
             if (username == null)
@@ -67,15 +67,15 @@ namespace System.DirectoryServices.AccountManagement
 
             // Logon user expects the username in UPN or to have the username and domain split to the separate parameters.
             // It does not work properly with NT4 style name formats.  This function will put the username in the proper format.
-            StringBuilder splitUsername = new StringBuilder(UnsafeNativeMethods.CRED_MAX_USERNAME_LENGTH);
-            StringBuilder splitDomain = new StringBuilder(UnsafeNativeMethods.CRED_MAX_DOMAIN_TARGET_LENGTH);
+            char* splitUsername = stackalloc char[UnsafeNativeMethods.CRED_MAX_USERNAME_LENGTH];
+            char* splitDomain = stackalloc char[UnsafeNativeMethods.CRED_MAX_DOMAIN_TARGET_LENGTH];
 
             int result = UnsafeNativeMethods.CredUIParseUserName(
-                                                username,
+                                                 username,
                                                  splitUsername,
-                                                 (uint)splitUsername.Capacity,
+                                                 UnsafeNativeMethods.CRED_MAX_USERNAME_LENGTH,
                                                  splitDomain,
-                                                 (uint)splitDomain.Capacity);
+                                                 UnsafeNativeMethods.CRED_MAX_DOMAIN_TARGET_LENGTH);
 
             // If CredUiParseUsername fails then username format must have been in a format it does not expect.
             // Just pass then entire username as the user passed it with a null domain string.
@@ -86,8 +86,8 @@ namespace System.DirectoryServices.AccountManagement
             }
             else
             {
-                parsedDomainName = splitDomain.ToString();
-                parsedUserName = splitUsername.ToString();
+                parsedDomainName = new string(splitDomain);
+                parsedUserName = new string(splitUsername);
             }
         }
 
