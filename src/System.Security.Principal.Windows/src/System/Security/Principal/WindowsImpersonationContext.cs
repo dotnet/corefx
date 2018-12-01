@@ -3,22 +3,24 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
-using System.Runtime.InteropServices;
-
+using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Security.Principal
 {
     public class WindowsImpersonationContext : IDisposable
     {
-        private SafeAccessTokenHandle _previousUserToken = SafeAccessTokenHandle.InvalidHandle;
+        private readonly SafeAccessTokenHandle _previousUserToken = SafeAccessTokenHandle.InvalidHandle;
+        private readonly AsyncLocal<SafeAccessTokenHandle> _currentImpersonatedTokenWIC;
 
         private WindowsImpersonationContext() { }
 
-        internal WindowsImpersonationContext(SafeAccessTokenHandle currentUserToken, bool isImpersonating)
+        internal WindowsImpersonationContext(SafeAccessTokenHandle currentUserToken, bool isImpersonating, AsyncLocal<SafeAccessTokenHandle> currentImpersonatedTokenWIC)
         {
             if (currentUserToken.IsInvalid)
+            {
                 throw new ArgumentException(SR.Argument_InvalidImpersonationToken);
+            }
 
             if (isImpersonating)
             {
@@ -26,14 +28,19 @@ namespace System.Security.Principal
                 // after impersonation
                 _previousUserToken = WindowsIdentity.DuplicateAccessToken(currentUserToken);
             }
+
+            // Save current impersonated token to revert context on Undo()
+            _currentImpersonatedTokenWIC = currentImpersonatedTokenWIC;
         }
 
         public void Undo()
         {
             if (!Interop.Advapi32.RevertToSelf())
-            { 
+            {
                 Environment.FailFast(new Win32Exception().Message);
             }
+
+            _currentImpersonatedTokenWIC.Value = null;
 
             // revert impersonating token and impersonate previous identity
             if (!_previousUserToken.IsInvalid)
@@ -42,6 +49,9 @@ namespace System.Security.Principal
                 {
                     throw new SecurityException(SR.Argument_ImpersonateUser);
                 }
+
+                // Reset AsyncLocal to allow impersonation context flow in case of async/await
+                _currentImpersonatedTokenWIC.Value = _previousUserToken;
             }
         }
 
@@ -52,7 +62,6 @@ namespace System.Security.Principal
                 if (_previousUserToken != null && !_previousUserToken.IsClosed)
                 {
                     Undo();
-                    _previousUserToken.Dispose();
                 }
             }
         }
