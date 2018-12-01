@@ -279,7 +279,7 @@ namespace System.Collections
                 fixed (int* leftPtr = m_array)
                 fixed (int* rightPtr = value.m_array)
                 {
-                    for (; i < m_array.Length - 4; i += 4)
+                    for (; i < m_array.Length - 3; i += 4)
                     {
                         Vector128<int> leftVec = Sse2.LoadVector128(leftPtr + i);
                         Vector128<int> rightVec = Sse2.LoadVector128(rightPtr + i);
@@ -314,7 +314,7 @@ namespace System.Collections
                 fixed (int* leftPtr = m_array)
                 fixed (int* rightPtr = value.m_array)
                 {
-                    for (; i < m_array.Length - 4; i += 4)
+                    for (; i < m_array.Length - 3; i += 4)
                     {
                         Vector128<int> leftVec = Sse2.LoadVector128(leftPtr + i);
                         Vector128<int> rightVec = Sse2.LoadVector128(rightPtr + i);
@@ -349,7 +349,7 @@ namespace System.Collections
                 fixed (int* leftPtr = m_array)
                 fixed (int* rightPtr = value.m_array)
                 {
-                    for (; i < m_array.Length - 4; i += 4)
+                    for (; i < m_array.Length - 3; i += 4)
                     {
                         Vector128<int> leftVec = Sse2.LoadVector128(leftPtr + i);
                         Vector128<int> rightVec = Sse2.LoadVector128(rightPtr + i);
