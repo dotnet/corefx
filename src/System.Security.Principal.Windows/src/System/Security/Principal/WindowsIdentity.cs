@@ -57,6 +57,10 @@ namespace System.Security.Principal
         private static bool s_ignoreWindows8Properties;
         private static readonly SafeAccessTokenHandle s_invalidTokenHandle = SafeAccessTokenHandle.InvalidHandle;
 
+        // 8 byte or less name that indicates the source of the access token. This choice of name is visible to callers through the native GetTokenInformation() api
+        // so we'll use the same name the CLR used even though we're not actually the "CLR."
+        private static readonly byte[] s_sourceName = { (byte)'C', (byte)'L', (byte)'R', (byte)0 };
+
         public WindowsIdentity(IntPtr userToken) : this(userToken, null, -1) { }
 
         public WindowsIdentity(IntPtr userToken, string type) : this(userToken, type, -1) { }
@@ -124,11 +128,7 @@ namespace System.Security.Principal
         {
             // Desktop compat: See comments below for why we don't validate sUserPrincipalName.
 
-            // 8 byte or less name that indicates the source of the access token. This choice of name is visible to callers through the native GetTokenInformation() api
-            // so we'll use the same name the CLR used even though we're not actually the "CLR."
-            byte[] sourceName = { (byte)'C', (byte)'L', (byte)'R', (byte)0 };
-
-            using (SafeLsaHandle lsaHandle = GetLsaHandle(sourceName))
+            using (SafeLsaHandle lsaHandle = GetLsaHandle(s_sourceName))
             {
                 int packageId = LookupAuthenticationPackage(lsaHandle, Interop.SspiCli.AuthenticationPackageNames.MICROSOFT_KERBEROS_NAME_A);
                 
@@ -136,7 +136,7 @@ namespace System.Security.Principal
                 if (!Interop.Advapi32.AllocateLocallyUniqueId(out sourceContext.SourceIdentifier))
                     throw new SecurityException(new Win32Exception().Message);
                 sourceContext.SourceName = new byte[TOKEN_SOURCE.TOKEN_SOURCE_LENGTH];
-                Buffer.BlockCopy(sourceName, 0, sourceContext.SourceName, 0, sourceName.Length);
+                Buffer.BlockCopy(s_sourceName, 0, sourceContext.SourceName, 0, s_sourceName.Length);
 
                 // Desktop compat: Desktop never null-checks sUserPrincipalName. Actual behavior is that the null makes it down to Encoding.Unicode.GetBytes() which then throws
                 // the ArgumentNullException (provided that the prior LSA calls didn't fail first.) To make this compat decision explicit, we'll null check ourselves 
@@ -178,13 +178,13 @@ namespace System.Security.Principal
                         pKerbS4uLogin->ClientRealm.Length = pKerbS4uLogin->ClientRealm.MaximumLength = 0;
                         pKerbS4uLogin->ClientRealm.Buffer = IntPtr.Zero;
 
-                        ushort sourceNameLength = checked((ushort)(sourceName.Length));
+                        ushort sourceNameLength = checked((ushort)(s_sourceName.Length));
                         using (SafeLocalAllocHandle sourceNameBuffer = Interop.Kernel32.LocalAlloc(0, new UIntPtr(sourceNameLength)))
                         {
                             if (sourceNameBuffer.IsInvalid)
                                 throw new OutOfMemoryException();
 
-                            Marshal.Copy(sourceName, 0, sourceNameBuffer.DangerousGetHandle(), sourceName.Length);
+                            Marshal.Copy(s_sourceName, 0, sourceNameBuffer.DangerousGetHandle(), s_sourceName.Length);
                             LSA_STRING lsaOriginName = new LSA_STRING(sourceNameBuffer.DangerousGetHandle(), sourceNameLength);
 
                             SafeLsaReturnBufferHandle profileBuffer;
@@ -233,56 +233,54 @@ namespace System.Security.Principal
         {
             SafeLsaHandle lsaHandle;
 
-            // Try to get an impersonation token
-            Privilege privilege = null;
             try
-            { 
-                // Try to enable the TCB privilege if possible
+            {
+                // Try to get an impersonation token
+                Privilege privilege = null;
                 try
-                {
-                    privilege = new Privilege("SeTcbPrivilege");
-                    privilege.Enable();
-                }
-                catch (PrivilegeNotHeldException) { }
-
-                ushort sourceNameLength = checked((ushort)(logonProcessNameBuffer.Length));
-                using (SafeLocalAllocHandle sourceNameBuffer = Interop.Kernel32.LocalAlloc(0, new UIntPtr(sourceNameLength)))
-                {
-                    if (sourceNameBuffer.IsInvalid)
-                        throw new OutOfMemoryException();
-
-                    Marshal.Copy(logonProcessNameBuffer, 0, sourceNameBuffer.DangerousGetHandle(), logonProcessNameBuffer.Length);
-                    LSA_STRING logonProcessName = new LSA_STRING(sourceNameBuffer.DangerousGetHandle(), sourceNameLength);
-                    IntPtr dummy = IntPtr.Zero;
-                    int ntStatus = Interop.SspiCli.LsaRegisterLogonProcess(ref logonProcessName, out lsaHandle, out dummy);
-                    if (Interop.Errors.ERROR_ACCESS_DENIED == Marshal.GetLastWin32Error())
+                { 
+                    // Try to enable the TCB privilege if possible
+                    try
                     {
-                        // We don't have the Tcb privilege. The best we can hope for is to get an Identification token.
-                        ntStatus = Interop.SspiCli.LsaConnectUntrusted(out lsaHandle);
+                        privilege = new Privilege("SeTcbPrivilege");
+                        privilege.Enable();
+                    }
+                    catch (PrivilegeNotHeldException) { }
 
-                        // non-negative numbers indicate success
-                        if (ntStatus < 0)
-                        { 
-                            throw GetExceptionFromNtStatus(ntStatus);
+                    ushort sourceNameLength = checked((ushort)(logonProcessNameBuffer.Length));
+                    using (SafeLocalAllocHandle sourceNameBuffer = Interop.Kernel32.LocalAlloc(0, new UIntPtr(sourceNameLength)))
+                    {
+                        if (sourceNameBuffer.IsInvalid)
+                            throw new OutOfMemoryException();
+
+                        Marshal.Copy(logonProcessNameBuffer, 0, sourceNameBuffer.DangerousGetHandle(), logonProcessNameBuffer.Length);
+                        LSA_STRING logonProcessName = new LSA_STRING(sourceNameBuffer.DangerousGetHandle(), sourceNameLength);
+                        IntPtr dummy = IntPtr.Zero;
+                        int ntStatus = Interop.SspiCli.LsaRegisterLogonProcess(ref logonProcessName, out lsaHandle, out dummy);
+                        if (Interop.Errors.ERROR_ACCESS_DENIED == Marshal.GetLastWin32Error())
+                        {
+                            // We don't have the Tcb privilege. The best we can hope for is to get an Identification token.
+                            ntStatus = Interop.SspiCli.LsaConnectUntrusted(out lsaHandle);
+
+                            // non-negative numbers indicate success
+                            if (ntStatus < 0)
+                            { 
+                                throw GetExceptionFromNtStatus(ntStatus);
+                            }
                         }
                     }
+                }
+                finally
+                {
+                    // We call revert also in case of PrivilegeNotHeldException
+                    // Revert() internally check if privilege was been set or not and do the right thing
+                    privilege?.Revert();
                 }
             }
             catch
             {
                 // protect against exception filter-based luring attacks
-                if (privilege != null)
-                { 
-                    privilege.Revert();
-                }
                 throw;
-            }
-            finally
-            {
-                if (privilege != null)
-                { 
-                    privilege.Revert();
-                }
             }
 
             return lsaHandle;
@@ -1386,22 +1384,15 @@ namespace System.Security.Principal
 
             WindowsImpersonationContext context = new WindowsImpersonationContext(currentUserToken, isImpersonating);
 
-            // impersonating a zero token means clear the token on the thread
-            if (userTokenToImpersonate.IsInvalid)
-            { 
-                if (!Interop.Advapi32.RevertToSelf())
-                { 
-                    Environment.FailFast(new Win32Exception().Message);
-                }
-            }
             // revert existent impersonating token if existent and impersonate with new token identity
-            else
-            {
-                if (!Interop.Advapi32.RevertToSelf())
-                { 
-                    Environment.FailFast(new Win32Exception().Message);
-                }
+            if (!Interop.Advapi32.RevertToSelf())
+            { 
+                Environment.FailFast(new Win32Exception().Message);
+            }
 
+            // impersonating a zero token means only clear the token on the thread
+            if (!userTokenToImpersonate.IsInvalid)
+            {
                 if (!Interop.Advapi32.ImpersonateLoggedOnUser(userTokenToImpersonate))
                 {
                     // if impersonation fails we cleanup WindowsImpersonationContext and throw SecurityException
