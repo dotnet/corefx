@@ -68,7 +68,6 @@ namespace System.Memory.Tests.SequenceReader
                 new byte[] { 5, 6, 7, 8 }
             });
 
-            SequenceReader<byte> AdvanceToNextSpan = new SequenceReader<byte>(bytes);
             Assert.Throws<ArgumentOutOfRangeException>(() => new SequenceReader<byte>(bytes).Advance(-1));
         }
     }
