@@ -15,10 +15,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E55E513E-152E-48D1-82B6-DDC9A993D779}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E55E513E-152E-48D1-82B6-DDC9A993D779}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E55E513E-152E-48D1-82B6-DDC9A993D779}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E55E513E-152E-48D1-82B6-DDC9A993D779}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E55E513E-152E-48D1-82B6-DDC9A993D779}.Debug|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Debug|Any CPU
+		{E55E513E-152E-48D1-82B6-DDC9A993D779}.Debug|Any CPU.Build.0 = netcoreapp-Windows_NT-Debug|Any CPU
+		{E55E513E-152E-48D1-82B6-DDC9A993D779}.Release|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Release|Any CPU
+		{E55E513E-152E-48D1-82B6-DDC9A993D779}.Release|Any CPU.Build.0 = netcoreapp-Windows_NT-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
