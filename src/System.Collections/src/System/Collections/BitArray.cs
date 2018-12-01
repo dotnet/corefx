@@ -277,11 +277,13 @@ namespace System.Collections
             {
                 fixed (int* leftPtr = m_array)
                 fixed (int* rightPtr = value.m_array)
-                for (; i < m_array.Length - 4; i += 4)
                 {
-                    var leftVec = Sse2.LoadVector128(leftPtr + i);
-                    var rightVec = Sse2.LoadVector128(rightPtr + i);
-                    Sse2.Store(leftPtr + i, Sse2.And(leftVec, rightVec));
+                    for (; i < m_array.Length - 4; i += 4)
+                    {
+                        var leftVec = Sse2.LoadVector128(leftPtr + i);
+                        var rightVec = Sse2.LoadVector128(rightPtr + i);
+                        Sse2.Store(leftPtr + i, Sse2.And(leftVec, rightVec));
+                    }
                 }
             }
 
@@ -310,11 +312,13 @@ namespace System.Collections
             {
                 fixed (int* leftPtr = m_array)
                 fixed (int* rightPtr = value.m_array)
-                for (; i < m_array.Length - 4; i += 4)
                 {
-                    var leftVec = Sse2.LoadVector128(leftPtr + i);
-                    var rightVec = Sse2.LoadVector128(rightPtr + i);
-                    Sse2.Store(leftPtr + i, Sse2.Or(leftVec, rightVec));
+                    for (; i < m_array.Length - 4; i += 4)
+                    {
+                        var leftVec = Sse2.LoadVector128(leftPtr + i);
+                        var rightVec = Sse2.LoadVector128(rightPtr + i);
+                        Sse2.Store(leftPtr + i, Sse2.Or(leftVec, rightVec));
+                    }
                 }
             }
 
@@ -343,11 +347,13 @@ namespace System.Collections
             {
                 fixed (int* leftPtr = m_array)
                 fixed (int* rightPtr = value.m_array)
-                for (; i < m_array.Length - 4; i += 4)
                 {
-                    var leftVec = Sse2.LoadVector128(leftPtr + i);
-                    var rightVec = Sse2.LoadVector128(rightPtr + i);
-                    Sse2.Store(leftPtr + i, Sse2.Xor(leftVec, rightVec));
+                    for (; i < m_array.Length - 4; i += 4)
+                    {
+                        var leftVec = Sse2.LoadVector128(leftPtr + i);
+                        var rightVec = Sse2.LoadVector128(rightPtr + i);
+                        Sse2.Store(leftPtr + i, Sse2.Xor(leftVec, rightVec));
+                    }
                 }
             }
 
