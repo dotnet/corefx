@@ -12,7 +12,9 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 {
     internal class EnumerableViewOfDispatch : ICustomAdapter, IEnumerable
     {
+        // Reserved DISPID slot for getting an enumerator from an IDispatch-implementing COM interface.
         private const int DispIdNewEnum = -4;
+        private const int DefaultLcid = 1;
         private readonly object _dispatch;
 
         public EnumerableViewOfDispatch(object dispatch)
@@ -29,7 +31,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
             Dispatch.Invoke(
                 DispIdNewEnum,
                 ref guid,
-                lcid: 1,
+                DefaultLcid,
                 InvokeFlags.Method | InvokeFlags.PropertyGet,
                 ref dispParams,
                 out object result,
