@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,7 +16,8 @@ namespace System.Runtime.InteropServices.CustomMarshalers
         public static ICustomMarshaler GetInstance(string cookie) => s_enumerableToDispatchMarshaler;
 
         private EnumerableToDispatchMarshaler()
-        {}
+        {
+        }
 
         public void CleanUpManagedData(object ManagedObj)
         {
@@ -28,6 +30,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 
         public int GetNativeDataSize()
         {
+            // Return -1 to indicate the managed type this marshaler handles is not a value type.
             return -1;
         }
 

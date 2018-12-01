@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
 {
     internal class EnumerableViewOfDispatch : ICustomAdapter, IEnumerable
     {
-        private const int DispId_NewEnum = -4;
+        private const int DispIdNewEnum = -4;
         private readonly object _dispatch;
 
         public EnumerableViewOfDispatch(object dispatch)
@@ -26,9 +27,9 @@ namespace System.Runtime.InteropServices.CustomMarshalers
             DISPPARAMS dispParams = new DISPPARAMS();
             Guid guid = Guid.Empty;
             Dispatch.Invoke(
-                DispId_NewEnum,
+                DispIdNewEnum,
                 ref guid,
-                1,
+                lcid: 1,
                 InvokeFlags.Method | InvokeFlags.PropertyGet,
                 ref dispParams,
                 out object result,
