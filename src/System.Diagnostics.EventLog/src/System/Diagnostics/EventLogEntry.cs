@@ -278,11 +278,13 @@ namespace System.Diagnostics
                 int domainNameLen = 256;
                 unsafe
                 {
-                    char* bufUserName = stackalloc char[userNameLen];
-                    char* bufDomainName = stackalloc char[domainNameLen];
-                    if (Interop.Advapi32.LookupAccountSid(MachineName, sid, bufUserName, ref userNameLen, bufDomainName, ref domainNameLen, out int sidNameUse) != 0)
+                    fixed (char* bufUserName = new char[userNameLen])
+                    fixed (char* bufDomainName = new char[domainNameLen])
                     {
-                        return new string(bufDomainName) + "\\" + new string(bufUserName);
+                        if (Interop.Advapi32.LookupAccountSid(MachineName, sid, bufUserName, ref userNameLen, bufDomainName, ref domainNameLen, out int sidNameUse) != 0)
+                        {
+                            return new string(bufDomainName) + "\\" + new string(bufUserName);
+                        }
                     }
                 }
 
