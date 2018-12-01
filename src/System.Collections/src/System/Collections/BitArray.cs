@@ -281,21 +281,6 @@ namespace System.Collections
                 case 2: m_array[1] &= value.m_array[1]; goto case 1;
                 case 1: m_array[0] &= value.m_array[0]; goto _done;
                 case 0: goto _done;
-
-                case 7: m_array[6] &= value.m_array[6]; goto case 6;
-                case 6: m_array[5] &= value.m_array[5]; goto case 5;
-                case 5: m_array[4] &= value.m_array[4]; goto case 4;
-                case 4:
-                {
-                    fixed (int* leftPtr = m_array)
-                    fixed (int* rightPtr = value.m_array)
-                    {
-                        Vector128<int> leftVec = Sse2.LoadVector128(leftPtr);
-                        Vector128<int> rightVec = Sse2.LoadVector128(rightPtr);
-                        Sse2.Store(leftPtr, Sse2.And(leftVec, rightVec));
-                    }
-                    goto _done;
-                }
             }
 
             int i = 0;
@@ -340,21 +325,6 @@ _done:
                 case 2: m_array[1] |= value.m_array[1]; goto case 1;
                 case 1: m_array[0] |= value.m_array[0]; goto _done;
                 case 0: goto _done;
-
-                case 7: m_array[6] |= value.m_array[6]; goto case 6;
-                case 6: m_array[5] |= value.m_array[5]; goto case 5;
-                case 5: m_array[4] |= value.m_array[4]; goto case 4;
-                case 4:
-                {
-                    fixed (int* leftPtr = m_array)
-                    fixed (int* rightPtr = value.m_array)
-                    {
-                        Vector128<int> leftVec = Sse2.LoadVector128(leftPtr);
-                        Vector128<int> rightVec = Sse2.LoadVector128(rightPtr);
-                        Sse2.Store(leftPtr, Sse2.Or(leftVec, rightVec));
-                    }
-                    goto _done;
-                }
             }
 
             int i = 0;
@@ -399,21 +369,6 @@ _done:
                 case 2: m_array[1] ^= value.m_array[1]; goto case 1;
                 case 1: m_array[0] ^= value.m_array[0]; goto _done;
                 case 0: goto _done;
-
-                case 7: m_array[6] ^= value.m_array[6]; goto case 6;
-                case 6: m_array[5] ^= value.m_array[5]; goto case 5;
-                case 5: m_array[4] ^= value.m_array[4]; goto case 4;
-                case 4:
-                {
-                    fixed (int* leftPtr = m_array)
-                    fixed (int* rightPtr = value.m_array)
-                    {
-                        Vector128<int> leftVec = Sse2.LoadVector128(leftPtr);
-                        Vector128<int> rightVec = Sse2.LoadVector128(rightPtr);
-                        Sse2.Store(leftPtr, Sse2.Xor(leftVec, rightVec));
-                    }
-                    goto _done;
-                }
             }
 
             int i = 0;
