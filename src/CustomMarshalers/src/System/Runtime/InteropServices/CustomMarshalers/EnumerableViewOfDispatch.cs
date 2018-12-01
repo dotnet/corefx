@@ -32,7 +32,7 @@ namespace System.Runtime.InteropServices.CustomMarshalers
                 DISPID_NEWENUM,
                 ref guid,
                 LCID_DEFAULT,
-                InvokeFlags.Method | InvokeFlags.PropertyGet,
+                InvokeFlags.DISPATCH_METHOD | InvokeFlags.DISPATCH_PROPERTYGET,
                 ref dispParams,
                 out object result,
                 IntPtr.Zero,
