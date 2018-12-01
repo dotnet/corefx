@@ -662,9 +662,7 @@ public sealed class WindowsTestAccount : IDisposable
                 _accountTokenHandle = null;
                 throw new Exception($"Failed to get SafeAccessTokenHandle for test account {_userName}", new Win32Exception());
             }
-
         }
-
     }
 
     [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]

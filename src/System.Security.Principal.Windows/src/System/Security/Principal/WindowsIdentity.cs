@@ -1370,6 +1370,7 @@ namespace System.Security.Principal
         /// 4) We revert current impersonated context if existent and call ImpersonateLoggedOnUser with new token identity.
         /// 5) On WindowsImpersonationContext.Undo()/.Dispose() if we were in a impersonated context we revert to correct identity or simply clear the token
         ///    on the thread.
+        ///  We also flow impersonation context using AsyncLocal to handle await/async
         /// </summary>
         /// <param name="userToken"></param>
         /// <returns></returns>
@@ -1402,7 +1403,7 @@ namespace System.Security.Principal
                     throw new SecurityException(SR.Argument_ImpersonateUser);
                 }
 
-                // Create AsyncLocal to allow impersonation context flow in case of async/await
+                // setup AsyncLocal to allow impersonation context flow in case of async/await
                 s_currentImpersonatedToken.Value = userTokenToImpersonate;
             }
             

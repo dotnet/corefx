@@ -29,7 +29,7 @@ namespace System.Security.Principal
                 _previousUserToken = WindowsIdentity.DuplicateAccessToken(currentUserToken);
             }
 
-            // Save current impersonated token to revert context on Undo()
+            // save current impersonated token to revert context on Undo()
             _currentImpersonatedToken = currentImpersonatedToken;
         }
 
@@ -50,7 +50,7 @@ namespace System.Security.Principal
                     throw new SecurityException(SR.Argument_ImpersonateUser);
                 }
 
-                // Reset AsyncLocal to allow impersonation context flow in case of async/await
+                // reset AsyncLocal to allow impersonation context flow in case of async/await
                 _currentImpersonatedToken.Value = _previousUserToken;
             }
         }
