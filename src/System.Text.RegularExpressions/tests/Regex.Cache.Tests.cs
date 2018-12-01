@@ -98,7 +98,7 @@ namespace System.Text.RegularExpressions.Tests
                 Assert.True(Regex.IsMatch("1", "1", RegexOptions.IgnoreCase));
                 Assert.True(Regex.IsMatch("1", "1", RegexOptions.Multiline));
                 Assert.True(GetCachedItemsNum() == 2);
-                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("de-DE");
+                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 Assert.True(Regex.IsMatch("1", "1", RegexOptions.Multiline));
                 Assert.True(GetCachedItemsNum() == 3);
                 return SuccessExitCode;
