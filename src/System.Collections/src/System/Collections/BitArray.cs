@@ -273,24 +273,48 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            int i = 0;
-            if (Sse2.IsSupported && m_array.Length >= 4)
+            var count = m_array.Length;
+
+            switch (count)
             {
-                fixed (int* leftPtr = m_array)
-                fixed (int* rightPtr = value.m_array)
+                case 3: m_array[2] &= value.m_array[2]; goto case 2;
+                case 2: m_array[1] &= value.m_array[1]; goto case 1;
+                case 1: m_array[0] &= value.m_array[0]; goto _done;
+                case 0: goto _done;
+
+                case 7: m_array[6] &= value.m_array[6]; goto case 6;
+                case 6: m_array[5] &= value.m_array[5]; goto case 5;
+                case 5: m_array[4] &= value.m_array[4]; goto case 4;
+                case 4:
                 {
-                    for (; i < m_array.Length - 3; i += 4)
+                    fixed (int* leftPtr = m_array)
+                    fixed (int* rightPtr = value.m_array)
                     {
-                        Vector128<int> leftVec = Sse2.LoadVector128(leftPtr + i);
-                        Vector128<int> rightVec = Sse2.LoadVector128(rightPtr + i);
-                        Sse2.Store(leftPtr + i, Sse2.And(leftVec, rightVec));
+                        Vector128<int> leftVec = Sse2.LoadVector128(leftPtr);
+                        Vector128<int> rightVec = Sse2.LoadVector128(rightPtr);
+                        Sse2.Store(leftPtr, Sse2.And(leftVec, rightVec));
                     }
+                    goto _done;
                 }
             }
 
-            for (; i < m_array.Length; i++)
+            int i = 0;
+            if (Sse2.IsSupported)
+            {
+                fixed (int* leftPtr = m_array)
+                fixed (int* rightPtr = value.m_array)
+                for (; i < count - 3; i += 4)
+                {
+                    Vector128<int> leftVec = Sse2.LoadVector128(leftPtr + i);
+                    Vector128<int> rightVec = Sse2.LoadVector128(rightPtr + i);
+                    Sse2.Store(leftPtr + i, Sse2.And(leftVec, rightVec));
+                }
+            }
+
+            for (; i < count; i++)
                 m_array[i] &= value.m_array[i];
 
+_done:
             _version++;
             return this;
         }
@@ -308,24 +332,48 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            int i = 0;
-            if (Sse2.IsSupported && m_array.Length >= 4)
+            var count = m_array.Length;
+
+            switch (count)
             {
-                fixed (int* leftPtr = m_array)
-                fixed (int* rightPtr = value.m_array)
+                case 3: m_array[2] |= value.m_array[2]; goto case 2;
+                case 2: m_array[1] |= value.m_array[1]; goto case 1;
+                case 1: m_array[0] |= value.m_array[0]; goto _done;
+                case 0: goto _done;
+
+                case 7: m_array[6] |= value.m_array[6]; goto case 6;
+                case 6: m_array[5] |= value.m_array[5]; goto case 5;
+                case 5: m_array[4] |= value.m_array[4]; goto case 4;
+                case 4:
                 {
-                    for (; i < m_array.Length - 3; i += 4)
+                    fixed (int* leftPtr = m_array)
+                    fixed (int* rightPtr = value.m_array)
                     {
-                        Vector128<int> leftVec = Sse2.LoadVector128(leftPtr + i);
-                        Vector128<int> rightVec = Sse2.LoadVector128(rightPtr + i);
-                        Sse2.Store(leftPtr + i, Sse2.Or(leftVec, rightVec));
+                        Vector128<int> leftVec = Sse2.LoadVector128(leftPtr);
+                        Vector128<int> rightVec = Sse2.LoadVector128(rightPtr);
+                        Sse2.Store(leftPtr, Sse2.Or(leftVec, rightVec));
                     }
+                    goto _done;
                 }
             }
 
-            for (; i < m_array.Length; i++)
+            int i = 0;
+            if (Sse2.IsSupported)
+            {
+                fixed (int* leftPtr = m_array)
+                fixed (int* rightPtr = value.m_array)
+                for (; i < count - 3; i += 4)
+                {
+                    Vector128<int> leftVec = Sse2.LoadVector128(leftPtr + i);
+                    Vector128<int> rightVec = Sse2.LoadVector128(rightPtr + i);
+                    Sse2.Store(leftPtr + i, Sse2.Or(leftVec, rightVec));
+                }
+            }
+
+            for (; i < count; i++)
                 m_array[i] |= value.m_array[i];
 
+_done:
             _version++;
             return this;
         }
@@ -343,24 +391,48 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            int i = 0;
-            if (Sse2.IsSupported && m_array.Length >= 4)
+            var count = m_array.Length;
+
+            switch (count)
             {
-                fixed (int* leftPtr = m_array)
-                fixed (int* rightPtr = value.m_array)
+                case 3: m_array[2] ^= value.m_array[2]; goto case 2;
+                case 2: m_array[1] ^= value.m_array[1]; goto case 1;
+                case 1: m_array[0] ^= value.m_array[0]; goto _done;
+                case 0: goto _done;
+
+                case 7: m_array[6] ^= value.m_array[6]; goto case 6;
+                case 6: m_array[5] ^= value.m_array[5]; goto case 5;
+                case 5: m_array[4] ^= value.m_array[4]; goto case 4;
+                case 4:
                 {
-                    for (; i < m_array.Length - 3; i += 4)
+                    fixed (int* leftPtr = m_array)
+                    fixed (int* rightPtr = value.m_array)
                     {
-                        Vector128<int> leftVec = Sse2.LoadVector128(leftPtr + i);
-                        Vector128<int> rightVec = Sse2.LoadVector128(rightPtr + i);
-                        Sse2.Store(leftPtr + i, Sse2.Xor(leftVec, rightVec));
+                        Vector128<int> leftVec = Sse2.LoadVector128(leftPtr);
+                        Vector128<int> rightVec = Sse2.LoadVector128(rightPtr);
+                        Sse2.Store(leftPtr, Sse2.Xor(leftVec, rightVec));
                     }
+                    goto _done;
                 }
             }
 
-            for (; i < m_array.Length; i++)
+            int i = 0;
+            if (Sse2.IsSupported)
+            {
+                fixed (int* leftPtr = m_array)
+                fixed (int* rightPtr = value.m_array)
+                for (; i < count - 3; i += 4)
+                {
+                    Vector128<int> leftVec = Sse2.LoadVector128(leftPtr + i);
+                    Vector128<int> rightVec = Sse2.LoadVector128(rightPtr + i);
+                    Sse2.Store(leftPtr + i, Sse2.Xor(leftVec, rightVec));
+                }
+            }
+
+            for (; i < count; i++)
                 m_array[i] ^= value.m_array[i];
 
+_done:
             _version++;
             return this;
         }
