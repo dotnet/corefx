@@ -368,7 +368,9 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     {
         using (WindowsImpersonationContext windowsImpersonationContext = WindowsIdentity.Impersonate(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()))
         {
+
             Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
+
             await Task.Run(async () =>
             {
                 Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
@@ -377,8 +379,25 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
                 {
                     Assert.Equal(_fixture.TestAccount2.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
 
-                    await Task.Run(() =>
+                    await Task.Run(async () =>
                     {
+                        Assert.Equal(_fixture.TestAccount2.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
+
+                        using (WindowsImpersonationContext windowsImpersonationContext2 = WindowsIdentity.Impersonate(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()))
+                        {
+                            Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
+
+                            await Task.Run(() =>
+                            {
+                                WindowsIdentity.RunImpersonated(_fixture.TestAccount2.AccountTokenHandle, () =>
+                                {
+                                    Assert.Equal(_fixture.TestAccount2.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
+                                });
+                            });
+
+                            Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
+                        }
+
                         Assert.Equal(_fixture.TestAccount2.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
                     });
 
@@ -387,6 +406,9 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
 
                 Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
             });
+
+            Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
+
         }
     }
 }

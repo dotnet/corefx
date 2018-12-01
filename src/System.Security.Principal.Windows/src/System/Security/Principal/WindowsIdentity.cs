@@ -1361,8 +1361,6 @@ namespace System.Security.Principal
             return wi.Impersonate();
         }
 
-        private static AsyncLocal<SafeAccessTokenHandle> s_currentImpersonatedTokenWIC = new AsyncLocal<SafeAccessTokenHandle>(CurrentImpersonatedTokenChanged);
-
         /// <summary>
         /// Impersonation workflow:
         /// 1) We get current usertoken.
@@ -1384,7 +1382,7 @@ namespace System.Security.Principal
                 throw new SecurityException(new Win32Exception().Message);
             }
 
-            WindowsImpersonationContext context = new WindowsImpersonationContext(currentUserToken, isImpersonating, s_currentImpersonatedTokenWIC);
+            WindowsImpersonationContext context = new WindowsImpersonationContext(currentUserToken, isImpersonating, s_currentImpersonatedToken);
 
             // revert existent impersonating token if existent and impersonate with new token identity
             if (!Interop.Advapi32.RevertToSelf())
@@ -1392,7 +1390,7 @@ namespace System.Security.Principal
                 Environment.FailFast(new Win32Exception().Message);
             }
 
-            s_currentImpersonatedTokenWIC.Value = null;
+            s_currentImpersonatedToken.Value = null;
 
             // impersonating a zero token means only clear the token on the thread
             if (!userTokenToImpersonate.IsInvalid)
@@ -1405,7 +1403,7 @@ namespace System.Security.Principal
                 }
 
                 // Create AsyncLocal to allow impersonation context flow in case of async/await
-                s_currentImpersonatedTokenWIC.Value = userTokenToImpersonate;
+                s_currentImpersonatedToken.Value = userTokenToImpersonate;
             }
             
             return context;
