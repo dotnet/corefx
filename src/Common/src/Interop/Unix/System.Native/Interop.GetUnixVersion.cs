@@ -37,7 +37,7 @@ internal static partial class Interop
                 return string.Empty;
             }
 
-            Debug.Assert(Array.IndexOf(version, 0) != -1);
+            Debug.Assert(Array.IndexOf<byte>(version, 0) != -1);
             unsafe
             {
                 fixed (byte* ptr = version)

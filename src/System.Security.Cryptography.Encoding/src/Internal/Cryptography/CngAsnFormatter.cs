@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
@@ -28,12 +29,15 @@ namespace Internal.Cryptography
             unsafe
             {
                 IntPtr oidValuePtr = Marshal.StringToHGlobalAnsi(oidValue);
+                char[] pooledarray = null;
                 try
                 {
                     if (Interop.Crypt32.CryptFormatObject(X509_ASN_ENCODING, 0, dwFormatStrType, IntPtr.Zero, (byte*)oidValuePtr, rawData, rawData.Length, null, ref cbFormat))
                     {
                         int charLength = (cbFormat + 1) / 2;
-                        Span<char> buffer = charLength <= 256 ? stackalloc char[256] : new char[charLength];
+                        Span<char> buffer = charLength <= 256 ?
+                            stackalloc char[256] :
+                            (pooledarray = ArrayPool<char>.Shared.Rent(charLength));
                         fixed (char* bufferPtr = buffer)
                         {
                             if (Interop.Crypt32.CryptFormatObject(X509_ASN_ENCODING, 0, dwFormatStrType, IntPtr.Zero, (byte*)oidValuePtr, rawData, rawData.Length, bufferPtr, ref cbFormat))
@@ -46,6 +50,10 @@ namespace Internal.Cryptography
                 finally
                 {
                     Marshal.FreeHGlobal(oidValuePtr);
+                    if (pooledarray != null)
+                    {
+                        ArrayPool<char>.Shared.Return(pooledarray);
+                    }
                 }
             }
 
