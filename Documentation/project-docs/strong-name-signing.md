@@ -14,7 +14,7 @@ For the most part, the majority of applications do not need strong-names. Strong
 
 However, strong-names are still required in application in some rare situations, most of which are called out on this page: [Strong-Named Assemblies](https://docs.microsoft.com/en-us/dotnet/framework/app-domains/strong-named-assemblies).
 
-Because of the viral nature of strong naming, it is recommended that publically published .NET libraries are strong named. Not strong naming a .NET library excludes anyone who does need to strong name their application from using it. Read more about .NET libraries and strong naming in the [.NET Library Guidance](https://docs.microsoft.com/dotnet/standard/library-guidance/strong-naming).
+Because of the viral nature of strong-naming, it is recommended that publicly published .NET libraries are strong-named. Not strong-naming a .NET library excludes anyone who does need to strong-name their application or library from using it. Read more about .NET libraries and strong-naming in the [.NET Library Guidance](https://docs.microsoft.com/dotnet/standard/library-guidance/strong-naming).
 
 ### 2. I really, _really_ need to strong-name, what kinds of issues will I run into?
 There are three major problems that developers run into after strong naming their assemblies:
