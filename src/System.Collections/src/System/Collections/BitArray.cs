@@ -273,7 +273,7 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            var count = m_array.Length;
+            int count = m_array.Length;
 
             switch (count)
             {
@@ -289,7 +289,7 @@ namespace System.Collections
                 fixed (int* leftPtr = m_array)
                 fixed (int* rightPtr = value.m_array)
                 {
-                    for (; i < count - 3; i += 4)
+                    for (; i < count - (Vector128<int>.Count - 1); i += Vector128<int>.Count)
                     {
                         Vector128<int> leftVec = Sse2.LoadVector128(leftPtr + i);
                         Vector128<int> rightVec = Sse2.LoadVector128(rightPtr + i);
@@ -319,7 +319,7 @@ _done:
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            var count = m_array.Length;
+            int count = m_array.Length;
 
             switch (count)
             {
@@ -335,7 +335,7 @@ _done:
                 fixed (int* leftPtr = m_array)
                 fixed (int* rightPtr = value.m_array)
                 {
-                    for (; i < count - 3; i += 4)
+                    for (; i < count - (Vector128<int>.Count - 1); i += Vector128<int>.Count)
                     {
                         Vector128<int> leftVec = Sse2.LoadVector128(leftPtr + i);
                         Vector128<int> rightVec = Sse2.LoadVector128(rightPtr + i);
@@ -365,7 +365,7 @@ _done:
             if (Length != value.Length)
                 throw new ArgumentException(SR.Arg_ArrayLengthsDiffer);
 
-            var count = m_array.Length;
+            int count = m_array.Length;
 
             switch (count)
             {
@@ -381,7 +381,7 @@ _done:
                 fixed (int* leftPtr = m_array)
                 fixed (int* rightPtr = value.m_array)
                 {
-                    for (; i < count - 3; i += 4)
+                    for (; i < count - (Vector128<int>.Count - 1); i += Vector128<int>.Count)
                     {
                         Vector128<int> leftVec = Sse2.LoadVector128(leftPtr + i);
                         Vector128<int> rightVec = Sse2.LoadVector128(rightPtr + i);
