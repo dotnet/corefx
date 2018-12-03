@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <EnableFullCoverageReportTarget>true</EnableFullCoverageReportTarget>
-  </PropertyGroup>
-
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
 
   <PropertyGroup>
@@ -11,11 +7,15 @@
     Since IsTestProject is set to false in this case, when TargetGroup = netfx it will add net462 and net47 build configurations if they exist on the test project.
     We only want to build tests against current TargetGroup -->
     <AdditionalBuildConfigurations Condition="'$(TargetGroup)' == 'netfx'"></AdditionalBuildConfigurations>
+    <EnableBenchviewTarget>true</EnableBenchviewTarget>
+  </PropertyGroup>
 
+  <!-- Run code coverage if flag passed in and only for netcoreapp. -->
+  <PropertyGroup Condition="'$(Coverage)' == 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'">
+    <EnableFullCoverageReportTarget>true</EnableFullCoverageReportTarget>
     <GenerateFullCoverageReport>true</GenerateFullCoverageReport>
     <CoverageReportInputPath>$(TestWorkingDir)**/coverage.xml</CoverageReportInputPath>
     <CoverageReportDir>$(ArtifactsDir)coverage</CoverageReportDir>
-    <EnableBenchviewTarget>true</EnableBenchviewTarget>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(RunningSharedFrameworkValidation)'=='true'">

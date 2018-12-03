@@ -9,6 +9,12 @@ namespace System.ComponentModel.Tests
     public class AddingNewEventArgsTests
     {
         [Fact]
+        public void C()
+        {
+            var x = TypeDescriptor.GetConverter(typeof(Nullable<Boolean>));
+        }
+
+        [Fact]
         public void Ctor_Default()
         {
             var args = new AddingNewEventArgs();
