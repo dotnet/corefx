@@ -882,14 +882,13 @@ namespace System.Tests
             yield return new object[] { new DateTime(1601, 1, 1).AddTicks(1) };
             yield return new object[] { new DateTime(2018, 12, 24) };
             yield return new object[] { new DateTime(2018, 11, 24, 17, 57, 30, 12) };
-            yield return new object[] { DateTime.MaxValue };
         }
 
         [Theory]
         [MemberData(nameof(ToFileTime_TestData))]
         public void ToFileTime_Invoke_ReturnsExpected(DateTime date)
         {
-            Assert.Equal(date, DateTime.FromFileTime(date.ToFileTime()).ToLocalTime());
+            Assert.Equal(date, DateTime.FromFileTime(date.ToFileTime()));
         }
 
         public static IEnumerable<object[]> ToFileTime_Overflow_TestData()
