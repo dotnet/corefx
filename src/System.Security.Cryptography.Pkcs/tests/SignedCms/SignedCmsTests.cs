@@ -1060,6 +1060,27 @@ namespace System.Security.Cryptography.Pkcs.Tests
             cms.CheckSignature(true);
         }
 
+        [Fact]
+        public static void CheckSignature_Pkcs1_RsaWithSha256()
+        {
+            SignedCms signedCms = new SignedCms();
+            signedCms.Decode(SignedDocuments.RsaPkcs1Sha256WithRsa);
+
+            // Assert.NoThrows
+            signedCms.CheckSignature(true);
+        }
+
+        [Fact]
+        public static void CheckSignature_Pkcs1_Sha1_Declared_Sha256WithRsa()
+        {
+            SignedCms signedCms = new SignedCms();
+            signedCms.Decode(SignedDocuments.RsaPkcs1SignedSha1DeclaredSha256WithRsa);
+
+            Assert.Throws<CryptographicException>(() => {
+                signedCms.CheckSignature(true);
+            });
+        }
+
         [Theory]
         [InlineData(null, "0102", Oids.Pkcs7Data)]
         [InlineData(null, "010100", Oids.Pkcs7Data)]
@@ -1125,6 +1146,22 @@ namespace System.Security.Cryptography.Pkcs.Tests
             CheckSignedEncrypted(
                 SignedDocuments.SignedCmsOverEnvelopedCms_SKID_CoreFx,
                 SubjectIdentifierType.SubjectKeyIdentifier);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void ReadAndWriteDocumentWithIndefiniteLengthContent(bool checkSignature)
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.IndefiniteLengthContentDocument);
+
+            if (checkSignature)
+            {
+                cms.CheckSignature(true);
+            }
+
+            cms.Encode();
         }
 
         private static void CheckSignedEncrypted(byte[] docBytes, SubjectIdentifierType expectedType)
