@@ -10,7 +10,7 @@ namespace System.Diagnostics
     public partial class DiagnosticListener : System.Diagnostics.DiagnosticSource, System.IDisposable, System.IObservable<System.Collections.Generic.KeyValuePair<string, object>>
     {
         public DiagnosticListener(string name) { }
-        public static System.IObservable<System.Diagnostics.DiagnosticListener> AllListeners { get { throw null; } }
+        public static System.IObservable<System.Diagnostics.DiagnosticListener> AllListeners { [System.Runtime.CompilerServices.CompilerGeneratedAttribute] get { throw null; } }
         public string Name { get { throw null; } }
         public virtual void Dispose() { }
         public bool IsEnabled() { throw null; }
