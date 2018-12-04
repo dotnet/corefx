@@ -218,7 +218,7 @@ namespace System.Collections.Generic
         #region ICollection<T> methods
 
         /// <summary>
-        /// Add item to this hashset. This is the explicit implementation of the ICollection{T}
+        /// Add item to this hashset. This is the explicit implementation of the <see cref="ICollection{T}"/>
         /// interface. The other Add method returns bool indicating whether item was added.
         /// </summary>
         /// <param name="item">item to add</param>
