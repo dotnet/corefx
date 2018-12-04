@@ -19,7 +19,7 @@ namespace System.Collections.Concurrent
     /// <summary>
     /// Out-of-the-box partitioners are created with a set of default behaviors.  
     /// For example, by default, some form of buffering and chunking will be employed to achieve 
-    /// optimal performance in the common scenario where an IEnumerable{T} implementation is fast and 
+    /// optimal performance in the common scenario where an <see cref="IEnumerable{T}"/> implementation is fast and 
     /// non-blocking.  These behaviors can be overridden via this enumeration.
     /// </summary>
     [Flags]
