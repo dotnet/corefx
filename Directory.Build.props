@@ -351,7 +351,7 @@
     <NetFxRefPath>$(RefRootPath)netfx/</NetFxRefPath>
     <GlobalToolsDir>$(ArtifactsDir)tools/</GlobalToolsDir>
 
-    <!-- Helix proprties -->
+    <!-- Helix properties -->
     <OSPlatformConfig>$(OSGroup).$(Platform).$(ConfigurationGroup)</OSPlatformConfig>
     <AnyOSPlatformConfig>AnyOS.AnyCPU.$(ConfigurationGroup)</AnyOSPlatformConfig>
     <UnixPlatformConfig>Unix.$(Platform).$(ConfigurationGroup)</UnixPlatformConfig>

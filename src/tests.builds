@@ -8,10 +8,6 @@
     We only want to build tests against current TargetGroup -->
     <AdditionalBuildConfigurations Condition="'$(TargetGroup)' == 'netfx'"></AdditionalBuildConfigurations>
     <EnableBenchviewTarget>true</EnableBenchviewTarget>
-  </PropertyGroup>
-
-  <!-- Run code coverage if flag passed in and only for netcoreapp. -->
-  <PropertyGroup Condition="'$(Coverage)' == 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'">
     <EnableFullCoverageReportTarget>true</EnableFullCoverageReportTarget>
     <GenerateFullCoverageReport>true</GenerateFullCoverageReport>
     <CoverageReportInputPath>$(TestWorkingDir)**/coverage.xml</CoverageReportInputPath>
