@@ -401,7 +401,7 @@ namespace System.Diagnostics
                 if (!_spanIdSet)
                 {
                     if (IdFormat == ActivityIdFormat.W3C)
-                        _spanId = new SpanId(Id.subString(35, 16));
+                        _spanId = new SpanId(Id.Substring(35, 16));
                     _spanIdSet = true;
                 }
                 return ref _spanId;
@@ -419,10 +419,10 @@ namespace System.Diagnostics
                 if (!_traceIdSet)
                 {
                     if (IdFormat == ActivityIdFormat.W3C)
-                        _traceId = new SpanId(RootId);
+                        _traceId = new TraceId(RootId);
                     _traceIdSet = true;
                 }
-                return ref _spanId;
+                return ref _traceId;
             }
         }
 
@@ -740,29 +740,29 @@ namespace System.Diagnostics
         /// </summary>
         public SpanId(string hexId)
         {
-            _asULong = 0;
+            _asLong = 0;
             _asHexString = hexId;
         }
         /// <summary>
-        /// Creates a SpanId from a ulong id.  
+        /// Creates a SpanId from a long id.  
         /// </summary>
         /// <param name="id"></param>
-        public SpanId(ulong id)
+        public SpanId(long id)
         {
-            _asULong = id;
+            _asLong = id;
             _asHexString = null;
         }
 
         /// <summary>
-        /// Returns the SpanId as a 8 byte ulong.  
+        /// Returns the SpanId as a 8 byte long.  
         /// </summary>
-        public ulong AsULong
+        public long AsLong
         {
             get
             {
-                if (_asHexString != null && _asULong == 0)
-                    UInt64.TryParse(_asHexString, out _asULong);
-                return _asULong;
+                if (_asHexString != null && _asLong == 0)
+                    Int64.TryParse(_asHexString, out _asLong);
+                return _asLong;
             }
         }
         /// <summary>
@@ -774,7 +774,7 @@ namespace System.Diagnostics
             get
             {
                 if (_asHexString == null)
-                    _asHexString = _asULong.ToString("X8");
+                    _asHexString = _asLong.ToString("X8");
                 return _asHexString;
             }
         }
@@ -785,7 +785,7 @@ namespace System.Diagnostics
         public override string ToString() => AsHexString;
 
         #region private
-        ulong _asULong;
+        long _asLong;
         string _asHexString;   // ultimately change to object, and allow several representations based on type.   
         #endregion
     }
