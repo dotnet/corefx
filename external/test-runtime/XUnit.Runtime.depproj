@@ -34,11 +34,11 @@
     <PackageReference Include="xunit" Version="$(XUnitPackageVersion)" />
     <PackageReference Include="$(MicrosoftDotNetXUnitExtensionsPackage)" Version="$(MicrosoftDotNetXUnitExtensionsPackageVersion)" />
     <PackageReference Include="$(XUnitRunnerConsolePackageName)" Version="$(XUnitPackageVersion)" />
-    <PackageReference Include="Microsoft.DotNet.UAP.TestTools" Version="$(UAPToolsPackageVersion)" Condition="'$(TargetsUap)' == 'true'" />
+    <PackageReference Condition="'$(TargetsUap)' == 'true'" Include="Microsoft.DotNet.UAP.TestTools" Version="$(UAPToolsPackageVersion)" />
 
     <!-- for callstack line numbers -->
     <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.5.0" />
-    <PackageReference Include="Microsoft.DotNet.PlatformAbstractions" Version="2.1.0" Condition="'$(TargetGroup)' != 'uapaot'" />
+    <PackageReference Condition="'$(TargetGroup)' != 'uapaot'" Include="Microsoft.DotNet.PlatformAbstractions" Version="2.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
 
     <!-- Test Data -->
@@ -123,8 +123,8 @@
 
   <!-- Retrieve the UAP Tools to the TestHost folder -->
   <Target Name="CopyUAPToolsToTestHost"
-          AfterTargets="AfterResolveReferences"
-          Condition="'$(TargetGroup)' == 'uap'" >
+          Condition="'$(TargetGroup)' == 'uap'"
+          AfterTargets="AfterResolveReferences">
 
     <PropertyGroup>
       <UAPToolsPackageName>microsoft.dotnet.uap.testtools</UAPToolsPackageName>
@@ -134,7 +134,7 @@
     </PropertyGroup>
 
     <!-- Give a warning that the UAPToolsFolder is not set and that tests won't run -->
-    <Warning Text="Could not find the UAP Tools at '$(UAPToolsFolder)'. Please run sync." Condition="('$(UAPToolsFolder)'=='' or !Exists('$(UAPToolsFolder)')) AND '$(BuildAllConfigurations)' != 'true'" />
+    <Warning Condition="('$(UAPToolsFolder)'=='' or !Exists('$(UAPToolsFolder)')) AND '$(BuildAllConfigurations)' != 'true'" Text="Could not find the UAP Tools at '$(UAPToolsFolder)'. Please run sync." />
 
     <ItemGroup Condition="'$(UAPToolsFolder)'!=''">
       <RunnerFolderContents Include="$(UAPToolsFolder)\Runner\**\*" />
@@ -172,7 +172,7 @@
       <TestILCFolder Condition="'$(TestILCFolder)' == ''">$(PackagesDir)$(TestILCToolsPackageName)\$(ProjectNTfsTestILCPackageVersion)\TestILC</TestILCFolder>
     </PropertyGroup>
 
-    <Warning Text="Could not find the TestILC Tools at '$(TestILCFolder)'. Please run sync." Condition="('$(TestILCFolder)' == '' OR !Exists('$(TestILCFolder)')) AND '$(BuildAllConfigurations)' != 'true'" />
+    <Warning Condition="('$(TestILCFolder)' == '' OR !Exists('$(TestILCFolder)')) AND '$(BuildAllConfigurations)' != 'true'" Text="Could not find the TestILC Tools at '$(TestILCFolder)'. Please run sync." />
 
     <ItemGroup Condition="Exists('$(TestILCFolder)')">
       <TestILCFolderContents Include="$(TestILCFolder)\**\*" />
@@ -204,8 +204,8 @@
   </Target>
 
   <Target Name="AddTestPlatformDependenciesNetCore"
-          BeforeTargets="ResolveReferences"
-          Condition="'$(TargetGroup)' == 'netcoreapp'">
+          Condition="'$(TargetGroup)' == 'netcoreapp'"
+          BeforeTargets="ResolveReferences">
 
     <Error Condition="!Exists('$(PackagesDir)$(XUnitRunnerConsolePackageName)\$(XUnitPackageVersion)\tools\netcoreapp2.0\$(XUnitRunner).dll')"
             Text="Error: looks the package $(PackagesDir)$(XUnitRunnerConsolePackageName)\$(XUnitPackageVersion) not restored or missing $(XUnitRunner).dll."
@@ -237,9 +237,9 @@
 
   </Target>
 
-  <Target Name="AddTestPlatformDependenciesUap" 
-          BeforeTargets="ResolveReferences" 
-          Condition="'$(TargetGroup)' == 'uap' OR '$(TargetGroup)' == 'uapaot'">
+  <Target Name="AddTestPlatformDependenciesUap"
+          Condition="'$(TargetGroup)' == 'uap' OR '$(TargetGroup)' == 'uapaot'"
+          BeforeTargets="ResolveReferences">
 
     <Error Condition="'$(TargetGroup)' == 'uapaot' AND !Exists('$(PackagesDir)$(XUnitRunnerConsolePackageName)\$(XUnitPackageVersion)\tools\netcoreapp2.0\$(XUnitRunner).dll')"
             Text="Error: looks the package $(PackagesDir)$(XUnitRunnerConsolePackageName)\$(XUnitPackageVersion) not restored or missing $(XUnitRunner).dll."
@@ -272,8 +272,8 @@
   </Target>
 
   <Target Name="AddTestPlatformDependenciesNetfx"
-          BeforeTargets="ResolveReferences"
-          Condition="'$(TargetGroup)' == 'netfx'">
+          Condition="'$(TargetGroup)' == 'netfx'"
+          BeforeTargets="ResolveReferences">
 
     <Error Condition="!Exists('$(PackagesDir)$(XUnitRunnerConsolePackageName)\$(XUnitPackageVersion)\tools\net472\$(XUnitRunner).exe')"
             Text="Error: looks the package $(PackagesDir)$(XUnitRunnerConsolePackageName)\$(XUnitPackageVersion) not restored or missing $(XUnitRunner).exe."
