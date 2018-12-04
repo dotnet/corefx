@@ -479,4 +479,4 @@ If you prefer, you can use a Debug build of System.Private.CoreLib, but if you d
 
 If the test project does not set the property `TestRuntime` to `true` and you want to collect code coverage that includes types in System.Private.CoreLib.dll, you'll need to follow the above steps, then
 
-`dotnet msbuild /t:rebuildandtest /p:Coverage=true /p:CodeCoverageAssemblies="System.Private.CoreLib"`
+`dotnet msbuild /t:rebuildandtest /p:Coverage=true /p:TestRuntime=true`
