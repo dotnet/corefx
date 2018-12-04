@@ -19,8 +19,11 @@ namespace System.IO.Pipelines
         private SynchronizationContext _synchronizationContext;
         private ExecutionContext _executionContext;
 
-#if !netcoreapp
+#if netcoreapp
+        private CancellationToken CancellationToken => _cancellationTokenRegistration.Token;
+#else
         private CancellationToken _cancellationToken;
+        private CancellationToken CancellationToken => _cancellationToken;
 #endif
 
         public PipeAwaitable(bool completed, bool useSynchronizationContext)
@@ -51,6 +54,9 @@ namespace System.IO.Pipelines
             // Don't register if already completed, we would immediately unregistered in ObserveCancellation
             if (cancellationToken.CanBeCanceled && !IsCompleted)
             {
+#if !netcoreapp
+                _cancellationToken = cancellationToken;
+#endif
                 _cancellationTokenRegistration = cancellationToken.UnsafeRegister(callback, state);
             }
         }
@@ -129,13 +135,8 @@ namespace System.IO.Pipelines
 
         public void CancellationTokenFired(out CompletionData completionData)
         {
-#if netcoreapp
-            CancellationToken cancellationToken = _cancellationTokenRegistration.Token;
-#else
-            CancellationToken cancellationToken = _cancellationToken;
-#endif
             // We might be getting stale callbacks that we already unsubscribed from
-            if (cancellationToken.IsCancellationRequested)
+            if (CancellationToken.IsCancellationRequested)
             {
                 Cancel(out completionData);
             }
@@ -158,15 +159,14 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public CancellationTokenRegistration ReleaseCancellationTokenRegistration(out CancellationToken cancellationToken)
         {
-
+            cancellationToken = CancellationToken;
             CancellationTokenRegistration cancellationTokenRegistration = _cancellationTokenRegistration;
-            _cancellationTokenRegistration = default;
-#if netcoreapp
-            cancellationToken = cancellationTokenRegistration.Token;
-#else
-            cancellationToken = _cancellationToken;
+
+#if !netcoreapp
             _cancellationToken = default;
 #endif
+            _cancellationTokenRegistration = default;
+
             return cancellationTokenRegistration;
         }
 

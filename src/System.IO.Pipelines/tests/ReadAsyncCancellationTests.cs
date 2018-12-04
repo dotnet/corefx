@@ -461,6 +461,7 @@ namespace System.IO.Pipelines.Tests
             cts.Cancel();
 
             Assert.False(Pipe.Reader.TryRead(out result));
+            Assert.False(result.IsCanceled);
         }
 
         [Fact]
