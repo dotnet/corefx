@@ -1120,7 +1120,8 @@ namespace System.Runtime.Intrinsics.X86
         internal Bmi2() { }
         public static bool IsSupported { get { throw null; } }
         public static uint ZeroHighBits(uint value, uint index) { throw null; }
-        public static unsafe uint MultiplyNoFlags(uint left, uint right, uint* high) { throw null; }
+        public static uint MultiplyNoFlags(uint left, uint right) { throw null; }
+        public static unsafe uint MultiplyNoFlags(uint left, uint right, uint* low) { throw null; }
         public static uint ParallelBitDeposit(uint value, uint mask) { throw null; }
         public static uint ParallelBitExtract(uint value, uint mask) { throw null; }
         public abstract class X64
@@ -1128,7 +1129,8 @@ namespace System.Runtime.Intrinsics.X86
             internal X64() { }
             public static bool IsSupported { get { throw null; } }
             public static ulong ZeroHighBits(ulong value, ulong index) { throw null; }
-            public static unsafe ulong MultiplyNoFlags(ulong left, ulong right, ulong* high) { throw null; }
+            public static ulong MultiplyNoFlags(ulong left, ulong right) { throw null; }
+            public static unsafe ulong MultiplyNoFlags(ulong left, ulong right, ulong* low) { throw null; }
             public static ulong ParallelBitDeposit(ulong value, ulong mask) { throw null; }
             public static ulong ParallelBitExtract(ulong value, ulong mask) { throw null; } 
         }
