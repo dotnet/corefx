@@ -457,6 +457,13 @@
   <!-- TODO: Fix VB test project reference to Test SDK. -->
   <Import Condition="'$(IsTestProject)' == 'true' AND '$(IsTestSupportProject)' != 'true' AND '$(EnableVSTestReferences)' == 'true' AND '$(Language)' != 'VB'" Project="$(RuntimePath)Microsoft.Net.Test.Sdk.props" />
 
+  <ItemDefinitionGroup Condition="'$(IsTestProject)' != 'true'"> 
+    <!-- Project references for non-test assemblies should never be copied to the output. -->
+    <ProjectReference>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+
   <!-- Import it at the end of the props file to override the OutputPath for reference assemblies and use common directory props -->
   <Import Project="$(MSBuildThisFileDirectory)eng\ReferenceAssemblies.props" />
 
