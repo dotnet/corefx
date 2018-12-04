@@ -10,7 +10,7 @@ internal static partial class Interop
     {
         /// <summary>
         /// Stream / storage modes.
-        /// See https://docs.microsoft.com/en-us/windows/desktop/Stg/stgm-constants
+        /// <see href="https://docs.microsoft.com/en-us/windows/desktop/Stg/stgm-constants"/>
         /// </summary>
         [Flags]
         internal enum STGM : uint
