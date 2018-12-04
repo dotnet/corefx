@@ -8,7 +8,7 @@ internal static partial class Interop
     {
         /// <summary>
         /// Stat flags for <see cref="IStream.Stat(out STATSTG, STATFLAG)"/>.
-        /// <see cref="https://docs.microsoft.com/en-us/windows/desktop/api/wtypes/ne-wtypes-tagstatflag"/>
+        /// See https://docs.microsoft.com/en-us/windows/desktop/api/wtypes/ne-wtypes-tagstatflag.
         /// </summary>
         internal enum STATFLAG : uint
         {
