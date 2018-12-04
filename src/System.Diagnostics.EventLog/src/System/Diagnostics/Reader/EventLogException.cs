@@ -2,19 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This public class describes an exception thrown from Event
-** Log related classes.
-**
-============================================================*/
-
 using System.ComponentModel;
 
 namespace System.Diagnostics.Eventing.Reader
 {
+    /// <summary>
+    /// describes an exception thrown from Event Log related classes.
+    /// </summary>
     public class EventLogException : Exception
     {
         internal static void Throw(int errorCode)
@@ -59,9 +53,6 @@ namespace System.Diagnostics.Eventing.Reader
 
         public override string Message
         {
-            // marked as SecurityCritical because it uses Win32Exception.
-            // marked as TreatAsSafe because it performs Demand.
-            [System.Security.SecurityCritical]
             get
             {
                 Win32Exception win32Exception = new Win32Exception(_errorCode);

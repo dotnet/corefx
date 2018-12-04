@@ -2,21 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This public class describes the metadata for a specific Opcode
-** defined by a Provider. An instance of this class is obtained from
-** a ProviderMetadata object.
-**
-============================================================*/
-
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace System.Diagnostics.Eventing.Reader
 {
+    /// <summary>
+    /// The metadata for a specific Opcode defined by a Provider.
+    /// An instance of this class is obtained from a ProviderMetadata object.
+    /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "Opcode", Justification = "matell: Shipped public in 3.5, breaking change to fix now.")]
     public sealed class EventOpcode
     {
@@ -27,7 +21,7 @@ namespace System.Diagnostics.Eventing.Reader
         private ProviderMetadata _pmReference;
         private object _syncObject;
 
-        //call from EventMetadata
+        // Call from EventMetadata
         internal EventOpcode(int value, ProviderMetadata pmReference)
         {
             _value = value;
@@ -35,7 +29,7 @@ namespace System.Diagnostics.Eventing.Reader
             _syncObject = new object();
         }
 
-        //call from ProviderMetadata
+        // Call from ProviderMetadata
         internal EventOpcode(string name, int value, string displayName)
         {
             _value = value;
@@ -52,9 +46,9 @@ namespace System.Diagnostics.Eventing.Reader
                 if (_dataReady == true)
                     return;
 
-                // get the data
+                // Get the data
                 IEnumerable<EventOpcode> result = _pmReference.Opcodes;
-                //set the names and display names to null
+                // Set the names and display names to null
                 _name = null;
                 _displayName = null;
                 _dataReady = true;
@@ -69,7 +63,7 @@ namespace System.Diagnostics.Eventing.Reader
                     }
                 }
             }
-        }//End Prepare Data
+        } // End Prepare Data
 
         public string Name
         {

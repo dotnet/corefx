@@ -2,16 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This public class describes the metadata for a specific Level
-** defined by a Provider. An instance of this class is obtained from
-** a ProviderMetadata object.
-**
-============================================================*/
-
 using System.Collections.Generic;
 
 namespace System.Diagnostics.Eventing.Reader
@@ -22,25 +12,24 @@ namespace System.Diagnostics.Eventing.Reader
     /// </summary>
     public sealed class EventLevel
     {
-        private int _value;
         private string _name;
         private string _displayName;
         private bool _dataReady;
         private ProviderMetadata _pmReference;
         private object _syncObject;
 
-        //called from EventMetadata
+        // Called from EventMetadata
         internal EventLevel(int value, ProviderMetadata pmReference)
         {
-            _value = value;
+            Value = value;
             _pmReference = pmReference;
             _syncObject = new object();
         }
 
-        //called from ProviderMetadata
+        // Called from ProviderMetadata
         internal EventLevel(string name, int value, string displayName)
         {
-            _value = value;
+            Value = value;
             _name = name;
             _displayName = displayName;
             _dataReady = true;
@@ -63,7 +52,7 @@ namespace System.Diagnostics.Eventing.Reader
                 _dataReady = true;
                 foreach (EventLevel lev in result)
                 {
-                    if (lev.Value == _value)
+                    if (lev.Value == Value)
                     {
                         _name = lev.Name;
                         _displayName = lev.DisplayName;
@@ -82,13 +71,7 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        public int Value
-        {
-            get
-            {
-                return _value;
-            }
-        }
+        public int Value { get; }
 
         public string DisplayName
         {

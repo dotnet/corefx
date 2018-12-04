@@ -2,16 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This public class allows accessing static channel information and
-** configures channel publishing and logging properties.  An instance
-** of this class is obtained from EventLogManagement class.
-**
-============================================================*/
-
 using System.Collections.Generic;
 using Microsoft.Win32;
 
@@ -54,38 +44,24 @@ namespace System.Diagnostics.Eventing.Reader
     /// </summary>
     public class EventLogConfiguration : IDisposable
     {
-        //
-        // access to the data member reference is safe, while
-        // invoking methods on it is marked SecurityCritical as appropriate.
-        //
         private EventLogHandle _handle = EventLogHandle.Zero;
 
         private EventLogSession _session = null;
-        private string _channelName;
 
         public EventLogConfiguration(string logName) : this(logName, null) { }
 
-        // marked as SecurityCritical because allocates SafeHandles.
-        // marked as Safe because performs Demand check.
-        [System.Security.SecurityCritical]
         public EventLogConfiguration(string logName, EventLogSession session)
         {
             if (session == null)
                 session = EventLogSession.GlobalSession;
 
             _session = session;
-            _channelName = logName;
+            LogName = logName;
 
-            _handle = NativeWrapper.EvtOpenChannelConfig(_session.Handle, _channelName, 0);
+            _handle = NativeWrapper.EvtOpenChannelConfig(_session.Handle, LogName, 0);
         }
 
-        public string LogName
-        {
-            get
-            {
-                return _channelName;
-            }
-        }
+        public string LogName { get; }
 
         public EventLogType LogType
         {
@@ -288,7 +264,6 @@ namespace System.Diagnostics.Eventing.Reader
             GC.SuppressFinalize(this);
         }
 
-        [System.Security.SecuritySafeCritical]
         protected virtual void Dispose(bool disposing)
         {
             if (_handle != null && !_handle.IsInvalid)

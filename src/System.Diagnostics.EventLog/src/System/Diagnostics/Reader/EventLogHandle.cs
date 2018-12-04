@@ -2,28 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This internal class is a SafeHandle implementation over a
-** native EVT_HANDLE - obtained from EventLog Native Methods.
-**
-============================================================*/
-
 using System.Runtime.InteropServices;
 
+/// <summary>
+/// A SafeHandle implementation over native EVT_HANDLE
+/// obtained from EventLog Native Methods.
+/// </summary>
 namespace System.Diagnostics.Eventing.Reader
 {
-    //
-    // Marked as SecurityCritical due to link demands from inherited
-    // SafeHandle members.
-    //
-
-    // marked as Safe since the only real operation that is performed
-    // by this class is NativeWrapper.EvtClose and that is protected
-    // by a full Demand() before doing any work.
-    [System.Security.SecuritySafeCritical]
     internal sealed class EventLogHandle : SafeHandle
     {
         // Called by P/Invoke when returning SafeHandles

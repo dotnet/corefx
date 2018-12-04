@@ -2,16 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This public class describes the metadata for a specific Log
-** Reference defined by a Provider. An instance of this class is obtained from
-** a ProviderMetadata object.
-**
-============================================================*/
-
 using System.Collections.Generic;
 
 namespace System.Diagnostics.Eventing.Reader
@@ -26,15 +16,13 @@ namespace System.Diagnostics.Eventing.Reader
         private string _channelName;
         private bool _isImported;
         private string _displayName;
-        private uint _channelId;
-
         private bool _dataReady;
         private ProviderMetadata _pmReference;
         private object _syncObject;
 
         internal EventLogLink(uint channelId, ProviderMetadata pmReference)
         {
-            _channelId = channelId;
+            ChannelId = channelId;
             _pmReference = pmReference;
             _syncObject = new object();
         }
@@ -44,7 +32,7 @@ namespace System.Diagnostics.Eventing.Reader
             _channelName = channelName;
             _isImported = isImported;
             _displayName = displayName;
-            _channelId = channelId;
+            ChannelId = channelId;
 
             _dataReady = true;
             _syncObject = new object();
@@ -69,7 +57,7 @@ namespace System.Diagnostics.Eventing.Reader
 
                 foreach (EventLogLink ch in result)
                 {
-                    if (ch.ChannelId == _channelId)
+                    if (ch.ChannelId == ChannelId)
                     {
                         _channelName = ch.LogName;
                         _isImported = ch.IsImported;
@@ -110,12 +98,6 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        internal uint ChannelId
-        {
-            get
-            {
-                return _channelId;
-            }
-        }
+        internal uint ChannelId { get; }
     }
 }

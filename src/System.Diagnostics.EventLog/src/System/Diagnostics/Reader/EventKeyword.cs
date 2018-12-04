@@ -2,16 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This public class describes the metadata for a specific Keyword
-** defined by a Provider. An instance of this class is obtained from
-** a ProviderMetadata object.
-**
-============================================================*/
-
 using System.Collections.Generic;
 
 namespace System.Diagnostics.Eventing.Reader
@@ -22,25 +12,24 @@ namespace System.Diagnostics.Eventing.Reader
     /// </summary>
     public sealed class EventKeyword
     {
-        private long _value;
         private string _name;
         private string _displayName;
         private bool _dataReady;
         private ProviderMetadata _pmReference;
         private object _syncObject;
 
-        //called from EventMetadata
+        // Called from EventMetadata
         internal EventKeyword(long value, ProviderMetadata pmReference)
         {
-            _value = value;
+            Value = value;
             _pmReference = pmReference;
             _syncObject = new object();
         }
 
-        //called from ProviderMetadata
+        // Called from ProviderMetadata
         internal EventKeyword(string name, long value, string displayName)
         {
-            _value = value;
+            Value = value;
             _name = name;
             _displayName = displayName;
             _dataReady = true;
@@ -65,7 +54,7 @@ namespace System.Diagnostics.Eventing.Reader
 
                 foreach (EventKeyword key in result)
                 {
-                    if (key.Value == _value)
+                    if (key.Value == Value)
                     {
                         _name = key.Name;
                         _displayName = key.DisplayName;
@@ -84,13 +73,7 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        public long Value
-        {
-            get
-            {
-                return _value;
-            }
-        }
+        public long Value { get; }
 
         public string DisplayName
         {

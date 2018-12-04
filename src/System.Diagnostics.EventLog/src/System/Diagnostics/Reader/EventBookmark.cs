@@ -2,18 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This public class represents an opaque Event Bookmark obtained
-** from an EventRecord.  The bookmark denotes a unique identifier
-** for the event instance as well as marks the location in the
-** the result set of the EventReader that the event instance was
-** obtained from.
-**
-============================================================*/
-
 namespace System.Diagnostics.Eventing.Reader
 {
     //
@@ -30,16 +18,14 @@ namespace System.Diagnostics.Eventing.Reader
     /// </summary>
     public class EventBookmark
     {
-        private string _bookmark;
 
+        // Look for replaces for nameof
         internal EventBookmark(string bookmarkText)
         {
-            if (bookmarkText == null)
-                throw new ArgumentNullException("bookmarkText");
-            _bookmark = bookmarkText;
+            BookmarkText = bookmarkText ?? throw new ArgumentNullException(nameof(bookmarkText));
         }
 
-        internal string BookmarkText { get { return _bookmark; } }
+        internal string BookmarkText { get; }
     }
 }
 

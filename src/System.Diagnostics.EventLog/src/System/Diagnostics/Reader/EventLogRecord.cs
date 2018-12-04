@@ -2,15 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This public class is an EventLog implementation of EventRecord.  An
-** instance of this is obtained from an EventLogReader.
-**
-============================================================*/
-
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Win32;
@@ -20,42 +11,32 @@ namespace System.Diagnostics.Eventing.Reader
     public class EventLogRecord : EventRecord
     {
         private const int SYSTEM_PROPERTY_COUNT = 18;
-
-        //
-        // access to the data member reference is safe, while
-        // invoking methods on it is marked SecurityCritical as appropriate.
-        //
-        [System.Security.SecuritySafeCritical]
-        private EventLogHandle _handle;
-
         private EventLogSession _session;
 
         private NativeWrapper.SystemProperties _systemProperties;
         private string _containerChannel;
         private int[] _matchedQueryIds;
 
-        //a dummy object which is used only for the locking.
+        // A dummy object which is used only for the locking.
         private object _syncObject;
 
-        //cached DisplayNames for each instance
+        // Cached DisplayNames for each instance
         private string _levelName = null;
         private string _taskName = null;
         private string _opcodeName = null;
         private IEnumerable<string> _keywordsNames = null;
 
-        //cached DisplayNames for each instance
+        // Cached DisplayNames for each instance
         private bool _levelNameReady;
         private bool _taskNameReady;
         private bool _opcodeNameReady;
 
         private ProviderMetadataCachedInformation _cachedMetadataInformation;
 
-        // marking as TreatAsSafe because just passing around a reference to an EventLogHandle is safe.
-        [System.Security.SecuritySafeCritical]
         internal EventLogRecord(EventLogHandle handle, EventLogSession session, ProviderMetadataCachedInformation cachedMetadataInfo)
         {
             _cachedMetadataInformation = cachedMetadataInfo;
-            _handle = handle;
+            Handle = handle;
             _session = session;
             _systemProperties = new NativeWrapper.SystemProperties();
             _syncObject = new object();
@@ -63,13 +44,7 @@ namespace System.Diagnostics.Eventing.Reader
 
         internal EventLogHandle Handle
         {
-            // just returning reference to security critical type, the methods
-            // of that type are protected by SecurityCritical as appropriate.
-            [System.Security.SecuritySafeCritical]
-            get
-            {
-                return _handle;
-            }
+            get;
         }
 
         internal void PrepareSystemData()
@@ -77,14 +52,14 @@ namespace System.Diagnostics.Eventing.Reader
             if (_systemProperties.filled)
                 return;
 
-            //prepare the System Context, if it is not already initialized.
+            // Prepare the System Context, if it is not already initialized.
             _session.SetupSystemContext();
 
             lock (_syncObject)
             {
                 if (_systemProperties.filled == false)
                 {
-                    NativeWrapper.EvtRenderBufferWithContextSystem(_session.renderContextHandleSystem, _handle, UnsafeNativeMethods.EvtRenderFlags.EvtRenderEventValues, _systemProperties, SYSTEM_PROPERTY_COUNT);
+                    NativeWrapper.EvtRenderBufferWithContextSystem(_session.renderContextHandleSystem, Handle, UnsafeNativeMethods.EvtRenderFlags.EvtRenderEventValues, _systemProperties, SYSTEM_PROPERTY_COUNT);
                     _systemProperties.filled = true;
                 }
             }
@@ -290,11 +265,10 @@ namespace System.Diagnostics.Eventing.Reader
 
         public override EventBookmark Bookmark
         {
-            [System.Security.SecuritySafeCritical]
             get
             {
                 EventLogHandle bookmarkHandle = NativeWrapper.EvtCreateBookmark(null);
-                NativeWrapper.EvtUpdateBookmark(bookmarkHandle, _handle);
+                NativeWrapper.EvtUpdateBookmark(bookmarkHandle, Handle);
                 string bookmarkText = NativeWrapper.EvtRenderBookmark(bookmarkHandle);
 
                 return new EventBookmark(bookmarkText);
@@ -303,7 +277,7 @@ namespace System.Diagnostics.Eventing.Reader
 
         public override string FormatDescription()
         {
-            return _cachedMetadataInformation.GetFormatDescription(this.ProviderName, _handle);
+            return _cachedMetadataInformation.GetFormatDescription(this.ProviderName, Handle);
         }
 
         public override string FormatDescription(IEnumerable<object> values)
@@ -311,7 +285,7 @@ namespace System.Diagnostics.Eventing.Reader
             if (values == null)
                 return this.FormatDescription();
 
-            //copy the value IEnumerable to an array.
+            // Copy the value IEnumerable to an array.
             string[] theValues = new string[0];
             int i = 0;
             foreach (object o in values)
@@ -322,7 +296,7 @@ namespace System.Diagnostics.Eventing.Reader
                 i++;
             }
 
-            return _cachedMetadataInformation.GetFormatDescription(this.ProviderName, _handle, theValues);
+            return _cachedMetadataInformation.GetFormatDescription(this.ProviderName, Handle, theValues);
         }
 
         public override string LevelDisplayName
@@ -336,7 +310,7 @@ namespace System.Diagnostics.Eventing.Reader
                     if (_levelNameReady == false)
                     {
                         _levelNameReady = true;
-                        _levelName = _cachedMetadataInformation.GetLevelDisplayName(this.ProviderName, _handle);
+                        _levelName = _cachedMetadataInformation.GetLevelDisplayName(this.ProviderName, Handle);
                     }
                     return _levelName;
                 }
@@ -352,7 +326,7 @@ namespace System.Diagnostics.Eventing.Reader
                     if (_opcodeNameReady == false)
                     {
                         _opcodeNameReady = true;
-                        _opcodeName = _cachedMetadataInformation.GetOpcodeDisplayName(this.ProviderName, _handle);
+                        _opcodeName = _cachedMetadataInformation.GetOpcodeDisplayName(this.ProviderName, Handle);
                     }
                     return _opcodeName;
                 }
@@ -370,7 +344,7 @@ namespace System.Diagnostics.Eventing.Reader
                     if (_taskNameReady == false)
                     {
                         _taskNameReady = true;
-                        _taskName = _cachedMetadataInformation.GetTaskDisplayName(this.ProviderName, _handle);
+                        _taskName = _cachedMetadataInformation.GetTaskDisplayName(this.ProviderName, Handle);
                     }
                     return _taskName;
                 }
@@ -387,7 +361,7 @@ namespace System.Diagnostics.Eventing.Reader
                 {
                     if (_keywordsNames == null)
                     {
-                        _keywordsNames = _cachedMetadataInformation.GetKeywordDisplayNames(this.ProviderName, _handle);
+                        _keywordsNames = _cachedMetadataInformation.GetKeywordDisplayNames(this.ProviderName, Handle);
                     }
                     return _keywordsNames;
                 }
@@ -399,7 +373,7 @@ namespace System.Diagnostics.Eventing.Reader
             get
             {
                 _session.SetupUserContext();
-                IList<object> properties = NativeWrapper.EvtRenderBufferWithContextUserOrValues(_session.renderContextHandleUser, _handle);
+                IList<object> properties = NativeWrapper.EvtRenderBufferWithContextUserOrValues(_session.renderContextHandleUser, Handle);
                 List<EventProperty> list = new List<EventProperty>();
                 foreach (object value in properties)
                 {
@@ -412,27 +386,23 @@ namespace System.Diagnostics.Eventing.Reader
         public IList<object> GetPropertyValues(EventLogPropertySelector propertySelector)
         {
             if (propertySelector == null)
-                throw new ArgumentNullException("propertySelector");
-            return NativeWrapper.EvtRenderBufferWithContextUserOrValues(propertySelector.Handle, _handle);
+                throw new ArgumentNullException(nameof(propertySelector));
+            return NativeWrapper.EvtRenderBufferWithContextUserOrValues(propertySelector.Handle, Handle);
         }
 
-        // marked as SecurityCritical because it allocates SafeHandle
-        // marked as TreatAsSafe because it performs Demand.
-        [System.Security.SecuritySafeCritical]
         public override string ToXml()
         {
             StringBuilder renderBuffer = new StringBuilder(2000);
-            NativeWrapper.EvtRender(EventLogHandle.Zero, _handle, UnsafeNativeMethods.EvtRenderFlags.EvtRenderEventXml, renderBuffer);
+            NativeWrapper.EvtRender(EventLogHandle.Zero, Handle, UnsafeNativeMethods.EvtRenderFlags.EvtRenderEventXml, renderBuffer);
             return renderBuffer.ToString();
         }
 
-        [System.Security.SecuritySafeCritical]
         protected override void Dispose(bool disposing)
         {
             try
             {
-                if (_handle != null && !_handle.IsInvalid)
-                    _handle.Dispose();
+                if (Handle != null && !Handle.IsInvalid)
+                    Handle.Dispose();
             }
             finally
             {
@@ -440,8 +410,6 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        // marked as SecurityCritical because allocates SafeHandle.
-        [System.Security.SecurityCritical]
         internal static EventLogHandle GetBookmarkHandleFromBookmark(EventBookmark bookmark)
         {
             if (bookmark == null)

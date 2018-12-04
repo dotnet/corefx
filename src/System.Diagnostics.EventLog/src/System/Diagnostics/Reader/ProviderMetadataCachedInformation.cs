@@ -2,27 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This internal class exposes a limited set of cached Provider
-** metadata information.   It is meant to support the Metadata
-**
-============================================================*/
-
 using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.Win32;
 
 namespace System.Diagnostics.Eventing.Reader
 {
-    //
-    // this class does not expose underlying Provider metadata objects.  Instead it
-    // exposes a limited set of Provider metadata information from the cache.  The reason
-    // for this is so the cache can easily Dispose the metadata object without worrying
-    // about who is using it.
-    //
+    /// <summary>
+    /// This class does not expose underlying Provider metadata objects. Instead it
+    /// exposes a limited set of Provider metadata information from the cache. The reason
+    /// for this is so the cache can easily Dispose the metadata object without worrying
+    /// about who is using it.
+    /// </summary>
     internal class ProviderMetadataCachedInformation
     {
         private Dictionary<ProviderMetadataId, CacheItem> _cache;
@@ -32,13 +23,10 @@ namespace System.Diagnostics.Eventing.Reader
 
         private class ProviderMetadataId
         {
-            private string _providerName;
-            private CultureInfo _cultureInfo;
-
             public ProviderMetadataId(string providerName, CultureInfo cultureInfo)
             {
-                _providerName = providerName;
-                _cultureInfo = cultureInfo;
+                ProviderName = providerName;
+                TheCultureInfo = cultureInfo;
             }
 
             public override bool Equals(object obj)
@@ -46,62 +34,31 @@ namespace System.Diagnostics.Eventing.Reader
                 ProviderMetadataId rhs = obj as ProviderMetadataId;
                 if (rhs == null)
                     return false;
-                if (_providerName.Equals(rhs._providerName) && (_cultureInfo == rhs._cultureInfo))
+                if (ProviderName.Equals(rhs.ProviderName) && (TheCultureInfo == rhs.TheCultureInfo))
                     return true;
                 return false;
             }
 
             public override int GetHashCode()
             {
-                return _providerName.GetHashCode() ^ _cultureInfo.GetHashCode();
+                return ProviderName.GetHashCode() ^ TheCultureInfo.GetHashCode();
             }
 
-            public string ProviderName
-            {
-                get
-                {
-                    return _providerName;
-                }
-            }
-            public CultureInfo TheCultureInfo
-            {
-                get
-                {
-                    return _cultureInfo;
-                }
-            }
+            public string ProviderName { get; }
+            public CultureInfo TheCultureInfo { get; }
         }
 
         private class CacheItem
         {
-            private ProviderMetadata _pm;
-            private DateTime _theTime;
-
             public CacheItem(ProviderMetadata pm)
             {
-                _pm = pm;
-                _theTime = DateTime.Now;
+                ProviderMetadata = pm;
+                TheTime = DateTime.Now;
             }
 
-            public DateTime TheTime
-            {
-                get
-                {
-                    return _theTime;
-                }
-                set
-                {
-                    _theTime = value;
-                }
-            }
+            public DateTime TheTime { get; set; }
 
-            public ProviderMetadata ProviderMetadata
-            {
-                get
-                {
-                    return _pm;
-                }
-            }
+            public ProviderMetadata ProviderMetadata { get; }
         }
 
         public ProviderMetadataCachedInformation(EventLogSession session, string logfile, int maximumCacheSize)
@@ -150,13 +107,13 @@ namespace System.Diagnostics.Eventing.Reader
             DateTime timeNow = DateTime.Now;
             ProviderMetadataId keyToDelete = null;
 
-            //get the entry in the cache which was not accessed for the longest time.
+            // Get the entry in the cache which was not accessed for the longest time.
             foreach (KeyValuePair<ProviderMetadataId, CacheItem> kvp in _cache)
             {
-                //the time difference (in ms) between the timeNow and the last used time of each entry
+                // The time difference (in ms) between the timeNow and the last used time of each entry
                 TimeSpan timeDifference = timeNow.Subtract(kvp.Value.TheTime);
 
-                //for the "unused" items (with ReferenceCount == 0)   -> can possible be deleted.
+                // For the "unused" items (with ReferenceCount == 0)   -> can possible be deleted.
                 if (timeDifference.TotalMilliseconds >= maxPassedTime)
                 {
                     maxPassedTime = timeDifference.TotalMilliseconds;
@@ -195,10 +152,8 @@ namespace System.Diagnostics.Eventing.Reader
 
                 ProviderMetadata pm = cacheItem.ProviderMetadata;
 
-                //
                 // check Provider metadata to be sure it's hasn't been
                 // uninstalled since last time it was used.
-                //
 
                 try
                 {
@@ -223,8 +178,6 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        // marking as TreatAsSafe because just passing around a reference to an EventLogHandle is safe.
-        [System.Security.SecuritySafeCritical]
         public string GetFormatDescription(string ProviderName, EventLogHandle eventHandle)
         {
             lock (this)
@@ -260,8 +213,6 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        // marking as TreatAsSafe because just passing around a reference to an EventLogHandle is safe.
-        [System.Security.SecuritySafeCritical]
         public string GetLevelDisplayName(string ProviderName, EventLogHandle eventHandle)
         {
             lock (this)
@@ -272,8 +223,6 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        // marking as TreatAsSafe because just passing around a reference to an EventLogHandle is safe.
-        [System.Security.SecuritySafeCritical]
         public string GetOpcodeDisplayName(string ProviderName, EventLogHandle eventHandle)
         {
             lock (this)
@@ -284,8 +233,6 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        // marking as TreatAsSafe because just passing around a reference to an EventLogHandle is safe.
-        [System.Security.SecuritySafeCritical]
         public string GetTaskDisplayName(string ProviderName, EventLogHandle eventHandle)
         {
             lock (this)
@@ -296,8 +243,6 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        // marking as TreatAsSafe because just passing around a reference to an EventLogHandle is safe.
-        [System.Security.SecuritySafeCritical]
         public IEnumerable<string> GetKeywordDisplayNames(string ProviderName, EventLogHandle eventHandle)
         {
             lock (this)

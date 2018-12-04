@@ -2,24 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This internal class is a SafeHandle implementation over a
-** native CoTaskMem allocated via SecureStringToCoTaskMemUnicode.
-**
-============================================================*/
-
 using System.Runtime.InteropServices;
 
 namespace System.Diagnostics.Eventing.Reader
 {
-    //
-    // Marked as SecurityCritical due to link demands from inherited
-    // SafeHandle members.
-    //
-    [System.Security.SecurityCritical]
+    /// <summary>
+    /// A SafeHandle implementation over a native CoTaskMem allocated via SecureStringToCoTaskMemUnicode.
+    /// </summary>
     internal sealed class CoTaskMemUnicodeSafeHandle : SafeHandle
     {
         internal CoTaskMemUnicodeSafeHandle()

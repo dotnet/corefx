@@ -2,18 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** Public class that encapsulates the information for fast
-** access to Event Values of an EventLogRecord. Implements
-** the EventPropertyContext abstract class.  An instance of this
-** class is constructed and then passed to
-** EventLogRecord.GetEventPropertyValues.
-**
-============================================================*/
-
 using System.Collections.Generic;
 using Microsoft.Win32;
 
@@ -26,17 +14,10 @@ namespace System.Diagnostics.Eventing.Reader
     /// </summary>
     public class EventLogPropertySelector : IDisposable
     {
-        //
-        // access to the data member reference is safe, while
-        // invoking methods on it is marked SecurityCritical as appropriate.
-        //
-        private EventLogHandle _renderContextHandleValues;
-
-        [System.Security.SecurityCritical]
         public EventLogPropertySelector(IEnumerable<string> propertyQueries)
         {
             if (propertyQueries == null)
-                throw new ArgumentNullException("propertyQueries");
+                throw new ArgumentNullException(nameof(propertyQueries));
 
             string[] paths;
 
@@ -53,18 +34,10 @@ namespace System.Diagnostics.Eventing.Reader
                 paths = queries.ToArray();
             }
 
-            _renderContextHandleValues = NativeWrapper.EvtCreateRenderContext(paths.Length, paths, UnsafeNativeMethods.EvtRenderContextFlags.EvtRenderContextValues);
+            Handle = NativeWrapper.EvtCreateRenderContext(paths.Length, paths, UnsafeNativeMethods.EvtRenderContextFlags.EvtRenderContextValues);
         }
 
-        internal EventLogHandle Handle
-        {
-            // just returning reference to security critical type, the methods
-            // of that type are protected by SecurityCritical as appropriate.
-            get
-            {
-                return _renderContextHandleValues;
-            }
-        }
+        internal EventLogHandle Handle { get; }
 
         public void Dispose()
         {
@@ -72,11 +45,10 @@ namespace System.Diagnostics.Eventing.Reader
             GC.SuppressFinalize(this);
         }
 
-        [System.Security.SecuritySafeCritical]
         protected virtual void Dispose(bool disposing)
         {
-            if (_renderContextHandleValues != null && !_renderContextHandleValues.IsInvalid)
-                _renderContextHandleValues.Dispose();
+            if (Handle != null && !Handle.IsInvalid)
+                Handle.Dispose();
         }
     }
 }

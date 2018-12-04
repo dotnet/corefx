@@ -2,14 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This public class is used for reading event records from event log.
-**
-============================================================*/
-
 using System.IO;
 using System.Collections.Generic;
 using Microsoft.Win32;
@@ -71,11 +63,10 @@ namespace System.Diagnostics.Eventing.Reader
         {
         }
 
-        [System.Security.SecurityCritical]
         public EventLogReader(EventLogQuery eventQuery, EventBookmark bookmark)
         {
             if (eventQuery == null)
-                throw new ArgumentNullException("eventQuery");
+                throw new ArgumentNullException(nameof(eventQuery));
 
             string logfile = null;
             if (eventQuery.ThePathType == PathType.FilePath)
@@ -83,10 +74,10 @@ namespace System.Diagnostics.Eventing.Reader
 
             _cachedMetadataInformation = new ProviderMetadataCachedInformation(eventQuery.Session, logfile, 50);
 
-            //explicit data
+            // Explicit data
             _eventQuery = eventQuery;
 
-            //implicit
+            // Implicit
             _batchSize = 64;
             _eventsBuffer = new IntPtr[_batchSize];
 
@@ -130,18 +121,15 @@ namespace System.Diagnostics.Eventing.Reader
             set
             {
                 if (value < 1)
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 _batchSize = value;
             }
         }
 
-        [System.Security.SecurityCritical]
         private bool GetNextBatch(TimeSpan ts)
         {
-            int timeout;
-            if (ts == TimeSpan.MaxValue)
-                timeout = -1;
-            else
+            int timeout = -1;
+            if (ts != TimeSpan.MaxValue)
                 timeout = (int)ts.TotalMilliseconds;
 
             // batchSize was changed by user, reallocate buffer.
@@ -155,7 +143,7 @@ namespace System.Diagnostics.Eventing.Reader
             {
                 _eventCount = 0;
                 _currentIndex = 0;
-                return false; //no more events in the result set
+                return false; // No more events in the result set
             }
 
             _currentIndex = 0;
@@ -168,9 +156,6 @@ namespace System.Diagnostics.Eventing.Reader
             return ReadEvent(TimeSpan.MaxValue);
         }
 
-        // security critical because allocates SafeHandle.
-        // marked as safe because performs Demand check.
-        [System.Security.SecurityCritical]
         public EventRecord ReadEvent(TimeSpan timeout)
         {
             if (_isEof)
@@ -199,7 +184,6 @@ namespace System.Diagnostics.Eventing.Reader
             GC.SuppressFinalize(this);
         }
 
-        [System.Security.SecuritySafeCritical]
         protected virtual void Dispose(bool disposing)
         {
             while (_currentIndex < _eventCount)
@@ -212,11 +196,10 @@ namespace System.Diagnostics.Eventing.Reader
                 _handle.Dispose();
         }
 
-        [System.Security.SecurityCritical]
         internal void SeekReset()
         {
             //
-            //close all unread event handles in the buffer
+            // Close all unread event handles in the buffer
             //
             while (_currentIndex < _eventCount)
             {
@@ -224,14 +207,12 @@ namespace System.Diagnostics.Eventing.Reader
                 _currentIndex++;
             }
 
-            //reset the indexes used by Next
+            // Reset the indexes used by Next
             _currentIndex = 0;
             _eventCount = 0;
             _isEof = false;
         }
 
-        // marked as SecurityCritical because it allocates SafeHandle.
-        [System.Security.SecurityCritical]
         internal void SeekCommon(long offset)
         {
             //
@@ -251,11 +232,10 @@ namespace System.Diagnostics.Eventing.Reader
             Seek(bookmark, 0);
         }
 
-        [System.Security.SecurityCritical]
         public void Seek(EventBookmark bookmark, long offset)
         {
             if (bookmark == null)
-                throw new ArgumentNullException("bookmark");
+                throw new ArgumentNullException(nameof(bookmark));
 
             SeekReset();
             using (EventLogHandle bookmarkHandle = EventLogRecord.GetBookmarkHandleFromBookmark(bookmark))
@@ -264,7 +244,6 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        [System.Security.SecurityCritical]
         public void Seek(SeekOrigin origin, long offset)
         {
             switch (origin)
@@ -284,14 +263,14 @@ namespace System.Diagnostics.Eventing.Reader
                 case SeekOrigin.Current:
                     if (offset >= 0)
                     {
-                        //we can reuse elements in the batch.
+                        // We can reuse elements in the batch.
                         if (_currentIndex + offset < _eventCount)
                         {
                             //
                             // We don't call Seek here, we can reposition within the batch.
                             //
 
-                            // close all event handles between [currentIndex, currentIndex + offset)
+                            // Close all event handles between [currentIndex, currentIndex + offset)
                             int index = _currentIndex;
                             while (index < _currentIndex + offset)
                             {
@@ -300,8 +279,8 @@ namespace System.Diagnostics.Eventing.Reader
                             }
 
                             _currentIndex = (int)(_currentIndex + offset);
-                            //leave the eventCount unchanged
-                            //leave the same Eof
+                            // Leave the eventCount unchanged
+                            // Leave the same Eof
                         }
                         else
                         {
@@ -323,7 +302,6 @@ namespace System.Diagnostics.Eventing.Reader
 
         public IList<EventLogStatus> LogStatus
         {
-            [System.Security.SecurityCritical]
             get
             {
                 List<EventLogStatus> list = null;

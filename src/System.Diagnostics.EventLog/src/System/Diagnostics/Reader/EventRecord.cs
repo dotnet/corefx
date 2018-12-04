@@ -2,15 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This public abstract class defines the methods / properties
-** that all events should support.
-**
-============================================================*/
-
 using System.Collections.Generic;
 using System.Security.Principal;
 using System.Diagnostics.CodeAnalysis;

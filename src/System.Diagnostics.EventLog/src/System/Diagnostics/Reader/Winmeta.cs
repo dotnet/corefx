@@ -2,15 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** Contains eventing constants defined by the Windows
-** environment.
-**
-============================================================*/
-
 using System.Diagnostics.CodeAnalysis;
 
 namespace System.Diagnostics.Eventing.Reader
@@ -45,6 +36,7 @@ namespace System.Diagnostics.Eventing.Reader
         /// </summary>
         Verbose
     }
+
     /// <summary>
     /// WindowsEventTask
     /// </summary>

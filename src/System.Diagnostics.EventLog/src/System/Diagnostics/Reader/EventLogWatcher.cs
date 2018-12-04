@@ -2,27 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-** Class: EventLogWatcher
-**
-** Purpose: 
-** This public class is used for subscribing to event record 
-** notifications from event log. 
-**
-============================================================*/
-
 using System.Threading;
 using Microsoft.Win32;
 
 namespace System.Diagnostics.Eventing.Reader
 {
-
     /// <summary>
     /// Used for subscribing to event record notifications from 
     /// event log. 
     /// </summary>
-    //[System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
+    // [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class EventLogWatcher : IDisposable
     {
 
@@ -68,7 +57,7 @@ namespace System.Diagnostics.Eventing.Reader
 
             if (eventQuery == null)
             {
-                throw new ArgumentNullException("eventQuery");
+                throw new ArgumentNullException(nameof(eventQuery));
             }
 
             if (bookmark != null)
@@ -76,7 +65,7 @@ namespace System.Diagnostics.Eventing.Reader
                 readExistingEvents = false;
             }
 
-            //explicit data
+            // Explicit data
             _eventQuery = eventQuery;
             _readExistingEvents = readExistingEvents;
 
@@ -109,15 +98,11 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         internal void StopSubscribing()
         {
+            // C:\public\System.Diagnostics.Eventing\Microsoft\Win32\SafeHandles;
 
-            //C:\public\System.Diagnostics.Eventing\Microsoft\Win32\SafeHandles;
-
-            //
-            // need to set isSubscribing to false before waiting for completion of callback.
-            // 
+            // Need to set isSubscribing to false before waiting for completion of callback.
             _isSubscribing = false;
 
             if (_registeredWaitHandle != null)
@@ -127,10 +112,8 @@ namespace System.Diagnostics.Eventing.Reader
 
                 if (_callbackThreadId != Thread.CurrentThread.ManagedThreadId)
                 {
-                    //
-                    // not calling Stop from within callback - wait for 
-                    // any outstanding callbacks to complete.
-                    // 
+                    // Not calling Stop from within callback - wait for 
+                    // Any outstanding callbacks to complete.
                     if (_unregisterDoneHandle != null)
                     {
                         _unregisterDoneHandle.WaitOne();
@@ -170,10 +153,8 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         internal void StartSubscribing()
         {
-
             if (_isSubscribing)
             {
                 throw new InvalidOperationException();
@@ -198,7 +179,7 @@ namespace System.Diagnostics.Eventing.Reader
                 flag |= (int)UnsafeNativeMethods.EvtSubscribeFlags.EvtSubscribeTolerateQueryErrors;
             }
 
-            //C:\public\System.Diagnostics.Eventing\Microsoft\Win32\SafeHandles;
+            // C:\public\System.Diagnostics.Eventing\Microsoft\Win32\SafeHandles;
 
             _callbackThreadId = -1;
             _unregisterDoneHandle = new AutoResetEvent(false);
@@ -244,11 +225,9 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         private void RequestEvents()
         {
-
-            //C:\public\System.Diagnostics.Eventing\Microsoft\Win32\SafeHandles;
+            // C:\public\System.Diagnostics.Eventing\Microsoft\Win32\SafeHandles;
 
             asyncException = null;
             Debug.Assert(_numEventsInBuffer == 0);
@@ -286,18 +265,14 @@ namespace System.Diagnostics.Eventing.Reader
 
         private void IssueCallback(EventRecordWrittenEventArgs eventArgs)
         {
-
             if (EventRecordWritten != null)
             {
                 EventRecordWritten(this, eventArgs);
             }
         }
 
-        // marked as SecurityCritical because allocates SafeHandles.
-        [System.Security.SecurityCritical]
         private void HandleEventsRequestCompletion()
         {
-
             if (asyncException != null)
             {
                 EventRecordWrittenEventArgs args = new EventRecordWrittenEventArgs(asyncException.Data["RealException"] as Exception);
@@ -324,10 +299,8 @@ namespace System.Diagnostics.Eventing.Reader
             GC.SuppressFinalize(this);
         }
 
-        [System.Security.SecuritySafeCritical]
         protected virtual void Dispose(bool disposing)
         {
-
             if (disposing)
             {
                 StopSubscribing();

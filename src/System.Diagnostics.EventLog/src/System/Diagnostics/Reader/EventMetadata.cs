@@ -2,16 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This public class describes the metadata for a specific event
-** raised by Provider. An instance of this class is obtained from
-** ProviderMetadata class.
-**
-============================================================*/
-
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -22,31 +12,26 @@ namespace System.Diagnostics.Eventing.Reader
     /// </summary>
     public sealed class EventMetadata
     {
-        private long _id;
-        private byte _version;
         private byte _channelId;
         private byte _level;
         private short _opcode;
         private int _task;
         private long _keywords;
-        private string _template;
-        private string _description;
-
         private ProviderMetadata _pmReference;
 
         internal EventMetadata(uint id, byte version, byte channelId,
                  byte level, byte opcode, short task, long keywords,
                  string template, string description, ProviderMetadata pmReference)
         {
-            _id = id;
-            _version = version;
+            Id = id;
+            Version = version;
             _channelId = channelId;
             _level = level;
             _opcode = opcode;
             _task = task;
             _keywords = keywords;
-            _template = template;
-            _description = description;
+            Template = template;
+            Description = description;
             _pmReference = pmReference;
         }
 
@@ -59,21 +44,9 @@ namespace System.Diagnostics.Eventing.Reader
         // and rest of the bits of the legacy event id would be stored in
         // Qualifiers property.
         //
-        public long Id
-        {
-            get
-            {
-                return _id;
-            }
-        }
+        public long Id { get; }
 
-        public byte Version
-        {
-            get
-            {
-                return _version;
-            }
-        }
+        public byte Version { get; }
 
         public EventLogLink LogLink
         {
@@ -117,18 +90,18 @@ namespace System.Diagnostics.Eventing.Reader
                 ulong theKeywords = unchecked((ulong)_keywords);
                 ulong mask = 0x8000000000000000;
 
-                //for every bit
-                //for (int i = 0; i < 64 && theKeywords != 0; i++)
+                // For every bit
+                // for (int i = 0; i < 64 && theKeywords != 0; i++)
                 for (int i = 0; i < 64; i++)
                 {
-                    //if this bit is set
+                    // If this bit is set
                     if ((theKeywords & mask) > 0)
                     {
-                        //the mask is the keyword we will be searching for.
+                        // The mask is the keyword we will be searching for.
                         list.Add(new EventKeyword(unchecked((long)mask), _pmReference));
-                        //theKeywords = theKeywords - mask;
+                        // theKeywords = theKeywords - mask;
                     }
-                    //modify the mask to check next bit.
+                    // Modify the mask to check next bit.
                     mask = mask >> 1;
                 }
 
@@ -136,20 +109,8 @@ namespace System.Diagnostics.Eventing.Reader
             }
         }
 
-        public string Template
-        {
-            get
-            {
-                return _template;
-            }
-        }
+        public string Template { get; }
 
-        public string Description
-        {
-            get
-            {
-                return _description;
-            }
-        }
+        public string Description { get; }
     }
 }

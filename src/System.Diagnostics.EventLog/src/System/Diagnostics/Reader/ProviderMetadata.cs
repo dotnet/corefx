@@ -2,16 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/*============================================================
-**
-**
-** Purpose:
-** This public class exposes all the metadata for a specific
-** Provider.  An instance of this class is obtained from
-** EventLogManagement and is scoped to a single Locale.
-**
-============================================================*/
-
 using System.Globalization;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -40,8 +30,8 @@ namespace System.Diagnostics.Eventing.Reader
         private CultureInfo _cultureInfo;
         private string _logFilePath;
 
-        //caching of the IEnumerable<EventLevel>, <EventTask>, <EventKeyword>, <EventOpcode> on the ProviderMetadata
-        //they do not change with every call.
+        // caching of the IEnumerable<EventLevel>, <EventTask>, <EventKeyword>, <EventOpcode> on the ProviderMetadata
+        // they do not change with every call.
         private IList<EventLevel> _levels = null;
         private IList<EventOpcode> _opcodes = null;
         private IList<EventTask> _tasks = null;
@@ -64,9 +54,6 @@ namespace System.Diagnostics.Eventing.Reader
         {
         }
 
-        // SecurityCritical since it allocates SafeHandles.
-        // Marked TreatAsSafe since we perform the Demand check.
-        [System.Security.SecuritySafeCritical]
         internal ProviderMetadata(string providerName, EventLogSession session, CultureInfo targetCultureInfo, string logFilePath)
         {
             if (targetCultureInfo == null)
@@ -151,7 +138,6 @@ namespace System.Diagnostics.Eventing.Reader
 
         public string DisplayName
         {
-            [System.Security.SecurityCritical]
             get
             {
                 uint msgId = (uint)this.ProviderMessageID;
@@ -165,7 +151,6 @@ namespace System.Diagnostics.Eventing.Reader
 
         public IList<EventLogLink> LogLinks
         {
-            [System.Security.SecurityCritical]
             get
             {
                 EventLogHandle elHandle = EventLogHandle.Zero;
@@ -199,7 +184,7 @@ namespace System.Diagnostics.Eventing.Reader
                             int channelRefMessageId = unchecked((int)((uint)NativeWrapper.EvtGetObjectArrayProperty(elHandle, index, (int)UnsafeNativeMethods.EvtPublisherMetadataPropertyId.EvtPublisherMetadataChannelReferenceMessageID)));
                             string channelRefDisplayName;
 
-                            //if channelRefMessageId == -1, we do not have anything in the message table.
+                            // if channelRefMessageId == -1, we do not have anything in the message table.
                             if (channelRefMessageId == -1)
                             {
                                 channelRefDisplayName = null;
@@ -299,7 +284,6 @@ namespace System.Diagnostics.Eventing.Reader
             return null;
         }
 
-        [System.Security.SecuritySafeCritical]
         internal object GetProviderListProperty(EventLogHandle providerHandle, UnsafeNativeMethods.EvtPublisherMetadataPropertyId metadataProperty)
         {
             EventLogHandle elHandle = EventLogHandle.Zero;
@@ -520,7 +504,6 @@ namespace System.Diagnostics.Eventing.Reader
 
         public IEnumerable<EventMetadata> Events
         {
-            [System.Security.SecurityCritical]
             get
             {
                 List<EventMetadata> emList = new List<EventMetadata>();
@@ -564,7 +547,6 @@ namespace System.Diagnostics.Eventing.Reader
         }
 
         // throws if Provider metadata has been uninstalled since this object was created.
-
         internal void CheckReleased()
         {
             lock (_syncObject)
@@ -579,7 +561,6 @@ namespace System.Diagnostics.Eventing.Reader
             GC.SuppressFinalize(this);
         }
 
-        [System.Security.SecuritySafeCritical]
         protected virtual void Dispose(bool disposing)
         {
             if (_handle != null && !_handle.IsInvalid)
