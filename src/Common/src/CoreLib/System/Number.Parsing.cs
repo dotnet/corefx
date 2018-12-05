@@ -463,7 +463,7 @@ namespace System
                         {
                             number.Scale = 0;
                         }
-                        if ((state & StateDecimal) == 0)
+                        if ((number.Kind == NumberBufferKind.Integer) && (state & StateDecimal) == 0)
                         {
                             number.IsNegative = false;
                         }
@@ -510,7 +510,7 @@ namespace System
         }
 
         /// <summary>Parses int limited to styles that make up NumberStyles.Integer.</summary>
-        private static bool TryParseInt32IntegerStyle(ReadOnlySpan<char> value, NumberStyles styles, NumberFormatInfo info, out int result, ref bool failureIsOverflow)
+        internal static bool TryParseInt32IntegerStyle(ReadOnlySpan<char> value, NumberStyles styles, NumberFormatInfo info, out int result, ref bool failureIsOverflow)
         {
             Debug.Assert((styles & ~NumberStyles.Integer) == 0, "Only handles subsets of Integer format");
             Debug.Assert(!failureIsOverflow, $"failureIsOverflow should have been initialized to false");
@@ -681,7 +681,7 @@ namespace System
         }
 
         /// <summary>Parses long inputs limited to styles that make up NumberStyles.Integer.</summary>
-        private static bool TryParseInt64IntegerStyle(
+        internal static bool TryParseInt64IntegerStyle(
             ReadOnlySpan<char> value, NumberStyles styles, NumberFormatInfo info, out long result, ref bool failureIsOverflow)
         {
             Debug.Assert((styles & ~NumberStyles.Integer) == 0, "Only handles subsets of Integer format");
@@ -919,7 +919,7 @@ namespace System
         }
 
         /// <summary>Parses uint limited to styles that make up NumberStyles.Integer.</summary>
-        private static bool TryParseUInt32IntegerStyle(
+        internal static bool TryParseUInt32IntegerStyle(
             ReadOnlySpan<char> value, NumberStyles styles, NumberFormatInfo info, out uint result, ref bool failureIsOverflow)
         {
             Debug.Assert((styles & ~NumberStyles.Integer) == 0, "Only handles subsets of Integer format");
@@ -1240,7 +1240,7 @@ namespace System
         }
 
         /// <summary>Parses ulong limited to styles that make up NumberStyles.Integer.</summary>
-        private static bool TryParseUInt64IntegerStyle(
+        internal static bool TryParseUInt64IntegerStyle(
             ReadOnlySpan<char> value, NumberStyles styles, NumberFormatInfo info, out ulong result, ref bool failureIsOverflow)
         {
             Debug.Assert((styles & ~NumberStyles.Integer) == 0, "Only handles subsets of Integer format");
@@ -1537,7 +1537,7 @@ namespace System
             return result;
         }
 
-        private static unsafe bool TryNumberToDecimal(ref NumberBuffer number, ref decimal value)
+        internal static unsafe bool TryNumberToDecimal(ref NumberBuffer number, ref decimal value)
         {
             number.CheckConsistency();
 
@@ -1693,6 +1693,10 @@ namespace System
             {
                 ReadOnlySpan<char> valueTrim = value.Trim();
 
+                // This code would be simpler if we only had the concept of `InfinitySymbol`, but
+                // we don't so we'll check the existing cases first and then handle `PositiveSign` +
+                // `PositiveInfinitySymbol` and `PositiveSign/NegativeSign` + `NaNSymbol` last.
+
                 if (valueTrim.EqualsOrdinalIgnoreCase(info.PositiveInfinitySymbol))
                 {
                     result = double.PositiveInfinity;
@@ -1702,6 +1706,29 @@ namespace System
                     result = double.NegativeInfinity;
                 }
                 else if (valueTrim.EqualsOrdinalIgnoreCase(info.NaNSymbol))
+                {
+                    result = double.NaN;
+                }
+                else if (valueTrim.StartsWith(info.PositiveSign, StringComparison.OrdinalIgnoreCase))
+                {
+                    valueTrim = valueTrim.Slice(info.PositiveSign.Length);
+
+                    if (valueTrim.EqualsOrdinalIgnoreCase(info.PositiveInfinitySymbol))
+                    {
+                        result = double.PositiveInfinity;
+                    }
+                    else if (valueTrim.EqualsOrdinalIgnoreCase(info.NaNSymbol))
+                    {
+                        result = double.NaN;
+                    }
+                    else
+                    {
+                        result = 0;
+                        return false;
+                    }
+                }
+                else if (valueTrim.StartsWith(info.NegativeSign, StringComparison.OrdinalIgnoreCase) &&
+                        valueTrim.Slice(info.NegativeSign.Length).EqualsOrdinalIgnoreCase(info.NaNSymbol))
                 {
                     result = double.NaN;
                 }
@@ -1728,6 +1755,14 @@ namespace System
             {
                 ReadOnlySpan<char> valueTrim = value.Trim();
 
+                // This code would be simpler if we only had the concept of `InfinitySymbol`, but
+                // we don't so we'll check the existing cases first and then handle `PositiveSign` +
+                // `PositiveInfinitySymbol` and `PositiveSign/NegativeSign` + `NaNSymbol` last.
+                //
+                // Additionally, since some cultures ("wo") actually define `PositiveInfinitySymbol`
+                // to include `PositiveSign`, we need to check whether `PositiveInfinitySymbol` fits
+                // that case so that we don't start parsing things like `++infini`.
+
                 if (valueTrim.EqualsOrdinalIgnoreCase(info.PositiveInfinitySymbol))
                 {
                     result = float.PositiveInfinity;
@@ -1737,6 +1772,30 @@ namespace System
                     result = float.NegativeInfinity;
                 }
                 else if (valueTrim.EqualsOrdinalIgnoreCase(info.NaNSymbol))
+                {
+                    result = float.NaN;
+                }
+                else if (valueTrim.StartsWith(info.PositiveSign, StringComparison.OrdinalIgnoreCase))
+                {
+                    valueTrim = valueTrim.Slice(info.PositiveSign.Length);
+
+                    if (!info.PositiveInfinitySymbol.StartsWith(info.PositiveSign, StringComparison.OrdinalIgnoreCase) && valueTrim.EqualsOrdinalIgnoreCase(info.PositiveInfinitySymbol))
+                    {
+                        result = float.PositiveInfinity;
+                    }
+                    else if (!info.NaNSymbol.StartsWith(info.PositiveSign, StringComparison.OrdinalIgnoreCase) && valueTrim.EqualsOrdinalIgnoreCase(info.NaNSymbol))
+                    {
+                        result = float.NaN;
+                    }
+                    else
+                    {
+                        result = 0;
+                        return false;
+                    }
+                }
+                else if (valueTrim.StartsWith(info.NegativeSign, StringComparison.OrdinalIgnoreCase) &&
+                         !info.NaNSymbol.StartsWith(info.NegativeSign, StringComparison.OrdinalIgnoreCase) &&
+                         valueTrim.Slice(info.NegativeSign.Length).EqualsOrdinalIgnoreCase(info.NaNSymbol))
                 {
                     result = float.NaN;
                 }
@@ -1834,7 +1893,7 @@ namespace System
                (Exception)new FormatException(SR.Format_InvalidString);
         }
 
-        private static double NumberToDouble(ref NumberBuffer number)
+        internal static double NumberToDouble(ref NumberBuffer number)
         {
             number.CheckConsistency();
 
@@ -1843,7 +1902,7 @@ namespace System
             return number.IsNegative ? -result : result;
         }
 
-        private static float NumberToSingle(ref NumberBuffer number)
+        internal static float NumberToSingle(ref NumberBuffer number)
         {
             number.CheckConsistency();
 

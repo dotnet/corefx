@@ -1742,12 +1742,6 @@
         "net45": "4.0.0.0"
       }
     },
-    "System.Drawing.Design.Primitives": {
-      "InboxOn": {},
-      "AssemblyVersionInPackageVersion": {
-        "4.0.0.0": "4.6.0"
-      }
-    },
     "System.Drawing.Primitives": {
       "StableVersions": [
         "4.0.0",
@@ -3098,9 +3092,13 @@
       }
     },
     "System.Numerics.Tensors": {
+      "StableVersions": [
+        "0.1.0"
+      ],
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
-        "0.1.0.0": "0.1.0"
+        "0.1.0.0": "0.1.0",
+        "0.2.0.0": "0.2.0"
       }
     },
     "System.Numerics.Vectors": {
@@ -3144,7 +3142,7 @@
         "4.0.0",
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0",
+      "BaselineVersion": "4.6.0",
       "InboxOn": {
         "uap10.0.16299": "4.0.4.0"
       },
@@ -3473,10 +3471,10 @@
       }
     },
     "System.Reflection.MetadataLoadContext": {
-        "InboxOn": {},
-        "AssemblyVersionInPackageVersion": {
-            "4.0.0.0": "4.6.0"
-        }
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.6.0"
+      }
     },
     "System.Reflection.Primitives": {
       "StableVersions": [
@@ -4173,8 +4171,10 @@
         "4.0.11",
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0",
+      "BaselineVersion": "4.6.0",
       "InboxOn": {
+        "net45": "4.0.0.0", 
+        "net451": "4.0.10.0",
         "portable46-win81+wp81+wpa81": "4.0.0.0",
         "portable46-win81+wp81": "4.0.0.0",
         "portable46-win81+wpa81": "4.0.10.0",
@@ -4202,6 +4202,7 @@
       ],
       "BaselineVersion": "4.3.0",
       "InboxOn": {
+        "net45": "4.0.0.0",
         "portable46-win81+wpa81": "4.0.0.0",
         "uap10.0.16299": "4.0.4.0",
         "win8": "4.0.0.0",

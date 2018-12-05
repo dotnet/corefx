@@ -214,7 +214,7 @@ namespace System
             return (CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.DecimalDigitNumber);
         }
 
-        private static bool IsInRange(char c, char min, char max) => (uint)(c - min) <= (uint)(max - min);
+        internal static bool IsInRange(char c, char min, char max) => (uint)(c - min) <= (uint)(max - min);
 
         private static bool IsInRange(UnicodeCategory c, UnicodeCategory min, UnicodeCategory max) => (uint)(c - min) <= (uint)(max - min);
 
@@ -275,7 +275,7 @@ namespace System
             {
                 return (IsWhiteSpaceLatin1(c));
             }
-            return CharUnicodeInfo.IsWhiteSpace(c);
+            return CheckSeparator(CharUnicodeInfo.GetUnicodeCategory(c));
         }
 
 
@@ -795,7 +795,7 @@ namespace System
                 return IsWhiteSpaceLatin1(s[index]);
             }
 
-            return CharUnicodeInfo.IsWhiteSpace(s, index);
+            return CheckSeparator(CharUnicodeInfo.GetUnicodeCategory(s, index));
         }
 
         public static UnicodeCategory GetUnicodeCategory(char c)
