@@ -184,15 +184,12 @@ namespace System.IO.Pipelines
                 newSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
 
                 // Set all the pointers
-                _writingHead = newSegment;
-                _readHead = _writingHead;
-                _readTail = _readHead;
+                _writingHead = _readHead = _readTail = newSegment;
             }
             else
             {
                 int bytesLeftInBuffer = _writingHead.WritableBytes;
 
-                // If inadequate bytes left or if the segment is readonly
                 if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < sizeHint)
                 {
                     BufferSegment newSegment = CreateSegmentUnsynchronized();
@@ -237,8 +234,7 @@ namespace System.IO.Pipelines
         {
             _operationState.EndWrite();
 
-            var bytesWritten = _currentWriteLength;
-            if (bytesWritten == 0)
+            if (_currentWriteLength == 0)
             {
                 // Nothing written to commit
                 return true;
@@ -247,7 +243,7 @@ namespace System.IO.Pipelines
             // Always move the read tail to the write head
             _readTail = _writingHead;
             _readTailIndex = _writingHead.End;
-            _length += bytesWritten;
+            _length += _currentWriteLength;
 
             // Do not reset if reader is complete
             if (_pauseWriterThreshold > 0 &&
@@ -625,6 +621,8 @@ namespace System.IO.Pipelines
                 {
                     ThrowHelper.ThrowInvalidOperationException_AlreadyReading();
                 }
+
+                _operationState.BeginReadTentative();
                 result = default;
                 return false;
             }

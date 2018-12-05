@@ -15,62 +15,59 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BeginRead()
         {
-            if ((_state & State.BeginRead) == State.BeginRead)
+            if ((_state & State.Reading) == State.Reading)
             {
                 ThrowHelper.ThrowInvalidOperationException_AlreadyReading();
             }
 
-            _state &= ~State.EndRead;
-            _state |= State.BeginRead;
+            _state |= State.Reading;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BeginReadTentative()
         {
-            if ((_state & State.BeginRead) == State.BeginRead)
+            if ((_state & State.Reading) == State.Reading)
             {
                 ThrowHelper.ThrowInvalidOperationException_AlreadyReading();
             }
 
-            _state &= ~State.EndRead;
-            _state |= State.BeginReadTenative;
+            _state |= State.ReadingTentative;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void EndRead()
         {
-            if ((_state & State.EndRead) == State.EndRead)
+            if ((_state & State.Reading) != State.Reading && 
+                (_state & State.ReadingTentative) != State.ReadingTentative)
             {
                 ThrowHelper.ThrowInvalidOperationException_NoReadToComplete();
             }
 
-            _state &= ~(State.BeginRead | State.BeginReadTenative);
-            _state |= State.EndRead;
+            _state &= ~(State.Reading | State.ReadingTentative);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BeginWrite()
         {
-            _state |= State.WritingActive;
+            _state |= State.Writing;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void EndWrite()
         {
-            _state &= ~State.WritingActive;
+            _state &= ~State.Writing;
         }
 
-        public bool IsWritingActive => (_state & State.WritingActive) == State.WritingActive;
+        public bool IsWritingActive => (_state & State.Writing) == State.Writing;
 
-        public bool IsReadingActive => (_state & State.BeginRead) == State.BeginRead;
+        public bool IsReadingActive => (_state & State.Reading) == State.Reading;
 
         [Flags]
-        internal enum State
+        internal enum State : byte
         {
-            BeginRead = 1,
-            BeginReadTenative = 2,
-            EndRead = 4,
-            WritingActive = 8
+            Reading = 1,
+            ReadingTentative = 2,
+            Writing = 4
         }
     }
 }
