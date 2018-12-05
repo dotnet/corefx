@@ -11,10 +11,8 @@ namespace System.Diagnostics.Eventing.Reader
     /// Used for subscribing to event record notifications from 
     /// event log. 
     /// </summary>
-    // [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public class EventLogWatcher : IDisposable
     {
-
         public event EventHandler<EventRecordWrittenEventArgs> EventRecordWritten;
 
         private EventLogQuery _eventQuery;

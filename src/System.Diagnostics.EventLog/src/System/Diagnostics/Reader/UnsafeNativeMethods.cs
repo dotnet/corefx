@@ -2,25 +2,24 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.Win32.SafeHandles;
+using System;
+using System.Configuration.Assemblies;
+using System.Diagnostics.Eventing;
+using System.Diagnostics.Eventing.Reader;
+using System.Runtime.CompilerServices;
+using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Runtime.Versioning;
+using System.Security;
+using System.Security.Permissions;
+using System.Security.Principal;
+using System.Text;
+using System.Threading;
+
 namespace Microsoft.Win32
 {
-    using Microsoft.Win32;
-    using Microsoft.Win32.SafeHandles;
-    using System;
-    using System.Configuration.Assemblies;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.ConstrainedExecution;
-    using System.Runtime.InteropServices;
-    using System.Security.Principal;
-    using System.Runtime.Serialization;
-    using System.Threading;
-    using System.Runtime.Versioning;
-    using System.Security;
-    using System.Security.Permissions;
-    using System.Text;
-    using System.Diagnostics.Eventing;
-    using System.Diagnostics.Eventing.Reader;
-
     [SuppressUnmanagedCodeSecurityAttribute()]
     internal static partial class UnsafeNativeMethods
     {

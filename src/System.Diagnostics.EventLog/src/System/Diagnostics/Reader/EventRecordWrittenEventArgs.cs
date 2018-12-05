@@ -4,11 +4,9 @@
 
 namespace System.Diagnostics.Eventing.Reader
 {
-
     /// <summary>
     /// The custom event handler args.
     /// </summary>
-    // [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
     public sealed class EventRecordWrittenEventArgs : EventArgs
     {
         internal EventRecordWrittenEventArgs(EventLogRecord record) { EventRecord = record; }

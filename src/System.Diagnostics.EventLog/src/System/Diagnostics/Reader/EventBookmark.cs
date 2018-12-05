@@ -18,8 +18,6 @@ namespace System.Diagnostics.Eventing.Reader
     /// </summary>
     public class EventBookmark
     {
-
-        // Look for replaces for nameof
         internal EventBookmark(string bookmarkText)
         {
             BookmarkText = bookmarkText ?? throw new ArgumentNullException(nameof(bookmarkText));

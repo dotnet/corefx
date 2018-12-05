@@ -18,7 +18,6 @@ namespace System.Diagnostics.Eventing.Reader
         private ProviderMetadata _pmReference;
         private object _syncObject;
 
-        // Called from EventMetadata
         internal EventKeyword(long value, ProviderMetadata pmReference)
         {
             Value = value;
@@ -26,7 +25,6 @@ namespace System.Diagnostics.Eventing.Reader
             _syncObject = new object();
         }
 
-        // Called from ProviderMetadata
         internal EventKeyword(string name, long value, string displayName)
         {
             Value = value;

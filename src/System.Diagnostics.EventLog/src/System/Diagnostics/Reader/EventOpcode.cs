@@ -21,7 +21,6 @@ namespace System.Diagnostics.Eventing.Reader
         private ProviderMetadata _pmReference;
         private object _syncObject;
 
-        // Call from EventMetadata
         internal EventOpcode(int value, ProviderMetadata pmReference)
         {
             _value = value;
@@ -29,7 +28,6 @@ namespace System.Diagnostics.Eventing.Reader
             _syncObject = new object();
         }
 
-        // Call from ProviderMetadata
         internal EventOpcode(string name, int value, string displayName)
         {
             _value = value;
