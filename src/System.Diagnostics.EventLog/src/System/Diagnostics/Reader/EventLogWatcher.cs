@@ -234,7 +234,6 @@ namespace System.Diagnostics.Eventing.Reader
 
             do
             {
-
                 if (!_isSubscribing)
                 {
                     break;
@@ -242,7 +241,6 @@ namespace System.Diagnostics.Eventing.Reader
 
                 try
                 {
-
                     results = NativeWrapper.EvtNext(_handle, _eventsBuffer.Length, _eventsBuffer, 0, 0, ref _numEventsInBuffer);
 
                     if (!results)

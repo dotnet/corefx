@@ -149,7 +149,6 @@ namespace System.Diagnostics.Eventing.Reader
             else
             {
                 CacheItem cacheItem = _cache[key];
-
                 ProviderMetadata pm = cacheItem.ProviderMetadata;
 
                 // check Provider metadata to be sure it's hasn't been

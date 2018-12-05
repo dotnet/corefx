@@ -20,7 +20,6 @@ using System.Threading;
 
 namespace Microsoft.Win32
 {
-    [SuppressUnmanagedCodeSecurityAttribute()]
     internal static partial class UnsafeNativeMethods
     {
         internal const String WEVTAPI = "wevtapi.dll";
