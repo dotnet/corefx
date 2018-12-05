@@ -38,13 +38,13 @@ Namespace Microsoft.VisualBasic.Tests.VB
         Private Shared Function HasExpectedData(FileNameWithPath As String, ExpectedData() As Char) As Boolean
             Using stream As New IO.StreamReader(IO.File.OpenRead(FileNameWithPath))
                 Dim ReadData(ExpectedData.Length) As Char
-                stream.Read(ReadData, 0, SourceData.Length)
+                stream.Read(ReadData, 0, SourceData.Length - 1)
                 Return ExpectedData = ReadData
             End Using
         End Function
 
         Private Shared Sub WriteFile(FileName As String, TestData As Char())
-            Using IOStream As New IO.StreamWriter(IO.File.Create(TestData))
+            Using IOStream As New IO.StreamWriter(IO.File.Create(FileName))
                 IOStream.Write(TestData, 0, TestData.Length)
             End Using
         End Sub
@@ -198,11 +198,6 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
                 ' Write and copy file
                 WriteFile(testFileSource, SourceData)
-
-                Using sourceStream As New IO.StreamWriter(IO.File.Create(testFileSource))
-                    sourceStream.Write(SourceData, 0, SourceData.Length)
-                End Using
-
                 WriteFile(testFileDest, DestData)
                 Assert.Throws(Of IO.IOException)(Sub() FileSystem.CopyFile(testFileSource, testFileDest))
 
