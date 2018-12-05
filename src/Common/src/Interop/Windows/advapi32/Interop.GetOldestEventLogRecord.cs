@@ -11,6 +11,6 @@ internal partial class Interop
     {
         [DllImport(Libraries.Advapi32, CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool GetOldestEventLogRecord(SafeHandle hEventLog, out int number);
+        public static extern bool GetOldestEventLogRecord(SafeHandle hEventLog, out int OldestRecord);
     }
 }

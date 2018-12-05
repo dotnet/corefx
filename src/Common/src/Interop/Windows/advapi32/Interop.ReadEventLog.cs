@@ -14,9 +14,9 @@ internal partial class Interop
             SafeHandle hEventLog,
             int dwReadFlags,
             int dwRecordOffset,
-            byte[] buffer,
-            int numberOfBytesToRead,
-            out int bytesRead,
-            out int minNumOfBytesNeeded);
+            byte[] lpBuffer,
+            int nNumberOfBytesRead,
+            out int pnBytesRead,
+            out int pnMinNumberOfBytesNeeded);
     }
 }

@@ -3,12 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 
 internal partial class Interop
 {
     internal partial class Advapi32
     {
         [DllImport(Libraries.Advapi32, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern bool ClearEventLog(SafeHandle hEventLog, HandleRef lpctstrBackupFileName);
+        public static extern bool ClearEventLog(SafeEventLogReadHandle hEventLog, HandleRef lpBackupFileName);
     }
 }

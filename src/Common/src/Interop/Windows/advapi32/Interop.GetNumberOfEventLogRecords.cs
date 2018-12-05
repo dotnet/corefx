@@ -9,6 +9,6 @@ internal partial class Interop
     internal partial class Advapi32
     {
         [DllImport(Libraries.Advapi32, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern bool GetNumberOfEventLogRecords(SafeHandle hEventLog, out int count);
+        public static extern bool GetNumberOfEventLogRecords(SafeHandle hEventLog, out int NumberOfRecords);
     }
 }

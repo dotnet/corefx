@@ -11,13 +11,13 @@ internal partial class Interop
         [DllImport(Libraries.Advapi32, CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern bool ReportEvent(
             SafeHandle hEventLog,
-            short type,
-            ushort category,
-            uint eventID,
-            byte[] userSID,
-            short numStrings,
-            int dataLen,
-            HandleRef strings,
-            byte[] rawData);
+            short wType,
+            ushort wcategory,
+            uint dwEventID,
+            byte[] lpUserSid,
+            short wNumStrings,
+            int dwDataSize,
+            HandleRef lpStrings,
+            byte[] lpRawData);
     }
 }
