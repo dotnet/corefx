@@ -547,21 +547,24 @@ Namespace Microsoft.VisualBasic.Tests.VB
         Public Shared Sub GetFiles_Directory_SearchOption()
             Using TestBase As New FileIOTests
                 Dim NewSubDirectoryPath As String = IO.Path.Combine(TestBase.TestDirectory, "GetFiles_Directory_SearchOptionNewSubDirectory")
-                IO.Directory.CreateDirectory(NewSubDirectoryPath)
+                WriteFile(IO.Path.Combine(NewSubDirectoryPath, "TestFile"), "Test".ToCharArray)
+
                 CreateTestFile(TestBase, SourceData, TestFileName:="NewFile")
+                IO.Directory.CreateDirectory(NewSubDirectoryPath)
                 Dim FileList As ReadOnlyCollection(Of String) = FileSystem.GetFiles(TestBase.TestDirectory)
                 Assert.True(FileList.Count = 0)
                 For i As Integer = 0 To 5
                     CreateTestFile(TestBase, SourceData, TestFileName:=$"NewFile{i}")
                 Next
                 FileList = FileSystem.GetFiles(TestBase.TestDirectory, SearchOption.SearchTopLevelOnly)
+                CreateTestFile(TestBase, SourceData, TestFileName:="NewFile")
                 Assert.True(FileList.Count = 6)
                 For i As Integer = 0 To 5
                     Assert.True(FileList.Contains(IO.Path.Combine(TestBase.TestDirectory, $"NewFile{i}")))
                 Next
                 FileList = FileSystem.GetFiles(TestBase.TestDirectory, SearchOption.SearchAllSubDirectories)
-                Assert.True(FileList.Count = 7)
-                For i As Integer = 0 To 6
+                Assert.True(FileList.Count = 8)
+                For i As Integer = 0 To 7
                     Assert.True(IO.File.Exists(FileList(i)))
                 Next
             End Using
