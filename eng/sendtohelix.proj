@@ -1,4 +1,4 @@
-<Project InitialTargets="BuildHelixWorkItem" Sdk="Microsoft.DotNet.Helix.Sdk">
+<Project InitialTargets="BuildHelixWorkItems" Sdk="Microsoft.DotNet.Helix.Sdk">
   <PropertyGroup>
     <!-- Set helix source -->
     <HelixSourcePrefix>pr/</HelixSourcePrefix>
@@ -18,10 +18,11 @@
     <!-- We need to enable xunit reporter so that it parses test results -->
     <EnableXunitReporter>true</EnableXunitReporter>
     
+    <TestArchiveRuntimeFile>$(TestArchiveRuntimeRoot)test-runtime-$(BuildConfiguration).zip</TestArchiveRuntimeFile>
+
     <!-- The helix runtime payload and the tests to run -->
-    <!-- TODO: Use TestArchiveDir properties once: https://github.com/dotnet/corefx/pull/33423 -->
-    <HelixCorrelationPayload Condition="'$(HelixCorrelationPayload)' == ''">$(ArtifactsDir)\**\tests\**\archive\test-runtime*.zip</HelixCorrelationPayload>
-    <WorkItemArchiveWildCard Condition="'$(WorkItemArchiveWildCard)' == ''">$(ArtifactsDir)\**\tests\**\archive\tests\**\*.zip</WorkItemArchiveWildCard>
+    <HelixCorrelationPayload Condition="'$(HelixCorrelationPayload)' == ''">$(TestArchiveRuntimeFile)</HelixCorrelationPayload>
+    <WorkItemArchiveWildCard Condition="'$(WorkItemArchiveWildCard)' == ''">$(TestArchiveTestsRoot)**/*.zip</WorkItemArchiveWildCard>
 
     <HelixConfiguration>$(ConfigurationGroup)</HelixConfiguration>
     <HelixArchitecture>$(ArchGroup)</HelixArchitecture>
@@ -29,9 +30,12 @@
     <!-- This property is used to show the tests results in VSTS. By setting this property the
     test run name will be displayed as $(TestRunNamePrefix)-$(HelixTargetQueue) -->
     <TestRunNamePrefix Condition="'$(TargetGroup)' != ''">$(TargetGroup)-</TestRunNamePrefix>
+  </PropertyGroup>
 
-    <!-- TODO: Pass it as argument when adding official build support -->
-    <EnableAzurePipelinesReporter>true</EnableAzurePipelinesReporter>
+  <PropertyGroup Condition="'$(MaxRetryCount)' == ''">
+    <!-- In Windows we need a higher value due to some flakyness in Nano. Can remove when helix provides new containers model -->
+    <MaxRetryCount Condition="'$(TargetsWindows)' == 'true'">3</MaxRetryCount>
+    <MaxRetryCount Condition="'$(TargetsWindows)' != 'true'">1</MaxRetryCount>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(HelixCommand)' == ''">
@@ -42,12 +46,29 @@
     <HelixCommand Condition="'$(TargetsWindows)' != 'true'">./RunTests.sh $HELIX_CORRELATION_PAYLOAD</HelixCommand>
   </PropertyGroup>
 
+  <!-- We need to include all dlls in the runtime path as inputs to make it really incremental
+  if we use the root folder, if a dll is updated, the folder's timestamp is not updated, therefore skipped. -->
   <ItemGroup>
-    <HelixCorrelationPayload Include="$(HelixCorrelationPayload)" />
+    <_RuntimeInputs Include="$(TestHostRootPath)**/*.dll" />
   </ItemGroup>
 
-  <Target Name="BuildHelixWorkItem">
+  <Target Name="CompressRuntimeDirectory"
+          Inputs="@(_RuntimeInputs)"
+          Outputs="$(TestArchiveRuntimeFile)">
+
+    <MakeDir Directories="$(TestArchiveRuntimeRoot)" />
+    <ZipDirectory
+        SourceDirectory="$(TestHostRootPath)"
+        DestinationFile="$(TestArchiveRuntimeFile)"
+        Overwrite="true" />
+
+  </Target>
+
+  <Target Name="BuildHelixWorkItems" DependsOnTargets="CompressRuntimeDirectory">
     <ItemGroup>
+
+      <HelixCorrelationPayload Include="$(HelixCorrelationPayload)" />
+
       <_WorkItem Include="$(WorkItemArchiveWildCard)" Exclude="$(HelixCorrelationPayload)" />
 
       <HelixWorkItem Include="@(_WorkItem -> '%(FileName)')">
@@ -56,5 +77,6 @@
         <Timeout>$(_timeoutSpan)</Timeout>
       </HelixWorkItem>
     </ItemGroup>
+
   </Target>
 </Project>

@@ -1,94 +1,117 @@
 # Windows legs
 jobs:
 
-# Legs with Helix testing
 - template: corefx-base.yml
   parameters:
-    name: WinWithHelix
-    displayName: Windows
-    strategy:
-      matrix:
-        # netcoreapp windows x64 debug
-        x64_Debug:
-          _configuration: Debug
-          _architecture: x64
-          framework: netcoreapp
-          helixQueues: $(netcoreappWindowsQueues) #TODO: enable nano queue once issues are fixed +$(nanoQueues)
-
-        # netcoreapp windows x86 release
-        x86_Release:
-          _configuration: Release
-          _architecture: x86
-          framework: netcoreapp
-          helixQueues: $(netcoreappWindowsQueues)
-
-        NETFX_x86_Release:
-          _configuration: Release
-          _architecture: x86
-          framework: netfx
-          helixQueues: $(uapNetfxQueues)
-
-        UWP_CoreCLR_x64_Debug:
-          _configuration: Debug
-          _architecture: x64
-          framework: uap
-          helixQueues: $(uapNetfxQueues)
-
-    pool:
-      name: Hosted VS2017
     targetOS: Windows_NT
+    jobs:
 
-# # Legs without Helix testing
-- template: /eng/pipelines/corefx-base.yml
-  parameters:
-    name: WinNoHelix
-    displayName: Windows
-    strategy:
-      matrix:
-        UWP_NETNative_x86_Release:
-          _configuration: Release
-          _architecture: x86
-          framework: uapaot
+    # Legs with Helix testing
+    - job: WindowsHelix
+      displayName: Windows
+      strategy:
+        matrix:
+          # netcoreapp windows x64 debug
+          x64_Debug:
+            _configuration: Debug
+            _architecture: x64
+            _framework: netcoreapp
+            _helixQueues: $(netcoreappWindowsQueues)+$(nanoQueues)
 
-    submitToHelix: false
-    pool:
-      name: Hosted VS2017
-    targetOS: Windows_NT
+          # netcoreapp windows x86 release
+          x86_Release:
+            _configuration: Release
+            _architecture: x86
+            _framework: netcoreapp
+            _helixQueues: $(netcoreappWindowsQueues)
 
-- template: /eng/pipelines/corefx-base.yml
-  parameters:
-    name: WinAllConfigurations
-    displayName: Packaging All Configurations
-    strategy:
-      matrix:
-        x64_Debug:
-          _configuration: Debug
-          _architecture: x64
-          framework: allConfigurations
-    pool:
-      name: Hosted VS2017
-    submitToHelix: false
+          NETFX_x86_Release:
+            _configuration: Release
+            _architecture: x86
+            _framework: netfx
+            _helixQueues: $(uapNetfxQueues)
 
-    customBuildSteps:
-      - script: build.cmd
-                -ci
-                -$(framework)
-                /p:ArchGroup=$(_architecture)
-                /p:ConfigurationGroup=$(_configuration)
-                /p:RuntimeOS=win10
-        displayName: Build Packages
-      - script: build.cmd
-                -ci
-                -test
-                /p:TargetGroup=netstandard
-                /p:ArchGroup=$(_architecture)
-                /p:ConfigurationGroup=$(_configuration)
-                /p:SkipTests=true
-        displayName: Build Netstandard Test Suite
-      - script: build.cmd
-                -ci
-                -test
-                -$(framework)
-                /p:ArchGroup=$(_architecture)
-                /p:ConfigurationGroup=$(_configuration)
-        displayName: Run Package Tests
+          UWP_CoreCLR_x64_Debug:
+            _configuration: Debug
+            _architecture: x64
+            _framework: uap
+            _helixQueues: $(uapNetfxQueues)
+
+      pool:
+        name: Hosted VS2017
+
+      submitToHelix: true
+
+      variables:
+        - name: _skipTests
+          value: true
+
+        - name: _outerloop
+          value: false
+
+        - name: netcoreappWindowsQueues
+          value: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.ES.Open
+        - name: nanoQueues
+          value: Windows.10.Nano.Amd64.Open
+        - name: uapNetfxQueues
+          value: Windows.10.Amd64.ClientRS4.Open
+
+    # Uapaot leg
+    - job: WindowsNoHelix
+      displayName: Windows
+      strategy:
+        matrix:
+          UWP_NETNative_x86_Release:
+            _configuration: Release
+            _architecture: x86
+            _framework: uapaot
+
+      pool:
+        name: Hosted VS2017
+
+      submitToHelix: false
+
+      variables:
+        - name: _skipTests
+          value: true
+
+        - name: _outerloop
+          value: false
+
+    # Packaging all configurations
+    - job: WindowsAllConfigurations
+      displayName: Packaging All Configurations
+      strategy:
+        matrix:
+          x64_Debug:
+            _configuration: Debug
+            _architecture: x64
+            _framework: allConfigurations
+      pool:
+        name: Hosted VS2017
+
+      submitToHelix: false
+
+      customBuildSteps:
+        - script: build.cmd
+                  -ci
+                  -$(_framework)
+                  /p:ArchGroup=$(_architecture)
+                  /p:ConfigurationGroup=$(_configuration)
+                  /p:RuntimeOS=win10
+          displayName: Build Packages
+        - script: build.cmd
+                  -ci
+                  -test
+                  /p:TargetGroup=netstandard
+                  /p:ArchGroup=$(_architecture)
+                  /p:ConfigurationGroup=$(_configuration)
+                  /p:SkipTests=true
+          displayName: Build Netstandard Test Suite
+        - script: build.cmd
+                  -ci
+                  -test
+                  -$(_framework)
+                  /p:ArchGroup=$(_architecture)
+                  /p:ConfigurationGroup=$(_configuration)
+          displayName: Run Package Tests

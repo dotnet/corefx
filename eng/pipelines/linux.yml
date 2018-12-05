@@ -1,81 +1,105 @@
 # Linux legs
 jobs:
 
-# Legs with Helix testing
 - template: corefx-base.yml
   parameters:
-    name: LinuxHelix
-    displayName: Linux
-    strategy:
-      matrix:
-        # netcoreapp linux x64 release
-        x64_Release:
-          _configuration: Release
-          _architecture: x64
-          framework: netcoreapp
-          helixQueues: $(linuxDefaultQueues)
-          _dockerContainer: rhel7_container
-          _buildScriptPrefix: ''
-
-        # netcoreapp linux arm64 release
-        arm64_Release:
-          _configuration: Release
-          _architecture: arm64
-          framework: netcoreapp
-          helixQueues: $(linuxArm64Queues)
-          _dockerContainer: ubuntu_1604_arm64_cross_container
-          _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
-
-    pool:
-      name: Hosted Ubuntu 1604
-
     targetOS: Linux
-    container: $[ variables['_dockerContainer'] ]
-    buildScriptPrefix: $(_buildScriptPrefix)
+    jobs:
 
-# Linux arm leg -- TODO: move to LinuxNoHelix once Hosted Ubuntu 1604 can be used.
-- template: corefx-base.yml
-  parameters:
-    name: LinuxArm32
-    displayName: Linux
-    strategy:
-      matrix:
-        arm32_Release:
-          _configuration: Release
-          _architecture: arm
-          framework: netcoreapp
-          _buildExtraArguments: /p:RuntimeOS=ubuntu.16.04
-          _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm '
-          _dockerContainer: ubuntu_1604_arm_cross_container
+    # Legs with Helix testing
+    - job: LinuxHelix
+      displayName: Linux
+      strategy:
+        matrix:
+          # netcoreapp linux x64 release
+          x64_Release:
+            _configuration: Release
+            _architecture: x64
+            _framework: netcoreapp
+            _helixQueues: $(linuxDefaultQueues)
+            _dockerContainer: rhel7_container
+            _buildScriptPrefix: ''
 
-    pool:
-      name: Hosted Ubuntu 1604
+          # netcoreapp linux arm64 release
+          arm64_Release:
+            _configuration: Release
+            _architecture: arm64
+            _framework: netcoreapp
+            _helixQueues: $(linuxArm64Queues)
+            _dockerContainer: ubuntu_1604_arm64_cross_container
+            _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
 
-    targetOS: Linux
-    container: $[ variables['_dockerContainer'] ]
-    buildExtraArguments: $(_buildExtraArguments)
-    buildScriptPrefix: $(_buildScriptPrefix)
-    submitToHelix: false
+      pool:
+        name: Hosted Ubuntu 1604
 
-# Legs without helix
-- template: corefx-base.yml
-  parameters:
-    name: LinuxNoHelix
-    displayName: Linux
-    strategy:
-      matrix:
-        # linux-musl x64 debug
-        musl_x64_Debug:
-          _configuration: Debug
-          _architecture: x64
-          framework: netcoreapp
-          _dockerContainer: alpine_36_container
-          _buildExtraArguments: /p:RuntimeOS=linux-musl /p:PortableBuild=false
+      container: $[ variables['_dockerContainer'] ]
+      buildScriptPrefix: $(_buildScriptPrefix)
+      submitToHelix: true
 
-    pool:
-      name: Default # TODO: update to Hosted Ubuntu 1604 once bring your own node is available and merge with Linux ARM job
+      variables:
+        - name: _skipTests
+          value: true
 
-    targetOS: Linux
-    container: $[ variables['_dockerContainer'] ]
-    buildExtraArguments: $(_buildExtraArguments)
-    submitToHelix: false
+        - name: _outerloop
+          value: false
+
+        - name: linuxDefaultQueues
+          value: Centos.7.Amd64.Open+RedHat.7.Amd64.Open+Debian.8.Amd64.Open+Ubuntu.1604.Amd64.Open+Ubuntu.1804.Amd64.Open+OpenSuse.42.Amd64.Open+Fedora.27.Amd64.Open
+        - name: linuxArm64Queues
+          value: Ubuntu.1604.Arm64.Open
+
+    # Linux arm leg -- TODO: move to LinuxNoHelix once Hosted Ubuntu 1604 can be used.
+    - job: LinuxArm32
+      displayName: Linux
+      strategy:
+        matrix:
+          arm32_Release:
+            _configuration: Release
+            _architecture: arm
+            _framework: netcoreapp
+            _buildExtraArguments: /p:RuntimeOS=ubuntu.16.04
+            _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm '
+            _dockerContainer: ubuntu_1604_arm_cross_container
+
+      pool:
+        name: Hosted Ubuntu 1604
+
+      container: $[ variables['_dockerContainer'] ]
+      buildExtraArguments: $(_buildExtraArguments)
+      buildScriptPrefix: $(_buildScriptPrefix)
+      submitToHelix: false
+
+      variables:
+        - name: _skipTests
+          value: true
+
+        - name: _outerloop
+          value: false
+
+    # Legs without helix testing
+    - job: LinuxNoHelix
+      displayName: Linux
+      strategy:
+        matrix:
+          # linux-musl x64 debug
+          musl_x64_Debug:
+            _configuration: Debug
+            _architecture: x64
+            _framework: netcoreapp
+            _dockerContainer: alpine_36_container
+            _buildExtraArguments: /p:RuntimeOS=linux-musl /p:PortableBuild=false
+
+      pool:
+        name: Default # TODO: update to Hosted Ubuntu 1604 once bring your own node is available and merge with Linux ARM job
+
+      targetOS: Linux
+      container: $[ variables['_dockerContainer'] ]
+      buildExtraArguments: $(_buildExtraArguments)
+      submitToHelix: false
+
+      variables:
+        - name: _skipTests
+          value: true
+
+        - name: _outerloop
+          value: false

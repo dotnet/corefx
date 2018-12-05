@@ -1,13 +1,4 @@
 parameters:
-  # Required: Name to display for this job in the UI
-  displayName: ''
-  
-  # Required: Name for this specific job -- should be unique per each job.
-  name: ''
-
-  # Required: Pool to run the job on.
-  pool: {}
-
   # Required: TargetOS value to know what script commands to use
   # Accepted values:
   # - Windows_NT
@@ -16,112 +7,117 @@ parameters:
   # - FreeBSD
   targetOS: ''
 
-  # Required: Strategy matrix (the matrix that we're going to build for this job)
-  # The following variables should be defined within the matrix:
-  #   matrix:
-  #     matrix_display_name:
-  #      _configuration: Debug | Release
-  #      _architecture: x64 | x86 | arm | arm64
-  #      framework: (netcoreapp, netfx, uap, etc).
-  #      helixQueues: Windows.Amd64 (Only needed if submitToHelix -> true.) -- Queues should be separated by + if multiple.
-  strategy: {}
+  # Required: A collection of jobs to run - https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=vsts&tabs=schema#job
+  jobs: []
 
-  # Optional: string to append to Unix build script.
-  #   buildScriptPrefix: 'HOME=/home/ ' -> 'HOME=/home/ ./build.sh ...'
-  buildScriptPrefix: ''
+  # EACH JOB SHOULD INCLUDE THE FOLLOWING PROPERTIES (ASIDE FROM THE REQUIRED ONES IN THE JOB SCHEMA)
 
-  # Optional: container resource name declared in source template.
-  container: ''
+  # Required: as part of the strategy matrix, the following variables should be defined
+  #     _configuration: Debug | Release
+  #     _architecture: x64 | x86 | arm | arm64
+  #     _framework: (netcoreapp, netfx, uap, etc).
+  #     _helixQueues: Windows.Amd64 (Only needed if submitToHelix -> true.) -- Queues should be separated by + if multiple.
 
-  # Optional: a list of steps to run instead of the common build steps.
-  customBuildSteps: []
+  # Required: as part of the variables object, the following values need to be passed:
+  #     _skipTests: true | false
+  #     _outerloop: true | false
 
-  # Optional: if microbuild plugin for signing should be enabled
-  enableMicrobuild: true
+  # Required: submitToHelix -> Boolean -> Value to know if it should submit tests payloads to helix.
   
-  # Optional: steps to be executed before common build steps.
-  # In example, to install build dependencies, or setup an environment.
-  preBuildSteps: []
+  # Optional: buildScriptPrefix -> String -> string to append to Unix build script.
+  #   buildScriptPrefix: 'HOME=/home/ ' -> 'HOME=/home/ ./build.sh ...'
 
-  # Optional
-  # Default: true
-  # true -- tests are built, but not run.
-  # false -- tests are built and run in the build machine.
-  skipTests: true
+  # Optional: buildExtraArguments -> String -> string to append at the end of the build arguments
+  #   buildExtraArguments: /p:RuntimeOS=win10 -> 'build.cmd ... /p:RuntimeOS=win10'
 
-  # Optional: Value to know if it should submit tests payloads to helix.
-  # Default: true
-  submitToHelix: true
+  # Optional: customBuildSteps -> Array -> list of steps to run instead of the common build steps.
+  #   customBuildSteps:
+  #     - script: echo Hello World
+  #       displayName: MyScript
 
-  # Optional: Value to know if it should test outerloop tests
+  # Optional: enableMicrobuildPlugin -> Boolean - if microbuild plugin for signing should be enabled
   # Default: false
-  testOuterloop: false
+  
+  # Optional: preBuildSteps -> Array -> list of steps to be executed before common build steps.
+  # In example, to install build dependencies, or setup an environment.
+  #   preBuildSteps:
+  #     - script: brew install cmake
+  #       displayName: Install Cmake
 
-  # Optional: Timeout for the job in minutes
-  # Default: 180
-  timeoutInMinutes: 180
+  # timeoutInMinutes: if a job doesn't define it, we will default it to 150 minutes
 
 jobs:
-  - template: ../common/templates/job/job.yml
-    parameters:
-      name: ${{ parameters.name }}
-      variables:
-        # OS Specific commands
-      - ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
-        - name: _buildScript
-          value: build.cmd -ci
-        - name: _msbuildCommand
-          value: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
-      - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
-        - name: _buildScript
-          value: ${{ parameters.buildScriptPrefix }}./build.sh --ci
-        - name: _msbuildCommand
-          value: ${{ parameters.buildScriptPrefix }}./eng/common/msbuild.sh --warnaserror false --ci
+  - ${{ each job in parameters.jobs }}:
+    - template: ../common/templates/job/job.yml
+      parameters:
+        variables:
+        # pass along job variables
+        - ${{ each variable in job.variables }}:
+          - ${{ if ne(variable.name, '') }}:
+            - name: ${{ variable.name }}
+              value: ${{ variable.value }}
+          - ${{ if ne(variable.group, '') }}:
+            - group: ${{ variable.group }}
+          
+        # Define OS specific commands
+        - ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
+          - name: _buildScript
+            value: build.cmd -ci
+          - name: _msbuildCommand
+            value: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
+        - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
+          - name: _buildScript
+            value: ${{ job.buildScriptPrefix }}./build.sh --ci
+          - name: _msbuildCommand
+            value: ${{ job.buildScriptPrefix }}./eng/common/msbuild.sh --warnaserror false --ci
 
-      - ${{ if eq(parameters.enableMicrobuild, 'true') }}:
-        - name: _TeamName
-          value: DotNetCore
-        - name: _SignType
-          value: true
-      - ${{ if eq(parameters.submitToHelix, 'true') }}:
-        - group: Helix Anonymous
+        - ${{ if eq(job.enableMicrobuild, 'true') }}:
+          - name: _TeamName
+            value: DotNetCore
+          - name: _SignType
+            value: real
 
-      enableMicrobuild: ${{ parameters.enableMicrobuild }}
-      displayName: ${{ parameters.displayName }}
-      timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
-      pool:
-        ${{ insert }}: ${{ parameters.pool }}
+        - ${{ if eq(job.submitToHelix, 'true') }}:
+          - group: Helix Anonymous
 
-      ${{ if ne(parameters.strategy, '') }}:
-        strategy:
-          ${{ insert }}: ${{ parameters.strategy }}
+        # pass along job properties
+        ${{ each property in job }}:
+          ${{ if and(ne(property.key, 'job'), ne(property.key, 'variables')) }}:
+            ${{ property.key }}: ${{ property.value }}
+        
+        name: ${{ job.job }}
 
-      container: ${{ parameters.container }}
+        ${{ if ne(job.enableMicrobuild, '') }}:
+          enableMicrobuild: ${{ job.enableMicrobuild }}
 
-      steps:
-        - ${{ parameters.preBuildSteps }}
+        ${{ if eq(job.timeoutInMinutes, '') }}:
+          timeoutInMinutes: 150
 
-        - ${{ if eq(parameters.customBuildSteps[0], '') }}:
-          - script: $(_buildScript)
-                  -includetests
-                  -framework $(framework)
-                  /p:ArchGroup=$(_architecture)
-                  /p:ConfigurationGroup=$(_configuration)
-                  /p:SkipTests=${{ parameters.skipTests }}
-                  /p:ArchiveTests=${{ parameters.submitToHelix }}
-                  /p:Outerloop=${{ parameters.testOuterloop }}
-                  ${{ parameters.buildExtraArguments }}
-            displayName: Build Sources and Tests
+        steps:
+          - ${{ if ne(job.preBuildSteps[0], '') }}:
+            - ${{ job.preBuildSteps }}
 
-        - ${{ if ne(parameters.customBuildSteps[0], '') }}:
-          - ${{ parameters.customBuildSteps }}
+          - ${{ if eq(job.customBuildSteps[0], '') }}:
+            - script: $(_buildScript)
+                    -includetests
+                    -framework $(_framework)
+                    /p:ArchGroup=$(_architecture)
+                    /p:ConfigurationGroup=$(_configuration)
+                    /p:SkipTests=$(_skipTests)
+                    /p:Outerloop=$(_outerloop)
+                    /p:ArchiveTests=${{ job.submitToHelix }}
+                    ${{ job.buildExtraArguments }}
+              displayName: Build Sources and Tests
 
-        - ${{ if eq(parameters.submitToHelix, 'true') }}:
-          - template: /eng/pipelines/helix.yml
-            parameters:
-              targetOS: ${{ parameters.targetOS }}
-              archGroup: $(_architecture)
-              configuration: $(_configuration)
-              helixQueues: $(helixQueues)
-              msbuildScript: $(_msbuildCommand)
-              framework: $(framework)
+          - ${{ if ne(job.customBuildSteps[0], '') }}:
+            - ${{ job.customBuildSteps }}
+
+          - ${{ if eq(job.submitToHelix, 'true') }}:
+            - template: /eng/pipelines/helix.yml
+              parameters:
+                targetOS: ${{ parameters.targetOS }}
+                archGroup: $(_architecture)
+                configuration: $(_configuration)
+                helixQueues: $(_helixQueues)
+                msbuildScript: $(_msbuildCommand)
+                framework: $(_framework)

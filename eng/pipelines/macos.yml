@@ -1,28 +1,41 @@
-# Linux legs
+# macOS legs
 jobs:
 
-# Legs with Helix testing
 - template: corefx-base.yml
   parameters:
-    name: MacOS
-    displayName: MacOS
-    strategy:
-      matrix:
-        x64_Debug:
-          _configuration: Debug
-          _architecture: x64
-          framework: netcoreapp
-          helixQueues: $(macOSQueues)
-
-    pool:
-      name: Hosted Mac Internal Sierra
-
     targetOS: OSX
+    jobs:
 
-    preBuildSteps:
-      - script: |
-          brew install pkgconfig openssl
-          ln -s /usr/local/opt/openssl/lib/pkgconfig/libcrypto.pc /usr/local/lib/pkgconfig/
-          ln -s /usr/local/opt/openssl/lib/pkgconfig/libssl.pc /usr/local/lib/pkgconfig/
-          ln -s /usr/local/opt/openssl/lib/pkgconfig/openssl.pc /usr/local/lib/pkgconfig/
-        displayName: Install Build Dependencies
+    # Legs with Helix testing
+    - job: MacOS
+      displayName: MacOS
+      strategy:
+        matrix:
+          x64_Debug:
+            _configuration: Debug
+            _architecture: x64
+            _framework: netcoreapp
+            _helixQueues: $(macOSQueues)
+
+      pool:
+        name: Hosted Mac Internal Sierra
+
+      preBuildSteps:
+        - script: |
+            brew install pkgconfig openssl
+            ln -s /usr/local/opt/openssl/lib/pkgconfig/libcrypto.pc /usr/local/lib/pkgconfig/
+            ln -s /usr/local/opt/openssl/lib/pkgconfig/libssl.pc /usr/local/lib/pkgconfig/
+            ln -s /usr/local/opt/openssl/lib/pkgconfig/openssl.pc /usr/local/lib/pkgconfig/
+          displayName: Install Build Dependencies
+      
+      submitToHelix: true
+
+      variables:
+        - name: _skipTests
+          value: true
+
+        - name: _outerloop
+          value: false
+
+        - name: macOSQueues
+          value: OSX.1012.Amd64.Open+OSX.1013.Amd64.Open
