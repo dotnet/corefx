@@ -407,7 +407,7 @@ namespace System.IO.Pipelines
                     returnEnd = consumedSegment;
 
                     // Check if we crossed _maximumSizeLow and complete backpressure
-                    long consumedBytes = new ReadOnlySequence<byte>(returnStart, _readHeadIndex, consumedSegment, consumedIndex).Length;
+                    long consumedBytes = GetLength(returnStart, _readHeadIndex, consumedSegment, consumedIndex);
                     long oldLength = _length;
                     _length -= consumedBytes;
 
@@ -474,6 +474,19 @@ namespace System.IO.Pipelines
             }
 
             TrySchedule(_writerScheduler, completionData);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private long GetLength(BufferSegment startSegment, int startIndex, BufferSegment endSegment, int endIndex)
+        {
+            if (startSegment != endSegment)
+            {
+                // (End offset) - (start offset)
+                return (endSegment.RunningIndex + endIndex) - (startSegment.RunningIndex + startIndex);
+            }
+
+            // Single segment length
+            return endIndex - startIndex;
         }
 
         internal void CompleteReader(Exception exception)
