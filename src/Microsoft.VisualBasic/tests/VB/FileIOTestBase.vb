@@ -1,8 +1,9 @@
-﻿Option Explicit On
-Option Strict On
-' Licensed to the .NET Foundation under one or more agreements.
+﻿' Licensed to the .NET Foundation under one or more agreements.
 ' The .NET Foundation licenses this file to you under the MIT license.
 ' See the LICENSE file in the project root for more information.
+Option Explicit On
+Option Strict On
+
 Imports System.Runtime.CompilerServices
 Imports Xunit
 Namespace Microsoft.VisualBasic.Tests.VB
@@ -29,15 +30,15 @@ Namespace Microsoft.VisualBasic.Tests.VB
         ''' <param name="TestBase">Object to manage temporary Files</param>
         ''' <param name="TestData">Data to be written to file</param>
         ''' <param name="PathFromBase">Optional additional subdirectories that file will be created under</param>
-        ''' <param name="TestFileName">Optional Filename, if none a random one based on TestName will be created</param>
+        ''' <param name="TestFileName">Optional Filename, If TestFileName is not provided, the name is based on memberName and lineNumber rather than being random./param>
         ''' <returns>Full Path to New File</returns>
         Public Shared Function CreateTestFile(TestBase As FileIOTestBase, TestData() As Char, PathFromBase As String, TestFileName As String, <CallerMemberName> Optional memberName As String = Nothing, <CallerLineNumber> Optional lineNumber As Integer = 0) As String
             Dim TempFileNameWithPath As String
-            If TestFileName = "" Then
+            If String.IsNullOrEmpty(TestFileName) Then
                 TempFileNameWithPath = TestBase.GetTestFilePath(memberName:=memberName, lineNumber:=lineNumber)
             Else
                 Assert.False(IO.Path.IsPathRooted(TestFileName))
-                If PathFromBase = "" Then
+                If String.IsNullOrEmpty(PathFromBase) Then
                     TempFileNameWithPath = IO.Path.Combine(TestBase.TestDirectory, TestFileName)
                 Else
                     ' If we have a Base we must have a filename

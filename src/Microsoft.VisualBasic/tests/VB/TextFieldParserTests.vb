@@ -4,7 +4,6 @@
 Option Explicit On
 Option Strict On
 
-Imports System.Runtime.CompilerServices
 Imports Microsoft.VisualBasic.FileIO
 Imports Xunit
 
@@ -13,15 +12,8 @@ Namespace Microsoft.VisualBasic.Tests.VB
         Inherits FileIOTestBase
 
         Private Const HeaderLine As String = "seq,oneword,age,street,city,state,zip,dollar,pick,date,paragraph"
+        Private Const ShortHeaderLine As String = "Field1,Field2,Field3,Field4"
 
-        Private Const CSVData As String =
-                    HeaderLine & vbCrLf &
-            "1,Test,99,Two Words,Rumnoman,KS,80586,$8333.85,GREEN,09/28/1929,""Ipmadaw udoteac vu ote ozehop ane lujat, lar buh cugi lef owici tat liz cogde.
-Fatigiug kojitfu taapi iz alujok me zimipa koz latkekij vem fo si cepzizhub li por ejcirlu.
-Ewujajlu mivec tooju ad bu cowic irtafit ehaoca vojhehfo aztidun zo wezecmo abe muz wikhutwen idce.
-Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun urokir tawdac rahaw beiweed."""
-
-        Private Shared ReadOnly FixedFieldWidths() As Integer = {5, 10, 6, -1}
         Private Shared ReadOnly FixedFormatData() As String = {
             "Err  1001                  Cannot access resource.",
             "Err  2014                  Resource not found.",
@@ -31,38 +23,17 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
             "Acc  10/04/2009 User2      Standard user."
         }
 
-        Private Shared ReadOnly ErrorFormat As Integer() = {5, 5, -1}
-        Private Shared ReadOnly StdFormat As Integer() = {5, 10, 11, -1}
-
-        Enum FormatType
-            ErrorFormat = 0
-            StdFormat = 1
-        End Enum
-
-        Private Shared ReadOnly MultipleFormatData() As String = {
-            "Err  1001 Cannot access resource.",
-            "Err  2014 Resource not found.",
-            "Acc  10/03/2009User1      Administrator.",
-            "Err  0323 Warning: Invalid access attempt.",
-            "Acc  10/03/2009User2      Standard user.",
-            "Acc  10/04/2009User2      Standard user."
-        }
-
         <Fact>
         Public Shared Sub BadPathTest()
-            Dim TestFile As String = ""
             Using TestBase As New TextFieldParserTests
-                TestFile = CreateTestFile(TestBase:=TestBase, TestData:=(HeaderLine & vbCrLf & """" & vbCrLf).ToCharArray, PathFromBase:="", TestFileName:="")
-                Assert.Throws(Of IO.FileNotFoundException)(Function() New TextFieldParser(IO.Path.ChangeExtension(TestFile, ".txt")))
+                Assert.Throws(Of IO.FileNotFoundException)(Function() New TextFieldParser(IO.Path.ChangeExtension(CreateTestFile(TestBase:=TestBase, TestData:=(HeaderLine & vbCrLf & """" & vbCrLf).ToCharArray, PathFromBase:="", TestFileName:=""), ".txt")))
             End Using
         End Sub
 
         <Fact>
         Public Shared Sub CSVBadDataTest()
-            Dim TestFile As String = ""
             Using TestBase As New TextFieldParserTests
-                TestFile = CreateTestFile(TestBase, TestData:=(HeaderLine & ",""").ToCharArray, PathFromBase:="", TestFileName:="")
-                Using MyReader As New TextFieldParser(TestFile)
+                Using MyReader As New TextFieldParser(CreateTestFile(TestBase, TestData:=(HeaderLine & ",""").ToCharArray, PathFromBase:="", TestFileName:=""))
                     MyReader.TextFieldType = FieldType.Delimited
                     MyReader.Delimiters = New String() {","}
                     While Not MyReader.EndOfData
@@ -74,10 +45,15 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
 
         <Fact>
         Public Shared Sub CSVDataTest()
-            Dim TestFile As String = ""
+            Const CSVData As String =
+                    HeaderLine & vbCrLf &
+            "1,Test,99,Two Words,Rumnoman,KS,80586,$8333.85,GREEN,09/28/1929,""Ipmadaw udoteac vu ote ozehop ane lujat, lar buh cugi lef owici tat liz cogde.
+Fatigiug kojitfu taapi iz alujok me zimipa koz latkekij vem fo si cepzizhub li por ejcirlu.
+Ewujajlu mivec tooju ad bu cowic irtafit ehaoca vojhehfo aztidun zo wezecmo abe muz wikhutwen idce.
+Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun urokir tawdac rahaw beiweed."""
+
             Using TestBase As New TextFieldParserTests
-                TestFile = CreateTestFile(TestBase, TestData:=CSVData.ToCharArray, PathFromBase:="", TestFileName:="")
-                Using MyReader As New TextFieldParser(TestFile)
+                Using MyReader As New TextFieldParser(CreateTestFile(TestBase, TestData:=CSVData.ToCharArray, PathFromBase:="", TestFileName:=""))
                     MyReader.TextFieldType = FieldType.Delimited
                     MyReader.Delimiters = New String() {","}
                     Dim currentRow As String()
@@ -111,11 +87,102 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
         End Sub
 
         <Fact>
-        Public Shared Sub FixedFormatTest()
-            Dim TestFile As String = ""
+        Public Shared Sub CSVDataTestEmptyFields()
+            Const CSVData As String =
+                    ShortHeaderLine & vbCrLf & "1,,"""",4"
+
             Using TestBase As New TextFieldParserTests
-                TestFile = CreateTestFile(TestBase, TestData:=String.Join(vbCrLf, FixedFormatData).ToCharArray, PathFromBase:="", TestFileName:="")
-                Using MyReader As New TextFieldParser(TestFile)
+                Using MyReader As New TextFieldParser(CreateTestFile(TestBase, TestData:=CSVData.ToCharArray, PathFromBase:="", TestFileName:=""))
+                    MyReader.TextFieldType = FieldType.Delimited
+                    MyReader.Delimiters = New String() {","}
+                    Dim currentRow As String()
+                    Assert.False(MyReader.EndOfData)
+                    Dim HeaderSplit() As String = ShortHeaderLine.Split(CType(",", Char()))
+                    currentRow = MyReader.ReadFields()
+                    For i As Integer = 0 To HeaderSplit.Length - 1
+                        Assert.Equal(HeaderSplit(i), currentRow(i))
+                    Next
+
+                    Assert.False(MyReader.EndOfData)
+                    currentRow = MyReader.ReadFields()
+                    Assert.Equal(4, currentRow.Length)
+                    Assert.Equal("1", currentRow(0))
+                    Assert.Equal("", currentRow(1))
+                    Assert.Equal("", currentRow(2))
+                    Assert.Equal("4", currentRow(3))
+                    Assert.True(MyReader.EndOfData)
+                End Using
+            End Using
+        End Sub
+
+        <Fact>
+        Public Shared Sub CSVDataTestLeadingandtrailingspaces()
+            Const CSVData As String =
+                    ShortHeaderLine & vbCrLf & "1, two,three ,4"
+
+            Using TestBase As New TextFieldParserTests
+                Using MyReader As New TextFieldParser(CreateTestFile(TestBase, TestData:=CSVData.ToCharArray, PathFromBase:="", TestFileName:=""))
+                    MyReader.TextFieldType = FieldType.Delimited
+                    MyReader.Delimiters = New String() {","}
+                    Dim currentRow As String()
+                    Assert.False(MyReader.EndOfData)
+                    Dim HeaderSplit() As String = ShortHeaderLine.Split(CType(",", Char()))
+                    currentRow = MyReader.ReadFields()
+                    For i As Integer = 0 To HeaderSplit.Length - 1
+                        Assert.Equal(HeaderSplit(i), currentRow(i))
+                    Next
+
+                    Assert.False(MyReader.EndOfData)
+                    currentRow = MyReader.ReadFields()
+                    Assert.Equal(4, currentRow.Length)
+                    Assert.Equal("1", currentRow(0))
+                    Assert.Equal("two", currentRow(1))
+                    Assert.Equal("three", currentRow(2))
+                    Assert.Equal("4", currentRow(3))
+                End Using
+            End Using
+        End Sub
+
+        <Fact>
+        Public Shared Sub CSVDataTestSpacesOnly()
+            Const CSVData As String =
+                ShortHeaderLine & vbCrLf & "1,2,3, " & vbCrLf & " ,2,3,4"
+
+            Using TestBase As New TextFieldParserTests
+                Using MyReader As New TextFieldParser(CreateTestFile(TestBase, TestData:=CSVData.ToCharArray, PathFromBase:="", TestFileName:=""))
+                    MyReader.TextFieldType = FieldType.Delimited
+                    MyReader.Delimiters = New String() {","}
+                    Dim currentRow As String()
+                    Assert.False(MyReader.EndOfData)
+                    Dim HeaderSplit() As String = ShortHeaderLine.Split(CType(",", Char()))
+                    currentRow = MyReader.ReadFields()
+                    For i As Integer = 0 To HeaderSplit.Length - 1
+                        Assert.Equal(HeaderSplit(i), currentRow(i))
+                    Next
+
+                    Assert.False(MyReader.EndOfData)
+                    currentRow = MyReader.ReadFields()
+                    Assert.Equal(4, currentRow.Length)
+                    Assert.Equal("1", currentRow(0))
+                    Assert.Equal("2", currentRow(1))
+                    Assert.Equal("3", currentRow(2))
+                    Assert.Equal("", currentRow(3))
+                    currentRow = MyReader.ReadFields()
+                    Assert.Equal(4, currentRow.Length)
+                    Assert.Equal("", currentRow(0))
+                    Assert.Equal("2", currentRow(1))
+                    Assert.Equal("3", currentRow(2))
+                    Assert.Equal("4", currentRow(3))
+                    Assert.True(MyReader.EndOfData)
+                End Using
+            End Using
+        End Sub
+
+        <Fact>
+        Public Shared Sub FixedFormatTest()
+            Dim FixedFieldWidths() As Integer = {5, 10, 6, -1}
+            Using TestBase As New TextFieldParserTests
+                Using MyReader As New TextFieldParser(CreateTestFile(TestBase, TestData:=String.Join(vbCrLf, FixedFormatData).ToCharArray, PathFromBase:="", TestFileName:=""))
                     MyReader.TextFieldType = FieldType.FixedWidth
                     MyReader.SetFieldWidths(FixedFieldWidths)
 
@@ -123,11 +190,12 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
                     Dim CurrentRowIndex As Integer = 0
                     While Not MyReader.EndOfData
                         CurrentRow = MyReader.ReadFields()
+                        Dim CurrentRowData As String = FixedFormatData(CurrentRowIndex)
                         Assert.Equal(FixedFieldWidths.Length, CurrentRow.Length)
-                        Assert.Equal(CurrentRow(0), FixedFormatData(CurrentRowIndex).Substring(0, FixedFieldWidths(0)).Trim)
-                        Assert.Equal(CurrentRow(1), FixedFormatData(CurrentRowIndex).Substring(FixedFieldWidths(0), FixedFieldWidths(1)).Trim)
-                        Assert.Equal(CurrentRow(2), FixedFormatData(CurrentRowIndex).Substring(FixedFieldWidths(0) + FixedFieldWidths(1), FixedFieldWidths(2)).Trim)
-                        Assert.Equal(CurrentRow(3), FixedFormatData(CurrentRowIndex).Substring(FixedFieldWidths(0) + FixedFieldWidths(1) + FixedFieldWidths(2)).Trim)
+                        Assert.Equal(CurrentRow(0), CurrentRowData.Substring(0, FixedFieldWidths(0)).Trim)
+                        Assert.Equal(CurrentRow(1), CurrentRowData.Substring(FixedFieldWidths(0), FixedFieldWidths(1)).Trim)
+                        Assert.Equal(CurrentRow(2), CurrentRowData.Substring(FixedFieldWidths(0) + FixedFieldWidths(1), FixedFieldWidths(2)).Trim)
+                        Assert.Equal(CurrentRow(3), CurrentRowData.Substring(FixedFieldWidths(0) + FixedFieldWidths(1) + FixedFieldWidths(2)).Trim)
                         CurrentRowIndex += 1
                     End While
                 End Using
@@ -136,45 +204,56 @@ Vesu sejawga tef lahi dirueg si uwmac bidiw nowidza daime sapmim ki casdun uroki
 
         <Fact>
         Public Shared Sub MultiFormatTest()
-            Dim TestFile As String = ""
+            Dim MultipleFormatData() As String = {
+            "Err  1001 Cannot access resource.",
+            "Err  2014 Resource not found.",
+            "Acc  10/03/2009User1      Administrator.",
+            "Err  0323 Warning: Invalid access attempt.",
+            "Acc  10/03/2009User2      Standard user.",
+            "Acc  10/04/2009User2      Standard user."
+        }
+            Dim ErrorFormat As Integer() = {5, 5, -1}
+            Dim StdFormat As Integer() = {5, 10, 11, -1}
+
             Using TestBase As New TextFieldParserTests
-                TestFile = CreateTestFile(TestBase, TestData:=String.Join(vbCrLf, FixedFormatData).ToCharArray, PathFromBase:="", TestFileName:="")
-                Using MyReader As New TextFieldParser(TestFile)
+                Using MyReader As New TextFieldParser(CreateTestFile(TestBase, TestData:=String.Join(vbCrLf, FixedFormatData).ToCharArray, PathFromBase:="", TestFileName:=""))
                     MyReader.TextFieldType = FieldType.FixedWidth
                     MyReader.FieldWidths = StdFormat
 
-                    Dim CurrentFormatType As FormatType
+                    Dim useErrorFormat As Boolean
                     Dim CurrentRow As String()
                     Dim CurrentRowIndex As Integer = 0
                     While Not MyReader.EndOfData
                         Dim rowType = MyReader.PeekChars(3)
                         If String.Compare(rowType, "Err") = 0 Then
                             ' If this line describes an error, the format of the row will be different.
-                            CurrentFormatType = FormatType.ErrorFormat
+                            useErrorFormat = True
                             MyReader.SetFieldWidths(ErrorFormat)
                         Else
                             ' Otherwise parse the fields normally
-                            CurrentFormatType = FormatType.StdFormat
+                            useErrorFormat = False
                             MyReader.SetFieldWidths(StdFormat)
                         End If
 
                         CurrentRow = MyReader.ReadFields
-                        If CurrentFormatType = FormatType.ErrorFormat Then
+                        Dim CurrentRowData As String = MultipleFormatData(CurrentRowIndex)
+                        If useErrorFormat Then
                             Assert.Equal(ErrorFormat.Length, CurrentRow.Length)
-                            Assert.Equal(CurrentRow(0), MultipleFormatData(CurrentRowIndex).Substring(0, ErrorFormat(0)).Trim)
-                            Assert.Equal(CurrentRow(1), MultipleFormatData(CurrentRowIndex).Substring(ErrorFormat(0), ErrorFormat(1)).Trim)
-                            Assert.Equal(CurrentRow(2), MultipleFormatData(CurrentRowIndex).Substring(ErrorFormat(0) + ErrorFormat(1)).Trim)
+                            Assert.Equal(CurrentRow(0), CurrentRowData.Substring(0, ErrorFormat(0)).Trim)
+                            Assert.Equal(CurrentRow(1), CurrentRowData.Substring(ErrorFormat(0), ErrorFormat(1)).Trim)
+                            Assert.Equal(CurrentRow(2), CurrentRowData.Substring(ErrorFormat(0) + ErrorFormat(1)).Trim)
                         Else
                             Assert.Equal(StdFormat.Length, CurrentRow.Length)
-                            Assert.Equal(CurrentRow(0), MultipleFormatData(CurrentRowIndex).Substring(0, StdFormat(0)).Trim)
-                            Assert.Equal(CurrentRow(1), MultipleFormatData(CurrentRowIndex).Substring(StdFormat(0), StdFormat(1)).Trim)
-                            Assert.Equal(CurrentRow(2), MultipleFormatData(CurrentRowIndex).Substring(StdFormat(0) + StdFormat(1), StdFormat(2)).Trim)
-                            Assert.Equal(CurrentRow(3), MultipleFormatData(CurrentRowIndex).Substring(StdFormat(0) + StdFormat(1) + StdFormat(2)).Trim)
+                            Assert.Equal(CurrentRow(0), CurrentRowData.Substring(0, StdFormat(0)).Trim)
+                            Assert.Equal(CurrentRow(1), CurrentRowData.Substring(StdFormat(0), StdFormat(1)).Trim)
+                            Assert.Equal(CurrentRow(2), CurrentRowData.Substring(StdFormat(0) + StdFormat(1), StdFormat(2)).Trim)
+                            Assert.Equal(CurrentRow(3), CurrentRowData.Substring(StdFormat(0) + StdFormat(1) + StdFormat(2)).Trim)
                         End If
                         CurrentRowIndex += 1
                     End While
                 End Using
             End Using
         End Sub
+
     End Class
 End Namespace

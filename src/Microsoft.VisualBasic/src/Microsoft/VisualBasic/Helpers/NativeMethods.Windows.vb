@@ -192,9 +192,9 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
         ''' <summary>
         ''' Notifies the system of an event that an application has performed.
-        ''' An appliation should use this function if it performs an action that may affect the shell.
+        ''' An application should use this function if it performs an action that may affect the shell.
         ''' </summary>
-        ''' <param name="wEventId">Describes the event that has occured. Typically, only one event is specified at at a time.
+        ''' <param name="wEventId">Describes the event that has occurred. Typically, only one event is specified at at a time.
         '''       If more than one event is specified, the values contained in dwItem1 and dwItem2 must be the same,
         '''       respectively, for all specified events. See ShellChangeNotificationEvents.</param>
         ''' <param name="uFlags">Flags that indicate the meaning of the dwItem1 and dwItem2 parameter. See ShellChangeNotificationFlags.</param>
@@ -212,7 +212,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
         End Sub
 
         ''' <summary>
-        ''' Describes the event that has occured. Used in SHChangeNotify.
+        ''' Describes the event that has occurred. Used in SHChangeNotify.
         ''' There are more values in shellapi.h. Only include the relevant ones.
         ''' </summary>
         Friend Enum SHChangeEventTypes As UInt32
@@ -258,6 +258,5 @@ Namespace Microsoft.VisualBasic.CompilerServices
         End Sub
 
     End Class
-
 
 End Namespace
