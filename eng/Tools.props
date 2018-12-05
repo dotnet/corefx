@@ -43,6 +43,11 @@
     <PackageReference Include="System.Security.Cryptography.Hashing.Algorithms.Analyzers" Version="1.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <RepoTool Include="coverlet.console" Version="$(CoverletConsolePackageVersion)" />
+    <RepoTool Include="dotnet-reportgenerator-globaltool" Version="$(DotNetReportGeneratorGlobalToolPackageVersion)" />
+  </ItemGroup>
+
   <Target Name="InitTools" AfterTargets="Restore">
 
     <PropertyGroup>
@@ -65,16 +70,7 @@
 
   <Target Name="InitGlobalTools" AfterTargets="Restore">
 
-    <ItemGroup>
-      <RepoTool Include="coverlet.console" Version="$(CoverletConsolePackageVersion)" />
-      <RepoTool Include="dotnet-reportgenerator-globaltool" Version="$(DotNetReportGeneratorGlobalToolPackageVersion)" />
-    </ItemGroup>
-
-    <PropertyGroup>
-      <RepoToolIdentifierEscaped>$([System.Text.RegularExpressions.Regex]::Escape('%(RepoTool.Identity)'))</RepoToolIdentifierEscaped>
-      <RepoToolVersionEscaped>$([System.Text.RegularExpressions.Regex]::Escape('%(RepoTool.Version)'))</RepoToolVersionEscaped>
-    </PropertyGroup>
-
+    <!-- List all global tools and save the output. -->
     <Exec Condition="Exists($(GlobalToolsDir))"
           Command="$(DotNetCmd) tool list --tool-path $(GlobalToolsDir)"
           ConsoleToMsBuild="true"
@@ -82,12 +78,16 @@
       <Output TaskParameter="ConsoleOutput" PropertyName="DotNetListToolsOutput" />
     </Exec>
 
-    <Exec Condition="Exists($(GlobalToolsDir)) AND !$([System.Text.RegularExpressions.Regex]::IsMatch('$(DotNetListToolsOutput)', '$(RepoToolIdentifierEscaped)\s+$(RepoToolVersionEscaped)'))"
+    <!-- Uninstall the global tool if it exists with a different version. -->
+    <Exec Condition="Exists($(GlobalToolsDir)) AND $(DotNetListToolsOutput.Contains('%(RepoTool.Identity)')) AND !$([System.Text.RegularExpressions.Regex]::IsMatch('$(DotNetListToolsOutput)', '$([System.Text.RegularExpressions.Regex]::Escape('%(RepoTool.Identity)'))\s+$([System.Text.RegularExpressions.Regex]::Escape('%(RepoTool.Version)'))'))"
           Command="$(DotNetCmd) tool uninstall --tool-path $(GlobalToolsDir) %(RepoTool.Identity)"
           ContinueOnError="WarnAndContinue" />
 
-    <!-- Creates the global tools dir if it doesn't exist yet. -->
-    <Exec Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(DotNetListToolsOutput)', '$(RepoToolIdentifierEscaped)\s+$(RepoToolVersionEscaped)'))"
+    <!--
+      Installs the global tool if it doesn't exist with the right version.
+      Creates the global tools folder automatically if it doesn't exist.
+    -->
+    <Exec Condition="!Exists($(GlobalToolsDir)) OR !$([System.Text.RegularExpressions.Regex]::IsMatch('$(DotNetListToolsOutput)', '$([System.Text.RegularExpressions.Regex]::Escape('%(RepoTool.Identity)'))\s+$([System.Text.RegularExpressions.Regex]::Escape('%(RepoTool.Version)'))'))"
           Command="$(DotNetCmd) tool install --tool-path $(GlobalToolsDir) %(RepoTool.Identity) --version %(RepoTool.Version)"
           ContinueOnError="WarnAndContinue" />
     

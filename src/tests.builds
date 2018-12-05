@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <!-- For UAP we are using an APPX that is registered with a unique ID. Because of that we need to run tests sequentially -->
-  <PropertyGroup Condition="('$(BuildingUAPVertical)'=='true' AND '$(SkipTests)' != 'true') OR '$(Coverage)' == 'true'">
+  <PropertyGroup Condition="('$(BuildingUAPVertical)'=='true' OR '$(Coverage)' == 'true') AND '$(SkipTests)' != 'true'">
     <SerializeProjects>true</SerializeProjects>
   </PropertyGroup>
 
