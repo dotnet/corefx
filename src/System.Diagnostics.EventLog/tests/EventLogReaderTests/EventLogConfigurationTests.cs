@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Threading;
 using Xunit;
@@ -15,24 +16,24 @@ namespace System.Diagnostics.Tests
         {
             var configuration = new EventLogConfiguration("Application");
 
-            var LogName = configuration.LogName;
-            var LogType = configuration.LogType;
-            var LogIsolation = configuration.LogIsolation;
-            var IsEnabled = configuration.IsEnabled;
-            var IsClassicLog = configuration.IsClassicLog;
-            var SecurityDescriptor = configuration.SecurityDescriptor;
-            var LogFilePath = configuration.LogFilePath;
-            var MaximumSizeInBytes = configuration.MaximumSizeInBytes;
-            var LogMode = configuration.LogMode;
-            var OwningProviderName = configuration.OwningProviderName;
-            var ProviderNames = configuration.ProviderNames;
-            var ProviderLevel = configuration.ProviderLevel;
-            var ProviderKeywords = configuration.ProviderKeywords;
-            var ProviderBufferSize = configuration.ProviderBufferSize;
-            var ProviderMinimumNumberOfBuffers = configuration.ProviderMinimumNumberOfBuffers;
-            var ProviderMaximumNumberOfBuffers = configuration.ProviderMaximumNumberOfBuffers;
-            var ProviderLatency = configuration.ProviderLatency;
-            var ProviderControlGuid = configuration.ProviderControlGuid;
+            string logName = configuration.LogName;
+            EventLogType logType = configuration.LogType;
+            EventLogIsolation logIsolation = configuration.LogIsolation;
+            bool isEnabled = configuration.IsEnabled;
+            bool isClassicLog = configuration.IsClassicLog;
+            string securityDescriptor = configuration.SecurityDescriptor;
+            string logFilePath = configuration.LogFilePath;
+            long maximumSizeInBytes = configuration.MaximumSizeInBytes;
+            EventLogMode logMode = configuration.LogMode;
+            string owningProviderName = configuration.OwningProviderName;
+            IEnumerable<string> providerNames = configuration.ProviderNames;
+            int? providerLevel = configuration.ProviderLevel;
+            long? providerKeywords = configuration.ProviderKeywords;
+            int? providerBufferSize = configuration.ProviderBufferSize;
+            int? providerMinimumNumberOfBuffers = configuration.ProviderMinimumNumberOfBuffers;
+            int? providerMaximumNumberOfBuffers = configuration.ProviderMaximumNumberOfBuffers;
+            int? providerLatency = configuration.ProviderLatency;
+            Guid? providerControlGuid = configuration.ProviderControlGuid;
         }
     }
 }

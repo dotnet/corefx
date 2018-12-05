@@ -23,5 +23,13 @@ namespace System.Diagnostics.Tests
             session.CancelCurrentOperations();
             session.Dispose();
         }
+
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        public void Methods_Throws()
+        {
+            var session = new EventLogSession();
+            Assert.Throws<EventLogException>(() => session.ExportLogAndMessages("Application", PathType.LogName, "Application", Guid.NewGuid().ToString("N")));
+            session.Dispose();
+        }
     }
 }

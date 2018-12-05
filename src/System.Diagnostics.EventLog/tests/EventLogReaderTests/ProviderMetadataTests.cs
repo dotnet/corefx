@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Threading;
 using Xunit;
@@ -13,20 +14,20 @@ namespace System.Diagnostics.Tests
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
         public void Properties_DoNotThrow()
         {
-            var providerMetadata = new ProviderMetadata("");
-            var Name = providerMetadata.Name;
-            var Id = providerMetadata.Id;
-            var MessageFilePath = providerMetadata.MessageFilePath;
-            var ResourceFilePath = providerMetadata.ResourceFilePath;
-            var ParameterFilePath = providerMetadata.ParameterFilePath;
-            var HelpLink = providerMetadata.HelpLink;
-            var DisplayName = providerMetadata.DisplayName;
-            var LogLinks = providerMetadata.LogLinks;
-            var Levels = providerMetadata.Levels;
-            var Opcodes = providerMetadata.Opcodes;
-            var Keywords = providerMetadata.Keywords;
-            var Events = providerMetadata.Events;
-            var Tasks = providerMetadata.Tasks;
+            ProviderMetadata providerMetadata = new ProviderMetadata("");
+            string name = providerMetadata.Name;
+            Guid id = providerMetadata.Id;
+            string messageFilePath = providerMetadata.MessageFilePath;
+            string resourceFilePath = providerMetadata.ResourceFilePath;
+            string parameterFilePath = providerMetadata.ParameterFilePath;
+            Uri helpLink = providerMetadata.HelpLink;
+            string displayName = providerMetadata.DisplayName;
+            IList<EventLogLink> logLinks = providerMetadata.LogLinks;
+            IList<EventLevel> levels = providerMetadata.Levels;
+            IList<EventOpcode> ppcodes = providerMetadata.Opcodes;
+            IList<EventKeyword> keywords = providerMetadata.Keywords;
+            IEnumerable<EventMetadata> events = providerMetadata.Events;
+            IList<EventTask> tasks = providerMetadata.Tasks;
         }
     }
 }
