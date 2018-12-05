@@ -37,8 +37,8 @@ Namespace Microsoft.VisualBasic.Tests.VB
 
         Private Shared Function HasExpectedData(FileNameWithPath As String, ExpectedData() As Char) As Boolean
             Using stream As New IO.StreamReader(IO.File.OpenRead(FileNameWithPath))
-                Dim ReadData(ExpectedData.Length) As Char
-                stream.Read(ReadData, 0, SourceData.Length - 1)
+                Dim ReadData(ExpectedData.Length - 1) As Char
+                stream.Read(ReadData, 0, SourceData.Length)
                 Return ExpectedData = ReadData
             End Using
         End Function
@@ -547,10 +547,8 @@ Namespace Microsoft.VisualBasic.Tests.VB
         Public Shared Sub GetFiles_Directory_SearchOption()
             Using TestBase As New FileIOTests
                 Dim NewSubDirectoryPath As String = IO.Path.Combine(TestBase.TestDirectory, "GetFiles_Directory_SearchOptionNewSubDirectory")
-                WriteFile(IO.Path.Combine(NewSubDirectoryPath, "TestFile"), "Test".ToCharArray)
-
-                CreateTestFile(TestBase, SourceData, TestFileName:="NewFile")
                 IO.Directory.CreateDirectory(NewSubDirectoryPath)
+                CreateTestFile(TestBase, SourceData, "GetFiles_Directory_SearchOptionNewSubDirectory", TestFileName:="NewFile")
                 Dim FileList As ReadOnlyCollection(Of String) = FileSystem.GetFiles(TestBase.TestDirectory)
                 Assert.True(FileList.Count = 0)
                 For i As Integer = 0 To 5
@@ -838,20 +836,20 @@ Namespace Microsoft.VisualBasic.Tests.VB
         <Fact>
         Public Shared Sub RenameDirectory_Directory_NewName()
             Using TestBase As New FileIOTests
-                ''' <exception cref="IO.FileNotFoundException">If directory does not point to an existing directory.</exception>
+                ' <exception cref="IO.FileNotFoundException">If directory does not point to an existing directory.</exception>
                 Assert.Throws(Of IO.DirectoryNotFoundException)(Sub() FileSystem.RenameDirectory(IO.Path.Combine(TestBase.TestDirectory, "DoesNotExistDirectory"), "NewDirectory"))
                 Dim OrigDirectoryWithPath As String = IO.Path.Combine(TestBase.TestDirectory, "OriginalDirectory")
                 IO.Directory.CreateDirectory(OrigDirectoryWithPath)
-                ''' <exception cref="System.ArgumentException">If newName is Nothing or Empty String.</exception>
+                ' <exception cref="System.ArgumentException">If newName is Nothing or Empty String.</exception>
                 Assert.Throws(Of ArgumentNullException)(Sub() FileSystem.RenameDirectory(OrigDirectoryWithPath, ""))
                 Dim DirectoryNameWithPath As String = IO.Path.Combine(TestBase.TestDirectory, "DoesNotExist")
-                ''' <exception cref="System.ArgumentException">If contains path information.</exception>
+                ' <exception cref="System.ArgumentException">If contains path information.</exception>
                 Assert.Throws(Of ArgumentException)(Sub() FileSystem.RenameDirectory(OrigDirectoryWithPath, DirectoryNameWithPath))
                 FileSystem.RenameDirectory(OrigDirectoryWithPath, "NewFDirectory")
                 Dim NewFDirectoryPath As String = IO.Path.Combine(TestBase.TestDirectory, "NewFDirectory")
                 Assert.True(IO.Directory.Exists(NewFDirectoryPath))
                 Assert.False(IO.Directory.Exists(OrigDirectoryWithPath))
-                ''' <exception cref="IO.IOException">If directory points to a root directory or if there's an existing directory or an existing file with the same name.</exception>
+                ' <exception cref="IO.IOException">If directory points to a root directory or if there's an existing directory or an existing file with the same name.</exception>
                 IO.Directory.CreateDirectory(OrigDirectoryWithPath)
                 Assert.Throws(Of IO.IOException)(Sub() FileSystem.RenameDirectory(NewFDirectoryPath, "OriginalDirectory"))
             End Using
@@ -860,19 +858,19 @@ Namespace Microsoft.VisualBasic.Tests.VB
         <Fact>
         Public Shared Sub RenameFile_File_NewName()
             Using TestBase As New FileIOTests
-                ''' <exception cref="IO.FileNotFoundException">If file does not point to an existing file.</exception>
+                ' <exception cref="IO.FileNotFoundException">If file does not point to an existing file.</exception>
                 Assert.Throws(Of IO.FileNotFoundException)(Sub() FileSystem.RenameFile(IO.Path.Combine(TestBase.TestDirectory, "DoesNotExistFile"), "NewFile"))
                 Dim OrigFileWithPath As String = CreateTestFile(TestBase, SourceData)
                 Dim ExistingFileWithPath As String = CreateTestFile(TestBase, DestData)
-                ''' <exception cref="System.ArgumentException">If newName is Nothing or Empty String.</exception>
+                ' <exception cref="System.ArgumentException">If newName is Nothing or Empty String.</exception>
                 Assert.Throws(Of ArgumentNullException)(Sub() FileSystem.RenameFile(OrigFileWithPath, ""))
-                ''' <exception cref="System.ArgumentException">If contains path information.</exception>
+                ' <exception cref="System.ArgumentException">If contains path information.</exception>
                 Assert.Throws(Of ArgumentException)(Sub() FileSystem.RenameFile(OrigFileWithPath, ExistingFileWithPath))
                 FileSystem.RenameFile(OrigFileWithPath, "NewFile")
                 Dim NewFileWithPath As String = IO.Path.Combine(TestBase.TestDirectory, "NewFile")
                 Assert.True(IO.File.Exists(NewFileWithPath))
                 Assert.False(IO.File.Exists(OrigFileWithPath))
-                ''' <exception cref="IO.IOException">If there's an existing directory or an existing file with the same name.</exception>
+                ' <exception cref="IO.IOException">If there's an existing directory or an existing file with the same name.</exception>
                 Assert.Throws(Of IO.IOException)(Sub() FileSystem.RenameFile(NewFileWithPath, "NewFile"))
                 IO.Directory.CreateDirectory(IO.Path.Combine(TestBase.TestDirectory, "NewFDirectory"))
                 Assert.Throws(Of IO.IOException)(Sub() FileSystem.RenameFile(NewFileWithPath, "NewFDirectory"))
