@@ -425,11 +425,14 @@ Code coverage is built into the corefx build system.  It utilizes OpenCover for 
 :: Run full coverage
 build -test -Coverage
 
+If coverage succeeds, the full report can be found at `artifacts\coverage\index.htm`.
+
 :: To run a single project with code coverage enabled pass the /p:Coverage=true property
 cd src\System.Collections.Immutable\tests
 dotnet msbuild /t:BuildAndTest /p:Coverage=true
 ```
-If coverage succeeds, the code coverage report will be generated automatically and placed in the bin\tests\coverage directory.  You can view the full report by opening index.htm
+
+If coverage succeeds, the individual report can be found at `$(TestPath)\report\index.htm`.
 
 Code coverage reports from the continuous integration system are available from the links on the front page of the corefx repo.
 

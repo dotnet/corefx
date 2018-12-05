@@ -46,7 +46,7 @@ You can perform code coverage runs for the entire repository locally by adding t
 
 This builds and tests the test assemblies and generates the full code coverage report. The resulting index.htm file providing the results of the run should be available at:
 
-    artifacts\bin\tests\coverage\index.htm
+    artifacts\coverage\index.htm
 
 You can also build and test with code coverage for a particular test project rather than for the whole repo with the ```/p:Coverage=true``` argument:
 
@@ -59,7 +59,7 @@ The results for this one library will then show up in the aforementioned index.h
 
 And then once the run completes:
 
-    ..\..\..\bin\tests\coverage\index.htm
+    $(TestPath)\report\index.htm
 
 ## Code coverage with System.Private.CoreLib code
 
