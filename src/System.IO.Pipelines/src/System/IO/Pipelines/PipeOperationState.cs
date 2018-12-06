@@ -37,13 +37,22 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void EndRead()
         {
-            if ((_state & State.Reading) != State.Reading && 
-                (_state & State.ReadingTentative) != State.ReadingTentative)
+            if (!TryEndRead())
             {
                 ThrowHelper.ThrowInvalidOperationException_NoReadToComplete();
             }
+        }
+
+        public bool TryEndRead()
+        {
+            if ((_state & State.Reading) != State.Reading &&
+                (_state & State.ReadingTentative) != State.ReadingTentative)
+            {
+                return false;
+            }
 
             _state &= ~(State.Reading | State.ReadingTentative);
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -59,9 +59,10 @@ namespace System.IO.Pipelines
 
         public void ResetMemory()
         {
-            _memoryOwner.Dispose();
+            IMemoryOwner<byte> memoryOwner = _memoryOwner;
             _memoryOwner = null;
             AvailableMemory = default;
+            memoryOwner.Dispose();
         }
 
         internal IMemoryOwner<byte> MemoryOwner => _memoryOwner;

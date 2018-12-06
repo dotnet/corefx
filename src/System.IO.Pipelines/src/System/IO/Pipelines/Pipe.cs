@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
@@ -43,8 +44,6 @@ namespace System.IO.Pipelines
         private readonly PipeScheduler _readerScheduler;
         private readonly PipeScheduler _writerScheduler;
 
-        private readonly BufferSegment[] _bufferSegmentPool;
-
         private readonly DefaultPipeReader _reader;
         private readonly DefaultPipeWriter _writer;
 
@@ -52,8 +51,6 @@ namespace System.IO.Pipelines
 
         private long _length;
         private long _currentWriteLength;
-
-        private int _pooledSegmentCount;
 
         private PipeAwaitable _readerAwaitable;
         private PipeAwaitable _writerAwaitable;
@@ -95,8 +92,6 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.options);
             }
 
-            _bufferSegmentPool = new BufferSegment[SegmentPoolSize];
-
             _operationState = default;
             _readerCompletion = default;
             _writerCompletion = default;
@@ -112,6 +107,8 @@ namespace System.IO.Pipelines
             _writerAwaitable = new PipeAwaitable(completed: true, _useSynchronizationContext);
             _reader = new DefaultPipeReader(this);
             _writer = new DefaultPipeWriter(this);
+
+            BufferSegmentPool.IncrementActivePipes();
         }
 
         private void ResetState()
@@ -180,7 +177,7 @@ namespace System.IO.Pipelines
             if (_writingHead == null)
             {
                 // We need to allocate memory to write since nobody has written before
-                BufferSegment newSegment = CreateSegmentUnsynchronized();
+                BufferSegment newSegment = BufferSegmentPool.GetSegment();
                 newSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
 
                 // Set all the pointers
@@ -192,7 +189,7 @@ namespace System.IO.Pipelines
 
                 if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < sizeHint)
                 {
-                    BufferSegment newSegment = CreateSegmentUnsynchronized();
+                    BufferSegment newSegment = BufferSegmentPool.GetSegment();
                     newSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
 
                     _writingHead.SetNext(newSegment);
@@ -208,26 +205,6 @@ namespace System.IO.Pipelines
             // After that adjust it to fit into pools max buffer size
             var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, sizeHint);
             return adjustedToMaximumSize;
-        }
-
-        private BufferSegment CreateSegmentUnsynchronized()
-        {
-            if (_pooledSegmentCount > 0)
-            {
-                _pooledSegmentCount--;
-                return _bufferSegmentPool[_pooledSegmentCount];
-            }
-
-            return new BufferSegment();
-        }
-
-        private void ReturnSegmentUnsynchronized(BufferSegment segment)
-        {
-            if (_pooledSegmentCount < _bufferSegmentPool.Length)
-            {
-                _bufferSegmentPool[_pooledSegmentCount] = segment;
-                _pooledSegmentCount++;
-            }
         }
 
         internal bool CommitUnsynchronized()
@@ -384,6 +361,7 @@ namespace System.IO.Pipelines
         {
             BufferSegment returnStart = null;
             BufferSegment returnEnd = null;
+            bool readCompleted;
 
             CompletionData completionData = default;
 
@@ -463,29 +441,22 @@ namespace System.IO.Pipelines
                     _readerAwaitable.Reset();
                 }
 
-                _operationState.EndRead();
+                readCompleted = _operationState.TryEndRead();
             }
 
-            // Scehudle early, prior to clean up
-            TrySchedule(_writerScheduler, completionData);
-
-            // Reset the segments outside lock
-            BufferSegment returnCurrent = returnStart;
-            while (returnCurrent != null && returnCurrent != returnEnd)
+            if (readCompleted)
             {
-                returnCurrent.ResetMemory();
-                returnCurrent = returnCurrent.NextSegment;
+                // If read completed sucessfully, scehudle next early, prior to clean up
+                TrySchedule(_writerScheduler, completionData);
             }
 
-            // Return the segments to the pipe pool inside lock
-            returnCurrent = returnStart;
-            lock (_sync)
+            // Always reset and return the segments prior to any read exception
+            BufferSegmentPool.ReturnSegments(returnStart, returnEndExclusive: returnEnd);
+
+            if (!readCompleted)
             {
-                while (returnCurrent != null && returnCurrent != returnEnd)
-                {
-                    ReturnSegmentUnsynchronized(returnCurrent);
-                    returnCurrent = returnCurrent.NextSegment;
-                }
+                // If read not completed sucessfully throw exception
+                ThrowHelper.ThrowInvalidOperationException_NoReadToComplete();
             }
         }
 
@@ -702,7 +673,7 @@ namespace System.IO.Pipelines
 
         private void CompletePipe()
         {
-            BufferSegment returnStart = null;
+            BufferSegment segment = null;
             lock (_sync)
             {
                 if (_disposed)
@@ -714,7 +685,7 @@ namespace System.IO.Pipelines
                 // Return all segments
                 // if _readHead is null we need to try return _commitHead
                 // because there might be a block allocated for writing
-                returnStart = _readHead ?? _readTail;
+                segment = _readHead ?? _readTail;
 
                 _writingHead = null;
                 _readHead = null;
@@ -722,11 +693,8 @@ namespace System.IO.Pipelines
             }
 
             // Reset the segments outside lock
-            while (returnStart != null)
-            {
-                returnStart.ResetMemory();
-                returnStart = returnStart.NextSegment;
-            }
+            BufferSegmentPool.DecrementActivePipes();
+            BufferSegmentPool.ReturnSegments(segment, returnEndExclusive: null);
         }
 
         internal ValueTaskSourceStatus GetReadAsyncStatus()
@@ -928,6 +896,194 @@ namespace System.IO.Pipelines
 
                 _disposed = false;
                 ResetState();
+            }
+        }
+
+        private class BufferSegmentPool
+        {
+            private static ThreadLocal<BufferSegmentPool> s_pools = null;
+
+            private static readonly Func<BufferSegmentPool> s_poolFactory = new Func<BufferSegmentPool>(PoolFactory);
+            private static int s_activePools;
+            private static readonly object s_sync = new object();
+            private static int s_activePipes;
+            private static int s_maxSegmentsPerThread;
+
+            private int _count;
+            private BufferSegment _firstSegment;
+            private BufferSegment _lastSegment;
+
+            private ThreadLocal<BufferSegmentPool> _owningPool;
+
+            private BufferSegmentPool(ThreadLocal<BufferSegmentPool> owningPool)
+            {
+                _owningPool = owningPool;
+            }
+
+            public static void DecrementActivePipes()
+            {
+                lock (s_sync)
+                {
+                    int activePipes = s_activePipes - 1;
+                    if (activePipes == 0)
+                    {
+                        // No active pipes, discard the pool
+                        s_pools = null;
+                        s_maxSegmentsPerThread = 0;
+                        s_activePools = 0;
+                    }
+
+                    s_activePipes = activePipes;
+
+                    CalculateSegmentsPerThread();
+                }
+            }
+
+            public static void IncrementActivePipes()
+            {
+                lock (s_sync)
+                {
+                    int activePipes = s_activePipes + 1;
+                    if (activePipes == 1)
+                    {
+                        // First active pipe, create the pool
+                        s_pools = new ThreadLocal<BufferSegmentPool>(s_poolFactory);
+                    }
+
+                    s_activePipes = activePipes;
+
+                    CalculateSegmentsPerThread();
+                }
+            }
+
+            public static BufferSegment GetSegment()
+            {
+                Debug.Assert(s_pools != null);
+
+                return s_pools.Value.GetOrCreateSegment();
+            }
+
+            private BufferSegment GetOrCreateSegment()
+            {
+                BufferSegmentPool pool = s_pools.Value;
+
+                BufferSegment segment = _firstSegment;
+                if (segment != null)
+                {
+                    BufferSegment nextSegment = segment.NextSegment;
+                    _firstSegment = nextSegment;
+                    if (nextSegment == null)
+                    {
+                        _lastSegment = null;
+                    }
+
+                    segment.NextSegment = null;
+                    return segment;
+                }
+
+                return new BufferSegment();
+            }
+
+            public static void ReturnSegments(BufferSegment returnStart, BufferSegment returnEndExclusive)
+            {
+                BufferSegmentPool pool = s_pools.Value;
+
+                if (pool == null || pool._count >= s_maxSegmentsPerThread)
+                {
+                    // Pool full or no pool; just reset, don't return
+                    while (returnStart != null && returnStart != returnEndExclusive)
+                    {
+                        BufferSegment nextSegment = returnStart.NextSegment;
+                        returnStart.ResetMemory();
+                        returnStart = nextSegment;
+                    }
+                }
+                else if (returnStart != returnEndExclusive)
+                {
+                    pool.ResetAndReturnSegments(returnStart, returnEndExclusive);
+                }
+            }
+
+            private void ResetAndReturnSegments(BufferSegment returnStart, BufferSegment returnEndExclusive)
+            {
+                Debug.Assert(_count < s_maxSegmentsPerThread);
+                Debug.Assert(returnStart != returnEndExclusive);
+
+                int count = _count;
+                int maxSegments = s_maxSegmentsPerThread;
+
+                BufferSegment lastSegment = _lastSegment;
+                BufferSegment currentSegment = returnStart;
+
+                if (_firstSegment == null)
+                {
+                    _firstSegment = currentSegment;
+                }
+                else
+                {
+                    lastSegment.NextSegment = currentSegment;
+                }
+
+                while (currentSegment != null && currentSegment != returnEndExclusive)
+                {
+                    BufferSegment nextSegment = currentSegment.NextSegment;
+                    currentSegment.ResetMemory();
+
+                    if (count < maxSegments)
+                    {
+                        count++;
+                        lastSegment = currentSegment;
+                    }
+
+                    if (count >= maxSegments)
+                    {
+                        currentSegment.NextSegment = null;
+                    }
+
+                    currentSegment = nextSegment;
+                }
+
+                _count = count;
+                _lastSegment = lastSegment;
+            }
+
+            private static void CalculateSegmentsPerThread()
+            {
+                if (s_activePools > 0)
+                {
+                    s_maxSegmentsPerThread = Math.Max(SegmentPoolSize, (s_activePipes * SegmentPoolSize) / s_activePools);
+                }
+                else
+                {
+                    s_maxSegmentsPerThread = 0;
+                }
+            }
+
+            private static BufferSegmentPool PoolFactory()
+            {
+                lock (s_sync)
+                {
+                    BufferSegmentPool pool = new BufferSegmentPool(s_pools);
+                    s_activePools++;
+                    CalculateSegmentsPerThread();
+                    return pool;
+                }
+            }
+
+            ~BufferSegmentPool()
+            {
+                if (_owningPool == s_pools)
+                {
+                    lock (s_sync)
+                    {
+                        if (_owningPool == s_pools)
+                        {
+                            s_activePools--;
+
+                            CalculateSegmentsPerThread();
+                        }
+                    }
+                }
             }
         }
     }
