@@ -429,17 +429,17 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        private void SendPackets(SocketImplementationType type, SendPacketsElement element, int bytesExpected)
+        private void SendPackets(SocketImplementationType type, SendPacketsElement element, int bytesExpected, byte[] contentExpected = null)
         {
-            SendPackets(type, new[] {element}, SocketError.Success, bytesExpected);
+            SendPackets(type, new[] {element}, SocketError.Success, bytesExpected, contentExpected);
         }
 
-        private void SendPackets(SocketImplementationType type, SendPacketsElement element, SocketError expectedResut, int bytesExpected)
+        private void SendPackets(SocketImplementationType type, SendPacketsElement element, SocketError expectedResult, int bytesExpected)
         {
-            SendPackets(type, new[] {element}, expectedResut, bytesExpected);
+            SendPackets(type, new[] {element}, expectedResult, bytesExpected);
         }
 
-        private void SendPackets(SocketImplementationType type, SendPacketsElement[] elements, SocketError expectedResut, int bytesExpected)
+        private void SendPackets(SocketImplementationType type, SendPacketsElement[] elements, SocketError expectedResult, int bytesExpected, byte[] contentExpected = null)
         {
             Assert.True(Capability.IPv6Support());
 
@@ -461,8 +461,17 @@ namespace System.Net.Sockets.Tests
                         {
                             Assert.True(completed.WaitOne(TestSettings.PassingTestTimeout), "Timed out");
                         }
-                        Assert.Equal(expectedResut, args.SocketError);
+                        Assert.Equal(expectedResult, args.SocketError);
                         Assert.Equal(bytesExpected, args.BytesTransferred);
+                    
+                    }
+
+                    if (contentExpected != null) {
+                        // test server should just echo back, so read length expected bytes from the stream
+                        var contentActual = new byte[bytesExpected];
+                        var bytesReceived = sock.Receive(contentActual);
+                        Assert.Equal(bytesExpected, bytesReceived);
+                        Assert.Equal(contentExpected, contentActual);
                     }
                 }
             }
