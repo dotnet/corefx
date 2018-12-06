@@ -291,6 +291,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.UTimensat.cs">
       <Link>Common\Interop\Unix\Interop.UTimensat.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.LChflags.cs">
+      <Link>Common\Interop\Unix\Interop.LChflags.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathInternal.Unix.cs">
       <Link>Common\CoreLib\System\IO\PathInternal.Unix.cs</Link>
     </Compile>
