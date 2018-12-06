@@ -463,17 +463,30 @@ namespace System.IO.Pipelines
                     _readerAwaitable.Reset();
                 }
 
-                while (returnStart != null && returnStart != returnEnd)
-                {
-                    returnStart.ResetMemory();
-                    ReturnSegmentUnsynchronized(returnStart);
-                    returnStart = returnStart.NextSegment;
-                }
-
                 _operationState.EndRead();
             }
 
+            // Scehudle early, prior to clean up
             TrySchedule(_writerScheduler, completionData);
+
+            // Reset the segments outside lock
+            BufferSegment returnCurrent = returnStart;
+            while (returnCurrent != null && returnCurrent != returnEnd)
+            {
+                returnCurrent.ResetMemory();
+                returnCurrent = returnCurrent.NextSegment;
+            }
+
+            // Return the segments to the pipe pool inside lock
+            returnCurrent = returnStart;
+            lock (_sync)
+            {
+                while (returnCurrent != null && returnCurrent != returnEnd)
+                {
+                    ReturnSegmentUnsynchronized(returnCurrent);
+                    returnCurrent = returnCurrent.NextSegment;
+                }
+            }
         }
 
         internal void CompleteReader(Exception exception)
@@ -689,6 +702,7 @@ namespace System.IO.Pipelines
 
         private void CompletePipe()
         {
+            BufferSegment returnStart = null;
             lock (_sync)
             {
                 if (_disposed)
@@ -700,18 +714,18 @@ namespace System.IO.Pipelines
                 // Return all segments
                 // if _readHead is null we need to try return _commitHead
                 // because there might be a block allocated for writing
-                BufferSegment segment = _readHead ?? _readTail;
-                while (segment != null)
-                {
-                    BufferSegment returnSegment = segment;
-                    segment = segment.NextSegment;
-
-                    returnSegment.ResetMemory();
-                }
+                returnStart = _readHead ?? _readTail;
 
                 _writingHead = null;
                 _readHead = null;
                 _readTail = null;
+            }
+
+            // Reset the segments outside lock
+            while (returnStart != null)
+            {
+                returnStart.ResetMemory();
+                returnStart = returnStart.NextSegment;
             }
         }
 
