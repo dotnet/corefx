@@ -177,11 +177,12 @@ namespace System.IO.Pipelines
         private void AllocateWriteHeadUnsynchronized(int sizeHint)
         {
             _operationState.BeginWrite();
+            int segmentSize = GetSegmentSize(sizeHint);
             if (_writingHead == null)
             {
                 // We need to allocate memory to write since nobody has written before
                 BufferSegment newSegment = CreateSegmentUnsynchronized();
-                newSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
+                newSegment.SetMemory(_pool.Rent(segmentSize));
 
                 // Set all the pointers
                 _writingHead = _readHead = _readTail = newSegment;
@@ -193,7 +194,7 @@ namespace System.IO.Pipelines
                 if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < sizeHint)
                 {
                     BufferSegment newSegment = CreateSegmentUnsynchronized();
-                    newSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
+                    newSegment.SetMemory(_pool.Rent(segmentSize));
 
                     _writingHead.SetNext(newSegment);
                     _writingHead = newSegment;
@@ -212,25 +213,14 @@ namespace System.IO.Pipelines
 
         private BufferSegment CreateSegmentUnsynchronized()
         {
-            if (_pooledSegmentCount > 0)
+            int count = _pooledSegmentCount;
+            if (count > 0)
             {
-                _pooledSegmentCount--;
-                return _bufferSegmentPool[_pooledSegmentCount];
+                _pooledSegmentCount = count - 1;
+                return _bufferSegmentPool[count - 1];
             }
 
             return new BufferSegment();
-        }
-
-        private bool TryReturnSegmentUnsynchronized(BufferSegment segment)
-        {
-            if (_pooledSegmentCount < _bufferSegmentPool.Length)
-            {
-                _bufferSegmentPool[_pooledSegmentCount] = segment;
-                _pooledSegmentCount++;
-                return true;
-            }
-
-            return false;
         }
 
         internal bool CommitUnsynchronized()
@@ -488,10 +478,17 @@ namespace System.IO.Pipelines
             returnCurrent = returnStart;
             lock (_sync)
             {
+                int count = _pooledSegmentCount;
+                BufferSegment[] pool = _bufferSegmentPool;
                 BufferSegment lastSegment = null;
                 while (returnCurrent != null && returnCurrent != returnEnd)
                 {
-                    if (!TryReturnSegmentUnsynchronized(returnCurrent))
+                    if ((uint)count < (uint)pool.Length)
+                    {
+                        pool[count] = returnCurrent;
+                        _pooledSegmentCount = count + 1;
+                    }
+                    else
                     {
                         // Pool full, drop and stop processing the rest of the chain
                         if (lastSegment != null)
