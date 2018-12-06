@@ -180,7 +180,60 @@ namespace System.Net.Sockets.Tests
             }
         }
 
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamWithOptions_Success(SocketImplementationType type) {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan)) {
+                var element = new SendPacketsElement(stream, 0, s_testFileSize);
+                SendPackets(type, element, s_testFileSize, GetExpectedContent(element)); 
+            }
+        }
+
         #endregion FileStreams
+
+        #region Mixed Buffer, FilePath, FileStream tests
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamMultiPartMixed_Success(SocketImplementationType type) {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous)) {
+                var elements = new[]
+                {
+                    new SendPacketsElement(new byte[] { 5, 6, 7 }, 0, 3),
+                    new SendPacketsElement(stream, s_testFileSize - 10, 10),
+                    new SendPacketsElement(TestFileName, 0L, 10),
+                    new SendPacketsElement(stream, 10L, 20),
+                    new SendPacketsElement(TestFileName, 30, 10),
+                    new SendPacketsElement(new byte[] { 8, 9, 10 }, 0, 3),
+                };
+                var expected = GetExpectedContent(elements);
+                SendPackets(type, elements, SocketError.Success, expected.Length, expected);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamMultiPartMixed_MultipleFileStreams_Success(SocketImplementationType type) {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous)) 
+            using (var stream2 = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous)) {
+                    var elements = new[]
+                {
+                    new SendPacketsElement(new byte[] { 5, 6, 7 }, 0, 0),
+                    new SendPacketsElement(stream, s_testFileSize - 10, 10),
+                    new SendPacketsElement(stream2, s_testFileSize - 100, 10),
+                    new SendPacketsElement(TestFileName, 0L, 10),
+                    new SendPacketsElement(new byte[] { 8, 9, 10 }, 0, 1),
+                    new SendPacketsElement(TestFileName, 30, 10),
+                };
+                var expected = GetExpectedContent(elements);
+                SendPackets(type, elements, SocketError.Success, expected.Length, expected);
+            }
+        }
+
+        #endregion
 
         #region Helpers
 
@@ -232,7 +285,8 @@ namespace System.Net.Sockets.Tests
                     ReadFromFile(spe.FileStream.Name, spe.OffsetLong, spe.Count, result, ref resultOffset);
                 }
                 else if (spe.Buffer != null && spe.Count > 0) {
-                    Array.Copy(spe.Buffer, spe.OffsetLong, result, resultOffset += spe.Count, spe.Count);
+                    Array.Copy(spe.Buffer, spe.OffsetLong, result, resultOffset, spe.Count);
+                    resultOffset += spe.Count;
                 }
             }
 
