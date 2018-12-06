@@ -654,7 +654,6 @@ namespace System.Net.Sockets
             {
                 // Loop through the elements attempting to open each files and get its handle.
                 int index = 0;
-                // Create arrays for streams.
                 _sendPacketsFileStreams = new FileStream[sendPacketsElementsFileCount];
                 try
                 {
