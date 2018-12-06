@@ -333,6 +333,82 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
+        public void TestSmtpDeliveryFormatSevenBit() {
+            SmtpServer server = null;
+            SmtpClient client = null;
+            var serverList = new System.Collections.Generic.List<SmtpServer>();
+
+            MailMessage msg = new MailMessage("foo@example.com", "bar@example.com");
+            msg.HeadersEncoding = msg.BodyEncoding = msg.SubjectEncoding = System.Text.Encoding.UTF8;
+
+            var subjectTxt = "Test 测试 Contain 包含 UTF8";
+            var subjectEncode = "=?utf-8?B?VGVzdCDmtYvor5UgQ29udGFpbiDljIXlkKsgVVRGOA==?=";
+
+            msg.Subject = subjectTxt;
+
+            Action<SmtpDeliveryFormat, bool, string, string, string> test = (format, utf8, async, sync, tag) => {
+                var retry = 0;
+                while (retry < 3) {
+                    if (client != null) {
+                        server.Stop();
+                        client.Dispose();
+                    }
+                    //New connections are required when parameters change
+                    //How to close cached SmtpConnection !!?? Killing this server is the quickest solution.
+                    server = new SmtpServer();
+                    var running = false;
+                    Thread t = new Thread(() => {
+                        running = true;
+                        server.Run();
+                    });
+                    t.Start();
+                    while (!running) {//wait fist server started
+                        Thread.Sleep(1);
+                    }
+                    Thread.Sleep(100);//wait all server running
+                    server.Support_SMTPUTF8 = utf8;
+
+                    client = new SmtpClient("localhost", server.EndPoint.Port);
+                    client.DeliveryFormat = format;
+
+
+                    var task = client.SendMailAsync(msg);
+                    if (!task.Wait(5000)) {//If the server did not accept the request? Try again.
+                        retry++;
+                        if (retry >= 3) {
+                            throw new Exception("Cannot connect SmtpServer!");
+                        }
+                        continue;
+                    }
+                    Assert.Equal(tag + " Async " + async, tag + " Async " + server.Subject);
+
+                    client.Send(msg);
+                    Assert.Equal(tag + " Sync " + sync, tag + " Sync " + server.Subject);
+                    break;
+                }
+            };
+            try {
+                test(SmtpDeliveryFormat.International, false
+                    , subjectEncode, subjectEncode, "International");
+                
+                test(SmtpDeliveryFormat.International, true
+                    , subjectTxt, subjectTxt, "International+SMTPUTF8");
+
+
+
+                test(SmtpDeliveryFormat.SevenBit, false
+                    , subjectEncode, subjectEncode, "SevenBit");
+
+                //This asynchronous sending of content is wrong before fixing it.
+                test(SmtpDeliveryFormat.SevenBit, true
+                    , subjectEncode, subjectEncode, "SevenBit+SMTPUTF8");
+            } finally {
+                client.Dispose();
+                server.Stop();
+            }
+        }
+
+        [Fact]
         public async Task TestCredentialsCopyInAsyncContext()
         {
             SmtpServer server = new SmtpServer();

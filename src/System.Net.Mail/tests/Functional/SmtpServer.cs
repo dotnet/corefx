@@ -77,7 +77,8 @@ namespace System.Net.Mail.Tests
             }
         }
 
-        // return false == terminate
+        public bool Support_SMTPUTF8 { get; set; }
+		// return false == terminate
         private bool Dispatch(NetworkStream ns, StreamReader r, string s)
         {
             Trace("command", s);
@@ -97,6 +98,9 @@ namespace System.Net.Mail.Tests
                     _clientdomain = s.Substring(5).Trim().ToLower();
                     WriteNS(ns, "250-localhost Hello" + s.Substring(5, s.Length - 5) + "\r\n");
                     WriteNS(ns, "250-AUTH PLAIN\r\n");
+                    if (Support_SMTPUTF8) {
+                        WriteNS(ns, "250-SMTPUTF8\r\n");
+                    }
                     break;
                 case "QUIT":
                     WriteNS(ns, "221 Quit\r\n");
