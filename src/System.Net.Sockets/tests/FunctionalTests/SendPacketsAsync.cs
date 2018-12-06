@@ -467,12 +467,12 @@ namespace System.Net.Sockets.Tests
                     }
 
                     if (contentExpected != null) {
-                        // test server should just echo back, so read length expected bytes from the stream
+                        // test server just echos back, so read number of expected bytes from the stream
                         var contentActual = new byte[bytesExpected];
                         var bytesReceived = 0;
                         var tries = 0;
                         const int MaxTries = 15;
-                        while (bytesReceived < bytesExpected && tries < NaxTries) {
+                        while (bytesReceived < bytesExpected && tries < MaxTries) {
                             bytesReceived += sock.Receive(contentActual, bytesReceived, bytesExpected, SocketFlags.None);
                             tries++;
                         }
