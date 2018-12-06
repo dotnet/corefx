@@ -43,6 +43,7 @@ namespace System.IO.Pipelines
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryEndRead()
         {
             if ((_state & State.Reading) != State.Reading &&
