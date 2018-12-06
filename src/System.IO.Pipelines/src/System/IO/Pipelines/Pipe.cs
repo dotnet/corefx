@@ -909,11 +909,12 @@ namespace System.IO.Pipelines
             private static int s_activePipes;
             private static int s_maxSegmentsPerThread;
 
+            private readonly ThreadLocal<BufferSegmentPool> _owningPool;
+
             private int _count;
             private BufferSegment _firstSegment;
             private BufferSegment _lastSegment;
 
-            private ThreadLocal<BufferSegmentPool> _owningPool;
 
             private BufferSegmentPool(ThreadLocal<BufferSegmentPool> owningPool)
             {
@@ -986,7 +987,7 @@ namespace System.IO.Pipelines
 
             public static void ReturnSegments(BufferSegment returnStart, BufferSegment returnEndExclusive)
             {
-                BufferSegmentPool pool = s_pools.Value;
+                BufferSegmentPool pool = s_pools?.Value;
 
                 if (pool == null || pool._count >= s_maxSegmentsPerThread)
                 {
