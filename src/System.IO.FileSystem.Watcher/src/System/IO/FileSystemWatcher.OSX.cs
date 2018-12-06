@@ -174,16 +174,105 @@ namespace System.IO
                 _stopping = false;
             }
 
+            private static class StaticWatcherRunLoopManager
+            {
+                // A reference to the RunLoop that we can use to start or stop a Watcher
+                private static CFRunLoopRef _watcherRunLoop = IntPtr.Zero;
+
+                private static int scheduledStreamsCount = 0;
+
+                private static object lockObject = new object();
+
+                public static void ScheduleEventStream(SafeEventStreamHandle eventStream)
+                {
+                    if(_watcherRunLoop == IntPtr.Zero)
+                    {
+                        lock (lockObject)
+                        {
+                            if (_watcherRunLoop == IntPtr.Zero)
+                            {
+                                var runLoopStarted = new ManualResetEventSlim();
+                                new Thread(WatchForFileSystemEventsThreadStart) { IsBackground = true }.Start(new object[] { runLoopStarted, eventStream });
+                                runLoopStarted.Wait();
+
+                                Interlocked.Increment(ref scheduledStreamsCount);
+                                return;
+                            }
+                        }
+                    }
+
+                    // Schedule the EventStream to run on the thread's RunLoop
+                    Interop.EventStream.FSEventStreamScheduleWithRunLoop(eventStream, _watcherRunLoop, Interop.RunLoop.kCFRunLoopDefaultMode);
+                    Interlocked.Increment(ref scheduledStreamsCount);
+                }
+
+                public static void UnscheduleFromRunLoop(SafeEventStreamHandle eventStream)
+                {
+                    if (_watcherRunLoop != IntPtr.Zero)
+                    {
+                        // Always unschedule the RunLoop before cleaning up
+                        Interop.EventStream.FSEventStreamUnscheduleFromRunLoop(eventStream, _watcherRunLoop, Interop.RunLoop.kCFRunLoopDefaultMode);
+                        Interlocked.Decrement(ref scheduledStreamsCount);
+
+                        if (scheduledStreamsCount == 0)
+                        {
+                            // Stop the FS event message pump
+                            Interop.RunLoop.CFRunLoopStop(_watcherRunLoop);
+                        }
+                    }
+                }
+
+                private static void WatchForFileSystemEventsThreadStart(object args)
+                {
+                    var inputArgs = (object[])args;
+                    var runLoopStarted = (ManualResetEventSlim)inputArgs[0];
+                    var _eventStream = (SafeEventStreamHandle)inputArgs[1];
+                    // Get this thread's RunLoop
+                    _watcherRunLoop = Interop.RunLoop.CFRunLoopGetCurrent();
+                    Debug.Assert(_watcherRunLoop != IntPtr.Zero);
+
+                    // Retain the RunLoop so that it doesn't get moved or cleaned up before we're done with it.
+                    IntPtr retainResult = Interop.CoreFoundation.CFRetain(_watcherRunLoop);
+                    Debug.Assert(retainResult == _watcherRunLoop, "CFRetain is supposed to return the input value");
+
+
+                    // Schedule the EventStream to run on the thread's RunLoop
+                    Interop.EventStream.FSEventStreamScheduleWithRunLoop(_eventStream, _watcherRunLoop, Interop.RunLoop.kCFRunLoopDefaultMode);
+
+                    runLoopStarted.Set();
+                    try
+                    {
+                        // Start the OS X RunLoop (a blocking call) that will pump file system changes into the callback function
+                        Interop.RunLoop.CFRunLoopRun();
+                    }
+                    finally
+                    {
+                        // Release the WatcherLoop Core Foundation object.
+                        lock (lockObject)
+                        {
+                            Interop.CoreFoundation.CFRelease(_watcherRunLoop);
+                            _watcherRunLoop = IntPtr.Zero;
+                        }
+                    }
+                }
+            }
+
             private void CancellationCallback()
             {
-                lock (StopLock)
-                {
-                    if (!_stopping && _watcherRunLoop != IntPtr.Zero)
+                lock (StopLock) {
+                    if (!_stopping && _eventStream != null)
                     {
                         _stopping = true;
 
-                        // Stop the FS event message pump
-                        Interop.RunLoop.CFRunLoopStop(_watcherRunLoop);
+                        try
+                        {
+                            // When we get here, we've requested to stop so cleanup the EventStream and unschedule from the RunLoop
+                            Interop.EventStream.FSEventStreamStop(_eventStream);
+                        }
+                        finally 
+                        {
+                            StaticWatcherRunLoopManager.UnscheduleFromRunLoop(_eventStream);
+                        }
                     }
                 }
             }
@@ -244,67 +333,17 @@ namespace System.IO
                     throw Interop.GetExceptionForIoErrno(Interop.Sys.GetLastErrorInfo(), _fullDirectory, true);
                 }
 
-                // Create and start our watcher thread then wait for the thread to initialize and start 
-                // the RunLoop. We wait for that to prevent this function from returning before the RunLoop
-                // has a chance to start so that any callers won't race with the background thread's initialization
-                // and calling Stop, which would attempt to stop a RunLoop that hasn't started yet.
-                var runLoopStarted = new ManualResetEventSlim();
-                new Thread(WatchForFileSystemEventsThreadStart) { IsBackground = true }.Start(runLoopStarted);
-                runLoopStarted.Wait();
-            }
+                StaticWatcherRunLoopManager.ScheduleEventStream(_eventStream);
 
-            private void WatchForFileSystemEventsThreadStart(object arg)
-            {
-                var runLoopStarted = (ManualResetEventSlim)arg;
-
-                // Get this thread's RunLoop
-                _watcherRunLoop = Interop.RunLoop.CFRunLoopGetCurrent();
-                Debug.Assert(_watcherRunLoop != IntPtr.Zero);
-
-                // Retain the RunLoop so that it doesn't get moved or cleaned up before we're done with it.
-                IntPtr retainResult = Interop.CoreFoundation.CFRetain(_watcherRunLoop);
-                Debug.Assert(retainResult == _watcherRunLoop, "CFRetain is supposed to return the input value");
-
-                // Schedule the EventStream to run on the thread's RunLoop
-                Interop.EventStream.FSEventStreamScheduleWithRunLoop(_eventStream, _watcherRunLoop, Interop.RunLoop.kCFRunLoopDefaultMode);
-
-                try
-                {
-                    bool started = Interop.EventStream.FSEventStreamStart(_eventStream);
-
-                    // Notify the StartRaisingEvents call that we are initialized and about to start
-                    // so that it can return and avoid a race-condition around multiple threads calling Stop and Start
-                    runLoopStarted.Set();
-
-                    if (started)
+                bool started = Interop.EventStream.FSEventStreamStart(_eventStream);
+                if (!started)
+                {  
+                    // Try to get the Watcher to raise the error event; if we can't do that, just silently exist since the watcher is gone anyway
+                    FileSystemWatcher watcher;
+                    if (_weakWatcher.TryGetTarget(out watcher))
                     {
-                        // Start the OS X RunLoop (a blocking call) that will pump file system changes into the callback function
-                        Interop.RunLoop.CFRunLoopRun();
-
-                        // When we get here, we've requested to stop so cleanup the EventStream and unschedule from the RunLoop
-                        Interop.EventStream.FSEventStreamStop(_eventStream);
-                    }
-                    else
-                    {
-                        // Try to get the Watcher to raise the error event; if we can't do that, just silently exist since the watcher is gone anyway
-                        FileSystemWatcher watcher;
-                        if (_weakWatcher.TryGetTarget(out watcher))
-                        {
-                            // An error occurred while trying to start the run loop so fail out
-                            watcher.OnError(new ErrorEventArgs(new IOException(SR.EventStream_FailedToStart, Marshal.GetLastWin32Error())));
-                        }
-                    }
-                }
-                finally
-                {
-                    // Always unschedule the RunLoop before cleaning up
-                    Interop.EventStream.FSEventStreamUnscheduleFromRunLoop(_eventStream, _watcherRunLoop, Interop.RunLoop.kCFRunLoopDefaultMode);
-
-                    // Release the WatcherLoop Core Foundation object.
-                    lock (StopLock)
-                    {
-                        Interop.CoreFoundation.CFRelease(_watcherRunLoop);
-                        _watcherRunLoop = IntPtr.Zero;
+                        // An error occurred while trying to start the run loop so fail out
+                        watcher.OnError(new ErrorEventArgs(new IOException(SR.EventStream_FailedToStart, Marshal.GetLastWin32Error())));
                     }
                 }
             }
