@@ -649,6 +649,12 @@ namespace System.Net.Sockets
                 }
             }
 
+            if (sendPacketsElementsFileCount + sendPacketsElementsFileStreamCount + sendPacketsElementsBufferCount == 0)
+            {
+                FinishOperationSyncSuccess(0, SocketFlags.None);
+                return SocketError.Success;
+            }
+
             // Attempt to open the files if any were given.
             if (sendPacketsElementsFileCount > 0)
             {
@@ -678,12 +684,6 @@ namespace System.Net.Sockets
                     _sendPacketsFileStreams = null;
                     throw;
                 }
-            }
-
-            if (sendPacketsElementsFileCount + sendPacketsElementsFileStreamCount + sendPacketsElementsBufferCount == 0)
-            {
-                FinishOperationSyncSuccess(0, SocketFlags.None);
-                return SocketError.Success;
             }
 
             Interop.Winsock.TransmitPacketsElement[] sendPacketsDescriptor =
