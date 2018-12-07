@@ -716,19 +716,34 @@ namespace System.IO.Pipelines
                 // Return all segments
                 // if _readHead is null we need to try return _commitHead
                 // because there might be a block allocated for writing
-                BufferSegment segment = _readHead ?? _readTail;
-                while (segment != null)
-                {
-                    BufferSegment returnSegment = segment;
-                    segment = segment.NextSegment;
-
-                    returnSegment.ResetMemory();
-                }
+                BufferSegment current = _readHead ?? _readTail;
 
                 _writingHead = null;
                 _readHead = null;
                 _readTail = null;
+
+                if (current != null)
+                {
+                    int index = _pooledSegmentCount;
+                    BufferSegment[] pool = _bufferSegmentPool;
+                    do
+                    {
+                        BufferSegment next = current.NextSegment;
+                        current.ResetMemory();
+
+                        if ((uint)index < (uint)pool.Length)
+                        {
+                            pool[index] = current;
+                            index++;
+                        }
+
+                        current = next;
+                    } while (current != null);
+
+                    _pooledSegmentCount = index;
+                }
             }
+
         }
 
         internal ValueTaskSourceStatus GetReadAsyncStatus()
