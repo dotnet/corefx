@@ -93,7 +93,7 @@ namespace System
 
         //  Remarks: MUST NOT be used unless all input indexes are verified and trusted.
         //           start must be next to '[' position, or error is reported
-        internal unsafe static bool IsValidStrict(char* name, int start, ref int end, bool allowAnyScope = false)
+        internal unsafe static bool IsValidStrict(char* name, int start, ref int end)
         {
             int sequenceCount = 0;
             int sequenceLength = 0;
@@ -143,7 +143,7 @@ namespace System
                                 {
                                     goto case '/';
                                 }
-                                else if (!allowAnyScope && (name[i] < '0' || name[i] > '9'))
+                                else if (name[i] < '0' || name[i] > '9')
                                 {
                                     // scope ID must only contain digits
                                     return false;
