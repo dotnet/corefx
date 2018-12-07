@@ -378,7 +378,7 @@ namespace System.Net.Mail.Tests
                 SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
                 client.DeliveryFormat = SmtpDeliveryFormat.SevenBit;
 
-                MailMessage msg = new MailMessage("foo@example.com", "bar@example.com", "Test \u6d4b\u8bd5 Contain \u5305\u542b UTF8", "howdydoo");
+                MailMessage msg = new MailMessage("foo@example.com", "bar@example.com", "Test \u6d4b\u8bd5 Contain \u5305\u542b UTF8", "hello \u9ad8\u575a\u679c");
                 msg.HeadersEncoding = msg.BodyEncoding = msg.SubjectEncoding = System.Text.Encoding.UTF8;
 
                 try
