@@ -211,10 +211,12 @@ namespace System.IO.Pipelines
 
         private BufferSegment CreateSegmentUnsynchronized()
         {
-            if (_pooledSegmentCount > 0)
+            int index = _pooledSegmentCount - 1;
+            BufferSegment[] pool = _bufferSegmentPool;
+            if ((uint)index < (uint)pool.Length)
             {
-                _pooledSegmentCount--;
-                return _bufferSegmentPool[_pooledSegmentCount];
+                _pooledSegmentCount = index;
+                return pool[index];
             }
 
             return new BufferSegment();
