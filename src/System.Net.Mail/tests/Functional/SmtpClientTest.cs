@@ -386,10 +386,13 @@ namespace System.Net.Mail.Tests
                     Thread t = new Thread(server.Run);
                     t.Start();
 
-                    if (i == 0) {
+                    if (i == 0)
+                    {
                         client.Send(msg);
                         sendSubject = server.Subject;
-                    } else {
+                    }
+                    else
+                    {
                         client.SendMailAsync(msg).Wait();
                         sendAsyncSubject = server.Subject;
                     }
