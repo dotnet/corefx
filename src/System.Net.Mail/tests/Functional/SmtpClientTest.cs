@@ -403,8 +403,8 @@ namespace System.Net.Mail.Tests
                 }
             }
 
-            //Comparing the results of synchronous and asynchronous methods
-            Assert.Equal(sendSubject, sendAsyncSubject);
+            //Comparing the results of synchronous and asynchronous methods. Prefixes are used to distinguish the next test.
+            Assert.Equal("subject:" + sendSubject, "subject:" + sendAsyncSubject);
 
             //Most important inspection
             Assert.Equal("=?utf-8?B?VGVzdCDmtYvor5UgQ29udGFpbiDljIXlkKsgVVRGOA==?=", sendAsyncSubject);
