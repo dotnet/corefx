@@ -54,7 +54,6 @@ namespace System.IO.Pipelines
             AvailableMemory = _memoryOwner.Memory;
             RunningIndex = 0;
             End = 0;
-            NextSegment = null;
         }
 
         public void ResetMemory()
@@ -62,6 +61,7 @@ namespace System.IO.Pipelines
             IMemoryOwner<byte> memoryOwner = _memoryOwner;
             _memoryOwner = null;
             AvailableMemory = default;
+            NextSegment = null;
 
             memoryOwner.Dispose();
         }
