@@ -177,11 +177,11 @@ namespace System.IO.Pipelines
         private void AllocateWriteHeadUnsynchronized(int sizeHint)
         {
             _operationState.BeginWrite();
-            int segmentSize = GetSegmentSize(sizeHint);
             if (_writingHead == null)
             {
                 // We need to allocate memory to write since nobody has written before
                 BufferSegment newSegment = CreateSegmentUnsynchronized();
+                int segmentSize = GetSegmentSize(sizeHint);
                 newSegment.SetMemory(_pool.Rent(segmentSize));
 
                 // Set all the pointers
@@ -194,6 +194,7 @@ namespace System.IO.Pipelines
                 if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < sizeHint)
                 {
                     BufferSegment newSegment = CreateSegmentUnsynchronized();
+                    int segmentSize = GetSegmentSize(sizeHint);
                     newSegment.SetMemory(_pool.Rent(segmentSize));
 
                     _writingHead.SetNext(newSegment);
@@ -213,11 +214,13 @@ namespace System.IO.Pipelines
 
         private BufferSegment CreateSegmentUnsynchronized()
         {
-            int count = _pooledSegmentCount;
-            if (count > 0)
+            int index = _pooledSegmentCount - 1;
+            BufferSegment[] pool = _bufferSegmentPool;
+
+            if ((uint)index < (uint)pool.Length)
             {
-                _pooledSegmentCount = count - 1;
-                return _bufferSegmentPool[count - 1];
+                _pooledSegmentCount = index;
+                return pool[index];
             }
 
             return new BufferSegment();
