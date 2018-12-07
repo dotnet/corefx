@@ -31,6 +31,8 @@ namespace System.Net.Mail.Tests
             get { return (IPEndPoint)_server.LocalEndpoint; }
         }
 
+        public bool SupportSmtpUTF8 { get; set; }
+
         public SmtpServer()
         {
             IPAddress address = IPAddress.Loopback;
@@ -77,8 +79,7 @@ namespace System.Net.Mail.Tests
             }
         }
 
-        public bool Support_SMTPUTF8 { get; set; }
-		// return false == terminate
+        // return false == terminate
         private bool Dispatch(NetworkStream ns, StreamReader r, string s)
         {
             Trace("command", s);
@@ -98,7 +99,8 @@ namespace System.Net.Mail.Tests
                     _clientdomain = s.Substring(5).Trim().ToLower();
                     WriteNS(ns, "250-localhost Hello" + s.Substring(5, s.Length - 5) + "\r\n");
                     WriteNS(ns, "250-AUTH PLAIN\r\n");
-                    if (Support_SMTPUTF8) {
+                    if (SupportSmtpUTF8)
+                    {
                         WriteNS(ns, "250-SMTPUTF8\r\n");
                     }
                     break;
