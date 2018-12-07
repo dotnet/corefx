@@ -365,29 +365,43 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        public async Task TestSmtpDeliveryFormatSevenBit()
+        public void TestSmtpDeliveryFormatSevenBit()
         {
-            SmtpServer server = new SmtpServer();
-            server.SupportSmtpUTF8 = true;
+            string sendSubject = "", sendAsyncSubject = "";
 
-            SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
-            client.DeliveryFormat = SmtpDeliveryFormat.SevenBit;
+            //Run twice to get the results of synchronous and asynchronous methods
+            for (var i = 0; i < 2; i++)
+            { 
+                SmtpServer server = new SmtpServer();
+                server.SupportSmtpUTF8 = true;
 
-            MailMessage msg = new MailMessage("foo@example.com", "bar@example.com", "Test \u6d4b\u8bd5 Contain \u5305\u542b UTF8", "howdydoo");
-            msg.HeadersEncoding = msg.BodyEncoding = msg.SubjectEncoding = System.Text.Encoding.UTF8;
+                SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
+                client.DeliveryFormat = SmtpDeliveryFormat.SevenBit;
 
-            try
-            {
-                Thread t = new Thread(server.Run);
-                t.Start();
-                await client.SendMailAsync(msg);
+                MailMessage msg = new MailMessage("foo@example.com", "bar@example.com", "Test \u6d4b\u8bd5 Contain \u5305\u542b UTF8", "howdydoo");
+                msg.HeadersEncoding = msg.BodyEncoding = msg.SubjectEncoding = System.Text.Encoding.UTF8;
 
-                Assert.Equal("=?utf-8?B?VGVzdCDmtYvor5UgQ29udGFpbiDljIXlkKsgVVRGOA==?=", server.Subject);
+                try
+                {
+                    Thread t = new Thread(server.Run);
+                    t.Start();
+
+                    if (i == 0) {
+                        client.Send(msg);
+                        sendSubject = server.Subject;
+                    } else {
+                        client.SendMailAsync(msg).Wait();
+                        sendAsyncSubject = server.Subject;
+                    }
+                }
+                finally
+                {
+                    server.Stop();
+                }
             }
-            finally
-            {
-                server.Stop();
-            }
+
+            //Comparing the results of synchronous and asynchronous methods
+            Assert.Equal(sendSubject, sendAsyncSubject);
         }
     }
 }
