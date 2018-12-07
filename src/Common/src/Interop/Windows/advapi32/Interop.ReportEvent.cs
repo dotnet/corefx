@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
@@ -18,7 +19,7 @@ internal partial class Interop
             byte[] lpUserSid,
             short wNumStrings,
             int dwDataSize,
-            HandleRef lpStrings,
+            IntPtr lpStrings,
             byte[] lpRawData);
     }
 }

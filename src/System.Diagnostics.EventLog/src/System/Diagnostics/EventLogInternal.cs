@@ -479,7 +479,7 @@ namespace System.Diagnostics
 
             if (!IsOpenForRead)
                 OpenForRead(currentMachineName);
-            bool success = Interop.Advapi32.ClearEventLog(readHandle, NativeMethods.NullHandleRef);
+            bool success = Interop.Advapi32.ClearEventLog(readHandle, null);
             if (!success)
             {
                 // Ignore file not found errors.  ClearEventLog seems to try to delete the file where the event log is
@@ -1436,7 +1436,7 @@ namespace System.Diagnostics
                 byte[] sid = null;
                 // actually report the event
                 bool success = Interop.Advapi32.ReportEvent(writeHandle, (short)type, category, eventID,
-                                                     sid, (short)strings.Length, rawData.Length, new HandleRef(this, stringsRootHandle.AddrOfPinnedObject()), rawData);
+                                                     sid, (short)strings.Length, rawData.Length, stringsRootHandle.AddrOfPinnedObject(), rawData);
                 if (!success)
                 {
                     // Trace("WriteEvent", "Throwing Win32Exception");

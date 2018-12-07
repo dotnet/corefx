@@ -10,6 +10,6 @@ internal partial class Interop
     internal partial class Advapi32
     {
         [DllImport(Libraries.Advapi32, CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern bool ClearEventLog(SafeEventLogReadHandle hEventLog, HandleRef lpBackupFileName);
+        public static extern bool ClearEventLog(SafeEventLogReadHandle hEventLog, string lpBackupFileName);
     }
 }
