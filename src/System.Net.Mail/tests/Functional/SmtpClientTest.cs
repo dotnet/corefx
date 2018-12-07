@@ -403,11 +403,11 @@ namespace System.Net.Mail.Tests
                 }
             }
 
-            //Most important inspection
-            Assert.Equal("=?utf-8?B?VGVzdCDmtYvor5UgQ29udGFpbiDljIXlkKsgVVRGOA==?=", sendAsyncSubject);
-
             //Comparing the results of synchronous and asynchronous methods
             Assert.Equal(sendSubject, sendAsyncSubject);
+
+            //Most important inspection
+            Assert.Equal("=?utf-8?B?VGVzdCDmtYvor5UgQ29udGFpbiDljIXlkKsgVVRGOA==?=", sendAsyncSubject);
         }
     }
 }
