@@ -40,7 +40,6 @@ namespace System.Globalization.Tests
             var format = new DateTimeFormatInfo();
             format.AbbreviatedMonthGenitiveNames = new string[] { "GenJan", "GenFeb", "GenMar", "GenApr", "GenMay", "GenJun", "GenJul", "GenAug", "GenSep", "GenOct", "GenNov", "GenDec", "Gen" };
             
-            Assert.Equal("19 GenJune 76", new DateTime(1976, 6, 19).ToString("d MMMM yy", format));
             Assert.Equal("19 GenJun 76", new DateTime(1976, 6, 19).ToString("d MMM yy", format));
         }
     }
