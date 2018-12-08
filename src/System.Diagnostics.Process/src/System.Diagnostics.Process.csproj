@@ -13,7 +13,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsFreeBSD)' == 'true' OR '$(TargetsUnknownUnix)' == 'true' ">
     <!-- Suppress unused field warnings when using PlatformNotSupportedException stubs -->
-    <NoWarn>0649</NoWarn>
+    <NoWarn>$(NoWarn);0649</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="FxCopBaseline.cs" />
