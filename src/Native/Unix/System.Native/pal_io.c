@@ -441,6 +441,25 @@ int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, Dir
     struct dirent* result = NULL;
     int error = readdir_r(dir, entry, &result);
 
+#ifdef _AIX
+    // AIX returns 0 on success, but bizarrely, it returns 9 for both error and
+    // end-of-directory - in the latter case, it sets result to NULL, and in the
+    // former, sets errno. (I'm not making this up either, see readdir_r(3).)
+
+    // 9 returned, do we have a null result for end of directory?
+    if (error == 9 && result == NULL)
+    {
+        memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
+        return -1;         // shim convention for end-of-stream
+    }
+    // result non-null, so must be an error
+    else if (error == 9)
+    {
+        assert(error > 0);
+        memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
+        return errno;
+    }
+#else
     // positive error number returned -> failure
     if (error != 0)
     {
@@ -455,6 +474,7 @@ int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, Dir
         memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
         return -1;         // shim convention for end-of-stream
     }
+#endif
 
     // 0 returned with non-null result (guaranteed to be set to entry arg) -> success
     assert(result == entry);
