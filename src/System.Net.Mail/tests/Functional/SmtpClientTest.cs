@@ -364,50 +364,72 @@ namespace System.Net.Mail.Tests
             }
         }
 
-        [Fact]
-        public void TestSmtpDeliveryFormatSevenBit()
+
+        [Theory]
+        [InlineData(false, false, false)]
+        [InlineData(false, false, true)] // Received text.
+        [InlineData(false, true, false)]
+        [InlineData(false, true, true)]
+        [InlineData(true, false, false)]
+        [InlineData(true, false, true)] // Received text.
+        [InlineData(true, true, false)]
+        [InlineData(true, true, true)]
+        public void SendMail_DeliveryFormatSevenBit_SubjectEncoded(bool useAsyncSend, bool useSevenBit, bool useSmtpUTF8)
         {
-            string sendSubject = "", sendAsyncSubject = "";
+            // If the server support `SMTPUTF8` and use `SmtpDeliveryFormat.International`, the server should received this subject.
+            const string subjectText = "Test \u6d4b\u8bd5 Contain \u5305\u542b UTF8";
 
-            //Run twice to get the results of synchronous and asynchronous methods
-            for (var i = 0; i < 2; i++)
-            { 
-                SmtpServer server = new SmtpServer();
-                server.SupportSmtpUTF8 = true;
+            // If the server does not support `SMTPUTF8` or use `SmtpDeliveryFormat.SevenBit`, the server should received this subject.
+            const string subjectBase64 = "=?utf-8?B?VGVzdCDmtYvor5UgQ29udGFpbiDljIXlkKsgVVRGOA==?=";
 
-                SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
+            SmtpServer server = new SmtpServer();
+
+            // Setting up Server Support for `SMTPUTF8`.
+            server.SupportSmtpUTF8 = useSmtpUTF8;
+
+            SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
+            
+            if (useSevenBit)
+            {
+                // Subject will be encoded by Base64.
                 client.DeliveryFormat = SmtpDeliveryFormat.SevenBit;
-
-                MailMessage msg = new MailMessage("foo@example.com", "bar@example.com", "Test \u6d4b\u8bd5 Contain \u5305\u542b UTF8", "hello \u9ad8\u575a\u679c");
-                msg.HeadersEncoding = msg.BodyEncoding = msg.SubjectEncoding = System.Text.Encoding.UTF8;
-
-                try
-                {
-                    Thread t = new Thread(server.Run);
-                    t.Start();
-
-                    if (i == 0)
-                    {
-                        client.Send(msg);
-                        sendSubject = server.Subject;
-                    }
-                    else
-                    {
-                        client.SendMailAsync(msg).Wait();
-                        sendAsyncSubject = server.Subject;
-                    }
-                }
-                finally
-                {
-                    server.Stop();
-                }
+            }
+            else
+            {
+                // If the server supports `SMTPUTF8`, subject will not be encoded. Otherwise, subject will be encoded by Base64.
+                client.DeliveryFormat = SmtpDeliveryFormat.International;
             }
 
-            //Comparing the results of synchronous and asynchronous methods. Prefixes are used to distinguish the next test.
-            Assert.Equal("subject:" + sendSubject, "subject:" + sendAsyncSubject);
+            MailMessage msg = new MailMessage("foo@example.com", "bar@example.com", subjectText, "hello \u9ad8\u575a\u679c");
+            msg.HeadersEncoding = msg.BodyEncoding = msg.SubjectEncoding = System.Text.Encoding.UTF8;
 
-            //Most important inspection
-            Assert.Equal("=?utf-8?B?VGVzdCDmtYvor5UgQ29udGFpbiDljIXlkKsgVVRGOA==?=", sendAsyncSubject);
+            try
+            {
+                Thread t = new Thread(server.Run);
+                t.Start();
+
+                if (useAsyncSend)
+                {
+                    client.SendMailAsync(msg).Wait(); 
+                }
+                else
+                {
+                    client.Send(msg);
+                }
+
+                if (useSevenBit || !useSmtpUTF8)
+                {
+                    Assert.Equal(subjectBase64, server.Subject);
+                }
+                else
+                {
+                    Assert.Equal(subjectText, server.Subject);
+                }
+            }
+            finally
+            {
+                server.Stop();
+            }
         }
     }
 }
