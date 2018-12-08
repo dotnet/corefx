@@ -538,7 +538,6 @@ namespace System.Tests
             yield return new object[] { "1:1:1.00001", CultureInfo.InvariantCulture, new TimeSpan(36610000100) };
             yield return new object[] { "1:1:1.000001", CultureInfo.InvariantCulture, new TimeSpan(36610000010) };
             yield return new object[] { "1:1:1.0000001", CultureInfo.InvariantCulture, new TimeSpan(36610000001) };
-            yield return new object[] { "1:1:1.00000001", CultureInfo.InvariantCulture, new TimeSpan(36610000001) };
 
             // DD.HH:MM:SS
             yield return new object[] { "1.12:24:02", null, new TimeSpan(1, 12, 24, 2, 0) };
@@ -560,7 +559,6 @@ namespace System.Tests
             yield return new object[] { "1:1:.00001", CultureInfo.InvariantCulture, new TimeSpan(36600000100) };
             yield return new object[] { "1:1:.000001", CultureInfo.InvariantCulture, new TimeSpan(36600000010) };
             yield return new object[] { "1:1:.0000001", CultureInfo.InvariantCulture, new TimeSpan(36600000001) };
-            yield return new object[] { "1:1:.00000001", CultureInfo.InvariantCulture, new TimeSpan(36600000001) };
 
             // Just below overflow on various components
             yield return new object[] { "10675199", null, new TimeSpan(9223371936000000000) };
