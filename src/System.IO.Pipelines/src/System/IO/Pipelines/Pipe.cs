@@ -479,7 +479,14 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetLength(BufferSegment startSegment, int startIndex, BufferSegment endSegment, int endIndex)
         {
-            return (endSegment.RunningIndex + endIndex) - (startSegment.RunningIndex + startIndex);
+            if (startSegment != endSegment)
+            {
+                // (End offset) - (start offset)
+                return (endSegment.RunningIndex + endIndex) - (startSegment.RunningIndex + startIndex);
+            }
+
+            // Single segment length
+            return endIndex - startIndex;
         }
 
         internal void CompleteReader(Exception exception)
