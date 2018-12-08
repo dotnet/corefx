@@ -27,14 +27,14 @@
     <HelixConfiguration>$(ConfigurationGroup)</HelixConfiguration>
     <HelixArchitecture>$(ArchGroup)</HelixArchitecture>
 
-    <!-- This property is used to show the tests results in VSTS. By setting this property the
-    test run name will be displayed as $(TestRunNamePrefix)-$(HelixTargetQueue) -->
-    <TestRunNamePrefix Condition="'$(TargetGroup)' != ''">$(TargetGroup)-</TestRunNamePrefix>
+    <!-- This property is used to show the tests results in Azure Dev Ops. By setting this property the
+    test run name will be displayed as $(BuildConfiguration)-$(HelixTargetQueue) -->
+    <TestRunNamePrefix>$(BuildConfiguration)-</TestRunNamePrefix>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MaxRetryCount)' == ''">
     <!-- In Windows we need a higher value due to some flakyness in Nano. Can remove when helix provides new containers model -->
-    <MaxRetryCount Condition="'$(TargetsWindows)' == 'true'">3</MaxRetryCount>
+    <MaxRetryCount Condition="'$(TargetsWindows)' == 'true'">9</MaxRetryCount>
     <MaxRetryCount Condition="'$(TargetsWindows)' != 'true'">1</MaxRetryCount>
   </PropertyGroup>
 
@@ -79,4 +79,5 @@
     </ItemGroup>
 
   </Target>
+
 </Project>

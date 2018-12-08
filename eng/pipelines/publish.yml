@@ -1,0 +1,26 @@
+jobs:
+  - job: Publish
+    displayName: Publish Packages
+    dependsOn:
+      - WindowsTest
+      - WindowsNoTest
+      - AllConfigurations
+      - LinuxTest
+      - LinuxNoTest
+      - MacOS
+      - RedHat6
+
+    pool:
+      name: dotnet-internal-temp
+
+    workspace: 
+      clean: all
+
+    steps:
+      - task: DownloadBuildArtifacts@0
+        displayName: Download packages to publish
+        inputs:
+          artifactName: packages
+          downloadPath: $(Build.SourcesDirectory)/artifacts
+      - script: dir /s /b $(Build.SourcesDirectory)\artifacts\packages
+        displayName: Show packages

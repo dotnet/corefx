@@ -1,12 +1,14 @@
 parameters:
   archGroup: ''
   configuration: ''
+  creator: ''
   framework: ''
   helixQueues: ''
-  helixToken: $(BotAccount-dotnet-github-anon-kaonashi-bot-helix-token)
+  helixToken: ''
+  isExternal: '' # true | false
   msbuildScript: ''
   targetOS: ''
-  waitForCompletion: true
+  waitForCompletion: '' # true | false
 
 steps:
   - script: ${{ parameters.msbuildScript }}
@@ -20,6 +22,8 @@ steps:
             /p:HelixBuild=$(Build.BuildNumber)
             /p:HelixAccessToken=${{ parameters.helixToken }}
             /p:WaitForWorkItemCompletion=${{ parameters.waitForCompletion }}
+            /p:IsExternal=${{ parameters.isExternal }}
+            /p:Creator=${{ parameters.creator }}
             /p:EnableAzurePipelinesReporter=true
     displayName: Send to Helix
     env:
