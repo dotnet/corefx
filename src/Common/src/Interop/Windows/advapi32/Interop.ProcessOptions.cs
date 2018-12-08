@@ -41,6 +41,8 @@ internal partial class Interop
         internal partial class WaitOptions
         {
             internal const int WAIT_TIMEOUT = 0x00000102;
+            internal const int WAIT_OBJECT_0 = 0x00000000;
+            internal const int WAIT_ABANDONED = 0x00000080;
         }
 
         internal partial class StartupInfoOptions

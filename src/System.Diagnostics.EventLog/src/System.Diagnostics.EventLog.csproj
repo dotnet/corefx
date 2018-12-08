@@ -28,7 +28,6 @@
     <Compile Include="System\Diagnostics\OverflowAction.cs" />
     <Compile Include="System\Diagnostics\SafeEventLogReadHandle.cs" />
     <Compile Include="System\Diagnostics\SafeEventLogWriteHandle.cs" />
-    <Compile Include="System\Diagnostics\SharedUtils.cs" />
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs">
       <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs</Link>
     </Compile>
@@ -59,6 +58,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.OpenEventLog.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.OpenEventLog.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ProcessOptions.cs">
+      <Link>Common\Interop\Windows\advapi32\Interop.ProcessOptions.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ReadEventLog.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.ReadEventLog.cs</Link>
     </Compile>
@@ -82,6 +84,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Diagnostics\SharedUtils.cs">
+      <Link>Common\System\Diagnostics\SharedUtils.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">

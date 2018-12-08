@@ -748,7 +748,7 @@ namespace System.Diagnostics
             while (idx < entries.Length)
             {
                 byte[] buf = new byte[BUF_SIZE];
-                bool success = Interop.Advapi32.ReadEventLog(readHandle, NativeMethods.FORWARDS_READ | NativeMethods.SEEK_READ,
+                bool success = Interop.Advapi32.ReadEventLog(readHandle, Interop.Advapi32.FORWARDS_READ | Interop.Advapi32.SEEK_READ,
                                                       oldestEntry + idx, buf, buf.Length, out bytesRead, out minBytesNeeded);
                 if (!success)
                 {
@@ -767,7 +767,7 @@ namespace System.Diagnostics
                             Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "Increasing buffer size from " + buf.Length.ToString(CultureInfo.InvariantCulture) + " to " + minBytesNeeded.ToString(CultureInfo.InvariantCulture) + " bytes");
                             buf = new byte[minBytesNeeded];
                         }
-                        success = Interop.Advapi32.ReadEventLog(readHandle, NativeMethods.FORWARDS_READ | NativeMethods.SEEK_READ,
+                        success = Interop.Advapi32.ReadEventLog(readHandle, Interop.Advapi32.FORWARDS_READ | Interop.Advapi32.SEEK_READ,
                                                          oldestEntry + idx, buf, buf.Length, out bytesRead, out minBytesNeeded);
                         if (!success)
                             break;
@@ -913,12 +913,12 @@ namespace System.Diagnostics
             int flags = 0;
             if (GetCachedEntryPos(index + 1) < 0)
             {
-                flags = NativeMethods.FORWARDS_READ | NativeMethods.SEEK_READ;
+                flags = Interop.Advapi32.FORWARDS_READ | Interop.Advapi32.SEEK_READ;
                 boolFlags[Flag_forwards] = true;
             }
             else
             {
-                flags = NativeMethods.BACKWARDS_READ | NativeMethods.SEEK_READ;
+                flags = Interop.Advapi32.BACKWARDS_READ | Interop.Advapi32.SEEK_READ;
                 boolFlags[Flag_forwards] = false;
             }
 
@@ -947,7 +947,7 @@ namespace System.Diagnostics
                             cache = new byte[minBytesNeeded];
                         }
                     }
-                    success = Interop.Advapi32.ReadEventLog(readHandle, NativeMethods.FORWARDS_READ | NativeMethods.SEEK_READ, index,
+                    success = Interop.Advapi32.ReadEventLog(readHandle, Interop.Advapi32.FORWARDS_READ | Interop.Advapi32.SEEK_READ, index,
                                                      cache, cache.Length, out bytesRead, out minBytesNeeded);
                 }
 
