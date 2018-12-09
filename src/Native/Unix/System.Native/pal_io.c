@@ -439,26 +439,36 @@ int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, Dir
     }
 
     struct dirent* result = NULL;
-    int error = readdir_r(dir, entry, &result);
-
 #ifdef _AIX
     // AIX returns 0 on success, but bizarrely, it returns 9 for both error and
-    // end-of-directory - in the latter case, it sets result to NULL, and in the
-    // former, sets errno. (I'm not making this up either, see readdir_r(3).)
+    // end-of-directory. result is NULL for both cases. The API returns the
+    // same thing for EOD/error, so disambiguation between the two is nearly
+    // impossible without clobbering errno for yourself and seeing if the API
+    // changed it. See:
+    // https://www.ibm.com/support/knowledgecenter/ssw_aix_71/com.ibm.aix.basetrf2/readdir_r.htm
 
-    // 9 returned, do we have a null result for end of directory?
-    if (error == 9 && result == NULL)
+    int oldErrno = errno; // save errno before we clobber it
+    errno = 0; // create a success condition for the API to clobber
+    int error = readdir_r(dir, entry, &result);
+
+    if (error == 9 && errno == 0)
     {
         memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
-        return -1;         // shim convention for end-of-stream
+        errno = oldErrno; // un-clobber errno because EOD
+        return -1;
     }
-    // result non-null, so must be an error
     else if (error == 9)
     {
         memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
-        return errno;
+        return errno; // we don't need to reset errno now that we have a real error
+    }
+    else
+    {
+        errno = oldErrno; // un-clobber errno because neither EOD nor errno
     }
 #else
+    int error = readdir_r(dir, entry, &result);
+
     // positive error number returned -> failure
     if (error != 0)
     {
