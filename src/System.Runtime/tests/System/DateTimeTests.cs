@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Tests
@@ -721,7 +722,7 @@ namespace System.Tests
             Assert.Equal(expected, dateTime.Subtract(timeSpan));
             Assert.Equal(expected, dateTime - timeSpan);
         }
-        
+
         public static IEnumerable<object[]> Subtract_OutOfRangeTimeSpan_TestData()
         {
             yield return new object[] { DateTime.Now, TimeSpan.MinValue };
@@ -2175,6 +2176,59 @@ namespace System.Tests
         public void GetObjectData_NullInfo_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("info", () => ((ISerializable)DateTime.Now).GetObjectData(null, new StreamingContext()));
+        }
+
+        [Fact]
+        public void TestRoundTrippingDateTimeAndFileTime()
+        {
+            // This test ensure the round tripping of DateTime with the system file time.
+            // It is important to have this working on systems support leap seconds as the conversion wouldn't be simple
+            // conversion but involve some OS calls to ensure the right conversion is happening.
+
+            DateTime now = DateTime.UtcNow;
+            long fileTime = now.ToFileTimeUtc();
+            DateTime roundTrippedDateTime = DateTime.FromFileTimeUtc(fileTime);
+            Assert.Equal(now, roundTrippedDateTime);
+
+            now = DateTime.Now;
+            fileTime = now.ToFileTime();
+            roundTrippedDateTime = DateTime.FromFileTime(fileTime);
+            Assert.Equal(now, roundTrippedDateTime);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void TestTimeSynchronizationWithTheSystem()
+        {
+            // The reported time by the framework should be synchronized with the OS.
+            // There shouldn't be any shift by more than one second, otherwise there is something wrong.
+            // This test is useful when running on a system supporting leap seconds to ensure when the system
+            // has leap seconds, the framework reported time will still be synchronized.
+
+            SYSTEMTIME st;
+            GetSystemTime(out st);
+            DateTime dt = DateTime.UtcNow;
+
+            DateTime systemDateTimeNow  = new DateTime(st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMillisecond, DateTimeKind.Utc);
+            TimeSpan diff = systemDateTimeNow - dt;
+
+            Assert.True(diff < TimeSpan.FromSeconds(1), $"Reported DateTime.UtcNow {dt} is shifted by more than one second then the system time {systemDateTimeNow}");
+        }
+
+        [DllImport("Kernel32.dll")]
+        internal static extern void GetSystemTime(out SYSTEMTIME lpSystemTime);
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct SYSTEMTIME
+        {
+            internal ushort wYear;
+            internal ushort wMonth;
+            internal ushort wDayOfWeek;
+            internal ushort wDay;
+            internal ushort wHour;
+            internal ushort wMinute;
+            internal ushort wSecond;
+            internal ushort wMillisecond;
         }
 
         private class DateMaxCalendar : Calendar
