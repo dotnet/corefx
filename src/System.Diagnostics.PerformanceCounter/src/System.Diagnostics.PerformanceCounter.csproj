@@ -64,6 +64,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.TOKEN_INFORMATION_CLASS.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.TOKEN_INFORMATION_CLASS.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.Constants.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.Constants.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.CreateFileMapping.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.CreateFileMapping.cs</Link>
     </Compile>
@@ -148,8 +151,8 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafePerfProviderHandle.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafePerfProviderHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Diagnostics\SharedUtils.cs">
-      <Link>Common\System\Diagnostics\SharedUtils.cs</Link>
+    <Compile Include="$(CommonPath)\System\Diagnostics\NetFrameworkUtils.cs">
+      <Link>Common\System\Diagnostics\NetFrameworkUtils.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">

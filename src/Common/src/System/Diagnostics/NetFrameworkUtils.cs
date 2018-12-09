@@ -5,30 +5,13 @@
 using System.Threading;
 using System.Text;
 using Microsoft.Win32;
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace System.Diagnostics
 {
-    internal static partial class SharedUtils
+    internal static partial class NetFrameworkUtils
     {
-        internal static Win32Exception CreateSafeWin32Exception()
-        {
-            return CreateSafeWin32Exception(0);
-        }
-
-        internal static Win32Exception CreateSafeWin32Exception(int error)
-        {
-            Win32Exception newException = null;
-            if (error == 0)
-                newException = new Win32Exception();
-            else
-                newException = new Win32Exception(error);
-
-            return newException;
-        }
-
         internal static void EnterMutex(string name, ref Mutex mutex)
         {
             string mutexName = "Global\\" + name;
@@ -94,14 +77,14 @@ namespace System.Diagnostics
                 int result = Interop.Kernel32.WaitForSingleObject(mutexIn.SafeWaitHandle, 500);
                 switch (result)
                 {
-                    case Interop.Advapi32.WaitOptions.WAIT_OBJECT_0:
-                    case Interop.Advapi32.WaitOptions.WAIT_ABANDONED:
+                    case Interop.Kernel32.WAIT_OBJECT_0:
+                    case Interop.Kernel32.WAIT_ABANDONED:
                         // Mutex was obtained, atomically record that fact.
                         mutexOut = mutexIn;
                         ret = true;
                         break;
 
-                    case Interop.Advapi32.WaitOptions.WAIT_TIMEOUT:
+                    case Interop.Kernel32.WAIT_TIMEOUT:
                         // Couldn't get mutex yet, simply return and we'll try again later.
                         ret = true;
                         break;
@@ -132,14 +115,11 @@ namespace System.Diagnostics
 
             try
             {
-                if (machineName.Equals("."))
-                {
-                    return GetLocalBuildDirectory();
-                }
+                if (machineName == ".")
+                    baseKey = Registry.LocalMachine;
                 else
-                {
                     baseKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, machineName);
-                }
+
                 if (baseKey == null)
                     throw new InvalidOperationException(SR.Format(SR.RegKeyMissingShort, "HKEY_LOCAL_MACHINE", machineName));
 

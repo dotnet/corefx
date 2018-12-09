@@ -1248,7 +1248,7 @@ namespace System.Diagnostics
                 res = 0;
 
             if (res != 0)
-                throw SharedUtils.CreateSafeWin32Exception(res);
+                throw new Win32Exception(res);
         }
 
         internal static void UnregisterCategory(string categoryName)
@@ -1354,7 +1354,7 @@ namespace System.Diagnostics
                             break;
 
                         default:
-                            throw SharedUtils.CreateSafeWin32Exception(error);
+                            throw new Win32Exception(error);
                     }
                 }
                 catch (InvalidCastException e)
@@ -1363,7 +1363,7 @@ namespace System.Diagnostics
                 }
             }
 
-            throw SharedUtils.CreateSafeWin32Exception(error);
+            throw new Win32Exception(error);
         }
 
     }

@@ -24,7 +24,6 @@
     <Compile Include="System\Diagnostics\EventLogInternal.cs" />
     <Compile Include="System\Diagnostics\EventSourceCreationData.cs" />
     <Compile Include="System\Diagnostics\EventLogTraceListener.cs" />
-    <Compile Include="System\Diagnostics\NativeMethods.cs" />
     <Compile Include="System\Diagnostics\OverflowAction.cs" />
     <Compile Include="System\Diagnostics\SafeEventLogReadHandle.cs" />
     <Compile Include="System\Diagnostics\SafeEventLogWriteHandle.cs" />
@@ -58,9 +57,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.OpenEventLog.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.OpenEventLog.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ProcessOptions.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.ProcessOptions.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ReadEventLog.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.ReadEventLog.cs</Link>
     </Compile>
@@ -69,6 +65,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ReportEvent.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.ReportEvent.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.Constants.cs">
+      <Link>Common\Interop\Windows\kernel32\Interop.Constants.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FormatMessage_SafeLibraryHandle.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.FormatMessage_SafeLibraryHandle.cs</Link>
@@ -85,8 +84,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Diagnostics\SharedUtils.cs">
-      <Link>Common\System\Diagnostics\SharedUtils.cs</Link>
+    <Compile Include="$(CommonPath)\System\Diagnostics\NetFrameworkUtils.cs">
+      <Link>Common\System\Diagnostics\NetFrameworkUtils.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
