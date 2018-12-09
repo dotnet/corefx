@@ -789,6 +789,8 @@ namespace System.IO.Pipelines
             BufferSegment head = _readHead;
             if (head != null)
             {
+                SetMemory();
+
                 // Reading commit head shared with writer
                 var readOnlySequence = new ReadOnlySequence<byte>(head, _readHeadIndex, _readTail, _readTailIndex);
                 result = new ReadResult(readOnlySequence, isCanceled, isCompleted);
@@ -805,6 +807,23 @@ namespace System.IO.Pipelines
             else
             {
                 _operationState.BeginRead();
+            }
+        }
+
+        private void SetMemory()
+        {
+            // REVIEW: Optimize the single block case?
+            BufferSegment node = _readHead;
+
+            while (true)
+            {
+                node.UpdateMemory();
+
+                if (node == null || node == _readTail)
+                {
+                    break;
+                }
+                node = node.NextSegment;
             }
         }
 

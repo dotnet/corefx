@@ -13,6 +13,7 @@ namespace System.IO.Pipelines
         private IMemoryOwner<byte> _memoryOwner;
         private BufferSegment _next;
         private int _end;
+        private bool _dirty;
 
         /// <summary>
         /// The End represents the offset into AvailableMemory where the range of "active" bytes ends. At the point when the block is leased
@@ -27,7 +28,7 @@ namespace System.IO.Pipelines
                 Debug.Assert(value <= AvailableMemory.Length);
 
                 _end = value;
-                Memory = AvailableMemory.Slice(0, _end);
+                _dirty = true;
             }
         }
 
@@ -69,6 +70,15 @@ namespace System.IO.Pipelines
         public Memory<byte> AvailableMemory { get; private set; }
 
         public int Length => End;
+
+        public void UpdateMemory()
+        {
+            if (_dirty)
+            {
+                Memory = AvailableMemory.Slice(0, _end);
+                _dirty = false;
+            }
+        }
 
         /// <summary>
         /// The amount of writable bytes in this segment. It is the amount of bytes between Length and End
