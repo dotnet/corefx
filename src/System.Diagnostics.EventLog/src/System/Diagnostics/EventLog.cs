@@ -890,8 +890,8 @@ namespace System.Diagnostics
                     handles[i] = GCHandle.Alloc(insertionStrings[i], GCHandleType.Pinned);
                     addresses[i] = handles[i].AddrOfPinnedObject();
                 }
-                int lastError = Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER;
-                while (msgLen == 0 && lastError == Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER)
+                int lastError = Interop.Errors.ERROR_INSUFFICIENT_BUFFER;
+                while (msgLen == 0 && lastError == Interop.Errors.ERROR_INSUFFICIENT_BUFFER)
                 {
                     msgLen = Interop.Kernel32.FormatMessage(
                         flags,
@@ -905,7 +905,7 @@ namespace System.Diagnostics
                     if (msgLen == 0)
                     {
                         lastError = Marshal.GetLastWin32Error();
-                        if (lastError == Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER)
+                        if (lastError == Interop.Errors.ERROR_INSUFFICIENT_BUFFER)
                             buf = new char[buf.Length * 2];
                     }
                 }

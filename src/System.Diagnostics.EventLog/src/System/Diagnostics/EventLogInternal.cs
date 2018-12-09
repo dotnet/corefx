@@ -485,7 +485,7 @@ namespace System.Diagnostics
                 // Ignore file not found errors.  ClearEventLog seems to try to delete the file where the event log is
                 // stored.  If it can't find it, it gives an error. 
                 int error = Marshal.GetLastWin32Error();
-                if (error != Interop.Kernel32.ERROR_FILE_NOT_FOUND)
+                if (error != Interop.Errors.ERROR_FILE_NOT_FOUND)
                     throw new Win32Exception();
             }
             // now that we've cleared the event log, we need to re-open our handles, because
@@ -755,9 +755,9 @@ namespace System.Diagnostics
                     error = Marshal.GetLastWin32Error();
                     Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "Error from ReadEventLog is " + error.ToString(CultureInfo.InvariantCulture));
 
-                    if (error == Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER || error == Interop.Kernel32.ERROR_EVENTLOG_FILE_CHANGED)
+                    if (error == Interop.Errors.ERROR_INSUFFICIENT_BUFFER || error == Interop.Errors.ERROR_EVENTLOG_FILE_CHANGED)
                     {
-                        if (error == Interop.Kernel32.ERROR_EVENTLOG_FILE_CHANGED)
+                        if (error == Interop.Errors.ERROR_EVENTLOG_FILE_CHANGED)
                         {
                             Reset(currentMachineName);
                         }
@@ -931,9 +931,9 @@ namespace System.Diagnostics
             {
                 int error = Marshal.GetLastWin32Error();
                 Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "Error from ReadEventLog is " + error.ToString(CultureInfo.InvariantCulture));
-                if (error == Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER || error == Interop.Kernel32.ERROR_EVENTLOG_FILE_CHANGED)
+                if (error == Interop.Errors.ERROR_INSUFFICIENT_BUFFER || error == Interop.Errors.ERROR_EVENTLOG_FILE_CHANGED)
                 {
-                    if (error == Interop.Kernel32.ERROR_EVENTLOG_FILE_CHANGED)
+                    if (error == Interop.Errors.ERROR_EVENTLOG_FILE_CHANGED)
                     {
                         byte[] tempcache = cache;
                         Reset(currentMachineName);

@@ -13,9 +13,6 @@ internal partial class Interop
         public const int FORMAT_MESSAGE_IGNORE_INSERTS = 0x00000200;
         public const int FORMAT_MESSAGE_FROM_HMODULE = 0x00000800;
         public const int FORMAT_MESSAGE_ARGUMENT_ARRAY = 0x00002000;
-        public const int ERROR_INSUFFICIENT_BUFFER = 0x7A;
-        public const int ERROR_EVENTLOG_FILE_CHANGED = 1503;
-        public const int ERROR_FILE_NOT_FOUND = 2;
 
         [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, SetLastError = true, BestFitMapping = true)]
         public static unsafe extern int FormatMessage(
