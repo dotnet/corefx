@@ -455,7 +455,6 @@ int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, Dir
     // result non-null, so must be an error
     else if (error == 9)
     {
-        assert(error > 0);
         memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
         return errno;
     }
