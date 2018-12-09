@@ -35,7 +35,7 @@ namespace System.Globalization.Tests
         }
         
         [Fact]
-	[SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+	    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void AbbreviatedMonthNames_Format()
         {
             var format = new DateTimeFormatInfo();
