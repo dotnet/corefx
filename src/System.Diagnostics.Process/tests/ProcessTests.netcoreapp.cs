@@ -130,16 +130,8 @@ namespace System.Diagnostics.Tests
             Assert.Throws<InvalidOperationException>(() => testProcess.Start());
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
-        public void VerifyingCiBehavior()
-        {
-            throw new Exception();
-        }
-
         [PlatformSpecific(TestPlatforms.Windows)]
-        [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
         public void Kill_EntireProcessTree_ThrowsPlatformNotSupportedException()
         {
@@ -175,7 +167,7 @@ namespace System.Diagnostics.Tests
                 return;
             }
 
-            Assert.Throws<InvalidOperationException>(() => process.Kill(entireProcessTree: true));
+            Assert.Throws<NotSupportedException>(() => process.Kill(entireProcessTree: true));
 
         }
 
