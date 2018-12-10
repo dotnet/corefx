@@ -470,13 +470,9 @@ namespace System.Net.Sockets.Tests
                         // test server just echos back, so read number of expected bytes from the stream
                         var contentActual = new byte[bytesExpected];
                         int bytesReceived = 0;
-                        int tries = 0;
-                        const int MaxTries = 15;
-                        while (bytesReceived < bytesExpected && tries < MaxTries) {
+                        while (bytesReceived < bytesExpected) {
                             bytesReceived += sock.Receive(contentActual, bytesReceived, bytesExpected-bytesReceived, SocketFlags.None);
-                            tries++;
                         }
-                        Assert.InRange(tries, 0, MaxTries);
                         Assert.Equal(bytesExpected, bytesReceived);
                         Assert.Equal(contentExpected, contentActual);
                     }
