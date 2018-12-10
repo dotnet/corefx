@@ -2206,13 +2206,24 @@ namespace System.Tests
             // has leap seconds, the framework reported time will still be synchronized.
 
             SYSTEMTIME st;
+            SYSTEMTIME st1;
+
             GetSystemTime(out st);
             DateTime dt = DateTime.UtcNow;
+            GetSystemTime(out st1);
 
-            DateTime systemDateTimeNow  = new DateTime(st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMillisecond, DateTimeKind.Utc);
-            TimeSpan diff = systemDateTimeNow - dt;
+            DateTime systemDateTimeNow1  = new DateTime(st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMillisecond, DateTimeKind.Utc);
+            DateTime systemDateTimeNow2  = new DateTime(st1.wYear, st1.wMonth, st1.wDay, st1.wHour, st1.wMinute, st1.wSecond, st1.wMillisecond, DateTimeKind.Utc);
 
-            Assert.True(diff < TimeSpan.FromSeconds(1), $"Reported DateTime.UtcNow {dt} is shifted by more than one second then the system time {systemDateTimeNow}");
+            // Usually GetSystemTime and DateTime.UtcNow calls doesn't take one second to execute, if this is not the case then
+            // the thread was sleeping for awhile and we cannot test reliably on that case.
+
+            TimeSpan diff = systemDateTimeNow2 - systemDateTimeNow1;
+            if (diff < TimeSpan.FromSeconds(1))
+            {
+                diff = systemDateTimeNow1 - dt;
+                Assert.True(diff < TimeSpan.FromSeconds(1), $"Reported DateTime.UtcNow {dt} is shifted by more than one second then the system time {systemDateTimeNow1}");
+            }
         }
 
         [DllImport("Kernel32.dll")]
