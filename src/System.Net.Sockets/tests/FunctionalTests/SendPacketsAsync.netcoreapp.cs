@@ -219,7 +219,7 @@ namespace System.Net.Sockets.Tests
         public void SendPacketsElement_FileStreamMultiPartMixed_MultipleFileStreams_Success(SocketImplementationType type) {
             using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous)) 
             using (var stream2 = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous)) {
-                    var elements = new[]
+                var elements = new[]
                 {
                     new SendPacketsElement(new byte[] { 5, 6, 7 }, 0, 0),
                     new SendPacketsElement(stream, s_testFileSize - 10, 10),
@@ -227,6 +227,23 @@ namespace System.Net.Sockets.Tests
                     new SendPacketsElement(TestFileName, 0L, 10),
                     new SendPacketsElement(new byte[] { 8, 9, 10 }, 0, 1),
                     new SendPacketsElement(TestFileName, 30, 10),
+                };
+                var expected = GetExpectedContent(elements);
+                SendPackets(type, elements, SocketError.Success, expected.Length, expected);
+            }
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        public void SendPacketsElement_FileStreamMultiPartMixed_MultipleWholeFiles_Success(SocketImplementationType type) {
+            using (var stream = new FileStream(TestFileName, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous)) {
+                var elements = new[]
+                {
+                    new SendPacketsElement(stream, 0L, 0),
+                    new SendPacketsElement(TestFileName, 0L, 10),
+                    new SendPacketsElement(stream, 0L, 0),
+                    new SendPacketsElement(TestFileName, 0L, 10),
                 };
                 var expected = GetExpectedContent(elements);
                 SendPackets(type, elements, SocketError.Success, expected.Length, expected);
