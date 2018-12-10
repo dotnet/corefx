@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
@@ -73,55 +74,57 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// Makes a best-effort attempt to kill all descendant (child, grandchild, etc.) processes.
-        /// </summary>
-        private void KillTree()
+        private IEnumerable<Exception> KillTree()
         {
+            List<Exception> exceptions = new List<Exception>();
+
+            try
+            {
+                // Stop but don't kill the process. Keeps additional children from being started but leaves the process alive 
+                // so that its children can be enumerated.
+                Stop();
+            }
+            catch (InvalidOperationException)
+            {
+                // It appears that nothing more can be done with the process. Implies that its children can't be enumerated.
+                return Enumerable.Empty<Exception>();
+            }
+            catch (Win32Exception e)
+            {
+                exceptions.Add(e);
+            }
+
+            IReadOnlyList<Process> children = GetChildProcesses();
+
             try
             {
                 try
                 {
-                    // Stop but don't kill the process. Keeps additional children from being started but leaves the process around 
-                    // so that its children can be enumerated.
-                    Stop();
-                }
-                catch (Exception e) when (e is InvalidOperationException || e is Win32Exception)
-                {
-                    // Made a best attempt which failed (likely because the process is dead or we do not have the necessary permissions). 
-                    // However, there is still a chance that it is possible to terminate the process's children, so suppress the exception 
-                    // and keep going.
-                }
-
-                IReadOnlyList<Process> children = GetChildProcesses();
-
-                try
-                {
-                    // Since the process's children have been enumerated, it can now be terminated.
+                    // Since children have been enumerated, the process can be terminated.
                     Kill();
                 }
-                catch (Exception e) when (e is InvalidOperationException || e is Win32Exception)
+                catch (InvalidOperationException)
                 {
-                    // Made a best attempt which failed (likely because the process is dead or we do not have the necessary permissions). 
-                    // However, there is still a chance that it is possible to terminate the process's children, so suppress the exception 
-                    // and keep going.
+                    // Ignore. The process is already dead.
+                }
+                catch (Win32Exception e)
+                {
+                    exceptions.Add(e);
                 }
 
-                KillChildren(children);
+                foreach (Process childProcess in children)
+                {
+                    IEnumerable<Exception> exceptionsFromChild = childProcess.KillTree();
+                    exceptions.AddRange(exceptionsFromChild);
+                }
             }
-            catch (Exception e)
+            finally
             {
-                // This method is to be fail-safe so exceptions should not escape from it. 
-                //
-                // Some exceptions that could be encountered will only be thrown in race or difficult to simulate situations, making 
-                // it impractical to use tests to trigger these exceptions and verify that they are caught. Without such tests, it's possible 
-                // that code changes elsewhere could change the list of exceptions this method might encounter this method being updated. 
-                //
-                // To ensure this method honors its 'fail-safe' contract, it catches all exceptions when in production. In development, 
-                // unexpected exceptions cause failures, encouraging the developer to update the explicit catches, as appropriate.
-
-                Debug.Fail("Unexpected exception encountered", e.ToString());
+                foreach (Process child in children)
+                    child.Dispose();
             }
+
+            return exceptions;
         }
 
         /// <summary>Discards any information about the associated process.</summary>
@@ -306,7 +309,7 @@ namespace System.Diagnostics
         /// </summary>
         private IReadOnlyList<Process> GetChildProcesses()
         {
-            var childProcesses = new List<Process>();
+            List<Process> childProcesses = new List<Process>();
 
             foreach (Process possibleChildProcess in GetProcesses())
             {
@@ -323,9 +326,7 @@ namespace System.Diagnostics
                 finally
                 {
                     if (!keep)
-                    {
                         possibleChildProcess.Dispose();
-                    }
                 }
             }
 
@@ -335,6 +336,9 @@ namespace System.Diagnostics
         /// <summary>Checks whether the argument is a direct child of this process.</summary>
         private bool IsParentOf(Process possibleChildProcess) =>
             Id == possibleChildProcess.ParentProcessId;
+
+        private bool Equals(Process process) =>
+            Id == process.Id;
 
         partial void ThrowIfExited(bool refresh)
         {

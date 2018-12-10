@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 
 namespace System.Diagnostics
 {
@@ -16,29 +18,67 @@ namespace System.Diagnostics
             }
             else
             {
-                // Ensures that an InvalidOperationException is thrown if the process hasn't started yet -- present to mimic the behavior of Kill()
-                EnsureState(State.Associated);
+                EnsureState(State.Associated | State.IsLocal | State.HaveNonExitedId);
 
-                KillTree();
+                if (IsInTreeOf(GetCurrentProcess()))
+                    throw new InvalidOperationException(SR.KillEntireProcessTree_DisallowedBecauseTreeContainsCallingProcess);
+
+                IEnumerable<Exception> result = KillTree();
+
+                if (result.Any())
+                    throw new AggregateException(SR.KillEntireProcessTree_TerminationIncomplete, result);
             }
         }
 
-        private void KillChildren(IReadOnlyList<Process> children)
+        private bool IsInTreeOf(Process processOfInterest)
         {
+            if (SafePredicateTest(() => Equals(processOfInterest)))
+                return true;
+
+            Process[] processes = GetProcesses();
+
             try
             {
-                foreach (Process childProcess in children)
+                var queue = new Queue<Process>();
+                Process current = this;
+
+                do
                 {
-                    childProcess.KillTree();
-                }
+                    IEnumerable<Process> children = processes
+                        .Where(p => SafePredicateTest(() => current.IsParentOf(p)));
+
+                    if (children.Any(c => SafePredicateTest(() => c.Equals(processOfInterest))))
+                        return true;
+
+                    foreach (Process child in children)
+                        queue.Enqueue(child);
+                } while (queue.TryDequeue(out current));
             }
             finally
             {
-                foreach (Process childProcess in children)
+                foreach (Process process in processes)
                 {
-                    childProcess.Dispose();
+                    process.Dispose();
                 }
             }
+
+            return false;
         }
+
+        private bool SafePredicateTest(Func<bool> predicate, bool fallbackResult = false)
+        {
+            try
+            {
+                return predicate();
+            }
+            catch (Exception e) when (e is InvalidOperationException || e is Win32Exception)
+            {
+                // InvalidOperationException signifies conditions such as the process already being dead.
+                // Win32Exception signifies issues such as insufficient permissions to get details on the process.
+                // In either case, the predicate couldn't be applied so return the fallback result. 
+                return fallbackResult;
+            }
+        }
+
     }
 }

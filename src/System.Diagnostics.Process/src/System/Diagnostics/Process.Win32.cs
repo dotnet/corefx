@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -347,113 +348,101 @@ namespace System.Diagnostics
         /// <remarks>
         /// A child process is a process which has this process's id as its parent process id and which started after this process did.
         /// </remakrs>
-        private bool IsParentOf(Process possibleChildProcess) =>
-            StartTime < possibleChildProcess.StartTime
-            && Id == possibleChildProcess.GetParentProcessId();
+        private bool IsParentOf(Process possibleChild) =>
+            StartTime < possibleChild.StartTime
+            && Id == possibleChild.ParentProcessId;
 
         /// <summary>
-        /// Attempts to get the process's parent process id.
+        /// Get the process's parent process id.
         /// </summary>
-        private unsafe int? GetParentProcessId()
+        private unsafe int ParentProcessId
         {
-            Interop.NtDll.PROCESS_BASIC_INFORMATION info = default;
-
-            if (Interop.NtDll.NtQueryInformationProcess(SafeHandle, Interop.NtDll.PROCESSINFOCLASS.ProcessBasicInformation, &info, (uint)sizeof(Interop.NtDll.PROCESS_BASIC_INFORMATION), out _) == 0)
+            get
             {
-                return (int)info.InheritedFromUniqueProcessId;
-            }
+                Interop.NtDll.PROCESS_BASIC_INFORMATION info = default;
 
-            return null;
+                using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_INFORMATION))
+                {
+                    if (Interop.NtDll.NtQueryInformationProcess(handle, Interop.NtDll.PROCESSINFOCLASS.ProcessBasicInformation, &info, (uint)sizeof(Interop.NtDll.PROCESS_BASIC_INFORMATION), out _) != 0)
+                        throw new Win32Exception(SR.ProcessInformationUnavailable);
+
+                    return (int)info.InheritedFromUniqueProcessId;
+                }
+            }
         }
 
-        /// <summary>
-        /// Makes a best-effort attempt to kill all descendant (child, grandchild, etc.) processes.
-        /// </summary>
-        private void KillTree()
+        private bool Equals(Process process) =>
+            Id == process.Id
+            && StartTime == process.StartTime;
+
+        private IEnumerable<Exception> KillTree()
         {
+            // The process's structures will be preserved as long as a handle is held pointing to them, even if the process exits or 
+            // is terminated. A handle is held here to ensure a stable reference to the process during execution.
+            using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_LIMITED_INFORMATION))
+            {
+                return KillTree(handle);
+            }
+        }
+
+        private IEnumerable<Exception> KillTree(SafeProcessHandle handle)
+        {
+            List<Exception> exceptions = new List<Exception>();
+
             try
             {
-                try
-                {
-                    // Causes this object instance to hold a handle to the process. While held, the process's PID won't be reused 
-                    // and its children can be enumerated. These behaviors hold true even if the process is subsequently terminated.
-                    OpenProcessHandle();
-                }
-                catch (Exception e) when (e is ObjectDisposedException || e is InvalidOperationException || e is Win32Exception)
-                {
-                    // If obtaining a handle fails, we can't do anything further related to this process.
-                    return;
-                }
-
-                try
-                {
-                    // Kill the process, so that no further children can be created.
-                    Kill();
-                }
-                catch (Exception e) when (e is InvalidOperationException || e is Win32Exception)
-                {
-                    // Made a best-effort attempt which failed (perhaps because the process is already dead).
-                    // However, since it still might be possible to terminate the process's children, suppress the failure and keep going.
-                }
-
-                KillChildren(GetChildProcesses());
+                // Kill the process, so that no further children can be created.
+                Kill();
             }
-            catch (Exception e)
+            catch (InvalidOperationException)
             {
-                // This method is to be fail-safe so exceptions should not escape from it. 
-                //
-                // Some exceptions that could be encountered will only be thrown in race or difficult to simulate situations, making 
-                // it impractical to use tests to trigger these exceptions and verify that they are caught. Without such tests, it's possible 
-                // that code changes elsewhere could change the list of exceptions this method might encounter this method being updated. 
-                //
-                // To ensure this method honors its 'fail-safe' contract, it catches all exceptions when in production. In development, 
-                // unexpected exceptions cause failures, encouraging the developer to update the explicit catches, as appropriate.
-
-                Debug.Fail("Unexpected exception encountered", e.ToString());
+                // The process isn't in a valid state for termination (e.g. already dead), so ignore the exception
+                // but don't give up in case children can still be enumerated.
             }
+            catch (Win32Exception e)
+            {
+                exceptions.Add(e);
+            }
+
+            IReadOnlyList<(Process Process, SafeProcessHandle Handle)> children = GetProcessHandlePairs(p => SafePredicateTest(() => IsParentOf(p)));
+            try
+            {
+                foreach ((Process Process, SafeProcessHandle Handle) child in children)
+                {
+                    IEnumerable<Exception> exceptionsFromChild = child.Process.KillTree(child.Handle);
+                    exceptions.AddRange(exceptionsFromChild);
+                }
+            }
+            finally
+            {
+                foreach ((Process Process, SafeProcessHandle Handle) child in children)
+                {
+                    child.Process.Dispose();
+                    child.Handle.Dispose();
+                }
+            }
+
+            return exceptions;
         }
 
-        /// <summary>
-        /// Returns all immediate child processes.
-        /// </summary>
-        private IReadOnlyList<Process> GetChildProcesses()
+        private IReadOnlyList<(Process Process, SafeProcessHandle Handle)> GetProcessHandlePairs(Func<Process, bool> predicate)
         {
-            var childProcesses = new List<Process>();
+            return GetProcesses()
+                .Select(p => (Process: p, Handle: SafeGetHandle(p)))
+                .Where(p => !p.Handle.IsInvalid && predicate(p.Process))
+                .ToList();
 
-            foreach (Process possibleChildProcess in GetProcesses())
+            SafeProcessHandle SafeGetHandle(Process process)
             {
-                bool keep = false;
-
                 try
                 {
-                    try
-                    {
-                        // Causes the instance to hold a handle to the process. While held, the process's PID won't be reused 
-                        // and its children can be enumerated. These behaviors hold true even if the process is subsequently terminated.
-                        possibleChildProcess.OpenProcessHandle();
-                    }
-                    catch (Exception e) when (e is ObjectDisposedException || e is InvalidOperationException || e is Win32Exception)
-                    {
-                        // Made a best-effort attempt which failed (perhaps because the process is already dead).
-                        continue;
-                    }
-
-                    if (IsParentOf(possibleChildProcess))
-                    {
-                        childProcesses.Add(possibleChildProcess);
-                        keep = true;
-                    }
+                    return process.GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_QUERY_LIMITED_INFORMATION, false);
                 }
-                finally
+                catch (Win32Exception)
                 {
-                    if (!keep)
-                    {
-                        possibleChildProcess.Dispose();
-                    }
+                    return SafeProcessHandle.InvalidHandle;
                 }
             }
-
-            return childProcesses;
         }
     }
 }

@@ -158,6 +158,94 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        public void Kill_EntireProcessTree_True_CalledByNonLocalProcess_ThrowsInvalidOperationException()
+        {
+            Process currentProcess = Process.GetCurrentProcess();
+            Process process;
+
+            try
+            {
+                process = Process.GetProcessById(currentProcess.Id, "127.0.0.1");
+            }
+            catch (InvalidOperationException)
+            {
+                // As we can't detect reliably if performance counters are enabled, 
+                // we silently abort on InvalidOperationExceptions since this test
+                // can only run if the attempt to get the process succeeded.
+                return;
+            }
+
+            Assert.Throws<InvalidOperationException>(() => process.Kill(entireProcessTree: true));
+
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        public void Kill_EntireProcessTree_True_CalledOnCallingProcess_ThrowsInvalidOperationException()
+        {
+            var process = Process.GetCurrentProcess();
+            Assert.Throws<InvalidOperationException>(() => process.Kill(entireProcessTree: true));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        public void Kill_EntireProcessTree_True_CalledOnTreeContainingCallingProcess_ThrowsInvalidOperationException()
+        {
+            Process containingProcess = CreateProcess(() =>
+            {
+                Process parentProcess = CreateProcess(() => RunProcessAttemptingToKillEntireTreeOnParent());
+
+                parentProcess.Start();
+                parentProcess.WaitForExit();
+
+                return parentProcess.ExitCode;
+
+            });
+
+            containingProcess.Start();
+            containingProcess.WaitForExit();
+
+            if (containingProcess.ExitCode != 10)
+                Assert.True(false, "attempt to terminate a process tree containing the calling process did not throw the expected exception");
+
+
+            int RunProcessAttemptingToKillEntireTreeOnParent()
+            {
+                Process process = CreateProcess(parentProcessIdString =>
+                {
+                    Process parentProcess = Process.GetProcessById(int.Parse(parentProcessIdString));
+
+                    bool caught = false;
+                    try
+                    {
+                        parentProcess.Kill(entireProcessTree: true);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        caught = true;
+                    }
+                    return caught ? 10 : 20;
+                }, Process.GetCurrentProcess().Id.ToString());
+
+                process.Start();
+                process.WaitForExit();
+                return process.ExitCode;
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        public void Kill_EntireProcessTree_True_CalledOnExitedProcess_ThrowsInvalidOperationException()
+        {
+            Process process = CreateProcess();
+            process.Start();
+            process.WaitForExit();
+
+            Assert.Throws<InvalidOperationException>(() => process.Kill(entireProcessTree: true));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public async Task Kill_EntireProcessTree_False_OnlyRootProcessTerminated()
         {
             IReadOnlyList<Process> tree = CreateProcessTree();
@@ -184,7 +272,7 @@ namespace System.Diagnostics.Tests
                     }
                     catch
                     {
-                        // Best-effort attempt, so ignore any exceptions
+                        // Test cleanup code, so ignore any exceptions.
                     }
                 }
             }
@@ -205,7 +293,7 @@ namespace System.Diagnostics.Tests
                 await Helpers.RetryWithBackoff(() =>
                 {
                     var actual = tree.Select(p => p.HasExited).ToList();
-                    Assert.True(actual.All(x => x == true));
+                    Assert.Equal(new[] { true, true, true }, actual);
                 });
             }
             finally
@@ -218,7 +306,7 @@ namespace System.Diagnostics.Tests
                     }
                     catch
                     {
-                        // Best-effort attempt, so ignore any exceptions
+                        // Test cleanup code, so ignore any exceptions.
                     }
                 }
             }
