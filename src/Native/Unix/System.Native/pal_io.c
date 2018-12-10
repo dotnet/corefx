@@ -447,24 +447,13 @@ int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, Dir
     // changed it. See:
     // https://www.ibm.com/support/knowledgecenter/ssw_aix_71/com.ibm.aix.basetrf2/readdir_r.htm
 
-    int oldErrno = errno; // save errno before we clobber it
     errno = 0; // create a success condition for the API to clobber
     int error = readdir_r(dir, entry, &result);
 
-    if (error == 9 && errno == 0)
+    if (error == 9)
     {
         memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
-        errno = oldErrno; // un-clobber errno because EOD
-        return -1;
-    }
-    else if (error == 9)
-    {
-        memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
-        return errno; // we don't need to reset errno now that we have a real error
-    }
-    else
-    {
-        errno = oldErrno; // un-clobber errno because neither EOD nor errno
+        return errno == 0 ? -1 : errno;
     }
 #else
     int error = readdir_r(dir, entry, &result);
