@@ -2182,7 +2182,7 @@ namespace System.Tests
         public void TestRoundTrippingDateTimeAndFileTime()
         {
             // This test ensure the round tripping of DateTime with the system file time.
-            // It is important to have this working on systems support leap seconds as the conversion wouldn't be simple
+            // It is important to have this working on systems supporting leap seconds as the conversion wouldn't be simple
             // conversion but involve some OS calls to ensure the right conversion is happening.
 
             DateTime now = DateTime.UtcNow;
