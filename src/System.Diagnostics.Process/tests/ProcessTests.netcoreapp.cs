@@ -148,7 +148,9 @@ namespace System.Diagnostics.Tests
             Assert.Throws<InvalidOperationException>(() => process.Kill(entireProcessTree: true));
         }
 
+        
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)] // Currently, remote processes are only supported on Windows. If that changes, adjust accordingly.
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void Kill_EntireProcessTree_True_CalledByNonLocalProcess_ThrowsInvalidOperationException()
         {
