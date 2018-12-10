@@ -473,7 +473,7 @@ namespace System.Net.Sockets.Tests
                         var tries = 0;
                         const int MaxTries = 15;
                         while (bytesReceived < bytesExpected && tries < MaxTries) {
-                            bytesReceived += sock.Receive(contentActual, bytesReceived, bytesExpected, SocketFlags.None);
+                            bytesReceived += sock.Receive(contentActual, bytesReceived, bytesExpected-bytesReceived, SocketFlags.None);
                             tries++;
                         }
                         Assert.InRange(tries, 0, MaxTries);
