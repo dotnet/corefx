@@ -208,7 +208,7 @@ namespace System.Net.Sockets.Tests
                     new SendPacketsElement(TestFileName, 30, 10),
                     new SendPacketsElement(new byte[] { 8, 9, 10 }, 0, 3),
                 };
-                var expected = GetExpectedContent(elements);
+                byte[] expected = GetExpectedContent(elements);
                 SendPackets(type, elements, SocketError.Success, expected.Length, expected);
             }
         }
@@ -228,7 +228,7 @@ namespace System.Net.Sockets.Tests
                     new SendPacketsElement(new byte[] { 8, 9, 10 }, 0, 1),
                     new SendPacketsElement(TestFileName, 30, 10),
                 };
-                var expected = GetExpectedContent(elements);
+                byte[] expected = GetExpectedContent(elements);
                 SendPackets(type, elements, SocketError.Success, expected.Length, expected);
             }
         }
@@ -245,7 +245,7 @@ namespace System.Net.Sockets.Tests
                     new SendPacketsElement(stream, 0L, 0),
                     new SendPacketsElement(TestFileName, 0L, 10),
                 };
-                var expected = GetExpectedContent(elements);
+                byte[] expected = GetExpectedContent(elements);
                 SendPackets(type, elements, SocketError.Success, expected.Length, expected);
             }
         }
@@ -288,12 +288,12 @@ namespace System.Net.Sockets.Tests
                 throw new ArgumentException("Expected SendPacketsElement with FilePath or FileStream set.", nameof(element));
             }
 
-            var totalCount = 0;
+            int totalCount = 0;
             foreach (var element in elements) {
                 totalCount += element.Buffer != null ? element.Count : FileCount(element);
             }
             var result = new byte[totalCount];
-            var resultOffset = 0L;
+            long resultOffset = 0L;
             foreach (var spe in elements) {
                 if (spe.FilePath != null) {
                     ReadFromFile(spe.FilePath, spe.OffsetLong, spe.Count, result, ref resultOffset);
