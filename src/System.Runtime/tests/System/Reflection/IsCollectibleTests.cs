@@ -58,7 +58,6 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        // TODO: IsCollectible is returning false... fix it
         public void Assembly_IsCollectibleTrue_WhenUsingAssemblyLoadContext()
         {
             RemoteInvoke(() => {
