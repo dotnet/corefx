@@ -20,7 +20,7 @@ namespace System
 
         public int Value => _value < 0 ? ~_value : _value;
         public bool FromEnd => _value < 0;
-        public override bool Equals(object value) => value is Index && _value == ((Index)value)._value;
+        public override bool Equals(object value) => value is Index index && _value == index._value;
         public bool Equals (Index other) => _value == other._value;
 
         public override int GetHashCode()
