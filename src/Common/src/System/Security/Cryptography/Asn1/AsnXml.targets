@@ -10,7 +10,7 @@
 
   <!-- MSBuild for .NET Core doesn't support XslTransform at this time -->
   <Target Name="CompileAsn" BeforeTargets="CoreCompile"
-    Condition="'$(RunningOnCore)' != 'true'"
+    Condition="'$(MSBuildRuntimeType)' != 'core'"
     Inputs="@(AsnXml);$(MSBuildThisFileDirectory)asn.xslt"
     Outputs="%(Identity).cs">
 
