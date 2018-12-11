@@ -701,7 +701,7 @@ namespace System.Security.Cryptography
         {
             get
             {
-                if (_parameters.KeyNumber == (int) KeySpec.AT_KEYEXCHANGE)
+                if (_parameters.KeyNumber == (int)Interop.Advapi32.KeySpec.AT_KEYEXCHANGE)
                 {
                     return "RSA-PKCS1-KeyEx";
                 }
