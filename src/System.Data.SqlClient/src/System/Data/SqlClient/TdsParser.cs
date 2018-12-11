@@ -136,7 +136,7 @@ namespace System.Data.SqlClient
         internal TdsParser(bool MARS, bool fAsynchronous)
         {
             _fMARS = MARS; // may change during Connect to pre Yukon servers
-            
+
             _physicalStateObj = TdsParserStateObjectFactory.Singleton.CreateTdsParserStateObject(this);
         }
 
@@ -388,7 +388,7 @@ namespace System.Data.SqlClient
                 Debug.Assert(retCode == TdsEnums.SNI_SUCCESS, "Unexpected failure state upon calling SniGetConnectionId");
 
                 SendPreLoginHandshake(instanceName, encrypt);
-                status = ConsumePreLoginHandshake(encrypt, trustServerCert, integratedSecurity, out marsCapable, out _connHandler._fedAuthRequired); 
+                status = ConsumePreLoginHandshake(encrypt, trustServerCert, integratedSecurity, out marsCapable, out _connHandler._fedAuthRequired);
 
                 // Don't need to check for Sphinx failure, since we've already consumed
                 // one pre-login packet and know we are connecting to Shiloh.
@@ -424,7 +424,7 @@ namespace System.Data.SqlClient
 
             // create a new packet encryption changes the internal packet size
             _physicalStateObj.ClearAllWritePackets();
-            
+
         }
 
         internal void EnableMars()
@@ -434,7 +434,7 @@ namespace System.Data.SqlClient
                 // Cache physical stateObj and connection.
                 _pMarsPhysicalConObj = _physicalStateObj;
 
-                if(TdsParserStateObjectFactory.UseManagedSNI) _pMarsPhysicalConObj.IncrementPendingCallbacks();
+                if (TdsParserStateObjectFactory.UseManagedSNI) _pMarsPhysicalConObj.IncrementPendingCallbacks();
 
                 uint info = 0;
                 uint error = _pMarsPhysicalConObj.EnableMars(ref info);
@@ -658,7 +658,7 @@ namespace System.Data.SqlClient
             _physicalStateObj.WritePacket(TdsEnums.HARDFLUSH);
         }
 
-        private PreLoginHandshakeStatus ConsumePreLoginHandshake(bool encrypt, bool trustServerCert, bool integratedSecurity, out bool marsCapable, out bool fedAuthRequired )
+        private PreLoginHandshakeStatus ConsumePreLoginHandshake(bool encrypt, bool trustServerCert, bool integratedSecurity, out bool marsCapable, out bool fedAuthRequired)
         {
             marsCapable = _fMARS; // Assign default value
             fedAuthRequired = false;
@@ -802,7 +802,7 @@ namespace System.Data.SqlClient
                             }
 
                             WaitForSSLHandShakeToComplete(ref error);
-                            
+
                             // create a new packet encryption changes the internal packet size
                             _physicalStateObj.ClearAllWritePackets();
                         }
@@ -1149,7 +1149,7 @@ namespace System.Data.SqlClient
             Debug.Assert(SniContext.Undefined != stateObj.DebugOnlyCopyOfSniContext || ((_fMARS) && ((_state == TdsParserState.Closed) || (_state == TdsParserState.Broken))), "SniContext must not be None");
 #endif
             SNIErrorDetails details = GetSniErrorDetails();
-            
+
             if (details.sniErrorNumber != 0)
             {
                 // handle special SNI error codes that are converted into exception which is not a SqlException.
@@ -2287,7 +2287,7 @@ namespace System.Data.SqlClient
                             {
                                 return false;
                             }
-                            
+
                             // Give the parser the new collation values in case parameters don't specify one
                             _defaultCollation = env.newCollation;
 
@@ -6223,7 +6223,7 @@ namespace System.Data.SqlClient
                     _physicalStateObj.SniContext = SniContext.Snix_LoginSspi;
 
                     SSPIData(null, 0, ref outSSPIBuff, ref outSSPILength);
-                    
+
                     if (outSSPILength > int.MaxValue)
                     {
                         throw SQL.InvalidSSPIPacketSize();  // SqlBu 332503
@@ -6547,7 +6547,7 @@ namespace System.Data.SqlClient
                 }
             }
             else
-            { 
+            {
                 if (receivedBuff == null)
                 {
                     // if we do not have SSPI data coming from server, send over 0's for pointer and length
@@ -6982,13 +6982,13 @@ namespace System.Data.SqlClient
                         (task, state) =>
                         {
                             Debug.Assert(!task.IsCanceled, "Task should not be canceled");
-                            var parameters = (Tuple<TdsParserStateObject, bool, SqlInternalConnectionTds>)state;
-                            TdsParserStateObject tdsParserStateObject = parameters.Item1;
+                            var parameters = (Tuple<TdsParser, TdsParserStateObject, bool, SqlInternalConnectionTds>)state;
+                            TdsParserStateObject tdsParserStateObject = parameters.Item2;
                             try
                             {
                                 if (task.IsFaulted)
                                 {
-                                    FailureCleanup(tdsParserStateObject, task.Exception.InnerException);
+                                    parameters.Item1.FailureCleanup(tdsParserStateObject, task.Exception.InnerException);
                                     throw task.Exception.InnerException;
                                 }
                                 else
@@ -6998,14 +6998,13 @@ namespace System.Data.SqlClient
                             }
                             finally
                             {
-                                if (parameters.Item2)
+                                if (parameters.Item3)
                                 {
-                                    parameters.Item3._parserLock.Release();
+                                    parameters.Item4._parserLock.Release();
                                 }
                             }
-
                         },
-                        Tuple.Create(stateObj, taskReleaseConnectionLock, taskReleaseConnectionLock ? _connHandler : null),
+                        Tuple.Create(this, stateObj, taskReleaseConnectionLock, taskReleaseConnectionLock ? _connHandler : null),
                         TaskScheduler.Default
                     );
                 }
