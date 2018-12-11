@@ -13,15 +13,7 @@ namespace System.Reflection.Tests
 {
     public class TestAssemblyLoadContext : AssemblyLoadContext
     {
-        private readonly string _assemblyName;
-        private readonly string _assemblyPath;
-
-        public TestAssemblyLoadContext(string assemblyName, string assemblyPath)
-            : base(true)
-        {
-            _assemblyName = assemblyName;
-            _assemblyPath = assemblyPath;
-        }
+        public TestAssemblyLoadContext() : base(true) {}
         protected override Assembly Load(AssemblyName assemblyName) => null;
     }
 
@@ -62,7 +54,7 @@ namespace System.Reflection.Tests
         public void Assembly_IsCollectibleTrue_WhenUsingAssemblyLoadContext()
         {
             RemoteInvoke(() => {
-                AssemblyLoadContext alc = new TestAssemblyLoadContext(asmNameString, asmPath);
+                AssemblyLoadContext alc = new TestAssemblyLoadContext();
 
                 Assembly asm = alc.LoadFromAssemblyPath(asmPath);
 
@@ -78,6 +70,10 @@ namespace System.Reflection.Tests
         [InlineData("MyField")]
         [InlineData("MyProperty")]
         [InlineData("MyMethod")]
+        [InlineData("MyGenericMethod")]
+        [InlineData("MyStaticMethod")]
+        [InlineData("MyStaticField")]
+        [InlineData("MyStaticGenericMethod")]
         public void MemberInfo_IsCollectibleFalse_WhenUsingAssemblyLoad(string memberName)
         {
             RemoteInvoke((marshalledName) => 
@@ -102,6 +98,10 @@ namespace System.Reflection.Tests
         }
 
         [Theory]
+        [InlineData("MyStaticGenericField")]
+        [InlineData("MyStaticField")]
+        [InlineData("MyStaticGenericMethod")]
+        [InlineData("MyStaticMethod")]
         [InlineData("MyGenericField")]
         [InlineData("MyGenericProperty")]
         [InlineData("MyGenericMethod")]
@@ -129,6 +129,43 @@ namespace System.Reflection.Tests
         }
 
         [Theory]
+        [InlineData("MyField")]
+        [InlineData("MyProperty")]
+        [InlineData("MyMethod")]
+        [InlineData("MyGenericMethod")]
+        [InlineData("MyStaticMethod")]
+        [InlineData("MyStaticField")]
+        [InlineData("MyStaticGenericMethod")]
+        public void MemberInfo_IsCollectibleTrue_WhenUsingAssemblyLoadContext(string memberName)
+        {
+            RemoteInvoke((marshalledName) => 
+            {
+                AssemblyLoadContext alc = new TestAssemblyLoadContext();
+
+                Type t1 = Type.GetType(
+                    "TestCollectibleAssembly.MyTestClass, TestCollectibleAssembly, Version=1.0.0.0", 
+                    collectibleAssemblyResolver(alc), 
+                    typeResolver(false), 
+                    true
+                );
+
+                Assert.NotNull(t1);
+
+                var member = t1.GetMember(marshalledName).FirstOrDefault();
+
+                Assert.NotNull(member);
+
+                Assert.True(member.IsCollectible);
+
+                return SuccessExitCode;
+            }, memberName).Dispose();
+        }
+
+        [Theory]
+        [InlineData("MyStaticGenericField")]
+        [InlineData("MyStaticField")]
+        [InlineData("MyStaticGenericMethod")]
+        [InlineData("MyStaticMethod")]
         [InlineData("MyGenericField")]
         [InlineData("MyGenericProperty")]
         [InlineData("MyGenericMethod")]
@@ -136,7 +173,7 @@ namespace System.Reflection.Tests
         {
             RemoteInvoke((marshalledName) => 
             {
-                AssemblyLoadContext alc = new TestAssemblyLoadContext(asmNameString, asmPath);
+                AssemblyLoadContext alc = new TestAssemblyLoadContext();
 
                 Type t1 = Type.GetType(
                     "TestCollectibleAssembly.MyGenericTestClass`1[System.Int32], TestCollectibleAssembly, Version=1.0.0.0", 
@@ -162,7 +199,7 @@ namespace System.Reflection.Tests
         {
             RemoteInvoke(() => 
             {
-                AssemblyLoadContext alc = new TestAssemblyLoadContext(asmNameString, asmPath);
+                AssemblyLoadContext alc = new TestAssemblyLoadContext();
 
                 Type t1 = Type.GetType(
                     "System.Collections.Generic.Dictionary`2[[System.Int32],[TestCollectibleAssembly.MyTestClass, TestCollectibleAssembly, Version=1.0.0.0]]", 
