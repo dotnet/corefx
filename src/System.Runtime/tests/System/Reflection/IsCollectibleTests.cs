@@ -44,6 +44,7 @@ namespace System.Reflection.Tests
                 asm.GetType(simpleTypeName, shouldThrowIfNotFound, isCaseSensitive);
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() is not supported on UapAot")]
         public void Assembly_IsCollectibleFalse_WhenUsingAssemblyLoad()
         {
             RemoteInvoke(() => {
@@ -58,6 +59,7 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() is not supported on UapAot")]
         public void Assembly_IsCollectibleTrue_WhenUsingAssemblyLoadContext()
         {
             RemoteInvoke(() => {
