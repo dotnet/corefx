@@ -55,7 +55,7 @@ namespace System.Reflection.Tests
                 Assert.False(asm.IsCollectible);
 
                 return SuccessExitCode;
-            });
+            }).Dispose();
         }
 
         [Fact]
