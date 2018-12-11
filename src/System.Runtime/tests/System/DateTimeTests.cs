@@ -2221,7 +2221,7 @@ namespace System.Tests
             TimeSpan diff = systemDateTimeNow2 - systemDateTimeNow1;
             if (diff < TimeSpan.FromSeconds(1))
             {
-                diff = systemDateTimeNow1 - dt;
+                diff = dt - systemDateTimeNow1;
                 Assert.True(diff < TimeSpan.FromSeconds(1), $"Reported DateTime.UtcNow {dt} is shifted by more than one second then the system time {systemDateTimeNow1}");
             }
         }
