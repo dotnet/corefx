@@ -148,7 +148,7 @@ namespace System.Text
         public int Utf16SequenceLength => UnicodeUtility.GetUtf16SequenceLength(_value);
 
         /// <summary>
-        /// Returns the length in code units (<see cref="Utf8Char"/>) of the
+        /// Returns the length in code units of the
         /// UTF-8 sequence required to represent this scalar value.
         /// </summary>
         /// <remarks>
@@ -335,8 +335,15 @@ namespace System.Text
         /// </summary>
         public override string ToString()
         {
-            Span<char> chars = stackalloc char[2]; // worst case
-            return new string(chars.Slice(0, EncodeToUtf16(chars)));
+            if (IsBmp)
+            {
+                return string.CreateFromChar((char)_value);
+            }
+            else
+            {
+                UnicodeUtility.GetUtf16SurrogatesFromSupplementaryPlaneScalar(_value, out char high, out char low);
+                return string.CreateFromChar(high, low);
+            }
         }
 
         /// <summary>
@@ -420,7 +427,7 @@ namespace System.Text
         /// Encodes this <see cref="Rune"/> to a destination buffer as UTF-8 bytes.
         /// </summary>
         /// <param name="destination">The buffer to which to write this value as UTF-8.</param>
-        /// <param name="charsWritten">
+        /// <param name="bytesWritten">
         /// The number of <see cref="byte"/>s written to <paramref name="destination"/>,
         /// or 0 if the destination buffer is not large enough to contain the output.</param>
         /// <returns>True if the value was written to the buffer; otherwise, false.</returns>

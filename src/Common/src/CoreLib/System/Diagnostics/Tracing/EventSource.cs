@@ -456,15 +456,13 @@ namespace System.Diagnostics.Tracing
         {
             get
             {
-#pragma warning disable 612, 618
-                int threadID = AppDomain.GetCurrentThreadId();
+                int threadID = Win32Native.GetCurrentThreadId();
 
                 // Managed thread IDs are more aggressively re-used than native thread IDs,
                 // so we'll use the latter...
                 return new Guid(unchecked((uint)threadID),
                                 unchecked((ushort)s_currentPid), unchecked((ushort)(s_currentPid >> 16)),
                                 0x94, 0x1b, 0x87, 0xd5, 0xa6, 0x5c, 0x36, 0x64);
-#pragma warning restore 612, 618
             }
         }
 #endif // !ES_BUILD_STANDALONE
@@ -4092,7 +4090,7 @@ namespace System.Diagnostics.Tracing
                 if (!s_EventSourceShutdownRegistered)
                 {
                     s_EventSourceShutdownRegistered = true;
-#if ES_BUILD_PN
+#if CORECLR || ES_BUILD_PN
                     AppContext.ProcessExit += DisposeOnShutdown;
 #else
                     AppDomain.CurrentDomain.ProcessExit += DisposeOnShutdown;
