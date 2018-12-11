@@ -15,16 +15,7 @@ namespace System
             End = end;
         }
 
-        public override bool Equals(object value)
-        {
-            if (value is Range range)
-            {
-                return Equals(range);
-            }
-
-            return false;
-        }
-
+        public override bool Equals(object value) => value is Range range && Equals(range);
         public bool Equals (Range other) => other.Start.Equals(Start) && other.End.Equals(End);
 
         public override int GetHashCode()
