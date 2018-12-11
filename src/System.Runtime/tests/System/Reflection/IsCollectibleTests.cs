@@ -12,9 +12,17 @@ namespace System.Reflection.Tests
 {
     public class TestAssemblyLoadContext : AssemblyLoadContext
     {
+        private readonly string _assemblyName;
+        private readonly string _assemblyPath;
+
+        public TestAssemblyLoadContext(string assemblyName, string assemblyPath)
+        {
+            _assemblyName = assemblyName;
+            _assemblyPath = assemblyPath;
+        }
         protected override Assembly Load(AssemblyName assemblyName)
         {
-            throw new NotImplementedException();
+            return assemblyName.Name == _assemblyName ? Assembly.LoadFrom(_assemblyPath) : null;
         }
     }
 
@@ -58,6 +66,34 @@ namespace System.Reflection.Tests
             {
                 Type t1 = Type.GetType(
                     "TestCollectibleAssembly.MyTestClass, TestCollectibleAssembly, Version=1.0.0.0", 
+                    assemblyResolver, 
+                    typeResolver(false), 
+                    true
+                );
+
+                Assert.NotNull(t1);
+
+                var member = t1.GetMember(marshalledName).FirstOrDefault();
+
+                Assert.NotNull(member);
+
+                Assert.False(member.IsCollectible);
+
+                return SuccessExitCode;
+            }, memberName).Dispose();
+        }
+
+        [Theory]
+        [InlineData("MyGenericField")]
+        [InlineData("MyGenericProperty")]
+        [InlineData("MyGenericMethod")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFrom() is not supported on UapAot")]
+        public void MemberInfoGeneric_IsCollectibleFalse_WhenUsingAssemblyLoad(string memberName)
+        {
+            RemoteInvoke((marshalledName) => 
+            {
+                Type t1 = Type.GetType(
+                    "TestCollectibleAssembly.MyGenericTestClass`1[System.Int32], TestCollectibleAssembly, Version=1.0.0.0", 
                     assemblyResolver, 
                     typeResolver(false), 
                     true

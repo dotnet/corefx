@@ -18,4 +18,9 @@ namespace TestCollectibleAssembly
         public T MyGenericMethod(T arg1) { return arg1; }
         public T MyGenericMethod<V>(T arg1, V arg2) { return arg1; }
     }
+
+    public class UseGenerics
+    {
+        public MyGenericTestClass<int> myGenericTest { get; set; }
+    }
 }
