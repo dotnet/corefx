@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 namespace System.Diagnostics
 {
-    internal sealed class AsyncStreamReader
+    internal sealed class AsyncStreamReader : IDisposable
     {
         private const int DefaultBufferSize = 1024;  // Byte buffer size
 
@@ -33,6 +33,7 @@ namespace System.Diagnostics
         // Delegate to call user function.
         private readonly Action<string> _userCallBack;
 
+        private readonly CancellationTokenSource _cts;
         private Task _readToBufferTask;
         private readonly Queue<string> _messageQueue;
         private StringBuilder _sb;
@@ -60,6 +61,7 @@ namespace System.Diagnostics
             int maxCharsPerBuffer = encoding.GetMaxCharCount(DefaultBufferSize);
             _charBuffer = new char[maxCharsPerBuffer];
 
+            _cts = new CancellationTokenSource();
             _messageQueue = new Queue<string>();
         }
 
@@ -94,7 +96,7 @@ namespace System.Diagnostics
             {
                 try
                 {
-                    int bytesRead = await _stream.ReadAsync(new Memory<byte>(_byteBuffer)).ConfigureAwait(false);
+                    int bytesRead = await _stream.ReadAsync(new Memory<byte>(_byteBuffer), _cts.Token).ConfigureAwait(false);
                     if (bytesRead == 0)
                         break;
 
@@ -262,6 +264,11 @@ namespace System.Diagnostics
                 _readToBufferTask.GetAwaiter().GetResult();
                 _readToBufferTask = null;
             }
+        }
+
+        public void Dispose()
+        {
+            _cts.Cancel();
         }
     }
 }
