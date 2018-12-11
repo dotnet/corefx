@@ -51,9 +51,9 @@ namespace System.Data.SqlClient
         // The OnReturnValue function will test this flag to determine whether the returned value is a _prepareHandle or something else.
         //
         // _prepareHandle - the handle of a prepared command. Apparently there can be multiple prepared commands at a time - a feature that we do not support yet.
-
+        private static readonly object s_cachedInvalidPrepareHandle = (object)-1;
         private bool _inPrepare = false;
-        private int _prepareHandle = -1;
+        private object _prepareHandle = s_cachedInvalidPrepareHandle; // this is an int which is used in the object typed SqlParameter.Value field, avoid repeated boxing by storing in a box
         private bool _hiddenPrepare = false;
         private int _preparedConnectionCloseCount = -1;
         private int _preparedConnectionReconnectCount = -1;
@@ -83,7 +83,7 @@ namespace System.Data.SqlClient
         }
 
         // Cached info for async executions
-        private class CachedAsyncState
+        private sealed class CachedAsyncState
         {
             private int _cachedAsyncCloseCount = -1;    // value of the connection's CloseCount property when the asyncResult was set; tracks when connections are closed after an async operation
             private TaskCompletionSource<object> _cachedAsyncResult = null;
@@ -261,7 +261,7 @@ namespace System.Data.SqlClient
                 // Don't allow the connection to be changed while in an async operation.
                 if (_activeConnection != value && _activeConnection != null)
                 { // If new value...
-                    if (cachedAsyncState.PendingAsyncOperation)
+                    if (_cachedAsyncState != null && _cachedAsyncState.PendingAsyncOperation)
                     { // If in pending async state, throw.
                         throw SQL.CannotModifyPropertyAsyncOperationInProgress();
                     }
@@ -292,7 +292,7 @@ namespace System.Data.SqlClient
                         finally
                         {
                             // clean prepare status (even successful Unprepare does not do that)
-                            _prepareHandle = -1;
+                            _prepareHandle = s_cachedInvalidPrepareHandle;
                             _execType = EXECTYPE.UNPREPARED;
                         }
                     }
@@ -672,7 +672,7 @@ namespace System.Data.SqlClient
             if ((_activeConnection.CloseCount != _preparedConnectionCloseCount) || (_activeConnection.ReconnectCount != _preparedConnectionReconnectCount))
             {
                 // reset our handle
-                _prepareHandle = -1;
+                _prepareHandle = s_cachedInvalidPrepareHandle;
             }
 
             _cachedMetaData = null;
@@ -2568,7 +2568,7 @@ namespace System.Data.SqlClient
 
                     if (_execType == EXECTYPE.PREPARED)
                     {
-                        Debug.Assert(this.IsPrepared && (_prepareHandle != -1), "invalid attempt to call sp_execute without a handle!");
+                        Debug.Assert(this.IsPrepared && ((int)_prepareHandle != -1), "invalid attempt to call sp_execute without a handle!");
                         rpc = BuildExecute(inSchema);
                     }
                     else if (_execType == EXECTYPE.PREPAREPENDING)
@@ -2863,16 +2863,16 @@ namespace System.Data.SqlClient
 
         private void ValidateAsyncCommand()
         {
-            if (cachedAsyncState.PendingAsyncOperation)
+            if (_cachedAsyncState != null && _cachedAsyncState.PendingAsyncOperation)
             { // Enforce only one pending async execute at a time.
-                if (cachedAsyncState.IsActiveConnectionValid(_activeConnection))
+                if (_cachedAsyncState.IsActiveConnectionValid(_activeConnection))
                 {
                     throw SQL.PendingBeginXXXExists();
                 }
                 else
                 {
                     _stateObj = null; // Session was re-claimed by session pool upon connection close.
-                    cachedAsyncState.ResetAsyncState();
+                    _cachedAsyncState.ResetAsyncState();
                 }
             }
         }
@@ -3371,7 +3371,7 @@ namespace System.Data.SqlClient
 
         private _SqlRPC BuildExecute(bool inSchema)
         {
-            Debug.Assert(_prepareHandle != -1, "Invalid call to sp_execute without a valid handle!");
+            Debug.Assert((int)_prepareHandle != -1, "Invalid call to sp_execute without a valid handle!");
             int j = 1;
 
             int count = CountSendableParameters(_parameters);
@@ -3401,7 +3401,7 @@ namespace System.Data.SqlClient
         private void BuildExecuteSql(CommandBehavior behavior, string commandText, SqlParameterCollection parameters, ref _SqlRPC rpc)
         {
 
-            Debug.Assert(_prepareHandle == -1, "This command has an existing handle, use sp_execute!");
+            Debug.Assert((int)_prepareHandle == -1, "This command has an existing handle, use sp_execute!");
             Debug.Assert(CommandType.Text == this.CommandType, "invalid use of sp_executesql for stored proc invocation!");
             int j;
             SqlParameter sqlParam;
