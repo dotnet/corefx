@@ -2135,7 +2135,7 @@ namespace System.Data.SqlClient
             {
                 // Dev11 #344723: SqlClient stress hang System_Data!Tcp::ReadSync via a call to SqlDataReader::Close
                 // Spin until SendAttention has cleared _attentionSending, this prevents a race condition between receiving the attention ACK and setting _attentionSent
-                SpinWait.SpinUntil(() => !stateObj._attentionSending);
+                TryRunSetupSpinWaitContinuation(stateObj);
 
                 Debug.Assert(stateObj._attentionSent, "Attention ACK has been received without attention sent");
                 if (stateObj._attentionSent)
@@ -2157,6 +2157,12 @@ namespace System.Data.SqlClient
                 ThrowExceptionAndWarning(stateObj);
             }
             return true;
+        }
+
+        // This is in its own method to avoid always allocating the lambda in TryRun 
+        private static void TryRunSetupSpinWaitContinuation(TdsParserStateObject stateObj)
+        {
+            SpinWait.SpinUntil(() => !stateObj._attentionSending);
         }
 
         private bool TryProcessEnvChange(int tokenLength, TdsParserStateObject stateObj, out SqlEnvChange[] sqlEnvChange)
@@ -6972,29 +6978,36 @@ namespace System.Data.SqlClient
                     // Need to wait for flush - continuation will unlock the connection                    
                     bool taskReleaseConnectionLock = releaseConnectionLock;
                     releaseConnectionLock = false;
-                    return executeTask.ContinueWith(t =>
-                    {
-                        Debug.Assert(!t.IsCanceled, "Task should not be canceled");
-                        try
+                    return executeTask.ContinueWith(
+                        (task, state) =>
                         {
-                            if (t.IsFaulted)
+                            Debug.Assert(!task.IsCanceled, "Task should not be canceled");
+                            var parameters = (Tuple<TdsParserStateObject, bool, SqlInternalConnectionTds>)state;
+                            TdsParserStateObject tdsParserStateObject = parameters.Item1;
+                            try
                             {
-                                FailureCleanup(stateObj, t.Exception.InnerException);
-                                throw t.Exception.InnerException;
+                                if (task.IsFaulted)
+                                {
+                                    FailureCleanup(tdsParserStateObject, task.Exception.InnerException);
+                                    throw task.Exception.InnerException;
+                                }
+                                else
+                                {
+                                    tdsParserStateObject.SniContext = SniContext.Snix_Read;
+                                }
                             }
-                            else
+                            finally
                             {
-                                stateObj.SniContext = SniContext.Snix_Read;
+                                if (parameters.Item2)
+                                {
+                                    parameters.Item3._parserLock.Release();
+                                }
                             }
-                        }
-                        finally
-                        {
-                            if (taskReleaseConnectionLock)
-                            {
-                                _connHandler._parserLock.Release();
-                            }
-                        }
-                    }, TaskScheduler.Default);
+
+                        },
+                        Tuple.Create(stateObj, taskReleaseConnectionLock, taskReleaseConnectionLock ? _connHandler : null),
+                        TaskScheduler.Default
+                    );
                 }
 
                 // Finished sync
@@ -7494,11 +7507,7 @@ namespace System.Data.SqlClient
                                         task = completion.Task;
                                     }
 
-                                    AsyncHelper.ContinueTask(writeParamTask, completion,
-                                        () => TdsExecuteRPC(rpcArray, timeout, inSchema, notificationRequest, stateObj, isCommandProc, sync, completion,
-                                                              startRpc: ii, startParam: i + 1),
-                                        connectionToDoom: _connHandler,
-                                        onFailure: exc => TdsExecuteRPC_OnFailure(exc, stateObj));
+                                    TDSExecuteRPCParameterSetupWriteCompletion(rpcArray, timeout, inSchema, notificationRequest, stateObj, isCommandProc, sync, completion, ii, i, writeParamTask);
 
                                     // Take care of releasing the locks
                                     if (releaseConnectionLock)
@@ -7547,10 +7556,9 @@ namespace System.Data.SqlClient
                             task = completion.Task;
                         }
 
-                        bool taskReleaseConnectionLock = releaseConnectionLock;
-                        execFlushTask.ContinueWith(tsk => ExecuteFlushTaskCallback(tsk, stateObj, completion, taskReleaseConnectionLock), TaskScheduler.Default);
+                        TDSExecuteRPCParameterSetupFlushCompletion(stateObj, completion, execFlushTask, releaseConnectionLock);
 
-                        // ExecuteFlushTaskCallback will take care of the locks for us
+                        // TDSExecuteRPCParameterSetupFlushCompletion calling ExecuteFlushTaskCallback will take care of the locks for us
                         releaseConnectionLock = false;
 
                         return task;
@@ -7595,6 +7603,36 @@ namespace System.Data.SqlClient
                     _connHandler._parserLock.Release();
                 }
             }
+        }
+
+
+        // This is in its own method to avoid always allocating the lambda in TDSExecuteRPCParameter
+        private void TDSExecuteRPCParameterSetupWriteCompletion(_SqlRPC[] rpcArray, int timeout, bool inSchema, SqlNotificationRequest notificationRequest, TdsParserStateObject stateObj, bool isCommandProc, bool sync, TaskCompletionSource<object> completion, int ii, int i, Task writeParamTask)
+        {
+            AsyncHelper.ContinueTask(
+                writeParamTask,
+                completion,
+                () => TdsExecuteRPC(
+                        rpcArray,
+                        timeout,
+                        inSchema,
+                        notificationRequest,
+                        stateObj,
+                        isCommandProc,
+                        sync,
+                        completion,
+                        startRpc: ii,
+                        startParam: i + 1
+                      ),
+                connectionToDoom: _connHandler,
+                onFailure: exc => TdsExecuteRPC_OnFailure(exc, stateObj)
+            );
+        }
+
+        // This is in its own method to avoid always allocating the lambda in  TDSExecuteRPCParameter 
+        private void TDSExecuteRPCParameterSetupFlushCompletion(TdsParserStateObject stateObj, TaskCompletionSource<object> completion, Task execFlushTask, bool taskReleaseConnectionLock)
+        {
+            execFlushTask.ContinueWith(tsk => ExecuteFlushTaskCallback(tsk, stateObj, completion, taskReleaseConnectionLock), TaskScheduler.Default);
         }
 
         private void FinalizeExecuteRPC(TdsParserStateObject stateObj)
