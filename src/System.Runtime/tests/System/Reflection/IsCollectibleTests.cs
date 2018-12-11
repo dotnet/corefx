@@ -26,7 +26,7 @@ namespace System.Reflection.Tests
             assemblyName.Name == _assemblyName ? LoadFromAssemblyPath(_assemblyPath) : null;
     }
 
-    public class MemberInfoIsCollectibleTests : RemoteExecutorTestBase
+    public class IsCollectibleTests : RemoteExecutorTestBase
     {
         static public string asmNameString = "TestCollectibleAssembly";
         static public string asmPath = Path.Combine(Environment.CurrentDirectory, "TestCollectibleAssembly.dll");
