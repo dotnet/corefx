@@ -33,11 +33,11 @@ namespace System.Diagnostics
         // Delegate to call user function.
         private readonly Action<string> _userCallBack;
 
-        private readonly CancellationTokenSource _cts;
         private Task _readToBufferTask;
         private readonly Queue<string> _messageQueue;
         private StringBuilder _sb;
         private bool _bLastCarriageReturn;
+        private bool _cancelOperation;
 
         // Cache the last position scanned in sb when searching for lines.
         private int _currentLinePos;
@@ -60,13 +60,17 @@ namespace System.Diagnostics
             int maxCharsPerBuffer = encoding.GetMaxCharCount(DefaultBufferSize);
             _charBuffer = new char[maxCharsPerBuffer];
 
-            _cts = new CancellationTokenSource();
             _messageQueue = new Queue<string>();
         }
 
         // User calls BeginRead to start the asynchronous read
         internal void BeginReadLine()
         {
+            if (_cancelOperation)
+            {
+                _cancelOperation = false;
+            }
+
             if (_sb == null)
             {
                 _sb = new StringBuilder(DefaultBufferSize);
@@ -80,7 +84,7 @@ namespace System.Diagnostics
 
         internal void CancelOperation()
         {
-            _cts.Cancel();
+            _cancelOperation = true;
         }
 
         // This is the async callback function. Only one thread could/should call this.
@@ -90,7 +94,7 @@ namespace System.Diagnostics
             {
                 try
                 {
-                    int bytesRead = await _stream.ReadAsync(new Memory<byte>(_byteBuffer), _cts.Token).ConfigureAwait(false);
+                    int bytesRead = await _stream.ReadAsync(new Memory<byte>(_byteBuffer)).ConfigureAwait(false);
                     if (bytesRead == 0)
                         break;
 
@@ -213,8 +217,8 @@ namespace System.Diagnostics
         {
             try
             {
-                // Keep going until we're either canceled or we run out of data to process.
-                while (!_cts.Token.IsCancellationRequested)
+                // Keep going until we're out of data to process.
+                while (true)
                 {
                     // Get the next line (if there isn't one, we're done) and 
                     // invoke the user's callback with it.
@@ -227,7 +231,11 @@ namespace System.Diagnostics
                         }
                         line = _messageQueue.Dequeue();
                     }
-                    _userCallBack(line); // invoked outside of the lock
+
+                    if (!_cancelOperation)
+                    {
+                        _userCallBack(line); // invoked outside of the lock
+                    }
                 }
                 return false;
             }

@@ -1,11 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Collections.Generic;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -85,6 +86,55 @@ namespace System.Diagnostics.Tests
 
                 string expected = RemotelyInvokable.TestConsoleApp + " started" + (i == 1 ? "" : RemotelyInvokable.TestConsoleApp + " closed");
                 Assert.Equal(expected, sb.ToString());
+            }
+        }
+
+        [Fact]
+        public void TestAsyncOutputStream_BeginCancelBegin_OutputReadLine()
+        {
+            var dataArrivedEvent = new AutoResetEvent(false);
+            ConcurrentBag<int> dataReceived = new ConcurrentBag<int>();
+            Process p = CreateProcessPortable(RemotelyInvokable.WriteLoop);
+            try
+            {
+                int minDataArrived = 5;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.OutputDataReceived += (s, e) =>
+                {
+                    if(!string.IsNullOrEmpty(e.Data))
+                    { 
+                        dataReceived.Add(int.Parse(e.Data));
+                    }
+
+                    if(dataReceived.Count > minDataArrived)
+                    { 
+                        dataArrivedEvent.Set();
+                    }
+                };
+                p.Start();
+                p.BeginOutputReadLine();
+            
+                Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Data not come after BeginOutputReadLine");
+                Assert.True(dataReceived.Count >= minDataArrived);
+                Assert.Empty(Enumerable.Range(dataReceived.First(), dataReceived.Last()).Except(dataReceived));
+
+                p.CancelOutputRead();
+
+                // Wait to drain async stream queue
+                Thread.Sleep(3000);
+
+                minDataArrived = 10;
+                p.BeginOutputReadLine();
+
+                Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Data not come after CancelOutputRead");
+                Assert.True(dataReceived.Count >= minDataArrived);
+
+                // We have a gap because the async queue is drained between CancelOutputRead() and BeginOutputReadLine()
+                Assert.NotEmpty(Enumerable.Range(dataReceived.OrderBy(v => v).First(), dataReceived.OrderBy(v => v).Last()).Except(dataReceived));
+            }
+            finally
+            {
+               p.Kill();
             }
         }
 
