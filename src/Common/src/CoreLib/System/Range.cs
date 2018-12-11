@@ -17,10 +17,9 @@ namespace System
 
         public override bool Equals(object value)
         {
-            if (value is Range)
+            if (value is Range range)
             {
-                Range r = (Range)value;
-                return r.Start.Equals(Start) && r.End.Equals(End);
+                return Equals(range);
             }
 
             return false;
