@@ -22,8 +22,7 @@ namespace System.Reflection.Tests
             _assemblyName = assemblyName;
             _assemblyPath = assemblyPath;
         }
-        protected override Assembly Load(AssemblyName assemblyName) =>
-            assemblyName.Name == _assemblyName ? LoadFromAssemblyPath(_assemblyPath) : null;
+        protected override Assembly Load(AssemblyName assemblyName) => null;
     }
 
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "AssemblyLoadContext not available in NetFx")]
@@ -65,7 +64,7 @@ namespace System.Reflection.Tests
             RemoteInvoke(() => {
                 AssemblyLoadContext alc = new TestAssemblyLoadContext(asmNameString, asmPath);
 
-                Assembly asm = alc.LoadFromAssemblyName(new AssemblyName(asmNameString));
+                Assembly asm = alc.LoadFromAssemblyPath(asmPath);
 
                 Assert.NotNull(asm);
                 
