@@ -112,13 +112,13 @@ namespace System.Security.Cryptography
 
                 uint flags = (_flags & (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_MACHINE_KEYSET) | (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_DELETEKEYSET;
                 SafeProvHandle hIgnoredProv;
-                bool ignoredSuccess = CapiHelper.CryptAcquireContext(out hIgnoredProv, _containerName, _providerName, _type, flags);
+                bool ignoredSuccess = Interop.Advapi32.CryptAcquireContext(out hIgnoredProv, _containerName, _providerName, _type, flags);
                 hIgnoredProv.Dispose();
                 // Ignoring success result code as CryptAcquireContext is being called to delete a key container rather than acquire a context.
                 // If it fails, we can't do anything about it anyway as we're in a dispose method.
             }
 
-            bool successfullyFreed = CapiHelper.CryptReleaseContext(handle, 0);
+            bool successfullyFreed = Interop.Advapi32.CryptReleaseContext(handle, 0);
             Debug.Assert(successfullyFreed);
 
             SetHandle(IntPtr.Zero);
@@ -205,7 +205,7 @@ namespace System.Security.Cryptography
 
         protected override bool ReleaseHandle()
         {
-            bool successfullyFreed = CapiHelper.CryptDestroyKey(handle);
+            bool successfullyFreed = Interop.Advapi32.CryptDestroyKey(handle);
             Debug.Assert(successfullyFreed);
 
             SafeProvHandle parent = _parent;
@@ -260,7 +260,7 @@ namespace System.Security.Cryptography
 
         protected override bool ReleaseHandle()
         {
-            bool successfullyFreed = CapiHelper.CryptDestroyHash(handle);
+            bool successfullyFreed = Interop.Advapi32.CryptDestroyHash(handle);
             Debug.Assert(successfullyFreed);
 
             SafeProvHandle parent = _parent;

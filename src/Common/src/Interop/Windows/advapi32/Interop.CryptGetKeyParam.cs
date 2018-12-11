@@ -9,11 +9,20 @@ internal partial class Interop
 {
     internal partial class Advapi32
     {
+        internal enum CryptGetKeyParamFlags : int
+        {
+            CRYPT_EXPORT = 0x0004,
+            KP_IV = 1,
+            KP_PERMISSIONS = 6,
+            KP_ALGID = 7,
+            KP_KEYLEN = 9
+        }
+
         [DllImport(Libraries.Advapi32, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool CryptGetKeyParam(
             SafeKeyHandle hKey,
-            int dwParam,
+            CryptGetKeyParamFlags dwParam,
             byte[] pbData,
             ref int pdwDataLen,
             int dwFlags);
