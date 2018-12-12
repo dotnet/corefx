@@ -86,6 +86,9 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Reset()
         {
+            Debug.Assert(_completion == null);
+            Debug.Assert(_completionState == null);
+
             _completion = null;
             _completionState = null;
             _synchronizationContext = null;
