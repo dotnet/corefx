@@ -116,7 +116,6 @@ namespace System.Diagnostics.Tests
             
                 Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Data not come after BeginOutputReadLine");
                 Assert.True(dataReceived.Count >= minDataArrived);
-                Assert.Empty(Enumerable.Range(dataReceived.First(), dataReceived.Last()).Except(dataReceived));
 
                 p.CancelOutputRead();
 
@@ -128,9 +127,6 @@ namespace System.Diagnostics.Tests
 
                 Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Data not come after CancelOutputRead");
                 Assert.True(dataReceived.Count >= minDataArrived);
-
-                // We have a gap because the async queue is drained between CancelOutputRead() and BeginOutputReadLine()
-                Assert.NotEmpty(Enumerable.Range(dataReceived.OrderBy(v => v).First(), dataReceived.OrderBy(v => v).Last()).Except(dataReceived));
             }
             finally
             {
