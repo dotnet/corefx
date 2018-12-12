@@ -20,6 +20,102 @@ namespace System.Data.SqlClient
         internal long _value;
     }
 
+    internal readonly ref struct PacketHandle
+    {
+        public const int NativePointerType = 1;
+        public const int NativePacketType = 2;
+        public const int ManagedPacketType = 3;
+
+#if FEATURE_INTEROPSNI
+        public readonly IntPtr NativePointer;
+        public readonly SNIPacketHandle NativePacket;
+#endif
+        public readonly SNI.SNIPacket ManagedPacket;
+        public readonly int Type;
+
+        private PacketHandle(IntPtr nativePointer,
+#if FEATURE_INTEROPSNI
+            SNIPacketHandle
+#else
+            int
+#endif
+
+            nativePacket, SNI.SNIPacket managedPacket, int type)
+        {
+            Type = type;
+            ManagedPacket = managedPacket;
+#if FEATURE_INTEROPSNI
+            NativePointer = nativePointer;
+            NativePacket = nativePacket;
+#endif
+        }
+
+        public static PacketHandle FromManagedPacket(SNI.SNIPacket managedPacket)
+        {
+            return new PacketHandle(default, default, managedPacket, ManagedPacketType);
+        }
+
+#if FEATURE_INTEROPSNI
+        public static PacketHandle FromNativePointer(IntPtr nativePointer)
+        {
+            return new PacketHandle(nativePointer,default,default, NativePointerType);
+        }
+
+        public static PacketHandle FromNativePacket(SNIPacketHandle nativePacket)
+        {
+            return new PacketHandle(default, nativePacket, default, NativePacketType);
+        }
+#endif
+
+
+    }
+
+    internal readonly ref struct SessionHandle
+    {
+        public const int NativeHandleType = 1;
+        public const int ManagedHandleType = 2;
+
+        public readonly SNI.SNIHandle ManagedHandle;
+#if FEATURE_INTEROPSNI
+        public readonly SNIHandle NativeHandle;
+#endif
+        public readonly int Type;
+
+        public SessionHandle(SNI.SNIHandle managedHandle,
+#if FEATURE_INTEROPSNI
+            SNIHandle
+#else
+            int
+#endif
+            nativeHandle,
+            int type
+        )
+        {
+            Type = type;
+            ManagedHandle = managedHandle;
+#if FEATURE_INTEROPSNI
+            NativeHandle = nativeHandle;
+#endif
+        }
+
+        public bool IsNull =>
+#if FEATURE_INTEROPSNI
+            (Type == NativeHandleType) ? NativeHandle == null : 
+#endif
+            ManagedHandle == null;
+
+        public static SessionHandle FromManagedSession(SNI.SNIHandle managedSessionHandle)
+        {
+            return new SessionHandle(managedSessionHandle, default, ManagedHandleType);
+        }
+#if FEATURE_INTEROPSNI
+        public static SessionHandle FromNativeHandle(SNIHandle nativeSessionHandle)
+        {
+            return new SessionHandle(default, nativeSessionHandle, NativeHandleType);
+        }
+#endif
+    }
+
     internal abstract class TdsParserStateObject
     {
         private const int AttentionTimeoutSeconds = 5;
@@ -392,7 +488,7 @@ namespace System.Data.SqlClient
             get;
         }
 
-        internal abstract object SessionHandle
+        internal abstract SessionHandle SessionHandle
         {
             get;
         }
@@ -761,27 +857,27 @@ namespace System.Data.SqlClient
 
         internal abstract void DisposePacketCache();
 
-        internal abstract bool IsPacketEmpty(object readPacket);
+        internal abstract bool IsPacketEmpty(PacketHandle readPacket);
 
-        internal abstract object ReadSyncOverAsync(int timeoutRemaining, out uint error);
+        internal abstract PacketHandle ReadSyncOverAsync(int timeoutRemaining, out uint error);
 
-        internal abstract object ReadAsync(out uint error, ref object handle);
+        internal abstract PacketHandle ReadAsync(SessionHandle handle, out uint error);
 
         internal abstract uint CheckConnection();
 
         internal abstract uint SetConnectionBufferSize(ref uint unsignedPacketSize);
 
-        internal abstract void ReleasePacket(object syncReadPacket);
+        internal abstract void ReleasePacket(PacketHandle syncReadPacket);
 
-        protected abstract uint SNIPacketGetData(object packet, byte[] _inBuff, ref uint dataSize);
+        protected abstract uint SNIPacketGetData(PacketHandle packet, byte[] _inBuff, ref uint dataSize);
 
-        internal abstract object GetResetWritePacket();
+        internal abstract PacketHandle GetResetWritePacket();
 
         internal abstract void ClearAllWritePackets();
 
-        internal abstract object AddPacketToPendingList(object packet);
+        internal abstract PacketHandle AddPacketToPendingList(PacketHandle packet);
 
-        protected abstract void RemovePacketFromPendingList(object pointer);
+        protected abstract void RemovePacketFromPendingList(PacketHandle pointer);
 
         internal abstract uint GenerateSspiClientContext(byte[] receivedBuff, uint receivedLength, ref byte[] sendBuff, ref uint sendLength, byte[] _sniSpnBuffer);
 
@@ -855,7 +951,7 @@ namespace System.Data.SqlClient
 
             // NOTE: TdsParserSessionPool may call DecrementPendingCallbacks on a TdsParserStateObject which is already disposed
             // This is not dangerous (since the stateObj is no longer in use), but we need to add a workaround in the assert for it
-            Debug.Assert((remaining == -1 && SessionHandle == null) || (0 <= remaining && remaining < 3), string.Format("_pendingCallbacks values is invalid after decrementing: {0}", remaining));
+            Debug.Assert((remaining == -1 && SessionHandle.IsNull) || (0 <= remaining && remaining < 3), string.Format("_pendingCallbacks values is invalid after decrementing: {0}", remaining));
             return remaining;
         }
 
@@ -2069,7 +2165,7 @@ namespace System.Data.SqlClient
                 throw ADP.ClosedConnectionError();
             }
 
-            object readPacket = null;
+            PacketHandle readPacket = default;
 
             uint error;
 
@@ -2291,7 +2387,7 @@ namespace System.Data.SqlClient
 #endif
 
 
-            object readPacket = null;
+            PacketHandle readPacket = default;
 
             uint error = 0;
 
@@ -2317,16 +2413,14 @@ namespace System.Data.SqlClient
                     ChangeNetworkPacketTimeout(msecsRemaining, Timeout.Infinite);
                 }
 
-                object handle = null;
-
                 Interlocked.Increment(ref _readingCount);
 
-                handle = SessionHandle;
-                if (handle != null)
+                SessionHandle handle = SessionHandle;
+                if (!handle.IsNull)
                 {
                     IncrementPendingCallbacks();
 
-                    readPacket = ReadAsync(out error, ref handle);
+                    readPacket = ReadAsync(handle, out error);
 
                     if (!(TdsEnums.SNI_SUCCESS == error || TdsEnums.SNI_SUCCESS_IO_PENDING == error))
                     {
@@ -2335,8 +2429,8 @@ namespace System.Data.SqlClient
                 }
 
                 Interlocked.Decrement(ref _readingCount);
-                
-                if (handle == null)
+
+                if (handle.IsNull)
                 {
                     throw ADP.ClosedConnectionError();
                 }
@@ -2419,7 +2513,7 @@ namespace System.Data.SqlClient
                 {
                     uint error;
 
-                    object readPacket = EmptyReadPacket;
+                    PacketHandle readPacket = EmptyReadPacket;
 
                     try
                     {
@@ -2512,7 +2606,7 @@ namespace System.Data.SqlClient
                         {
                             stateObj.SendAttention(mustTakeWriteLock: true);
 
-                            object syncReadPacket = null;
+                            PacketHandle syncReadPacket = default;
 
                             bool shouldDecrement = false;
                             try
@@ -2584,7 +2678,7 @@ namespace System.Data.SqlClient
             AssertValidState();
         }
 
-        public void ProcessSniPacket(object packet, uint error)
+        public void ProcessSniPacket(PacketHandle packet, uint error)
         {
             if (error != 0)
             {
@@ -2683,13 +2777,12 @@ namespace System.Data.SqlClient
             }
         }
 
-        public void ReadAsyncCallback<T>(T packet, uint error)
+        public void ReadAsyncCallback(PacketHandle packet, uint error)
         {
             ReadAsyncCallback(IntPtr.Zero, packet, error);
         }
 
-
-        public void ReadAsyncCallback<T>(IntPtr key, T packet, uint error)
+        public void ReadAsyncCallback(IntPtr key, PacketHandle packet, uint error)
         {
             // Key never used.
             // Note - it's possible that when native calls managed that an asynchronous exception
@@ -2769,7 +2862,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        protected abstract bool CheckPacket(object packet, TaskCompletionSource<object> source);
+        protected abstract bool CheckPacket(PacketHandle packet, TaskCompletionSource<object> source);
 
         private void ReadAsyncCallbackCaptureException(TaskCompletionSource<object> source)
         {
@@ -2815,12 +2908,12 @@ namespace System.Data.SqlClient
 
 #pragma warning disable 0420 // a reference to a volatile field will not be treated as volatile
 
-        public void WriteAsyncCallback<T>(T packet, uint sniError)
+        public void WriteAsyncCallback(PacketHandle packet, uint sniError)
         {
             WriteAsyncCallback(IntPtr.Zero, packet, sniError);
         }
 
-        public void WriteAsyncCallback<T>(IntPtr key, T packet, uint sniError)
+        public void WriteAsyncCallback(IntPtr key, PacketHandle packet, uint sniError)
         { // Key never used.
             RemovePacketFromPendingList(packet);
             try
@@ -3189,7 +3282,7 @@ namespace System.Data.SqlClient
 
 #pragma warning disable 0420 // a reference to a volatile field will not be treated as volatile
 
-        private Task SNIWritePacket(object packet, out uint sniError, bool canAccumulate, bool callerHasConnectionLock)
+        private Task SNIWritePacket(PacketHandle packet, out uint sniError, bool canAccumulate, bool callerHasConnectionLock)
         {
             // Check for a stored exception
             var delayedException = Interlocked.Exchange(ref _delayedWriteAsyncCallbackException, null);
@@ -3201,7 +3294,7 @@ namespace System.Data.SqlClient
             Task task = null;
             _writeCompletionSource = null;
 
-            object packetPointer = EmptyReadPacket;
+            PacketHandle packetPointer = EmptyReadPacket;
 
             bool sync = !_parser._asyncWrite;
             if (sync && _asyncWriteCount > 0)
@@ -3322,8 +3415,9 @@ namespace System.Data.SqlClient
             return task;
         }
 
-        internal abstract bool IsValidPacket(object packetPointer);
-        internal abstract uint WritePacket(object packet, bool sync);
+        internal abstract bool IsValidPacket(PacketHandle packetPointer);
+
+        internal abstract uint WritePacket(PacketHandle packet, bool sync);
 
 #pragma warning restore 0420
 
@@ -3340,7 +3434,7 @@ namespace System.Data.SqlClient
                     return;
                 }
 
-                object attnPacket = CreateAndSetAttentionPacket();
+                PacketHandle attnPacket = CreateAndSetAttentionPacket();
 
                 try
                 {
@@ -3398,14 +3492,14 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal abstract object CreateAndSetAttentionPacket();
+        internal abstract PacketHandle CreateAndSetAttentionPacket();
 
-        internal abstract void SetPacketData(object packet, byte[] buffer, int bytesUsed);
+        internal abstract void SetPacketData(PacketHandle packet, byte[] buffer, int bytesUsed);
 
         private Task WriteSni(bool canAccumulate)
         {
             // Prepare packet, and write to packet.
-            object packet = GetResetWritePacket();
+            PacketHandle packet = GetResetWritePacket();
 
             SetBufferSecureStrings();
             SetPacketData(packet, _outBuff, _outBytesUsed);
@@ -3617,7 +3711,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        protected abstract object EmptyReadPacket { get; }
+        protected abstract PacketHandle EmptyReadPacket { get; }
 
         /// <summary>
         /// Gets the full list of errors and warnings (including the pre-attention ones), then wipes all error and warning lists
