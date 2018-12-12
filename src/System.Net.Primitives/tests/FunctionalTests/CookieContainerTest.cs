@@ -170,6 +170,7 @@ namespace System.Net.Primitives.Functional.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // .NET Framework will not perform domainTable clean up.
         public static void AddCookies_CapacityReached_OldCookiesRemoved(bool isFromSameDomain)
         {
             const int Capacity = 10;
