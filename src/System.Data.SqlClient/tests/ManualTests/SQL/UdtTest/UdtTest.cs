@@ -10,14 +10,15 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public class UdtTest
     {
+        private const string UdtTestDbName = "UdtTestDb";
         private string _connStr;
 
         public UdtTest()
         {
-            _connStr = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { InitialCatalog = "UdtTestDb" }).ConnectionString;
+            _connStr = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { InitialCatalog = UdtTestDbName }).ConnectionString;
         }
 
-        [CheckConnStrSetupFact]
+        [CheckDatabaseIsPresentFact(UdtTestDbName)]
         public void ReaderTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -57,7 +58,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [CheckDatabaseIsPresentFact(UdtTestDbName)]
         public void ExecuteScalarTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -74,7 +75,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [CheckDatabaseIsPresentFact(UdtTestDbName)]
         public void InputParameterTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -123,7 +124,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [CheckDatabaseIsPresentFact(UdtTestDbName)]
         public void OutputParameterTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -158,7 +159,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [CheckDatabaseIsPresentFact(UdtTestDbName)]
         public void FillTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -180,7 +181,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [CheckDatabaseIsPresentFact(UdtTestDbName)]
         public void UpdateTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -216,7 +217,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [CheckDatabaseIsPresentFact(UdtTestDbName)]
         public void NullTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
