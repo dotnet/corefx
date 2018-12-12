@@ -56,7 +56,7 @@ namespace System.IO.Pipelines.Tests
         public async Task CallingFlushAsyncMultipleTimesAllowsFirstToComplete()
         {
             Pipe.Writer.WriteEmpty(65);
-            var flushTask = Pipe.Writer.FlushAsync().AsTask();
+            Task<FlushResult> flushTask = Pipe.Writer.FlushAsync().AsTask();
 
             Pipe.Writer.WriteEmpty(1);
 
@@ -64,10 +64,28 @@ namespace System.IO.Pipelines.Tests
             _ = Pipe.Writer.FlushAsync();
             _ = Pipe.Writer.FlushAsync();
 
-            var result = await Pipe.Reader.ReadAsync();
+            ReadResult result = await Pipe.Reader.ReadAsync();
             Pipe.Reader.AdvanceTo(result.Buffer.End);
 
             Assert.True(flushTask.IsCompleted);
+        }
+
+        [Fact]
+        public async Task DoubleFlushAsyncThrows()
+        {
+            Pipe.Writer.WriteEmpty(65);
+
+            ValueTask<FlushResult> flushResult1 = Pipe.Writer.FlushAsync();
+            ValueTask<FlushResult> flushResult2 = Pipe.Writer.FlushAsync();
+
+            var task1 = Assert.ThrowsAsync<InvalidOperationException>(async () => await flushResult1);
+            var task2 = Assert.ThrowsAsync<InvalidOperationException>(async () => await flushResult2);
+
+            var exception1 = await task1;
+            var exception2 = await task2;
+
+            Assert.Equal("Concurrent reads or writes are not supported.", exception1.Message);
+            Assert.Equal("Concurrent reads or writes are not supported.", exception2.Message);
         }
     }
 }

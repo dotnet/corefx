@@ -74,12 +74,16 @@ namespace System.IO.Pipelines
         {
             Action<object> currentCompletion = _completion;
             object currentState = _completionState;
+            ExecutionContext executionContext = _executionContext;
+            SynchronizationContext synchronizationContext = _synchronizationContext;
 
             _completion = null;
             _completionState = null;
+            _synchronizationContext = null;
+            _executionContext = null;
 
             completionData = currentCompletion != null ?
-                new CompletionData(currentCompletion, currentState, _executionContext, _synchronizationContext) :
+                new CompletionData(currentCompletion, currentState, executionContext, synchronizationContext) :
                 default;
         }
 
@@ -88,11 +92,8 @@ namespace System.IO.Pipelines
         {
             Debug.Assert(_completion == null);
             Debug.Assert(_completionState == null);
-
-            _completion = null;
-            _completionState = null;
-            _synchronizationContext = null;
-            _executionContext = null;
+            Debug.Assert(_synchronizationContext == null);
+            Debug.Assert(_executionContext == null);
 
             _awaitableState &= ~AwaitableState.Completed;
         }
