@@ -90,6 +90,8 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        // On this test RemotelyInvokable.WriteLoop never returns, we cannot use RemotelyInvokable.WriteLoopUapCmd workaround
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void TestAsyncOutputStream_BeginCancelBegin_OutputReadLine()
         {
             var dataArrivedEvent = new AutoResetEvent(false);
