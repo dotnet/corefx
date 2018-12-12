@@ -141,8 +141,8 @@
     <BinPlaceConfiguration Include="@(AdditionalBinPlaceConfiguration)" />
   </ItemGroup>
 
-  <Import Project="$(RepositoryEngineeringDir)/blockReflectionAttribute.targets" />
-  <Import Project="$(RepositoryEngineeringDir)/depProj.targets" Condition="'$(MSBuildProjectExtension)' == '.depproj'" />
+  <Import Project="$(RepositoryEngineeringDir)blockReflectionAttribute.targets" />
+  <Import Project="$(RepositoryEngineeringDir)depProj.targets" Condition="'$(MSBuildProjectExtension)' == '.depproj'" />
   <Import Project="$(RepositoryEngineeringDir)Resources.targets" />
   <Import Project="$(RepositoryEngineeringDir)references.targets" />
   <Import Project="$(RepositoryEngineeringDir)resolveContract.targets" />
@@ -154,8 +154,8 @@
      <!-- optionalTooling uses DotnetToolCommand -->
     <DotnetToolCommand>$(DotnetTool)</DotnetToolCommand>
   </PropertyGroup>
-  <Import Project="$(ToolsDir)/codeOptimization.targets" />
-  <Import Project="$(ToolsDir)/optionalTooling.targets" />
+  <Import Project="$(ToolsDir)codeOptimization.targets" />
+  <Import Project="$(ToolsDir)OptionalTooling.targets" />
 
   <Import Project="$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets" Condition="Exists('$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets')" />
 

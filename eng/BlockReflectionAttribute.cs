@@ -1,9 +1,10 @@
-/*
-  Providing a definition for __BlockReflectionAttribute in an assembly is a signal to the .NET Native toolchain 
-  to remove the metadata for all non-public APIs. This both reduces size and disables private reflection on those 
-  APIs in libraries that include this. The attribute can also be applied to individual public APIs to similarly block them.
-  This file is consumed by Build.Common.Targets.
-*/
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+// Defining __BlockReflectionAttribute indicates that the .NET Native toolchain should remove metadata for all non-public APIs.
+// This reduces size and disables private reflection on those APIs. 
+// The attribute can also be applied to individual public APIs to similarly block them.
 
 using System;
 

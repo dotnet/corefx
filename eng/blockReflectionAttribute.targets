@@ -1,21 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <!--
-    Providing a definition for __BlockReflectionAttribute in an assembly is a signal to the .NET Native toolchain
-    to remove the metadata for all non-public APIs. This both reduces size and disables private reflection on those
-    APIs in libraries that include this. The attribute can also be applied to individual public APIs to similarly block them.
-  -->
+      Defining __BlockReflectionAttribute indicates that the .NET Native toolchain should remove the metadata for all non-public APIs.
+      This reduces size and disables private reflection on those APIs.
+      The attribute can also be applied to individual public APIs to similarly block them.
+   -->
   <PropertyGroup>
     <BlockReflectionAttribute Condition="'$(BlockReflectionAttribute)' == '' and '$(UWPCompatible)' == 'true' and '$(IsTestProject)' != 'true'">true</BlockReflectionAttribute>
     <BlockReflectionAttribute Condition="'$(MSBuildProjectExtension)' != '.csproj'">false</BlockReflectionAttribute>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(BlockReflectionAttribute)'=='true'">
-    <CoreCompileDependsOn>$(CoreCompileDependsOn);AddBlockReflectionAttribute</CoreCompileDependsOn>
-    <BlockReflectionAtributeFile>$(MSBuildThisFileDirectory)/BlockReflectionAttribute.cs</BlockReflectionAtributeFile>
-  </PropertyGroup>
-  <Target Name="AddBlockReflectionAttribute">
-    <ItemGroup>
-      <Compile Include="$(BlockReflectionAtributeFile)" />
-    </ItemGroup>
-  </Target>
+
+  <ItemGroup Condition="'$(BlockReflectionAttribute)'=='true'">
+    <Compile Include="$(MSBuildThisFileDirectory)/BlockReflectionAttribute.cs" />
+  </ItemGroup>
 </Project>

@@ -5,6 +5,13 @@
     <AssemblySearchPaths>$(AssemblySearchPaths);$(ContractOutputPath);{RawFileName}</AssemblySearchPaths>
     <!-- Disable RAR from transitively discovering dependencies for References -->
     <_FindDependencies>false</_FindDependencies>
+    <!--
+      We don't use any of MSBuild's resolution logic for resolving the framework, so just set these two properties to any folder
+      that exists to skip the GenerateReferenceAssemblyPaths task (not target) and to prevent it from outputting a warning (MSB3644).
+      Need to set these after the common targets import.
+      -->
+    <_TargetFrameworkDirectories>$(MSBuildThisFileDirectory)</_TargetFrameworkDirectories>
+    <_FullFrameworkReferenceAssemblyPaths>$(MSBuildThisFileDirectory)</_FullFrameworkReferenceAssemblyPaths>
   </PropertyGroup>
   <PropertyGroup Condition="'$(IncludeDefaultReferences)' == ''">
     <IncludeDefaultReferences Condition="'$(MSBuildProjectExtension)' == '.csproj'">true</IncludeDefaultReferences>

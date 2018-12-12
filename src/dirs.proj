@@ -1,4 +1,4 @@
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
   <Import Project="Directory.Build.props" />
 
   <!-- required to build the projects in their specified order -->
