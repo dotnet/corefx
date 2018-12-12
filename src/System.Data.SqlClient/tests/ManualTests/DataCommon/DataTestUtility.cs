@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -21,6 +22,10 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                                                                      ".database.cloudapi.de",
                                                                      ".database.usgovcloudapi.net",
                                                                      ".database.chinacloudapi.cn"};
+
+        private static bool? serviceBrokerEnabled;
+        private static Dictionary<string, bool> databasesAvailable;
+
         static DataTestUtility()
         {
             NpConnStr = Environment.GetEnvironmentVariable("TEST_NP_CONN_STR");
@@ -30,6 +35,68 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         public static bool AreConnStringsSetup()
         {
             return !string.IsNullOrEmpty(NpConnStr) && !string.IsNullOrEmpty(TcpConnStr);
+        }
+
+        public static bool IsServiceBrokerEnabled()
+        {
+            if (!serviceBrokerEnabled.HasValue)
+            {
+                serviceBrokerEnabled = false;
+                if (AreConnStringsSetup())
+                {
+                    try
+                    {
+                        var builder = new SqlConnectionStringBuilder(TcpConnStr);
+                        string database = builder.InitialCatalog;
+                        builder.ConnectTimeout = 2;
+                        using (var connection = new SqlConnection(builder.ToString()))
+                        using (var command = new SqlCommand("SELECT is_service_broker_enabled FROM sys.sys.databases WHERE name=@name", connection))
+                        {
+                            command.Parameters.AddWithValue("name", database);
+                            using (var reader = command.ExecuteReader())
+                            {
+                                if (reader.HasRows && reader.Read())
+                                {
+                                    serviceBrokerEnabled = (reader.GetInt32(0) == 1);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        serviceBrokerEnabled = false;
+                    }
+                }
+            }
+            return serviceBrokerEnabled.Value;
+        }
+
+        public static bool IsDatabasePresent(string name)
+        {
+            if (databasesAvailable == null)
+            {
+                databasesAvailable = new Dictionary<string, bool>();
+            }
+            bool present = false;
+            if (AreConnStringsSetup() && !string.IsNullOrEmpty(name) && !databasesAvailable.TryGetValue(name, out present))
+            {
+                try
+                {
+                    var builder = new SqlConnectionStringBuilder(TcpConnStr);
+                    builder.ConnectTimeout = 2;
+                    using (var connection = new SqlConnection(builder.ToString()))
+                    using (var command = new SqlCommand("SELECT COUNT(*) FROM sys.sys.databases WHERE name=@name", connection))
+                    {
+                        command.Parameters.AddWithValue("name", name);
+                        present = Convert.ToInt32(command.ExecuteScalar()) == 1;
+                    }
+                }
+                catch (Exception)
+                {
+                }
+                databasesAvailable[name] = present;
+            }
+            return present;
         }
 
         public static bool IsUsingManagedSNI() => (bool)(s_useManagedSNI?.GetValue(null) ?? false);
