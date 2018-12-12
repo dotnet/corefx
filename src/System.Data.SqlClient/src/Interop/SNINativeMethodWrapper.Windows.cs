@@ -197,7 +197,7 @@ namespace System.Data.SqlClient
         internal static extern void SNIPacketRelease(IntPtr pPacket);
 
         [DllImport(SNI, CallingConvention = CallingConvention.Cdecl, EntryPoint = "SNIPacketResetWrapper")]
-        internal static extern void SNIPacketReset([In] SNIHandle pConn, IOType IOType, SNIPacket pPacket, ConsumerNumber ConsNum);
+        internal static extern void SNIPacketReset([In] SNIHandle pConn, IOType IOType, SNIPacketHandle pPacket, ConsumerNumber ConsNum);
 
         [DllImport(SNI, CallingConvention = CallingConvention.Cdecl)]
         internal static extern uint SNIQueryInfo(QTypes QType, ref uint pbQInfo);
@@ -256,7 +256,7 @@ namespace System.Data.SqlClient
         private static extern uint SNIPacketGetDataWrapper([In] IntPtr packet, [In, Out] byte[] readBuffer, uint readBufferLength, out uint dataSize);
 
         [DllImport(SNI, CallingConvention = CallingConvention.Cdecl)]
-        private static extern unsafe void SNIPacketSetData(SNIPacket pPacket, [In] byte* pbBuf, uint cbBuf);
+        private static extern unsafe void SNIPacketSetData(SNIPacketHandle pPacket, [In] byte* pbBuf, uint cbBuf);
 
         [DllImport(SNI, CallingConvention = CallingConvention.Cdecl)]
         private static extern unsafe uint SNISecGenClientContextWrapper(
@@ -272,10 +272,10 @@ namespace System.Data.SqlClient
             [MarshalAsAttribute(UnmanagedType.LPWStr)] string pwszPassword);
 
         [DllImport(SNI, CallingConvention = CallingConvention.Cdecl)]
-        private static extern uint SNIWriteAsyncWrapper(SNIHandle pConn, [In] SNIPacket pPacket);
+        private static extern uint SNIWriteAsyncWrapper(SNIHandle pConn, [In] SNIPacketHandle pPacket);
 
         [DllImport(SNI, CallingConvention = CallingConvention.Cdecl)]
-        private static extern uint SNIWriteSyncOverAsync(SNIHandle pConn, [In] SNIPacket pPacket);
+        private static extern uint SNIWriteSyncOverAsync(SNIHandle pConn, [In] SNIPacketHandle pPacket);
         #endregion
 
         internal static uint SniGetConnectionId(SNIHandle pConn, ref Guid connId)
@@ -347,7 +347,7 @@ namespace System.Data.SqlClient
             return SNIPacketGetDataWrapper(packet, readBuffer, (uint)readBuffer.Length, out dataSize);
         }
 
-        internal static unsafe void SNIPacketSetData(SNIPacket packet, byte[] data, int length)
+        internal static unsafe void SNIPacketSetData(SNIPacketHandle packet, byte[] data, int length)
         {
             fixed (byte* pin_data = &data[0])
             {
@@ -374,7 +374,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal static uint SNIWritePacket(SNIHandle pConn, SNIPacket packet, bool sync)
+        internal static uint SNIWritePacket(SNIHandle pConn, SNIPacketHandle packet, bool sync)
         {
             if (sync)
             {
