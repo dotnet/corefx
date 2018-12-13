@@ -4,7 +4,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 
 internal static partial class Interop
 {
@@ -54,29 +53,6 @@ internal static partial class Interop
                 {
                     return CryptGetProvParam(safeProvHandle, dwParam, (IntPtr)bytePtr, ref dwDataLen, 0);
                 }
-            }
-        }
-
-        public static unsafe bool CryptGetProvParam(
-                SafeProvHandle safeProvHandle,
-                CryptProvParam dwParam,
-                byte[] pbData,
-                ref int dwDataLen,
-                int dwFlags)
-        {
-            if (dwDataLen > pbData?.Length)
-            {
-                throw new IndexOutOfRangeException();
-            }
-
-            fixed (byte* bytePtr = pbData)
-            {
-                return CryptGetProvParam(
-                    safeProvHandle,
-                    dwParam,
-                    (IntPtr)bytePtr,
-                    ref dwDataLen,
-                    dwFlags);
             }
         }
     }
