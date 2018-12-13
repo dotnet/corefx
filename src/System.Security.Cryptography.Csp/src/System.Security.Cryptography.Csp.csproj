@@ -129,8 +129,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.CryptSetProvParam.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.CryptSetProvParam.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.CryptSignHashW.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.CryptSignHashW.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.CryptSignHash.cs">
+      <Link>Common\Interop\Windows\advapi32\Interop.CryptSignHash.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Crypt32\Interop.FindOidInfo.cs">
       <Link>Common\Interop\Windows\Crypt32\Interop.FindOidInfo.cs</Link>

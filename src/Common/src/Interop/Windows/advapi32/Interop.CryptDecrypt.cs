@@ -9,6 +9,12 @@ internal partial class Interop
 {
     internal partial class Advapi32
     {
+        internal enum CryptDecryptFlags : int
+        {
+            CRYPT_OAEP = 0x00000040,
+            CRYPT_DECRYPT_RSA_NO_PADDING_CHECK = 0x00000020
+        }
+
         [DllImport(Libraries.Advapi32, SetLastError = true)]
         public static extern bool CryptDecrypt(
             SafeKeyHandle hKey,

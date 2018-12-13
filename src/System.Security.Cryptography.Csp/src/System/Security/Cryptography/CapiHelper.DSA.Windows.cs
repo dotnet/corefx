@@ -35,7 +35,7 @@ namespace Internal.NativeCrypto
                     null,
                     MS_ENH_DSS_DH_PROV,
                     dwProvType,
-                    (uint)CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT))
+                    (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT))
                 {
                     wszUpgrade = MS_ENH_DSS_DH_PROV;
                 }

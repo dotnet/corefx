@@ -106,11 +106,11 @@ namespace System.Security.Cryptography
         protected override bool ReleaseHandle()
         {
             // Make sure not to delete a key that we want to keep in the key container or an ephemeral key
-            if (!_fPersistKeyInCsp && 0 == (_flags & (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT))
+            if (!_fPersistKeyInCsp && 0 == (_flags & (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT))
             {
                 // Delete the key container. 
 
-                uint flags = (_flags & (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_MACHINE_KEYSET) | (uint)CapiHelper.CryptAcquireContextFlags.CRYPT_DELETEKEYSET;
+                uint flags = (_flags & (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_MACHINE_KEYSET) | (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_DELETEKEYSET;
                 SafeProvHandle hIgnoredProv;
                 bool ignoredSuccess = Interop.Advapi32.CryptAcquireContext(out hIgnoredProv, _containerName, _providerName, _type, flags);
                 hIgnoredProv.Dispose();

@@ -10,7 +10,7 @@ using System.Text;
 using Internal.Cryptography;
 using Microsoft.Win32.SafeHandles;
 using static Interop.Crypt32;
-using CryptProvParam = global::Interop.Advapi32.CryptProvParam;
+using CryptProvParam = Interop.Advapi32.CryptProvParam;
 
 namespace Internal.NativeCrypto
 {
@@ -58,7 +58,7 @@ namespace Internal.NativeCrypto
 
                 // attempt to use the AES provider
                 if (S_OK == AcquireCryptContext(out safeProvHandle, null, MS_ENH_RSA_AES_PROV,
-                                                dwProvType, (uint)CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT))
+                                                dwProvType, (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT))
                 {
                     wszUpgrade = MS_ENH_RSA_AES_PROV;
                 }
@@ -120,10 +120,10 @@ namespace Internal.NativeCrypto
         /// </summary>
         private static void CreateCSP(CspParameters parameters, bool randomKeyContainer, out SafeProvHandle safeProvHandle)
         {
-            uint dwFlags = (uint)CryptAcquireContextFlags.CRYPT_NEWKEYSET;
+            uint dwFlags = (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_NEWKEYSET;
             if (randomKeyContainer)
             {
-                dwFlags |= (uint)CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT;
+                dwFlags |= (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT;
             }
 
             SafeProvHandle hProv;
@@ -143,8 +143,8 @@ namespace Internal.NativeCrypto
         private static int AcquireCryptContext(out SafeProvHandle safeProvHandle, string keyContainer,
                                                 string providerName, int providerType, uint flags)
         {
-            const uint VerifyContextFlag = (uint)CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT;
-            const uint MachineContextFlag = (uint)CryptAcquireContextFlags.CRYPT_MACHINE_KEYSET;
+            const uint VerifyContextFlag = (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT;
+            const uint MachineContextFlag = (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_MACHINE_KEYSET;
 
             int ret = S_OK;
             // Specifying both verify context (for an ephemeral key) and machine keyset (for a persisted machine key)
@@ -182,7 +182,7 @@ namespace Internal.NativeCrypto
             // We want to just open this CSP.  Passing in verify context will
             // open it and, if a container is given, map to open the container.
             //
-            int ret = OpenCSP(cspParameters, (uint)CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT, out hProv);
+            int ret = OpenCSP(cspParameters, (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT, out hProv);
             if (S_OK != ret)
             {
                 hProv.Dispose();
@@ -253,7 +253,7 @@ namespace Internal.NativeCrypto
             hProv.Flags = flags;
 
             // We never want to delete a key container if it's already there.
-            if (IsFlagBitSet(flags, (uint)CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT))
+            if (IsFlagBitSet(flags, (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT))
             {
                 hProv.PersistKeyInCsp = false;
             }
@@ -344,7 +344,7 @@ namespace Internal.NativeCrypto
         internal static int GetProviderParameterWorker(SafeProvHandle safeProvHandle, byte[] impType, ref int cb, CryptProvParam flags)
         {
             int impTypeReturn = 0;
-            if (!CryptGetProvParam(safeProvHandle, flags, impType, ref cb, 0))
+            if (!Interop.Advapi32.CryptGetProvParam(safeProvHandle, flags, impType, ref cb))
             {
                 throw GetErrorCode().ToCryptographicException();
             }
@@ -519,15 +519,15 @@ namespace Internal.NativeCrypto
 
             if (IsFlagBitSet((uint)flags, (uint)CspProviderFlags.UseMachineKeyStore))
             {
-                cspFlags |= (uint)CryptAcquireContextFlags.CRYPT_MACHINE_KEYSET;
+                cspFlags |= (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_MACHINE_KEYSET;
             }
             if (IsFlagBitSet((uint)flags, (uint)CspProviderFlags.NoPrompt))
             {
-                cspFlags |= (uint)CryptAcquireContextFlags.CRYPT_SILENT;
+                cspFlags |= (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_SILENT;
             }
             if (IsFlagBitSet((uint)flags, (uint)CspProviderFlags.CreateEphemeralKey))
             {
-                cspFlags |= (uint)CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT;
+                cspFlags |= (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_VERIFYCONTEXT;
             }
             return cspFlags;
         }
@@ -821,7 +821,7 @@ namespace Internal.NativeCrypto
             Buffer.BlockCopy(encryptedData, 0, dataTobeDecrypted, 0, encryptedDataLength);
             Array.Reverse(dataTobeDecrypted);
 
-            int dwFlags = fOAEP ? (int)CryptDecryptFlags.CRYPT_OAEP : 0;
+            int dwFlags = fOAEP ? (int)Interop.Advapi32.CryptDecryptFlags.CRYPT_OAEP : 0;
             int decryptedDataLength = encryptedDataLength;
             if (!Interop.Advapi32.CryptDecrypt(safeKeyHandle, SafeHashHandle.InvalidHandle, true, dwFlags, dataTobeDecrypted, ref decryptedDataLength))
             {
@@ -831,7 +831,7 @@ namespace Internal.NativeCrypto
                 // padded data in order to prevent a chosen ciphertext attack.  We will allow NTE_BAD_KEY out, since
                 // that error does not relate to the padding.  Otherwise just throw a cryptographic exception based on
                 // the error code.
-                if ((uint)((uint)dwFlags & (uint)CryptDecryptFlags.CRYPT_OAEP) == (uint)CryptDecryptFlags.CRYPT_OAEP &&
+                if ((uint)((uint)dwFlags & (uint)Interop.Advapi32.CryptDecryptFlags.CRYPT_OAEP) == (uint)Interop.Advapi32.CryptDecryptFlags.CRYPT_OAEP &&
                                                       unchecked((uint)ErrCode) != (uint)CryptKeyError.NTE_BAD_KEY)
                 {
                     if (unchecked((uint)ErrCode) == (uint)CryptKeyError.NTE_BAD_FLAGS)
@@ -877,7 +877,7 @@ namespace Internal.NativeCrypto
             Debug.Assert(pbKey != null, "pbKey is null");
             Debug.Assert(cbKey >= 0, $"cbKey is less than 0 ({cbKey})");
 
-            int dwEncryptFlags = foep ? (int)CryptDecryptFlags.CRYPT_OAEP : 0;
+            int dwEncryptFlags = foep ? (int)Interop.Advapi32.CryptDecryptFlags.CRYPT_OAEP : 0;
             // Figure out how big the encrypted key will be
             int cbEncryptedKey = cbKey;
             if (!Interop.Advapi32.CryptEncrypt(safeKeyHandle, SafeHashHandle.InvalidHandle, true, dwEncryptFlags, null, ref cbEncryptedKey, cbEncryptedKey))
@@ -1457,29 +1457,6 @@ namespace Internal.NativeCrypto
             return E_FAIL.ToCryptographicException();
         }
 
-        public static unsafe bool CryptGetProvParam(
-                SafeProvHandle safeProvHandle,
-                CryptProvParam dwParam,
-                byte[] pbData,
-                ref int dwDataLen,
-                int dwFlags)
-        {
-            if (dwDataLen > pbData?.Length)
-            {
-                throw new IndexOutOfRangeException();
-            }
-
-            fixed (byte* bytePtr = pbData)
-            {
-                return global::Interop.Advapi32.CryptGetProvParam(
-                    safeProvHandle,
-                    dwParam,
-                    (IntPtr)bytePtr,
-                    ref dwDataLen,
-                    dwFlags);
-            }
-        }
-
         public static bool CryptGetUserKey(
             SafeProvHandle safeProvHandle,
             int dwKeySpec,
@@ -1579,12 +1556,6 @@ namespace Internal.NativeCrypto
         internal const string MS_SCARD_PROV = "Microsoft Base Smart Card Crypto Provider";
         internal const string MS_STRONG_PROV = "Microsoft Strong Cryptographic Provider";
 
-        internal enum CryptDecryptFlags : int
-        {
-            CRYPT_OAEP = 0x00000040,
-            CRYPT_DECRYPT_RSA_NO_PADDING_CHECK = 0x00000020
-        }
-
         [Flags]
         internal enum CryptGetProvParamPPImpTypeFlags : int
         {
@@ -1595,16 +1566,6 @@ namespace Internal.NativeCrypto
             CRYPT_IMPL_REMOVABLE = 0x8
         }
         //All the flags are capture here
-        [Flags]
-        internal enum CryptAcquireContextFlags : uint
-        {
-            None = 0x00000000,
-            CRYPT_NEWKEYSET = 0x00000008,                         // CRYPT_NEWKEYSET
-            CRYPT_DELETEKEYSET = 0x00000010,                      // CRYPT_DELETEKEYSET
-            CRYPT_MACHINE_KEYSET = 0x00000020,                     // CRYPT_MACHINE_KEYSET
-            CRYPT_SILENT = 0x00000040,                            // CRYPT_SILENT
-            CRYPT_VERIFYCONTEXT = 0xF0000000      // CRYPT_VERIFYCONTEXT
-        }
 
         internal enum CryptGetKeyParamQueryType : int
         {
