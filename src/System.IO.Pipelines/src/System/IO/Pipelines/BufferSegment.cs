@@ -94,6 +94,10 @@ namespace System.IO.Pipelines
             Debug.Assert(segment != null);
             Debug.Assert(Next == null);
 
+            // Update the memory of the current segment since it's full and we're 
+            // adding another segment as the NextSegment
+            UpdateMemory();
+
             NextSegment = segment;
 
             segment = this;
