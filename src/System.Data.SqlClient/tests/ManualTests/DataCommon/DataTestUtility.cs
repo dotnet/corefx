@@ -14,6 +14,9 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     {
         public static readonly string NpConnStr = null;
         public static readonly string TcpConnStr = null;
+
+        public const string UdtTestDbName = "UdtTestDb";
+
         private static readonly Assembly s_systemDotData = typeof(System.Data.SqlClient.SqlConnection).GetTypeInfo().Assembly;
         private static readonly Type s_tdsParserStateObjectFactory = s_systemDotData?.GetType("System.Data.SqlClient.TdsParserStateObjectFactory");
         private static readonly PropertyInfo s_useManagedSNI = s_tdsParserStateObjectFactory?.GetProperty("UseManagedSNI", BindingFlags.Static | BindingFlags.Public);
@@ -73,10 +76,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         public static bool IsDatabasePresent(string name)
         {
-            if (databasesAvailable == null)
-            {
-                databasesAvailable = new Dictionary<string, bool>();
-            }
+            databasesAvailable = databasesAvailable ?? new Dictionary<string, bool>();
             bool present = false;
             if (AreConnStringsSetup() && !string.IsNullOrEmpty(name) && !databasesAvailable.TryGetValue(name, out present))
             {
@@ -85,7 +85,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     var builder = new SqlConnectionStringBuilder(TcpConnStr);
                     builder.ConnectTimeout = 2;
                     using (var connection = new SqlConnection(builder.ToString()))
-                    using (var command = new SqlCommand("SELECT COUNT(*) FROM sys.sys.databases WHERE name=@name", connection))
+                    using (var command = new SqlCommand("SELECT COUNT(*) FROM sys.databases WHERE name=@name", connection))
                     {
                         command.Parameters.AddWithValue("name", name);
                         present = Convert.ToInt32(command.ExecuteScalar()) == 1;

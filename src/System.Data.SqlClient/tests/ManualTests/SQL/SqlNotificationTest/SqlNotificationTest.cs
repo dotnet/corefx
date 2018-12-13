@@ -37,9 +37,13 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             Cleanup();
         }
 
+        public static bool IsServiceBrokerEnabled() => DataTestUtility.IsServiceBrokerEnabled();
+
+        private static bool AreConnectionStringsSetup() => DataTestUtility.AreConnStringsSetup();
+
         #region StartStop_Tests
 
-        [CheckServiceBrokerEnabledFact]
+        [ConditionalFact(nameof(IsServiceBrokerEnabled), nameof(AreConnectionStringsSetup))]
         public void Test_DoubleStart_SameConnStr()
         {
             Assert.True(SqlDependency.Start(_startConnectionString), "Failed to start listener.");
@@ -51,7 +55,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             Assert.True(SqlDependency.Stop(_startConnectionString), "Failed to stop listener.");
         }
 
-        [CheckServiceBrokerEnabledFact]
+        [ConditionalFact(nameof(IsServiceBrokerEnabled), nameof(AreConnectionStringsSetup))]
         public void Test_DoubleStart_DifferentConnStr()
         {
             SqlConnectionStringBuilder cb = new SqlConnectionStringBuilder(_startConnectionString);
@@ -76,7 +80,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckServiceBrokerEnabledFact]
+        [ConditionalFact(nameof(IsServiceBrokerEnabled), nameof(AreConnectionStringsSetup))]
         public void Test_Start_DifferentDB()
         {
             SqlConnectionStringBuilder cb = new SqlConnectionStringBuilder(_startConnectionString)
@@ -97,7 +101,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         #region SqlDependency_Tests
 
-        [CheckServiceBrokerEnabledFact]
+        [ConditionalFact(nameof(IsServiceBrokerEnabled), nameof(AreConnectionStringsSetup))]
         public void Test_SingleDependency_NoStart()
         {
             using (SqlConnection conn = new SqlConnection(_execConnectionString))
@@ -115,7 +119,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckServiceBrokerEnabledFact]
+        [ConditionalFact(nameof(IsServiceBrokerEnabled), nameof(AreConnectionStringsSetup))]
         public void Test_SingleDependency_Stopped()
         {
             SqlDependency.Start(_startConnectionString);
@@ -137,7 +141,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckServiceBrokerEnabledFact]
+        [ConditionalFact(nameof(IsServiceBrokerEnabled), nameof(AreConnectionStringsSetup))]
         public void Test_SingleDependency_AllDefaults_SqlAuth()
         {
             Assert.True(SqlDependency.Start(_startConnectionString), "Failed to start listener.");
@@ -181,7 +185,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckServiceBrokerEnabledFact]
+        [ConditionalFact(nameof(IsServiceBrokerEnabled), nameof(AreConnectionStringsSetup))]
         public void Test_SingleDependency_CustomQueue_SqlAuth()
         {
             Assert.True(SqlDependency.Start(_startConnectionString, _queueName), "Failed to start listener.");
@@ -225,7 +229,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         /// <summary>
         /// SqlDependecy premature timeout
         /// </summary>
-        [CheckServiceBrokerEnabledFact]
+        [ConditionalFact(nameof(IsServiceBrokerEnabled), nameof(AreConnectionStringsSetup))]
         public void Test_SingleDependency_Timeout()
         {
             Assert.True(SqlDependency.Start(_startConnectionString), "Failed to start listener.");

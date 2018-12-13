@@ -10,15 +10,18 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public class UdtTest
     {
-        private const string UdtTestDbName = "UdtTestDb";
         private string _connStr;
+
+        public static bool IsUDTTestDBPresent() => DataTestUtility.IsDatabasePresent(DataTestUtility.UdtTestDbName);
+
+        private static bool AreConnectionStringsSetup() => DataTestUtility.AreConnStringsSetup();
 
         public UdtTest()
         {
-            _connStr = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { InitialCatalog = UdtTestDbName }).ConnectionString;
+            _connStr = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { InitialCatalog = DataTestUtility.UdtTestDbName }).ConnectionString;
         }
 
-        [CheckDatabaseIsPresentFact(UdtTestDbName)]
+        [ConditionalFact(nameof(IsUDTTestDBPresent), nameof(AreConnectionStringsSetup))]
         public void ReaderTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -58,7 +61,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckDatabaseIsPresentFact(UdtTestDbName)]
+        [ConditionalFact(nameof(IsUDTTestDBPresent), nameof(AreConnectionStringsSetup))]
         public void ExecuteScalarTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -75,7 +78,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckDatabaseIsPresentFact(UdtTestDbName)]
+        [ConditionalFact(nameof(IsUDTTestDBPresent), nameof(AreConnectionStringsSetup))]
         public void InputParameterTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -124,7 +127,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckDatabaseIsPresentFact(UdtTestDbName)]
+        [ConditionalFact(nameof(IsUDTTestDBPresent), nameof(AreConnectionStringsSetup))]
         public void OutputParameterTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -159,7 +162,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckDatabaseIsPresentFact(UdtTestDbName)]
+        [ConditionalFact(nameof(IsUDTTestDBPresent), nameof(AreConnectionStringsSetup))]
         public void FillTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -181,7 +184,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckDatabaseIsPresentFact(UdtTestDbName)]
+        [ConditionalFact(nameof(IsUDTTestDBPresent), nameof(AreConnectionStringsSetup))]
         public void UpdateTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))
@@ -217,7 +220,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckDatabaseIsPresentFact(UdtTestDbName)]
+        [ConditionalFact(nameof(IsUDTTestDBPresent), nameof(AreConnectionStringsSetup))]
         public void NullTest()
         {
             using (SqlConnection conn = new SqlConnection(_connStr))

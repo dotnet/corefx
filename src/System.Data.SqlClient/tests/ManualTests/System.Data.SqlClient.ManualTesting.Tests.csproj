@@ -8,8 +8,6 @@
       <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
     </Compile>
     <Compile Include="DataCommon\CheckConnStrSetupFactAttribute.cs" />
-    <Compile Include="DataCommon\CheckDatabaseIsPresentFactAttribute.cs" />
-    <Compile Include="DataCommon\CheckServiceBrokerEnabledFactAttribute.cs" />
     <Compile Include="SQL\AdapterTest\AdapterTest.cs" />
     <Compile Include="SQL\AsyncTest\BeginExecAsyncTest.cs" />
     <Compile Include="SQL\AsyncTest\XmlReaderAsyncTest.cs" />

@@ -2,17 +2,22 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Xunit;
+
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public class UdtBulkCopyTest
     {
-        private const string UdtTestDbName = "UdtTestDb";
         private string _connStr;
 
-        [CheckDatabaseIsPresentFact(UdtTestDbName)]
+        public static bool IsUDTTestDBPresent() => DataTestUtility.IsDatabasePresent(DataTestUtility.UdtTestDbName);
+
+        private static bool AreConnectionStringsSetup() => DataTestUtility.AreConnStringsSetup();
+
+        [ConditionalFact(nameof(IsUDTTestDBPresent), nameof(AreConnectionStringsSetup))]
         public void RunCopyTest()
         {
-            _connStr = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { InitialCatalog = UdtTestDbName }).ConnectionString;
+            _connStr = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { InitialCatalog = DataTestUtility.UdtTestDbName }).ConnectionString;
             SqlConnection conn = new SqlConnection(_connStr);
 
             string cities = DataTestUtility.GetUniqueNameForSqlServer("UdtBulkCopy_cities");
