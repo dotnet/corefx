@@ -11,6 +11,10 @@
     <Compile Include="System\Numerics\Tensors\ArrayUtilities.cs" />
     <Compile Include="System\Numerics\Tensors\CompressedSparseTensor.cs" />
     <Compile Include="System\Numerics\Tensors\DenseTensor.cs" />
+    <Compile Include="System\Numerics\Tensors\ICompressedSparseTensor.cs" />
+    <Compile Include="System\Numerics\Tensors\IDenseTensor.cs" />
+    <Compile Include="System\Numerics\Tensors\ISparseTensor.cs" />
+    <Compile Include="System\Numerics\Tensors\ITensor.cs" />
     <Compile Include="System\Numerics\Tensors\SparseTensor.cs" />
     <Compile Include="System\Numerics\Tensors\Tensor.cs" />
   </ItemGroup>

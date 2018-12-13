@@ -20,7 +20,7 @@ namespace System.Numerics.Tensors
         /// <typeparam name="T">type contained within the Tensor.  Typically a value type such as int, double, float, etc.</typeparam>
         /// <param name="size">Width and height of the identity tensor to create.</param>
         /// <returns>a <paramref name="size"/> by <paramref name="size"/> with 1s along the diagonal and zeros elsewhere.</returns>
-        public static Tensor<T> CreateIdentity<T>(int size)
+        public static ITensor<T> CreateIdentity<T>(int size)
         {
             return CreateIdentity(size, false, Tensor<T>.One);
         }
@@ -32,7 +32,7 @@ namespace System.Numerics.Tensors
         /// <param name="size">Width and height of the identity tensor to create.</param>
         /// <param name="columMajor">>False to indicate that the first dimension is most minor (closest) and the last dimension is most major (farthest): row-major.  True to indicate that the last dimension is most minor (closest together) and the first dimension is most major (farthest apart): column-major.</param>
         /// <returns>a <paramref name="size"/> by <paramref name="size"/> with 1s along the diagonal and zeros elsewhere.</returns>
-        public static Tensor<T> CreateIdentity<T>(int size, bool columMajor)
+        public static ITensor<T> CreateIdentity<T>(int size, bool columMajor)
         {
             return CreateIdentity(size, columMajor, Tensor<T>.One);
         }
@@ -45,7 +45,7 @@ namespace System.Numerics.Tensors
         /// <param name="columMajor">>False to indicate that the first dimension is most minor (closest) and the last dimension is most major (farthest): row-major.  True to indicate that the last dimension is most minor (closest together) and the first dimension is most major (farthest apart): column-major.</param>
         /// <param name="oneValue">Value of <typeparamref name="T"/> that is used along the diagonal.</param>
         /// <returns>a <paramref name="size"/> by <paramref name="size"/> with 1s along the diagonal and zeros elsewhere.</returns>
-        public static Tensor<T> CreateIdentity<T>(int size, bool columMajor, T oneValue)
+        public static ITensor<T> CreateIdentity<T>(int size, bool columMajor, T oneValue)
         {
             Span<int> dimensions = stackalloc int[2];
             dimensions[0] = dimensions[1] = size;
@@ -66,7 +66,7 @@ namespace System.Numerics.Tensors
         /// <typeparam name="T">type contained within the Tensor.  Typically a value type such as int, double, float, etc.</typeparam>
         /// <param name="diagonal">Tensor representing the diagonal to build the new tensor from.</param>
         /// <returns>A new tensor of the same layout and order as <paramref name="diagonal"/> of one higher rank, with the values of <paramref name="diagonal"/> along the diagonal and zeros elsewhere.</returns>
-        public static Tensor<T> CreateFromDiagonal<T>(Tensor<T> diagonal)
+        public static ITensor<T> CreateFromDiagonal<T>(ITensor<T> diagonal)
         {
             return CreateFromDiagonal(diagonal, 0);
         }
@@ -78,42 +78,42 @@ namespace System.Numerics.Tensors
         /// <param name="diagonal">Tensor representing the diagonal to build the new tensor from.</param>
         /// <param name="offset">Offset of diagonal to set in returned tensor.  0 for the main diagonal, less than zero for diagonals below, greater than zero from diagonals above.</param>
         /// <returns>A new tensor of the same layout and order as <paramref name="diagonal"/> of one higher rank, with the values of <paramref name="diagonal"/> along the specified diagonal and zeros elsewhere.</returns>
-        public static Tensor<T> CreateFromDiagonal<T>(Tensor<T> diagonal, int offset)
+        public static ITensor<T> CreateFromDiagonal<T>(ITensor<T> diagonal, int offset)
         {
             if (diagonal.Rank < 1)
             {
                 throw new ArgumentException($"Tensor {nameof(diagonal)} must have at least one dimension.", nameof(diagonal));
             }
 
-            int diagonalLength = diagonal.dimensions[0];
+            int diagonalLength = diagonal.Dimensions[0];
 
             // TODO: allow specification of axis1 and axis2?
-            var rank = diagonal.dimensions.Length + 1;
+            var rank = diagonal.Dimensions.Length + 1;
             Span<int> dimensions = rank < ArrayUtilities.StackallocMax ? stackalloc int[rank] : new int[rank];
 
             // assume square
             var axisLength = diagonalLength + Math.Abs(offset);
             dimensions[0] = dimensions[1] = axisLength;
 
-            for (int i = 1; i < diagonal.dimensions.Length; i++)
+            for (int i = 1; i < diagonal.Dimensions.Length; i++)
             {
-                dimensions[i + 1] = diagonal.dimensions[i];
+                dimensions[i + 1] = diagonal.Dimensions[i];
             }
 
             var result = diagonal.CloneEmpty(dimensions);
 
             var sizePerDiagonal = diagonal.Length / diagonalLength;
 
-            var diagProjectionStride = diagonal.IsReversedStride && diagonal.Rank > 1 ? diagonal.strides[1] : 1;
-            var resultProjectionStride = result.IsReversedStride && result.Rank > 2 ? result.strides[2] : 1;
+            var diagProjectionStride = diagonal.IsReversedStride && diagonal.Rank > 1 ? diagonal.Strides[1] : 1;
+            var resultProjectionStride = result.IsReversedStride && result.Rank > 2 ? result.Strides[2] : 1;
 
             for (int diagIndex = 0; diagIndex < diagonalLength; diagIndex++)
             {
                 var resultIndex0 = offset < 0 ? diagIndex - offset : diagIndex;
                 var resultIndex1 = offset > 0 ? diagIndex + offset : diagIndex;
 
-                var resultBase = resultIndex0 * result.strides[0] + resultIndex1 * result.strides[1];
-                var diagBase = diagIndex * diagonal.strides[0];
+                var resultBase = resultIndex0 * result.Strides[0] + resultIndex1 * result.Strides[1];
+                var diagBase = diagIndex * diagonal.Strides[0];
 
                 for (int diagProjectionOffset = 0; diagProjectionOffset < sizePerDiagonal; diagProjectionOffset++)
                 {
@@ -132,7 +132,7 @@ namespace System.Numerics.Tensors
     /// <typeparam name="T">type contained within the Tensor.  Typically a value type such as int, double, float, etc.</typeparam>
     [DebuggerDisplay("{GetArrayString(false)}")]
     // When we cross-compile for frameworks that expose ICloneable this must implement ICloneable as well.
-    public abstract class Tensor<T> : IList, IList<T>, IReadOnlyList<T>, IStructuralComparable, IStructuralEquatable
+    public abstract class Tensor<T> : ITensor<T>, IList, IList<T>, IReadOnlyList<T>, IStructuralComparable, IStructuralEquatable
     {
         internal static T Zero
         {
@@ -376,13 +376,13 @@ namespace System.Numerics.Tensors
         /// Creates a shallow copy of this tensor, with new backing storage.
         /// </summary>
         /// <returns>A shallow copy of this tensor.</returns>
-        public abstract Tensor<T> Clone();
+        public abstract ITensor<T> Clone();
 
         /// <summary>
         /// Creates a new Tensor with the same layout and dimensions as this tensor with elements initialized to their default value.
         /// </summary>
         /// <returns>A new Tensor with the same layout and dimensions as this tensor with elements initialized to their default value.</returns>
-        public virtual Tensor<T> CloneEmpty()
+        public virtual ITensor<T> CloneEmpty()
         {
             return CloneEmpty<T>(dimensions);
         }
@@ -392,7 +392,7 @@ namespace System.Numerics.Tensors
         /// </summary>
         /// <param name="dimensions">An span of integers that represent the size of each dimension of the DenseTensor to create.</param>
         /// <returns>A new Tensor with the same layout as this tensor and specified <paramref name="dimensions"/> with elements initialized to their default value.</returns>
-        public virtual Tensor<T> CloneEmpty(ReadOnlySpan<int> dimensions)
+        public virtual ITensor<T> CloneEmpty(ReadOnlySpan<int> dimensions)
         {
             return CloneEmpty<T>(dimensions);
         }
@@ -402,7 +402,7 @@ namespace System.Numerics.Tensors
         /// </summary>
         /// <typeparam name="TResult">Type contained within the new Tensor.  Typically a value type such as int, double, float, etc.</typeparam>
         /// <returns>A new Tensor with the same layout and dimensions as this tensor with elements of <typeparamref name="TResult"/> type initialized to their default value.</returns>
-        public virtual Tensor<TResult> CloneEmpty<TResult>()
+        public virtual ITensor<TResult> CloneEmpty<TResult>()
         {
             return CloneEmpty<TResult>(dimensions);
         }
@@ -413,13 +413,13 @@ namespace System.Numerics.Tensors
         /// <typeparam name="TResult">Type contained within the new Tensor.  Typically a value type such as int, double, float, etc.</typeparam>
         /// <param name="dimensions">An span of integers that represent the size of each dimension of the DenseTensor to create.</param>
         /// <returns>A new Tensor with the same layout as this tensor of specified <paramref name="dimensions"/> with elements of <typeparamref name="TResult"/> type initialized to their default value.</returns>
-        public abstract Tensor<TResult> CloneEmpty<TResult>(ReadOnlySpan<int> dimensions);
+        public abstract ITensor<TResult> CloneEmpty<TResult>(ReadOnlySpan<int> dimensions);
 
         /// <summary>
         /// Gets the n-1 dimension diagonal from the n dimension tensor.
         /// </summary>
         /// <returns>An n-1 dimension tensor with the values from the main diagonal of this tensor.</returns>
-        public Tensor<T> GetDiagonal()
+        public ITensor<T> GetDiagonal()
         {
             return GetDiagonal(0);
         }
@@ -429,7 +429,7 @@ namespace System.Numerics.Tensors
         /// </summary>
         /// <param name="offset">Offset of diagonal to set in returned tensor.  0 for the main diagonal, less than zero for diagonals below, greater than zero from diagonals above.</param>
         /// <returns>An n-1 dimension tensor with the values from the specified diagonal of this tensor.</returns>
-        public Tensor<T> GetDiagonal(int offset)
+        public ITensor<T> GetDiagonal(int offset)
         {
             // Get diagonal of first two dimensions for all remaining dimensions
 
@@ -485,7 +485,7 @@ namespace System.Numerics.Tensors
             var diagonalTensor = CloneEmpty(newTensorDimensions);
             var sizePerDiagonal = diagonalTensor.Length / diagonalTensor.Dimensions[0];
 
-            var diagProjectionStride = diagonalTensor.IsReversedStride && diagonalTensor.Rank > 1 ? diagonalTensor.strides[1] : 1;
+            var diagProjectionStride = diagonalTensor.IsReversedStride && diagonalTensor.Rank > 1 ? diagonalTensor.Strides[1] : 1;
             var sourceProjectionStride = IsReversedStride && Rank > 2 ? strides[2] : 1;
 
             for (int diagIndex = 0; diagIndex < diagonalLength; diagIndex++)
@@ -494,7 +494,7 @@ namespace System.Numerics.Tensors
                 var sourceIndex1 = offset > 0 ? diagIndex + offset : diagIndex;
 
                 var sourceBase = sourceIndex0 * strides[0] + sourceIndex1 * strides[1];
-                var diagBase = diagIndex * diagonalTensor.strides[0];
+                var diagBase = diagIndex * diagonalTensor.Strides[0];
 
                 for (int diagProjectionIndex = 0; diagProjectionIndex < sizePerDiagonal; diagProjectionIndex++)
                 {
@@ -510,7 +510,7 @@ namespace System.Numerics.Tensors
         /// Gets a tensor representing the elements below and including the diagonal, with the rest of the elements zero-ed.
         /// </summary>
         /// <returns>A tensor with the values from this tensor at and below the main diagonal and zeros elsewhere.</returns>
-        public Tensor<T> GetTriangle()
+        public ITensor<T> GetTriangle()
         {
             return GetTriangle(0, upper: false);
         }
@@ -520,7 +520,7 @@ namespace System.Numerics.Tensors
         /// </summary>
         /// <param name="offset">Offset of diagonal to set in returned tensor.  0 for the main diagonal, less than zero for diagonals below, greater than zero from diagonals above.</param>
         /// <returns>A tensor with the values from this tensor at and below the specified diagonal and zeros elsewhere.</returns>
-        public Tensor<T> GetTriangle(int offset)
+        public ITensor<T> GetTriangle(int offset)
         {
             return GetTriangle(offset, upper: false);
         }
@@ -529,7 +529,7 @@ namespace System.Numerics.Tensors
         /// Gets a tensor representing the elements above and including the diagonal, with the rest of the elements zero-ed.
         /// </summary>
         /// <returns>A tensor with the values from this tensor at and above the main diagonal and zeros elsewhere.</returns>
-        public Tensor<T> GetUpperTriangle()
+        public ITensor<T> GetUpperTriangle()
         {
             return GetTriangle(0, upper: true);
         }
@@ -539,12 +539,12 @@ namespace System.Numerics.Tensors
         /// </summary>
         /// <param name="offset">Offset of diagonal to set in returned tensor.  0 for the main diagonal, less than zero for diagonals below, greater than zero from diagonals above.</param>
         /// <returns>A tensor with the values from this tensor at and above the specified diagonal and zeros elsewhere.</returns>
-        public Tensor<T> GetUpperTriangle(int offset)
+        public ITensor<T> GetUpperTriangle(int offset)
         {
             return GetTriangle(offset, upper: true);
         }
 
-        private Tensor<T> GetTriangle(int offset, bool upper)
+        private ITensor<T> GetTriangle(int offset, bool upper)
         {
             if (Rank < 2)
             {
@@ -602,7 +602,7 @@ namespace System.Numerics.Tensors
 
                 while ((triIndex1 < axisLength1) && (triIndex0 < axisLength0))
                 {
-                    var baseIndex = triIndex0 * strides[0] + triIndex1 * result.strides[1];
+                    var baseIndex = triIndex0 * strides[0] + triIndex1 * result.Strides[1];
 
                     for (int projectionIndex = 0; projectionIndex < projectionSize; projectionIndex++)
                     {
@@ -630,7 +630,7 @@ namespace System.Numerics.Tensors
         /// </summary>
         /// <param name="dimensions">An span of integers that represent the size of each dimension of the Tensor to create.</param>
         /// <returns>A new tensor that reinterprets this tensor with different dimensions.</returns>
-        public abstract Tensor<T> Reshape(ReadOnlySpan<int> dimensions);
+        public abstract ITensor<T> Reshape(ReadOnlySpan<int> dimensions);
 
         /// <summary>
         /// Obtains the value at the specified indices
@@ -1176,7 +1176,7 @@ namespace System.Numerics.Tensors
         /// Creates a copy of this tensor as a DenseTensor&lt;T&gt;.  If this tensor is already a DenseTensor&lt;T&gt; calling this method is equivalent to calling Clone().
         /// </summary>
         /// <returns></returns>
-        public virtual DenseTensor<T> ToDenseTensor()
+        public virtual IDenseTensor<T> ToDenseTensor()
         {
             var denseTensor = new DenseTensor<T>(Dimensions, IsReversedStride);
             for (int i = 0; i < Length; i++)
@@ -1191,7 +1191,7 @@ namespace System.Numerics.Tensors
         /// Creates a copy of this tensor as a SparseTensor&lt;T&gt;.  If this tensor is already a SparseTensor&lt;T&gt; calling this method is equivalent to calling Clone().
         /// </summary>
         /// <returns></returns>
-        public virtual SparseTensor<T> ToSparseTensor()
+        public virtual ISparseTensor<T> ToSparseTensor()
         {
             var sparseTensor = new SparseTensor<T>(Dimensions, IsReversedStride);
             for (int i = 0; i < Length; i++)
@@ -1205,7 +1205,7 @@ namespace System.Numerics.Tensors
         /// Creates a copy of this tensor as a CompressedSparseTensor&lt;T&gt;.  If this tensor is already a CompressedSparseTensor&lt;T&gt; calling this method is equivalent to calling Clone().
         /// </summary>
         /// <returns></returns>
-        public virtual CompressedSparseTensor<T> ToCompressedSparseTensor()
+        public virtual ICompressedSparseTensor<T> ToCompressedSparseTensor()
         {
             var compressedSparseTensor = new CompressedSparseTensor<T>(Dimensions, IsReversedStride);
             for (int i = 0; i < Length; i++)

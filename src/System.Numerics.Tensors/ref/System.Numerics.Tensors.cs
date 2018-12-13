@@ -22,7 +22,7 @@ namespace System.Numerics.Tensors
         public static System.Numerics.Tensors.DenseTensor<T> ToTensor<T>(this T[,] array, bool reverseStride = false) { throw null; }
         public static System.Numerics.Tensors.DenseTensor<T> ToTensor<T>(this T[] array) { throw null; }
     }
-    public partial class CompressedSparseTensor<T> : System.Numerics.Tensors.Tensor<T>
+    public partial class CompressedSparseTensor<T> : System.Numerics.Tensors.Tensor<T>, System.Numerics.Tensors.ICompressedSparseTensor<T>, System.Numerics.Tensors.ITensor<T>
     {
         public CompressedSparseTensor(System.Memory<T> values, System.Memory<int> compressedCounts, System.Memory<int> indices, int nonZeroCount, System.ReadOnlySpan<int> dimensions, bool reverseStride = false) : base (default(int)) { }
         public CompressedSparseTensor(System.ReadOnlySpan<int> dimensions, bool reverseStride = false) : base (default(int)) { }
@@ -33,51 +33,96 @@ namespace System.Numerics.Tensors
         public override T this[System.ReadOnlySpan<int> indices] { get { throw null; } set { } }
         public int NonZeroCount { get { throw null; } }
         public System.Memory<T> Values { get { throw null; } }
-        public override System.Numerics.Tensors.Tensor<T> Clone() { throw null; }
-        public override System.Numerics.Tensors.Tensor<TResult> CloneEmpty<TResult>(System.ReadOnlySpan<int> dimensions) { throw null; }
+        public override System.Numerics.Tensors.ITensor<T> Clone() { throw null; }
+        public override System.Numerics.Tensors.ITensor<TResult> CloneEmpty<TResult>(System.ReadOnlySpan<int> dimensions) { throw null; }
         public override T GetValue(int index) { throw null; }
-        public override System.Numerics.Tensors.Tensor<T> Reshape(System.ReadOnlySpan<int> dimensions) { throw null; }
+        public override System.Numerics.Tensors.ITensor<T> Reshape(System.ReadOnlySpan<int> dimensions) { throw null; }
         public override void SetValue(int index, T value) { }
-        public override System.Numerics.Tensors.CompressedSparseTensor<T> ToCompressedSparseTensor() { throw null; }
-        public override System.Numerics.Tensors.DenseTensor<T> ToDenseTensor() { throw null; }
-        public override System.Numerics.Tensors.SparseTensor<T> ToSparseTensor() { throw null; }
+        public override System.Numerics.Tensors.ICompressedSparseTensor<T> ToCompressedSparseTensor() { throw null; }
+        public override System.Numerics.Tensors.IDenseTensor<T> ToDenseTensor() { throw null; }
+        public override System.Numerics.Tensors.ISparseTensor<T> ToSparseTensor() { throw null; }
     }
-    public partial class DenseTensor<T> : System.Numerics.Tensors.Tensor<T>
+    public partial class DenseTensor<T> : System.Numerics.Tensors.Tensor<T>, System.Numerics.Tensors.IDenseTensor<T>, System.Numerics.Tensors.ITensor<T>
     {
         public DenseTensor(int length) : base (default(int)) { }
         public DenseTensor(System.Memory<T> memory, System.ReadOnlySpan<int> dimensions, bool reverseStride = false) : base (default(int)) { }
         public DenseTensor(System.ReadOnlySpan<int> dimensions, bool reverseStride = false) : base (default(int)) { }
         public System.Memory<T> Buffer { get { throw null; } }
-        public override System.Numerics.Tensors.Tensor<T> Clone() { throw null; }
-        public override System.Numerics.Tensors.Tensor<TResult> CloneEmpty<TResult>(System.ReadOnlySpan<int> dimensions) { throw null; }
+        public override System.Numerics.Tensors.ITensor<T> Clone() { throw null; }
+        public override System.Numerics.Tensors.ITensor<TResult> CloneEmpty<TResult>(System.ReadOnlySpan<int> dimensions) { throw null; }
         protected override void CopyTo(T[] array, int arrayIndex) { }
         public override T GetValue(int index) { throw null; }
         protected override int IndexOf(T item) { throw null; }
-        public override System.Numerics.Tensors.Tensor<T> Reshape(System.ReadOnlySpan<int> dimensions) { throw null; }
+        public override System.Numerics.Tensors.ITensor<T> Reshape(System.ReadOnlySpan<int> dimensions) { throw null; }
         public override void SetValue(int index, T value) { }
     }
-    public partial class SparseTensor<T> : System.Numerics.Tensors.Tensor<T>
+    public partial interface ICompressedSparseTensor<T> : System.Numerics.Tensors.ITensor<T>
+    {
+        int Capacity { get; }
+        System.Memory<int> CompressedCounts { get; }
+        System.Memory<int> Indices { get; }
+        int NonZeroCount { get; }
+        System.Memory<T> Values { get; }
+    }
+    public partial interface IDenseTensor<T> : System.Numerics.Tensors.ITensor<T>
+    {
+        System.Memory<T> Buffer { get; }
+    }
+    public partial interface ISparseTensor<T> : System.Numerics.Tensors.ITensor<T>
+    {
+        int NonZeroCount { get; }
+    }
+    public partial interface ITensor<T>
+    {
+        System.ReadOnlySpan<int> Dimensions { get; }
+        bool IsReversedStride { get; }
+        T this[params int[] indices] { get; set; }
+        T this[System.ReadOnlySpan<int> indices] { get; set; }
+        long Length { get; }
+        int Rank { get; }
+        System.ReadOnlySpan<int> Strides { get; }
+        System.Numerics.Tensors.ITensor<T> Clone();
+        System.Numerics.Tensors.ITensor<T> CloneEmpty();
+        System.Numerics.Tensors.ITensor<T> CloneEmpty(System.ReadOnlySpan<int> dimensions);
+        System.Numerics.Tensors.ITensor<TResult> CloneEmpty<TResult>();
+        System.Numerics.Tensors.ITensor<TResult> CloneEmpty<TResult>(System.ReadOnlySpan<int> dimensions);
+        void Fill(T value);
+        string GetArrayString(bool includeWhitespace = true);
+        System.Numerics.Tensors.ITensor<T> GetDiagonal();
+        System.Numerics.Tensors.ITensor<T> GetDiagonal(int offset);
+        System.Numerics.Tensors.ITensor<T> GetTriangle();
+        System.Numerics.Tensors.ITensor<T> GetTriangle(int offset);
+        System.Numerics.Tensors.ITensor<T> GetUpperTriangle();
+        System.Numerics.Tensors.ITensor<T> GetUpperTriangle(int offset);
+        T GetValue(int index);
+        System.Numerics.Tensors.ITensor<T> Reshape(System.ReadOnlySpan<int> dimensions);
+        void SetValue(int index, T value);
+        System.Numerics.Tensors.ICompressedSparseTensor<T> ToCompressedSparseTensor();
+        System.Numerics.Tensors.IDenseTensor<T> ToDenseTensor();
+        System.Numerics.Tensors.ISparseTensor<T> ToSparseTensor();
+    }
+    public partial class SparseTensor<T> : System.Numerics.Tensors.Tensor<T>, System.Numerics.Tensors.ISparseTensor<T>, System.Numerics.Tensors.ITensor<T>
     {
         public SparseTensor(System.ReadOnlySpan<int> dimensions, bool reverseStride = false, int capacity = 0) : base (default(int)) { }
         public int NonZeroCount { get { throw null; } }
-        public override System.Numerics.Tensors.Tensor<T> Clone() { throw null; }
-        public override System.Numerics.Tensors.Tensor<TResult> CloneEmpty<TResult>(System.ReadOnlySpan<int> dimensions) { throw null; }
+        public override System.Numerics.Tensors.ITensor<T> Clone() { throw null; }
+        public override System.Numerics.Tensors.ITensor<TResult> CloneEmpty<TResult>(System.ReadOnlySpan<int> dimensions) { throw null; }
         public override T GetValue(int index) { throw null; }
-        public override System.Numerics.Tensors.Tensor<T> Reshape(System.ReadOnlySpan<int> dimensions) { throw null; }
+        public override System.Numerics.Tensors.ITensor<T> Reshape(System.ReadOnlySpan<int> dimensions) { throw null; }
         public override void SetValue(int index, T value) { }
-        public override System.Numerics.Tensors.CompressedSparseTensor<T> ToCompressedSparseTensor() { throw null; }
-        public override System.Numerics.Tensors.DenseTensor<T> ToDenseTensor() { throw null; }
-        public override System.Numerics.Tensors.SparseTensor<T> ToSparseTensor() { throw null; }
+        public override System.Numerics.Tensors.ICompressedSparseTensor<T> ToCompressedSparseTensor() { throw null; }
+        public override System.Numerics.Tensors.IDenseTensor<T> ToDenseTensor() { throw null; }
+        public override System.Numerics.Tensors.ISparseTensor<T> ToSparseTensor() { throw null; }
     }
     public static partial class Tensor
     {
-        public static System.Numerics.Tensors.Tensor<T> CreateFromDiagonal<T>(System.Numerics.Tensors.Tensor<T> diagonal) { throw null; }
-        public static System.Numerics.Tensors.Tensor<T> CreateFromDiagonal<T>(System.Numerics.Tensors.Tensor<T> diagonal, int offset) { throw null; }
-        public static System.Numerics.Tensors.Tensor<T> CreateIdentity<T>(int size) { throw null; }
-        public static System.Numerics.Tensors.Tensor<T> CreateIdentity<T>(int size, bool columMajor) { throw null; }
-        public static System.Numerics.Tensors.Tensor<T> CreateIdentity<T>(int size, bool columMajor, T oneValue) { throw null; }
+        public static System.Numerics.Tensors.ITensor<T> CreateFromDiagonal<T>(System.Numerics.Tensors.ITensor<T> diagonal) { throw null; }
+        public static System.Numerics.Tensors.ITensor<T> CreateFromDiagonal<T>(System.Numerics.Tensors.ITensor<T> diagonal, int offset) { throw null; }
+        public static System.Numerics.Tensors.ITensor<T> CreateIdentity<T>(int size) { throw null; }
+        public static System.Numerics.Tensors.ITensor<T> CreateIdentity<T>(int size, bool columMajor) { throw null; }
+        public static System.Numerics.Tensors.ITensor<T> CreateIdentity<T>(int size, bool columMajor, T oneValue) { throw null; }
     }
-    public abstract partial class Tensor<T> : System.Collections.Generic.ICollection<T>, System.Collections.Generic.IEnumerable<T>, System.Collections.Generic.IList<T>, System.Collections.Generic.IReadOnlyCollection<T>, System.Collections.Generic.IReadOnlyList<T>, System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.IList, System.Collections.IStructuralComparable, System.Collections.IStructuralEquatable
+    public abstract partial class Tensor<T> : System.Collections.Generic.ICollection<T>, System.Collections.Generic.IEnumerable<T>, System.Collections.Generic.IList<T>, System.Collections.Generic.IReadOnlyCollection<T>, System.Collections.Generic.IReadOnlyList<T>, System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.IList, System.Collections.IStructuralComparable, System.Collections.IStructuralEquatable, System.Numerics.Tensors.ITensor<T>
     {
         protected Tensor(System.Array fromArray, bool reverseStride) { }
         protected Tensor(int length) { }
@@ -99,26 +144,26 @@ namespace System.Numerics.Tensors
         bool System.Collections.ICollection.IsSynchronized { get { throw null; } }
         object System.Collections.ICollection.SyncRoot { get { throw null; } }
         object System.Collections.IList.this[int index] { get { throw null; } set { } }
-        public abstract System.Numerics.Tensors.Tensor<T> Clone();
-        public virtual System.Numerics.Tensors.Tensor<T> CloneEmpty() { throw null; }
-        public virtual System.Numerics.Tensors.Tensor<T> CloneEmpty(System.ReadOnlySpan<int> dimensions) { throw null; }
-        public virtual System.Numerics.Tensors.Tensor<TResult> CloneEmpty<TResult>() { throw null; }
-        public abstract System.Numerics.Tensors.Tensor<TResult> CloneEmpty<TResult>(System.ReadOnlySpan<int> dimensions);
+        public abstract System.Numerics.Tensors.ITensor<T> Clone();
+        public virtual System.Numerics.Tensors.ITensor<T> CloneEmpty() { throw null; }
+        public virtual System.Numerics.Tensors.ITensor<T> CloneEmpty(System.ReadOnlySpan<int> dimensions) { throw null; }
+        public virtual System.Numerics.Tensors.ITensor<TResult> CloneEmpty<TResult>() { throw null; }
+        public abstract System.Numerics.Tensors.ITensor<TResult> CloneEmpty<TResult>(System.ReadOnlySpan<int> dimensions);
         public static int Compare(System.Numerics.Tensors.Tensor<T> left, System.Numerics.Tensors.Tensor<T> right) { throw null; }
         protected virtual bool Contains(T item) { throw null; }
         protected virtual void CopyTo(T[] array, int arrayIndex) { }
         public static bool Equals(System.Numerics.Tensors.Tensor<T> left, System.Numerics.Tensors.Tensor<T> right) { throw null; }
         public virtual void Fill(T value) { }
         public string GetArrayString(bool includeWhitespace = true) { throw null; }
-        public System.Numerics.Tensors.Tensor<T> GetDiagonal() { throw null; }
-        public System.Numerics.Tensors.Tensor<T> GetDiagonal(int offset) { throw null; }
-        public System.Numerics.Tensors.Tensor<T> GetTriangle() { throw null; }
-        public System.Numerics.Tensors.Tensor<T> GetTriangle(int offset) { throw null; }
-        public System.Numerics.Tensors.Tensor<T> GetUpperTriangle() { throw null; }
-        public System.Numerics.Tensors.Tensor<T> GetUpperTriangle(int offset) { throw null; }
+        public System.Numerics.Tensors.ITensor<T> GetDiagonal() { throw null; }
+        public System.Numerics.Tensors.ITensor<T> GetDiagonal(int offset) { throw null; }
+        public System.Numerics.Tensors.ITensor<T> GetTriangle() { throw null; }
+        public System.Numerics.Tensors.ITensor<T> GetTriangle(int offset) { throw null; }
+        public System.Numerics.Tensors.ITensor<T> GetUpperTriangle() { throw null; }
+        public System.Numerics.Tensors.ITensor<T> GetUpperTriangle(int offset) { throw null; }
         public abstract T GetValue(int index);
         protected virtual int IndexOf(T item) { throw null; }
-        public abstract System.Numerics.Tensors.Tensor<T> Reshape(System.ReadOnlySpan<int> dimensions);
+        public abstract System.Numerics.Tensors.ITensor<T> Reshape(System.ReadOnlySpan<int> dimensions);
         public abstract void SetValue(int index, T value);
         void System.Collections.Generic.ICollection<T>.Add(T item) { }
         void System.Collections.Generic.ICollection<T>.Clear() { }
@@ -141,8 +186,8 @@ namespace System.Numerics.Tensors
         int System.Collections.IStructuralComparable.CompareTo(object other, System.Collections.IComparer comparer) { throw null; }
         bool System.Collections.IStructuralEquatable.Equals(object other, System.Collections.IEqualityComparer comparer) { throw null; }
         int System.Collections.IStructuralEquatable.GetHashCode(System.Collections.IEqualityComparer comparer) { throw null; }
-        public virtual System.Numerics.Tensors.CompressedSparseTensor<T> ToCompressedSparseTensor() { throw null; }
-        public virtual System.Numerics.Tensors.DenseTensor<T> ToDenseTensor() { throw null; }
-        public virtual System.Numerics.Tensors.SparseTensor<T> ToSparseTensor() { throw null; }
+        public virtual System.Numerics.Tensors.ICompressedSparseTensor<T> ToCompressedSparseTensor() { throw null; }
+        public virtual System.Numerics.Tensors.IDenseTensor<T> ToDenseTensor() { throw null; }
+        public virtual System.Numerics.Tensors.ISparseTensor<T> ToSparseTensor() { throw null; }
     }
 }

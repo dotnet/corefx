@@ -19,7 +19,7 @@ namespace System.Numerics.Tensors
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class CompressedSparseTensor<T> : Tensor<T>
+    public class CompressedSparseTensor<T> : Tensor<T>, ICompressedSparseTensor<T>
     {
         private Memory<T> values;
         private Memory<int> compressedCounts;
@@ -387,7 +387,7 @@ namespace System.Numerics.Tensors
         /// Creates a shallow copy of this tensor, with new backing storage.
         /// </summary>
         /// <returns>A shallow copy of this tensor.</returns>
-        public override Tensor<T> Clone()
+        public override ITensor<T> Clone()
         {
             return new CompressedSparseTensor<T>(values.ToArray(), compressedCounts.ToArray(), indices.ToArray(), nonZeroCount, dimensions, IsReversedStride);
         }
@@ -398,7 +398,7 @@ namespace System.Numerics.Tensors
         /// <typeparam name="TResult">Type contained in the returned Tensor.</typeparam>
         /// <param name="dimensions">An span of integers that represent the size of each dimension of the CompressedSparseTensor to create.</param>
         /// <returns>A new tensor with the same layout as this tensor but different type and dimensions.</returns>
-        public override Tensor<TResult> CloneEmpty<TResult>(ReadOnlySpan<int> dimensions)
+        public override ITensor<TResult> CloneEmpty<TResult>(ReadOnlySpan<int> dimensions)
         {
             return new CompressedSparseTensor<TResult>(dimensions, IsReversedStride);
         }
@@ -408,7 +408,7 @@ namespace System.Numerics.Tensors
         /// </summary>
         /// <param name="dimensions">An span of integers that represent the size of each dimension of the CompressedSparseTensor to create.</param>
         /// <returns>A new tensor that reinterprets the content of this tensor to new dimensions (assuming the same linear index for each element).</returns>
-        public override Tensor<T> Reshape(ReadOnlySpan<int> dimensions)
+        public override ITensor<T> Reshape(ReadOnlySpan<int> dimensions)
         {
             // reshape currently has shallow semantics which are not compatible with the backing storage for CompressedSparseTensor
             // which bakes in information about dimensions (compressedCounts and indices)
@@ -448,7 +448,7 @@ namespace System.Numerics.Tensors
         /// Creates a copy of this tensor as a DenseTensor&lt;T&gt;.
         /// </summary>
         /// <returns>A copy of this tensor as a DenseTensor&lt;T&gt;</returns>
-        public override DenseTensor<T> ToDenseTensor()
+        public override IDenseTensor<T> ToDenseTensor()
         {
             var denseTensor = new DenseTensor<T>(Dimensions, reverseStride: IsReversedStride);
 
@@ -477,7 +477,7 @@ namespace System.Numerics.Tensors
         /// Creates a copy of this tensor as a new CompressedSparseTensor&lt;T&gt; eliminating any unused space in the backing storage.
         /// </summary>
         /// <returns>A copy of this tensor as a CompressedSparseTensor&lt;T&gt;.</returns>
-        public override CompressedSparseTensor<T> ToCompressedSparseTensor()
+        public override ICompressedSparseTensor<T> ToCompressedSparseTensor()
         {
             // Create a copy of the backing storage, eliminating any unused space.
             var newValues = values.Slice(0, nonZeroCount).ToArray();
@@ -490,7 +490,7 @@ namespace System.Numerics.Tensors
         /// Creates a copy of this tensor as a SparseTensor&lt;T&gt;. 
         /// </summary>
         /// <returns>A copy of this tensor as a SparseTensor&lt;T&gt;.</returns>
-        public override SparseTensor<T> ToSparseTensor()
+        public override ISparseTensor<T> ToSparseTensor()
         {
             var sparseTensor = new SparseTensor<T>(dimensions, capacity: NonZeroCount, reverseStride: IsReversedStride);
 

@@ -10,7 +10,7 @@ namespace System.Numerics.Tensors
     /// Represents a multi-dimensional collection of objects of type T that can be accessed by indices.  DenseTensor stores values in a contiguous sequential block of memory where all values are represented.
     /// </summary>
     /// <typeparam name="T">type contained within the Tensor.  Typically a value type such as int, double, float, etc.</typeparam>
-    public class DenseTensor<T> : Tensor<T>
+    public class DenseTensor<T> : Tensor<T>, IDenseTensor<T>
     {
         private readonly Memory<T> memory;
 
@@ -137,7 +137,7 @@ namespace System.Numerics.Tensors
         /// Creates a shallow copy of this tensor, with new backing storage.
         /// </summary>
         /// <returns>A shallow copy of this tensor.</returns>
-        public override Tensor<T> Clone()
+        public override ITensor<T> Clone()
         {
             return new DenseTensor<T>(Buffer.ToArray(), dimensions, IsReversedStride);
         }
@@ -148,7 +148,7 @@ namespace System.Numerics.Tensors
         /// <typeparam name="TResult">Type contained in the returned Tensor.</typeparam>
         /// <param name="dimensions">An span of integers that represent the size of each dimension of the DenseTensor to create.</param>
         /// <returns>A new tensor with the same layout as this tensor but different type and dimensions.</returns>
-        public override Tensor<TResult> CloneEmpty<TResult>(ReadOnlySpan<int> dimensions)
+        public override ITensor<TResult> CloneEmpty<TResult>(ReadOnlySpan<int> dimensions)
         {
             return new DenseTensor<TResult>(dimensions, IsReversedStride);
         }
@@ -158,7 +158,7 @@ namespace System.Numerics.Tensors
         /// </summary>
         /// <param name="dimensions">An span of integers that represent the size of each dimension of the DenseTensor to create.</param>
         /// <returns>A new tensor that reinterprets backing Buffer of this tensor with different dimensions.</returns>
-        public override Tensor<T> Reshape(ReadOnlySpan<int> dimensions)
+        public override ITensor<T> Reshape(ReadOnlySpan<int> dimensions)
         {
             if (dimensions.Length == 0)
             {

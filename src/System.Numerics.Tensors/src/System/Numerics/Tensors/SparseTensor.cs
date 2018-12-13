@@ -10,7 +10,7 @@ namespace System.Numerics.Tensors
     /// Represents a multi-dimensional collection of objects of type T that can be accessed by indices.  Unlike other Tensor&lt;T&gt; implementations SparseTensor&lt;T&gt; does not expose its backing storage.  It is meant as an intermediate to be used to build other Tensors, such as CompressedSparseTensor.  Unlike CompressedSparseTensor where insertions are O(n), insertions to SparseTensor&lt;T&gt; are nominally O(1).
     /// </summary>
     /// <typeparam name="T">type contained within the Tensor.  Typically a value type such as int, double, float, etc.</typeparam>
-    public class SparseTensor<T> : Tensor<T>
+    public class SparseTensor<T> : Tensor<T>, ISparseTensor<T>
     {
         private readonly Dictionary<int, T> values;
         /// <summary>
@@ -106,7 +106,7 @@ namespace System.Numerics.Tensors
         /// Creates a shallow copy of this tensor, with new backing storage.
         /// </summary>
         /// <returns>A shallow copy of this tensor.</returns>
-        public override Tensor<T> Clone()
+        public override ITensor<T> Clone()
         {
             var valueCopy = new Dictionary<int, T>(values);
             return new SparseTensor<T>(valueCopy, dimensions, IsReversedStride);
@@ -118,7 +118,7 @@ namespace System.Numerics.Tensors
         /// <typeparam name="TResult">Type contained in the returned Tensor.</typeparam>
         /// <param name="dimensions">An span of integers that represent the size of each dimension of the SparseTensor to create.</param>
         /// <returns>A new tensor with the same layout as this tensor but different type and dimensions.</returns>
-        public override Tensor<TResult> CloneEmpty<TResult>(ReadOnlySpan<int> dimensions)
+        public override ITensor<TResult> CloneEmpty<TResult>(ReadOnlySpan<int> dimensions)
         {
             return new SparseTensor<TResult>(dimensions, IsReversedStride);
         }
@@ -128,7 +128,7 @@ namespace System.Numerics.Tensors
         /// </summary>
         /// <param name="dimensions">An span of integers that represent the size of each dimension of the SparseTensor to create.</param>
         /// <returns>A new tensor that reinterprets backing storage of this tensor with different dimensions.</returns>
-        public override Tensor<T> Reshape(ReadOnlySpan<int> dimensions)
+        public override ITensor<T> Reshape(ReadOnlySpan<int> dimensions)
         {
             return new SparseTensor<T>(values, dimensions, IsReversedStride);
         }
@@ -137,7 +137,7 @@ namespace System.Numerics.Tensors
         /// Creates a copy of this tensor as a DenseTensor&lt;T&gt;.  
         /// </summary>
         /// <returns>A copy of this tensor as a DenseTensor&lt;T&gt;</returns>
-        public override DenseTensor<T> ToDenseTensor()
+        public override IDenseTensor<T> ToDenseTensor()
         {
             var denseTensor = new DenseTensor<T>(Dimensions, reverseStride: IsReversedStride);
             
@@ -154,7 +154,7 @@ namespace System.Numerics.Tensors
         /// Creates a copy of this tensor as a new SparseTensor&lt;T&gt; eliminating any unused space in the backing storage.
         /// </summary>
         /// <returns>A copy of this tensor as a SparseTensor&lt;T&gt; eliminated any usused space in the backing storage.</returns>
-        public override SparseTensor<T> ToSparseTensor()
+        public override ISparseTensor<T> ToSparseTensor()
         {
             var valueCopy = new Dictionary<int, T>(values);
             return new SparseTensor<T>(valueCopy, dimensions, IsReversedStride);
@@ -164,7 +164,7 @@ namespace System.Numerics.Tensors
         /// Creates a copy of this tensor as a CompressedSparseTensor&lt;T&gt;.
         /// </summary>
         /// <returns>A copy of this tensor as a CompressedSparseTensor&lt;T&gt;.</returns>
-        public override CompressedSparseTensor<T> ToCompressedSparseTensor()
+        public override ICompressedSparseTensor<T> ToCompressedSparseTensor()
         {
             var compressedSparseTensor = new CompressedSparseTensor<T>(dimensions, capacity: NonZeroCount, reverseStride: IsReversedStride);
 
