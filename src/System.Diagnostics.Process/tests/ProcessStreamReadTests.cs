@@ -89,6 +89,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [OuterLoop]
         [Fact]
         // On this test RemotelyInvokable.WriteLoop never returns, we cannot use RemotelyInvokable.WriteLoopUapCmd workaround
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
