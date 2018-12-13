@@ -122,7 +122,6 @@ namespace System.Diagnostics.Tests
                 }
             });
 
-            
             p.StartInfo.RedirectStandardOutput = true;
             p.OutputDataReceived += (s, e) =>
             {
