@@ -2160,10 +2160,7 @@ namespace System.Data.SqlClient
         }
 
         // This is in its own method to avoid always allocating the lambda in TryRun 
-        private static void TryRunSetupSpinWaitContinuation(TdsParserStateObject stateObj)
-        {
-            SpinWait.SpinUntil(() => !stateObj._attentionSending);
-        }
+        private static void TryRunSetupSpinWaitContinuation(TdsParserStateObject stateObj) => SpinWait.SpinUntil(() => !stateObj._attentionSending);
 
         private bool TryProcessEnvChange(int tokenLength, TdsParserStateObject stateObj, out SqlEnvChange[] sqlEnvChange)
         {
@@ -6982,13 +6979,15 @@ namespace System.Data.SqlClient
                         (task, state) =>
                         {
                             Debug.Assert(!task.IsCanceled, "Task should not be canceled");
-                            var parameters = (Tuple<TdsParser, TdsParserStateObject, bool, SqlInternalConnectionTds>)state;
+                            var parameters = (Tuple<TdsParser, TdsParserStateObject, SqlInternalConnectionTds>)state;
+                            TdsParser parser = parameters.Item1;
                             TdsParserStateObject tdsParserStateObject = parameters.Item2;
+                            SqlInternalConnectionTds internalConnectionTds = parameters.Item3;
                             try
                             {
                                 if (task.IsFaulted)
                                 {
-                                    parameters.Item1.FailureCleanup(tdsParserStateObject, task.Exception.InnerException);
+                                    parser.FailureCleanup(tdsParserStateObject, task.Exception.InnerException);
                                     throw task.Exception.InnerException;
                                 }
                                 else
@@ -6998,13 +6997,10 @@ namespace System.Data.SqlClient
                             }
                             finally
                             {
-                                if (parameters.Item3)
-                                {
-                                    parameters.Item4._parserLock.Release();
-                                }
+                                internalConnectionTds?._parserLock.Release();
                             }
                         },
-                        Tuple.Create(this, stateObj, taskReleaseConnectionLock, taskReleaseConnectionLock ? _connHandler : null),
+                        Tuple.Create(this, stateObj, taskReleaseConnectionLock ? _connHandler : null),
                         TaskScheduler.Default
                     );
                 }
@@ -7506,7 +7502,19 @@ namespace System.Data.SqlClient
                                         task = completion.Task;
                                     }
 
-                                    TDSExecuteRPCParameterSetupWriteCompletion(rpcArray, timeout, inSchema, notificationRequest, stateObj, isCommandProc, sync, completion, ii, i, writeParamTask);
+                                    TDSExecuteRPCParameterSetupWriteCompletion(
+                                        rpcArray, 
+                                        timeout, 
+                                        inSchema, 
+                                        notificationRequest, 
+                                        stateObj, 
+                                        isCommandProc, 
+                                        sync, 
+                                        completion, 
+                                        ii, 
+                                        i+1, 
+                                        writeParamTask
+                                    );
 
                                     // Take care of releasing the locks
                                     if (releaseConnectionLock)
@@ -7606,7 +7614,7 @@ namespace System.Data.SqlClient
 
 
         // This is in its own method to avoid always allocating the lambda in TDSExecuteRPCParameter
-        private void TDSExecuteRPCParameterSetupWriteCompletion(_SqlRPC[] rpcArray, int timeout, bool inSchema, SqlNotificationRequest notificationRequest, TdsParserStateObject stateObj, bool isCommandProc, bool sync, TaskCompletionSource<object> completion, int ii, int i, Task writeParamTask)
+        private void TDSExecuteRPCParameterSetupWriteCompletion(_SqlRPC[] rpcArray, int timeout, bool inSchema, SqlNotificationRequest notificationRequest, TdsParserStateObject stateObj, bool isCommandProc, bool sync, TaskCompletionSource<object> completion, int startRpc, int startParam, Task writeParamTask)
         {
             AsyncHelper.ContinueTask(
                 writeParamTask,
@@ -7620,8 +7628,8 @@ namespace System.Data.SqlClient
                         isCommandProc,
                         sync,
                         completion,
-                        startRpc: ii,
-                        startParam: i + 1
+                        startRpc,
+                        startParam
                       ),
                 connectionToDoom: _connHandler,
                 onFailure: exc => TdsExecuteRPC_OnFailure(exc, stateObj)

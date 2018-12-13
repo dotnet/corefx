@@ -947,7 +947,10 @@ namespace System.Data.SqlClient
                 // Add callback after work is done to avoid overlapping Begin\End methods
                 if (callback != null)
                 {
-                    completion.Task.ContinueWith((t) => callback(t), TaskScheduler.Default);
+                    completion.Task.ContinueWith(
+                        (task,state) => ((AsyncCallback)state)(task),
+                        state: callback
+                    );
                 }
 
                 return completion.Task;
