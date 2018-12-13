@@ -367,14 +367,14 @@ namespace System.Net.Mail.Tests
 
         [Theory]
         [InlineData(false, false, false)]
-        [InlineData(false, false, true)] // Received text.
+        [InlineData(false, false, true)] // Received subjectText.
         [InlineData(false, true, false)]
         [InlineData(false, true, true)]
         [InlineData(true, false, false)]
-        [InlineData(true, false, true)] // Received text.
+        [InlineData(true, false, true)] // Received subjectText.
         [InlineData(true, true, false)]
-        [InlineData(true, true, true)]
-        public void SendMail_DeliveryFormatSevenBit_SubjectEncoded(bool useAsyncSend, bool useSevenBit, bool useSmtpUTF8)
+        [InlineData(true, true, true)] // Received subjectBase64. If subjectText is received, the test fails, and the results are inconsistent with those of synchronous methods.
+        public void SendMail_DeliveryFormat_SubjectEncoded(bool useAsyncSend, bool useSevenBit, bool useSmtpUTF8)
         {
             // If the server support `SMTPUTF8` and use `SmtpDeliveryFormat.International`, the server should received this subject.
             const string subjectText = "Test \u6d4b\u8bd5 Contain \u5305\u542b UTF8";
