@@ -12,7 +12,7 @@ namespace System.Numerics
     /// </summary>
     public struct Plane : IEquatable<Plane>
     {
-        private const float NormalizeEpsilon = 1.192092896e-07f; // smallest such that 1.0+FLT_EPSILON != 1.0
+        private const float NormalizeEpsilon = 1.192092896e-07f; // smallest such that 1.0+NormalizeEpsilon != 1.0
 
         /// <summary>
         /// The normal vector of the Plane.
