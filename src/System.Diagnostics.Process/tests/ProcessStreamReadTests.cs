@@ -94,41 +94,96 @@ namespace System.Diagnostics.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void TestAsyncOutputStream_BeginCancelBegin_OutputReadLine()
         {
+            List<int> dataArrived = new List<int>();
+
+            var produceValueEvent = new EventWaitHandle(false, EventResetMode.AutoReset, nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine) + ".Parent", out bool createdNew);
+            Assert.True(createdNew, "Parent process must create event");
+
             var dataArrivedEvent = new AutoResetEvent(false);
-            ConcurrentBag<int> dataReceived = new ConcurrentBag<int>();
-            Process p = CreateProcessPortable(RemotelyInvokable.WriteLoop);
+
+            Process p = CreateProcessPortable(() => 
+            {
+                int counter = 0;
+
+                var produceValueChildEvent = new EventWaitHandle(false, EventResetMode.AutoReset, nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine) + ".Parent", out bool createdNewChild);
+                Assert.False(createdNewChild, "Parent process must create event");
+
+                var dataGeneratedChildEvent = new EventWaitHandle(false, EventResetMode.AutoReset, nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine) + ".Child", out createdNewChild);
+                Assert.True(createdNewChild, "Child process must create event");
+
+                // Signal parent process that we'are ready to produce
+                produceValueChildEvent.Set();
+
+                for (; ; )
+                {
+                    produceValueChildEvent.WaitOne();
+                    Console.WriteLine(++counter);
+                    dataGeneratedChildEvent.Set();
+                }
+            });
+
+            
+            p.StartInfo.RedirectStandardOutput = true;
+            p.OutputDataReceived += (s, e) =>
+            {
+                if (e.Data != null)
+                {
+                    dataArrived.Add(int.Parse(e.Data));
+                    dataArrivedEvent.Set();
+                }
+            };
+
             try
             {
-                int minDataArrived = 5;
-                p.StartInfo.RedirectStandardOutput = true;
-                p.OutputDataReceived += (s, e) =>
-                {
-                    if(!string.IsNullOrEmpty(e.Data))
-                    { 
-                        dataReceived.Add(int.Parse(e.Data));
-                    }
-
-                    if(dataReceived.Count > minDataArrived)
-                    { 
-                        dataArrivedEvent.Set();
-                    }
-                };
+                // Start process
                 p.Start();
-                p.BeginOutputReadLine();
-            
-                Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Data not come after BeginOutputReadLine");
-                Assert.True(dataReceived.Count >= minDataArrived);
 
+                // Wait for process startup, we use "produceValueEvent" to wait child process startup
+                Assert.True(produceValueEvent.WaitOne(WaitInMS), "Missed startup signal from child process");
+
+                var dataGeneratedParentEvent = new EventWaitHandle(false, EventResetMode.AutoReset, nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine) + ".Child", out createdNew);
+                Assert.False(createdNew, "Child process must create event");
+
+                // Start listening
+                p.BeginOutputReadLine();
+
+                // Produce value 1
+                produceValueEvent.Set();
+                Assert.True(dataGeneratedParentEvent.WaitOne(WaitInMS), "Missed signal of production of value 1");
+
+                // Wait for data
+                Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Data not received after BeginOutputReadLine()");
+
+                Assert.Single(dataArrived);
+                Assert.Equal(1, dataArrived[0]);
+
+                // Suspend listening
                 p.CancelOutputRead();
 
-                // Wait to drain async stream queue
+                // Produce value 2,3,4
+                for (int i = 0; i < 3; i++)
+                {
+                    produceValueEvent.Set();
+                    Assert.True(dataGeneratedParentEvent.WaitOne(WaitInMS), "Missed signal of production of new value");
+                }
+
+                // Wait some seconds to be sure to lose produced value due to async nature of stream
                 Thread.Sleep(3000);
 
-                minDataArrived = 10;
+                // Re-enable output 
                 p.BeginOutputReadLine();
 
-                Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Data not come after CancelOutputRead");
-                Assert.True(dataReceived.Count >= minDataArrived);
+                // Produce value 5
+                produceValueEvent.Set();
+                Assert.True(dataGeneratedParentEvent.WaitOne(WaitInMS), "Missed signal of production of value 5");
+
+                // Wait for data
+                Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Data not received after CancelOutputRead()/BeginOutputReadLine()");
+
+                // We assert that we lost value 2,3,4 between CancelOutputRead() and BeginOutputReadLine()
+                Assert.Equal(2, dataArrived.Count);
+                Assert.Equal(1, dataArrived[0]);
+                Assert.Equal(5, dataArrived[1]);
             }
             finally
             {

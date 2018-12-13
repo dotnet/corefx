@@ -209,15 +209,5 @@ namespace System.Diagnostics.Tests
         {
             ClosedEvent?.Invoke(null, EventArgs.Empty);
         }
-        
-        public static int WriteLoop()
-        {
-            int counter = 0;
-            for (; ; )
-            {
-                Console.WriteLine(++counter);
-                Thread.Sleep(1000);
-            }
-        }
     }
 }
