@@ -71,10 +71,19 @@ jobs:
             value: -ci -includetests
           - name: _msbuildCommand
             value: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
-          - name: _windowsOfficialBuildArguments
-            ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-              value: -sign /p:DotNetSignType=$(_SignType) /p:EnableProfileGuidedOptimization=true /p:OptionalToolSource=$(OptionalToolSourceUri) /p:OptionalToolSourcePassword=$(dn-bot-devdiv-nuget-feed-read) /p:OptionalToolSourceUser=dn-bot
-            ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+          - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+            - name: _optionalToolsArguments
+              value: /p:OptionalToolSourceUser=dn-bot
+                     /p:OptionalToolSource=$(OptionalToolSourceUri)
+                     /p:OptionalToolSourcePassword=$(dn-bot-devdiv-nuget-feed-read)
+            - name: _windowsOfficialBuildArguments
+              value: -sign
+                     /p:DotNetSignType=$(_SignType)
+                     /p:EnableProfileGuidedOptimization=true
+                     $(_optionalToolsArguments)
+
+          - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+            - name: _windowsOfficialBuildArguments
               value: ''
 
           # Optional tooling variables
@@ -98,7 +107,7 @@ jobs:
           - name: _TeamName
             value: DotNetCore
           - name: _SignType
-            value: test
+            value: real
 
         - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
           - name: _msbuildCommonParameters
@@ -163,6 +172,7 @@ jobs:
                 ${{ if eq(parameters.isOfficialBuild, 'true') }}:
                   isExternal: false
                   waitForCompletion: false
+                  officialBuildId: $(Build.BuildNumber)
 
                 ${{ if eq(parameters.isOfficialBuild, 'false') }}:
                   creator: $(Build.RequestedFor)
@@ -173,7 +183,7 @@ jobs:
             - task: PublishBuildArtifacts@1
               displayName: Publish packages to artifacts container
               inputs:
-                pathToPublish: $(Build.SourcesDirectory)/artifacts/packages
+                pathToPublish: $(Build.SourcesDirectory)/artifacts/packages/$(_configuration)
                 artifactName: packages
                 artifactType: container
               condition: and(succeeded(), ne(variables['_skipPublishPackages'], 'true'))

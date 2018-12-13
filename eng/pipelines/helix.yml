@@ -9,6 +9,7 @@ parameters:
   msbuildScript: ''
   targetOS: ''
   waitForCompletion: '' # true | false
+  officialBuildId: ''
 
 steps:
   - script: ${{ parameters.msbuildScript }}
@@ -24,6 +25,7 @@ steps:
             /p:WaitForWorkItemCompletion=${{ parameters.waitForCompletion }}
             /p:IsExternal=${{ parameters.isExternal }}
             /p:Creator=${{ parameters.creator }}
+            /p:OfficialBuildId=${{ parameters.officialBuildId }}
             /p:EnableAzurePipelinesReporter=true
     displayName: Send to Helix
     env:

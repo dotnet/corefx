@@ -43,8 +43,8 @@ jobs:
 
   # Only run in official builds
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
-    # Publish step
-    - template: /eng/pipelines/publish.yml
-
     # Redhat6 leg is only for official builds
     - template: /eng/pipelines/redhat6.yml
+
+    # Publish step
+    - template: /eng/pipelines/publish.yml
