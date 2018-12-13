@@ -10,7 +10,7 @@
     <OptionCompare>Binary</OptionCompare>
     <WarningsNotAsErrors>42025</WarningsNotAsErrors>
     <DefineConstants>$(DefineConstants),LATEBINDING=True</DefineConstants>
-    <AssemblyName>Microsoft.VisualBasic</AssemblyName>
+    <AssemblyName>Microsoft.VisualBasic.Core</AssemblyName>
     <NoStdLib>true</NoStdLib>
     <RemoveIntegerChecks>false</RemoveIntegerChecks>
     <RootNamespace />

@@ -189,7 +189,7 @@
     "Microsoft.Private.PackageBaseline": {
       "InboxOn": {}
     },
-    "Microsoft.VisualBasic": {
+    "Microsoft.VisualBasic.Core": {
       "StableVersions": [
         "10.0.1",
         "10.0.0",

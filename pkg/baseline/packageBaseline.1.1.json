@@ -9,7 +9,7 @@
     "Microsoft.NETCore.Targets": {
       "BaselineVersion": "1.1.0"
     },
-    "Microsoft.VisualBasic": {
+    "Microsoft.VisualBasic.Core": {
       "BaselineVersion": "10.1.0"
     },
     "Microsoft.Win32.Primitives": {

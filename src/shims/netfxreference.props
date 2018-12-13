@@ -3,6 +3,7 @@
     <NetFxReference Include="mscorlib">
       <ExcludeFromRuntime>true</ExcludeFromRuntime>
     </NetFxReference>
+    <NetFxReference Include="Microsoft.VisualBasic" />
     <NetFxReference Include="System">
       <ExcludeFromRuntime>true</ExcludeFromRuntime>
     </NetFxReference>

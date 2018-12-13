@@ -2,10 +2,10 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <ItemGroup>
-    <ProjectReference Include="..\ref\Microsoft.VisualBasic.csproj">
+    <ProjectReference Include="..\ref\Microsoft.VisualBasic.Core.csproj">
       <SupportedFramework>net45;netcore45;netcoreapp1.0;wpa81;$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\src\Microsoft.VisualBasic.vbproj" />
+    <ProjectReference Include="..\src\Microsoft.VisualBasic.Core.vbproj" />
     <InboxOnTargetFramework Include="net45">
       <AsFrameworkReference>true</AsFrameworkReference>
     </InboxOnTargetFramework>
