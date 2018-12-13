@@ -88,8 +88,10 @@ namespace System.Net.NetworkInformation
 
         private Socket GetRawSocket(SocketConfig socketConfig)
         {
+            IPEndPoint ep = socketConfig.EndPoint as IPEndPoint;
+
             // Setting Socket.DontFragment and .Ttl is not supported on Unix, so socketConfig.Options is ignored.
-            AddressFamily addrFamily = ((IPEndPoint)socketConfig.EndPoint).Address.AddressFamily;
+            AddressFamily addrFamily = ep.Address.AddressFamily;
             Socket socket = new Socket(addrFamily, SocketType.Raw, socketConfig.ProtocolType);
             socket.ReceiveTimeout = socketConfig.Timeout;
             socket.SendTimeout = socketConfig.Timeout;
@@ -97,6 +99,16 @@ namespace System.Net.NetworkInformation
             {
                 socket.Ttl = (short)socketConfig.Options.Ttl;
             }
+
+#pragma warning disable 618
+            // Disable warning about obsolete property. We could use GetAddressBytes but that allocates.
+            if (!ep.Address.IsIPv6Multicast && !(addrFamily == AddressFamily.InterNetwork && (ep.Address.Address & 0xf0) == 0xe0))
+            {
+                // If it is not multicast, use Connect to scope responses only tho target address.
+                socket.Connect(socketConfig.EndPoint);
+            }
+#pragma warning restore 618
+
             return socket;
         }
 
@@ -129,7 +141,7 @@ namespace System.Net.NetworkInformation
             {
                 return false;
             }
-            
+
             sw.Stop();
             long roundTripTime = sw.ElapsedMilliseconds;
             int dataOffset = ipHeaderLength + IcmpHeaderLengthInBytes;
