@@ -1,0 +1,2 @@
+# Inadvertently missed from whitelist
+sspicli.dll!LsaRegisterLogonProcess
