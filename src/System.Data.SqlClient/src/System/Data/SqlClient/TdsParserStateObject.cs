@@ -28,14 +28,14 @@ namespace System.Data.SqlClient
 
 #if FEATURE_INTEROPSNI
         public readonly IntPtr NativePointer;
-        public readonly SNIPacketHandle NativePacket;
+        public readonly SNIPacket NativePacket;
 #endif
         public readonly SNI.SNIPacket ManagedPacket;
         public readonly int Type;
 
         private PacketHandle(IntPtr nativePointer,
 #if FEATURE_INTEROPSNI
-            SNIPacketHandle
+            SNIPacket
 #else
             int
 #endif
@@ -61,7 +61,7 @@ namespace System.Data.SqlClient
             return new PacketHandle(nativePointer,default,default, NativePointerType);
         }
 
-        public static PacketHandle FromNativePacket(SNIPacketHandle nativePacket)
+        public static PacketHandle FromNativePacket(SNIPacket nativePacket)
         {
             return new PacketHandle(default, nativePacket, default, NativePacketType);
         }

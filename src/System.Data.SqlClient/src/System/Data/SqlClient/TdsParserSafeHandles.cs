@@ -206,9 +206,9 @@ namespace System.Data.SqlClient
         }
     }
 
-    internal sealed class SNIPacketHandle : SafeHandle
+    internal sealed class SNIPacket : SafeHandle
     {
-        internal SNIPacketHandle(SafeHandle sniHandle) : base(IntPtr.Zero, true)
+        internal SNIPacket(SafeHandle sniHandle) : base(IntPtr.Zero, true)
         {
             SNINativeMethodWrapper.SNIPacketAllocate(sniHandle, SNINativeMethodWrapper.IOType.WRITE, ref base.handle);
             if (IntPtr.Zero == base.handle)
@@ -241,17 +241,17 @@ namespace System.Data.SqlClient
     internal sealed class WritePacketCache : IDisposable
     {
         private bool _disposed;
-        private Stack<SNIPacketHandle> _packets;
+        private Stack<SNIPacket> _packets;
 
         public WritePacketCache()
         {
             _disposed = false;
-            _packets = new Stack<SNIPacketHandle>();
+            _packets = new Stack<SNIPacket>();
         }
 
-        public SNIPacketHandle Take(SNIHandle sniHandle)
+        public SNIPacket Take(SNIHandle sniHandle)
         {
-            SNIPacketHandle packet;
+            SNIPacket packet;
             if (_packets.Count > 0)
             {
                 // Success - reset the packet
@@ -261,12 +261,12 @@ namespace System.Data.SqlClient
             else
             {
                 // Failed to take a packet - create a new one
-                packet = new SNIPacketHandle(sniHandle);
+                packet = new SNIPacket(sniHandle);
             }
             return packet;
         }
 
-        public void Add(SNIPacketHandle packet)
+        public void Add(SNIPacket packet)
         {
             if (!_disposed)
             {

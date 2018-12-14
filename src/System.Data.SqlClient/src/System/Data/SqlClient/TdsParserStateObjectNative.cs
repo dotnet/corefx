@@ -14,15 +14,15 @@ namespace System.Data.SqlClient
     {
         private SNIHandle _sessionHandle = null;              // the SNI handle we're to work on
 
-        private SNIPacketHandle _sniPacket = null;                // Will have to re-vamp this for MARS
-        internal SNIPacketHandle _sniAsyncAttnPacket = null;                // Packet to use to send Attn
+        private SNIPacket _sniPacket = null;                // Will have to re-vamp this for MARS
+        internal SNIPacket _sniAsyncAttnPacket = null;                // Packet to use to send Attn
         private readonly WritePacketCache _writePacketCache = new WritePacketCache(); // Store write packets that are ready to be re-used
 
         public TdsParserStateObjectNative(TdsParser parser) : base(parser) { }
 
         private GCHandle _gcHandle;                                    // keeps this object alive until we're closed.
 
-        private Dictionary<IntPtr, SNIPacketHandle> _pendingWritePackets = new Dictionary<IntPtr, SNIPacketHandle>(); // Stores write packets that have been sent to SNI, but have not yet finished writing (i.e. we are waiting for SNI's callback)
+        private Dictionary<IntPtr, SNIPacket> _pendingWritePackets = new Dictionary<IntPtr, SNIPacket>(); // Stores write packets that have been sent to SNI, but have not yet finished writing (i.e. we are waiting for SNI's callback)
 
         internal TdsParserStateObjectNative(TdsParser parser, TdsParserStateObject physicalConnection, bool async) :
             base(parser, physicalConnection, async)
@@ -119,7 +119,7 @@ namespace System.Data.SqlClient
             Debug.Assert(ptr.Type == PacketHandle.NativePointerType, "unexpected packet type when requiring NativePointer");
             IntPtr pointer = ptr.NativePointer;
 
-            SNIPacketHandle recoveredPacket;
+            SNIPacket recoveredPacket;
 
             lock (_writePacketLockObject)
             {
@@ -216,7 +216,7 @@ namespace System.Data.SqlClient
         internal override PacketHandle CreateAndSetAttentionPacket()
         {
             SNIHandle handle = Handle;
-            SNIPacketHandle attnPacket = new SNIPacketHandle(handle);
+            SNIPacket attnPacket = new SNIPacket(handle);
             _sniAsyncAttnPacket = attnPacket;
             SetPacketData(PacketHandle.FromNativePacket(attnPacket), SQL.AttentionHeader, TdsEnums.HEADER_LEN);
             return PacketHandle.FromNativePacket(attnPacket);
@@ -231,7 +231,7 @@ namespace System.Data.SqlClient
         internal override PacketHandle AddPacketToPendingList(PacketHandle packetToAdd)
         {
             Debug.Assert(packetToAdd.Type == PacketHandle.NativePacketType, "unexpected packet type when requiring NativePacket");
-            SNIPacketHandle packet = packetToAdd.NativePacket;
+            SNIPacket packet = packetToAdd.NativePacket;
             Debug.Assert(packet == _sniPacket, "Adding a packet other than the current packet to the pending list");
             _sniPacket = null;
             IntPtr pointer = packet.DangerousGetHandle();
@@ -323,17 +323,17 @@ namespace System.Data.SqlClient
         internal sealed class WritePacketCache : IDisposable
         {
             private bool _disposed;
-            private Stack<SNIPacketHandle> _packets;
+            private Stack<SNIPacket> _packets;
 
             public WritePacketCache()
             {
                 _disposed = false;
-                _packets = new Stack<SNIPacketHandle>();
+                _packets = new Stack<SNIPacket>();
             }
 
-            public SNIPacketHandle Take(SNIHandle sniHandle)
+            public SNIPacket Take(SNIHandle sniHandle)
             {
-                SNIPacketHandle packet;
+                SNIPacket packet;
                 if (_packets.Count > 0)
                 {
                     // Success - reset the packet
@@ -343,12 +343,12 @@ namespace System.Data.SqlClient
                 else
                 {
                     // Failed to take a packet - create a new one
-                    packet = new SNIPacketHandle(sniHandle);
+                    packet = new SNIPacket(sniHandle);
                 }
                 return packet;
             }
 
-            public void Add(SNIPacketHandle packet)
+            public void Add(SNIPacket packet)
             {
                 if (!_disposed)
                 {
