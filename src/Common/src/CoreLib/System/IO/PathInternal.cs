@@ -132,7 +132,7 @@ namespace System.IO
         /// <summary>
         /// Try to remove relative segments from the given path (without combining with a root).
         /// </summary>
-		/// <param name="path">Input path</param>
+        /// <param name="path">Input path</param>
         /// <param name="rootLength">The length of the root of the given path</param>
         /// <param name="sb">String builder that will store the result</param>
         /// <returns>"true" if the path was modified</returns>
