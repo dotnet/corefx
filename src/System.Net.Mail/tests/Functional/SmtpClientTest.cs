@@ -377,10 +377,10 @@ namespace System.Net.Mail.Tests
         public void SendMail_DeliveryFormat_SubjectEncoded(bool useAsyncSend, bool useSevenBit, bool useSmtpUTF8)
         {
             // If the server support `SMTPUTF8` and use `SmtpDeliveryFormat.International`, the server should received this subject.
-            const string subjectText = "Test \u6d4b\u8bd5 Contain \u5305\u542b UTF8";
+            const string subjectText = "Test \u0387 Contain \u0387 UTF8";
 
             // If the server does not support `SMTPUTF8` or use `SmtpDeliveryFormat.SevenBit`, the server should received this subject.
-            const string subjectBase64 = "=?utf-8?B?VGVzdCDmtYvor5UgQ29udGFpbiDljIXlkKsgVVRGOA==?=";
+            const string subjectBase64 = "=?utf-8?B?VGVzdCDCtyBDb250YWluIMK3IFVURjg=?=";
 
             SmtpServer server = new SmtpServer();
 
