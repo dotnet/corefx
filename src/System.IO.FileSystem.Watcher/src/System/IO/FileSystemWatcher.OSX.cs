@@ -151,7 +151,7 @@ namespace System.IO
             // Calling RunLoopStop multiple times SegFaults so protect the call to it
             private bool _stopping;
 
-            private ExecutionContext context;
+            private ExecutionContext _context;
 
             internal RunningInstance(
                 FileSystemWatcher watcher,
@@ -229,14 +229,13 @@ namespace System.IO
                     var runLoopStarted = (ManualResetEventSlim)inputArgs[0];
                     var _eventStream = (SafeEventStreamHandle)inputArgs[1];
                     // Get this thread's RunLoop
-                    var runLoop = Interop.RunLoop.CFRunLoopGetCurrent();
+                    IntPtr runLoop = Interop.RunLoop.CFRunLoopGetCurrent();
                     s_watcherRunLoop = runLoop;
                     Debug.Assert(s_watcherRunLoop != IntPtr.Zero);
 
                     // Retain the RunLoop so that it doesn't get moved or cleaned up before we're done with it.
                     IntPtr retainResult = Interop.CoreFoundation.CFRetain(runLoop);
                     Debug.Assert(retainResult == runLoop, "CFRetain is supposed to return the input value");
-
 
                     // Schedule the EventStream to run on the thread's RunLoop
                     Interop.EventStream.FSEventStreamScheduleWithRunLoop(_eventStream, runLoop, Interop.RunLoop.kCFRunLoopDefaultMode);
@@ -249,7 +248,7 @@ namespace System.IO
                     }
                     finally
                     {
-                        lock(s_lockObject)
+                        lock (s_lockObject)
                         {                    
                             Interop.CoreFoundation.CFRelease(runLoop);                                  
                             s_watcherRunLoop = IntPtr.Zero;
@@ -315,7 +314,7 @@ namespace System.IO
                     _callback = new Interop.EventStream.FSEventStreamCallback(FileSystemEventCallback);
                 }
 
-                context = ExecutionContext.Capture();
+                _context = ExecutionContext.Capture();
 
                 // Make sure the OS file buffer(s) are fully flushed so we don't get events from cached I/O
                 Interop.Sys.Sync();
@@ -372,7 +371,7 @@ namespace System.IO
                     return;
                 }
 
-                ExecutionContext.Run(context, delegate (object state)
+                ExecutionContext.Run(_context, delegate
                 {
 
                     // Since renames come in pairs, when we find the first we need to search for the next one. Once we find it, we'll add it to this
@@ -472,6 +471,8 @@ namespace System.IO
                             ArrayPool<char>.Shared.Return(underlyingArray.Array);
                     }
 
+                    this._context = ExecutionContext.Capture();
+
                     void ProcessEvents()
                     {
                         for (int i = 0; i < events.Length; i++)
@@ -496,10 +497,7 @@ namespace System.IO
                             events[i] = events[i].Slice(0, charCount);
                         }
                     }
-
-                    var instance = (RunningInstance)state;
-                    instance.context = ExecutionContext.Capture();
-                }, this);
+                }, null);
             }
 
             /// <summary>
