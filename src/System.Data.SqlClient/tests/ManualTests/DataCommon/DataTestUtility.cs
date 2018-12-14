@@ -87,6 +87,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     using (var connection = new SqlConnection(builder.ToString()))
                     using (var command = new SqlCommand("SELECT COUNT(*) FROM sys.databases WHERE name=@name", connection))
                     {
+                        connection.Open();
                         command.Parameters.AddWithValue("name", name);
                         present = Convert.ToInt32(command.ExecuteScalar()) == 1;
                     }
