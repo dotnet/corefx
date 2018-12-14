@@ -47,27 +47,21 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 serviceBrokerEnabled = false;
                 if (AreConnStringsSetup())
                 {
-                    try
+                    var builder = new SqlConnectionStringBuilder(TcpConnStr);
+                    string database = builder.InitialCatalog;
+                    builder.ConnectTimeout = 2;
+                    using (var connection = new SqlConnection(builder.ToString()))
+                    using (var command = new SqlCommand("SELECT is_broker_enabled FROM sys.databases WHERE name=@name", connection))
                     {
-                        var builder = new SqlConnectionStringBuilder(TcpConnStr);
-                        string database = builder.InitialCatalog;
-                        builder.ConnectTimeout = 2;
-                        using (var connection = new SqlConnection(builder.ToString()))
-                        using (var command = new SqlCommand("SELECT is_service_broker_enabled FROM sys.sys.databases WHERE name=@name", connection))
+                        connection.Open();
+                        command.Parameters.AddWithValue("name", database);
+                        using (var reader = command.ExecuteReader())
                         {
-                            command.Parameters.AddWithValue("name", database);
-                            using (var reader = command.ExecuteReader())
+                            if (reader.HasRows && reader.Read())
                             {
-                                if (reader.HasRows && reader.Read())
-                                {
-                                    serviceBrokerEnabled = (reader.GetInt32(0) == 1);
-                                }
+                                serviceBrokerEnabled = reader.GetBoolean(0);
                             }
                         }
-                    }
-                    catch (Exception)
-                    {
-                        serviceBrokerEnabled = false;
                     }
                 }
             }
