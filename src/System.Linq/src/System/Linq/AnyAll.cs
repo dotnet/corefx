@@ -15,10 +15,14 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 return e.MoveNext();
             }
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Any<TSource>(_ => true));
+#endif
         }
 
         public static bool Any<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
@@ -33,6 +37,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
+#if PRE_CHAINLINQ
             foreach (TSource element in source)
             {
                 if (predicate(element))
@@ -42,6 +47,9 @@ namespace System.Linq
             }
 
             return false;
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Any<TSource>(predicate));
+#endif
         }
 
         public static bool All<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
@@ -56,6 +64,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
+#if PRE_CHAINLINQ
             foreach (TSource element in source)
             {
                 if (!predicate(element))
@@ -65,6 +74,10 @@ namespace System.Linq
             }
 
             return true;
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.All<TSource>(predicate));
+#endif
+
         }
     }
 }
