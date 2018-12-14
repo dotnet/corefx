@@ -19,6 +19,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             if (comparer == null)
             {
                 foreach (TSource element in source)
@@ -41,6 +42,16 @@ namespace System.Linq
             }
 
             return false;
+#else
+            if (comparer == null)
+            {
+                return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Contains<TSource>(value));
+            }
+            else
+            {
+                return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.ContainsWithComparer<TSource>(value, comparer));
+            }
+#endif
         }
     }
 }
