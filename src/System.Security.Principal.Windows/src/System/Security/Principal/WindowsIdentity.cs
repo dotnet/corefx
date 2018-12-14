@@ -1372,7 +1372,7 @@ namespace System.Security.Principal
         ///    on the thread.
         ///  We also flow impersonation context using AsyncLocal to handle await/async
         /// </summary>
-        /// <param name="userToken"></param>
+        /// <param name="userTokenToImpersonate"></param>
         /// <returns></returns>
         private static WindowsImpersonationContext SafeImpersonate(SafeAccessTokenHandle userTokenToImpersonate)
         {
