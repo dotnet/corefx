@@ -949,8 +949,8 @@ namespace System.Management
         [PreserveSig] int GetCount_([Out] out uint puKeyCount);
         [PreserveSig] int SetKey_([In][MarshalAs(UnmanagedType.LPWStr)]  string   wszName, [In] uint uFlags, [In] uint uCimType, [In] IntPtr pKeyVal);
         [PreserveSig] int SetKey2_([In][MarshalAs(UnmanagedType.LPWStr)]  string   wszName, [In] uint uFlags, [In] uint uCimType, [In] ref object pKeyVal);
-        [PreserveSig] int GetKey_([In] uint uKeyIx, [In] uint uFlags, [In][Out] ref uint puNameBufSize, [Out][MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U2, SizeParamIndex = 1)]  char[]   pszKeyName, [In][Out] ref uint puKeyValBufSize, [In][Out] IntPtr pKeyVal, [Out] out uint puApparentCimType);
-        [PreserveSig] int GetKey2_([In] uint uKeyIx, [In] uint uFlags, [In][Out] ref uint puNameBufSize, [Out][MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U2, SizeParamIndex = 1)]  char[]   pszKeyName, [In][Out] ref object pKeyValue, [Out] out uint puApparentCimType);
+        [PreserveSig] int GetKey_([In] uint uKeyIx, [In] uint uFlags, [In][Out] ref uint puNameBufSize, [Out][MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U2, SizeParamIndex = 2)]  char[]   pszKeyName, [In][Out] ref uint puKeyValBufSize, [In][Out] IntPtr pKeyVal, [Out] out uint puApparentCimType);
+        [PreserveSig] int GetKey2_([In] uint uKeyIx, [In] uint uFlags, [In][Out] ref uint puNameBufSize, [Out][MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U2, SizeParamIndex = 2)]  char[]   pszKeyName, [In][Out] ref object pKeyValue, [Out] out uint puApparentCimType);
         [PreserveSig] int RemoveKey_([In][MarshalAs(UnmanagedType.LPWStr)]  string   wszName, [In] uint uFlags);
         [PreserveSig] int RemoveAllKeys_([In] uint uFlags);
         [PreserveSig] int MakeSingleton_([In] sbyte bSet);
