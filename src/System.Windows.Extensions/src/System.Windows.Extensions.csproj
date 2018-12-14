@@ -1,8 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{E0C4E267-B1D6-463B-9C95-8C0D3C335924}</ProjectGuid>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetsWindows)' != 'true'">SR.PlatformNotSupported_X509Certificate2UI</GeneratePlatformNotSupportedAssemblyMessage>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);CS1574</NoWarn>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
@@ -36,15 +37,29 @@
     <Compile Include="System\Security\Cryptography\X509Certificates\X509Certificate2UI.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\SafeX509Handles.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509Utils.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs">
+      <Link>CoreLib\System\Text\ValueStringBuilder.cs</Link>
+    </Compile>
+    <Compile Include="System\Drawing\FontConverter.cs" />
+    <Compile Include="System\Drawing\IconConverter.cs" />
+    <Compile Include="System\Drawing\ImageConverter.cs" />
+    <Compile Include="System\Drawing\ImageFormatConverter.cs" />
+    <Compile Include="System\Drawing\Printing\MarginsConverter.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Reference Include="System.Buffers" />
+    <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.ComponentModel.TypeConverter" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Drawing.Common" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />
-    <Reference Include="System.Collections.NonGeneric" />
+    <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading" />
   </ItemGroup>
 </Project>

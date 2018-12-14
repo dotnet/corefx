@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{a32671b6-5470-4f9c-9cd8-4094b9ab0799}</ProjectGuid>
     <NoVbRuntimeReference>true</NoVbRuntimeReference>
@@ -12,7 +12,10 @@
     <DefineConstants>$(DefineConstants),LATEBINDING=True</DefineConstants>
     <AssemblyName>Microsoft.VisualBasic</AssemblyName>
     <NoStdLib>true</NoStdLib>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
     <RootNamespace />
+    <!-- Disable this as it seems to break windows builds for now. -->
+    <DocumentationFile />
     <Configurations>netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
@@ -48,6 +51,7 @@
     <Compile Include="Microsoft\VisualBasic\CompilerServices\ProjectData.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\StandardModuleAttribute.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\StaticLocalInitFlag.vb" />
+    <Compile Include="Microsoft\VisualBasic\CompilerServices\StructUtils.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Symbols.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Utils.LateBinder.vb" />
     <Compile Include="Microsoft\VisualBasic\CompilerServices\Utils.vb" />

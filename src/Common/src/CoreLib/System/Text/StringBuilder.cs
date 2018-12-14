@@ -562,7 +562,7 @@ namespace System.Text
         /// thus can be used in a C# 'foreach' statements to retreive the data in the StringBuilder
         /// as chunks (ReadOnlyMemory) of characters.  An example use is:
         /// 
-        ///      foreach (ReadOnlyMemory<char> chunk in sb.GetChunks())
+        ///      foreach (ReadOnlyMemory&lt;char&gt; chunk in sb.GetChunks())
         ///         foreach(char c in chunk.Span)
         ///             { /* operation on c }
         ///
@@ -577,10 +577,10 @@ namespace System.Text
         /// compared to the fetching of the character, so create a local variable for the SPAN 
         /// if you need to use it in a nested for statement.  For example 
         /// 
-        ///    foreach (ReadOnlyMemory<char> chunk in sb.GetChunks())
+        ///    foreach (ReadOnlyMemory&lt;char&gt; chunk in sb.GetChunks())
         ///    {
         ///         var span = chunk.Span;
-        ///         for(int i = 0; i < span.Length; i++)
+        ///         for(int i = 0; i &lt; span.Length; i++)
         ///             { /* operation on span[i] */ }
         ///    }
         /// </summary>
@@ -1211,6 +1211,8 @@ namespace System.Text
             return this;
         }
 
+        public StringBuilder Append(ReadOnlyMemory<char> value) => Append(value.Span);
+
         #region AppendJoin
 
         public unsafe StringBuilder AppendJoin(string separator, params object[] values)
@@ -1777,7 +1779,7 @@ namespace System.Text
         {
             if (sb == null)
                 return false;
-            if (Capacity != sb.Capacity || MaxCapacity != sb.MaxCapacity || Length != sb.Length)
+            if (Length != sb.Length)
                 return false;
             if (sb == this)
                 return true;
@@ -1817,9 +1819,9 @@ namespace System.Text
         }
 
         /// <summary>
-        /// Determines if the contents of this builder are equal to the contents of ReadOnlySpan<char>.
+        /// Determines if the contents of this builder are equal to the contents of <see cref="ReadOnlySpan{Char}"/>.
         /// </summary>
-        /// <param name="span">The ReadOnlySpan{char}.</param>
+        /// <param name="span">The <see cref="ReadOnlySpan{Char}"/>.</param>
         public bool Equals(ReadOnlySpan<char> span)
         {
             if (span.Length != Length)
@@ -2088,7 +2090,10 @@ namespace System.Text
                 fixed (char* valuePtr = value)
                 {
                     // calculate the total amount of extra space or space needed for all the replacements.
-                    int delta = (value.Length - removeCount) * replacementsCount;
+                    long longDelta = (value.Length - removeCount) * (long)replacementsCount;
+                    int delta = (int)longDelta;
+                    if (delta != longDelta)
+                        throw new OutOfMemoryException();
 
                     StringBuilder targetChunk = sourceChunk;        // the target as we copy chars down
                     int targetIndexInChunk = replacements[0];
@@ -2337,19 +2342,20 @@ namespace System.Text
             //     really big chunks even if the string gets really big.
             int newBlockLength = Math.Max(minBlockCharCount, Math.Min(Length, MaxChunkSize));
 
+            // Check for integer overflow (logical buffer size > int.MaxValue)
+            if (m_ChunkOffset + m_ChunkLength + newBlockLength < newBlockLength)
+                throw new OutOfMemoryException();
+
+            // Allocate the array before updating any state to avoid leaving inconsistent state behind in case of out of memory exception
+            char[] chunkChars = new char[newBlockLength];
+
             // Move all of the data from this chunk to a new one, via a few O(1) pointer adjustments.
             // Then, have this chunk point to the new one as its predecessor.
             m_ChunkPrevious = new StringBuilder(this);
             m_ChunkOffset += m_ChunkLength;
             m_ChunkLength = 0;
 
-            // Check for integer overflow (logical buffer size > int.MaxValue)
-            if (m_ChunkOffset + newBlockLength < newBlockLength)
-            {
-                m_ChunkChars = null;
-                throw new OutOfMemoryException();
-            }
-            m_ChunkChars = new char[newBlockLength];
+            m_ChunkChars = chunkChars;
 
             AssertInvariants();
         }

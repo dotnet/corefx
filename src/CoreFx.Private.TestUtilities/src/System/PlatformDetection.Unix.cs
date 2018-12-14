@@ -18,6 +18,7 @@ namespace System
         public static bool IsWindows => false;
         public static bool IsWindows7 => false;
         public static bool IsWindows8x => false;
+        public static bool IsWindows8xOrLater => false;
         public static bool IsWindows10Version1607OrGreater => false;
         public static bool IsWindows10Version1703OrGreater => false;
         public static bool IsWindows10Version1709OrGreater => false;
@@ -38,6 +39,7 @@ namespace System
         public static bool IsUbuntu1710 => IsDistroAndVersion("ubuntu", 17, 10);
         public static bool IsUbuntu1710OrHigher => IsDistroAndVersionOrHigher("ubuntu", 17, 10);
         public static bool IsUbuntu1804 => IsDistroAndVersion("ubuntu", 18, 04);
+        public static bool IsUbuntu1810OrHigher => IsDistroAndVersionOrHigher("ubuntu", 18, 10);
         public static bool IsTizen => IsDistroAndVersion("tizen");
         public static bool IsFedora => IsDistroAndVersion("fedora");
         public static bool IsWindowsNanoServer => false;
@@ -58,9 +60,35 @@ namespace System
         public static bool IsNetfx471OrNewer => false;
         public static bool IsNetfx472OrNewer => false;
 
+        public static bool IsDrawingSupported { get; } = GetGdiplusIsAvailable();
+
+        [DllImport("libdl")]
+        private static extern IntPtr dlopen(string libName, int flags);
+        public const int RTLD_NOW = 0x002;
+
+        private static bool GetGdiplusIsAvailable()
+        {
+            IntPtr nativeLib;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                nativeLib = dlopen("libgdiplus.dylib", RTLD_NOW);
+            }
+            else
+            {
+                nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
+                if (nativeLib == IntPtr.Zero)
+                {
+                    nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
+                }
+            }
+
+            return nativeLib != IntPtr.Zero;
+        }
+
         public static Version OSXVersion { get; } = ToVersion(Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion);
 
-        public static Version OpenSslVersion => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? Interop.OpenSsl.OpenSslVersion : throw new PlatformNotSupportedException();
+        public static Version OpenSslVersion => !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? GetOpenSslVersion() : throw new PlatformNotSupportedException();
 
         public static string GetDistroVersionString()
         {
@@ -213,10 +241,10 @@ namespace System
             return
                 VersionEquivalentTo(major, minor, build, revision, actualVersionId) ||
                     (actualVersionId.Major > major ||
-                        (actualVersionId.Major == major && actualVersionId.Minor > minor ||
-                            (actualVersionId.Minor == minor && actualVersionId.Build > build ||
-                                (actualVersionId.Build == build && actualVersionId.Revision > revision ||
-                                    (actualVersionId.Revision == revision)))));
+                        (actualVersionId.Major == major && (actualVersionId.Minor > minor ||
+                            (actualVersionId.Minor == minor && (actualVersionId.Build > build ||
+                                (actualVersionId.Build == build && (actualVersionId.Revision > revision ||
+                                    (actualVersionId.Revision == revision))))))));
         }
 
         private static Version GetOSXProductVersion()
@@ -267,6 +295,30 @@ namespace System
 
             // In case of exception or couldn't get the version 
             return new Version(0, 0, 0);
+        }
+
+        private static Version s_opensslVersion;
+        private static Version GetOpenSslVersion()
+        {
+            if (s_opensslVersion == null)
+            {
+                // OpenSSL version numbers are encoded as
+                // 0xMNNFFPPS: major (one nybble), minor (one byte, unaligned),
+                // "fix" (one byte, unaligned), patch (one byte, unaligned), status (one nybble)
+                //
+                // e.g. 1.0.2a final is 0x1000201F
+                //
+                // Currently they don't exceed 29-bit values, but we use long here to account
+                // for the expanded range on their 64-bit C-long return value.
+                long versionNumber = Interop.OpenSsl.OpenSslVersionNumber();
+                int major = (int)((versionNumber >> 28) & 0xF);
+                int minor = (int)((versionNumber >> 20) & 0xFF);
+                int fix = (int)((versionNumber >> 12) & 0xFF);
+
+                s_opensslVersion = new Version(major, minor, fix);
+            }
+
+            return s_opensslVersion;
         }
 
         [DllImport("libc", SetLastError = true)]

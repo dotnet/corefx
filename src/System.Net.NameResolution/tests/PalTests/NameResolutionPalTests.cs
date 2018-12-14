@@ -35,7 +35,7 @@ namespace System.Net.NameResolution.PalTests
             Assert.NotNull(hostEntry.Aliases);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(32797)]
         public void TryGetAddrInfo_HostName()
         {
             string hostName = NameResolutionPal.GetHostName();
@@ -92,7 +92,7 @@ namespace System.Net.NameResolution.PalTests
             Assert.NotNull(name);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(32797)]
         public void TryGetAddrInfo_HostName_TryGetNameInfo()
         {
             string hostName = NameResolutionPal.GetHostName();
@@ -165,6 +165,15 @@ namespace System.Net.NameResolution.PalTests
             error = NameResolutionPal.TryGetAddrInfo(name, out hostEntry, out nativeErrorCode);
             Assert.Equal(SocketError.Success, error);
             Assert.NotNull(hostEntry);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void Exception_HostNotFound_Success()
+        {
+            var ex = new  SocketException((int)SocketError.HostNotFound);
+
+            Assert.Equal(-1, ex.Message.IndexOf("Device"));
         }
     }
 }

@@ -182,15 +182,15 @@ namespace System.Data.SqlClient.SNI
             IPAddress[] ipAddresses = Dns.GetHostAddresses(serverName);
             IPAddress serverIPv4 = null;
             IPAddress serverIPv6 = null;
-            foreach (IPAddress ipAdress in ipAddresses)
+            foreach (IPAddress ipAddress in ipAddresses)
             {
-                if (ipAdress.AddressFamily == AddressFamily.InterNetwork)
+                if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    serverIPv4 = ipAdress;
+                    serverIPv4 = ipAddress;
                 }
-                else if (ipAdress.AddressFamily == AddressFamily.InterNetworkV6)
+                else if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
                 {
-                    serverIPv6 = ipAdress;
+                    serverIPv6 = ipAddress;
                 }
             }
             ipAddresses = new IPAddress[] { serverIPv4, serverIPv6 };
@@ -223,6 +223,8 @@ namespace System.Data.SqlClient.SNI
                     if (ipAddresses[i] != null)
                     {
                         sockets[i] = new Socket(ipAddresses[i].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                        // enable keep-alive on socket
+                        SNITcpHandle.SetKeepAliveValues(ref sockets[i]);                      
                         sockets[i].Connect(ipAddresses[i], port);
                         if (sockets[i] != null) // sockets[i] can be null if cancel callback is executed during connect()
                         {
@@ -509,7 +511,6 @@ namespace System.Data.SqlClient.SNI
         /// </summary>
         /// <param name="receiveCallback">Receive callback</param>
         /// <param name="sendCallback">Send callback</param>
-        /// <summary>
         public override void SetAsyncCallbacks(SNIAsyncCallback receiveCallback, SNIAsyncCallback sendCallback)
         {
             _receiveCallback = receiveCallback;

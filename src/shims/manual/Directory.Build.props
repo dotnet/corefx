@@ -19,13 +19,20 @@
     <_RuntimePath Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap' OR '$(TargetGroup)' == 'netcoreappaot'">$(RuntimePath)</_RuntimePath>
     <_RuntimePath Condition="'$(TargetGroup)' == 'netcoreapp2.0'">$(ShimsTargetRuntimeRoot)netcoreapp2.0/</_RuntimePath>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
-    <AssemblyKey>ECMA</AssemblyKey>
+    <StrongNameKeyId>ECMA</StrongNameKeyId>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <GenFacadesForceZeroVersionSeeds>true</GenFacadesForceZeroVersionSeeds>
     <GenFacadesIgnoreMissingTypes>true</GenFacadesIgnoreMissingTypes>
     <IsRuntimeAssembly>true</IsRuntimeAssembly>
     <HasMatchingContract>true</HasMatchingContract>
+    <IncludeDefaultReferences>false</IncludeDefaultReferences>
     <ContractAssemblyPath>$(NetFxRefPath)$(MSBuildProjectName).dll</ContractAssemblyPath>
     <DefineConstants Condition="'$(TargetsNetCoreApp)' == 'true'">$(DefineConstants);netcoreapp</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ReferencePath
+      Include="$(_RuntimePath)System.*.dll;$(_RuntimePath)Microsoft.Win32.*.dll"
+      Exclude="$(_RuntimePath)System.dll;$(_RuntimePath)System.Data.dll" />
+  </ItemGroup>
 </Project>

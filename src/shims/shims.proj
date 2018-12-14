@@ -2,7 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <Import Project="Directory.Build.props" />
 
-  <UsingTask TaskName="GenFacadesTask" AssemblyFile="$(PackagesDir)/$(MicrosoftDotNetGenFacadesPackage.ToLower())/$(MicrosoftDotNetGenFacadesPackageVersion)/tools/netcoreapp2.1/Microsoft.DotNet.GenFacades.dll" />
   <PropertyGroup>
     <PackageConfigurations>
       netcoreapp2.0;
@@ -66,18 +65,6 @@
       ForceZeroVersionSeeds="$(GenFacadesForceZeroVersionSeeds)"
       BuildPartialReferenceFacade="$(GenFacadesBuildPartialReferenceFacade)"
     />
-
-    <WriteSigningRequired
-        Condition="'@(NetFxContracts)' != '' and '$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
-        AuthenticodeSig="Microsoft"
-        StrongNameSig="%(NetFxContracts.StrongNameSig)"
-        MarkerFile="$(GenFacadesOutputPath)%(NetFxContracts.Filename)%(NetFxContracts.Extension).requires_signing" />
-
-    <WriteSigningRequired
-        Condition="'@(NETStandardContracts)' != '' and '$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
-        AuthenticodeSig="Microsoft"
-        StrongNameSig="Open"
-        MarkerFile="$(GenFacadesOutputPath)%(NETStandardContracts.Filename)%(NETStandardContracts.Extension).requires_signing" />
 
     <MakeDir Directories="$(IntermediateOutputPath)" />
     <Touch Files="$(GenFacadesSemaphoreFile)" AlwaysCreate="true" />

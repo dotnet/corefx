@@ -1,10 +1,5 @@
 Compat issues with assembly System.Runtime.Intrinsics:
-MembersMustExist : Member 'System.Runtime.Intrinsics.X86.Avx2.BroadcastScalarToVector256(System.Byte*)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.Intrinsics.X86.Avx2.BroadcastScalarToVector256(System.Int16*)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.Intrinsics.X86.Avx2.BroadcastScalarToVector256(System.Int32*)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.Intrinsics.X86.Avx2.BroadcastScalarToVector256(System.Int64*)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.Intrinsics.X86.Avx2.BroadcastScalarToVector256(System.SByte*)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.Intrinsics.X86.Avx2.BroadcastScalarToVector256(System.UInt16*)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.Intrinsics.X86.Avx2.BroadcastScalarToVector256(System.UInt32*)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.Intrinsics.X86.Avx2.BroadcastScalarToVector256(System.UInt64*)' does not exist in the implementation but it does exist in the contract.
-Total Issues: 8
+TypesMustExist : Type 'System.Runtime.Intrinsics.Vector128' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Runtime.Intrinsics.Vector256' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Runtime.Intrinsics.Vector64' does not exist in the implementation but it does exist in the contract.
+Total Issues: 3

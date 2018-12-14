@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProjectGuid>{484C92C6-6D2C-45BC-A5E2-4A12BA228E1E}</ProjectGuid>
@@ -133,7 +133,14 @@
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'netstandard'">
+    <Compile Include="CompareInfo\CompareInfoTests.netcoreapp.cs" />
+  </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="$(CommonTestPath)\Data\UnicodeData.11.0.txt">
+      <Link>CharUnicodeInfo\UnicodeData.11.0.txt</Link>
+      <LogicalName>UnicodeData.11.0.txt</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="$(CommonTestPath)\Data\UnicodeData.8.0.txt">
       <Link>CharUnicodeInfo\UnicodeData8.0.txt</Link>
       <LogicalName>UnicodeData.8.0.txt</LogicalName>

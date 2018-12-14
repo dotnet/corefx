@@ -52,7 +52,7 @@ If you want to run your benchmarks without spawning a new process per benchmark 
 
 1. Before you start benchmarking the code you need to build entire CoreFX in Release which is going to generate the right CoreRun bits for you:
 
-        C:\Projects\corefx>build.cmd -release -buildArch=x64
+        C:\Projects\corefx>build.cmd -release /p:ArchGroup=x64
 
 After that, you should be able to find `CoreRun.exe` in a location similar to:
 
@@ -72,7 +72,7 @@ class Program
 
         dotnet run -c Release -f netcoreapp2.1 -- -f * --coreRun "C:\Projects\corefx\bin\testhost\netcoreapp-Windows_NT-Release-x64\shared\Microsoft.NETCore.App\9.9.9\CoreRun.exe" --artifacts ".\before"
 
-6. Go to the coresponding CoreFX source folder (an example `corefx\src\System.Collections.Immutable`)
+6. Go to the corresponding CoreFX source folder (an example `corefx\src\System.Collections.Immutable`)
 7. Apply the optimization that you want to test
 8. Rebuild given CoreFX part in Release:
 

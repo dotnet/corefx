@@ -2,9 +2,10 @@ parameters:
   helixSource: 'undefined_defaulted_in_telemetry.yml'
   helixType: 'undefined_defaulted_in_telemetry.yml'
   buildConfig: ''
+  runAsPublic: false
 
 steps:
-- ${{ if not(eq(variables['System.TeamProject'], 'public')) }}:
+- ${{ if and(eq(parameters.runAsPublic, 'false'), not(eq(variables['System.TeamProject'], 'public'))) }}:
   - task: AzureKeyVault@1
     inputs:
       azureSubscription: 'HelixProd_KeyVault'
@@ -30,17 +31,16 @@ steps:
     }
     JobListStuff
     
+    cat $jobInfo
+
     # create a temporary file for curl output
     res=`mktemp`
 
-    accessTokenParameter=''
-    if [[ ! "$HelixApiAccessToken" == "" ]]; then
-      accessTokenParameter="?access_token=$HelixApiAccessToken"
-    fi
+    accessTokenParameter="?access_token=$HelixApiAccessToken"
 
     curlResult=`
       cat $jobInfo |\
-      curl --verbose --output $res --write-out "%{http_code}" \
+      curl --trace - --verbose --output $res --write-out "%{http_code}" \
       -H 'Content-Type: application/json' \
       -X POST "https://helix.dot.net/api/2018-03-14/telemetry/job$accessTokenParameter" -d @-`
     curlStatus=$?
