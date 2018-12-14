@@ -88,7 +88,7 @@ namespace System.Net.NetworkInformation
 
         private Socket GetRawSocket(SocketConfig socketConfig)
         {
-            IPEndPoint ep = socketConfig.EndPoint as IPEndPoint;
+            IPEndPoint ep = (IPEndPoint)socketConfig.EndPoint;
 
             // Setting Socket.DontFragment and .Ttl is not supported on Unix, so socketConfig.Options is ignored.
             AddressFamily addrFamily = ep.Address.AddressFamily;
@@ -102,9 +102,10 @@ namespace System.Net.NetworkInformation
 
 #pragma warning disable 618
             // Disable warning about obsolete property. We could use GetAddressBytes but that allocates.
+            // IPv4 multicast address starts with 1110 bits so mask rest and test if we get correct value e.g. 0xe0.
             if (!ep.Address.IsIPv6Multicast && !(addrFamily == AddressFamily.InterNetwork && (ep.Address.Address & 0xf0) == 0xe0))
             {
-                // If it is not multicast, use Connect to scope responses only tho target address.
+                // If it is not multicast, use Connect to scope responses only to the target address.
                 socket.Connect(socketConfig.EndPoint);
             }
 #pragma warning restore 618
