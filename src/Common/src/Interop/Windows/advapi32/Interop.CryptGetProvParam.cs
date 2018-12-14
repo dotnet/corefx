@@ -4,7 +4,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 
 internal static partial class Interop
 {
@@ -33,7 +32,7 @@ internal static partial class Interop
             int dwFlags);
 
         public static bool CryptGetProvParam(
-            SafeProvHandle safeProvHandle,
+            SafeHandle safeProvHandle,
             CryptProvParam dwParam,
             Span<byte> pbData,
             ref int dwDataLen)
