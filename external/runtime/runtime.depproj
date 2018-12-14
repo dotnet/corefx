@@ -114,10 +114,12 @@
           Condition="'@(SymbolPackagesToDownload)' != ''">
       <DownloadFile SourceUrl="%(SymbolPackagesToDownload.Url)"
                     DestinationFolder="$(SymbolPackagesDir)"
-                    DestinationFileName="%(SymbolPackagesToDownload.DestinationFile)" />
+                    DestinationFileName="%(SymbolPackagesToDownload.DestinationFile)"
+                    ContinueOnError="WarnAndContinue" />
       <Unzip SourceFiles="$(SymbolPackagesDir)\%(SymbolPackagesToDownload.DestinationFile)"
              DestinationFolder="%(SymbolPackagesToDownload.UnzipDestinationDir)"
-             OverwriteReadOnlyFiles="true"  />
+             OverwriteReadOnlyFiles="true"
+             Condition="Exists('$(SymbolPackagesDir)\%(SymbolPackagesToDownload.DestinationFile)')" />
   </Target>
           
 
