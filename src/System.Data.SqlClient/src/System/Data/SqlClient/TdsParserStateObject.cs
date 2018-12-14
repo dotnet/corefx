@@ -3077,7 +3077,7 @@ namespace System.Data.SqlClient
                             {
                                 byte[] tempArray = new byte[len];
                                 Span<byte> copyTempTo = tempArray.AsSpan();
-                                ReadOnlySpan<byte> copyTempFrom = b.Slice(remainder, len);
+                                ReadOnlySpan<byte> copyTempFrom = b.Slice(0, len);
 
                                 Debug.Assert(copyTempTo.Length == copyTempFrom.Length, $"copyTempTo.Length:{copyTempTo.Length} and copyTempFrom.Length:{copyTempFrom.Length:D} should be the same");
 
