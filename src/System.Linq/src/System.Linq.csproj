@@ -10,6 +10,8 @@
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Base.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Enumerable.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumer\Aggregate.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumer\Reduce.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\Enumerators\Consumer.cs" />
     <Compile Include="System\Linq\ChainLinq\Enumerators\Enumerable.cs" />

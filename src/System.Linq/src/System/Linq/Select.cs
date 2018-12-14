@@ -23,7 +23,6 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
-            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectLink<TSource, TResult>(selector));
 #if PRE_CHAINLINQ
             if (source is Iterator<TSource> iterator)
             {
@@ -58,6 +57,8 @@ namespace System.Linq
             }
 
             return new SelectEnumerableIterator<TSource, TResult>(source, selector);
+#else
+            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectLink<TSource, TResult>(selector));
 #endif
         }
 
