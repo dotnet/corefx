@@ -23,9 +23,7 @@
 #if HAVE_PIPE2
 #include <fcntl.h>
 #endif
-#if !HAVE_PIPE2
 #include <pthread.h>
-#endif
 
 #if HAVE_SCHED_SETAFFINITY || HAVE_SCHED_GETAFFINITY
 #include <sched.h>
@@ -167,6 +165,12 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     bool success = true;
     int stdinFds[2] = {-1, -1}, stdoutFds[2] = {-1, -1}, stderrFds[2] = {-1, -1}, waitForChildToExecPipe[2] = {-1, 1};
     pid_t processId = -1;
+    int thread_cancel_state;
+    sigset_t signal_set;
+    sigset_t old_signal_set;
+
+    // None of this code can be cancelled without leaking handles, so just don't allow it
+    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &thread_cancel_state);
 
     // Validate arguments
     if (NULL == filename || NULL == argv || NULL == envp || NULL == stdinFd || NULL == stdoutFd ||
@@ -233,6 +237,11 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     SystemNative_Pipe(waitForChildToExecPipe, PAL_O_CLOEXEC);
 #endif
 
+    // The fork child must not be signalled until it calls exec(): our signal handlers do not
+    // handle being raised in the child process correctly
+    sigfillset(&signal_set);
+    pthread_sigmask(SIG_SETMASK, &signal_set, &old_signal_set);
+
 #if HAVE_VFORK
     // This platform has vfork(). vfork() is either a synonym for fork or provides shared memory
     // semantics. For a one gigabyte process/ the expected performance gain of using shared memory
@@ -263,6 +272,35 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     if ((processId = fork()) == 0) // processId == 0 if this is child process
 #endif
     {
+	// It turns out that child processes depend on their sigmask being set to something sane rather than mask all.
+        // On the other hand, we have to mask all to avoid our own signal handlers running in the child process, writing
+        // to the pipe, and waking up the handling thread in the parent process. This also avoids third-party code getting
+        // equally confused.
+        // Remove all signals, then restore signal mask.
+        sigset_t junk_signal_set;
+        struct sigaction sa_default;
+        struct sigaction sa_old;
+        struct sigaction sa_trash;
+        memset(&sa_default, 0, sizeof(sa_default)); // On some architectures, sa_mask is a struct so assigning zero to it doesn't compile
+        sa_default.sa_handler = SIG_DFL;
+        for (int sig = 1; ; ++sig)
+        {
+            if (sigaction(sig, &sa_default, &sa_old))
+            {
+                if (sig != SIGKILL && sig != SIGSTOP)
+                    break; // No more signals
+            } else {
+                if ((sa_old.sa_flags & SA_SIGINFO)
+                    ? ((void (*)(int))sa_old.sa_sigaction == SIG_IGN || (void (*)(int))sa_old.sa_sigaction == SIG_DFL)
+                    : (sa_old.sa_handler == SIG_IGN || sa_old.sa_handler == SIG_DFL))
+                {
+                    // It has a pre-defined handler -- put it back
+                    sigaction(sig, &sa_old, &sa_trash);
+                }
+            }
+        }
+        pthread_sigmask(SIG_SETMASK, &old_signal_set, &junk_signal_set); // Not all architectures allow NULL here
+
         // For any redirections that should happen, dup the pipe descriptors onto stdin/out/err.
         // We don't need to explicitly close out the old pipe descriptors as they will be closed on the 'execve' call.
         if ((redirectStdin && Dup2WithInterruptedRetry(stdinFds[READ_END_OF_PIPE], STDIN_FILENO) == -1) ||
@@ -295,8 +333,13 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         execve(filename, argv, envp);
         ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno);
     }
-    else if (processId < 0)
+
+    // Restore signal mask in the parent process immediately after fork() or vfork() call
+    pthread_sigmask(SIG_SETMASK, &old_signal_set, &signal_set);
+
+    if (processId < 0)
     {
+        // failed
         success = false;
         goto done;
     }
@@ -362,10 +405,12 @@ done:;
         *childPid = -1;
 
         errno = priorErrno;
-        return -1;
     }
 
-    return 0;
+    // Restore thread cancel state
+    //pthread_setcancelstate(thread_cancel_state, &thread_cancel_state);
+
+    return success ? 0 : -1;
 }
 
 FILE* SystemNative_POpen(const char* command, const char* type)
