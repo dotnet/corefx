@@ -13,6 +13,7 @@
     <Compile Include="System\Linq\ChainLinq\Consumer\Aggregate.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\All.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Any.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumer\Average.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Reduce.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\Enumerators\Consumer.cs" />

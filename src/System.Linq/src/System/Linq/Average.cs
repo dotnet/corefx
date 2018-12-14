@@ -15,6 +15,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<int> e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
@@ -35,6 +36,9 @@ namespace System.Linq
 
                 return (double)sum / count;
             }
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageInt());
+#endif
         }
 
         public static double? Average(this IEnumerable<int?> source)
@@ -44,6 +48,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<int?> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -72,6 +77,9 @@ namespace System.Linq
             }
 
             return null;
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableInt());
+#endif
         }
 
         public static double Average(this IEnumerable<long> source)
@@ -81,6 +89,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<long> e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
@@ -101,6 +110,9 @@ namespace System.Linq
 
                 return (double)sum / count;
             }
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageLong());
+#endif
         }
 
         public static double? Average(this IEnumerable<long?> source)
@@ -110,6 +122,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<long?> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -138,6 +151,9 @@ namespace System.Linq
             }
 
             return null;
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableLong());
+#endif
         }
 
         public static float Average(this IEnumerable<float> source)
@@ -147,6 +163,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<float> e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
@@ -164,6 +181,9 @@ namespace System.Linq
 
                 return (float)(sum / count);
             }
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageFloat());
+#endif
         }
 
         public static float? Average(this IEnumerable<float?> source)
@@ -173,6 +193,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<float?> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -201,6 +222,9 @@ namespace System.Linq
             }
 
             return null;
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableFloat());
+#endif
         }
 
         public static double Average(this IEnumerable<double> source)
@@ -210,6 +234,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<double> e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
@@ -230,6 +255,9 @@ namespace System.Linq
 
                 return sum / count;
             }
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageDouble());
+#endif
         }
 
         public static double? Average(this IEnumerable<double?> source)
@@ -239,6 +267,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<double?> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -267,6 +296,9 @@ namespace System.Linq
             }
 
             return null;
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableDouble());
+#endif
         }
 
         public static decimal Average(this IEnumerable<decimal> source)
@@ -276,6 +308,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<decimal> e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
@@ -293,6 +326,9 @@ namespace System.Linq
 
                 return sum / count;
             }
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageDecimal());
+#endif
         }
 
         public static decimal? Average(this IEnumerable<decimal?> source)
@@ -302,6 +338,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<decimal?> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -327,6 +364,9 @@ namespace System.Linq
             }
 
             return null;
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableDecimal());
+#endif
         }
 
         public static double Average<TSource>(this IEnumerable<TSource> source, Func<TSource, int> selector)
@@ -341,6 +381,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
@@ -361,6 +402,9 @@ namespace System.Linq
 
                 return (double)sum / count;
             }
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageInt<TSource>(selector));
+#endif
         }
 
         public static double? Average<TSource>(this IEnumerable<TSource> source, Func<TSource, int?> selector)
@@ -375,6 +419,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -403,6 +448,9 @@ namespace System.Linq
             }
 
             return null;
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableInt<TSource>(selector));
+#endif
         }
 
         public static double Average<TSource>(this IEnumerable<TSource> source, Func<TSource, long> selector)
@@ -417,6 +465,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
@@ -437,6 +486,9 @@ namespace System.Linq
 
                 return (double)sum / count;
             }
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageLong<TSource>(selector));
+#endif
         }
 
         public static double? Average<TSource>(this IEnumerable<TSource> source, Func<TSource, long?> selector)
@@ -451,6 +503,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -479,6 +532,9 @@ namespace System.Linq
             }
 
             return null;
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableLong<TSource>(selector));
+#endif
         }
 
         public static float Average<TSource>(this IEnumerable<TSource> source, Func<TSource, float> selector)
@@ -493,6 +549,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
@@ -510,6 +567,9 @@ namespace System.Linq
 
                 return (float)(sum / count);
             }
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageFloat<TSource>(selector));
+#endif
         }
 
         public static float? Average<TSource>(this IEnumerable<TSource> source, Func<TSource, float?> selector)
@@ -524,6 +584,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -552,6 +613,9 @@ namespace System.Linq
             }
 
             return null;
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableFloat<TSource>(selector));
+#endif
         }
 
         public static double Average<TSource>(this IEnumerable<TSource> source, Func<TSource, double> selector)
@@ -566,6 +630,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
@@ -586,6 +651,9 @@ namespace System.Linq
 
                 return sum / count;
             }
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageDouble<TSource>(selector));
+#endif
         }
 
         public static double? Average<TSource>(this IEnumerable<TSource> source, Func<TSource, double?> selector)
@@ -600,6 +668,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -628,6 +697,9 @@ namespace System.Linq
             }
 
             return null;
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableDouble<TSource>(selector));
+#endif
         }
 
         public static decimal Average<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal> selector)
@@ -642,6 +714,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
@@ -659,6 +732,9 @@ namespace System.Linq
 
                 return sum / count;
             }
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageDecimal<TSource>(selector));
+#endif
         }
 
         public static decimal? Average<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal?> selector)
@@ -673,6 +749,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if PRE_CHAINLINQ
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 while (e.MoveNext())
@@ -698,6 +775,9 @@ namespace System.Linq
             }
 
             return null;
+#else
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableDecimal<TSource>(selector));
+#endif
         }
     }
 }
