@@ -322,9 +322,9 @@ namespace System.Management
 
                     if (status >= 0 && 0 < bufLen)
                     {
-                        StringBuilder pathBuilder = new StringBuilder((int)bufLen - 1);
-                        status = wbemPath.GetText_(flags, ref bufLen, pathBuilder);
-                        pathStr = pathBuilder.ToString();
+                        char[] pathChars = new char[(int)bufLen - 1];
+                        status = wbemPath.GetText_(flags, ref bufLen, pathChars);
+                        pathStr = new string(pathChars);
                     }
                 }
 
@@ -510,12 +510,12 @@ namespace System.Management
 
                     if (status >= 0 && 0 < bufLen)
                     {
-                        StringBuilder pathBuilder = new StringBuilder((int)bufLen - 1);
+                        char[] pathChars = new char[(int)bufLen - 1];
                         status = wmiPath.GetText_(
                             (int) tag_WBEM_GET_TEXT_FLAGS.WBEMPATH_GET_RELATIVE_ONLY,
                             ref bufLen, 
-                            pathBuilder);
-                        pathStr = pathBuilder.ToString();
+                            pathChars);
+                        pathStr = new string(pathChars);
                     }
 
                     if (status < 0)
@@ -610,9 +610,9 @@ namespace System.Management
 
                     if (status >= 0 && 0 < uLen)
                     {
-                        StringBuilder pathBuilder = new StringBuilder((int)uLen - 1);
-                        status = wmiPath.GetServer_(ref uLen, pathBuilder);
-                        pathStr = pathBuilder.ToString();
+                        char[] pathChars = new char[(int)uLen - 1];
+                        status = wmiPath.GetServer_(ref uLen, pathChars);
+                        pathStr = new string(pathChars);
                     }
 
                     if (status < 0)
@@ -710,11 +710,11 @@ namespace System.Management
                             
                         if (status >= 0)
                         {
-                            StringBuilder spaceBuilder = new StringBuilder((int)uLen - 1);
-                            status = wmiPathTmp.GetNamespaceAt_(i, ref uLen, spaceBuilder);
+                            char[] space = new char[(int)uLen - 1];
+                            status = wmiPathTmp.GetNamespaceAt_(i, ref uLen, space);
                             if (status >= 0)
                             {
-                                status = wmiPath.SetNamespaceAt_(i, spaceBuilder.ToString());
+                                status = wmiPath.SetNamespaceAt_(i, space);
                                     
                                 if (status < 0)
                                     break;
@@ -742,9 +742,9 @@ namespace System.Management
 
                 if (status >= 0 && uLen > 0)
                 {
-                    StringBuilder newServerBuilder = new StringBuilder((int)uLen - 1);
-                    status = wmiPathTmp.GetServer_(ref uLen, newServerBuilder);
-                    string serverNew = newServerBuilder.ToString();
+                    char[] newServerChars = new char[(int)uLen - 1];
+                    status = wmiPathTmp.GetServer_(ref uLen, newServerChars);
+                    string serverNew = new string(newServerChars);
 
                     if (status >= 0)
                     {
@@ -755,9 +755,9 @@ namespace System.Management
 
                         if (status >= 0)
                         {
-                            StringBuilder orgServerBuilder = new StringBuilder((int)uLen - 1);
-                            status = wmiPath.GetServer_(ref uLen, orgServerBuilder);
-                            string serverOrg = orgServerBuilder.ToString();
+                            char[] orgServerChars = new char[(int)uLen - 1];
+                            status = wmiPath.GetServer_(ref uLen, orgServerChars);
+                            string serverOrg = new string(orgServerChars);
 
                             if (status >= 0 && !string.Equals(serverOrg, serverNew, StringComparison.OrdinalIgnoreCase))
                                 status = wmiPath.SetServer_(serverNew);
@@ -814,9 +814,9 @@ namespace System.Management
 
                     if (status >= 0 && bufLen > 0)
                     {
-                        StringBuilder pathBuilder = new StringBuilder((int)bufLen - 1);
-                        status = wbemPath.GetText_(flags, ref bufLen, pathBuilder);
-                        pathStr = pathBuilder.ToString();
+                        char[] pathChars = new char[(int)bufLen - 1];
+                        status = wbemPath.GetText_(flags, ref bufLen, pathChars);
+                        pathStr = new string(pathChars);
                     }
                 }
 
@@ -912,9 +912,9 @@ namespace System.Management
 
                     if (status >= 0 && 0 < bufLen)
                     {
-                        StringBuilder pathBuilder = new StringBuilder((int)bufLen - 1);
-                        status = wmiPath.GetClassName_(ref bufLen, pathBuilder);
-                        pathStr = pathBuilder.ToString();
+                        char[] pathChars = new char[(int)bufLen - 1];
+                        status = wmiPath.GetClassName_(ref bufLen, pathChars);
+                        pathStr = new string(pathChars);
 
                         if (status < 0)
                             pathStr = string.Empty;
