@@ -279,8 +279,8 @@ namespace System.Collections
             {
                 case 3: m_array[2] &= value.m_array[2]; goto case 2;
                 case 2: m_array[1] &= value.m_array[1]; goto case 1;
-                case 1: m_array[0] &= value.m_array[0]; goto _done;
-                case 0: goto _done;
+                case 1: m_array[0] &= value.m_array[0]; goto Done;
+                case 0: goto Done;
             }
 
             int i = 0;
@@ -301,7 +301,7 @@ namespace System.Collections
             for (; i < count; i++)
                 m_array[i] &= value.m_array[i];
 
-_done:
+        Done:
             _version++;
             return this;
         }
@@ -325,8 +325,8 @@ _done:
             {
                 case 3: m_array[2] |= value.m_array[2]; goto case 2;
                 case 2: m_array[1] |= value.m_array[1]; goto case 1;
-                case 1: m_array[0] |= value.m_array[0]; goto _done;
-                case 0: goto _done;
+                case 1: m_array[0] |= value.m_array[0]; goto Done;
+                case 0: goto Done;
             }
 
             int i = 0;
@@ -347,7 +347,7 @@ _done:
             for (; i < count; i++)
                 m_array[i] |= value.m_array[i];
 
-_done:
+        Done:
             _version++;
             return this;
         }
@@ -371,8 +371,8 @@ _done:
             {
                 case 3: m_array[2] ^= value.m_array[2]; goto case 2;
                 case 2: m_array[1] ^= value.m_array[1]; goto case 1;
-                case 1: m_array[0] ^= value.m_array[0]; goto _done;
-                case 0: goto _done;
+                case 1: m_array[0] ^= value.m_array[0]; goto Done;
+                case 0: goto Done;
             }
 
             int i = 0;
@@ -393,7 +393,7 @@ _done:
             for (; i < count; i++)
                 m_array[i] ^= value.m_array[i];
 
-_done:
+        Done:
             _version++;
             return this;
         }
