@@ -26,7 +26,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                                                                      ".database.usgovcloudapi.net",
                                                                      ".database.chinacloudapi.cn"};
 
-        private static bool? serviceBrokerEnabled;
         private static Dictionary<string, bool> databasesAvailable;
 
         static DataTestUtility()
