@@ -10,6 +10,7 @@ namespace System.Linq
 {
     public static partial class Enumerable
     {
+#if PRE_CHAINLINQ
         static partial void CreateSelectIPartitionIterator<TResult, TSource>(
             Func<TSource, TResult> selector, IPartition<TSource> partition, ref IEnumerable<TResult> result)
         {
@@ -688,5 +689,6 @@ namespace System.Linq
                 return count;
             }
         }
+#endif
     }
 }

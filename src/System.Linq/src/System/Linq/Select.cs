@@ -58,12 +58,14 @@ namespace System.Linq
 
             return new SelectEnumerableIterator<TSource, TResult>(source, selector);
 #else
-            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectLink<TSource, TResult>(selector));
+            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Select<TSource, TResult>(selector));
 #endif
         }
 
+#if PRE_CHAINLINQ
         static partial void CreateSelectIPartitionIterator<TResult, TSource>(
             Func<TSource, TResult> selector, IPartition<TSource> partition, ref IEnumerable<TResult> result);
+#endif
 
         public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, int, TResult> selector)
         {
@@ -77,6 +79,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if PRE_CHAINLINQ
             return SelectIterator(source, selector);
         }
 
@@ -93,7 +96,12 @@ namespace System.Linq
                 yield return selector(element, index);
             }
         }
+#else
+            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectIndexed<TSource, TResult>(selector));
+        }
+#endif
 
+#if PRE_CHAINLINQ
         /// <summary>
         /// An iterator that maps each item of an <see cref="IEnumerable{TSource}"/>.
         /// </summary>
@@ -295,5 +303,6 @@ namespace System.Linq
             public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
                 new SelectIListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
         }
+#endif
     }
 }

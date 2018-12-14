@@ -10,9 +10,10 @@ namespace System.Linq
     {
         private sealed partial class RepeatIterator<TResult> : IPartition<TResult>
         {
+#if PRE_CHAINLINQ
             public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
                 new SelectIPartitionIterator<TResult, TResult2>(this, selector);
-
+#endif
             public TResult[] ToArray()
             {
                 TResult[] array = new TResult[_count];

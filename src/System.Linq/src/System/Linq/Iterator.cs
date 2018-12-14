@@ -97,7 +97,10 @@ namespace System.Linq
             /// <param name="selector">The selector used to map each item.</param>
             public virtual IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
             {
+#if PRE_CHAINLINQ
                 return new SelectEnumerableIterator<TSource, TResult>(this, selector);
+#endif
+                return ChainLinq.Utils.PushTransform(this, new ChainLinq.Links.Select<TSource, TResult>(selector));
             }
 
             /// <summary>

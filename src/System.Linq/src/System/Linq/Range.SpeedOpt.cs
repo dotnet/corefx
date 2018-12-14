@@ -10,11 +10,12 @@ namespace System.Linq
     {
         private sealed partial class RangeIterator : IPartition<int>
         {
+#if PRE_CHAINLINQ
             public override IEnumerable<TResult> Select<TResult>(Func<int, TResult> selector)
             {
                 return new SelectIPartitionIterator<int, TResult>(this, selector);
             }
-
+#endif
             public int[] ToArray()
             {
                 int[] array = new int[_end - _start];
