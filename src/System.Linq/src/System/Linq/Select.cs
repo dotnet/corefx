@@ -23,6 +23,8 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectLink<TSource, TResult>(selector));
+#if PRE_CHAINLINQ
             if (source is Iterator<TSource> iterator)
             {
                 return iterator.Select(selector);
@@ -56,6 +58,7 @@ namespace System.Linq
             }
 
             return new SelectEnumerableIterator<TSource, TResult>(source, selector);
+#endif
         }
 
         static partial void CreateSelectIPartitionIterator<TResult, TSource>(

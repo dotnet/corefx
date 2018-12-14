@@ -723,7 +723,9 @@ namespace System.Linq.Tests
             var enumerator1 = query.GetEnumerator();
             var enumerator2 = query.GetEnumerator();
 
+#if PRE_CHAINLINQ
             Assert.Same(query, enumerator1);
+#endif
             Assert.NotSame(enumerator1, enumerator2);
 
             enumerator1.Dispose();
