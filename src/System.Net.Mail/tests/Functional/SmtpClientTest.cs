@@ -365,6 +365,7 @@ namespace System.Net.Mail.Tests
         }
 
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NETFX doesn't have the fix for encoding")]
         [Theory]
         [InlineData(false, false, false)]
         [InlineData(false, false, true)] // Received subjectText.
