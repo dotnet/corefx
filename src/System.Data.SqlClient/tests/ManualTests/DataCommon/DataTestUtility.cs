@@ -80,25 +80,21 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             bool present = false;
             if (AreConnStringsSetup() && !string.IsNullOrEmpty(name) && !databasesAvailable.TryGetValue(name, out present))
             {
-                try
+                var builder = new SqlConnectionStringBuilder(TcpConnStr);
+                builder.ConnectTimeout = 2;
+                using (var connection = new SqlConnection(builder.ToString()))
+                using (var command = new SqlCommand("SELECT COUNT(*) FROM sys.databases WHERE name=@name", connection))
                 {
-                    var builder = new SqlConnectionStringBuilder(TcpConnStr);
-                    builder.ConnectTimeout = 2;
-                    using (var connection = new SqlConnection(builder.ToString()))
-                    using (var command = new SqlCommand("SELECT COUNT(*) FROM sys.databases WHERE name=@name", connection))
-                    {
-                        connection.Open();
-                        command.Parameters.AddWithValue("name", name);
-                        present = Convert.ToInt32(command.ExecuteScalar()) == 1;
-                    }
-                }
-                catch (Exception)
-                {
+                    connection.Open();
+                    command.Parameters.AddWithValue("name", name);
+                    present = Convert.ToInt32(command.ExecuteScalar()) == 1;
                 }
                 databasesAvailable[name] = present;
             }
             return present;
         }
+
+        public static bool IsUdtTestDatabasePresent() => IsDatabasePresent(UdtTestDbName);
 
         public static bool IsUsingManagedSNI() => (bool)(s_useManagedSNI?.GetValue(null) ?? false);
 

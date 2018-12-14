@@ -10,11 +10,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     {
         private string _connStr;
 
-        public static bool IsUDTTestDBPresent() => DataTestUtility.IsDatabasePresent(DataTestUtility.UdtTestDbName);
-
-        private static bool AreConnectionStringsSetup() => DataTestUtility.AreConnStringsSetup();
-
-        [ConditionalFact(nameof(IsUDTTestDBPresent), nameof(AreConnectionStringsSetup))]
+        [ConditionalFact(typeof(DataTestUtility), nameof(DataTestUtility.IsUdtTestDatabasePresent), nameof(DataTestUtility.AreConnStringsSetup))]
         public void RunCopyTest()
         {
             _connStr = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { InitialCatalog = DataTestUtility.UdtTestDbName }).ConnectionString;
