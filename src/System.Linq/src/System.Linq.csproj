@@ -21,6 +21,7 @@
     <Compile Include="System\Linq\ChainLinq\Enumerators\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Compose.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Distinct.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Identity.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Select.cs" />
     <Compile Include="System\Linq\ChainLinq\Utils.cs" />

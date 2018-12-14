@@ -18,6 +18,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if PRE_CHAINLINQ
             return new DistinctIterator<TSource>(source, comparer);
         }
 
@@ -88,6 +89,9 @@ namespace System.Linq
 
                 base.Dispose();
             }
+#else
+            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Distinct<TSource>(comparer));
+#endif
         }
     }
 }
