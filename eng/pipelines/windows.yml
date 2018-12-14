@@ -99,29 +99,19 @@ jobs:
       buildExtraArguments: /p:RuntimeOS=win10
 
       variables:
-        - name: _skipTests
-          value: true
-
-        - name: _outerloop
-          value: ${{ parameters.isOfficialBuild }}
+        - _skipTests: true
+        - _outerloop: ${{ parameters.isOfficialBuild }}
 
         - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-          - name: netcoreappWindowsQueues
-            value: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.ES.Open
-          - name: nanoQueues
-            value: Windows.10.Nano.Amd64.Open
-          - name: uapNetfxQueues
-            value: Windows.10.Amd64.ClientRS4.Open
+          - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.ES.Open
+          - nanoQueues: Windows.10.Nano.Amd64.Open
+          - uapNetfxQueues: Windows.10.Amd64.ClientRS4.Open
         
         - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-          - name: netcoreappWindowsQueues
-            value: Windows.7.Amd64+Windows.81.Amd64+Windows.10.Amd64.Core+Windows.10.Amd64.ClientRS4
-          - name: nanoQueues
-            value: Windows.10.Nano.Amd64
-          - name: uapNetfxQueues
-            value: Windows.10.Amd64.ClientRS4
-          - name: windowsArmQueue
-            value: Windows.10.Arm64
+          - netcoreappWindowsQueues: Windows.7.Amd64+Windows.81.Amd64+Windows.10.Amd64.Core+Windows.10.Amd64.ClientRS4
+          - nanoQueues: Windows.10.Nano.Amd64
+          - uapNetfxQueues: Windows.10.Amd64.ClientRS4
+          - windowsArmQueue: Windows.10.Arm64
 
     # Packaging all configurations
     - job: AllConfigurations
@@ -232,8 +222,5 @@ jobs:
       buildExtraArguments: /p:RuntimeOS=win10
 
       variables:
-        - name: _skipTests
-          value: true
-
-        - name: _outerloop
-          value: ${{ parameters.isOfficialBuild }}
+        - _skipTests: true
+        - _outerloop: ${{ parameters.isOfficialBuild }}

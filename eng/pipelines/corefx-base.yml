@@ -63,71 +63,68 @@ jobs:
           - ${{ if ne(variable.group, '') }}:
             - group: ${{ variable.group }}
 
-        # Define OS specific commands
-        - ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
-          - name: _buildScript
-            value: build.cmd
-          - name: _commonArguments
-            value: -ci -includetests
-          - name: _msbuildCommand
-            value: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
-          - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            - name: _optionalToolsArguments
-              value: /p:OptionalToolSourceUser=dn-bot
-                     /p:OptionalToolSource=$(OptionalToolSourceUri)
-                     /p:OptionalToolSourcePassword=$(dn-bot-devdiv-nuget-feed-read)
-            - name: _windowsOfficialBuildArguments
-              value: -sign
-                     /p:DotNetSignType=$(_SignType)
-                     /p:EnableProfileGuidedOptimization=true
-                     $(_optionalToolsArguments)
-
-          - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-            - name: _windowsOfficialBuildArguments
-              value: ''
-
-          # Optional tooling variables
-          - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            - group: DotNet-Internal-Tools-Feed
-
-        - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
-          - name: _buildScript
-            value: ${{ job.buildScriptPrefix }}./build.sh
-          - name: _commonArguments
-            ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-              value: --ci -includetests -stripSymbols
-            ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-              value: --ci -includetests
-          - name: _msbuildCommand
-            value: ${{ job.buildScriptPrefix }}./eng/common/msbuild.sh --warnaserror false --ci
-          - name: _windowsOfficialBuildArguments
-            value: ''
-
-        - ${{ if and(eq(job.enableMicrobuild, 'true'), eq(parameters.isOfficialBuild, 'true')) }}:
-          - name: _TeamName
-            value: DotNetCore
-          - name: _SignType
-            value: real
+          # handle key-value variable syntax.
+          # example:
+          # - [key]: [value]
+          - ${{ if and(eq(variable.name, ''), eq(variable.group, '')) }}:
+            - ${{ each pair in variable }}:
+              - name: ${{ pair.key }}
+                value: ${{ pair.value }}
 
         - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-          - name: _msbuildCommonParameters
-            value: /p:OfficialBuildId=$(Build.BuildNumber)
+          - _msbuildCommonParameters: /p:OfficialBuildId=$(Build.BuildNumber)
         - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-          - name: _msbuildCommonParameters
-            value: ''
+          - _msbuildCommonParameters: ''
 
         - ${{ if eq(job.submitToHelix, 'true') }}:
           - group: DotNet-HelixApi-Access
 
           - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-            - name: HelixApiAccessToken
-              value: $(BotAccount-dotnet-github-anon-kaonashi-bot-helix-token)
+            - HelixApiAccessToken: $(BotAccount-dotnet-github-anon-kaonashi-bot-helix-token)
+
+        # Windows variables
+        - ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
+          - _buildScript: build.cmd
+          - _commonArguments: -ci -includetests
+          - _msbuildCommand: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
+
+          - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+            - _optionalToolsArguments: /p:OptionalToolSourceUser=dn-bot
+                                       /p:OptionalToolSource=$(OptionalToolSourceUri)
+                                       /p:OptionalToolSourcePassword=$(dn-bot-devdiv-nuget-feed-read)
+            - _windowsOfficialBuildArguments: -sign
+                                              /p:DotNetSignType=$(_SignType)
+                                              /p:EnableProfileGuidedOptimization=true
+                                              $(_optionalToolsArguments)
+
+          - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+            - _windowsOfficialBuildArguments: ''
+
+          # Optional tooling variables
+          - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+            - group: DotNet-Internal-Tools-Feed
+
+        # Non-Windows variables
+        - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
+          - _buildScript: ${{ job.buildScriptPrefix }}./build.sh
+
+          - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+            - _commonArguments: --ci -includetests -stripSymbols
+          - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+            - _commonArguments: --ci -includetests
+
+          - _msbuildCommand: ${{ job.buildScriptPrefix }}./eng/common/msbuild.sh --warnaserror false --ci
+          - _windowsOfficialBuildArguments: ''
+
+        - ${{ if and(eq(job.enableMicrobuild, 'true'), eq(parameters.isOfficialBuild, 'true')) }}:
+          - _TeamName: DotNetCore
+          - _SignType: real
 
         # pass along job properties
         ${{ each property in job }}:
           ${{ if and(ne(property.key, 'job'), ne(property.key, 'variables'), ne(property.key, 'enableMicrobuild')) }}:
             ${{ property.key }}: ${{ property.value }}
-        
+
         name: ${{ job.job }}
         workspace:
           clean: all

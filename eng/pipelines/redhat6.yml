@@ -26,11 +26,6 @@ jobs:
       submitToHelix: true
 
       variables:
-        - name: _skipTests
-          value: true
-
-        - name: _outerloop
-          value: true # Only runs in official builds
-        
-        - name: redhatHelixQueue
-          value: RedHat.6.Amd64
+        - _skipTests: true
+        - _outerloop: true # Only runs in official builds
+        - redhatHelixQueue: RedHat.6.Amd64

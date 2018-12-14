@@ -24,6 +24,7 @@ jobs:
             _helixQueues: $(linuxDefaultQueues)
             _dockerContainer: rhel7_container
             _buildScriptPrefix: ''
+            _buildExtraArguments: ''
 
           arm64_Release:
             _configuration: Release
@@ -32,32 +33,38 @@ jobs:
             _helixQueues: $(linuxArm64Queues)
             _dockerContainer: ubuntu_1604_arm64_cross_container
             _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
+            _buildExtraArguments: ''
+          
+          ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+            musl_x64_Release:
+              _configuration: Release
+              _architecture: x64
+              _framework: netcoreapp
+              _helixQueues: $(alpineQueues)
+              _dockerContainer: alpine_36_container
+              _buildScriptPrefix: ''
+              _buildExtraArguments: /p:RuntimeOS=linux-musl /p:PortableBuild=false
 
       pool:
         name: Hosted Ubuntu 1604
 
       container: $[ variables['_dockerContainer'] ]
       buildScriptPrefix: $(_buildScriptPrefix)
+      buildExtraArguments: $(_buildExtraArguments)
       submitToHelix: true
 
       variables:
-        - name: _skipTests
-          value: true
-
-        - name: _outerloop
-          value: ${{ parameters.isOfficialBuild }}
+        - _skipTests: true
+        - _outerloop: ${{ parameters.isOfficialBuild }}
 
         - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-          - name: linuxDefaultQueues
-            value: Centos.7.Amd64.Open+RedHat.7.Amd64.Open+Debian.8.Amd64.Open+Ubuntu.1604.Amd64.Open+Ubuntu.1804.Amd64.Open+OpenSuse.42.Amd64.Open+Fedora.27.Amd64.Open
-          - name: linuxArm64Queues
-            value: Ubuntu.1604.Arm64.Open
+          - linuxDefaultQueues: Centos.7.Amd64.Open+RedHat.7.Amd64.Open+Debian.8.Amd64.Open+Ubuntu.1604.Amd64.Open+Ubuntu.1804.Amd64.Open+OpenSuse.42.Amd64.Open+Fedora.27.Amd64.Open
+          - linuxArm64Queues: Ubuntu.1604.Arm64.Open
       
         - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-          - name: linuxDefaultQueues
-            value: Centos.7.Amd64+RedHat.7.Amd64+Debian.8.Amd64+Debian.9.Amd64+Ubuntu.1604.Amd64+Ubuntu.1804.Amd64+Ubuntu.1810.Amd64+OpenSuse.42.Amd64+SLES.12.Amd64+SLES.15.Amd64+Fedora.27.Amd64+Fedora.28.Amd64
-          - name: linuxArm64Queues
-            value: Ubuntu.1604.Arm64
+          - linuxDefaultQueues: Centos.7.Amd64+RedHat.7.Amd64+Debian.8.Amd64+Debian.9.Amd64+Ubuntu.1604.Amd64+Ubuntu.1804.Amd64+Ubuntu.1810.Amd64+OpenSuse.42.Amd64+SLES.12.Amd64+SLES.15.Amd64+Fedora.27.Amd64+Fedora.28.Amd64
+          - linuxArm64Queues: Ubuntu.1604.Arm64
+          - alpineQueues: Alpine.36.Amd64+Alpine.38.Amd64
 
     # Legs without helix testing
     - job: LinuxNoTest
@@ -67,15 +74,6 @@ jobs:
           ${{ if eq(parameters.isOfficialBuild, 'false') }}:
             musl_x64_Debug:
               _configuration: Debug
-              _architecture: x64
-              _framework: netcoreapp
-              _dockerContainer: alpine_36_container
-              _buildScriptPrefix: ''
-              _buildExtraArguments: /p:RuntimeOS=linux-musl /p:PortableBuild=false
-
-          ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            musl_x64_Release:
-              _configuration: Release
               _architecture: x64
               _framework: netcoreapp
               _dockerContainer: alpine_36_container
@@ -99,8 +97,5 @@ jobs:
       submitToHelix: false
 
       variables:
-        - name: _skipTests
-          value: true
-
-        - name: _outerloop
-          value: ${{ parameters.isOfficialBuild }}
+        - _skipTests: true
+        - _outerloop: ${{ parameters.isOfficialBuild }}
