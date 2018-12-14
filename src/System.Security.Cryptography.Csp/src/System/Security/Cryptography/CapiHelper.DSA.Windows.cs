@@ -4,6 +4,7 @@
 
 using System;
 using System.Security.Cryptography;
+using Microsoft.Win32.SafeHandles;
 
 namespace Internal.NativeCrypto
 {

@@ -4,6 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
 {
@@ -21,6 +22,22 @@ internal static partial class Interop
             PP_SIGNATURE_PIN = 33,
             PP_UNIQUE_CONTAINER = 36
         }
+
+        [DllImport(Libraries.Advapi32, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CryptSetProvParam(
+            SafeHandle safeProvHandle,
+            CryptProvParam dwParam,
+            IntPtr pbData,
+            int dwFlags);
+
+        [DllImport(Libraries.Advapi32, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool CryptSetProvParam(
+            SafeProvHandle hProv,
+            CryptProvParam dwParam,
+            ref IntPtr pbData,
+            int dwFlags);
 
         [DllImport(Libraries.Advapi32, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]

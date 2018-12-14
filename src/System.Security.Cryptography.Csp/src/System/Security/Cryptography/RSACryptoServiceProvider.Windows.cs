@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using Internal.Cryptography;
 using Internal.NativeCrypto;
+using Microsoft.Win32.SafeHandles;
 using static Internal.NativeCrypto.CapiHelper;
 
 namespace System.Security.Cryptography
