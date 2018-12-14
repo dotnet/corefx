@@ -3045,7 +3045,7 @@ namespace System.Data.SqlClient
                         offset += remainder;
                         _outBytesUsed += remainder;
                         len -= remainder;
-                        b = b.Slice(remainder);
+                        b = b.Slice(remainder, len);
 
                         Task packetTask = WritePacket(TdsEnums.SOFTFLUSH, canAccumulate);
 
@@ -3063,11 +3063,10 @@ namespace System.Data.SqlClient
                             {
                                 byte[] tempArray = new byte[len];
                                 Span<byte> copyTempTo = tempArray.AsSpan();
-                                ReadOnlySpan<byte> copyTempFrom = b.Slice(0, len);
 
-                                Debug.Assert(copyTempTo.Length == copyTempFrom.Length, $"copyTempTo.Length:{copyTempTo.Length} and copyTempFrom.Length:{copyTempFrom.Length:D} should be the same");
+                                Debug.Assert(copyTempTo.Length == b.Length, $"copyTempTo.Length:{copyTempTo.Length} and copyTempFrom.Length:{b.Length:D} should be the same");
 
-                                copyTempFrom.CopyTo(copyTempTo);
+                                b.CopyTo(copyTempTo);
                                 array = tempArray;
                                 offset = 0;
                             }
