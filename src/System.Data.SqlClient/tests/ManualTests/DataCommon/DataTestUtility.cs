@@ -40,34 +40,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return !string.IsNullOrEmpty(NpConnStr) && !string.IsNullOrEmpty(TcpConnStr);
         }
 
-        public static bool IsServiceBrokerEnabled()
-        {
-            if (!serviceBrokerEnabled.HasValue)
-            {
-                serviceBrokerEnabled = false;
-                if (AreConnStringsSetup())
-                {
-                    var builder = new SqlConnectionStringBuilder(TcpConnStr);
-                    string database = builder.InitialCatalog;
-                    builder.ConnectTimeout = 2;
-                    using (var connection = new SqlConnection(builder.ToString()))
-                    using (var command = new SqlCommand("SELECT is_broker_enabled FROM sys.databases WHERE name=@name", connection))
-                    {
-                        connection.Open();
-                        command.Parameters.AddWithValue("name", database);
-                        using (var reader = command.ExecuteReader())
-                        {
-                            if (reader.HasRows && reader.Read())
-                            {
-                                serviceBrokerEnabled = reader.GetBoolean(0);
-                            }
-                        }
-                    }
-                }
-            }
-            return serviceBrokerEnabled.Value;
-        }
-
         public static bool IsDatabasePresent(string name)
         {
             databasesAvailable = databasesAvailable ?? new Dictionary<string, bool>();
