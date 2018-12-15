@@ -128,7 +128,7 @@ namespace System.Diagnostics.Tests
 
                 int counter = 0;
 
-                // Wait for child process
+                // Signal child process started
                 Assert.True(childLockList["childStarted"].TryAcquire(WaitInMS), "Child process should acquire 'childStarted' lock");
 
                 // Wait fist BeginOutputReadLine() from parent
@@ -142,7 +142,7 @@ namespace System.Diagnostics.Tests
                 // Signal 1,2,3 produced
                 Assert.True(childLockList["childProduced123"].TryAcquire(WaitInMS), "Child process should acquire 'childProduced123' lock");
 
-                // signal stop listening
+                // Wait call to CancelOutputRead() from parent
                 Assert.True(childLockList["parentCancelOutputRead"].WaitSignal(WaitInMS), "Signal to shutdown not come after 'WaitInMS'");
 
                 // Produce 4,5,6
@@ -187,10 +187,10 @@ namespace System.Diagnostics.Tests
             // Wait for child process
             Assert.True(parentLockList["childStarted"].WaitSignal(WaitInMS), "Child process not started");
 
-            // start listen
+            // Start listen
             p.BeginOutputReadLine();
 
-            // signal start listening
+            // Signal start listening
             Assert.True(parentLockList["parentFirstBeginOutputReadLine"].TryAcquire(WaitInMS), "Parent process should acquire 'parentFirstBeginOutputReadLine'");
 
             // Wait for production of 1,2,3
@@ -210,19 +210,19 @@ namespace System.Diagnostics.Tests
                 Assert.Equal(i + 1, dataReceived[i]);
             }
 
-            // start listen
+            // Stop listen
             p.CancelOutputRead();
 
-            // signal stop listening
+            // Signal stop listening
             Assert.True(parentLockList["parentCancelOutputRead"].TryAcquire(WaitInMS), "Parent process should acquire 'CancelOutputRead'");
 
             // Wait for production of 4,5,6
             Assert.True(parentLockList["childProduced456"].WaitSignal(WaitInMS), "Child process not produced expected data");
 
-            // re-start listen
+            // Re-start listen
             p.BeginOutputReadLine();
 
-            // signal start listening
+            // Signal re-start listening
             Assert.True(parentLockList["parentSecondBeginOutputReadLine"].TryAcquire(WaitInMS), "Parent process should acquire 'parentSecondBeginOutputReadLine'");
 
             // Wait for production of 7,8,9
