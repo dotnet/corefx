@@ -243,12 +243,19 @@ namespace System.Diagnostics.Tests
             // shutdown child process
             Assert.True(parentLockList["shutdownChildProcess"].TryAcquire(WaitInMS), "Parent process should acquire 'shutdownChildProcess'");
             p.WaitForExit();
+
+            // Cleanup
+            foreach (KeyValuePair<string, FileSystemLock> fileLock in parentLockList)
+            {
+                fileLock.Value.Dispose();
+            }
+            Directory.Delete(Path.Combine(Path.GetTempPath(), nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)), true);
         }
 
         /// <summary>
         /// We save lock files in temp directory
         /// </summary>
-        private class FileSystemLock
+        private class FileSystemLock : IDisposable
         {
             private readonly string _lockFileName = "";
             private FileStream _fs = null;
@@ -301,6 +308,16 @@ namespace System.Diagnostics.Tests
                             return false;
                         }
                     }
+                }
+            }
+
+            public void Dispose()
+            {
+                _fs?.Dispose();
+
+                if (File.Exists(_lockFileName))
+                {
+                    File.Delete(_lockFileName);
                 }
             }
         }
