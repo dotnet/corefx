@@ -98,34 +98,32 @@ namespace System.Diagnostics.Tests
 
             Dictionary<string, FileSystemLock> parentLockList = new Dictionary<string, FileSystemLock>
             {
-                { "childStarted", new FileSystemLock("childStarted", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },                
-                { "parentWaitAssertion123", new FileSystemLock("parentWaitAssertion123", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
+                { "childStarted", new FileSystemLock("childStarted", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
                 { "parentFirstBeginOutputReadLine", new FileSystemLock("parentFirstBeginOutputReadLine", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
                 { "parentSecondBeginOutputReadLine", new FileSystemLock("parentSecondBeginOutputReadLine", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                { "shutdownChildProcess", new FileSystemLock("shutdownChildProcess", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
                 { "parentCancelOutputRead", new FileSystemLock("parentCancelOutputRead", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
                 { "childProduced123", new FileSystemLock("childProduced123", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
                 { "childProduced456", new FileSystemLock("childProduced456", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
-                { "childProduced789", new FileSystemLock("childProduced789", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))}
+                { "childProduced789", new FileSystemLock("childProduced789", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
+                { "shutdownChildProcess", new FileSystemLock("shutdownChildProcess", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))}
             };
 
             List<int> dataReceived = new List<int>();
             var dataArrivedEvent = new AutoResetEvent(false);
-            var dataConfirmed = new AutoResetEvent(false);
+            var dataConfirmedEvent = new AutoResetEvent(false);
 
             Process p = CreateProcessPortable(() =>
             {
                 Dictionary<string, FileSystemLock> childLockList = new Dictionary<string, FileSystemLock>
                 {
                     { "childStarted", new FileSystemLock("childStarted", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                    { "parentWaitAssertion123", new FileSystemLock("parentWaitAssertion123", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
                     { "parentFirstBeginOutputReadLine", new FileSystemLock("parentFirstBeginOutputReadLine", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
                     { "parentSecondBeginOutputReadLine", new FileSystemLock("parentSecondBeginOutputReadLine", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                    { "shutdownChildProcess", new FileSystemLock("shutdownChildProcess", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
                     { "parentCancelOutputRead", new FileSystemLock("parentCancelOutputRead", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
                     { "childProduced123", new FileSystemLock("childProduced123", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
                     { "childProduced456", new FileSystemLock("childProduced456", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
-                    { "childProduced789", new FileSystemLock("childProduced789", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))}
+                    { "childProduced789", new FileSystemLock("childProduced789", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
+                    { "shutdownChildProcess", new FileSystemLock("shutdownChildProcess", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))}
                 };
 
                 int counter = 0;
@@ -179,7 +177,7 @@ namespace System.Diagnostics.Tests
                 {
                     dataReceived.Add(int.Parse(e.Data));
                     dataArrivedEvent.Set();
-                    dataConfirmed.WaitOne();
+                    dataConfirmedEvent.WaitOne();
                 }
             };
 
@@ -202,7 +200,7 @@ namespace System.Diagnostics.Tests
             for (int i = 0; i < 3; i++)
             {
                 Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "1,2,3 signal expected");
-                dataConfirmed.Set();
+                dataConfirmedEvent.Set();
             }
 
             // Verify we received 1,2,3
@@ -234,7 +232,7 @@ namespace System.Diagnostics.Tests
             for (int i = 0; i < 3; i++)
             {
                 Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "7,8,9 signal expected");
-                dataConfirmed.Set();
+                dataConfirmedEvent.Set();
             }
 
             // Verify we received 1,2,3,7,8,9
