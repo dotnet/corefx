@@ -242,7 +242,7 @@ namespace System.Diagnostics.Tests
 
             // shutdown child process
             Assert.True(parentLockList["shutdownChildProcess"].TryAcquire(WaitInMS), "Parent process should acquire 'shutdownChildProcess'");
-            p.WaitForExit();
+            p.WaitForExit(WaitInMS);
 
             // Cleanup
             foreach (KeyValuePair<string, FileSystemLock> fileLock in parentLockList)
