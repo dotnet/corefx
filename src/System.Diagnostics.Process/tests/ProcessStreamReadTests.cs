@@ -253,7 +253,6 @@ namespace System.Diagnostics.Tests
         private class FileSystemLock
         {
             private readonly string _lockFileName = "";
-            private readonly string _lockName = "";
             private FileStream _fs = null;
 
             public FileSystemLock(string lockName, string directoryName)
@@ -266,7 +265,6 @@ namespace System.Diagnostics.Tests
                 }
 
                 _lockFileName = Path.Combine(rootDirectory, lockName);
-                _lockName = lockName;
             }
 
             public bool WaitSignal(int millisecondsTimeout)
