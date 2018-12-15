@@ -1389,6 +1389,7 @@ namespace System.Net.Security
                     catch (Exception exc)
                     {
                         taskCompletionSource.SetException(exc);
+                        break;
                     }
                     taskCompletionSource.SetResult(oldKeyResult);
                     break;
