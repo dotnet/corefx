@@ -358,7 +358,7 @@ namespace System.IO.Pipelines
 
             if (completionCallbacks != null)
             {
-                TrySchedule(_readerScheduler, s_invokeCompletionCallbacks, completionCallbacks);
+                ScheduleCallbacks(_readerScheduler, completionCallbacks);
             }
 
             TrySchedule(_readerScheduler, completionData);
@@ -513,7 +513,7 @@ namespace System.IO.Pipelines
 
             if (completionCallbacks != null)
             {
-                TrySchedule(_writerScheduler, s_invokeCompletionCallbacks, completionCallbacks);
+                ScheduleCallbacks(_writerScheduler, completionCallbacks);
             }
 
             TrySchedule(_writerScheduler, completionData);
@@ -521,7 +521,7 @@ namespace System.IO.Pipelines
 
         internal void OnWriterCompleted(Action<Exception, object> callback, object state)
         {
-            if (callback == null)
+            if (callback is null)
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.callback);
             }
@@ -534,7 +534,7 @@ namespace System.IO.Pipelines
 
             if (completionCallbacks != null)
             {
-                TrySchedule(_readerScheduler, s_invokeCompletionCallbacks, completionCallbacks);
+                ScheduleCallbacks(_readerScheduler, completionCallbacks);
             }
         }
 
@@ -560,7 +560,7 @@ namespace System.IO.Pipelines
 
         internal void OnReaderCompleted(Action<Exception, object> callback, object state)
         {
-            if (callback == null)
+            if (callback is null)
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.callback);
             }
@@ -573,7 +573,7 @@ namespace System.IO.Pipelines
 
             if (completionCallbacks != null)
             {
-                TrySchedule(_writerScheduler, s_invokeCompletionCallbacks, completionCallbacks);
+                ScheduleCallbacks(_writerScheduler, completionCallbacks);
             }
         }
 
@@ -631,13 +631,11 @@ namespace System.IO.Pipelines
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void TrySchedule(PipeScheduler scheduler, Action<object> action, object state)
+        private static void ScheduleCallbacks(PipeScheduler scheduler, PipeCompletionCallbacks completionCallbacks)
         {
-            if (action != null)
-            {
-                scheduler.UnsafeSchedule(action, state);
-            }
+            Debug.Assert(completionCallbacks != null);
+
+            scheduler.UnsafeSchedule(s_invokeCompletionCallbacks, completionCallbacks);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
