@@ -96,79 +96,13 @@ namespace System.Diagnostics.Tests
             // We use file system lock tecnique to sync process
             // We cannot use named wait event because are not supported on all platform
 
-            Dictionary<string, FileSystemLock> parentLockList = new Dictionary<string, FileSystemLock>
-            {
-                { "childStarted", new FileSystemLock("childStarted", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                { "parentFirstBeginOutputReadLine", new FileSystemLock("parentFirstBeginOutputReadLine", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                { "parentSecondBeginOutputReadLine", new FileSystemLock("parentSecondBeginOutputReadLine", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                { "parentCancelOutputRead", new FileSystemLock("parentCancelOutputRead", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
-                { "childProduced123", new FileSystemLock("childProduced123", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                { "childProduced456", new FileSystemLock("childProduced456", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
-                { "childProduced789", new FileSystemLock("childProduced789", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
-                { "shutdownChildProcess", new FileSystemLock("shutdownChildProcess", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))}
-            };
+            Dictionary<string, FileSystemLock> parentLockList = TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper();
 
             List<int> dataReceived = new List<int>();
             var dataArrivedEvent = new AutoResetEvent(false);
             var dataConfirmedEvent = new AutoResetEvent(false);
 
-            Process p = CreateProcessPortable(() =>
-            {
-                Dictionary<string, FileSystemLock> childLockList = new Dictionary<string, FileSystemLock>
-                {
-                    { "childStarted", new FileSystemLock("childStarted", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                    { "parentFirstBeginOutputReadLine", new FileSystemLock("parentFirstBeginOutputReadLine", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                    { "parentSecondBeginOutputReadLine", new FileSystemLock("parentSecondBeginOutputReadLine", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                    { "parentCancelOutputRead", new FileSystemLock("parentCancelOutputRead", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
-                    { "childProduced123", new FileSystemLock("childProduced123", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                    { "childProduced456", new FileSystemLock("childProduced456", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
-                    { "childProduced789", new FileSystemLock("childProduced789", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
-                    { "shutdownChildProcess", new FileSystemLock("shutdownChildProcess", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))}
-                };
-
-                int counter = 0;
-
-                // Signal child process started
-                Assert.True(childLockList["childStarted"].TryAcquire(WaitInMS), "Child process should acquire 'childStarted' lock");
-
-                // Wait fist BeginOutputReadLine() from parent
-                Assert.True(childLockList["parentFirstBeginOutputReadLine"].WaitSignal(WaitInMS), "Parent signal missing");
-
-                // Produce 1,2,3
-                Console.WriteLine(++counter);
-                Console.WriteLine(++counter);
-                Console.WriteLine(++counter);
-
-                // Signal 1,2,3 produced
-                Assert.True(childLockList["childProduced123"].TryAcquire(WaitInMS), "Child process should acquire 'childProduced123' lock");
-
-                // Wait call to CancelOutputRead() from parent
-                Assert.True(childLockList["parentCancelOutputRead"].WaitSignal(WaitInMS), "Signal to shutdown not come after 'WaitInMS'");
-
-                // Produce 4,5,6
-                Console.WriteLine(++counter);
-                Console.WriteLine(++counter);
-                Console.WriteLine(++counter);
-
-                // Signal 4,5,6 produced
-                Assert.True(childLockList["childProduced456"].TryAcquire(WaitInMS), "Child process should acquire 'childProduced456' lock");
-
-                // Wait second BeginOutputReadLine() from parent
-                Assert.True(childLockList["parentSecondBeginOutputReadLine"].WaitSignal(WaitInMS), "Parent signal missing");
-
-                // Produce 7,8,9
-                Console.WriteLine(++counter);
-                Console.WriteLine(++counter);
-                Console.WriteLine(++counter);
-
-                // Signal 7,8,9 produced
-                Assert.True(childLockList["childProduced789"].TryAcquire(WaitInMS), "Child process should acquire 'childProduced789' lock");
-
-                // Shutdown process
-                Assert.True(childLockList["shutdownChildProcess"].WaitSignal(WaitInMS), "Signal to shutdown not come after 'WaitInMS'");
-
-                return SuccessExitCode;
-            });
+            Process p = CreateProcessPortable(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable);
 
             p.StartInfo.RedirectStandardOutput = true;
             p.OutputDataReceived += (s, e) =>
@@ -250,6 +184,69 @@ namespace System.Diagnostics.Tests
                 fileLock.Value.Dispose();
             }
             Directory.Delete(Path.Combine(Path.GetTempPath(), nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)), true);
+        }
+
+        private int TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable()
+        {
+            Dictionary<string, FileSystemLock> childLockList = TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper();
+
+            int counter = 0;
+
+            // Signal child process started
+            Assert.True(childLockList["childStarted"].TryAcquire(WaitInMS), "Child process should acquire 'childStarted' lock");
+
+            // Wait fist BeginOutputReadLine() from parent
+            Assert.True(childLockList["parentFirstBeginOutputReadLine"].WaitSignal(WaitInMS), "Parent signal missing");
+
+            // Produce 1,2,3
+            Console.WriteLine(++counter);
+            Console.WriteLine(++counter);
+            Console.WriteLine(++counter);
+
+            // Signal 1,2,3 produced
+            Assert.True(childLockList["childProduced123"].TryAcquire(WaitInMS), "Child process should acquire 'childProduced123' lock");
+
+            // Wait call to CancelOutputRead() from parent
+            Assert.True(childLockList["parentCancelOutputRead"].WaitSignal(WaitInMS), "Signal to shutdown not come after 'WaitInMS'");
+
+            // Produce 4,5,6
+            Console.WriteLine(++counter);
+            Console.WriteLine(++counter);
+            Console.WriteLine(++counter);
+
+            // Signal 4,5,6 produced
+            Assert.True(childLockList["childProduced456"].TryAcquire(WaitInMS), "Child process should acquire 'childProduced456' lock");
+
+            // Wait second BeginOutputReadLine() from parent
+            Assert.True(childLockList["parentSecondBeginOutputReadLine"].WaitSignal(WaitInMS), "Parent signal missing");
+
+            // Produce 7,8,9
+            Console.WriteLine(++counter);
+            Console.WriteLine(++counter);
+            Console.WriteLine(++counter);
+
+            // Signal 7,8,9 produced
+            Assert.True(childLockList["childProduced789"].TryAcquire(WaitInMS), "Child process should acquire 'childProduced789' lock");
+
+            // Shutdown process
+            Assert.True(childLockList["shutdownChildProcess"].WaitSignal(WaitInMS), "Signal to shutdown not come after 'WaitInMS'");
+
+            return SuccessExitCode;
+        }
+
+        private Dictionary<string, FileSystemLock> TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper()
+        {
+            return new Dictionary<string, FileSystemLock>
+            {
+                { "childStarted", new FileSystemLock("childStarted", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
+                { "parentFirstBeginOutputReadLine", new FileSystemLock("parentFirstBeginOutputReadLine", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
+                { "parentSecondBeginOutputReadLine", new FileSystemLock("parentSecondBeginOutputReadLine", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
+                { "parentCancelOutputRead", new FileSystemLock("parentCancelOutputRead", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
+                { "childProduced123", new FileSystemLock("childProduced123", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
+                { "childProduced456", new FileSystemLock("childProduced456", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
+                { "childProduced789", new FileSystemLock("childProduced789", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
+                { "shutdownChildProcess", new FileSystemLock("shutdownChildProcess", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))}
+            };
         }
 
         /// <summary>
