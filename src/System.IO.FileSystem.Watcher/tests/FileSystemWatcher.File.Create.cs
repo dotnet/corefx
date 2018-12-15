@@ -27,7 +27,7 @@ namespace System.IO.Tests
             }
         }
 
-        [ActiveIssue(34017, TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "#34017")]
         [OuterLoop]
         [Fact]
         public void FileSystemWatcher_File_Create_MultipleWatchers_ExecutionContextFlowed()
