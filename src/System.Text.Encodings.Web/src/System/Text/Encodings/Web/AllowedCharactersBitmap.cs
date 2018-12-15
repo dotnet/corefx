@@ -15,17 +15,11 @@ namespace System.Text.Internal
 
         // should be called in place of the default ctor
         public static AllowedCharactersBitmap CreateNew()
-        {
-            return new AllowedCharactersBitmap(new uint[ALLOWED_CHARS_BITMAP_LENGTH]);
-        }
+            => new AllowedCharactersBitmap(new uint[ALLOWED_CHARS_BITMAP_LENGTH]);
 
         private AllowedCharactersBitmap(uint[] allowedCharacters)
         {
-            if(allowedCharacters == null)
-            {
-                throw new ArgumentNullException(nameof(allowedCharacters));
-            }
-            _allowedCharacters = allowedCharacters;
+            _allowedCharacters = allowedCharacters ?? throw new ArgumentNullException(nameof(allowedCharacters));
         }
 
         // Marks a character as allowed (can be returned unencoded)
@@ -52,23 +46,17 @@ namespace System.Text.Internal
         {
             uint[] definedCharactersBitmap = UnicodeHelpers.GetDefinedCharacterBitmap();
             Debug.Assert(definedCharactersBitmap.Length == _allowedCharacters.Length);
+
             for (int i = 0; i < _allowedCharacters.Length; i++)
-            {
                 _allowedCharacters[i] &= definedCharactersBitmap[i];
-            }
         }
 
         // Marks all characters as forbidden (must be returned encoded)
-        public void Clear()
-        {
-            Array.Clear(_allowedCharacters, 0, _allowedCharacters.Length);
-        }
+        public void Clear() => Array.Clear(_allowedCharacters, 0, _allowedCharacters.Length);
 
         // Creates a deep copy of this bitmap
         public AllowedCharactersBitmap Clone()
-        {
-            return new AllowedCharactersBitmap((uint[])_allowedCharacters.Clone());
-        }
+            => new AllowedCharactersBitmap((uint[])_allowedCharacters.Clone());
 
         // Determines whether the given character can be returned unencoded.
         public bool IsCharacterAllowed(char character)
@@ -89,11 +77,14 @@ namespace System.Text.Internal
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe int FindFirstCharacterToEncode(char* text, int textLength)
+        public int FindFirstCharacterToEncode(ReadOnlySpan<char> text)
         {
-            for (int i = 0; i < textLength; i++)
+            for (int i = 0; i < text.Length; i++)
             {
-                if (!IsCharacterAllowed(text[i])) { return i; }
+                if (!IsCharacterAllowed(text[i]))
+                {
+                    return i;
+                }
             }
             return -1;
         }

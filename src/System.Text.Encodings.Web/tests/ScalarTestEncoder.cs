@@ -53,5 +53,20 @@ namespace Microsoft.Framework.WebEncoders
             numberOfCharactersWritten = Int32Length;
             return true;
         }
+
+        public override unsafe bool TryEncodeUnicodeScalar(int unicodeScalar, Span<char> buffer, out int numberOfCharactersWritten)
+        {
+            fixed (char* chars = unicodeScalar.ToString("X8"))
+                for (int i = 0; i < Int32Length; i++)
+                    buffer[i] = chars[i];
+
+            numberOfCharactersWritten = Int32Length;
+            return true;
+        }
+
+        public override int FindFirstCharacterToEncode(ReadOnlySpan<char> text)
+        {
+            return 0;
+        }
     }
 }

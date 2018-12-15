@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Internal;
@@ -18,10 +17,7 @@ namespace System.Text.Encodings.Web
         /// <summary>
         /// Returns a default built-in instance of <see cref="HtmlEncoder"/>.
         /// </summary>
-        public static HtmlEncoder Default
-        {
-            get { return DefaultHtmlEncoder.Singleton; }
-        }
+        public static HtmlEncoder Default => DefaultHtmlEncoder.s_singleton;
 
         /// <summary>
         /// Creates a new instance of HtmlEncoder with provided settings.
@@ -29,9 +25,7 @@ namespace System.Text.Encodings.Web
         /// <param name="settings">Settings used to control how the created <see cref="HtmlEncoder"/> encodes, primarily which characters to encode.</param>
         /// <returns>A new instance of the <see cref="HtmlEncoder"/>.</returns>
         public static HtmlEncoder Create(TextEncoderSettings settings)
-        {
-            return new DefaultHtmlEncoder(settings);
-        }
+            => new DefaultHtmlEncoder(settings);
 
         /// <summary>
         /// Creates a new instance of HtmlEncoder specifying character to be encoded.
@@ -40,15 +34,13 @@ namespace System.Text.Encodings.Web
         /// <returns>A new instance of the <see cref="HtmlEncoder"/></returns>
         /// <remarks>Some characters in <paramref name="allowedRanges"/> might still get encoded, i.e. this parameter is just telling the encoder what ranges it is allowed to not encode, not what characters it must not encode.</remarks> 
         public static HtmlEncoder Create(params UnicodeRange[] allowedRanges)
-        {
-            return new DefaultHtmlEncoder(allowedRanges);
-        }
+            => new DefaultHtmlEncoder(allowedRanges);
     }
 
     internal sealed class DefaultHtmlEncoder : HtmlEncoder
     {
         private AllowedCharactersBitmap _allowedCharacters;
-        internal static readonly DefaultHtmlEncoder Singleton = new DefaultHtmlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
+        internal static readonly DefaultHtmlEncoder s_singleton = new DefaultHtmlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
 
         public DefaultHtmlEncoder(TextEncoderSettings settings)
         {
@@ -82,20 +74,22 @@ namespace System.Text.Encodings.Web
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool WillEncode(int unicodeScalar)
         {
-            if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar)) return true;
+            if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar))
+                return true;
             return !_allowedCharacters.IsUnicodeScalarAllowed(unicodeScalar);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe override int FindFirstCharacterToEncode(char* text, int textLength)
         {
-            return _allowedCharacters.FindFirstCharacterToEncode(text, textLength);
+            if (text == null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+            return FindFirstCharacterToEncode(new ReadOnlySpan<char>(text, textLength));
         }
 
-        public override int MaxOutputCharactersPerInputCharacter
-        {
-            get { return 10; } // "&#x10FFFF;" is the longest encoded form
-        }
+        public override int MaxOutputCharactersPerInputCharacter => 10; // "&#x10FFFF;" is the longest encoded form
 
         static readonly char[] s_quote = "&quot;".ToCharArray();
         static readonly char[] s_ampersand = "&amp;".ToCharArray();
@@ -105,22 +99,29 @@ namespace System.Text.Encodings.Web
         public unsafe override bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
         {
             if (buffer == null)
-            {
                 throw new ArgumentNullException(nameof(buffer));
-            }
 
-            if (!WillEncode(unicodeScalar)) { return TryWriteScalarAsChar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
-            else if (unicodeScalar == '\"') { return TryCopyCharacters(s_quote, buffer, bufferLength, out numberOfCharactersWritten); }
-            else if (unicodeScalar == '&') { return TryCopyCharacters(s_ampersand, buffer, bufferLength, out numberOfCharactersWritten); }
-            else if (unicodeScalar == '<') { return TryCopyCharacters(s_lessthan, buffer, bufferLength, out numberOfCharactersWritten); }
-            else if (unicodeScalar == '>') { return TryCopyCharacters(s_greaterthan, buffer, bufferLength, out numberOfCharactersWritten); }
-            else { return TryWriteEncodedScalarAsNumericEntity(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
+            return TryEncodeUnicodeScalar(unicodeScalar, new Span<char>(buffer, bufferLength), out numberOfCharactersWritten);
         }
 
-        private static unsafe bool TryWriteEncodedScalarAsNumericEntity(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
+        public override bool TryEncodeUnicodeScalar(int unicodeScalar, Span<char> buffer, out int numberOfCharactersWritten)
         {
-            Debug.Assert(buffer != null && bufferLength >= 0);
+            if (!WillEncode(unicodeScalar))
+                return TryWriteScalarAsChar(unicodeScalar, buffer, out numberOfCharactersWritten);
+            else if (unicodeScalar == '\"')
+                return TryCopyCharacters(s_quote, buffer, out numberOfCharactersWritten);
+            else if (unicodeScalar == '&')
+                return TryCopyCharacters(s_ampersand, buffer, out numberOfCharactersWritten);
+            else if (unicodeScalar == '<')
+                return TryCopyCharacters(s_lessthan, buffer, out numberOfCharactersWritten);
+            else if (unicodeScalar == '>')
+                return TryCopyCharacters(s_greaterthan, buffer, out numberOfCharactersWritten);
+            else
+                return TryWriteEncodedScalarAsNumericEntity(unicodeScalar, buffer, out numberOfCharactersWritten);
+        }
 
+        private static bool TryWriteEncodedScalarAsNumericEntity(int unicodeScalar, Span<char> buffer, out int numberOfCharactersWritten)
+        {
             // We're writing the characters in reverse, first determine
             // how many there are
             const int nibbleSize = 4;
@@ -137,31 +138,34 @@ namespace System.Text.Encodings.Web
             numberOfCharactersWritten = numberOfHexCharacters + 4; // four chars are &, #, x, and ;
             Debug.Assert(numberOfHexCharacters > 0, "At least one character should've been written.");
 
-            if (numberOfHexCharacters + 4 > bufferLength)
+            if (numberOfHexCharacters + 4 > buffer.Length)
             {
                 numberOfCharactersWritten = 0;
                 return false;
             }
+
+            int idx = 0;
             // Finally, write out the HTML-encoded scalar value.
-            *buffer = '&';
-            buffer++;
-            *buffer = '#';
-            buffer++;
-            *buffer = 'x';
+            buffer[idx++] = '&';
+            buffer[idx++] = '#';
+            buffer[idx] = 'x';
 
             // Jump to the end of the hex position and write backwards
-            buffer += numberOfHexCharacters;
+            idx += numberOfHexCharacters;
             do
             {
-                *buffer = HexUtil.Int32LsbToHexDigit(unicodeScalar & 0xF);
+                buffer[idx] = HexUtil.Int32LsbToHexDigit(unicodeScalar & 0xF);
                 unicodeScalar >>= nibbleSize;
-                buffer--;
+                idx--;
             }
             while (unicodeScalar != 0);
 
-            buffer += numberOfHexCharacters + 1;
-            *buffer = ';';
+            idx += numberOfHexCharacters + 1;
+            buffer[idx] = ';';
             return true;
         }
+
+        public override int FindFirstCharacterToEncode(ReadOnlySpan<char> text)
+            => _allowedCharacters.FindFirstCharacterToEncode(text);
     }
 }

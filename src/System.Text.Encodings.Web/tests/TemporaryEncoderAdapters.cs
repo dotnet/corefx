@@ -44,7 +44,7 @@ namespace Microsoft.Framework.WebEncoders
 
         public HtmlEncoder()
         {
-            _encoder = System.Text.Encodings.Web.DefaultHtmlEncoder.Singleton;
+            _encoder = System.Text.Encodings.Web.DefaultHtmlEncoder.s_singleton;
         }
         public HtmlEncoder(TextEncoderSettings filter)
         {
@@ -107,7 +107,7 @@ namespace Microsoft.Framework.WebEncoders
 
         public JavaScriptStringEncoder()
         {
-            _encoder = System.Text.Encodings.Web.DefaultJavaScriptEncoder.Singleton;
+            _encoder = System.Text.Encodings.Web.DefaultJavaScriptEncoder.s_singleton;
         }
         public JavaScriptStringEncoder(TextEncoderSettings filter)
         {
@@ -170,7 +170,7 @@ namespace Microsoft.Framework.WebEncoders
 
         public UrlEncoder()
         {
-            _encoder = System.Text.Encodings.Web.DefaultUrlEncoder.Singleton;
+            _encoder = System.Text.Encodings.Web.DefaultUrlEncoder.s_singleton;
         }
         public UrlEncoder(TextEncoderSettings filter)
         {
@@ -190,7 +190,7 @@ namespace Microsoft.Framework.WebEncoders
 
         public string UrlEncode(string value)
         {
-            return _encoder.Encode(value); ;
+            return _encoder.Encode(value);
         }
 
         public void UrlEncode(string value, int startIndex, int characterCount, TextWriter output)

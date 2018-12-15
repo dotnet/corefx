@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text.Internal;
 using System.Text.Unicode;
@@ -17,10 +16,7 @@ namespace System.Text.Encodings.Web
         /// <summary>
         /// Returns a default built-in instance of <see cref="UrlEncoder"/>.
         /// </summary>
-        public static UrlEncoder Default
-        {
-            get { return DefaultUrlEncoder.Singleton; }
-        }
+        public static UrlEncoder Default => DefaultUrlEncoder.s_singleton;
 
         /// <summary>
         /// Creates a new instance of UrlEncoder with provided settings.
@@ -28,9 +24,7 @@ namespace System.Text.Encodings.Web
         /// <param name="settings">Settings used to control how the created <see cref="UrlEncoder"/> encodes, primarily which characters to encode.</param>
         /// <returns>A new instance of the <see cref="UrlEncoder"/>.</returns>
         public static UrlEncoder Create(TextEncoderSettings settings)
-        {
-            return new DefaultUrlEncoder(settings);
-        }
+            => new DefaultUrlEncoder(settings);
 
         /// <summary>
         /// Creates a new instance of UrlEncoder specifying character to be encoded.
@@ -39,23 +33,18 @@ namespace System.Text.Encodings.Web
         /// <returns>A new instance of the <see cref="UrlEncoder"/>.</returns>
         /// <remarks>Some characters in <paramref name="allowedRanges"/> might still get encoded, i.e. this parameter is just telling the encoder what ranges it is allowed to not encode, not what characters it must not encode.</remarks> 
         public static UrlEncoder Create(params UnicodeRange[] allowedRanges)
-        {
-            return new DefaultUrlEncoder(allowedRanges);
-        }
+            => new DefaultUrlEncoder(allowedRanges);
     }
 
     internal sealed class DefaultUrlEncoder : UrlEncoder
     {
         private AllowedCharactersBitmap _allowedCharacters;
 
-        internal static readonly DefaultUrlEncoder Singleton = new DefaultUrlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
+        internal static readonly DefaultUrlEncoder s_singleton = new DefaultUrlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
 
         // We perform UTF8 conversion of input, which means that the worst case is
         // 12 output chars per input surrogate char: [input] U+FFFF U+FFFF -> [output] "%XX%YY%ZZ%WW".
-        public override int MaxOutputCharactersPerInputCharacter
-        {
-            get { return 12; }
-        }
+        public override int MaxOutputCharactersPerInputCharacter => 12;
 
         public DefaultUrlEncoder(TextEncoderSettings filter)
         {
@@ -141,7 +130,8 @@ namespace System.Text.Encodings.Web
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool WillEncode(int unicodeScalar)
         {
-            if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar)) return true;
+            if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar))
+                return true;
             return !_allowedCharacters.IsUnicodeScalarAllowed(unicodeScalar);
         }
 
@@ -149,42 +139,46 @@ namespace System.Text.Encodings.Web
         public unsafe override int FindFirstCharacterToEncode(char* text, int textLength)
         {
             if (text == null)
-            {
                 throw new ArgumentNullException(nameof(text));
-            }
-            return _allowedCharacters.FindFirstCharacterToEncode(text, textLength);
+            return FindFirstCharacterToEncode(new ReadOnlySpan<char>(text, textLength));
         }
 
         public unsafe override bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
         {
             if (buffer == null)
-            {
                 throw new ArgumentNullException(nameof(buffer));
-            }
 
-            if (!WillEncode(unicodeScalar)) { return TryWriteScalarAsChar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
+            return TryEncodeUnicodeScalar(unicodeScalar, new Span<char>(buffer, bufferLength), out numberOfCharactersWritten);
+        }
+
+        public override bool TryEncodeUnicodeScalar(int unicodeScalar, Span<char> buffer, out int numberOfCharactersWritten)
+        {
+            if (!WillEncode(unicodeScalar))
+            {
+                return TryWriteScalarAsChar(unicodeScalar, buffer, out numberOfCharactersWritten);
+            }
 
             numberOfCharactersWritten = 0;
             uint asUtf8 = unchecked((uint)UnicodeHelpers.GetUtf8RepresentationForScalarValue((uint)unicodeScalar));
             do
             {
-                char highNibble, lowNibble;
-                HexUtil.ByteToHexDigits(unchecked((byte)asUtf8), out highNibble, out lowNibble);
+                HexUtil.ByteToHexDigits(unchecked((byte)asUtf8), out char highNibble, out char lowNibble);
 
-                if (numberOfCharactersWritten + 3 > bufferLength)
+                if (numberOfCharactersWritten + 3 > buffer.Length)
                 {
                     numberOfCharactersWritten = 0;
                     return false;
                 }
 
-                *buffer = '%'; buffer++;
-                *buffer = highNibble; buffer++;
-                *buffer = lowNibble; buffer++;
-
-                numberOfCharactersWritten += 3;
+                buffer[numberOfCharactersWritten++] = '%';
+                buffer[numberOfCharactersWritten++] = highNibble;
+                buffer[numberOfCharactersWritten++] = lowNibble;
             }
             while ((asUtf8 >>= 8) != 0);
             return true;
         }
+
+        public override int FindFirstCharacterToEncode(ReadOnlySpan<char> text)
+            => _allowedCharacters.FindFirstCharacterToEncode(text);
     }
 }
