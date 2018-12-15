@@ -26,7 +26,7 @@ namespace System.IO.Pipelines
 
             public override ValueTask<ReadResult> ReadAsync(CancellationToken cancellationToken = default) => _pipe.ReadAsync(cancellationToken);
 
-            public override void AdvanceTo(SequencePosition consumed) => _pipe.AdvanceReader(consumed);
+            public override void AdvanceTo(SequencePosition consumed) => _pipe.AdvanceReader(consumed, consumed);
 
             public override void AdvanceTo(SequencePosition consumed, SequencePosition examined) => _pipe.AdvanceReader(consumed, examined);
 

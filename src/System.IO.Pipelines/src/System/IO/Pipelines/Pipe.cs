@@ -364,11 +364,6 @@ namespace System.IO.Pipelines
             TrySchedule(_readerScheduler, completionData);
         }
 
-        internal void AdvanceReader(in SequencePosition consumed)
-        {
-            AdvanceReader(consumed, consumed);
-        }
-
         internal void AdvanceReader(in SequencePosition consumed, in SequencePosition examined)
         {
             // If the reader is completed
@@ -379,7 +374,19 @@ namespace System.IO.Pipelines
 
             // TODO: Use new SequenceMarshal.TryGetReadOnlySequenceSegment to get the correct data
             // directly casting only works because the type value in ReadOnlySequenceSegment is 0
-            AdvanceReader((BufferSegment)consumed.GetObject(), consumed.GetInteger(), (BufferSegment)examined.GetObject(), examined.GetInteger());
+            BufferSegment consumedSegment = (BufferSegment)consumed.GetObject();
+            object examinedObject = examined.GetObject();
+
+            if (ReferenceEquals(consumedSegment, examinedObject))
+            {
+                // Common path, if consumedSegment and examinedObject are the same, use consumedSegment and only cast once
+                AdvanceReader(consumedSegment, consumed.GetInteger(), consumedSegment, examined.GetInteger());
+            }
+            else
+            {
+                // consumedSegment is not same as examinedObject, cast examinedObject to BufferSegment
+                AdvanceReader(consumedSegment, consumed.GetInteger(), (BufferSegment)examinedObject, examined.GetInteger());
+            }
         }
 
         private void AdvanceReader(BufferSegment consumedSegment, int consumedIndex, BufferSegment examinedSegment, int examinedIndex)
