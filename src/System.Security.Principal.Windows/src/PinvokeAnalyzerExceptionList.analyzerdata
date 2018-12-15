@@ -1,2 +1,3 @@
 # Inadvertently missed from whitelist
 sspicli.dll!LsaRegisterLogonProcess
+advapi32.dll!LsaNtStatusToWinError

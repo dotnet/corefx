@@ -16,6 +16,9 @@ using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 using Xunit;
 
+// We skip all tests on Uap because we need to create some new Windows users before run
+// On Uap sandbox we cannot create users
+[SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
 public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpersonateFixture>
 {
     private const string authenticationType = "WindowsAuthentication";
@@ -228,7 +231,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     // On full framework 'RunImpersonate' doesn't capture/revert Execution context
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-    public void Impersonate_ExcutionContext_NotReverted()
+    public void Impersonate_ExecutionContext_NotReverted()
     {
         AsyncLocal<string> impersonatedContextValue = new AsyncLocal<string>
         {
