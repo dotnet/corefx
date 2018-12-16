@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace System.Linq.ChainLinq
 {
@@ -10,7 +6,14 @@ namespace System.Linq.ChainLinq
     {
         internal static Consumable<U> CreateConsumable<T, U>(IEnumerable<T> e, ILink<T, U> transform)
         {
-            return new Consumables.Enumerable<T, U>(e, transform);
+            switch (e)
+            {
+                case T[] array:
+                    return new Consumables.Array<T, U>(array, transform);
+
+                default:
+                    return new Consumables.Enumerable<T, U>(e, transform);
+            }
         }
 
         internal static Consumable<U> PushTransform<T, U>(IEnumerable<T> e, ILink<T, U> transform)
