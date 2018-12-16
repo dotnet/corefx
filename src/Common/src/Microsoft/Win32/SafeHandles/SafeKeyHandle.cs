@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
+using Microsoft.Win32.SafeHandles;
 
-namespace Microsoft.Win32.SafeHandles
+namespace System.Security.Cryptography
 {
     /// <summary>
     ///     Safe handle representing a HCRYPTKEY 

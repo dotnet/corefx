@@ -17,7 +17,6 @@ internal partial class Interop
         }
 
         [DllImport(Libraries.Advapi32, SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "CryptGetDefaultProviderW")]
-        [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool CryptGetDefaultProvider(
             int dwProvType,
             IntPtr pdwReserved,

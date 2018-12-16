@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
-using Microsoft.Win32.SafeHandles;
+using System.Security.Cryptography;
 
 internal partial class Interop
 {
@@ -19,7 +19,6 @@ internal partial class Interop
         }
 
         [DllImport(Libraries.Advapi32, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool CryptGetKeyParam(
             SafeKeyHandle hKey,
             CryptGetKeyParamFlags dwParam,
