@@ -93,102 +93,102 @@ namespace System.Diagnostics.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void TestAsyncOutputStream_BeginCancelBegin_OutputReadLine()
         {
-            // We use file system lock tecnique to sync process
+            // We use file system lock technique to sync process
             // We cannot use named wait event because are not supported on all platform
 
-            Dictionary<string, FileSystemLock> parentLockList = TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper();
+            Dictionary<string, FileSystemLock> parentLockList = TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper(nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine));
 
             List<int> dataReceived = new List<int>();
             var dataArrivedEvent = new AutoResetEvent(false);
             var dataConfirmedEvent = new AutoResetEvent(false);
 
-            Process p = CreateProcessPortable(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable);
-
-            p.StartInfo.RedirectStandardOutput = true;
-            p.OutputDataReceived += (s, e) =>
-            {
-                if (e.Data != null)
+            using(Process p = CreateProcessPortable(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable))
+            { 
+                p.StartInfo.RedirectStandardOutput = true;
+                p.OutputDataReceived += (s, e) =>
                 {
-                    dataReceived.Add(int.Parse(e.Data));
-                    dataArrivedEvent.Set();
-                    dataConfirmedEvent.WaitOne();
+                    if (e.Data != null)
+                    {
+                        dataReceived.Add(int.Parse(e.Data));
+                        dataArrivedEvent.Set();
+                        dataConfirmedEvent.WaitOne();
+                    }
+                };
+
+                // Start child process
+                p.Start();
+
+                // Wait for child process
+                Assert.True(parentLockList["childStarted"].WaitSignal(WaitInMS), "Child process not started");
+
+                // Start listen
+                p.BeginOutputReadLine();
+
+                // Signal start listening
+                Assert.True(parentLockList["parentFirstBeginOutputReadLine"].TryAcquire(WaitInMS), "Parent process should acquire 'parentFirstBeginOutputReadLine'");
+
+                // Wait for production of 1,2,3
+                Assert.True(parentLockList["childProduced123"].WaitSignal(WaitInMS), "Child process not produced expected data");
+
+                // Wait signal for 1,2,3
+                for (int i = 0; i < 3; i++)
+                {
+                    Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "1,2,3 signal expected");
+                    dataConfirmedEvent.Set();
                 }
-            };
 
-            // Start child process
-            p.Start();
+                // Verify we received 1,2,3
+                Assert.Equal(3, dataReceived.Count);
+                for (int i = 0; i < dataReceived.Count; i++)
+                {
+                    Assert.Equal(i + 1, dataReceived[i]);
+                }
 
-            // Wait for child process
-            Assert.True(parentLockList["childStarted"].WaitSignal(WaitInMS), "Child process not started");
+                // Stop listen
+                p.CancelOutputRead();
 
-            // Start listen
-            p.BeginOutputReadLine();
+                // Signal stop listening
+                Assert.True(parentLockList["parentCancelOutputRead"].TryAcquire(WaitInMS), "Parent process should acquire 'CancelOutputRead'");
 
-            // Signal start listening
-            Assert.True(parentLockList["parentFirstBeginOutputReadLine"].TryAcquire(WaitInMS), "Parent process should acquire 'parentFirstBeginOutputReadLine'");
+                // Wait for production of 4,5,6
+                Assert.True(parentLockList["childProduced456"].WaitSignal(WaitInMS), "Child process not produced expected data");
 
-            // Wait for production of 1,2,3
-            Assert.True(parentLockList["childProduced123"].WaitSignal(WaitInMS), "Child process not produced expected data");
+                // Re-start listen
+                p.BeginOutputReadLine();
 
-            // Wait signal for 1,2,3
-            for (int i = 0; i < 3; i++)
-            {
-                Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "1,2,3 signal expected");
-                dataConfirmedEvent.Set();
+                // Signal re-start listening
+                Assert.True(parentLockList["parentSecondBeginOutputReadLine"].TryAcquire(WaitInMS), "Parent process should acquire 'parentSecondBeginOutputReadLine'");
+
+                // Wait for production of 7,8,9
+                Assert.True(parentLockList["childProduced789"].WaitSignal(WaitInMS), "Child process not produced expected data");
+
+                // Wait signal for 7,8,9
+                for (int i = 0; i < 3; i++)
+                {
+                    Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "7,8,9 signal expected");
+                    dataConfirmedEvent.Set();
+                }
+
+                // Verify we received 1,2,3,7,8,9
+                Assert.Equal(6, dataReceived.Count);
+                // Ensure gap between CancelOutputRead() and BeginOutputReadLine()
+                Assert.Empty(dataReceived.Except(new int[] { 1, 2, 3, 7, 8, 9 }));
+
+                // shutdown child process
+                Assert.True(parentLockList["shutdownChildProcess"].TryAcquire(WaitInMS), "Parent process should acquire 'shutdownChildProcess'");
+                p.WaitForExit(WaitInMS);
+
+                // Cleanup
+                foreach (KeyValuePair<string, FileSystemLock> fileLock in parentLockList)
+                {
+                    fileLock.Value.Dispose();
+                }
             }
-
-            // Verify we received 1,2,3
-            Assert.Equal(3, dataReceived.Count);
-            for (int i = 0; i < dataReceived.Count; i++)
-            {
-                Assert.Equal(i + 1, dataReceived[i]);
-            }
-
-            // Stop listen
-            p.CancelOutputRead();
-
-            // Signal stop listening
-            Assert.True(parentLockList["parentCancelOutputRead"].TryAcquire(WaitInMS), "Parent process should acquire 'CancelOutputRead'");
-
-            // Wait for production of 4,5,6
-            Assert.True(parentLockList["childProduced456"].WaitSignal(WaitInMS), "Child process not produced expected data");
-
-            // Re-start listen
-            p.BeginOutputReadLine();
-
-            // Signal re-start listening
-            Assert.True(parentLockList["parentSecondBeginOutputReadLine"].TryAcquire(WaitInMS), "Parent process should acquire 'parentSecondBeginOutputReadLine'");
-
-            // Wait for production of 7,8,9
-            Assert.True(parentLockList["childProduced789"].WaitSignal(WaitInMS), "Child process not produced expected data");
-
-            // Wait signal for 7,8,9
-            for (int i = 0; i < 3; i++)
-            {
-                Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "7,8,9 signal expected");
-                dataConfirmedEvent.Set();
-            }
-
-            // Verify we received 1,2,3,7,8,9
-            Assert.Equal(6, dataReceived.Count);
-            // Ensure gap between CancelOutputRead() and BeginOutputReadLine()
-            Assert.Empty(dataReceived.Except(new int[] { 1, 2, 3, 7, 8, 9 }));
-
-            // shutdown child process
-            Assert.True(parentLockList["shutdownChildProcess"].TryAcquire(WaitInMS), "Parent process should acquire 'shutdownChildProcess'");
-            p.WaitForExit(WaitInMS);
-
-            // Cleanup
-            foreach (KeyValuePair<string, FileSystemLock> fileLock in parentLockList)
-            {
-                fileLock.Value.Dispose();
-            }
-            Directory.Delete(Path.Combine(Path.GetTempPath(), nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)), true);
         }
 
         private int TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable()
         {
-            Dictionary<string, FileSystemLock> childLockList = TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper();
+            Dictionary<string, FileSystemLock> childLockList = TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper(nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine));
 
             int counter = 0;
 
@@ -234,18 +234,18 @@ namespace System.Diagnostics.Tests
             return SuccessExitCode;
         }
 
-        private Dictionary<string, FileSystemLock> TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper()
+        private Dictionary<string, FileSystemLock> TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper(string directoryName)
         {
             return new Dictionary<string, FileSystemLock>
             {
-                { "childStarted", new FileSystemLock("childStarted", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                { "parentFirstBeginOutputReadLine", new FileSystemLock("parentFirstBeginOutputReadLine", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                { "parentSecondBeginOutputReadLine", new FileSystemLock("parentSecondBeginOutputReadLine", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                { "parentCancelOutputRead", new FileSystemLock("parentCancelOutputRead", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
-                { "childProduced123", new FileSystemLock("childProduced123", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine)) },
-                { "childProduced456", new FileSystemLock("childProduced456", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
-                { "childProduced789", new FileSystemLock("childProduced789", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))},
-                { "shutdownChildProcess", new FileSystemLock("shutdownChildProcess", nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine))}
+                { "childStarted", new FileSystemLock("childStarted", directoryName) },
+                { "parentFirstBeginOutputReadLine", new FileSystemLock("parentFirstBeginOutputReadLine", directoryName) },
+                { "parentSecondBeginOutputReadLine", new FileSystemLock("parentSecondBeginOutputReadLine", directoryName) },
+                { "parentCancelOutputRead", new FileSystemLock("parentCancelOutputRead", directoryName)},
+                { "childProduced123", new FileSystemLock("childProduced123", directoryName) },
+                { "childProduced456", new FileSystemLock("childProduced456", directoryName) },
+                { "childProduced789", new FileSystemLock("childProduced789", directoryName) },
+                { "shutdownChildProcess", new FileSystemLock("shutdownChildProcess", directoryName) }
             };
         }
 
@@ -315,6 +315,12 @@ namespace System.Diagnostics.Tests
                 if (File.Exists(_lockFileName))
                 {
                     File.Delete(_lockFileName);
+                }
+
+                string lockFilesDirectory = Path.GetDirectoryName(_lockFileName);
+                if (Directory.GetFiles(lockFilesDirectory).Length == 0)
+                {
+                    Directory.Delete(lockFilesDirectory, true);
                 }
             }
         }
