@@ -15,6 +15,7 @@
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Range.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Aggregate.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumer\All - Copy.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\All.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Any.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Average.cs" />

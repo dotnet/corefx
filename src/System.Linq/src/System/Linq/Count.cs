@@ -21,6 +21,9 @@ namespace System.Linq
                 return collectionoft.Count;
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Count<TSource>());
+#else
             if (source is IIListProvider<TSource> listProv)
             {
                 return listProv.GetCount(onlyIfCheap: false);
@@ -44,6 +47,7 @@ namespace System.Linq
             }
 
             return count;
+#endif
         }
 
         public static int Count<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
@@ -58,6 +62,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.CountConditional<TSource>(predicate));
+#else
             int count = 0;
             foreach (TSource element in source)
             {
@@ -71,6 +78,7 @@ namespace System.Linq
             }
 
             return count;
+#endif
         }
 
         public static long LongCount<TSource>(this IEnumerable<TSource> source)
@@ -80,6 +88,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.LongCount<TSource>());
+#else
             long count = 0;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -93,6 +104,7 @@ namespace System.Linq
             }
 
             return count;
+#endif
         }
 
         public static long LongCount<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
@@ -107,6 +119,10 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.LongCountConditional<TSource>(predicate));
+#else
+
             long count = 0;
             foreach (TSource element in source)
             {
@@ -120,6 +136,7 @@ namespace System.Linq
             }
 
             return count;
+#endif
         }
     }
 }
