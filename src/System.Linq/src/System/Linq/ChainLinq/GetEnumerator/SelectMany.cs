@@ -5,6 +5,7 @@ namespace System.Linq.ChainLinq.GetEnumerator
 {
     static class SelectMany
     {
+        // TODO: Modify to be ConsumerEnumerator
         class Enumerator<T, V> : IEnumerator<V>
         {
             /*
@@ -170,6 +171,7 @@ namespace System.Linq.ChainLinq.GetEnumerator
             public void Reset() => throw new NotImplementedException();
         }
 
+        // TODO: Modify to be ConsumerEnumerator
         class Enumerator<TSource, TCollection, T, V> : IEnumerator<V>
         {
             /*

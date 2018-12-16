@@ -82,7 +82,7 @@ namespace System.Linq.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip = "ChainLinq: This is no longer true")]
         public void Range_EnumerableAndEnumeratorAreSame()
         {
             var rangeEnumerable = Enumerable.Range(1, 1);

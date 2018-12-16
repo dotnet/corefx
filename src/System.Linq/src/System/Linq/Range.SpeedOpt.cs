@@ -8,15 +8,14 @@ namespace System.Linq
 {
     public static partial class Enumerable
     {
+#if PRE_CHAINLINQ
         private sealed partial class RangeIterator : IPartition<int>
         {
-#if PRE_CHAINLINQ
             public override IEnumerable<TResult> Select<TResult>(Func<int, TResult> selector)
             {
                 return new SelectIPartitionIterator<int, TResult>(this, selector);
             }
-#endif
-            public int[] ToArray()
+        public int[] ToArray()
             {
                 int[] array = new int[_end - _start];
                 int cur = _start;
@@ -87,5 +86,6 @@ namespace System.Linq
                 return _end - 1;
             }
         }
+#endif
     }
 }

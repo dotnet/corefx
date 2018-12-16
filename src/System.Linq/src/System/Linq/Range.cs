@@ -22,6 +22,12 @@ namespace System.Linq
                 return Empty<int>();
             }
 
+#if !PRE_CHAINLINQ
+
+            return new ChainLinq.Consumables.Range<int>(start, count, ChainLinq.Links.Identity<int>.Instance);
+        }
+#else
+
             return new RangeIterator(start, count);
         }
 
@@ -69,5 +75,6 @@ namespace System.Linq
                 _state = -1; // Don't reset current
             }
         }
+#endif
     }
 }

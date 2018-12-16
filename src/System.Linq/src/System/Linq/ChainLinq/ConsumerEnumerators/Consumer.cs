@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace System.Linq.ChainLinq.Enumerators
+namespace System.Linq.ChainLinq.ConsumerEnumerators
 {
     internal abstract class ConsumerEnumerator<T> : Consumer<T, T>, IEnumerator<T>
     {
-        protected ChainStatus state = ChainStatus.Flow;
+        protected ChainStatus status = ChainStatus.Flow;
 
         protected ConsumerEnumerator() : base(default(T)) { }
 
