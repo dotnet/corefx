@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace System.Linq.ChainLinq.Enumerators
 {
@@ -10,14 +6,14 @@ namespace System.Linq.ChainLinq.Enumerators
     {
         private IEnumerable<T> enumerable;
         private IEnumerator<T> enumerator;
-        private Chain<T, ChainEnd> activity = null;
+        private Chain<T> chain = null;
 
-        internal override Chain StartOfChain => activity;
+        internal override Chain StartOfChain => chain;
 
         public ConsumerEnumeratorEnumerable(IEnumerable<T> enumerable, ILink<T, TResult> factory)
         {
             this.enumerable = enumerable;
-            activity = factory.Compose(this);
+            chain = factory.Compose(this);
         }
 
         public override void ChainDispose()
@@ -28,7 +24,7 @@ namespace System.Linq.ChainLinq.Enumerators
                 enumerator = null;
             }
             enumerable = null;
-            activity = null;
+            chain = null;
         }
 
         public override bool MoveNext()
@@ -43,11 +39,11 @@ namespace System.Linq.ChainLinq.Enumerators
             if (!enumerator.MoveNext() || state.IsStopped())
             {
                 Result = default(TResult);
-                activity.ChainComplete();
+                chain.ChainComplete();
                 return false;
             }
 
-            state = activity.ProcessNext(enumerator.Current);
+            state = chain.ProcessNext(enumerator.Current);
             if (!state.IsFlowing())
                 goto tryAgain;
 

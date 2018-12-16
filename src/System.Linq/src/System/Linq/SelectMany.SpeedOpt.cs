@@ -8,6 +8,7 @@ namespace System.Linq
 {
     public static partial class Enumerable
     {
+#if PRE_CHAINLINQ
         private sealed partial class SelectManySingleSelectorIterator<TSource, TResult> : IIListProvider<TResult>
         {
             public int GetCount(bool onlyIfCheap)
@@ -70,5 +71,6 @@ namespace System.Linq
                 return list;
             }
         }
+#endif
     }
 }

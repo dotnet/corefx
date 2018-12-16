@@ -21,7 +21,12 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if PRE_CHAINLINQ
             return new SelectManySingleSelectorIterator<TSource, TResult>(source, selector);
+#else
+            var selectMany = ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Select<TSource, IEnumerable<TResult>>(selector));
+            return new ChainLinq.Consumables.SelectMany<TResult, TResult>(selectMany, ChainLinq.Links.Identity<TResult>.Instance);
+#endif
         }
 
         public static IEnumerable<TResult> SelectMany<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TResult>> selector)
@@ -35,10 +40,15 @@ namespace System.Linq
             {
                 throw Error.ArgumentNull(nameof(selector));
             }
-
+#if PRE_CHAINLINQ
             return SelectManyIterator(source, selector);
+#else
+            var selectMany = ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectIndexed<TSource, IEnumerable<TResult>>(selector));
+            return new ChainLinq.Consumables.SelectMany<TResult, TResult>(selectMany, ChainLinq.Links.Identity<TResult>.Instance);
+#endif
         }
 
+#if PRE_CHAINLINQ
         private static IEnumerable<TResult> SelectManyIterator<TSource, TResult>(IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TResult>> selector)
         {
             int index = -1;
@@ -55,6 +65,7 @@ namespace System.Linq
                 }
             }
         }
+#endif
 
         public static IEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(this IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
         {
@@ -72,10 +83,15 @@ namespace System.Linq
             {
                 throw Error.ArgumentNull(nameof(resultSelector));
             }
-
+#if PRE_CHAINLINQ
             return SelectManyIterator(source, collectionSelector, resultSelector);
+#else
+            var selectMany = ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectManyIndexed<TSource, TCollection>(collectionSelector));
+            return new ChainLinq.Consumables.SelectMany<TSource, TCollection, TResult, TResult>(selectMany, resultSelector, ChainLinq.Links.Identity<TResult>.Instance);
+#endif
         }
 
+#if PRE_CHAINLINQ
         private static IEnumerable<TResult> SelectManyIterator<TSource, TCollection, TResult>(IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
         {
             int index = -1;
@@ -92,6 +108,7 @@ namespace System.Linq
                 }
             }
         }
+#endif
 
         public static IEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(this IEnumerable<TSource> source, Func<TSource, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
         {
@@ -110,9 +127,15 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(resultSelector));
             }
 
+#if PRE_CHAINLINQ
             return SelectManyIterator(source, collectionSelector, resultSelector);
+#else
+            var selectMany = ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectMany<TSource, TCollection>(collectionSelector));
+            return new ChainLinq.Consumables.SelectMany<TSource, TCollection, TResult, TResult>(selectMany, resultSelector, ChainLinq.Links.Identity<TResult>.Instance);
+#endif
         }
 
+#if PRE_CHAINLINQ
         private static IEnumerable<TResult> SelectManyIterator<TSource, TCollection, TResult>(IEnumerable<TSource> source, Func<TSource, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
         {
             foreach (TSource element in source)
@@ -202,5 +225,6 @@ namespace System.Linq
                 return false;
             }
         }
+#endif
     }
 }

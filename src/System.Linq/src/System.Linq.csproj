@@ -10,21 +10,27 @@
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Base.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Enumerable.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Aggregate.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\All.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Any.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Average.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Contains.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Reduce.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumer\SetResult.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consume\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\Enumerators\Consumer.cs" />
     <Compile Include="System\Linq\ChainLinq\Enumerators\Enumerable.cs" />
+    <Compile Include="System\Linq\ChainLinq\GetEnumerator\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Compose.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Distinct.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Identity.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Select.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\SelectIndexed.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\SelectMany.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\SelectManyIndexed.cs" />
     <Compile Include="System\Linq\ChainLinq\Utils.cs" />
   </ItemGroup>
   <ItemGroup>

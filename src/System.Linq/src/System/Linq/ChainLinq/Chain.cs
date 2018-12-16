@@ -15,9 +15,6 @@ namespace System.Linq.ChainLinq
         Filter = 0x00,
         Flow = 0x01,
         Stop = 0x02,
-        Consumer = 0x04,
-
-        StoppedConsumer = Stop | Consumer,
     }
 
     static class ProcessNextResultHelper
@@ -27,9 +24,6 @@ namespace System.Linq.ChainLinq
 
         public static bool IsFlowing(this ChainStatus result) =>
             (result & ChainStatus.Flow) == ChainStatus.Flow;
-
-        public static bool IsStoppedConsumer(this ChainStatus result) =>
-            (result & ChainStatus.StoppedConsumer) == ChainStatus.StoppedConsumer;
     }
 
     abstract class Chain<T> : Chain

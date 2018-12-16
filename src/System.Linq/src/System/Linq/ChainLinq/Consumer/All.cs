@@ -12,7 +12,7 @@
             if (!_selector(input))
             {
                 Result = false;
-                return ChainStatus.StoppedConsumer;
+                return ChainStatus.Stop;
             }
             return ChainStatus.Flow;
         }

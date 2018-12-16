@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.GetEnumerator
 {
-    class Enumerable
+    static class Enumerable
     {
         public static IEnumerator<U> Get<T, U>(IEnumerable<T> e, ILink<T, U> composition)
         {

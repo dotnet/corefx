@@ -2,29 +2,30 @@
 
 namespace System.Linq.ChainLinq.Consume
 {
-    class Enumerable
+    static class Enumerable
     {
         public static Result Invoke<T, V, Result>(IEnumerable<T> e, ILink<T, V> composition, Consumer<V, Result> consumer)
         {
-            Pipeline(e, composition.Compose(consumer));
-            return consumer.Result;
-        }
-
-        private static void Pipeline<T>(IEnumerable<T> e, Chain<T> chain)
-        {
+            var chain = composition.Compose(consumer);
             try
             {
-                foreach (var item in e)
-                {
-                    var state = chain.ProcessNext(item);
-                    if (state.IsStopped())
-                        break;
-                }
+                Pipeline(e, chain);
                 chain.ChainComplete();
             }
             finally
             {
                 chain.ChainDispose();
+            }
+            return consumer.Result;
+        }
+
+        private static void Pipeline<T>(IEnumerable<T> e, Chain<T> chain)
+        {
+            foreach (var item in e)
+            {
+                var state = chain.ProcessNext(item);
+                if (state.IsStopped())
+                    break;
             }
         }
 

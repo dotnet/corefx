@@ -14,7 +14,7 @@ namespace System.Linq.ChainLinq.Consumer
             if (EqualityComparer<T>.Default.Equals(input, _value)) // benefits from devirtualization and likely inlining
             {
                 Result = true;
-                return ChainStatus.StoppedConsumer;
+                return ChainStatus.Stop;
             }
             return ChainStatus.Flow;
         }
@@ -33,7 +33,7 @@ namespace System.Linq.ChainLinq.Consumer
             if (_comparer.Equals(input, _value))
             {
                 Result = true;
-                return ChainStatus.StoppedConsumer;
+                return ChainStatus.Stop;
             }
             return ChainStatus.Flow;
         }
