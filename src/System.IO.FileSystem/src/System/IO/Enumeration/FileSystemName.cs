@@ -110,7 +110,7 @@ namespace System.IO.Enumeration
         // cannot contain wildcards, while the expression may contain wildcards.
         //
         // Expression wild cards are evaluated as shown in the nondeterministic
-        // finite automatons below.  Note that ~* and ~? are DOS_STAR and DOS_QM.
+        // finite automations below.  Note that ~* and ~? are DOS_STAR and DOS_QM.
         //
         //        ~* is DOS_STAR, ~? is DOS_QM, and ~. is DOS_DOT
         //
