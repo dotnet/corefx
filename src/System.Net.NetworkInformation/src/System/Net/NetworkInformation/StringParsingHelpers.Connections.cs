@@ -281,21 +281,26 @@ namespace System.Net.NetworkInformation
             {
                 throw ExceptionHelper.CreateForParseFailure();
             }
-            
+
             ipAddress = new IPAddress(addressValue);
             return ipAddress;
         }
 
         // Parses a 128-bit IPv6 Address stored as a 32-character hex number.
         // Strings passed to this must be 32 characters in length.
+        // tcp6 has IPv6 address printed as four network-byte integers.
         private static IPAddress ParseIPv6HexString(string hexAddress)
         {
             Debug.Assert(hexAddress.Length == 32);
             byte[] addressBytes = new byte[16];
-            for (int i = 0; i < 16; i++)
+            for (int i = 0; i < 16; i += 4)
             {
-                addressBytes[i] = (byte)(HexToByte(hexAddress[(i * 2)])
-                                    + HexToByte(hexAddress[(i * 2) + 1]));
+                for (int j = 0; j < 4; j++)
+                {
+                    var offset = (i * 2) + 6 - (j * 2);
+                    addressBytes[i + j] = (byte)(0x10 * HexToByte(hexAddress[offset]) // upper half
+                                    + HexToByte(hexAddress[offset + 1]));           // + lower half
+                }
             }
 
             IPAddress ipAddress = new IPAddress(addressBytes);
