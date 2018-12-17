@@ -11,6 +11,7 @@ namespace System.IO.Tests
 {
     public class FileSystemWatcher_Multiple_Test : FileSystemWatcherTest
     {
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "#34017")]        
         [OuterLoop]
         [Fact]
         public void FileSystemWatcher_File_Create_MultipleWatchers_ExecutionContextFlowed()
@@ -35,7 +36,7 @@ namespace System.IO.Tests
                     watcher1.EnableRaisingEvents = true;
                     local.Value = 84;
                     watcher2.EnableRaisingEvents = true;
-                    local.Value = 0;
+                    local.Value = 168;
 
                     File.Create(fileName).Dispose();
                     Task.WaitAll(new[] { tcs1.Task, tcs2.Task }, WaitForExpectedEventTimeout);
