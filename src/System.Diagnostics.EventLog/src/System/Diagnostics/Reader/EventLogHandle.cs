@@ -4,12 +4,12 @@
 
 using System.Runtime.InteropServices;
 
-/// <summary>
-/// A SafeHandle implementation over native EVT_HANDLE
-/// obtained from EventLog Native Methods.
-/// </summary>
 namespace System.Diagnostics.Eventing.Reader
 {
+    /// <summary>
+    /// A SafeHandle implementation over native EVT_HANDLE
+    /// obtained from EventLog Native Methods.
+    /// </summary>
     internal sealed class EventLogHandle : SafeHandle
     {
         // Called by P/Invoke when returning SafeHandles
