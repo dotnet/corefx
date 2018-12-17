@@ -222,15 +222,6 @@ namespace System.IO.Pipelines
             return new BufferSegment();
         }
 
-        private void ReturnSegmentUnsynchronized(BufferSegment segment)
-        {
-            if (_pooledSegmentCount < _bufferSegmentPool.Length)
-            {
-                _bufferSegmentPool[_pooledSegmentCount] = segment;
-                _pooledSegmentCount++;
-            }
-        }
-
         internal bool CommitUnsynchronized()
         {
             _operationState.EndWrite();
@@ -467,13 +458,33 @@ namespace System.IO.Pipelines
                     _readerAwaitable.SetUncompleted();
                 }
 
-                while (returnStart != null && returnStart != returnEnd)
+                // Reset and try to pool any used blocks
+                if (returnStart != null)
                 {
-                    returnStart.ResetMemory();
-                    ReturnSegmentUnsynchronized(returnStart);
-                    returnStart = returnStart.NextSegment;
+                    int index = _pooledSegmentCount;
+                    BufferSegment[] pool = _bufferSegmentPool;
+                    while (returnStart != returnEnd)
+                    {
+                        BufferSegment next = returnStart.NextSegment;
+                        returnStart.ResetMemory();
+
+                        if ((uint)index < (uint)pool.Length)
+                        {
+                            pool[index] = returnStart;
+                            index++;
+                        }
+
+                        if (next is null)
+                        {
+                            break;
+                        }
+                        returnStart = next;
+                    }
+
+                    _pooledSegmentCount = index;
                 }
 
+                // This may throw, blocks must be returned prior to the method exit (i.e. the throw)
                 _operationState.EndRead();
             }
 
@@ -724,6 +735,7 @@ namespace System.IO.Pipelines
                 _readHead = null;
                 _readTail = null;
 
+                // Reset and try to pool any used blocks
                 if (current != null)
                 {
                     int index = _pooledSegmentCount;
