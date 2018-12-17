@@ -207,7 +207,7 @@ namespace System.Net.NetworkInformation.Tests
             Assert.Equal(10L, table.CompressedPacketsReceived);
             Assert.Equal(12L, table.MulticastFramesReceived);
 
-            Assert.Equal(27465L, table.BytesTransmitted);
+            Assert.Equal(429496730000L, table.BytesTransmitted);
             Assert.Equal(208L, table.PacketsTransmitted);
             Assert.Equal(1L, table.ErrorsTransmitted);
             Assert.Equal(2L, table.OutgoingPacketsDropped);
@@ -224,7 +224,7 @@ namespace System.Net.NetworkInformation.Tests
             FileUtil.NormalizeLineEndings("NetworkFiles/dev", fileName);
             IPInterfaceStatisticsTable table = StringParsingHelpers.ParseInterfaceStatisticsTableFromFile(fileName, "lo");
 
-            Assert.Equal(429496730000L, table.BytesReceived);
+            Assert.Equal(long.MaxValue, table.BytesReceived);
             Assert.Equal(302L, table.PacketsReceived);
             Assert.Equal(0L, table.ErrorsReceived);
             Assert.Equal(0L, table.IncomingPacketsDropped);
