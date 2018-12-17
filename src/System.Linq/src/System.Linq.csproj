@@ -10,10 +10,12 @@
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Base.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Array.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Concat.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Range.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Array.cs" />
+    <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Concat.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Range.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Aggregate.cs" />
@@ -25,12 +27,14 @@
     <Compile Include="System\Linq\ChainLinq\Consumer\Reduce.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\SetResult.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Array.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consume\Concat.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Range.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Consumer.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Array.cs" />
+    <Compile Include="System\Linq\ChainLinq\GetEnumerator\Concat.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Range.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Enumerable.cs" />

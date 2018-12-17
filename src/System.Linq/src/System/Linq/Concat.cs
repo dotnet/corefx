@@ -21,6 +21,10 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(second));
             }
 
+#if !PRE_CHAINLINQ
+            return new ChainLinq.Consumables.Concat<TSource, TSource>(first, second, ChainLinq.Links.Identity<TSource>.Instance);
+        }
+#else
             return first is ConcatIterator<TSource> firstConcat
                 ? firstConcat.Concat(second)
                 : new Concat2Iterator<TSource>(first, second);
@@ -253,5 +257,6 @@ namespace System.Linq
                 return false;
             }
         }
+#endif
     }
 }

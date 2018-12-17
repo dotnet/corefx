@@ -19,7 +19,13 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
 
         public virtual T Current => Result;
         object IEnumerator.Current => Result;
-        public virtual void Dispose() => StartOfChain.ChainDispose();
+        public virtual void Dispose()
+        {
+            if (StartOfChain != null)
+            {
+                StartOfChain.ChainDispose();
+            }
+        }
         public virtual void Reset() => throw new NotSupportedException();
 
         public abstract bool MoveNext();
