@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace System.Linq.ChainLinq.Consumer
+﻿namespace System.Linq.ChainLinq.Consumer
 {
     class AverageInt : Consumer<int, double>
     {

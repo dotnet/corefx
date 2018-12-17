@@ -26,6 +26,7 @@
     <Compile Include="System\Linq\ChainLinq\Consumer\Contains.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Reduce.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\SetResult.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumer\Sum.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Array.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Concat.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Range.cs" />
