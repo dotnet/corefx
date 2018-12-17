@@ -349,7 +349,7 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Check packet equality
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="packet"></param>
         /// <returns>true if equal</returns>
         public bool Equals(SNIPacket packet)
         {
