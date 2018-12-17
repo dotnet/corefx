@@ -459,11 +459,11 @@ namespace System.IO.Pipelines
                 }
 
                 // Reset and try to pool any used blocks
-                if (returnStart != null)
+                if (returnStart != returnEnd)
                 {
                     int index = _pooledSegmentCount;
                     BufferSegment[] pool = _bufferSegmentPool;
-                    while (returnStart != returnEnd)
+                    while (returnStart != null)
                     {
                         BufferSegment next = returnStart.NextSegment;
                         returnStart.ResetMemory();
@@ -474,10 +474,11 @@ namespace System.IO.Pipelines
                             index++;
                         }
 
-                        if (next is null)
+                        if (next == returnEnd)
                         {
                             break;
                         }
+
                         returnStart = next;
                     }
 
