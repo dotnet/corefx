@@ -1,0 +1,36 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+
+namespace System.Data.SqlClient
+{
+    internal readonly ref struct SessionHandle
+    {
+        public const int NativeHandleType = 1;
+        public const int ManagedHandleType = 2;
+
+        public readonly SNI.SNIHandle ManagedHandle;
+        public readonly SNIHandle NativeHandle;
+
+        public readonly int Type;
+
+        public SessionHandle(SNI.SNIHandle managedHandle, SNIHandle nativeHandle, int type)
+        {
+            Type = type;
+            ManagedHandle = managedHandle;
+            NativeHandle = nativeHandle;
+        }
+
+        public bool IsNull => (Type == NativeHandleType) ? NativeHandle is null : ManagedHandle is null;
+
+        public static SessionHandle FromManagedSession(SNI.SNIHandle managedSessionHandle)
+        {
+            return new SessionHandle(managedSessionHandle, default, ManagedHandleType);
+        }
+        public static SessionHandle FromNativeHandle(SNIHandle nativeSessionHandle)
+        {
+            return new SessionHandle(default, nativeSessionHandle, NativeHandleType);
+        }
+    }
+}
