@@ -351,7 +351,7 @@ namespace System.Diagnostics
         /// <summary>Checks whether the argument is a direct child of this process.</summary>
         /// <remarks>
         /// A child process is a process which has this process's id as its parent process id and which started after this process did.
-        /// </remakrs>
+        /// </remarks>
         private bool IsParentOf(Process possibleChild) =>
             StartTime < possibleChild.StartTime
             && Id == possibleChild.ParentProcessId;
