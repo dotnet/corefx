@@ -127,6 +127,15 @@
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.CryptSignHash.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.CryptSignHash.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\SafeHashHandle.cs">
+      <Link>Common\Interop\Windows\advapi32\SafeHashHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\SafeKeyHandle.cs">
+      <Link>Common\Interop\Windows\advapi32\SafeKeyHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\SafeProvHandle.cs">
+      <Link>Common\Interop\Windows\advapi32\SafeProvHandle.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Crypt32\Interop.FindOidInfo.cs">
       <Link>Common\Interop\Windows\Crypt32\Interop.FindOidInfo.cs</Link>
     </Compile>
@@ -138,15 +147,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleCache.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleCache.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHashHandle.cs">
-      <Link>Common\Microsoft\Win32\SafeHandles\SafeHashHandle.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeKeyHandle.cs">
-      <Link>Common\Microsoft\Win32\SafeHandles\SafeKeyHandle.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeProvHandle.cs">
-      <Link>Common\Microsoft\Win32\SafeHandles\SafeProvHandle.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
