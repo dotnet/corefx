@@ -21,18 +21,13 @@ namespace System.Linq.ChainLinq.Consume
 
         private static void Pipeline<T>(IEnumerable<T> first, IEnumerable<T> second, Chain<T> chain)
         {
-            foreach (var item in first)
-            {
-                var state = chain.ProcessNext(item);
-                if (state.IsStopped())
-                    return;
-            }
-            foreach (var item in second)
-            {
-                var state = chain.ProcessNext(item);
-                if (state.IsStopped())
-                    break;
-            }
+            UnknownEnumerable.ChainConsumer<T> inner = null;
+
+            var status = UnknownEnumerable.Consume(first, chain, ref inner);
+            if (status.IsStopped())
+                return;
+
+            UnknownEnumerable.Consume(second, chain, ref inner);
         }
 
     }

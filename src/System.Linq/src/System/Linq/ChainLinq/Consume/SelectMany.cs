@@ -4,21 +4,6 @@ namespace System.Linq.ChainLinq.Consume
 {
     static class SelectMany
     {
-        class SelectManyInnerConsumer<T> : Consumer<T, ChainStatus>
-        {
-            private readonly Chain<T> _chainT;
-
-            public SelectManyInnerConsumer(Chain<T> chainT) : base(ChainStatus.Flow) =>
-                _chainT = chainT;
-
-            public override ChainStatus ProcessNext(T input)
-            {
-                var state = _chainT.ProcessNext(input);
-                Result = state;
-                return state;
-            }
-        }
-
         class SelectManyInnerConsumer<TSource, TCollection, T> : Consumer<TCollection, ChainStatus>
         {
             private readonly Chain<T> _chainT;
@@ -40,38 +25,13 @@ namespace System.Linq.ChainLinq.Consume
         class SelectManyOuterConsumer<T> : Consumer<IEnumerable<T>, ChainEnd>
         {
             private readonly Chain<T> _chainT;
-            private SelectManyInnerConsumer<T> _inner;
-
-            private SelectManyInnerConsumer<T> GetInnerConsumer()
-            {
-                if (_inner == null)
-                    _inner = new SelectManyInnerConsumer<T>(_chainT);
-                return _inner;
-            }
+            private UnknownEnumerable.ChainConsumer<T> _inner;
 
             public SelectManyOuterConsumer(Chain<T> chainT) : base(default) =>
                 _chainT = chainT;
 
-            public override ChainStatus ProcessNext(IEnumerable<T> input)
-            {
-                var state = ChainStatus.Flow;
-                switch (input)
-                {
-                    case Consumable<T> consumable:
-                        state = consumable.Consume(GetInnerConsumer());
-                        break;
-
-                    default:
-                        foreach (var item in input)
-                        {
-                            state = _chainT.ProcessNext(item);
-                            if (state.IsStopped())
-                                break;
-                        }
-                        break;
-                }
-                return state;
-            }
+            public override ChainStatus ProcessNext(IEnumerable<T> input) =>
+                UnknownEnumerable.Consume(input, _chainT, ref _inner);
         }
 
         class SelectManyOuterConsumer<TSource, TCollection, T> : Consumer<(TSource, IEnumerable<TCollection>), ChainEnd>

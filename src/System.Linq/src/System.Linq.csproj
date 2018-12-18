@@ -29,6 +29,7 @@
     <Compile Include="System\Linq\ChainLinq\Consumer\Sum.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Array.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Concat.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consume\UnknownEnumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Range.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Enumerable.cs" />
