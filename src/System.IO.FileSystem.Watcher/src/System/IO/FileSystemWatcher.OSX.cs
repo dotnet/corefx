@@ -193,6 +193,7 @@ namespace System.IO
                             return;
                         }
 
+                        Debug.Assert(s_scheduledStreamsCount == 0);
                         s_scheduledStreamsCount = 1;
                         var runLoopStarted = new ManualResetEventSlim();
                         new Thread(WatchForFileSystemEventsThreadStart) { IsBackground = true }.Start(new object[] { runLoopStarted, eventStream });
@@ -202,22 +203,20 @@ namespace System.IO
 
                 public static void UnscheduleFromRunLoop(SafeEventStreamHandle eventStream)
                 {
-                    if (s_watcherRunLoop != IntPtr.Zero)
-                    { 
-                        lock (s_lockObject)
-                        {
-                            if (s_watcherRunLoop != IntPtr.Zero)
-                            { 
-                                // Always unschedule the RunLoop before cleaning up
-                                Interop.EventStream.FSEventStreamUnscheduleFromRunLoop(eventStream, s_watcherRunLoop, Interop.RunLoop.kCFRunLoopDefaultMode);
-                                s_scheduledStreamsCount--;
+                    Debug.Assert(s_watcherRunLoop != IntPtr.Zero);
+                    lock (s_lockObject)
+                    {
+                        if (s_watcherRunLoop != IntPtr.Zero)
+                        { 
+                            // Always unschedule the RunLoop before cleaning up
+                            Interop.EventStream.FSEventStreamUnscheduleFromRunLoop(eventStream, s_watcherRunLoop, Interop.RunLoop.kCFRunLoopDefaultMode);
+                            s_scheduledStreamsCount--;
 
-                                if (s_scheduledStreamsCount == 0)
-                                {
-                                    // Stop the FS event message pump
-                                    Interop.RunLoop.CFRunLoopStop(s_watcherRunLoop);                                    
-                                    s_watcherRunLoop = IntPtr.Zero;
-                                }
+                            if (s_scheduledStreamsCount == 0)
+                            {
+                                // Stop the FS event message pump
+                                Interop.RunLoop.CFRunLoopStop(s_watcherRunLoop);
+                                s_watcherRunLoop = IntPtr.Zero;
                             }
                         }
                     }
@@ -249,9 +248,8 @@ namespace System.IO
                     finally
                     {
                         lock (s_lockObject)
-                        {                    
-                            Interop.CoreFoundation.CFRelease(runLoop);                                  
-                            s_watcherRunLoop = IntPtr.Zero;
+                        {
+                            Interop.CoreFoundation.CFRelease(runLoop);
                         }
                     }
                 }
