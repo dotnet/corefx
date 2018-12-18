@@ -39,7 +39,6 @@
     <Compile Include="System\Diagnostics\Reader\EventMetadata.cs" />
     <Compile Include="System\Diagnostics\Reader\EventOpcode.cs" />
     <Compile Include="System\Diagnostics\Reader\EventProperty.cs" />
-    <Compile Include="System\Diagnostics\Reader\EventPropertyContext.cs" />
     <Compile Include="System\Diagnostics\Reader\EventRecord.cs" />
     <Compile Include="System\Diagnostics\Reader\EventRecordWrittenEventArgs.cs" />
     <Compile Include="System\Diagnostics\Reader\EventTask.cs" />

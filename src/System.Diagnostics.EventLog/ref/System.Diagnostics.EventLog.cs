@@ -422,12 +422,6 @@ namespace System.Diagnostics.Eventing.Reader
         internal EventProperty() { }
         public object Value { get { throw null; } }
     }
-    public abstract partial class EventPropertyContext : System.IDisposable
-    {
-        protected EventPropertyContext() { }
-        public void Dispose() { }
-        protected virtual void Dispose(bool disposing) { }
-    }
     public abstract partial class EventRecord : System.IDisposable
     {
         protected EventRecord() { }
