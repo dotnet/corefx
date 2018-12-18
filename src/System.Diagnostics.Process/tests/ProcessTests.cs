@@ -958,7 +958,7 @@ namespace System.Diagnostics.Tests
 
             uint sessionId;
 #if TargetsWindows
-            Interop.ProcessIdToSessionId((uint)_process.Id, out sessionId);
+                Interop.ProcessIdToSessionId((uint)_process.Id, out sessionId);
 #else
                 sessionId = (uint)Interop.getsid(_process.Id);
 #endif
@@ -1281,7 +1281,7 @@ namespace System.Diagnostics.Tests
             Assert.Throws<InvalidOperationException>(() => process.StandardInput);
         }
 
-        // [Fact][SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // uncomment for diagnostic purposes to list processes to console
+        // [Fact] // uncomment for diagnostic purposes to list processes to console
         public void TestDiagnosticsWithConsoleWriteLine()
         {
             foreach (var p in Process.GetProcesses().OrderBy(p => p.Id))
