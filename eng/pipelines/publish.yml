@@ -76,10 +76,8 @@ jobs:
       - script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 build.proj
                 -warnaserror:0 -ci
                 /t:UpdatePublishedVersions
-                /p:GitHubUser=dotnet-helix-bot
-                /p:GitHubEmail=dotnet-helix-bot@microsoft.com
                 /p:GitHubAuthToken=$(AccessToken-dotnet-build-bot-public-repo)
-                /p:VersionsRepoOwner=dagood
+                /p:VersionsRepoOwner=dotnet
                 /p:VersionsRepo=versions
                 /p:VersionsRepoPath=build-info/dotnet/corefx/$(Build.SourceBranchName)
                 /p:ShippedNuGetPackageGlobPath=${{ parameters.artifactsDir }}/packages/*.nupkg
