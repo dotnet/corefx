@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
 using System.IO;
 
 namespace System.Net.NetworkInformation
@@ -445,7 +446,7 @@ namespace System.Net.NetworkInformation
 
         private static long ParseUInt64AndClampToInt64(string value) 
         {
-            return (long)Math.Min((ulong)long.MaxValue, ulong.Parse(value)); 
+            return (long)Math.Min((ulong)long.MaxValue, ulong.Parse(value, CultureInfo.InvariantCulture));
         }
     }
 }
