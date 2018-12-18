@@ -612,16 +612,27 @@ namespace System.Data.SqlClient
                         break;
 
                     case (int)PreLoginOptions.TRACEID:
+#if netcoreapp
+                        Span<byte> connectionIdBytes = stackalloc byte[16];
+                        _connHandler._clientConnectionId.TryWriteBytes(connectionIdBytes);
+                        connectionIdBytes.CopyTo(payload.AsSpan(payloadLength, GUID_SIZE));
+#else
                         byte[] connectionIdBytes = _connHandler._clientConnectionId.ToByteArray();
                         Debug.Assert(GUID_SIZE == connectionIdBytes.Length);
                         Buffer.BlockCopy(connectionIdBytes, 0, payload, payloadLength, GUID_SIZE);
+#endif
                         payloadLength += GUID_SIZE;
                         offset += GUID_SIZE;
                         optionDataSize = GUID_SIZE;
 
                         ActivityCorrelator.ActivityId actId = ActivityCorrelator.Next();
+#if netcoreapp
+                        actId.Id.TryWriteBytes(connectionIdBytes);
+                        connectionIdBytes.CopyTo(payload.AsSpan(payloadLength, GUID_SIZE));
+#else
                         connectionIdBytes = actId.Id.ToByteArray();
                         Buffer.BlockCopy(connectionIdBytes, 0, payload, payloadLength, GUID_SIZE);
+#endif
                         payloadLength += GUID_SIZE;
                         payload[payloadLength++] = (byte)(0x000000ff & actId.Sequence);
                         payload[payloadLength++] = (byte)((0x0000ff00 & actId.Sequence) >> 8);
@@ -5129,10 +5140,20 @@ namespace System.Data.SqlClient
                 case TdsEnums.SQLUNIQUEID:
                     {
                         System.Guid guid = (System.Guid)value;
+
+#if netcoreapp
+                        Span<byte> b = stackalloc byte[16];
+                        guid.TryWriteBytes(b);
+#else
                         byte[] b = guid.ToByteArray();
+#endif
 
                         Debug.Assert((length == b.Length) && (length == 16), "Invalid length for guid type in com+ object");
+#if netcoreapp
+                        stateObj.WriteByteSpan(b);
+#else
                         stateObj.WriteByteArray(b, length, 0);
+#endif
                         break;
                     }
 
@@ -5286,12 +5307,20 @@ namespace System.Data.SqlClient
                 case TdsEnums.SQLUNIQUEID:
                     {
                         System.Guid guid = (System.Guid)value;
+#if netcoreapp
+                        Span<byte> b = stackalloc byte[16];
+                        guid.TryWriteBytes(b);
+#else
                         byte[] b = guid.ToByteArray();
-
+#endif
                         length = b.Length;
                         Debug.Assert(length == 16, "Invalid length for guid type in com+ object");
                         WriteSqlVariantHeader(18, metatype.TDSType, metatype.PropBytes, stateObj);
+#if netcoreapp
+                        stateObj.WriteByteSpan(b);
+#else
                         stateObj.WriteByteArray(b, length, 0);
+#endif
                         break;
                     }
 
@@ -8736,10 +8765,19 @@ namespace System.Data.SqlClient
 
                 case TdsEnums.SQLUNIQUEID:
                     {
+                        Debug.Assert(actualLength == 16, "Invalid length for guid type in com+ object");
+#if netcoreapp
+                        Span<byte> b = stackalloc byte[16];
+                        SqlGuid sqlGuid = (SqlGuid)value;
+                        if (!sqlGuid.IsNull) // if isnull then b has been initialized by the runtime to all zeros which is the same as a null guid
+                        {
+                            sqlGuid.Value.TryWriteBytes(b);
+                        }
+                        stateObj.WriteByteSpan(b);
+#else
                         byte[] b = ((SqlGuid)value).ToByteArray();
-
-                        Debug.Assert((actualLength == b.Length) && (actualLength == 16), "Invalid length for guid type in com+ object");
                         stateObj.WriteByteArray(b, actualLength, 0);
+#endif
                         break;
                     }
 
@@ -9364,11 +9402,16 @@ namespace System.Data.SqlClient
 
                 case TdsEnums.SQLUNIQUEID:
                     {
+                        Debug.Assert(actualLength == 16, "Invalid length for guid type in com+ object");
                         System.Guid guid = (System.Guid)value;
+#if netcoreapp
+                        Span<byte> b = stackalloc byte[16];
+                        guid.TryWriteBytes(b);
+                        stateObj.WriteByteSpan(b);
+#else
                         byte[] b = guid.ToByteArray();
-
-                        Debug.Assert((actualLength == b.Length) && (actualLength == 16), "Invalid length for guid type in com+ object");
                         stateObj.WriteByteArray(b, actualLength, 0);
+#endif
                         break;
                     }
 
