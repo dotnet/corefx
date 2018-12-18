@@ -323,6 +323,7 @@
   </data>
   <data name="KillEntireProcessTree_TerminationIncomplete" xml:space="preserve">
     <value>Not all processes in process tree could be terminated.</value>
+  </data>
   <data name="InvalidSysctl" xml:space="preserve">
     <value>sysctl {0} failed with {1} error.</value>
   </data>
