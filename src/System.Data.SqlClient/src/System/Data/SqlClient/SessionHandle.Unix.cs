@@ -5,7 +5,15 @@
 
 namespace System.Data.SqlClient
 {
-    internal readonly ref struct SessionHandle
+	// this structure is used for transporting packet handle references between the TdsParserStateObject
+	//  base class and Managed or Native implementations. 
+	// It carries type information so that assertions about the type of handle can be made in the 
+	//  implemented abstract methods 
+	// it is a ref struct so that it can only be used to transport the handles and not store them
+
+	// N.B. If you change this type you must also change the version for the other platform
+
+	internal readonly ref struct SessionHandle
     {
         public const int NativeHandleType = 1;
         public const int ManagedHandleType = 2;
@@ -21,9 +29,6 @@ namespace System.Data.SqlClient
 
         public bool IsNull => ManagedHandle is null;
 
-        public static SessionHandle FromManagedSession(SNI.SNIHandle managedSessionHandle)
-        {
-            return new SessionHandle(managedSessionHandle, ManagedHandleType);
-        }
-    }
+		public static SessionHandle FromManagedSession(SNI.SNIHandle managedSessionHandle) => new SessionHandle(managedSessionHandle, ManagedHandleType);
+	}
 }

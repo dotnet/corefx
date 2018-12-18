@@ -33,8 +33,6 @@ namespace System.Data.SqlClient.SNI
 
         internal override SessionHandle SessionHandle => SessionHandle.FromManagedSession(_sessionHandle);
 
-        protected override PacketHandle EmptyReadPacket => default;
-
         protected override bool CheckPacket(PacketHandle packet, TaskCompletionSource<object> source)
         {
             SNIPacket p = packet.ManagedPacket;

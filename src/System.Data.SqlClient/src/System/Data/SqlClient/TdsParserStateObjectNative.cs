@@ -35,8 +35,6 @@ namespace System.Data.SqlClient
 
         internal override SessionHandle SessionHandle => SessionHandle.FromNativeHandle(_sessionHandle);
 
-        protected override PacketHandle EmptyReadPacket => default;
-
         protected override void CreateSessionHandle(TdsParserStateObject physicalConnection, bool async)
         {
             Debug.Assert(physicalConnection is TdsParserStateObjectNative, "Expected a stateObject of type " + this.GetType());

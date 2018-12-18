@@ -2416,37 +2416,23 @@ namespace System.Data.SqlClient
                 else
                 {
                     uint error;
+                    SniContext = SniContext.Snix_Connect;
+                    error = CheckConnection();
 
-                    PacketHandle readPacket = EmptyReadPacket;
-
-                    try
+                    if ((error != TdsEnums.SNI_SUCCESS) && (error != TdsEnums.SNI_WAIT_TIMEOUT))
                     {
-                        SniContext = SniContext.Snix_Connect;
-
-                        error = CheckConnection();
-
-                        if ((error != TdsEnums.SNI_SUCCESS) && (error != TdsEnums.SNI_WAIT_TIMEOUT))
+                        // Connection is dead
+                        isAlive = false;
+                        if (throwOnException)
                         {
-                            // Connection is dead
-                            isAlive = false;
-                            if (throwOnException)
-                            {
-                                // Get the error from SNI so that we can throw the correct exception
-                                AddError(_parser.ProcessSNIError(this));
-                                ThrowExceptionAndWarning();
-                            }
-                        }
-                        else
-                        {
-                            _lastSuccessfulIOTimer._value = DateTime.UtcNow.Ticks;
+                            // Get the error from SNI so that we can throw the correct exception
+                            AddError(_parser.ProcessSNIError(this));
+                            ThrowExceptionAndWarning();
                         }
                     }
-                    finally
+                    else
                     {
-                        if (!IsPacketEmpty(readPacket))
-                        {
-                            ReleasePacket(readPacket);
-                        }
+                        _lastSuccessfulIOTimer._value = DateTime.UtcNow.Ticks;
                     }
                 }
             }
@@ -3658,7 +3644,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        protected abstract PacketHandle EmptyReadPacket { get; }
+        protected virtual PacketHandle EmptyReadPacket => default;
 
         /// <summary>
         /// Gets the full list of errors and warnings (including the pre-attention ones), then wipes all error and warning lists
