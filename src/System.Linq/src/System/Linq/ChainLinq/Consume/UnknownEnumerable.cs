@@ -13,21 +13,14 @@ namespace System.Linq.ChainLinq.Consume
 
             public override ChainStatus ProcessNext(T input)
             {
-                var state = _chainT.ProcessNext(input);
-                Result = state;
-                return state;
+                var status = _chainT.ProcessNext(input);
+                Result = status;
+                return status;
             }
         }
 
-        private static ChainConsumer<T> GetInnerConsumer<T>(Chain<T> chain, ref ChainConsumer<T> consumer)
-        {
-            if (consumer == null)
-            {
-                consumer = new ChainConsumer<T>(chain);
-                return consumer;
-            }
-            return consumer;
-        }
+        private static ChainConsumer<T> GetInnerConsumer<T>(Chain<T> chain, ref ChainConsumer<T> consumer) =>
+            consumer ?? (consumer = new ChainConsumer<T>(chain));
 
         public static ChainStatus Consume<T>(IEnumerable<T> input, Chain<T> chain, ref ChainConsumer<T> consumer)
         {
@@ -37,7 +30,7 @@ namespace System.Linq.ChainLinq.Consume
                     return consumable.Consume(GetInnerConsumer(chain, ref consumer));
 
                 case T[] array:
-                    return ConsumerArray(chain, array);
+                    return ConsumerArray(array, chain);
 
                 default:
                     return ConsumerEnumerable(input, chain);
@@ -56,7 +49,7 @@ namespace System.Linq.ChainLinq.Consume
             return status;
         }
 
-        private static ChainStatus ConsumerArray<T>(Chain<T> chain, T[] array)
+        private static ChainStatus ConsumerArray<T>(T[] array, Chain<T> chain)
         {
             var status = ChainStatus.Flow;
             foreach (var item in array)
