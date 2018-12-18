@@ -12,10 +12,30 @@ namespace System.Diagnostics.Tests
         [ConditionalTheory(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
         [InlineData("Application", false)]
         [InlineData("Application", true)]
-        [InlineData("Microsoft-Windows-PowerShell/Operational", false)]
-        [InlineData("Microsoft-Windows-PowerShell/Operational", true)]
         public void ReadEvent(string logName, bool useQuery)
         {
+            var eventLog =
+                useQuery
+                ? new EventLogReader(
+                     new EventLogQuery(logName, PathType.LogName) { ReverseDirection = true })
+                : new EventLogReader(logName);
+
+            using (eventLog)
+            {
+                var record = eventLog.ReadEvent();
+                Assert.NotNull(record);
+                Assert.Equal(logName, record.LogName);
+            }
+        }
+
+        [ConditionalTheory(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        [InlineData("Microsoft-Windows-PowerShell/Operational", false)]
+        [InlineData("Microsoft-Windows-PowerShell/Operational", true)]
+        public void ReadEventPsh(string logName, bool useQuery)
+        {
+            if (PlatformDetection.IsWindows7) // Null events in PowerShell log
+                return;
+
             var eventLog =
                 useQuery
                 ? new EventLogReader(
