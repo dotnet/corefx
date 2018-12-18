@@ -17,11 +17,13 @@ namespace System.Data.SqlClient
         // Temporary disabling App Context switching for managed SNI.
         // If the appcontext switch is set then Use Managed SNI based on the value. Otherwise Managed SNI should always be used.
         //private static bool shouldUseLegacyNetorking;
-        private static Lazy<bool> shouldUseLegacyNetorking = new Lazy<bool>(() => bool.TrueString.Equals(Environment.GetEnvironmentVariable("System.Data.SqlClient.UseLegacyNetworkingOnWindows"), StringComparison.InvariantCultureIgnoreCase));
         //public static bool UseManagedSNI { get; } = AppContext.TryGetSwitch(UseLegacyNetworkingOnWindows, out shouldUseLegacyNetorking) ? !shouldUseLegacyNetorking : true;
 
-
 #if DEBUG
+        private static Lazy<bool> shouldUseLegacyNetorking = new Lazy<bool>(
+            () => bool.TrueString.Equals(Environment.GetEnvironmentVariable("System.Data.SqlClient.UseLegacyNetworkingOnWindows"), StringComparison.InvariantCultureIgnoreCase)
+        );
+
         public static bool UseManagedSNI => shouldUseLegacyNetorking.Value;
 #else
         public static bool UseManagedSNI { get; } = false;
