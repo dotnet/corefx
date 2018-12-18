@@ -77,7 +77,7 @@ namespace System.IO.Tests
                     watcher1.EnableRaisingEvents = false;
 
                     File.Create(fileName).Dispose();
-                    Assert.False(autoResetEvent1.WaitOne(WaitForExpectedEventTimeout));
+                    Assert.False(autoResetEvent1.WaitOne(WaitForUnexpectedEventTimeout));
                     Assert.True(WaitHandle.WaitAll(new[] { autoResetEvent2, autoResetEvent3 }, WaitForExpectedEventTimeout_NoRetry));
                 }
             });
@@ -104,11 +104,11 @@ namespace System.IO.Tests
 
                 File.Create(fileName1).Dispose();
                 Assert.True(autoResetEvent1.WaitOne(WaitForExpectedEventTimeout_NoRetry));
-                Assert.False(autoResetEvent2.WaitOne(WaitForExpectedEventTimeout));
+                Assert.False(autoResetEvent2.WaitOne(WaitForUnexpectedEventTimeout));
 
                 File.Create(fileName2).Dispose();
                 Assert.True(autoResetEvent2.WaitOne(WaitForExpectedEventTimeout_NoRetry));
-                Assert.False(autoResetEvent1.WaitOne(WaitForExpectedEventTimeout));                
+                Assert.False(autoResetEvent1.WaitOne(WaitForUnexpectedEventTimeout));                
             }
         }
 
@@ -141,7 +141,7 @@ namespace System.IO.Tests
                 }
 
                 File.Create(fileName).Dispose(); 
-                Assert.False(WaitHandle.WaitAll(autoResetEvents, WaitForExpectedEventTimeout));
+                Assert.False(WaitHandle.WaitAll(autoResetEvents, WaitForUnexpectedEventTimeout));
 
                 File.Delete(fileName);
 
@@ -207,20 +207,20 @@ namespace System.IO.Tests
 
                     Directory.SetLastWriteTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
                     Assert.True(WaitHandle.WaitAll(new[] { autoResetEvent1, autoResetEvent2 }, WaitForExpectedEventTimeout_NoRetry));
-                    Assert.False(autoResetEvent3.WaitOne(WaitForExpectedEventTimeout));
+                    Assert.False(autoResetEvent3.WaitOne(WaitForUnexpectedEventTimeout));
 
                     Directory.SetLastWriteTime(otherFile.Path, DateTime.Now + TimeSpan.FromSeconds(10));
-                    Assert.False(WaitHandle.WaitAll(new[] { autoResetEvent1, autoResetEvent2 }, WaitForExpectedEventTimeout));
+                    Assert.False(WaitHandle.WaitAll(new[] { autoResetEvent1, autoResetEvent2 }, WaitForUnexpectedEventTimeout));
                     Assert.True(autoResetEvent3.WaitOne(WaitForExpectedEventTimeout_NoRetry));
 
                     watcher1.EnableRaisingEvents = false;
 
                     Directory.SetLastWriteTime(file.Path, DateTime.Now + TimeSpan.FromSeconds(10));
-                    Assert.False(WaitHandle.WaitAll(new[] { autoResetEvent1, autoResetEvent3 }, WaitForExpectedEventTimeout));
+                    Assert.False(WaitHandle.WaitAll(new[] { autoResetEvent1, autoResetEvent3 }, WaitForUnexpectedEventTimeout));
                     Assert.True(autoResetEvent2.WaitOne(WaitForExpectedEventTimeout_NoRetry));
 
                     Directory.SetLastWriteTime(otherFile.Path, DateTime.Now + TimeSpan.FromSeconds(10));
-                    Assert.False(WaitHandle.WaitAll(new[] { autoResetEvent1, autoResetEvent2 }, WaitForExpectedEventTimeout));
+                    Assert.False(WaitHandle.WaitAll(new[] { autoResetEvent1, autoResetEvent2 }, WaitForUnexpectedEventTimeout));
                     Assert.True(autoResetEvent3.WaitOne(WaitForExpectedEventTimeout_NoRetry));
                 }
             });
@@ -258,7 +258,7 @@ namespace System.IO.Tests
                     watcher1.EnableRaisingEvents = false;
 
                     File.Delete(fileName);
-                    Assert.False(autoResetEvent1.WaitOne(WaitForExpectedEventTimeout));
+                    Assert.False(autoResetEvent1.WaitOne(WaitForUnexpectedEventTimeout));
                     Assert.True(WaitHandle.WaitAll(new[] { autoResetEvent2, autoResetEvent3 }, WaitForExpectedEventTimeout_NoRetry));
                 }
             });
@@ -298,7 +298,7 @@ namespace System.IO.Tests
                     File.Move(filePath, filePathRenamed);
                     Assert.False(WaitHandle.WaitAll(
                     	new[] { autoResetEvent1_created, autoResetEvent1_deleted },
-                    	WaitForExpectedEventTimeout));
+                    	WaitForUnexpectedEventTimeout));
                     Assert.True(WaitHandle.WaitAll(
                     	new[] { autoResetEvent2_created, autoResetEvent2_deleted },
                     	WaitForExpectedEventTimeout_NoRetry));
