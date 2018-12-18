@@ -14,6 +14,7 @@ using System.Runtime.Serialization;
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.ISupportInitialize))]
 // moved to System.ObjectModel
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.TypeConverterAttribute))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.TypeDescriptionProviderAttribute))]
 
 namespace System
 {
@@ -583,13 +584,6 @@ namespace System.ComponentModel
         public virtual System.ComponentModel.ICustomTypeDescriptor GetTypeDescriptor(System.Type objectType, object instance) { throw null; }
         public virtual bool IsSupportedType(System.Type type) { throw null; }
     }
-    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = true)]
-    public sealed partial class TypeDescriptionProviderAttribute : System.Attribute
-    {
-        public TypeDescriptionProviderAttribute(string typeName) { }
-        public TypeDescriptionProviderAttribute(System.Type type) { }
-        public string TypeName { get { throw null; } }
-    }
     public sealed partial class TypeDescriptor
     {
         internal TypeDescriptor() { }
@@ -797,6 +791,9 @@ namespace System.Timers
         public System.DateTime SignalTime { get { throw null; } }
     }
     public delegate void ElapsedEventHandler(object sender, System.Timers.ElapsedEventArgs e);
+    
+    [System.ComponentModel.DefaultProperty("Interval")]
+    [System.ComponentModel.DefaultEvent("Elapsed")]
     public partial class Timer : System.ComponentModel.Component, System.ComponentModel.ISupportInitialize
     {
         public Timer() { }

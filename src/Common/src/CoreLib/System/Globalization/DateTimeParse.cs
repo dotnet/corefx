@@ -678,7 +678,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                             raw.year = tokenValue;
                             //
                             // If we have number which has 3 or more digits (like "001" or "0001"),
-                            // we assume this number is a year. Save the currnet raw.numCount in
+                            // we assume this number is a year. Save the current raw.numCount in
                             // raw.year.
                             //
                             switch (sep = str.GetSeparatorToken(dtfi, out indexBeforeSeparator, out charBeforeSeparator))
@@ -882,7 +882,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                             raw.year = tokenValue;
                             //
                             // If we have number which has 3 or more digits (like "001" or "0001"),
-                            // we assume this number is a year. Save the currnet raw.numCount in
+                            // we assume this number is a year. Save the current raw.numCount in
                             // raw.year.
                             //
                             switch (sep = str.GetSeparatorToken(dtfi, out indexBeforeSeparator, out charBeforeSeparator))
@@ -2644,7 +2644,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                         {
                             if (!ProcessTerminalState(dps, ref str, ref result, ref styles, ref raw, dtfi))
                             {
-                                TPTraceExit("0060 (ProcessTerminaltState)", dps);
+                                TPTraceExit("0060 (ProcessTerminalState)", dps);
                                 return false;
                             }
                         }
@@ -2695,9 +2695,15 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 TPTraceExit("0100 (result.calendar.TryToDateTime)", dps);
                 return false;
             }
+
             if (raw.fraction > 0)
             {
-                time = time.AddTicks((long)Math.Round(raw.fraction * Calendar.TicksPerSecond));
+                if (!time.TryAddTicks((long)Math.Round(raw.fraction * Calendar.TicksPerSecond), out time))
+                {
+                    result.SetBadDateTimeFailure();
+                    TPTraceExit("0100 (time.TryAddTicks)", dps);
+                    return false;
+                }
             }
 
             //
@@ -3059,7 +3065,12 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 return false;
             }
 
-            time = time.AddTicks((long)Math.Round(partSecond * Calendar.TicksPerSecond));
+            if (!time.TryAddTicks((long)Math.Round(partSecond * Calendar.TicksPerSecond), out time))
+            {
+                result.SetBadDateTimeFailure();
+                return false;
+            }
+
             result.parsedDate = time;
             if (!DetermineTimeZoneAdjustments(ref result, styles, false))
             {
@@ -3825,7 +3836,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             // ParseJapaneseEraStart will be called when parsing the year number. We can have dates which not listing
             // the year as a number and listing it as JapaneseEraStart symbol (which means year 1).
             // This will be legitimate date to recognize.
-            if (AppContextSwitches.EnforceLegacyJapaneseDateParsing || dtfi.Calendar.ID != CalendarId.JAPAN || !str.GetNext())
+            if (LocalAppContextSwitches.EnforceLegacyJapaneseDateParsing || dtfi.Calendar.ID != CalendarId.JAPAN || !str.GetNext())
                 return false;
 
             if (str.m_current != DateTimeFormatInfo.JapaneseEraStart[0])
@@ -4638,7 +4649,11 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             }
             if (result.fraction > 0)
             {
-                result.parsedDate = result.parsedDate.AddTicks((long)Math.Round(result.fraction * Calendar.TicksPerSecond));
+                if (!result.parsedDate.TryAddTicks((long)Math.Round(result.fraction * Calendar.TicksPerSecond), out result.parsedDate))
+                {
+                    result.SetBadDateTimeFailure();
+                    return false;
+                }
             }
 
             //
@@ -4983,7 +4998,12 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 result.SetBadDateTimeFailure();
                 return false;
             }
-            result.parsedDate = dateTime.AddTicks((long)Math.Round(fraction * Calendar.TicksPerSecond));
+
+            if (!dateTime.TryAddTicks((long)Math.Round(fraction * Calendar.TicksPerSecond), out result.parsedDate))
+            {
+                result.SetBadDateTimeFailure();
+                return false;
+            }
 
             if ((uint)source.Length > 27)
             {

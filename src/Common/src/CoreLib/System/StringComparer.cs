@@ -293,7 +293,7 @@ namespace System
                 {
                     return false;
                 }
-                return string.Equals(x, y, StringComparison.OrdinalIgnoreCase);
+                return CompareInfo.EqualsOrdinalIgnoreCase(ref x.GetRawStringData(), ref y.GetRawStringData(), x.Length);
             }
             return x.Equals(y);
         }
@@ -307,7 +307,7 @@ namespace System
 
             if (_ignoreCase)
             {
-                return CompareInfo.GetIgnoreCaseHash(obj);
+                return obj.GetHashCodeOrdinalIgnoreCase();
             }
 
             return obj.GetHashCode();
@@ -367,7 +367,25 @@ namespace System
 
         public override int Compare(string x, string y) => string.Compare(x, y, StringComparison.OrdinalIgnoreCase);
 
-        public override bool Equals(string x, string y) => string.Equals(x, y, StringComparison.OrdinalIgnoreCase);
+        public override bool Equals(string x, string y)
+        {
+            if (ReferenceEquals(x, y))
+            {
+                return true;
+            }
+
+            if (x is null || y is null)
+            {
+                return false;
+            }
+
+            if (x.Length != y.Length)
+            {
+                return false;
+            }
+
+            return CompareInfo.EqualsOrdinalIgnoreCase(ref x.GetRawStringData(), ref y.GetRawStringData(), x.Length);
+        }
 
         public override int GetHashCode(string obj)
         {
@@ -375,7 +393,7 @@ namespace System
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.obj);
             }
-            return CompareInfo.GetIgnoreCaseHash(obj);
+            return obj.GetHashCodeOrdinalIgnoreCase();
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)

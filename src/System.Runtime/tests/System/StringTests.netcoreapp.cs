@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using Xunit;
 
 namespace System.Tests
@@ -412,6 +413,38 @@ namespace System.Tests
         }
 
         [Theory]
+        [InlineData(new char[0], new int[0])] // empty
+        [InlineData(new char[] { 'x', 'y', 'z' }, new int[] { 'x', 'y', 'z' })]
+        [InlineData(new char[] { 'x', '\uD86D', '\uDF54', 'y' }, new int[] { 'x', 0x2B754, 'y' })] // valid surrogate pair
+        [InlineData(new char[] { 'x', '\uD86D', 'y' }, new int[] { 'x', 0xFFFD, 'y' })] // standalone high surrogate
+        [InlineData(new char[] { 'x', '\uDF54', 'y' }, new int[] { 'x', 0xFFFD, 'y' })] // standalone low surrogate
+        [InlineData(new char[] { 'x', '\uD86D' }, new int[] { 'x', 0xFFFD })] // standalone high surrogate at end of string
+        [InlineData(new char[] { 'x', '\uDF54' }, new int[] { 'x', 0xFFFD })] // standalone low surrogate at end of string
+        [InlineData(new char[] { 'x', '\uD86D', '\uD86D', 'y' }, new int[] { 'x', 0xFFFD, 0xFFFD, 'y' })] // two high surrogates should be two replacement chars
+        [InlineData(new char[] { 'x', '\uFFFD', 'y' }, new int[] { 'x', 0xFFFD, 'y' })] // literal U+FFFD
+        public static void EnumerateRunes(char[] chars, int[] expected)
+        {
+            // Test data is smuggled as char[] instead of straight-up string since the test framework
+            // doesn't like invalid UTF-16 literals.
+
+            string asString = new string(chars);
+
+            // First, use a straight-up foreach keyword to ensure pattern matching works as expected
+
+            List<int> enumeratedScalarValues = new List<int>();
+            foreach (Rune rune in asString.EnumerateRunes())
+            {
+                enumeratedScalarValues.Add(rune.Value);
+            }
+            Assert.Equal(expected, enumeratedScalarValues.ToArray());
+
+            // Then use LINQ to ensure IEnumerator<...> works as expected
+
+            int[] enumeratedValues = new string(chars).EnumerateRunes().Select(r => r.Value).ToArray();
+            Assert.Equal(expected, enumeratedValues);
+        }
+
+        [Theory]
         [InlineData("Hello", 'H', true)]
         [InlineData("Hello", 'h', false)]
         [InlineData("H", 'H', true)]
@@ -673,6 +706,59 @@ namespace System.Tests
 
         private static readonly StringComparison[] StringComparisons = (StringComparison[])Enum.GetValues(typeof(StringComparison));
 
+        [Fact]
+        public static void GetHashCode_OfSpan_EmbeddedNull_ReturnsDifferentHashCodes()
+        {
+            Assert.NotEqual(string.GetHashCode("\0AAAAAAAAA".AsSpan()), string.GetHashCode("\0BBBBBBBBBBBB".AsSpan()));
+        }
+
+        [Fact]
+        public static void GetHashCode_OfSpan_MatchesOfString()
+        {
+            // parameterless should be ordinal only
+            Assert.Equal("abc".GetHashCode(), string.GetHashCode("abc".AsSpan()));
+            Assert.NotEqual("abc".GetHashCode(), string.GetHashCode("ABC".AsSpan())); // case differences
+        }
+
+        [Fact]
+        public static void GetHashCode_CompareInfo()
+        {
+            // ordinal
+            Assert.Equal("abc".GetHashCode(), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("abc", CompareOptions.Ordinal));
+            Assert.NotEqual("abc".GetHashCode(), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("ABC", CompareOptions.Ordinal));
+
+            // ordinal ignore case
+            Assert.Equal("abc".GetHashCode(StringComparison.OrdinalIgnoreCase), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("abc", CompareOptions.OrdinalIgnoreCase));
+            Assert.Equal("abc".GetHashCode(StringComparison.OrdinalIgnoreCase), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("ABC", CompareOptions.OrdinalIgnoreCase));
+
+            // culture-aware
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.CurrentCulture), CultureInfo.CurrentCulture.CompareInfo.GetHashCode("aeiXXabc", CompareOptions.None));
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.CurrentCultureIgnoreCase), CultureInfo.CurrentCulture.CompareInfo.GetHashCode("aeiXXabc", CompareOptions.IgnoreCase));
+
+            // invariant culture
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.InvariantCulture), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("aeiXXabc", CompareOptions.None));
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.InvariantCultureIgnoreCase), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("aeiXXabc", CompareOptions.IgnoreCase));
+        }
+
+        [Fact]
+        public static void GetHashCode_CompareInfo_OfSpan()
+        {
+            // ordinal
+            Assert.Equal("abc".GetHashCode(), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("abc".AsSpan(), CompareOptions.Ordinal));
+            Assert.NotEqual("abc".GetHashCode(), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("ABC".AsSpan(), CompareOptions.Ordinal));
+
+            // ordinal ignore case
+            Assert.Equal("abc".GetHashCode(StringComparison.OrdinalIgnoreCase), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("abc".AsSpan(), CompareOptions.OrdinalIgnoreCase));
+            Assert.Equal("abc".GetHashCode(StringComparison.OrdinalIgnoreCase), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("ABC".AsSpan(), CompareOptions.OrdinalIgnoreCase));
+
+            // culture-aware
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.CurrentCulture), CultureInfo.CurrentCulture.CompareInfo.GetHashCode("aeiXXabc".AsSpan(), CompareOptions.None));
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.CurrentCultureIgnoreCase), CultureInfo.CurrentCulture.CompareInfo.GetHashCode("aeiXXabc".AsSpan(), CompareOptions.IgnoreCase));
+
+            // invariant culture
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.InvariantCulture), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("aeiXXabc".AsSpan(), CompareOptions.None));
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.InvariantCultureIgnoreCase), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("aeiXXabc".AsSpan(), CompareOptions.IgnoreCase));
+        }
 
         public static IEnumerable<object[]> GetHashCode_StringComparison_Data => StringComparisons.Select(value => new object[] { value });
 
@@ -680,9 +766,13 @@ namespace System.Tests
         [MemberData(nameof(GetHashCode_StringComparison_Data))]
         public static void GetHashCode_StringComparison(StringComparison comparisonType)
         {
-            Assert.Equal(StringComparer.FromComparison(comparisonType).GetHashCode("abc"), "abc".GetHashCode(comparisonType));
-        }
+            int hashCodeFromStringComparer = StringComparer.FromComparison(comparisonType).GetHashCode("abc");
+            int hashCodeFromStringGetHashCode = "abc".GetHashCode(comparisonType);
+            int hashCodeFromStringGetHashCodeOfSpan = string.GetHashCode("abc".AsSpan(), comparisonType);
 
+            Assert.Equal(hashCodeFromStringComparer, hashCodeFromStringGetHashCode);
+            Assert.Equal(hashCodeFromStringComparer, hashCodeFromStringGetHashCodeOfSpan);
+        }
 
         public static IEnumerable<object[]> GetHashCode_NoSuchStringComparison_ThrowsArgumentException_Data => new[]
         {
@@ -695,6 +785,7 @@ namespace System.Tests
         public static void GetHashCode_NoSuchStringComparison_ThrowsArgumentException(StringComparison comparisonType)
         {
             AssertExtensions.Throws<ArgumentException>("comparisonType", () => "abc".GetHashCode(comparisonType));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.GetHashCode("abc".AsSpan(), comparisonType));
         }
 
         [Theory]

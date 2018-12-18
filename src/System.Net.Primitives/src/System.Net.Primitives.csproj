@@ -29,8 +29,12 @@
     <Compile Include="System\Net\IPAddress.cs" />
     <Compile Include="System\Net\IPAddressParser.cs" />
     <Compile Include="System\Net\IPEndPoint.cs" />
-    <Compile Include="System\Net\IPv4AddressHelper.cs" />
-    <Compile Include="System\Net\IPv6AddressHelper.cs" />
+    <Compile Include="$(CommonPath)\System\Net\IPv4AddressHelper.Common.cs">
+      <Link>System\Net\IPv4AddressHelper.Common.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Net\IPv6AddressHelper.Common.cs">
+      <Link>System\Net\IPv6AddressHelper.Common.cs</Link>
+    </Compile>
     <Compile Include="System\Net\IWebProxy.cs" />
     <Compile Include="System\Net\NetEventSource.Primitives.cs" />
     <Compile Include="System\Net\NetworkCredential.cs" />

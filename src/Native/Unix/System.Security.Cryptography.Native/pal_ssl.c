@@ -72,7 +72,7 @@ Returns 1 on success, 0 on failure.
 static long TrySetECDHNamedCurve(SSL_CTX* ctx)
 {
 #ifdef NEED_OPENSSL_1_0
-    uint32_t version = CryptoNative_OpenSslVersionNumber();
+    int64_t version = CryptoNative_OpenSslVersionNumber();
     long result = 0;
 
     if (version >= OPENSSL_VERSION_1_1_0_RTM)
@@ -147,7 +147,10 @@ void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
 #ifndef SSL_OP_NO_TLSv1_3
 #define SSL_OP_NO_TLSv1_3 0x20000000U
 #endif
-    protocolOptions |= SSL_OP_NO_TLSv1_3;
+    if ((protocols & PAL_SSL_TLS13) != PAL_SSL_TLS13)
+    {
+        protocolOptions |= SSL_OP_NO_TLSv1_3;
+    }
 
     // OpenSSL 1.0 calls this long, OpenSSL 1.1 calls it unsigned long.
 #pragma clang diagnostic push

@@ -112,7 +112,7 @@ namespace System
 
             // All other paths are based on the XDG Base Directory Specification:
             // https://specifications.freedesktop.org/basedir-spec/latest/
-            string home;
+            string home = null;
             try
             {
                 home = PersistedFiles.GetHomeDirectory();
@@ -120,9 +120,15 @@ namespace System
             catch (Exception exc)
             {
                 Debug.Fail($"Unable to get home directory: {exc}");
-                home = Path.GetTempPath();
             }
-            Debug.Assert(!string.IsNullOrEmpty(home), "Expected non-null or empty HOME");
+
+            // Fall back to '/' when we can't determine the home directory.
+            // This location isn't writable by non-root users which provides some safeguard
+            // that the application doesn't write data which is meant to be private.
+            if (string.IsNullOrEmpty(home))
+            {
+                home = "/";
+            }
 
             // TODO: Consider caching (or precomputing and caching) all subsequent results.
             // This would significantly improve performance for repeated access, at the expense

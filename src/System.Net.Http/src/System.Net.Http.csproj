@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -137,6 +137,7 @@
     <Compile Include="System\Net\Http\SocketsHttpHandler\ContentLengthReadStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\ContentLengthWriteStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\CookieHelper.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\CreditManager.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\DecompressionHandler.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\EmptyReadStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\Http2Connection.cs" />
@@ -599,6 +600,9 @@
     <Compile Include="System\Net\Http\HttpClientHandler.Core.cs" />
     <Compile Include="uap\System\Net\HttpClientHandler.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Reference Include="System.Net.NameResolution" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'netcoreappaot' OR '$(TargetGroup)' == 'uap'">
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Buffers" />
@@ -625,7 +629,6 @@
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.Csp" />
     <Reference Include="System.Security.Cryptography.Encoding" />
-    <Reference Include="System.Security.Cryptography.OpenSsl" />
     <Reference Include="System.Security.Cryptography.Primitives" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />
     <Reference Include="System.Security.Principal.Windows" />
@@ -645,6 +648,7 @@
     <Reference Include="System.IO.FileSystem" />
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.Encoding" />
+    <Reference Include="System.Security.Cryptography.OpenSsl" />
     <Reference Include="System.Security.Cryptography.Primitives" />
   </ItemGroup>
 </Project>

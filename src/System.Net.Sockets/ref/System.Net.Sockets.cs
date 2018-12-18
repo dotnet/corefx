@@ -186,6 +186,12 @@ namespace System.Net.Sockets
         Unknown = -1,
         Unspecified = 0,
     }
+
+    public sealed class SafeSocketHandle : Microsoft.Win32.SafeHandles.SafeHandleMinusOneIsInvalid
+    {
+        public SafeSocketHandle(IntPtr preexistingHandle, bool ownsHandle) : base(ownsHandle) { }
+        protected override bool ReleaseHandle() { throw null; }
+    }
     public enum SelectMode
     {
         SelectError = 2,
@@ -200,10 +206,17 @@ namespace System.Net.Sockets
         public SendPacketsElement(string filepath) { }
         public SendPacketsElement(string filepath, int offset, int count) { }
         public SendPacketsElement(string filepath, int offset, int count, bool endOfPacket) { }
+        public SendPacketsElement(string filepath, long offset, int count) { }
+        public SendPacketsElement(string filepath, long offset, int count, bool endOfPacket) { }
+        public SendPacketsElement(System.IO.FileStream fileStream) { }
+        public SendPacketsElement(System.IO.FileStream fileStream, long offset, int count) { }
+        public SendPacketsElement(System.IO.FileStream fileStream, long offset, int count, bool endOfPacket) { }
         public byte[] Buffer { get { throw null; } }
         public int Count { get { throw null; } }
+        public long OffsetLong { get { throw null; } }
         public bool EndOfPacket { get { throw null; } }
         public string FilePath { get { throw null; } }
+        public System.IO.FileStream FileStream { get { throw null; } }
         public int Offset { get { throw null; } }
     }
     public partial class Socket : System.IDisposable
@@ -231,6 +244,7 @@ namespace System.Net.Sockets
         public int ReceiveBufferSize { get { throw null; } set { } }
         public int ReceiveTimeout { get { throw null; } set { } }
         public System.Net.EndPoint RemoteEndPoint { get { throw null; } }
+        public SafeSocketHandle SafeHandle { get { throw null; } }
         public int SendBufferSize { get { throw null; } set { } }
         public int SendTimeout { get { throw null; } set { } }
         public System.Net.Sockets.SocketType SocketType { get { throw null; } }

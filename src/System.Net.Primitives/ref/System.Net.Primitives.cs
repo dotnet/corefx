@@ -263,6 +263,10 @@ namespace System.Net
         public override int GetHashCode() { throw null; }
         public override System.Net.SocketAddress Serialize() { throw null; }
         public override string ToString() { throw null; }
+        public static bool TryParse(string s, out IPEndPoint result) { throw null; }
+        public static bool TryParse(ReadOnlySpan<char> s, out IPEndPoint result) { throw null; }
+        public static IPEndPoint Parse(string s) { throw null; }
+        public static IPEndPoint Parse(ReadOnlySpan<char> s) { throw null; }
     }
     public partial interface IWebProxy
     {
@@ -504,6 +508,7 @@ namespace System.Security.Authentication
         Tls = 192,
         Tls11 = 768,
         Tls12 = 3072,
+        Tls13 = 12288,
         [Obsolete("This value has been deprecated.  It is no longer supported. https://go.microsoft.com/fwlink/?linkid=14202")]
         Default = Ssl3 | Tls
     }

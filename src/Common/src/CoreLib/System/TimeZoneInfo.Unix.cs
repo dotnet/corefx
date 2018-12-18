@@ -80,6 +80,14 @@ namespace System
             GetDisplayName(Interop.Globalization.TimeZoneDisplayNameType.Standard, ref _standardDisplayName);
             GetDisplayName(Interop.Globalization.TimeZoneDisplayNameType.DaylightSavings, ref _daylightDisplayName);
 
+            if (_standardDisplayName == _displayName)
+            {
+                if (_baseUtcOffset >= TimeSpan.Zero)
+                    _displayName = $"(UTC+{_baseUtcOffset:hh\\:mm}) {_standardDisplayName}";
+                else
+                    _displayName = $"(UTC-{_baseUtcOffset:hh\\:mm}) {_standardDisplayName}";
+            }
+
             // TZif supports seconds-level granularity with offsets but TimeZoneInfo only supports minutes since it aligns
             // with DateTimeOffset, SQL Server, and the W3C XML Specification
             if (_baseUtcOffset.Ticks % TimeSpan.TicksPerMinute != 0)
@@ -96,7 +104,7 @@ namespace System
             ValidateTimeZoneInfo(_id, _baseUtcOffset, _adjustmentRules, out _supportsDaylightSavingTime);
         }
 
-        private void GetDisplayName(Interop.Globalization.TimeZoneDisplayNameType nameType, ref string displayName)
+        private unsafe void GetDisplayName(Interop.Globalization.TimeZoneDisplayNameType nameType, ref string displayName)
         {
             if (GlobalizationMode.Invariant)
             {
@@ -106,12 +114,13 @@ namespace System
 
             string timeZoneDisplayName;
             bool result = Interop.CallStringMethod(
-                (locale, id, type, stringBuilder) => Interop.Globalization.GetTimeZoneDisplayName(
-                    locale,
-                    id,
-                    type,
-                    stringBuilder,
-                    stringBuilder.Capacity),
+                (buffer, locale, id, type) =>
+                {
+                    fixed (char* bufferPtr = buffer)
+                    {
+                        return Interop.Globalization.GetTimeZoneDisplayName(locale, id, type, bufferPtr, buffer.Length);
+                    }
+                },
                 CultureInfo.CurrentUICulture.Name,
                 _id,
                 nameType,
@@ -623,7 +632,7 @@ namespace System
         }
 
         /// <summary>
-        /// Helper function for retrieving a TimeZoneInfo object by <time_zone_name>.
+        /// Helper function for retrieving a TimeZoneInfo object by time_zone_name.
         /// This function wraps the logic necessary to keep the private
         /// SystemTimeZones cache in working order
         ///

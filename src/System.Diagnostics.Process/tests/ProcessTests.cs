@@ -69,7 +69,7 @@ namespace System.Diagnostics.Tests
 
             try
             {
-                // We are not checking for RealTime case here, as RealTime priority process can 
+                // We are not checking for RealTime case here, as RealTime priority process can
                 // preempt the threads of all other processes, including operating system processes
                 // performing important tasks, which may cause the machine to be unresponsive.
 
@@ -215,6 +215,92 @@ namespace System.Diagnostics.Tests
                         Assert.True(px.WaitForExit(WaitInMS));
                     }
                 }
+            }
+        }
+
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsServerCore),
+            nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsIoTCore))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
+        [InlineData(true), InlineData(false)]
+        public void ProcessStart_UseShellExecute_Executes(bool filenameAsUrl)
+        {
+            string filename = WriteScriptFile(TestDirectory, GetTestFileName(), returnValue: 42);
+
+            if (filenameAsUrl)
+            {
+                filename = new Uri(filename).ToString();
+            }
+
+            using (var process = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = filename }))
+            {
+                process.WaitForExit();
+                Assert.Equal(42, process.ExitCode);
+            }
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsServerCore),
+            nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsIoTCore))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
+        public void ProcessStart_UseShellExecute_ExecuteOrder()
+        {
+            // Create a directory that we will use as PATH
+            string path = Path.Combine(TestDirectory, "Path");
+            Directory.CreateDirectory(path);
+            // Create a directory that will be our working directory
+            string wd = Path.Combine(TestDirectory, "WorkingDirectory");
+            Directory.CreateDirectory(wd);
+
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.StartInfo.EnvironmentVariables["PATH"] = path;
+            options.StartInfo.WorkingDirectory = wd;
+            RemoteInvoke(pathDirectory =>
+            {
+                // Create two identically named scripts, one in the working directory and one on PATH.
+                const int workingDirReturnValue = 1;
+                const int pathDirReturnValue = 2;
+                string pathScriptFile = WriteScriptFile(pathDirectory,                 "script", returnValue: pathDirReturnValue);
+                string wdScriptFile = WriteScriptFile(Directory.GetCurrentDirectory(), "script", returnValue: workingDirReturnValue);
+                string scriptFilename = Path.GetFileName(pathScriptFile);
+                Assert.Equal(scriptFilename, Path.GetFileName(wdScriptFile));
+
+                // Execute the script and verify we prefer the one in the working directory.
+                using (var process = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = scriptFilename }))
+                {
+                    process.WaitForExit();
+                    Assert.Equal(workingDirReturnValue, process.ExitCode);
+                }
+
+                // Remove the script in the working directory and verify we now use the one on PATH.
+                File.Delete(scriptFilename);
+                using (var process = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = scriptFilename }))
+                {
+                    process.WaitForExit();
+                    Assert.Equal(pathDirReturnValue, process.ExitCode);
+                }
+
+                return SuccessExitCode;
+            }, path, options).Dispose();
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsServerCore),
+            nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsIoTCore))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
+        public void ProcessStart_UseShellExecute_WorkingDirectory()
+        {
+            // Create a directory that will ProcessStartInfo.WorkingDirectory
+            // and add a script.
+            string wd = Path.Combine(TestDirectory, "WorkingDirectory");
+            Directory.CreateDirectory(wd);
+            string filename = Path.GetFileName(WriteScriptFile(wd, GetTestFileName(), returnValue: 42));
+
+            // Verify UseShellExecute finds the script in the WorkingDirectory.
+            Assert.False(Path.IsPathRooted(filename));
+            using (var process = Process.Start(new ProcessStartInfo { UseShellExecute = true,
+                                                                      FileName = filename,
+                                                                      WorkingDirectory = wd }))
+            {
+                process.WaitForExit();
+                Assert.Equal(42, process.ExitCode);
             }
         }
 
@@ -975,7 +1061,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: https://github.com/dotnet/corefx/issues/32780
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         public void GetProcessesByName_ProcessName_ReturnsExpected()
         {
@@ -1025,7 +1111,7 @@ namespace System.Diagnostics.Tests
             }
             catch (InvalidOperationException)
             {
-                // As we can't detect reliably if performance counters are enabled 
+                // As we can't detect reliably if performance counters are enabled
                 // we let possible InvalidOperationExceptions pass silently.
             }
         }
@@ -1078,13 +1164,13 @@ namespace System.Diagnostics.Tests
             }
             catch (InvalidOperationException)
             {
-                // As we can't detect reliably if performance counters are enabled 
+                // As we can't detect reliably if performance counters are enabled
                 // we let possible InvalidOperationExceptions pass silently.
             }
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]        
+        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void StartInfo_GetFileName_ReturnsExpected()
         {
             Process process = CreateProcessLong();
@@ -1099,7 +1185,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]        
+        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void StartInfo_SetOnRunningProcess_ThrowsInvalidOperationException()
         {
             Process process = CreateProcessLong();

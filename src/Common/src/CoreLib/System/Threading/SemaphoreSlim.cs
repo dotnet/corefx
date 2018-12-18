@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+
+using Thread = Internal.Runtime.Augments.RuntimeThread;
 
 namespace System.Threading
 {
@@ -75,19 +73,16 @@ namespace System.Threading
         private const int NO_MAXIMUM = int.MaxValue;
 
         // Task in a linked list of asynchronous waiters
-        private sealed class TaskNode : Task<bool>, IThreadPoolWorkItem
+        private sealed class TaskNode : Task<bool>
         {
             internal TaskNode Prev, Next;
             internal TaskNode() : base() { }
 
-            void IThreadPoolWorkItem.ExecuteWorkItem()
+            internal override void ExecuteFromThreadPool(Thread threadPoolThread)
             {
                 bool setSuccessfully = TrySetResult(true);
                 Debug.Assert(setSuccessfully, "Should have been able to complete task");
             }
-#if CORECLR
-            void IThreadPoolWorkItem.MarkAborted(ThreadAbortException tae) { /* nop */ } 
-#endif
         }
         #endregion
 
@@ -552,9 +547,6 @@ namespace System.Threading
         /// A <see cref="System.TimeSpan"/> that represents the number of milliseconds
         /// to wait, or a <see cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
         /// </param>
-        /// <param name="cancellationToken">
-        /// The <see cref="T:System.Threading.CancellationToken"/> token to observe.
-        /// </param>
         /// <returns>
         /// A task that will complete with a result of true if the current thread successfully entered 
         /// the <see cref="SemaphoreSlim"/>, otherwise with a result of false.
@@ -578,6 +570,9 @@ namespace System.Threading
         /// <param name="timeout">
         /// A <see cref="System.TimeSpan"/> that represents the number of milliseconds
         /// to wait, or a <see cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The <see cref="T:System.Threading.CancellationToken"/> token to observe.
         /// </param>
         /// <returns>
         /// A task that will complete with a result of true if the current thread successfully entered 
@@ -716,6 +711,7 @@ namespace System.Threading
         }
 
         /// <summary>Performs the asynchronous wait.</summary>
+        /// <param name="asyncWaiter">The asynchronous waiter.</param>
         /// <param name="millisecondsTimeout">The timeout.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The task to return to the caller.</returns>
@@ -851,7 +847,7 @@ namespace System.Threading
                         // Get the next async waiter to release and queue it to be completed
                         var waiterTask = m_asyncHead;
                         RemoveAsyncWaiter(waiterTask); // ensures waiterTask.Next/Prev are null
-                        QueueWaiterTask(waiterTask);
+                        ThreadPool.UnsafeQueueUserWorkItemInternal(waiterTask, preferLocal: true);
                     }
                 }
                 m_currentCount = currentCount;
@@ -865,15 +861,6 @@ namespace System.Threading
 
             // And return the count
             return returnCount;
-        }
-
-        /// <summary>
-        /// Queues a waiter task to the ThreadPool. We use this small helper method so that
-        /// the larger Release(count) method does not need to be SecuritySafeCritical.
-        /// </summary>
-        private static void QueueWaiterTask(TaskNode waiterTask)
-        {
-            ThreadPool.UnsafeQueueCustomWorkItem(waiterTask, forceGlobal: false);
         }
 
         /// <summary>

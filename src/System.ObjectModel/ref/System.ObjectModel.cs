@@ -206,6 +206,13 @@ namespace System.ComponentModel
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
     }
+    [System.AttributeUsageAttribute((System.AttributeTargets)(4), Inherited = true)]
+    public sealed partial class TypeDescriptionProviderAttribute : System.Attribute
+    {
+        public TypeDescriptionProviderAttribute(string typeName) { }
+        public TypeDescriptionProviderAttribute(System.Type type) { }
+        public string TypeName { get { throw null; } }
+    }
 }
 namespace System.Reflection
 {
@@ -216,6 +223,8 @@ namespace System.Reflection
 }
 namespace System.Windows.Input
 {
+    [System.ComponentModel.TypeConverterAttribute("System.Windows.Input.CommandConverter, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, Custom=null")]
+    [System.Windows.Markup.ValueSerializerAttribute("System.Windows.Input.CommandValueSerializer, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, Custom=null")]
     public partial interface ICommand
     {
         event System.EventHandler CanExecuteChanged;

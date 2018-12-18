@@ -7,7 +7,7 @@
   </PropertyGroup>
   <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
   <ItemGroup>
-    <TargetingPackExclusions Include="System.Net.NameResolution" />
+    <DefaultReferenceExclusions Include="System.Net.NameResolution" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="..\..\src\System\Net\IPHostEntry.cs">
@@ -107,6 +107,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.WSASocketW.cs">
       <Link>Interop\Windows\Winsock\Interop.WSASocketW.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.SocketConstructorFlags.cs">
+      <Link>Interop\Windows\Winsock\Interop.SocketConstructorFlags.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\Sockets\ProtocolFamily.cs">
       <Link>Common\System\Net\Sockets\ProtocolFamily.cs</Link>

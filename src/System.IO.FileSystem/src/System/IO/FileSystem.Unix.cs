@@ -78,6 +78,11 @@ namespace System.IO
 
         public static void MoveFile(string sourceFullPath, string destFullPath)
         {
+            MoveFile(sourceFullPath, destFullPath, false);
+        }
+
+        public static void MoveFile(string sourceFullPath, string destFullPath, bool overwrite)
+        {
             // The desired behavior for Move(source, dest) is to not overwrite the destination file
             // if it exists. Since rename(source, dest) will replace the file at 'dest' if it exists,
             // link/unlink are used instead. However, if the source path and the dest path refer to
@@ -87,6 +92,8 @@ namespace System.IO
             // way (e.g. source file doesn't exist, dest file doesn't exist, rename fails, etc.), we
             // just fall back to trying the link/unlink approach and generating any exceptional messages
             // from there as necessary.
+            //
+            // Rename is also appropriate for overwrite=true with same source/dest file
             Interop.Sys.FileStatus sourceStat, destStat;
             if (Interop.Sys.LStat(sourceFullPath, out sourceStat) == 0 && // source file exists
                 Interop.Sys.LStat(destFullPath, out destStat) == 0 && // dest file exists
@@ -98,6 +105,35 @@ namespace System.IO
                 return;
             }
 
+            // If overwrite is allowed then just call rename
+            if (overwrite)
+            {
+                if (Interop.Sys.Rename(sourceFullPath, destFullPath) < 0)
+                {
+                    Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
+                    if (errorInfo.Error == Interop.Error.EXDEV) // rename fails across devices / mount points
+                    {
+                        CopyFile(sourceFullPath, destFullPath, overwrite);
+                    }
+                    else
+                    {
+                        // Windows distinguishes between whether the directory or the file isn't found,
+                        // and throws a different exception in these cases.  We attempt to approximate that
+                        // here; there is a race condition here, where something could change between
+                        // when the error occurs and our checks, but it's the best we can do, and the
+                        // worst case in such a race condition (which could occur if the file system is
+                        // being manipulated concurrently with these checks) is that we throw a
+                        // FileNotFoundException instead of DirectoryNotFoundexception.
+                        throw Interop.GetExceptionForIoErrno(errorInfo, destFullPath,
+                            isDirectory: errorInfo.Error == Interop.Error.ENOENT && !Directory.Exists(Path.GetDirectoryName(destFullPath))   // The parent directory of destFile can't be found
+                            );
+                    }
+                }
+
+                // Rename or CopyFile complete
+                return;
+            }
+            
             if (Interop.Sys.Link(sourceFullPath, destFullPath) < 0)
             {
                 // If link fails, we can fall back to doing a full copy, but we'll only do so for
@@ -161,7 +197,12 @@ namespace System.IO
                 switch (errorInfo.Error)
                 {
                     case Interop.Error.ENOENT:
-                        // ENOENT means it already doesn't exist; nop
+                        // In order to match Windows behavior
+                        string directoryName = Path.GetDirectoryName(fullPath);
+                        if(directoryName.Length > 0 && !Directory.Exists(directoryName))
+                        {
+                            throw Interop.GetExceptionForIoErrno(errorInfo, fullPath, true);
+                        }                        
                         return;
                     case Interop.Error.EROFS:
                         // EROFS means the file system is read-only

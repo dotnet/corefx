@@ -13,6 +13,11 @@ Namespace Global.Microsoft.VisualBasic
 
     Public Module Strings
 
+        Private Const STANDARD_COMPARE_FLAGS As CompareOptions =
+            CompareOptions.IgnoreCase Or CompareOptions.IgnoreWidth Or CompareOptions.IgnoreKanaType
+
+        Friend ReadOnly m_InvariantCompareInfo As CompareInfo = CultureInfo.InvariantCulture.CompareInfo
+
         '============================================================================
         ' Character manipulation functions.
         '============================================================================
@@ -227,6 +232,236 @@ Namespace Global.Microsoft.VisualBasic
             Catch ex As Exception
                 Throw ex
             End Try
+        End Function
+
+        Public Function InStr(ByVal String1 As String, ByVal String2 As String, <Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute()> Optional ByVal [Compare] As CompareMethod = CompareMethod.Binary) As Integer
+            If Compare = CompareMethod.Binary Then
+                Return (InternalInStrBinary(0, String1, String2) + 1)
+            Else
+                Return (InternalInStrText(0, String1, String2) + 1)
+            End If
+        End Function
+
+        Public Function InStr(ByVal Start As Integer, ByVal String1 As String, ByVal String2 As String, <Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute()> Optional ByVal [Compare] As CompareMethod = CompareMethod.Binary) As Integer
+            If Start < 1 Then
+                Throw New ArgumentException(SR.Format(SR.Argument_GTZero1, NameOf(Start)), NameOf(Start))
+            End If
+
+            If Compare = CompareMethod.Binary Then
+                Return (InternalInStrBinary(Start - 1, String1, String2) + 1)
+            Else
+                Return (InternalInStrText(Start - 1, String1, String2) + 1)
+            End If
+        End Function
+
+        'THIS FUNCTION IS ZERO BASED
+        Private Function InternalInStrBinary(ByVal StartPos As Integer, ByVal sSrc As String, ByVal sFind As String) As Integer
+            Dim SrcLength As Integer
+
+            If sSrc IsNot Nothing Then
+                SrcLength = sSrc.Length
+            Else
+                SrcLength = 0
+            End If
+
+            If StartPos > SrcLength OrElse SrcLength = 0 Then
+                Return -1
+            End If
+
+            If (sFind Is Nothing) OrElse (sFind.Length = 0) Then
+                Return StartPos
+            End If
+
+            Return m_InvariantCompareInfo.IndexOf(sSrc, sFind, StartPos, CompareOptions.Ordinal)
+        End Function
+
+        Private Function InternalInStrText(ByVal lStartPos As Integer, ByVal sSrc As String, ByVal sFind As String) As Integer
+            Dim lSrcLen As Integer
+
+            If Not sSrc Is Nothing Then
+                lSrcLen = sSrc.Length
+            Else
+                lSrcLen = 0
+            End If
+
+            If lStartPos > lSrcLen OrElse lSrcLen = 0 Then
+                Return -1
+            End If
+
+            If (sFind Is Nothing) OrElse (sFind.Length = 0) Then
+                Return lStartPos
+            End If
+
+            Return GetCultureInfo().CompareInfo.IndexOf(sSrc, sFind, lStartPos, STANDARD_COMPARE_FLAGS)
+        End Function
+
+        Public Function InStrRev(ByVal StringCheck As String, ByVal StringMatch As String, Optional ByVal Start As Integer = -1, <Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute()> Optional ByVal [Compare] As CompareMethod = CompareMethod.Binary) As Integer
+            Try
+                Dim lStrLen As Integer
+
+                If Start = 0 OrElse Start < -1 Then
+                    Throw New ArgumentException(SR.Format(SR.Argument_MinusOneOrGTZero1, NameOf(Start)), NameOf(Start))
+                End If
+
+                If StringCheck Is Nothing Then
+                    lStrLen = 0
+                Else
+                    lStrLen = StringCheck.Length
+                End If
+
+                If Start = -1 Then
+                    Start = lStrLen
+                End If
+
+                If (Start > lStrLen) OrElse (lStrLen = 0) Then
+                    Return 0
+                End If
+
+                If StringMatch Is Nothing Then
+                    GoTo EmptyMatchString
+                End If
+
+                If StringMatch.Length = 0 Then
+EmptyMatchString:
+                    Return Start
+                End If
+
+                If [Compare] = CompareMethod.Binary Then
+                    Return (m_InvariantCompareInfo.LastIndexOf(StringCheck, StringMatch, Start - 1, Start, CompareOptions.Ordinal) + 1)
+                Else
+                    Return (GetCultureInfo().CompareInfo.LastIndexOf(StringCheck, StringMatch, Start - 1, Start, STANDARD_COMPARE_FLAGS) + 1)
+                End If
+            Catch ex As Exception
+                Throw ex
+            End Try
+        End Function
+
+        Public Function Len(ByVal Expression As Boolean) As Integer
+            Return 2
+        End Function
+
+        <CLSCompliant(False)>
+        Public Function Len(ByVal Expression As SByte) As Integer
+            Return 1
+        End Function
+
+        Public Function Len(ByVal Expression As Byte) As Integer
+            Return 1
+        End Function
+
+        Public Function Len(ByVal Expression As Int16) As Integer
+            Return 2
+        End Function
+
+        <CLSCompliant(False)>
+        Public Function Len(ByVal Expression As UInt16) As Integer
+            Return 2
+        End Function
+
+        Public Function Len(ByVal Expression As Int32) As Integer
+            Return 4
+        End Function
+
+        <CLSCompliant(False)>
+        Public Function Len(ByVal Expression As UInt32) As Integer
+            Return 4
+        End Function
+
+        Public Function Len(ByVal Expression As Int64) As Integer
+            Return 8
+        End Function
+
+        <CLSCompliant(False)>
+        Public Function Len(ByVal Expression As UInt64) As Integer
+            Return 8
+        End Function
+
+        Public Function Len(ByVal Expression As Decimal) As Integer
+            'This must return the length for VB6 Currency
+            Return 8
+        End Function
+
+        Public Function Len(ByVal Expression As Single) As Integer
+            Return 4
+        End Function
+
+        Public Function Len(ByVal Expression As Double) As Integer
+            Return 8
+        End Function
+
+        Public Function Len(ByVal Expression As DateTime) As Integer
+            Return 8
+        End Function
+
+        Public Function Len(ByVal Expression As Char) As Integer
+            Return 2
+        End Function
+
+        Public Function Len(ByVal Expression As String) As Integer
+            If Expression Is Nothing Then
+                Return 0
+            End If
+
+            Return Expression.Length
+        End Function
+
+        Public Function Len(ByVal Expression As Object) As Integer
+            If Expression Is Nothing Then
+                Return 0
+            End If
+
+            Dim ValueInterface As IConvertible = TryCast(Expression, IConvertible)
+            If Not ValueInterface Is Nothing Then
+                Select Case ValueInterface.GetTypeCode()
+                    Case TypeCode.Boolean
+                        Return 2
+                    Case TypeCode.SByte
+                        Return 1
+                    Case TypeCode.Byte
+                        Return 1
+                    Case TypeCode.Int16
+                        Return 2
+                    Case TypeCode.UInt16
+                        Return 2
+                    Case TypeCode.Int32
+                        Return 4
+                    Case TypeCode.UInt32
+                        Return 4
+                    Case TypeCode.Int64
+                        Return 8
+                    Case TypeCode.UInt64
+                        Return 8
+                    Case TypeCode.Decimal
+                        Return 16
+                    Case TypeCode.Single
+                        Return 4
+                    Case TypeCode.Double
+                        Return 8
+                    Case TypeCode.DateTime
+                        Return 8
+                    Case TypeCode.Char
+                        Return 2
+                    Case TypeCode.String
+                        Return Expression.ToString().Length
+                    Case TypeCode.Object
+                        'Fallthrough to below
+                End Select
+
+            Else
+                Dim CharArray As Char() = TryCast(Expression, Char())
+
+                If CharArray IsNot Nothing Then
+                    'REVIEW: Should this be char length or byte length?
+                    Return CharArray.Length
+                End If
+            End If
+
+            If TypeOf Expression Is ValueType Then
+                Dim Length As Integer = StructUtils.GetRecordLength(Expression, 1)
+                Return Length
+            End If
+
+            Throw VbMakeException(vbErrors.TypeMismatch)
         End Function
 
         '============================================================================
