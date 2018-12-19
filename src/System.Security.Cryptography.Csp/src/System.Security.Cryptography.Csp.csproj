@@ -148,6 +148,15 @@
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHandleCache.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleCache.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeHashHandle.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeHashHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeKeyHandle.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeKeyHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeProvHandle.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeProvHandle.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Buffers" />
