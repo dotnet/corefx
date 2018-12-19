@@ -14,6 +14,7 @@
   <PropertyGroup>
     <MicrosoftDotNetXUnitExtensionsPackage>Microsoft.DotNet.XUnitExtensions</MicrosoftDotNetXUnitExtensionsPackage>
   </PropertyGroup>
+  <!-- Arcade dependencies -->
   <PropertyGroup>
     <MicrosoftDotNetApiCompatPackageVersion>1.0.0-beta.18618.3</MicrosoftDotNetApiCompatPackageVersion>
     <MicrosoftDotNetCodeAnalysisPackageVersion>1.0.0-beta.18618.3</MicrosoftDotNetCodeAnalysisPackageVersion>
@@ -24,5 +25,10 @@
     <MicrosoftDotNetCoreFxTestingPackageVersion>1.0.0-beta.18618.3</MicrosoftDotNetCoreFxTestingPackageVersion>
     <MicrosoftDotNetBuildTasksConfigurationPackageVersion>1.0.0-beta.18618.3</MicrosoftDotNetBuildTasksConfigurationPackageVersion>
     <MicrosoftDotNetBuildTasksFeedPackageVersion>2.2.0-beta.18618.3</MicrosoftDotNetBuildTasksFeedPackageVersion>
+  </PropertyGroup>
+  <!-- Coreclr dependencies -->
+  <PropertyGroup>
+    <MicrosoftNetCoreIlasmPackageVersion>3.0.0-preview-27218-02</MicrosoftNetCoreIlasmPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview-27218-02</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
   </PropertyGroup>
 </Project>
