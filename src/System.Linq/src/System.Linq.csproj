@@ -45,6 +45,8 @@
     <Compile Include="System\Linq\ChainLinq\Links\Compose.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Distinct.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Identity.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\WhereIndexed.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Where.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Select.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\SelectIndexed.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\SelectMany.cs" />

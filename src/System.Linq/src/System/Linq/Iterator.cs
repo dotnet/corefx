@@ -109,7 +109,10 @@ namespace System.Linq
             /// <param name="predicate">The predicate used to filter each item.</param>
             public virtual IEnumerable<TSource> Where(Func<TSource, bool> predicate)
             {
+#if PRE_CHAINLINQ
                 return new WhereEnumerableIterator<TSource>(this, predicate);
+#endif
+                return ChainLinq.Utils.PushTransform(this, new ChainLinq.Links.Where<TSource>(predicate));
             }
 
             object IEnumerator.Current => Current;

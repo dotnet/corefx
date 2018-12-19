@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 namespace System.Linq
 {
+#if PRE_CHAINLINQ
     public static partial class Enumerable
     {
         private sealed partial class WhereEnumerableIterator<TSource> : IIListProvider<TSource>
@@ -362,4 +363,5 @@ namespace System.Linq
             }
         }
     }
+#endif
 }

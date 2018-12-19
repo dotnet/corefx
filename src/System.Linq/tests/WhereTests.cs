@@ -858,7 +858,9 @@ namespace System.Linq.Tests
             using (var enumerator1 = result.GetEnumerator())
             using (var enumerator2 = result.GetEnumerator())
             {
+#if PRE_CHAINLINQ
                 Assert.Same(result, enumerator1);
+#endif
                 Assert.NotSame(enumerator1, enumerator2);
             }
         }

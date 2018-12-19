@@ -6,9 +6,9 @@ using System.Collections.Generic;
 
 namespace System.Linq
 {
+#if PRE_CHAINLINQ
     public static partial class Enumerable
     {
-#if PRE_CHAINLINQ
         private sealed partial class DistinctIterator<TSource> : IIListProvider<TSource>
         {
             private Set<TSource> FillSet()
@@ -24,6 +24,6 @@ namespace System.Linq
 
             public int GetCount(bool onlyIfCheap) => onlyIfCheap ? -1 : FillSet().Count;
         }
-#endif
     }
+#endif
 }

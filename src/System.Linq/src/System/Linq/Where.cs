@@ -22,6 +22,10 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Where<TSource>(predicate));
+#else
+
             if (source is Iterator<TSource> iterator)
             {
                 return iterator.Where(predicate);
@@ -40,6 +44,7 @@ namespace System.Linq
             }
 
             return new WhereEnumerableIterator<TSource>(source, predicate);
+#endif
         }
 
         public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
@@ -53,6 +58,10 @@ namespace System.Linq
             {
                 throw Error.ArgumentNull(nameof(predicate));
             }
+
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.WhereIndexed<TSource>(predicate));
+#else
 
             return WhereIterator(source, predicate);
         }
@@ -406,6 +415,7 @@ namespace System.Linq
 
             public override IEnumerable<TResult2> Select<TResult2>(Func<TResult, TResult2> selector) =>
                 new WhereSelectEnumerableIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
+#endif
         }
     }
 }

@@ -5,8 +5,14 @@ namespace System.Linq.ChainLinq.Consumables
 {
     internal class Concat<T, V> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, T>
     {
+        /// <summary>
+        /// Used for Prepender in Prepend call
+        /// </summary>
         private readonly IEnumerable<T> _firstOrNull;
         private readonly IEnumerable<T> _second;
+        /// <summary>
+        /// Used for Appender in Append call
+        /// </summary>
         private readonly IEnumerable<T> _thirdOrNull;
 
         public Concat(IEnumerable<T> firstOrNull, IEnumerable<T> second, IEnumerable<T> thirdOrNull, ILink<T, V> link) : base(link) =>
