@@ -87,29 +87,32 @@ namespace System.IO.Tests
         [Fact]
         public void FileSystemWatcher_File_Create_WatchOwnPath()
         {
-            using (var dir = new TempDirectory(GetTestFilePath()))
-            using (var dir1 = new TempDirectory(Path.Combine(dir.Path, "dir1")))
-            using (var dir2 = new TempDirectory(Path.Combine(dir.Path, "dir2")))
-            using (var watcher1 = new FileSystemWatcher(dir1.Path, "*"))
-            using (var watcher2 = new FileSystemWatcher(dir2.Path, "*"))
-            {
-                string fileName1 = Path.Combine(dir1.Path, "file");
-                string fileName2 = Path.Combine(dir2.Path, "file");
+            ExecuteWithRetry(() =>
+            {            
+                using (var dir = new TempDirectory(GetTestFilePath()))
+                using (var dir1 = new TempDirectory(Path.Combine(dir.Path, "dir1")))
+                using (var dir2 = new TempDirectory(Path.Combine(dir.Path, "dir2")))
+                using (var watcher1 = new FileSystemWatcher(dir1.Path, "*"))
+                using (var watcher2 = new FileSystemWatcher(dir2.Path, "*"))
+                {
+                    string fileName1 = Path.Combine(dir1.Path, "file");
+                    string fileName2 = Path.Combine(dir2.Path, "file");
 
-                AutoResetEvent autoResetEvent1 = WatchCreated(watcher1, new[] { fileName1 }).EventOccured;
-                AutoResetEvent autoResetEvent2 = WatchCreated(watcher2, new[] { fileName2 }).EventOccured;
+                    AutoResetEvent autoResetEvent1 = WatchCreated(watcher1, new[] { fileName1 }).EventOccured;
+                    AutoResetEvent autoResetEvent2 = WatchCreated(watcher2, new[] { fileName2 }).EventOccured;
 
-                watcher1.EnableRaisingEvents = true;
-                watcher2.EnableRaisingEvents = true;
+                    watcher1.EnableRaisingEvents = true;
+                    watcher2.EnableRaisingEvents = true;
 
-                File.Create(fileName1).Dispose();
-                Assert.True(autoResetEvent1.WaitOne(WaitForExpectedEventTimeout_NoRetry));
-                Assert.False(autoResetEvent2.WaitOne(WaitForUnexpectedEventTimeout));
+                    File.Create(fileName1).Dispose();
+                    Assert.True(autoResetEvent1.WaitOne(WaitForExpectedEventTimeout_NoRetry));
+                    Assert.False(autoResetEvent2.WaitOne(WaitForUnexpectedEventTimeout));
 
-                File.Create(fileName2).Dispose();
-                Assert.True(autoResetEvent2.WaitOne(WaitForExpectedEventTimeout_NoRetry));
-                Assert.False(autoResetEvent1.WaitOne(WaitForUnexpectedEventTimeout));                
-            }
+                    File.Create(fileName2).Dispose();
+                    Assert.True(autoResetEvent2.WaitOne(WaitForExpectedEventTimeout_NoRetry));
+                    Assert.False(autoResetEvent1.WaitOne(WaitForUnexpectedEventTimeout));                
+                }
+            });
         }
 
         [OuterLoop]
