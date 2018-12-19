@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <ProductDependencies></ProductDependencies>
+  <ProductDependencies>
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview-27218-02">
+      <Uri>https://github.com/dotnet/coreclr</Uri>
+      <Sha>6f4c9d6427829807ad1fc4432f6f7d544e982c67</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.0.0-preview-27218-02">
+      <Uri>https://github.com/dotnet/coreclr</Uri>
+      <Sha>6f4c9d6427829807ad1fc4432f6f7d544e982c67</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.0.0-preview-27218-02">
+      <Uri>https://github.com/dotnet/coreclr</Uri>
+      <Sha>6f4c9d6427829807ad1fc4432f6f7d544e982c67</Sha>
+    </Dependency>
+  </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.18618.3">
       <Uri>https://github.com/dotnet/arcade</Uri>

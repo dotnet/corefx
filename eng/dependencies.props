@@ -10,7 +10,6 @@
   -->
   <PropertyGroup>
     <CoreFxCurrentRef>bf2f112caac2b0ae34440ecbdf2467dd2813176f</CoreFxCurrentRef>
-    <CoreClrCurrentRef>bf2f112caac2b0ae34440ecbdf2467dd2813176f</CoreClrCurrentRef>
     <CoreSetupCurrentRef>56b60e4ef0879b0423542f32a0b87779b4236453</CoreSetupCurrentRef>
     <ExternalCurrentRef>96dc7805f5df4a70a55783964ce69dcd91bfca80</ExternalCurrentRef>
     <ProjectNTfsCurrentRef>259833ca9bc03788c4af55c6df35c5f71c70a660</ProjectNTfsCurrentRef>
@@ -34,8 +33,6 @@
   <PropertyGroup>
     <CoreFxExpectedPrerelease>preview.18619.1</CoreFxExpectedPrerelease>
     <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview.18619.1</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview-27219-04</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
-    <MicrosoftNetCoreIlasmPackageVersion>3.0.0-preview-27219-04</MicrosoftNetCoreIlasmPackageVersion>
     <ProjectNTfsExpectedPrerelease>beta-27213-00</ProjectNTfsExpectedPrerelease>
     <ProjectNTfsTestILCExpectedPrerelease>beta-27213-00</ProjectNTfsTestILCExpectedPrerelease>
     <ProjectNTfsTestILCPackageVersion>1.0.0-beta-27213-00</ProjectNTfsTestILCPackageVersion>
@@ -93,10 +90,6 @@
       <BuildInfoPath>$(BaseDotNetBuildInfo)corefx/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(CoreFxCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
-    <RemoteDependencyBuildInfo Include="CoreClr">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)coreclr/$(DependencyBranch)</BuildInfoPath>
-      <CurrentRef>$(CoreClrCurrentRef)</CurrentRef>
-    </RemoteDependencyBuildInfo>
     <RemoteDependencyBuildInfo Include="CoreSetup">
       <BuildInfoPath>$(BaseDotNetBuildInfo)core-setup/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(CoreSetupCurrentRef)</CurrentRef>
@@ -144,22 +137,6 @@
       <ElementName>MicrosoftNETCorePlatformsPackageVersion</ElementName>
       <PackageId>Microsoft.NETCore.Platforms</PackageId>
     </XmlUpdateStep>
-    <XmlUpdateStep Include="CoreClr">
-      <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>MicrosoftNETCoreRuntimeCoreCLRPackageVersion</ElementName>
-      <PackageId>Microsoft.NETCore.Runtime.CoreCLR</PackageId>
-    </XmlUpdateStep>
-    <XmlUpdateStep Include="CoreClr">
-      <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>MicrosoftNetCoreIlasmPackageVersion</ElementName>
-      <PackageId>Microsoft.NETCore.ILAsm</PackageId>
-    </XmlUpdateStep>
-    <UpdateStep Include="CoreCLR">
-      <UpdaterType>MSBuildSdk</UpdaterType>
-      <Path>$(MSBuildThisFileDirectory)../global.json</Path>
-      <PackageId>Microsoft.NET.Sdk.IL</PackageId>
-      <MSBuildSdkName>Microsoft.NET.Sdk.IL</MSBuildSdkName>
-    </UpdateStep>
     <XmlUpdateStep Include="Standard">
       <Path>$(MSBuildThisFileFullPath)</Path>
       <ElementName>NETStandardLibraryPackageVersion</ElementName>
