@@ -181,11 +181,8 @@ namespace System.IO.Tests
                 {
                     for (var i = 0; i < watchers.Length; i++)
                     {
-                        watchers[i].Dispose();
-                        if (!useExistingWatchers)
-                        {
-                            watchers1[i].Dispose();
-                        }
+                        watchers[i]?.Dispose();
+                        watchers1[i]?.Dispose();
                     }
                 }
             });
