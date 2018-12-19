@@ -5,8 +5,9 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
 {
     internal class Concat<T, TResult> : ConsumerEnumerator<TResult>
     {
-        private IEnumerable<T> _first;
+        private IEnumerable<T> _firstOrNull;
         private IEnumerable<T> _second;
+        private IEnumerable<T> _thirdOrNull;
         private IEnumerator<T> _enumerator;
 
         ILink<T, TResult> _factory;
@@ -16,11 +17,12 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
 
         internal override Chain StartOfChain => _chain;
 
-        public Concat(IEnumerable<T> first, IEnumerable<T> second, ILink<T, TResult> factory)
+        public Concat(IEnumerable<T> firstOrNull, IEnumerable<T> second, IEnumerable<T> thirdOrNull, ILink<T, TResult> factory)
         {
             _state = Initialization;
-            _first = first;
+            _firstOrNull = firstOrNull;
             _second = second;
+            _thirdOrNull = thirdOrNull;
             _factory = factory;
         }
 
@@ -33,16 +35,18 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
                 _enumerator.Dispose();
                 _enumerator = null;
             }
-            _first = null;
+            _firstOrNull = null;
             _second = null;
+            _thirdOrNull = null;
             _chain = null;
         }
 
         const int Initialization = 0;
         const int ReadFirstEnumerator = 1;
         const int ReadSecondEnumerator = 2;
-        const int Finished = 3;
-        const int PostFinished = 4;
+        const int ReadThirdEnumerator = 3;
+        const int Finished = 4;
+        const int PostFinished = 5;
 
         public override bool MoveNext()
         {
@@ -50,10 +54,20 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
             {
                 case Initialization:
                     _chain = _factory.Compose(this);
-                    _enumerator = _first.GetEnumerator();
-                    _first = null;
-                    _state = ReadFirstEnumerator;
-                    goto case ReadFirstEnumerator;
+                    if (_firstOrNull == null)
+                    {
+                        _enumerator = _second.GetEnumerator();
+                        _second = null;
+                        _state = ReadSecondEnumerator;
+                        goto case ReadSecondEnumerator;
+                    }
+                    else
+                    {
+                        _enumerator = _firstOrNull.GetEnumerator();
+                        _firstOrNull = null;
+                        _state = ReadFirstEnumerator;
+                        goto case ReadFirstEnumerator;
+                    }
 
                 case ReadFirstEnumerator:
                     if (status.IsStopped())
@@ -81,6 +95,37 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
                     goto case ReadFirstEnumerator;
 
                 case ReadSecondEnumerator:
+                    if (status.IsStopped())
+                    {
+                        _state = Finished;
+                        goto case Finished;
+                    }
+
+                    if (!_enumerator.MoveNext())
+                    {
+                        _enumerator.Dispose();
+                        if (_thirdOrNull == null)
+                        {
+                            _enumerator = null;
+                            _state = Finished;
+                            goto case Finished;
+                        }
+                        _enumerator = _thirdOrNull.GetEnumerator();
+                        _thirdOrNull = null;
+                        _state = ReadThirdEnumerator;
+                        goto case ReadThirdEnumerator;
+                    }
+
+                    status = _chain.ProcessNext(_enumerator.Current);
+                    if (status.IsFlowing())
+                    {
+                        return true;
+                    }
+
+                    Debug.Assert(_state == ReadSecondEnumerator);
+                    goto case ReadSecondEnumerator;
+
+                case ReadThirdEnumerator:
                     if (!_enumerator.MoveNext() || status.IsStopped())
                     {
                         _state = Finished;
@@ -93,13 +138,13 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
                         return true;
                     }
 
-                    Debug.Assert(_state == ReadSecondEnumerator);
-                    goto case ReadSecondEnumerator;
+                    Debug.Assert(_state == ReadThirdEnumerator);
+                    goto case ReadThirdEnumerator;
 
                 case Finished:
                     Result = default;
                     _chain.ChainComplete();
-                    _state = 4;
+                    _state = PostFinished;
                     return false;
 
                 default:

@@ -4,12 +4,12 @@ namespace System.Linq.ChainLinq.Consume
 {
     static class Concat
     {
-        public static Result Invoke<T, V, Result>(IEnumerable<T> first, IEnumerable<T> second, ILink<T, V> composition, Consumer<V, Result> consumer)
+        public static Result Invoke<T, V, Result>(IEnumerable<T> firstOrNull, IEnumerable<T> second, IEnumerable<T> thirdOrNull, ILink<T, V> composition, Consumer<V, Result> consumer)
         {
             var chain = composition.Compose(consumer);
             try
             {
-                Pipeline(first, second, chain);
+                Pipeline(firstOrNull, second, thirdOrNull, chain);
                 chain.ChainComplete();
             }
             finally
@@ -19,15 +19,26 @@ namespace System.Linq.ChainLinq.Consume
             return consumer.Result;
         }
 
-        private static void Pipeline<T>(IEnumerable<T> first, IEnumerable<T> second, Chain<T> chain)
+        private static void Pipeline<T>(IEnumerable<T> firstOrNull, IEnumerable<T> second, IEnumerable<T> thirdOrNull, Chain<T> chain)
         {
             UnknownEnumerable.ChainConsumer<T> inner = null;
+            ChainStatus status;
 
-            var status = UnknownEnumerable.Consume(first, chain, ref inner);
+            if (firstOrNull != null)
+            {
+                status = UnknownEnumerable.Consume(firstOrNull, chain, ref inner);
+                if (status.IsStopped())
+                    return;
+            }
+
+            status = UnknownEnumerable.Consume(second, chain, ref inner);
             if (status.IsStopped())
                 return;
 
-            UnknownEnumerable.Consume(second, chain, ref inner);
+            if (thirdOrNull != null)
+            {
+                UnknownEnumerable.Consume(thirdOrNull, chain, ref inner);
+            }
         }
 
     }

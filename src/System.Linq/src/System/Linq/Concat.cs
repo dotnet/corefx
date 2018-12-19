@@ -22,7 +22,16 @@ namespace System.Linq
             }
 
 #if !PRE_CHAINLINQ
-            return new ChainLinq.Consumables.Concat<TSource, TSource>(first, second, ChainLinq.Links.Identity<TSource>.Instance);
+            if (first is ChainLinq.Consumables.Concat<TSource, TSource> forAppending)
+            {
+                return forAppending.Append(second);
+            }
+            else if (second is ChainLinq.Consumables.Concat<TSource, TSource> forPrepending)
+            {
+                return forPrepending.Prepend(first);
+            }
+
+            return new ChainLinq.Consumables.Concat<TSource, TSource>(null, first, second, ChainLinq.Links.Identity<TSource>.Instance);
         }
 #else
             return first is ConcatIterator<TSource> firstConcat

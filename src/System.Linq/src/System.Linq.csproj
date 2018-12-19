@@ -8,10 +8,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Appender.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Base.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Array.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Concat.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Enumerable.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Prepender.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Range.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Array.cs" />

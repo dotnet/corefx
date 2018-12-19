@@ -16,9 +16,18 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            if (source is ChainLinq.Consumables.Concat<TSource, TSource> forAppending)
+            {
+                return forAppending.Append(element);
+            }
+
+            return new ChainLinq.Consumables.Concat<TSource, TSource>(null, source, new ChainLinq.Consumables.Appender<TSource>(element), ChainLinq.Links.Identity<TSource>.Instance);
+#else
             return source is AppendPrependIterator<TSource> appendable
                 ? appendable.Append(element)
                 : new AppendPrepend1Iterator<TSource>(source, element, appending: true);
+#endif
         }
 
         public static IEnumerable<TSource> Prepend<TSource>(this IEnumerable<TSource> source, TSource element)
@@ -28,11 +37,21 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            if (source is ChainLinq.Consumables.Concat<TSource, TSource> forPrepending)
+            {
+                return forPrepending.Prepend(element);
+            }
+
+            return new ChainLinq.Consumables.Concat<TSource, TSource>(new ChainLinq.Consumables.Prepender<TSource>(element), source, null, ChainLinq.Links.Identity<TSource>.Instance);
+#else
             return source is AppendPrependIterator<TSource> appendable
                 ? appendable.Prepend(element)
                 : new AppendPrepend1Iterator<TSource>(source, element, appending: false);
+#endif
         }
 
+#if PRE_CHAINLINQ
         /// <summary>
         /// Represents the insertion of one or more items before or after an <see cref="IEnumerable{TSource}"/>.
         /// </summary>
@@ -243,5 +262,6 @@ namespace System.Linq
                 return new AppendPrependN<TSource>(_source, prepended, _appended, _prependCount + 1, _appendCount);
             }
         }
+#endif
     }
 }

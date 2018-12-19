@@ -7,6 +7,7 @@ using System.Diagnostics;
 
 namespace System.Linq
 {
+#if PRE_CHAINLINQ
     public static partial class Enumerable
     {
         private abstract partial class AppendPrependIterator<TSource> : IIListProvider<TSource>
@@ -211,4 +212,5 @@ namespace System.Linq
             }
         }
     }
+#endif
 }

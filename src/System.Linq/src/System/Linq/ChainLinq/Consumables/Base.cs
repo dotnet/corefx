@@ -16,5 +16,7 @@
             Create(Links.Composition.Create(Link, next));
 
         public abstract Consumable<V> Create<V>(ILink<T, V> first);
+
+        protected bool IsIdentity => ReferenceEquals(Link, Links.Identity<T>.Instance);
     }
 }

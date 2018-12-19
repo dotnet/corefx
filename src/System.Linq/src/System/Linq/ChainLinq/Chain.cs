@@ -12,6 +12,9 @@ namespace System.Linq.ChainLinq
     [Flags]
     enum ChainStatus
     {
+        /// <summary>
+        /// Filter should not be used a flag, rather Flow flag not set
+        /// </summary>
         Filter = 0x00,
         Flow = 0x01,
         Stop = 0x02,
