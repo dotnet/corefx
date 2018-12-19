@@ -16,6 +16,21 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            if (count <= 0)
+            {
+                // Return source if not actually skipping, but only if it's a type from here, to avoid
+                // issues if collections are used as keys or otherwise must not be aliased.
+                if (source is ChainLinq.Consumable<TSource>)
+                {
+                    return source;
+                }
+
+                count = 0;
+            }
+
+            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Skip<TSource>(count));
+#else
             if (count <= 0)
             {
                 // Return source if not actually skipping, but only if it's a type from here, to avoid
@@ -33,6 +48,7 @@ namespace System.Linq
             }
 
             return SkipIterator(source, count);
+#endif
         }
 
         public static IEnumerable<TSource> SkipWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)

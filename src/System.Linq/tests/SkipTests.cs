@@ -476,6 +476,8 @@ namespace System.Linq.Tests
             Assert.Empty(skipped.ToList());
         }
 
+#if PRE_CHAINLINQ
+// we use a member variable called _state, but with a different meaning
         [Fact]
         public void IteratorStateShouldNotChangeIfNumberOfElementsIsUnbounded()
         {
@@ -508,6 +510,7 @@ namespace System.Linq.Tests
                 }
             }
         }
+#endif
 
         [Theory]
         [InlineData(0, -1)]

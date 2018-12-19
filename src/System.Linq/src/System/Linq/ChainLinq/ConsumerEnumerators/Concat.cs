@@ -72,6 +72,8 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
                 case ReadFirstEnumerator:
                     if (status.IsStopped())
                     {
+                        _enumerator.Dispose();
+                        _enumerator = null;
                         _state = Finished;
                         goto case Finished;
                     }
@@ -97,6 +99,8 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
                 case ReadSecondEnumerator:
                     if (status.IsStopped())
                     {
+                        _enumerator.Dispose();
+                        _enumerator = null;
                         _state = Finished;
                         goto case Finished;
                     }
@@ -128,6 +132,8 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
                 case ReadThirdEnumerator:
                     if (status.IsStopped() || !_enumerator.MoveNext())
                     {
+                        _enumerator.Dispose();
+                        _enumerator = null;
                         _state = Finished;
                         goto case Finished;
                     }
