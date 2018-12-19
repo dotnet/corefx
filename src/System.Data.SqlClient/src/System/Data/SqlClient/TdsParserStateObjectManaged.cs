@@ -184,6 +184,7 @@ namespace System.Data.SqlClient.SNI
 
         internal override bool IsValidPacket(PacketHandle packet)
         {
+            Debug.Assert(packet.Type == PacketHandle.ManagedPacketType, "unexpected packet type when requiring ManagedPacket");
             return (
                 packet.Type == PacketHandle.ManagedPacketType &&
                 packet.ManagedPacket != null &&
