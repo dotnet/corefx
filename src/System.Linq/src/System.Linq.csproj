@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Appender.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\ChainLinqConsumable.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Empty.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Base.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Array.cs" />

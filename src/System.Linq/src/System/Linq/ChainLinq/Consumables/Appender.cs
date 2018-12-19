@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    class Appender<T> : Consumable<T>
+    class Appender<T> : InternalChainLinqConsumable<T>
     {
         readonly T _element;
         readonly Appender<T> _previous;
