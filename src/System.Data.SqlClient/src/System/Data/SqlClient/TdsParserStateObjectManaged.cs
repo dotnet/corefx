@@ -135,6 +135,8 @@ namespace System.Data.SqlClient.SNI
             return PacketHandle.FromManagedPacket(packet);
         }
 
+        protected override PacketHandle EmptyReadPacket => PacketHandle.FromManagedPacket(null);
+
         internal override bool IsPacketEmpty(PacketHandle packet)
         {
             return packet.ManagedPacket == null;
@@ -180,7 +182,14 @@ namespace System.Data.SqlClient.SNI
             return packet;
         }
 
-        internal override bool IsValidPacket(PacketHandle packet) => packet.ManagedPacket?.IsInvalid ?? false;
+        internal override bool IsValidPacket(PacketHandle packet)
+        {
+            return (
+                packet.Type == PacketHandle.ManagedPacketType &&
+                packet.ManagedPacket != null &&
+                !packet.ManagedPacket.IsInvalid
+            );
+        }
 
         internal override PacketHandle GetResetWritePacket()
         {

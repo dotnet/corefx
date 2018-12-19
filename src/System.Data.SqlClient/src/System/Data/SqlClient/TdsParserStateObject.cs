@@ -3644,7 +3644,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        protected virtual PacketHandle EmptyReadPacket => default;
+        protected abstract PacketHandle EmptyReadPacket { get; }
 
         /// <summary>
         /// Gets the full list of errors and warnings (including the pre-attention ones), then wipes all error and warning lists

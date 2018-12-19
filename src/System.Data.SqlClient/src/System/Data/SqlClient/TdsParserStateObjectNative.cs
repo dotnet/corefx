@@ -185,6 +185,8 @@ namespace System.Data.SqlClient
             return PacketHandle.FromNativePointer(readPacketPtr);
         }
 
+        protected override PacketHandle EmptyReadPacket => PacketHandle.FromNativePointer(default);
+
         internal override bool IsPacketEmpty(PacketHandle readPacket)
         {
             Debug.Assert(readPacket.Type == PacketHandle.NativePointerType || readPacket.Type == 0, "unexpected packet type when requiring NativePointer");
@@ -244,8 +246,12 @@ namespace System.Data.SqlClient
 
         internal override bool IsValidPacket(PacketHandle packetPointer)
         {
-            Debug.Assert(packetPointer.Type == PacketHandle.NativePointerType, "unexpected packet type when requiring NativePointer");
-            return packetPointer.NativePointer != IntPtr.Zero;
+            Debug.Assert(packetPointer.Type == PacketHandle.NativePointerType || packetPointer.Type==PacketHandle.NativePacketType, "unexpected packet type when requiring NativePointer");
+            return (
+                (packetPointer.Type == PacketHandle.NativePointerType && packetPointer.NativePointer != IntPtr.Zero)
+                ||
+                (packetPointer.Type == PacketHandle.NativePacketType && packetPointer.NativePacket != null)
+            );
         }
 
         internal override PacketHandle GetResetWritePacket()
