@@ -476,9 +476,7 @@ namespace System.Linq.Tests
             Assert.Empty(skipped.ToList());
         }
 
-#if PRE_CHAINLINQ
-// we use a member variable called _state, but with a different meaning
-        [Fact]
+        [Fact(Skip = "This test no longer makes sense under ChainLinq")]
         public void IteratorStateShouldNotChangeIfNumberOfElementsIsUnbounded()
         {
             // With https://github.com/dotnet/corefx/pull/13628, Skip and Take return
@@ -510,7 +508,6 @@ namespace System.Linq.Tests
                 }
             }
         }
-#endif
 
         [Theory]
         [InlineData(0, -1)]
