@@ -9,7 +9,7 @@
       <Uri>https://github.com/dotnet/coreclr</Uri>
       <Sha>6f4c9d6427829807ad1fc4432f6f7d544e982c67</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.0.0-preview-27218-02">
+    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.0.0-preview-27219-04">
       <Uri>https://github.com/dotnet/coreclr</Uri>
       <Sha>6f4c9d6427829807ad1fc4432f6f7d544e982c67</Sha>
     </Dependency>
