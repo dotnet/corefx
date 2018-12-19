@@ -117,7 +117,7 @@ def osShortName = ['Windows 10': 'win10',
                         "python3.5 \"\${WORKSPACE}/artifacts/Microsoft.BenchView.JSONFormat/tools/build.py\" git --branch \$GIT_BRANCH_WITHOUT_ORIGIN --type " + runType)
                         shell("python3.5 \"\${WORKSPACE}/artifacts/Microsoft.BenchView.JSONFormat/tools/machinedata.py\"")
 
-                        shell("bash .eng/common/build.sh --ci --configuration Release /p:ConfigurationGroup=Release /p:BuildTests=true /p:BuildNative=false /p:Performance=true /p:TargetOS=${osGroup} /m:1 /p:LogToBenchview=true /p:BenchviewRunType=${runType} /p:PerformanceType=Profile")
+                        shell("bash ./eng/common/build.sh --ci --configuration Release /p:ConfigurationGroup=Release /p:BuildTests=true /p:BuildNative=false /p:Performance=true /p:TargetOS=${osGroup} /m:1 /p:LogToBenchview=true /p:BenchviewRunType=${runType} /p:PerformanceType=Profile")
                     }
                 }
             }
