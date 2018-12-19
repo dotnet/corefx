@@ -192,7 +192,16 @@ namespace System.Text.Json
         /// </exception>
         public bool Read()
         {
-            return _isSingleSegment ? ReadSingleSegment() : ReadMultiSegment();
+            bool retVal = _isSingleSegment ? ReadSingleSegment() : ReadMultiSegment();
+
+            if (!retVal)
+            {
+                if (_isFinalBlock && TokenType == JsonTokenType.None)
+                {
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ArrayDepthTooLarge); // TODO: should be used a proper error message
+                }
+            }
+            return retVal;
         }
 
         private void StartObject()

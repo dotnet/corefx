@@ -806,6 +806,44 @@ namespace System.Text.Json.Tests
             }
         }
 
+        [Fact]
+        public static void InvalidJson1() // TODO
+        {
+            var dataUtf8 = ReadOnlySpan<byte>.Empty;
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, new JsonReaderState());
+
+            try
+            {
+                while (json.Read())
+                    ;
+                Assert.True(false, "Expected JsonReaderException was not thrown with single-segment data.");
+            }
+            catch (JsonReaderException ex)
+            {
+                Assert.Equal(0, ex.LineNumber);
+                Assert.Equal(0, ex.BytePositionInLine);
+            }
+        }
+
+        [Fact]
+        public static void InvalidJson2() // TODO
+        {
+            var dataUtf8 = new byte[] { 0x20 };
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, new JsonReaderState());
+
+            try
+            {
+                while (json.Read())
+                    ;
+                Assert.True(false, "Expected JsonReaderException was not thrown with single-segment data.");
+            }
+            catch (JsonReaderException ex)
+            {
+                Assert.Equal(0, ex.LineNumber);
+                Assert.Equal(1, ex.BytePositionInLine);
+            }
+        }
+
         [Theory]
         [MemberData(nameof(InvalidJsonStrings))]
         public static void InvalidJsonSingleSegment(string jsonString, int expectedlineNumber, int expectedBytePosition, int maxDepth = 64)
@@ -1049,6 +1087,8 @@ namespace System.Text.Json.Tests
         [InlineData("//\n", 3)]
         [InlineData("/**/", 4)]
         [InlineData("/*/*/", 5)]
+        [InlineData("// just a comment", 17)]
+        [InlineData(" /* comment and whitespace */ ", 30)]
 
         [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", 32)]
         [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", 37)]
@@ -1085,20 +1125,27 @@ namespace System.Text.Json.Tests
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
             JsonTokenType prevTokenType = JsonTokenType.None;
-            while (json.Read())
+            try
             {
-                JsonTokenType tokenType = json.TokenType;
-                switch (tokenType)
+                while (json.Read())
                 {
-                    case JsonTokenType.Comment:
-                        Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
-                        break;
+                    JsonTokenType tokenType = json.TokenType;
+                    switch (tokenType)
+                    {
+                        case JsonTokenType.Comment:
+                            Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
+                            break;
+                    }
+                    Assert.NotEqual(tokenType, prevTokenType);
+                    prevTokenType = tokenType;
                 }
-                Assert.NotEqual(tokenType, prevTokenType);
-                prevTokenType = tokenType;
+                Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+                Assert.Equal(dataUtf8.Length, json.CurrentState.BytesConsumed);
             }
-            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(dataUtf8.Length, json.CurrentState.BytesConsumed);
+            catch (JsonReaderException)
+            {
+                //Assert.Equal(json.BytesConsumed, ex.BytePositionInLine);
+            }
         }
 
         [Theory]
@@ -1106,6 +1153,8 @@ namespace System.Text.Json.Tests
         [InlineData("//\n", 3)]
         [InlineData("/**/", 4)]
         [InlineData("/*/*/", 5)]
+        [InlineData("// just a comment", 17)]
+        [InlineData(" /* comment and whitespace */ ", 30)]
 
         [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", 32)]
         [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", 37)]
@@ -1144,52 +1193,65 @@ namespace System.Text.Json.Tests
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
-            while (json.Read())
+            try
             {
-                JsonTokenType tokenType = json.TokenType;
-                switch (tokenType)
+                while (json.Read())
                 {
-                    case JsonTokenType.Comment:
-                        Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
-                        break;
+                    JsonTokenType tokenType = json.TokenType;
+                    switch (tokenType)
+                    {
+                        case JsonTokenType.Comment:
+                            Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
+                            break;
+                    }
                 }
+                Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+                Assert.Equal(dataUtf8.Length, json.CurrentState.BytesConsumed);
             }
-            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
-            Assert.Equal(dataUtf8.Length, json.CurrentState.BytesConsumed);
+            catch (JsonReaderException)
+            {
+                //Assert.Equal(json.BytesConsumed, ex.BytePositionInLine);
+            }
 
             for (int i = 0; i < dataUtf8.Length; i++)
             {
                 var stateInner = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
                 var jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, stateInner);
-
-                while (jsonSlice.Read())
+                try
                 {
-                    JsonTokenType tokenType = jsonSlice.TokenType;
-                    switch (tokenType)
+                    while (jsonSlice.Read())
                     {
-                        case JsonTokenType.Comment:
-                            Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
-                            break;
+                        JsonTokenType tokenType = jsonSlice.TokenType;
+                        switch (tokenType)
+                        {
+                            case JsonTokenType.Comment:
+                                Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
+                                break;
+                        }
                     }
+
+                    int prevConsumed = (int)jsonSlice.BytesConsumed;
+                    Assert.Equal(prevConsumed, jsonSlice.CurrentState.BytesConsumed);
+                    jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(prevConsumed), isFinalBlock: true, jsonSlice.CurrentState);
+
+                    while (jsonSlice.Read())
+                    {
+                        JsonTokenType tokenType = jsonSlice.TokenType;
+                        switch (tokenType)
+                        {
+                            case JsonTokenType.Comment:
+                                Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
+                                break;
+                        }
+                    }
+
+                    Assert.Equal(dataUtf8.Length - prevConsumed, jsonSlice.BytesConsumed);
+                    Assert.Equal(jsonSlice.BytesConsumed, jsonSlice.CurrentState.BytesConsumed);
                 }
-
-                int prevConsumed = (int)jsonSlice.BytesConsumed;
-                Assert.Equal(prevConsumed, jsonSlice.CurrentState.BytesConsumed);
-                jsonSlice = new Utf8JsonReader(dataUtf8.AsSpan(prevConsumed), isFinalBlock: true, jsonSlice.CurrentState);
-
-                while (jsonSlice.Read())
+                catch (JsonReaderException)
                 {
-                    JsonTokenType tokenType = jsonSlice.TokenType;
-                    switch (tokenType)
-                    {
-                        case JsonTokenType.Comment:
-                            Assert.True(false, "TokenType should never be 'Comment' when we are skipping them.");
-                            break;
-                    }
+                   // Assert.Equal(jsonSlice.BytesConsumed, ex.BytePositionInLine);
                 }
-
-                Assert.Equal(dataUtf8.Length - prevConsumed, jsonSlice.BytesConsumed);
-                Assert.Equal(jsonSlice.BytesConsumed, jsonSlice.CurrentState.BytesConsumed);
             }
         }
 
