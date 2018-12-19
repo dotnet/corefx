@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Appender.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Empty.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Base.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Array.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Concat.cs" />
@@ -45,6 +46,7 @@
     <Compile Include="System\Linq\ChainLinq\Links\Compose.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Distinct.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Identity.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Take.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\WhereIndexed.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Where.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Select.cs" />

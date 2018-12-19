@@ -126,7 +126,7 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
                     goto case ReadSecondEnumerator;
 
                 case ReadThirdEnumerator:
-                    if (!_enumerator.MoveNext() || status.IsStopped())
+                    if (status.IsStopped() || !_enumerator.MoveNext())
                     {
                         _state = Finished;
                         goto case Finished;

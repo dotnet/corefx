@@ -38,7 +38,7 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
             }
 
         tryAgain:
-            if (!_enumerator.MoveNext() || status.IsStopped())
+            if (status.IsStopped() || !_enumerator.MoveNext())
             {
                 Result = default;
                 _chain.ChainComplete();

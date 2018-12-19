@@ -9,7 +9,10 @@ namespace System.Linq.ChainLinq
             switch (e)
             {
                 case T[] array:
-                    return new Consumables.Array<T, U>(array, transform);
+                    return 
+                        array.Length == 0
+                          ? Consumables.Empty<U>.Instance
+                          : new Consumables.Array<T, U>(array, transform);
 
                 default:
                     return new Consumables.Enumerable<T, U>(e, transform);
