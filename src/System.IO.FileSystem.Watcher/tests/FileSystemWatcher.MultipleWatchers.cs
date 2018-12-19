@@ -123,65 +123,69 @@ namespace System.IO.Tests
         {
             ExecuteWithRetry(() =>
             {
-                string fileName = Path.Combine(TestDirectory, "file");
-                AutoResetEvent[] autoResetEvents = new AutoResetEvent[64];
                 FileSystemWatcher[] watchers = new FileSystemWatcher[64];
-                for (var i = 0; i < watchers.Length; i++)
+                FileSystemWatcher[] watchers1 = new FileSystemWatcher[64];
+
+                try
                 {
-                    watchers[i] = new FileSystemWatcher(TestDirectory);
-                    watchers[i].Filter = Path.GetFileName(fileName);
-                    autoResetEvents[i] = WatchCreated(watchers[i], new[] { fileName }).EventOccured;
-                    watchers[i].EnableRaisingEvents = true;
-                }
-
-                File.Create(fileName).Dispose();
-                Assert.True(WaitHandle.WaitAll(autoResetEvents, WaitForExpectedEventTimeout_NoRetry));
-
-                File.Delete(fileName);
-                for (var i = 0; i < watchers.Length; i++)
-                {
-                    watchers[i].EnableRaisingEvents = false;
-                }
-
-                File.Create(fileName).Dispose(); 
-                Assert.False(WaitHandle.WaitAll(autoResetEvents, WaitForUnexpectedEventTimeout));
-
-                File.Delete(fileName);
-
-                if (useExistingWatchers)
-                {
+                    string fileName = Path.Combine(TestDirectory, "file");
+                    AutoResetEvent[] autoResetEvents = new AutoResetEvent[64];
                     for (var i = 0; i < watchers.Length; i++)
                     {
+                        watchers[i] = new FileSystemWatcher(TestDirectory);
+                        watchers[i].Filter = Path.GetFileName(fileName);
+                        autoResetEvents[i] = WatchCreated(watchers[i], new[] { fileName }).EventOccured;
                         watchers[i].EnableRaisingEvents = true;
                     }
 
                     File.Create(fileName).Dispose();
                     Assert.True(WaitHandle.WaitAll(autoResetEvents, WaitForExpectedEventTimeout_NoRetry));
 
+                    File.Delete(fileName);
+                    for (var i = 0; i < watchers.Length; i++)
+                    {
+                        watchers[i].EnableRaisingEvents = false;
+                    }
+
+                    File.Create(fileName).Dispose(); 
+                    Assert.False(WaitHandle.WaitAll(autoResetEvents, WaitForUnexpectedEventTimeout));
+
+                    File.Delete(fileName);
+
+                    if (useExistingWatchers)
+                    {
+                        for (var i = 0; i < watchers.Length; i++)
+                        {
+                            watchers[i].EnableRaisingEvents = true;
+                        }
+
+                        File.Create(fileName).Dispose();
+                        Assert.True(WaitHandle.WaitAll(autoResetEvents, WaitForExpectedEventTimeout_NoRetry));
+                    }
+                    else
+                    {                        
+                        AutoResetEvent[] autoResetEvents1 = new AutoResetEvent[64];                        
+                        for (var i = 0; i < watchers1.Length; i++)
+                        {
+                            watchers1[i] = new FileSystemWatcher(TestDirectory);
+                            watchers1[i].Filter = Path.GetFileName(fileName);
+                            autoResetEvents1[i] = WatchCreated(watchers1[i], new[] { fileName }).EventOccured;
+                            watchers1[i].EnableRaisingEvents = true;
+                        }
+
+                        File.Create(fileName).Dispose();
+                        Assert.True(WaitHandle.WaitAll(autoResetEvents1, WaitForExpectedEventTimeout_NoRetry));
+                    }
+                }
+                finally
+                {
                     for (var i = 0; i < watchers.Length; i++)
                     {
                         watchers[i].Dispose();
-                    }
-                }
-                else
-                {
-                    AutoResetEvent[] autoResetEvents1 = new AutoResetEvent[64];
-                    FileSystemWatcher[] watchers1 = new FileSystemWatcher[64];
-                    for (var i = 0; i < watchers1.Length; i++)
-                    {
-                        watchers1[i] = new FileSystemWatcher(TestDirectory);
-                        watchers1[i].Filter = Path.GetFileName(fileName);
-                        autoResetEvents1[i] = WatchCreated(watchers1[i], new[] { fileName }).EventOccured;
-                        watchers1[i].EnableRaisingEvents = true;
-                    }
-
-                    File.Create(fileName).Dispose();
-                    Assert.True(WaitHandle.WaitAll(autoResetEvents1, WaitForExpectedEventTimeout_NoRetry));
-
-                    for (var i = 0; i < watchers1.Length; i++)
-                    {
-                        watchers[i].Dispose();
-                        watchers1[i].Dispose();
+                        if (!useExistingWatchers)
+                        {
+                            watchers1[i].Dispose();
+                        }
                     }
                 }
             });
