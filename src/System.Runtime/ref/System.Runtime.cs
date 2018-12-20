@@ -128,7 +128,6 @@ namespace System
         [System.CLSCompliantAttribute(false)]
         public System.TypedReference GetNextArg(System.RuntimeTypeHandle rth) { throw null; }
         public System.RuntimeTypeHandle GetNextArgType() { throw null; }
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
         public int GetRemainingCount() { throw null; }
     }
     public partial class ArgumentException : System.SystemException
@@ -2330,6 +2329,7 @@ namespace System
         public bool EndsWith(System.String value) { throw null; }
         public bool EndsWith(System.String value, bool ignoreCase, System.Globalization.CultureInfo culture) { throw null; }
         public bool EndsWith(System.String value, System.StringComparison comparisonType) { throw null; }
+        public System.Text.StringRuneEnumerator EnumerateRunes() { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.String value) { throw null; }
         public static bool Equals(System.String a, System.String b) { throw null; }
@@ -3896,7 +3896,7 @@ namespace System.Collections.Generic
 {
     public partial interface IAsyncEnumerable<out T>
     {
-        System.Collections.Generic.IAsyncEnumerator<T> GetAsyncEnumerator();
+        System.Collections.Generic.IAsyncEnumerator<T> GetAsyncEnumerator(System.Threading.CancellationToken cancellationToken = default);
     }
     public partial interface IAsyncEnumerator<out T> : System.IAsyncDisposable
     {
@@ -5273,6 +5273,7 @@ namespace System.Reflection
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.Module> Modules { get { throw null; } }
         public virtual bool ReflectionOnly { get { throw null; } }
         public virtual System.Security.SecurityRuleSet SecurityRuleSet { get { throw null; } }
+        public virtual bool IsCollectible { get { throw null; } }
         public virtual event System.Reflection.ModuleResolveEventHandler ModuleResolve { add { } remove { } }
         public object CreateInstance(string typeName) { throw null; }
         public object CreateInstance(string typeName, bool ignoreCase) { throw null; }
@@ -5856,6 +5857,7 @@ namespace System.Reflection
         public virtual System.Reflection.Module Module { get { throw null; } }
         public abstract string Name { get; }
         public abstract System.Type ReflectedType { get; }
+        public virtual bool IsCollectible { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public abstract object[] GetCustomAttributes(bool inherit);
         public abstract object[] GetCustomAttributes(System.Type attributeType, bool inherit);
@@ -6437,6 +6439,11 @@ namespace System.Runtime.CompilerServices
         public AsyncMethodBuilderAttribute(System.Type builderType) { }
         public System.Type BuilderType { get { throw null; } }
     }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    public sealed partial class AsyncIteratorStateMachineAttribute : System.Runtime.CompilerServices.StateMachineAttribute
+    {
+        public AsyncIteratorStateMachineAttribute(System.Type stateMachineType) : base(default(System.Type)) { }
+    }
     [System.AttributeUsageAttribute(System.AttributeTargets.Method, Inherited=false, AllowMultiple=false)]
     public sealed partial class AsyncStateMachineAttribute : System.Runtime.CompilerServices.StateMachineAttribute
     {
@@ -6755,6 +6762,8 @@ namespace System.Runtime.CompilerServices
         public const string DefaultImplementationsOfInterfaces = "DefaultImplementationsOfInterfaces";
 #endif
         public const string PortablePdb = "PortablePdb";
+        public static bool IsDynamicCodeCompiled { get { throw null; } }
+        public static bool IsDynamicCodeSupported { get { throw null; } }
         public static bool IsSupported(string feature) { throw null; }
     }
     public static partial class RuntimeHelpers
@@ -7624,6 +7633,63 @@ namespace System.Text
         FormKC = 5,
         FormKD = 6,
     }
+    public readonly struct Rune : IComparable<Rune>, IEquatable<Rune>
+    {
+        private readonly int _dummyPrimitive;
+        public Rune(char ch) { throw null; }
+        public Rune(int value) { throw null; }
+        [CLSCompliant(false)]
+        public Rune(uint value) { throw null; }
+        public static bool operator ==(Rune left, Rune right) { throw null; }
+        public static bool operator !=(Rune left, Rune right) { throw null; }
+        public static bool operator <(Rune left, Rune right) { throw null; }
+        public static bool operator <=(Rune left, Rune right) { throw null; }
+        public static bool operator >(Rune left, Rune right) { throw null; }
+        public static bool operator >=(Rune left, Rune right) { throw null; }
+        public static explicit operator Rune(char ch) { throw null; }
+        [CLSCompliant(false)]
+        public static explicit operator Rune(uint value) { throw null; }
+        public static explicit operator Rune(int value) { throw null; }
+        public bool IsAscii { get { throw null; } }
+        public bool IsBmp { get { throw null; } }
+        public int Plane { get { throw null; } }
+        public static Rune ReplacementChar { get { throw null; } }
+        public int Utf16SequenceLength { get { throw null; } }
+        public int Utf8SequenceLength { get { throw null; } }
+        public int Value { get { throw null; } }
+        public int CompareTo(Rune other) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public bool Equals(Rune other) { throw null; }
+        public override int GetHashCode() { throw null; }
+        public static Rune GetRuneAt(string input, int index) { throw null; }
+        public static bool IsValid(int value) { throw null; }
+        [CLSCompliant(false)]
+        public static bool IsValid(uint value) { throw null; }
+        public override string ToString() { throw null; }
+        public static bool TryCreate(char ch, out Rune result) { throw null; }
+        public static bool TryCreate(int value, out Rune result) { throw null; }
+        [CLSCompliant(false)]
+        public static bool TryCreate(uint value, out Rune result) { throw null; }
+        public bool TryEncode(Span<char> destination, out int charsWritten) { throw null; }
+        public static bool TryGetRuneAt(string input, int index, out Rune value) { throw null; }
+        public static double GetNumericValue(Rune value) { throw null; }
+        public static System.Globalization.UnicodeCategory GetUnicodeCategory(Rune value) { throw null; }
+        public static bool IsControl(Rune value) { throw null; }
+        public static bool IsDigit(Rune value) { throw null; }
+        public static bool IsLetter(Rune value) { throw null; }
+        public static bool IsLetterOrDigit(Rune value) { throw null; }
+        public static bool IsLower(Rune value) { throw null; }
+        public static bool IsNumber(Rune value) { throw null; }
+        public static bool IsPunctuation(Rune value) { throw null; }
+        public static bool IsSeparator(Rune value) { throw null; }
+        public static bool IsSymbol(Rune value) { throw null; }
+        public static bool IsUpper(Rune value) { throw null; }
+        public static bool IsWhiteSpace(Rune value) { throw null; }
+        public static Rune ToLower(Rune value, System.Globalization.CultureInfo culture) { throw null; }
+        public static Rune ToLowerInvariant(Rune value) { throw null; }
+        public static Rune ToUpper(Rune value, System.Globalization.CultureInfo culture) { throw null; }
+        public static Rune ToUpperInvariant(Rune value) { throw null; }
+    }
     public sealed partial class StringBuilder : System.Runtime.Serialization.ISerializable
     {
         public StringBuilder() { }
@@ -7651,6 +7717,7 @@ namespace System.Text
         public System.Text.StringBuilder Append(int value) { throw null; }
         public System.Text.StringBuilder Append(long value) { throw null; }
         public System.Text.StringBuilder Append(object value) { throw null; }
+        public System.Text.StringBuilder Append(System.ReadOnlyMemory<char> value) { throw null; }
         public System.Text.StringBuilder Append(System.ReadOnlySpan<char> value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public System.Text.StringBuilder Append(sbyte value) { throw null; }
@@ -7725,6 +7792,19 @@ namespace System.Text
             public System.Text.StringBuilder.ChunkEnumerator GetEnumerator() { throw null; }
             public bool MoveNext() { throw null; }
         }
+    }
+    public partial struct StringRuneEnumerator : System.Collections.Generic.IEnumerable<System.Text.Rune>, System.Collections.Generic.IEnumerator<System.Text.Rune>
+    {
+        private readonly object _dummyReference;
+        private readonly int _dummyPrimitive;
+        public System.Text.Rune Current { get { throw null; } }
+        public StringRuneEnumerator GetEnumerator() { throw null; }
+        public bool MoveNext() { throw null; }
+        object System.Collections.IEnumerator.Current { get { throw null; } }
+        void IDisposable.Dispose() { }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
+        System.Collections.Generic.IEnumerator<System.Text.Rune> System.Collections.Generic.IEnumerable<System.Text.Rune>.GetEnumerator() { throw null; }
+        void System.Collections.IEnumerator.Reset() { }
     }
 }
 namespace System.Threading

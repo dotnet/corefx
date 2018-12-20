@@ -23,17 +23,20 @@
 
   <Import Project="Directory.Build.targets" />
 
-  <UsingTask TaskName="GenerateConfigurationProps" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
-
-  <Target Name="Restore" DependsOnTargets="RestoreOptionalToolingPackages;RestoreOptimizationDataPackage">
+  <Target Name="Restore" DependsOnTargets="GenerateConfigurationProps;RestoreOptionalToolingPackages;RestoreOptimizationDataPackage">
     <ItemGroup>
       <_RestoreProjects Include="external\dir.proj" />
     </ItemGroup>
 
-    <!-- Generate the configurations for this repo -->
-    <GenerateConfigurationProps Properties="@(Property)" PropertyValues="@(PropertyValue)" PropsFolder="$(BuildConfigurationFolder)" />
-
     <MSBuild Projects="@(_RestoreProjects)" Properties="$(ProjectProperties)" />
+  </Target>
+
+  <Target Name="_IsProjectRestoreSupported"
+          Returns="@(_ValidProjectsForRestore)">
+
+    <ItemGroup>
+      <_ValidProjectsForRestore Include="$(MSBuildProjectFullPath)" />
+    </ItemGroup>
   </Target>
 
   <Target Name="BuildNative">
@@ -97,4 +100,7 @@
     <UpdateVSConfigurations ProjectsToUpdate="@(_projectsToUpdate)" SolutionsToUpdate="@(_solutionsToUpdate)" />
     <Message Importance="High" Text="Updating configurations for projects ... Done." />
   </Target>
+
+  <!-- Define an empty Execute target for Arcade's publish to BAR finds it: https://github.com/dotnet/arcade/issues/1452 -->
+  <Target Name="Execute" />
 </Project>

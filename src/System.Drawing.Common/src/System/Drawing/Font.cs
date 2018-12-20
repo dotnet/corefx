@@ -18,6 +18,7 @@ namespace System.Drawing
     [TypeConverter("System.Drawing.FontConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #endif
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public sealed partial class Font : MarshalByRefObject, ICloneable, IDisposable, ISerializable
     {
         private IntPtr _nativeFont;
@@ -117,7 +118,7 @@ namespace System.Drawing
         public string OriginalFontName => _originalFontName;
 
         /// <summary>
-        /// Gets the name of this <see cref='Drawing.SystemFont'/>.
+        /// Gets the name of this <see cref='Font'/>.
         /// </summary>
         [Browsable(false)]
         public string SystemFontName => _systemFontName;

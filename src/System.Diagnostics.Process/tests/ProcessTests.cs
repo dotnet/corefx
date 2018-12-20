@@ -218,6 +218,92 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsServerCore),
+            nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsIoTCore))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
+        [InlineData(true), InlineData(false)]
+        public void ProcessStart_UseShellExecute_Executes(bool filenameAsUrl)
+        {
+            string filename = WriteScriptFile(TestDirectory, GetTestFileName(), returnValue: 42);
+
+            if (filenameAsUrl)
+            {
+                filename = new Uri(filename).ToString();
+            }
+
+            using (var process = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = filename }))
+            {
+                process.WaitForExit();
+                Assert.Equal(42, process.ExitCode);
+            }
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsServerCore),
+            nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsIoTCore))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
+        public void ProcessStart_UseShellExecute_ExecuteOrder()
+        {
+            // Create a directory that we will use as PATH
+            string path = Path.Combine(TestDirectory, "Path");
+            Directory.CreateDirectory(path);
+            // Create a directory that will be our working directory
+            string wd = Path.Combine(TestDirectory, "WorkingDirectory");
+            Directory.CreateDirectory(wd);
+
+            RemoteInvokeOptions options = new RemoteInvokeOptions();
+            options.StartInfo.EnvironmentVariables["PATH"] = path;
+            options.StartInfo.WorkingDirectory = wd;
+            RemoteInvoke(pathDirectory =>
+            {
+                // Create two identically named scripts, one in the working directory and one on PATH.
+                const int workingDirReturnValue = 1;
+                const int pathDirReturnValue = 2;
+                string pathScriptFile = WriteScriptFile(pathDirectory,                 "script", returnValue: pathDirReturnValue);
+                string wdScriptFile = WriteScriptFile(Directory.GetCurrentDirectory(), "script", returnValue: workingDirReturnValue);
+                string scriptFilename = Path.GetFileName(pathScriptFile);
+                Assert.Equal(scriptFilename, Path.GetFileName(wdScriptFile));
+
+                // Execute the script and verify we prefer the one in the working directory.
+                using (var process = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = scriptFilename }))
+                {
+                    process.WaitForExit();
+                    Assert.Equal(workingDirReturnValue, process.ExitCode);
+                }
+
+                // Remove the script in the working directory and verify we now use the one on PATH.
+                File.Delete(scriptFilename);
+                using (var process = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = scriptFilename }))
+                {
+                    process.WaitForExit();
+                    Assert.Equal(pathDirReturnValue, process.ExitCode);
+                }
+
+                return SuccessExitCode;
+            }, path, options).Dispose();
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsServerCore),
+            nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsIoTCore))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "not supported on UAP")]
+        public void ProcessStart_UseShellExecute_WorkingDirectory()
+        {
+            // Create a directory that will ProcessStartInfo.WorkingDirectory
+            // and add a script.
+            string wd = Path.Combine(TestDirectory, "WorkingDirectory");
+            Directory.CreateDirectory(wd);
+            string filename = Path.GetFileName(WriteScriptFile(wd, GetTestFileName(), returnValue: 42));
+
+            // Verify UseShellExecute finds the script in the WorkingDirectory.
+            Assert.False(Path.IsPathRooted(filename));
+            using (var process = Process.Start(new ProcessStartInfo { UseShellExecute = true,
+                                                                      FileName = filename,
+                                                                      WorkingDirectory = wd }))
+            {
+                process.WaitForExit();
+                Assert.Equal(42, process.ExitCode);
+            }
+        }
+
         [Fact]
         [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestExitCode()
@@ -379,8 +465,9 @@ namespace System.Diagnostics.Tests
                 Assert.True((long)p.MinWorkingSet >= 0);
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD"))) {
                 return; // doesn't support getting/setting working set for other processes
+            }
 
             long curValue = (long)_process.MaxWorkingSet;
             Assert.True(curValue >= 0);
@@ -406,7 +493,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)] // Getting MaxWorkingSet is not supported on OSX.
+        [PlatformSpecific(~(TestPlatforms.OSX | TestPlatforms.FreeBSD))] // Getting MaxWorkingSet is not supported on OSX and BSD.
         public void MaxWorkingSet_GetNotStarted_ThrowsInvalidOperationException()
         {
             var process = new Process();
@@ -414,7 +501,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.OSX)]
+        [PlatformSpecific(TestPlatforms.OSX | TestPlatforms.FreeBSD)]
         public void MaxValueWorkingSet_GetSetMacos_ThrowsPlatformSupportedException()
         {
             var process = new Process();
@@ -434,8 +521,9 @@ namespace System.Diagnostics.Tests
                 Assert.True((long)p.MinWorkingSet >= 0);
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD"))) {
                 return; // doesn't support getting/setting working set for other processes
+            }
 
             long curValue = (long)_process.MinWorkingSet;
             Assert.True(curValue >= 0);
@@ -461,7 +549,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)] // Getting MinWorkingSet is not supported on OSX.
+        [PlatformSpecific(~(TestPlatforms.OSX | TestPlatforms.FreeBSD))] // Getting MinWorkingSet is not supported on OSX and BSD.
         public void MinWorkingSet_GetNotStarted_ThrowsInvalidOperationException()
         {
             var process = new Process();
@@ -469,7 +557,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.OSX)]
+        [PlatformSpecific(TestPlatforms.OSX | TestPlatforms.FreeBSD)]
         public void MinWorkingSet_GetMacos_ThrowsPlatformSupportedException()
         {
             var process = new Process();
@@ -745,7 +833,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)] // getting/setting affinity not supported on OSX
+        [PlatformSpecific(~(TestPlatforms.OSX | TestPlatforms.FreeBSD))] // getting/setting affinity not supported on OSX and BSD
         [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TestProcessorAffinity()
         {

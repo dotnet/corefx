@@ -12,12 +12,12 @@ Performance test files (if present) are stored within a library's ```tests/Perfo
 **Step # 2:** Change directory to the performance tests directory: ```cd path/to/library/tests/Performance```
 
 **Step # 3:** Build and run the tests:
- - Windows ```dotnet msbuild /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release```
- - Linux: ```dotnet msbuild /t:BuildAndTest /p:Performance=true /p:ConfigurationGroup=Release```
+ - Windows ```dotnet msbuild /t:BuildAndTest /p:ConfigurationGroup=Release```
+ - Linux: ```dotnet msbuild /t:BuildAndTest /p:ConfigurationGroup=Release```
 
 **Note: Because test build runs tests concurrently, do not use it for executing performance tests. If you still want to run them concurrently you need to pass the flag `/p:Performance=true` to it: `build -test -release /p:Performance=true`.**
 
-The results files will be dropped in corefx/bin/tests/FLAVOR/TESTLIBRARY/TARGETFRAMEWORK.  The console output will also specify the location of these files.
+The results files will be dropped in corefx/artifacts/bin/tests/TESTLIBRARY/FLAVOR/.  The console output will also specify the location of these files.
 
 **Getting memory usage**
 
@@ -32,20 +32,12 @@ Performance tests should reside within their own "Performance" folder within the
 It's easiest to copy and modify an existing example like the one above. Notice that you'll need these lines in the tests csproj:
 ```
   <ItemGroup>
-    <!-- Performance Tests -->
-    <Compile Include="Performance\Perf.Dictionary.cs" />
-    <Compile Include="Performance\Perf.List.cs" />
-    <Compile Include="$(CommonTestPath)\System\PerfUtils.cs">
-      <Link>Common\System\PerfUtils.cs</Link>
-    </Compile>
+    <ProjectReference Include="$(CommonTestPath)\Performance\PerfRunner\PerfRunner.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>PerfRunner</Name>
+    </ProjectReference>
   </ItemGroup>
-  <!-- Optimizations to configure Xunit for performance -->
-  <PropertyGroup>
-    <IncludePerformanceTests>true</IncludePerformanceTests>
-  </PropertyGroup>
 ```
-(Replace Dictionary/List with whatever class you’re testing.)
-
 Once that’s all done, you can actually add tests to the file.
 
 Writing Test Cases

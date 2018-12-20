@@ -42,6 +42,8 @@ namespace System
         public static bool EndsWith(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public static bool EndsWith<T>(this System.ReadOnlySpan<T> span, System.ReadOnlySpan<T> value) where T : System.IEquatable<T> { throw null; }
         public static bool EndsWith<T>(this System.Span<T> span, System.ReadOnlySpan<T> value) where T : System.IEquatable<T> { throw null; }
+        public static System.Text.SpanRuneEnumerator EnumerateRunes(this ReadOnlySpan<char> span) { throw null; }
+        public static System.Text.SpanRuneEnumerator EnumerateRunes(this Span<char> span) { throw null; }
         public static bool Equals(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> other, System.StringComparison comparisonType) { throw null; }
         public static int IndexOf(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public static int IndexOfAny<T>(this System.ReadOnlySpan<T> span, System.ReadOnlySpan<T> values) where T : System.IEquatable<T> { throw null; }
@@ -245,6 +247,7 @@ namespace System.Buffers
         public static bool operator !=(System.Buffers.StandardFormat left, System.Buffers.StandardFormat right) { throw null; }
         public static System.Buffers.StandardFormat Parse(System.ReadOnlySpan<char> format) { throw null; }
         public static System.Buffers.StandardFormat Parse(string format) { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> format, out StandardFormat result) { throw null; }
         public override string ToString() { throw null; }
     }
 }
@@ -428,5 +431,16 @@ namespace System.Runtime.InteropServices
         public static bool TryRead<T>(ref System.Buffers.SequenceReader<byte> reader, out T value) where T : unmanaged { throw null; }
         public static bool TryGetReadOnlyMemory<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.ReadOnlyMemory<T> memory) { throw null; }
         public static bool TryGetReadOnlySequenceSegment<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.Buffers.ReadOnlySequenceSegment<T> startSegment, out int startIndex, out System.Buffers.ReadOnlySequenceSegment<T> endSegment, out int endIndex) { throw null; }
+    }
+}
+namespace System.Text
+{
+    public ref partial struct SpanRuneEnumerator
+    {
+        private readonly object _dummyReference;
+        private readonly int _dummyPrimitive;
+        public Rune Current { get { throw null; } }
+        public SpanRuneEnumerator GetEnumerator() { throw null; }
+        public bool MoveNext() { throw null; }
     }
 }
