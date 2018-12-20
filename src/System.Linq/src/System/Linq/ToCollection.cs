@@ -27,7 +27,25 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            if (source is ChainLinq.Optimizations.ICountOnConsumable counter)
+            {
+                var count = counter.GetCount(true);
+                if (count >= 0)
+                {
+                    return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.ToList<TSource>(count));
+                }
+            }
+
+            if (source is ChainLinq.Consumable<TSource> consumable)
+            {
+                return consumable.Consume(new ChainLinq.Consumer.ToList<TSource>());
+            }
+
+            return new List<TSource>(source);
+#else
             return source is IIListProvider<TSource> listProvider ? listProvider.ToList() : new List<TSource>(source);
+#endif
         }
 
         public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector) =>

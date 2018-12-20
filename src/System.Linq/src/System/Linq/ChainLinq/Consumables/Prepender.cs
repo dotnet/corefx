@@ -2,18 +2,22 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    class Prepender<T> : Consumable<T>, IConsumableInternal
+    partial class Prepender<T> : Consumable<T>, IConsumableInternal
     {
         readonly T _element;
+        readonly int _count;
         readonly Prepender<T> _previous;
 
-        private Prepender(Prepender<T> previous, T element) =>
-            (_previous, _element) = (previous, element);
+        private int AddCount() =>
+            _count < 0 ? _count : Math.Max(-1, _count + 1);
 
-        public Prepender(T element) : this(null, element) { }
+        private Prepender(Prepender<T> previous, T element, int count) =>
+            (_previous, _element, _count) = (previous, element, count);
+
+        public Prepender(T element) : this(null, element, 1) { }
 
         public Prepender<T> Push(T element) =>
-            new Prepender<T>(this, element);
+            new Prepender<T>(this, element, AddCount());
 
         public override Result Consume<Result>(Consumer<T, Result> consumer)
         {

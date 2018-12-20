@@ -2,21 +2,24 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    class Appender<T>
+    partial class Appender<T>
         : Consumable<T>
         , IConsumableInternal
-        , Optimizations.ICountOnConsumable
     {
         readonly T _element;
+        readonly int _count;
         readonly Appender<T> _previous;
 
-        private Appender(Appender<T> previous, T element) =>
-            (_previous, _element) = (previous, element);
+        private int AddCount() =>
+            _count < 0 ? _count : Math.Max(-1, _count + 1);
 
-        public Appender(T element) : this(null, element) { }
+        private Appender(Appender<T> previous, T element, int count) =>
+            (_previous, _element, _count) = (previous, element, count);
+
+        public Appender(T element) : this(null, element, 1) { }
 
         public Appender<T> Add(T element) =>
-            new Appender<T>(this, element);
+            new Appender<T>(this, element, AddCount());
 
         private Prepender<T> Reverse()
         {
@@ -40,11 +43,6 @@ namespace System.Linq.ChainLinq.Consumables
         {
             var reversed = Reverse();
             return reversed.GetEnumerator();
-        }
-
-        public int GetCount(bool onlyIfCheap)
-        {
-            throw new NotImplementedException();
         }
     }
 }
