@@ -14,8 +14,15 @@
 
     static class Composition
     {
-        public static ILink<T, V> Create<T, U, V>(ILink<T, U> first, ILink<U, V> second) =>
-            new Composition<T, U, V>(first, second);
+        public static ILink<T, V> Create<T, U, V>(ILink<T, U> first, ILink<U, V> second)
+        {
+            if (ReferenceEquals(Identity<T>.Instance, first))
+            {
+                return (ILink<T, V>)second;
+            }
+
+            return new Composition<T, U, V>(first, second);
+        }
     }
 
 }
