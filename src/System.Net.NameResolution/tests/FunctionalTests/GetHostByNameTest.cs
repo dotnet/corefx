@@ -102,7 +102,6 @@ namespace System.Net.NameResolution.Tests
             Assert.Equal(IPAddress.IPv6Loopback, entry.AddressList[0]);
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(32797)]
         public void DnsObsoleteGetHostByName_EmptyString_ReturnsHostName()
         {
             IPHostEntry entry = Dns.GetHostByName("");
@@ -111,7 +110,6 @@ namespace System.Net.NameResolution.Tests
             Assert.Contains(Dns.GetHostName(), entry.HostName, StringComparison.OrdinalIgnoreCase);
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(32797)]
         public void DnsObsoleteBeginEndGetHostByName_EmptyString_ReturnsHostName()
         {
             IPHostEntry entry = Dns.EndGetHostByName(Dns.BeginGetHostByName("", null, null));

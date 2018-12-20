@@ -162,6 +162,8 @@ c_static_assert(offsetof(IOVector, Count) == offsetof(iovec, iov_len));
 
 #define Min(left,right) (((left) < (right)) ? (left) : (right))
 
+#define MAX_RETRY_COUNT 3
+
 static void ConvertByteArrayToIn6Addr(struct in6_addr* addr, const uint8_t* buffer, int32_t bufferLength)
 {
     assert(bufferLength == NUM_BYTES_IN_IPV6_ADDRESS);
@@ -242,7 +244,14 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
     hint.ai_flags = AI_CANONNAME;
 
     struct addrinfo* info = NULL;
-    int result = getaddrinfo((const char*)address, NULL, &hint, &info);
+    int result;
+    int retry = MAX_RETRY_COUNT;
+
+    do {
+        result = getaddrinfo((const char*)address, NULL, &hint, &info);
+        retry--;
+    } while ((result == EAI_AGAIN) && retry);
+
     if (result != 0)
     {
         return ConvertGetAddrInfoAndGetNameInfoErrorsToPal(result);
@@ -251,7 +260,7 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
     entry->CanonicalName = NULL;
     entry->Aliases = NULL;
     entry->AddressListHandle = info;
-    entry->IPAddressCount = 0;    
+    entry->IPAddressCount = 0;
 
     // Find the canonical name for this host (if any) and count the number of IP end points.
     for (struct addrinfo* ai = info; ai != NULL; ai = ai->ai_next)
@@ -367,33 +376,37 @@ int32_t SystemNative_GetNameInfo(const uint8_t* address,
 
     NativeFlagsType nativeFlags = ConvertGetNameInfoFlagsToNative(flags);
     int32_t result;
+    int retry = MAX_RETRY_COUNT;
 
-    if (isIPv6)
-    {
-        struct sockaddr_in6 addr;
-        memset(&addr, 0, sizeof(struct sockaddr_in6));
-        ConvertByteArrayToSockAddrIn6(&addr, address, addressLength);
-        result = getnameinfo((const struct sockaddr*)&addr,
+    do {
+        if (isIPv6)
+        {
+            struct sockaddr_in6 addr;
+            memset(&addr, 0, sizeof(struct sockaddr_in6));
+            ConvertByteArrayToSockAddrIn6(&addr, address, addressLength);
+            result = getnameinfo((const struct sockaddr*)&addr,
                              sizeof(struct sockaddr_in6),
                              (char*)host,
                              (uint32_t)hostLength,
                              (char*)service,
                              (uint32_t)serviceLength,
                              nativeFlags);
-    }
-    else
-    {
-        struct sockaddr_in addr;
-        memset(&addr, 0, sizeof(struct sockaddr_in));
-        ConvertByteArrayToSockAddrIn(&addr, address, addressLength);
-        result = getnameinfo((const struct sockaddr*)&addr,
+        }
+        else
+        {
+            struct sockaddr_in addr;
+            memset(&addr, 0, sizeof(struct sockaddr_in));
+            ConvertByteArrayToSockAddrIn(&addr, address, addressLength);
+            result = getnameinfo((const struct sockaddr*)&addr,
                              sizeof(struct sockaddr_in),
                              (char*)host,
                              (uint32_t)hostLength,
                              (char*)service,
                              (uint32_t)serviceLength,
                              nativeFlags);
-    }
+        }
+        retry--;
+    } while ((result == EAI_AGAIN) && retry);
 
     return ConvertGetAddrInfoAndGetNameInfoErrorsToPal(result);
 }
