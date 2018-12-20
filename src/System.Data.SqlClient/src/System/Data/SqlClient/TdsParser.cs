@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Buffers;
 using System.Data.Common;
 using System.Data.Sql;
 using System.Data.SqlTypes;
@@ -6232,6 +6233,7 @@ namespace System.Data.SqlClient
             }
 
             // allocate memory for SSPI variables
+            byte[] rentedSSPIBuff = null;
             byte[] outSSPIBuff = null;
             uint outSSPILength = 0;
 
@@ -6249,7 +6251,8 @@ namespace System.Data.SqlClient
                 if (rec.useSSPI)
                 {
                     // now allocate proper length of buffer, and set length
-                    outSSPIBuff = new byte[s_maxSSPILength];
+                    rentedSSPIBuff = ArrayPool<byte>.Shared.Rent((int)s_maxSSPILength);
+                    outSSPIBuff = rentedSSPIBuff;
                     outSSPILength = s_maxSSPILength;
 
                     // Call helper function for SSPI data and actual length.
@@ -6557,6 +6560,11 @@ namespace System.Data.SqlClient
                 throw;
             }
 
+            if (rentedSSPIBuff != null)
+            {
+                ArrayPool<byte>.Shared.Return(rentedSSPIBuff, clearArray: true);
+            }
+
             _physicalStateObj.WritePacket(TdsEnums.HARDFLUSH);
             _physicalStateObj.ResetSecurePasswordsInformation();
             _physicalStateObj._pendingData = true;
@@ -6611,7 +6619,8 @@ namespace System.Data.SqlClient
             if (!result) { throw SQL.SynchronousCallMayNotPend(); }
 
             // allocate send buffer and initialize length
-            byte[] sendBuff = new byte[s_maxSSPILength];
+            byte[] rentedSendBuff = ArrayPool<byte>.Shared.Rent((int)s_maxSSPILength);
+            byte[] sendBuff = rentedSendBuff;
             uint sendLength = s_maxSSPILength;
 
             // make call for SSPI data
@@ -6620,6 +6629,8 @@ namespace System.Data.SqlClient
 
             // DO NOT SEND LENGTH - TDS DOC INCORRECT!  JUST SEND SSPI DATA!
             _physicalStateObj.WriteByteArray(sendBuff, (int)sendLength, 0);
+
+            ArrayPool<byte>.Shared.Return(rentedSendBuff, clearArray: true);
 
             // set message type so server knows its a SSPI response
             _physicalStateObj._outputMessageType = TdsEnums.MT_SSPI;
