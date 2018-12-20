@@ -55,6 +55,7 @@
     <Compile Include="System\Linq\ChainLinq\Links\SelectIndexed.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\SelectManyIndexed.cs" />
+    <Compile Include="System\Linq\ChainLinq\Optimizations\SkipTake.cs" />
     <Compile Include="System\Linq\ChainLinq\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -63,6 +64,10 @@
     </ContractProject>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'"> <!-- Optimize for speed -->
+    <Compile Include="System\Linq\ChainLinq\Consumables\Range.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Identity.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Select.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\SelectIndexed.SpeedOpt.cs" />
     <Compile Include="System\Linq\AppendPrepend.SpeedOpt.cs" />
     <Compile Include="System\Linq\Concat.SpeedOpt.cs" />
     <Compile Include="System\Linq\DefaultIfEmpty.SpeedOpt.cs" />

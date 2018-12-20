@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    internal class Range<T> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<T, int>
+    internal partial class Range<T> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<T, int>
     {
         private readonly int _start;
         private readonly int _count;

@@ -29,6 +29,11 @@ namespace System.Linq
                 count = 0;
             }
 
+            if (source is ChainLinq.Optimizations.ISkipTakeOnConsumable<TSource> opt)
+            {
+                return opt.Skip(count);
+            }
+
             return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Skip<TSource>(count));
 #else
             if (count <= 0)

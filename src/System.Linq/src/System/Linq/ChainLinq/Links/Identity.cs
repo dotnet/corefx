@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    class Identity<T> : ILink<T, T>
+    partial class Identity<T> : ILink<T, T>
     {
         public static ILink<T, T> Instance { get; } = new Identity<T>();
 
