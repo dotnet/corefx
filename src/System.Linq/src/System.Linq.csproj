@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Appender.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\SelectMany.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Concat.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Array.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\ChainLinqConsumable.cs" />

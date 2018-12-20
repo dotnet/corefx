@@ -467,7 +467,7 @@ namespace System.Linq.Tests
             return lengths.SelectMany(l => lengths, (l1, l2) => new object[] { l1, l2 });
         }
 
-        [Theory(Skip = "** TBD - Optimize for ChainLinq **")]
+        [Theory]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, ".NET Core optimizes SelectMany and throws an OverflowException. On the full .NET Framework this takes a long time. See https://github.com/dotnet/corefx/pull/13942.")]
         [InlineData(new[] { int.MaxValue, 1 })]
         [InlineData(new[] { 2, int.MaxValue - 1 })]

@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    internal class SelectMany<T, V> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, T>
+    internal partial class SelectMany<T, V> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, T>
     {
         private readonly Consumable<IEnumerable<T>> _selectMany;
 
@@ -19,7 +19,7 @@ namespace System.Linq.ChainLinq.Consumables
             ChainLinq.Consume.SelectMany.Invoke(_selectMany, Link, consumer);
     }
 
-    internal class SelectMany<TSource, TCollection, T, V> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, T>
+    internal partial class SelectMany<TSource, TCollection, T, V> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, T>
     {
         private readonly Consumable<(TSource, IEnumerable<TCollection>)> _selectMany;
         private readonly Func<TSource, TCollection, T> _resultSelector;

@@ -27,6 +27,11 @@ namespace System.Linq
                 return opt.GetCount(false);
             }
 
+            if (source is ICollection collection)
+            {
+                return collection.Count;
+            }
+
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Count<TSource>());
 #else
             if (source is IIListProvider<TSource> listProv)
