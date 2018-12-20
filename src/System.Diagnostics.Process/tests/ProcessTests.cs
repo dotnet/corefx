@@ -465,8 +465,9 @@ namespace System.Diagnostics.Tests
                 Assert.True((long)p.MinWorkingSet >= 0);
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")));
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD"))) {
                 return; // doesn't support getting/setting working set for other processes
+            }
 
             long curValue = (long)_process.MaxWorkingSet;
             Assert.True(curValue >= 0);
@@ -520,8 +521,9 @@ namespace System.Diagnostics.Tests
                 Assert.True((long)p.MinWorkingSet >= 0);
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")));
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD"))) {
                 return; // doesn't support getting/setting working set for other processes
+            }
 
             long curValue = (long)_process.MinWorkingSet;
             Assert.True(curValue >= 0);
