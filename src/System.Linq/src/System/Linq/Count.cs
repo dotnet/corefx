@@ -22,6 +22,11 @@ namespace System.Linq
             }
 
 #if !PRE_CHAINLINQ
+            if (source is ChainLinq.Optimizations.ICountOnConsumable opt)
+            {
+                return opt.GetCount(false);
+            }
+
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Count<TSource>());
 #else
             if (source is IIListProvider<TSource> listProv)

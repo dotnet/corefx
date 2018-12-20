@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    internal class Concat<T, V> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, T>
+    internal partial class Concat<T, V> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, T>
     {
         /// <summary>
         /// Used for Prepender in Prepend call

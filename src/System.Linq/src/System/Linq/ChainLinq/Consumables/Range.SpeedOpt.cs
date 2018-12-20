@@ -1,7 +1,21 @@
 ﻿namespace System.Linq.ChainLinq.Consumables
 {
-    internal partial class Range<T> : Optimizations.ISkipTakeOnConsumable<T>
+    internal partial class Range<T>
+        : Optimizations.ISkipTakeOnConsumable<T>
+        , Optimizations.ICountOnConsumable
     {
+        public int GetCount(bool onlyIfCheap)
+        {
+            if (Link is Optimizations.ICountOnConsumableLink countLink)
+            {
+                var count = countLink.GetCount(_count);
+                if (count >= 0)
+                    return count;
+            }
+
+            return onlyIfCheap ? -1 : Consume(new Consumer.Count<T>());
+        }
+
         public Consumable<T> Skip(int count)
         {
             if (Link is Optimizations.ISkipTakeOnConsumableLinkUpdate<int,T> skipLink)

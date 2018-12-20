@@ -10,7 +10,7 @@ namespace System.Linq.ChainLinq.Links
         public abstract ILink<T, V> ReplaceTail<Unknown, V>(ILink<Unknown, V> newLink);
     }
 
-    class Composition<T, U, V> : Composition<T, V>
+    partial class Composition<T, U, V> : Composition<T, V>
     {
         private readonly ILink<T, U> _first;
         private readonly ILink<U, V> _second;

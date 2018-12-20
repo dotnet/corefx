@@ -9,6 +9,8 @@
   <ItemGroup>
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Appender.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Concat.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Array.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\ChainLinqConsumable.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Empty.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Base.cs" />
@@ -46,7 +48,9 @@
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Compose.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Distinct.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Compose.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Identity.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Take.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Skip.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Skip.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Take.cs" />
@@ -58,6 +62,7 @@
     <Compile Include="System\Linq\ChainLinq\Links\SelectIndexed.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\SelectManyIndexed.cs" />
+    <Compile Include="System\Linq\ChainLinq\Optimizations\Count.cs" />
     <Compile Include="System\Linq\ChainLinq\Optimizations\Select.cs" />
     <Compile Include="System\Linq\ChainLinq\Optimizations\SkipTake.cs" />
     <Compile Include="System\Linq\ChainLinq\Utils.cs" />

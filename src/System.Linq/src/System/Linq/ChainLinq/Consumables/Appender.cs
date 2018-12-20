@@ -2,7 +2,10 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    class Appender<T> : Consumable<T>, IConsumableInternal
+    class Appender<T>
+        : Consumable<T>
+        , IConsumableInternal
+        , Optimizations.ICountOnConsumable
     {
         readonly T _element;
         readonly Appender<T> _previous;
@@ -37,6 +40,11 @@ namespace System.Linq.ChainLinq.Consumables
         {
             var reversed = Reverse();
             return reversed.GetEnumerator();
+        }
+
+        public int GetCount(bool onlyIfCheap)
+        {
+            throw new NotImplementedException();
         }
     }
 }
