@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    internal class Where<T> : ILink<T, T>
+    internal partial class Where<T> : ILink<T, T>
     {
         public Func<T, bool> Predicate { get; }
 

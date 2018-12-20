@@ -23,7 +23,19 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
-#if PRE_CHAINLINQ
+#if !PRE_CHAINLINQ
+            if (source is ChainLinq.ConsumableForMerging<TSource> merger)
+            {
+                if (merger.TailLink is ChainLinq.Optimizations.IMergeSelect<TSource> selectMerge)
+                {
+                    return selectMerge.MergeSelect(merger, selector);
+                }
+
+                return merger.AddTail(CreateSelectLink(selector));
+            }
+
+            return ChainLinq.Utils.PushTransform(source, CreateSelectLink(selector));
+#else
             if (source is Iterator<TSource> iterator)
             {
                 return iterator.Select(selector);
@@ -57,9 +69,12 @@ namespace System.Linq
             }
 
             return new SelectEnumerableIterator<TSource, TResult>(source, selector);
-#else
-            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Select<TSource, TResult>(selector));
 #endif
+        }
+
+        private static ChainLinq.Links.Select<TSource, TResult> CreateSelectLink<TSource, TResult>(Func<TSource, TResult> selector)
+        {
+            return new ChainLinq.Links.Select<TSource, TResult>(selector);
         }
 
 #if PRE_CHAINLINQ

@@ -50,12 +50,15 @@
     <Compile Include="System\Linq\ChainLinq\Links\Skip.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Skip.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Take.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\WhereSelect.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Where.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\WhereIndexed.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Where.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Select.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\SelectIndexed.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\SelectManyIndexed.cs" />
+    <Compile Include="System\Linq\ChainLinq\Optimizations\Select.cs" />
     <Compile Include="System\Linq\ChainLinq\Optimizations\SkipTake.cs" />
     <Compile Include="System\Linq\ChainLinq\Utils.cs" />
   </ItemGroup>

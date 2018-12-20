@@ -36,9 +36,9 @@ namespace System.Linq
 
             if (source is ChainLinq.ConsumableForMerging<TSource> merger)
             {
-                if (merger.TailLink is ChainLinq.Optimizations.ISkipMerge<TSource> skipMerge)
+                if (merger.TailLink is ChainLinq.Optimizations.IMergeSkip<TSource> skipMerge)
                 {
-                    return skipMerge.Merge(merger, count);
+                    return skipMerge.MergeSkip(merger, count);
                 }
 
                 return merger.AddTail(CreateSkipLink<TSource>(count));

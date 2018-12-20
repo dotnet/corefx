@@ -1,8 +1,8 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    sealed partial class Skip<T> : Optimizations.ISkipMerge<T>
+    sealed partial class Skip<T> : Optimizations.IMergeSkip<T>
     {
-        public Consumable<T> Merge(ConsumableForMerging<T> consumable, int count)
+        public Consumable<T> MergeSkip(ConsumableForMerging<T> consumable, int count)
         {
             if ((long)_count + count > int.MaxValue)
                 return consumable.AddTail(new Skip<T>(count));
