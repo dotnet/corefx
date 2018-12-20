@@ -16,8 +16,7 @@ namespace System.Collections.ObjectModel
     public class ReadOnlyDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>
     {
         private readonly IDictionary<TKey, TValue> m_dictionary; // Do not rename (binary serialization)
-        [NonSerialized]
-        private object _syncRoot;
+
         [NonSerialized]
         private KeyCollection _keys;
         [NonSerialized]
@@ -335,19 +334,8 @@ namespace System.Collections.ObjectModel
         {
             get
             {
-                if (_syncRoot == null)
-                {
-                    ICollection c = m_dictionary as ICollection;
-                    if (c != null)
-                    {
-                        _syncRoot = c.SyncRoot;
-                    }
-                    else
-                    {
-                        System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new object(), null);
-                    }
-                }
-                return _syncRoot;
+                ICollection c = m_dictionary as ICollection;
+                return c == null ? this : c.SyncRoot;
             }
         }
 
@@ -420,8 +408,6 @@ namespace System.Collections.ObjectModel
         public sealed class KeyCollection : ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
         {
             private readonly ICollection<TKey> _collection;
-            [NonSerialized]
-            private object _syncRoot;
 
             internal KeyCollection(ICollection<TKey> collection)
             {
@@ -505,19 +491,8 @@ namespace System.Collections.ObjectModel
             {
                 get
                 {
-                    if (_syncRoot == null)
-                    {
-                        ICollection c = _collection as ICollection;
-                        if (c != null)
-                        {
-                            _syncRoot = c.SyncRoot;
-                        }
-                        else
-                        {
-                            System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new object(), null);
-                        }
-                    }
-                    return _syncRoot;
+                    ICollection c = _collection as ICollection;
+                    return c == null ? this : c.SyncRoot;
                 }
             }
             #endregion
@@ -528,8 +503,6 @@ namespace System.Collections.ObjectModel
         public sealed class ValueCollection : ICollection<TValue>, ICollection, IReadOnlyCollection<TValue>
         {
             private readonly ICollection<TValue> _collection;
-            [NonSerialized]
-            private object _syncRoot;
 
             internal ValueCollection(ICollection<TValue> collection)
             {
@@ -613,21 +586,11 @@ namespace System.Collections.ObjectModel
             {
                 get
                 {
-                    if (_syncRoot == null)
-                    {
-                        ICollection c = _collection as ICollection;
-                        if (c != null)
-                        {
-                            _syncRoot = c.SyncRoot;
-                        }
-                        else
-                        {
-                            System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new object(), null);
-                        }
-                    }
-                    return _syncRoot;
+                    ICollection c = _collection as ICollection;
+                    return c == null ? this : c.SyncRoot;
                 }
             }
+
             #endregion ICollection Members
         }
     }
