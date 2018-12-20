@@ -14,6 +14,9 @@ namespace System.Linq.ChainLinq
                           ? Consumables.Empty<U>.Instance
                           : new Consumables.Array<T, U>(array, transform);
 
+                case List<T> list:
+                    return new Consumables.List<T, U>(list, transform);
+
                 default:
                     return new Consumables.Enumerable<T, U>(e, transform);
             }
