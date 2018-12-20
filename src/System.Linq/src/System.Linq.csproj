@@ -28,6 +28,7 @@
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Range.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Aggregate.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumer\ToArray.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\ToList.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Count.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\All.cs" />

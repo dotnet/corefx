@@ -15,9 +15,27 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            if (source is ChainLinq.Optimizations.ICountOnConsumable counter)
+            {
+                var count = counter.GetCount(true);
+                if (count >= 0)
+                {
+                    return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.ToArrayKnownSize<TSource>(count));
+                }
+            }
+
+            if (source is ChainLinq.Consumable<TSource> consumable)
+            {
+                return consumable.Consume(new ChainLinq.Consumer.ToArrayViaBuilder<TSource>());
+            }
+
+            return EnumerableHelpers.ToArray(source);
+#else
             return source is IIListProvider<TSource> arrayProvider
                 ? arrayProvider.ToArray()
                 : EnumerableHelpers.ToArray(source);
+#endif
         }
 
         public static List<TSource> ToList<TSource>(this IEnumerable<TSource> source)
