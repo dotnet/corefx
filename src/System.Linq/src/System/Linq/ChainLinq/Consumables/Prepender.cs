@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    class Prepender<T> : InternalChainLinqConsumable<T>
+    class Prepender<T> : Consumable<T>, IConsumableInternal
     {
         readonly T _element;
         readonly Prepender<T> _previous;
@@ -11,9 +11,6 @@ namespace System.Linq.ChainLinq.Consumables
             (_previous, _element) = (previous, element);
 
         public Prepender(T element) : this(null, element) { }
-
-        public override Consumable<U> AddTail<U>(ILink<T, U> transform) =>
-            new Enumerable<T, U>(this, transform);
 
         public Prepender<T> Push(T element) =>
             new Prepender<T>(this, element);

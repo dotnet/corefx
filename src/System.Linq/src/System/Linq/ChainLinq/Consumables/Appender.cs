@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    class Appender<T> : InternalChainLinqConsumable<T>
+    class Appender<T> : Consumable<T>, IConsumableInternal
     {
         readonly T _element;
         readonly Appender<T> _previous;
@@ -11,9 +11,6 @@ namespace System.Linq.ChainLinq.Consumables
             (_previous, _element) = (previous, element);
 
         public Appender(T element) : this(null, element) { }
-
-        public override Consumable<U> AddTail<U>(ILink<T, U> transform) =>
-            new Enumerable<T, U>(this, transform);
 
         public Appender<T> Add(T element) =>
             new Appender<T>(this, element);

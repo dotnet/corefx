@@ -21,7 +21,7 @@ namespace System.Linq
             {
                 // Return source if not actually skipping, but only if it's a type from here, to avoid
                 // issues if collections are used as keys or otherwise must not be aliased.
-                if (source is ChainLinq.Consumables.InternalChainLinqConsumable<TSource>)
+                if (source is ChainLinq.Consumables.IConsumableInternal)
                 {
                     return source;
                 }
@@ -34,7 +34,17 @@ namespace System.Linq
                 return opt.Skip(count);
             }
 
-            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Skip<TSource>(count));
+            if (source is ChainLinq.ConsumableForMerging<TSource> merger)
+            {
+                if (merger.TailLink is ChainLinq.Optimizations.ISkipMerge<TSource> skipMerge)
+                {
+                    return skipMerge.Merge(merger, count);
+                }
+
+                return merger.AddTail(CreateSkipLink<TSource>(count));
+            }
+
+            return ChainLinq.Utils.PushTransform(source, CreateSkipLink<TSource>(count));
 #else
             if (count <= 0)
             {
@@ -55,6 +65,9 @@ namespace System.Linq
             return SkipIterator(source, count);
 #endif
         }
+
+        private static ChainLinq.Links.Skip<TSource> CreateSkipLink<TSource>(int count) =>
+            new ChainLinq.Links.Skip<TSource>(count);
 
         public static IEnumerable<TSource> SkipWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {

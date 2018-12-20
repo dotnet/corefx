@@ -23,7 +23,7 @@ namespace System.Linq.ChainLinq
         {
             switch (e)
             {
-                case Consumable<T> consumable:
+                case ConsumableForAddition<T> consumable:
                     return consumable.AddTail(transform);
 
                 default:

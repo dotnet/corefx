@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    internal class Skip<T> : ILink<T, T>
+    sealed partial class Skip<T> : ILink<T, T>
     {
         private int _count;
 

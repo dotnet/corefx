@@ -47,6 +47,7 @@
     <Compile Include="System\Linq\ChainLinq\Links\Compose.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Distinct.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Identity.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Skip.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Skip.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Take.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\WhereIndexed.cs" />

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    class Empty<T> : InternalChainLinqConsumable<T>, IEnumerator<T>
+    class Empty<T> : ConsumableForAddition<T>, IEnumerator<T>, IConsumableInternal
     {
         public static Consumable<T> Instance = new Empty<T>();
 

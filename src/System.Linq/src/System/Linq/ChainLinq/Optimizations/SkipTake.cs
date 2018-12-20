@@ -10,4 +10,9 @@
     {
         ILink<T, U> Skip(int count);
     }
+
+    interface ISkipMerge<T>
+    {
+        Consumable<T> Merge(ConsumableForMerging<T> consumable, int count);
+    }
 }

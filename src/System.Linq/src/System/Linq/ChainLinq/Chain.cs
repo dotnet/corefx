@@ -70,14 +70,22 @@ namespace System.Linq.ChainLinq
         public override void ChainDispose() { }
     }
 
-    internal abstract class Consumable<T>
-        : IEnumerable<T>
+    internal abstract class Consumable<T> : IEnumerable<T>
     {
-        public abstract Consumable<U> AddTail<U>(ILink<T, U> transform);
-
         public abstract Result Consume<Result>(Consumer<T, Result> consumer);
 
         public abstract IEnumerator<T> GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    internal abstract class ConsumableForAddition<T> : Consumable<T>
+    {
+        public abstract Consumable<U> AddTail<U>(ILink<T, U> transform);
+    }
+
+    abstract class ConsumableForMerging<T> : ConsumableForAddition<T>
+    {
+        public abstract object TailLink { get; }
+        public abstract Consumable<V> ReplaceTailLink<Unknown, V>(ILink<Unknown, V> newLink);
     }
 }
