@@ -17,6 +17,12 @@ namespace System.Linq
             }
 
 #if !PRE_CHAINLINQ
+
+            if (source is ChainLinq.Optimizations.ISkipTakeOnConsumable<TSource> opt)
+            {
+                return opt.Take(count);
+            }
+
             return
                 count <= 0
                   ? ChainLinq.Consumables.Empty<TSource>.Instance

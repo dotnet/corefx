@@ -25,10 +25,22 @@
 
         public Consumable<T> Take(int count)
         {
-            if (count >= _count)
-                return this;
+            if (count <= 0)
+            {
+                return Empty<T>.Instance;
+            }
 
-            return new Range<T>(_start, _count, Link);
+            if (count >= _count)
+            {
+                return this;
+            }
+
+            if (Link is Optimizations.ISkipTakeOnConsumableLinkUpdate<int, T>)
+            {
+                return new Range<T>(_start, count, Link);
+            }
+
+            return AddTail(new Links.Take<T>(count));
         }
     }
 }
