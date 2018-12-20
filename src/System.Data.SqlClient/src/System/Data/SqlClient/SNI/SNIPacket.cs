@@ -23,7 +23,6 @@ namespace System.Data.SqlClient.SNI
 
         private ArrayPool<byte>  _arrayPool = ArrayPool<byte>.Shared;
         private bool _isBufferFromArrayPool = false;
-        private ValueTask _asyncOperation;
 
         public SNIPacket() { }
 
@@ -239,7 +238,6 @@ namespace System.Data.SqlClient.SNI
             _offset = 0;
             _description = null;
             _completionCallback = null;
-            _asyncOperation = default;
         }
 
         /// <summary>
@@ -250,7 +248,7 @@ namespace System.Data.SqlClient.SNI
         public void ReadFromStreamAsync(Stream stream, SNIAsyncCallback callback)
         {
             // Treat local function as a static and pass all params otherwise as async will allocate
-            async ValueTask ReadFromStreamAsync(SNIPacket packet, SNIAsyncCallback cb, ValueTask<int> valueTask)
+            async Task ReadFromStreamAsync(SNIPacket packet, SNIAsyncCallback cb, ValueTask<int> valueTask)
             {
                 bool error = false;
                 try
@@ -292,7 +290,7 @@ namespace System.Data.SqlClient.SNI
             }
 
             // Not complete or error call the async local function to complete
-            _asyncOperation = ReadFromStreamAsync(this, callback, vt);
+            _ = ReadFromStreamAsync(this, callback, vt);
         }
 
         /// <summary>
@@ -320,7 +318,7 @@ namespace System.Data.SqlClient.SNI
         public void WriteToStreamAsync(Stream stream, SNIAsyncCallback callback, SNIProviders provider, bool disposeAfterWriteAsync = false)
         {
             // Treat local function as a static and pass all params otherwise as async will allocate
-            async ValueTask WriteToStreamAsync(SNIPacket packet, SNIAsyncCallback cb, SNIProviders providers, bool disposeAfter, ValueTask valueTask)
+            async Task WriteToStreamAsync(SNIPacket packet, SNIAsyncCallback cb, SNIProviders providers, bool disposeAfter, ValueTask valueTask)
             {
                 uint status = TdsEnums.SNI_SUCCESS;
                 try
@@ -345,6 +343,9 @@ namespace System.Data.SqlClient.SNI
 
             if (vt.IsCompletedSuccessfully)
             {
+                // Read the result to register as complete for the ValueTask
+                vt.GetAwaiter().GetResult();
+
                 callback(this, TdsEnums.SNI_SUCCESS);
 
                 if (disposeAfterWriteAsync)
@@ -357,7 +358,7 @@ namespace System.Data.SqlClient.SNI
             }
 
             // Not complete or error call the async local function to complete
-            _asyncOperation = WriteToStreamAsync(this, callback, provider, disposeAfterWriteAsync, vt);
+            _ = WriteToStreamAsync(this, callback, provider, disposeAfterWriteAsync, vt);
         }
 
         /// <summary>
