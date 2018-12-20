@@ -15,6 +15,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinInt());
+#else
             int value;
             using (IEnumerator<int> e = source.GetEnumerator())
             {
@@ -35,6 +38,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static int? Min(this IEnumerable<int?> source)
@@ -44,6 +48,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinNullableInt());
+#else
             int? value = null;
             using (IEnumerator<int?> e = source.GetEnumerator())
             {
@@ -79,6 +86,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static long Min(this IEnumerable<long> source)
@@ -88,6 +96,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinLong());
+#else
             long value;
             using (IEnumerator<long> e = source.GetEnumerator())
             {
@@ -108,6 +119,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static long? Min(this IEnumerable<long?> source)
@@ -117,6 +129,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinNullableLong());
+#else
             long? value = null;
             using (IEnumerator<long?> e = source.GetEnumerator())
             {
@@ -148,6 +163,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static float Min(this IEnumerable<float> source)
@@ -157,6 +173,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinFloat());
+#else
             float value;
             using (IEnumerator<float> e = source.GetEnumerator())
             {
@@ -190,6 +209,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static float? Min(this IEnumerable<float?> source)
@@ -199,6 +219,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinNullableFloat());
+#else
             float? value = null;
             using (IEnumerator<float?> e = source.GetEnumerator())
             {
@@ -234,6 +257,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static double Min(this IEnumerable<double> source)
@@ -243,6 +267,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinDouble());
+#else
             double value;
             using (IEnumerator<double> e = source.GetEnumerator())
             {
@@ -267,6 +294,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static double? Min(this IEnumerable<double?> source)
@@ -276,6 +304,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinNullableDouble());
+#else
             double? value = null;
             using (IEnumerator<double?> e = source.GetEnumerator())
             {
@@ -311,6 +342,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static decimal Min(this IEnumerable<decimal> source)
@@ -320,6 +352,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinDecimal());
+#else
             decimal value;
             using (IEnumerator<decimal> e = source.GetEnumerator())
             {
@@ -340,6 +375,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static decimal? Min(this IEnumerable<decimal?> source)
@@ -349,6 +385,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinNullableDecimal());
+#else
             decimal? value = null;
             using (IEnumerator<decimal?> e = source.GetEnumerator())
             {
@@ -377,6 +416,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static TSource Min<TSource>(this IEnumerable<TSource> source)
@@ -386,6 +426,16 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            if (default(TSource) == null)
+            {
+                return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinRefType<TSource>());
+            }
+            else
+            {
+                return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinValueType<TSource>());
+            }
+#else
             Comparer<TSource> comparer = Comparer<TSource>.Default;
             TSource value = default(TSource);
             if (value == null)
@@ -435,6 +485,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static int Min<TSource>(this IEnumerable<TSource> source, Func<TSource, int> selector)
@@ -449,6 +500,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinInt<TSource>(selector));
+#else
             int value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -469,6 +523,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static int? Min<TSource>(this IEnumerable<TSource> source, Func<TSource, int?> selector)
@@ -483,6 +538,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinNullableInt<TSource>(selector));
+#else
             int? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -518,6 +576,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static long Min<TSource>(this IEnumerable<TSource> source, Func<TSource, long> selector)
@@ -532,6 +591,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinLong<TSource>(selector));
+#else
             long value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -552,6 +614,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static long? Min<TSource>(this IEnumerable<TSource> source, Func<TSource, long?> selector)
@@ -566,6 +629,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinNullableLong<TSource>(selector));
+#else
             long? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -597,6 +663,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static float Min<TSource>(this IEnumerable<TSource> source, Func<TSource, float> selector)
@@ -611,6 +678,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinFloat<TSource>(selector));
+#else
             float value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -644,6 +714,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static float? Min<TSource>(this IEnumerable<TSource> source, Func<TSource, float?> selector)
@@ -658,6 +729,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinNullableFloat<TSource>(selector));
+#else
             float? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -693,6 +767,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static double Min<TSource>(this IEnumerable<TSource> source, Func<TSource, double> selector)
@@ -707,6 +782,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinDouble<TSource>(selector));
+#else
             double value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -731,6 +809,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static double? Min<TSource>(this IEnumerable<TSource> source, Func<TSource, double?> selector)
@@ -745,6 +824,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinNullableDouble<TSource>(selector));
+#else
             double? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -780,6 +862,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static decimal Min<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal> selector)
@@ -794,6 +877,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinDecimal<TSource>(selector));
+#else
             decimal value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -814,6 +900,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static decimal? Min<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal?> selector)
@@ -828,6 +915,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinNullableDecimal<TSource>(selector));
+#else
             decimal? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -856,6 +946,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static TResult Min<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
@@ -870,6 +961,16 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            if (default(TResult) == null)
+            {
+                return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinRefType<TSource, TResult>(selector));
+            }
+            else
+            {
+                return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MinValueType<TSource, TResult>(selector));
+            }
+#else
             Comparer<TResult> comparer = Comparer<TResult>.Default;
             TResult value = default(TResult);
             if (value == null)
@@ -919,6 +1020,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
     }
 }
