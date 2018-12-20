@@ -461,10 +461,14 @@ namespace System.Data.SqlClient
         // Skip first 4 bytes since they contain the version
         private Guid GetGlobalTxnIdentifierFromToken()
         {
+#if netcoreapp
+            return new Guid(_connection.PromotedDTCToken.AsSpan(_globalTransactionsTokenVersionSizeInBytes, 16));
+#else
             byte[] txnGuid = new byte[16];
             Array.Copy(_connection.PromotedDTCToken, _globalTransactionsTokenVersionSizeInBytes, // Skip the version
                 txnGuid, 0, txnGuid.Length);
             return new Guid(txnGuid);
+#endif
         }
     }
 }
