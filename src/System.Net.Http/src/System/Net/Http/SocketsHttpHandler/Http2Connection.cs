@@ -237,9 +237,9 @@ namespace System.Net.Http
         // will result in a connection level error.
         private Http2Stream GetStream(int streamId)
         {
-            // If we implement support for Push Promise, this will need to be updated to
-            // track the highest stream ID used by the server in addition to the highest
-            // ID used by the client.
+            // TODO: ISSUE 34192: If we implement support for Push Promise, this will
+            // need to be updated to track the highest stream ID used by the server in
+            // addition to the highest ID used by the client.
             if (streamId <= 0 || streamId >= _nextStream)
             {
                 throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
