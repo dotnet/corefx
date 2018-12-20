@@ -32,6 +32,9 @@ namespace System.Linq.ChainLinq.Consume
                 case T[] array:
                     return ConsumerArray(array, chain);
 
+                case List<T> list:
+                    return ConsumerList(list, chain);
+
                 default:
                     return ConsumerEnumerable(input, chain);
             }
@@ -53,6 +56,18 @@ namespace System.Linq.ChainLinq.Consume
         {
             var status = ChainStatus.Flow;
             foreach (var item in array)
+            {
+                status = chain.ProcessNext(item);
+                if (status.IsStopped())
+                    break;
+            }
+            return status;
+        }
+
+        private static ChainStatus ConsumerList<T>(List<T> list, Chain<T> chain)
+        {
+            var status = ChainStatus.Flow;
+            foreach (var item in list)
             {
                 status = chain.ProcessNext(item);
                 if (status.IsStopped())

@@ -8,6 +8,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\List.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\List.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Prepender.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Appender.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Appender.SpeedOpt.cs" />
@@ -23,6 +25,7 @@
     <Compile Include="System\Linq\ChainLinq\Consumables\Prepender.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Range.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\SelectMany.cs" />
+    <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\List.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Array.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Concat.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Range.cs" />
@@ -38,6 +41,7 @@
     <Compile Include="System\Linq\ChainLinq\Consumer\Reduce.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\SetResult.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Sum.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consume\List.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Array.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Concat.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\UnknownEnumerable.cs" />
@@ -46,6 +50,7 @@
     <Compile Include="System\Linq\ChainLinq\Consume\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Consumer.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Enumerable.cs" />
+    <Compile Include="System\Linq\ChainLinq\GetEnumerator\List.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Array.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Concat.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Range.cs" />
