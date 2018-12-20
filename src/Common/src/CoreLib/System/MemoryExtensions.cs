@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
 using Internal.Runtime.CompilerServices;
 
@@ -295,6 +296,12 @@ namespace System
                     span.Length,
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     value.Length);
+            if (typeof(T) == typeof(char))
+                return SpanHelpers.IndexOf(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    span.Length,
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(value)),
+                    value.Length);
 
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(value), value.Length);
         }
@@ -423,6 +430,12 @@ namespace System
                     span.Length,
                     ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(value)),
                     value.Length);
+            if (typeof(T) == typeof(char))
+                return SpanHelpers.IndexOf(
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(span)),
+                    span.Length,
+                    ref Unsafe.As<T, char>(ref MemoryMarshal.GetReference(value)),
+                    value.Length);
 
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(value), value.Length);
         }
@@ -536,11 +549,32 @@ namespace System
         {
             if (typeof(T) == typeof(byte))
             {
-                return SpanHelpers.IndexOfAny(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    span.Length,
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values)),
-                    values.Length);
+                ref byte valueRef = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values));
+                if (values.Length == 2)
+                {
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        valueRef,
+                        Unsafe.Add(ref valueRef, 1),
+                        span.Length);
+                }
+                else if (values.Length == 3)
+                {
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        valueRef,
+                        Unsafe.Add(ref valueRef, 1),
+                        Unsafe.Add(ref valueRef, 2),
+                        span.Length);
+                }
+                else
+                {
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        span.Length,
+                        ref valueRef,
+                        values.Length);
+                }
             }
             if (typeof(T) == typeof(char))
             {
@@ -665,11 +699,34 @@ namespace System
             where T : IEquatable<T>
         {
             if (typeof(T) == typeof(byte))
-                return SpanHelpers.IndexOfAny(
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
-                    span.Length,
-                    ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values)),
-                    values.Length);
+            {
+                ref byte valueRef = ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values));
+                if (values.Length == 2)
+                {
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        valueRef,
+                        Unsafe.Add(ref valueRef, 1),
+                        span.Length);
+                }
+                else if (values.Length == 3)
+                {
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        valueRef,
+                        Unsafe.Add(ref valueRef, 1),
+                        Unsafe.Add(ref valueRef, 2),
+                        span.Length);
+                }
+                else
+                {
+                    return SpanHelpers.IndexOfAny(
+                        ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)),
+                        span.Length,
+                        ref valueRef,
+                        values.Length);
+                }
+            }
 
             if (typeof(T) == typeof(char))
             {
@@ -976,6 +1033,28 @@ namespace System
         }
 
         /// <summary>
+        /// Returns an enumeration of <see cref="Rune"/> from the provided span.
+        /// </summary>
+        /// <remarks>
+        /// Invalid sequences will be represented in the enumeration by <see cref="Rune.ReplacementChar"/>.
+        /// </remarks>
+        public static SpanRuneEnumerator EnumerateRunes(this ReadOnlySpan<char> span)
+        {
+            return new SpanRuneEnumerator(span);
+        }
+
+        /// <summary>
+        /// Returns an enumeration of <see cref="Rune"/> from the provided span.
+        /// </summary>
+        /// <remarks>
+        /// Invalid sequences will be represented in the enumeration by <see cref="Rune.ReplacementChar"/>.
+        /// </remarks>
+        public static SpanRuneEnumerator EnumerateRunes(this Span<char> span)
+        {
+            return new SpanRuneEnumerator(span);
+        }
+
+        /// <summary>
         /// Reverses the sequence of the elements in the entire span.
         /// </summary>
         public static void Reverse<T>(this Span<T> span)
@@ -1047,7 +1126,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this ArraySegment<T> segment, int start)
         {
-            if (((uint)start) > segment.Count)
+            if (((uint)start) > (uint)segment.Count)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             return new Span<T>(segment.Array, segment.Offset + start, segment.Count - start);
@@ -1068,9 +1147,9 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this ArraySegment<T> segment, int start, int length)
         {
-            if (((uint)start) > segment.Count)
+            if (((uint)start) > (uint)segment.Count)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
-            if (((uint)length) > segment.Count - start)
+            if (((uint)length) > (uint)(segment.Count - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
 
             return new Span<T>(segment.Array, segment.Offset + start, length);
@@ -1126,7 +1205,7 @@ namespace System
         /// </exception>
         public static Memory<T> AsMemory<T>(this ArraySegment<T> segment, int start)
         {
-            if (((uint)start) > segment.Count)
+            if (((uint)start) > (uint)segment.Count)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
 
             return new Memory<T>(segment.Array, segment.Offset + start, segment.Count - start);
@@ -1146,9 +1225,9 @@ namespace System
         /// </exception>
         public static Memory<T> AsMemory<T>(this ArraySegment<T> segment, int start, int length)
         {
-            if (((uint)start) > segment.Count)
+            if (((uint)start) > (uint)segment.Count)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.start);
-            if (((uint)length) > segment.Count - start)
+            if (((uint)length) > (uint)(segment.Count - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
 
             return new Memory<T>(segment.Array, segment.Offset + start, length);

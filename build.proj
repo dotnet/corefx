@@ -5,12 +5,13 @@
   <PropertyGroup>
     <BuildRestore Condition="'$(BuildRestore)'==''">true</BuildRestore>
     <BuildNative Condition="'$(BuildNative)'==''">true</BuildNative>
+    <BuildManaged Condition="'$(BuildManaged)'==''">true</BuildManaged>
     <BuildTests Condition="'$(BuildTests)'==''">false</BuildTests>
     <BuildPackages Condition="'$(BuildPackages)'==''">true</BuildPackages>
 
     <BuildDependsOn Condition="'$(BuildRestore)'=='true'">$(BuildDependsOn);Restore</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildNative)'=='true'">$(BuildDependsOn);BuildNative</BuildDependsOn>
-    <BuildDependsOn>$(BuildDependsOn);BuildManaged</BuildDependsOn>
+    <BuildDependsOn Condition="'$(BuildManaged)'=='true'">$(BuildDependsOn);BuildManaged</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildTests)'=='true'">$(BuildDependsOn);Test</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildPackages)'=='true'">$(BuildDependsOn);Pack</BuildDependsOn>
 
@@ -22,17 +23,20 @@
 
   <Import Project="Directory.Build.targets" />
 
-  <UsingTask TaskName="GenerateConfigurationProps" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
-
-  <Target Name="Restore" DependsOnTargets="CreateOrUpdateCurrentVersionFile">
+  <Target Name="Restore" DependsOnTargets="GenerateConfigurationProps;RestoreOptionalToolingPackages;RestoreOptimizationDataPackage">
     <ItemGroup>
       <_RestoreProjects Include="external\dir.proj" />
     </ItemGroup>
 
-    <!-- Generate the configurations for this repo -->
-    <GenerateConfigurationProps Properties="@(Property)" PropertyValues="@(PropertyValue)" PropsFolder="$(BuildConfigurationFolder)" />
-
     <MSBuild Projects="@(_RestoreProjects)" Properties="$(ProjectProperties)" />
+  </Target>
+
+  <Target Name="_IsProjectRestoreSupported"
+          Returns="@(_ValidProjectsForRestore)">
+
+    <ItemGroup>
+      <_ValidProjectsForRestore Include="$(MSBuildProjectFullPath)" />
+    </ItemGroup>
   </Target>
 
   <Target Name="BuildNative">
@@ -61,8 +65,6 @@
 
   <Target Name="Pack">
     <ItemGroup>
-      <!-- signing needs to happen before packaging -->
-      <_PackProjects Include="src\sign.proj" />
       <_PackProjects Include="src\packages.builds" Condition="'$(BuildPackages)'=='true'" />
     </ItemGroup>
 
@@ -74,9 +76,9 @@
   <Target Name="Build" DependsOnTargets="$(BuildDependsOn)" />
 
   <Target Name="Clean">
-    <RemoveDir Directories="$(BinDir)" />
-    <!-- Temporarily outside BinDir -->
-    <RemoveDir Directories="$(PackageInstallPath)" />
+    <RemoveDir Directories="$(ArtifactsObjDir)" />
+    <RemoveDir Directories="$(ArtifactsBinDir)" />
+    <RemoveDir Directories="$(ArtifactsPackagesDir)" />
   </Target>
 
   <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
@@ -98,4 +100,7 @@
     <UpdateVSConfigurations ProjectsToUpdate="@(_projectsToUpdate)" SolutionsToUpdate="@(_solutionsToUpdate)" />
     <Message Importance="High" Text="Updating configurations for projects ... Done." />
   </Target>
+
+  <!-- Define an empty Execute target for Arcade's publish to BAR finds it: https://github.com/dotnet/arcade/issues/1452 -->
+  <Target Name="Execute" />
 </Project>

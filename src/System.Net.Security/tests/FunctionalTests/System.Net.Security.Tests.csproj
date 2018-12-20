@@ -92,6 +92,7 @@
     <Compile Include="SslStreamAlertsTest.cs" />
     <Compile Include="SslStreamAllowRenegotiationTests.cs" />
     <Compile Include="SslStreamAlpnTests.cs" />
+    <Compile Include="SslStreamDisposeTest.cs" />
     <Compile Include="SslStreamSniTest.cs" />
     <Compile Include="SslStreamEKUTest.cs" />
     <Compile Include="SslStreamSchSendAuxRecordTest.cs" />
@@ -153,8 +154,5 @@
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
 </Project>

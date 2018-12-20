@@ -39,7 +39,6 @@ namespace System
         /// </summary>
         /// <param name="array">The target array.</param>
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
-        /// reference (Nothing in Visual Basic).</exception>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span(T[] array)
@@ -64,7 +63,6 @@ namespace System
         /// <param name="start">The index at which to begin the span.</param>
         /// <param name="length">The number of items in the span.</param>
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
-        /// reference (Nothing in Visual Basic).</exception>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=Length).
@@ -81,8 +79,14 @@ namespace System
             }
             if (default(T) == null && array.GetType() != typeof(T[]))
                 ThrowHelper.ThrowArrayTypeMismatchException();
+#if BIT64
+            // See comment in Span<T>.Slice for how this works.
+            if ((ulong)(uint)start + (ulong)(uint)length > (ulong)(uint)array.Length)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+#else
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException();
+#endif
 
             _pointer = new ByReference<T>(ref Unsafe.Add(ref Unsafe.As<byte, T>(ref array.GetRawSzArrayData()), start));
             _length = length;
@@ -125,6 +129,7 @@ namespace System
             _length = length;
         }
 
+        /// <summary>
         /// Returns a reference to specified element of the Span.
         /// </summary>
         /// <param name="index"></param>
@@ -151,6 +156,26 @@ namespace System
                 return ref Unsafe.Add(ref _pointer.Value, index);
             }
 #endif
+        }
+
+        public ref T this[Index index]
+        {
+            get
+            {
+                // Evaluate the actual index first because it helps performance
+                int actualIndex = index.FromEnd ? _length - index.Value : index.Value;
+                return ref this [actualIndex];
+            }
+        }
+
+        public Span<T> this[Range range]
+        {
+            get
+            {
+                int start = range.Start.FromEnd ? _length - range.Start.Value : range.Start.Value;
+                int end = range.End.FromEnd ? _length - range.End.Value : range.End.Value;
+                return Slice(start, end - start);
+            }
         }
 
         /// <summary>
@@ -338,8 +363,19 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Span<T> Slice(int start, int length)
         {
+#if BIT64
+            // Since start and length are both 32-bit, their sum can be computed across a 64-bit domain
+            // without loss of fidelity. The cast to uint before the cast to ulong ensures that the
+            // extension from 32- to 64-bit is zero-extending rather than sign-extending. The end result
+            // of this is that if either input is negative or if the input sum overflows past Int32.MaxValue,
+            // that information is captured correctly in the comparison against the backing _length field.
+            // We don't use this same mechanism in a 32-bit process due to the overhead of 64-bit arithmetic.
+            if ((ulong)(uint)start + (ulong)(uint)length > (ulong)(uint)_length)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+#else
             if ((uint)start > (uint)_length || (uint)length > (uint)(_length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException();
+#endif
 
             return new Span<T>(ref Unsafe.Add(ref _pointer.Value, start), length);
         }

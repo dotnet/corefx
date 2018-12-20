@@ -18,6 +18,7 @@ namespace System
         public static bool IsWindows => false;
         public static bool IsWindows7 => false;
         public static bool IsWindows8x => false;
+        public static bool IsWindows8xOrLater => false;
         public static bool IsWindows10Version1607OrGreater => false;
         public static bool IsWindows10Version1703OrGreater => false;
         public static bool IsWindows10Version1709OrGreater => false;
@@ -38,6 +39,7 @@ namespace System
         public static bool IsUbuntu1710 => IsDistroAndVersion("ubuntu", 17, 10);
         public static bool IsUbuntu1710OrHigher => IsDistroAndVersionOrHigher("ubuntu", 17, 10);
         public static bool IsUbuntu1804 => IsDistroAndVersion("ubuntu", 18, 04);
+        public static bool IsUbuntu1810OrHigher => IsDistroAndVersionOrHigher("ubuntu", 18, 10);
         public static bool IsTizen => IsDistroAndVersion("tizen");
         public static bool IsFedora => IsDistroAndVersion("fedora");
         public static bool IsWindowsNanoServer => false;
@@ -58,9 +60,35 @@ namespace System
         public static bool IsNetfx471OrNewer => false;
         public static bool IsNetfx472OrNewer => false;
 
+        public static bool IsDrawingSupported { get; } = GetGdiplusIsAvailable();
+
+        [DllImport("libdl")]
+        private static extern IntPtr dlopen(string libName, int flags);
+        public const int RTLD_NOW = 0x002;
+
+        private static bool GetGdiplusIsAvailable()
+        {
+            IntPtr nativeLib;
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                nativeLib = dlopen("libgdiplus.dylib", RTLD_NOW);
+            }
+            else
+            {
+                nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
+                if (nativeLib == IntPtr.Zero)
+                {
+                    nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
+                }
+            }
+
+            return nativeLib != IntPtr.Zero;
+        }
+
         public static Version OSXVersion { get; } = ToVersion(Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion);
 
-        public static Version OpenSslVersion => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? GetOpenSslVersion() : throw new PlatformNotSupportedException();
+        public static Version OpenSslVersion => !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? GetOpenSslVersion() : throw new PlatformNotSupportedException();
 
         public static string GetDistroVersionString()
         {
@@ -154,7 +182,10 @@ namespace System
         /// Get whether the OS platform matches the given Linux distro and optional version.
         /// </summary>
         /// <param name="distroId">The distribution id.</param>
-        /// <param name="versionId">The distro version.  If omitted, compares the distro only.</param>
+        /// <param name="major">The distro major version. If omitted, this portion of the version is not included in the comparison.</param>
+        /// <param name="minor">The distro minor version. If omitted, this portion of the version is not included in the comparison.</param>
+        /// <param name="build">The distro build version. If omitted, this portion of the version is not included in the comparison.</param>
+        /// <param name="revision">The distro revision version. If omitted, this portion of the version is not included in the comparison.</param>
         /// <returns>Whether the OS platform matches the given Linux distro and optional version.</returns>
         private static bool IsDistroAndVersion(string distroId, int major = -1, int minor = -1, int build = -1, int revision = -1)
         {
@@ -165,7 +196,10 @@ namespace System
         /// Get whether the OS platform matches the given Linux distro and optional version is same or higher.
         /// </summary>
         /// <param name="distroId">The distribution id.</param>
-        /// <param name="versionId">The distro version.  If omitted, compares the distro only.</param>
+        /// <param name="major">The distro major version. If omitted, this portion of the version is not included in the comparison.</param>
+        /// <param name="minor">The distro minor version. If omitted, this portion of the version is not included in the comparison.</param>
+        /// <param name="build">The distro build version. If omitted, this portion of the version is not included in the comparison.</param>
+        /// <param name="revision">The distro revision version.  If omitted, this portion of the version is not included in the comparison.</param>
         /// <returns>Whether the OS platform matches the given Linux distro and optional version is same or higher.</returns>
         private static bool IsDistroAndVersionOrHigher(string distroId, int major = -1, int minor = -1, int build = -1, int revision = -1)
         {
@@ -213,10 +247,10 @@ namespace System
             return
                 VersionEquivalentTo(major, minor, build, revision, actualVersionId) ||
                     (actualVersionId.Major > major ||
-                        (actualVersionId.Major == major && actualVersionId.Minor > minor ||
-                            (actualVersionId.Minor == minor && actualVersionId.Build > build ||
-                                (actualVersionId.Build == build && actualVersionId.Revision > revision ||
-                                    (actualVersionId.Revision == revision)))));
+                        (actualVersionId.Major == major && (actualVersionId.Minor > minor ||
+                            (actualVersionId.Minor == minor && (actualVersionId.Build > build ||
+                                (actualVersionId.Build == build && (actualVersionId.Revision > revision ||
+                                    (actualVersionId.Revision == revision))))))));
         }
 
         private static Version GetOSXProductVersion()

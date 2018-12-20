@@ -8,31 +8,65 @@
 namespace System.Diagnostics
 {
     /// <summary>
-    /// Provides default implementation for Write and ShowDialog methods in Debug class.
+    /// Provides default implementation for Write and Fail methods in Debug class.
     /// </summary>
     public partial class DebugProvider
     {
+        public virtual void Fail(string message, string detailMessage)
+        {
+            string stackTrace;
+            try
+            {
+                stackTrace = new StackTrace(0, true).ToString(System.Diagnostics.StackTrace.TraceFormat.Normal);
+            }
+            catch
+            {
+                stackTrace = "";
+            }
+            WriteAssert(stackTrace, message, detailMessage);
+            FailCore(stackTrace, message, detailMessage, "Assertion Failed");
+        }
+
+        internal void WriteAssert(string stackTrace, string message, string detailMessage)
+        {
+            WriteLine(SR.DebugAssertBanner + Environment.NewLine
+                   + SR.DebugAssertShortMessage + Environment.NewLine
+                   + message + Environment.NewLine
+                   + SR.DebugAssertLongMessage + Environment.NewLine
+                   + detailMessage + Environment.NewLine
+                   + stackTrace);
+        }
+
         public virtual void Write(string message)
         {
             lock (s_lock)
             {
                 if (message == null)
                 {
-                    s_WriteCore(string.Empty);
+                    WriteCore(string.Empty);
                     return;
                 }
-                if (s_needIndent)
+                if (_needIndent)
                 {
                     message = GetIndentString() + message;
-                    s_needIndent = false;
+                    _needIndent = false;
                 }
-                s_WriteCore(message);
+                WriteCore(message);
                 if (message.EndsWith(Environment.NewLine))
                 {
-                    s_needIndent = true;
+                    _needIndent = true;
                 }
             }
         }
+        
+        public virtual void WriteLine(string message)
+        {
+            Write(message + Environment.NewLine);
+        }
+
+        public virtual void OnIndentLevelChanged(int indentLevel) { }
+
+        public virtual void OnIndentSizeChanged(int indentSize) { }
 
         private static readonly object s_lock = new object();
 
@@ -54,48 +88,22 @@ namespace System.Diagnostics
             }
         }
 
-        [ThreadStatic]
-        private static int s_indentLevel;
-        internal static int IndentLevel
+        private bool _needIndent = true;
+
+        private string _indentString;
+
+        private string GetIndentString()
         {
-            get
+            int indentCount = Debug.IndentSize * Debug.IndentLevel;
+            if (_indentString?.Length == indentCount)
             {
-                return s_indentLevel;
+                return _indentString;
             }
-            set
-            {
-                s_indentLevel = value < 0 ? 0 : value;
-            }
-        }
-
-        private static int s_indentSize = 4;
-        internal static int IndentSize
-        {
-            get
-            {
-                return s_indentSize;
-            }
-            set
-            {
-                s_indentSize = value < 0 ? 0 : value;
-            }
-        }
-
-        private static bool s_needIndent;
-
-        private static string s_indentString;
-
-        internal static string GetIndentString()
-        {
-            int indentCount = IndentSize * IndentLevel;
-            if (s_indentString?.Length == indentCount)
-            {
-                return s_indentString;
-            }
-            return s_indentString = new string(' ', indentCount);
+            return _indentString = new string(' ', indentCount);
         }
 
         // internal and not readonly so that the tests can swap this out.
-        internal static Action<string> s_WriteCore = WriteCore;
+        internal static Action<string, string, string, string> s_FailCore = null;
+        internal static Action<string> s_WriteCore = null;
     }
 }

@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
+using Internal.Runtime.CompilerServices;
 
 namespace System
 {
@@ -499,6 +500,14 @@ namespace System
             return result;
         }
 
+        internal static string CreateFromChar(char c1, char c2)
+        {
+            string result = FastAllocateString(2);
+            result._firstChar = c1;
+            Unsafe.Add(ref result._firstChar, 1) = c2;
+            return result;
+        }
+
         internal static unsafe void wstrcpy(char* dmem, char* smem, int charCount)
         {
             Buffer.Memmove((byte*)dmem, (byte*)smem, ((uint)charCount) * 2);
@@ -530,6 +539,17 @@ namespace System
         IEnumerator IEnumerable.GetEnumerator()
         {
             return new CharEnumerator(this);
+        }
+
+        /// <summary>
+        /// Returns an enumeration of <see cref="Rune"/> from this string.
+        /// </summary>
+        /// <remarks>
+        /// Invalid sequences will be represented in the enumeration by <see cref="Rune.ReplacementChar"/>.
+        /// </remarks>
+        public StringRuneEnumerator EnumerateRunes()
+        {
+            return new StringRuneEnumerator(this);
         }
 
         internal static unsafe int wcslen(char* ptr)

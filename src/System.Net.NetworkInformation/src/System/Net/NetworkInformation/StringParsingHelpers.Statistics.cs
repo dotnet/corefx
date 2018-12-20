@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
 using System.IO;
 
 namespace System.Net.NetworkInformation
@@ -150,24 +151,24 @@ namespace System.Net.NetworkInformation
     internal struct IPInterfaceStatisticsTable
     {
         // Receive section
-        public uint BytesReceived;
-        public uint PacketsReceived;
-        public uint ErrorsReceived;
-        public uint IncomingPacketsDropped;
-        public uint FifoBufferErrorsReceived;
-        public uint PacketFramingErrorsReceived;
-        public uint CompressedPacketsReceived;
-        public uint MulticastFramesReceived;
+        public long BytesReceived;
+        public long PacketsReceived;
+        public long ErrorsReceived;
+        public long IncomingPacketsDropped;
+        public long FifoBufferErrorsReceived;
+        public long PacketFramingErrorsReceived;
+        public long CompressedPacketsReceived;
+        public long MulticastFramesReceived;
 
         // Transmit section
-        public uint BytesTransmitted;
-        public uint PacketsTransmitted;
-        public uint ErrorsTransmitted;
-        public uint OutgoingPacketsDropped;
-        public uint FifoBufferErrorsTransmitted;
-        public uint CollisionsDetected;
-        public uint CarrierLosses;
-        public uint CompressedPacketsTransmitted;
+        public long BytesTransmitted;
+        public long PacketsTransmitted;
+        public long ErrorsTransmitted;
+        public long OutgoingPacketsDropped;
+        public long FifoBufferErrorsTransmitted;
+        public long CollisionsDetected;
+        public long CarrierLosses;
+        public long CompressedPacketsTransmitted;
     }
 
     internal static partial class StringParsingHelpers
@@ -178,6 +179,7 @@ namespace System.Net.NetworkInformation
             string fileContents = File.ReadAllText(filePath);
             int firstIpHeader = fileContents.IndexOf("Icmp:", StringComparison.Ordinal);
             int secondIpHeader = fileContents.IndexOf("Icmp:", firstIpHeader + 1, StringComparison.Ordinal);
+            int inCsumErrorsIdx = fileContents.IndexOf("InCsumErrors", firstIpHeader + 1, StringComparison.Ordinal);
             int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondIpHeader, StringComparison.Ordinal);
             string icmpData = fileContents.Substring(secondIpHeader, endOfSecondLine - secondIpHeader);
             StringParser parser = new StringParser(icmpData, ' ');
@@ -188,7 +190,7 @@ namespace System.Net.NetworkInformation
             {
                 InMsgs = parser.ParseNextInt32(),
                 InErrors = parser.ParseNextInt32(),
-                InCsumErrors = parser.ParseNextInt32(),
+                InCsumErrors = inCsumErrorsIdx == -1 ? 0 : parser.ParseNextInt32(),
                 InDestUnreachs = parser.ParseNextInt32(),
                 InTimeExcds = parser.ParseNextInt32(),
                 InParmProbs = parser.ParseNextInt32(),
@@ -220,13 +222,14 @@ namespace System.Net.NetworkInformation
         {
             string fileContents = File.ReadAllText(filePath);
             RowConfigReader reader = new RowConfigReader(fileContents);
+            int Icmp6OutErrorsIdx = fileContents.IndexOf("Icmp6OutErrors", StringComparison.Ordinal);
 
             return new Icmpv6StatisticsTable()
             {
                 InMsgs = reader.GetNextValueAsInt32("Icmp6InMsgs"),
                 InErrors = reader.GetNextValueAsInt32("Icmp6InErrors"),
                 OutMsgs = reader.GetNextValueAsInt32("Icmp6OutMsgs"),
-                OutErrors = reader.GetNextValueAsInt32("Icmp6OutErrors"),
+                OutErrors = Icmp6OutErrorsIdx == -1 ? 0 : reader.GetNextValueAsInt32("Icmp6OutErrors"),
                 InDestUnreachs = reader.GetNextValueAsInt32("Icmp6InDestUnreachs"),
                 InPktTooBigs = reader.GetNextValueAsInt32("Icmp6InPktTooBigs"),
                 InTimeExcds = reader.GetNextValueAsInt32("Icmp6InTimeExcds"),
@@ -330,6 +333,7 @@ namespace System.Net.NetworkInformation
             string fileContents = File.ReadAllText(filePath);
             int firstTcpHeader = fileContents.IndexOf("Tcp:", StringComparison.Ordinal);
             int secondTcpHeader = fileContents.IndexOf("Tcp:", firstTcpHeader + 1, StringComparison.Ordinal);
+            int inCsumErrorsIdx = fileContents.IndexOf("InCsumErrors", firstTcpHeader + 1, StringComparison.Ordinal);
             int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondTcpHeader, StringComparison.Ordinal);
             string tcpData = fileContents.Substring(secondTcpHeader, endOfSecondLine - secondTcpHeader);
             StringParser parser = new StringParser(tcpData, ' ');
@@ -352,7 +356,7 @@ namespace System.Net.NetworkInformation
                 RetransSegs = parser.ParseNextInt32(),
                 InErrs = parser.ParseNextInt32(),
                 OutRsts = parser.ParseNextInt32(),
-                InCsumErrors = parser.ParseNextInt32()
+                InCsumErrors = inCsumErrorsIdx == -1 ? 0 : parser.ParseNextInt32()
             };
         }
 
@@ -361,6 +365,7 @@ namespace System.Net.NetworkInformation
             string fileContents = File.ReadAllText(filePath);
             int firstUdpHeader = fileContents.IndexOf("Udp:", StringComparison.Ordinal);
             int secondUdpHeader = fileContents.IndexOf("Udp:", firstUdpHeader + 1, StringComparison.Ordinal);
+            int inCsumErrorsIdx = fileContents.IndexOf("InCsumErrors", firstUdpHeader + 1, StringComparison.Ordinal);
             int endOfSecondLine = fileContents.IndexOf(Environment.NewLine, secondUdpHeader, StringComparison.Ordinal);
             string tcpData = fileContents.Substring(secondUdpHeader, endOfSecondLine - secondUdpHeader);
             StringParser parser = new StringParser(tcpData, ' ');
@@ -375,7 +380,7 @@ namespace System.Net.NetworkInformation
                 OutDatagrams = parser.ParseNextInt32(),
                 RcvbufErrors = parser.ParseNextInt32(),
                 SndbufErrors = parser.ParseNextInt32(),
-                InCsumErrors = parser.ParseNextInt32()
+                InCsumErrors = inCsumErrorsIdx == -1 ? 0 : parser.ParseNextInt32()
             };
         }
 
@@ -383,6 +388,7 @@ namespace System.Net.NetworkInformation
         {
             string fileContents = File.ReadAllText(filePath);
             RowConfigReader reader = new RowConfigReader(fileContents);
+            int udp6ErrorsIdx = fileContents.IndexOf("Udp6SndbufErrors", StringComparison.Ordinal);
 
             return new UdpGlobalStatisticsTable()
             {
@@ -390,9 +396,9 @@ namespace System.Net.NetworkInformation
                 NoPorts = reader.GetNextValueAsInt32("Udp6NoPorts"),
                 InErrors = reader.GetNextValueAsInt32("Udp6InErrors"),
                 OutDatagrams = reader.GetNextValueAsInt32("Udp6OutDatagrams"),
-                RcvbufErrors = reader.GetNextValueAsInt32("Udp6RcvbufErrors"),
-                SndbufErrors = reader.GetNextValueAsInt32("Udp6SndbufErrors"),
-                InCsumErrors = reader.GetNextValueAsInt32("Udp6InCsumErrors"),
+                RcvbufErrors = udp6ErrorsIdx == -1 ? 0 : reader.GetNextValueAsInt32("Udp6RcvbufErrors"),
+                SndbufErrors = udp6ErrorsIdx == -1 ? 0 : reader.GetNextValueAsInt32("Udp6SndbufErrors"),
+                InCsumErrors = udp6ErrorsIdx == -1 ? 0 : reader.GetNextValueAsInt32("Udp6InCsumErrors"),
             };
         }
 
@@ -412,23 +418,23 @@ namespace System.Net.NetworkInformation
 
                         return new IPInterfaceStatisticsTable()
                         {
-                            BytesReceived = ParseUInt64AndClampToUInt32(pieces[1]),
-                            PacketsReceived = ParseUInt64AndClampToUInt32(pieces[2]),
-                            ErrorsReceived = ParseUInt64AndClampToUInt32(pieces[3]),
-                            IncomingPacketsDropped = ParseUInt64AndClampToUInt32(pieces[4]),
-                            FifoBufferErrorsReceived = ParseUInt64AndClampToUInt32(pieces[5]),
-                            PacketFramingErrorsReceived = ParseUInt64AndClampToUInt32(pieces[6]),
-                            CompressedPacketsReceived = ParseUInt64AndClampToUInt32(pieces[7]),
-                            MulticastFramesReceived = ParseUInt64AndClampToUInt32(pieces[8]),
+                            BytesReceived = ParseUInt64AndClampToInt64(pieces[1]),
+                            PacketsReceived = ParseUInt64AndClampToInt64(pieces[2]),
+                            ErrorsReceived = ParseUInt64AndClampToInt64(pieces[3]),
+                            IncomingPacketsDropped = ParseUInt64AndClampToInt64(pieces[4]),
+                            FifoBufferErrorsReceived = ParseUInt64AndClampToInt64(pieces[5]),
+                            PacketFramingErrorsReceived = ParseUInt64AndClampToInt64(pieces[6]),
+                            CompressedPacketsReceived = ParseUInt64AndClampToInt64(pieces[7]),
+                            MulticastFramesReceived = ParseUInt64AndClampToInt64(pieces[8]),
 
-                            BytesTransmitted = ParseUInt64AndClampToUInt32(pieces[9]),
-                            PacketsTransmitted = ParseUInt64AndClampToUInt32(pieces[10]),
-                            ErrorsTransmitted = ParseUInt64AndClampToUInt32(pieces[11]),
-                            OutgoingPacketsDropped = ParseUInt64AndClampToUInt32(pieces[12]),
-                            FifoBufferErrorsTransmitted = ParseUInt64AndClampToUInt32(pieces[13]),
-                            CollisionsDetected = ParseUInt64AndClampToUInt32(pieces[14]),
-                            CarrierLosses = ParseUInt64AndClampToUInt32(pieces[15]),
-                            CompressedPacketsTransmitted = ParseUInt64AndClampToUInt32(pieces[16]),
+                            BytesTransmitted = ParseUInt64AndClampToInt64(pieces[9]),
+                            PacketsTransmitted = ParseUInt64AndClampToInt64(pieces[10]),
+                            ErrorsTransmitted = ParseUInt64AndClampToInt64(pieces[11]),
+                            OutgoingPacketsDropped = ParseUInt64AndClampToInt64(pieces[12]),
+                            FifoBufferErrorsTransmitted = ParseUInt64AndClampToInt64(pieces[13]),
+                            CollisionsDetected = ParseUInt64AndClampToInt64(pieces[14]),
+                            CarrierLosses = ParseUInt64AndClampToInt64(pieces[15]),
+                            CompressedPacketsTransmitted = ParseUInt64AndClampToInt64(pieces[16]),
                         };
                     }
                     index += 1;
@@ -438,9 +444,9 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        private static uint ParseUInt64AndClampToUInt32(string value)
+        private static long ParseUInt64AndClampToInt64(string value) 
         {
-            return (uint)Math.Min(uint.MaxValue, ulong.Parse(value));
+            return (long)Math.Min((ulong)long.MaxValue, ulong.Parse(value, CultureInfo.InvariantCulture));
         }
     }
 }

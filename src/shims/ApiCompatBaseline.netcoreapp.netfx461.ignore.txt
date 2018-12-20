@@ -826,7 +826,6 @@ TypesMustExist : Type 'System.IAppDomainSetup' does not exist in the implementat
 TypesMustExist : Type 'System.Deployment.Internal.InternalActivationContextHelper' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Deployment.Internal.InternalApplicationIdentityHelper' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Diagnostics.Contracts.Internal.ContractHelper' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Runtime.CompilerServices.IDispatchConstantAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.DesignerServices.WindowsRuntimeDesignerContext' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Hosting.ActivationArguments' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.Runtime.Hosting.ApplicationActivator' does not exist in the implementation but it does exist in the contract.
@@ -2705,8 +2704,6 @@ TypesMustExist : Type 'System.ServiceProcess.ServiceInstaller' does not exist in
 TypesMustExist : Type 'System.ServiceProcess.ServiceProcessDescriptionAttribute' does not exist in the implementation but it does exist in the contract.
 TypesMustExist : Type 'System.ServiceProcess.ServiceProcessInstaller' does not exist in the implementation but it does exist in the contract.
 
-// Not bringing back argiterator
-TypesMustExist : Type 'System.ArgIterator' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Console.Write(System.String, System.Object, System.Object, System.Object, System.Object, __arglist)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Console.WriteLine(System.String, System.Object, System.Object, System.Object, System.Object, __arglist)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.String.Concat(System.Object, System.Object, System.Object, System.Object, __arglist)' does not exist in the implementation but it does exist in the contract.

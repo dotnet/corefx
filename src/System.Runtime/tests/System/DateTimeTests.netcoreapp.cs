@@ -7,7 +7,7 @@ using Xunit;
 
 namespace System.Tests
 {
-    public static partial class DateTimeTests
+    public partial class DateTimeTests
     {
         [Theory]
         [MemberData(nameof(StandardFormatSpecifiers))]
@@ -49,8 +49,8 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Parse_ValidInput_Suceeds_MemberData))]
-        public static void Parse_Span_ValidInput_Suceeds(string input, CultureInfo culture, DateTime? expected)
+        [MemberData(nameof(Parse_ValidInput_Succeeds_MemberData))]
+        public static void Parse_Span_ValidInput_Succeeds(string input, CultureInfo culture, DateTime? expected)
         {
             Assert.Equal(expected, DateTime.Parse(input.AsSpan(), culture));
         }

@@ -59,6 +59,7 @@ namespace System
         public void SetPrincipalPolicy(System.Security.Principal.PrincipalPolicy policy) { }
         public void SetThreadPrincipal(System.Security.Principal.IPrincipal principal) { }
         public AppDomainSetup SetupInformation { get { throw null; } }
+        public System.Security.PermissionSet PermissionSet { get { throw null; } }
         public override string ToString() { throw null; }
         public static void Unload(System.AppDomain domain) { }
         public bool ShadowCopyFiles { get { throw null; } }
@@ -780,6 +781,8 @@ namespace System
         public static double Atan2(double y, double x) { throw null; }
         public static double Atanh(double d) { throw null; }
         public static long BigMul(int a, int b) { throw null; }
+        public static double BitDecrement(double x) { throw null; }
+        public static double BitIncrement(double x) { throw null; }
         public static double Cbrt(double d) { throw null; }
         public static decimal Ceiling(decimal d) { throw null; }
         public static double Ceiling(double a) { throw null; }
@@ -798,6 +801,7 @@ namespace System
         public static uint Clamp(uint value, uint min, uint max) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static ulong Clamp(ulong value, ulong min, ulong max) { throw null; }
+        public static double CopySign(double x, double y) { throw null; }
         public static double Cos(double d) { throw null; }
         public static double Cosh(double value) { throw null; }
         public static int DivRem(int a, int b, out int result) { throw null; }
@@ -805,9 +809,12 @@ namespace System
         public static double Exp(double d) { throw null; }
         public static decimal Floor(decimal d) { throw null; }
         public static double Floor(double d) { throw null; }
+        public static double FusedMultiplyAdd(double x, double y, double z) { throw null; }
         public static double IEEERemainder(double x, double y) { throw null; }
+        public static int ILogB(double x) { throw null; }
         public static double Log(double d) { throw null; }
         public static double Log(double a, double newBase) { throw null; }
+        public static double Log2(double x) { throw null; }
         public static double Log10(double d) { throw null; }
         public static byte Max(byte val1, byte val2) { throw null; }
         public static decimal Max(decimal val1, decimal val2) { throw null; }
@@ -824,6 +831,7 @@ namespace System
         public static uint Max(uint val1, uint val2) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static ulong Max(ulong val1, ulong val2) { throw null; }
+        public static double MaxMagnitude(double x, double y) { throw null; }
         public static byte Min(byte val1, byte val2) { throw null; }
         public static decimal Min(decimal val1, decimal val2) { throw null; }
         public static double Min(double val1, double val2) { throw null; }
@@ -839,6 +847,7 @@ namespace System
         public static uint Min(uint val1, uint val2) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static ulong Min(ulong val1, ulong val2) { throw null; }
+        public static double MinMagnitude(double x, double y) { throw null; }
         public static double Pow(double x, double y) { throw null; }
         public static decimal Round(decimal d) { throw null; }
         public static decimal Round(decimal d, int decimals) { throw null; }
@@ -848,6 +857,7 @@ namespace System
         public static double Round(double value, int digits) { throw null; }
         public static double Round(double value, int digits, System.MidpointRounding mode) { throw null; }
         public static double Round(double value, System.MidpointRounding mode) { throw null; }
+        public static double ScaleB(double x, int n) { throw null; }
         public static int Sign(decimal value) { throw null; }
         public static int Sign(double value) { throw null; }
         public static int Sign(short value) { throw null; }
@@ -874,23 +884,32 @@ namespace System
         public static float Atan(float x) { throw null; }
         public static float Atanh(float x) { throw null; }
         public static float Atan2(float y, float x) { throw null; }
+        public static float BitDecrement(float x) { throw null; }
+        public static float BitIncrement(float x) { throw null; }
         public static float Cbrt(float x) { throw null; }
         public static float Ceiling(float x) { throw null; }
+        public static float CopySign(float x, float y) { throw null; }
         public static float Cos(float x) { throw null; }
         public static float Cosh(float x) { throw null; }
         public static float Exp(float x) { throw null; }
         public static float Floor(float x) { throw null; }
+        public static float FusedMultiplyAdd(float x, float y, float z) { throw null; }
         public static float IEEERemainder(float x, float y) { throw null; }
+        public static int ILogB(float x) { throw null; }
         public static float Log(float x) { throw null; }
         public static float Log(float x, float y) { throw null; }
+        public static float Log2(float x) { throw null; }
         public static float Log10(float x) { throw null; }        
         public static float Max(float x, float y) { throw null; }
+        public static float MaxMagnitude(float x, float y) { throw null; }
         public static float Min(float x, float y) { throw null; }
+        public static float MinMagnitude(float x, float y) { throw null; }
         public static float Pow(float x, float y) { throw null; }
         public static float Round(float x) { throw null; }
         public static float Round(float x, int digits) { throw null; }
         public static float Round(float x, int digits, System.MidpointRounding mode) { throw null; }
         public static float Round(float x, System.MidpointRounding mode) { throw null; }
+        public static float ScaleB(float x, int n) { throw null; }
         public static int Sign(float x) { throw null; }
         public static float Sin(float x) { throw null; }
         public static float Sinh(float x) { throw null; }
@@ -1303,6 +1322,7 @@ namespace System.IO
         public virtual System.IO.Stream BaseStream { get { throw null; } }
         public virtual void Close() { }
         public void Dispose() { }
+        public virtual System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         protected virtual void Dispose(bool disposing) { }
         public virtual void Flush() { }
         public virtual long Seek(int offset, System.IO.SeekOrigin origin) { throw null; }
@@ -1344,6 +1364,7 @@ namespace System.IO
         public override System.IAsyncResult BeginRead(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { throw null; }
         public override System.IAsyncResult BeginWrite(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { throw null; }
         protected override void Dispose(bool disposing) { }
+        public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override int EndRead(System.IAsyncResult asyncResult) { throw null; }
         public override void EndWrite(System.IAsyncResult asyncResult) { throw null; }
         public override void Flush() { }
@@ -1464,6 +1485,7 @@ namespace System.IO
         public override System.Text.Encoding Encoding { get { throw null; } }
         public override void Close() { }
         protected override void Dispose(bool disposing) { }
+        public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override void Flush() { }
         public override System.Threading.Tasks.Task FlushAsync() { throw null; }
         public override void Write(char value) { }
@@ -1563,6 +1585,7 @@ namespace System.IO
         public virtual void Close() { }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
+        public virtual System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public virtual void Flush() { }
         public virtual System.Threading.Tasks.Task FlushAsync() { throw null; }
         public static System.IO.TextWriter Synchronized(System.IO.TextWriter writer) { throw null; }
@@ -1653,6 +1676,54 @@ namespace System.Security
         void FromXml(System.Security.SecurityElement e);
         System.Security.SecurityElement ToXml();
     }
+    public partial interface IStackWalk
+    {
+        void Assert();
+        void Demand();
+        void Deny();
+        void PermitOnly();
+    }
+    public partial class PermissionSet : System.Collections.ICollection, System.Collections.IEnumerable, System.Runtime.Serialization.IDeserializationCallback, System.Security.ISecurityEncodable, System.Security.IStackWalk
+    {
+        public PermissionSet(System.Security.Permissions.PermissionState state) { }
+        public PermissionSet(System.Security.PermissionSet permSet) { }
+        public virtual int Count { get { throw null; } }
+        public virtual bool IsReadOnly { get { throw null; } }
+        public virtual bool IsSynchronized { get { throw null; } }
+        public virtual object SyncRoot { get { throw null; } }
+        public System.Security.IPermission AddPermission(System.Security.IPermission perm) { throw null; }
+        protected virtual System.Security.IPermission AddPermissionImpl(System.Security.IPermission perm) { throw null; }
+        public void Assert() { }
+        public bool ContainsNonCodeAccessPermissions() { throw null; }
+        [System.ObsoleteAttribute]
+        public static byte[] ConvertPermissionSet(string inFormat, byte[] inData, string outFormat) { throw null; }
+        public virtual System.Security.PermissionSet Copy() { throw null; }
+        public virtual void CopyTo(System.Array array, int index) { }
+        public void Demand() { }
+        [System.ObsoleteAttribute]
+        public void Deny() { }
+        public override bool Equals(object o) { throw null; }
+        public virtual void FromXml(System.Security.SecurityElement et) { }
+        public System.Collections.IEnumerator GetEnumerator() { throw null; }
+        protected virtual System.Collections.IEnumerator GetEnumeratorImpl() { throw null; }
+        public override int GetHashCode() { throw null; }
+        public System.Security.IPermission GetPermission(System.Type permClass) { throw null; }
+        protected virtual System.Security.IPermission GetPermissionImpl(System.Type permClass) { throw null; }
+        public System.Security.PermissionSet Intersect(System.Security.PermissionSet other) { throw null; }
+        public bool IsEmpty() { throw null; }
+        public bool IsSubsetOf(System.Security.PermissionSet target) { throw null; }
+        public bool IsUnrestricted() { throw null; }
+        public void PermitOnly() { }
+        public System.Security.IPermission RemovePermission(System.Type permClass) { throw null; }
+        protected virtual System.Security.IPermission RemovePermissionImpl(System.Type permClass) { throw null; }
+        public static void RevertAssert() { }
+        public System.Security.IPermission SetPermission(System.Security.IPermission perm) { throw null; }
+        protected virtual System.Security.IPermission SetPermissionImpl(System.Security.IPermission perm) { throw null; }
+        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
+        public override string ToString() { throw null; }
+        public virtual System.Security.SecurityElement ToXml() { throw null; }
+        public System.Security.PermissionSet Union(System.Security.PermissionSet other) { throw null; }
+    }
     public sealed partial class SecurityElement
     {
         public SecurityElement(string tag) { }
@@ -1683,6 +1754,11 @@ namespace System.Security.Permissions
     public abstract partial class CodeAccessSecurityAttribute : System.Security.Permissions.SecurityAttribute
     {
         protected CodeAccessSecurityAttribute(System.Security.Permissions.SecurityAction action) : base(default(System.Security.Permissions.SecurityAction)) { }
+    }
+    public enum PermissionState
+    {
+        None = 0,
+        Unrestricted = 1,
     }
     public enum SecurityAction
     {

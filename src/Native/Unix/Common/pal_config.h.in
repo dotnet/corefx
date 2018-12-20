@@ -32,7 +32,7 @@
 #cmakedefine01 HAVE_TIOCGWINSZ
 #cmakedefine01 HAVE_SCHED_GETAFFINITY
 #cmakedefine01 HAVE_SCHED_SETAFFINITY
-#cmakedefine01 HAVE_ARC4RANDOM
+#cmakedefine01 HAVE_ARC4RANDOM_BUF
 #cmakedefine01 KEVENT_HAS_VOID_UDATA
 #cmakedefine01 HAVE_FDS_BITS
 #cmakedefine01 HAVE_PRIVATE_FDS_BITS
@@ -57,6 +57,8 @@
 #cmakedefine01 HAVE_IP_MREQN
 #cmakedefine01 HAVE_TCP_VAR_H
 #cmakedefine01 HAVE_RT_MSGHDR
+#cmakedefine01 HAVE_RT_MSGHDR2
+#cmakedefine01 HAVE_IF_MSGHDR2
 #cmakedefine01 HAVE_SYS_SYSCTL_H
 #cmakedefine01 HAVE_NET_IFMEDIA_H
 #cmakedefine01 HAVE_LINUX_RTNETLINK_H

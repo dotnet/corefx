@@ -64,6 +64,27 @@ internal static partial class Interop
                     throw CreateSslException(SR.net_allocate_ssl_context_failed);
                 }
 
+                // TLS 1.3 uses different ciphersuite restrictions than previous versions.
+                // It has no equivalent to a NoEncryption option.
+                if (policy == EncryptionPolicy.NoEncryption)
+                {
+                    if (protocols == SslProtocols.None)
+                    {
+                        protocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
+                    }
+                    else
+                    {
+                        protocols &= ~SslProtocols.Tls13;
+
+                        if (protocols == SslProtocols.None)
+                        {
+                            throw new SslException(
+                                SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
+                        }
+                    }
+                }
+
+
                 // Configure allowed protocols. It's ok to use DangerousGetHandle here without AddRef/Release as we just
                 // create the handle, it's rooted by the using, no one else has a reference to it, etc.
                 Ssl.SetProtocolOptions(innerContext.DangerousGetHandle(), protocols);
@@ -178,7 +199,7 @@ internal static partial class Interop
         {
             sendBuf = null;
             sendCount = 0;
-            
+
             if ((recvBuf != null) && (recvCount > 0))
             {
                 if (BioWrite(context.InputBio, recvBuf, recvOffset, recvCount) <= 0)
@@ -382,7 +403,7 @@ internal static partial class Interop
             GCHandle protocolHandle = GCHandle.FromIntPtr(arg);
             if (!(protocolHandle.Target is List<SslApplicationProtocol> protocolList))
             {
-                return Ssl.SSL_TLSEXT_ERR_NOACK;
+                return Ssl.SSL_TLSEXT_ERR_ALERT_FATAL;
             }
 
             try
@@ -411,14 +432,14 @@ internal static partial class Interop
                 // It is ok to clear the handle value here, this results in handshake failure, so the SslStream object is disposed.
                 protocolHandle.Target = null;
 
-                return Ssl.SSL_TLSEXT_ERR_NOACK;
+                return Ssl.SSL_TLSEXT_ERR_ALERT_FATAL;
             }
 
             // No common application protocol was negotiated, set the target on the alpnHandle to null.
             // It is ok to clear the handle value here, this results in handshake failure, so the SslStream object is disposed.
             protocolHandle.Target = null;
 
-            return Ssl.SSL_TLSEXT_ERR_NOACK;
+            return Ssl.SSL_TLSEXT_ERR_ALERT_FATAL;
         }
 
         private static int BioRead(SafeBioHandle bio, byte[] buffer, int count)
