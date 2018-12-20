@@ -272,7 +272,7 @@
     <Compile Include="System\Data\SqlClient\SqlConnectionStringBuilder.NetCoreApp.cs" />
     <Compile Include="System\Data\SqlClient\SNI\SNIPacket.NetCoreApp.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true' OR '$(OSGroup)' == 'AnyOS' OR '$(TargetsNetCoreApp)' != 'true'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(OSGroup)' != 'AnyOS' AND '$(TargetsNetCoreApp)' != 'true'">
     <Compile Include="System\Data\SqlClient\SNI\SNIPacket.NetStandard.cs" />
   </ItemGroup>
   <!-- Manage the SNI toggle for Windows netstandard and UWP -->
