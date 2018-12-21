@@ -15,6 +15,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxInt());
+#else
             int value;
             using (IEnumerator<int> e = source.GetEnumerator())
             {
@@ -35,6 +38,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static int? Max(this IEnumerable<int?> source)
@@ -44,6 +48,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxNullableInt());
+#else
             int? value = null;
             using (IEnumerator<int?> e = source.GetEnumerator())
             {
@@ -97,6 +104,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static long Max(this IEnumerable<long> source)
@@ -106,6 +114,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxLong());
+#else
             long value;
             using (IEnumerator<long> e = source.GetEnumerator())
             {
@@ -126,6 +137,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static long? Max(this IEnumerable<long?> source)
@@ -135,6 +147,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxNullableLong());
+#else
             long? value = null;
             using (IEnumerator<long?> e = source.GetEnumerator())
             {
@@ -182,6 +197,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static double Max(this IEnumerable<double> source)
@@ -191,6 +207,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxDouble());
+#else
             double value;
             using (IEnumerator<double> e = source.GetEnumerator())
             {
@@ -226,6 +245,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static double? Max(this IEnumerable<double?> source)
@@ -235,6 +255,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxNullableDouble());
+#else
             double? value = null;
             using (IEnumerator<double?> e = source.GetEnumerator())
             {
@@ -280,6 +303,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static float Max(this IEnumerable<float> source)
@@ -289,6 +313,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxFloat());
+#else
             float value;
             using (IEnumerator<float> e = source.GetEnumerator())
             {
@@ -319,6 +346,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static float? Max(this IEnumerable<float?> source)
@@ -328,6 +356,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxNullableFloat());
+#else
             float? value = null;
             using (IEnumerator<float?> e = source.GetEnumerator())
             {
@@ -373,6 +404,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static decimal Max(this IEnumerable<decimal> source)
@@ -382,6 +414,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxDecimal());
+#else
             decimal value;
             using (IEnumerator<decimal> e = source.GetEnumerator())
             {
@@ -402,6 +437,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static decimal? Max(this IEnumerable<decimal?> source)
@@ -411,6 +447,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxNullableDecimal());
+#else
             decimal? value = null;
             using (IEnumerator<decimal?> e = source.GetEnumerator())
             {
@@ -439,6 +478,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static TSource Max<TSource>(this IEnumerable<TSource> source)
@@ -448,6 +488,16 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+#if !PRE_CHAINLINQ
+            if (default(TSource) == null)
+            {
+                return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxRefType<TSource>());
+            }
+            else
+            {
+                return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxValueType<TSource>());
+            }
+#else
             Comparer<TSource> comparer = Comparer<TSource>.Default;
             TSource value = default(TSource);
             if (value == null)
@@ -497,6 +547,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static int Max<TSource>(this IEnumerable<TSource> source, Func<TSource, int> selector)
@@ -511,6 +562,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxInt<TSource>(selector));
+#else
             int value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -531,6 +585,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static int? Max<TSource>(this IEnumerable<TSource> source, Func<TSource, int?> selector)
@@ -545,6 +600,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxNullableInt<TSource>(selector));
+#else
             int? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -598,6 +656,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static long Max<TSource>(this IEnumerable<TSource> source, Func<TSource, long> selector)
@@ -612,6 +671,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxLong<TSource>(selector));
+#else
             long value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -632,6 +694,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static long? Max<TSource>(this IEnumerable<TSource> source, Func<TSource, long?> selector)
@@ -646,6 +709,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxNullableLong<TSource>(selector));
+#else
             long? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -693,6 +759,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static float Max<TSource>(this IEnumerable<TSource> source, Func<TSource, float> selector)
@@ -707,6 +774,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxFloat<TSource>(selector));
+#else
             float value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -737,6 +807,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static float? Max<TSource>(this IEnumerable<TSource> source, Func<TSource, float?> selector)
@@ -751,6 +822,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxNullableFloat<TSource>(selector));
+#else
             float? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -796,6 +870,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static double Max<TSource>(this IEnumerable<TSource> source, Func<TSource, double> selector)
@@ -810,6 +885,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxDouble<TSource>(selector));
+#else
             double value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -845,6 +923,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static double? Max<TSource>(this IEnumerable<TSource> source, Func<TSource, double?> selector)
@@ -859,6 +938,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxNullableDouble<TSource>(selector));
+#else
             double? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -904,6 +986,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static decimal Max<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal> selector)
@@ -918,6 +1001,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxDecimal<TSource>(selector));
+#else
             decimal value;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -938,6 +1024,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static decimal? Max<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal?> selector)
@@ -952,6 +1039,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxNullableDecimal<TSource>(selector));
+#else
             decimal? value = null;
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
@@ -980,6 +1070,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
 
         public static TResult Max<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
@@ -994,6 +1085,16 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
+#if !PRE_CHAINLINQ
+            if (default(TResult) == null)
+            {
+                return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxRefType<TSource, TResult>(selector));
+            }
+            else
+            {
+                return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.MaxValueType<TSource, TResult>(selector));
+            }
+#else
             Comparer<TResult> comparer = Comparer<TResult>.Default;
             TResult value = default(TResult);
             if (value == null)
@@ -1043,6 +1144,7 @@ namespace System.Linq
             }
 
             return value;
+#endif
         }
     }
 }
