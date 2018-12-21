@@ -70,6 +70,8 @@ namespace System.Collections
         private IComparer comparer; // Do not rename (binary serialization)
         private KeyList keyList; // Do not rename (binary serialization)
         private ValueList valueList; // Do not rename (binary serialization)
+        [NonSerialized]
+        private object _syncRoot; // Serialized indirectly in SyncSortedList
 
         private const int _defaultCapacity = 16;
 
@@ -290,7 +292,17 @@ namespace System.Collections
         }
 
         // Synchronization root for this object.
-        public virtual object SyncRoot => this;
+        public virtual object SyncRoot
+        {
+            get
+            {
+                if (_syncRoot == null)
+                {
+                    System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new object(), null);
+                }
+                return _syncRoot;
+            }
+        }
 
         // Removes all entries from this sorted list.
         public virtual void Clear()
