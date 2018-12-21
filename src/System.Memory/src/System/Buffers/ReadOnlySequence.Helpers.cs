@@ -104,7 +104,7 @@ namespace System.Buffers
 
             // A == 0 && B == 0 means SequenceType.MultiSegment
             // Equivalent to startIndex >= 0 && endIndex >= 0
-            if ((startIndex >> 31) + (endIndex >> 31) == 0)
+            if ((startIndex | endIndex) >= 0)
             {
                 ReadOnlyMemory<T> memory = ((ReadOnlySequenceSegment<T>)startObject).Memory;
                 if (isMultiSegment)
