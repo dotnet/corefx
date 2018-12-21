@@ -7,9 +7,6 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="System\Linq\ChainLinq\GetEnumerator\Array.SpeedOpt.cs" />
-    <Compile Include="System\Linq\ChainLinq\GetEnumerator\Enumerable.SpeedOpt.cs" />
-    <Compile Include="System\Linq\ChainLinq\GetEnumerator\List.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Optimizations\Pipeline.cs" />
     <Compile Include="System\Linq\Empty.cs" />
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
@@ -91,6 +88,9 @@
     <Compile Include="System\Linq\ChainLinq\Consumables\Prepender.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Range.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\SelectMany.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\GetEnumerator\Array.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\GetEnumerator\Enumerable.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\GetEnumerator\List.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Compose.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Identity.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Take.SpeedOpt.cs" />
