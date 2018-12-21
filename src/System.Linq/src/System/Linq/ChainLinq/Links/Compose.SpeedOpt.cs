@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    partial class Composition<T, U, V>
+    sealed partial class Composition<T, U, V>
         : Optimizations.ICountOnConsumableLink
     {
         public int GetCount(int count)

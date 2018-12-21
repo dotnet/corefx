@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Consumer
 {
-    class SumInt : Consumer<int, int>
+    sealed class SumInt : Consumer<int, int>
     {
         public SumInt() : base(0) { }
 
@@ -14,7 +14,7 @@
         }
     }
 
-    class SumNullableInt : Consumer<int?, int?>
+    sealed class SumNullableInt : Consumer<int?, int?>
     {
         public SumNullableInt() : base(0) { }
 
@@ -28,7 +28,7 @@
         }
     }
 
-    class SumLong : Consumer<long, long>
+    sealed class SumLong : Consumer<long, long>
     {
         public SumLong() : base(0L) { }
 
@@ -42,7 +42,7 @@
         }
     }
 
-    class SumNullableLong : Consumer<long?, long?>
+    sealed class SumNullableLong : Consumer<long?, long?>
     {
         public SumNullableLong() : base(0L) { }
 
@@ -57,7 +57,7 @@
     }
 
 
-    class SumFloat : Consumer<float, float>
+    sealed class SumFloat : Consumer<float, float>
     {
         double _sum = 0.0;
 
@@ -75,7 +75,7 @@
         }
     }
 
-    class SumNullableFloat : Consumer<float?, float?>
+    sealed class SumNullableFloat : Consumer<float?, float?>
     {
         double _sum = 0.0;
 
@@ -93,7 +93,7 @@
         }
     }
 
-    class SumDouble : Consumer<double, double>
+    sealed class SumDouble : Consumer<double, double>
     {
         public SumDouble() : base(0.0) { }
 
@@ -104,7 +104,7 @@
         }
     }
 
-    class SumNullableDouble : Consumer<double?, double?>
+    sealed class SumNullableDouble : Consumer<double?, double?>
     {
         public SumNullableDouble() : base(0.0) { }
 
@@ -115,7 +115,7 @@
         }
     }
 
-    class SumDecimal : Consumer<decimal, decimal>
+    sealed class SumDecimal : Consumer<decimal, decimal>
     {
         public SumDecimal() : base(0M) { }
 
@@ -126,7 +126,7 @@
         }
     }
 
-    class SumNullableDecimal : Consumer<decimal?, decimal?>
+    sealed class SumNullableDecimal : Consumer<decimal?, decimal?>
     {
         public SumNullableDecimal() : base(0M) { }
 
@@ -138,7 +138,7 @@
     }
 
 
-    class SumInt<TSource> : Consumer<TSource, int>
+    sealed class SumInt<TSource> : Consumer<TSource, int>
     {
         Func<TSource, int> _selector;
 
@@ -155,7 +155,7 @@
         }
     }
 
-    class SumNullableInt<TSource> : Consumer<TSource, int?>
+    sealed class SumNullableInt<TSource> : Consumer<TSource, int?>
     {
         Func<TSource, int?> _selector;
 
@@ -172,7 +172,7 @@
         }
     }
 
-    class SumLong<TSource> : Consumer<TSource, long>
+    sealed class SumLong<TSource> : Consumer<TSource, long>
     {
         Func<TSource, long> _selector;
 
@@ -189,7 +189,7 @@
         }
     }
 
-    class SumNullableLong<TSource> : Consumer<TSource, long?>
+    sealed class SumNullableLong<TSource> : Consumer<TSource, long?>
     {
         Func<TSource, long?> _selector;
 
@@ -207,7 +207,7 @@
     }
 
 
-    class SumFloat<TSource> : Consumer<TSource, float>
+    sealed class SumFloat<TSource> : Consumer<TSource, float>
     {
         double _sum = 0.0;
 
@@ -228,7 +228,7 @@
         }
     }
 
-    class SumNullableFloat<TSource> : Consumer<TSource, float?>
+    sealed class SumNullableFloat<TSource> : Consumer<TSource, float?>
     {
         double _sum = 0.0;
 
@@ -249,7 +249,7 @@
         }
     }
 
-    class SumDouble<TSource> : Consumer<TSource, double>
+    sealed class SumDouble<TSource> : Consumer<TSource, double>
     {
         Func<TSource, double> _selector;
 
@@ -263,7 +263,7 @@
         }
     }
 
-    class SumNullableDouble<TSource> : Consumer<TSource, double?>
+    sealed class SumNullableDouble<TSource> : Consumer<TSource, double?>
     {
         Func<TSource, double?> _selector;
 
@@ -277,7 +277,7 @@
         }
     }
 
-    class SumDecimal<TSource> : Consumer<TSource, decimal>
+    sealed class SumDecimal<TSource> : Consumer<TSource, decimal>
     {
         Func<TSource, decimal> _selector;
 
@@ -291,7 +291,7 @@
         }
     }
 
-    class SumNullableDecimal<TSource> : Consumer<TSource, decimal?>
+    sealed class SumNullableDecimal<TSource> : Consumer<TSource, decimal?>
     {
         Func<TSource, decimal?> _selector;
 

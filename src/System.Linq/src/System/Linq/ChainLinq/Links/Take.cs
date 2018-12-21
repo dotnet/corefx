@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    internal partial class Take<T> : ILink<T, T>
+    sealed partial class Take<T> : ILink<T, T>
     {
         private int _count;
 

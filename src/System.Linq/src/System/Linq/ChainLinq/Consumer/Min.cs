@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.Consumer
 {
-    class MinInt : Consumer<int, int>
+    sealed class MinInt : Consumer<int, int>
     {
         bool _first;
 
@@ -28,7 +28,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinNullableInt : Consumer<int?, int?>
+    sealed class MinNullableInt : Consumer<int?, int?>
     {
         public MinNullableInt() : base(null) { }
 
@@ -43,7 +43,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinLong : Consumer<long, long>
+    sealed class MinLong : Consumer<long, long>
     {
         bool _first;
 
@@ -69,7 +69,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinNullableLong : Consumer<long?, long?>
+    sealed class MinNullableLong : Consumer<long?, long?>
     {
         public MinNullableLong() : base(null) { }
 
@@ -84,7 +84,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinFloat : Consumer<float, float>
+    sealed class MinFloat : Consumer<float, float>
     {
         bool _first;
 
@@ -115,7 +115,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinNullableFloat : Consumer<float?, float?>
+    sealed class MinNullableFloat : Consumer<float?, float?>
     {
         public MinNullableFloat() : base(null) { }
 
@@ -149,7 +149,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinDouble : Consumer<double, double>
+    sealed class MinDouble : Consumer<double, double>
     {
         bool _first;
 
@@ -180,7 +180,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinNullableDouble : Consumer<double?, double?>
+    sealed class MinNullableDouble : Consumer<double?, double?>
     {
         public MinNullableDouble() : base(null) { }
 
@@ -214,7 +214,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinDecimal : Consumer<decimal, decimal>
+    sealed class MinDecimal : Consumer<decimal, decimal>
     {
         bool _first;
 
@@ -240,7 +240,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinNullableDecimal : Consumer<decimal?, decimal?>
+    sealed class MinNullableDecimal : Consumer<decimal?, decimal?>
     {
         public MinNullableDecimal() : base(null) { }
 
@@ -263,7 +263,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinValueType<T> : Consumer<T, T>
+    sealed class MinValueType<T> : Consumer<T, T>
     {
         bool _first;
 
@@ -294,7 +294,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinRefType<T> : Consumer<T, T>
+    sealed class MinRefType<T> : Consumer<T, T>
     {
         public MinRefType() : base(default) { }
 
@@ -309,7 +309,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinInt<TSource> : Consumer<TSource, int>
+    sealed class MinInt<TSource> : Consumer<TSource, int>
     {
         private readonly Func<TSource, int> _selector;
 
@@ -339,7 +339,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinNullableInt<TSource> : Consumer<TSource, int?>
+    sealed class MinNullableInt<TSource> : Consumer<TSource, int?>
     {
         private readonly Func<TSource, int?> _selector;
 
@@ -359,7 +359,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinLong<TSource> : Consumer<TSource, long>
+    sealed class MinLong<TSource> : Consumer<TSource, long>
     {
         private readonly Func<TSource, long> _selector;
 
@@ -389,7 +389,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinNullableLong<TSource> : Consumer<TSource, long?>
+    sealed class MinNullableLong<TSource> : Consumer<TSource, long?>
     {
         private readonly Func<TSource, long?> _selector;
 
@@ -409,7 +409,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinFloat<TSource> : Consumer<TSource, float>
+    sealed class MinFloat<TSource> : Consumer<TSource, float>
     {
         private readonly Func<TSource, float> _selector;
 
@@ -444,7 +444,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinNullableFloat<TSource> : Consumer<TSource, float?>
+    sealed class MinNullableFloat<TSource> : Consumer<TSource, float?>
     {
         private readonly Func<TSource, float?> _selector;
 
@@ -483,7 +483,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinDouble<TSource> : Consumer<TSource, double>
+    sealed class MinDouble<TSource> : Consumer<TSource, double>
     {
         private readonly Func<TSource, double> _selector;
 
@@ -518,7 +518,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinNullableDouble<TSource> : Consumer<TSource, double?>
+    sealed class MinNullableDouble<TSource> : Consumer<TSource, double?>
     {
         private readonly Func<TSource, double?> _selector;
 
@@ -557,7 +557,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinDecimal<TSource> : Consumer<TSource, decimal>
+    sealed class MinDecimal<TSource> : Consumer<TSource, decimal>
     {
         private readonly Func<TSource, decimal> _selector;
 
@@ -587,7 +587,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinNullableDecimal<TSource> : Consumer<TSource, decimal?>
+    sealed class MinNullableDecimal<TSource> : Consumer<TSource, decimal?>
     {
         private readonly Func<TSource, decimal?> _selector;
 
@@ -615,7 +615,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinValueType<TSource, T> : Consumer<TSource, T>
+    sealed class MinValueType<TSource, T> : Consumer<TSource, T>
     {
         private readonly Func<TSource, T> _selector;
 
@@ -650,7 +650,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MinRefType<TSource, T> : Consumer<TSource, T>
+    sealed class MinRefType<TSource, T> : Consumer<TSource, T>
     {
         private readonly Func<TSource, T> _selector;
 

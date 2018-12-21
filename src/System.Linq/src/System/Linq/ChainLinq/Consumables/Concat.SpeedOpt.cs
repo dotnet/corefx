@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    internal partial class Concat<T, V>
+    sealed partial class Concat<T, V>
         : Optimizations.ICountOnConsumable
     {
         private static int GetCount(IEnumerable<T> e, bool onlyIfCheap)

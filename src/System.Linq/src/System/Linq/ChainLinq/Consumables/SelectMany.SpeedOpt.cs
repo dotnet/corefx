@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    class SelectManyCount<T> : Consumer<IEnumerable<T>, int>
+    sealed class SelectManyCount<T> : Consumer<IEnumerable<T>, int>
     {
         public SelectManyCount() : base(0) { }
 
@@ -16,7 +16,7 @@ namespace System.Linq.ChainLinq.Consumables
         }
     }
 
-    internal partial class SelectMany<T, V>
+    sealed partial class SelectMany<T, V>
         : Optimizations.ICountOnConsumable
     {
         public int GetCount(bool onlyIfCheap)

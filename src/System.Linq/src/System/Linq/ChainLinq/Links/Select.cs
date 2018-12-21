@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    internal partial class Select<T, U> : ILink<T, U>
+    partial class Select<T, U> : ILink<T, U>
     {
         public Select(Func<T, U> selector) =>
             Selector = selector;

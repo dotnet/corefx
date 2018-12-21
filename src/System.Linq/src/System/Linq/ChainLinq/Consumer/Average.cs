@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Consumer
 {
-    class AverageInt : Consumer<int, double>
+    sealed class AverageInt : Consumer<int, double>
     {
         long _sum;
         long _count;
@@ -36,7 +36,7 @@
         }
     }
 
-    class AverageNullableInt : Consumer<int?, double?>
+    sealed class AverageNullableInt : Consumer<int?, double?>
     {
         long _sum;
         long _count;
@@ -74,7 +74,7 @@
         }
     }
 
-    class AverageLong : Consumer<long, double>
+    sealed class AverageLong : Consumer<long, double>
     {
         long _sum;
         long _count;
@@ -110,7 +110,7 @@
         }
     }
 
-    class AverageNullableLong : Consumer<long?, double?>
+    sealed class AverageNullableLong : Consumer<long?, double?>
     {
         long _sum;
         long _count;
@@ -148,7 +148,7 @@
         }
     }
 
-    class AverageFloat : Consumer<float, float>
+    sealed class AverageFloat : Consumer<float, float>
     {
         double _sum;
         long _count;
@@ -181,7 +181,7 @@
         }
     }
 
-    class AverageNullableFloat : Consumer<float?, float?>
+    sealed class AverageNullableFloat : Consumer<float?, float?>
     {
         double _sum;
         long _count;
@@ -217,7 +217,7 @@
     }
 
 
-    class AverageDouble : Consumer<double, double>
+    sealed class AverageDouble : Consumer<double, double>
     {
         double _sum;
         long _count;
@@ -253,7 +253,7 @@
         }
     }
 
-    class AverageNullableDouble : Consumer<double?, double?>
+    sealed class AverageNullableDouble : Consumer<double?, double?>
     {
         double _sum;
         long _count;
@@ -288,7 +288,7 @@
         }
     }
 
-    class AverageDecimal : Consumer<decimal, decimal>
+    sealed class AverageDecimal : Consumer<decimal, decimal>
     {
         decimal _sum;
         long _count;
@@ -321,7 +321,7 @@
         }
     }
 
-    class AverageNullableDecimal : Consumer<decimal?, decimal?>
+    sealed class AverageNullableDecimal : Consumer<decimal?, decimal?>
     {
         decimal _sum;
         long _count;
@@ -356,7 +356,7 @@
         }
     }
 
-    class AverageInt<TSource> : Consumer<TSource, double>
+    sealed class AverageInt<TSource> : Consumer<TSource, double>
     {
         readonly Func<TSource, int> _selector;
 
@@ -395,7 +395,7 @@
         }
     }
 
-    class AverageNullableInt<TSource> : Consumer<TSource, double?>
+    sealed class AverageNullableInt<TSource> : Consumer<TSource, double?>
     {
         readonly Func<TSource, int?> _selector;
 
@@ -436,7 +436,7 @@
         }
     }
 
-    class AverageLong<TSource> : Consumer<TSource, double>
+    sealed class AverageLong<TSource> : Consumer<TSource, double>
     {
         readonly Func<TSource, long> _selector;
 
@@ -475,7 +475,7 @@
         }
     }
 
-    class AverageNullableLong<TSource> : Consumer<TSource, double?>
+    sealed class AverageNullableLong<TSource> : Consumer<TSource, double?>
     {
         readonly Func<TSource, long?> _selector;
 
@@ -516,7 +516,7 @@
         }
     }
 
-    class AverageFloat<TSource> : Consumer<TSource, float>
+    sealed class AverageFloat<TSource> : Consumer<TSource, float>
     {
         readonly Func<TSource, float> _selector;
 
@@ -552,7 +552,7 @@
         }
     }
 
-    class AverageNullableFloat<TSource> : Consumer<TSource, float?>
+    sealed class AverageNullableFloat<TSource> : Consumer<TSource, float?>
     {
         readonly Func<TSource, float?> _selector;
 
@@ -591,7 +591,7 @@
     }
 
 
-    class AverageDouble<TSource> : Consumer<TSource, double>
+    sealed class AverageDouble<TSource> : Consumer<TSource, double>
     {
         readonly Func<TSource, double> _selector;
 
@@ -630,7 +630,7 @@
         }
     }
 
-    class AverageNullableDouble<TSource> : Consumer<TSource, double?>
+    sealed class AverageNullableDouble<TSource> : Consumer<TSource, double?>
     {
         readonly Func<TSource, double?> _selector;
 
@@ -668,7 +668,7 @@
         }
     }
 
-    class AverageDecimal<TSource> : Consumer<TSource, decimal>
+    sealed class AverageDecimal<TSource> : Consumer<TSource, decimal>
     {
         readonly Func<TSource, decimal> _selector;
 
@@ -704,7 +704,7 @@
         }
     }
 
-    class AverageNullableDecimal<TSource> : Consumer<TSource, decimal?>
+    sealed class AverageNullableDecimal<TSource> : Consumer<TSource, decimal?>
     {
         readonly Func<TSource, decimal?> _selector;
 

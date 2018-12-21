@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace System.Linq.ChainLinq.ConsumerEnumerators
 {
-    internal class Concat<T, TResult> : ConsumerEnumerator<TResult>
+    internal sealed class Concat<T, TResult> : ConsumerEnumerator<TResult>
     {
         private IEnumerable<T> _firstOrNull;
         private IEnumerable<T> _second;

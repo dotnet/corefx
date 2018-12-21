@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Consumables
 {
-    internal partial class Appender<T>
+    sealed partial class Appender<T>
         : Optimizations.ICountOnConsumable
     {
         public int GetCount(bool onlyIfCheap)

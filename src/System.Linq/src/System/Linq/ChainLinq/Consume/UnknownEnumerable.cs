@@ -4,7 +4,7 @@ namespace System.Linq.ChainLinq.Consume
 {
     static class UnknownEnumerable
     {
-        public class ChainConsumer<T> : Consumer<T, ChainStatus>
+        public sealed class ChainConsumer<T> : Consumer<T, ChainStatus>
         {
             private readonly Chain<T> _chainT;
 

@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.Consumer
 {
-    class MaxInt : Consumer<int, int>
+    sealed class MaxInt : Consumer<int, int>
     {
         bool _first;
 
@@ -28,7 +28,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxNullableInt : Consumer<int?, int?>
+    sealed class MaxNullableInt : Consumer<int?, int?>
     {
         public MaxNullableInt() : base(null) { }
 
@@ -43,7 +43,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxLong : Consumer<long, long>
+    sealed class MaxLong : Consumer<long, long>
     {
         bool _first;
 
@@ -69,7 +69,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxNullableLong : Consumer<long?, long?>
+    sealed class MaxNullableLong : Consumer<long?, long?>
     {
         public MaxNullableLong() : base(null) { }
 
@@ -84,7 +84,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxFloat : Consumer<float, float>
+    sealed class MaxFloat : Consumer<float, float>
     {
         bool _first;
 
@@ -110,7 +110,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxNullableFloat : Consumer<float?, float?>
+    sealed class MaxNullableFloat : Consumer<float?, float?>
     {
         public MaxNullableFloat() : base(null) { }
 
@@ -140,7 +140,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxDouble : Consumer<double, double>
+    sealed class MaxDouble : Consumer<double, double>
     {
         bool _first;
 
@@ -166,7 +166,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxNullableDouble : Consumer<double?, double?>
+    sealed class MaxNullableDouble : Consumer<double?, double?>
     {
         public MaxNullableDouble() : base(null) { }
 
@@ -196,7 +196,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxDecimal : Consumer<decimal, decimal>
+    sealed class MaxDecimal : Consumer<decimal, decimal>
     {
         bool _first;
 
@@ -222,7 +222,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxNullableDecimal : Consumer<decimal?, decimal?>
+    sealed class MaxNullableDecimal : Consumer<decimal?, decimal?>
     {
         public MaxNullableDecimal() : base(null) { }
 
@@ -245,7 +245,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxValueType<T> : Consumer<T, T>
+    sealed class MaxValueType<T> : Consumer<T, T>
     {
         bool _first;
 
@@ -276,7 +276,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxRefType<T> : Consumer<T, T>
+    sealed class MaxRefType<T> : Consumer<T, T>
     {
         public MaxRefType() : base(default) { }
 
@@ -291,7 +291,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxInt<TSource> : Consumer<TSource, int>
+    sealed class MaxInt<TSource> : Consumer<TSource, int>
     {
         private readonly Func<TSource, int> _selector;
 
@@ -321,7 +321,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxNullableInt<TSource> : Consumer<TSource, int?>
+    sealed class MaxNullableInt<TSource> : Consumer<TSource, int?>
     {
         private readonly Func<TSource, int?> _selector;
 
@@ -341,7 +341,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxLong<TSource> : Consumer<TSource, long>
+    sealed class MaxLong<TSource> : Consumer<TSource, long>
     {
         private readonly Func<TSource, long> _selector;
 
@@ -371,7 +371,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxNullableLong<TSource> : Consumer<TSource, long?>
+    sealed class MaxNullableLong<TSource> : Consumer<TSource, long?>
     {
         private readonly Func<TSource, long?> _selector;
 
@@ -391,7 +391,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxFloat<TSource> : Consumer<TSource, float>
+    sealed class MaxFloat<TSource> : Consumer<TSource, float>
     {
         private readonly Func<TSource, float> _selector;
 
@@ -421,7 +421,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxNullableFloat<TSource> : Consumer<TSource, float?>
+    sealed class MaxNullableFloat<TSource> : Consumer<TSource, float?>
     {
         private readonly Func<TSource, float?> _selector;
 
@@ -456,7 +456,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxDouble<TSource> : Consumer<TSource, double>
+    sealed class MaxDouble<TSource> : Consumer<TSource, double>
     {
         private readonly Func<TSource, double> _selector;
 
@@ -486,7 +486,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxNullableDouble<TSource> : Consumer<TSource, double?>
+    sealed class MaxNullableDouble<TSource> : Consumer<TSource, double?>
     {
         private readonly Func<TSource, double?> _selector;
 
@@ -521,7 +521,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxDecimal<TSource> : Consumer<TSource, decimal>
+    sealed class MaxDecimal<TSource> : Consumer<TSource, decimal>
     {
         private readonly Func<TSource, decimal> _selector;
 
@@ -551,7 +551,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxNullableDecimal<TSource> : Consumer<TSource, decimal?>
+    sealed class MaxNullableDecimal<TSource> : Consumer<TSource, decimal?>
     {
         private readonly Func<TSource, decimal?> _selector;
 
@@ -579,7 +579,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxValueType<TSource, T> : Consumer<TSource, T>
+    sealed class MaxValueType<TSource, T> : Consumer<TSource, T>
     {
         private readonly Func<TSource, T> _selector;
 
@@ -614,7 +614,7 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    class MaxRefType<TSource, T> : Consumer<TSource, T>
+    sealed class MaxRefType<TSource, T> : Consumer<TSource, T>
     {
         private readonly Func<TSource, T> _selector;
 

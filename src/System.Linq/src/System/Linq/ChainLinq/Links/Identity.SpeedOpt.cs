@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    partial class Identity<T>
+    sealed partial class Identity<T>
         : Optimizations.ISkipTakeOnConsumableLinkUpdate<T, T>
         , Optimizations.ICountOnConsumableLink
     {

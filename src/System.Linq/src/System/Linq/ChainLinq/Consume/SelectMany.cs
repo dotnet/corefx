@@ -4,7 +4,7 @@ namespace System.Linq.ChainLinq.Consume
 {
     static class SelectMany
     {
-        class SelectManyInnerConsumer<TSource, TCollection, T> : Consumer<TCollection, ChainStatus>
+        sealed class SelectManyInnerConsumer<TSource, TCollection, T> : Consumer<TCollection, ChainStatus>
         {
             private readonly Chain<T> _chainT;
             private readonly Func<TSource, TCollection, T> _resultSelector;
@@ -22,7 +22,7 @@ namespace System.Linq.ChainLinq.Consume
             }
         }
 
-        class SelectManyOuterConsumer<T> : Consumer<IEnumerable<T>, ChainEnd>
+        sealed class SelectManyOuterConsumer<T> : Consumer<IEnumerable<T>, ChainEnd>
         {
             private readonly Chain<T> _chainT;
             private UnknownEnumerable.ChainConsumer<T> _inner;
@@ -34,7 +34,7 @@ namespace System.Linq.ChainLinq.Consume
                 UnknownEnumerable.Consume(input, _chainT, ref _inner);
         }
 
-        class SelectManyOuterConsumer<TSource, TCollection, T> : Consumer<(TSource, IEnumerable<TCollection>), ChainEnd>
+        sealed class SelectManyOuterConsumer<TSource, TCollection, T> : Consumer<(TSource, IEnumerable<TCollection>), ChainEnd>
         {
             readonly Func<TSource, TCollection, T> _resultSelector;
             readonly Chain<T> _chainT;

@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.ConsumerEnumerators
 {
-    internal class Array<T, TResult> : ConsumerEnumerator<TResult>
+    internal sealed class Array<T, TResult> : ConsumerEnumerator<TResult>
     {
         private T[] _array;
         private int _idx;

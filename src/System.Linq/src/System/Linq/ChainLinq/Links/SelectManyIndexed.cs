@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.Links
 {
-    internal class SelectManyIndexed<T, U> : ILink<T, (T, IEnumerable<U>)>
+    internal sealed class SelectManyIndexed<T, U> : ILink<T, (T, IEnumerable<U>)>
     {
         private readonly Func<T, int, IEnumerable<U>> collectionSelector;
 
@@ -12,7 +12,7 @@ namespace System.Linq.ChainLinq.Links
         public Chain<T, V> Compose<V>(Chain<(T, IEnumerable<U>), V> next) =>
             new Activity<V>(next, collectionSelector);
 
-        private class Activity<V> : Activity<T, (T, IEnumerable<U>), V>
+        private sealed class Activity<V> : Activity<T, (T, IEnumerable<U>), V>
         {
             private readonly Func<T, int, IEnumerable<U>> collectionSelector;
             private int index = 0;

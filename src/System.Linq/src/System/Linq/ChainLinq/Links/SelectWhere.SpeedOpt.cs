@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    internal class SelectWhere<T, U>
+    internal sealed class SelectWhere<T, U>
         : ILink<T, U>
         , Optimizations.IMergeWhere<U>
     {

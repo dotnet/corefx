@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.ConsumerEnumerators
 {
-    internal class Range<TResult> : ConsumerEnumerator<TResult>
+    internal sealed class Range<TResult> : ConsumerEnumerator<TResult>
     {
         private readonly int _end;
         private Chain<int> _chain = null;

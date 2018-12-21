@@ -1,7 +1,7 @@
 ﻿namespace System.Linq.ChainLinq.Consumer
 {
     // TODO: Remove?
-    class SetResult<T> : Consumer<T, T>
+    sealed class SetResult<T> : Consumer<T, T>
     {
         public SetResult() : base(default) { }
 

@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq
 {
-    class Utils
+    static class Utils
     {
         internal static Consumable<U> CreateConsumable<T, U>(IEnumerable<T> e, ILink<T, U> transform)
         {

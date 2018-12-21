@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.ConsumerEnumerators
 {
-    class SelectMany<T, V> : ConsumerEnumerator<V>
+    sealed class SelectMany<T, V> : ConsumerEnumerator<V>
     {
         /* Implementation of:
 
@@ -156,7 +156,7 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
         }
     }
 
-    class SelectMany<TSource, TCollection, T, V> : ConsumerEnumerator<V>
+    sealed class SelectMany<TSource, TCollection, T, V> : ConsumerEnumerator<V>
     {
         /* Implementation of:
 

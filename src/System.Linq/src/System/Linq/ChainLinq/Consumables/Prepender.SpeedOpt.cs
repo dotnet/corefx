@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Consumables
 {
-    internal partial class Prepender<T>
+    sealed partial class Prepender<T>
         : Optimizations.ICountOnConsumable
     {
         public int GetCount(bool onlyIfCheap)

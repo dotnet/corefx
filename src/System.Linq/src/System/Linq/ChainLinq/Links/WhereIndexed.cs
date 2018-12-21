@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    internal class WhereIndexed<T> : ILink<T, T>
+    sealed class WhereIndexed<T> : ILink<T, T>
     {
         public Func<T, int, bool> Predicate { get; }
 

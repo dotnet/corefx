@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace System.Linq.ChainLinq.ConsumerEnumerators
 {
-    internal class Enumerable<T, TResult> : ConsumerEnumerator<TResult>
+    internal sealed class Enumerable<T, TResult> : ConsumerEnumerator<TResult>
     {
         private IEnumerable<T> _enumerable;
         private IEnumerator<T> _enumerator;

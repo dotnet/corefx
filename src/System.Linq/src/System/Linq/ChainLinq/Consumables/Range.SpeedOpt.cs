@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Consumables
 {
-    internal partial class Range<T>
+    sealed partial class Range<T>
         : Optimizations.ISkipTakeOnConsumable<T>
         , Optimizations.ICountOnConsumable
     {

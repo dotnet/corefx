@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    internal partial class Concat<T, V> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, T>
+    sealed partial class Concat<T, V> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, T>
     {
         /// <summary>
         /// Used for Prepender in Prepend call
@@ -73,7 +73,7 @@ namespace System.Linq.ChainLinq.Consumables
             {
                 if (_thirdOrNull is Appender<V> appender)
                 {
-                    return new Concat<T, V>(_firstOrNull, _second, (IEnumerable<T>)appender.Add(element), Link);
+                    return new Concat<T, V>(_firstOrNull, _second, (IEnumerable<T>)(object)appender.Add(element), Link);
                 }
             }
             return Append(new Appender<V>(element));
@@ -85,7 +85,7 @@ namespace System.Linq.ChainLinq.Consumables
             {
                 if (_firstOrNull is Prepender<V> prepender)
                 {
-                    return new Concat<T, V>((IEnumerable<T>)prepender.Push(element), _second, _thirdOrNull, Link);
+                    return new Concat<T, V>((IEnumerable<T>)(object)prepender.Push(element), _second, _thirdOrNull, Link);
                 }
             }
             return Prepend(new Prepender<V>(element));

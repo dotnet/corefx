@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    partial class Prepender<T> : Consumable<T>, IConsumableInternal
+    sealed partial class Prepender<T> : Consumable<T>, IConsumableInternal
     {
         readonly T _element;
         readonly int _count;

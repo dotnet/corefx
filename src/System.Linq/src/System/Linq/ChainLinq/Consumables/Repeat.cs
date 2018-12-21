@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    internal partial class Repeat<T, U> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<U, T>
+    sealed partial class Repeat<T, U> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<U, T>
     {
         private readonly T _element;
         private readonly int _count;

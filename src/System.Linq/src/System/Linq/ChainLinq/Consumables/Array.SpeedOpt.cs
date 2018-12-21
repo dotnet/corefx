@@ -1,6 +1,6 @@
 ﻿namespace System.Linq.ChainLinq.Consumables
 {
-    internal partial class Array<T, V>
+    sealed partial class Array<T, V>
         : Optimizations.ICountOnConsumable
     {
         public int GetCount(bool onlyIfCheap)

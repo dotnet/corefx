@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    partial class Appender<T>
+    sealed partial class Appender<T>
         : Consumable<T>
         , IConsumableInternal
     {

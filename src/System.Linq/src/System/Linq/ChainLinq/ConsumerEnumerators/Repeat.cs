@@ -2,7 +2,7 @@
 
 namespace System.Linq.ChainLinq.ConsumerEnumerators
 {
-    internal class Repeat<T, TResult> : ConsumerEnumerator<TResult>
+    internal sealed class Repeat<T, TResult> : ConsumerEnumerator<TResult>
     {
         private readonly T _element;
         private readonly int _end;
