@@ -29,11 +29,6 @@ namespace System.Collections.Generic
                 return true;
             }
 
-            if (source is IIListProvider<T> provider)
-            {
-                return (count = provider.GetCount(onlyIfCheap: true)) >= 0;
-            }
-
             count = -1;
             return false;
         }

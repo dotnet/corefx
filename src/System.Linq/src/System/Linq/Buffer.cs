@@ -28,16 +28,7 @@ namespace System.Linq
         /// <param name="source">The enumerable to be store.</param>
         internal Buffer(IEnumerable<TElement> source)
         {
-            if (source is IIListProvider<TElement> iterator)
-            {
-                TElement[] array = iterator.ToArray();
-                _items = array;
-                _count = array.Length;
-            }
-            else
-            {
-                _items = EnumerableHelpers.ToArray(source, out _count);
-            }
+            _items = EnumerableHelpers.ToArray(source, out _count);
         }
     }
 }

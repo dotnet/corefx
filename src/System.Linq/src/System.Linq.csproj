@@ -7,16 +7,11 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="System\Linq\Empty.cs" />
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
-    <Compile Include="System\Linq\ChainLinq\Consumables\List.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\List.cs" />
-    <Compile Include="System\Linq\ChainLinq\Consumables\Prepender.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Appender.cs" />
-    <Compile Include="System\Linq\ChainLinq\Consumables\Appender.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Repeat.cs" />
-    <Compile Include="System\Linq\ChainLinq\Consumables\SelectMany.SpeedOpt.cs" />
-    <Compile Include="System\Linq\ChainLinq\Consumables\Concat.SpeedOpt.cs" />
-    <Compile Include="System\Linq\ChainLinq\Consumables\Array.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\ChainLinqConsumable.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Empty.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Base.cs" />
@@ -64,15 +59,9 @@
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Compose.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Distinct.cs" />
-    <Compile Include="System\Linq\ChainLinq\Links\Compose.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Identity.cs" />
-    <Compile Include="System\Linq\ChainLinq\Links\Take.SpeedOpt.cs" />
-    <Compile Include="System\Linq\ChainLinq\Links\Skip.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Skip.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Take.cs" />
-    <Compile Include="System\Linq\ChainLinq\Links\SelectWhere.SpeedOpt.cs" />
-    <Compile Include="System\Linq\ChainLinq\Links\WhereSelect.SpeedOpt.cs" />
-    <Compile Include="System\Linq\ChainLinq\Links\Where.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\WhereIndexed.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Where.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Select.cs" />
@@ -91,20 +80,22 @@
     </ContractProject>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'"> <!-- Optimize for speed -->
+    <Compile Include="System\Linq\ChainLinq\Consumables\Appender.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Array.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Concat.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\List.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Prepender.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Range.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\SelectMany.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Compose.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Identity.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Take.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Select.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\SelectIndexed.SpeedOpt.cs" />
-    <Compile Include="System\Linq\DefaultIfEmpty.SpeedOpt.cs" />
-    <Compile Include="System\Linq\Enumerable.SpeedOpt.cs" />
-    <Compile Include="System\Linq\Grouping.SpeedOpt.cs" />
-    <Compile Include="System\Linq\Lookup.SpeedOpt.cs" />
-    <Compile Include="System\Linq\OrderedEnumerable.SpeedOpt.cs" />
-    <Compile Include="System\Linq\Partition.SpeedOpt.cs" />
-    <Compile Include="System\Linq\Reverse.SpeedOpt.cs" />
-    <Compile Include="System\Linq\Skip.SpeedOpt.cs" />
-    <Compile Include="System\Linq\Take.SpeedOpt.cs" />
-    <Compile Include="System\Linq\Union.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Skip.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\SelectWhere.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\WhereSelect.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Where.SpeedOpt.cs" />
     <Compile Include="$(CommonPath)\System\Collections\Generic\LargeArrayBuilder.SpeedOpt.cs">
       <Link>System\Collections\Generic\LargeArrayBuilder.SpeedOpt.cs</Link>
     </Compile>
@@ -154,8 +145,6 @@
     <Compile Include="System\Linq\GroupJoin.cs" />
     <Compile Include="System\Linq\Intersect.cs" />
     <Compile Include="System\Linq\Iterator.cs" />
-    <Compile Include="System\Linq\IIListProvider.cs" />
-    <Compile Include="System\Linq\IPartition.cs" />
     <Compile Include="System\Linq\Join.cs" />
     <Compile Include="System\Linq\Last.cs" />
     <Compile Include="System\Linq\Lookup.cs" />

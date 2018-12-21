@@ -18,7 +18,7 @@ namespace System.Linq
 
             if (count == 0)
             {
-                return Empty<TResult>();
+                return ChainLinq.Consumables.Empty<TResult>.Instance;
             }
 
             return new ChainLinq.Consumables.Repeat<TResult, TResult>(element, count, ChainLinq.Links.Identity<TResult>.Instance);

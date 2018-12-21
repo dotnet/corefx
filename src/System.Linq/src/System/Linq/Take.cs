@@ -98,7 +98,7 @@ namespace System.Linq
             }
 
             return count <= 0 ?
-                Empty<TSource>() :
+                ChainLinq.Consumables.Empty<TSource>.Instance :
                 TakeLastIterator(source, count);
         }
 

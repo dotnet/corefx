@@ -132,7 +132,7 @@ namespace System.Linq
                     return grouping;
                 }
 
-                return Enumerable.Empty<TElement>();
+                return ChainLinq.Consumables.Empty<TElement>.Instance;
             }
         }
 

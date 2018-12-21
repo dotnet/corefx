@@ -43,11 +43,6 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            if (source is IPartition<TSource> partition)
-            {
-                return partition.TryGetFirst(out found);
-            }
-
             if (source is IList<TSource> list)
             {
                 if (list.Count > 0)

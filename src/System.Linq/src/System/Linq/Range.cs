@@ -19,7 +19,7 @@ namespace System.Linq
 
             if (count == 0)
             {
-                return Empty<int>();
+                return ChainLinq.Consumables.Empty<int>.Instance;
             }
 
             return new ChainLinq.Consumables.Range<int>(start, count, ChainLinq.Links.Identity<int>.Instance);

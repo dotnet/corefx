@@ -15,13 +15,8 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            if (source is IPartition<TSource> partition)
+            if (false)
             {
-                TSource element = partition.TryGetElementAt(index, out bool found);
-                if (found)
-                {
-                    return element;
-                }
             }
             else
             {
@@ -55,11 +50,6 @@ namespace System.Linq
             if (source == null)
             {
                 throw Error.ArgumentNull(nameof(source));
-            }
-
-            if (source is IPartition<TSource> partition)
-            {
-                return partition.TryGetElementAt(index, out bool _);
             }
 
             if (index >= 0)
