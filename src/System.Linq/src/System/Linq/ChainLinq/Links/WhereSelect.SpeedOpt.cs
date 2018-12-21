@@ -1,6 +1,8 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    internal class WhereSelect<T, U> : ILink<T, U>, Optimizations.IMergeSelect<U>
+    internal class WhereSelect<T, U>
+        : ILink<T, U>
+        , Optimizations.IMergeSelect<U>
     {
         public Func<T, bool> Predicate { get; }
         public Func<T, U> Selector { get; }
