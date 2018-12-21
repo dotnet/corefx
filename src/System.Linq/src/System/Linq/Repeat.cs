@@ -21,53 +21,7 @@ namespace System.Linq
                 return Empty<TResult>();
             }
 
-            return new RepeatIterator<TResult>(element, count);
-        }
-
-        /// <summary>
-        /// An iterator that yields the same item multiple times. 
-        /// </summary>
-        /// <typeparam name="TResult">The type of the item.</typeparam>
-        private sealed partial class RepeatIterator<TResult> : Iterator<TResult>
-        {
-            private readonly int _count;
-
-            public RepeatIterator(TResult element, int count)
-            {
-                Debug.Assert(count > 0);
-                _current = element;
-                _count = count;
-            }
-
-            public override Iterator<TResult> Clone()
-            {
-                return new RepeatIterator<TResult>(_current, _count);
-            }
-
-            public override void Dispose()
-            {
-                // Don't let base.Dispose wipe Current.
-                _state = -1;
-            }
-
-            public override bool MoveNext()
-            {
-                // Having a separate field for the number of sent items would be more readable.
-                // However, we save it into _state with a bias to minimize field size of the iterator.
-                int sent = _state - 1;
-
-                // We can't have sent a negative number of items, obviously. However, if this iterator
-                // was illegally casted to IEnumerator without GetEnumerator being called, or if we've
-                // already been disposed, then `sent` will be negative.
-                if (sent >= 0 && sent != _count)
-                {
-                    ++_state;
-                    return true;
-                }
-
-                Dispose();
-                return false;
-            }
+            return new ChainLinq.Consumables.Repeat<TResult, TResult>(element, count, ChainLinq.Links.Identity<TResult>.Instance);
         }
     }
 }

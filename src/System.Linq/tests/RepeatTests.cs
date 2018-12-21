@@ -91,7 +91,7 @@ namespace System.Linq.Tests
             }
         }
 
-        [Fact]
+        [Fact(Skip="ChainLinq: This is no longer true")]
         public void Repeat_EnumerableAndEnumeratorAreSame()
         {
             var repeatEnumerable = Enumerable.Repeat(1, 1);

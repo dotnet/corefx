@@ -13,6 +13,7 @@
     <Compile Include="System\Linq\ChainLinq\Consumables\Prepender.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Appender.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Appender.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Repeat.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\SelectMany.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Concat.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Array.SpeedOpt.cs" />
@@ -28,6 +29,7 @@
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\List.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Array.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Concat.cs" />
+    <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Repeat.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Range.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Aggregate.cs" />
@@ -46,6 +48,7 @@
     <Compile Include="System\Linq\ChainLinq\Consume\List.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Array.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Concat.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consume\Repeat.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\UnknownEnumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Range.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\SelectMany.cs" />
@@ -55,6 +58,7 @@
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\List.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Array.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Concat.cs" />
+    <Compile Include="System\Linq\ChainLinq\GetEnumerator\Repeat.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Range.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\SelectMany.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Enumerable.cs" />
@@ -95,7 +99,6 @@
     <Compile Include="System\Linq\Lookup.SpeedOpt.cs" />
     <Compile Include="System\Linq\OrderedEnumerable.SpeedOpt.cs" />
     <Compile Include="System\Linq\Partition.SpeedOpt.cs" />
-    <Compile Include="System\Linq\Repeat.SpeedOpt.cs" />
     <Compile Include="System\Linq\Reverse.SpeedOpt.cs" />
     <Compile Include="System\Linq\Skip.SpeedOpt.cs" />
     <Compile Include="System\Linq\Take.SpeedOpt.cs" />
