@@ -184,9 +184,6 @@ namespace System.Net.Sockets
             return ReceiveAsync((Memory<byte>)buffer, socketFlags, fromNetworkStream, default).AsTask();
         }
 
-        // TODO https://github.com/dotnet/corefx/issues/24430:
-        // Fully plumb cancellation down into socket operations.
-
         internal ValueTask<int> ReceiveAsync(Memory<byte> buffer, SocketFlags socketFlags, bool fromNetworkStream, CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -201,14 +198,16 @@ namespace System.Net.Sockets
                 saea.SetBuffer(buffer);
                 saea.SocketFlags = socketFlags;
                 saea.WrapExceptionsInIOExceptions = fromNetworkStream;
-                return saea.ReceiveAsync(this);
+                return saea.ReceiveAsync(this, cancellationToken);
             }
-            else
-            {
-                // We couldn't get a cached instance, due to a concurrent receive operation on the socket.
-                // Fall back to wrapping APM.
-                return new ValueTask<int>(ReceiveAsyncApm(buffer, socketFlags));
-            }
+
+            // We couldn't get a cached instance, due to a concurrent receive operation on the socket.
+            // Fall back to wrapping APM.
+            Task<int> apmTask = ReceiveAsyncApm(buffer, socketFlags);
+            return new ValueTask<int>(
+                cancellationToken.CanBeCanceled && !apmTask.IsCompleted ?
+                    WaitWithCancellationAsync(apmTask, cancellationToken) :
+                    apmTask);
         }
 
         /// <summary>Implements Task-returning ReceiveAsync on top of Begin/EndReceive.</summary>
@@ -350,14 +349,16 @@ namespace System.Net.Sockets
                 saea.SetBuffer(MemoryMarshal.AsMemory(buffer));
                 saea.SocketFlags = socketFlags;
                 saea.WrapExceptionsInIOExceptions = false;
-                return saea.SendAsync(this);
+                return saea.SendAsync(this, cancellationToken);
             }
-            else
-            {
-                // We couldn't get a cached instance, due to a concurrent send operation on the socket.
-                // Fall back to wrapping APM.
-                return new ValueTask<int>(SendAsyncApm(buffer, socketFlags));
-            }
+
+            // We couldn't get a cached instance, due to a concurrent send operation on the socket.
+            // Fall back to wrapping APM.
+            Task<int> apmTask = SendAsyncApm(buffer, socketFlags);
+            return new ValueTask<int>(
+                cancellationToken.CanBeCanceled && !apmTask.IsCompleted ?
+                    WaitWithCancellationAsync(apmTask, cancellationToken) :
+                    apmTask);
         }
 
         internal ValueTask SendAsyncForNetworkStream(ReadOnlyMemory<byte> buffer, SocketFlags socketFlags, CancellationToken cancellationToken)
@@ -374,14 +375,16 @@ namespace System.Net.Sockets
                 saea.SetBuffer(MemoryMarshal.AsMemory(buffer));
                 saea.SocketFlags = socketFlags;
                 saea.WrapExceptionsInIOExceptions = true;
-                return saea.SendAsyncForNetworkStream(this);
+                return saea.SendAsyncForNetworkStream(this, cancellationToken);
             }
-            else
-            {
-                // We couldn't get a cached instance, due to a concurrent send operation on the socket.
-                // Fall back to wrapping APM.
-                return new ValueTask(SendAsyncApm(buffer, socketFlags));
-            }
+
+            // We couldn't get a cached instance, due to a concurrent send operation on the socket.
+            // Fall back to wrapping APM.
+            Task<int> apmTask = SendAsyncApm(buffer, socketFlags);
+            return new ValueTask(
+                cancellationToken.CanBeCanceled && !apmTask.IsCompleted ?
+                    WaitWithCancellationAsync(apmTask, cancellationToken) :
+                    apmTask);
         }
 
         /// <summary>Implements Task-returning SendAsync on top of Begin/EndSend.</summary>
@@ -468,6 +471,27 @@ namespace System.Net.Sockets
                 catch (Exception e) { innerTcs.TrySetException(e); }
             }, tcs);
             return tcs.Task;
+        }
+
+        /// <summary>Waits for the provided task to complete, and in the interim cancels pending operations on the socket if cancellation is requested.</summary>
+        private async Task<int> WaitWithCancellationAsync(Task<int> task, CancellationToken cancellationToken)
+        {
+            Debug.Assert(cancellationToken.CanBeCanceled);
+            using (cancellationToken.UnsafeRegister(s => SocketPal.CancelPendingOperations((Socket)s), this))
+            {
+                try
+                {
+                    return await task.ConfigureAwait(false);
+                }
+                catch (SocketException se)
+                {
+                    if (se.SocketErrorCode == SocketError.OperationAborted)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+                    throw;
+                }
+            }
         }
 
         /// <summary>Validates the supplied array segment, throwing if its array or indices are null or out-of-bounds, respectively.</summary>
@@ -819,7 +843,9 @@ namespace System.Net.Sockets
             /// when the operation does complete.
             /// </summary>
             private Action<object> _continuation = s_availableSentinel;
+            /// <summary>Captured ExecutionContext to use when invoking the continuation.</summary>
             private ExecutionContext _executionContext;
+            /// <summary>Context or scheduler to which continuations should be queued.</summary>
             private object _scheduler;
             /// <summary>Current token value given to a ValueTask and then verified against the value it passes back to us.</summary>
             /// <remarks>
@@ -828,6 +854,19 @@ namespace System.Net.Sockets
             /// it's already being reused by someone else.
             /// </remarks>
             private short _token;
+            /// <summary>CancellationToken associated with the current operation.</summary>
+            private CancellationToken _cancellationToken;
+            /// <summary>Cancellation registration for the current operation.</summary>
+            private CancellationTokenRegistration _cancellationRegistration;
+            /// <summary>Flag used to communicate between the threads initiating and completing operations.</summary>
+            private byte _cancellationState;
+
+            /// <summary>Indicates that cancelation isn't applicable for the operation.</summary>
+            private const byte CancellationState_None = 0;
+            /// <summary>Indicates that a cancellation callback is in the process of being registered.</summary>
+            private const byte CancellationState_Registering = 1;
+            /// <summary>Indicates that a cancellation callback has been registered.</summary>
+            private const byte CancellationState_Registered = 2;
 
             /// <summary>Initializes the event args.</summary>
             public AwaitableSocketAsyncEventArgs() :
@@ -842,12 +881,26 @@ namespace System.Net.Sockets
 
             private void Release()
             {
+                _cancellationToken = default;
                 _token++;
                 Volatile.Write(ref _continuation, s_availableSentinel);
             }
 
             protected override void OnCompleted(SocketAsyncEventArgs _)
             {
+                // _cancellationState will be None if cancellation can't happen,
+                // Registering if it's in the process of being registered, and
+                // Registered if it's been registered.  If cancellation may happen,
+                // we spin until it's been registered, so that we can safely unregister.
+                // That way, there's no concern about leaking a registration.
+                if (_cancellationState != CancellationState_None)
+                {
+                    var sw = new SpinWait();
+                    while (Volatile.Read(ref _cancellationState) == CancellationState_Registering) sw.SpinOnce();
+                    _cancellationRegistration.Dispose();
+                    _cancellationState = CancellationState_None;
+                }
+
                 // When the operation completes, see if OnCompleted was already called to hook up a continuation.
                 // If it was, invoke the continuation.
                 Action<object> c = _continuation;
@@ -882,13 +935,29 @@ namespace System.Net.Sockets
 
             /// <summary>Initiates a receive operation on the associated socket.</summary>
             /// <returns>This instance.</returns>
-            public ValueTask<int> ReceiveAsync(Socket socket)
+            public ValueTask<int> ReceiveAsync(Socket socket, CancellationToken cancellationToken)
             {
                 Debug.Assert(Volatile.Read(ref _continuation) == null, $"Expected null continuation to indicate reserved for use");
 
-                if (socket.ReceiveAsync(this))
+                if (cancellationToken.CanBeCanceled)
                 {
-                    return new ValueTask<int>(this, _token);
+                    _cancellationState = CancellationState_Registering;
+                    if (socket.ReceiveAsync(this))
+                    {
+                        // Store the token and the registration, then let the callback know that it can safely dispose of the registration.
+                        _cancellationToken = cancellationToken;
+                        _cancellationRegistration = cancellationToken.UnsafeRegister(s => SocketPal.CancelPendingOperations((Socket)s), socket);
+                        Volatile.Write(ref _cancellationState, CancellationState_Registered);
+                        return new ValueTask<int>(this, _token);
+                    }
+                }
+                else
+                {
+                    _cancellationState = CancellationState_None;
+                    if (socket.ReceiveAsync(this))
+                    {
+                        return new ValueTask<int>(this, _token);
+                    }
                 }
 
                 int bytesTransferred = BytesTransferred;
@@ -903,13 +972,29 @@ namespace System.Net.Sockets
 
             /// <summary>Initiates a send operation on the associated socket.</summary>
             /// <returns>This instance.</returns>
-            public ValueTask<int> SendAsync(Socket socket)
+            public ValueTask<int> SendAsync(Socket socket, CancellationToken cancellationToken)
             {
                 Debug.Assert(Volatile.Read(ref _continuation) == null, $"Expected null continuation to indicate reserved for use");
 
-                if (socket.SendAsync(this))
+                if (cancellationToken.CanBeCanceled)
                 {
-                    return new ValueTask<int>(this, _token);
+                    _cancellationState = CancellationState_Registering;
+                    if (socket.SendAsync(this))
+                    {
+                        // Store the token and the registration, then let the callback know that it can safely dispose of the registration.
+                        _cancellationToken = cancellationToken;
+                        _cancellationRegistration = cancellationToken.UnsafeRegister(s => SocketPal.CancelPendingOperations((Socket)s), socket);
+                        Volatile.Write(ref _cancellationState, CancellationState_Registered);
+                        return new ValueTask<int>(this, _token);
+                    }
+                }
+                else
+                {
+                    _cancellationState = CancellationState_None;
+                    if (socket.SendAsync(this))
+                    {
+                        return new ValueTask<int>(this, _token);
+                    }
                 }
 
                 int bytesTransferred = BytesTransferred;
@@ -922,13 +1007,29 @@ namespace System.Net.Sockets
                     new ValueTask<int>(Task.FromException<int>(CreateException(error)));
             }
 
-            public ValueTask SendAsyncForNetworkStream(Socket socket)
+            public ValueTask SendAsyncForNetworkStream(Socket socket, CancellationToken cancellationToken)
             {
                 Debug.Assert(Volatile.Read(ref _continuation) == null, $"Expected null continuation to indicate reserved for use");
 
-                if (socket.SendAsync(this))
+                if (cancellationToken.CanBeCanceled)
                 {
-                    return new ValueTask(this, _token);
+                    _cancellationState = CancellationState_Registering;
+                    if (socket.SendAsync(this))
+                    {
+                        // Store the token and the registration, then let the callback know that it can safely dispose of the registration.
+                        _cancellationToken = cancellationToken;
+                        _cancellationRegistration = cancellationToken.UnsafeRegister(s => SocketPal.CancelPendingOperations((Socket)s), socket);
+                        Volatile.Write(ref _cancellationState, CancellationState_Registered);
+                        return new ValueTask(this, _token);
+                    }
+                }
+                else
+                {
+                    _cancellationState = CancellationState_None;
+                    if (socket.SendAsync(this))
+                    {
+                        return new ValueTask(this, _token);
+                    }
                 }
 
                 SocketError error = SocketError;
@@ -1051,12 +1152,13 @@ namespace System.Net.Sockets
 
                 SocketError error = SocketError;
                 int bytes = BytesTransferred;
+                CancellationToken cancellationToken = _cancellationToken;
 
                 Release();
 
                 if (error != SocketError.Success)
                 {
-                    ThrowException(error);
+                    ThrowException(error, cancellationToken);
                 }
                 return bytes;
             }
@@ -1069,12 +1171,13 @@ namespace System.Net.Sockets
                 }
 
                 SocketError error = SocketError;
+                CancellationToken cancellationToken = _cancellationToken;
 
                 Release();
 
                 if (error != SocketError.Success)
                 {
-                    ThrowException(error);
+                    ThrowException(error, cancellationToken);
                 }
             }
 
@@ -1082,7 +1185,15 @@ namespace System.Net.Sockets
 
             private void ThrowMultipleContinuationsException() => throw new InvalidOperationException(SR.InvalidOperation_MultipleContinuations);
 
-            private void ThrowException(SocketError error) => throw CreateException(error);
+            private void ThrowException(SocketError error, CancellationToken cancellationToken)
+            {
+                if (error == SocketError.OperationAborted)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+
+                throw CreateException(error);
+            }
 
             private Exception CreateException(SocketError error)
             {

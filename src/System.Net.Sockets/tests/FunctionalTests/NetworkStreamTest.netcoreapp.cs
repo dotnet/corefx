@@ -350,6 +350,45 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        public async Task ReadAsync_CancelPendingRead_DoesntImpactSubsequentReads()
+        {
+            await RunWithConnectedNetworkStreamsAsync(async (server, client) =>
+            {
+                CancellationTokenSource cts;
+                for (int i = 0; i < 3; i++)
+                {
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(() => client.ReadAsync(new byte[1], 0, 1, new CancellationToken(true)));
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => { await client.ReadAsync(new Memory<byte>(new byte[1]), new CancellationToken(true)); });
+
+                    cts = new CancellationTokenSource();
+
+                    Task<int> t1 = client.ReadAsync(new byte[1], 0, 1, cts.Token);
+                    Task<int> t2 = client.ReadAsync(new byte[1], 0, 1, cts.Token);
+                    ValueTask<int> t3 = client.ReadAsync(new Memory<byte>(new byte[1]), cts.Token);
+                    ValueTask<int> t4 = client.ReadAsync(new Memory<byte>(new byte[1]), cts.Token);
+
+                    Assert.False(t1.IsCompleted);
+                    Assert.False(t2.IsCompleted);
+                    Assert.False(t3.IsCompleted);
+                    Assert.False(t4.IsCompleted);
+
+                    cts.Cancel();
+
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(() => t1);
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(() => t2);
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => { await t3; });
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => { await t4; });
+
+                    byte[] buffer = new byte[1];
+                    await server.WriteAsync(new ReadOnlyMemory<byte>(new byte[1] { (byte)(42+i)}));
+                    int bytesRead = await client.ReadAsync(new Memory<byte>(buffer));
+                    Assert.Equal(1, bytesRead);
+                    Assert.Equal(42 + i, buffer[0]);
+                }
+            });
+        }
+
+        [Fact]
         public async Task DisposeAsync_ClosesStream()
         {
             await RunWithConnectedNetworkStreamsAsync(async (server, client) =>

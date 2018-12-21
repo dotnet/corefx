@@ -93,6 +93,16 @@ namespace System.Net.Sockets
             return errorCode == SocketError.SocketError ? GetLastSocketError() : SocketError.Success;
         }
 
+        public static unsafe void CancelPendingOperations(Socket socket)
+        {
+            // Ignore any failures; this is opportunistic cancellation only.
+            try
+            {
+                Interop.Kernel32.CancelIoEx(socket.SafeHandle, null);
+            }
+            catch { }
+        }
+
         public static SocketError Listen(SafeSocketHandle handle, int backlog)
         {
             SocketError errorCode = Interop.Winsock.listen(handle, backlog);

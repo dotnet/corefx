@@ -1067,19 +1067,21 @@ namespace System.Net.Sockets
                 nextOp?.Dispatch();
             }
 
-            // Called when the socket is closed.
-            public void StopAndAbort(SocketAsyncContext context)
+            // Called to cancel all pending items, either in response to a cancellation
+            // request or in response to closing the socket.
+            public void Cancel(SocketAsyncContext context, bool close)
             {
-                // We should be called exactly once, by SafeSocketHandle.
                 Debug.Assert(_state != QueueState.Stopped);
 
                 using (Lock())
                 {
                     Trace(context, $"Enter");
 
-                    Debug.Assert(_state != QueueState.Stopped);
-
-                    _state = QueueState.Stopped;
+                    if (close)
+                    {
+                        Debug.Assert(_state != QueueState.Stopped);
+                        _state = QueueState.Stopped;
+                    }
 
                     if (_tail != null)
                     {
@@ -1160,9 +1162,7 @@ namespace System.Net.Sockets
 
         public void Close()
         {
-            // Drain queues
-            _sendQueue.StopAndAbort(this);
-            _receiveQueue.StopAndAbort(this);
+            Cancel(close: true);
 
             lock (_registerLock)
             { 
@@ -1170,6 +1170,13 @@ namespace System.Net.Sockets
                 // from the event port automatically by the OS when it's closed.
                 _asyncEngineToken.Free();
             }
+        }
+
+        public void Cancel(bool close)
+        {
+            // Drain queues
+            _sendQueue.Cancel(this, close);
+            _receiveQueue.Cancel(this, close);
         }
 
         public void SetNonBlocking()

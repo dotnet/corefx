@@ -851,6 +851,11 @@ namespace System.Net.Sockets
             return err == Interop.Error.SUCCESS ? SocketError.Success : GetSocketErrorForErrorCode(err);
         }
 
+        public static void CancelPendingOperations(Socket socket)
+        {
+            socket.SafeHandle.AsyncContext.Cancel(close: false);
+        }
+
         public static SocketError Listen(SafeSocketHandle handle, int backlog)
         {
             Interop.Error err = Interop.Sys.Listen(handle, backlog);
