@@ -334,7 +334,7 @@ namespace System.Collections.ObjectModel
         {
             get
             {
-                m_dictionary is ICollection coll ? coll.SyncRoot : null;
+                return (m_dictionary is ICollection coll) ? coll.SyncRoot : this;
             }
         }
 
@@ -490,8 +490,7 @@ namespace System.Collections.ObjectModel
             {
                 get
                 {
-                    ICollection c = _collection as ICollection;
-                    return c == null ? this : c.SyncRoot;
+                    return (_collection is ICollection coll) ? coll.SyncRoot : this;
                 }
             }
             #endregion
@@ -585,8 +584,7 @@ namespace System.Collections.ObjectModel
             {
                 get
                 {
-                    ICollection c = _collection as ICollection;
-                    return c == null ? this : c.SyncRoot;
+                    return (_collection is ICollection coll) ? coll.SyncRoot : this;
                 }
             }
 
