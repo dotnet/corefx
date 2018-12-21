@@ -139,6 +139,7 @@
     <Compile Include="Microsoft\Win32\SafeHandles\SafeHeapAllocHandle.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeProvOrNCryptKeyHandle.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeProvOrNCryptKeyHandleUwp.cs" />
+    <Compile Include="Interop\Windows\Crypt32\Interop.CertDuplicateCertificateContext.cs" />
   </ItemGroup>
   <!-- Interop types (platform: Windows) -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true'">
@@ -186,9 +187,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Crypt32\Interop.CertCreateCertificateContext.cs">
       <Link>Common\Interop\Windows\Crypt32\Interop.CertCreateCertificateContext.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Crypt32\Interop.CertDuplicateCertificateContext.cs">
-      <Link>Common\Interop\Windows\Crypt32\Interop.CertDuplicateCertificateContext.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Crypt32\Interop.CertFreeCertificateContext.cs">
       <Link>Common\Interop\Windows\Crypt32\Interop.CertFreeCertificateContext.cs</Link>

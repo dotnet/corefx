@@ -4,13 +4,12 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 
 internal static partial class Interop
 {
     internal static partial class Crypt32
     {
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern SafeCertContextHandle CertDuplicateCertificateContext(IntPtr pCertContext);
+        internal static extern IntPtr CertDuplicateCertificateContext(IntPtr pCertContext);
     }
 }
