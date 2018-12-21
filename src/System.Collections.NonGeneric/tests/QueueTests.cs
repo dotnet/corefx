@@ -851,7 +851,7 @@ namespace System.Collections.Tests
             {
                 queueMother.Enqueue(i);
             }
-            Assert.Equal(queueMother.SyncRoot.GetType(), typeof(Queue));
+            Assert.IsType<Queue>(queueMother.SyncRoot);
 
             var queueSon = Queue.Synchronized(queueMother);
             _queueGrandDaughter = Queue.Synchronized(queueSon);

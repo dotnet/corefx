@@ -334,8 +334,7 @@ namespace System.Collections.ObjectModel
         {
             get
             {
-                ICollection c = m_dictionary as ICollection;
-                return c == null ? this : c.SyncRoot;
+                m_dictionary is ICollection coll ? coll.SyncRoot : null;
             }
         }
 
