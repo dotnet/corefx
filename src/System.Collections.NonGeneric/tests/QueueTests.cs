@@ -834,6 +834,7 @@ namespace System.Collections.Tests
         }
     }
 
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Changed behavior
     public class Queue_SyncRootTests
     {
         private const int NumberOfElements = 1000;
