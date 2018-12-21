@@ -6,31 +6,19 @@ namespace System.Xml.Schema
 {
     using System.Xml.Serialization;
 
-    /// <include file='doc\XmlSchemaComplexContent.uex' path='docs/doc[@for="XmlSchemaComplexContent"]/*' />
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public class XmlSchemaComplexContent : XmlSchemaContentModel
     {
         private XmlSchemaContent _content;
         private bool _isMixed;
         private bool _hasMixedAttribute;
 
-        /// <include file='doc\XmlSchemaComplexContent.uex' path='docs/doc[@for="XmlSchemaComplexContent.IsMixed"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        [XmlAttribute("mixed")]
+         [XmlAttribute("mixed")]
         public bool IsMixed
         {
             get { return _isMixed; }
             set { _isMixed = value; _hasMixedAttribute = true; }
         }
 
-        /// <include file='doc\XmlSchemaComplexContent.uex' path='docs/doc[@for="XmlSchemaComplexContent.Content"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         [XmlElement("restriction", typeof(XmlSchemaComplexContentRestriction)),
          XmlElement("extension", typeof(XmlSchemaComplexContentExtension))]
         public override XmlSchemaContent Content
