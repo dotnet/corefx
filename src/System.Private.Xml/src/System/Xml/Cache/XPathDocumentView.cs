@@ -154,11 +154,11 @@ namespace System.Xml.XPath.DataBinding
             throw new NotSupportedException("IList.Clear");
         }
 
-         int IList.Add(object value) {
+        int IList.Add(object value) {
             throw new NotSupportedException("IList.Add");
         }
 
-         void IList.Insert(int index, object value) {
+        void IList.Insert(int index, object value) {
             throw new NotSupportedException("IList.Insert");
         }
 

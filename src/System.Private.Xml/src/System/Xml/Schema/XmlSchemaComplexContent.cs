@@ -12,7 +12,7 @@ namespace System.Xml.Schema
         private bool _isMixed;
         private bool _hasMixedAttribute;
 
-         [XmlAttribute("mixed")]
+        [XmlAttribute("mixed")]
         public bool IsMixed
         {
             get { return _isMixed; }

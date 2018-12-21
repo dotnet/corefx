@@ -26,7 +26,7 @@ namespace System.Xml.Schema
         }
 
         //Compiled Information
-         [XmlIgnore]
+        [XmlIgnore]
         public XmlSchemaSimpleType[] BaseMemberTypes
         {
             get { return _baseMemberTypes; }

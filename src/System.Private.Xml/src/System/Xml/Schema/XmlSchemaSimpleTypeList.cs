@@ -19,7 +19,7 @@ namespace System.Xml.Schema
             set { _itemTypeName = (value == null ? XmlQualifiedName.Empty : value); }
         }
 
-         [XmlElement("simpleType", typeof(XmlSchemaSimpleType))]
+        [XmlElement("simpleType", typeof(XmlSchemaSimpleType))]
         public XmlSchemaSimpleType ItemType
         {
             get { return _itemType; }

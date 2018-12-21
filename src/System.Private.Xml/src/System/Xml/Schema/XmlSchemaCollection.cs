@@ -193,7 +193,7 @@ namespace System.Xml.Schema
 
 
         /// <summary>
-        /// Looks up the schema by it's associated namespace URI
+        /// Looks up the schema by its associated namespace URI
         /// </summary>
         public XmlSchema this[string ns]
         {
