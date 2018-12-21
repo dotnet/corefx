@@ -16,7 +16,6 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-#if !PRE_CHAINLINQ
             if (count <= 0)
             {
                 // Return source if not actually skipping, but only if it's a type from here, to avoid
@@ -45,25 +44,6 @@ namespace System.Linq
             }
 
             return ChainLinq.Utils.PushTransform(source, CreateSkipLink<TSource>(count));
-#else
-            if (count <= 0)
-            {
-                // Return source if not actually skipping, but only if it's a type from here, to avoid
-                // issues if collections are used as keys or otherwise must not be aliased.
-                if (source is Iterator<TSource> || source is IPartition<TSource>)
-                {
-                    return source;
-                }
-
-                count = 0;
-            }
-            else if (source is IPartition<TSource> partition)
-            {
-                return partition.Skip(count);
-            }
-
-            return SkipIterator(source, count);
-#endif
         }
 
         private static ChainLinq.Links.Skip<TSource> CreateSkipLink<TSource>(int count) =>

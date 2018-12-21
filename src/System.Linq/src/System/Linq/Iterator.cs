@@ -97,9 +97,6 @@ namespace System.Linq
             /// <param name="selector">The selector used to map each item.</param>
             public virtual IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
             {
-#if PRE_CHAINLINQ
-                return new SelectEnumerableIterator<TSource, TResult>(this, selector);
-#endif
                 return ChainLinq.Utils.PushTransform(this, new ChainLinq.Links.Select<TSource, TResult>(selector));
             }
 
@@ -109,9 +106,6 @@ namespace System.Linq
             /// <param name="predicate">The predicate used to filter each item.</param>
             public virtual IEnumerable<TSource> Where(Func<TSource, bool> predicate)
             {
-#if PRE_CHAINLINQ
-                return new WhereEnumerableIterator<TSource>(this, predicate);
-#endif
                 return ChainLinq.Utils.PushTransform(this, new ChainLinq.Links.Where<TSource>(predicate));
             }
 

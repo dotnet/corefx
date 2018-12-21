@@ -22,59 +22,7 @@ namespace System.Linq
                 return Empty<int>();
             }
 
-#if !PRE_CHAINLINQ
-
             return new ChainLinq.Consumables.Range<int>(start, count, ChainLinq.Links.Identity<int>.Instance);
         }
-#else
-
-            return new RangeIterator(start, count);
-        }
-
-        /// <summary>
-        /// An iterator that yields a range of consecutive integers.
-        /// </summary>
-        private sealed partial class RangeIterator : Iterator<int>
-        {
-            private readonly int _start;
-            private readonly int _end;
-
-            public RangeIterator(int start, int count)
-            {
-                Debug.Assert(count > 0);
-                _start = start;
-                _end = unchecked(start + count);
-            }
-
-            public override Iterator<int> Clone() => new RangeIterator(_start, _end - _start);
-
-            public override bool MoveNext()
-            {
-                switch (_state)
-                {
-                    case 1:
-                        Debug.Assert(_start != _end);
-                        _current = _start;
-                        _state = 2;
-                        return true;
-                    case 2:
-                        if (unchecked(++_current) == _end)
-                        {
-                            break;
-                        }
-
-                        return true;
-                }
-
-                _state = -1;
-                return false;
-            }
-
-            public override void Dispose()
-            {
-                _state = -1; // Don't reset current
-            }
-        }
-#endif
     }
 }

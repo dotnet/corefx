@@ -21,7 +21,6 @@ namespace System.Linq
                 return collectionoft.Count;
             }
 
-#if !PRE_CHAINLINQ
             if (source is ChainLinq.Optimizations.ICountOnConsumable opt)
             {
                 return opt.GetCount(false);
@@ -33,31 +32,6 @@ namespace System.Linq
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Count<TSource>());
-#else
-            if (source is IIListProvider<TSource> listProv)
-            {
-                return listProv.GetCount(onlyIfCheap: false);
-            }
-
-            if (source is ICollection collection)
-            {
-                return collection.Count;
-            }
-
-            int count = 0;
-            using (IEnumerator<TSource> e = source.GetEnumerator())
-            {
-                checked
-                {
-                    while (e.MoveNext())
-                    {
-                        count++;
-                    }
-                }
-            }
-
-            return count;
-#endif
         }
 
         public static int Count<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
@@ -72,23 +46,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-#if !PRE_CHAINLINQ
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.CountConditional<TSource>(predicate));
-#else
-            int count = 0;
-            foreach (TSource element in source)
-            {
-                checked
-                {
-                    if (predicate(element))
-                    {
-                        count++;
-                    }
-                }
-            }
-
-            return count;
-#endif
         }
 
         public static long LongCount<TSource>(this IEnumerable<TSource> source)
@@ -98,23 +56,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-#if !PRE_CHAINLINQ
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.LongCount<TSource>());
-#else
-            long count = 0;
-            using (IEnumerator<TSource> e = source.GetEnumerator())
-            {
-                checked
-                {
-                    while (e.MoveNext())
-                    {
-                        count++;
-                    }
-                }
-            }
-
-            return count;
-#endif
         }
 
         public static long LongCount<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
@@ -129,24 +71,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-#if !PRE_CHAINLINQ
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.LongCountConditional<TSource>(predicate));
-#else
-
-            long count = 0;
-            foreach (TSource element in source)
-            {
-                checked
-                {
-                    if (predicate(element))
-                    {
-                        count++;
-                    }
-                }
-            }
-
-            return count;
-#endif
         }
     }
 }

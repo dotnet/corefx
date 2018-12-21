@@ -21,12 +21,8 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
-#if PRE_CHAINLINQ
-            return new SelectManySingleSelectorIterator<TSource, TResult>(source, selector);
-#else
             var selectMany = ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Select<TSource, IEnumerable<TResult>>(selector));
             return new ChainLinq.Consumables.SelectMany<TResult, TResult>(selectMany, ChainLinq.Links.Identity<TResult>.Instance);
-#endif
         }
 
         public static IEnumerable<TResult> SelectMany<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TResult>> selector)
@@ -40,32 +36,9 @@ namespace System.Linq
             {
                 throw Error.ArgumentNull(nameof(selector));
             }
-#if PRE_CHAINLINQ
-            return SelectManyIterator(source, selector);
-#else
             var selectMany = ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectIndexed<TSource, IEnumerable<TResult>>(selector));
             return new ChainLinq.Consumables.SelectMany<TResult, TResult>(selectMany, ChainLinq.Links.Identity<TResult>.Instance);
-#endif
         }
-
-#if PRE_CHAINLINQ
-        private static IEnumerable<TResult> SelectManyIterator<TSource, TResult>(IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TResult>> selector)
-        {
-            int index = -1;
-            foreach (TSource element in source)
-            {
-                checked
-                {
-                    index++;
-                }
-
-                foreach (TResult subElement in selector(element, index))
-                {
-                    yield return subElement;
-                }
-            }
-        }
-#endif
 
         public static IEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(this IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
         {
@@ -83,32 +56,10 @@ namespace System.Linq
             {
                 throw Error.ArgumentNull(nameof(resultSelector));
             }
-#if PRE_CHAINLINQ
-            return SelectManyIterator(source, collectionSelector, resultSelector);
-#else
+
             var selectMany = ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectManyIndexed<TSource, TCollection>(collectionSelector));
             return new ChainLinq.Consumables.SelectMany<TSource, TCollection, TResult, TResult>(selectMany, resultSelector, ChainLinq.Links.Identity<TResult>.Instance);
-#endif
         }
-
-#if PRE_CHAINLINQ
-        private static IEnumerable<TResult> SelectManyIterator<TSource, TCollection, TResult>(IEnumerable<TSource> source, Func<TSource, int, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
-        {
-            int index = -1;
-            foreach (TSource element in source)
-            {
-                checked
-                {
-                    index++;
-                }
-
-                foreach (TCollection subElement in collectionSelector(element, index))
-                {
-                    yield return resultSelector(element, subElement);
-                }
-            }
-        }
-#endif
 
         public static IEnumerable<TResult> SelectMany<TSource, TCollection, TResult>(this IEnumerable<TSource> source, Func<TSource, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
         {
@@ -127,104 +78,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(resultSelector));
             }
 
-#if PRE_CHAINLINQ
-            return SelectManyIterator(source, collectionSelector, resultSelector);
-#else
             var selectMany = ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectMany<TSource, TCollection>(collectionSelector));
             return new ChainLinq.Consumables.SelectMany<TSource, TCollection, TResult, TResult>(selectMany, resultSelector, ChainLinq.Links.Identity<TResult>.Instance);
-#endif
         }
 
-#if PRE_CHAINLINQ
-        private static IEnumerable<TResult> SelectManyIterator<TSource, TCollection, TResult>(IEnumerable<TSource> source, Func<TSource, IEnumerable<TCollection>> collectionSelector, Func<TSource, TCollection, TResult> resultSelector)
-        {
-            foreach (TSource element in source)
-            {
-                foreach (TCollection subElement in collectionSelector(element))
-                {
-                    yield return resultSelector(element, subElement);
-                }
-            }
-        }
-
-        private sealed partial class SelectManySingleSelectorIterator<TSource, TResult> : Iterator<TResult>
-        {
-            private readonly IEnumerable<TSource> _source;
-            private readonly Func<TSource, IEnumerable<TResult>> _selector;
-            private IEnumerator<TSource> _sourceEnumerator;
-            private IEnumerator<TResult> _subEnumerator;
-
-            internal SelectManySingleSelectorIterator(IEnumerable<TSource> source, Func<TSource, IEnumerable<TResult>> selector)
-            {
-                Debug.Assert(source != null);
-                Debug.Assert(selector != null);
-
-                _source = source;
-                _selector = selector;
-            }
-
-            public override Iterator<TResult> Clone()
-            {
-                return new SelectManySingleSelectorIterator<TSource, TResult>(_source, _selector);
-            }
-
-            public override void Dispose()
-            {
-                if (_subEnumerator != null)
-                {
-                    _subEnumerator.Dispose();
-                    _subEnumerator = null;
-                }
-
-                if (_sourceEnumerator != null)
-                {
-                    _sourceEnumerator.Dispose();
-                    _sourceEnumerator = null;
-                }
-
-                base.Dispose();
-            }
-
-            public override bool MoveNext()
-            {
-                switch (_state)
-                {
-                    case 1:
-                        // Retrieve the source enumerator.
-                        _sourceEnumerator = _source.GetEnumerator();
-                        _state = 2;
-                        goto case 2;
-                    case 2:
-                        // Take the next element from the source enumerator.
-                        if (!_sourceEnumerator.MoveNext())
-                        {
-                            break;
-                        }
-
-                        TSource element = _sourceEnumerator.Current;
-
-                        // Project it into a sub-collection and get its enumerator.
-                        _subEnumerator = _selector(element).GetEnumerator();
-                        _state = 3;
-                        goto case 3;
-                    case 3:
-                        // Take the next element from the sub-collection and yield.
-                        if (!_subEnumerator.MoveNext())
-                        {
-                            _subEnumerator.Dispose();
-                            _subEnumerator = null;
-                            _state = 2;
-                            goto case 2;
-                        }
-
-                        _current = _subEnumerator.Current;
-                        return true;
-                }
-
-                Dispose();
-                return false;
-            }
-        }
-#endif
     }
 }

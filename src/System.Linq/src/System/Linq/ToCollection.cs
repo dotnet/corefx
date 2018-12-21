@@ -15,7 +15,6 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-#if !PRE_CHAINLINQ
             if (source is ChainLinq.Optimizations.ICountOnConsumable counter)
             {
                 var count = counter.GetCount(true);
@@ -31,11 +30,6 @@ namespace System.Linq
             }
 
             return EnumerableHelpers.ToArray(source);
-#else
-            return source is IIListProvider<TSource> arrayProvider
-                ? arrayProvider.ToArray()
-                : EnumerableHelpers.ToArray(source);
-#endif
         }
 
         public static List<TSource> ToList<TSource>(this IEnumerable<TSource> source)
@@ -45,7 +39,6 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-#if !PRE_CHAINLINQ
             if (source is ChainLinq.Optimizations.ICountOnConsumable counter)
             {
                 var count = counter.GetCount(true);
@@ -61,9 +54,6 @@ namespace System.Linq
             }
 
             return new List<TSource>(source);
-#else
-            return source is IIListProvider<TSource> listProvider ? listProvider.ToList() : new List<TSource>(source);
-#endif
         }
 
         public static Dictionary<TKey, TSource> ToDictionary<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector) =>

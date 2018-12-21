@@ -178,10 +178,6 @@ namespace System.Linq
                 return false;
             }
 
-#if PRE_CHAINLINQ
-            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector) =>
-                new SelectListPartitionIterator<TSource, TResult>(_source, selector, _minIndexInclusive, _maxIndexInclusive);
-#endif
             public IPartition<TSource> Skip(int count)
             {
                 int minIndex = _minIndexInclusive + count;
@@ -411,10 +407,6 @@ namespace System.Linq
                 return false;
             }
 
-#if PRE_CHAINLINQ
-            public override IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector) =>
-                new SelectIPartitionIterator<TSource, TResult>(this, selector);
-#endif
 
             public IPartition<TSource> Skip(int count)
             {

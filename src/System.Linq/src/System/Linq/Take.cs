@@ -16,7 +16,6 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-#if !PRE_CHAINLINQ
 
             if (source is ChainLinq.Optimizations.ISkipTakeOnConsumable<TSource> opt)
             {
@@ -27,11 +26,6 @@ namespace System.Linq
                 count <= 0
                   ? ChainLinq.Consumables.Empty<TSource>.Instance
                   : ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Take<TSource>(count));
-#else
-            return count <= 0 ?
-                Empty<TSource>() :
-                TakeIterator<TSource>(source, count);
-#endif
         }
 
         public static IEnumerable<TSource> TakeWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)

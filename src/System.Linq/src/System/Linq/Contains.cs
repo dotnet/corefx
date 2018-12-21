@@ -19,30 +19,6 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-#if PRE_CHAINLINQ
-            if (comparer == null)
-            {
-                foreach (TSource element in source)
-                {
-                    if (EqualityComparer<TSource>.Default.Equals(element, value)) // benefits from devirtualization and likely inlining
-                    {
-                        return true;
-                    }
-                }
-            }
-            else
-            {
-                foreach (TSource element in source)
-                {
-                    if (comparer.Equals(element, value))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-#else
             if (comparer == null)
             {
                 return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Contains<TSource>(value));
@@ -51,7 +27,6 @@ namespace System.Linq
             {
                 return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.ContainsWithComparer<TSource>(value, comparer));
             }
-#endif
         }
     }
 }
