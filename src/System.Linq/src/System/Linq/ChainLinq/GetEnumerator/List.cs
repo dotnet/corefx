@@ -2,11 +2,20 @@
 
 namespace System.Linq.ChainLinq.GetEnumerator
 {
-    static class List
+    static partial class List
     {
-        public static IEnumerator<U> Get<T, U>(List<T> array, ILink<T, U> link)
+        static partial void Optimized<T, U>(List<T> list, ILink<T, U> link, ref IEnumerator<U> enumerator);
+
+        public static IEnumerator<U> Get<T, U>(List<T> list, ILink<T, U> link)
         {
-            return new ConsumerEnumerators.List<T, U>(array, link);
+            IEnumerator<U> optimized = null;
+            Optimized(list, link, ref optimized);
+            if (optimized != null)
+            {
+                return optimized;
+            }
+
+            return new ConsumerEnumerators.List<T, U>(list, link);
         }
     }
 }

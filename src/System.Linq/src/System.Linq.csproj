@@ -7,6 +7,9 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="System\Linq\ChainLinq\GetEnumerator\Array.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\GetEnumerator\Enumerable.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\GetEnumerator\List.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Optimizations\Pipeline.cs" />
     <Compile Include="System\Linq\Empty.cs" />
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
