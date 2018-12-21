@@ -563,7 +563,7 @@ namespace System.Collections.Tests
                 stackMother.Push(i);
             }
 
-            Assert.Equal(typeof(object), stackMother.SyncRoot.GetType());
+            Assert.Equal(typeof(Stack), stackMother.SyncRoot.GetType());
 
             Stack stackSon = Stack.Synchronized(stackMother);
             _stackGrandDaughter = Stack.Synchronized(stackSon);

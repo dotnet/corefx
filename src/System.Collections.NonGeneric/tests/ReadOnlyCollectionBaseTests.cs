@@ -23,7 +23,7 @@ namespace System.Collections.Tests
         public static void SyncRoot()
         {
             MyReadOnlyCollectionBase collection = CreateCollection();
-            Assert.False(collection.SyncRoot is ArrayList);
+            Assert.True(collection.SyncRoot is ArrayList);
             Assert.Same(collection.SyncRoot, collection.SyncRoot);
         }
 
