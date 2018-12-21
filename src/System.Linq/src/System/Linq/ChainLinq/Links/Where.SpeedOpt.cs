@@ -1,4 +1,6 @@
-﻿namespace System.Linq.ChainLinq.Links
+﻿using System.Collections.Generic;
+
+namespace System.Linq.ChainLinq.Links
 {
     internal partial class Where<T>
         : Optimizations.IMergeSelect<T>
@@ -9,6 +11,51 @@
 
         public virtual Consumable<T> MergeWhere(ConsumableForMerging<T> consumable, Func<T, bool> second) =>
             consumable.ReplaceTailLink(new Where2<T>(Predicate, second));
+
+        sealed partial class Activity<U>
+            : Optimizations.IPipelineArray<T>
+            , Optimizations.IPipelineList<T>
+            , Optimizations.IPipelineEnumerable<T>
+        {
+            public void Pipeline(T[] array)
+            {
+                foreach (var item in array)
+                {
+                    if (_predicate(item))
+                    {
+                        var state = Next(item);
+                        if (state.IsStopped())
+                            break;
+                    }
+                }
+            }
+
+            public void Pipeline(List<T> list)
+            {
+                foreach (var item in list)
+                {
+                    if (_predicate(item))
+                    {
+                        var state = Next(item);
+                        if (state.IsStopped())
+                            break;
+                    }
+                }
+            }
+
+            public void Pipeline(IEnumerable<T> enumerable)
+            {
+                foreach (var item in enumerable)
+                {
+                    if (_predicate(item))
+                    {
+                        var state = Next(item);
+                        if (state.IsStopped())
+                            break;
+                    }
+                }
+            }
+        }
     }
 
     sealed class Where2<T> : Where<T>

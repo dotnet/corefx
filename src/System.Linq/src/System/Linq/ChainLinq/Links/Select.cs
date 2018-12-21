@@ -10,7 +10,7 @@
         public Chain<T, V> Compose<V>(Chain<U, V> activity) =>
             new Activity<V>(Selector, activity);
 
-        sealed class Activity<V> : Activity<T, U, V>
+        sealed partial class Activity<V> : Activity<T, U, V>
         {
             private readonly Func<T, U> _selector;
 

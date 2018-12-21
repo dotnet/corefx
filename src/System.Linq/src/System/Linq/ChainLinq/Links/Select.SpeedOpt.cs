@@ -1,4 +1,6 @@
-﻿namespace System.Linq.ChainLinq.Links
+﻿using System.Collections.Generic;
+
+namespace System.Linq.ChainLinq.Links
 {
     internal partial class Select<T, U> 
         : Optimizations.ISkipTakeOnConsumableLinkUpdate<T, U>
@@ -8,6 +10,42 @@
             consumable.ReplaceTailLink(new Select<T, U, V>(Selector, selector));
 
         public ILink<T, U> Skip(int count) => this;
+
+        sealed partial class Activity<V>
+            : Optimizations.IPipelineArray<T>
+            , Optimizations.IPipelineList<T>
+            , Optimizations.IPipelineEnumerable<T>
+        {
+            public void Pipeline(T[] array)
+            {
+                foreach (var item in array)
+                {
+                    var state = Next(_selector(item));
+                    if (state.IsStopped())
+                        break;
+                }
+            }
+
+            public void Pipeline(IEnumerable<T> e)
+            {
+                foreach (var item in e)
+                {
+                    var state = Next(_selector(item));
+                    if (state.IsStopped())
+                        break;
+                }
+            }
+
+            public void Pipeline(List<T> list)
+            {
+                foreach (var item in list)
+                {
+                    var state = Next(_selector(item));
+                    if (state.IsStopped())
+                        break;
+                }
+            }
+        }
     }
 
     sealed class Select<T, U, V> : Select<T, V>

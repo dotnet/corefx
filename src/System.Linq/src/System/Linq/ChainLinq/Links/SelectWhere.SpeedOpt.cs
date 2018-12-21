@@ -1,4 +1,6 @@
-﻿namespace System.Linq.ChainLinq.Links
+﻿using System.Collections.Generic;
+
+namespace System.Linq.ChainLinq.Links
 {
     internal sealed class SelectWhere<T, U>
         : ILink<T, U>
@@ -16,7 +18,11 @@
         public Consumable<U> MergeWhere(ConsumableForMerging<U> consumable, Func<U, bool> second) =>
             consumable.ReplaceTailLink(new SelectWhere<T, U>(Selector, t => Predicate(t) && second(t)));
 
-        sealed class Activity<V> : Activity<T, U, V>
+        sealed class Activity<V>
+            : Activity<T, U, V>
+            , Optimizations.IPipelineArray<T>
+            , Optimizations.IPipelineList<T>
+            , Optimizations.IPipelineEnumerable<T>
         {
             private readonly Func<T, U> _selector;
             private readonly Func<U, bool> _predicate;
@@ -28,6 +34,48 @@
             {
                 var item = _selector(input);
                 return _predicate(item) ? Next(item) : ChainStatus.Filter;
+            }
+
+            public void Pipeline(T[] array)
+            {
+                foreach (var t in array)
+                {
+                    var u = _selector(t);
+                    if (_predicate(u))
+                    {
+                        var state = Next(u);
+                        if (state.IsStopped())
+                            break;
+                    }
+                }
+            }
+
+            public void Pipeline(List<T> list)
+            {
+                foreach (var t in list)
+                {
+                    var u = _selector(t);
+                    if (_predicate(u))
+                    {
+                        var state = Next(u);
+                        if (state.IsStopped())
+                            break;
+                    }
+                }
+            }
+
+            public void Pipeline(IEnumerable<T> enumerable)
+            {
+                foreach (var t in enumerable)
+                {
+                    var u = _selector(t);
+                    if (_predicate(u))
+                    {
+                        var state = Next(u);
+                        if (state.IsStopped())
+                            break;
+                    }
+                }
             }
         }
     }

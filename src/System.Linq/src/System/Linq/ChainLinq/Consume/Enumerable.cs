@@ -9,7 +9,14 @@ namespace System.Linq.ChainLinq.Consume
             var chain = composition.Compose(consumer);
             try
             {
-                Pipeline(e, chain);
+                if (chain is Optimizations.IPipelineEnumerable<T> optimized)
+                {
+                    optimized.Pipeline(e);
+                }
+                else
+                {
+                    Pipeline(e, chain);
+                }
                 chain.ChainComplete();
             }
             finally

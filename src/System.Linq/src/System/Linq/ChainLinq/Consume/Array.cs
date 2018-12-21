@@ -7,7 +7,14 @@
             var chain = composition.Compose(consumer);
             try
             {
-                Pipeline(array, chain);
+                if (chain is Optimizations.IPipelineArray<T> optimized)
+                {
+                    optimized.Pipeline(array);
+                }
+                else
+                {
+                    Pipeline(array, chain);
+                }
                 chain.ChainComplete();
             }
             finally

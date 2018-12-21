@@ -1,4 +1,6 @@
-﻿namespace System.Linq.ChainLinq.Links
+﻿using System.Collections.Generic;
+
+namespace System.Linq.ChainLinq.Links
 {
     sealed class WhereSelect<T, U>
         : ILink<T, U>
@@ -16,7 +18,11 @@
         public Consumable<V> MergeSelect<V>(ConsumableForMerging<U> consumable, Func<U, V> u2v) =>
             consumable.ReplaceTailLink(new WhereSelect<T, V>(Predicate, t => u2v(Selector(t))));
 
-        sealed class Activity<V> : Activity<T, U, V>
+        sealed class Activity<V>
+            : Activity<T, U, V>
+            , Optimizations.IPipelineArray<T>
+            , Optimizations.IPipelineList<T>
+            , Optimizations.IPipelineEnumerable<T>
         {
             private readonly Func<T, bool> _predicate;
             private readonly Func<T, U> _selector; 
@@ -26,6 +32,45 @@
 
             public override ChainStatus ProcessNext(T input) =>
                 _predicate(input) ? Next(_selector(input)) : ChainStatus.Filter;
+
+            public void Pipeline(T[] array)
+            {
+                foreach (var item in array)
+                {
+                    if (_predicate(item))
+                    {
+                        var state = Next(_selector(item));
+                        if (state.IsStopped())
+                            break;
+                    }
+                }
+            }
+
+            public void Pipeline(List<T> list)
+            {
+                foreach (var item in list)
+                {
+                    if (_predicate(item))
+                    {
+                        var state = Next(_selector(item));
+                        if (state.IsStopped())
+                            break;
+                    }
+                }
+            }
+
+            public void Pipeline(IEnumerable<T> enumerable)
+            {
+                foreach (var item in enumerable)
+                {
+                    if (_predicate(item))
+                    {
+                        var state = Next(_selector(item));
+                        if (state.IsStopped())
+                            break;
+                    }
+                }
+            }
         }
     }
 }

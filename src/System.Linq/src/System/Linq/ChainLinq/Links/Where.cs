@@ -10,7 +10,7 @@
         public Chain<T, U> Compose<U>(Chain<T, U> activity) =>
             new Activity<U>(Predicate, activity);
 
-        sealed class Activity<U> : Activity<T, T, U>
+        sealed partial class Activity<U> : Activity<T, T, U>
         {
             private readonly Func<T, bool> _predicate;
 
