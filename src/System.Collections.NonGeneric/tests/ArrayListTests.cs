@@ -2548,6 +2548,7 @@ namespace System.Collections.Tests
         }
     }
 
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Changed behavior
     public class ArrayList_SyncRootTests
     {
         private ArrayList _arrDaughter;

@@ -20,6 +20,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Changed behavior
         public static void SyncRoot()
         {
             MyReadOnlyCollectionBase collection = CreateCollection();
@@ -33,7 +34,7 @@ namespace System.Collections.Tests
             MyReadOnlyCollectionBase collection = CreateCollection();
             Assert.Equal(100, collection.Count);
         }
-        
+
         [Fact]
         public static void CopyTo_ZeroIndex()
         {
