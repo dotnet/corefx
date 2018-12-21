@@ -37,4 +37,7 @@
       <Platform>wasm</Platform>
     </OfficialBuildRID>
   </ItemGroup>
+  <PropertyGroup>
+    <BuildsEvenIfRIDNotOfficiallySupported>true</BuildsEvenIfRIDNotOfficiallySupported>
+  </PropertyGroup>
 </Project>
