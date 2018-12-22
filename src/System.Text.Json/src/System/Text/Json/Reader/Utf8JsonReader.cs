@@ -198,7 +198,7 @@ namespace System.Text.Json
             {
                 if (_isFinalBlock && TokenType == JsonTokenType.None)
                 {
-                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ArrayDepthTooLarge); // TODO: should be used a proper error message
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedJsonTokens);
                 }
             }
             return retVal;
