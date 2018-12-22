@@ -1,18 +1,79 @@
+
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-// Note: This code went through some modifications and generation comment might not be fully valid
 // WARNING: This file is generated and should not be modified directly.  Instead,
 // modify XmlTextWriterGenerator.cxx and run gen.bat in the same directory.
 // This batch file will execute the following commands:
 //
+//   cl.exe /C /EP /D _XML_UTF8_TEXT_WRITER XmlRawTextWriterGenerator.cxx > XmlUtf8RawTextWriter.cs
 //   cl.exe /C /EP /D _XML_ENCODED_TEXT_WRITER XmlRawTextWriterGenerator.cxx > XmlEncodedRawTextWriter.cs
 //
 // Because these two implementations of XmlTextWriter are so similar, the C++ preprocessor
 // is used to generate each implementation from one template file, using macros and ifdefs.
 
 // Note: This file was generated without #define SILVERLIGHT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 using System;
 using System.IO;
@@ -40,7 +101,7 @@ namespace System.Xml
         // output stream
         protected Stream stream;
 
-        // encoding of the stream or text writer 
+        // encoding of the stream or text writer
         protected Encoding encoding;
 
         // char type tables
@@ -59,6 +120,25 @@ namespace System.Xml
         protected bool writeToNull;
         protected bool hadDoubleBracket;
         protected bool inAttributeValue;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         // writer settings
         protected NewLineHandling newLineHandling;
@@ -106,6 +186,30 @@ namespace System.Xml
             }
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // Construct an instance of this class that serializes to a Stream interface.
         public XmlUtf8RawTextWriter(Stream stream, XmlWriterSettings settings) : this(settings)
         {
@@ -122,6 +226,7 @@ namespace System.Xml
 
             bufBytes = new byte[bufLen + OVERFLOW];
 
+
             // Output UTF-8 byte order mark if Encoding object wants it
             if (!stream.CanSeek || stream.Position == 0)
             {
@@ -132,7 +237,39 @@ namespace System.Xml
                     bufPos += bom.Length;
                     textPos += bom.Length;
                 }
-            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             // Write the xml declaration
             if (settings.AutoXmlDeclaration)
@@ -169,12 +306,14 @@ namespace System.Xml
             }
         }
 
-        // Write the xml declaration.  This must be the first call.  
+        // Write the xml declaration.  This must be the first call.
         internal override void WriteXmlDeclaration(XmlStandalone standalone)
         {
             // Output xml declaration only if user allows it and it was not already output
             if (!omitXmlDeclaration && !autoXmlDeclaration)
             {
+                
+
                 RawText("<?xml version=\"");
 
                 // Version
@@ -211,6 +350,8 @@ namespace System.Xml
         public override void WriteDocType(string name, string pubid, string sysid, string subset)
         {
             Debug.Assert(name != null && name.Length > 0);
+
+            
 
             RawText("<!DOCTYPE ");
             RawText(name);
@@ -252,6 +393,8 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
+            
+
             bufBytes[bufPos++] = (byte)'<';
             if (prefix != null && prefix.Length != 0)
             {
@@ -281,6 +424,8 @@ namespace System.Xml
         {
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
+
+            
 
             if (contentPos != bufPos)
             {
@@ -312,6 +457,8 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
+            
+
             bufBytes[bufPos++] = (byte)'<';
             bufBytes[bufPos++] = (byte)'/';
 
@@ -329,6 +476,10 @@ namespace System.Xml
         {
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
+
+
+
+
 
             if (attrEndPos == bufPos)
             {
@@ -350,6 +501,7 @@ namespace System.Xml
         // Serialize the end of an attribute value using double quotes: '"'
         public override void WriteEndAttribute()
         {
+            
             bufBytes[bufPos++] = (byte)'"';
             inAttributeValue = false;
             attrEndPos = bufPos;
@@ -376,6 +528,8 @@ namespace System.Xml
         {
             Debug.Assert(prefix != null);
 
+            
+
             if (prefix.Length == 0)
             {
                 RawText(" xmlns=\"");
@@ -389,10 +543,12 @@ namespace System.Xml
             }
 
             inAttributeValue = true;
+            
         }
 
         internal override void WriteEndNamespaceDeclaration()
         {
+            
             inAttributeValue = false;
 
             bufBytes[bufPos++] = (byte)'"';
@@ -404,6 +560,8 @@ namespace System.Xml
         public override void WriteCData(string text)
         {
             Debug.Assert(text != null);
+
+            
 
             if (mergeCDataSections && bufPos == cdataPos)
             {
@@ -440,6 +598,8 @@ namespace System.Xml
         {
             Debug.Assert(text != null);
 
+            
+
             bufBytes[bufPos++] = (byte)'<';
             bufBytes[bufPos++] = (byte)'!';
             bufBytes[bufPos++] = (byte)'-';
@@ -457,6 +617,8 @@ namespace System.Xml
         {
             Debug.Assert(name != null && name.Length > 0);
             Debug.Assert(text != null);
+
+            
 
             bufBytes[bufPos++] = (byte)'<';
             bufBytes[bufPos++] = (byte)'?';
@@ -476,6 +638,8 @@ namespace System.Xml
         public override void WriteEntityRef(string name)
         {
             Debug.Assert(name != null && name.Length > 0);
+
+            
 
             bufBytes[bufPos++] = (byte)'&';
             RawText(name);
@@ -500,6 +664,8 @@ namespace System.Xml
                 throw XmlConvert.CreateInvalidCharException(ch, '\0');
             }
 
+            
+
             bufBytes[bufPos++] = (byte)'&';
             bufBytes[bufPos++] = (byte)'#';
             bufBytes[bufPos++] = (byte)'x';
@@ -519,6 +685,7 @@ namespace System.Xml
         public override unsafe void WriteWhitespace(string ws)
         {
             Debug.Assert(ws != null);
+            
 
             fixed (char* pSrc = ws)
             {
@@ -539,6 +706,7 @@ namespace System.Xml
         public override unsafe void WriteString(string text)
         {
             Debug.Assert(text != null);
+            
 
             fixed (char* pSrc = text)
             {
@@ -557,6 +725,7 @@ namespace System.Xml
         // Serialize surrogate character entity.
         public override void WriteSurrogateCharEntity(char lowChar, char highChar)
         {
+            
             int surrogateChar = XmlCharType.CombineSurrogateChar(lowChar, highChar);
 
             bufBytes[bufPos++] = (byte)'&';
@@ -575,6 +744,8 @@ namespace System.Xml
             Debug.Assert(buffer != null);
             Debug.Assert(index >= 0);
             Debug.Assert(count >= 0 && index + count <= buffer.Length);
+
+            
 
             fixed (char* pSrcBegin = &buffer[index])
             {
@@ -598,6 +769,8 @@ namespace System.Xml
             Debug.Assert(index >= 0);
             Debug.Assert(count >= 0 && index + count <= buffer.Length);
 
+            
+
             fixed (char* pSrcBegin = &buffer[index])
             {
                 WriteRawWithCharChecking(pSrcBegin, pSrcBegin + count);
@@ -611,6 +784,8 @@ namespace System.Xml
         public override unsafe void WriteRaw(string data)
         {
             Debug.Assert(data != null);
+
+            
 
             fixed (char* pSrcBegin = data)
             {
@@ -654,6 +829,29 @@ namespace System.Xml
                         }
                     }
                 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             }
         }
 
@@ -667,6 +865,16 @@ namespace System.Xml
             {
                 stream.Flush();
             }
+
+
+
+
+
+
+
+
+
+
         }
 
         //
@@ -680,8 +888,40 @@ namespace System.Xml
                 // Output all characters (except for previous characters stored at beginning of buffer)
                 if (!writeToNull)
                 {
+
                     Debug.Assert(stream != null);
                     stream.Write(bufBytes, 1, bufPos - 1);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 }
             }
             catch
@@ -695,6 +935,7 @@ namespace System.Xml
                 // Move last buffer character to the beginning of the buffer (so that previous character can always be determined)
                 bufBytes[0] = bufBytes[bufPos - 1];
 
+
                 if (IsSurrogateByte(bufBytes[0]))
                 {
                     // Last character was the first byte in a surrogate encoding, so move last three
@@ -703,6 +944,7 @@ namespace System.Xml
                     bufBytes[2] = bufBytes[bufPos + 1];
                     bufBytes[3] = bufBytes[bufPos + 2];
                 }
+
 
                 // Reset buffer position
                 textPos = (textPos == bufPos) ? 1 : 0;
@@ -714,15 +956,61 @@ namespace System.Xml
             }
         }
 
+
         private void FlushEncoder()
         {
             // intentionally empty
 
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         // Serialize text that is part of an attribute value.  The '&', '<', '>', and '"' characters
         // are entitized.
-
         protected unsafe void WriteAttributeTextBlock(char* pSrc, char* pSrcEnd)
         {
             fixed (byte* pDstBegin = bufBytes)
@@ -738,7 +1026,11 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
+
                     while (pDst < pDstEnd && (xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)) && ch <= 0x7F))
+
+
+
                     {
                         *pDst = (byte)ch;
                         pDst++;
@@ -828,7 +1120,6 @@ namespace System.Xml
 
         // Serialize text that is part of element content.  The '&', '<', and '>' characters
         // are entitized.
-
         protected unsafe void WriteElementTextBlock(char* pSrc, char* pSrcEnd)
         {
             fixed (byte* pDstBegin = bufBytes)
@@ -844,7 +1135,11 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
+
                     while (pDst < pDstEnd && (xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)) && ch <= 0x7F))
+
+
+
                     {
                         *pDst = (byte)ch;
                         pDst++;
@@ -957,7 +1252,11 @@ namespace System.Xml
                         pDstEnd = pDstBegin + this.bufLen;
                     }
 
+
                     while (pDst < pDstEnd && ((ch = *pSrc) <= 0x7F))
+
+
+
                     {
                         pSrc++;
                         *pDst = (byte)ch;
@@ -1003,7 +1302,11 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
+
                     while (pDst < pDstEnd && (xmlCharType.IsTextChar((char)(ch = *pSrc)) && ch <= 0x7F))
+
+
+
                     {
                         *pDst = (byte)ch;
                         pDst++;
@@ -1105,7 +1408,11 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
+
                     while (pDst < pDstEnd && (xmlCharType.IsTextChar((char)(ch = *pSrc)) && ch != stopChar && ch <= 0x7F))
+
+
+
                     {
                         *pDst = (byte)ch;
                         pDst++;
@@ -1150,7 +1457,7 @@ namespace System.Xml
                             pDst++;
                             if (ch == stopChar)
                             {
-                                // Processing instruction: insert space between adjacent '?' and '>' 
+                                // Processing instruction: insert space between adjacent '?' and '>'
                                 if (pSrc + 1 < pSrcEnd && *(pSrc + 1) == '>')
                                 {
                                     *pDst = (byte)' ';
@@ -1238,7 +1545,11 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
+
                     while (pDst < pDstEnd && (xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)) && ch != ']' && ch <= 0x7F))
+
+
+
                     {
                         *pDst = (byte)ch;
                         pDst++;
@@ -1333,12 +1644,14 @@ namespace System.Xml
             }
         }
 
+
         // Returns true if UTF8 encoded byte is first of four bytes that encode a surrogate pair.
         // To do this, detect the bit pattern 11110xxx.
         private static bool IsSurrogateByte(byte b)
         {
             return (b & 0xF8) == 0xF0;
         }
+
 
         private static unsafe byte* EncodeSurrogate(char* pSrc, char* pSrcEnd, byte* pDst)
         {
@@ -1353,6 +1666,7 @@ namespace System.Xml
                     if (lowChar >= XmlCharType.SurLowStart &&
                         (LocalAppContextSwitches.DontThrowOnInvalidSurrogatePairs || lowChar <= XmlCharType.SurLowEnd))
                     {
+
                         // Calculate Unicode scalar value for easier manipulations (see section 3.7 in Unicode spec)
                         // The scalar value repositions surrogate values to start at 0x10000.
 
@@ -1363,6 +1677,11 @@ namespace System.Xml
                         pDst[2] = (byte)(0x80 | (ch >> 6) & 0x3F);
                         pDst[3] = (byte)(0x80 | ch & 0x3F);
                         pDst += 4;
+
+
+
+
+
 
                         return pDst;
                     }
@@ -1391,10 +1710,13 @@ namespace System.Xml
                 }
                 else
                 {
+
                     if (ch < 0x80)
                     {
+
                         *pDst = (byte)ch;
                         pDst++;
+
                     }
                     else
                     {
@@ -1411,6 +1733,7 @@ namespace System.Xml
             int ch = *pSrc;
             if (XmlCharType.IsSurrogate(ch)) { pDst = EncodeSurrogate(pSrc, pSrcEnd, pDst); pSrc += 2; } else if (ch <= 0x7F || ch >= 0xFFFE) { pDst = InvalidXmlChar(ch, pDst, false); pSrc++; } else { pDst = EncodeMultibyteUTF8(ch, pDst); pSrc++; };
         }
+
 
         internal static unsafe byte* EncodeMultibyteUTF8(int ch, byte* pDst)
         {
@@ -1461,8 +1784,29 @@ namespace System.Xml
             }
         }
 
-        // Write NewLineChars to the specified buffer position and return an updated position.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Write NewLineChars to the specified buffer position and return an updated position.
         protected unsafe byte* WriteNewLine(byte* pDst)
         {
             fixed (byte* pDstBegin = bufBytes)
@@ -1680,6 +2024,12 @@ namespace System.Xml
         //
         // Constructors
         //
+
+
+
+
+
+
 
         public XmlUtf8RawTextWriterIndent(Stream stream, XmlWriterSettings settings) : base(stream, settings)
         {
@@ -1919,4 +2269,3 @@ namespace System.Xml
         }
     }
 }
-
