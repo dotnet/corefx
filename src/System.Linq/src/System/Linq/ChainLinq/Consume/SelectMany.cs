@@ -62,6 +62,24 @@ namespace System.Linq.ChainLinq.Consume
                         state = consumable.Consume(consumer);
                         break;
 
+                    case TCollection[] array:
+                        foreach (var item in array)
+                        {
+                            state = _chainT.ProcessNext(_resultSelector(input.Item1, item));
+                            if (state.IsStopped())
+                                break;
+                        }
+                        break;
+
+                    case List<TCollection> list:
+                        foreach (var item in list)
+                        {
+                            state = _chainT.ProcessNext(_resultSelector(input.Item1, item));
+                            if (state.IsStopped())
+                                break;
+                        }
+                        break;
+
                     default:
                         foreach (var item in input.Item2)
                         {
