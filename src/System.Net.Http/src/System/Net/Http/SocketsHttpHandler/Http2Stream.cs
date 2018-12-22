@@ -22,83 +22,76 @@ namespace System.Net.Http
             private readonly int _streamId;
             private readonly object _syncObject;
 
+            private readonly TaskCompletionSource<bool> _responseHeadersAvailable;
             private ArrayBuffer _responseBuffer;
             private TaskCompletionSource<bool> _responseDataAvailable;
             private bool _responseComplete;
             private bool _responseAborted;
 
-            private HttpResponseMessage _response;
+            private readonly CreditManager _streamWindow;
+
+            private readonly HttpRequestMessage _request;
+            private readonly HttpResponseMessage _response;
+            private readonly HttpConnectionResponseContent _responseContent;
             private bool _disposed;
 
-            public Http2Stream(Http2Connection connection)
+            public Http2Stream(HttpRequestMessage request, Http2Connection connection, int streamId, int initialWindowSize)
             {
                 _connection = connection;
+                _streamId = streamId;
 
-                _streamId = connection.AddStream(this);
+                _request = request;
+                _responseContent = new HttpConnectionResponseContent();
+                _response = new HttpResponseMessage() { Version = HttpVersion.Version20, RequestMessage = request, Content = _responseContent };
 
                 _syncObject = new object();
                 _disposed = false;
 
                 _responseBuffer = new ArrayBuffer(InitialBufferSize);
+
+                _streamWindow = new CreditManager(initialWindowSize);
+
+                _responseHeadersAvailable = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+                // TODO: ISSUE 31313: Avoid allocating a TaskCompletionSource repeatedly by using a resettable ValueTaskSource.
+                // See: https://github.com/dotnet/corefx/blob/master/src/Common/tests/System/Threading/Tasks/Sources/ManualResetValueTaskSource.cs
+                _responseDataAvailable = null;
             }
 
             public int StreamId => _streamId;
+            public HttpRequestMessage Request => _request;
+            public HttpResponseMessage Response => _response;
 
-            public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            public async Task SendRequestBodyAsync()
             {
-                // TODO: ISSUE 31310: Cancellation support
-
-                HttpConnectionResponseContent responseContent = new HttpConnectionResponseContent();
-                _response = new HttpResponseMessage() { Version = HttpVersion.Version20, RequestMessage = request, Content = responseContent };
-
                 // TODO: ISSUE 31312: Expect: 100-continue and early response handling
                 // Note that in an "early response" scenario, where we get a response before we've finished sending the request body
                 // (either with a 100-continue that timed out, or without 100-continue),
                 // we can stop send a RST_STREAM on the request stream and stop sending the request without tearing down the entire connection.
 
-                // TODO: ISSUE 31313: Avoid allocating a TaskCompletionSource repeatedly by using a resettable ValueTaskSource.
-                // See: https://github.com/dotnet/corefx/blob/master/src/Common/tests/System/Threading/Tasks/Sources/ManualResetValueTaskSource.cs
-                Debug.Assert(_responseDataAvailable == null);
-                _responseDataAvailable = new TaskCompletionSource<bool>();
-                Task readDataAvailableTask = _responseDataAvailable.Task;
-
-                // Send headers
-                await _connection.SendHeadersAsync(_streamId, request).ConfigureAwait(false);
-
                 // Send request body, if any
-                if (request.Content != null)
+                if (_request.Content != null)
                 {
                     using (Http2WriteStream writeStream = new Http2WriteStream(this))
                     {
-                        await request.Content.CopyToAsync(writeStream).ConfigureAwait(false);
+                        await _request.Content.CopyToAsync(writeStream).ConfigureAwait(false);
                     }
                 }
+            }
 
+            public async Task ReadResponseHeadersAsync()
+            {
                 // Wait for response headers to be read.
-                await readDataAvailableTask.ConfigureAwait(false);
+                bool emptyResponse = await _responseHeadersAvailable.Task.ConfigureAwait(false);
 
                 // Start to process the response body.
-                bool emptyResponse = false;
-                lock (_syncObject)
-                {
-                    if (_responseComplete && _responseBuffer.ActiveSpan.Length == 0)
-                    {
-                        if (_responseAborted)
-                        {
-                            throw new IOException(SR.net_http_invalid_response);
-                        }
-
-                        emptyResponse = true;
-                    }
-                }
-
                 if (emptyResponse)
                 {
-                    responseContent.SetStream(EmptyReadStream.Instance);
+                    _responseContent.SetStream(EmptyReadStream.Instance);
                 }
                 else
                 {
-                    responseContent.SetStream(new Http2ReadStream(this));
+                    _responseContent.SetStream(new Http2ReadStream(this));
                 }
 
                 // Process Set-Cookie headers.
@@ -106,8 +99,11 @@ namespace System.Net.Http
                 {
                     CookieHelper.ProcessReceivedCookies(_response, _connection._pool.Settings._cookieContainer);
                 }
+            }
 
-                return _response;
+            public void OnWindowUpdate(int amount)
+            {
+                _streamWindow.AdjustCredit(amount);
             }
 
             private static readonly byte[] s_statusHeaderName = Encoding.ASCII.GetBytes(":status");
@@ -159,14 +155,7 @@ namespace System.Net.Http
 
             public void OnResponseHeadersComplete(bool endStream)
             {
-                if (endStream)
-                {
-                    _responseComplete = true;
-                }
-
-                TaskCompletionSource<bool> readDataAvailable = _responseDataAvailable;
-                _responseDataAvailable = null;
-                readDataAvailable.SetResult(true);
+                _responseHeadersAvailable.SetResult(endStream);
             }
 
             public void OnResponseData(ReadOnlySpan<byte> buffer, bool endStream)
@@ -182,7 +171,7 @@ namespace System.Net.Http
 
                     Debug.Assert(!_responseComplete);
 
-                    if (_responseBuffer.ActiveSpan.Length + buffer.Length > InitialWindowSize)
+                    if (_responseBuffer.ActiveSpan.Length + buffer.Length > DefaultInitialWindowSize)
                     {
                         // Window size exceeded.
                         throw new Http2ProtocolException(Http2ProtocolErrorCode.FlowControlError);
@@ -212,8 +201,6 @@ namespace System.Net.Http
 
             public void OnResponseAbort()
             {
-                TaskCompletionSource<bool> readDataAvailable = null;
-
                 lock (_syncObject)
                 {
                     if (_disposed)
@@ -226,16 +213,22 @@ namespace System.Net.Http
                     _responseComplete = true;
                     _responseAborted = true;
 
-                    if (_responseDataAvailable != null)
+                    if (!_responseHeadersAvailable.Task.IsCompleted)
                     {
-                        readDataAvailable = _responseDataAvailable;
-                        _responseDataAvailable = null;
-                    }
-                }
+                        // We are still waiting for response headers, so fail that task
+                        _responseHeadersAvailable.SetException(new IOException(SR.net_http_invalid_response));
 
-                if (readDataAvailable != null)
-                {
-                    readDataAvailable.SetResult(true);
+                        // We shouldn't be waiting on data, since we haven't processed headers yet
+                        Debug.Assert(_responseDataAvailable == null);
+                    }
+                    else
+                    {
+                        if (_responseDataAvailable != null)
+                        {
+                            _responseDataAvailable.SetResult(true);
+                            _responseDataAvailable = null;
+                        }
+                    }
                 }
             }
 
@@ -308,6 +301,21 @@ namespace System.Net.Http
                 return ReadDataAsyncCore(onDataAvailable, buffer);
             }
 
+            private async ValueTask SendDataAsync(ReadOnlyMemory<byte> buffer)
+            {
+                ReadOnlyMemory<byte> remaining = buffer;
+
+                while (remaining.Length > 0)
+                {
+                    int sendSize = await _streamWindow.RequestCreditAsync(remaining.Length).ConfigureAwait(false);
+
+                    ReadOnlyMemory<byte> current;
+                    (current, remaining) = SplitBuffer(remaining, sendSize);
+
+                    await _connection.SendStreamDataAsync(_streamId, current).ConfigureAwait(false);
+                }
+            }
+
             public void Dispose()
             {
                 lock (_syncObject)
@@ -315,6 +323,8 @@ namespace System.Net.Http
                     if (!_disposed)
                     {
                         _disposed = true;
+
+                        _streamWindow.Dispose();
 
                         // TODO: ISSUE 31310: If the stream is not complete, we should send RST_STREAM
                     }
@@ -393,7 +403,7 @@ namespace System.Net.Http
 
                 public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
                 {
-                    return _http2Stream._connection.SendStreamDataAsync(_http2Stream._streamId, buffer);
+                    return _http2Stream.SendDataAsync(buffer);
                 }
 
                 public override Task FlushAsync(CancellationToken cancellationToken) => Task.CompletedTask;

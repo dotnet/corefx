@@ -31,6 +31,14 @@
     <MSBuild Projects="@(_RestoreProjects)" Properties="$(ProjectProperties)" />
   </Target>
 
+  <Target Name="_IsProjectRestoreSupported"
+          Returns="@(_ValidProjectsForRestore)">
+
+    <ItemGroup>
+      <_ValidProjectsForRestore Include="$(MSBuildProjectFullPath)" />
+    </ItemGroup>
+  </Target>
+
   <Target Name="BuildNative">
     <ItemGroup>
       <_BuildNativeProjects Include="src\Native\build-native.proj" />
@@ -92,4 +100,7 @@
     <UpdateVSConfigurations ProjectsToUpdate="@(_projectsToUpdate)" SolutionsToUpdate="@(_solutionsToUpdate)" />
     <Message Importance="High" Text="Updating configurations for projects ... Done." />
   </Target>
+
+  <!-- Define an empty Execute target for Arcade's publish to BAR finds it: https://github.com/dotnet/arcade/issues/1452 -->
+  <Target Name="Execute" />
 </Project>

@@ -87,7 +87,7 @@ function Exec-Process([string]$command, [string]$commandArgs) {
 }
 
 function InitializeDotNetCli([bool]$install) {
-  if (Test-Path global:_DotNetInstallDir) {
+  if (Test-Path variable:global:_DotNetInstallDir) {
     return $global:_DotNetInstallDir
   }
 
@@ -136,6 +136,11 @@ function InitializeDotNetCli([bool]$install) {
     $env:DOTNET_INSTALL_DIR = $dotnetRoot
   }
 
+  # Add dotnet to PATH. This prevents any bare invocation of dotnet in custom
+  # build steps from using anything other than what we've downloaded.
+  # It also ensures that VS msbuild will use the downloaded sdk targets.
+  $env:PATH = "$dotnetRoot;$env:PATH"
+
   return $global:_DotNetInstallDir = $dotnetRoot
 }
 
@@ -169,12 +174,13 @@ function InstallDotNetSdk([string] $dotnetRoot, [string] $version) {
 # Returns full path to msbuild.exe.
 # Throws on failure.
 #
-function InitializeVisualStudioMSBuild([bool]$install) {
-  if (Test-Path global:_MSBuildExe) {
+function InitializeVisualStudioMSBuild([bool]$install, [object]$vsRequirements = $null) {
+  if (Test-Path variable:global:_MSBuildExe) {
     return $global:_MSBuildExe
   }
 
-  $vsMinVersionStr = if (!$GlobalJson.tools.vs.version) { $GlobalJson.tools.vs.version } else { "15.9" }
+  if (!$vsRequirements) { $vsRequirements = $GlobalJson.tools.vs }
+  $vsMinVersionStr = if ($vsRequirements.version) { $vsRequirements.version } else { "15.9" }
   $vsMinVersion = [Version]::new($vsMinVersionStr) 
 
   # Try msbuild command available in the environment.
@@ -191,7 +197,7 @@ function InitializeVisualStudioMSBuild([bool]$install) {
   }
 
   # Locate Visual Studio installation or download x-copy msbuild.
-  $vsInfo = LocateVisualStudio  
+  $vsInfo = LocateVisualStudio $vsRequirements
   if ($vsInfo -ne $null) {
     $vsInstallDir = $vsInfo.installationPath
     $vsMajorVersion = $vsInfo.installationVersion.Split('.')[0]
@@ -255,7 +261,7 @@ function InstallXCopyMSBuild([string] $packageVersion) {
 # Returns JSON describing the located VS instance (same format as returned by vswhere), 
 # or $null if no instance meeting the requirements is found on the machine.
 #
-function LocateVisualStudio {
+function LocateVisualStudio([object]$vsRequirements = $null){
   if (Get-Member -InputObject $GlobalJson.tools -Name "vswhere") {
     $vswhereVersion = $GlobalJson.tools.vswhere
   } else {
@@ -271,16 +277,16 @@ function LocateVisualStudio {
     Invoke-WebRequest "https://github.com/Microsoft/vswhere/releases/download/$vswhereVersion/vswhere.exe" -OutFile $vswhereExe
   }
 
-  $vs = $GlobalJson.tools.vs
+  if (!$vsRequirements) { $vsRequirements = $GlobalJson.tools.vs }
   $args = @("-latest", "-prerelease", "-format", "json", "-requires", "Microsoft.Component.MSBuild")
   
-  if (Get-Member -InputObject $vs -Name "version") { 
+  if (Get-Member -InputObject $vsRequirements -Name "version") {
     $args += "-version"
-    $args += $vs.version
+    $args += $vsRequirements.version
   }
 
-  if (Get-Member -InputObject $vs -Name "components") { 
-    foreach ($component in $vs.components) {
+  if (Get-Member -InputObject $vsRequirements -Name "components") {
+    foreach ($component in $vsRequirements.components) {
       $args += "-requires"
       $args += $component
     }    
@@ -297,7 +303,7 @@ function LocateVisualStudio {
 }
 
 function InitializeBuildTool() {
-  if (Test-Path global:_BuildTool) {
+  if (Test-Path variable:global:_BuildTool) {
     return $global:_BuildTool
   }
 
@@ -364,7 +370,7 @@ function GetNuGetPackageCachePath() {
 }
 
 function InitializeToolset() {
-  if (Test-Path global:_ToolsetBuildProj) {
+  if (Test-Path variable:global:_ToolsetBuildProj) {
     return $global:_ToolsetBuildProj
   }
 
