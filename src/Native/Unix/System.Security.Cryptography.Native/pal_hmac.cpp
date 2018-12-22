@@ -31,7 +31,7 @@ extern "C" HMAC_CTX* CryptoNative_HmacCreate(const uint8_t* key, int32_t keyLen,
 
     if (!ret)
     {
-        free(ctx);
+        HMAC_CTX_free(ctx);
         return nullptr;
     }
 
