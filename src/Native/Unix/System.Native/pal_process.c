@@ -277,6 +277,9 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         // to the pipe, and waking up the handling thread in the parent process. This also avoids third-party code getting
         // equally confused.
         // Remove all signals, then restore signal mask.
+        // Since we are in a vfork() child, the only safe signal values are SIG_DFL and SIG_IGN.  See man 3 libthr on BSD.
+        // "The implementation interposes the user-installed signal(3) handlers....to pospone signal delivery to threads
+        // which entered (libthr-internal) critical sections..."  We want to pass SIG_DFL anyway.
         sigset_t junk_signal_set;
         struct sigaction sa_default;
         struct sigaction sa_old;
@@ -285,18 +288,20 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         sa_default.sa_handler = SIG_DFL;
         for (int sig = 1; ; ++sig)
         {
+            if (sig == SIGKILL || sig == SIGSTOP)
+            {
+                continue;
+            }
             if (sigaction(sig, &sa_default, &sa_old))
             {
-                if (sig != SIGKILL && sig != SIGSTOP)
-                    break; // No more signals
-            } else {
-                if ((sa_old.sa_flags & SA_SIGINFO)
-                    ? ((void (*)(int))sa_old.sa_sigaction == SIG_IGN || (void (*)(int))sa_old.sa_sigaction == SIG_DFL)
-                    : (sa_old.sa_handler == SIG_IGN || sa_old.sa_handler == SIG_DFL))
-                {
-                    // It has a pre-defined handler -- put it back
-                    sigaction(sig, &sa_old, &sa_trash);
-                }
+                break; // No more signals
+            }
+            if ((sa_old.sa_flags & SA_SIGINFO)
+                ? ((void (*)(int))sa_old.sa_sigaction == SIG_IGN || (void (*)(int))sa_old.sa_sigaction == SIG_DFL)
+                : (sa_old.sa_handler == SIG_IGN || sa_old.sa_handler == SIG_DFL))
+            {
+                // It has a pre-defined handler -- put it back -- the flags value may be significant
+                sigaction(sig, &sa_old, &sa_trash);
             }
         }
         pthread_sigmask(SIG_SETMASK, &old_signal_set, &junk_signal_set); // Not all architectures allow NULL here
@@ -331,7 +336,7 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
 
         // Finally, execute the new process.  execve will not return if it's successful.
         execve(filename, argv, envp);
-        ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno);
+        ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno); // execve failed
     }
 
     // Restore signal mask in the parent process immediately after fork() or vfork() call
@@ -408,7 +413,7 @@ done:;
     }
 
     // Restore thread cancel state
-    //pthread_setcancelstate(thread_cancel_state, &thread_cancel_state);
+    pthread_setcancelstate(thread_cancel_state, &thread_cancel_state);
 
     return success ? 0 : -1;
 }
