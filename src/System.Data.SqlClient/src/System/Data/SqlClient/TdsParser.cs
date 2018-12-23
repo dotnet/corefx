@@ -1572,12 +1572,25 @@ namespace System.Data.SqlClient
                 token == TdsEnums.SQLSESSIONSTATE);
         }
 
+        [Conditional("DEBUG")]
+        private void AssertTryRunContext(TdsParserStateObject stateObj)
+        {
+            bool condition = (SniContext.Undefined != stateObj.SniContext) &&       // SniContext must not be Undefined
+    ((stateObj._attentionSent) || ((SniContext.Snix_Execute != stateObj.SniContext) && (SniContext.Snix_SendRows != stateObj.SniContext)));
+            if (!condition)
+            {
+                Debug.Assert(condition,  // SniContext should not be Execute or SendRows unless attention was sent (and, therefore, we are looking for an ACK)
+                string.Format("Unexpected SniContext on call to TryRun; SniContext={0}", stateObj.SniContext));
+            }
+        }
+
         // Main parse loop for the top-level tds tokens, calls back into the I*Handler interfaces
         internal bool TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, out bool dataReady)
         {
-            Debug.Assert((SniContext.Undefined != stateObj.SniContext) &&       // SniContext must not be Undefined
-                ((stateObj._attentionSent) || ((SniContext.Snix_Execute != stateObj.SniContext) && (SniContext.Snix_SendRows != stateObj.SniContext))),  // SniContext should not be Execute or SendRows unless attention was sent (and, therefore, we are looking for an ACK)
-                        string.Format("Unexpected SniContext on call to TryRun; SniContext={0}", stateObj.SniContext));
+            AssertTryRunContext(stateObj);
+            //Debug.Assert((SniContext.Undefined != stateObj.SniContext) &&       // SniContext must not be Undefined
+            //    ((stateObj._attentionSent) || ((SniContext.Snix_Execute != stateObj.SniContext) && (SniContext.Snix_SendRows != stateObj.SniContext))),  // SniContext should not be Execute or SendRows unless attention was sent (and, therefore, we are looking for an ACK)
+            //            string.Format("Unexpected SniContext on call to TryRun; SniContext={0}", stateObj.SniContext));
 
             if (TdsParserState.Broken == State || TdsParserState.Closed == State)
             {

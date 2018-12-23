@@ -853,10 +853,19 @@ namespace System.Data.SqlClient
 
             FreeGcHandle(remaining, release);
 
+            DecrementPendingCallbackAssertion(remaining);
+            return remaining;
+        }
+
+        [Conditional("DEBUG")]
+        private void DecrementPendingCallbackAssertion(int remaining)
+        {
             // NOTE: TdsParserSessionPool may call DecrementPendingCallbacks on a TdsParserStateObject which is already disposed
             // This is not dangerous (since the stateObj is no longer in use), but we need to add a workaround in the assert for it
-            Debug.Assert((remaining == -1 && SessionHandle.IsNull) || (0 <= remaining && remaining < 3), string.Format("_pendingCallbacks values is invalid after decrementing: {0}", remaining));
-            return remaining;
+            if (!((remaining == -1 && SessionHandle.IsNull) || (0 <= remaining && remaining < 3)))
+            {
+                Debug.Assert(false, string.Format("_pendingCallbacks values is invalid after decrementing: {0}", remaining));
+            }
         }
 
         internal void DisposeCounters()
@@ -904,8 +913,17 @@ namespace System.Data.SqlClient
         internal int IncrementPendingCallbacks()
         {
             int remaining = Interlocked.Increment(ref _pendingCallbacks);
-            Debug.Assert(0 < remaining && remaining <= 3, string.Format("_pendingCallbacks values is invalid after incrementing: {0}", remaining));
+            IncrementPendingCallbacksAssertion(remaining);
             return remaining;
+        }
+
+        [Conditional("DEBUG")]
+        private void IncrementPendingCallbacksAssertion(int remaining)
+        {
+            if (!(0 < remaining && remaining <= 3))
+            {
+                Debug.Assert(false, string.Format("_pendingCallbacks values is invalid after incrementing: {0}", remaining));
+            }
         }
 
         internal void SetTimeoutSeconds(int timeout)
@@ -3034,11 +3052,7 @@ namespace System.Data.SqlClient
                         // write the remainder
                         Span<byte> copyTo = _outBuff.AsSpan(_outBytesUsed, remainder);
                         ReadOnlySpan<byte> copyFrom = b.Slice(0, remainder);
-
-                        Debug.Assert(copyTo.Length == copyFrom.Length, $"copyTo.Length:{copyTo.Length} and copyFrom.Length{copyFrom.Length:D} should be the same");
-
                         copyFrom.CopyTo(copyTo);
-
                         offset += remainder;
                         _outBytesUsed += remainder;
                         len -= remainder;
@@ -3059,11 +3073,7 @@ namespace System.Data.SqlClient
                             if (array == null)
                             {
                                 byte[] tempArray = new byte[len];
-                                Span<byte> copyTempTo = tempArray.AsSpan();
-
-                                Debug.Assert(copyTempTo.Length == b.Length, $"copyTempTo.Length:{copyTempTo.Length} and copyTempFrom.Length:{b.Length:D} should be the same");
-
-                                b.CopyTo(copyTempTo);
+                                b.CopyTo(tempArray.AsSpan());
                                 array = tempArray;
                                 offset = 0;
                             }
@@ -3080,9 +3090,6 @@ namespace System.Data.SqlClient
 
                         Span<byte> copyTo = _outBuff.AsSpan(_outBytesUsed, len);
                         ReadOnlySpan<byte> copyFrom = b.Slice(0, len);
-
-                        Debug.Assert(copyTo.Length == copyFrom.Length, $"copyTo.Length:{copyTo.Length} and copyFrom.Length:{copyFrom.Length:D} should be the same");
-
                         copyFrom.CopyTo(copyTo);
 
                         // handle out buffer bytes used counter
@@ -3517,8 +3524,8 @@ namespace System.Data.SqlClient
                 statistics.RequestNetworkServerTimer();
             }
         }
-        [Conditional("DEBUG")]
 
+        [Conditional("DEBUG")]
         private void AssertValidState()
         {
             string assertMessage = null;
@@ -3755,7 +3762,11 @@ namespace System.Data.SqlClient
                 Debug.Assert(_asyncWriteCount == 0, "StateObj still has outstanding async writes");
                 Debug.Assert(_delayedWriteAsyncCallbackException == null, "StateObj has an unobserved exceptions from an async write");
                 // Attention\Cancellation\Timeouts
-                Debug.Assert(!_attentionReceived && !_attentionSent && !_attentionSending, string.Format("StateObj is still dealing with attention: Sent: {0}, Received: {1}, Sending: {2}", _attentionSent, _attentionReceived, _attentionSending));
+                bool handlingAttentions = !_attentionReceived && !_attentionSent && !_attentionSending;
+                if (!handlingAttentions)
+                {
+                    Debug.Assert(handlingAttentions, string.Format("StateObj is still dealing with attention: Sent: {0}, Received: {1}, Sending: {2}", _attentionSent, _attentionReceived, _attentionSending));
+                }
                 Debug.Assert(!_cancelled, "StateObj still has cancellation set");
                 Debug.Assert(!_internalTimeout, "StateObj still has internal timeout set");
                 // Errors and Warnings
