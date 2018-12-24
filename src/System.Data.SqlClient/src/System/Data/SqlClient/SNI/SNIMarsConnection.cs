@@ -21,7 +21,7 @@ namespace System.Data.SqlClient.SNI
         private ushort _nextSessionId = 0;
         private int _currentHeaderByteCount = 0;
         private int _dataBytesLeft = 0;
-        private SNISMUXHeader _currentHeader;
+        private SNISMUXHeader _currentHeader = new SNISMUXHeader();
         private SNIPacket _currentPacket;
 
         /// <summary>
@@ -134,6 +134,7 @@ namespace System.Data.SqlClient.SNI
             {
                 handle.HandleReceiveError(packet);
             }
+            packet?.Dispose();
         }
 
         /// <summary>
@@ -183,6 +184,8 @@ namespace System.Data.SqlClient.SNI
 
                             if (bytesTaken == 0)
                             {
+                                packet.Dispose();
+                                packet = null;
                                 sniErrorCode = ReceiveAsync(ref packet);
 
                                 if (sniErrorCode == TdsEnums.SNI_SUCCESS_IO_PENDING)
@@ -195,16 +198,7 @@ namespace System.Data.SqlClient.SNI
                             }
                         }
 
-                        _currentHeader = new SNISMUXHeader()
-                        {
-                            SMID = _headerBytes[0],
-                            flags = _headerBytes[1],
-                            sessionId = BitConverter.ToUInt16(_headerBytes, 2),
-                            length = BitConverter.ToUInt32(_headerBytes, 4) - SNISMUXHeader.HEADER_LENGTH,
-                            sequenceNumber = BitConverter.ToUInt32(_headerBytes, 8),
-                            highwater = BitConverter.ToUInt32(_headerBytes, 12)
-                        };
-
+                        _currentHeader.Read(_headerBytes);
                         _dataBytesLeft = (int)_currentHeader.length;
                         _currentPacket = new SNIPacket((int)_currentHeader.length);
                     }
@@ -221,6 +215,8 @@ namespace System.Data.SqlClient.SNI
 
                             if (_dataBytesLeft > 0)
                             {
+                                packet.Dispose();
+                                packet = null;
                                 sniErrorCode = ReceiveAsync(ref packet);
 
                                 if (sniErrorCode == TdsEnums.SNI_SUCCESS_IO_PENDING)
@@ -276,6 +272,8 @@ namespace System.Data.SqlClient.SNI
                 {
                     if (packet.DataLeft == 0)
                     {
+                        packet.Dispose();
+                        packet = null;
                         sniErrorCode = ReceiveAsync(ref packet);
 
                         if (sniErrorCode == TdsEnums.SNI_SUCCESS_IO_PENDING)
