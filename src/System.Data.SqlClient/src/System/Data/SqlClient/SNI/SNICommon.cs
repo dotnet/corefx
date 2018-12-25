@@ -45,14 +45,14 @@ namespace System.Data.SqlClient.SNI
         public uint sequenceNumber;
         public uint highwater;
 
-        public void Read(ReadOnlySpan<byte> bytes)
+        public void Read(byte[] bytes)
         {
             SMID = bytes[0];
             flags = bytes[1];
-            sessionId = BitConverter.ToUInt16(bytes.Slice(2,2));
-            length = BitConverter.ToUInt32(bytes.Slice(4,4)) - SNISMUXHeader.HEADER_LENGTH;
-            sequenceNumber = BitConverter.ToUInt32(bytes.Slice(8,4));
-            highwater = BitConverter.ToUInt32(bytes.Slice(12,4));
+            sessionId = BitConverter.ToUInt16(bytes, 2);
+            length = BitConverter.ToUInt32(bytes, 4) - SNISMUXHeader.HEADER_LENGTH;
+            sequenceNumber = BitConverter.ToUInt32(bytes, 8);
+            highwater = BitConverter.ToUInt32(bytes, 12);
         }
 
         public void Write(Span<byte> bytes)
