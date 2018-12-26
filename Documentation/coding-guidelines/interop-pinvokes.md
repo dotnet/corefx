@@ -95,42 +95,49 @@ Guids are usable directly in signatures. When passed by ref they can either be p
 Common Data Types
 -----------------
 
+The following types are the same size on 32-bit and 64-bit Windows, despite their names. (In contrast
+to Unix, where some of these types are wider on 64-bit, for example native `long` becomes 64-bit.)
 
-|Windows        | C                 | C#    | Alternative |
-|---------------|-------------------|-------|-------------|
-|`BOOL`           |`int`                |`int`    |`bool`
-|`BOOLEAN`        |`unsigned char`      |`byte`   |`[MarshalAs(UnmanagedType.U1)] bool`
-|`BYTE`           |`unsigned char`      |`byte` | |
-|`CHAR`           |`char`               |`sbyte` | |
-|`UCHAR`          |`unsigned char`      |`byte` | |
-|`SHORT`          |`short`              |`short` | |
-|`CSHORT`         |`short`              |`short` | |
-|`USHORT`         |`unsigned short`     |`ushort` | |
-|`WORD`           |`unsigned short`     |`ushort` | |
-|`ATOM`           |`unsigned short`     |`ushort` | |
-|`INT`            |`int`                |`int` | |
-|`LONG`           |`long`               |`int` | |
-|`ULONG`          |`unsigned long`      |`uint` | |
-|`DWORD`          |`unsigned long`      |`uint` | |
-|`LARGE_INTEGER`  |`__int64`            |`long` | |
-|`LONGLONG`       |`__int64`            |`long` | |
-|`ULONGLONG`      |`unsigned __int64`   |`ulong` | |
-|`ULARGE_INTEGER` |`unsigned __int64`   |`ulong` | |
-|`UCHAR`          |`unsigned char`      |`byte` | |
-|`HRESULT`        |`long`               |`int` | |
+| Width | Windows          | C                  | C#       | Alternative                          |
+|:------|:-----------------|:-------------------|:---------|:-------------------------------------|
+| 32    | `BOOL`           | `int`              | `int`    | `bool`                               |
+| 8     | `BOOLEAN`        | `unsigned char`    | `byte`   | `[MarshalAs(UnmanagedType.U1)] bool` |
+| 8     | `BYTE`           | `unsigned char`    | `byte`   |                                      |
+| 8     | `CHAR`           | `char`             | `sbyte`  |                                      |
+| 8     | `UCHAR`          | `unsigned char`    | `byte`   |                                      |
+| 16    | `SHORT`          | `short`            | `short`  |                                      |
+| 16    | `CSHORT`         | `short`            | `short`  |                                      |
+| 16    | `USHORT`         | `unsigned short`   | `ushort` |                                      |
+| 16    | `WORD`           | `unsigned short`   | `ushort` |                                      |
+| 16    | `ATOM`           | `unsigned short`   | `ushort` |                                      |
+| 32    | `INT`            | `int`              | `int`    |                                      |
+| 32    | `LONG`           | `long`             | `int`    |                                      |
+| 32    | `ULONG`          | `unsigned long`    | `uint`   |                                      |
+| 32    | `DWORD`          | `unsigned long`    | `uint`   |                                      |
+| 64    | `LARGE_INTEGER`  | `__int64`          | `long`   |                                      |
+| 64    | `LONGLONG`       | `__int64`          | `long`   |                                      |
+| 64    | `ULONGLONG`      | `unsigned __int64` | `ulong`  |                                      |
+| 64    | `ULARGE_INTEGER` | `unsigned __int64` | `ulong`  |                                      |
+| 8     | `UCHAR`          | `unsigned char`    | `byte`   |                                      |
+| 32    | `HRESULT`        | `long`             | `int`    |                                      |
+| 32    | `NTSTATUS`       | `long`             | `int`    |                                      |
+| 64    | `QWORD`          | `__int64`          | `long`   |                                      |
 
+The following types, being pointers, do follow the width of the platform. Use `IntPtr`/`UIntPtr` for these.
 
-| Signed Pointer Types (`IntPtr`) | Unsigned Pointer Types (`UIntPtr`) |
-|----------------------------------|-------------------------------------|
-| `HANDLE` | `WPARAM` |
-| `HWND` | `UINT_PTR` |
-| `HINSTANCE` | `ULONG_PTR` |
-| `LPARAM` | `SIZE_T` |
-| `LRESULT` | |
-| `LONG_PTR` | |
-| `INT_PTR` | |
+| Signed Pointer Types (use `IntPtr`) | Unsigned Pointer Types (use `UIntPtr`) |
+|:------------------------------------|:---------------------------------------|
+| `HANDLE`                            | `WPARAM`                               |
+| `HWND`                              | `UINT_PTR`                             |
+| `HINSTANCE`                         | `ULONG_PTR`                            |
+| `LPARAM`                            | `SIZE_T`                               |
+| `LRESULT`                           |                                        |
+| `LONG_PTR`                          |                                        |
+| `INT_PTR`                           |                                        |
 
-[Windows Data Types](http://msdn.microsoft.com/en-us/library/aa383751.aspx "MSDN")  
+A C `void*` can be marshaled as either `IntPtr` or `UIntPtr`. Generally, it doesn't matter.
+
+[Windows Data Types](http://msdn.microsoft.com/en-us/library/aa383751.aspx "MSDN")
 [Data Type Ranges](http://msdn.microsoft.com/en-us/library/s3f49ktz.aspx "MSDN")
 
 Blittable Types
@@ -217,6 +224,64 @@ Blittable structs are much more performant as they they can simply be used direc
 *If* the struct is blittable use `sizeof()` instead of `Marshal.SizeOf<MyStruct>()` for better performance. As mentioned above, you can validate that the type is blittable by attempting to create a pinned `GCHandle`. If the type is not a string or considered blittable `GCHandle.Alloc` will throw an `ArgumentException`.
 
 Pointers to structs in definitions must either be passed by `ref` or use `unsafe` and `*`.
+
+The compiler or marshaler will make sure any pointers in your struct are correctly aligned. For this reason seemingly "wrong" declarations can still work. For example PROCESS_BASIC_INFORMATION is documented as:
+
+```C
+typedef struct _PROCESS_BASIC_INFORMATION {
+    PVOID Reserved1;
+    PPEB PebBaseAddress;
+    PVOID Reserved2[2];
+    ULONG_PTR UniqueProcessId;
+    PVOID Reserved3;
+} PROCESS_BASIC_INFORMATION;
+```
+
+All the members of this struct have the underlying type of pointer, so a correct managed representation could be:
+
+```c#
+    struct PROCESS_BASIC_INFORMATION
+    {
+        public IntPtr Reserved1; // or UIntPtr
+        public IntPtr PebBaseAddress;
+        public IntPtr Reserved2a;
+        public IntPtr Reserved2b;
+        public IntPtr BasePriority;
+        public UIntPtr UniqueProcessId;
+        public UIntPtr Reserved3;
+    }
+```
+
+Under the covers, the first field in this struct is actually type `LONG` which would normally marshal as a 32-bit `int` in managed code. The reason that `IntPtr` still works is that the next field happens to be a pointer, which must be aligned. To
+achieve that alignment, the compiler or marshaler would pad the preceding field to pointer width even if it is not declared as a pointer.
+
+In such cases and others, we always prefer to match the managed struct as closely as possible to the shape and names that is used in the documentation. 
+
+In the case above, the array of pointers `PVOID Reserved2[2]` was marshaled to two `IntPtr` fields, `Reserved2a` and `Reserved2b`. When the native array is a primitive type, we can use the `fixed` keyword to write it a little more cleanly. For example, `SYSTEM_PROCESS_INFORMATION` looks like this in the native header:
+
+```c
+typedef struct _SYSTEM_PROCESS_INFORMATION {
+    ULONG NextEntryOffset;
+    ULONG NumberOfThreads;
+    BYTE Reserved1[48];
+    UNICODE_STRING ImageName;
+...
+} SYSTEM_PROCESS_INFORMATION
+```
+
+In C#, we can write it like this:
+
+```c#
+    internal unsafe struct SystemProcessInformation
+    {
+        internal uint NextEntryOffset;
+        internal uint NumberOfThreads;
+        private fixed byte Reserved1[48];
+        internal Interop.UNICODE_STRING ImageName;
+        ...
+    }
+```
+It makes sense to make the undocumented members `private`.
 
 
 Other References
