@@ -135,10 +135,10 @@ The following types, being pointers, do follow the width of the platform. Use `I
 | `LONG_PTR`                          |                                        |
 | `INT_PTR`                           |                                        |
 
-A Windows `PVOID` which is a C `void*` can be marshaled as either `IntPtr` or `UIntPtr`. Generally, it doesn't matter.
+A Windows `PVOID` which is a C `void*` can be marshaled as either `IntPtr` or `UIntPtr` but we would prefer `void*`.
 
-[Windows Data Types](http://msdn.microsoft.com/en-us/library/aa383751.aspx "MSDN")
-[Data Type Ranges](http://msdn.microsoft.com/en-us/library/s3f49ktz.aspx "MSDN")
+[Windows Data Types](https://docs.microsoft.com/en-us/windows/desktop/WinProg/windows-data-types "MSDN")
+[Data Type Ranges](https://docs.microsoft.com/en-us/cpp/cpp/data-type-ranges?view=vs-2017 "MSDN")
 
 Blittable Types
 ---------------
@@ -242,15 +242,17 @@ All the members of this struct have the underlying type of pointer, so a correct
 ```c#
     struct PROCESS_BASIC_INFORMATION
     {
-        public IntPtr Reserved1; // or UIntPtr
+        private IntPtr Reserved1; // or UIntPtr
         public IntPtr PebBaseAddress;
-        public IntPtr Reserved2a;
-        public IntPtr Reserved2b;
+        private IntPtr Reserved2a;
+        private IntPtr Reserved2b;
         public IntPtr BasePriority;
         public UIntPtr UniqueProcessId;
-        public UIntPtr Reserved3;
+        private UIntPtr Reserved3;
     }
 ```
+
+We mark the undocumented members `private` so at the least the caller is prompted to think before choosing to use them.
 
 Under the covers, the first field in this struct is actually type `LONG` which would normally marshal as a 32-bit `int` in managed code. The reason that `IntPtr` still works is that the next field happens to be a pointer, which must be aligned. To
 achieve that alignment, the compiler or marshaler would pad the preceding field to pointer width even if it is not declared as a pointer.
@@ -272,7 +274,7 @@ typedef struct _SYSTEM_PROCESS_INFORMATION {
 In C#, we can write it like this:
 
 ```c#
-    internal unsafe struct SystemProcessInformation
+    internal unsafe struct SYSTEM_PROCESS_INFORMATION
     {
         internal uint NextEntryOffset;
         internal uint NumberOfThreads;
@@ -281,8 +283,6 @@ In C#, we can write it like this:
         ...
     }
 ```
-It makes sense to make the undocumented members `private`.
-
 
 Other References
 ----------------
