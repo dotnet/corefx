@@ -231,6 +231,7 @@ namespace System.Net.NetworkInformation
             }
             catch (Exception e)
             {
+                Finish();
                 throw new PingException(SR.net_ping, e);
             }
         }
@@ -331,6 +332,7 @@ namespace System.Net.NetworkInformation
             }
             catch (Exception e)
             {
+                Finish();
                 return Task.FromException<PingReply>(new PingException(SR.net_ping, e));
             }
         }
@@ -379,6 +381,7 @@ namespace System.Net.NetworkInformation
             }
             catch (Exception e)
             {
+                Finish();
                 throw new PingException(SR.net_ping, e);
             }
         }
@@ -389,8 +392,8 @@ namespace System.Net.NetworkInformation
             try
             {
                 IPAddress[] addresses = await Dns.GetHostAddressesAsync(hostNameOrAddress).ConfigureAwait(false);
-                requiresFinish = false;
                 Task<PingReply> pingReplyTask = SendPingAsyncCore(addresses[0], buffer, timeout, options);
+                requiresFinish = false;
                 return await pingReplyTask.ConfigureAwait(false);
             }
             catch (Exception e)
