@@ -225,40 +225,9 @@ Blittable structs are much more performant as they they can simply be used direc
 
 Pointers to structs in definitions must either be passed by `ref` or use `unsafe` and `*`.
 
-The compiler or marshaler will make sure any pointers in your struct are correctly aligned. For this reason you may see seemingly "wrong" declarations that still work. For example a native struct looking like this:
+We always prefer to match the managed struct as closely as possible to the shape and names that are used in the official platform documentation or header.
 
-```C
-typedef struct {
-    LONG Something;
-    INT_PTR Reserved2[2];
-} MY_STRUCT;
-```
-
-should be represented as (we mark the undocumented members `private` so at the least the caller is prompted to think before choosing to use them):
-
-```c#
-    struct MY_STRUCT
-    {
-        public int Something;
-        private IntPtr Reserved1a;
-        private IntPtr Reserved1b;
-    }
-```
-but this would also function correctly
-```c#
-    struct MY_STRUCT
-    {
-        public IntPtr Something;
-        private IntPtr Reserved1a;
-        private IntPtr Reserved1b;
-    }
-```
-
-The `LONG` is always 32-bit wide, but `INT_PTR` changes in Width. How does this still work? The reason that `IntPtr` still works is that the next field happens to be a pointer, which must be aligned. To achieve that alignment, the compiler or marshaler would pad the preceding field to pointer width even if it is not declared as a pointer.
-
-Sometimes Windows headers have cosmetic glitches like this. In such cases and others, we always prefer to match the managed struct as closely as possible to the shape and names that are used in the official platform documentation or header.
-
-In the case above, the array of pointers `INT_PTR Reserved2[2]` had to be marshaled to two `IntPtr` fields, `Reserved1a` and `Reserved1b`. When the native array is a primitive type, we can use the `fixed` keyword to write it a little more cleanly. For example, `SYSTEM_PROCESS_INFORMATION` looks like this in the native header:
+An array like `INT_PTR Reserved1[2]` has to be marshaled to two `IntPtr` fields, `Reserved1a` and `Reserved1b`. When the native array is a primitive type, we can use the `fixed` keyword to write it a little more cleanly. For example, `SYSTEM_PROCESS_INFORMATION` looks like this in the native header:
 
 ```c
 typedef struct _SYSTEM_PROCESS_INFORMATION {
