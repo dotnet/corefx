@@ -114,14 +114,14 @@ to Unix, where some of these types are wider on 64-bit, for example native `long
 | 32    | `LONG`           | `long`             | `int`    |                                      |
 | 32    | `ULONG`          | `unsigned long`    | `uint`   |                                      |
 | 32    | `DWORD`          | `unsigned long`    | `uint`   |                                      |
+| 64    | `QWORD`          | `__int64`          | `long`   |                                      |
 | 64    | `LARGE_INTEGER`  | `__int64`          | `long`   |                                      |
 | 64    | `LONGLONG`       | `__int64`          | `long`   |                                      |
 | 64    | `ULONGLONG`      | `unsigned __int64` | `ulong`  |                                      |
 | 64    | `ULARGE_INTEGER` | `unsigned __int64` | `ulong`  |                                      |
-| 8     | `UCHAR`          | `unsigned char`    | `byte`   |                                      |
 | 32    | `HRESULT`        | `long`             | `int`    |                                      |
 | 32    | `NTSTATUS`       | `long`             | `int`    |                                      |
-| 64    | `QWORD`          | `__int64`          | `long`   |                                      |
+
 
 The following types, being pointers, do follow the width of the platform. Use `IntPtr`/`UIntPtr` for these.
 
