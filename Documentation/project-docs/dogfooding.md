@@ -8,37 +8,37 @@ this experience. Make sure to consult this document often.
 
 ## Install prerequisites
 
-1. Acquire the latest nightly .NET Core SDK by downloading the zip or tarball listed in https://github.com/dotnet/cli/blob/master/README.md#installers-and-binaries (for example, https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.zip ) into a new folder.
+1. Acquire the latest nightly .NET Core SDK by downloading the zip or tarball listed in https://github.com/dotnet/core-sdk#installers-and-binaries (for example, https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.zip ) into a new folder for instance `D:\git\playground\dogfooding\dotnet`.
 
 2. By default, the dotnet CLI will use the globally installed SDK if it matches the major/minor version you request and has a higher revision. To force it to use the locally installed SDK, you must set an environment variable `DOTNET_MULTILEVEL_LOOKUP=0` in your shell. You can use `dotnet --info` to verify what version of the Shared Framework it is using.
 
-3. Reminder: if you are using a local copy of the dotnet CLI, take care that when you type `dotnet` you do not inadvertently pick up a different copy that you may have in your path. On Windows, for example, if you use a Command Prompt, a global copy may be in the path, so use the fully qualified path to your local `dotnet`. If you receive an error "The current .NET SDK does not support targeting .NET Core 2.1." then you may be executing an older `dotnet`.
+3. Reminder: if you are using a local copy of the dotnet CLI, take care that when you type `dotnet` you do not inadvertently pick up a different copy that you may have in your path. On Windows, for example, if you use a Command Prompt, a global copy may be in the path, so use the fully qualified path to your local `dotnet`. If you receive an error "error NETSDK1045: The current .NET SDK does not support targeting .NET Core 3.0." then you may be executing an older `dotnet`.
 
-After setting up dotnet you can verify you are using the newer version by executing `dotnet --info` -- the version should be greater than `2.1.300-*`  (dotnet CLI for .NET Core 2.1 is currently numbered `2.1.300-*`). Here is an example output at the time of writing:
+After setting up dotnet you can verify you are using the newer version by executing `dotnet --info` -- the version should be greater than `2.2.101-*`  (dotnet CLI for .NET Core 2.2 is currently numbered `2.2.101-*`). Here is an example output at the time of writing:
 ```
 >dotnet --info
 .NET Core SDK (reflecting any global.json):
- Version:   2.1.301
- Commit:    59524873d6
+ Version:   3.0.100-preview-009844
+ Commit:    fa073dacc4
 
 Runtime Environment:
  OS Name:     Windows
- OS Version:  10.0.17711
+ OS Version:  10.0.17134
  OS Platform: Windows
  RID:         win10-x64
- Base Path:   C:\Program Files\dotnet\sdk\2.1.301\
+ Base Path:   D:\git\playground\dogfooding\dotnet\sdk\3.0.100-preview-009844\
 
 Host (useful for support):
-  Version: 2.1.1
-  Commit:  6985b9f684
+  Version: 3.0.0-preview-27218-01
+  Commit:  d40b87f29d
 
 .NET Core SDKs installed:
-  2.1.301 [C:\Program Files\dotnet\sdk]
+  3.0.100-preview-009844 [D:\git\playground\dogfooding\dotnet\sdk]
 
 .NET Core runtimes installed:
-  Microsoft.AspNetCore.All 2.1.1 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.All]
-  Microsoft.AspNetCore.App 2.1.1 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
-  Microsoft.NETCore.App 2.1.1 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.AspNetCore.App 3.0.0-preview-18579-0056 [D:\git\playground\dogfooding\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.NETCore.App 3.0.0-preview-27218-01 [D:\git\playground\dogfooding\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.WindowsDesktop.App 3.0.0-alpha-27218-3 [D:\git\playground\dogfooding\dotnet\shared\Microsoft.WindowsDesktop.App]
 
 To install additional .NET Core runtimes or SDKs:
   https://aka.ms/dotnet-download
@@ -95,8 +95,8 @@ runtime.
 ```XML
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RuntimeFrameworkVersion>2.1.0-preview1-25825-07</RuntimeFrameworkVersion> <!-- modify build in this line -->
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <RuntimeFrameworkVersion>3.0.0-preview-27225-1</RuntimeFrameworkVersion> <!-- modify build in this line -->
   </PropertyGroup>
 ```
 
@@ -116,8 +116,8 @@ make it self-contained
 ```XML
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RuntimeFrameworkVersion>2.1.0-preview1-25825-07</RuntimeFrameworkVersion> <!-- modify build in this line -->
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <RuntimeFrameworkVersion>3.0.0-preview-27218-01</RuntimeFrameworkVersion> <!-- modify build in this line -->
     <RuntimeIdentifier>win-x64</RuntimeIdentifier> <!-- make self-contained -->
   </PropertyGroup>
 ```
@@ -125,7 +125,7 @@ make it self-contained
 ```
 $ dotnet restore
 $ dotnet publish
-$ bin\Debug\netcoreapp2.1\win-x64\publish\App.exe
+$ bin\Debug\netcoreapp3.0\win-x64\publish\App.exe
 ```
 
 ## More Advanced Scenario - Using your local CoreFx build
@@ -140,11 +140,11 @@ and run a self-contained application you need the following steps to consume you
 
 Look for a package named `Microsoft.Private.CoreFx.NETCoreApp.<version>.nupkg` under `corefx\artifacts\packages\Debug` (or Release if you built a release version of corefx).
 
-Once you find the version number (for this example assume it is `4.5.0-preview1-25830-0`) you need to add the following line to your project file:
+Once you find the version number (for this example assume it is `4.6.0-dev.18626.1`) you need to add the following line to your project file:
 
 ```
   <ItemGroup>
-    <PackageReference Include="Microsoft.Private.CoreFx.NETCoreApp" Version="4.5.0-preview1-25830-0" />
+    <PackageReference Include="Microsoft.Private.CoreFx.NETCoreApp" Version="4.6.0-dev.18626.1" />
   </ItemGroup>
 ```
 
@@ -208,13 +208,13 @@ give it a value by setting the BuildNumberMinor environment variable.
 ```bat
     set BuildNumberMinor=3
 ```
-before packaging. You should see this number show up in the version number (e.g. 4.5.0-preview1-25830-03).
+before packaging. You should see this number show up in the version number (e.g. 4.6.0-dev.18626.1).
 
 Alternatively just delete the existing copy of the package from the Nuget cache. For example on
 windows (on Linux substitute ~/ for %HOMEPATH%) you could delete
 ```bat
-     %HOMEPATH%\.nuget\packages\Microsoft.Private.CoreFx.NETCoreApp\4.5.0-preview1-25830-0
-     %HOMEPATH%\.nuget\packages\runtime.win-x64.microsoft.private.corefx.netcoreapp\4.5.0-preview1-25830-0
+     %HOMEPATH%\.nuget\packages\Microsoft.Private.CoreFx.NETCoreApp\4.6.0-dev.18626.1
+     %HOMEPATH%\.nuget\packages\runtime.win-x64.microsoft.private.corefx.netcoreapp\4.6.0-dev.18626.1
 ```
 which should make `dotnet restore` now pick up the new copy.
 
