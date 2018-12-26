@@ -138,7 +138,7 @@ and run a self-contained application you need the following steps to consume you
 
 #### 1 - Get the Version number of the CoreFx package you built.
 
-Look for a package named `Microsoft.Private.CoreFx.NETCoreApp.<version>.nupkg` under `corefx\bin\packages\Debug` or `corefx\artifacts\packages\Debug`  (or Release if you built a release version of corefx).
+Look for a package named `Microsoft.Private.CoreFx.NETCoreApp.<version>.nupkg` under `corefx\artifacts\packages\Debug` (or Release if you built a release version of corefx).
 
 Once you find the version number (for this example assume it is `4.5.0-preview1-25830-0`) you need to add the following line to your project file:
 
