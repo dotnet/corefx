@@ -135,7 +135,7 @@ The following types, being pointers, do follow the width of the platform. Use `I
 | `LONG_PTR`                          |                                        |
 | `INT_PTR`                           |                                        |
 
-A C `void*` can be marshaled as either `IntPtr` or `UIntPtr`. Generally, it doesn't matter.
+A Windows `PVOID` which is a C `void*` can be marshaled as either `IntPtr` or `UIntPtr`. Generally, it doesn't matter.
 
 [Windows Data Types](http://msdn.microsoft.com/en-us/library/aa383751.aspx "MSDN")
 [Data Type Ranges](http://msdn.microsoft.com/en-us/library/s3f49ktz.aspx "MSDN")
