@@ -14,7 +14,7 @@ this experience. Make sure to consult this document often.
 
 3. Reminder: if you are using a local copy of the dotnet CLI, take care that when you type `dotnet` you do not inadvertently pick up a different copy that you may have in your path. On Windows, for example, if you use a Command Prompt, a global copy may be in the path, so use the fully qualified path to your local `dotnet`. If you receive an error "error NETSDK1045: The current .NET SDK does not support targeting .NET Core 3.0." then you may be executing an older `dotnet`.
 
-After setting up dotnet you can verify you are using the newer version by executing `dotnet --info` -- the version should be greater than `2.2.101-*`  (dotnet CLI for .NET Core 2.2 is currently numbered `2.2.101-*`). Here is an example output at the time of writing:
+After setting up dotnet you can verify you are using the dogfooding version by executing `dotnet --info`. Here is an example output at the time of writing:
 ```
 >dotnet --info
 .NET Core SDK (reflecting any global.json):
