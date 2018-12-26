@@ -170,7 +170,7 @@ as a reference to our nightly dotnet-core feed on myget. The Nuget.Config file c
 ```xml
 <configuration>
   <packageSources>
-    <add key="local coreclr" value="D:\git\corefx\bin\packages\Debug" /> <!-- Change this to your own output path -->
+    <add key="local coreclr" value="D:\git\corefx\artifacts\packages\Debug" /> <!-- Change this to your own output path -->
     <add key="dotnet-core" value="https://dotnet.myget.org/F/dotnet-core/api/v3/index.json" />
   </packageSources>
 </configuration>
