@@ -10,7 +10,7 @@
     <PackageReference Include="Microsoft.CSharp" Version="$(CoreFxPackageVersion)" />
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="2.0.0-$(CoreFxExpectedPrerelease)" />
     <PackageReference Include="Microsoft.NETCore.Targets" Version="2.0.0-$(CoreFxExpectedPrerelease)" />
-    <PackageReference Include="Microsoft.VisualBasic.Core" Version="10.2.0-$(CoreFxExpectedPrerelease)" />
+    <PackageReference Include="Microsoft.VisualBasic" Version="10.2.0-$(CoreFxExpectedPrerelease)" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="$(CoreFxPackageVersion)" />
     <PackageReference Include="Microsoft.Win32.Registry.AccessControl" Version="$(CoreFxPackageVersion)" />
     <PackageReference Include="Microsoft.XmlSerializer.Generator" Version="1.0.0-$(CoreFxExpectedPrerelease)" />

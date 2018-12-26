@@ -39,7 +39,7 @@
     <!-- Permit the following implementation-only assemblies -->
     <ValidatePackageSuppression Condition="'$(PackageTargetRuntime)' != ''" Include="PermitInbox">
       <Value>
-        Microsoft.VisualBasic;
+        Microsoft.VisualBasic.Core;
         System.Diagnostics.DiagnosticSource;
         System.Private.DataContractSerialization;
         System.Private.Uri;
