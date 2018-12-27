@@ -122,6 +122,46 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
+        [CheckConnStrSetupFact]
+        public static void OldCredentialsShouldFail()
+        {
+            var user = "u" + Guid.NewGuid().ToString().Replace("-", "");
+            var passStr = "Pax561O$T5K#jD";
+
+            try
+            {
+                createTestUser(user, passStr);
+
+                SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
+                sqlConnectionStringBuilder.Remove("User ID");
+                sqlConnectionStringBuilder.Remove("Password");
+                sqlConnectionStringBuilder.IntegratedSecurity = false;
+
+                SecureString password = new SecureString();
+                passStr.ToCharArray().ToList().ForEach(x => password.AppendChar(x));
+                password.MakeReadOnly();
+
+                using (SqlConnection conn1 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, password)))
+                using (SqlConnection conn2 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, password)))
+                using (SqlConnection conn3 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, password)))
+                using (SqlConnection conn4 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, password)))
+                {
+                    conn1.Open();
+                    conn2.Open();
+                    conn3.Open();
+                    conn4.Open();
+
+                    SqlConnection.ChangePassword(sqlConnectionStringBuilder.ConnectionString, "newPassWord");
+                    SqlConnection conn5 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, password));
+                    conn5.Open();
+                }
+            }
+            finally
+            {
+                dropTestUser(user);
+            }
+        }
+
         private static void createTestUser(string username, string password)
         {
             // Creates a test user with read permissions.
