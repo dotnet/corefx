@@ -8,11 +8,11 @@ this experience. Make sure to consult this document often.
 
 ## Install prerequisites
 
-1. Acquire the latest nightly .NET Core SDK by downloading the zip or tarball listed in https://github.com/dotnet/core-sdk#installers-and-binaries (for example, https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.zip ) into a new folder for instance `D:\git\playground\dogfooding\dotnet`.
+1. Acquire the latest nightly .NET Core SDK by downloading the zip or tarball listed in https://github.com/dotnet/core-sdk#installers-and-binaries (for example, https://dotnetcli.blob.core.windows.net/dotnet/Sdk/master/dotnet-sdk-latest-win-x64.zip ) into a new folder for instance `C:\dotnet`.
 
 2. By default, the dotnet CLI will use the globally installed SDK if it matches the major/minor version you request and has a higher revision. To force it to use the locally installed SDK, you must set an environment variable `DOTNET_MULTILEVEL_LOOKUP=0` in your shell. You can use `dotnet --info` to verify what version of the Shared Framework it is using.
 
-3. Reminder: if you are using a local copy of the dotnet CLI, take care that when you type `dotnet` you do not inadvertently pick up a different copy that you may have in your path. On Windows, for example, if you use a Command Prompt, a global copy may be in the path, so use the fully qualified path to your local `dotnet`. If you receive an error "error NETSDK1045: The current .NET SDK does not support targeting .NET Core 3.0." then you may be executing an older `dotnet`.
+3. Reminder: if you are using a local copy of the dotnet CLI, take care that when you type `dotnet` you do not inadvertently pick up a different copy that you may have in your path. On Windows, for example, if you use a Command Prompt, a global copy may be in the path, so use the fully qualified path to your local `dotnet` (e.g. `C:\dotnet\dotnet.exe`) . If you receive an error "error NETSDK1045: The current .NET SDK does not support targeting .NET Core 3.0." then you may be executing an older `dotnet`.
 
 After setting up dotnet you can verify you are using the dogfooding version by executing `dotnet --info`. Here is an example output at the time of writing:
 ```
@@ -26,19 +26,19 @@ Runtime Environment:
  OS Version:  10.0.17134
  OS Platform: Windows
  RID:         win10-x64
- Base Path:   D:\git\playground\dogfooding\dotnet\sdk\3.0.100-preview-009844\
+ Base Path:   C:\dotnet\sdk\3.0.100-preview-009844\
 
 Host (useful for support):
   Version: 3.0.0-preview-27218-01
   Commit:  d40b87f29d
 
 .NET Core SDKs installed:
-  3.0.100-preview-009844 [D:\git\playground\dogfooding\dotnet\sdk]
+  3.0.100-preview-009844 [C:\dotnet\sdk]
 
 .NET Core runtimes installed:
-  Microsoft.AspNetCore.App 3.0.0-preview-18579-0056 [D:\git\playground\dogfooding\dotnet\shared\Microsoft.AspNetCore.App]
-  Microsoft.NETCore.App 3.0.0-preview-27218-01 [D:\git\playground\dogfooding\dotnet\shared\Microsoft.NETCore.App]
-  Microsoft.WindowsDesktop.App 3.0.0-alpha-27218-3 [D:\git\playground\dogfooding\dotnet\shared\Microsoft.WindowsDesktop.App]
+  Microsoft.AspNetCore.App 3.0.0-preview-18579-0056 [C:\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.NETCore.App 3.0.0-preview-27218-01 [C:\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.WindowsDesktop.App 3.0.0-alpha-27218-3 [C:\dotnet\shared\Microsoft.WindowsDesktop.App]
 
 To install additional .NET Core runtimes or SDKs:
   https://aka.ms/dotnet-download
@@ -130,7 +130,7 @@ $ bin\Debug\netcoreapp3.0\win-x64\publish\App.exe
 
 ## More Advanced Scenario - Using your local CoreFx build
 
-If you built corefx locally with `build -allconfigurations` after building binaries it will build NuGet packages containing them. You can use those in your projects.
+If you built corefx locally with `build -BuildAllConfigurations` after building binaries it will build NuGet packages containing them. You can use those in your projects.
 
 To use your local built corefx packages you will need to be a self-contained application and so you will
 need to follow the "Self-contained" steps from above. Once you can successfully restore, build, publish,
