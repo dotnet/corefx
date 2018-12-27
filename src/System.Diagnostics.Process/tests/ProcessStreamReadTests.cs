@@ -287,7 +287,7 @@ namespace System.Diagnostics.Tests
             public bool TryAcquire(int millisecondsTimeout)
             {
                 DateTime maxWait = DateTime.UtcNow.AddMilliseconds(millisecondsTimeout);
-                for (; ; )
+                while (true)
                 {
                     try
                     {
