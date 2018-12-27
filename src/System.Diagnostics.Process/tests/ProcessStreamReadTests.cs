@@ -286,7 +286,7 @@ namespace System.Diagnostics.Tests
 
             public bool TryAcquire(int millisecondsTimeout)
             {
-                DateTime maxWait = DateTime.UtcNow.AddMilliseconds(millisecondsTimeout);
+                Stopwatch waitTimer = Stopwatch.StartNew();
                 while (true)
                 {
                     try
@@ -297,7 +297,7 @@ namespace System.Diagnostics.Tests
                     catch (IOException)
                     {
                         Thread.Sleep(150);
-                        if (DateTime.UtcNow > maxWait)
+                        if (waitTimer.ElapsedMilliseconds > millisecondsTimeout)
                         {
                             return false;
                         }
