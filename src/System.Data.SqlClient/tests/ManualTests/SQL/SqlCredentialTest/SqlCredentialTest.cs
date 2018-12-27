@@ -125,8 +125,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         [CheckConnStrSetupFact]
         public static void OldCredentialsShouldFail()
         {
-            var user = "u" + Guid.NewGuid().ToString().Replace("-", "");
-            var passStr = "Pax561O$T5K#jD";
+            String user = "u" + Guid.NewGuid().ToString().Replace("-", "");
+            String passStr = "Pax561O$T5K#jD";
 
             try
             {
@@ -140,20 +140,24 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 SecureString password = new SecureString();
                 passStr.ToCharArray().ToList().ForEach(x => password.AppendChar(x));
                 password.MakeReadOnly();
+                SqlCredential credential = new SqlCredential(user, password);
 
-                using (SqlConnection conn1 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, password)))
-                using (SqlConnection conn2 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, password)))
-                using (SqlConnection conn3 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, password)))
-                using (SqlConnection conn4 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, password)))
+                using (SqlConnection conn1 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, credential))
+                using (SqlConnection conn2 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, credential))
+                using (SqlConnection conn3 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, credential))
+                using (SqlConnection conn4 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, credential))
                 {
                     conn1.Open();
                     conn2.Open();
                     conn3.Open();
                     conn4.Open();
 
-                    SqlConnection.ChangePassword(sqlConnectionStringBuilder.ConnectionString, "newPassWord");
-                    SqlConnection conn5 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, password));
-                    conn5.Open();
+                    SecureString NewPassword = new SecureString();
+                    "NewPassword".ToCharArray().ToList().ForEach(x => NewPassword.AppendChar(x));
+                    NewPassword.MakeReadOnly();
+                    SqlConnection.ChangePassword(sqlConnectionStringBuilder.ConnectionString, credential, NewPassword);
+                    SqlConnection conn5 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, NewPassword));
+                    Assert.Throws<SqlException>(() => conn5.Open());
                 }
             }
             finally
