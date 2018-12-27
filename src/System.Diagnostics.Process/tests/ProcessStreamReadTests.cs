@@ -98,11 +98,11 @@ namespace System.Diagnostics.Tests
 
             Dictionary<string, FileSystemLock> parentLockList = TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper(nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine));
 
-            List<int> dataReceived = new List<int>();
+            var dataReceived = new List<int>();
             var dataArrivedEvent = new AutoResetEvent(false);
             var dataConfirmedEvent = new AutoResetEvent(false);
 
-            using(Process p = CreateProcessPortable(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable))
+            using (Process p = CreateProcessPortable(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable))
             { 
                 p.StartInfo.RedirectStandardOutput = true;
                 p.OutputDataReceived += (s, e) =>
@@ -261,20 +261,17 @@ namespace System.Diagnostics.Tests
             {
                 string rootDirectory = Path.Combine(Path.GetTempPath(), directoryName);
 
-                if (!Directory.Exists(rootDirectory))
-                {
-                    Directory.CreateDirectory(rootDirectory);
-                }
+                Directory.CreateDirectory(rootDirectory);
 
                 _lockFileName = Path.Combine(rootDirectory, lockName);
             }
 
             public bool WaitSignal(int millisecondsTimeout)
             {
-                DateTime maxWait = DateTime.UtcNow.AddMilliseconds(millisecondsTimeout);
+                Stopwatch waitTimer = Stopwatch.StartNew();
                 try
                 {
-                    while (DateTime.UtcNow < maxWait)
+                    while (waitTimer.ElapsedMilliseconds < millisecondsTimeout)
                     {
                         using (new FileStream(_lockFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None)) { }
                         Thread.Sleep(150);

@@ -68,10 +68,7 @@ namespace System.Diagnostics
         // User calls BeginRead to start the asynchronous read
         internal void BeginReadLine()
         {
-            if (_cancelOperation)
-            {
-                _cancelOperation = false;
-            }
+            _cancelOperation = false;
 
             if (_sb == null)
             {
