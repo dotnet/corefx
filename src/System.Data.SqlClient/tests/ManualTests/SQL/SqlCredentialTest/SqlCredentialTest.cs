@@ -156,8 +156,10 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     "NewPassword".ToCharArray().ToList().ForEach(x => NewPassword.AppendChar(x));
                     NewPassword.MakeReadOnly();
                     SqlConnection.ChangePassword(sqlConnectionStringBuilder.ConnectionString, credential, NewPassword);
-                    SqlConnection conn5 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, NewPassword));
-                    Assert.Throws<SqlException>(() => conn5.Open());
+                    using (SqlConnection conn5 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString, new SqlCredential(user, password)))
+                    {
+                        Assert.Throws<SqlException>(() => conn5.Open());
+                    }
                 }
             }
             finally
