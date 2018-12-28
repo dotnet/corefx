@@ -132,7 +132,7 @@ namespace System.IO.Tests
         }
 
         [ConditionalFact(nameof(isHFS))]
-        public void CopyToNanoSecondsPresent_OSX()
+        public void CopyToNanoSecondsPresent_HFS()
         {
             FileInfo input = GetNonZeroNanoSeconds();
             FileInfo output = new FileInfo(Path.Combine(GetTestFilePath(), input.Name));
@@ -140,7 +140,7 @@ namespace System.IO.Tests
             output.Directory.Create();
             output = input.CopyTo(output.FullName, true);
 
-            Assert.Equal(output.LastWriteTime.Ticks, input.LastWriteTime.Ticks);
+            Assert.Equal(input.LastWriteTime.Ticks, output.LastWriteTime.Ticks);
             Assert.Equal(0, output.LastWriteTime.Ticks % 10);
             Assert.Equal(0, input.LastWriteTime.Ticks % 10);
         }
