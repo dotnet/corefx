@@ -65,7 +65,7 @@ namespace System.Diagnostics
             return false;
         }
 
-        private bool SafePredicateTest(Func<bool> predicate, bool fallbackResult = false)
+        private bool SafePredicateTest(Func<bool> predicate)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace System.Diagnostics
                 // InvalidOperationException signifies conditions such as the process already being dead.
                 // Win32Exception signifies issues such as insufficient permissions to get details on the process.
                 // In either case, the predicate couldn't be applied so return the fallback result. 
-                return fallbackResult;
+                return false;
             }
         }
 
