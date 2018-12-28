@@ -49,7 +49,7 @@ namespace System.IO.Tests
                 // not support nanosecond granularity.
 
                 // If it's 1/10, or low granularity, this may help:
-                Thread.Sleep(1234);
+                Thread.Sleep(123);
             }
             return fileinfo;
         }
@@ -109,12 +109,12 @@ namespace System.IO.Tests
             FileInfo input = GetNonZeroMilliSec();
             FileInfo output = new FileInfo(Path.Combine(GetTestFilePath(), input.Name));
 
+            Assert.Equal(0, output.LastWriteTime.Millisecond);
             output.Directory.Create();
             output = input.CopyTo(output.FullName, true);
 
-            Assert.Equal(input.LastWriteTime.Ticks, output.LastWriteTime.Ticks);
-            Assert.Equal(0, output.LastWriteTime.Ticks % 10);
-            Assert.Equal(0, input.LastWriteTime.Ticks % 10);
+            Assert.NotEqual(0, input.LastWriteTime.Millisecond);
+            Assert.NotEqual(0, output.LastWriteTime.Millisecond);
         }
 
         [ConditionalFact(nameof(isNotHFS))]
@@ -140,7 +140,6 @@ namespace System.IO.Tests
             output.Directory.Create();
             output = input.CopyTo(output.FullName, true);
 
-            Assert.Equal(input.LastWriteTime.Ticks, output.LastWriteTime.Ticks);
             Assert.Equal(0, output.LastWriteTime.Ticks % 10);
             Assert.Equal(0, input.LastWriteTime.Ticks % 10);
         }
