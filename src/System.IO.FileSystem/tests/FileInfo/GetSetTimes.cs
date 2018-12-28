@@ -36,6 +36,24 @@ namespace System.IO.Tests
             return fileinfo;
         }
 
+        public FileInfo GetNonZeroNanoSeconds()
+        {
+            FileInfo fileinfo = new FileInfo(GetTestFilePath());
+            for (int i = 0; i < 5; i++)
+            {
+                fileinfo.Create().Dispose();
+                if (fileinfo.LastWriteTime.Ticks % 10 != 0)
+                    break;
+
+                // This case should only happen 1/10 times, unless the OS/Filesystem does
+                // not support nanosecond granularity.
+
+                // If it's 1/10, or low granularity, this may help:
+                Thread.Sleep(1234);
+            }
+            return fileinfo;
+        }
+
         public override FileInfo GetMissingItem() => new FileInfo(GetTestFilePath());
 
         public override string GetItemPath(FileInfo item) => item.FullName;
@@ -91,12 +109,40 @@ namespace System.IO.Tests
             FileInfo input = GetNonZeroMilliSec();
             FileInfo output = new FileInfo(Path.Combine(GetTestFilePath(), input.Name));
 
-            Assert.Equal(0, output.LastWriteTime.Millisecond);
             output.Directory.Create();
             output = input.CopyTo(output.FullName, true);
 
-            Assert.NotEqual(0, input.LastWriteTime.Millisecond);
-            Assert.NotEqual(0, output.LastWriteTime.Millisecond);
+            Assert.Equal(input.LastWriteTime.Ticks, output.LastWriteTime.Ticks);
+            Assert.Equal(0, output.LastWriteTime.Ticks % 10);
+            Assert.Equal(0, input.LastWriteTime.Ticks % 10);
+        }
+
+        [ConditionalFact(nameof(isNotHFS))]
+        public void CopyToNanoSecondsPresent()
+        {
+            FileInfo input = GetNonZeroNanoSeconds();
+            FileInfo output = new FileInfo(Path.Combine(GetTestFilePath(), input.Name));
+
+            output.Directory.Create();
+            output = input.CopyTo(output.FullName, true);
+
+            Assert.Equal(input.LastWriteTime.Ticks, output.LastWriteTime.Ticks);
+            Assert.NotEqual(0, output.LastWriteTime.Ticks % 10);
+            Assert.NotEqual(0, input.LastWriteTime.Ticks % 10);
+        }
+
+        [ConditionalFact(nameof(isHFS))]
+        public void CopyToNanoSecondsPresent_OSX()
+        {
+            FileInfo input = GetNonZeroNanoSeconds();
+            FileInfo output = new FileInfo(Path.Combine(GetTestFilePath(), input.Name));
+
+            output.Directory.Create();
+            output = input.CopyTo(output.FullName, true);
+
+            Assert.Equal(output.LastWriteTime.Ticks, input.LastWriteTime.Ticks);
+            Assert.Equal(0, output.LastWriteTime.Ticks % 10);
+            Assert.Equal(0, input.LastWriteTime.Ticks % 10);
         }
 
         [ConditionalFact(nameof(isHFS))]
