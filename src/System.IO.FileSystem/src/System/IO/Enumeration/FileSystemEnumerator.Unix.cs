@@ -55,7 +55,7 @@ namespace System.IO.Enumeration
             try
             {
                 _pathBuffer = ArrayPool<char>.Shared.Rent(StandardBufferSize);
-                int size = Interop.Sys.ReadBufferSize;
+                int size = Interop.Sys.GetReadDirRBufferSize();
                 _entryBuffer = size > 0 ? ArrayPool<byte>.Shared.Rent(size) : null;
             }
             catch
@@ -175,28 +175,33 @@ namespace System.IO.Enumeration
 
         private unsafe void FindNextEntry()
         {
-            Span<byte> buffer = _entryBuffer == null ? Span<byte>.Empty : new Span<byte>(_entryBuffer);
-            int result = Interop.Sys.ReadDir(_directoryHandle, buffer, ref _entry);
-            switch (result)
+            if (_entryBuffer == null)
+                return;
+
+            fixed (byte* bufferPtr = _entryBuffer)
             {
-                case -1:
-                    // End of directory
-                    DirectoryFinished();
-                    break;
-                case 0:
-                    // Success
-                    break;
-                default:
-                    // Error
-                    if (InternalContinueOnError(new Interop.ErrorInfo(result)))
-                    {
+                int result = Interop.Sys.ReadDirR(_directoryHandle, bufferPtr, _entryBuffer.Length, out _entry);
+                switch (result)
+                {
+                    case -1:
+                        // End of directory
                         DirectoryFinished();
                         break;
-                    }
-                    else
-                    {
-                        throw Interop.GetExceptionForIoErrno(new Interop.ErrorInfo(result), _currentPath, isDirectory: true);
-                    }
+                    case 0:
+                        // Success
+                        break;
+                    default:
+                        // Error
+                        if (InternalContinueOnError(new Interop.ErrorInfo(result)))
+                        {
+                            DirectoryFinished();
+                            break;
+                        }
+                        else
+                        {
+                            throw Interop.GetExceptionForIoErrno(new Interop.ErrorInfo(result), _currentPath, isDirectory: true);
+                        }
+                }
             }
         }
 
