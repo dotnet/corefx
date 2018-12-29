@@ -93,31 +93,38 @@ namespace System.Xml
             }
         }
 
-        //
-        // XmlWriter implementation
-        //
         // Returns settings the writer currently applies.
-        public override XmlWriterSettings Settings
+        public override XmlWriterSettings Settings => GetSettings();
+
+        private XmlWriterSettings GetSettings()
         {
-            get
+            return new XmlWriterSettings
             {
-                XmlWriterSettings settings = new XmlWriterSettings();
+                Encoding = encoding,
+                OmitXmlDeclaration = omitXmlDeclaration,
+                NewLineHandling = newLineHandling,
+                NewLineChars = newLineChars,
+                CloseOutput = closeOutput,
+                ConformanceLevel = ConformanceLevel.Auto,
+                CheckCharacters = checkCharacters,
+                AutoXmlDeclaration = autoXmlDeclaration,
+                Standalone = standalone,
+                OutputMethod = outputMethod,
+                ReadOnly = true
+            };
+        }
 
-                settings.Encoding = encoding;
-                settings.OmitXmlDeclaration = omitXmlDeclaration;
-                settings.NewLineHandling = newLineHandling;
-                settings.NewLineChars = newLineChars;
-                settings.CloseOutput = closeOutput;
-                settings.ConformanceLevel = ConformanceLevel.Auto;
-                settings.CheckCharacters = checkCharacters;
+        protected XmlWriterSettings GetSettingsIndent()
+        {
+            var settings = GetSettings();
 
-                settings.AutoXmlDeclaration = autoXmlDeclaration;
-                settings.Standalone = standalone;
-                settings.OutputMethod = outputMethod;
+            settings.ReadOnly = false;
+            settings.Indent = true;
+            settings.IndentChars = _indentChars;
+            settings.NewLineOnAttributes = _newLineOnAttributes;
+            settings.ReadOnly = true;
 
-                settings.ReadOnly = true;
-                return settings;
-            }
+            return settings;
         }
 
         // Write the xml declaration.  This must be the first call.
@@ -1331,11 +1338,13 @@ namespace System.Xml
 
             fixed (char* pSrc = s)
             {
-                char* pS = pSrc;
-                while (CompareBufferType(*pDst++ = ToBufferType(*pS++), '\0'));
+                for (var i = 0; i < s.Length; i++)
+                {
+                    *pDst++ = ToBufferType(pSrc[i]);
+                }
             }
 
-            pDst[-1] = ToBufferType(';');
+            *pDst++ = ToBufferType(';');
             return pDst;
         }
 

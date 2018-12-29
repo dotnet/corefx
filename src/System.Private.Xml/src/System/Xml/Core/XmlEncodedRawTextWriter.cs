@@ -419,6 +419,8 @@ namespace System.Xml
             InitIndent(settings);
         }
 
+        public override XmlWriterSettings Settings => GetSettingsIndent();
+
         public override void WriteDocType(string name, string pubid, string sysid, string subset)
         {
             WriteDocTypeIndent();
