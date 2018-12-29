@@ -13,13 +13,8 @@
 // Because these two implementations of XmlTextWriter are so similar, the C++ preprocessor
 // is used to generate each implementation from one template file, using macros and ifdefs.
 
-using System;
-using System.IO;
-using System.Text;
-using System.Xml;
-using System.Xml.Schema;
 using System.Diagnostics;
-using MS.Internal.Xml;
+using System.IO;
 
 namespace System.Xml
 {
@@ -85,27 +80,27 @@ namespace System.Xml
                     RawText("\" \"");
                     RawText(sysid);
                 }
-                bufChars[bufPos++] = (char)'"';
+                buf[bufPos++] = (char)'"';
             }
             else if (sysid != null)
             {
                 RawText(" SYSTEM \"");
                 RawText(sysid);
-                bufChars[bufPos++] = (char)'"';
+                buf[bufPos++] = (char)'"';
             }
             else
             {
-                bufChars[bufPos++] = (char)' ';
+                buf[bufPos++] = (char)' ';
             }
 
             if (subset != null)
             {
-                bufChars[bufPos++] = (char)'[';
+                buf[bufPos++] = (char)'[';
                 RawText(subset);
-                bufChars[bufPos++] = (char)']';
+                buf[bufPos++] = (char)']';
             }
 
-            bufChars[this.bufPos++] = (char)'>';
+            buf[this.bufPos++] = (char)'>';
         }
 
         // For the HTML element, it should call this method with ns and prefix as String.Empty
@@ -121,7 +116,7 @@ namespace System.Xml
 
                 if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
                 currentElementProperties = (ElementProperties)elementPropertySearch.FindCaseInsensitiveString(localName);
-                base.bufChars[bufPos++] = (char)'<';
+                base.buf[bufPos++] = (char)'<';
                 base.RawText(localName);
                 base.attrEndPos = bufPos;
             }
@@ -137,7 +132,7 @@ namespace System.Xml
         // Output >. For HTML needs to output META info
         internal override void StartElementContent()
         {
-            base.bufChars[base.bufPos++] = (char)'>';
+            base.buf[base.bufPos++] = (char)'>';
 
             // Detect whether content is output
             this.contentPos = this.bufPos;
@@ -162,10 +157,10 @@ namespace System.Xml
 
                 if ((currentElementProperties & ElementProperties.EMPTY) == 0)
                 {
-                    bufChars[base.bufPos++] = (char)'<';
-                    bufChars[base.bufPos++] = (char)'/';
+                    buf[base.bufPos++] = (char)'<';
+                    buf[base.bufPos++] = (char)'/';
                     base.RawText(localName);
-                    bufChars[base.bufPos++] = (char)'>';
+                    buf[base.bufPos++] = (char)'>';
                 }
             }
             else
@@ -187,10 +182,10 @@ namespace System.Xml
 
                 if ((currentElementProperties & ElementProperties.EMPTY) == 0)
                 {
-                    bufChars[base.bufPos++] = (char)'<';
-                    bufChars[base.bufPos++] = (char)'/';
+                    buf[base.bufPos++] = (char)'<';
+                    buf[base.bufPos++] = (char)'/';
                     base.RawText(localName);
-                    bufChars[base.bufPos++] = (char)'>';
+                    buf[base.bufPos++] = (char)'>';
                 }
             }
             else
@@ -310,7 +305,7 @@ namespace System.Xml
 
                 if (base.attrEndPos == bufPos)
                 {
-                    base.bufChars[bufPos++] = (char)' ';
+                    base.buf[bufPos++] = (char)' ';
                 }
                 base.RawText(localName);
 
@@ -330,8 +325,8 @@ namespace System.Xml
                     _currentAttributeProperties = AttributeProperties.DEFAULT;
                 }
 
-                base.bufChars[bufPos++] = (char)'=';
-                base.bufChars[bufPos++] = (char)'"';
+                base.buf[bufPos++] = (char)'=';
+                base.buf[bufPos++] = (char)'"';
             }
             else
             {
@@ -359,7 +354,7 @@ namespace System.Xml
 
                 if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
-                base.bufChars[bufPos++] = (char)'"';
+                base.buf[bufPos++] = (char)'"';
             }
             base.inAttributeValue = false;
             base.attrEndPos = bufPos;
@@ -372,14 +367,14 @@ namespace System.Xml
 
             if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
-            bufChars[base.bufPos++] = (char)'<';
-            bufChars[base.bufPos++] = (char)'?';
+            buf[base.bufPos++] = (char)'<';
+            buf[base.bufPos++] = (char)'?';
             base.RawText(target);
-            bufChars[base.bufPos++] = (char)' ';
+            buf[base.bufPos++] = (char)' ';
 
             base.WriteCommentOrPi(text, '?');
 
-            base.bufChars[base.bufPos++] = (char)'>';
+            base.buf[base.bufPos++] = (char)'>';
 
             if (base.bufPos > base.bufLen)
             {
@@ -566,7 +561,7 @@ namespace System.Xml
                 _endsWithAmpersand = false;
             }
 
-            fixed (char* pDstBegin = bufChars)
+            fixed (char* pDstBegin = buf)
             {
                 char* pDst = pDstBegin + this.bufPos;
 
@@ -611,7 +606,7 @@ namespace System.Xml
                             }
                             else if (pSrc[1] != '{')
                             {
-                                pDst = XmlEncodedRawTextWriter.AmpEntity(pDst);
+                                pDst = AmpEntity(pDst);
                                 break;
                             }
                             *pDst++ = (char)ch;
@@ -654,7 +649,7 @@ namespace System.Xml
                 _endsWithAmpersand = false;
             }
 
-            fixed (char* pDstBegin = bufChars)
+            fixed (char* pDstBegin = buf)
             {
                 char* pDst = pDstBegin + this.bufPos;
 
@@ -699,7 +694,7 @@ namespace System.Xml
                             }
                             else if (pSrc[1] != '{')
                             {
-                                pDst = XmlEncodedRawTextWriter.AmpEntity(pDst);
+                                pDst = AmpEntity(pDst);
                                 break;
                             }
                             *pDst++ = (char)ch;
@@ -749,10 +744,10 @@ namespace System.Xml
         // For handling &{ in Html text field. If & is not followed by {, it still needs to be escaped.
         private void OutputRestAmps()
         {
-            base.bufChars[bufPos++] = (char)'a';
-            base.bufChars[bufPos++] = (char)'m';
-            base.bufChars[bufPos++] = (char)'p';
-            base.bufChars[bufPos++] = (char)';';
+            base.buf[bufPos++] = (char)'a';
+            base.buf[bufPos++] = (char)'m';
+            base.buf[bufPos++] = (char)'p';
+            base.buf[bufPos++] = (char)';';
         }
     }
 
@@ -858,7 +853,7 @@ namespace System.Xml
                 }
                 _indentLevel++;
 
-                base.bufChars[bufPos++] = (char)'<';
+                base.buf[bufPos++] = (char)'<';
             }
             else
             {
@@ -870,11 +865,11 @@ namespace System.Xml
                 }
                 _indentLevel++;
 
-                base.bufChars[base.bufPos++] = (char)'<';
+                base.buf[base.bufPos++] = (char)'<';
                 if (prefix.Length != 0)
                 {
                     base.RawText(prefix);
-                    base.bufChars[base.bufPos++] = (char)':';
+                    base.buf[base.bufPos++] = (char)':';
                 }
             }
             base.RawText(localName);
@@ -883,7 +878,7 @@ namespace System.Xml
 
         internal override void StartElementContent()
         {
-            base.bufChars[base.bufPos++] = (char)'>';
+            base.buf[base.bufPos++] = (char)'>';
 
             // Detect whether content is output
             base.contentPos = base.bufPos;

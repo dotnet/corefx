@@ -13,13 +13,8 @@
 // Because these two implementations of XmlTextWriter are so similar, the C++ preprocessor
 // is used to generate each implementation from one template file, using macros and ifdefs.
 
-using System;
-using System.IO;
-using System.Text;
-using System.Xml;
-using System.Xml.Schema;
 using System.Diagnostics;
-using MS.Internal.Xml;
+using System.IO;
 
 namespace System.Xml
 {
@@ -77,27 +72,27 @@ namespace System.Xml
                     RawText("\" \"");
                     RawText(sysid);
                 }
-                bufBytes[bufPos++] = (byte)'"';
+                buf[bufPos++] = (byte)'"';
             }
             else if (sysid != null)
             {
                 RawText(" SYSTEM \"");
                 RawText(sysid);
-                bufBytes[bufPos++] = (byte)'"';
+                buf[bufPos++] = (byte)'"';
             }
             else
             {
-                bufBytes[bufPos++] = (byte)' ';
+                buf[bufPos++] = (byte)' ';
             }
 
             if (subset != null)
             {
-                bufBytes[bufPos++] = (byte)'[';
+                buf[bufPos++] = (byte)'[';
                 RawText(subset);
-                bufBytes[bufPos++] = (byte)']';
+                buf[bufPos++] = (byte)']';
             }
 
-            bufBytes[this.bufPos++] = (byte)'>';
+            buf[this.bufPos++] = (byte)'>';
         }
 
         // For the HTML element, it should call this method with ns and prefix as String.Empty
@@ -113,7 +108,7 @@ namespace System.Xml
 
 
                 currentElementProperties = (ElementProperties)elementPropertySearch.FindCaseInsensitiveString(localName);
-                base.bufBytes[bufPos++] = (byte)'<';
+                base.buf[bufPos++] = (byte)'<';
                 base.RawText(localName);
                 base.attrEndPos = bufPos;
             }
@@ -129,7 +124,7 @@ namespace System.Xml
         // Output >. For HTML needs to output META info
         internal override void StartElementContent()
         {
-            base.bufBytes[base.bufPos++] = (byte)'>';
+            base.buf[base.bufPos++] = (byte)'>';
 
             // Detect whether content is output
             this.contentPos = this.bufPos;
@@ -154,10 +149,10 @@ namespace System.Xml
 
                 if ((currentElementProperties & ElementProperties.EMPTY) == 0)
                 {
-                    bufBytes[base.bufPos++] = (byte)'<';
-                    bufBytes[base.bufPos++] = (byte)'/';
+                    buf[base.bufPos++] = (byte)'<';
+                    buf[base.bufPos++] = (byte)'/';
                     base.RawText(localName);
-                    bufBytes[base.bufPos++] = (byte)'>';
+                    buf[base.bufPos++] = (byte)'>';
                 }
             }
             else
@@ -179,10 +174,10 @@ namespace System.Xml
 
                 if ((currentElementProperties & ElementProperties.EMPTY) == 0)
                 {
-                    bufBytes[base.bufPos++] = (byte)'<';
-                    bufBytes[base.bufPos++] = (byte)'/';
+                    buf[base.bufPos++] = (byte)'<';
+                    buf[base.bufPos++] = (byte)'/';
                     base.RawText(localName);
-                    bufBytes[base.bufPos++] = (byte)'>';
+                    buf[base.bufPos++] = (byte)'>';
                 }
             }
             else
@@ -302,7 +297,7 @@ namespace System.Xml
 
                 if (base.attrEndPos == bufPos)
                 {
-                    base.bufBytes[bufPos++] = (byte)' ';
+                    base.buf[bufPos++] = (byte)' ';
                 }
                 base.RawText(localName);
 
@@ -322,8 +317,8 @@ namespace System.Xml
                     _currentAttributeProperties = AttributeProperties.DEFAULT;
                 }
 
-                base.bufBytes[bufPos++] = (byte)'=';
-                base.bufBytes[bufPos++] = (byte)'"';
+                base.buf[bufPos++] = (byte)'=';
+                base.buf[bufPos++] = (byte)'"';
             }
             else
             {
@@ -351,7 +346,7 @@ namespace System.Xml
 
 
 
-                base.bufBytes[bufPos++] = (byte)'"';
+                base.buf[bufPos++] = (byte)'"';
             }
             base.inAttributeValue = false;
             base.attrEndPos = bufPos;
@@ -364,14 +359,14 @@ namespace System.Xml
 
 
 
-            bufBytes[base.bufPos++] = (byte)'<';
-            bufBytes[base.bufPos++] = (byte)'?';
+            buf[base.bufPos++] = (byte)'<';
+            buf[base.bufPos++] = (byte)'?';
             base.RawText(target);
-            bufBytes[base.bufPos++] = (byte)' ';
+            buf[base.bufPos++] = (byte)' ';
 
             base.WriteCommentOrPi(text, '?');
 
-            base.bufBytes[base.bufPos++] = (byte)'>';
+            base.buf[base.bufPos++] = (byte)'>';
 
             if (base.bufPos > base.bufLen)
             {
@@ -554,7 +549,7 @@ namespace System.Xml
                 _endsWithAmpersand = false;
             }
 
-            fixed (byte* pDstBegin = bufBytes)
+            fixed (byte* pDstBegin = buf)
             {
                 byte* pDst = pDstBegin + this.bufPos;
 
@@ -599,7 +594,7 @@ namespace System.Xml
                             }
                             else if (pSrc[1] != '{')
                             {
-                                pDst = XmlUtf8RawTextWriter.AmpEntity(pDst);
+                                pDst = AmpEntity(pDst);
                                 break;
                             }
                             *pDst++ = (byte)ch;
@@ -642,7 +637,7 @@ namespace System.Xml
                 _endsWithAmpersand = false;
             }
 
-            fixed (byte* pDstBegin = bufBytes)
+            fixed (byte* pDstBegin = buf)
             {
                 byte* pDst = pDstBegin + this.bufPos;
 
@@ -687,7 +682,7 @@ namespace System.Xml
                             }
                             else if (pSrc[1] != '{')
                             {
-                                pDst = XmlUtf8RawTextWriter.AmpEntity(pDst);
+                                pDst = AmpEntity(pDst);
                                 break;
                             }
                             *pDst++ = (byte)ch;
@@ -738,10 +733,10 @@ namespace System.Xml
         // For handling &{ in Html text field. If & is not followed by {, it still needs to be escaped.
         private void OutputRestAmps()
         {
-            base.bufBytes[bufPos++] = (byte)'a';
-            base.bufBytes[bufPos++] = (byte)'m';
-            base.bufBytes[bufPos++] = (byte)'p';
-            base.bufBytes[bufPos++] = (byte)';';
+            base.buf[bufPos++] = (byte)'a';
+            base.buf[bufPos++] = (byte)'m';
+            base.buf[bufPos++] = (byte)'p';
+            base.buf[bufPos++] = (byte)';';
         }
     }
 
@@ -846,7 +841,7 @@ namespace System.Xml
                 }
                 _indentLevel++;
 
-                base.bufBytes[bufPos++] = (byte)'<';
+                base.buf[bufPos++] = (byte)'<';
             }
             else
             {
@@ -858,11 +853,11 @@ namespace System.Xml
                 }
                 _indentLevel++;
 
-                base.bufBytes[base.bufPos++] = (byte)'<';
+                base.buf[base.bufPos++] = (byte)'<';
                 if (prefix.Length != 0)
                 {
                     base.RawText(prefix);
-                    base.bufBytes[base.bufPos++] = (byte)':';
+                    base.buf[base.bufPos++] = (byte)':';
                 }
             }
             base.RawText(localName);
@@ -871,7 +866,7 @@ namespace System.Xml
 
         internal override void StartElementContent()
         {
-            base.bufBytes[base.bufPos++] = (byte)'>';
+            base.buf[base.bufPos++] = (byte)'>';
 
             // Detect whether content is output
             base.contentPos = base.bufPos;
