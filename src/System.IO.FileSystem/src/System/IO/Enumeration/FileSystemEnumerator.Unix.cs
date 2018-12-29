@@ -113,11 +113,11 @@ namespace System.IO.Enumeration
                 // If HAVE_READDIR_R is defined for the platform FindNextEntry depends on _entryBuffer being fixed since
                 // _entry will point to a string in the middle of the array. If the array is not fixed GC can move it after
                 // the native call and _entry will point to a bogus file name. 
-                fixed (byte* _ = _entryBuffer)
+                fixed (byte* entryBufferPtr = _entryBuffer)
                 {
                     do
                     {
-                        FindNextEntry();
+                        FindNextEntry(entryBufferPtr, _entryBuffer == null ? 0 : _entryBuffer.Length);
                         if (_lastEntryFound)
                             return false;
 
@@ -175,33 +175,35 @@ namespace System.IO.Enumeration
 
         private unsafe void FindNextEntry()
         {
-            if (_entryBuffer == null)
-                return;
-
-            fixed (byte* bufferPtr = _entryBuffer)
+            fixed(byte* entryBufferPtr = _entryBuffer)
             {
-                int result = Interop.Sys.ReadDirR(_directoryHandle, bufferPtr, _entryBuffer.Length, out _entry);
-                switch (result)
-                {
-                    case -1:
-                        // End of directory
+                FindNextEntry(entryBufferPtr, _entryBuffer == null ? 0 : _entryBuffer.Length);
+            }
+        }
+
+        private unsafe void FindNextEntry(byte* entryBufferPtr, int bufferLength)
+        {
+            int result = Interop.Sys.ReadDirR(_directoryHandle, entryBufferPtr, bufferLength, out _entry);
+            switch (result)
+            {
+                case -1:
+                    // End of directory
+                    DirectoryFinished();
+                    break;
+                case 0:
+                    // Success
+                    break;
+                default:
+                    // Error
+                    if (InternalContinueOnError(new Interop.ErrorInfo(result)))
+                    {
                         DirectoryFinished();
                         break;
-                    case 0:
-                        // Success
-                        break;
-                    default:
-                        // Error
-                        if (InternalContinueOnError(new Interop.ErrorInfo(result)))
-                        {
-                            DirectoryFinished();
-                            break;
-                        }
-                        else
-                        {
-                            throw Interop.GetExceptionForIoErrno(new Interop.ErrorInfo(result), _currentPath, isDirectory: true);
-                        }
-                }
+                    }
+                    else
+                    {
+                        throw Interop.GetExceptionForIoErrno(new Interop.ErrorInfo(result), _currentPath, isDirectory: true);
+                    }
             }
         }
 
