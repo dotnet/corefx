@@ -175,7 +175,7 @@ namespace System.IO.Enumeration
 
         private unsafe void FindNextEntry()
         {
-            fixed(byte* entryBufferPtr = _entryBuffer)
+            fixed (byte* entryBufferPtr = _entryBuffer)
             {
                 FindNextEntry(entryBufferPtr, _entryBuffer == null ? 0 : _entryBuffer.Length);
             }
