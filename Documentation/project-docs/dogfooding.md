@@ -96,7 +96,8 @@ runtime.
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <RuntimeFrameworkVersion>3.0.0-preview-27225-1</RuntimeFrameworkVersion> <!-- modify build in this line -->
+    <!-- modify build in this line with version reported by `dotnet --info` as above under ".NET Core runtimes installed" -> Microsoft.NETCore.App -->
+    <RuntimeFrameworkVersion>3.0.0-preview-27225-1</RuntimeFrameworkVersion>
   </PropertyGroup>
 ```
 
@@ -117,7 +118,8 @@ make it self-contained
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <RuntimeFrameworkVersion>3.0.0-preview-27218-01</RuntimeFrameworkVersion> <!-- modify build in this line -->
+    <!-- modify build in this line with version reported by `dotnet --info` as above under ".NET Core runtimes installed" -> Microsoft.NETCore.App -->
+    <RuntimeFrameworkVersion>3.0.0-preview-27218-01</RuntimeFrameworkVersion>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier> <!-- make self-contained -->
   </PropertyGroup>
 ```
