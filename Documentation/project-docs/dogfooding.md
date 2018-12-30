@@ -95,7 +95,7 @@ runtime.
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-     <!-- modify version in this line with one reported by `dotnet --info` under ".NET Core runtimes installed" -> Microsoft.NETCore.App -->
+    <!-- modify version in this line with one reported by `dotnet --info` under ".NET Core runtimes installed" -> Microsoft.NETCore.App -->
     <RuntimeFrameworkVersion>3.0.0-preview-27225-1</RuntimeFrameworkVersion>
   </PropertyGroup>
 ```
