@@ -109,8 +109,8 @@ $ dotnet run
 
 In this case, the .NET Core runtime will be published along with your application.
 
-0. You still need to install the prerequisite .NET Core SDK from above.
-1. Modify your .csproj to reference the nightly build of Microsoft.NETCore.App *and*
+1. You still need to install the prerequisite .NET Core SDK from above.
+2. Modify your .csproj to reference the nightly build of Microsoft.NETCore.App *and*
 make it self-contained
 
 ```XML
@@ -118,6 +118,7 @@ make it self-contained
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <!-- modify build in this line with version reported by `dotnet --info` as above under ".NET Core runtimes installed" -> Microsoft.NETCore.App -->
+    <!-- moreover, this can be any valid Microsoft.NETCore.App package version from https://dotnet.myget.org/feed/dotnet-core/package/nuget/Microsoft.NETCore.App -->
     <RuntimeFrameworkVersion>3.0.0-preview-27218-01</RuntimeFrameworkVersion>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier> <!-- make self-contained -->
   </PropertyGroup>
