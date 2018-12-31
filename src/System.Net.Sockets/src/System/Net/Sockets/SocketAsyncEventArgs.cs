@@ -484,14 +484,19 @@ namespace System.Net.Sockets
 
         private void ThrowForNonFreeStatus(int status)
         {
+            throw GetExceptionForNonFreeStatus(status);
+        }
+
+        private Exception GetExceptionForNonFreeStatus(int status)
+        {
             Debug.Assert(status == InProgress || status == Configuring || status == Disposed, $"Unexpected status: {status}");
             if (status == Disposed)
             {
-                throw new ObjectDisposedException(GetType().FullName);
+                return new ObjectDisposedException(GetType().FullName);
             }
             else
             {
-                throw new InvalidOperationException(SR.net_socketopinprogress);
+                return new InvalidOperationException(SR.net_socketopinprogress);
             }
         }
 
