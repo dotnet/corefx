@@ -484,20 +484,20 @@ namespace System.Net.Sockets
 
         private void ThrowForNonFreeStatus(int status)
         {
-            throw GetExceptionForNonFreeStatus(status);
-        }
+            Exception GetExceptionForNonFreeStatus(int innerStatus)
+            {
+                Debug.Assert(innerStatus == InProgress || innerStatus == Configuring || innerStatus == Disposed, $"Unexpected status: {innerStatus}");
+                if (innerStatus == Disposed)
+                {
+                    return new ObjectDisposedException(GetType().FullName);
+                }
+                else
+                {
+                    return new InvalidOperationException(SR.net_socketopinprogress);
+                }
+            }
 
-        private Exception GetExceptionForNonFreeStatus(int status)
-        {
-            Debug.Assert(status == InProgress || status == Configuring || status == Disposed, $"Unexpected status: {status}");
-            if (status == Disposed)
-            {
-                return new ObjectDisposedException(GetType().FullName);
-            }
-            else
-            {
-                return new InvalidOperationException(SR.net_socketopinprogress);
-            }
+            throw GetExceptionForNonFreeStatus(status);
         }
 
         // Prepares for a native async socket call.
