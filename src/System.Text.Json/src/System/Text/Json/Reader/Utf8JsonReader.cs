@@ -1726,14 +1726,19 @@ namespace System.Text.Json
             }
 
             // If we have encountered \r, check and advance index if next character is \n
-            if (localBuffer[idx] == JsonConstants.CarriageReturn 
-                && idx < localBuffer.Length - 1
-                && localBuffer[idx + 1] == JsonConstants.LineFeed)
+            if (localBuffer[idx] == JsonConstants.CarriageReturn)
             {
-                idx++;
+                if (idx < localBuffer.Length - 1)
+                {
+                    if (localBuffer[idx + 1] == JsonConstants.LineFeed)
+                        idx++;
+                }
+                else if (!IsLastSpan)
+                {
+                    return false;
+                }
             }
-
-
+            
             idx++;
             _bytePositionInLine = 0;
             _lineNumber++;

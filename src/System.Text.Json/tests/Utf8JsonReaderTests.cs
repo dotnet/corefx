@@ -654,30 +654,40 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("\"h\u6F22\u5B57ello\"", 1, 0)] // "\""
-        [InlineData("12345", 3, 0)]   // "123"
-        [InlineData("null", 3, 0)]   // "nul"
-        [InlineData("true", 3, 0)]   // "tru"
-        [InlineData("false", 4, 0)]  // "fals"
-        [InlineData("   {\"a\u6F22\u5B57ge\":30}   ", 16, 16)] // "   {\"a\u6F22\u5B57ge\":"
-        [InlineData("{\"n\u6F22\u5B57ame\":\"A\u6F22\u5B57hson\"}", 15, 14)]  // "{\"n\u6F22\u5B57ame\":\"A\u6F22\u5B57hso"
-        [InlineData("-123456789", 1, 0)] // "-"
-        [InlineData("0.5", 2, 0)]    // "0."
-        [InlineData("10.5e+3", 5, 0)] // "10.5e"
-        [InlineData("10.5e-1", 6, 0)]    // "10.5e-"
-        [InlineData("{\"i\u6F22\u5B57nts\":[1, 2, 3, 4, 5]}", 27, 25)]    // "{\"i\u6F22\u5B57nts\":[1, 2, 3, 4, "
-        [InlineData("{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\"], \"ints\":[1, 2, 3, 4, 5]}", 36, 36)]  // "{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\""
-        [InlineData("{\"a\u6F22\u5B57ge\":30, \"name\":\"test}:[]\", \"another \u6F22\u5B57string\" : \"tests\"}", 25, 24)]   // "{\"a\u6F22\u5B57ge\":30, \"name\":\"test}"
-        [InlineData("   [[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"t\u6F22\u5B57emp2:[]}]]]]}]]]]\":[]}]]]]}]]]]   ", 54, 29)] // "   [[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"t\u6F22\u5B57emp2:[]}]]]]}]]]]"
-        [InlineData("{\r\n\"is\u6F22\u5B57Active\": false, \"in\u6F22\u5B57valid\"\r\n : \"now its \u6F22\u5B57valid\"}", 26, 26)]  // "{\r\n\"is\u6F22\u5B57Active\": false, \"in\u6F22\u5B57valid\"\r\n}"
-        [InlineData("{\"property\\u1234Name\": \"String value with hex: \\uABCD in the middle.\"}", 51, 23)]  // "{\"property\\u1234Name\": \"String value with hex: \\uAB"
-        [InlineData("{ \"number\": 0}", 13, 12)]    // "{ \"number\": 0"
-        public static void PartialJson(string jsonString, int splitLocation, int consumed)
+        [InlineData("\"h\u6F22\u5B57ello\"", 1, 0, false)] // "\""
+        [InlineData("12345", 3, 0, false)]   // "123"
+        [InlineData("null", 3, 0, false)]   // "nul"
+        [InlineData("true", 3, 0, false)]   // "tru"
+        [InlineData("false", 4, 0, false)]  // "fals"
+        [InlineData("   {\"a\u6F22\u5B57ge\":30}   ", 16, 16, false)] // "   {\"a\u6F22\u5B57ge\":"
+        [InlineData("{\"n\u6F22\u5B57ame\":\"A\u6F22\u5B57hson\"}", 15, 14, false)]  // "{\"n\u6F22\u5B57ame\":\"A\u6F22\u5B57hso"
+        [InlineData("-123456789", 1, 0, false)] // "-"
+        [InlineData("0.5", 2, 0, false)]    // "0."
+        [InlineData("10.5e+3", 5, 0, false)] // "10.5e"
+        [InlineData("10.5e-1", 6, 0, false)]    // "10.5e-"
+        [InlineData("{\"i\u6F22\u5B57nts\":[1, 2, 3, 4, 5]}", 27, 25, false)]    // "{\"i\u6F22\u5B57nts\":[1, 2, 3, 4, "
+        [InlineData("{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\"], \"ints\":[1, 2, 3, 4, 5]}", 36, 36, false)]  // "{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\""
+        [InlineData("{\"a\u6F22\u5B57ge\":30, \"name\":\"test}:[]\", \"another \u6F22\u5B57string\" : \"tests\"}", 25, 24, false)]   // "{\"a\u6F22\u5B57ge\":30, \"name\":\"test}"
+        [InlineData("   [[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"t\u6F22\u5B57emp2:[]}]]]]}]]]]\":[]}]]]]}]]]]   ", 54, 29, false)] // "   [[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"t\u6F22\u5B57emp2:[]}]]]]}]]]]"
+        [InlineData("{\r\n\"is\u6F22\u5B57Active\": false, \"in\u6F22\u5B57valid\"\r\n : \"now its \u6F22\u5B57valid\"}", 26, 26, false)]  // "{\r\n\"is\u6F22\u5B57Active\": false, \"in\u6F22\u5B57valid\"\r\n}"
+        [InlineData("{\"property\\u1234Name\": \"String value with hex: \\uABCD in the middle.\"}", 51, 23, false)]  // "{\"property\\u1234Name\": \"String value with hex: \\uAB"
+        [InlineData("{ \"number\": 0}", 13, 12, false)]    // "{ \"number\": 0"
+
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment", 53, 16, true)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment", 54, 54, true)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r\n//Another single-line comment", 59, 16, true)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r\n//Another single-line comment", 60, 60, true)]
+        [InlineData("//This is a comment with a carriage return\r//Another single-line comment", 42, 0, true)]
+        [InlineData("//This is a comment with a carriage return\r//Another single-line comment", 43, 0, true)]
+        [InlineData("//This is a comment with a carriage return\r//Another single-line comment", 44, 43, true)]
+        public static void PartialJson(string jsonString, int splitLocation, int consumed, bool containsComments)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
+                if (commentHandling == JsonCommentHandling.Disallow && containsComments)
+                    continue;
+
                 var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
                 var json = new Utf8JsonReader(dataUtf8.AsSpan(0, splitLocation), false, state);
                 while (json.Read())
@@ -999,12 +1009,13 @@ namespace System.Text.Json.Tests
         [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "/*This is a split multi-line \n\u6F22\u5B57comment after json*/", 72)]
         [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", "/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/", 85)]
         [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", "/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/", 103)]
-
         [InlineData("{\r\n   \"value\": 11,\r\n   /* yes, it's mis-spelled */\r\n   \"deelay\": 3\r\n}", "/* yes, it's mis-spelled */", 50)]
         [InlineData("[\r\n   12,\r\n   87,\r\n   /* Isn't it \"nice\" that JSON provides no limits on the length of numbers? */\r\n   123456789012345678901234567890123456789.01234567890123456789e+9876543218976543219876543210\r\n]",
             "/* Isn't it \"nice\" that JSON provides no limits on the length of numbers? */", 98)]
+        
         public static void AllowSingleSegment(string jsonString, string expectedComment, int expectedIndex)
         {
+            System.Diagnostics.Debugger.Break();
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
@@ -1098,6 +1109,9 @@ namespace System.Text.Json.Tests
         [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n", 52)]
         [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}", 54)]
         [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}", 72)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r//Another single-line comment", 59)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment", 54)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return and line break\r\n//Another single-line comment", 75)]
 
         [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"", 44)]
         [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/", 50)]
@@ -1159,6 +1173,9 @@ namespace System.Text.Json.Tests
         [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 53)]
         [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}", 55)]
         [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}", 73)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r//Another single-line comment", 59)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment", 54)]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return and line break\r\n//Another single-line comment", 75)]
 
         [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"", 51)]
         [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/", 57)]
@@ -1168,7 +1185,7 @@ namespace System.Text.Json.Tests
         [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 60)]
         [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", 73)]
         [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", 91)]
-
+        
         [InlineData("{\r\n   \"value\": 11,\r\n   /* yes, it's mis-spelled */\r\n   \"deelay\": 3\r\n}", 50)]
         [InlineData("[\r\n   12,\r\n   87,\r\n   /* Isn't it \"nice\" that JSON provides no limits on the length of numbers? */\r\n   123456789012345678901234567890123456789.01234567890123456789e+9876543218976543219876543210\r\n]", 98)]
         public static void SkipSingleSegment(string jsonString, int expectedConsumed)
