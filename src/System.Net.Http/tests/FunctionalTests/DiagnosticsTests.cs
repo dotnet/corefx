@@ -383,6 +383,57 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [Fact]
+        public void SendAsync_ExpectedDiagnosticSourceActivityLoggingDoesNotOverwriteHeader()
+        {
+            RemoteInvoke(useSocketsHttpHandlerString =>
+            {
+                bool activityStartLogged = false;
+                bool activityStopLogged = false;
+
+                Activity parentActivity = new Activity("parent");
+                parentActivity.AddBaggage("correlationId", Guid.NewGuid().ToString());
+                parentActivity.Start();
+
+                string customRequestIdHeader = "|foo.bar.";
+                var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(kvp =>
+                {
+                    if (kvp.Key.Equals("System.Net.Http.HttpRequestOut.Start"))
+                    {
+                        var request = GetPropertyValueFromAnonymousTypeInstance<HttpRequestMessage>(kvp.Value, "Request");
+                        request.Headers.Add("Request-Id", customRequestIdHeader);
+
+                        activityStartLogged = true;
+                    }
+                    else if (kvp.Key.Equals("System.Net.Http.HttpRequestOut.Stop"))
+                    {
+                        var request = GetPropertyValueFromAnonymousTypeInstance<HttpRequestMessage>(kvp.Value, "Request");
+                        Assert.Single(request.Headers.GetValues("Request-Id"));
+                        Assert.Equal(customRequestIdHeader, request.Headers.GetValues("Request-Id").Single());
+                        activityStopLogged = true;
+                    }
+                });
+
+                using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
+                {
+                    diagnosticListenerObserver.Enable();
+                    using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString))
+                    {
+                        client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
+                    }
+
+                    Assert.True(activityStartLogged, "HttpRequestOut.Start was not logged.");
+
+                    // Poll with a timeout since logging response is not synchronized with returning a response.
+                    WaitForTrue(() => activityStopLogged, TimeSpan.FromSeconds(1), "HttpRequestOut.Stop was not logged within 1 second timeout.");
+                    diagnosticListenerObserver.Disable();
+                }
+
+                return SuccessExitCode;
+            }, UseSocketsHttpHandler.ToString()).Dispose();
+        }
+
+        [OuterLoop] // TODO: Issue #11345
+        [Fact]
         public void SendAsync_ExpectedDiagnosticSourceUrlFilteredActivityLogging()
         {
             RemoteInvoke(useSocketsHttpHandlerString =>
