@@ -95,16 +95,17 @@ namespace System.Diagnostics
         }
 
         /// <summary>Gets parent process ID</summary>
-        private int? ParentProcessId
+        private int ParentProcessId
         {
             get
             {
                 EnsureState(State.HaveNonExitedId);
-
-                // Returns null if permissions do not allow querying the specified process
                 Interop.libproc.proc_taskallinfo? info = Interop.libproc.GetProcessInfoById(Id);
 
-                return (info.HasValue)? (int?)Convert.ToInt32(info.Value.pbsd.pbi_ppid) : null;
+                if (info == null)
+                    throw new Win32Exception(SR.ProcessInformationUnavailable);
+
+                return Convert.ToInt32(info.Value.pbsd.pbi_ppid);
             }
         }
 

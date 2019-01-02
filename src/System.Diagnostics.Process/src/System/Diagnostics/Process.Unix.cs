@@ -317,7 +317,7 @@ namespace System.Diagnostics
 
                 try
                 {
-                    if (IsParentOf(possibleChildProcess))
+                    if (SafePredicateTest(() => IsParentOf(possibleChildProcess)))
                     {
                         childProcesses.Add(possibleChildProcess);
                         keep = true;
