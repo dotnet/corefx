@@ -206,11 +206,11 @@ namespace System.Xml
             {
                 XmlWriterSettings settings = new XmlWriterSettings();
 
-                settings.Encoding = this.encoding;
-                settings.OmitXmlDeclaration = this.omitXmlDeclaration;
-                settings.NewLineHandling = this.newLineHandling;
-                settings.NewLineChars = this.newLineChars;
-                settings.CloseOutput = this.closeOutput;
+                settings.Encoding = encoding;
+                settings.OmitXmlDeclaration = omitXmlDeclaration;
+                settings.NewLineHandling = newLineHandling;
+                settings.NewLineChars = newLineChars;
+                settings.CloseOutput = closeOutput;
                 settings.ConformanceLevel = ConformanceLevel.Auto;
                 settings.CheckCharacters = checkCharacters;
 
@@ -307,7 +307,7 @@ namespace System.Xml
                 bufChars[bufPos++] = (char)']';
             }
 
-            bufChars[this.bufPos++] = (char)'>';
+            bufChars[bufPos++] = (char)'>';
         }
 
         // Serialize the beginning of an element start tag: "<prefix:localName"
@@ -325,7 +325,7 @@ namespace System.Xml
             if (prefix != null && prefix.Length != 0)
             {
                 RawText(prefix);
-                bufChars[this.bufPos++] = (char)':';
+                bufChars[bufPos++] = (char)':';
             }
 
             RawText(localName);
@@ -447,9 +447,9 @@ namespace System.Xml
         {
             Debug.Assert(prefix != null && namespaceName != null);
 
-            this.WriteStartNamespaceDeclaration(prefix);
-            this.WriteString(namespaceName);
-            this.WriteEndNamespaceDeclaration();
+            WriteStartNamespaceDeclaration(prefix);
+            WriteString(namespaceName);
+            WriteEndNamespaceDeclaration();
         }
 
         internal override bool SupportsNamespaceDeclarationInChunks
@@ -961,7 +961,7 @@ namespace System.Xml
         {
             fixed (char* pDstBegin = bufChars)
             {
-                char* pDst = pDstBegin + this.bufPos;
+                char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
@@ -1081,7 +1081,7 @@ namespace System.Xml
         {
             fixed (char* pDstBegin = bufChars)
             {
-                char* pDst = pDstBegin + this.bufPos;
+                char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
@@ -1208,16 +1208,16 @@ namespace System.Xml
         {
             fixed (char* pDstBegin = bufChars)
             {
-                char* pDst = pDstBegin + this.bufPos;
+                char* pDst = pDstBegin + bufPos;
                 char* pSrc = pSrcBegin;
 
                 int ch = 0;
                 for (;;)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
-                    if (pDstEnd > pDstBegin + this.bufLen)
+                    if (pDstEnd > pDstBegin + bufLen)
                     {
-                        pDstEnd = pDstBegin + this.bufLen;
+                        pDstEnd = pDstBegin + bufLen;
                     }
 
                     while (pDst < pDstEnd && ((ch = *pSrc) < XmlCharType.SurHighStart))
@@ -1739,7 +1739,7 @@ namespace System.Xml
             {
                 GrowTextContentMarks();
             }
-            _textContentMarks[++_lastMarkPos] = this.bufPos;
+            _textContentMarks[++_lastMarkPos] = bufPos;
         }
 
         private void GrowTextContentMarks()
