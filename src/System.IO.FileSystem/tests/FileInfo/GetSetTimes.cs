@@ -126,7 +126,8 @@ namespace System.IO.Tests
         [ConditionalFact(nameof(isNotHFS))]
         public void CopyToNanoSecondsPresent()
         {
-            FileInfo input = GetNonZeroNanoSeconds();
+            FileInfo input = new FileInfo(GetTestFilePath());
+            input.Create().Dispose();
             FileInfo output = new FileInfo(Path.Combine(GetTestFilePath(), input.Name));
 
             output.Directory.Create();
