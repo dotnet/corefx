@@ -18,6 +18,8 @@ namespace System.IO.Tests
             return new FileInfo(path);
         }
 
+        private static bool HasNonZeroNanoSeconds(DateTime dt) => dt.Ticks % 10 != 0;
+        
         public FileInfo GetNonZeroMilliSec()
         {
             FileInfo fileinfo = new FileInfo(GetTestFilePath());
@@ -33,6 +35,8 @@ namespace System.IO.Tests
                 // If it's 1/1000, or low granularity, this may help:
                 Thread.Sleep(1234);
             }
+
+            Assert.NotEqual(0, fileinfo.LastWriteTime.Millisecond);
             return fileinfo;
         }
 
@@ -42,7 +46,7 @@ namespace System.IO.Tests
             for (int i = 0; i < 5; i++)
             {
                 fileinfo.Create().Dispose();
-                if (fileinfo.LastWriteTime.Ticks % 10 != 0)
+                if (HasNonZeroNanoSeconds(fileinfo.LastWriteTime))
                     break;
 
                 // This case should only happen 1/10 times, unless the OS/Filesystem does
@@ -51,6 +55,8 @@ namespace System.IO.Tests
                 // If it's 1/10, or low granularity, this may help:
                 Thread.Sleep(123);
             }
+            
+            Assert.True(HasNonZeroNanoSeconds(fileinfo.LastWriteTime), "Tests failed to create a file with non-zero nanoseconds.");
             return fileinfo;
         }
 
@@ -113,7 +119,7 @@ namespace System.IO.Tests
             output.Directory.Create();
             output = input.CopyTo(output.FullName, true);
 
-            Assert.NotEqual(0, input.LastWriteTime.Millisecond);
+            Assert.Equal(input.LastWriteTime.Millisecond, output.LastWriteTime.Millisecond);
             Assert.NotEqual(0, output.LastWriteTime.Millisecond);
         }
 
@@ -127,8 +133,7 @@ namespace System.IO.Tests
             output = input.CopyTo(output.FullName, true);
 
             Assert.Equal(input.LastWriteTime.Ticks, output.LastWriteTime.Ticks);
-            Assert.NotEqual(0, output.LastWriteTime.Ticks % 10);
-            Assert.NotEqual(0, input.LastWriteTime.Ticks % 10);
+            Assert.True(HasNonZeroNanoSeconds(output.LastWriteTime));
         }
 
         [ConditionalFact(nameof(isHFS))]
@@ -140,8 +145,8 @@ namespace System.IO.Tests
             output.Directory.Create();
             output = input.CopyTo(output.FullName, true);
 
-            Assert.Equal(0, output.LastWriteTime.Ticks % 10);
-            Assert.Equal(0, input.LastWriteTime.Ticks % 10);
+            Assert.Equal(input.LastWriteTime.Ticks, output.LastWriteTime.Ticks);
+            Assert.True(HasNonZeroNanoSeconds(output.LastWriteTime));
         }
 
         [ConditionalFact(nameof(isHFS))]
@@ -175,7 +180,7 @@ namespace System.IO.Tests
             FileInfo output = new FileInfo(Path.Combine(GetTestFilePath(), input.Name));
             output.Directory.Create();
             output = input.CopyTo(output.FullName, true);
-            Assert.Equal(0, input.LastWriteTime.Millisecond);
+            Assert.Equal(input.LastWriteTime.Millisecond, output.LastWriteTime.Millisecond);
             Assert.Equal(0, output.LastWriteTime.Millisecond);
         }
 

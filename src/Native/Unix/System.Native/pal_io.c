@@ -1283,8 +1283,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
     if (ret == 0)
     {
 #if HAVE_FUTIMENS
-        // futimens is prefered because it has a higher resolution and is 
-        // available on Android.
+        // futimens is prefered because it has a higher resolution.
         struct timespec origTimes[2];
         origTimes[0].tv_sec = (time_t)sourceStat.st_atime;
         origTimes[0].tv_nsec = ST_ATIME_NSEC(&sourceStat);
@@ -1292,7 +1291,6 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
         origTimes[1].tv_nsec = ST_MTIME_NSEC(&sourceStat);
         while ((ret = futimens(outFd, origTimes)) < 0 && errno == EINTR);
 #elif HAVE_FUTIMES
-        // futimes is a POSIX function and is not available on Android.
         struct timeval origTimes[2];
         origTimes[0].tv_sec = sourceStat.st_atime;
         origTimes[0].tv_usec = ST_ATIME_NSEC(&sourceStat) / 1000;
