@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -10,6 +10,51 @@ namespace System.Diagnostics.Tests
 {
     public class EventLogWatcherTests
     {
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        public void Ctor_Default()
+        {
+            using (var eventLogWatcher = new EventLogWatcher("Application"))
+            {
+                Assert.False(eventLogWatcher.Enabled);
+                eventLogWatcher.Enabled = true;
+                Assert.True(eventLogWatcher.Enabled);
+                eventLogWatcher.Enabled = false;
+                Assert.False(eventLogWatcher.Enabled);
+            }
+        }
+            
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        public void Ctor_UsingBookmark()
+        {
+            EventBookmark bookmark = GetBookmark();
+            Assert.Throws<ArgumentNullException>(() => new EventLogWatcher(null, bookmark, true));
+            Assert.Throws<InvalidOperationException>(() => new EventLogWatcher(new EventLogQuery("Application", PathType.LogName, "*[System]") { ReverseDirection = true }, bookmark, true));
+
+            var query = new EventLogQuery("Application", PathType.LogName, "*[System]");
+            using (var eventLogWatcher = new EventLogWatcher(query, bookmark))
+            {
+                Assert.False(eventLogWatcher.Enabled);
+                eventLogWatcher.Enabled = true;
+                Assert.True(eventLogWatcher.Enabled);
+                eventLogWatcher.Enabled = false;
+                Assert.False(eventLogWatcher.Enabled);
+            }
+        }
+
+        private EventBookmark GetBookmark()
+        {
+            EventBookmark bookmark;
+            EventLogQuery eventLogQuery = new EventLogQuery("Application", PathType.LogName, "*[System]");
+            using (var eventLog = new EventLogReader(eventLogQuery))
+            using (var record = eventLog.ReadEvent())
+            {
+                Assert.NotNull(record);
+                bookmark = record.Bookmark;
+                Assert.NotNull(record.Bookmark);
+            }
+            return bookmark;
+        }
+
         static AutoResetEvent signal;
         private const string message = "EventRecordWrittenTestMessage";
         private int eventCounter;
@@ -31,6 +76,7 @@ namespace System.Diagnostics.Tests
                     eventLogWatcher.EventRecordWritten += (s, e) =>
                     {
                         eventCounter += 1;
+                        Assert.True(e.EventException != null || e.EventRecord != null);
                         signal.Set();
                     };
                     Helpers.RetryOnWin7(() => eventLogWatcher.Enabled = waitOnEvent);

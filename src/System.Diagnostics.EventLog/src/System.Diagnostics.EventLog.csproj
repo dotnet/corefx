@@ -47,7 +47,6 @@
     <Compile Include="System\Diagnostics\Reader\ProviderMetadataCachedInformation.cs" />
     <Compile Include="System\Diagnostics\Reader\Winmeta.cs" />
     <Compile Include="System\Diagnostics\Reader\UnsafeNativeMethods.cs" />
-
     <Compile Include="System\Diagnostics\EventLogEntryCollection.cs" />
     <Compile Include="System\Diagnostics\EventLogEntryType.cs" />
     <Compile Include="System\Diagnostics\EventLogInternal.cs" />

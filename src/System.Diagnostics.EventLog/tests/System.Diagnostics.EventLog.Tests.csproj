@@ -6,17 +6,19 @@
   <ItemGroup>
     <Compile Include="EventInstanceTests.cs" />
     <Compile Include="EventLogEntryCollectionTests.cs" />
-    <Compile Include="EventLogReaderTests\EventLogRecordTests.cs" />
-    <Compile Include="EventLogReaderTests\EventLogConfigurationTests.cs" />
-    <Compile Include="EventLogReaderTests\EventLogSessionTests.cs" />
-    <Compile Include="EventLogReaderTests\ProviderMetadataTests.cs" />
-    <Compile Include="EventLogTraceListenerTests.cs" />
-    <Compile Include="EventLogReaderTests\EventLogReaderTests.cs" />
-    <Compile Include="EventLogReaderTests\EventLogWatcherTests.cs" />
     <Compile Include="EventLogTests\EventLogEntryWrittenTest.cs" />
     <Compile Include="EventLogTests\EventLogSourceCreationTests.cs" />
     <Compile Include="EventLogTests\EventLogTests.cs" />
     <Compile Include="EventLogTests\EventLogWriteEntryTests.cs" />
+    <Compile Include="EventLogTraceListenerTests.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="System\Diagnostics\Reader\EventLogExceptionTests.cs" />
+    <Compile Include="System\Diagnostics\Reader\EventLogInformationTests.cs" />
+    <Compile Include="System\Diagnostics\Reader\EventLogPropertySelectorTests.cs" />
+    <Compile Include="System\Diagnostics\Reader\EventLogQueryTests.cs" />
+    <Compile Include="System\Diagnostics\Reader\EventLogReaderTests.cs" />
+    <Compile Include="System\Diagnostics\Reader\EventLogSessionTests.cs" />
+    <Compile Include="System\Diagnostics\Reader\EventLogWatcherTests.cs" /> 
+    <Compile Include="System\Diagnostics\Reader\ProviderMetadataTests.cs" />
   </ItemGroup>
 </Project>
