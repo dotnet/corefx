@@ -2,5 +2,5 @@
 <#@ assembly name="System.Core" #>
 <#@ output extension=".cs" #>
 <#@ import namespace="System" #>
-<#@ include file="XmlEncodedRawTextWriter.ttinclude" #>
-<#@ include file="XmlRawTextWriterGenerator.ttinclude" #>
+<#@ include file="XmlUtf8RawTextWriter.ttinclude" #>
+<#@ include file="XmlRawTextWriterGeneratorAsync.ttinclude" #>

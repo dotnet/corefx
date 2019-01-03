@@ -1,53 +1,10 @@
+<#@ template debug="false" hostspecific="false" language="C#" #>
 <#@ import namespace="System" #>
 <#
 switch (WriterType)
 {
     case RawTextWriterType.Utf8:
-        Classname = "XmlUtf8RawTextWriter";
-        ClassnameIndent = "XmlUtf8RawTextWriterIndent";
-        BufferName = "bufBytes";
-        BufferType = "byte";
-        EncodeCharBody = @"/* Surrogate character */
-                            if (XmlCharType.IsSurrogate(ch)) {
-                                pDst = EncodeSurrogate(pSrc, pSrcEnd, pDst);
-                                pSrc += 2;
-                            }
-                            /* Invalid XML character */
-                            else if (ch <= 0x7F || ch >= 0xFFFE) {
-                                pDst = InvalidXmlChar(ch, pDst, _entitizeInvalidChars_);
-                                pSrc++;
-                            }
-                            /* Multibyte UTF8 character */
-                            else {
-                                pDst = EncodeMultibyteUTF8(ch, pDst);
-                                pSrc++;
-                            }";
-        SetTextContentMarkBody = "";
-        break;
     case RawTextWriterType.Encoded:
-        Classname = "XmlEncodedRawTextWriter";
-        ClassnameIndent = "XmlEncodedRawTextWriterIndent";
-        BufferName = "bufChars";
-        BufferType = "char";
-        EncodeCharBody = @"/* Surrogate character */
-                            if (XmlCharType.IsSurrogate(ch)) {
-                                pDst = EncodeSurrogate(pSrc, pSrcEnd, pDst);
-                                pSrc += 2;
-                            }
-                            /* Invalid XML character */
-                            else  if (ch <= 0x7F || ch >= 0xFFFE) {
-                                pDst = InvalidXmlChar(ch, pDst, _entitizeInvalidChars_);
-                                pSrc++;
-                            }
-                            /* Other character between SurLowEnd and 0xFFFE */
-                            else {
-                                *pDst = (char)ch;
-                                pDst++;
-                                pSrc++;
-                            }";
-        SetTextContentMarkBody = @"if (trackTextContent && inTextContent != _value_) {
-                ChangeTextContentMark(_value_);
-            }";
         break;
     default:
         throw new ArgumentOutOfRangeException(
@@ -71,7 +28,7 @@ namespace System.Xml
     // text.  The general-purpose XmlEncodedTextWriter uses the Encoder class to output to any
     // encoding.  The XmlUtf8TextWriter class combined the encoding operation with serialization
     // in order to achieve better performance.
-    internal partial class <#= Classname #> : XmlRawWriter
+    internal partial class <#= ClassName #> : XmlRawWriter
     {
         //
         // Fields
@@ -148,7 +105,7 @@ namespace System.Xml
         // Constructors
         //
         // Construct and initialize an instance of this class.
-        protected <#= Classname #>(XmlWriterSettings settings)
+        protected <#= ClassName #>(XmlWriterSettings settings)
         {
             _useAsync = settings.Async;
 
@@ -171,7 +128,7 @@ namespace System.Xml
 
 <# if (WriterType == RawTextWriterType.Encoded) { #>
         // Construct an instance of this class that outputs text to the TextWriter interface.
-        public <#= Classname #>(TextWriter writer, XmlWriterSettings settings) : this(settings)
+        public <#= ClassName #>(TextWriter writer, XmlWriterSettings settings) : this(settings)
         {
             Debug.Assert(writer != null && settings != null);
 
@@ -194,7 +151,7 @@ namespace System.Xml
 <# } #>
 
         // Construct an instance of this class that serializes to a Stream interface.
-        public <#= Classname #>(Stream stream, XmlWriterSettings settings) : this(settings)
+        public <#= ClassName #>(Stream stream, XmlWriterSettings settings) : this(settings)
         {
             Debug.Assert(stream != null && settings != null);
 
@@ -1988,7 +1945,7 @@ namespace System.Xml
     }
 
     // Same as base text writer class except that elements, attributes, comments, and pi's are indented.
-    internal partial class <#= ClassnameIndent #> : <#= Classname #>
+    internal partial class <#= ClassNameIndent #> : <#= ClassName #>
     {
         //
         // Fields
@@ -2006,13 +1963,13 @@ namespace System.Xml
         // Constructors
         //
 <# if (WriterType == RawTextWriterType.Encoded) { #>
-        public <#= ClassnameIndent #>(TextWriter writer, XmlWriterSettings settings) : base(writer, settings)
+        public <#= ClassNameIndent #>(TextWriter writer, XmlWriterSettings settings) : base(writer, settings)
         {
             Init(settings);
         }
 <# } #>
 
-        public <#= ClassnameIndent #>(Stream stream, XmlWriterSettings settings) : base(stream, settings)
+        public <#= ClassNameIndent #>(Stream stream, XmlWriterSettings settings) : base(stream, settings)
         {
             Init(settings);
         }
@@ -2251,12 +2208,17 @@ namespace System.Xml
     }
 }
 <#+
-    public string Classname = "Undefined";
-    public string ClassnameIndent = "Undefined";
-    public string BufferName = "Undefined";
-    public string BufferType = "Undefined";
-    public string EncodeCharBody = "Undefined";
-    public string SetTextContentMarkBody = "Undefined";
+    public enum RawTextWriterType {
+        Unknown, Utf8, Encoded
+    }
+
+    public RawTextWriterType WriterType;
+    public string ClassName;
+    public string ClassNameIndent;
+    public string BufferName;
+    public string BufferType;
+    public string EncodeCharBody;
+    public string SetTextContentMarkBody;
 
     public string SetTextContentMark(bool value)
     {

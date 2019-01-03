@@ -31,12 +31,43 @@
     <Compile Include="System\Xml\Bits.cs" />
     <Compile Include="System\Xml\BitStack.cs" />
     <Compile Include="System\Xml\ByteStack.cs" />
+    <None Include="System\Xml\Core\XmlRawTextWriterGeneratorAsync.ttinclude" />
+    <None Include="System\Xml\Core\XmlRawTextWriterGenerator.ttinclude" />
+    <None Include="System\Xml\Core\XmlEncodedRawTextWriter.ttinclude" />
     <Content Include="System\Xml\Core\XmlEncodedRawTextWriter.tt">
       <LastGenOutput>XmlEncodedRawTextWriter.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
     </Content>
     <Compile Include="System\Xml\Core\XmlEncodedRawTextWriter.cs">
       <DependentUpon>XmlEncodedRawTextWriter.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Content Include="System\Xml\Core\XmlEncodedRawTextWriterAsync.tt">
+      <LastGenOutput>XmlEncodedRawTextWriterAsync.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </Content>
+    <Compile Include="System\Xml\Core\XmlEncodedRawTextWriterAsync.cs">
+      <DependentUpon>XmlEncodedRawTextWriterAsync.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <None Include="System\Xml\Core\XmlUtf8RawTextWriter.ttinclude" />
+    <Content Include="System\Xml\Core\XmlUtf8RawTextWriter.tt">
+      <LastGenOutput>XmlUtf8RawTextWriter.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </Content>
+    <Compile Include="System\Xml\Core\XmlUtf8RawTextWriter.cs">
+      <DependentUpon>XmlUtf8RawTextWriter.tt</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Content Include="System\Xml\Core\XmlUtf8RawTextWriterAsync.tt">
+      <LastGenOutput>XmlUtf8RawTextWriterAsync.cs</LastGenOutput>
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </Content>
+    <Compile Include="System\Xml\Core\XmlUtf8RawTextWriterAsync.cs">
+      <DependentUpon>XmlUtf8RawTextWriterAsync.tt</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
@@ -102,16 +133,6 @@
     <Compile Include="System\Xml\Core\SecureStringHasher.cs" />
     <Compile Include="System\Xml\Core\TextEncodedRawTextWriter.cs" />
     <None Include="System\Xml\Core\TextRawTextWriterGenerator.cxx" />
-    <None Include="System\Xml\Core\XmlRawTextWriterGenerator.ttinclude" />
-    <Content Include="System\Xml\Core\XmlUtf8RawTextWriter.tt">
-      <LastGenOutput>XmlUtf8RawTextWriter.cs</LastGenOutput>
-      <Generator>TextTemplatingFileGenerator</Generator>
-    </Content>
-    <Compile Include="System\Xml\Core\XmlUtf8RawTextWriter.cs">
-      <DependentUpon>XmlUtf8RawTextWriter.tt</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
     <Compile Include="System\Xml\Core\TextUtf8RawTextWriter.cs" />
     <Compile Include="System\Xml\Core\ValidatingReaderNodeData.cs" />
     <Compile Include="System\Xml\Core\ValidationType.cs" />
@@ -123,7 +144,6 @@
     <Compile Include="System\Xml\Core\XmlCharCheckingReaderAsync.cs" />
     <Compile Include="System\Xml\Core\XmlCharCheckingWriter.cs" />
     <Compile Include="System\Xml\Core\XmlCharCheckingWriterAsync.cs" />
-    <Compile Include="System\Xml\Core\XmlEncodedRawTextWriterAsync.cs" />
     <Compile Include="System\Xml\Core\XmlEventCache.cs" />
     <Compile Include="System\Xml\Core\XmlParserContext.cs" />
     <Compile Include="System\Xml\Core\XmlRawWriter.cs" />
@@ -141,7 +161,6 @@
     <Compile Include="System\Xml\Core\XmlTextReaderImplHelpers.cs" />
     <Compile Include="System\Xml\Core\XmlTextReaderImplHelpersAsync.cs" />
     <Compile Include="System\Xml\Core\XmlTextWriter.cs" />
-    <Compile Include="System\Xml\Core\XmlUtf8RawTextWriterAsync.cs" />
     <Compile Include="System\Xml\Core\XmlValidatingReader.cs" />
     <Compile Include="System\Xml\Core\XmlValidatingReaderImpl.cs" />
     <Compile Include="System\Xml\Core\XmlValidatingReaderImplAsync.cs" />

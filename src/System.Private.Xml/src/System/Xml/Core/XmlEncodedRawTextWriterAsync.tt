@@ -3,4 +3,4 @@
 <#@ output extension=".cs" #>
 <#@ import namespace="System" #>
 <#@ include file="XmlEncodedRawTextWriter.ttinclude" #>
-<#@ include file="XmlRawTextWriterGenerator.ttinclude" #>
+<#@ include file="XmlRawTextWriterGeneratorAsync.ttinclude" #>
