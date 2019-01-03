@@ -1,0 +1,12 @@
+<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ output extension=".cs" #>
+<#@ import namespace="System" #>
+<# WriterType = RawTextWriterType.Utf8; #>
+<#@ include file="XmlRawTextWriterGenerator.ttinclude" #>
+<#+
+    public RawTextWriterType WriterType;
+    public enum RawTextWriterType {
+        Utf8, Encoded
+    }
+#>

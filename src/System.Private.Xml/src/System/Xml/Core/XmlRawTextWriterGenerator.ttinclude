@@ -1,33 +1,13 @@
-<#@ template debug="true" hostSpecific="true" #>
-<#@ output extension=".cs" #>
-<#@ Assembly Name="System.Core.dll" #>
-<#@ Assembly Name="System.Xml.dll" #>
 <#@ import namespace="System" #>
-
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
-// WARNING: This file is generated and should not be modified directly.
-// Instead, modify XmlTextWriterGenerator.t4 and run the following commands:
-//
-//   TextTransform.exe -a '!!Classname!XmlUtf8RawTextWriter' XmlRawTextWriterGenerator.t4 -out XmlUtf8RawTextWriter.cs
-//   TextTransform.exe -a '!!Classname!XmlEncodedRawTextWriter' XmlRawTextWriterGenerator.t4 -out XmlEncodedRawTextWriter.cs
-
 <#
-    string classname = Host.ResolveParameterValue(null, null, "Classname");
-    bool isUtf8Writer = false;
-    bool isEncodedWriter = false;
-    string classnameIndent;
-    string buffer;
-    string bufferType;
-    switch (classname)
-    {
-        case "XmlUtf8RawTextWriter":
-            classnameIndent = "XmlUtf8RawTextWriterIndent";
-            buffer = "bufBytes";
-            bufferType = "byte";
-            encodeCharBody = @"/* Surrogate character */
+switch (WriterType)
+{
+    case RawTextWriterType.Utf8:
+        Classname = "XmlUtf8RawTextWriter";
+        ClassnameIndent = "XmlUtf8RawTextWriterIndent";
+        BufferName = "bufBytes";
+        BufferType = "byte";
+        EncodeCharBody = @"/* Surrogate character */
                             if (XmlCharType.IsSurrogate(ch)) {
                                 pDst = EncodeSurrogate(pSrc, pSrcEnd, pDst);
                                 pSrc += 2;
@@ -42,14 +22,14 @@
                                 pDst = EncodeMultibyteUTF8(ch, pDst);
                                 pSrc++;
                             }";
-            setTextContentMarkBody = "";
-            isUtf8Writer = true;
-            break;
-        case "XmlEncodedRawTextWriter":
-            classnameIndent = "XmlEncodedRawTextWriterIndent";
-            buffer = "bufChars";
-            bufferType = "char";
-            encodeCharBody = @"/* Surrogate character */
+        SetTextContentMarkBody = "";
+        break;
+    case RawTextWriterType.Encoded:
+        Classname = "XmlEncodedRawTextWriter";
+        ClassnameIndent = "XmlEncodedRawTextWriterIndent";
+        BufferName = "bufChars";
+        BufferType = "char";
+        EncodeCharBody = @"/* Surrogate character */
                             if (XmlCharType.IsSurrogate(ch)) {
                                 pDst = EncodeSurrogate(pSrc, pSrcEnd, pDst);
                                 pSrc += 2;
@@ -65,18 +45,18 @@
                                 pDst++;
                                 pSrc++;
                             }";
-            setTextContentMarkBody = @"
-            if (trackTextContent && inTextContent != _value_) {
+        SetTextContentMarkBody = @"if (trackTextContent && inTextContent != _value_) {
                 ChangeTextContentMark(_value_);
             }";
-            isEncodedWriter = true;
-            break;
-        default:
-            throw new ArgumentOutOfRangeException(
-                "Classname", classname,
-                "Unknown value for Classname.");
-    }
-#>
+        break;
+    default:
+        throw new ArgumentOutOfRangeException(
+            "WriterType", WriterType,
+            "Unknown value for WriterType.");
+}
+#>// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -91,7 +71,7 @@ namespace System.Xml
     // text.  The general-purpose XmlEncodedTextWriter uses the Encoder class to output to any
     // encoding.  The XmlUtf8TextWriter class combined the encoding operation with serialization
     // in order to achieve better performance.
-    internal partial class <#= classname #> : XmlRawWriter
+    internal partial class <#= Classname #> : XmlRawWriter
     {
         //
         // Fields
@@ -112,7 +92,7 @@ namespace System.Xml
 
         // buffer positions
         protected int bufPos = 1;     // buffer position starts at 1, because we need to be able to safely step back -1 in case we need to
-                                      // close an empty element or in CDATA section detection of double ]; <#= buffer #>[0] will always be 0
+                                      // close an empty element or in CDATA section detection of double ]; <#= BufferName #>[0] will always be 0
         protected int textPos = 1;    // text end position; don't indent first element, pi, or comment
         protected int contentPos;     // element content end position
         protected int cdataPos;       // cdata end position
@@ -124,7 +104,7 @@ namespace System.Xml
         protected bool hadDoubleBracket;
         protected bool inAttributeValue;
 
-<# if (isEncodedWriter) { #>
+<# if (WriterType == RawTextWriterType.Encoded) { #>
         protected int bufBytesUsed;
         protected char[] bufChars;
 
@@ -168,7 +148,7 @@ namespace System.Xml
         // Constructors
         //
         // Construct and initialize an instance of this class.
-        protected <#= classname #>(XmlWriterSettings settings)
+        protected <#= Classname #>(XmlWriterSettings settings)
         {
             _useAsync = settings.Async;
 
@@ -189,9 +169,9 @@ namespace System.Xml
             }
         }
 
-<# if (isEncodedWriter) { #>
+<# if (WriterType == RawTextWriterType.Encoded) { #>
         // Construct an instance of this class that outputs text to the TextWriter interface.
-        public <#= classname #>(TextWriter writer, XmlWriterSettings settings) : this(settings)
+        public <#= Classname #>(TextWriter writer, XmlWriterSettings settings) : this(settings)
         {
             Debug.Assert(writer != null && settings != null);
 
@@ -202,7 +182,7 @@ namespace System.Xml
             {
                 bufLen = ASYNCBUFSIZE;
             }
-            this.bufChars = new <#= bufferType #>[bufLen + OVERFLOW];
+            this.bufChars = new <#= BufferType #>[bufLen + OVERFLOW];
 
             // Write the xml declaration
             if (settings.AutoXmlDeclaration)
@@ -214,7 +194,7 @@ namespace System.Xml
 <# } #>
 
         // Construct an instance of this class that serializes to a Stream interface.
-        public <#= classname #>(Stream stream, XmlWriterSettings settings) : this(settings)
+        public <#= Classname #>(Stream stream, XmlWriterSettings settings) : this(settings)
         {
             Debug.Assert(stream != null && settings != null);
 
@@ -227,9 +207,9 @@ namespace System.Xml
                 bufLen = ASYNCBUFSIZE;
             }
 
-            <#= buffer #> = new <#= bufferType #>[bufLen + OVERFLOW];
+            <#= BufferName #> = new <#= BufferType #>[bufLen + OVERFLOW];
 
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
             // Output UTF-8 byte order mark if Encoding object wants it
             if (!stream.CanSeek || stream.Position == 0)
             {
@@ -367,27 +347,27 @@ namespace System.Xml
                 {
                     RawText(sysid);
                 }
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'"';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'"';
             }
             else if (sysid != null)
             {
                 RawText(" SYSTEM \"");
                 RawText(sysid);
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'"';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'"';
             }
             else
             {
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)' ';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)' ';
             }
 
             if (subset != null)
             {
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'[';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'[';
                 RawText(subset);
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)']';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)']';
             }
 
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'>';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'>';
         }
 
         // Serialize the beginning of an element start tag: "<prefix:localName"
@@ -398,11 +378,11 @@ namespace System.Xml
 
             <#= SetTextContentMark(false) #>
 
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'<';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'<';
             if (prefix != null && prefix.Length != 0)
             {
                 RawText(prefix);
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)':';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)':';
             }
 
             RawText(localName);
@@ -413,7 +393,7 @@ namespace System.Xml
         // Serialize the end of an element start tag in preparation for content serialization: ">"
         internal override void StartElementContent()
         {
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'>';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'>';
 
             // StartElementContent is always called; therefore, in order to allow shortcut syntax, we save the
             // position of the '>' character.  If WriteEndElement is called and no other characters have been
@@ -433,24 +413,24 @@ namespace System.Xml
             if (contentPos != bufPos)
             {
                 // Content has been output, so can't use shortcut syntax
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'<';
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'/';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'<';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'/';
 
                 if (prefix != null && prefix.Length != 0)
                 {
                     RawText(prefix);
-                    <#= buffer #>[bufPos++] = (<#= bufferType #>)':';
+                    <#= BufferName #>[bufPos++] = (<#= BufferType #>)':';
                 }
                 RawText(localName);
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'>';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'>';
             }
             else
             {
                 // Use shortcut syntax; overwrite the already output '>' character
                 bufPos--;
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)' ';
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'/';
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'>';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)' ';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'/';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'>';
             }
         }
 
@@ -462,16 +442,16 @@ namespace System.Xml
 
             <#= SetTextContentMark(false) #>
 
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'<';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'/';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'<';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'/';
 
             if (prefix != null && prefix.Length != 0)
             {
                 RawText(prefix);
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)':';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)':';
             }
             RawText(localName);
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'>';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'>';
         }
 
         // Serialize an attribute tag using double quotes around the attribute value: 'prefix:localName="'
@@ -484,17 +464,17 @@ namespace System.Xml
 
             if (attrEndPos == bufPos)
             {
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)' ';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)' ';
             }
 
             if (prefix != null && prefix.Length > 0)
             {
                 RawText(prefix);
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)':';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)':';
             }
             RawText(localName);
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'=';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'"';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'=';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'"';
 
             inAttributeValue = true;
         }
@@ -503,7 +483,7 @@ namespace System.Xml
         public override void WriteEndAttribute()
         {
             <#= SetTextContentMark(false) #>
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'"';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'"';
             inAttributeValue = false;
             attrEndPos = bufPos;
         }
@@ -539,8 +519,8 @@ namespace System.Xml
             {
                 RawText(" xmlns:");
                 RawText(prefix);
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'=';
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'"';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'=';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'"';
             }
 
             inAttributeValue = true;
@@ -552,7 +532,7 @@ namespace System.Xml
             <#= SetTextContentMark(false) #>
             inAttributeValue = false;
 
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'"';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'"';
             attrEndPos = bufPos;
         }
 
@@ -573,22 +553,22 @@ namespace System.Xml
             else
             {
                 // Start a new cdata section
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'<';
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'!';
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'[';
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'C';
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'D';
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'A';
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'T';
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'A';
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)'[';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'<';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'!';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'[';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'C';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'D';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'A';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'T';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'A';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)'[';
             }
 
             WriteCDataSection(text);
 
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)']';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)']';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'>';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)']';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)']';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'>';
 
             textPos = bufPos;
             cdataPos = bufPos;
@@ -601,16 +581,16 @@ namespace System.Xml
 
             <#= SetTextContentMark(false) #>
 
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'<';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'!';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'-';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'-';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'<';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'!';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'-';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'-';
 
             WriteCommentOrPi(text, '-');
 
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'-';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'-';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'>';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'-';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'-';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'>';
         }
 
         // Serialize a processing instruction.
@@ -621,18 +601,18 @@ namespace System.Xml
 
             <#= SetTextContentMark(false) #>
 
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'<';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'?';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'<';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'?';
             RawText(name);
 
             if (text.Length > 0)
             {
-                <#= buffer #>[bufPos++] = (<#= bufferType #>)' ';
+                <#= BufferName #>[bufPos++] = (<#= BufferType #>)' ';
                 WriteCommentOrPi(text, '?');
             }
 
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'?';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'>';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'?';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'>';
         }
 
         // Serialize an entity reference.
@@ -642,9 +622,9 @@ namespace System.Xml
 
             <#= SetTextContentMark(false) #>
 
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'&';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'&';
             RawText(name);
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)';';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)';';
 
             if (bufPos > bufLen)
             {
@@ -667,11 +647,11 @@ namespace System.Xml
 
             <#= SetTextContentMark(false) #>
 
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'&';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'#';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'x';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'&';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'#';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'x';
             RawText(strVal);
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)';';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)';';
 
             if (bufPos > bufLen)
             {
@@ -729,11 +709,11 @@ namespace System.Xml
             <#= SetTextContentMark(false) #>
             int surrogateChar = XmlCharType.CombineSurrogateChar(lowChar, highChar);
 
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'&';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'#';
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)'x';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'&';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'#';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'x';
             RawText(surrogateChar.ToString("X", NumberFormatInfo.InvariantInfo));
-            <#= buffer #>[bufPos++] = (<#= bufferType #>)';';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)';';
             textPos = bufPos;
         }
 
@@ -830,7 +810,7 @@ namespace System.Xml
                         }
                     }
                 }
-<# if (isEncodedWriter) { #>
+<# if (WriterType == RawTextWriterType.Encoded) { #>
                 else if (writer != null)
                 {
                     try
@@ -861,7 +841,7 @@ namespace System.Xml
         {
             FlushBuffer();
             FlushEncoder();
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
             if (stream != null)
             {
                 stream.Flush();
@@ -889,9 +869,9 @@ namespace System.Xml
                 // Output all characters (except for previous characters stored at beginning of buffer)
                 if (!writeToNull)
                 {
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
                     Debug.Assert(stream != null);
-                    stream.Write(<#= buffer #>, 1, bufPos - 1);
+                    stream.Write(<#= BufferName #>, 1, bufPos - 1);
 <# } else { #>
                     Debug.Assert(stream != null || writer != null);
 
@@ -920,7 +900,7 @@ namespace System.Xml
                     else
                     {
                         // Write text to TextWriter
-                        writer.Write(<#= buffer #>, 1, bufPos - 1);
+                        writer.Write(<#= BufferName #>, 1, bufPos - 1);
                     }
 <# } #>
                 }
@@ -934,16 +914,16 @@ namespace System.Xml
             finally
             {
                 // Move last buffer character to the beginning of the buffer (so that previous character can always be determined)
-                <#= buffer #>[0] = <#= buffer #>[bufPos - 1];
+                <#= BufferName #>[0] = <#= BufferName #>[bufPos - 1];
 
-<# if (isUtf8Writer) { #>
-                if (IsSurrogateByte(<#= buffer #>[0]))
+<# if (WriterType == RawTextWriterType.Utf8) { #>
+                if (IsSurrogateByte(<#= BufferName #>[0]))
                 {
                     // Last character was the first byte in a surrogate encoding, so move last three
                     // bytes of encoding to the beginning of the buffer.
-                    <#= buffer #>[1] = <#= buffer #>[bufPos];
-                    <#= buffer #>[2] = <#= buffer #>[bufPos + 1];
-                    <#= buffer #>[3] = <#= buffer #>[bufPos + 2];
+                    <#= BufferName #>[1] = <#= BufferName #>[bufPos];
+                    <#= BufferName #>[2] = <#= BufferName #>[bufPos + 1];
+                    <#= BufferName #>[3] = <#= BufferName #>[bufPos + 2];
                 }
 <# } #>
 
@@ -953,11 +933,11 @@ namespace System.Xml
                 contentPos = 0;    // Needs to be zero, since overwriting '>' character is no longer possible
                 cdataPos = 0;      // Needs to be zero, since overwriting ']]>' characters is no longer possible
                 bufPos = 1;        // Buffer position starts at 1, because we need to be able to safely step back -1 in case we need to
-                                   // close an empty element or in CDATA section detection of double ]; <#= buffer #>[0] will always be 0
+                                   // close an empty element or in CDATA section detection of double ]; <#= BufferName #>[0] will always be 0
             }
         }
 
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
         private void FlushEncoder()
         {
             // intentionally empty
@@ -976,7 +956,7 @@ namespace System.Xml
                 {
                     _charEntityFallback.StartOffset = startOffset;
                 }
-                encoder.Convert(<#= buffer #>, startOffset, endOffset - startOffset, bufBytes, bufBytesUsed, bufBytes.Length - bufBytesUsed, false, out chEnc, out bEnc, out completed);
+                encoder.Convert(<#= BufferName #>, startOffset, endOffset - startOffset, bufBytes, bufBytesUsed, bufBytes.Length - bufBytesUsed, false, out chEnc, out bEnc, out completed);
                 startOffset += chEnc;
                 bufBytesUsed += bEnc;
                 if (bufBytesUsed >= (bufBytes.Length - 16))
@@ -1001,7 +981,7 @@ namespace System.Xml
                 int bEnc;
                 bool completed;
                 // decode no chars, just flush
-                encoder.Convert(<#= buffer #>, 1, 0, bufBytes, 0, bufBytes.Length, true, out chEnc, out bEnc, out completed);
+                encoder.Convert(<#= BufferName #>, 1, 0, bufBytes, 0, bufBytes.Length, true, out chEnc, out bEnc, out completed);
                 if (bEnc != 0)
                 {
                     stream.Write(bufBytes, 0, bEnc);
@@ -1014,26 +994,26 @@ namespace System.Xml
         // are entitized.
         protected unsafe void WriteAttributeTextBlock(char* pSrc, char* pSrcEnd)
         {
-            fixed (<#= bufferType #>* pDstBegin = <#= buffer #>)
+            fixed (<#= BufferType #>* pDstBegin = <#= BufferName #>)
             {
-                <#= bufferType #>* pDst = pDstBegin + bufPos;
+                <#= BufferType #>* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
                 {
-                    <#= bufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
+                    <#= BufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
                     {
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
                     while (pDst < pDstEnd && (xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)) && ch <= 0x7F))
 <# } else { #>
                     while (pDst < pDstEnd && xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)))
 <# } #>
                     {
-                        *pDst = (<#= bufferType #>)ch;
+                        *pDst = (<#= BufferType #>)ch;
                         pDst++;
                         pSrc++;
                     }
@@ -1070,13 +1050,13 @@ namespace System.Xml
                             pDst = QuoteEntity(pDst);
                             break;
                         case '\'':
-                            *pDst = (<#= bufferType #>)ch;
+                            *pDst = (<#= BufferType #>)ch;
                             pDst++;
                             break;
                         case (char)0x9:
                             if (newLineHandling == NewLineHandling.None)
                             {
-                                *pDst = (<#= bufferType #>)ch;
+                                *pDst = (<#= BufferType #>)ch;
                                 pDst++;
                             }
                             else
@@ -1088,7 +1068,7 @@ namespace System.Xml
                         case (char)0xD:
                             if (newLineHandling == NewLineHandling.None)
                             {
-                                *pDst = (<#= bufferType #>)ch;
+                                *pDst = (<#= BufferType #>)ch;
                                 pDst++;
                             }
                             else
@@ -1100,7 +1080,7 @@ namespace System.Xml
                         case (char)0xA:
                             if (newLineHandling == NewLineHandling.None)
                             {
-                                *pDst = (<#= bufferType #>)ch;
+                                *pDst = (<#= BufferType #>)ch;
                                 pDst++;
                             }
                             else
@@ -1123,26 +1103,26 @@ namespace System.Xml
         // are entitized.
         protected unsafe void WriteElementTextBlock(char* pSrc, char* pSrcEnd)
         {
-            fixed (<#= bufferType #>* pDstBegin = <#= buffer #>)
+            fixed (<#= BufferType #>* pDstBegin = <#= BufferName #>)
             {
-                <#= bufferType #>* pDst = pDstBegin + bufPos;
+                <#= BufferType #>* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
                 {
-                    <#= bufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
+                    <#= BufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
                     {
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
                     while (pDst < pDstEnd && (xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)) && ch <= 0x7F))
 <# } else { #>
                     while (pDst < pDstEnd && xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)))
 <# } #>
                     {
-                        *pDst = (<#= bufferType #>)ch;
+                        *pDst = (<#= BufferType #>)ch;
                         pDst++;
                         pSrc++;
                     }
@@ -1178,7 +1158,7 @@ namespace System.Xml
                         case '"':
                         case '\'':
                         case (char)0x9:
-                            *pDst = (<#= bufferType #>)ch;
+                            *pDst = (<#= BufferType #>)ch;
                             pDst++;
                             break;
                         case (char)0xA:
@@ -1188,7 +1168,7 @@ namespace System.Xml
                             }
                             else
                             {
-                                *pDst = (<#= bufferType #>)ch;
+                                *pDst = (<#= BufferType #>)ch;
                                 pDst++;
                             }
                             break;
@@ -1210,7 +1190,7 @@ namespace System.Xml
                                     pDst = CarriageReturnEntity(pDst);
                                     break;
                                 case NewLineHandling.None:
-                                    *pDst = (<#= bufferType #>)ch;
+                                    *pDst = (<#= BufferType #>)ch;
                                     pDst++;
                                     break;
                             }
@@ -1239,28 +1219,28 @@ namespace System.Xml
 
         protected unsafe void RawText(char* pSrcBegin, char* pSrcEnd)
         {
-            fixed (<#= bufferType #>* pDstBegin = <#= buffer #>)
+            fixed (<#= BufferType #>* pDstBegin = <#= BufferName #>)
             {
-                <#= bufferType #>* pDst = pDstBegin + bufPos;
+                <#= BufferType #>* pDst = pDstBegin + bufPos;
                 char* pSrc = pSrcBegin;
 
                 int ch = 0;
                 for (;;)
                 {
-                    <#= bufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
+                    <#= BufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
                     {
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
                     while (pDst < pDstEnd && ((ch = *pSrc) <= 0x7F))
 <# } else { #>
                     while (pDst < pDstEnd && ((ch = *pSrc) < XmlCharType.SurHighStart))
 <# } #>
                     {
                         pSrc++;
-                        *pDst = (<#= bufferType #>)ch;
+                        *pDst = (<#= BufferType #>)ch;
                         pDst++;
                     }
                     Debug.Assert(pSrc <= pSrcEnd);
@@ -1289,27 +1269,27 @@ namespace System.Xml
 
         protected unsafe void WriteRawWithCharChecking(char* pSrcBegin, char* pSrcEnd)
         {
-            fixed (<#= bufferType #>* pDstBegin = <#= buffer #>)
+            fixed (<#= BufferType #>* pDstBegin = <#= BufferName #>)
             {
                 char* pSrc = pSrcBegin;
-                <#= bufferType #>* pDst = pDstBegin + bufPos;
+                <#= BufferType #>* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
                 {
-                    <#= bufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
+                    <#= BufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
                     {
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
                     while (pDst < pDstEnd && (xmlCharType.IsTextChar((char)(ch = *pSrc)) && ch <= 0x7F))
 <# } else { #>
                     while (pDst < pDstEnd && xmlCharType.IsTextChar((char)(ch = *pSrc)))
 <# } #>
                     {
-                        *pDst = (<#= bufferType #>)ch;
+                        *pDst = (<#= BufferType #>)ch;
                         pDst++;
                         pSrc++;
                     }
@@ -1338,7 +1318,7 @@ namespace System.Xml
                         case '<':
                         case '&':
                         case (char)0x9:
-                            *pDst = (<#= bufferType #>)ch;
+                            *pDst = (<#= BufferType #>)ch;
                             pDst++;
                             break;
                         case (char)0xD:
@@ -1354,7 +1334,7 @@ namespace System.Xml
                             }
                             else
                             {
-                                *pDst = (<#= bufferType #>)ch;
+                                *pDst = (<#= BufferType #>)ch;
                                 pDst++;
                             }
                             break;
@@ -1365,7 +1345,7 @@ namespace System.Xml
                             }
                             else
                             {
-                                *pDst = (<#= bufferType #>)ch;
+                                *pDst = (<#= BufferType #>)ch;
                                 pDst++;
                             }
                             break;
@@ -1392,30 +1372,30 @@ namespace System.Xml
             // write text
             fixed (char* pSrcBegin = text)
 
-            fixed (<#= bufferType #>* pDstBegin = <#= buffer #>)
+            fixed (<#= BufferType #>* pDstBegin = <#= BufferName #>)
             {
                 char* pSrc = pSrcBegin;
 
                 char* pSrcEnd = pSrcBegin + text.Length;
 
-                <#= bufferType #>* pDst = pDstBegin + bufPos;
+                <#= BufferType #>* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
                 {
-                    <#= bufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
+                    <#= BufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
                     {
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
                     while (pDst < pDstEnd && (xmlCharType.IsTextChar((char)(ch = *pSrc)) && ch != stopChar && ch <= 0x7F))
 <# } else { #>
                     while (pDst < pDstEnd && (xmlCharType.IsTextChar((char)(ch = *pSrc)) && ch != stopChar))
 <# } #>
                     {
-                        *pDst = (<#= bufferType #>)ch;
+                        *pDst = (<#= BufferType #>)ch;
                         pDst++;
                         pSrc++;
                     }
@@ -1441,33 +1421,33 @@ namespace System.Xml
                     switch (ch)
                     {
                         case '-':
-                            *pDst = (<#= bufferType #>)'-';
+                            *pDst = (<#= BufferType #>)'-';
                             pDst++;
                             if (ch == stopChar)
                             {
                                 // Insert space between adjacent dashes or before comment's end dashes
                                 if (pSrc + 1 == pSrcEnd || *(pSrc + 1) == '-')
                                 {
-                                    *pDst = (<#= bufferType #>)' ';
+                                    *pDst = (<#= BufferType #>)' ';
                                     pDst++;
                                 }
                             }
                             break;
                         case '?':
-                            *pDst = (<#= bufferType #>)'?';
+                            *pDst = (<#= BufferType #>)'?';
                             pDst++;
                             if (ch == stopChar)
                             {
                                 // Processing instruction: insert space between adjacent '?' and '>'
                                 if (pSrc + 1 < pSrcEnd && *(pSrc + 1) == '>')
                                 {
-                                    *pDst = (<#= bufferType #>)' ';
+                                    *pDst = (<#= BufferType #>)' ';
                                     pDst++;
                                 }
                             }
                             break;
                         case ']':
-                            *pDst = (<#= bufferType #>)']';
+                            *pDst = (<#= BufferType #>)']';
                             pDst++;
                             break;
                         case (char)0xD:
@@ -1483,7 +1463,7 @@ namespace System.Xml
                             }
                             else
                             {
-                                *pDst = (<#= bufferType #>)ch;
+                                *pDst = (<#= BufferType #>)ch;
                                 pDst++;
                             }
                             break;
@@ -1494,14 +1474,14 @@ namespace System.Xml
                             }
                             else
                             {
-                                *pDst = (<#= bufferType #>)ch;
+                                *pDst = (<#= BufferType #>)ch;
                                 pDst++;
                             }
                             break;
                         case '<':
                         case '&':
                         case (char)0x9:
-                            *pDst = (<#= bufferType #>)ch;
+                            *pDst = (<#= BufferType #>)ch;
                             pDst++;
                             break;
                         default:
@@ -1529,30 +1509,30 @@ namespace System.Xml
 
             fixed (char* pSrcBegin = text)
 
-            fixed (<#= bufferType #>* pDstBegin = <#= buffer #>)
+            fixed (<#= BufferType #>* pDstBegin = <#= BufferName #>)
             {
                 char* pSrc = pSrcBegin;
 
                 char* pSrcEnd = pSrcBegin + text.Length;
 
-                <#= bufferType #>* pDst = pDstBegin + bufPos;
+                <#= BufferType #>* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
                 {
-                    <#= bufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
+                    <#= BufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
                     {
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
                     while (pDst < pDstEnd && (xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)) && ch != ']' && ch <= 0x7F))
 <# } else { #>
                     while (pDst < pDstEnd && (xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)) && ch != ']'))
 <# } #>
                     {
-                        *pDst = (<#= bufferType #>)ch;
+                        *pDst = (<#= BufferType #>)ch;
                         pDst++;
                         pSrc++;
                     }
@@ -1578,25 +1558,25 @@ namespace System.Xml
                     switch (ch)
                     {
                         case '>':
-                            if (hadDoubleBracket && pDst[-1] == (<#= bufferType #>)']')
-                            {   // pDst[-1] will always correct - there is a padding character at <#= buffer #>[0]
+                            if (hadDoubleBracket && pDst[-1] == (<#= BufferType #>)']')
+                            {   // pDst[-1] will always correct - there is a padding character at <#= BufferName #>[0]
                                 // The characters "]]>" were found within the CData text
                                 pDst = RawEndCData(pDst);
                                 pDst = RawStartCData(pDst);
                             }
-                            *pDst = (<#= bufferType #>)'>';
+                            *pDst = (<#= BufferType #>)'>';
                             pDst++;
                             break;
                         case ']':
-                            if (pDst[-1] == (<#= bufferType #>)']')
-                            {   // pDst[-1] will always correct - there is a padding character at <#= buffer #>[0]
+                            if (pDst[-1] == (<#= BufferType #>)']')
+                            {   // pDst[-1] will always correct - there is a padding character at <#= BufferName #>[0]
                                 hadDoubleBracket = true;
                             }
                             else
                             {
                                 hadDoubleBracket = false;
                             }
-                            *pDst = (<#= bufferType #>)']';
+                            *pDst = (<#= BufferType #>)']';
                             pDst++;
                             break;
                         case (char)0xD:
@@ -1612,7 +1592,7 @@ namespace System.Xml
                             }
                             else
                             {
-                                *pDst = (<#= bufferType #>)ch;
+                                *pDst = (<#= BufferType #>)ch;
                                 pDst++;
                             }
                             break;
@@ -1623,7 +1603,7 @@ namespace System.Xml
                             }
                             else
                             {
-                                *pDst = (<#= bufferType #>)ch;
+                                *pDst = (<#= BufferType #>)ch;
                                 pDst++;
                             }
                             break;
@@ -1632,7 +1612,7 @@ namespace System.Xml
                         case '"':
                         case '\'':
                         case (char)0x9:
-                            *pDst = (<#= bufferType #>)ch;
+                            *pDst = (<#= BufferType #>)ch;
                             pDst++;
                             break;
                         default:
@@ -1645,7 +1625,7 @@ namespace System.Xml
             }
         }
 
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
         // Returns true if UTF8 encoded byte is first of four bytes that encode a surrogate pair.
         // To do this, detect the bit pattern 11110xxx.
         private static bool IsSurrogateByte(byte b)
@@ -1654,7 +1634,7 @@ namespace System.Xml
         }
 <# } #>
 
-        private static unsafe <#= bufferType #>* EncodeSurrogate(char* pSrc, char* pSrcEnd, <#= bufferType #>* pDst)
+        private static unsafe <#= BufferType #>* EncodeSurrogate(char* pSrc, char* pSrcEnd, <#= BufferType #>* pDst)
         {
             Debug.Assert(XmlCharType.IsSurrogate(*pSrc));
 
@@ -1667,7 +1647,7 @@ namespace System.Xml
                     if (lowChar >= XmlCharType.SurLowStart &&
                         (LocalAppContextSwitches.DontThrowOnInvalidSurrogatePairs || lowChar <= XmlCharType.SurLowEnd))
                     {
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
                         // Calculate Unicode scalar value for easier manipulations (see section 3.7 in Unicode spec)
                         // The scalar value repositions surrogate values to start at 0x10000.
 
@@ -1679,8 +1659,8 @@ namespace System.Xml
                         pDst[3] = (byte)(0x80 | ch & 0x3F);
                         pDst += 4;
 <# } else { #>
-                        pDst[0] = (<#= bufferType #>)ch;
-                        pDst[1] = (<#= bufferType #>)lowChar;
+                        pDst[0] = (<#= BufferType #>)ch;
+                        pDst[1] = (<#= BufferType #>)lowChar;
                         pDst += 2;
 <# } #>
 
@@ -1693,7 +1673,7 @@ namespace System.Xml
             throw XmlConvert.CreateInvalidHighSurrogateCharException((char)ch);
         }
 
-        private unsafe <#= bufferType #>* InvalidXmlChar(int ch, <#= bufferType #>* pDst, bool entitize)
+        private unsafe <#= BufferType #>* InvalidXmlChar(int ch, <#= BufferType #>* pDst, bool entitize)
         {
             Debug.Assert(!xmlCharType.IsWhiteSpace((char)ch));
             Debug.Assert(!xmlCharType.IsAttributeValueChar((char)ch));
@@ -1711,13 +1691,13 @@ namespace System.Xml
                 }
                 else
                 {
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
                     if (ch < 0x80)
                     {
 <# } #>
-                        *pDst = (<#= bufferType #>)ch;
+                        *pDst = (<#= BufferType #>)ch;
                         pDst++;
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
                     }
                     else
                     {
@@ -1729,13 +1709,13 @@ namespace System.Xml
             }
         }
 
-        internal unsafe void EncodeChar(ref char* pSrc, char* pSrcEnd, ref <#= bufferType #>* pDst)
+        internal unsafe void EncodeChar(ref char* pSrc, char* pSrcEnd, ref <#= BufferType #>* pDst)
         {
             int ch = *pSrc;
             <#= EncodeChar(false) #>
         }
 
-<# if (isUtf8Writer) { #>
+<# if (WriterType == RawTextWriterType.Utf8) { #>
         internal static unsafe byte* EncodeMultibyteUTF8(int ch, byte* pDst)
         {
             Debug.Assert(ch >= 0x80 && !XmlCharType.IsSurrogate(ch));
@@ -1786,7 +1766,7 @@ namespace System.Xml
         }
 <# } #>
 
-<# if (isEncodedWriter) { #>
+<# if (WriterType == RawTextWriterType.Encoded) { #>
         protected void ChangeTextContentMark(bool value)
         {
             Debug.Assert(inTextContent != value);
@@ -1808,9 +1788,9 @@ namespace System.Xml
         }
 <# } #>
         // Write NewLineChars to the specified buffer position and return an updated position.
-        protected unsafe <#= bufferType #>* WriteNewLine(<#= bufferType #>* pDst)
+        protected unsafe <#= BufferType #>* WriteNewLine(<#= BufferType #>* pDst)
         {
-            fixed (<#= bufferType #>* pDstBegin = <#= buffer #>)
+            fixed (<#= BufferType #>* pDstBegin = <#= BufferName #>)
             {
                 bufPos = (int)(pDst - pDstBegin);
                 // Let RawText do the real work
@@ -1824,128 +1804,128 @@ namespace System.Xml
 
         // Entitize '<' as "&lt;".  Return an updated pointer.
 
-        protected static unsafe <#= bufferType #>* LtEntity(<#= bufferType #>* pDst)
+        protected static unsafe <#= BufferType #>* LtEntity(<#= BufferType #>* pDst)
         {
-            pDst[0] = (<#= bufferType #>)'&';
-            pDst[1] = (<#= bufferType #>)'l';
-            pDst[2] = (<#= bufferType #>)'t';
-            pDst[3] = (<#= bufferType #>)';';
+            pDst[0] = (<#= BufferType #>)'&';
+            pDst[1] = (<#= BufferType #>)'l';
+            pDst[2] = (<#= BufferType #>)'t';
+            pDst[3] = (<#= BufferType #>)';';
             return pDst + 4;
         }
 
         // Entitize '>' as "&gt;".  Return an updated pointer.
 
-        protected static unsafe <#= bufferType #>* GtEntity(<#= bufferType #>* pDst)
+        protected static unsafe <#= BufferType #>* GtEntity(<#= BufferType #>* pDst)
         {
-            pDst[0] = (<#= bufferType #>)'&';
-            pDst[1] = (<#= bufferType #>)'g';
-            pDst[2] = (<#= bufferType #>)'t';
-            pDst[3] = (<#= bufferType #>)';';
+            pDst[0] = (<#= BufferType #>)'&';
+            pDst[1] = (<#= BufferType #>)'g';
+            pDst[2] = (<#= BufferType #>)'t';
+            pDst[3] = (<#= BufferType #>)';';
             return pDst + 4;
         }
 
         // Entitize '&' as "&amp;".  Return an updated pointer.
 
-        protected static unsafe <#= bufferType #>* AmpEntity(<#= bufferType #>* pDst)
+        protected static unsafe <#= BufferType #>* AmpEntity(<#= BufferType #>* pDst)
         {
-            pDst[0] = (<#= bufferType #>)'&';
-            pDst[1] = (<#= bufferType #>)'a';
-            pDst[2] = (<#= bufferType #>)'m';
-            pDst[3] = (<#= bufferType #>)'p';
-            pDst[4] = (<#= bufferType #>)';';
+            pDst[0] = (<#= BufferType #>)'&';
+            pDst[1] = (<#= BufferType #>)'a';
+            pDst[2] = (<#= BufferType #>)'m';
+            pDst[3] = (<#= BufferType #>)'p';
+            pDst[4] = (<#= BufferType #>)';';
             return pDst + 5;
         }
 
         // Entitize '"' as "&quot;".  Return an updated pointer.
 
-        protected static unsafe <#= bufferType #>* QuoteEntity(<#= bufferType #>* pDst)
+        protected static unsafe <#= BufferType #>* QuoteEntity(<#= BufferType #>* pDst)
         {
-            pDst[0] = (<#= bufferType #>)'&';
-            pDst[1] = (<#= bufferType #>)'q';
-            pDst[2] = (<#= bufferType #>)'u';
-            pDst[3] = (<#= bufferType #>)'o';
-            pDst[4] = (<#= bufferType #>)'t';
-            pDst[5] = (<#= bufferType #>)';';
+            pDst[0] = (<#= BufferType #>)'&';
+            pDst[1] = (<#= BufferType #>)'q';
+            pDst[2] = (<#= BufferType #>)'u';
+            pDst[3] = (<#= BufferType #>)'o';
+            pDst[4] = (<#= BufferType #>)'t';
+            pDst[5] = (<#= BufferType #>)';';
             return pDst + 6;
         }
 
         // Entitize '\t' as "&#x9;".  Return an updated pointer.
 
-        protected static unsafe <#= bufferType #>* TabEntity(<#= bufferType #>* pDst)
+        protected static unsafe <#= BufferType #>* TabEntity(<#= BufferType #>* pDst)
         {
-            pDst[0] = (<#= bufferType #>)'&';
-            pDst[1] = (<#= bufferType #>)'#';
-            pDst[2] = (<#= bufferType #>)'x';
-            pDst[3] = (<#= bufferType #>)'9';
-            pDst[4] = (<#= bufferType #>)';';
+            pDst[0] = (<#= BufferType #>)'&';
+            pDst[1] = (<#= BufferType #>)'#';
+            pDst[2] = (<#= BufferType #>)'x';
+            pDst[3] = (<#= BufferType #>)'9';
+            pDst[4] = (<#= BufferType #>)';';
             return pDst + 5;
         }
 
         // Entitize 0xa as "&#xA;".  Return an updated pointer.
 
-        protected static unsafe <#= bufferType #>* LineFeedEntity(<#= bufferType #>* pDst)
+        protected static unsafe <#= BufferType #>* LineFeedEntity(<#= BufferType #>* pDst)
         {
-            pDst[0] = (<#= bufferType #>)'&';
-            pDst[1] = (<#= bufferType #>)'#';
-            pDst[2] = (<#= bufferType #>)'x';
-            pDst[3] = (<#= bufferType #>)'A';
-            pDst[4] = (<#= bufferType #>)';';
+            pDst[0] = (<#= BufferType #>)'&';
+            pDst[1] = (<#= BufferType #>)'#';
+            pDst[2] = (<#= BufferType #>)'x';
+            pDst[3] = (<#= BufferType #>)'A';
+            pDst[4] = (<#= BufferType #>)';';
             return pDst + 5;
         }
 
         // Entitize 0xd as "&#xD;".  Return an updated pointer.
 
-        protected static unsafe <#= bufferType #>* CarriageReturnEntity(<#= bufferType #>* pDst)
+        protected static unsafe <#= BufferType #>* CarriageReturnEntity(<#= BufferType #>* pDst)
         {
-            pDst[0] = (<#= bufferType #>)'&';
-            pDst[1] = (<#= bufferType #>)'#';
-            pDst[2] = (<#= bufferType #>)'x';
-            pDst[3] = (<#= bufferType #>)'D';
-            pDst[4] = (<#= bufferType #>)';';
+            pDst[0] = (<#= BufferType #>)'&';
+            pDst[1] = (<#= BufferType #>)'#';
+            pDst[2] = (<#= BufferType #>)'x';
+            pDst[3] = (<#= BufferType #>)'D';
+            pDst[4] = (<#= BufferType #>)';';
             return pDst + 5;
         }
 
-        private static unsafe <#= bufferType #>* CharEntity(<#= bufferType #>* pDst, char ch)
+        private static unsafe <#= BufferType #>* CharEntity(<#= BufferType #>* pDst, char ch)
         {
             string s = ((int)ch).ToString("X", NumberFormatInfo.InvariantInfo);
-            pDst[0] = (<#= bufferType #>)'&';
-            pDst[1] = (<#= bufferType #>)'#';
-            pDst[2] = (<#= bufferType #>)'x';
+            pDst[0] = (<#= BufferType #>)'&';
+            pDst[1] = (<#= BufferType #>)'#';
+            pDst[2] = (<#= BufferType #>)'x';
             pDst += 3;
 
             fixed (char* pSrc = s)
             {
                 char* pS = pSrc;
-                while ((*pDst++ = (<#= bufferType #>)*pS++) != 0) ;
+                while ((*pDst++ = (<#= BufferType #>)*pS++) != 0) ;
             }
 
-            pDst[-1] = (<#= bufferType #>)';';
+            pDst[-1] = (<#= BufferType #>)';';
             return pDst;
         }
 
         // Write "<![CDATA[" to the specified buffer.  Return an updated pointer.
 
-        protected static unsafe <#= bufferType #>* RawStartCData(<#= bufferType #>* pDst)
+        protected static unsafe <#= BufferType #>* RawStartCData(<#= BufferType #>* pDst)
         {
-            pDst[0] = (<#= bufferType #>)'<';
-            pDst[1] = (<#= bufferType #>)'!';
-            pDst[2] = (<#= bufferType #>)'[';
-            pDst[3] = (<#= bufferType #>)'C';
-            pDst[4] = (<#= bufferType #>)'D';
-            pDst[5] = (<#= bufferType #>)'A';
-            pDst[6] = (<#= bufferType #>)'T';
-            pDst[7] = (<#= bufferType #>)'A';
-            pDst[8] = (<#= bufferType #>)'[';
+            pDst[0] = (<#= BufferType #>)'<';
+            pDst[1] = (<#= BufferType #>)'!';
+            pDst[2] = (<#= BufferType #>)'[';
+            pDst[3] = (<#= BufferType #>)'C';
+            pDst[4] = (<#= BufferType #>)'D';
+            pDst[5] = (<#= BufferType #>)'A';
+            pDst[6] = (<#= BufferType #>)'T';
+            pDst[7] = (<#= BufferType #>)'A';
+            pDst[8] = (<#= BufferType #>)'[';
             return pDst + 9;
         }
 
         // Write "]]>" to the specified buffer.  Return an updated pointer.
 
-        protected static unsafe <#= bufferType #>* RawEndCData(<#= bufferType #>* pDst)
+        protected static unsafe <#= BufferType #>* RawEndCData(<#= BufferType #>* pDst)
         {
-            pDst[0] = (<#= bufferType #>)']';
-            pDst[1] = (<#= bufferType #>)']';
-            pDst[2] = (<#= bufferType #>)'>';
+            pDst[0] = (<#= BufferType #>)']';
+            pDst[1] = (<#= BufferType #>)']';
+            pDst[2] = (<#= BufferType #>)'>';
             return pDst + 3;
         }
 
@@ -2008,7 +1988,7 @@ namespace System.Xml
     }
 
     // Same as base text writer class except that elements, attributes, comments, and pi's are indented.
-    internal partial class <#= classnameIndent #> : <#= classname #>
+    internal partial class <#= ClassnameIndent #> : <#= Classname #>
     {
         //
         // Fields
@@ -2025,14 +2005,14 @@ namespace System.Xml
         //
         // Constructors
         //
-<# if (isEncodedWriter) { #>
-        public <#= classnameIndent #>(TextWriter writer, XmlWriterSettings settings) : base(writer, settings)
+<# if (WriterType == RawTextWriterType.Encoded) { #>
+        public <#= ClassnameIndent #>(TextWriter writer, XmlWriterSettings settings) : base(writer, settings)
         {
             Init(settings);
         }
 <# } #>
 
-        public <#= classnameIndent #>(Stream stream, XmlWriterSettings settings) : base(stream, settings)
+        public <#= ClassnameIndent #>(Stream stream, XmlWriterSettings settings) : base(stream, settings)
         {
             Init(settings);
         }
@@ -2270,24 +2250,27 @@ namespace System.Xml
         }
     }
 }
-
 <#+
-    string encodeCharBody;
-    string setTextContentMarkBody;
+    public string Classname = "Undefined";
+    public string ClassnameIndent = "Undefined";
+    public string BufferName = "Undefined";
+    public string BufferType = "Undefined";
+    public string EncodeCharBody = "Undefined";
+    public string SetTextContentMarkBody = "Undefined";
 
-    string SetTextContentMark(bool value)
+    public string SetTextContentMark(bool value)
     {
-        return setTextContentMarkBody
+        return SetTextContentMarkBody
             .Replace("_value_", BoolString(value));
     }
 
-    string EncodeChar(bool entitizeInvalidChars)
+    public string EncodeChar(bool entitizeInvalidChars)
     {
-        return encodeCharBody
+        return EncodeCharBody
             .Replace("_entitizeInvalidChars_", BoolString(entitizeInvalidChars));
     }
 
-    string BoolString(bool value)
+    private static string BoolString(bool value)
     {
         return value ? "true" : "false";
     }

@@ -1,14 +1,6 @@
-
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-
-// WARNING: This file is generated and should not be modified directly.
-// Instead, modify XmlTextWriterGenerator.t4 and run the following commands:
-//
-//   TextTransform.exe -a '!!Classname!XmlUtf8RawTextWriter' XmlRawTextWriterGenerator.t4 -out XmlUtf8RawTextWriter.cs
-//   TextTransform.exe -a '!!Classname!XmlEncodedRawTextWriter' XmlRawTextWriterGenerator.t4 -out XmlEncodedRawTextWriter.cs
-
 
 using System;
 using System.IO;
