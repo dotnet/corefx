@@ -1374,7 +1374,7 @@ namespace System.Diagnostics
 
         internal void ReleaseData(byte[] data)
         {
-            perfDataKey.ReleaseBlob(data);
+            perfDataKey.ReleaseData(data);
         }
 
     }
@@ -1395,7 +1395,7 @@ namespace System.Diagnostics
         }
     }
 
-    internal class CategorySample : IDisposable
+    internal sealed class CategorySample : IDisposable
     {
         internal readonly long _systemFrequency;
         internal readonly long _timeStamp;

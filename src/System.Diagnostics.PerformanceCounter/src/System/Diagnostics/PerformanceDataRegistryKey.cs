@@ -1,15 +1,21 @@
-﻿using System.Buffers;
+﻿using System;
+using System.Buffers;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using Internal.Win32.SafeHandles;
 
+#if !netcoreapp
+using MemoryMarshal = System.Diagnostics.PerformanceCounterLib;
+#endif
+
 namespace System.Diagnostics
 {
-    internal class PerformanceDataRegistryKey
+    internal sealed class PerformanceDataRegistryKey : IDisposable
     {
-        private readonly SafeRegistryHandle _hkey;
-
         private const int PerformanceData = (int)RegistryHive.PerformanceData;
+
+        private readonly SafeRegistryHandle _hkey;
 
         private PerformanceDataRegistryKey(SafeRegistryHandle hkey)
         {
@@ -20,7 +26,7 @@ namespace System.Diagnostics
         {
             // connect to the specified remote registry
             SafeRegistryHandle foreignHKey = null;
-            int ret = Interop.Advapi32.RegConnectRegistry(machineName, new SafeRegistryHandle(new IntPtr(PerformanceData), false), out foreignHKey);
+            int ret = Interop.Advapi32.RegConnectRegistry(machineName, new SafeRegistryHandle(new IntPtr(PerformanceData), ownsHandle: false), out foreignHKey);
 
             if (ret == Interop.Errors.ERROR_DLL_INIT_FAILED)
             {
@@ -44,7 +50,7 @@ namespace System.Diagnostics
 
         public static PerformanceDataRegistryKey OpenLocal()
         {
-            var key = new SafeRegistryHandle(new IntPtr(PerformanceData), true);
+            var key = new SafeRegistryHandle(new IntPtr(PerformanceData), ownsHandle: true);
             return new PerformanceDataRegistryKey(key);
         }
 
@@ -55,11 +61,13 @@ namespace System.Diagnostics
 
             int ret;
             int type = 0;
-            byte[] blob = CreateBlob(size, usePool);
-            while (Interop.Errors.ERROR_MORE_DATA == (ret = Interop.Advapi32.RegQueryValueEx(_hkey, name, null, ref type, blob, ref sizeInput)))
+            byte[] data = CreateBlob(size, usePool);
+            while (Interop.Errors.ERROR_MORE_DATA == (ret = Interop.Advapi32.RegQueryValueEx(_hkey, name, lpReserved: null, ref type, data, ref sizeInput)))
             {
                 if (size == int.MaxValue)
                 {
+                    ReleaseData(data, usePool);
+
                     // ERROR_MORE_DATA was returned however we cannot increase the buffer size beyond Int32.MaxValue
                     Win32Error(ret, name);
                 }
@@ -74,23 +82,42 @@ namespace System.Diagnostics
                 }
                 sizeInput = size;
 
-                ReleaseBlob(blob, usePool);
-                blob = CreateBlob(size, usePool);
+                ReleaseData(data, usePool);
+                data = CreateBlob(size, usePool);
             }
 
             if (ret != 0)
             {
+                ReleaseData(data, usePool);
                 Win32Error(ret, name);
             }
 
-            return blob;
+            return data;
         }
 
-        public void ReleaseBlob(byte[] blob, bool usePool = true)
+        public void ReleaseData(byte[] data, bool usePool = true)
         {
             if (usePool)
             {
-                ArrayPool<byte>.Shared.Return(blob);
+#if DEBUG
+                // Fill array by garbage to detect early situations when this array is used after return
+                MemoryMarshal.Cast<byte, uint>(data.AsSpan()).Fill(0xBAADF00D);
+#endif
+
+                ArrayPool<byte>.Shared.Return(data);
+            }
+        }
+
+        public void Close()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (!_hkey.IsInvalid)
+            {
+                _hkey.Dispose();
             }
         }
 
@@ -111,9 +138,5 @@ namespace System.Diagnostics
             throw new IOException(Interop.Kernel32.GetMessage(errorCode), errorCode);
         }
 
-        public void Close()
-        {
-            Interop.Advapi32.RegCloseKey(new IntPtr(PerformanceData));
-        }
     }
 }

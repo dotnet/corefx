@@ -44,6 +44,21 @@
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Interop.BOOL.cs">
       <Link>Common\CoreLib\Interop\Windows\Interop.BOOL.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.FormatMessage.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\advapi32\Interop.RegCloseKey.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.RegCloseKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\advapi32\Interop.RegQueryValueEx.cs">
+      <Link>Common\CoreLib\Interop\Windows\advapi32\Interop.RegQueryValueEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeRegistryHandle.cs">
+      <Link>Common\CoreLib\Microsoft\Win32\SafeHandles\SafeRegistryHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeRegistryHandle.Windows.cs">
+      <Link>Common\CoreLib\Microsoft\Win32\SafeHandles\SafeRegistryHandle.Windows.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Errors.cs">
       <Link>Common\Interop\Windows\Interop.Errors.cs</Link>
     </Compile>
@@ -52,18 +67,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ConvertStringSecurityDescriptorToSecurityDescriptor.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.ConvertStringSecurityDescriptorToSecurityDescriptor.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
-      <Link>Common\CoreLib\Interop\Windows\Interop.FormatMessage.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.RegConnectRegistry.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.RegConnectRegistry.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\advapi32\Interop.RegCloseKey.cs">
-      <Link>Common\CoreLib\Interop\Windows\Interop.RegCloseKey.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\advapi32\Interop.RegQueryValueEx.cs">
-      <Link>Common\CoreLib\Interop\Windows\advapi32\Interop.RegQueryValueEx.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.GetTokenInformation.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.GetTokenInformation.cs</Link>
@@ -74,11 +77,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.ProcessOptions.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.ProcessOptions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeRegistryHandle.cs">
-      <Link>Common\CoreLib\Microsoft\Win32\SafeHandles\SafeRegistryHandle.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeRegistryHandle.Windows.cs">
-      <Link>Common\CoreLib\Microsoft\Win32\SafeHandles\SafeRegistryHandle.Windows.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.RegConnectRegistry.cs">
+      <Link>Common\Interop\Windows\advapi32\Interop.RegConnectRegistry.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.TOKEN_INFORMATION_CLASS.cs">
       <Link>Common\Interop\Windows\advapi32\Interop.TOKEN_INFORMATION_CLASS.cs</Link>
