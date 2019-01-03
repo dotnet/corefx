@@ -369,7 +369,7 @@ namespace System.Globalization
                 System.Globalization.CultureInfo culture = System.Globalization.CultureInfo.CurrentCulture;
                 if (!culture._isInherited)
                 {
-                    DateTimeFormatInfo info = culture.dateTimeInfo;
+                    DateTimeFormatInfo info = culture._dateTimeInfo;
                     if (info != null)
                     {
                         return info;
@@ -444,7 +444,7 @@ namespace System.Globalization
                     throw new InvalidOperationException(SR.InvalidOperation_ReadOnly);
                 if (value == null)
                 {
-                    throw new ArgumentNullException(nameof(value), SR.ArgumentNull_Obj);
+                    throw new ArgumentNullException(nameof(value));
                 }
                 if (value == calendar)
                 {
@@ -1842,8 +1842,7 @@ namespace System.Globalization
         {
             if (dtfi == null)
             {
-                throw new ArgumentNullException(nameof(dtfi),
-                    SR.ArgumentNull_Obj);
+                throw new ArgumentNullException(nameof(dtfi));
             }
             if (dtfi.IsReadOnly)
             {
