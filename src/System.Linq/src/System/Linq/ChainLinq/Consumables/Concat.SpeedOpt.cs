@@ -47,7 +47,9 @@ namespace System.Linq.ChainLinq.Consumables
                             if (tmp >= 0)
                             {
                                 count += tmp;
-                                return countLink.GetCount(count);
+                                count = countLink.GetCount(count);
+                                if (count >= 0)
+                                    return count;
                             }
                         }
                     }
