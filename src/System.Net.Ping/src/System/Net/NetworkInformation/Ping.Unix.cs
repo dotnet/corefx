@@ -26,7 +26,6 @@ namespace System.Net.NetworkInformation
             PingReply reply = RawSocketPermissions.CanUseRawSockets(address.AddressFamily) ?
                     SendIcmpEchoRequestOverRawSocket(address, buffer, timeout, options) :
                     SendWithPingUtility(address, buffer, timeout, options);
-            Finish();
             return reply;
         }
 
@@ -37,7 +36,6 @@ namespace System.Net.NetworkInformation
                     SendWithPingUtilityAsync(address, buffer, timeout, options);
 
             PingReply reply = await t.ConfigureAwait(false);
-            Finish();
 
             if (_canceled)
             {
@@ -305,7 +303,7 @@ namespace System.Net.NetworkInformation
 
                 if (finished == timeoutTask && !p.HasExited)
                 {
-                    // Try to kill the ping process if it didn't return. If it is already in the process of exiting, 
+                    // Try to kill the ping process if it didn't return. If it is already in the process of exiting,
                     // a Win32Exception will be thrown.
                     try
                     {

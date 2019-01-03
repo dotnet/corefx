@@ -76,7 +76,7 @@ namespace System.Net.NetworkInformation
                 throw new ArgumentException(SR.net_invalid_ip_addr, nameof(address));
             }
         }
-        
+
         private void CheckStart()
         {
             if (_disposeRequested)
@@ -211,7 +211,6 @@ namespace System.Net.NetworkInformation
             }
 
             CheckArgs(timeout, buffer, options);
-            CheckStart();
 
             return GetAddressAndSend(hostNameOrAddress, timeout, buffer, options);
         }
@@ -231,8 +230,11 @@ namespace System.Net.NetworkInformation
             }
             catch (Exception e)
             {
-                Finish();
                 throw new PingException(SR.net_ping, e);
+            }
+            finally
+            {
+                Finish();
             }
         }
 
@@ -332,8 +334,11 @@ namespace System.Net.NetworkInformation
             }
             catch (Exception e)
             {
-                Finish();
                 return Task.FromException<PingReply>(new PingException(SR.net_ping, e));
+            }
+            finally
+            {
+                Finish();
             }
         }
 
@@ -350,7 +355,6 @@ namespace System.Net.NetworkInformation
             }
 
             CheckArgs(timeout, buffer, options);
-            CheckStart();
 
             return GetAddressAndSendAsync(hostNameOrAddress, timeout, buffer, options);
         }
@@ -374,6 +378,7 @@ namespace System.Net.NetworkInformation
 
         private PingReply GetAddressAndSend(string hostNameOrAddress, int timeout, byte[] buffer, PingOptions options)
         {
+            CheckStart();
             try
             {
                 IPAddress[] addresses = Dns.GetHostAddresses(hostNameOrAddress);
@@ -381,31 +386,39 @@ namespace System.Net.NetworkInformation
             }
             catch (Exception e)
             {
-                Finish();
                 throw new PingException(SR.net_ping, e);
+            }
+            finally
+            {
+                Finish();
             }
         }
 
         private async Task<PingReply> GetAddressAndSendAsync(string hostNameOrAddress, int timeout, byte[] buffer, PingOptions options)
         {
-            bool requiresFinish = true;
+            IPAddress[] addresses;
             try
             {
-                IPAddress[] addresses = await Dns.GetHostAddressesAsync(hostNameOrAddress).ConfigureAwait(false);
+                addresses = await Dns.GetHostAddressesAsync(hostNameOrAddress).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                throw new PingException(SR.net_ping, e);
+            }
+
+            CheckStart();
+            try
+            {
                 Task<PingReply> pingReplyTask = SendPingAsyncCore(addresses[0], buffer, timeout, options);
-                requiresFinish = false;
                 return await pingReplyTask.ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                // SendPingAsyncCore will call Finish before completing the Task.  If SendPingAsyncCore isn't invoked
-                // because an exception is thrown first, or if it throws out an exception synchronously, then
-                // we need to invoke Finish; otherwise, it has the responsibility to invoke Finish.
-                if (requiresFinish)
-                {
-                    Finish();
-                }
                 throw new PingException(SR.net_ping, e);
+            }
+            finally
+            {
+                    Finish();
             }
         }
 
