@@ -103,11 +103,6 @@ namespace System.Diagnostics
         {
             if (usePool)
             {
-#if DEBUG
-                // Fill array by garbage to detect early situations when this array is used after return
-                MemoryMarshal.Cast<byte, uint>(data.AsSpan()).Fill(0xBAADF00D);
-#endif
-
                 ArrayPool<byte>.Shared.Return(data);
             }
         }
@@ -119,10 +114,7 @@ namespace System.Diagnostics
 
         public void Dispose()
         {
-            if (!_hkey.IsInvalid)
-            {
-                _hkey.Dispose();
-            }
+            _hkey.Dispose();
         }
 
         private byte[] CreateBlob(int size, in bool usePool)
