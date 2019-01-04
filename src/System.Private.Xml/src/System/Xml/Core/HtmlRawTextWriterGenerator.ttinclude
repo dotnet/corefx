@@ -62,7 +62,7 @@ namespace System.Xml
 
             RawText("<!DOCTYPE ");
 
-            // Bug 114337: Always output "html" or "HTML" in doc-type, even if "name" is something else
+            // Bug: Always output "html" or "HTML" in doc-type, even if "name" is something else
             if (name == "HTML")
                 RawText("HTML");
             else

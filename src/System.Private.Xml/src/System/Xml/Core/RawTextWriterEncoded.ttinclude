@@ -1,8 +1,7 @@
 <#@ template debug="false" hostspecific="false" language="C#" #>
 <#@ assembly name="System.Core" #>
 <#@ output extension=".cs" #>
-<#@ import namespace="System" #>
-<#
+<#@ import namespace="System" #><#
     WriterType = RawTextWriterType.Encoded;
     ClassName = "XmlEncodedRawTextWriter";
     ClassNameIndent = "XmlEncodedRawTextWriterIndent";

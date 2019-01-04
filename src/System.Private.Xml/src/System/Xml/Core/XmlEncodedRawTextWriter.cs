@@ -1,4 +1,3 @@
-
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
@@ -222,9 +221,7 @@ namespace System.Xml
             // Output xml declaration only if user allows it and it was not already output
             if (!omitXmlDeclaration && !autoXmlDeclaration)
             {
-                if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+                if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
                 RawText("<?xml version=\"");
 
@@ -263,9 +260,7 @@ namespace System.Xml
         {
             Debug.Assert(name != null && name.Length > 0);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             RawText("<!DOCTYPE ");
             RawText(name);
@@ -307,9 +302,7 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             bufChars[bufPos++] = (char)'<';
             if (prefix != null && prefix.Length != 0)
@@ -341,9 +334,7 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             if (contentPos != bufPos)
             {
@@ -375,9 +366,7 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             bufChars[bufPos++] = (char)'<';
             bufChars[bufPos++] = (char)'/';
@@ -397,9 +386,7 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             if (attrEndPos == bufPos)
             {
@@ -421,9 +408,7 @@ namespace System.Xml
         // Serialize the end of an attribute value using double quotes: '"'
         public override void WriteEndAttribute()
         {
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
             bufChars[bufPos++] = (char)'"';
             inAttributeValue = false;
             attrEndPos = bufPos;
@@ -450,9 +435,7 @@ namespace System.Xml
         {
             Debug.Assert(prefix != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             if (prefix.Length == 0)
             {
@@ -467,16 +450,12 @@ namespace System.Xml
             }
 
             inAttributeValue = true;
-            if (trackTextContent && inTextContent != true) {
-                ChangeTextContentMark(true);
-            }
+            if (trackTextContent && inTextContent != true) { ChangeTextContentMark(true); }
         }
 
         internal override void WriteEndNamespaceDeclaration()
         {
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
             inAttributeValue = false;
 
             bufChars[bufPos++] = (char)'"';
@@ -489,9 +468,7 @@ namespace System.Xml
         {
             Debug.Assert(text != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             if (mergeCDataSections && bufPos == cdataPos)
             {
@@ -528,9 +505,7 @@ namespace System.Xml
         {
             Debug.Assert(text != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             bufChars[bufPos++] = (char)'<';
             bufChars[bufPos++] = (char)'!';
@@ -550,9 +525,7 @@ namespace System.Xml
             Debug.Assert(name != null && name.Length > 0);
             Debug.Assert(text != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             bufChars[bufPos++] = (char)'<';
             bufChars[bufPos++] = (char)'?';
@@ -573,9 +546,7 @@ namespace System.Xml
         {
             Debug.Assert(name != null && name.Length > 0);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             bufChars[bufPos++] = (char)'&';
             RawText(name);
@@ -600,9 +571,7 @@ namespace System.Xml
                 throw XmlConvert.CreateInvalidCharException(ch, '\0');
             }
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             bufChars[bufPos++] = (char)'&';
             bufChars[bufPos++] = (char)'#';
@@ -623,9 +592,7 @@ namespace System.Xml
         public override unsafe void WriteWhitespace(string ws)
         {
             Debug.Assert(ws != null);
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             fixed (char* pSrc = ws)
             {
@@ -646,9 +613,7 @@ namespace System.Xml
         public override unsafe void WriteString(string text)
         {
             Debug.Assert(text != null);
-            if (trackTextContent && inTextContent != true) {
-                ChangeTextContentMark(true);
-            }
+            if (trackTextContent && inTextContent != true) { ChangeTextContentMark(true); }
 
             fixed (char* pSrc = text)
             {
@@ -667,9 +632,7 @@ namespace System.Xml
         // Serialize surrogate character entity.
         public override void WriteSurrogateCharEntity(char lowChar, char highChar)
         {
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
             int surrogateChar = XmlCharType.CombineSurrogateChar(lowChar, highChar);
 
             bufChars[bufPos++] = (char)'&';
@@ -689,9 +652,7 @@ namespace System.Xml
             Debug.Assert(index >= 0);
             Debug.Assert(count >= 0 && index + count <= buffer.Length);
 
-            if (trackTextContent && inTextContent != true) {
-                ChangeTextContentMark(true);
-            }
+            if (trackTextContent && inTextContent != true) { ChangeTextContentMark(true); }
 
             fixed (char* pSrcBegin = &buffer[index])
             {
@@ -715,9 +676,7 @@ namespace System.Xml
             Debug.Assert(index >= 0);
             Debug.Assert(count >= 0 && index + count <= buffer.Length);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             fixed (char* pSrcBegin = &buffer[index])
             {
@@ -733,9 +692,7 @@ namespace System.Xml
         {
             Debug.Assert(data != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             fixed (char* pSrcBegin = data)
             {

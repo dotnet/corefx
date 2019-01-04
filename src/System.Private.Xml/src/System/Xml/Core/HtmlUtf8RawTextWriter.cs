@@ -1,5 +1,4 @@
-﻿
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -56,7 +55,7 @@ namespace System.Xml
 
             RawText("<!DOCTYPE ");
 
-            // Bug 114337: Always output "html" or "HTML" in doc-type, even if "name" is something else
+            // Bug: Always output "html" or "HTML" in doc-type, even if "name" is something else
             if (name == "HTML")
                 RawText("HTML");
             else
