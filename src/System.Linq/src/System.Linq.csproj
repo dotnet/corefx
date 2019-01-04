@@ -7,14 +7,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Linq\ChainLinq\Consumables\IList.cs" />
-    <Compile Include="System\Linq\ChainLinq\Consumables\IList.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Last.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\IList.cs" />
-    <Compile Include="System\Linq\ChainLinq\Optimizations\Count.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Optimizations\Pipeline.cs" />
-    <Compile Include="System\Linq\ChainLinq\Optimizations\SkipTake.SpeedOpt.cs" />
     <Compile Include="System\Linq\Empty.cs" />
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\List.cs" />
@@ -91,6 +88,7 @@
     <Compile Include="System\Linq\ChainLinq\Consumables\Appender.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Array.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Concat.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\IList.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\List.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Prepender.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Range.SpeedOpt.cs" />
@@ -107,6 +105,8 @@
     <Compile Include="System\Linq\ChainLinq\Links\SelectWhere.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\WhereSelect.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Where.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Optimizations\Count.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Optimizations\SkipTake.SpeedOpt.cs" />
     <Compile Include="$(CommonPath)\System\Collections\Generic\LargeArrayBuilder.SpeedOpt.cs">
       <Link>System\Collections\Generic\LargeArrayBuilder.SpeedOpt.cs</Link>
     </Compile>
