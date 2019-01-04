@@ -24,7 +24,5 @@
                                 pDst++;
                                 pSrc++;
                             }";
-    SetTextContentMarkBody = @"if (trackTextContent && inTextContent != _value_) {
-                ChangeTextContentMark(_value_);
-            }";
+    SetTextContentMarkBody = @"if (trackTextContent && inTextContent != _value_) { ChangeTextContentMark(_value_); }";
 #>

@@ -31,9 +31,29 @@
     <Compile Include="System\Xml\Bits.cs" />
     <Compile Include="System\Xml\BitStack.cs" />
     <Compile Include="System\Xml\ByteStack.cs" />
+    <Compile Include="System\Xml\Core\HtmlEncodedRawTextWriter.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>HtmlEncodedRawTextWriter.tt</DependentUpon>
+    </Compile>
+    <Compile Include="System\Xml\Core\HtmlUtf8RawTextWriter.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>HtmlUtf8RawTextWriter.tt</DependentUpon>
+    </Compile>
+    <None Include="System\Xml\Core\HtmlEncodedRawTextWriter.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>HtmlEncodedRawTextWriter.cs</LastGenOutput>
+    </None>
+    <None Include="System\Xml\Core\HtmlRawTextWriterGenerator.ttinclude" />
+    <None Include="System\Xml\Core\HtmlUtf8RawTextWriter.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>HtmlUtf8RawTextWriter.cs</LastGenOutput>
+    </None>
+    <None Include="System\Xml\Core\RawTextWriter.ttinclude" />
     <None Include="System\Xml\Core\XmlRawTextWriterGeneratorAsync.ttinclude" />
     <None Include="System\Xml\Core\XmlRawTextWriterGenerator.ttinclude" />
-    <None Include="System\Xml\Core\XmlEncodedRawTextWriter.ttinclude" />
+    <None Include="System\Xml\Core\RawTextWriterEncoded.ttinclude" />
     <Content Include="System\Xml\Core\XmlEncodedRawTextWriter.tt">
       <LastGenOutput>XmlEncodedRawTextWriter.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -52,7 +72,7 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <None Include="System\Xml\Core\XmlUtf8RawTextWriter.ttinclude" />
+    <None Include="System\Xml\Core\RawTextWriterUtf8.ttinclude" />
     <Content Include="System\Xml\Core\XmlUtf8RawTextWriter.tt">
       <LastGenOutput>XmlUtf8RawTextWriter.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -110,10 +130,7 @@
     <Compile Include="System\Xml\Core\ConformanceLevel.cs" />
     <Compile Include="System\Xml\Core\DtdProcessing.cs" />
     <Compile Include="System\Xml\Core\EntityHandling.cs" />
-    <Compile Include="System\Xml\Core\HtmlEncodedRawTextWriter.cs" />
-    <None Include="System\Xml\Core\HtmlRawTextWriterGenerator.cxx" />
     <Compile Include="System\Xml\Core\HtmlTernaryTree.cs" />
-    <Compile Include="System\Xml\Core\HtmlUtf8RawTextWriter.cs" />
     <Compile Include="System\Xml\Core\IDtdInfo.cs" />
     <Compile Include="System\Xml\Core\IDtdParser.cs" />
     <Compile Include="System\Xml\Core\IDtdParserAsync.cs" />

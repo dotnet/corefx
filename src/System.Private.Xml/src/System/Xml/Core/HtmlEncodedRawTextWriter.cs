@@ -1,17 +1,7 @@
+﻿
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-
-// Following comment might not be valid anymore as this code is fairly old and a lot happened since it was written...
-// WARNING: This file is generated and should not be modified directly.  Instead,
-// modify XmlTextWriterGenerator.cxx and run gen.bat in the same directory.
-// This batch file will execute the following commands:
-//
-//   cl.exe /C /EP /D _XML_UTF8_TEXT_WRITER HtmlTextWriterGenerator.cxx > HtmlUtf8TextWriter.cs
-//   cl.exe /C /EP /D _XML_ENCODED_TEXT_WRITER HtmlTextWriterGenerator.cxx > HtmlEncodedTextWriter.cs
-//
-// Because these two implementations of XmlTextWriter are so similar, the C++ preprocessor
-// is used to generate each implementation from one template file, using macros and ifdefs.
 
 using System;
 using System.IO;
@@ -39,6 +29,7 @@ namespace System.Xml
         protected static TernaryTreeReadOnly attributePropertySearch;
 
         private const int StackIncrement = 10;
+
 
         public HtmlEncodedRawTextWriter(TextWriter writer, XmlWriterSettings settings) : base(writer, settings)
         {
@@ -70,7 +61,7 @@ namespace System.Xml
 
             RawText("<!DOCTYPE ");
 
-            // Bug: Always output "html" or "HTML" in doc-type, even if "name" is something else
+            // Bug 114337: Always output "html" or "HTML" in doc-type, even if "name" is something else
             if (name == "HTML")
                 RawText("HTML");
             else
@@ -579,7 +570,9 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
+
                     while (pDst < pDstEnd && xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)))
+
                     {
                         *pDst++ = (char)ch;
                         pSrc++;
@@ -611,7 +604,7 @@ namespace System.Xml
                             }
                             else if (pSrc[1] != '{')
                             {
-                                pDst = XmlEncodedRawTextWriter.AmpEntity(pDst);
+                                pDst = AmpEntity(pDst);
                                 break;
                             }
                             *pDst++ = (char)ch;
@@ -699,7 +692,7 @@ namespace System.Xml
                             }
                             else if (pSrc[1] != '{')
                             {
-                                pDst = XmlEncodedRawTextWriter.AmpEntity(pDst);
+                                pDst = AmpEntity(pDst);
                                 break;
                             }
                             *pDst++ = (char)ch;
@@ -723,6 +716,7 @@ namespace System.Xml
                             break;
                         default:
                             const string hexDigits = "0123456789ABCDEF";
+                            Debug.Assert(_uriEscapingBuffer?.Length > 0);
                             fixed (byte* pUriEscapingBuffer = _uriEscapingBuffer)
                             {
                                 byte* pByte = pUriEscapingBuffer;
@@ -811,7 +805,6 @@ namespace System.Xml
         //
         // Constructors
         //
-
 
         public HtmlEncodedRawTextWriterIndent(TextWriter writer, XmlWriterSettings settings) : base(writer, settings)
         {
@@ -984,5 +977,4 @@ namespace System.Xml
         }
     }
 }
-
 

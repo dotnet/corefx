@@ -1,0 +1,44 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#
+switch (WriterType)
+{
+    case RawTextWriterType.Utf8:
+    case RawTextWriterType.Encoded:
+        break;
+    default:
+        throw new ArgumentOutOfRangeException(
+            "WriterType", WriterType,
+            "Unknown value for WriterType.");
+}
+#>
+<#+
+    public enum RawTextWriterType {
+        Unknown, Utf8, Encoded
+    }
+
+    public RawTextWriterType WriterType;
+    public string ClassName;
+    public string ClassNameIndent;
+    public string BaseClassName;
+    public string BufferName;
+    public string BufferType;
+    public string EncodeCharBody;
+    public string SetTextContentMarkBody;
+
+    public string SetTextContentMark(bool value)
+    {
+        return SetTextContentMarkBody
+            .Replace("_value_", BoolString(value));
+    }
+
+    public string EncodeChar(bool entitizeInvalidChars)
+    {
+        return EncodeCharBody
+            .Replace("_entitizeInvalidChars_", BoolString(entitizeInvalidChars));
+    }
+
+    private static string BoolString(bool value)
+    {
+        return value ? "true" : "false";
+    }
+#>

@@ -35,9 +35,7 @@ namespace System.Xml
             // Output xml declaration only if user allows it and it was not already output
             if (!omitXmlDeclaration && !autoXmlDeclaration)
             {
-                if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+                if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
                 await RawTextAsync("<?xml version=\"").ConfigureAwait(false);
 
@@ -80,9 +78,7 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(name != null && name.Length > 0);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             await RawTextAsync("<!DOCTYPE ").ConfigureAwait(false);
             await RawTextAsync(name).ConfigureAwait(false);
@@ -125,9 +121,7 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
             Task task;
             bufChars[bufPos++] = (char)'<';
             if (prefix != null && prefix.Length != 0)
@@ -154,9 +148,7 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             if (contentPos != bufPos)
             {
@@ -191,9 +183,7 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             bufChars[bufPos++] = (char)'<';
             bufChars[bufPos++] = (char)'/';
@@ -215,9 +205,7 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             if (attrEndPos == bufPos)
             {
@@ -246,9 +234,7 @@ namespace System.Xml
         protected internal override Task WriteEndAttributeAsync()
         {
             CheckAsyncCall();
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
             bufChars[bufPos++] = (char)'"';
             inAttributeValue = false;
             attrEndPos = bufPos;
@@ -271,9 +257,7 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(prefix != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             if (prefix.Length == 0)
             {
@@ -288,17 +272,13 @@ namespace System.Xml
             }
 
             inAttributeValue = true;
-            if (trackTextContent && inTextContent != true) {
-                ChangeTextContentMark(true);
-            }
+            if (trackTextContent && inTextContent != true) { ChangeTextContentMark(true); }
         }
 
         internal override Task WriteEndNamespaceDeclarationAsync()
         {
             CheckAsyncCall();
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
             inAttributeValue = false;
 
             bufChars[bufPos++] = (char)'"';
@@ -314,9 +294,7 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(text != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             if (mergeCDataSections && bufPos == cdataPos)
             {
@@ -354,9 +332,7 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(text != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             bufChars[bufPos++] = (char)'<';
             bufChars[bufPos++] = (char)'!';
@@ -377,9 +353,7 @@ namespace System.Xml
             Debug.Assert(name != null && name.Length > 0);
             Debug.Assert(text != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             bufChars[bufPos++] = (char)'<';
             bufChars[bufPos++] = (char)'?';
@@ -401,9 +375,7 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(name != null && name.Length > 0);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             bufChars[bufPos++] = (char)'&';
             await RawTextAsync(name).ConfigureAwait(false);
@@ -429,9 +401,7 @@ namespace System.Xml
                 throw XmlConvert.CreateInvalidCharException(ch, '\0');
             }
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             bufChars[bufPos++] = (char)'&';
             bufChars[bufPos++] = (char)'#';
@@ -453,9 +423,7 @@ namespace System.Xml
         {
             CheckAsyncCall();
             Debug.Assert(ws != null);
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             if (inAttributeValue)
             {
@@ -473,9 +441,7 @@ namespace System.Xml
         {
             CheckAsyncCall();
             Debug.Assert(text != null);
-            if (trackTextContent && inTextContent != true) {
-                ChangeTextContentMark(true);
-            }
+            if (trackTextContent && inTextContent != true) { ChangeTextContentMark(true); }
 
             if (inAttributeValue)
             {
@@ -491,9 +457,7 @@ namespace System.Xml
         public override async Task WriteSurrogateCharEntityAsync(char lowChar, char highChar)
         {
             CheckAsyncCall();
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
             int surrogateChar = XmlCharType.CombineSurrogateChar(lowChar, highChar);
 
             bufChars[bufPos++] = (char)'&';
@@ -514,9 +478,7 @@ namespace System.Xml
             Debug.Assert(index >= 0);
             Debug.Assert(count >= 0 && index + count <= buffer.Length);
 
-            if (trackTextContent && inTextContent != true) {
-                ChangeTextContentMark(true);
-            }
+            if (trackTextContent && inTextContent != true) { ChangeTextContentMark(true); }
 
             if (inAttributeValue)
             {
@@ -538,9 +500,7 @@ namespace System.Xml
             Debug.Assert(index >= 0);
             Debug.Assert(count >= 0 && index + count <= buffer.Length);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             await WriteRawWithCharCheckingAsync(buffer, index, count).ConfigureAwait(false);
 
@@ -554,9 +514,7 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(data != null);
 
-            if (trackTextContent && inTextContent != false) {
-                ChangeTextContentMark(false);
-            }
+            if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
             await WriteRawWithCharCheckingAsync(data).ConfigureAwait(false);
 
