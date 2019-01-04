@@ -1,7 +1,7 @@
 ﻿namespace System.Linq.ChainLinq.Consumables
 {
-    sealed partial class Range<T>
-        : Optimizations.ISkipTakeOnConsumable<T>
+    sealed partial class IList<T, V>
+        : Optimizations.ISkipTakeOnConsumable<V>
         , Optimizations.ICountOnConsumable
     {
         public int GetCount(bool onlyIfCheap)
@@ -13,51 +13,51 @@
                     return count;
             }
 
-            return onlyIfCheap ? -1 : Consume(new Consumer.Count<T>());
+            return onlyIfCheap ? -1 : Consume(new Consumer.Count<V>());
         }
 
-        public Consumable<T> Skip(int toSkip)
+        public Consumable<V> Skip(int toSkip)
         {
             if (toSkip == 0)
                 return this;
 
-            if (Link is Optimizations.ISkipTakeOnConsumableLinkUpdate<int,T> skipLink)
+            if (Link is Optimizations.ISkipTakeOnConsumableLinkUpdate<T, V> skipLink)
             {
                 checked
                 {
                     var newCount = _count - toSkip;
                     if (newCount <= 0)
                     {
-                        return Empty<T>.Instance;
+                        return Empty<V>.Instance;
                     }
 
                     var newStart = _start + toSkip;
                     var newLink = skipLink.Skip(toSkip);
 
-                    return new Range<T>(newStart, newCount, newLink);
+                    return new IList<T, V>(_list, newStart, newCount, newLink);
                 }
             }
-            return AddTail(new Links.Skip<T>(toSkip));
+            return AddTail(new Links.Skip<V>(toSkip));
         }
 
-        public Consumable<T> Take(int count)
+        public Consumable<V> Take(int toTake)
         {
-            if (count <= 0)
+            if (toTake <= 0)
             {
-                return Empty<T>.Instance;
+                return Empty<V>.Instance;
             }
 
-            if (count >= _count)
+            if (toTake >= _count)
             {
                 return this;
             }
 
-            if (Link is Optimizations.ISkipTakeOnConsumableLinkUpdate<int, T>)
+            if (Link is Optimizations.ISkipTakeOnConsumableLinkUpdate<T, V>)
             {
-                return new Range<T>(_start, count, Link);
+                return new IList<T, V>(_list, _start, toTake, Link);
             }
 
-            return AddTail(new Links.Take<T>(count));
+            return AddTail(new Links.Take<V>(toTake));
         }
     }
 }

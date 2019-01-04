@@ -2,13 +2,13 @@
 {
     interface ISkipTakeOnConsumable<T>
     {
-        Consumable<T> Skip(int count);
-        Consumable<T> Take(int count);
+        Consumable<T> Skip(int toSkip);
+        Consumable<T> Take(int toTake);
     }
 
     interface ISkipTakeOnConsumableLinkUpdate<T, U>
     {
-        ILink<T, U> Skip(int count);
+        ILink<T, U> Skip(int toSkip);
     }
 
     interface IMergeSkip<T>

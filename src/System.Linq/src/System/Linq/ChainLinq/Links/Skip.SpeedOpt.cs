@@ -8,16 +8,16 @@
         {
             checked
             {
-                return Math.Max(0, count - _count);
+                return Math.Max(0, count - _toSkip);
             }
         }
 
         public Consumable<T> MergeSkip(ConsumableForMerging<T> consumable, int count)
         {
-            if ((long)_count + count > int.MaxValue)
+            if ((long)_toSkip + count > int.MaxValue)
                 return consumable.AddTail(new Skip<T>(count));
 
-            var totalCount = _count + count;
+            var totalCount = _toSkip + count;
             return consumable.ReplaceTailLink(new Skip<T>(totalCount));
         }
     }

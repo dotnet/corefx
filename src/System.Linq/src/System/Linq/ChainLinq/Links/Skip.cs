@@ -2,31 +2,31 @@
 {
     sealed partial class Skip<T> : ILink<T, T>
     {
-        private int _count;
+        private int _toSkip;
 
-        public Skip(int count) =>
-            _count = count;
+        public Skip(int toSkip) =>
+            _toSkip = toSkip;
 
         public Chain<T, V> Compose<V>(Chain<T, V> activity) =>
-            new Activity<V>(_count, activity);
+            new Activity<V>(_toSkip, activity);
 
         sealed class Activity<V> : Activity<T, T, V>
         {
-            private readonly int count;
+            private readonly int _toSkip;
 
-            private int index;
+            private int _index;
 
-            public Activity(int count, Chain<T, V> next) : base(next) =>
-                (this.count, index) = (count, 0);
+            public Activity(int toSkip, Chain<T, V> next) : base(next) =>
+                (_toSkip, _index) = (toSkip, 0);
 
             public override ChainStatus ProcessNext(T input)
             {
                 checked
                 {
-                    index++;
+                    _index++;
                 }
 
-                if (index <= count)
+                if (_index <= _toSkip)
                 {
                     return ChainStatus.Filter;
                 }

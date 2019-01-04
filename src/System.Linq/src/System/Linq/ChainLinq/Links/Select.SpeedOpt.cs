@@ -9,7 +9,7 @@ namespace System.Linq.ChainLinq.Links
         public virtual Consumable<V> MergeSelect<V>(ConsumableForMerging<U> consumable, Func<U, V> selector) =>
             consumable.ReplaceTailLink(new Select<T, U, V>(Selector, selector));
 
-        public ILink<T, U> Skip(int count) => this;
+        public ILink<T, U> Skip(int toSkip) => this;
 
         sealed partial class Activity<V>
             : Optimizations.IPipelineArray<T>

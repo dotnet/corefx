@@ -14,6 +14,7 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
         public IList(IList<T> list, int start, int count, ILink<T, TResult> factory)
         {
             _list = list;
+            _idx = start;
             checked { _finalIdx = start + count; }
             _chain = factory.Compose(this);
         }

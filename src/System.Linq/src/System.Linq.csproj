@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Linq\ChainLinq\Consumables\IList.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\IList.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\IList.cs" />
