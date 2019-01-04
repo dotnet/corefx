@@ -142,15 +142,12 @@ namespace System.Diagnostics.Tests
                                     }
                                 }
                                 EventTask task = eventMetadata.Task;
-                                if(eventMetadata.Task != null)
+                                if(task != null)
                                 {
-                                    if (task.Value == (int)StandardEventTask.None)
-                                    {
-                                        Assert.True(task.DisplayName == null || task.DisplayName == "None");
-                                        Assert.True(task.Name == null || task.Name == Prefix + "None");
-                                        Assert.Equal(new Guid(), task.EventGuid);
-                                        Assert.Equal(0, task.Value);
-                                    }
+                                    Assert.NotEqual(task, eventMetadata.Task);
+                                    Assert.Equal(task.DisplayName, eventMetadata.Task.DisplayName);
+                                    Assert.Equal(task.Name, eventMetadata.Task.Name);
+                                    Assert.Equal(task.Value, eventMetadata.Task.Value);
                                 }
                                 IEnumerable<EventKeyword> keywords = eventMetadata.Keywords;
                                 if(eventMetadata.Keywords != null)

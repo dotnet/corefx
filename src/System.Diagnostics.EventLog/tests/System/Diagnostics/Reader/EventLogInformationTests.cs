@@ -25,6 +25,10 @@ namespace System.Diagnostics.Tests
         [InlineData("Application")]
         public void GetLogInformation_UsingLogName_DoesNotThrow(string logName)
         {
+            DateTime? creationTime, lastAccessTime, lastWriteTime;
+            long? fileSize, recordCount, oldestRecordNumber;
+            int? attributes;
+            bool? isLogFull;
             using (var session = new EventLogSession())
             {
                 EventLogConfiguration configuration = null;
@@ -37,44 +41,33 @@ namespace System.Diagnostics.Tests
                     configuration?.Dispose();
                     return;
                 }
-                
-                Assert.Equal(logName, configuration.LogName);
-                Assert.True(configuration.IsEnabled);
-                Assert.NotEmpty(configuration.SecurityDescriptor);
-                Assert.Equal(EventLogMode.Circular, configuration.LogMode);
-                Assert.Equal(64, configuration.ProviderBufferSize);
-                Assert.Equal(0, configuration.ProviderMinimumNumberOfBuffers);
-                Assert.Equal(64, configuration.ProviderMaximumNumberOfBuffers);
-                Assert.NotEmpty(configuration.ProviderNames);
-                Assert.False(configuration.ProviderLevel.HasValue);
-                Assert.False(configuration.ProviderKeywords.HasValue);
-                Assert.False(configuration.ProviderControlGuid.HasValue);
-                Assert.Equal(1000, configuration.ProviderLatency);
-                Assert.Equal("Application", configuration.LogIsolation.ToString());
-                if (logName.Equals("Application"))
-                {
-                    Assert.Equal(EventLogType.Administrative, configuration.LogType);
-                    Assert.True(configuration.IsClassicLog);
-                    Assert.Contains("Application.evtx", configuration.LogFilePath);
-                    Assert.Empty(configuration.OwningProviderName);
-                }
-                else
-                {
-                    Assert.Equal(EventLogType.Operational, configuration.LogType);
-                    Assert.False(configuration.IsClassicLog);
-                    Assert.Contains("Microsoft-Windows-TaskScheduler%4Operational.evtx", configuration.LogFilePath);
-                    Assert.Equal("Microsoft-Windows-TaskScheduler", configuration.OwningProviderName);
-                }
 
                 EventLogInformation logInfo = session.GetLogInformation(configuration.LogName, PathType.LogName);
-                Assert.NotNull(logInfo.CreationTime);
-                Assert.NotNull(logInfo.LastAccessTime);
-                Assert.NotNull(logInfo.LastWriteTime);
-                Assert.NotNull(logInfo.FileSize);
-                Assert.NotNull(logInfo.Attributes);
-                Assert.NotNull(logInfo.RecordCount);
-                Assert.NotNull(logInfo.OldestRecordNumber);
-                Assert.NotNull(logInfo.IsLogFull);
+                creationTime = logInfo.CreationTime;
+                lastAccessTime = logInfo.LastAccessTime;
+                lastWriteTime = logInfo.LastWriteTime;
+                fileSize = logInfo.FileSize;
+                attributes = logInfo.Attributes;
+                recordCount = logInfo.RecordCount;
+                oldestRecordNumber = logInfo.OldestRecordNumber;
+                isLogFull = logInfo.IsLogFull;
+
+                configuration.Dispose();
+            }
+            using (var session = new EventLogSession())
+            {
+                using (var configuration = new EventLogConfiguration(logName, session))
+                {
+                    EventLogInformation logInfo = session.GetLogInformation(configuration.LogName, PathType.LogName);
+                    Assert.Equal(creationTime, logInfo.CreationTime);
+                    Assert.Equal(lastAccessTime, logInfo.LastAccessTime);
+                    Assert.Equal(lastWriteTime, logInfo.LastWriteTime);
+                    Assert.Equal(fileSize, logInfo.FileSize);
+                    Assert.Equal(attributes, logInfo.Attributes);
+                    Assert.Equal(recordCount, logInfo.RecordCount);
+                    Assert.Equal(oldestRecordNumber, logInfo.OldestRecordNumber);
+                    Assert.Equal(isLogFull, logInfo.IsLogFull);
+                }
             }
         }
     }

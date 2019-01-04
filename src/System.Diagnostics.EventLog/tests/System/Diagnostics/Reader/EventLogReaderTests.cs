@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics.Eventing.Reader;
-using System.Security.Principal;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -51,7 +50,7 @@ namespace System.Diagnostics.Tests
             if (useBookmark)
             {
                 Assert.Throws<EventLogException>(() => new EventLogReader(query, bookmark: null));
-                Assert.Throws<EventLogException>(() => new EventLogReader(query, bookmark: GetBookmark("Application", PathType.LogName)));
+                Assert.Throws<EventLogException>(() => new EventLogReader(query, bookmark: Helpers.GetBookmark("Application", PathType.LogName)));
             }
             else
             {
@@ -70,7 +69,7 @@ namespace System.Diagnostics.Tests
             if (useBookmark)
             {
                 Assert.Throws<EventLogException>(() => new EventLogReader(query, bookmark: null));
-                Assert.Throws<EventLogException>(() => new EventLogReader(query, bookmark: GetBookmark("Application", PathType.LogName)));
+                Assert.Throws<EventLogException>(() => new EventLogReader(query, bookmark: Helpers.GetBookmark("Application", PathType.LogName)));
             }
             else
             {
@@ -79,71 +78,19 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
-        public void EventLogRecord_MethodsAndProtperties()
+        public void CastToEventLogRecord_NotNull()
         {
             if (PlatformDetection.IsWindows7) // Null events in PowerShell log
                 return;
             var query = new EventLogQuery("Application", PathType.LogName, "*[System]") { ReverseDirection = true };
-            var eventLog = new EventLogReader(query, GetBookmark("Application", PathType.LogName));
+            var eventLog = new EventLogReader(query, Helpers.GetBookmark("Application", PathType.LogName));
             using (eventLog)
             {
-                EventLogRecord record = (EventLogRecord)eventLog.ReadEvent();
-                Assert.NotNull(record);
-                    
-                Assert.Throws<EventLogNotFoundException>(() => record.LevelDisplayName);
-                Assert.Throws<EventLogNotFoundException>(() => record.KeywordsDisplayNames);
-                Assert.Throws<EventLogNotFoundException>(() => record.OpcodeDisplayName);
-                Assert.Throws<EventLogNotFoundException>(() => record.TaskDisplayName);
-
-                Assert.Null(record.Version);
-                Assert.Null(record.Opcode);
-                Assert.Null(record.ProviderId);
-                Assert.Null(record.ProcessId);
-                Assert.Null(record.ThreadId);
-                SecurityIdentifier userId = record.UserId;
-                Guid? activityId = record.ActivityId;
-                Assert.False(activityId.HasValue);
-                Guid? relatedActivityId = record.RelatedActivityId;
-                Assert.False(relatedActivityId.HasValue);
-                
-                Assert.NotNull(record.Qualifiers);
-                Assert.NotNull(record.Level);
-                Assert.NotNull(record.Task);
-                Assert.NotNull(record.Keywords);
-                Assert.NotNull(record.RecordId);
-                Assert.NotNull(record.ProviderName);
-                Assert.NotNull(record.MachineName);
-                Assert.NotNull(record.TimeCreated);
-                Assert.NotNull(record.ContainerLog);
-                Assert.NotNull(record.MatchedQueryIds);
-                Assert.NotNull(record.Bookmark);
-
-                Assert.NotNull(record.Properties);
-                foreach (EventProperty eventProperty in record.Properties)
+                using (var record = (EventLogRecord)eventLog.ReadEvent())
                 {
-                    Assert.NotNull(eventProperty.Value);
+                    Assert.NotNull(record);
                 }
-
-                Assert.Throws<EventLogNotFoundException>(() => record.FormatDescription(new[] {"dummy"}));
-                Assert.Null(record.FormatDescription());
-                Assert.Throws<EventLogNotFoundException>(() => ((EventRecord)record).FormatDescription(new[] {"dummy"}));
-                Assert.Null(((EventRecord)record).FormatDescription(null));
-                Assert.Null(((EventRecord)record).FormatDescription());
-
-                Assert.Throws<ArgumentNullException>(() => record.GetPropertyValues(null));
-                Assert.NotNull(record.GetPropertyValues(new EventLogPropertySelector(new [] {"dummy"})));
-                Assert.NotNull(record.ToXml());
-
-                record.Dispose();
             }
-        }
-
-        private static EventBookmark GetBookmark(string log, PathType pathType)
-        {
-            var elq = new EventLogQuery(log, pathType) { ReverseDirection = true };
-            var reader = new EventLogReader(elq);
-            EventRecord record = reader.ReadEvent();
-            return record?.Bookmark;
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
@@ -183,7 +130,7 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
-        public void LogStatus_OtherCtor()
+        public void BatchSize_OtherCtor()
         {
             using (var eventLog = new EventLogReader("Application", PathType.LogName))
             {
