@@ -123,7 +123,7 @@ namespace System.Xml
                 <#= BufferName #>[bufPos++] = (<#= BufferType #>)']';
             }
 
-            <#= BufferName #>[this.bufPos++] = (<#= BufferType #>)'>';
+            <#= BufferName #>[bufPos++] = (<#= BufferType #>)'>';
         }
 
         // Serialize the beginning of an element start tag: "<prefix:localName"
@@ -259,9 +259,9 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(prefix != null && namespaceName != null);
 
-            await this.WriteStartNamespaceDeclarationAsync(prefix).ConfigureAwait(false);
-            await this.WriteStringAsync(namespaceName).ConfigureAwait(false);
-            await this.WriteEndNamespaceDeclarationAsync().ConfigureAwait(false);
+            await WriteStartNamespaceDeclarationAsync(prefix).ConfigureAwait(false);
+            await WriteStringAsync(namespaceName).ConfigureAwait(false);
+            await WriteEndNamespaceDeclarationAsync().ConfigureAwait(false);
         }
 
         internal override async Task WriteStartNamespaceDeclarationAsync(string prefix)
@@ -680,6 +680,7 @@ namespace System.Xml
             return Task.CompletedTask;
         }
 <# } #>
+
         // Serialize text that is part of an attribute value.  The '&', '<', '>', and '"' characters
         // are entitized.
         protected unsafe int WriteAttributeTextBlockNoFlush(char* pSrc, char* pSrcEnd)
@@ -688,7 +689,7 @@ namespace System.Xml
 
             fixed (<#= BufferType #>* pDstBegin = <#= BufferName #>)
             {
-                <#= BufferType #>* pDst = pDstBegin + this.bufPos;
+                <#= BufferType #>* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
@@ -879,7 +880,7 @@ namespace System.Xml
 
             fixed (<#= BufferType #>* pDstBegin = <#= BufferName #>)
             {
-                <#= BufferType #>* pDst = pDstBegin + this.bufPos;
+                <#= BufferType #>* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
@@ -1104,16 +1105,16 @@ namespace System.Xml
 
             fixed (<#= BufferType #>* pDstBegin = <#= BufferName #>)
             {
-                <#= BufferType #>* pDst = pDstBegin + this.bufPos;
+                <#= BufferType #>* pDst = pDstBegin + bufPos;
                 char* pSrc = pSrcBegin;
 
                 int ch = 0;
                 for (;;)
                 {
                     <#= BufferType #>* pDstEnd = pDst + (pSrcEnd - pSrc);
-                    if (pDstEnd > pDstBegin + this.bufLen)
+                    if (pDstEnd > pDstBegin + bufLen)
                     {
-                        pDstEnd = pDstBegin + this.bufLen;
+                        pDstEnd = pDstBegin + bufLen;
                     }
 
 <# if (WriterType == RawTextWriterType.Utf8) { #>

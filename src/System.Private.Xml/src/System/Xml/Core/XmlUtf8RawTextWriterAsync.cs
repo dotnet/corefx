@@ -35,7 +35,7 @@ namespace System.Xml
             // Output xml declaration only if user allows it and it was not already output
             if (!omitXmlDeclaration && !autoXmlDeclaration)
             {
-
+                
 
                 await RawTextAsync("<?xml version=\"").ConfigureAwait(false);
 
@@ -78,7 +78,7 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(name != null && name.Length > 0);
 
-
+            
 
             await RawTextAsync("<!DOCTYPE ").ConfigureAwait(false);
             await RawTextAsync(name).ConfigureAwait(false);
@@ -111,7 +111,7 @@ namespace System.Xml
                 bufBytes[bufPos++] = (byte)']';
             }
 
-            bufBytes[this.bufPos++] = (byte)'>';
+            bufBytes[bufPos++] = (byte)'>';
         }
 
         // Serialize the beginning of an element start tag: "<prefix:localName"
@@ -121,7 +121,7 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
-
+            
             Task task;
             bufBytes[bufPos++] = (byte)'<';
             if (prefix != null && prefix.Length != 0)
@@ -148,7 +148,7 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
-
+            
 
             if (contentPos != bufPos)
             {
@@ -183,7 +183,7 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
-
+            
 
             bufBytes[bufPos++] = (byte)'<';
             bufBytes[bufPos++] = (byte)'/';
@@ -205,7 +205,7 @@ namespace System.Xml
             Debug.Assert(localName != null && localName.Length > 0);
             Debug.Assert(prefix != null);
 
-
+            
 
             if (attrEndPos == bufPos)
             {
@@ -234,7 +234,7 @@ namespace System.Xml
         protected internal override Task WriteEndAttributeAsync()
         {
             CheckAsyncCall();
-
+            
             bufBytes[bufPos++] = (byte)'"';
             inAttributeValue = false;
             attrEndPos = bufPos;
@@ -247,9 +247,9 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(prefix != null && namespaceName != null);
 
-            await this.WriteStartNamespaceDeclarationAsync(prefix).ConfigureAwait(false);
-            await this.WriteStringAsync(namespaceName).ConfigureAwait(false);
-            await this.WriteEndNamespaceDeclarationAsync().ConfigureAwait(false);
+            await WriteStartNamespaceDeclarationAsync(prefix).ConfigureAwait(false);
+            await WriteStringAsync(namespaceName).ConfigureAwait(false);
+            await WriteEndNamespaceDeclarationAsync().ConfigureAwait(false);
         }
 
         internal override async Task WriteStartNamespaceDeclarationAsync(string prefix)
@@ -257,7 +257,7 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(prefix != null);
 
-
+            
 
             if (prefix.Length == 0)
             {
@@ -272,13 +272,13 @@ namespace System.Xml
             }
 
             inAttributeValue = true;
-
+            
         }
 
         internal override Task WriteEndNamespaceDeclarationAsync()
         {
             CheckAsyncCall();
-
+            
             inAttributeValue = false;
 
             bufBytes[bufPos++] = (byte)'"';
@@ -294,7 +294,7 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(text != null);
 
-
+            
 
             if (mergeCDataSections && bufPos == cdataPos)
             {
@@ -332,7 +332,7 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(text != null);
 
-
+            
 
             bufBytes[bufPos++] = (byte)'<';
             bufBytes[bufPos++] = (byte)'!';
@@ -353,7 +353,7 @@ namespace System.Xml
             Debug.Assert(name != null && name.Length > 0);
             Debug.Assert(text != null);
 
-
+            
 
             bufBytes[bufPos++] = (byte)'<';
             bufBytes[bufPos++] = (byte)'?';
@@ -375,7 +375,7 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(name != null && name.Length > 0);
 
-
+            
 
             bufBytes[bufPos++] = (byte)'&';
             await RawTextAsync(name).ConfigureAwait(false);
@@ -401,7 +401,7 @@ namespace System.Xml
                 throw XmlConvert.CreateInvalidCharException(ch, '\0');
             }
 
-
+            
 
             bufBytes[bufPos++] = (byte)'&';
             bufBytes[bufPos++] = (byte)'#';
@@ -423,7 +423,7 @@ namespace System.Xml
         {
             CheckAsyncCall();
             Debug.Assert(ws != null);
-
+            
 
             if (inAttributeValue)
             {
@@ -441,7 +441,7 @@ namespace System.Xml
         {
             CheckAsyncCall();
             Debug.Assert(text != null);
-
+            
 
             if (inAttributeValue)
             {
@@ -457,7 +457,7 @@ namespace System.Xml
         public override async Task WriteSurrogateCharEntityAsync(char lowChar, char highChar)
         {
             CheckAsyncCall();
-
+            
             int surrogateChar = XmlCharType.CombineSurrogateChar(lowChar, highChar);
 
             bufBytes[bufPos++] = (byte)'&';
@@ -478,7 +478,7 @@ namespace System.Xml
             Debug.Assert(index >= 0);
             Debug.Assert(count >= 0 && index + count <= buffer.Length);
 
-
+            
 
             if (inAttributeValue)
             {
@@ -500,7 +500,7 @@ namespace System.Xml
             Debug.Assert(index >= 0);
             Debug.Assert(count >= 0 && index + count <= buffer.Length);
 
-
+            
 
             await WriteRawWithCharCheckingAsync(buffer, index, count).ConfigureAwait(false);
 
@@ -514,7 +514,7 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(data != null);
 
-
+            
 
             await WriteRawWithCharCheckingAsync(data).ConfigureAwait(false);
 
@@ -531,7 +531,6 @@ namespace System.Xml
             {
                 await stream.FlushAsync().ConfigureAwait(false);
             }
-
         }
 
         //
@@ -547,7 +546,6 @@ namespace System.Xml
                 {
                     Debug.Assert(stream != null);
                     await stream.WriteAsync(bufBytes, 1, bufPos - 1).ConfigureAwait(false);
-
                 }
             }
             catch
@@ -588,7 +586,7 @@ namespace System.Xml
 
             fixed (byte* pDstBegin = bufBytes)
             {
-                byte* pDst = pDstBegin + this.bufPos;
+                byte* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
@@ -599,9 +597,7 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-
                     while (pDst < pDstEnd && (xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)) && ch <= 0x7F))
-
                     {
                         *pDst = (byte)ch;
                         pDst++;
@@ -791,7 +787,7 @@ namespace System.Xml
 
             fixed (byte* pDstBegin = bufBytes)
             {
-                byte* pDst = pDstBegin + this.bufPos;
+                byte* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
@@ -802,9 +798,7 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-
                     while (pDst < pDstEnd && (xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)) && ch <= 0x7F))
-
                     {
                         *pDst = (byte)ch;
                         pDst++;
@@ -1028,21 +1022,19 @@ namespace System.Xml
 
             fixed (byte* pDstBegin = bufBytes)
             {
-                byte* pDst = pDstBegin + this.bufPos;
+                byte* pDst = pDstBegin + bufPos;
                 char* pSrc = pSrcBegin;
 
                 int ch = 0;
                 for (;;)
                 {
                     byte* pDstEnd = pDst + (pSrcEnd - pSrc);
-                    if (pDstEnd > pDstBegin + this.bufLen)
+                    if (pDstEnd > pDstBegin + bufLen)
                     {
-                        pDstEnd = pDstBegin + this.bufLen;
+                        pDstEnd = pDstBegin + bufLen;
                     }
 
-
                     while (pDst < pDstEnd && ((ch = *pSrc) <= 0x7F))
-
                     {
                         pSrc++;
                         *pDst = (byte)ch;
@@ -1213,9 +1205,7 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-
                     while (pDst < pDstEnd && (xmlCharType.IsTextChar((char)(ch = *pSrc)) && ch <= 0x7F))
-
                     {
                         *pDst = (byte)ch;
                         pDst++;
@@ -1413,9 +1403,7 @@ namespace System.Xml
                             pDstEnd = pDstBegin + bufLen;
                         }
 
-
                         while (pDst < pDstEnd && (xmlCharType.IsTextChar((char)(ch = *pSrc)) && ch != stopChar && ch <= 0x7F))
-
                         {
                             *pDst = (byte)ch;
                             pDst++;
@@ -1601,9 +1589,7 @@ namespace System.Xml
                             pDstEnd = pDstBegin + bufLen;
                         }
 
-
                         while (pDst < pDstEnd && (xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)) && ch != ']' && ch <= 0x7F))
-
                         {
                             *pDst = (byte)ch;
                             pDst++;

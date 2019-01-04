@@ -115,7 +115,7 @@ namespace System.Xml
                 bufChars[bufPos++] = (char)']';
             }
 
-            bufChars[this.bufPos++] = (char)'>';
+            bufChars[bufPos++] = (char)'>';
         }
 
         // Serialize the beginning of an element start tag: "<prefix:localName"
@@ -261,9 +261,9 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(prefix != null && namespaceName != null);
 
-            await this.WriteStartNamespaceDeclarationAsync(prefix).ConfigureAwait(false);
-            await this.WriteStringAsync(namespaceName).ConfigureAwait(false);
-            await this.WriteEndNamespaceDeclarationAsync().ConfigureAwait(false);
+            await WriteStartNamespaceDeclarationAsync(prefix).ConfigureAwait(false);
+            await WriteStringAsync(namespaceName).ConfigureAwait(false);
+            await WriteEndNamespaceDeclarationAsync().ConfigureAwait(false);
         }
 
         internal override async Task WriteStartNamespaceDeclarationAsync(string prefix)
@@ -574,12 +574,10 @@ namespace System.Xml
             {
                 await stream.FlushAsync().ConfigureAwait(false);
             }
-
             else if (writer != null)
             {
                 await writer.FlushAsync().ConfigureAwait(false);
             }
-
         }
 
         //
@@ -622,7 +620,6 @@ namespace System.Xml
                         // Write text to TextWriter
                         await writer.WriteAsync(bufChars, 1, bufPos - 1).ConfigureAwait(false);
                     }
-
                 }
             }
             catch
@@ -646,7 +643,6 @@ namespace System.Xml
                                    // close an empty element or in CDATA section detection of double ]; _BUFFER[0] will always be 0
             }
         }
-
         private async Task EncodeCharsAsync(int startOffset, int endOffset, bool writeAllToStream)
         {
             // Write encoded text to stream
@@ -702,7 +698,7 @@ namespace System.Xml
 
             fixed (char* pDstBegin = bufChars)
             {
-                char* pDst = pDstBegin + this.bufPos;
+                char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
@@ -713,9 +709,7 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-
                     while (pDst < pDstEnd && xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)))
-
                     {
                         *pDst = (char)ch;
                         pDst++;
@@ -906,7 +900,7 @@ namespace System.Xml
 
             fixed (char* pDstBegin = bufChars)
             {
-                char* pDst = pDstBegin + this.bufPos;
+                char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
                 for (;;)
@@ -917,9 +911,7 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-
                     while (pDst < pDstEnd && xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)))
-
                     {
                         *pDst = (char)ch;
                         pDst++;
@@ -1144,21 +1136,19 @@ namespace System.Xml
 
             fixed (char* pDstBegin = bufChars)
             {
-                char* pDst = pDstBegin + this.bufPos;
+                char* pDst = pDstBegin + bufPos;
                 char* pSrc = pSrcBegin;
 
                 int ch = 0;
                 for (;;)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
-                    if (pDstEnd > pDstBegin + this.bufLen)
+                    if (pDstEnd > pDstBegin + bufLen)
                     {
-                        pDstEnd = pDstBegin + this.bufLen;
+                        pDstEnd = pDstBegin + bufLen;
                     }
 
-
                     while (pDst < pDstEnd && ((ch = *pSrc) < XmlCharType.SurHighStart))
-
                     {
                         pSrc++;
                         *pDst = (char)ch;
@@ -1330,9 +1320,7 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-
                     while (pDst < pDstEnd && xmlCharType.IsTextChar((char)(ch = *pSrc)))
-
                     {
                         *pDst = (char)ch;
                         pDst++;
@@ -1531,9 +1519,7 @@ namespace System.Xml
                             pDstEnd = pDstBegin + bufLen;
                         }
 
-
                         while (pDst < pDstEnd && (xmlCharType.IsTextChar((char)(ch = *pSrc)) && ch != stopChar))
-
                         {
                             *pDst = (char)ch;
                             pDst++;
@@ -1720,9 +1706,7 @@ namespace System.Xml
                             pDstEnd = pDstBegin + bufLen;
                         }
 
-
                         while (pDst < pDstEnd && (xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)) && ch != ']'))
-
                         {
                             *pDst = (char)ch;
                             pDst++;
