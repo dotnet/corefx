@@ -91,7 +91,7 @@ namespace System.Xml
                 bufBytes[bufPos++] = (byte)']';
             }
 
-            bufBytes[this.bufPos++] = (byte)'>';
+            bufBytes[bufPos++] = (byte)'>';
         }
 
         // For the HTML element, it should call this method with ns and prefix as String.Empty
@@ -126,7 +126,7 @@ namespace System.Xml
             base.bufBytes[base.bufPos++] = (byte)'>';
 
             // Detect whether content is output
-            this.contentPos = this.bufPos;
+            contentPos = bufPos;
 
             if ((currentElementProperties & ElementProperties.HEAD) != 0)
             {
@@ -554,7 +554,7 @@ namespace System.Xml
 
             fixed (byte* pDstBegin = bufBytes)
             {
-                byte* pDst = pDstBegin + this.bufPos;
+                byte* pDst = pDstBegin + bufPos;
 
                 char ch = (char)0;
                 for (;;)
@@ -644,7 +644,7 @@ namespace System.Xml
 
             fixed (byte* pDstBegin = bufBytes)
             {
-                byte* pDst = pDstBegin + this.bufPos;
+                byte* pDst = pDstBegin + bufPos;
 
                 char ch = (char)0;
                 for (;;)
