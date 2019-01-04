@@ -229,7 +229,6 @@
 
     <!-- support cross-targeting by choosing a RID to restore when running on a different machine that what we're build for -->
     <_portableOS Condition="'$(OSGroup)' == 'Unix' AND '$(_runtimeOSFamily)' != 'osx' AND '$(_runtimeOSFamily)' != 'FreeBSD' AND '$(_runtimeOS)' != 'linux-musl'">linux</_portableOS>
-    <_portableOS Condition="'$(OSGroup)' == 'Windows_NT'">win</_portableOS>
 
     <_packageRID/>
     <_packageRID Condition="'$(PortableBuild)' == 'true'">$(_portableOS)-$(ArchGroup)</_packageRID>
