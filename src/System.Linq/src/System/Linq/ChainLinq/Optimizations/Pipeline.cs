@@ -14,6 +14,11 @@ namespace System.Linq.ChainLinq.Optimizations
 
     interface IPipelineList<T>
     {
-        void Pipeline(List<T> array);
+        void Pipeline(List<T> list);
+    }
+
+    interface IPipelineIList<T>
+    {
+        void Pipeline(IList<T> list, int start, int count);
     }
 }

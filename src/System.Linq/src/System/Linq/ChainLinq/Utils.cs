@@ -17,6 +17,9 @@ namespace System.Linq.ChainLinq
                 case List<T> list:
                     return new Consumables.List<T, U>(list, transform);
 
+                case IList<T> list:
+                    return new Consumables.IList<T, U>(list, 0, list.Count, transform);
+
                 default:
                     return new Consumables.Enumerable<T, U>(e, transform);
             }
