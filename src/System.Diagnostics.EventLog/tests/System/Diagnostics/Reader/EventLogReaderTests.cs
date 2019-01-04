@@ -119,7 +119,6 @@ namespace System.Diagnostics.Tests
                 Guid? relatedActivityId = record.RelatedActivityId;
                 Assert.False(relatedActivityId.HasValue);
                 
-                Assert.NotEqual(0, record.Id);
                 Assert.NotNull(record.Qualifiers);
                 Assert.NotNull(record.Level);
                 Assert.NotNull(record.Task);
@@ -157,10 +156,8 @@ namespace System.Diagnostics.Tests
         {
             var elq = new EventLogQuery(log, pathType) { ReverseDirection = true };
             var reader = new EventLogReader(elq);
-            var record = reader.ReadEvent();
-            if (record != null)
-                return record.Bookmark;
-            return null;
+            EventRecord record = reader.ReadEvent();
+            return record?.Bookmark;
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]

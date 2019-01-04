@@ -15,6 +15,7 @@ namespace System.Diagnostics.Tests
     public class EventLogSessionTests : FileCleanupTestBase
     {
         private const string LogName = "Application";
+
         [ConditionalTheory(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
         [InlineData(true)]
         [InlineData(false)]

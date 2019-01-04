@@ -10,6 +10,10 @@ namespace System.Diagnostics.Tests
 {
     public class EventLogWatcherTests
     {
+        private static AutoResetEvent signal;
+        private const string message = "EventRecordWrittenTestMessage";
+        private int eventCounter;
+
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
         public void Ctor_Default()
         {
@@ -54,10 +58,6 @@ namespace System.Diagnostics.Tests
             }
             return bookmark;
         }
-
-        static AutoResetEvent signal;
-        private const string message = "EventRecordWrittenTestMessage";
-        private int eventCounter;
 
         public void RaisingEvent(string log, string methodName, bool waitOnEvent = true)
         {
