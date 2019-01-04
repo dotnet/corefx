@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// WARNING: This file is generated and should not be modified directly.
+// Instead, modify TextRawTextWriterGenerator.ttinclude
+
 using System;
 using System.IO;
 using System.Text;
@@ -18,7 +21,6 @@ namespace System.Xml
     // </summary>
     internal class TextUtf8RawTextWriter : XmlUtf8RawTextWriter
     {
-
 
         // Construct an instance of this class that serializes to a Stream interface.
         public TextUtf8RawTextWriter(Stream stream, XmlWriterSettings settings) : base(stream, settings)

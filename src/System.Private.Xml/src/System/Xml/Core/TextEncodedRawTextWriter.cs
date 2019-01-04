@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// WARNING: This file is generated and should not be modified directly.
+// Instead, modify TextRawTextWriterGenerator.ttinclude
+
 using System;
 using System.IO;
 using System.Text;
@@ -18,12 +21,10 @@ namespace System.Xml
     // </summary>
     internal class TextEncodedRawTextWriter : XmlEncodedRawTextWriter
     {
-
         // Construct an instance of this class that outputs text to the TextWriter interface.
         public TextEncodedRawTextWriter(TextWriter writer, XmlWriterSettings settings) : base(writer, settings)
         {
         }
-
 
         // Construct an instance of this class that serializes to a Stream interface.
         public TextEncodedRawTextWriter(Stream stream, XmlWriterSettings settings) : base(stream, settings)
