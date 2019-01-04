@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.even
 
-using System.Diagnostics.Eventing.Reader;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using Xunit;
 
 namespace System.Diagnostics.Tests

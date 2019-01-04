@@ -4,8 +4,6 @@
 
 using System.Diagnostics.Eventing.Reader;
 using System.Security.Principal;
-using System.Reflection;
-using System.Threading;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -25,7 +23,7 @@ namespace System.Diagnostics.Tests
 
             using (eventLog)
             {
-                var record = eventLog.ReadEvent();
+                EventRecord record = eventLog.ReadEvent();
                 Assert.NotNull(record);
                 Assert.Equal(logName, record.LogName);
             }
@@ -39,18 +37,7 @@ namespace System.Diagnostics.Tests
             if (PlatformDetection.IsWindows7) // Null events in PowerShell log
                 return;
 
-            var eventLog =
-                useQuery
-                ? new EventLogReader(
-                     new EventLogQuery(logName, PathType.LogName) { ReverseDirection = true })
-                : new EventLogReader(logName);
-
-            using (eventLog)
-            {
-                EventRecord record = eventLog.ReadEvent();
-                Assert.NotNull(record);
-                Assert.Equal(logName, record.LogName);
-            }
+            ReadEvent(logName, useQuery);
         }
 
         [ConditionalTheory(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
@@ -148,7 +135,6 @@ namespace System.Diagnostics.Tests
                 Assert.NotNull(record.ToXml());
 
                 record.Dispose();
-                // eventLog.CancelReading();
             }
         }
 

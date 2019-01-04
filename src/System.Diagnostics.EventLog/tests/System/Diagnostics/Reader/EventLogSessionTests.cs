@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.IO;
 using System.Security;
-using System.Threading;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -28,7 +26,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [ConditionalTheory(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        [ConditionalTheory(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]
         [InlineData(true)]
         [InlineData(false)]
         public void ExportLogAndMessages_NullPath_Throws(bool usingDefaultCtor)
@@ -82,6 +80,8 @@ namespace System.Diagnostics.Tests
                 Assert.Throws<ArgumentNullException>(() => session.ClearLog(null, backupPath: GetTestFilePath()));
                 Assert.Throws<EventLogException>(() => session.ClearLog(""));
                 
+                // Does not throw: (commenting out because it actually clears logs and causes problem for other tests.)
+                // session.ClearLog(logName: "Application");
                 session.CancelCurrentOperations();
             }
         }

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -19,14 +18,13 @@ namespace System.Diagnostics.Tests
             Assert.Throws<EventLogNotFoundException>(() => new ProviderMetadata("Source_Does_Not_Exist"));
         }
 
-        [ConditionalTheory(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        [ConditionalTheory(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]
         [InlineData(true)]
         [InlineData(false)]
         public void ProviderNameTests(bool noProviderName)
         {
             string log = "Application";
             string source = "Source_" + nameof(ProviderNameTests);
-            
             using (var session = new EventLogSession())
             {
                 try
@@ -79,105 +77,99 @@ namespace System.Diagnostics.Tests
                 }
                 session.CancelCurrentOperations();
             }
-
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
         public void GetProviderNames_AssertProperties()
         {
-            List<string> standardOpcodeNames = new List<string>(Enum.GetNames(typeof(StandardEventOpcode))).Select(x => "win:" + x).ToList();
+            const string Prefix = "win:";
+            var standardOpcodeNames = new List<string>(Enum.GetNames(typeof(StandardEventOpcode))).Select(x => Prefix + x).ToList();
             using (var session = new EventLogSession())
             {
                 Assert.NotEmpty(session.GetProviderNames());
                 foreach (string providerName in session.GetProviderNames())
                 {
-                    ProviderMetadata providerMetadata = null;
                     try
                     {
-                        providerMetadata = new ProviderMetadata(providerName);
-                        foreach (var keyword in providerMetadata.Keywords)
+                        using (var providerMetadata = new ProviderMetadata(providerName))
                         {
-                            Assert.NotEmpty(keyword.Name);
-                            Assert.NotNull(keyword.Value);
-                        }
-                        foreach (var logLink in providerMetadata.LogLinks)
-                        {
-                            Assert.NotEmpty(logLink.LogName);
-                        }
-                        foreach (var opcode in providerMetadata.Opcodes)
-                        {
-                            if (opcode != null && standardOpcodeNames.Contains(opcode.Name))
+                            foreach (var keyword in providerMetadata.Keywords)
                             {
-                                Assert.Contains((((StandardEventOpcode)(opcode.Value)).ToString()), opcode.Name);
+                                Assert.NotEmpty(keyword.Name);
+                                Assert.NotNull(keyword.Value);
                             }
-                        }
-                        foreach (var eventMetadata in providerMetadata.Events)
-                        {
-                            EventLogLink logLink = eventMetadata.LogLink;
-                            if(logLink != null)
+                            foreach (var logLink in providerMetadata.LogLinks)
                             {
-                                if (logLink.DisplayName != null && logLink.DisplayName.Equals("System"))
+                                Assert.NotEmpty(logLink.LogName);
+                            }
+                            foreach (var opcode in providerMetadata.Opcodes)
+                            {
+                                if (opcode != null && standardOpcodeNames.Contains(opcode.Name))
                                 {
-                                    Assert.Equal("System", logLink.LogName);
-                                    Assert.True(logLink.IsImported);
+                                    Assert.Contains((((StandardEventOpcode)(opcode.Value)).ToString()), opcode.Name);
                                 }
                             }
-                            EventLevel eventLevel = eventMetadata.Level;
-                            if(eventLevel != null)
+                            foreach (var eventMetadata in providerMetadata.Events)
                             {
-                                if (eventLevel.Name != null)
+                                EventLogLink logLink = eventMetadata.LogLink;
+                                if(logLink != null)
                                 {
-                                    // https://github.com/Microsoft/perfview/blob/d4b044abdfb4c8e40a344ca05383e04b5b6dc13a/src/related/EventRegister/winmeta.xml#L39
-                                    if (eventLevel.Name.StartsWith("win:") && !eventLevel.Name.Contains("ReservedLevel"))
+                                    if (logLink.DisplayName != null && logLink.DisplayName.Equals("System"))
                                     {
-                                        Assert.True(System.Enum.IsDefined(typeof(StandardEventLevel), eventLevel.Value));
-                                        Assert.Contains(eventLevel.Name.Substring(4), Enum.GetNames(typeof(StandardEventLevel)));
+                                        Assert.Equal("System", logLink.LogName);
+                                        Assert.True(logLink.IsImported);
                                     }
                                 }
-                            }
-                            EventOpcode opcode = eventMetadata.Opcode;
-                            if(opcode != null)
-                            {
-                                if (opcode.Name != null && opcode.DisplayName != null && opcode.DisplayName.ToLower().Equals("apprun"))
+                                EventLevel eventLevel = eventMetadata.Level;
+                                if(eventLevel != null)
                                 {
-                                    Assert.Contains(opcode.DisplayName.ToLower(), opcode.Name.ToLower());
-                                }
-                            }
-                            EventTask task = eventMetadata.Task;
-                            if(eventMetadata.Task != null)
-                            {
-                                if (task.Value == (int)StandardEventTask.None)
-                                {
-                                    Assert.True(task.DisplayName == null || task.DisplayName == "None");
-                                    Assert.True(task.Name == null || task.Name == "win:None");
-                                    Assert.Equal(new Guid(), task.EventGuid);
-                                    Assert.Equal(0, task.Value);
-                                }
-                            }
-                            IEnumerable<EventKeyword> keywords = eventMetadata.Keywords;
-                            if(eventMetadata.Keywords != null)
-                            {
-                                foreach(var keyword in eventMetadata.Keywords)
-                                {
-                                    if (keyword.Name != null)
+                                    if (eventLevel.Name != null)
                                     {
-                                        if (keyword.Name.StartsWith("win:"))
+                                        // https://github.com/Microsoft/perfview/blob/d4b044abdfb4c8e40a344ca05383e04b5b6dc13a/src/related/EventRegister/winmeta.xml#L39
+                                        if (eventLevel.Name.StartsWith(Prefix) && !eventLevel.Name.Contains("ReservedLevel"))
+                                        {
+                                            Assert.True(System.Enum.IsDefined(typeof(StandardEventLevel), eventLevel.Value));
+                                            Assert.Contains(eventLevel.Name.Substring(4), Enum.GetNames(typeof(StandardEventLevel)));
+                                        }
+                                    }
+                                }
+                                EventOpcode opcode = eventMetadata.Opcode;
+                                if(opcode != null)
+                                {
+                                    if (opcode.Name != null && opcode.DisplayName != null && opcode.DisplayName.ToLower().Equals("apprun"))
+                                    {
+                                        Assert.Contains(opcode.DisplayName.ToLower(), opcode.Name.ToLower());
+                                    }
+                                }
+                                EventTask task = eventMetadata.Task;
+                                if(eventMetadata.Task != null)
+                                {
+                                    if (task.Value == (int)StandardEventTask.None)
+                                    {
+                                        Assert.True(task.DisplayName == null || task.DisplayName == "None");
+                                        Assert.True(task.Name == null || task.Name == Prefix + "None");
+                                        Assert.Equal(new Guid(), task.EventGuid);
+                                        Assert.Equal(0, task.Value);
+                                    }
+                                }
+                                IEnumerable<EventKeyword> keywords = eventMetadata.Keywords;
+                                if(eventMetadata.Keywords != null)
+                                {
+                                    foreach(var keyword in eventMetadata.Keywords)
+                                    {
+                                        if (keyword.Name != null && keyword.Name.StartsWith(Prefix))
                                         {
                                             Assert.True(System.Enum.IsDefined(typeof(StandardEventKeywords), keyword.Value));
                                         }
                                     }
                                 }
+                                Assert.NotNull(eventMetadata.Template);
                             }
-                            Assert.NotNull(eventMetadata.Template);
                         }
                     }
                     catch (EventLogException)
                     {
                         continue;
-                    }
-                    finally
-                    {
-                        providerMetadata?.Dispose();
                     }
                 }
             }
