@@ -4,6 +4,7 @@
     {
         Consumable<T> Skip(int toSkip);
         Consumable<T> Take(int toTake);
+        T Last(bool orDefault);
     }
 
     interface ISkipTakeOnConsumableLinkUpdate<T, U>

@@ -28,12 +28,14 @@ namespace System.Linq
                 count = 0;
             }
 
-            if (source is ChainLinq.Optimizations.ISkipTakeOnConsumable<TSource> opt)
+            var consumable = ChainLinq.Utils.AsConsumable(source);
+
+            if (consumable is ChainLinq.Optimizations.ISkipTakeOnConsumable<TSource> opt)
             {
                 return opt.Skip(count);
             }
 
-            if (source is ChainLinq.ConsumableForMerging<TSource> merger)
+            if (consumable is ChainLinq.ConsumableForMerging<TSource> merger)
             {
                 if (merger.TailLink is ChainLinq.Optimizations.IMergeSkip<TSource> skipMerge)
                 {
@@ -43,7 +45,7 @@ namespace System.Linq
                 return merger.AddTail(CreateSkipLink<TSource>(count));
             }
 
-            return ChainLinq.Utils.PushTransform(source, CreateSkipLink<TSource>(count));
+            return ChainLinq.Utils.PushTransform(consumable, CreateSkipLink<TSource>(count));
         }
 
         private static ChainLinq.Links.Skip<TSource> CreateSkipLink<TSource>(int count) =>

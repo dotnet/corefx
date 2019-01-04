@@ -16,8 +16,9 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
+            var consumable = ChainLinq.Utils.AsConsumable(source);
 
-            if (source is ChainLinq.Optimizations.ISkipTakeOnConsumable<TSource> opt)
+            if (consumable is ChainLinq.Optimizations.ISkipTakeOnConsumable<TSource> opt)
             {
                 return opt.Take(count);
             }
@@ -25,7 +26,7 @@ namespace System.Linq
             return
                 count <= 0
                   ? ChainLinq.Consumables.Empty<TSource>.Instance
-                  : ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Take<TSource>(count));
+                  : ChainLinq.Utils.PushTransform(consumable, new ChainLinq.Links.Take<TSource>(count));
         }
 
         public static IEnumerable<TSource> TakeWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)

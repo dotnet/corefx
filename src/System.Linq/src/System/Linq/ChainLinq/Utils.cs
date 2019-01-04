@@ -25,6 +25,18 @@ namespace System.Linq.ChainLinq
             }
         }
 
+        internal static Consumable<T> AsConsumable<T>(IEnumerable<T> e)
+        {
+            switch (e)
+            {
+                case Consumable<T> c:
+                    return c;
+
+                default:
+                    return CreateConsumable(e, Links.Identity<T>.Instance);
+            }
+        }
+
         internal static Consumable<U> PushTransform<T, U>(IEnumerable<T> e, ILink<T, U> transform)
         {
             switch (e)
@@ -37,16 +49,7 @@ namespace System.Linq.ChainLinq
             }
         }
 
-        internal static Result Consume<T, Result>(IEnumerable<T> e, Consumer<T, Result> consumer)
-        {
-            switch (e)
-            {
-                case Consumable<T> consumable:
-                    return consumable.Consume(consumer);
-
-                default:
-                    return CreateConsumable(e, Links.Identity<T>.Instance).Consume(consumer);
-            }
-        }
+        internal static Result Consume<T, Result>(IEnumerable<T> e, Consumer<T, Result> consumer) =>
+            AsConsumable(e).Consume(consumer);
     }
 }

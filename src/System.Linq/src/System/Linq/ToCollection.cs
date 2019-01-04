@@ -15,17 +15,17 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            if (source is ChainLinq.Optimizations.ICountOnConsumable counter)
-            {
-                var count = counter.GetCount(true);
-                if (count >= 0)
-                {
-                    return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.ToArrayKnownSize<TSource>(count));
-                }
-            }
-
             if (source is ChainLinq.Consumable<TSource> consumable)
             {
+                if (source is ChainLinq.Optimizations.ICountOnConsumable counter)
+                {
+                    var count = counter.GetCount(true);
+                    if (count >= 0)
+                    {
+                        return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.ToArrayKnownSize<TSource>(count));
+                    }
+                }
+
                 return consumable.Consume(new ChainLinq.Consumer.ToArrayViaBuilder<TSource>());
             }
 
@@ -39,17 +39,17 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            if (source is ChainLinq.Optimizations.ICountOnConsumable counter)
-            {
-                var count = counter.GetCount(true);
-                if (count >= 0)
-                {
-                    return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.ToList<TSource>(count));
-                }
-            }
-
             if (source is ChainLinq.Consumable<TSource> consumable)
             {
+                if (source is ChainLinq.Optimizations.ICountOnConsumable counter)
+                {
+                    var count = counter.GetCount(true);
+                    if (count >= 0)
+                    {
+                        return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.ToList<TSource>(count));
+                    }
+                }
+
                 return consumable.Consume(new ChainLinq.Consumer.ToList<TSource>());
             }
 

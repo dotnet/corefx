@@ -3,13 +3,13 @@
 namespace System.Linq.ChainLinq.Consumables
 {
     /// <summary>
-    /// https://github.com/xunit/xunit/issues/1870
+    /// The generic arguments are reversed here due to a bug in xunit. See https://github.com/xunit/xunit/issues/1870
     /// </summary>
     /// <typeparam name="U"></typeparam>
     /// <typeparam name="T"></typeparam>
     internal abstract class Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<U, T> : ConsumableForMerging<U>, IConsumableInternal
     {
-        protected ILink<T, U> Link { get; }
+        public ILink<T, U> Link { get; }
 
         protected Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug(ILink<T, U> link) =>
             Link = link;

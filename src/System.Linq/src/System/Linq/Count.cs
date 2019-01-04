@@ -21,17 +21,19 @@ namespace System.Linq
                 return collectionoft.Count;
             }
 
-            if (source is ChainLinq.Optimizations.ICountOnConsumable opt)
-            {
-                return opt.GetCount(false);
-            }
-
             if (source is ICollection collection)
             {
                 return collection.Count;
             }
 
-            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Count<TSource>());
+            var consumable = ChainLinq.Utils.AsConsumable(source);
+
+            if (consumable is ChainLinq.Optimizations.ICountOnConsumable opt)
+            {
+                return opt.GetCount(false);
+            }
+
+            return ChainLinq.Utils.Consume(consumable, new ChainLinq.Consumer.Count<TSource>());
         }
 
         public static int Count<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)

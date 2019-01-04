@@ -8,74 +8,36 @@ namespace System.Linq
 {
     public static partial class Enumerable
     {
-        public static TSource Last<TSource>(this IEnumerable<TSource> source)
-        {
-            TSource last = source.TryGetLast(out bool found);
-            if (!found)
-            {
-                throw Error.NoElements();
-            }
-
-            return last;
-        }
-
-        public static TSource Last<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
-        {
-            TSource last = source.TryGetLast(predicate, out bool found);
-            if (!found)
-            {
-                throw Error.NoMatch();
-            }
-
-            return last;
-        }
+        public static TSource Last<TSource>(this IEnumerable<TSource> source) =>
+            GetLast(source, false);
 
         public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source) =>
-            source.TryGetLast(out bool _);
+            GetLast(source, true);
+
+        public static TSource Last<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) =>
+            GetLast(source, predicate, false);
 
         public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) =>
-            source.TryGetLast(predicate, out bool _);
+            GetLast(source, predicate, true);
 
-        private static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, out bool found)
+        private static TSource GetLast<TSource>(IEnumerable<TSource> source, bool orDefault)
         {
             if (source == null)
             {
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            if (source is IList<TSource> list)
-            {
-                int count = list.Count;
-                if (count > 0)
-                {
-                    found = true;
-                    return list[count - 1];
-                }
-            }
-            else
-            {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
-                {
-                    if (e.MoveNext())
-                    {
-                        TSource result;
-                        do
-                        {
-                            result = e.Current;
-                        }
-                        while (e.MoveNext());
+            var consumable = ChainLinq.Utils.AsConsumable(source);
 
-                        found = true;
-                        return result;
-                    }
-                }
+            if (consumable is ChainLinq.Optimizations.ISkipTakeOnConsumable<TSource> opt)
+            {
+                return opt.Last(orDefault);
             }
 
-            found = false;
-            return default(TSource);
+            return consumable.Consume(new ChainLinq.Consumer.Last<TSource>(orDefault));
         }
 
-        private static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out bool found)
+        private static TSource GetLast<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate, bool orDefault)
         {
             if (source == null)
             {
@@ -87,11 +49,6 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-            if (source is OrderedEnumerable<TSource> ordered)
-            {
-                return ordered.TryGetLast(predicate, out found);
-            }
-
             if (source is IList<TSource> list)
             {
                 for (int i = list.Count - 1; i >= 0; --i)
@@ -99,38 +56,19 @@ namespace System.Linq
                     TSource result = list[i];
                     if (predicate(result))
                     {
-                        found = true;
                         return result;
                     }
                 }
-            }
-            else
-            {
-                using (IEnumerator<TSource> e = source.GetEnumerator())
+
+                if (orDefault)
                 {
-                    while (e.MoveNext())
-                    {
-                        TSource result = e.Current;
-                        if (predicate(result))
-                        {
-                            while (e.MoveNext())
-                            {
-                                TSource element = e.Current;
-                                if (predicate(element))
-                                {
-                                    result = element;
-                                }
-                            }
-
-                            found = true;
-                            return result;
-                        }
-                    }
+                    return default;
                 }
+
+                throw Error.NoElements();
             }
 
-            found = false;
-            return default(TSource);
+            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.LastWithPredicate<TSource>(orDefault, predicate));
         }
     }
 }
