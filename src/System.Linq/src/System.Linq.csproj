@@ -6,9 +6,11 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="System\Linq\ChainLinq\Consumables\Array.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Last.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumer\Lookup.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\Optimizations\Pipeline.cs" />
@@ -20,7 +22,6 @@
     <Compile Include="System\Linq\ChainLinq\Consumables\ChainLinqConsumable.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Empty.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Base.cs" />
-    <Compile Include="System\Linq\ChainLinq\Consumables\Array.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Concat.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Enumerable.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Prepender.cs" />

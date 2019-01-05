@@ -25,7 +25,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(keySelector));
             }
 
-            return Lookup<TKey, TSource>.Create(source, keySelector, comparer);
+            return ChainLinq.Utils.AsConsumable(source).Consume(new ChainLinq.Consumer.Lookup<TSource, TKey>(keySelector, comparer));
         }
 
         public static ILookup<TKey, TElement> ToLookup<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) =>
@@ -48,7 +48,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(elementSelector));
             }
 
-            return Lookup<TKey, TElement>.Create(source, keySelector, elementSelector, comparer);
+            return ChainLinq.Utils.AsConsumable(source).Consume(new ChainLinq.Consumer.LookupSplit<TSource, TKey, TElement>(keySelector, elementSelector, comparer));
         }
     }
 
@@ -70,51 +70,7 @@ namespace System.Linq
         private Grouping<TKey, TElement> _lastGrouping;
         private int _count;
 
-        internal static Lookup<TKey, TElement> Create<TSource>(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
-        {
-            Debug.Assert(source != null);
-            Debug.Assert(keySelector != null);
-            Debug.Assert(elementSelector != null);
-
-            Lookup<TKey, TElement> lookup = new Lookup<TKey, TElement>(comparer);
-            foreach (TSource item in source)
-            {
-                lookup.GetGrouping(keySelector(item), create: true).Add(elementSelector(item));
-            }
-
-            return lookup;
-        }
-
-        internal static Lookup<TKey, TElement> Create(IEnumerable<TElement> source, Func<TElement, TKey> keySelector, IEqualityComparer<TKey> comparer)
-        {
-            Debug.Assert(source != null);
-            Debug.Assert(keySelector != null);
-
-            Lookup<TKey, TElement> lookup = new Lookup<TKey, TElement>(comparer);
-            foreach (TElement item in source)
-            {
-                lookup.GetGrouping(keySelector(item), create: true).Add(item);
-            }
-
-            return lookup;
-        }
-
-        internal static Lookup<TKey, TElement> CreateForJoin(IEnumerable<TElement> source, Func<TElement, TKey> keySelector, IEqualityComparer<TKey> comparer)
-        {
-            Lookup<TKey, TElement> lookup = new Lookup<TKey, TElement>(comparer);
-            foreach (TElement item in source)
-            {
-                TKey key = keySelector(item);
-                if (key != null)
-                {
-                    lookup.GetGrouping(key, create: true).Add(item);
-                }
-            }
-
-            return lookup;
-        }
-
-        private Lookup(IEqualityComparer<TKey> comparer)
+        internal Lookup(IEqualityComparer<TKey> comparer)
         {
             _comparer = comparer ?? EqualityComparer<TKey>.Default;
             _groupings = new Grouping<TKey, TElement>[7];
@@ -152,23 +108,23 @@ namespace System.Linq
             }
         }
 
-        internal List<TResult> ToList<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
-        {
-            List<TResult> list = new List<TResult>(_count);
-            Grouping<TKey, TElement> g = _lastGrouping;
-            if (g != null)
-            {
-                do
-                {
-                    g = g._next;
-                    g.Trim();
-                    list.Add(resultSelector(g._key, g._elements));
-                }
-                while (g != _lastGrouping);
-            }
+        //internal List<TResult> ToList<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
+        //{
+        //    List<TResult> list = new List<TResult>(_count);
+        //    Grouping<TKey, TElement> g = _lastGrouping;
+        //    if (g != null)
+        //    {
+        //        do
+        //        {
+        //            g = g._next;
+        //            g.Trim();
+        //            list.Add(resultSelector(g._key, g._elements));
+        //        }
+        //        while (g != _lastGrouping);
+        //    }
 
-            return list;
-        }
+        //    return list;
+        //}
 
         public IEnumerable<TResult> ApplyResultSelector<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
         {
