@@ -10,7 +10,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the options -->
   <ItemGroup>
     <Compile Include="..\..\System.Diagnostics.Tracing\src\System\Diagnostics\Tracing\EventCounter.cs" />
     <Compile Include="*.cs" />

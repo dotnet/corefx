@@ -6,7 +6,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the options -->
   <!-- Platform agnostic files -->
   <ItemGroup>
     <Compile Include="Interop\Interop.Brotli.Encoder.cs" />

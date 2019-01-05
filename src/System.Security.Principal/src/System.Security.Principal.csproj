@@ -5,7 +5,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the options -->
   <ItemGroup>
     <Compile Include="System\Security\Principal\IIdentity.cs" />
     <Compile Include="System\Security\Principal\IPrincipal.cs" />

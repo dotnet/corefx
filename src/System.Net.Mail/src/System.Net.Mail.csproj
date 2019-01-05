@@ -4,7 +4,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the options -->
   <ItemGroup>
     <Compile Include="System\Net\Base64Stream.cs" />
     <Compile Include="System\Net\Mime\MimePart.cs" />

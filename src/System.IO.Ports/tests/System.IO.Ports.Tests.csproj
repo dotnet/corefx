@@ -4,7 +4,6 @@
     <TestCategories>InnerLoop;OuterLoop</TestCategories>
     <Configurations>netfx-Debug;netfx-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the options -->
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="SerialPort\BaseStream.cs" />

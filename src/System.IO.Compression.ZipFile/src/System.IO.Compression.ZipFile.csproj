@@ -6,7 +6,6 @@
     <NoWarn>$(NoWarn);CS1573</NoWarn>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the options -->
   <ItemGroup>
     <Compile Include="System\IO\Compression\ZipFile.Create.cs" />
     <Compile Include="System\IO\Compression\ZipFile.Extract.cs" />

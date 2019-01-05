@@ -9,7 +9,6 @@
     <GeneratePlatformNotSupportedAssemblyWithGlobalPrefix>true</GeneratePlatformNotSupportedAssemblyWithGlobalPrefix>
     <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard1.1'">4.0.1.0</AssemblyVersion>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the options -->
   <ItemGroup Condition="'$(TargetsNETCoreApp)'=='true' or '$(TargetsUap)'=='true'">
     <Compile Include="System\Runtime\InteropServices\HResults.cs" />
     <Compile Include="System\Windows\CornerRadius.cs" />
