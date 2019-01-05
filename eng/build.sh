@@ -12,27 +12,45 @@ while [[ -h "$source" ]]; do
 done
 scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
 
+usage()
+{
+  echo "Default if no arguments are passed in: -restore -build"
+  echo ""
+  echo "CoreFX specific settings:"
+  echo "  -buildtests             Build test projects. Can be used as a target or as an option."
+  echo "  -framework              The target group assemblies are built for."
+  echo "  -os                     The operating system assemblies are built for."
+  echo "  -allconfigurations      Build packages for all build configurations."
+  echo "  -coverage               Collect code coverage when testing."
+  echo "  -outerloop              Include tests which are marked as OuterLoop."
+  echo "  -arch                   The architecture group."
+  echo ""
+}
+
 arguments=''
 extraargs=''
 checkedPossibleDirectoryToBuild=false
-defaultargs="--build --restore --warnaserror false"
+
+if [ "$#" -eq 0 ]; then
+    arguemnts="-restore -build"
+fi
 
 while (($# > 0)); do
   lowerI="$(echo $1 | awk '{print tolower($0)}')"
   case $lowerI in
-     -buildarch)
+     --help|-h)
+      usage
+      exit 0
+      ;;
+     -arch)
       arguments="$arguments /p:ArchGroup=$2"
       shift 2
       ;;
-     -release)
-      arguments="$arguments /p:ConfigurationGroup=Release --configuration Release"
-      shift 1
+     --configuration|-c)
+      arguments="$arguments /p:ConfigurationGroup=$2 --configuration $2"
+      shift 2
       ;;
-     -debug)
-      arguments="$arguments /p:ConfigurationGroup=Debug --configuration Debug"
-      shift 1
-      ;;
-     -framework|-targetgroup)
+     -framework)
       val="$(echo "$2" | awk '{print tolower($0)}')"
       arguments="$arguments /p:TargetGroup=$val"
       shift 2
@@ -45,20 +63,12 @@ while (($# > 0)); do
       arguments="$arguments /p:BuildAllConfigurations=true"
       shift 1
       ;;
-     -test)
-      defaultargs="--test --warnaserror false"
-      shift 1
-      ;;
-     -includetests|-buildtests)
+     -buildtests)
       arguments="$arguments /p:BuildTests=true"
       shift 1
       ;;
      -outerloop)
       arguments="$arguments /p:OuterLoop=true"
-      shift 1
-      ;;
-     -skiptests)
-      arguments="$arguments /p:SkipTests=true"
       shift 1
       ;;
      -coverage)
@@ -67,14 +77,6 @@ while (($# > 0)); do
       ;;
      -stripsymbols)
       arguments="$arguments /p:BuildNativeStripSymbols=true"
-      shift 1
-      ;;
-     -runtimeos)
-      arguments="$arguments /p:RuntimeOS=$2"
-      shift 2
-      ;;
-     -sync|-restore)
-      defaultargs="--restore"
       shift 1
       ;;
       *)
@@ -96,7 +98,7 @@ while (($# > 0)); do
   esac
 done
 
-arguments="$defaultargs $arguments $extraargs"
+arguments="$arguments $extraargs"
 
 "$scriptroot/common/build.sh" $arguments
 exit $?

@@ -82,7 +82,7 @@ jobs:
         # Windows variables
         - ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
           - _buildScript: build.cmd
-          - _commonArguments: -ci -includetests -configuration $(_BuildConfig)
+          - _commonArguments: -restore -build -configuration $(_BuildConfig) -buildtests
           - _msbuildCommand: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
 
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
@@ -99,7 +99,7 @@ jobs:
         # Non-Windows variables
         - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
           - _buildScript: ${{ job.buildScriptPrefix }}./build.sh
-          - _args: --ci -includetests --configuration $(_BuildConfig)
+          - _args: --restore --build --configuration $(_BuildConfig) -buildtests
           - _commonArguments: $(_args)
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
             - _commonArguments: $(_args) -stripSymbols
@@ -159,10 +159,8 @@ jobs:
             - script: $(_buildScript)
                     $(_commonArguments)
                     -framework $(_framework)
-                    /p:ArchGroup=$(_architecture)
-                    /p:ConfigurationGroup=$(_BuildConfig)
-                    /p:SkipTests=$(_skipTests)
-                    /p:Outerloop=$(_outerloop)
+                    /p:OuterLoop=$(_outerloop)
+                    -arch $(_architecture)
                     /p:ArchiveTests=${{ job.submitToHelix }}
                     ${{ job.buildExtraArguments }}
                     $(_msbuildCommonParameters)

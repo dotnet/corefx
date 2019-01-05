@@ -1,35 +1,53 @@
 [CmdletBinding(PositionalBinding=$false)]
 Param(
-  [string] $ArchGroup,
-  [switch] $Release,
-  [Alias("framework")][string] $TargetGroup,
-  [Alias("os")][string] $OSGroup,
-  [Alias("allconfigurations")][switch] $BuildAllConfigurations,
-  [string] $RuntimeOS,
-  [switch] $OuterLoop,
-  [switch] $SkipTests,
-  [Alias("sync")][switch] $Restore,
-  [switch] $Clean,
-  [Alias("includetests")][switch] $BuildTests,
-  [switch] $Test,
-  [switch] $Coverage,
-  [switch] $InitTools,
-  [Parameter(ValueFromRemainingArguments=$true)][String[]]$ExtraArgs
+  [switch] $build,
+  [switch] $buildtests,
+  [string][Alias('c')]$configuration = "Debug",
+  [string] $framework,
+  [string] $os,
+  [switch] $allconfigurations,
+  [switch] $coverage,
+  [switch] $outerloop,
+  [string] $arch,
+  [switch] $help,
+  [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
-$defaultargs = "-restore -build -warnaserror:0"
+function Print-Usage() {
+    Write-Host "Default if no arguments are passed in: -restore -build"
+    Write-Host ""
+    Write-Host "CoreFX specific settings:"
+    Write-Host "  -buildtests             Build test projects. Can be used as a target or as an option."
+    Write-Host "  -framework              The target group assemblies are built for."
+    Write-Host "  -os                     The operating system assemblies are built for."
+    Write-Host "  -allconfigurations      Build packages for all build configurations."
+    Write-Host "  -coverage               Collect code coverage when testing."
+    Write-Host "  -outerloop              Include tests which are marked as OuterLoop."
+    Write-Host "  -arch                   The architecture group."
+    Write-Host ""
+}
 
-$possibleDirToBuild = if($ExtraArgs.Length -gt 0) { $ExtraArgs[0]; } else { $null }
+if ($help -or (($null -ne $properties) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
+  Print-Usage
+  Invoke-Expression "& `"$PSScriptRoot/common/build.ps1`" -help"
+  exit 0
+}
 
-if ($possibleDirToBuild -ne $null) {
+if ($PSBoundParameters.Count -eq 0) {
+  $arguments = "-restore -build"
+}
+
+$possibleDirToBuild = if($properties.Length -gt 0) { $properties[0]; } else { $null }
+
+if ($null -ne $possibleDirToBuild) {
   $dtb = $possibleDirToBuild.TrimEnd('\')
   if (Test-Path $dtb) {
-    $ExtraArgs[0] = "/p:DirectoryToBuild=$(Resolve-Path $dtb)"
+    $properties[0] = "/p:DirectoryToBuild=$(Resolve-Path $dtb)"
   }
   else {
     $dtb = Join-Path "$PSSCriptRoot\..\src" $dtb
     if (Test-Path $dtb) {
-      $ExtraArgs[0] = "/p:DirectoryToBuild=$(Resolve-Path $dtb)"
+      $properties[0] = "/p:DirectoryToBuild=$(Resolve-Path $dtb)"
     }
   }
 }
@@ -38,18 +56,18 @@ foreach ($argument in $PSBoundParameters.Keys)
 {
   switch($argument)
   {
-    "Debug"       { $arguments += " /p:ConfigurationGroup=Debug -configuration Debug" }
-    "Release"     { $arguments += " /p:ConfigurationGroup=Release -configuration Release" }
-    "ExtraArgs"   { $arguments += " " + $ExtraArgs }
-    "TargetGroup" { $arguments += " /p:TargetGroup=$($PSBoundParameters[$argument].ToLowerInvariant())"}
-    "Restore"     { $defaultargs = "-restore" }
-    "Test"        { $defaultargs = "-test -warnaserror:0" }
-    "InitTools"   { $defaultargs = "-restore -warnaserror:0" }
-    default       { $arguments += " /p:$argument=$($PSBoundParameters[$argument])" }
+    "buildtests"        { $arguments += " /p:BuildTests=true" }
+    "configuration"     { $arguments += " /p:ConfigurationGroup=$($PSBoundParameters[$argument]) -configuration $($PSBoundParameters[$argument])" }
+    "framework"         { $arguments += " /p:TargetGroup=$($PSBoundParameters[$argument].ToLowerInvariant())"}
+    "os"                { $arguments += " /p:OSGroup=$($PSBoundParameters[$argument])" }
+    "allconfigurations" { $arguments += " /p:BuildAllConfigurations=true" }
+    "coverage"          { $arguments += " /p:Coverage=true" }
+    "outerloop"         { $arguments += " /p:OuterLoop=true" }
+    "arch"              { $arguments += " /p:ArchGroup=$($PSBoundParameters[$argument])" }
+    "properties"        { $arguments += " " + $properties }
+    default             { $arguments += " /p:$argument=$($PSBoundParameters[$argument])" }
   }
 }
-
-$arguments = "$defaultargs $arguments"
 
 Invoke-Expression "& `"$PSScriptRoot/common/build.ps1`" $arguments"
 exit $lastExitCode

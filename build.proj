@@ -58,12 +58,44 @@
     <MSBuild Projects="@(_BuildMangedProjects)" Properties="$(ProjectProperties)" />
   </Target>
 
+  <Target Name="BuildTests">
+    <ItemGroup>
+      <_TestProjects Include="src\tests.builds" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_TestProjects)"
+             Targets="BuildAllProjects"
+             Properties="$(ProjectProperties);BuildTests=true" />
+  </Target>
+
   <Target Name="Test">
     <ItemGroup>
       <_TestProjects Include="src\tests.builds" />
     </ItemGroup>
 
-    <MSBuild Projects="@(_TestProjects)" Properties="$(ProjectProperties)" />
+    <MSBuild Projects="@(_TestProjects)"
+             Targets="TestAllProjects"
+             Properties="$(ProjectProperties);Test=true" />
+  </Target>
+
+  <Target Name="IntegrationTest">
+    <ItemGroup>
+      <_TestProjects Include="src\tests.builds" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_TestProjects)"
+             Targets="TestAllProjects"
+             Properties="$(ProjectProperties);IntegrationTest=true" />
+  </Target>
+
+  <Target Name="PerformanceTest">
+    <ItemGroup>
+      <_TestProjects Include="src\tests.builds" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_TestProjects)"
+             Targets="TestAllProjects"
+             Properties="$(ProjectProperties);PerformanceTest=true" />
   </Target>
 
   <Target Name="Pack">

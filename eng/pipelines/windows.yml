@@ -177,30 +177,27 @@ jobs:
 
         customBuildSteps:
           - script: build.cmd
+                    -restore
+                    -build
+                    -configuration $(_BuildConfig)
                     -ci
-                    -$(_framework)
-                    /p:ArchGroup=$(_architecture)
-                    /p:ConfigurationGroup=$(_BuildConfig)
+                    -buildtests
+                    -allconfigurations
+                    -arch $(_architecture)                    
                     /p:RuntimeOS=win10
+                    /p:ArchiveTests=true
                     $(_windowsOfficialBuildArguments)
                     $(_msbuildCommonParameters)
-            displayName: Build Packages
-          - script: build.cmd
-                    -ci
-                    -test
-                    -$(_framework)
-                    /p:ArchGroup=$(_architecture)
-                    /p:ConfigurationGroup=$(_BuildConfig)
-                    /p:ArchiveTests=true
-            displayName: Build test projects
+            displayName: Build Packages and Tests
           - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
             - script: build.cmd
+                      -restore
+                      -build
+                      -configuration $(_BuildConfig)
                       -ci
-                      -test
-                      /p:TargetGroup=netstandard
-                      /p:ArchGroup=$(_architecture)
-                      /p:ConfigurationGroup=$(_BuildConfig)
-                      /p:SkipTests=true
+                      -buildtests
+                      -framework netstandard
+                      -arch $(_architecture)
               displayName: Build Netstandard Test Suite
 
       # TODO: UAPAOT official builds should send to helix using continuation runner.

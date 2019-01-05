@@ -255,21 +255,18 @@ dotnet msbuild System.Runtime.Tests.csproj /p:TargetGroup=netfx
 
 The tests can also be filtered based on xunit trait attributes defined in [`Microsoft.DotNet.XUnitExtensions`](https://github.com/dotnet/arcade/tree/master/src/Microsoft.DotNet.XUnitExtensions). These attributes are specified above the test method's definition. The available attributes are:
 
-#### OuterloopAttribute
+#### OuterLoopAttribute
 
 ```cs
 [OuterLoop()]
 ```
-Tests marked as `Outerloop` are for scenarios that don't need to run every build. They may take longer than normal tests, cover seldom hit code paths, or require special setup or resources to execute. These tests are excluded by default when testing through `dotnet msbuild` but can be enabled manually by adding the `Outerloop` property e.g.
+Tests marked as `OuterLoop` are for scenarios that don't need to run every build. They may take longer than normal tests, cover seldom hit code paths, or require special setup or resources to execute. These tests are excluded by default when testing through `dotnet msbuild` but can be enabled manually by adding the `outerloop` switch e.g.
 
 ```cmd
-build -test -Outerloop
+build -test -outerloop
 ```
 
-To run <b>only</b> the Outerloop tests, use the following command:
-```cmd
-dotnet msbuild <csproj_file> /t:BuildAndTest /p:WithCategories=OuterLoop
-```
+To run <b>only</b> OuterLoop tests, use the following msbuild property: `/p:WithCategories=OuterLoop`.
 
 #### PlatformSpecificAttribute
 
