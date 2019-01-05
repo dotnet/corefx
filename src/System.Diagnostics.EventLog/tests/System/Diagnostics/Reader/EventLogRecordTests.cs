@@ -29,6 +29,7 @@ namespace System.Diagnostics.Tests
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void FormatDescription()
         {
             if (PlatformDetection.IsWindows7) // Null events in PowerShell log
