@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Linq\ChainLinq\Consumables\Array.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Grouped.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Lookup.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Lookup.cs" />

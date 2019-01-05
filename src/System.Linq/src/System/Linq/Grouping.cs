@@ -11,28 +11,28 @@ namespace System.Linq
     public static partial class Enumerable
     {
         public static IEnumerable<IGrouping<TKey, TSource>> GroupBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector) =>
-            new GroupedEnumerable<TSource, TKey>(source, keySelector, null);
+            new ChainLinq.Consumables.GroupedEnumerable<TSource, TKey>(source, keySelector, null);
 
         public static IEnumerable<IGrouping<TKey, TSource>> GroupBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer) =>
-            new GroupedEnumerable<TSource, TKey>(source, keySelector, comparer);
+            new ChainLinq.Consumables.GroupedEnumerable<TSource, TKey>(source, keySelector, comparer);
 
         public static IEnumerable<IGrouping<TKey, TElement>> GroupBy<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) =>
-            new GroupedEnumerable<TSource, TKey, TElement>(source, keySelector, elementSelector, null);
+            new ChainLinq.Consumables.GroupedEnumerable<TSource, TKey, TElement>(source, keySelector, elementSelector, null);
 
         public static IEnumerable<IGrouping<TKey, TElement>> GroupBy<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer) =>
-            new GroupedEnumerable<TSource, TKey, TElement>(source, keySelector, elementSelector, comparer);
+            new ChainLinq.Consumables.GroupedEnumerable<TSource, TKey, TElement>(source, keySelector, elementSelector, comparer);
 
         public static IEnumerable<TResult> GroupBy<TSource, TKey, TResult>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TKey, IEnumerable<TSource>, TResult> resultSelector) =>
-            new GroupedResultEnumerable<TSource, TKey, TResult>(source, keySelector, resultSelector, null);
+            new ChainLinq.Consumables.GroupedResultEnumerable<TSource, TKey, TResult>(source, keySelector, resultSelector, null);
 
         public static IEnumerable<TResult> GroupBy<TSource, TKey, TElement, TResult>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, Func<TKey, IEnumerable<TElement>, TResult> resultSelector) =>
-            new GroupedResultEnumerable<TSource, TKey, TElement, TResult>(source, keySelector, elementSelector, resultSelector, null);
+            new ChainLinq.Consumables.GroupedResultEnumerable<TSource, TKey, TElement, TResult>(source, keySelector, elementSelector, resultSelector, null);
 
         public static IEnumerable<TResult> GroupBy<TSource, TKey, TResult>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TKey, IEnumerable<TSource>, TResult> resultSelector, IEqualityComparer<TKey> comparer) =>
-            new GroupedResultEnumerable<TSource, TKey, TResult>(source, keySelector, resultSelector, comparer);
+            new ChainLinq.Consumables.GroupedResultEnumerable<TSource, TKey, TResult>(source, keySelector, resultSelector, comparer);
 
         public static IEnumerable<TResult> GroupBy<TSource, TKey, TElement, TResult>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, IEqualityComparer<TKey> comparer) =>
-            new GroupedResultEnumerable<TSource, TKey, TElement, TResult>(source, keySelector, elementSelector, resultSelector, comparer);
+            new ChainLinq.Consumables.GroupedResultEnumerable<TSource, TKey, TElement, TResult>(source, keySelector, elementSelector, resultSelector, comparer);
     }
 
     public interface IGrouping<out TKey, out TElement> : IEnumerable<TElement>
@@ -132,95 +132,5 @@ namespace System.Linq
                 throw Error.NotSupported();
             }
         }
-    }
-
-    internal sealed partial class GroupedResultEnumerable<TSource, TKey, TElement, TResult> : IEnumerable<TResult>
-    {
-        private readonly IEnumerable<TSource> _source;
-        private readonly Func<TSource, TKey> _keySelector;
-        private readonly Func<TSource, TElement> _elementSelector;
-        private readonly IEqualityComparer<TKey> _comparer;
-        private readonly Func<TKey, IEnumerable<TElement>, TResult> _resultSelector;
-
-        public GroupedResultEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
-        {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
-            _elementSelector = elementSelector ?? throw Error.ArgumentNull(nameof(elementSelector));
-            _comparer = comparer;
-            _resultSelector = resultSelector ?? throw Error.ArgumentNull(nameof(resultSelector));
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            ChainLinq.Consumables.Lookup<TKey, TElement> lookup = ChainLinq.Utils.AsConsumable(_source).Consume(new ChainLinq.Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer));
-            return lookup.ApplyResultSelector(_resultSelector).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    }
-
-    internal sealed partial class GroupedResultEnumerable<TSource, TKey, TResult> : IEnumerable<TResult>
-    {
-        private readonly IEnumerable<TSource> _source;
-        private readonly Func<TSource, TKey> _keySelector;
-        private readonly IEqualityComparer<TKey> _comparer;
-        private readonly Func<TKey, IEnumerable<TSource>, TResult> _resultSelector;
-
-        public GroupedResultEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TKey, IEnumerable<TSource>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
-        {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
-            _resultSelector = resultSelector ?? throw Error.ArgumentNull(nameof(resultSelector));
-            _comparer = comparer;
-        }
-
-        public IEnumerator<TResult> GetEnumerator()
-        {
-            ChainLinq.Consumables.Lookup<TKey, TSource> lookup = ChainLinq.Utils.AsConsumable(_source).Consume(new ChainLinq.Consumer.Lookup<TSource, TKey>(_keySelector, _comparer));
-            return lookup.ApplyResultSelector(_resultSelector).GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    }
-
-    internal sealed partial class GroupedEnumerable<TSource, TKey, TElement> : IEnumerable<IGrouping<TKey, TElement>>
-    {
-        private readonly IEnumerable<TSource> _source;
-        private readonly Func<TSource, TKey> _keySelector;
-        private readonly Func<TSource, TElement> _elementSelector;
-        private readonly IEqualityComparer<TKey> _comparer;
-
-        public GroupedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
-        {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
-            _elementSelector = elementSelector ?? throw Error.ArgumentNull(nameof(elementSelector));
-            _comparer = comparer;
-        }
-
-        public IEnumerator<IGrouping<TKey, TElement>> GetEnumerator() =>
-            ChainLinq.Utils.AsConsumable(_source).Consume(new ChainLinq.Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer)).GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    }
-
-    internal sealed partial class GroupedEnumerable<TSource, TKey> : IEnumerable<IGrouping<TKey, TSource>>
-    {
-        private readonly IEnumerable<TSource> _source;
-        private readonly Func<TSource, TKey> _keySelector;
-        private readonly IEqualityComparer<TKey> _comparer;
-
-        public GroupedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
-        {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
-            _comparer = comparer;
-        }
-
-        public IEnumerator<IGrouping<TKey, TSource>> GetEnumerator() =>
-            ChainLinq.Utils.AsConsumable(_source).Consume(new ChainLinq.Consumer.Lookup<TSource, TKey>(_keySelector, _comparer)).GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

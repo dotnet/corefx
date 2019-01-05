@@ -9,6 +9,7 @@ namespace System.Linq.ChainLinq.Consumables
     internal partial class Lookup<TKey, TElement> 
         : ConsumableForAddition<IGrouping<TKey, TElement>>
         , ILookup<TKey, TElement>
+        , IConsumableInternal
     {
         private readonly IEqualityComparer<TKey> _comparer;
         private Grouping<TKey, TElement>[] _groupings;
@@ -38,10 +39,8 @@ namespace System.Linq.ChainLinq.Consumables
 
         public bool Contains(TKey key) => GetGrouping(key, create: false) != null;
 
-        public IEnumerable<TResult> ApplyResultSelector<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
+        private IEnumerable<TResult> ApplyResultSelector_<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
         {
-            // ChainLinq TODO: return underlying Consumable class
-
             Grouping<TKey, TElement> g = _lastGrouping;
             if (g != null)
             {
@@ -53,6 +52,12 @@ namespace System.Linq.ChainLinq.Consumables
                 }
                 while (g != _lastGrouping);
             }
+        }
+
+        internal ConsumableForAddition<TResult> ApplyResultSelector<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
+        {
+            // ChainLinq TODO: make this a proper Consumable
+            return new Enumerable<TResult, TResult>(ApplyResultSelector_(resultSelector), Links.Identity<TResult>.Instance);
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
