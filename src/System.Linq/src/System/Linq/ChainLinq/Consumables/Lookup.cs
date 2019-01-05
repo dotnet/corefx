@@ -39,26 +39,8 @@ namespace System.Linq.ChainLinq.Consumables
 
         public bool Contains(TKey key) => GetGrouping(key, create: false) != null;
 
-        private IEnumerable<TResult> ApplyResultSelector_<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
-        {
-            Grouping<TKey, TElement> g = _lastGrouping;
-            if (g != null)
-            {
-                do
-                {
-                    g = g._next;
-                    g.Trim();
-                    yield return resultSelector(g._key, g._elements);
-                }
-                while (g != _lastGrouping);
-            }
-        }
-
-        internal ConsumableForAddition<TResult> ApplyResultSelector<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
-        {
-            // ChainLinq TODO: make this a proper Consumable
-            return new Enumerable<TResult, TResult>(ApplyResultSelector_(resultSelector), Links.Identity<TResult>.Instance);
-        }
+        internal ConsumableForAddition<TResult> ApplyResultSelector<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector) =>
+            new LookupResultsSelector<TKey, TElement, TResult>(_lastGrouping, resultSelector);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -154,4 +136,44 @@ namespace System.Linq.ChainLinq.Consumables
         public override TResult Consume<TResult>(Consumer<V, TResult> consumer) =>
             ChainLinq.Consume.Lookup.Invoke(_lastGrouping, Link, consumer);
     }
+
+    class LookupResultsSelector<TKey, TElement, TResult>
+        : ConsumableForAddition<TResult>
+        , IConsumableInternal
+    {
+        private readonly Grouping<TKey, TElement> _lastGrouping;
+        private readonly Func<TKey, IEnumerable<TElement>, TResult> _resultSelector;
+
+        public LookupResultsSelector(Grouping<TKey, TElement> lastGrouping, Func<TKey, IEnumerable<TElement>, TResult> resultSelector) =>
+            (_lastGrouping, _resultSelector) = (lastGrouping, resultSelector);
+
+        public override Consumable<W> AddTail<W>(ILink<TResult, W> first) =>
+            new LookupResultsSelector<TKey, TElement, TResult, W>(_lastGrouping, _resultSelector, first);
+
+        public override IEnumerator<TResult> GetEnumerator() =>
+            ChainLinq.GetEnumerator.Lookup.Get(_lastGrouping, _resultSelector, Links.Identity<TResult>.Instance);
+
+        public override Result Consume<Result>(Consumer<TResult, Result> consumer) =>
+            ChainLinq.Consume.Lookup.Invoke(_lastGrouping, _resultSelector, Links.Identity<TResult>.Instance, consumer);
+    }
+
+    sealed partial class LookupResultsSelector<TKey, TElement, TResult, V> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, TResult>
+    {
+        private readonly Grouping<TKey, TElement> _lastGrouping;
+        private readonly Func<TKey, IEnumerable<TElement>, TResult> _resultSelector;
+
+        public LookupResultsSelector(Grouping<TKey, TElement> lastGrouping, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, ILink<TResult, V> first) : base(first) =>
+            (_lastGrouping, _resultSelector) = (lastGrouping, resultSelector);
+
+        public override Consumable<W> Create<W>(ILink<TResult, W> first) =>
+            new LookupResultsSelector<TKey, TElement, TResult, W>(_lastGrouping, _resultSelector, first);
+
+        public override IEnumerator<V> GetEnumerator() =>
+            ChainLinq.GetEnumerator.Lookup.Get(_lastGrouping, _resultSelector, Link);
+
+        public override Result Consume<Result>(Consumer<V, Result> consumer) =>
+            ChainLinq.Consume.Lookup.Invoke(_lastGrouping, _resultSelector, Link, consumer);
+    }
+
+
 }

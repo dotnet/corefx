@@ -8,5 +8,10 @@ namespace System.Linq.ChainLinq.GetEnumerator
         {
             return new ConsumerEnumerators.Lookup<TKey, TElement, U>(lastGrouping, link);
         }
+
+        public static IEnumerator<U> Get<TKey, TElement, TResult, U>(Grouping<TKey, TElement> lastGrouping, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, ILink<TResult, U> link)
+        {
+            return new ConsumerEnumerators.Lookup<TKey, TElement, TResult, U>(lastGrouping, resultSelector, link);
+        }
     }
 }

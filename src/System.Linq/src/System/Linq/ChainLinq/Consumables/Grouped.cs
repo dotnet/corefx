@@ -170,7 +170,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ToConsumable().GetEnumerator();
 
-        public override TResult2 Consume<TResult2>(Consumer<V, TResult2> consumer) =>
+        public override Result Consume<Result>(Consumer<V, Result> consumer) =>
             ToConsumable().Consume(consumer);
     }
 
@@ -232,7 +232,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ToConsumable().GetEnumerator();
 
-        public override TResult2 Consume<TResult2>(Consumer<V, TResult2> consumer) =>
+        public override Result Consume<Result>(Consumer<V, Result> consumer) =>
             ToConsumable().Consume(consumer);
     }
 
