@@ -112,4 +112,18 @@ namespace System.Linq
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public IGrouping<TKey, TElement>[] Groupings => _cachedGroupings ?? (_cachedGroupings = _lookup.ToArray());
     }
+
+    internal sealed class SystemLinq_ConsumablesLookupDebugView<TKey, TElement>
+    {
+        private readonly ChainLinq.Consumables.Lookup<TKey, TElement> _lookup;
+        private IGrouping<TKey, TElement>[] _cachedGroupings;
+
+        public SystemLinq_ConsumablesLookupDebugView(ChainLinq.Consumables.Lookup<TKey, TElement> lookup)
+        {
+            _lookup = lookup;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        public IGrouping<TKey, TElement>[] Groupings => _cachedGroupings ?? (_cachedGroupings = _lookup.ToArray());
+    }
 }

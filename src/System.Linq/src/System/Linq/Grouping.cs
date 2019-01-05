@@ -153,7 +153,7 @@ namespace System.Linq
 
         public IEnumerator<TResult> GetEnumerator()
         {
-            Lookup<TKey, TElement> lookup = ChainLinq.Utils.AsConsumable(_source).Consume(new ChainLinq.Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer));
+            ChainLinq.Consumables.Lookup<TKey, TElement> lookup = ChainLinq.Utils.AsConsumable(_source).Consume(new ChainLinq.Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer));
             return lookup.ApplyResultSelector(_resultSelector).GetEnumerator();
         }
 
@@ -177,7 +177,7 @@ namespace System.Linq
 
         public IEnumerator<TResult> GetEnumerator()
         {
-            Lookup<TKey, TSource> lookup = ChainLinq.Utils.AsConsumable(_source).Consume(new ChainLinq.Consumer.Lookup<TSource, TKey>(_keySelector, _comparer));
+            ChainLinq.Consumables.Lookup<TKey, TSource> lookup = ChainLinq.Utils.AsConsumable(_source).Consume(new ChainLinq.Consumer.Lookup<TSource, TKey>(_keySelector, _comparer));
             return lookup.ApplyResultSelector(_resultSelector).GetEnumerator();
         }
 

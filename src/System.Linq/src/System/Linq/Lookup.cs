@@ -61,152 +61,23 @@ namespace System.Linq
         bool Contains(TKey key);
     }
 
+    // ChainLinq has gutted this class, but left it here, because it was public
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(SystemLinq_LookupDebugView<,>))]
     public partial class Lookup<TKey, TElement> : ILookup<TKey, TElement>
     {
-        private readonly IEqualityComparer<TKey> _comparer;
-        private Grouping<TKey, TElement>[] _groupings;
-        private Grouping<TKey, TElement> _lastGrouping;
-        private int _count;
+        private Lookup() { }
 
-        internal Lookup(IEqualityComparer<TKey> comparer)
-        {
-            _comparer = comparer ?? EqualityComparer<TKey>.Default;
-            _groupings = new Grouping<TKey, TElement>[7];
-        }
+        public IEnumerable<TResult> ApplyResultSelector<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector) => throw new NotImplementedException();
 
-        public int Count => _count;
+        public IEnumerable<TElement> this[TKey key] => throw new NotImplementedException();
 
-        public IEnumerable<TElement> this[TKey key]
-        {
-            get
-            {
-                Grouping<TKey, TElement> grouping = GetGrouping(key, create: false);
-                if (grouping != null)
-                {
-                    return grouping;
-                }
+        public int Count => throw new NotImplementedException();
 
-                return ChainLinq.Consumables.Empty<TElement>.Instance;
-            }
-        }
+        public bool Contains(TKey key) => throw new NotImplementedException();
 
-        public bool Contains(TKey key) => GetGrouping(key, create: false) != null;
+        public IEnumerator<IGrouping<TKey, TElement>> GetEnumerator() =>  throw new NotImplementedException();
 
-        public IEnumerator<IGrouping<TKey, TElement>> GetEnumerator()
-        {
-            Grouping<TKey, TElement> g = _lastGrouping;
-            if (g != null)
-            {
-                do
-                {
-                    g = g._next;
-                    yield return g;
-                }
-                while (g != _lastGrouping);
-            }
-        }
-
-        //internal List<TResult> ToList<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
-        //{
-        //    List<TResult> list = new List<TResult>(_count);
-        //    Grouping<TKey, TElement> g = _lastGrouping;
-        //    if (g != null)
-        //    {
-        //        do
-        //        {
-        //            g = g._next;
-        //            g.Trim();
-        //            list.Add(resultSelector(g._key, g._elements));
-        //        }
-        //        while (g != _lastGrouping);
-        //    }
-
-        //    return list;
-        //}
-
-        public IEnumerable<TResult> ApplyResultSelector<TResult>(Func<TKey, IEnumerable<TElement>, TResult> resultSelector)
-        {
-            Grouping<TKey, TElement> g = _lastGrouping;
-            if (g != null)
-            {
-                do
-                {
-                    g = g._next;
-                    g.Trim();
-                    yield return resultSelector(g._key, g._elements);
-                }
-                while (g != _lastGrouping);
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        private int InternalGetHashCode(TKey key)
-        {
-            // Handle comparer implementations that throw when passed null
-            return (key == null) ? 0 : _comparer.GetHashCode(key) & 0x7FFFFFFF;
-        }
-
-        internal Grouping<TKey, TElement> GetGrouping(TKey key, bool create)
-        {
-            int hashCode = InternalGetHashCode(key);
-            for (Grouping<TKey, TElement> g = _groupings[hashCode % _groupings.Length]; g != null; g = g._hashNext)
-            {
-                if (g._hashCode == hashCode && _comparer.Equals(g._key, key))
-                {
-                    return g;
-                }
-            }
-
-            if (create)
-            {
-                if (_count == _groupings.Length)
-                {
-                    Resize();
-                }
-
-                int index = hashCode % _groupings.Length;
-                Grouping<TKey, TElement> g = new Grouping<TKey, TElement>();
-                g._key = key;
-                g._hashCode = hashCode;
-                g._elements = new TElement[1];
-                g._hashNext = _groupings[index];
-                _groupings[index] = g;
-                if (_lastGrouping == null)
-                {
-                    g._next = g;
-                }
-                else
-                {
-                    g._next = _lastGrouping._next;
-                    _lastGrouping._next = g;
-                }
-
-                _lastGrouping = g;
-                _count++;
-                return g;
-            }
-
-            return null;
-        }
-
-        private void Resize()
-        {
-            int newSize = checked((_count * 2) + 1);
-            Grouping<TKey, TElement>[] newGroupings = new Grouping<TKey, TElement>[newSize];
-            Grouping<TKey, TElement> g = _lastGrouping;
-            do
-            {
-                g = g._next;
-                int index = g._hashCode % newSize;
-                g._hashNext = newGroupings[index];
-                newGroupings[index] = g;
-            }
-            while (g != _lastGrouping);
-
-            _groupings = newGroupings;
-        }
+        IEnumerator IEnumerable.GetEnumerator() => throw new NotImplementedException();
     }
 }

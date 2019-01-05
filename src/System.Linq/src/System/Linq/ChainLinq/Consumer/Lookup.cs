@@ -2,11 +2,11 @@
 
 namespace System.Linq.ChainLinq.Consumer
 {
-    sealed class Lookup<TSource, TKey> : Consumer<TSource, Linq.Lookup<TKey, TSource>>
+    sealed class Lookup<TSource, TKey> : Consumer<TSource, Consumables.Lookup<TKey, TSource>>
     {
         private readonly Func<TSource, TKey> _keySelector;
 
-        public Lookup(Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer) : base(new System.Linq.Lookup<TKey, TSource>(comparer)) =>
+        public Lookup(Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer) : base(new Consumables.Lookup<TKey, TSource>(comparer)) =>
             (_keySelector) = (keySelector);
 
         public override ChainStatus ProcessNext(TSource item)
@@ -16,12 +16,12 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    sealed class LookupSplit<TSource, TKey, TElement> : Consumer<TSource, Linq.Lookup<TKey, TElement>>
+    sealed class LookupSplit<TSource, TKey, TElement> : Consumer<TSource, Consumables.Lookup<TKey, TElement>>
     {
         private readonly Func<TSource, TKey> _keySelector;
         private readonly Func<TSource, TElement> _elementSelector;
 
-        public LookupSplit(Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer) : base(new System.Linq.Lookup<TKey, TElement>(comparer)) =>
+        public LookupSplit(Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer) : base(new Consumables.Lookup<TKey, TElement>(comparer)) =>
             (_keySelector, _elementSelector) = (keySelector, elementSelector);
 
         public override ChainStatus ProcessNext(TSource item)
@@ -31,11 +31,11 @@ namespace System.Linq.ChainLinq.Consumer
         }
     }
 
-    sealed class LookupForJoin<TSource, TKey> : Consumer<TSource, Linq.Lookup<TKey, TSource>>
+    sealed class LookupForJoin<TSource, TKey> : Consumer<TSource, Consumables.Lookup<TKey, TSource>>
     {
         private readonly Func<TSource, TKey> _keySelector;
 
-        public LookupForJoin(Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer) : base(new System.Linq.Lookup<TKey, TSource>(comparer)) =>
+        public LookupForJoin(Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer) : base(new Consumables.Lookup<TKey, TSource>(comparer)) =>
             (_keySelector) = (keySelector);
 
         public override ChainStatus ProcessNext(TSource item)
