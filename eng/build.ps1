@@ -41,7 +41,7 @@ foreach ($argument in $PSBoundParameters.Keys)
     "Debug"       { $arguments += " /p:ConfigurationGroup=Debug -configuration Debug" }
     "Release"     { $arguments += " /p:ConfigurationGroup=Release -configuration Release" }
     "ExtraArgs"   { $arguments += " " + $ExtraArgs }
-    "TargetGroup" { $arguments += " /p:TargetGroup=$($PSBoundParameters[$argument].ToLower())"}
+    "TargetGroup" { $arguments += " /p:TargetGroup=$($PSBoundParameters[$argument].ToLowerInvariant())"}
     "Restore"     { $defaultargs = "-restore" }
     "Test"        { $defaultargs = "-test -warnaserror:0" }
     "InitTools"   { $defaultargs = "-restore -warnaserror:0" }
