@@ -33,7 +33,7 @@ namespace System.Reflection.TypeLoading
             public sealed override IEnumerable<CustomAttributeData> CustomAttributes => throw null;
             public sealed override bool IsConstructedGenericMethod => throw null;
             public sealed override bool IsGenericMethodDefinition => throw null;
-            public sealed override bool Equals(object obj) => throw null;
+            public sealed override bool Equals(object obj) => ReferenceEquals(this, obj);
             public sealed override MethodInfo GetGenericMethodDefinition() => throw null;
             public sealed override int GetHashCode() => throw null;
             public sealed override MethodBody GetMethodBody() => throw null;
