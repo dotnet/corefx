@@ -125,7 +125,7 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            char standardFormat = span.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            char standardFormat = _numberHasExponent ? 'e' : default;
             return Utf8Parser.TryParse(span, out value, out int bytesConsumed, standardFormat) && span.Length == bytesConsumed;
         }
 
@@ -147,7 +147,7 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            char standardFormat = span.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            char standardFormat = _numberHasExponent ? 'e' : default;
             return Utf8Parser.TryParse(span, out value, out int bytesConsumed, standardFormat) && span.Length == bytesConsumed;
         }
 
@@ -169,7 +169,7 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            char standardFormat = span.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            char standardFormat = _numberHasExponent ? 'e' : default;
             return Utf8Parser.TryParse(span, out value, out int bytesConsumed, standardFormat) && span.Length == bytesConsumed;
         }
     }
