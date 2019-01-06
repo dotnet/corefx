@@ -40,6 +40,7 @@ public class SecurityIdentifierTests
         Assert.All(parts, part => uint.TryParse(part, out uint _));
     }
 
+    [ActiveIssue(34395)]
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsServerCore))]
     public void ValidateToStringUsingWhoami()
     {
