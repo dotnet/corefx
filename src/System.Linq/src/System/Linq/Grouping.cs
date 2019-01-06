@@ -54,8 +54,8 @@ namespace System.Linq
         internal int _hashCode;
         internal TElement[] _elements;
         internal int _count;
-        internal Grouping<TKey, TElement> _hashNext;
-        internal Grouping<TKey, TElement> _next;
+        internal ChainLinq.Consumables.GroupingInternal<TKey, TElement> _hashNext;
+        internal ChainLinq.Consumables.GroupingInternal<TKey, TElement> _next;
 
         internal Grouping()
         {

@@ -17,6 +17,9 @@ namespace System.Linq.ChainLinq
                 case List<T> list:
                     return new Consumables.List<T, U>(list, transform);
 
+                case Consumables.IConsumableProvider<T> provider:
+                    return provider.GetConsumable(transform);
+
                 case IList<T> list:
                     return new Consumables.IList<T, U>(list, 0, list.Count, transform);
 

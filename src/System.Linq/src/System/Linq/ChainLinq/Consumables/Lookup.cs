@@ -12,13 +12,13 @@ namespace System.Linq.ChainLinq.Consumables
         , IConsumableInternal
     {
         private readonly IEqualityComparer<TKey> _comparer;
-        private Grouping<TKey, TElement>[] _groupings;
-        private Grouping<TKey, TElement> _lastGrouping;
+        private GroupingInternal<TKey, TElement>[] _groupings;
+        private GroupingInternal<TKey, TElement> _lastGrouping;
 
         internal Lookup(IEqualityComparer<TKey> comparer)
         {
             _comparer = comparer ?? EqualityComparer<TKey>.Default;
-            _groupings = new Grouping<TKey, TElement>[7];
+            _groupings = new GroupingInternal<TKey, TElement>[7];
         }
 
         public int Count { get; private set; }
@@ -50,10 +50,10 @@ namespace System.Linq.ChainLinq.Consumables
             return (key == null) ? 0 : _comparer.GetHashCode(key) & 0x7FFFFFFF;
         }
 
-        internal Grouping<TKey, TElement> GetGrouping(TKey key, bool create)
+        internal GroupingInternal<TKey, TElement> GetGrouping(TKey key, bool create)
         {
             int hashCode = InternalGetHashCode(key);
-            for (Grouping<TKey, TElement> g = _groupings[hashCode % _groupings.Length]; g != null; g = g._hashNext)
+            for (GroupingInternal<TKey, TElement> g = _groupings[hashCode % _groupings.Length]; g != null; g = g._hashNext)
             {
                 if (g._hashCode == hashCode && _comparer.Equals(g._key, key))
                 {
@@ -69,7 +69,7 @@ namespace System.Linq.ChainLinq.Consumables
                 }
 
                 int index = hashCode % _groupings.Length;
-                Grouping<TKey, TElement> g = new Grouping<TKey, TElement>();
+                GroupingInternal<TKey, TElement> g = new GroupingInternal<TKey, TElement>();
                 g._key = key;
                 g._hashCode = hashCode;
                 g._elements = new TElement[1];
@@ -96,8 +96,8 @@ namespace System.Linq.ChainLinq.Consumables
         private void Resize()
         {
             int newSize = checked((Count * 2) + 1);
-            Grouping<TKey, TElement>[] newGroupings = new Grouping<TKey, TElement>[newSize];
-            Grouping<TKey, TElement> g = _lastGrouping;
+            GroupingInternal<TKey, TElement>[] newGroupings = new GroupingInternal<TKey, TElement>[newSize];
+            GroupingInternal<TKey, TElement> g = _lastGrouping;
             do
             {
                 g = g._next;
