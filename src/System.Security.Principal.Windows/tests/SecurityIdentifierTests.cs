@@ -17,7 +17,8 @@ public class SecurityIdentifierTests
             Assert.NotNull(identity.User);
         }
     }
-
+    
+    [ActiveIssue(34395)]
     [Fact]
     public void ValidateToString()
     {
