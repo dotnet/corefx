@@ -283,7 +283,6 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         sigset_t junk_signal_set;
         struct sigaction sa_default;
         struct sigaction sa_old;
-        struct sigaction sa_trash;
         memset(&sa_default, 0, sizeof(sa_default)); // On some architectures, sa_mask is a struct so assigning zero to it doesn't compile
         sa_default.sa_handler = SIG_DFL;
         for (int sig = 1; ; ++sig)
@@ -292,16 +291,17 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
             {
                 continue;
             }
-            if (sigaction(sig, &sa_default, &sa_old))
+            if (sigaction(sig, NULL, &sa_old))
             {
                 break; // No more signals
             }
             if ((sa_old.sa_flags & SA_SIGINFO)
-                ? ((void (*)(int))sa_old.sa_sigaction == SIG_IGN || (void (*)(int))sa_old.sa_sigaction == SIG_DFL)
-                : (sa_old.sa_handler == SIG_IGN || sa_old.sa_handler == SIG_DFL))
+                ? ((void (*)(int))sa_old.sa_sigaction != SIG_IGN && (void (*)(int))sa_old.sa_sigaction != SIG_DFL)
+                : (sa_old.sa_handler != SIG_IGN && sa_old.sa_handler != SIG_DFL))
             {
-                // It has a pre-defined handler -- put it back -- the flags value may be significant
-                sigaction(sig, &sa_old, &sa_trash);
+                // It has a custom handler, put the default handler back.
+		// We check first th preserve flags on default handlers.
+                sigaction(sig, &sa_default, NULL);
             }
         }
         pthread_sigmask(SIG_SETMASK, &old_signal_set, &junk_signal_set); // Not all architectures allow NULL here
