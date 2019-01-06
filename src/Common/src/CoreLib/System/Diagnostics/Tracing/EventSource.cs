@@ -174,9 +174,9 @@ using System.Globalization;
 using System.Reflection;
 using System.Resources;
 using System.Security;
-#if !CORECLR && !ES_BUILD_PN
+#if ES_BUILD_STANDALONE
 using System.Security.Permissions;
-#endif // !CORECLR && !ES_BUILD_PN
+#endif
 
 using System.Text;
 using System.Threading;
@@ -2740,7 +2740,7 @@ namespace System.Diagnostics.Tracing
             }
             if (s_currentPid == 0)
             {
-#if ES_BUILD_STANDALONE && !ES_BUILD_PCL && !CORECLR
+#if ES_BUILD_STANDALONE
                 // for non-BCL EventSource we must assert SecurityPermission
                 new SecurityPermission(PermissionState.Unrestricted).Assert();
 #endif
@@ -3508,7 +3508,7 @@ namespace System.Diagnostics.Tracing
             // RET
             // 
             // If we find this pattern we return the XXX.  Otherwise we return -1.  
-#if !CORECLR
+#if ES_BUILD_STANDALONE
             (new ReflectionPermission(ReflectionPermissionFlag.MemberAccess)).Assert();
 #endif
             byte[] instrs = method.GetMethodBody().GetILAsByteArray();
@@ -3623,7 +3623,7 @@ namespace System.Diagnostics.Tracing
         {
 #if !ES_BUILD_PCL
             msg = msg.TrimEnd('\r', '\n') +
-                    string.Format(CultureInfo.InvariantCulture, ", Thrd({0})" + Environment.NewLine, Thread.CurrentThread.ManagedThreadId);
+                    string.Format(CultureInfo.InvariantCulture, ", Thrd({0})" + Environment.NewLine, Environment.CurrentManagedThreadId);
             System.Diagnostics.Debugger.Log(0, null, msg);
 #endif
         }
@@ -4090,11 +4090,11 @@ namespace System.Diagnostics.Tracing
                 if (!s_EventSourceShutdownRegistered)
                 {
                     s_EventSourceShutdownRegistered = true;
-#if CORECLR || ES_BUILD_PN
-                    AppContext.ProcessExit += DisposeOnShutdown;
-#else
+#if ES_BUILD_STANDALONE
                     AppDomain.CurrentDomain.ProcessExit += DisposeOnShutdown;
                     AppDomain.CurrentDomain.DomainUnload += DisposeOnShutdown;
+#else
+                    AppContext.ProcessExit += DisposeOnShutdown;
 #endif
                 }
 
@@ -5183,7 +5183,7 @@ namespace System.Diagnostics.Tracing
             if (dllName != null)
                 sb.Append("\" resourceFileName=\"").Append(dllName).Append("\" messageFileName=\"").Append(dllName);
 
-            var symbolsName = providerName.Replace("-", "").Replace(".", "_");  // Period and - are illegal replace them.
+            var symbolsName = providerName.Replace("-", "").Replace('.', '_');  // Period and - are illegal replace them.
             sb.Append("\" symbol=\"").Append(symbolsName);
             sb.Append("\">").AppendLine();
         }
