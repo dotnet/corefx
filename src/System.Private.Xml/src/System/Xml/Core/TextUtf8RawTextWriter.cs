@@ -21,12 +21,10 @@ namespace System.Xml
     // </summary>
     internal class TextUtf8RawTextWriter : XmlUtf8RawTextWriter
     {
-
         // Construct an instance of this class that serializes to a Stream interface.
         public TextUtf8RawTextWriter(Stream stream, XmlWriterSettings settings) : base(stream, settings)
         {
         }
-
 
         //
         // XmlRawWriter

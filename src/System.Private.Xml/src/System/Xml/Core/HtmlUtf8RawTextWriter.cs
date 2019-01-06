@@ -32,8 +32,6 @@ namespace System.Xml
 
         private const int StackIncrement = 10;
 
-
-
         public HtmlUtf8RawTextWriter(Stream stream, XmlWriterSettings settings) : base(stream, settings)
         {
             Init(settings);
@@ -53,8 +51,6 @@ namespace System.Xml
         public override void WriteDocType(string name, string pubid, string sysid, string subset)
         {
             Debug.Assert(name != null && name.Length > 0);
-
-            
 
             RawText("<!DOCTYPE ");
 
@@ -107,7 +103,6 @@ namespace System.Xml
             {
                 Debug.Assert(prefix.Length == 0);
 
-                
                 currentElementProperties = (ElementProperties)elementPropertySearch.FindCaseInsensitiveString(localName);
                 base.bufBytes[bufPos++] = (byte)'<';
                 base.RawText(localName);
@@ -146,8 +141,6 @@ namespace System.Xml
             {
                 Debug.Assert(prefix.Length == 0);
 
-                
-
                 if ((currentElementProperties & ElementProperties.EMPTY) == 0)
                 {
                     bufBytes[base.bufPos++] = (byte)'<';
@@ -170,8 +163,6 @@ namespace System.Xml
             if (ns.Length == 0)
             {
                 Debug.Assert(prefix.Length == 0);
-
-                
 
                 if ((currentElementProperties & ElementProperties.EMPTY) == 0)
                 {
@@ -294,7 +285,6 @@ namespace System.Xml
             if (ns.Length == 0)
             {
                 Debug.Assert(prefix.Length == 0);
-                
 
                 if (base.attrEndPos == bufPos)
                 {
@@ -345,8 +335,6 @@ namespace System.Xml
                     _endsWithAmpersand = false;
                 }
 
-                
-
                 base.bufBytes[bufPos++] = (byte)'"';
             }
             base.inAttributeValue = false;
@@ -357,8 +345,6 @@ namespace System.Xml
         public override void WriteProcessingInstruction(string target, string text)
         {
             Debug.Assert(target != null && target.Length != 0 && text != null);
-
-            
 
             bufBytes[base.bufPos++] = (byte)'<';
             bufBytes[base.bufPos++] = (byte)'?';
@@ -379,8 +365,6 @@ namespace System.Xml
         public override unsafe void WriteString(string text)
         {
             Debug.Assert(text != null);
-
-            
 
             fixed (char* pSrc = text)
             {
@@ -416,8 +400,6 @@ namespace System.Xml
             Debug.Assert(buffer != null);
             Debug.Assert(index >= 0);
             Debug.Assert(count >= 0 && index + count <= buffer.Length);
-
-            
 
             fixed (char* pSrcBegin = &buffer[index])
             {
@@ -567,9 +549,7 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-
                     while (pDst < pDstEnd && (xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)) && ch <= 0x7F))
-
                     {
                         *pDst++ = (byte)ch;
                         pSrc++;
@@ -747,7 +727,6 @@ namespace System.Xml
         }
     }
 
-
     //
     // Indentation HtmlWriter only indent <BLOCK><BLOCK> situations
     //
@@ -803,7 +782,6 @@ namespace System.Xml
         // Constructors
         //
 
-
         public HtmlUtf8RawTextWriterIndent(Stream stream, XmlWriterSettings settings) : base(stream, settings)
         {
             Init(settings);
@@ -826,8 +804,6 @@ namespace System.Xml
         public override void WriteStartElement(string prefix, string localName, string ns)
         {
             Debug.Assert(localName != null && localName.Length != 0 && prefix != null && ns != null);
-
-            
 
             base.elementScope.Push((byte)base.currentElementProperties);
 

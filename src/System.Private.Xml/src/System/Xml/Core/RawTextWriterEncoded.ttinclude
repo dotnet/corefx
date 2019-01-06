@@ -8,20 +8,23 @@
     BufferName = "bufChars";
     BufferType = "char";
     EncodeCharBody = @"/* Surrogate character */
-                            if (XmlCharType.IsSurrogate(ch)) {
-                                pDst = EncodeSurrogate(pSrc, pSrcEnd, pDst);
-                                pSrc += 2;
-                            }
-                            /* Invalid XML character */
-                            else  if (ch <= 0x7F || ch >= 0xFFFE) {
-                                pDst = InvalidXmlChar(ch, pDst, _entitizeInvalidChars_);
-                                pSrc++;
-                            }
-                            /* Other character between SurLowEnd and 0xFFFE */
-                            else {
-                                *pDst = (char)ch;
-                                pDst++;
-                                pSrc++;
-                            }";
+if (XmlCharType.IsSurrogate(ch))
+{
+    pDst = EncodeSurrogate(pSrc, pSrcEnd, pDst);
+    pSrc += 2;
+}
+/* Invalid XML character */
+else  if (ch <= 0x7F || ch >= 0xFFFE)
+{
+    pDst = InvalidXmlChar(ch, pDst, _entitizeInvalidChars_);
+    pSrc++;
+}
+/* Other character between SurLowEnd and 0xFFFE */
+else
+{
+    *pDst = (char)ch;
+    pDst++;
+    pSrc++;
+}";
     SetTextContentMarkBody = @"if (trackTextContent && inTextContent != _value_) { ChangeTextContentMark(_value_); }";
 #>

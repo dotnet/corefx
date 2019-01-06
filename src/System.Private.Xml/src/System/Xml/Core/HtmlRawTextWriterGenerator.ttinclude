@@ -33,8 +33,8 @@ namespace System.Xml
         protected static TernaryTreeReadOnly attributePropertySearch;
 
         private const int StackIncrement = 10;
-
 <# if (WriterType == RawTextWriterType.Encoded) { #>
+
         public <#= ClassName #>(TextWriter writer, XmlWriterSettings settings) : base(writer, settings)
         {
             Init(settings);
@@ -59,9 +59,9 @@ namespace System.Xml
         /// Html rules allow public ID without system ID and always output "html"
         public override void WriteDocType(string name, string pubid, string sysid, string subset)
         {
-            Debug.Assert(name != null && name.Length > 0);
-
-            <#= SetTextContentMark(false) #>
+            Debug.Assert(name != null && name.Length > 0);<#
+/* Code block is to squash extra line. */
+#><#= SetTextContentMark(3, false) #>
 
             RawText("<!DOCTYPE ");
 
@@ -112,9 +112,10 @@ namespace System.Xml
 
             if (ns.Length == 0)
             {
-                Debug.Assert(prefix.Length == 0);
+                Debug.Assert(prefix.Length == 0);<#
 
-                <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(4, false) #>
+
                 currentElementProperties = (ElementProperties)elementPropertySearch.FindCaseInsensitiveString(localName);
                 base.<#= BufferName #>[bufPos++] = (<#= BufferType #>)'<';
                 base.RawText(localName);
@@ -151,9 +152,9 @@ namespace System.Xml
         {
             if (ns.Length == 0)
             {
-                Debug.Assert(prefix.Length == 0);
+                Debug.Assert(prefix.Length == 0);<#
 
-                <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(4, false) #>
 
                 if ((currentElementProperties & ElementProperties.EMPTY) == 0)
                 {
@@ -176,9 +177,9 @@ namespace System.Xml
         {
             if (ns.Length == 0)
             {
-                Debug.Assert(prefix.Length == 0);
+                Debug.Assert(prefix.Length == 0);<#
 
-                <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(4, false) #>
 
                 if ((currentElementProperties & ElementProperties.EMPTY) == 0)
                 {
@@ -300,8 +301,9 @@ namespace System.Xml
 
             if (ns.Length == 0)
             {
-                Debug.Assert(prefix.Length == 0);
-                <#= SetTextContentMark(false) #>
+                Debug.Assert(prefix.Length == 0);<#
+
+#><#= SetTextContentMark(4, false) #>
 
                 if (base.attrEndPos == bufPos)
                 {
@@ -350,9 +352,9 @@ namespace System.Xml
                 {
                     OutputRestAmps();
                     _endsWithAmpersand = false;
-                }
+                }<#
 
-                <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(4, false) #>
 
                 base.<#= BufferName #>[bufPos++] = (<#= BufferType #>)'"';
             }
@@ -363,9 +365,9 @@ namespace System.Xml
         // HTML PI's use ">" to terminate rather than "?>".
         public override void WriteProcessingInstruction(string target, string text)
         {
-            Debug.Assert(target != null && target.Length != 0 && text != null);
+            Debug.Assert(target != null && target.Length != 0 && text != null);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             <#= BufferName #>[base.bufPos++] = (<#= BufferType #>)'<';
             <#= BufferName #>[base.bufPos++] = (<#= BufferType #>)'?';
@@ -385,9 +387,9 @@ namespace System.Xml
         // Serialize either attribute or element text using HTML rules.
         public override unsafe void WriteString(string text)
         {
-            Debug.Assert(text != null);
+            Debug.Assert(text != null);<#
 
-            <#= SetTextContentMark(true) #>
+#><#= SetTextContentMark(3, true) #>
 
             fixed (char* pSrc = text)
             {
@@ -422,9 +424,9 @@ namespace System.Xml
         {
             Debug.Assert(buffer != null);
             Debug.Assert(index >= 0);
-            Debug.Assert(count >= 0 && index + count <= buffer.Length);
+            Debug.Assert(count >= 0 && index + count <= buffer.Length);<#
 
-            <#= SetTextContentMark(true) #>
+#><#= SetTextContentMark(3, true) #>
 
             fixed (char* pSrcBegin = &buffer[index])
             {
@@ -756,7 +758,6 @@ namespace System.Xml
         }
     }
 
-
     //
     // Indentation HtmlWriter only indent <BLOCK><BLOCK> situations
     //
@@ -812,6 +813,7 @@ namespace System.Xml
         // Constructors
         //
 <# if (WriterType == RawTextWriterType.Encoded) { #>
+
         public <#= ClassNameIndent #>(TextWriter writer, XmlWriterSettings settings) : base(writer, settings)
         {
             Init(settings);
@@ -839,9 +841,9 @@ namespace System.Xml
 
         public override void WriteStartElement(string prefix, string localName, string ns)
         {
-            Debug.Assert(localName != null && localName.Length != 0 && prefix != null && ns != null);
+            Debug.Assert(localName != null && localName.Length != 0 && prefix != null && ns != null);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             base.elementScope.Push((byte)base.currentElementProperties);
 

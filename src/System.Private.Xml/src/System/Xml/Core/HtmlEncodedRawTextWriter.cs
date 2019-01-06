@@ -32,12 +32,10 @@ namespace System.Xml
 
         private const int StackIncrement = 10;
 
-
         public HtmlEncodedRawTextWriter(TextWriter writer, XmlWriterSettings settings) : base(writer, settings)
         {
             Init(settings);
         }
-
 
         public HtmlEncodedRawTextWriter(Stream stream, XmlWriterSettings settings) : base(stream, settings)
         {
@@ -113,6 +111,7 @@ namespace System.Xml
                 Debug.Assert(prefix.Length == 0);
 
                 if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
+
                 currentElementProperties = (ElementProperties)elementPropertySearch.FindCaseInsensitiveString(localName);
                 base.bufChars[bufPos++] = (char)'<';
                 base.RawText(localName);
@@ -299,6 +298,7 @@ namespace System.Xml
             if (ns.Length == 0)
             {
                 Debug.Assert(prefix.Length == 0);
+
                 if (trackTextContent && inTextContent != false) { ChangeTextContentMark(false); }
 
                 if (base.attrEndPos == bufPos)
@@ -572,9 +572,7 @@ namespace System.Xml
                         pDstEnd = pDstBegin + bufLen;
                     }
 
-
                     while (pDst < pDstEnd && xmlCharType.IsAttributeValueChar((char)(ch = *pSrc)))
-
                     {
                         *pDst++ = (char)ch;
                         pSrc++;
@@ -752,7 +750,6 @@ namespace System.Xml
         }
     }
 
-
     //
     // Indentation HtmlWriter only indent <BLOCK><BLOCK> situations
     //
@@ -812,7 +809,6 @@ namespace System.Xml
         {
             Init(settings);
         }
-
 
         public HtmlEncodedRawTextWriterIndent(Stream stream, XmlWriterSettings settings) : base(stream, settings)
         {

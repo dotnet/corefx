@@ -28,13 +28,12 @@ namespace System.Xml
         public <#= ClassName #>(TextWriter writer, XmlWriterSettings settings) : base(writer, settings)
         {
         }
-<# } #>
 
+<# } #>
         // Construct an instance of this class that serializes to a Stream interface.
         public <#= ClassName #>(Stream stream, XmlWriterSettings settings) : base(stream, settings)
         {
         }
-
 
         //
         // XmlRawWriter

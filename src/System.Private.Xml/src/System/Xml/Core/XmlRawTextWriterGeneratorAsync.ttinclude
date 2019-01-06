@@ -38,9 +38,8 @@ namespace System.Xml
             CheckAsyncCall();
             // Output xml declaration only if user allows it and it was not already output
             if (!omitXmlDeclaration && !autoXmlDeclaration)
-            {
-                <#= SetTextContentMark(false) #>
-
+            {<# /* Code block is to squash extra line. */
+#><#= SetTextContentMark(4, 1, false) #>
                 await RawTextAsync("<?xml version=\"").ConfigureAwait(false);
 
                 // Version
@@ -80,9 +79,9 @@ namespace System.Xml
         public override async Task WriteDocTypeAsync(string name, string pubid, string sysid, string subset)
         {
             CheckAsyncCall();
-            Debug.Assert(name != null && name.Length > 0);
+            Debug.Assert(name != null && name.Length > 0);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             await RawTextAsync("<!DOCTYPE ").ConfigureAwait(false);
             await RawTextAsync(name).ConfigureAwait(false);
@@ -123,9 +122,10 @@ namespace System.Xml
         {
             CheckAsyncCall();
             Debug.Assert(localName != null && localName.Length > 0);
-            Debug.Assert(prefix != null);
+            Debug.Assert(prefix != null);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
+
             Task task;
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'<';
             if (prefix != null && prefix.Length != 0)
@@ -150,9 +150,9 @@ namespace System.Xml
         {
             CheckAsyncCall();
             Debug.Assert(localName != null && localName.Length > 0);
-            Debug.Assert(prefix != null);
+            Debug.Assert(prefix != null);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             if (contentPos != bufPos)
             {
@@ -185,9 +185,9 @@ namespace System.Xml
         {
             CheckAsyncCall();
             Debug.Assert(localName != null && localName.Length > 0);
-            Debug.Assert(prefix != null);
+            Debug.Assert(prefix != null);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'<';
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'/';
@@ -207,9 +207,9 @@ namespace System.Xml
         {
             CheckAsyncCall();
             Debug.Assert(localName != null && localName.Length > 0);
-            Debug.Assert(prefix != null);
+            Debug.Assert(prefix != null);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             if (attrEndPos == bufPos)
             {
@@ -237,8 +237,10 @@ namespace System.Xml
         // Serialize the end of an attribute value using double quotes: '"'
         protected internal override Task WriteEndAttributeAsync()
         {
-            CheckAsyncCall();
-            <#= SetTextContentMark(false) #>
+            CheckAsyncCall();<#
+
+#><#= SetTextContentMark(3, false) #>
+
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'"';
             inAttributeValue = false;
             attrEndPos = bufPos;
@@ -259,9 +261,9 @@ namespace System.Xml
         internal override async Task WriteStartNamespaceDeclarationAsync(string prefix)
         {
             CheckAsyncCall();
-            Debug.Assert(prefix != null);
+            Debug.Assert(prefix != null);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             if (prefix.Length == 0)
             {
@@ -275,14 +277,16 @@ namespace System.Xml
                 <#= BufferName #>[bufPos++] = (<#= BufferType #>)'"';
             }
 
-            inAttributeValue = true;
-            <#= SetTextContentMark(true) #>
+            inAttributeValue = true;<#
+#><#= SetTextContentMark(3, true) #>
         }
 
         internal override Task WriteEndNamespaceDeclarationAsync()
         {
-            CheckAsyncCall();
-            <#= SetTextContentMark(false) #>
+            CheckAsyncCall();<#
+
+#><#= SetTextContentMark(3, false) #>
+
             inAttributeValue = false;
 
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'"';
@@ -296,9 +300,9 @@ namespace System.Xml
         public override async Task WriteCDataAsync(string text)
         {
             CheckAsyncCall();
-            Debug.Assert(text != null);
+            Debug.Assert(text != null);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             if (mergeCDataSections && bufPos == cdataPos)
             {
@@ -334,9 +338,9 @@ namespace System.Xml
         public override async Task WriteCommentAsync(string text)
         {
             CheckAsyncCall();
-            Debug.Assert(text != null);
+            Debug.Assert(text != null);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'<';
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'!';
@@ -355,9 +359,9 @@ namespace System.Xml
         {
             CheckAsyncCall();
             Debug.Assert(name != null && name.Length > 0);
-            Debug.Assert(text != null);
+            Debug.Assert(text != null);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'<';
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'?';
@@ -377,9 +381,9 @@ namespace System.Xml
         public override async Task WriteEntityRefAsync(string name)
         {
             CheckAsyncCall();
-            Debug.Assert(name != null && name.Length > 0);
+            Debug.Assert(name != null && name.Length > 0);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'&';
             await RawTextAsync(name).ConfigureAwait(false);
@@ -403,9 +407,9 @@ namespace System.Xml
             {
                 // we just have a single char, not a surrogate, therefore we have to pass in '\0' for the second char
                 throw XmlConvert.CreateInvalidCharException(ch, '\0');
-            }
+            }<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'&';
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'#';
@@ -426,8 +430,8 @@ namespace System.Xml
         public override Task WriteWhitespaceAsync(string ws)
         {
             CheckAsyncCall();
-            Debug.Assert(ws != null);
-            <#= SetTextContentMark(false) #>
+            Debug.Assert(ws != null);<#
+#><#= SetTextContentMark(3, false) #>
 
             if (inAttributeValue)
             {
@@ -444,8 +448,8 @@ namespace System.Xml
         public override Task WriteStringAsync(string text)
         {
             CheckAsyncCall();
-            Debug.Assert(text != null);
-            <#= SetTextContentMark(true) #>
+            Debug.Assert(text != null);<#
+#><#= SetTextContentMark(3, true) #>
 
             if (inAttributeValue)
             {
@@ -460,8 +464,9 @@ namespace System.Xml
         // Serialize surrogate character entity.
         public override async Task WriteSurrogateCharEntityAsync(char lowChar, char highChar)
         {
-            CheckAsyncCall();
-            <#= SetTextContentMark(false) #>
+            CheckAsyncCall();<#
+#><#= SetTextContentMark(3, false) #>
+
             int surrogateChar = XmlCharType.CombineSurrogateChar(lowChar, highChar);
 
             <#= BufferName #>[bufPos++] = (<#= BufferType #>)'&';
@@ -480,9 +485,9 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(buffer != null);
             Debug.Assert(index >= 0);
-            Debug.Assert(count >= 0 && index + count <= buffer.Length);
+            Debug.Assert(count >= 0 && index + count <= buffer.Length);<#
 
-            <#= SetTextContentMark(true) #>
+#><#= SetTextContentMark(3, true) #>
 
             if (inAttributeValue)
             {
@@ -502,9 +507,9 @@ namespace System.Xml
             CheckAsyncCall();
             Debug.Assert(buffer != null);
             Debug.Assert(index >= 0);
-            Debug.Assert(count >= 0 && index + count <= buffer.Length);
+            Debug.Assert(count >= 0 && index + count <= buffer.Length);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             await WriteRawWithCharCheckingAsync(buffer, index, count).ConfigureAwait(false);
 
@@ -516,9 +521,9 @@ namespace System.Xml
         public override async Task WriteRawAsync(string data)
         {
             CheckAsyncCall();
-            Debug.Assert(data != null);
+            Debug.Assert(data != null);<#
 
-            <#= SetTextContentMark(false) #>
+#><#= SetTextContentMark(3, false) #>
 
             await WriteRawWithCharCheckingAsync(data).ConfigureAwait(false);
 
@@ -773,7 +778,7 @@ namespace System.Xml
                             }
                             break;
                         default:
-                            <#= EncodeChar(true) #>
+<#= EncodeChar(7, true) #>
                             continue;
                     }
                     pSrc++;
@@ -845,7 +850,6 @@ namespace System.Xml
 
             return Task.CompletedTask;
         }
-
 
         private async Task _WriteAttributeTextBlockAsync(string text, int curIndex, int leftCount)
         {
@@ -964,7 +968,7 @@ namespace System.Xml
                             }
                             break;
                         default:
-                            <#= EncodeChar(true) #>
+<#= EncodeChar(7, true) #>
                             continue;
                     }
                     pSrc++;
@@ -1134,7 +1138,7 @@ namespace System.Xml
                         return (int)(pSrc - pRaw);
                     }
 
-                    <#= EncodeChar(false) #>
+<#= EncodeChar(5, false) #>
                 }
 
                 bufPos = (int)(pDst - pDstBegin);
@@ -1339,7 +1343,7 @@ namespace System.Xml
                             }
                             break;
                         default:
-                            <#= EncodeChar(false) #>
+<#= EncodeChar(7, false) #>
                             continue;
                     }
                     pSrc++;
@@ -1556,7 +1560,7 @@ namespace System.Xml
                                 pDst++;
                                 break;
                             default:
-                                <#= EncodeChar(false) #>
+<#= EncodeChar(8, false) #>
                                 continue;
                         }
                         pSrc++;
@@ -1726,7 +1730,7 @@ namespace System.Xml
                                 pDst++;
                                 break;
                             default:
-                                <#= EncodeChar(false) #>
+<#= EncodeChar(8, false) #>
                                 continue;
                         }
                         pSrc++;

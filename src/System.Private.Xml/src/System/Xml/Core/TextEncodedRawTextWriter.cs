@@ -31,7 +31,6 @@ namespace System.Xml
         {
         }
 
-
         //
         // XmlRawWriter
         //
