@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.IO.Enumeration;
 using Xunit;
 
@@ -102,9 +105,9 @@ namespace System.IO.Tests
         {
             var name = new String('a', 255);
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
-            File.Create(Path.Join(testDirectory.FullName, name).Dispose());
+            File.Create(Path.Join(testDirectory.FullName, name)).Dispose();
 
-            IEnumerable<string> entries = Directory.GetFiles(testDirectory);
+            IEnumerable<string> entries = Directory.GetFiles(testDirectory.FullName);
 
             Assert.Equal(new [] { name }, entries);
         }
@@ -116,7 +119,7 @@ namespace System.IO.Tests
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
             Directory.CreateDirectory(Path.Join(testDirectory.FullName, name));
 
-            IEnumerable<string> entries = Directory.GetDirectories(testDirectory);
+            IEnumerable<string> entries = Directory.GetDirectories(testDirectory.FullName);
 
             Assert.Equal(new [] { name }, entries);
         }
