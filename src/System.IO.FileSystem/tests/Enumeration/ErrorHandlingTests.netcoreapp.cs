@@ -96,5 +96,29 @@ namespace System.IO.Tests
                 Assert.Equal(info.FullName, ie.DirectoryFinished);
             }
         }
+
+        [Fact]
+        public void MaxLengthFileName()
+        {
+            var name = new String('a', 255);
+            DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
+            File.Create(Path.Join(testDirectory.FullName, name).Dispose());
+
+            IEnumerable<string> entries = Directory.GetFiles(testDirectory);
+
+            Assert.Equal(new [] { name }, entries);
+        }
+
+        [Fact]
+        public void MaxLengthDirectoryName()
+        {
+            var name = new String('a', 255);
+            DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
+            Directory.CreateDirectory(Path.Join(testDirectory.FullName, name));
+
+            IEnumerable<string> entries = Directory.GetDirectories(testDirectory);
+
+            Assert.Equal(new [] { name }, entries);
+        }
     }
 }
