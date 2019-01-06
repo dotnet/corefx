@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -100,30 +100,38 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
-        public void MaxLengthFileName()
-        {
-            var name = new String('a', 255);
-            DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
-            var child = Path.Join(testDirectory.FullName, name);
-            File.Create(child).Dispose();
+	[Fact]
+	public void VariableLengthFileNames_AllCreatableFilesAreEnumerable()
+	{
+	    DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
+	    var names = new List<string>();
 
-            IEnumerable<string> entries = Directory.GetFiles(testDirectory.FullName);
+	    for (int length = 1; length < 10_000; length++) // arbitrarily large limit for the test
+	    {
+	        string name = new string('a', length);
+	        try { File.Create(Path.Join(testDirectory.FullName, name)).Dispose(); }
+	        catch { break; }
+	        names.Add(name);
+	    }
+	    Assert.InRange(names.Count, 1, int.MaxValue);
+	    Assert.Equal(names.OrderBy(n => n), Directory.GetFiles(testDirectory.FullName).OrderBy(n => n));
+	}
 
-            Assert.Equal(new [] { child }, entries);
-        }
+	[Fact]
+	public void VariableLengthDirectoryNames_AllCreatableDirectoriesAreEnumerable()
+	{
+	    DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
+	    var names = new List<string>();
 
-        [Fact]
-        public void MaxLengthDirectoryName()
-        {
-            var name = new String('a', 255);
-            DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
-            var child = Path.Join(testDirectory.FullName, name);
-            Directory.CreateDirectory(child);
-
-            IEnumerable<string> entries = Directory.GetDirectories(testDirectory.FullName);
-
-            Assert.Equal(new [] { child }, entries);
-        }
+	    for (int length = 1; length < 10_000; length++) // arbitrarily large limit for the test
+	    {
+	        string name = new string('a', length);
+	        try { Directory.CreateDirectory(Path.Join(testDirectory.FullName, name)); }
+	        catch { break; }
+	        names.Add(name);
+	    }
+	    Assert.InRange(names.Count, 1, int.MaxValue);
+	    Assert.Equal(names.OrderBy(n => n), Directory.GetDirectories(testDirectory.FullName).OrderBy(n => n));
+	}
     }
 }
