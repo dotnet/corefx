@@ -105,11 +105,12 @@ namespace System.IO.Tests
         {
             var name = new String('a', 255);
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
-            File.Create(Path.Join(testDirectory.FullName, name)).Dispose();
+            var child = Path.Join(testDirectory.FullName, name);
+            File.Create(child).Dispose();
 
             IEnumerable<string> entries = Directory.GetFiles(testDirectory.FullName);
 
-            Assert.Equal(new [] { name }, entries);
+            Assert.Equal(new [] { child }, entries);
         }
 
         [Fact]
@@ -117,11 +118,12 @@ namespace System.IO.Tests
         {
             var name = new String('a', 255);
             DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
-            Directory.CreateDirectory(Path.Join(testDirectory.FullName, name));
+            var child = Path.Join(testDirectory.FullName, name);
+            Directory.CreateDirectory(child);
 
             IEnumerable<string> entries = Directory.GetDirectories(testDirectory.FullName);
 
-            Assert.Equal(new [] { name }, entries);
+            Assert.Equal(new [] { child }, entries);
         }
     }
 }
