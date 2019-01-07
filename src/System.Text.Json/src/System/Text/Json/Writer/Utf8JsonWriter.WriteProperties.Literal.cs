@@ -109,13 +109,13 @@ namespace System.Text.Json
 
         private void WriteLiteralEscapeProperty(ref ReadOnlySpan<char> propertyName, ref ReadOnlySpan<byte> value, int firstEscapeIndexProp)
         {
-            Debug.Assert(int.MaxValue / 6 >= propertyName.Length);
+            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
             char[] propertyArray = null;
 
-            int length = firstEscapeIndexProp + 6 * (propertyName.Length - firstEscapeIndexProp);
+            int length = firstEscapeIndexProp + MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
             Span<char> span;
-            if (length > 256)
+            if (length > StackallocThreshold)
             {
                 propertyArray = ArrayPool<char>.Shared.Rent(length);
                 span = propertyArray;
@@ -140,13 +140,13 @@ namespace System.Text.Json
 
         private void WriteLiteralEscapeProperty(ref ReadOnlySpan<byte> propertyName, ref ReadOnlySpan<byte> value, int firstEscapeIndexProp)
         {
-            Debug.Assert(int.MaxValue / 6 >= propertyName.Length);
+            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
             byte[] propertyArray = null;
 
-            int length = firstEscapeIndexProp + 6 * (propertyName.Length - firstEscapeIndexProp);
+            int length = firstEscapeIndexProp + MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
             Span<byte> span;
-            if (length > 256)
+            if (length > StackallocThreshold)
             {
                 propertyArray = ArrayPool<byte>.Shared.Rent(length);
                 span = propertyArray;

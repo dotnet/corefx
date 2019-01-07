@@ -11,6 +11,10 @@ namespace System.Text.Json
     public ref partial struct Utf8JsonWriter
     {
         private const int MinimumSizeThreshold = 256;
+        private const int StackallocThreshold = 256;
+        private const int MaxExpansionFactorWhileEscaping = 6;
+        private const int SpacesPerIndent = 2;
+        private const int DefaultGrowthSize = 4096;
 
         private readonly IBufferWriter<byte> _output;
         private int _buffered;
@@ -38,7 +42,7 @@ namespace System.Text.Json
         // else, no list separator is needed since we are writing the first item.
         private int _currentDepth;
 
-        private int Indentation => CurrentDepth * 2;
+        private int Indentation => CurrentDepth * SpacesPerIndent;
 
         public int CurrentDepth => _currentDepth & JsonConstants.RemoveFlagsBitMask;
 
@@ -324,13 +328,13 @@ namespace System.Text.Json
 
         private void WriteStartEscapeProperty(ref ReadOnlySpan<byte> propertyName, byte token, int firstEscapeIndexProp)
         {
-            Debug.Assert(int.MaxValue / 6 >= propertyName.Length);
+            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
             byte[] propertyArray = null;
 
-            int length = firstEscapeIndexProp + 6 * (propertyName.Length - firstEscapeIndexProp);
+            int length = firstEscapeIndexProp + MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
             Span<byte> span;
-            if (length > 256)
+            if (length > StackallocThreshold)
             {
                 propertyArray = ArrayPool<byte>.Shared.Rent(length);
                 span = propertyArray;
@@ -440,13 +444,13 @@ namespace System.Text.Json
 
         private void WriteStartEscapeProperty(ref ReadOnlySpan<char> propertyName, byte token, int firstEscapeIndexProp)
         {
-            Debug.Assert(int.MaxValue / 6 >= propertyName.Length);
+            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
             char[] propertyArray = null;
 
-            int length = firstEscapeIndexProp + 6 * (propertyName.Length - firstEscapeIndexProp);
+            int length = firstEscapeIndexProp + MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
             Span<char> span;
-            if (length > 256)
+            if (length > StackallocThreshold)
             {
                 propertyArray = ArrayPool<char>.Shared.Rent(length);
                 span = propertyArray;
@@ -635,10 +639,10 @@ namespace System.Text.Json
         private void GrowAndEnsure()
         {
             int previousSpanLength = _buffer.Length;
-            GrowSpan(4096);
+            GrowSpan(DefaultGrowthSize);
             if (_buffer.Length <= previousSpanLength)
             {
-                GrowSpan(4096);
+                GrowSpan(DefaultGrowthSize);
                 if (_buffer.Length <= previousSpanLength)
                 {
                     //TODO: Use Throwhelper and fix message.
@@ -649,10 +653,10 @@ namespace System.Text.Json
 
         private void GrowAndEnsure(int minimumSize)
         {
-            GrowSpan(4096);
+            GrowSpan(DefaultGrowthSize);
             if (_buffer.Length <= minimumSize)
             {
-                GrowSpan(4096);
+                GrowSpan(DefaultGrowthSize);
                 if (_buffer.Length <= minimumSize)
                 {
                     //TODO: Use Throwhelper and fix message.
@@ -670,7 +674,7 @@ namespace System.Text.Json
 
         private void AdvanceAndGrow(int alreadyWritten, int minimumSize)
         {
-            Debug.Assert(minimumSize > 6 && minimumSize <= 128);
+            Debug.Assert(minimumSize >= 1 && minimumSize <= 128);
             Advance(alreadyWritten);
             GrowAndEnsure(minimumSize);
         }

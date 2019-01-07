@@ -15,7 +15,7 @@ namespace System.Text.Json
         // and exclude characters that need to be escaped by adding a backslash: '\n', '\r', '\t', '\\', '/', '\b', '\f'
         //
         // non-zero = allowed, 0 = disallowed
-        private static ReadOnlySpan<byte> AllowList => new byte[256] {
+        private static ReadOnlySpan<byte> AllowList => new byte[byte.MaxValue + 1] {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1,
@@ -38,7 +38,7 @@ namespace System.Text.Json
         private static bool NeedsEscaping(byte value) => AllowList[value] == 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool NeedsEscaping(char value) => value > 255 || AllowList[value] == 0;
+        private static bool NeedsEscaping(char value) => value > byte.MaxValue || AllowList[value] == 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int NeedsEscaping(ReadOnlySpan<byte> value)
@@ -110,38 +110,38 @@ namespace System.Text.Json
             int scalar = unicodeScalar.Value;
             switch (scalar)
             {
-                case '\n':
+                case JsonConstants.LineFeed:
                     destination[written++] = (byte)'n';
                     break;
-                case '\r':
+                case JsonConstants.CarriageReturn:
                     destination[written++] = (byte)'r';
                     break;
-                case '\t':
+                case JsonConstants.Tab:
                     destination[written++] = (byte)'t';
                     break;
-                case '\\':
+                case JsonConstants.BackSlash:
                     destination[written++] = (byte)'\\';
                     break;
-                case '/':
+                case JsonConstants.Slash:
                     destination[written++] = (byte)'/';
                     break;
-                case '\b':
+                case JsonConstants.BackSpace:
                     destination[written++] = (byte)'b';
                     break;
-                case '\f':
+                case JsonConstants.FormFeed:
                     destination[written++] = (byte)'f';
                     break;
                 default:
                     destination[written++] = (byte)'u';
-                    if (scalar < 0x10000)
+                    if (scalar < JsonConstants.UnicodePlan01StartValue)
                     {
                         WriteHex(scalar, ref destination, ref written);
                     }
                     else
                     {
-                        int quotient = DivMod(scalar - 0x10000, 0x400, out int remainder);
-                        int firstChar = quotient + 0xD800;
-                        int nextChar = remainder + 0xDC00;
+                        int quotient = DivMod(scalar - JsonConstants.UnicodePlan01StartValue, 0x400, out int remainder);
+                        int firstChar = quotient + JsonConstants.HighSurrogateStartValue;
+                        int nextChar = remainder + JsonConstants.LowSurrogateStartValue;
                         WriteHex(firstChar, ref destination, ref written);
                         destination[written++] = (byte)'\\';
                         destination[written++] = (byte)'u';
@@ -401,16 +401,16 @@ namespace System.Text.Json
         private static void EscapeNextChars(ref ReadOnlySpan<char> value, int firstChar, ref Span<char> destination, ref int consumed, ref int written)
         {
             int nextChar = -1;
-            if (InRange(firstChar, 0xD800, 0xDFFF))
+            if (InRange(firstChar, JsonConstants.HighSurrogateStartValue, JsonConstants.LowSurrogateEndValue))
             {
                 consumed++;
-                if (value.Length <= consumed || firstChar >= 0xDC00)
+                if (value.Length <= consumed || firstChar >= JsonConstants.LowSurrogateStartValue)
                 {
                     ThrowHelper.ThrowJsonWriterException("Invalid UTF-16 string ending in an invalid surrogate pair.");
                 }
 
                 nextChar = value[consumed];
-                if (!InRange(nextChar, 0xDC00, 0xDFFF))
+                if (!InRange(nextChar, JsonConstants.LowSurrogateStartValue, JsonConstants.LowSurrogateEndValue))
                 {
                     ThrowHelper.ThrowJsonWriterException("Invalid UTF-16 string ending in an invalid surrogate pair.");
                 }
@@ -419,25 +419,25 @@ namespace System.Text.Json
             destination[written++] = '\\';
             switch (firstChar)
             {
-                case '\n':
+                case JsonConstants.LineFeed:
                     destination[written++] = 'n';
                     break;
-                case '\r':
+                case JsonConstants.CarriageReturn:
                     destination[written++] = 'r';
                     break;
-                case '\t':
+                case JsonConstants.Tab:
                     destination[written++] = 't';
                     break;
-                case '\\':
+                case JsonConstants.BackSlash:
                     destination[written++] = '\\';
                     break;
-                case '/':
+                case JsonConstants.Slash:
                     destination[written++] = '/';
                     break;
-                case '\b':
+                case JsonConstants.BackSpace:
                     destination[written++] = 'b';
                     break;
-                case '\f':
+                case JsonConstants.FormFeed:
                     destination[written++] = 'f';
                     break;
                 default:

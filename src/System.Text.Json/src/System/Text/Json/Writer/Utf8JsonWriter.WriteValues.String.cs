@@ -114,16 +114,16 @@ namespace System.Text.Json
 
         private void WriteStringEscapeValue(ref ReadOnlySpan<char> value, int firstEscapeIndexVal)
         {
-            Debug.Assert(int.MaxValue / 6 >= value.Length);
+            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= value.Length);
 
             char[] valueArray = null;
 
             if (firstEscapeIndexVal != -1)
             {
-                int length = firstEscapeIndexVal + 6 * (value.Length - firstEscapeIndexVal);
+                int length = firstEscapeIndexVal + MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
 
                 Span<char> span;
-                if (length > 256)
+                if (length > StackallocThreshold)
                 {
                     valueArray = ArrayPool<char>.Shared.Rent(length);
                     span = valueArray;
@@ -249,16 +249,16 @@ namespace System.Text.Json
 
         private void WriteStringEscapeValue(ref ReadOnlySpan<byte> value, int firstEscapeIndexVal)
         {
-            Debug.Assert(int.MaxValue / 6 >= value.Length);
+            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= value.Length);
 
             byte[] valueArray = null;
 
             if (firstEscapeIndexVal != -1)
             {
-                int length = firstEscapeIndexVal + 6 * (value.Length - firstEscapeIndexVal);
+                int length = firstEscapeIndexVal + MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
 
                 Span<byte> span;
-                if (length > 256)
+                if (length > StackallocThreshold)
                 {
                     valueArray = ArrayPool<byte>.Shared.Rent(length);
                     span = valueArray;

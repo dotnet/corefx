@@ -30,10 +30,6 @@ namespace System.Text.Json
         // Used to search for the end of a number
         public static ReadOnlySpan<byte> Delimiters => new byte[] { ListSeperator, CloseBrace, CloseBracket, Space, LineFeed, CarriageReturn, Tab, Slash };
 
-        public static ReadOnlySpan<byte> WhiteSpace => new byte[] { Space, LineFeed, CarriageReturn, Tab };
-
-        public static ReadOnlySpan<byte> EndOfComment => new byte[] { Asterisk, Slash };
-
         // Explicitly skipping ReverseSolidus since that is handled separately
         public static ReadOnlySpan<byte> EscapableChars => new byte[] { Quote, (byte)'n', (byte)'r', (byte)'t', Slash, (byte)'u', (byte)'b', (byte)'f' };
 
@@ -56,5 +52,11 @@ namespace System.Text.Json
         public const char HighSurrogateEnd = '\udbff';
         public const char LowSurrogateStart = '\udc00';
         public const char LowSurrogateEnd = '\udfff';
+
+        public const int UnicodePlan01StartValue = 0x10000;
+        public const int HighSurrogateStartValue = 0xD800;
+        public const int HighSurrogateEndValue = 0xDBFF;
+        public const int LowSurrogateStartValue = 0xDC00;
+        public const int LowSurrogateEndValue = 0xDFFF;
     }
 }
