@@ -169,6 +169,31 @@ namespace System.IO.Tests
         #region PlatformSpecific
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        public void LongDirectoryName()
+        {
+            DirectoryInfo path = Directory.CreateDirectory(Path.Join(GetTestFilePath(), new string('a', 255)));
+
+            Assert.True(Directory.Exists(path.FullName));
+            Directory.Delete(path.FullName);
+	    Assert.False(Directory.Exists(path.FullName));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Linux)]
+        public void LongFileName()
+        {
+            var dir = GetTestFilePath();
+            Directory.CreateDirectory(dir);
+            var path = Path.Join(dir, new string('b', 255));
+            File.Create(path).Dispose();
+
+            Assert.True(File.Exists(path));
+            File.Delete(path);
+            Assert.False(File.Exists(path));
+        }
+
+        [Fact]
         [PlatformSpecific(CaseSensitivePlatforms)]
         public void CaseSensitive()
         {
