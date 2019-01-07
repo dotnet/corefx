@@ -4,7 +4,6 @@
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Internal.Runtime.CompilerServices;
 
 namespace System.Buffers.Text
 {
@@ -46,18 +45,24 @@ namespace System.Buffers.Text
                 maxSrcLength = (destLength >> 2) * 3 - 2;
             }
 
-            int sourceIndex = 0;
-            int destIndex = 0;
-            int result = 0;
+            // PERF: use uint to avoid the sign-extensions
+            uint sourceIndex = 0;
+            uint destIndex = 0;
+            uint result = 0;
 
             ref byte encodingMap = ref s_encodingMap[0];
 
-            while (sourceIndex < maxSrcLength)
+            // In order to elide the movsxd in the loop
+            if (sourceIndex < maxSrcLength)
             {
-                result = Encode(ref Unsafe.Add(ref srcBytes, sourceIndex), ref encodingMap);
-                Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, destIndex), result);
-                destIndex += 4;
-                sourceIndex += 3;
+                do
+                {
+                    result = Encode(ref Unsafe.Add(ref srcBytes, (IntPtr)sourceIndex), ref encodingMap);
+                    Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, (IntPtr)destIndex), result);
+                    destIndex += 4;
+                    sourceIndex += 3;
+                }
+                while (sourceIndex < (uint)maxSrcLength);
             }
 
             if (maxSrcLength != srcLength - 2)
@@ -68,31 +73,31 @@ namespace System.Buffers.Text
 
             if (sourceIndex == srcLength - 1)
             {
-                result = EncodeAndPadTwo(ref Unsafe.Add(ref srcBytes, sourceIndex), ref encodingMap);
-                Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, destIndex), result);
+                result = EncodeAndPadTwo(ref Unsafe.Add(ref srcBytes, (IntPtr)sourceIndex), ref encodingMap);
+                Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, (IntPtr)destIndex), result);
                 destIndex += 4;
                 sourceIndex += 1;
             }
             else if (sourceIndex == srcLength - 2)
             {
-                result = EncodeAndPadOne(ref Unsafe.Add(ref srcBytes, sourceIndex), ref encodingMap);
-                Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, destIndex), result);
+                result = EncodeAndPadOne(ref Unsafe.Add(ref srcBytes, (IntPtr)sourceIndex), ref encodingMap);
+                Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, (IntPtr)destIndex), result);
                 destIndex += 4;
                 sourceIndex += 2;
             }
 
-            bytesConsumed = sourceIndex;
-            bytesWritten = destIndex;
+            bytesConsumed = (int)sourceIndex;
+            bytesWritten = (int)destIndex;
             return OperationStatus.Done;
 
         NeedMoreDataExit:
-            bytesConsumed = sourceIndex;
-            bytesWritten = destIndex;
+            bytesConsumed = (int)sourceIndex;
+            bytesWritten = (int)destIndex;
             return OperationStatus.NeedMoreData;
 
         DestinationSmallExit:
-            bytesConsumed = sourceIndex;
-            bytesWritten = destIndex;
+            bytesConsumed = (int)sourceIndex;
+            bytesWritten = (int)destIndex;
             return OperationStatus.DestinationTooSmall;
         }
 
@@ -134,9 +139,10 @@ namespace System.Buffers.Text
 
             int leftover = dataLength - (dataLength / 3) * 3; // how many bytes after packs of 3
 
-            int destinationIndex = encodedLength - 4;
-            int sourceIndex = dataLength - leftover;
-            int result = 0;
+            // PERF: use uint to avoid the sign-extensions
+            uint destinationIndex = (uint)(encodedLength - 4);
+            uint sourceIndex = (uint)(dataLength - leftover);
+            uint result = 0;
 
             ref byte encodingMap = ref s_encodingMap[0];
             ref byte bufferBytes = ref MemoryMarshal.GetReference(buffer);
@@ -146,23 +152,22 @@ namespace System.Buffers.Text
             {
                 if (leftover == 1)
                 {
-                    result = EncodeAndPadTwo(ref Unsafe.Add(ref bufferBytes, sourceIndex), ref encodingMap);
-                    Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferBytes, destinationIndex), result);
-                    destinationIndex -= 4;
+                    result = EncodeAndPadTwo(ref Unsafe.Add(ref bufferBytes, (IntPtr)sourceIndex), ref encodingMap);
                 }
                 else
                 {
-                    result = EncodeAndPadOne(ref Unsafe.Add(ref bufferBytes, sourceIndex), ref encodingMap);
-                    Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferBytes, destinationIndex), result);
-                    destinationIndex -= 4;
+                    result = EncodeAndPadOne(ref Unsafe.Add(ref bufferBytes, (IntPtr)sourceIndex), ref encodingMap);
                 }
+
+                Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferBytes, (IntPtr)destinationIndex), result);
+                destinationIndex -= 4;
             }
 
             sourceIndex -= 3;
-            while (sourceIndex >= 0)
+            while ((int)sourceIndex >= 0)
             {
-                result = Encode(ref Unsafe.Add(ref bufferBytes, sourceIndex), ref encodingMap);
-                Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferBytes, destinationIndex), result);
+                result = Encode(ref Unsafe.Add(ref bufferBytes, (IntPtr)sourceIndex), ref encodingMap);
+                Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferBytes, (IntPtr)destinationIndex), result);
                 destinationIndex -= 4;
                 sourceIndex -= 3;
             }
@@ -176,37 +181,37 @@ namespace System.Buffers.Text
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Encode(ref byte threeBytes, ref byte encodingMap)
+        private static uint Encode(ref byte threeBytes, ref byte encodingMap)
         {
-            int i = (threeBytes << 16) | (Unsafe.Add(ref threeBytes, 1) << 8) | Unsafe.Add(ref threeBytes, 2);
+            uint i = (uint)((threeBytes << 16) | (Unsafe.Add(ref threeBytes, 1) << 8) | Unsafe.Add(ref threeBytes, 2));
 
-            int i0 = Unsafe.Add(ref encodingMap, i >> 18);
-            int i1 = Unsafe.Add(ref encodingMap, (i >> 12) & 0x3F);
-            int i2 = Unsafe.Add(ref encodingMap, (i >> 6) & 0x3F);
-            int i3 = Unsafe.Add(ref encodingMap, i & 0x3F);
+            uint i0 = Unsafe.Add(ref encodingMap, (IntPtr)(i >> 18));
+            uint i1 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 12) & 0x3F));
+            uint i2 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 6) & 0x3F));
+            uint i3 = Unsafe.Add(ref encodingMap, (IntPtr)(i & 0x3F));
 
             return i0 | (i1 << 8) | (i2 << 16) | (i3 << 24);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int EncodeAndPadOne(ref byte twoBytes, ref byte encodingMap)
+        private static uint EncodeAndPadOne(ref byte twoBytes, ref byte encodingMap)
         {
-            int i = (twoBytes << 16) | (Unsafe.Add(ref twoBytes, 1) << 8);
+            uint i = (uint)((twoBytes << 16) | (Unsafe.Add(ref twoBytes, 1) << 8));
 
-            int i0 = Unsafe.Add(ref encodingMap, i >> 18);
-            int i1 = Unsafe.Add(ref encodingMap, (i >> 12) & 0x3F);
-            int i2 = Unsafe.Add(ref encodingMap, (i >> 6) & 0x3F);
+            uint i0 = Unsafe.Add(ref encodingMap, (IntPtr)(i >> 18));
+            uint i1 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 12) & 0x3F));
+            uint i2 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 6) & 0x3F));
 
             return i0 | (i1 << 8) | (i2 << 16) | (EncodingPad << 24);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int EncodeAndPadTwo(ref byte oneByte, ref byte encodingMap)
+        private static uint EncodeAndPadTwo(ref byte oneByte, ref byte encodingMap)
         {
-            int i = (oneByte << 8);
+            uint i = (uint)(oneByte << 8);
 
-            int i0 = Unsafe.Add(ref encodingMap, i >> 10);
-            int i1 = Unsafe.Add(ref encodingMap, (i >> 4) & 0x3F);
+            uint i0 = Unsafe.Add(ref encodingMap, (IntPtr)(i >> 10));
+            uint i1 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 4) & 0x3F));
 
             return i0 | (i1 << 8) | (EncodingPad << 16) | (EncodingPad << 24);
         }
