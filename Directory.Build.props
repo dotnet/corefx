@@ -153,8 +153,15 @@
 
   <!-- Enable the analyzers for this repo -->
   <PropertyGroup>
-    <EnableAnalyzers Condition="'$(EnableAnalyzers)' == '' AND '$(IsSourceProject)' == 'true'">true</EnableAnalyzers>
+    <EnableAnalyzers Condition="'$(EnableAnalyzers)' == '' AND ('$(IsSourceProject)' == 'true' OR '$(IsTestProject)' == 'true')">true</EnableAnalyzers>
   </PropertyGroup>
+
+  <!-- Define analyzers for source projects and test projects -->
+  <ItemGroup>
+    <TestAnalyzers Include="xunit.analyzers" />
+    <AnalyzersToExclude Condition="'$(IsSourceProject)' == 'true'" Include="@(TestAnalyzers)" />
+    <AnalyzersToInclude Condition="'$(IsTestProject)' == 'true'" Include="@(TestAnalyzers)" />
+  </ItemGroup>
 
   <!-- Default properties for CI builds -->
   <PropertyGroup Condition="'$(IsTestProject)' == 'true' and '$(ContinuousIntegrationBuild)' == 'true' and '$(OfficialBuildId)' == ''">
