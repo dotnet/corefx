@@ -114,7 +114,7 @@ namespace System.IO.Tests
 	        names.Add(name);
 	    }
 	    Assert.InRange(names.Count, 1, int.MaxValue);
-	    Assert.Equal(names.OrderBy(n => n), Directory.GetFiles(testDirectory.FullName).OrderBy(n => n));
+	    Assert.Equal(names.OrderBy(n => n), Directory.GetFiles(testDirectory.FullName).Select(n => Path.GetFileName(n)).OrderBy(n => n));
 	}
 
 	[Fact]
@@ -131,7 +131,7 @@ namespace System.IO.Tests
 	        names.Add(name);
 	    }
 	    Assert.InRange(names.Count, 1, int.MaxValue);
-	    Assert.Equal(names.OrderBy(n => n), Directory.GetDirectories(testDirectory.FullName).OrderBy(n => n));
+	    Assert.Equal(names.OrderBy(n => n), Directory.GetDirectories(testDirectory.FullName).Select(n => Path.GetFileName(n)).OrderBy(n => n));
 	}
     }
 }
