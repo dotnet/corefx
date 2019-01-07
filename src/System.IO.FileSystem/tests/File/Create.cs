@@ -173,7 +173,7 @@ namespace System.IO.Tests
         public void LongDirectoryName()
         {
             // 255 = NAME_MAX on Linux and macOS
-            DirectoryInfo path = Directory.CreateDirectory(Path.Join(GetTestFilePath(), new string('a', 255)));
+            DirectoryInfo path = Directory.CreateDirectory(Path.Combine(GetTestFilePath(), new string('a', 255)));
 
             Assert.True(Directory.Exists(path.FullName));
             Directory.Delete(path.FullName);
@@ -187,7 +187,7 @@ namespace System.IO.Tests
             // 255 = NAME_MAX on Linux and macOS
             var dir = GetTestFilePath();
             Directory.CreateDirectory(dir);
-            var path = Path.Join(dir, new string('b', 255));
+            var path = Path.Combine(dir, new string('b', 255));
             File.Create(path).Dispose();
 
             Assert.True(File.Exists(path));
