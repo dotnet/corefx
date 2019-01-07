@@ -69,19 +69,41 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [ConditionalTheory(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void ClearLog_NullOrEmptyLogName_Throws(bool usingDefaultCtor)
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]
+        public void ClearLog_LogNameNullEmptyOrNotExist_Throws()
         {
-            using (var session = usingDefaultCtor ? new EventLogSession() : new EventLogSession(null))
+            using (var session = new EventLogSession())
             {
                 Assert.Throws<ArgumentNullException>(() => session.ClearLog(null));
                 Assert.Throws<ArgumentNullException>(() => session.ClearLog(null, backupPath: GetTestFilePath()));
                 Assert.Throws<EventLogException>(() => session.ClearLog(""));
-                
-                // Does not throw: (commenting out because it actually clears logs and causes problem for other tests.)
-                // session.ClearLog(logName: "Application");
+                Assert.Throws<EventLogNotFoundException>(() => session.ClearLog(logName: nameof(ClearLog_LogNameNullEmptyOrNotExist_Throws)));
+            }
+        }
+
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]
+        public void ClearLog_LogExists_Success()
+        {
+            using (var session = new EventLogSession())
+            {
+                string log = "Log_" + nameof(ClearLog_LogExists_Success);
+                string source = "Source_" + nameof(ClearLog_LogExists_Success);
+                try
+                {
+                    EventLog.CreateEventSource(source, log);
+                    using (EventLog eventLog = new EventLog())
+                    {
+                        eventLog.Source = source;
+                        eventLog.WriteEntry("Writing to event log.");
+                        Assert.NotEqual(0, eventLog.Entries.Count);
+                        session.ClearLog(logName: log);
+                        Assert.Equal(0, eventLog.Entries.Count);
+                    }
+                }
+                finally
+                {
+                    EventLog.DeleteEventSource(source);
+                }                
                 session.CancelCurrentOperations();
             }
         }
