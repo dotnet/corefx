@@ -8780,10 +8780,7 @@ namespace System.Data.SqlClient
 #if netcoreapp
                         Span<byte> b = stackalloc byte[16];
                         SqlGuid sqlGuid = (SqlGuid)value;
-                        if (!sqlGuid.IsNull) // if isnull then b has been initialized by the runtime to all zeros which is the same as a null guid
-                        {
-                            sqlGuid.Value.TryWriteBytes(b);
-                        }
+                        (sqlGuid.IsNull ? Guid.Empty : sqlGuid.Value).TryWriteBytes(b);
                         stateObj.WriteByteSpan(b);
 #else
                         byte[] b = ((SqlGuid)value).ToByteArray();
