@@ -36,5 +36,25 @@ namespace System.Text.Json
 
         // Explicitly skipping ReverseSolidus since that is handled separately
         public static ReadOnlySpan<byte> EscapableChars => new byte[] { Quote, (byte)'n', (byte)'r', (byte)'t', Slash, (byte)'u', (byte)'b', (byte)'f' };
+
+        public const int RemoveFlagsBitMask = 0x7FFFFFFF;
+        public const int MaxWriterDepth = 1_000;
+        public const int MaxTokenSize = 2_000_000_000 / 6;  // 357_913_941 bytes
+        public const int MaxCharacterTokenSize = 2_000_000_000 / 6; // 357_913_941 characters
+
+        public const int MaximumInt64Length = 20;   // 19 + sign (i.e. -9223372036854775808)
+        public const int MaximumUInt64Length = 20;  // i.e. 18446744073709551615
+        public const int MaximumDoubleLength = 32;  // default (i.e. 'G') TODO: Should it be 22?
+        public const int MaximumSingleLength = 32;  // default (i.e. 'G') TODO: Should it be 13?
+        public const int MaximumDecimalLength = 32; // default (i.e. 'G') TODO: Should it be 31?
+        public const int MaximumGuidLength = 36;    // default (i.e. 'D') 8 + 4 + 4 + 4 + 12 + 4 for the hyphens (e.g. 094ffa0a-0442-494d-b452-04003fa755cc)
+        public const int MaximumDateTimeLength = 26;    // default (i.e. 'G') e.g. 05/25/2017 10:30:15 -08:00
+        public const int MaximumDateTimeOffsetLength = 26;  // default (i.e. 'G') e.g. 05/25/2017 10:30:15 -08:00
+
+        // Encoding Helpers
+        public const char HighSurrogateStart = '\ud800';
+        public const char HighSurrogateEnd = '\udbff';
+        public const char LowSurrogateStart = '\udc00';
+        public const char LowSurrogateEnd = '\udfff';
     }
 }
