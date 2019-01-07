@@ -68,7 +68,7 @@
     <MSBuild Projects="@(_TestProjects)" Properties="$(ProjectProperties)" />
   </Target>
 
-  <Target Name="Pack" Condition="'$(BuildPackages)' == 'true'">
+  <Target Name="Pack">
     <ItemGroup>
       <_PackProjects Include="src\packages.builds" />
     </ItemGroup>
