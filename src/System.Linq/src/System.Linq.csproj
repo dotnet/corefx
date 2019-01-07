@@ -15,6 +15,7 @@
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Last.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Lookup.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumer\ToDictionary.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Lookup.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\IList.cs" />
