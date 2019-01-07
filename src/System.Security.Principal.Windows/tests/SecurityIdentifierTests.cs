@@ -17,7 +17,8 @@ public class SecurityIdentifierTests
             Assert.NotNull(identity.User);
         }
     }
-
+    
+    [ActiveIssue(34395)]
     [Fact]
     public void ValidateToString()
     {
@@ -49,6 +50,7 @@ public class SecurityIdentifierTests
         Assert.All(ridParts, part => uint.TryParse(part, out uint _));
     }
 
+    [ActiveIssue(34395)]
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer), nameof(PlatformDetection.IsNotWindowsServerCore))]
     public void ValidateToStringUsingWhoami()
     {
