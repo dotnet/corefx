@@ -407,7 +407,7 @@ namespace System.ComponentModel.DataAnnotations
                 breakOnFirstError));
 
             // We only proceed to Step 2 if there are no errors
-            if (errors.Any())
+            if (breakOnFirstError && errors.Any())
             {
                 return errors;
             }
@@ -417,7 +417,7 @@ namespace System.ComponentModel.DataAnnotations
             errors.AddRange(GetValidationErrors(instance, validationContext, attributes, breakOnFirstError));
 
             // We only proceed to Step 3 if there are no errors
-            if (errors.Any())
+            if (breakOnFirstError && errors.Any())
             {
                 return errors;
             }
