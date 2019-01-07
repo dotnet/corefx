@@ -22,9 +22,11 @@ namespace System.Diagnostics.Tests
 
             using (eventLog)
             {
-                EventRecord record = eventLog.ReadEvent();
-                Assert.NotNull(record);
-                Assert.Equal(logName, record.LogName);
+                using (EventRecord record = eventLog.ReadEvent())
+                {
+                    Assert.NotNull(record);
+                    Assert.Equal(logName, record.LogName);
+                }
             }
         }
 
@@ -98,11 +100,13 @@ namespace System.Diagnostics.Tests
         {
             using (var eventLog = new EventLogReader("Application"))
             {
-                EventRecord record = eventLog.ReadEvent();
-                eventLog.Seek(record.Bookmark);
-                eventLog.Seek(IO.SeekOrigin.Begin, 0);
-                eventLog.Seek(IO.SeekOrigin.Current, 0);
-                eventLog.Seek(IO.SeekOrigin.End, 0);
+                using (EventRecord record = eventLog.ReadEvent())
+                {
+                    eventLog.Seek(record.Bookmark);
+                    eventLog.Seek(IO.SeekOrigin.Begin, 0);
+                    eventLog.Seek(IO.SeekOrigin.Current, 0);
+                    eventLog.Seek(IO.SeekOrigin.End, 0);
+                }
             }
         }
 
