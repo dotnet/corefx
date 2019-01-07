@@ -72,75 +72,6 @@ namespace System.Tests
             }
         }
 
-        public static IEnumerable<object[]> UnsupportedEnumType_TestData()
-        {
-#if netcoreapp
-            yield return new object[] { s_floatEnumType, 1.0f };
-            yield return new object[] { s_doubleEnumType, 1.0 };
-            yield return new object[] { s_intPtrEnumType, (IntPtr)1 };
-            yield return new object[] { s_uintPtrEnumType, (UIntPtr)1 };
-#else
-            return Array.Empty<object[]>();
-#endif //netcoreapp
-        }
-
-        [Theory]
-        [MemberData(nameof(UnsupportedEnumType_TestData))]
-        public static void GetName_Unsupported_ThrowsArgumentException(Type enumType, object value)
-        {
-            AssertExtensions.Throws<ArgumentException>("value", () => Enum.GetName(enumType, value));
-        }
-
-        [Theory]
-        [MemberData(nameof(UnsupportedEnumType_TestData))]
-        public static void IsDefined_UnsupportedEnumType_ThrowsInvalidOperationException(Type enumType, object value)
-        {
-            // A Contract.Assert(false, "...") is hit for certain unsupported primitives
-            Exception ex = Assert.ThrowsAny<Exception>(() => Enum.IsDefined(enumType, value));
-            string exName = ex.GetType().Name;
-            Assert.True(exName == nameof(InvalidOperationException) || exName == "ContractException");
-        }
-
-        public static IEnumerable<object[]> UnsupportedEnum_TestData()
-        {
-#if netcoreapp
-            yield return new object[] { Enum.ToObject(s_floatEnumType, 1) };
-            yield return new object[] { Enum.ToObject(s_doubleEnumType, 2) };
-            yield return new object[] { Enum.ToObject(s_intPtrEnumType, 1) };
-            yield return new object[] { Enum.ToObject(s_uintPtrEnumType, 2) };
-#else
-            return Array.Empty<object[]>();
-#endif //netcoreapp
-        }
-
-        [Theory]
-        [MemberData(nameof(UnsupportedEnum_TestData))]
-        public static void ToString_UnsupportedEnumType_ThrowsArgumentException(Enum e)
-        {
-            // A Contract.Assert(false, "...") is hit for certain unsupported primitives
-            Exception formatXException = Assert.ThrowsAny<Exception>(() => e.ToString("X"));
-            string formatXExceptionName = formatXException.GetType().Name;
-            Assert.True(formatXExceptionName == nameof(InvalidOperationException) || formatXExceptionName == "ContractException");
-        }
-
-        [Theory]
-        [MemberData(nameof(UnsupportedEnumType_TestData))]
-        public static void Format_UnsupportedEnumType_ThrowsArgumentException(Type enumType, object value)
-        {
-            // A Contract.Assert(false, "...") is hit for certain unsupported primitives
-            Exception formatGException = Assert.ThrowsAny<Exception>(() => Enum.Format(enumType, value, "G"));
-            string formatGExceptionName = formatGException.GetType().Name;
-            Assert.True(formatGExceptionName == nameof(InvalidOperationException) || formatGExceptionName == "ContractException");
-
-            Exception formatXException = Assert.ThrowsAny<Exception>(() => Enum.Format(enumType, value, "X"));
-            string formatXExceptionName = formatXException.GetType().Name;
-            Assert.True(formatXExceptionName == nameof(InvalidOperationException) || formatXExceptionName == "ContractException");
-
-            Exception formatFException = Assert.ThrowsAny<Exception>(() => Enum.Format(enumType, value, "F"));
-            string formatFExceptionName = formatFException.GetType().Name;
-            Assert.True(formatFExceptionName == nameof(InvalidOperationException) || formatFExceptionName == "ContractException");
-        }
-
 #if netcoreapp // .NetNative does not support RefEmit nor any other way to create Enum types with unusual backing types.
         private static EnumBuilder GetNonRuntimeEnumTypeBuilder(Type underlyingType)
         {
@@ -185,13 +116,13 @@ namespace System.Tests
             enumBuilder.DefineLiteral("Value1", 1.0f);
             enumBuilder.DefineLiteral("Value2", 2.0f);
 
-            enumBuilder.DefineLiteral("Value0x3f06", (float)0x3f06);
-            enumBuilder.DefineLiteral("Value0x3000", (float)0x3000);
-            enumBuilder.DefineLiteral("Value0x0f06", (float)0x0f06);
-            enumBuilder.DefineLiteral("Value0x1000", (float)0x1000);
-            enumBuilder.DefineLiteral("Value0x0000", (float)0x0000);
-            enumBuilder.DefineLiteral("Value0x0010", (float)0x0010);
-            enumBuilder.DefineLiteral("Value0x3f16", (float)0x3f16);
+            enumBuilder.DefineLiteral("Value0x3f06", BitConverter.Int32BitsToSingle(0x3f06));
+            enumBuilder.DefineLiteral("Value0x3000", BitConverter.Int32BitsToSingle(0x3000));
+            enumBuilder.DefineLiteral("Value0x0f06", BitConverter.Int32BitsToSingle(0x0f06));
+            enumBuilder.DefineLiteral("Value0x1000", BitConverter.Int32BitsToSingle(0x1000));
+            enumBuilder.DefineLiteral("Value0x0000", BitConverter.Int32BitsToSingle(0x0000));
+            enumBuilder.DefineLiteral("Value0x0010", BitConverter.Int32BitsToSingle(0x0010));
+            enumBuilder.DefineLiteral("Value0x3f16", BitConverter.Int32BitsToSingle(0x3f16));
 
             return enumBuilder.CreateTypeInfo().AsType();
         }
@@ -203,13 +134,13 @@ namespace System.Tests
             enumBuilder.DefineLiteral("Value1", 1.0);
             enumBuilder.DefineLiteral("Value2", 2.0);
 
-            enumBuilder.DefineLiteral("Value0x3f06", (double)0x3f06);
-            enumBuilder.DefineLiteral("Value0x3000", (double)0x3000);
-            enumBuilder.DefineLiteral("Value0x0f06", (double)0x0f06);
-            enumBuilder.DefineLiteral("Value0x1000", (double)0x1000);
-            enumBuilder.DefineLiteral("Value0x0000", (double)0x0000);
-            enumBuilder.DefineLiteral("Value0x0010", (double)0x0010);
-            enumBuilder.DefineLiteral("Value0x3f16", (double)0x3f16);
+            enumBuilder.DefineLiteral("Value0x3f06", BitConverter.Int64BitsToDouble(0x3f06));
+            enumBuilder.DefineLiteral("Value0x3000", BitConverter.Int64BitsToDouble(0x3000));
+            enumBuilder.DefineLiteral("Value0x0f06", BitConverter.Int64BitsToDouble(0x0f06));
+            enumBuilder.DefineLiteral("Value0x1000", BitConverter.Int64BitsToDouble(0x1000));
+            enumBuilder.DefineLiteral("Value0x0000", BitConverter.Int64BitsToDouble(0x0000));
+            enumBuilder.DefineLiteral("Value0x0010", BitConverter.Int64BitsToDouble(0x0010));
+            enumBuilder.DefineLiteral("Value0x3f16", BitConverter.Int64BitsToDouble(0x3f16));
 
             return enumBuilder.CreateTypeInfo().AsType();
         }

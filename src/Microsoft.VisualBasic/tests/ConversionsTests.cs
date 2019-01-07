@@ -48,17 +48,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { "invalid" };
         }
 
-        public static IEnumerable<object[]> InvalidBool_TestData()
-        {
-            if (ReflectionEmitSupported)
-            {
-                yield return new object[] { FloatEnum };
-                yield return new object[] { DoubleEnum };
-                yield return new object[] { IntPtrEnum };
-                yield return new object[] { UIntPtrEnum };
-            }
-        }
-
         public static IEnumerable<object[]> InvalidNumberObject_TestData()
         {
             yield return new object[] { char.MinValue };
@@ -69,6 +58,8 @@ namespace Microsoft.VisualBasic.Tests
             if (ReflectionEmitSupported)
             {
                 yield return new object[] { CharEnum };
+                yield return new object[] { IntPtrEnum };
+                yield return new object[] { UIntPtrEnum };
             }
         }
 
@@ -171,10 +162,12 @@ namespace Microsoft.VisualBasic.Tests
             // float.
             yield return new object[] { (float)0, byte.MinValue };
             yield return new object[] { (float)1, (byte)1 };
+            yield return new object[] { FloatEnum, (byte)0 };
 
             // double.
             yield return new object[] { (double)0, byte.MinValue };
             yield return new object[] { (double)1, (byte)1 };
+            yield return new object[] { DoubleEnum, (byte)0 };
 
             // decimal.
             yield return new object[] { (decimal)0, byte.MinValue };
@@ -210,13 +203,6 @@ namespace Microsoft.VisualBasic.Tests
         public void ToByte_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToByte(value));
-        }
-
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToByte_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToByte(value));
         }
 
         public static IEnumerable<object[]> ToByte_OverflowObject_TestData()
@@ -350,11 +336,13 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (float)(-1), (sbyte)(-1) };
             yield return new object[] { (float)0, (sbyte)0 };
             yield return new object[] { (float)1, (sbyte)1 };
+            yield return new object[] { FloatEnum, (sbyte)0 };
 
             // double.
             yield return new object[] { (double)(-1), (sbyte)(-1) };
             yield return new object[] { (double)0, (sbyte)0 };
             yield return new object[] { (double)1, (sbyte)1 };
+            yield return new object[] { DoubleEnum, (sbyte)0 };
 
             // decimal.
             yield return new object[] { (decimal)(-1), (sbyte)(-1) };
@@ -391,13 +379,6 @@ namespace Microsoft.VisualBasic.Tests
         public void ToSByte_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToSByte(value));
-        }
-
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToSByte_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToSByte(value));
         }
 
         public static IEnumerable<object[]> ToSByte_OverflowObject_TestData()
@@ -526,10 +507,12 @@ namespace Microsoft.VisualBasic.Tests
             // float.
             yield return new object[] { (float)0, ushort.MinValue };
             yield return new object[] { (float)1, (ushort)1 };
+            yield return new object[] { FloatEnum, (ushort)0 };
 
             // double.
             yield return new object[] { (double)0, ushort.MinValue };
             yield return new object[] { (double)1, (ushort)1 };
+            yield return new object[] { DoubleEnum, (ushort)0 };
 
             // decimal.
             yield return new object[] { (decimal)0, ushort.MinValue };
@@ -565,13 +548,6 @@ namespace Microsoft.VisualBasic.Tests
         public void ToUShort_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToUShort(value));
-        }
-
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToUShort_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToUShort(value));
         }
 
         public static IEnumerable<object[]> ToUShort_OverflowObject_TestData()
@@ -708,11 +684,13 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (float)(-1), (short)(-1) };
             yield return new object[] { (float)0, (short)0 };
             yield return new object[] { (float)1, (short)1 };
+            yield return new object[] { FloatEnum, (short)0 };
 
             // double.
             yield return new object[] { (double)(-1), (short)(-1) };
             yield return new object[] { (double)0, (short)0 };
             yield return new object[] { (double)1, (short)1 };
+            yield return new object[] { DoubleEnum, (short)0 };
 
             // decimal.
             yield return new object[] { (decimal)(-1), (short)(-1) };
@@ -749,13 +727,6 @@ namespace Microsoft.VisualBasic.Tests
         public void ToShort_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToShort(value));
-        }
-
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToShort_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToShort(value));
         }
 
         public static IEnumerable<object[]> ToShort_OverflowObject_TestData()
@@ -888,10 +859,12 @@ namespace Microsoft.VisualBasic.Tests
             // float.
             yield return new object[] { (float)0, uint.MinValue };
             yield return new object[] { (float)1, (uint)1 };
+            yield return new object[] { FloatEnum, (uint)0 };
 
             // double.
             yield return new object[] { (double)0, uint.MinValue };
             yield return new object[] { (double)1, (uint)1 };
+            yield return new object[] { DoubleEnum, (uint)0 };
 
             // decimal.
             yield return new object[] { (decimal)0, uint.MinValue };
@@ -927,13 +900,6 @@ namespace Microsoft.VisualBasic.Tests
         public void ToUInteger_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToUInteger(value));
-        }
-
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToUInteger_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToUInteger(value));
         }
 
         public static IEnumerable<object[]> ToUInteger_OverflowObject_TestData()
@@ -1076,11 +1042,13 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (float)(-1), -1 };
             yield return new object[] { (float)0, 0 };
             yield return new object[] { (float)1, 1 };
+            yield return new object[] { FloatEnum, 0 };
 
             // double.
             yield return new object[] { (double)(-1), -1 };
             yield return new object[] { (double)0, 0 };
             yield return new object[] { (double)1, 1 };
+            yield return new object[] { DoubleEnum, 0 };
 
             // decimal.
             yield return new object[] { (decimal)(-1), -1 };
@@ -1117,13 +1085,6 @@ namespace Microsoft.VisualBasic.Tests
         public void ToInteger_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToInteger(value));
-        }
-
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToInteger_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToInteger(value));
         }
 
         public static IEnumerable<object[]> ToInteger_OverflowObject_TestData()
@@ -1264,10 +1225,12 @@ namespace Microsoft.VisualBasic.Tests
             // float.
             yield return new object[] { (float)0, ulong.MinValue };
             yield return new object[] { (float)1, (ulong)1 };
+            yield return new object[] { FloatEnum, (ulong)0 };
 
             // double.
             yield return new object[] { (double)0, ulong.MinValue };
             yield return new object[] { (double)1, (ulong)1 };
+            yield return new object[] { DoubleEnum, (ulong)0 };
 
             // decimal.
             yield return new object[] { (decimal)0, ulong.MinValue };
@@ -1304,13 +1267,6 @@ namespace Microsoft.VisualBasic.Tests
         public void ToULong_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToULong(value));
-        }
-
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToULong_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToULong(value));
         }
 
         public static IEnumerable<object[]> ToULong_OverflowObject_TestData()
@@ -1490,11 +1446,13 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (float)(-1), (long)(-1) };
             yield return new object[] { (float)0, (long)0 };
             yield return new object[] { (float)1, (long)1 };
+            yield return new object[] { FloatEnum, (long)0 };
 
             // double.
             yield return new object[] { (double)(-1), (long)(-1) };
             yield return new object[] { (double)0, (long)0 };
             yield return new object[] { (double)1, (long)1 };
+            yield return new object[] { DoubleEnum, (long)0 };
 
             // decimal.
             yield return new object[] { (decimal)(-1), (long)(-1) };
@@ -1539,13 +1497,6 @@ namespace Microsoft.VisualBasic.Tests
         public void ToLong_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToLong(value));
-        }
-
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToLong_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToLong(value));
         }
 
         public static IEnumerable<object[]> ToLong_OverflowObject_TestData()
@@ -1709,6 +1660,7 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { float.PositiveInfinity, float.PositiveInfinity };
             yield return new object[] { float.NegativeInfinity, float.NegativeInfinity };
             yield return new object[] { float.NaN, float.NaN };
+            yield return new object[] { FloatEnum, default(float) };
 
             // double.
             yield return new object[] { double.MinValue, float.NegativeInfinity };
@@ -1719,6 +1671,7 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { double.PositiveInfinity, float.PositiveInfinity };
             yield return new object[] { double.NegativeInfinity, float.NegativeInfinity };
             yield return new object[] { double.NaN, float.NaN };
+            yield return new object[] { DoubleEnum, default(float) };
 
             // decimal.
             yield return new object[] { decimal.MinValue, float.Parse("-7.922816E+28", NumberStyles.Any, CultureInfo.InvariantCulture) };
@@ -1757,13 +1710,6 @@ namespace Microsoft.VisualBasic.Tests
         public void ToSingle_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToSingle(value));
-        }
-
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToSingle_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToSingle(value));
         }
 
         public static IEnumerable<object[]> ToSingle_OverflowObject_TestData()
@@ -1902,6 +1848,7 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { float.PositiveInfinity, double.PositiveInfinity };
             yield return new object[] { float.NegativeInfinity, double.NegativeInfinity };
             yield return new object[] { float.NaN, double.NaN };
+            yield return new object[] { FloatEnum, default(double) };
 
             // double.
             yield return new object[] { double.MinValue, double.MinValue };
@@ -1912,6 +1859,7 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { double.PositiveInfinity, double.PositiveInfinity };
             yield return new object[] { double.NegativeInfinity, double.NegativeInfinity };
             yield return new object[] { double.NaN, double.NaN };
+            yield return new object[] { DoubleEnum, default(double) };
 
             // decimal.
             yield return new object[] { decimal.MinValue, double.Parse("-7.92281625142643E+28", NumberStyles.Any, CultureInfo.InvariantCulture) };
@@ -1959,13 +1907,6 @@ namespace Microsoft.VisualBasic.Tests
         public void ToDouble_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToDouble(value));
-        }
-
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToDouble_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToDouble(value));
         }
 
         public static IEnumerable<object[]> ToDecimal_String_TestData()
@@ -2103,11 +2044,13 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { (float)(-1), (decimal)(-1) };
             yield return new object[] { (float)0, (decimal)0 };
             yield return new object[] { (float)1, (decimal)1 };
+            yield return new object[] { FloatEnum, (decimal)0 };
 
             // double.
             yield return new object[] { (double)(-1), (decimal)(-1) };
             yield return new object[] { (double)0, (decimal)0 };
             yield return new object[] { (double)1, (decimal)1 };
+            yield return new object[] { DoubleEnum, (decimal)0 };
 
             // decimal.
             yield return new object[] { decimal.MinValue, decimal.MinValue };
@@ -2158,13 +2101,6 @@ namespace Microsoft.VisualBasic.Tests
         public void ToDecimal_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToDecimal(value));
-        }
-
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToDecimal_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToDecimal(value));
         }
 
         public static IEnumerable<object[]> ToDecimal_OverflowObject_TestData()
@@ -2324,6 +2260,7 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { float.PositiveInfinity, true };
             yield return new object[] { float.NegativeInfinity, true };
             yield return new object[] { float.NaN, true };
+            yield return new object[] { FloatEnum, false };
 
             // double.
             yield return new object[] { double.MinValue, true };
@@ -2334,6 +2271,7 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { double.PositiveInfinity, true };
             yield return new object[] { double.NegativeInfinity, true };
             yield return new object[] { double.NaN, true };
+            yield return new object[] { DoubleEnum, false };
 
             // decimal.
             yield return new object[] { decimal.MinValue, true };
@@ -2381,13 +2319,6 @@ namespace Microsoft.VisualBasic.Tests
         public void ToBoolean_InvalidObject_ThrowsInvalidCastException(object value)
         {
             Assert.Throws<InvalidCastException>(() => Conversions.ToBoolean(value));
-        }
-
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToBoolean_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToBoolean(value));
         }
 
         public static IEnumerable<object[]> ToChar_String_TestData()
@@ -2545,13 +2476,6 @@ namespace Microsoft.VisualBasic.Tests
             Assert.Throws<InvalidCastException>(() => Conversions.ToChar(value));
         }
 
-        [Theory]
-        [MemberData(nameof(InvalidBool_TestData))]
-        public void ToChar_InvalidBool_ThrowsInvalidOperationException(object value)
-        {
-            Assert.Throws<InvalidOperationException>(() => Conversions.ToChar(value));
-        }
-
         private static object s_floatEnum;
 
         public static object FloatEnum
@@ -2563,7 +2487,7 @@ namespace Microsoft.VisualBasic.Tests
                     AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.RunAndCollect);
                     ModuleBuilder module = assembly.DefineDynamicModule("Name");
 
-                    EnumBuilder eb = module.DefineEnum("CharEnumType", TypeAttributes.Public, typeof(float));
+                    EnumBuilder eb = module.DefineEnum("FloatEnumType", TypeAttributes.Public, typeof(float));
                     eb.DefineLiteral("A", 1.0f);
                     eb.DefineLiteral("B", 2.0f);
                     eb.DefineLiteral("C", 3.0f);
@@ -2586,7 +2510,7 @@ namespace Microsoft.VisualBasic.Tests
                     AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.RunAndCollect);
                     ModuleBuilder module = assembly.DefineDynamicModule("Name");
 
-                    EnumBuilder eb = module.DefineEnum("CharEnumType", TypeAttributes.Public, typeof(double));
+                    EnumBuilder eb = module.DefineEnum("DoubleEnumType", TypeAttributes.Public, typeof(double));
                     eb.DefineLiteral("A", 1.0);
                     eb.DefineLiteral("B", 2.0);
                     eb.DefineLiteral("C", 3.0);
@@ -2654,7 +2578,7 @@ namespace Microsoft.VisualBasic.Tests
                     AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.RunAndCollect);
                     ModuleBuilder module = assembly.DefineDynamicModule("Name");
 
-                    EnumBuilder eb = module.DefineEnum("CharEnumType", TypeAttributes.Public, typeof(IntPtr));
+                    EnumBuilder eb = module.DefineEnum("IntPtrEnumType", TypeAttributes.Public, typeof(IntPtr));
 
                     s_intPtrEnum = Activator.CreateInstance(eb.CreateTypeInfo());
                 }
@@ -2674,7 +2598,7 @@ namespace Microsoft.VisualBasic.Tests
                     AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("Name"), AssemblyBuilderAccess.RunAndCollect);
                     ModuleBuilder module = assembly.DefineDynamicModule("Name");
 
-                    EnumBuilder eb = module.DefineEnum("CharEnumType", TypeAttributes.Public, typeof(UIntPtr));
+                    EnumBuilder eb = module.DefineEnum("UIntPtrEnumType", TypeAttributes.Public, typeof(UIntPtr));
 
                     s_uintPtrEnum = Activator.CreateInstance(eb.CreateTypeInfo());
                 }

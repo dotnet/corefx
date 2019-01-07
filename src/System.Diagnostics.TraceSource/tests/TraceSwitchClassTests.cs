@@ -26,7 +26,7 @@ namespace System.Diagnostics.TraceSourceTests
             item = new TraceSwitch("SwitchName", null, "warning");
             Assert.Equal(TraceLevel.Warning, item.Level);
             item = new TraceSwitch("Name", null, "NO_EXIST");
-            AssertExtensions.Throws<ArgumentException>(null, () => item.Level);
+            AssertExtensions.Throws<ArgumentException>("value", () => item.Level);
             item = new TraceSwitch("Name", null, null);
 
             Assert.Throws<ArgumentNullException>(() => item.Level);
