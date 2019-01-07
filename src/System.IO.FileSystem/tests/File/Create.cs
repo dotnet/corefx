@@ -169,20 +169,22 @@ namespace System.IO.Tests
         #region PlatformSpecific
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Linux)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void LongDirectoryName()
         {
+            // 255 = NAME_MAX on Linux and macOS
             DirectoryInfo path = Directory.CreateDirectory(Path.Join(GetTestFilePath(), new string('a', 255)));
 
             Assert.True(Directory.Exists(path.FullName));
             Directory.Delete(path.FullName);
-	    Assert.False(Directory.Exists(path.FullName));
+            Assert.False(Directory.Exists(path.FullName));
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Linux)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
         public void LongFileName()
         {
+            // 255 = NAME_MAX on Linux and macOS
             var dir = GetTestFilePath();
             Directory.CreateDirectory(dir);
             var path = Path.Join(dir, new string('b', 255));
