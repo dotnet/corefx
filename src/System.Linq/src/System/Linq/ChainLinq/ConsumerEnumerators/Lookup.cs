@@ -58,11 +58,12 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
 
                     _g = _g._next;
                     status = _chain.ProcessNext(_g);
-                    if (status.IsFlowing())
-                    {
-                        if (_g == _lastGrouping)
-                            status = ChainStatus.Stop;
+                    var flowing = status.IsFlowing();
+                    if (_g == _lastGrouping)
+                        status = ChainStatus.Stop;
 
+                    if (flowing)
+                    {
                         return true;
                     }
 
@@ -138,11 +139,12 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
                     _g = _g._next;
                     _g.Trim();
                     status = _chain.ProcessNext(_resultSelector(_g.Key, _g._elements));
-                    if (status.IsFlowing())
-                    {
-                        if (_g == _lastGrouping)
-                            status = ChainStatus.Stop;
+                    var flowing = status.IsFlowing();
+                    if (_g == _lastGrouping)
+                        status = ChainStatus.Stop;
 
+                    if (flowing)
+                    {
                         return true;
                     }
 
