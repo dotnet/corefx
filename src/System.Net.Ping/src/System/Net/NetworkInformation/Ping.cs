@@ -77,12 +77,17 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        private void CheckStart()
+        private void CheckDisposed()
         {
             if (_disposeRequested)
             {
                 throw new ObjectDisposedException(GetType().FullName);
             }
+        }
+
+        private void CheckStart()
+        {
+            CheckDisposed();
 
             int currentStatus;
             lock (_lockObject)
@@ -355,6 +360,7 @@ namespace System.Net.NetworkInformation
             }
 
             CheckArgs(timeout, buffer, options);
+            CheckDisposed();
 
             return GetAddressAndSendAsync(hostNameOrAddress, timeout, buffer, options);
         }
@@ -396,19 +402,10 @@ namespace System.Net.NetworkInformation
 
         private async Task<PingReply> GetAddressAndSendAsync(string hostNameOrAddress, int timeout, byte[] buffer, PingOptions options)
         {
-            IPAddress[] addresses;
-            try
-            {
-                addresses = await Dns.GetHostAddressesAsync(hostNameOrAddress).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                throw new PingException(SR.net_ping, e);
-            }
-
             CheckStart();
             try
             {
+                IPAddress[] addresses = await Dns.GetHostAddressesAsync(hostNameOrAddress).ConfigureAwait(false);
                 Task<PingReply> pingReplyTask = SendPingAsyncCore(addresses[0], buffer, timeout, options);
                 return await pingReplyTask.ConfigureAwait(false);
             }
