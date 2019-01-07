@@ -30,16 +30,17 @@ internal static partial class Interop
             internal byte* Name;
             internal int NameLength;
             internal NodeType InodeType;
-            internal const int NameBufferSize = 256;
+            internal const int NameBufferSize = 256; // sizeof(dirent->d_name) == NAME_MAX + 1
 
             internal ReadOnlySpan<char> GetName(Span<char> buffer)
             {
-                Debug.Assert(buffer.Length >= Encoding.UTF8.GetMaxCharCount(NameBufferSize - 1), "should have enough space for the max file name");
+                Debug.Assert(buffer.Length >= Encoding.UTF8.GetMaxCharCount(NameBufferSize - 1), $"should have enough space for the max file name, actual {buffer.Length} expected {Encoding.UTF8.GetMaxCharCount(NameBufferSize - 1)}");
+
                 Debug.Assert(Name != null, "should not have a null name");
 
                 ReadOnlySpan<byte> nameBytes = (NameLength == -1)
                     // In this case the struct was allocated via struct dirent *readdir(DIR *dirp);
-                    ? new ReadOnlySpan<byte>(Name, new ReadOnlySpan<byte>(Name, NameBufferSize - 1).IndexOf<byte>(0))
+                    ? new ReadOnlySpan<byte>(Name, new ReadOnlySpan<byte>(Name, NameBufferSize).IndexOf<byte>(0))
                     : new ReadOnlySpan<byte>(Name, NameLength);
 
                 Debug.Assert(nameBytes.Length > 0, "we shouldn't have gotten a garbage value from the OS");
