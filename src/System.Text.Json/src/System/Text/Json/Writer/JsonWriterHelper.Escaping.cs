@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -75,13 +74,6 @@ namespace System.Text.Json
 
         Return:
             return idx;
-        }
-
-        // TODO: Remmove this
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static OperationStatus EscapeString(ReadOnlySpan<byte> value, Span<byte> destination, out int consumed, out int bytesWritten)
-        {
-            throw new NotImplementedException();
         }
 
         public static void EscapeString(ref ReadOnlySpan<byte> value, ref Span<byte> destination, int indexOfFirstByteToEscape, out int written)

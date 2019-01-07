@@ -297,7 +297,7 @@ namespace System.Text.Json
                 AdvanceAndGrow(idx);
                 idx = 0;
             }
-            _buffer[idx++] = (byte)'*'; // TODO: Replace with JsonConstants.Asterisk
+            _buffer[idx++] = JsonConstants.Asterisk;
 
             ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(escapedValue);
             int partialConsumed = 0;
@@ -319,7 +319,7 @@ namespace System.Text.Json
                 AdvanceAndGrow(idx);
                 idx = 0;
             }
-            _buffer[idx++] = (byte)'*'; // TODO: Replace with JsonConstants.Asterisk
+            _buffer[idx++] = JsonConstants.Asterisk;
 
             while (_buffer.Length <= idx)
             {
@@ -343,7 +343,7 @@ namespace System.Text.Json
                 AdvanceAndGrow(idx);
                 idx = 0;
             }
-            _buffer[idx++] = (byte)'*'; // TODO: Replace with JsonConstants.Asterisk
+            _buffer[idx++] = JsonConstants.Asterisk;
 
             CopyLoop(ref escapedValue, ref idx);
 
@@ -352,7 +352,7 @@ namespace System.Text.Json
                 AdvanceAndGrow(idx);
                 idx = 0;
             }
-            _buffer[idx++] = (byte)'*'; // TODO: Replace with JsonConstants.Asterisk
+            _buffer[idx++] = JsonConstants.Asterisk;
 
             while (_buffer.Length <= idx)
             {

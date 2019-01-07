@@ -5,7 +5,6 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace System.Text.Json
 {
@@ -13,7 +12,7 @@ namespace System.Text.Json
     {
         private const int MinimumSizeThreshold = 256;
 
-        private IBufferWriter<byte> _output;
+        private readonly IBufferWriter<byte> _output;
         private int _buffered;
         private Span<byte> _buffer;
 
@@ -84,38 +83,19 @@ namespace System.Text.Json
             _buffer = _buffer.Slice(count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void CheckSizeAndGrow(int count)
-        {
-            Debug.Assert(count >= 0);
-
-            if (_buffer.Length < count)
-                GrowSpan(count);
-        }
-
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void GrowSpan(int count)
         {
             Flush();
 
-            if (_output == null)
-            {
-                if (count < MinimumSizeThreshold)
-                {
-                    throw new ArgumentException("The output span provided is too small.");
-                }
-            }
-            else
-            {
-                _buffer = _output.GetSpan(count);
+            _buffer = _output.GetSpan(count);
 
-                if (_buffer.Length < count && count < MinimumSizeThreshold)
-                {
-                    throw new ArgumentException("The IBufferWriter could not provide a span that is large enough to continue.");
-                }
-
-                Debug.Assert(_buffer.Length >= Math.Min(count, MinimumSizeThreshold));
+            if (_buffer.Length < count && count < MinimumSizeThreshold)
+            {
+                throw new ArgumentException("The IBufferWriter could not provide a span that is large enough to continue.");
             }
+
+            Debug.Assert(_buffer.Length >= Math.Min(count, MinimumSizeThreshold));
         }
 
         public void Flush(bool isFinalBlock = true)
@@ -131,15 +111,7 @@ namespace System.Text.Json
         private void Flush()
         {
             BytesCommitted += _buffered;
-            if (_output == null)
-            {
-                Debug.Assert(_buffer.Length >= _buffered);
-                _buffer = _buffer.Slice(_buffered);
-            }
-            else
-            {
-                _output.Advance(_buffered);
-            }
+            _output.Advance(_buffered);
             _buffered = 0;
         }
 
@@ -533,7 +505,7 @@ namespace System.Text.Json
             {
                 GrowAndEnsure();
             }
-            
+
             _buffer[0] = token;
             Advance(1);
         }
@@ -623,24 +595,6 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Span<byte> GetSpan(int bytesNeeded)
-        {
-            CheckSizeAndGrow(bytesNeeded);
-            Debug.Assert(_buffer.Length >= bytesNeeded);
-            return _buffer;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void WriteNewLine(ref Span<byte> byteBuffer, ref int idx)
-        {
-            // Write '\r\n' OR '\n', depending on OS
-            if (JsonWriterHelper.s_newLineUtf8.Length == 2)
-                byteBuffer[idx++] = JsonConstants.CarriageReturn;
-
-            byteBuffer[idx++] = JsonConstants.LineFeed;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void WriteNewLine(ref int idx)
         {
             // Write '\r\n' OR '\n', depending on OS
@@ -722,24 +676,6 @@ namespace System.Text.Json
         }
 
         private void CopyLoop(ref ReadOnlySpan<byte> span, ref int idx)
-        {
-            while (true)
-            {
-                if (span.Length <= _buffer.Length - idx)
-                {
-                    span.CopyTo(_buffer.Slice(idx));
-                    idx += span.Length;
-                    break;
-                }
-
-                span.Slice(0, _buffer.Length - idx).CopyTo(_buffer.Slice(idx));
-                span = span.Slice(_buffer.Length - idx);
-                AdvanceAndGrow(_buffer.Length);
-                idx = 0;
-            }
-        }
-
-        private void CopyLoop(ReadOnlySpan<byte> span, ref int idx)
         {
             while (true)
             {

@@ -42,7 +42,7 @@ namespace System.Text.Json
         private void WriteStringSuppressFalse(ref ReadOnlySpan<char> propertyName, Guid value)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
-        
+
             Debug.Assert(propertyIdx >= -1 && propertyIdx < int.MaxValue / 2);
 
             if (propertyIdx != -1)

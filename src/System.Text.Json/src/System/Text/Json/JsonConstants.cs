@@ -44,9 +44,9 @@ namespace System.Text.Json
 
         public const int MaximumInt64Length = 20;   // 19 + sign (i.e. -9223372036854775808)
         public const int MaximumUInt64Length = 20;  // i.e. 18446744073709551615
-        public const int MaximumDoubleLength = 32;  // default (i.e. 'G') TODO: Should it be 22?
-        public const int MaximumSingleLength = 32;  // default (i.e. 'G') TODO: Should it be 13?
-        public const int MaximumDecimalLength = 32; // default (i.e. 'G') TODO: Should it be 31?
+        public const int MaximumDoubleLength = 128;  // default (i.e. 'G'), using 128 (rather than say 32) to be future-proof.
+        public const int MaximumSingleLength = 128;  // default (i.e. 'G'), using 128 (rather than say 32) to be future-proof.
+        public const int MaximumDecimalLength = 128; // default (i.e. 'G'), using 128 (rather than say 32) to be future-proof.
         public const int MaximumGuidLength = 36;    // default (i.e. 'D') 8 + 4 + 4 + 4 + 12 + 4 for the hyphens (e.g. 094ffa0a-0442-494d-b452-04003fa755cc)
         public const int MaximumDateTimeLength = 26;    // default (i.e. 'G') e.g. 05/25/2017 10:30:15 -08:00
         public const int MaximumDateTimeOffsetLength = 26;  // default (i.e. 'G') e.g. 05/25/2017 10:30:15 -08:00

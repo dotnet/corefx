@@ -35,7 +35,7 @@ namespace System.Text.Json
         private void WriteNumberValueMinimized(long value)
         {
             // Calculated based on the following: ',long.MaxValue'
-            int bytesNeeded = JsonConstants.MaximumInt64Length  + 1;
+            int bytesNeeded = JsonConstants.MaximumInt64Length + 1;
             if (_buffer.Length < bytesNeeded)
             {
                 GrowAndEnsure(bytesNeeded);
