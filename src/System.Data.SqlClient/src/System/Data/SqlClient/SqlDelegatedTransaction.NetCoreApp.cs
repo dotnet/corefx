@@ -10,9 +10,6 @@ namespace System.Data.SqlClient
     {
         // Get the server-side Global Transaction Id from the PromotedDTCToken
         // Skip first 4 bytes since they contain the version
-        private Guid GetGlobalTxnIdentifierFromToken()
-        {
-            return new Guid(_connection.PromotedDTCToken.AsSpan(_globalTransactionsTokenVersionSizeInBytes, 16));
-        }
+        private Guid GetGlobalTxnIdentifierFromToken() => new Guid(_connection.PromotedDTCToken.AsSpan(_globalTransactionsTokenVersionSizeInBytes, 16));
     }
 }
