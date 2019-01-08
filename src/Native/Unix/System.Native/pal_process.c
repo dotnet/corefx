@@ -258,7 +258,7 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     //   + process exit by any means unblocks the parent
     //   + ptrace() makes a security demand against the parent process
     //   + accessing the terminal with read() or write() fail in system-dependent ways
-    // Due to lack of documentation, changing signals in the vfork() child is a bad idea. We don't
+    // Due to lack of documentation, setting signal handlers in the vfork() child is a bad idea. We don't
     // do this, but it's worth pointing out.
 
     // All platforms that provide shared memory vfork() check the parent process's context when
@@ -295,9 +295,8 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
             {
                 break; // No more signals
             }
-            if ((sa_old.sa_flags & SA_SIGINFO)
-                ? ((void (*)(int))sa_old.sa_sigaction != SIG_IGN && (void (*)(int))sa_old.sa_sigaction != SIG_DFL)
-                : (sa_old.sa_handler != SIG_IGN && sa_old.sa_handler != SIG_DFL))
+	    void (*oldhandler)(int) = (sa_old.sa_flags & SA_SIGINFO) ? (void (*)(int))sa_old.sa_sigaction : sa_old.sa_handler;
+	    if (oldhandler != SIG_IGN && oldhandler != SIG_DFL)
             {
                 // It has a custom handler, put the default handler back.
 		// We check first th preserve flags on default handlers.
