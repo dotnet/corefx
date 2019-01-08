@@ -486,6 +486,9 @@ namespace System.Text.Json.Tests
         [InlineData("{\"test\":[[[123,456]]]}", "test123456", "test123456")]
         [InlineData("/*a*//*z*/[/*b*//*z*/123/*c*//*z*/,/*d*//*z*/456/*e*//*z*/]/*f*//*z*/", "123456", "/*a*//*z*//*b*//*z*/123/*c*//*z*//*d*//*z*/456/*e*//*z*//*f*//*z*/")]
         [InlineData("[123,/*hi*/456/*bye*/]", "123456", "123/*hi*/456/*bye*/")]
+        [InlineData("[123,//hi\n456//bye\n]", "123456", "123//hi\n456//bye\n")]
+        [InlineData("[123,//hi\r456//bye\r]", "123456", "123//hi\r456//bye\r")]
+        [InlineData("[123,//hi\r\n456\r\n]", "123456", "123//hi\r\n456")]
         [InlineData("/*a*//*z*/{/*b*//*z*/\"test\":/*c*//*z*/[/*d*//*z*/[/*e*//*z*/[/*f*//*z*/123/*g*//*z*/,/*h*//*z*/456/*i*//*z*/]/*j*//*z*/]/*k*//*z*/]/*l*//*z*/}/*m*//*z*/",
     "test123456", "/*a*//*z*//*b*//*z*/test/*c*//*z*//*d*//*z*//*e*//*z*//*f*//*z*/123/*g*//*z*//*h*//*z*/456/*i*//*z*//*j*//*z*//*k*//*z*//*l*//*z*//*m*//*z*/")]
         [InlineData("//a\n//z\n{//b\n//z\n\"test\"://c\n//z\n[//d\n//z\n[//e\n//z\n[//f\n//z\n123//g\n//z\n,//h\n//z\n456//i\n//z\n]//j\n//z\n]//k\n//z\n]//l\n//z\n}//m\n//z\n",
@@ -654,40 +657,29 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("\"h\u6F22\u5B57ello\"", 1, 0, false)] // "\""
-        [InlineData("12345", 3, 0, false)]   // "123"
-        [InlineData("null", 3, 0, false)]   // "nul"
-        [InlineData("true", 3, 0, false)]   // "tru"
-        [InlineData("false", 4, 0, false)]  // "fals"
-        [InlineData("   {\"a\u6F22\u5B57ge\":30}   ", 16, 16, false)] // "   {\"a\u6F22\u5B57ge\":"
-        [InlineData("{\"n\u6F22\u5B57ame\":\"A\u6F22\u5B57hson\"}", 15, 14, false)]  // "{\"n\u6F22\u5B57ame\":\"A\u6F22\u5B57hso"
-        [InlineData("-123456789", 1, 0, false)] // "-"
-        [InlineData("0.5", 2, 0, false)]    // "0."
-        [InlineData("10.5e+3", 5, 0, false)] // "10.5e"
-        [InlineData("10.5e-1", 6, 0, false)]    // "10.5e-"
-        [InlineData("{\"i\u6F22\u5B57nts\":[1, 2, 3, 4, 5]}", 27, 25, false)]    // "{\"i\u6F22\u5B57nts\":[1, 2, 3, 4, "
-        [InlineData("{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\"], \"ints\":[1, 2, 3, 4, 5]}", 36, 36, false)]  // "{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\""
-        [InlineData("{\"a\u6F22\u5B57ge\":30, \"name\":\"test}:[]\", \"another \u6F22\u5B57string\" : \"tests\"}", 25, 24, false)]   // "{\"a\u6F22\u5B57ge\":30, \"name\":\"test}"
-        [InlineData("   [[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"t\u6F22\u5B57emp2:[]}]]]]}]]]]\":[]}]]]]}]]]]   ", 54, 29, false)] // "   [[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"t\u6F22\u5B57emp2:[]}]]]]}]]]]"
-        [InlineData("{\r\n\"is\u6F22\u5B57Active\": false, \"in\u6F22\u5B57valid\"\r\n : \"now its \u6F22\u5B57valid\"}", 26, 26, false)]  // "{\r\n\"is\u6F22\u5B57Active\": false, \"in\u6F22\u5B57valid\"\r\n}"
-        [InlineData("{\"property\\u1234Name\": \"String value with hex: \\uABCD in the middle.\"}", 51, 23, false)]  // "{\"property\\u1234Name\": \"String value with hex: \\uAB"
-        [InlineData("{ \"number\": 0}", 13, 12, false)]    // "{ \"number\": 0"
-
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment", 53, 16, true)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment", 54, 54, true)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r\n//Another single-line comment", 59, 16, true)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r\n//Another single-line comment", 60, 60, true)]
-        [InlineData("//This is a comment with a carriage return\r//Another single-line comment", 42, 0, true)]
-        [InlineData("//This is a comment with a carriage return\r//Another single-line comment", 43, 0, true)]
-        [InlineData("//This is a comment with a carriage return\r//Another single-line comment", 44, 43, true)]
-        public static void PartialJson(string jsonString, int splitLocation, int consumed, bool containsComments)
+        [InlineData("\"h\u6F22\u5B57ello\"", 1, 0)] // "\""
+        [InlineData("12345", 3, 0)]   // "123"
+        [InlineData("null", 3, 0)]   // "nul"
+        [InlineData("true", 3, 0)]   // "tru"
+        [InlineData("false", 4, 0)]  // "fals"
+        [InlineData("   {\"a\u6F22\u5B57ge\":30}   ", 16, 16)] // "   {\"a\u6F22\u5B57ge\":"
+        [InlineData("{\"n\u6F22\u5B57ame\":\"A\u6F22\u5B57hson\"}", 15, 14)]  // "{\"n\u6F22\u5B57ame\":\"A\u6F22\u5B57hso"
+        [InlineData("-123456789", 1, 0)] // "-"
+        [InlineData("0.5", 2, 0)]    // "0."
+        [InlineData("10.5e+3", 5, 0)] // "10.5e"
+        [InlineData("10.5e-1", 6, 0)]    // "10.5e-"
+        [InlineData("{\"i\u6F22\u5B57nts\":[1, 2, 3, 4, 5]}", 27, 25)]    // "{\"i\u6F22\u5B57nts\":[1, 2, 3, 4, "
+        [InlineData("{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\"], \"ints\":[1, 2, 3, 4, 5]}", 36, 36)]  // "{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\""
+        [InlineData("{\"a\u6F22\u5B57ge\":30, \"name\":\"test}:[]\", \"another \u6F22\u5B57string\" : \"tests\"}", 25, 24)]   // "{\"a\u6F22\u5B57ge\":30, \"name\":\"test}"
+        [InlineData("   [[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"t\u6F22\u5B57emp2:[]}]]]]}]]]]\":[]}]]]]}]]]]   ", 54, 29)] // "   [[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"t\u6F22\u5B57emp2:[]}]]]]}]]]]"
+        [InlineData("{\r\n\"is\u6F22\u5B57Active\": false, \"in\u6F22\u5B57valid\"\r\n : \"now its \u6F22\u5B57valid\"}", 26, 26)]  // "{\r\n\"is\u6F22\u5B57Active\": false, \"in\u6F22\u5B57valid\"\r\n}"
+        [InlineData("{\"property\\u1234Name\": \"String value with hex: \\uABCD in the middle.\"}", 51, 23)]  // "{\"property\\u1234Name\": \"String value with hex: \\uAB"
+        [InlineData("{ \"number\": 0}", 13, 12)]    // "{ \"number\": 0"
+        public static void PartialJson(string jsonString, int splitLocation, int consumed)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                if (commentHandling == JsonCommentHandling.Disallow && containsComments)
-                    continue;
-
                 var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
                 var json = new Utf8JsonReader(dataUtf8.AsSpan(0, splitLocation), false, state);
                 while (json.Read())

@@ -2136,8 +2136,7 @@ namespace System.Text.Json
             int idx;
             do
             {
-                // TODO: https://github.com/dotnet/corefx/issues/33293
-                idx = localBuffer.IndexOf(JsonConstants.LineFeed);
+                idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn);
                 if (idx == -1)
                 {
                     if (IsLastSpan)
@@ -2295,8 +2294,7 @@ namespace System.Text.Json
             int idx;
             do
             {
-                // TODO: https://github.com/dotnet/corefx/issues/33293
-                idx = localBuffer.IndexOf(JsonConstants.LineFeed);
+                idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn);
                 if (idx == -1)
                 {
                     if (IsLastSpan)
@@ -2318,7 +2316,7 @@ namespace System.Text.Json
                     localBuffer = _buffer;
                 }
             } while (idx == -1);
-
+            
             idx++;
             _bytePositionInLine = 0;
             _lineNumber++;
