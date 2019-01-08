@@ -96,8 +96,8 @@ namespace System.Text.Json
         public long BytesCommitted { get { throw null; } }
         public long BytesWritten { get { throw null; } }
         public int CurrentDepth { get { throw null; } }
+        public System.Text.Json.JsonWriterState CurrentState { get { throw null; } }
         public void Flush(bool isFinalBlock = true) { }
-        public System.Text.Json.JsonWriterState GetCurrentState() { throw null; }
         public void WriteBoolean(System.ReadOnlySpan<byte> propertyName, bool value, bool suppressEscaping = false) { }
         public void WriteBoolean(System.ReadOnlySpan<char> propertyName, bool value, bool suppressEscaping = false) { }
         public void WriteBoolean(string propertyName, bool value, bool suppressEscaping = false) { }

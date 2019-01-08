@@ -77,27 +77,27 @@ namespace System.Text.Json
         /// across async/await boundaries and hence this type is required to provide support for reading
         /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonWriter"/>.
         /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when there is JSON data that has been written and buffered but not yet flushed to the <see cref="IBufferWriter{T}" />.
-        /// Getting the state for creating a new <see cref="Utf8JsonWriter"/> without first committing the data that has been written
-        /// would result in an inconsistent state. Call Flush before getting the current state.
-        /// </exception>
-        public JsonWriterState GetCurrentState()
+        public JsonWriterState CurrentState
         {
-            if (_buffered != 0)
+            get
             {
-                throw ThrowHelper.GetInvalidOperationException_CallFlushFirst(_buffered);
+                // Getting the state for creating a new Utf8JsonWriter without first committing the data that has been written
+                // would result in an inconsistent state. Therefore, calling Flush before getting the current state.
+                if (_buffered != 0)
+                {
+                    Flush();
+                }
+                return new JsonWriterState
+                {
+                    _bytesWritten = BytesWritten,
+                    _bytesCommitted = BytesCommitted,
+                    _inObject = _inObject,
+                    _isNotPrimitive = _isNotPrimitive,
+                    _tokenType = _tokenType,
+                    _writerOptions = _writerOptions,
+                    _bitStack = _bitStack,
+                };
             }
-            return new JsonWriterState
-            {
-                _bytesWritten = BytesWritten,
-                _bytesCommitted = BytesCommitted,
-                _inObject = _inObject,
-                _isNotPrimitive = _isNotPrimitive,
-                _tokenType = _tokenType,
-                _writerOptions = _writerOptions,
-                _bitStack = _bitStack,
-            };
         }
 
         /// <summary>

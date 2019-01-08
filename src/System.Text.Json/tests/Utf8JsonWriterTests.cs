@@ -794,7 +794,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, state.BytesCommitted);
             Assert.Equal(0, state.BytesWritten);
 
-            state = jsonUtf8.GetCurrentState();
+            state = jsonUtf8.CurrentState;
             Assert.Equal(jsonUtf8.BytesCommitted, state.BytesCommitted);
             Assert.Equal(jsonUtf8.BytesWritten, state.BytesWritten);
 
@@ -818,7 +818,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(1, jsonUtf8.CurrentDepth);
             jsonUtf8.Flush(isFinalBlock: false);
 
-            state = jsonUtf8.GetCurrentState();
+            state = jsonUtf8.CurrentState;
 
             Assert.Equal(1, state.BytesCommitted);
             Assert.Equal(1, state.BytesWritten);
@@ -839,7 +839,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(1, state.BytesCommitted);
             Assert.Equal(1, state.BytesWritten);
 
-            state = jsonUtf8.GetCurrentState();
+            state = jsonUtf8.CurrentState;
 
             if (formatted)
             {
@@ -874,7 +874,7 @@ namespace System.Text.Json.Tests
 
             jsonUtf8.Flush(isFinalBlock: false);
 
-            state = jsonUtf8.GetCurrentState();
+            state = jsonUtf8.CurrentState;
 
             Assert.Equal(1, state.BytesCommitted);
             Assert.Equal(1, state.BytesWritten);
@@ -914,19 +914,14 @@ namespace System.Text.Json.Tests
 
             Assert.Equal(1, jsonUtf8.CurrentDepth);
 
-            try
-            {
-                state = jsonUtf8.GetCurrentState();
-            }
-            catch (InvalidOperationException)
-            {
-            }
-            finally
-            {
-                jsonUtf8.Flush(isFinalBlock: false);
-            }
+            state = jsonUtf8.CurrentState;
 
-            state = jsonUtf8.GetCurrentState();
+            if (formatted)
+                Assert.Equal(26 + 2 + Environment.NewLine.Length + 1, state.BytesWritten);
+            else
+                Assert.Equal(26, state.BytesWritten);
+
+            Assert.Equal(jsonUtf8.BytesWritten, jsonUtf8.BytesCommitted);
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             Assert.Equal(0, jsonUtf8.CurrentDepth);

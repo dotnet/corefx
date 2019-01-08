@@ -25,11 +25,6 @@ namespace System.Text.Json
             throw GetArgumentException(message);
         }
 
-        public static InvalidOperationException GetInvalidOperationException_CallFlushFirst(int _buffered)
-        {
-            return new InvalidOperationException(SR.Format(SR.CallFlushToAvoidDataLoss, _buffered));
-        }
-
         public static void ThrowArgumentException_PropertyNameTooLarge(int tokenLength)
         {
             throw GetArgumentException(SR.Format(SR.PropertyNameTooLarge, tokenLength));
