@@ -1213,6 +1213,16 @@ namespace System.Runtime.Serialization.Formatters.Tests
             Assert.Equal(@this.LineNumber, other.LineNumber);
             Assert.Equal(@this.BytePositionInLine, other.BytePositionInLine);
         }
+
+        public static void IsEqual(this JsonWriterException @this, JsonWriterException other, bool isSamePlatform)
+        {
+            if (@this == null && other == null)
+                return;
+
+            Assert.NotNull(@this);
+            Assert.NotNull(other);
+            IsEqual(@this as Exception, other as Exception, isSamePlatform);
+        }
 #endif
 
         public static void IsEqual(this EventArgs @this, EventArgs other, bool isSamePlatform)

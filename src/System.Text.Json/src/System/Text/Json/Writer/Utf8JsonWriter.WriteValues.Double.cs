@@ -15,6 +15,8 @@ namespace System.Text.Json
         /// </exception>
         public void WriteNumberValue(double value)
         {
+            JsonWriterHelper.ValidateDouble(value);
+
             if (_writerOptions.Indented)
             {
                 if (!_writerOptions.SkipValidation)

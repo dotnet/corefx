@@ -77,16 +77,28 @@ namespace System.Text.Json
         /// across async/await boundaries and hence this type is required to provide support for reading
         /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonWriter"/>.
         /// </summary>
-        public JsonWriterState CurrentState => new JsonWriterState
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when there is JSON data that has been written and buffered but not yet flushed to the <see cref="IBufferWriter{T}" />.
+        /// Getting the state for creating a new <see cref="Utf8JsonWriter"/> without first committing the data that has been written
+        /// would result in an inconsistent state. Call Flush before getting the current state.
+        /// </exception>
+        public JsonWriterState GetCurrentState()
         {
-            _bytesWritten = BytesWritten,
-            _bytesCommitted = BytesCommitted,
-            _inObject = _inObject,
-            _isNotPrimitive = _isNotPrimitive,
-            _tokenType = _tokenType,
-            _writerOptions = _writerOptions,
-            _bitStack = _bitStack,
-        };
+            if (_buffered != 0)
+            {
+                throw ThrowHelper.GetInvalidOperationException_CallFlushFirst(_buffered);
+            }
+            return new JsonWriterState
+            {
+                _bytesWritten = BytesWritten,
+                _bytesCommitted = BytesCommitted,
+                _inObject = _inObject,
+                _isNotPrimitive = _isNotPrimitive,
+                _tokenType = _tokenType,
+                _writerOptions = _writerOptions,
+                _bitStack = _bitStack,
+            };
+        }
 
         /// <summary>
         /// Constructs a new <see cref="Utf8JsonWriter"/> instance with a specified <paramref name="bufferWriter"/>.

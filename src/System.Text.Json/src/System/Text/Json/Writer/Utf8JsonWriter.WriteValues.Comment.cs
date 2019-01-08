@@ -37,9 +37,6 @@ namespace System.Text.Json
                 WriteCommentSuppressFalse(ref utf16Text);
             else
                 WriteCommentByOptions(ref utf16Text);
-
-            _currentDepth |= 1 << 31;
-            _tokenType = JsonTokenType.String;
         }
 
         private void WriteCommentSuppressFalse(ref ReadOnlySpan<char> value)
@@ -73,14 +70,6 @@ namespace System.Text.Json
         private void WriteCommentMinimized(ref ReadOnlySpan<char> escapedValue)
         {
             int idx = 0;
-            if (_currentDepth < 0)
-            {
-                while (_buffer.Length <= idx)
-                {
-                    GrowAndEnsure();
-                }
-                _buffer[idx++] = JsonConstants.ListSeperator;
-            }
 
             WriteCommentValue(ref escapedValue, ref idx);
 
@@ -90,14 +79,6 @@ namespace System.Text.Json
         private void WriteCommentIndented(ref ReadOnlySpan<char> escapedValue)
         {
             int idx = 0;
-            if (_currentDepth < 0)
-            {
-                while (_buffer.Length <= idx)
-                {
-                    GrowAndEnsure();
-                }
-                _buffer[idx++] = JsonConstants.ListSeperator;
-            }
 
             if (_tokenType != JsonTokenType.None)
                 WriteNewLine(ref idx);
@@ -172,9 +153,6 @@ namespace System.Text.Json
                 WriteCommentSuppressFalse(ref utf8Text);
             else
                 WriteCommentByOptions(ref utf8Text);
-
-            _currentDepth |= 1 << 31;
-            _tokenType = JsonTokenType.String;
         }
 
         private void WriteCommentSuppressFalse(ref ReadOnlySpan<byte> value)
@@ -208,14 +186,6 @@ namespace System.Text.Json
         private void WriteCommentMinimized(ref ReadOnlySpan<byte> escapedValue)
         {
             int idx = 0;
-            if (_currentDepth < 0)
-            {
-                while (_buffer.Length <= idx)
-                {
-                    GrowAndEnsure();
-                }
-                _buffer[idx++] = JsonConstants.ListSeperator;
-            }
 
             WriteCommentValue(ref escapedValue, ref idx);
 
@@ -225,14 +195,6 @@ namespace System.Text.Json
         private void WriteCommentIndented(ref ReadOnlySpan<byte> escapedValue)
         {
             int idx = 0;
-            if (_currentDepth < 0)
-            {
-                while (_buffer.Length <= idx)
-                {
-                    GrowAndEnsure();
-                }
-                _buffer[idx++] = JsonConstants.ListSeperator;
-            }
 
             if (_tokenType != JsonTokenType.None)
                 WriteNewLine(ref idx);

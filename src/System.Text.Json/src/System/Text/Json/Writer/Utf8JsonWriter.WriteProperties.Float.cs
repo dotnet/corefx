@@ -40,6 +40,7 @@ namespace System.Text.Json
         public void WriteNumber(ReadOnlySpan<char> propertyName, float value, bool suppressEscaping = false)
         {
             JsonWriterHelper.ValidateProperty(ref propertyName);
+            JsonWriterHelper.ValidateSingle(value);
 
             if (!suppressEscaping)
                 WriteNumberSuppressFalse(ref propertyName, value);
@@ -65,6 +66,7 @@ namespace System.Text.Json
         public void WriteNumber(ReadOnlySpan<byte> propertyName, float value, bool suppressEscaping = false)
         {
             JsonWriterHelper.ValidateProperty(ref propertyName);
+            JsonWriterHelper.ValidateSingle(value);
 
             if (!suppressEscaping)
                 WriteNumberSuppressFalse(ref propertyName, value);

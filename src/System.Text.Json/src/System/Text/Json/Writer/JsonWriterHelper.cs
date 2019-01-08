@@ -64,6 +64,20 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ValidateDouble(double value)
+        {
+            if (double.IsPositiveInfinity(value) || double.IsNegativeInfinity(value) || double.IsNaN(value))
+                ThrowHelper.ThrowArgumentException_ValueNotSupported();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ValidateSingle(float value)
+        {
+            if (float.IsPositiveInfinity(value) || float.IsNegativeInfinity(value) || float.IsNaN(value))
+                ThrowHelper.ThrowArgumentException_ValueNotSupported();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateProperty(ref ReadOnlySpan<char> propertyName)
         {
             if (propertyName.Length > JsonConstants.MaxCharacterTokenSize)

@@ -25,6 +25,11 @@ namespace System.Text.Json
             throw GetArgumentException(message);
         }
 
+        public static InvalidOperationException GetInvalidOperationException_CallFlushFirst(int _buffered)
+        {
+            return new InvalidOperationException(SR.Format(SR.CallFlushToAvoidDataLoss, _buffered));
+        }
+
         public static void ThrowArgumentException_PropertyNameTooLarge(int tokenLength)
         {
             throw GetArgumentException(SR.Format(SR.PropertyNameTooLarge, tokenLength));
@@ -33,6 +38,11 @@ namespace System.Text.Json
         public static void ThrowArgumentException_ValueTooLarge(int tokenLength)
         {
             throw GetArgumentException(SR.Format(SR.ValueTooLarge, tokenLength));
+        }
+
+        public static void ThrowArgumentException_ValueNotSupported()
+        {
+            throw GetArgumentException(SR.SpecialNumberValuesNotSupported);
         }
 
         public static void ThrowArgumentException(ExceptionResource resource, int minimumSize = 0)
@@ -346,6 +356,9 @@ namespace System.Text.Json
                     break;
                 case ExceptionResource.CannotWriteValueWithinObject:
                     message = SR.Format(SR.CannotWriteValueWithinObject, tokenType);
+                    break;
+                case ExceptionResource.CannotWritePropertyWithinArray:
+                    message = SR.Format(SR.CannotWritePropertyWithinArray, tokenType);
                     break;
                 case ExceptionResource.CannotWriteValueAfterPrimitive:
                     message = SR.Format(SR.CannotWriteValueAfterPrimitive, tokenType);

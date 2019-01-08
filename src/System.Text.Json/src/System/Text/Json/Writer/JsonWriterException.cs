@@ -11,7 +11,6 @@ namespace System.Text.Json
     /// tries to write invalid JSON text. This exception is also thrown whenever
     /// you write past the pre-set maximum depth or if the you try to write invalid UTF-8 text.
     /// </summary>
-    //TODO: Add a test? Do we need to override GetObjectData in this case?
     [Serializable]
     public sealed class JsonWriterException : Exception
     {
