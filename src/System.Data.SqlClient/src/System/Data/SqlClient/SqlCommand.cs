@@ -2209,8 +2209,7 @@ namespace System.Data.SqlClient
                         Debug.Assert(_activeConnection.IsKatmaiOrNewer, "Invalid datatype token received from pre-katmai server");
 
                         //read the type name
-                        p.TypeName = r[colNames[(int)ProcParamsColIndex.TypeCatalogName]] + "." +
-                            r[colNames[(int)ProcParamsColIndex.TypeSchemaName]] + "." +
+                        p.TypeName = r[colNames[(int)ProcParamsColIndex.TypeSchemaName]] + "." +
                             r[colNames[(int)ProcParamsColIndex.TypeName]];
                     }
 
