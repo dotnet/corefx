@@ -317,7 +317,7 @@ namespace System.Diagnostics
                     return null;
                 }
 
-                if (subscriptions.Observer == subscription.Observer &&
+                if (subscriptions.Observer == subscription.Observer && 
                     subscriptions.IsEnabled1Arg == subscription.IsEnabled1Arg &&
                     subscriptions.IsEnabled3Arg == subscription.IsEnabled3Arg)
                     return subscriptions.Next;

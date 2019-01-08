@@ -80,17 +80,7 @@ namespace System.Net.Http
             Activity currentActivity = Activity.Current;
             if (currentActivity != null && !request.Headers.Contains(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName))
             {
-                // Output the ID.  Based on what kind of ID we put it in different headers (either traceparent or Request-Id)
-                if (currentActivity.IdFormat == ActivityIdFormat.W3C)
-                    request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName, currentActivity.Id);
-                else
-                    request.Headers.Add(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName, currentActivity.Id);
-
-                // Propagate TraceState if present.  
-                string traceState = currentActivity.TraceState;
-                if (traceState != null)
-                    request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceStateHeaderName, traceState);
-
+                request.Headers.Add(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName, currentActivity.Id);
                 //we expect baggage to be empty or contain a few items
                 using (IEnumerator<KeyValuePair<string, string>> e = currentActivity.Baggage.GetEnumerator())
                 {
