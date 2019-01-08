@@ -43,8 +43,7 @@
     </ItemGroup>
   </Target>
 
-  <!-- We don't have any native components when building for netfx. -->
-  <Target Name="BuildNative" Condition="'$(TargetGroup)' != 'netfx'">
+  <Target Name="BuildNative">
     <ItemGroup>
       <_BuildNativeProjects Include="src\Native\build-native.proj" />
     </ItemGroup>
