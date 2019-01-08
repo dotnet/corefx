@@ -87,26 +87,10 @@ namespace System.Text.Json
             _buffer = _buffer.Slice(count);
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void GrowSpan(int count)
-        {
-            Flush();
-
-            _buffer = _output.GetSpan(count);
-
-            if (_buffer.Length < count && count < MinimumSizeThreshold)
-            {
-                throw new ArgumentException("The IBufferWriter could not provide a span that is large enough to continue.");
-            }
-
-            Debug.Assert(_buffer.Length >= Math.Min(count, MinimumSizeThreshold));
-        }
-
         public void Flush(bool isFinalBlock = true)
         {
-            //TODO: Fix exception message and check other potential conditions for invalid end.
             if (isFinalBlock && !_writerOptions.SkipValidation && CurrentDepth != 0)
-                ThrowHelper.ThrowJsonWriterException("Invalid end of JSON.");
+                ThrowHelper.ThrowJsonWriterException(ExceptionResource.ZeroDepthAtEnd, _currentDepth);
 
             Flush();
         }
@@ -133,9 +117,8 @@ namespace System.Text.Json
 
         private void WriteStart(byte token)
         {
-            // TODO: Use throw helper with proper error messages
             if (CurrentDepth >= JsonConstants.MaxWriterDepth)
-                ThrowHelper.ThrowJsonWriterException("Depth too large.");
+                ThrowHelper.ThrowJsonWriterException(ExceptionResource.DepthTooLarge, _currentDepth);
 
             if (_writerOptions.SlowPath)
                 WriteStartSlow(token);
@@ -177,7 +160,7 @@ namespace System.Text.Json
             {
                 if (!_writerOptions.SkipValidation)
                 {
-                    ValidateStart(token);
+                    ValidateStart();
                     UpdateBitStackOnStart(token);
                 }
                 WriteStartIndented(token);
@@ -185,25 +168,25 @@ namespace System.Text.Json
             else
             {
                 Debug.Assert(!_writerOptions.SkipValidation);
-                ValidateStart(token);
+                ValidateStart();
                 UpdateBitStackOnStart(token);
                 WriteStartMinimized(token);
             }
         }
 
-        private void ValidateStart(byte token)
+        private void ValidateStart()
         {
             if (_inObject)
             {
                 Debug.Assert(_tokenType != JsonTokenType.None && _tokenType != JsonTokenType.StartArray);
-                ThrowHelper.ThrowJsonWriterException(token, _tokenType);
+                ThrowHelper.ThrowJsonWriterException(ExceptionResource.CannotStartObjectArrayWithoutProperty, tokenType: _tokenType);
             }
             else
             {
                 Debug.Assert(_tokenType != JsonTokenType.StartObject);
                 if (_tokenType != JsonTokenType.None && !_isNotPrimitive)
                 {
-                    ThrowHelper.ThrowJsonWriterException(token, _tokenType);
+                    ThrowHelper.ThrowJsonWriterException(ExceptionResource.CannotStartObjectArrayAfterPrimitive, tokenType: _tokenType);
                 }
             }
         }
@@ -537,14 +520,14 @@ namespace System.Text.Json
         private void ValidateEnd(byte token)
         {
             if (_bitStack.CurrentDepth <= 0)
-                ThrowHelper.ThrowJsonWriterException(token);    //TODO: Add resource message
+                ThrowHelper.ThrowJsonWriterException(ExceptionResource.MismatchedObjectArray, token);
 
             if (token == JsonConstants.CloseBracket)
             {
                 if (_inObject)
                 {
                     Debug.Assert(_tokenType != JsonTokenType.None);
-                    ThrowHelper.ThrowJsonWriterException(token);    //TODO: Add resource message
+                    ThrowHelper.ThrowJsonWriterException(ExceptionResource.MismatchedObjectArray, token);
                 }
             }
             else
@@ -553,7 +536,7 @@ namespace System.Text.Json
 
                 if (!_inObject)
                 {
-                    ThrowHelper.ThrowJsonWriterException(token);    //TODO: Add resource message
+                    ThrowHelper.ThrowJsonWriterException(ExceptionResource.MismatchedObjectArray, token);
                 }
             }
 
@@ -638,29 +621,29 @@ namespace System.Text.Json
 
         private void GrowAndEnsure()
         {
+            Flush();
             int previousSpanLength = _buffer.Length;
-            GrowSpan(DefaultGrowthSize);
+            _buffer = _output.GetSpan(DefaultGrowthSize);
             if (_buffer.Length <= previousSpanLength)
             {
-                GrowSpan(DefaultGrowthSize);
+                _buffer = _output.GetSpan(DefaultGrowthSize);
                 if (_buffer.Length <= previousSpanLength)
                 {
-                    //TODO: Use Throwhelper and fix message.
-                    throw new OutOfMemoryException("Failed to get a larger buffer when growing.");
+                    ThrowHelper.ThrowArgumentException(ExceptionResource.FailedToGetLargerSpan);
                 }
             }
         }
 
         private void GrowAndEnsure(int minimumSize)
         {
-            GrowSpan(DefaultGrowthSize);
-            if (_buffer.Length <= minimumSize)
+            Flush();
+            _buffer = _output.GetSpan(DefaultGrowthSize);
+            if (_buffer.Length < minimumSize)
             {
-                GrowSpan(DefaultGrowthSize);
-                if (_buffer.Length <= minimumSize)
+                _buffer = _output.GetSpan(DefaultGrowthSize);
+                if (_buffer.Length < minimumSize)
                 {
-                    //TODO: Use Throwhelper and fix message.
-                    throw new OutOfMemoryException("Failed to get buffer larger than minimumSize when growing.");
+                    ThrowHelper.ThrowArgumentException(ExceptionResource.FailedToGetMinimumSizeSpan, minimumSize);
                 }
             }
         }

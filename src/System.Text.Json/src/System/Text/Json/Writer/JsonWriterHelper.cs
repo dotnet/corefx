@@ -52,39 +52,34 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateProperty(ref ReadOnlySpan<byte> propertyName)
         {
-            // TODO: Use throw helper with proper error messages
             if (propertyName.Length > JsonConstants.MaxTokenSize)
-                ThrowHelper.ThrowArgumentException("Argument too large.");
+                ThrowHelper.ThrowArgumentException_PropertyNameTooLarge(propertyName.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateValue(ref ReadOnlySpan<byte> value)
         {
-            // TODO: Use throw helper with proper error messages
             if (value.Length > JsonConstants.MaxTokenSize)
-                ThrowHelper.ThrowArgumentException("Argument too large.");
+                ThrowHelper.ThrowArgumentException_ValueTooLarge(value.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateProperty(ref ReadOnlySpan<char> propertyName)
         {
-            // TODO: Use throw helper with proper error messages
             if (propertyName.Length > JsonConstants.MaxCharacterTokenSize)
-                ThrowHelper.ThrowArgumentException("Argument too large.");
+                ThrowHelper.ThrowArgumentException_PropertyNameTooLarge(propertyName.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateValue(ref ReadOnlySpan<char> value)
         {
-            // TODO: Use throw helper with proper error messages
             if (value.Length > JsonConstants.MaxCharacterTokenSize)
-                ThrowHelper.ThrowArgumentException("Argument too large.");
+                ThrowHelper.ThrowArgumentException_ValueTooLarge(value.Length);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidatePropertyAndValue(ref ReadOnlySpan<char> propertyName, ref ReadOnlySpan<byte> value)
         {
-            // TODO: Use throw helper with proper error messages
             if (propertyName.Length > JsonConstants.MaxCharacterTokenSize || value.Length > JsonConstants.MaxTokenSize)
                 ThrowHelper.ThrowArgumentException(propertyName, value);
         }
@@ -92,7 +87,6 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidatePropertyAndValue(ref ReadOnlySpan<byte> propertyName, ref ReadOnlySpan<char> value)
         {
-            // TODO: Use throw helper with proper error messages
             if (propertyName.Length > JsonConstants.MaxTokenSize || value.Length > JsonConstants.MaxCharacterTokenSize)
                 ThrowHelper.ThrowArgumentException(propertyName, value);
         }
@@ -100,7 +94,6 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidatePropertyAndValue(ref ReadOnlySpan<byte> propertyName, ref ReadOnlySpan<byte> value)
         {
-            // TODO: Use throw helper with proper error messages
             if (propertyName.Length > JsonConstants.MaxTokenSize || value.Length > JsonConstants.MaxTokenSize)
                 ThrowHelper.ThrowArgumentException(propertyName, value);
         }
@@ -108,7 +101,6 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidatePropertyAndValue(ref ReadOnlySpan<char> propertyName, ref ReadOnlySpan<char> value)
         {
-            // TODO: Use throw helper with proper error messages
             if (propertyName.Length > JsonConstants.MaxCharacterTokenSize || value.Length > JsonConstants.MaxCharacterTokenSize)
                 ThrowHelper.ThrowArgumentException(propertyName, value);
         }

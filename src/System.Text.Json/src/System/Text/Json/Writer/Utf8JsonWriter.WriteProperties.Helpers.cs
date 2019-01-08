@@ -14,7 +14,6 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ValidatePropertyNameAndDepth(ref ReadOnlySpan<char> propertyName)
         {
-            // TODO: Use throw helper with proper error messages
             if (propertyName.Length > JsonConstants.MaxCharacterTokenSize || CurrentDepth >= JsonConstants.MaxWriterDepth)
                 ThrowHelper.ThrowJsonWriterOrArgumentException(propertyName, _currentDepth);
         }
@@ -22,7 +21,6 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ValidatePropertyNameAndDepth(ref ReadOnlySpan<byte> propertyName)
         {
-            // TODO: Use throw helper with proper error messages
             if (propertyName.Length > JsonConstants.MaxTokenSize || CurrentDepth >= JsonConstants.MaxWriterDepth)
                 ThrowHelper.ThrowJsonWriterOrArgumentException(propertyName, _currentDepth);
         }
@@ -32,7 +30,7 @@ namespace System.Text.Json
             if (!_inObject)
             {
                 Debug.Assert(_tokenType != JsonTokenType.StartObject);
-                ThrowHelper.ThrowJsonWriterException("Cannot add a property within an array or as the first JSON token.");    //TODO: Add resouce message
+                ThrowHelper.ThrowJsonWriterException(ExceptionResource.CannotWritePropertyWithinArray, tokenType: _tokenType);
             }
         }
 

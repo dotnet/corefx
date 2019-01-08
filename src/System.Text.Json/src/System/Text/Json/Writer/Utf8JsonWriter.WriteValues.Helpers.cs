@@ -13,13 +13,13 @@ namespace System.Text.Json
             if (_inObject)
             {
                 Debug.Assert(_tokenType != JsonTokenType.None && _tokenType != JsonTokenType.StartArray);
-                ThrowHelper.ThrowJsonWriterException(_tokenType);    //TODO: Add resource message
+                ThrowHelper.ThrowJsonWriterException(ExceptionResource.CannotWriteValueWithinObject, tokenType: _tokenType);
             }
             else
             {
                 if (!_isNotPrimitive && _tokenType != JsonTokenType.None)
                 {
-                    ThrowHelper.ThrowJsonWriterException(_tokenType);    //TODO: Add resource message
+                    ThrowHelper.ThrowJsonWriterException(ExceptionResource.CannotWriteValueAfterPrimitive, tokenType: _tokenType);
                 }
             }
         }

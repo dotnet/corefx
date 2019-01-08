@@ -104,7 +104,7 @@ namespace System.Text.Json
         {
             SequenceValidity status = PeekFirstSequence(value, out int numBytesConsumed, out UnicodeScalar unicodeScalar);
             if (status != SequenceValidity.WellFormed)
-                ThrowHelper.ThrowJsonWriterException("Invalid UTF-8 string.");
+                ThrowHelper.ThrowJsonWriterException_InvalidUTF8(value);
 
             destination[written++] = (byte)'\\';
             int scalar = unicodeScalar.Value;
@@ -406,13 +406,13 @@ namespace System.Text.Json
                 consumed++;
                 if (value.Length <= consumed || firstChar >= JsonConstants.LowSurrogateStartValue)
                 {
-                    ThrowHelper.ThrowJsonWriterException("Invalid UTF-16 string ending in an invalid surrogate pair.");
+                    ThrowHelper.ThrowJsonWriterException_InvalidUTF16(firstChar);
                 }
 
                 nextChar = value[consumed];
                 if (!InRange(nextChar, JsonConstants.LowSurrogateStartValue, JsonConstants.LowSurrogateEndValue))
                 {
-                    ThrowHelper.ThrowJsonWriterException("Invalid UTF-16 string ending in an invalid surrogate pair.");
+                    ThrowHelper.ThrowJsonWriterException_InvalidUTF16(nextChar);
                 }
             }
 

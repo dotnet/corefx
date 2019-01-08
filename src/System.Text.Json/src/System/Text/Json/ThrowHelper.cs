@@ -25,117 +25,129 @@ namespace System.Text.Json
             throw GetArgumentException(message);
         }
 
+        public static void ThrowArgumentException_PropertyNameTooLarge(int tokenLength)
+        {
+            throw GetArgumentException(SR.Format(SR.PropertyNameTooLarge, tokenLength));
+        }
+
+        public static void ThrowArgumentException_ValueTooLarge(int tokenLength)
+        {
+            throw GetArgumentException(SR.Format(SR.ValueTooLarge, tokenLength));
+        }
+
+        public static void ThrowArgumentException(ExceptionResource resource, int minimumSize = 0)
+        {
+            if (resource == ExceptionResource.FailedToGetLargerSpan)
+            {
+                throw GetArgumentException(SR.FailedToGetLargerSpan);
+            }
+            else
+            {
+                Debug.Assert(resource == ExceptionResource.FailedToGetMinimumSizeSpan);
+                throw GetArgumentException(SR.Format(SR.FailedToGetMinimumSizeSpan, minimumSize));
+            }
+        }
+
         public static void ThrowArgumentException(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
         {
-            GetArgumentException(propertyName, value);
+            if (propertyName.Length > JsonConstants.MaxTokenSize)
+            {
+                ThrowArgumentException(SR.Format(SR.PropertyNameTooLarge, propertyName.Length));
+            }
+            else
+            {
+                Debug.Assert(value.Length > JsonConstants.MaxTokenSize);
+                ThrowArgumentException(SR.Format(SR.ValueTooLarge, value.Length));
+            }
         }
 
         public static void ThrowArgumentException(ReadOnlySpan<byte> propertyName, ReadOnlySpan<char> value)
         {
-            GetArgumentException(propertyName, value);
+            if (propertyName.Length > JsonConstants.MaxTokenSize)
+            {
+                ThrowArgumentException(SR.Format(SR.PropertyNameTooLarge, propertyName.Length));
+            }
+            else
+            {
+                Debug.Assert(value.Length > JsonConstants.MaxCharacterTokenSize);
+                ThrowArgumentException(SR.Format(SR.ValueTooLarge, value.Length));
+            }
         }
 
         public static void ThrowArgumentException(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)
         {
-            GetArgumentException(propertyName, value);
+            if (propertyName.Length > JsonConstants.MaxCharacterTokenSize)
+            {
+                ThrowArgumentException(SR.Format(SR.PropertyNameTooLarge, propertyName.Length));
+            }
+            else
+            {
+                Debug.Assert(value.Length > JsonConstants.MaxTokenSize);
+                ThrowArgumentException(SR.Format(SR.ValueTooLarge, value.Length));
+            }
         }
 
         public static void ThrowArgumentException(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value)
         {
-            GetArgumentException(propertyName, value);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void GetArgumentException(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
-        {
-            if (propertyName.Length > JsonConstants.MaxTokenSize)
+            if (propertyName.Length > JsonConstants.MaxCharacterTokenSize)
             {
-                ThrowArgumentException("propertyName too large");
-            }
-            else
-            {
-                Debug.Assert(value.Length > JsonConstants.MaxTokenSize);
-                ThrowArgumentException("value too large");
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void GetArgumentException(ReadOnlySpan<byte> propertyName, ReadOnlySpan<char> value)
-        {
-            if (propertyName.Length > JsonConstants.MaxTokenSize)
-            {
-                ThrowArgumentException("propertyName too large");
+                ThrowArgumentException(SR.Format(SR.PropertyNameTooLarge, propertyName.Length));
             }
             else
             {
                 Debug.Assert(value.Length > JsonConstants.MaxCharacterTokenSize);
-                ThrowArgumentException("value too large");
+                ThrowArgumentException(SR.Format(SR.ValueTooLarge, value.Length));
             }
+        }
+
+        public static void ThrowJsonWriterOrArgumentException(ReadOnlySpan<byte> propertyName, int currentDepth)
+        {
+            GetJsonWriterOrArgumentException(propertyName, currentDepth);
+        }
+
+        public static void ThrowJsonWriterException(string message)
+        {
+            throw GetJsonWriterException(message);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void GetArgumentException(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)
+        private static JsonWriterException GetJsonWriterException(string message)
         {
-            if (propertyName.Length > JsonConstants.MaxCharacterTokenSize)
-            {
-                ThrowArgumentException("propertyName too large");
-            }
-            else
-            {
-                Debug.Assert(value.Length > JsonConstants.MaxTokenSize);
-                ThrowArgumentException("value too large");
-            }
+            return new JsonWriterException(message);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void GetArgumentException(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value)
+        private static void GetJsonWriterOrArgumentException(ReadOnlySpan<byte> propertyName, int currentDepth)
         {
-            if (propertyName.Length > JsonConstants.MaxCharacterTokenSize)
+            currentDepth &= JsonConstants.RemoveFlagsBitMask;
+            if (currentDepth >= JsonConstants.MaxWriterDepth)
             {
-                ThrowArgumentException("propertyName too large");
-            }
-            else
-            {
-                Debug.Assert(value.Length > JsonConstants.MaxCharacterTokenSize);
-                ThrowArgumentException("value too large");
-            }
-        }
-
-        public static void ThrowJsonWriterOrArgumentException(ReadOnlySpan<byte> propertyName, int indent)
-        {
-            GetJsonWriterOrArgumentException(propertyName, indent);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void GetJsonWriterOrArgumentException(ReadOnlySpan<byte> propertyName, int indent)
-        {
-            if ((indent & JsonConstants.RemoveFlagsBitMask) >= JsonConstants.MaxWriterDepth)
-            {
-                ThrowJsonWriterException("Depth too large.");
+                ThrowJsonWriterException(SR.Format(SR.DepthTooLarge, currentDepth));
             }
             else
             {
                 Debug.Assert(propertyName.Length > JsonConstants.MaxCharacterTokenSize);
-                ThrowArgumentException("Argument too large.");
+                ThrowArgumentException(SR.Format(SR.PropertyNameTooLarge, propertyName.Length));
             }
         }
 
-        public static void ThrowJsonWriterOrArgumentException(ReadOnlySpan<char> propertyName, int indent)
+        public static void ThrowJsonWriterOrArgumentException(ReadOnlySpan<char> propertyName, int currentDepth)
         {
-            GetJsonWriterOrArgumentException(propertyName, indent);
+            GetJsonWriterOrArgumentException(propertyName, currentDepth);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void GetJsonWriterOrArgumentException(ReadOnlySpan<char> propertyName, int indent)
+        private static void GetJsonWriterOrArgumentException(ReadOnlySpan<char> propertyName, int currentDepth)
         {
-            if ((indent & JsonConstants.RemoveFlagsBitMask) >= JsonConstants.MaxWriterDepth)
+            currentDepth &= JsonConstants.RemoveFlagsBitMask;
+            if (currentDepth >= JsonConstants.MaxWriterDepth)
             {
-                ThrowJsonWriterException("Depth too large.");
+                ThrowJsonWriterException(SR.Format(SR.DepthTooLarge, currentDepth));
             }
             else
             {
                 Debug.Assert(propertyName.Length > JsonConstants.MaxCharacterTokenSize);
-                ThrowArgumentException("Argument too large.");
+                ThrowArgumentException(SR.Format(SR.PropertyNameTooLarge, propertyName.Length));
             }
         }
 
@@ -158,52 +170,6 @@ namespace System.Text.Json
         private static InvalidOperationException GetInvalidOperationException(string message, JsonTokenType tokenType)
         {
             return new InvalidOperationException(SR.Format(SR.InvalidCast, tokenType, message));
-        }
-
-        public static void ThrowJsonWriterException(string message)
-        {
-            throw GetJsonWriterException(message);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static JsonWriterException GetJsonWriterException(string message)
-        {
-            return new JsonWriterException(message);
-        }
-
-        public static void ThrowJsonWriterException(byte token)
-        {
-            throw GetJsonWriterException(token);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static JsonWriterException GetJsonWriterException(byte token)
-        {
-            return new JsonWriterException(token.ToString());
-        }
-
-        public static void ThrowJsonWriterException(byte token, JsonTokenType tokenType)
-        {
-            throw GetJsonWriterException(token, tokenType);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static JsonWriterException GetJsonWriterException(byte token, JsonTokenType tokenType)
-        {
-            // TODO: Fix exception message
-            return new JsonWriterException(token.ToString());
-        }
-
-        public static void ThrowJsonWriterException(JsonTokenType tokenType)
-        {
-            throw GetJsonWriterException(tokenType);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static JsonWriterException GetJsonWriterException(JsonTokenType tokenType)
-        {
-            // TODO: Fix exception message
-            return new JsonWriterException("");
         }
 
         public static void ThrowJsonReaderException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte = default, ReadOnlySpan<byte> bytes = default)
@@ -316,6 +282,81 @@ namespace System.Text.Json
 
             return message;
         }
+
+        public static void ThrowJsonWriterException(ExceptionResource resource, int currentDepth = default, byte token = default, JsonTokenType tokenType = default)
+        {
+            throw GetJsonReaderException(resource, currentDepth, token, tokenType);
+        }
+
+        public static void ThrowJsonWriterException_InvalidUTF8(ReadOnlySpan<byte> value)
+        {
+            var builder = new StringBuilder();
+
+            int printFirst10 = Math.Min(value.Length, 10);
+
+            for (int i = 0; i < printFirst10; i++)
+            {
+                byte nextByte = value[i];
+                if (IsPrintable(nextByte))
+                {
+                    builder.Append((char)nextByte);
+                }
+                else
+                {
+                    builder.Append($"0x{nextByte:X2}");
+                }
+            }
+
+            throw new JsonWriterException(SR.Format(SR.CannotWriteInvalidUTF8, builder.ToString()));
+        }
+
+        public static void ThrowJsonWriterException_InvalidUTF16(int charAsInt)
+        {
+            throw new JsonWriterException(SR.Format(SR.CannotWriteInvalidUTF16, $"0x{charAsInt:X2}"));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static JsonWriterException GetJsonReaderException(ExceptionResource resource, int currentDepth, byte token, JsonTokenType tokenType)
+        {
+            string message = GetResourceString(resource, currentDepth, token, tokenType);
+            return new JsonWriterException(message);
+        }
+
+        // This function will convert an ExceptionResource enum value to the resource string.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static string GetResourceString(ExceptionResource resource, int currentDepth, byte token, JsonTokenType tokenType)
+        {
+            string message = "";
+            switch (resource)
+            {
+                case ExceptionResource.MismatchedObjectArray:
+                    message = SR.Format(SR.MismatchedObjectArray, token);
+                    break;
+                case ExceptionResource.DepthTooLarge:
+                    message = SR.Format(SR.DepthTooLarge, currentDepth & JsonConstants.RemoveFlagsBitMask);
+                    break;
+                case ExceptionResource.ZeroDepthAtEnd:
+                    message = SR.Format(SR.ZeroDepthAtEnd, currentDepth & JsonConstants.RemoveFlagsBitMask);
+                    break;
+                case ExceptionResource.CannotStartObjectArrayWithoutProperty:
+                    message = SR.Format(SR.CannotStartObjectArrayWithoutProperty, tokenType);
+                    break;
+                case ExceptionResource.CannotStartObjectArrayAfterPrimitive:
+                    message = SR.Format(SR.CannotStartObjectArrayAfterPrimitive, tokenType);
+                    break;
+                case ExceptionResource.CannotWriteValueWithinObject:
+                    message = SR.Format(SR.CannotWriteValueWithinObject, tokenType);
+                    break;
+                case ExceptionResource.CannotWriteValueAfterPrimitive:
+                    message = SR.Format(SR.CannotWriteValueAfterPrimitive, tokenType);
+                    break;
+                default:
+                    Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
+                    break;
+            }
+
+            return message;
+        }
     }
 
     internal enum ExceptionResource
@@ -345,5 +386,13 @@ namespace System.Text.Json
         MismatchedObjectArray,
         ObjectDepthTooLarge,
         ZeroDepthAtEnd,
+        DepthTooLarge,
+        CannotStartObjectArrayWithoutProperty,
+        CannotStartObjectArrayAfterPrimitive,
+        CannotWriteValueWithinObject,
+        CannotWriteValueAfterPrimitive,
+        FailedToGetMinimumSizeSpan,
+        FailedToGetLargerSpan,
+        CannotWritePropertyWithinArray,
     }
 }
