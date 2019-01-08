@@ -435,7 +435,8 @@ namespace System.Data.SqlClient
                 // Cache physical stateObj and connection.
                 _pMarsPhysicalConObj = _physicalStateObj;
 
-                if (TdsParserStateObjectFactory.UseManagedSNI) _pMarsPhysicalConObj.IncrementPendingCallbacks();
+                if (TdsParserStateObjectFactory.UseManagedSNI)
+                    _pMarsPhysicalConObj.IncrementPendingCallbacks();
 
                 uint info = 0;
                 uint error = _pMarsPhysicalConObj.EnableMars(ref info);
@@ -613,27 +614,13 @@ namespace System.Data.SqlClient
                         break;
 
                     case (int)PreLoginOptions.TRACEID:
-#if netcoreapp
-                        Span<byte> connectionIdBytes = stackalloc byte[16];
-                        _connHandler._clientConnectionId.TryWriteBytes(connectionIdBytes);
-                        connectionIdBytes.CopyTo(payload.AsSpan(payloadLength, GUID_SIZE));
-#else
-                        byte[] connectionIdBytes = _connHandler._clientConnectionId.ToByteArray();
-                        Debug.Assert(GUID_SIZE == connectionIdBytes.Length);
-                        Buffer.BlockCopy(connectionIdBytes, 0, payload, payloadLength, GUID_SIZE);
-#endif
+                        GetGuidBytes(_connHandler._clientConnectionId, payload.AsSpan(payloadLength, GUID_SIZE));
                         payloadLength += GUID_SIZE;
                         offset += GUID_SIZE;
                         optionDataSize = GUID_SIZE;
 
                         ActivityCorrelator.ActivityId actId = ActivityCorrelator.Next();
-#if netcoreapp
-                        actId.Id.TryWriteBytes(connectionIdBytes);
-                        connectionIdBytes.CopyTo(payload.AsSpan(payloadLength, GUID_SIZE));
-#else
-                        connectionIdBytes = actId.Id.ToByteArray();
-                        Buffer.BlockCopy(connectionIdBytes, 0, payload, payloadLength, GUID_SIZE);
-#endif
+                        GetGuidBytes(actId.Id, payload.AsSpan(payloadLength, GUID_SIZE));
                         payloadLength += GUID_SIZE;
                         payload[payloadLength++] = (byte)(0x000000ff & actId.Sequence);
                         payload[payloadLength++] = (byte)((0x0000ff00 & actId.Sequence) >> 8);
@@ -677,7 +664,8 @@ namespace System.Data.SqlClient
             bool isYukonOrLater = false;
             Debug.Assert(_physicalStateObj._syncOverAsync, "Should not attempt pends in a synchronous call");
             bool result = _physicalStateObj.TryReadNetworkPacket();
-            if (!result) { throw SQL.SynchronousCallMayNotPend(); }
+            if (!result)
+            { throw SQL.SynchronousCallMayNotPend(); }
 
             if (_physicalStateObj._inBytesRead == 0)
             {
@@ -687,7 +675,8 @@ namespace System.Data.SqlClient
                 ThrowExceptionAndWarning(_physicalStateObj);
             }
 
-            if (!_physicalStateObj.TryProcessHeader()) { throw SQL.SynchronousCallMayNotPend(); }
+            if (!_physicalStateObj.TryProcessHeader())
+            { throw SQL.SynchronousCallMayNotPend(); }
 
             if (_physicalStateObj._inBytesPacket > TdsEnums.MAX_PACKET_SIZE || _physicalStateObj._inBytesPacket <= 0)
             {
@@ -697,7 +686,8 @@ namespace System.Data.SqlClient
 
             Debug.Assert(_physicalStateObj._syncOverAsync, "Should not attempt pends in a synchronous call");
             result = _physicalStateObj.TryReadByteArray(payload, payload.Length);
-            if (!result) { throw SQL.SynchronousCallMayNotPend(); }
+            if (!result)
+            { throw SQL.SynchronousCallMayNotPend(); }
 
             if (payload[0] == 0xaa)
             {
@@ -1431,14 +1421,9 @@ namespace System.Data.SqlClient
         //
         internal void WriteFloat(float v, TdsParserStateObject stateObj)
         {
-#if netcoreapp // BitConverter.TryGetBytes is only availble in netcoreapp 2.1> at this time, review support when changing
             Span<byte> bytes = stackalloc byte[sizeof(float)];
-            BitConverter.TryWriteBytes(bytes, v);
+            GetFloatBytes(v, bytes);
             stateObj.WriteByteSpan(bytes);
-#else
-            byte[] bytes = BitConverter.GetBytes(v);
-            stateObj.WriteByteArray(bytes, bytes.Length, 0); 
-#endif
         }
 
         //
@@ -1510,14 +1495,10 @@ namespace System.Data.SqlClient
         //
         internal void WriteDouble(double v, TdsParserStateObject stateObj)
         {
-#if netcoreapp // BitConverter.TryGetBytes is only availble in netcoreapp 2.1> at this time, review support when changing
             Span<byte> bytes = stackalloc byte[sizeof(double)];
-            BitConverter.TryWriteBytes(bytes, v);
+            GetDoubleBytes(v, bytes);
             stateObj.WriteByteSpan(bytes);
-#else
-            byte[] bytes = BitConverter.GetBytes(v);
-            stateObj.WriteByteArray(bytes, bytes.Length, 0);
-#endif
+
         }
 
         internal void PrepareResetConnection(bool preserveTransaction)
@@ -2835,7 +2816,8 @@ namespace System.Data.SqlClient
                         sdata._deltaDirty = true;
                         if (!recoverable)
                         {
-                            checked { sdata._unrecoverableStatesCount++; }
+                            checked
+                            { sdata._unrecoverableStatesCount++; }
                         }
                     }
                     else
@@ -2854,7 +2836,8 @@ namespace System.Data.SqlClient
                                 }
                                 else
                                 {
-                                    checked { sdata._unrecoverableStatesCount++; }
+                                    checked
+                                    { sdata._unrecoverableStatesCount++; }
                                 }
                                 sv._recoverable = recoverable;
                             }
@@ -2925,15 +2908,18 @@ namespace System.Data.SqlClient
             switch (majorMinor)
             {
                 case TdsEnums.YUKON_MAJOR << 24 | TdsEnums.YUKON_RTM_MINOR:     // Yukon
-                    if (increment != TdsEnums.YUKON_INCREMENT) { throw SQL.InvalidTDSVersion(); }
+                    if (increment != TdsEnums.YUKON_INCREMENT)
+                    { throw SQL.InvalidTDSVersion(); }
                     _isYukon = true;
                     break;
                 case TdsEnums.KATMAI_MAJOR << 24 | TdsEnums.KATMAI_MINOR:
-                    if (increment != TdsEnums.KATMAI_INCREMENT) { throw SQL.InvalidTDSVersion(); }
+                    if (increment != TdsEnums.KATMAI_INCREMENT)
+                    { throw SQL.InvalidTDSVersion(); }
                     _isKatmai = true;
                     break;
                 case TdsEnums.DENALI_MAJOR << 24 | TdsEnums.DENALI_MINOR:
-                    if (increment != TdsEnums.DENALI_INCREMENT) { throw SQL.InvalidTDSVersion(); }
+                    if (increment != TdsEnums.DENALI_INCREMENT)
+                    { throw SQL.InvalidTDSVersion(); }
                     _isDenali = true;
                     break;
                 default:
@@ -5141,20 +5127,10 @@ namespace System.Data.SqlClient
                 case TdsEnums.SQLUNIQUEID:
                     {
                         System.Guid guid = (System.Guid)value;
-
-#if netcoreapp
                         Span<byte> b = stackalloc byte[16];
-                        guid.TryWriteBytes(b);
-#else
-                        byte[] b = guid.ToByteArray();
-#endif
-
+                        TdsParser.GetGuidBytes(guid, b);
                         Debug.Assert((length == b.Length) && (length == 16), "Invalid length for guid type in com+ object");
-#if netcoreapp
                         stateObj.WriteByteSpan(b);
-#else
-                        stateObj.WriteByteArray(b, length, 0);
-#endif
                         break;
                     }
 
@@ -5308,20 +5284,14 @@ namespace System.Data.SqlClient
                 case TdsEnums.SQLUNIQUEID:
                     {
                         System.Guid guid = (System.Guid)value;
-#if netcoreapp
+
                         Span<byte> b = stackalloc byte[16];
-                        guid.TryWriteBytes(b);
-#else
-                        byte[] b = guid.ToByteArray();
-#endif
+                        GetGuidBytes(guid, b);
                         length = b.Length;
                         Debug.Assert(length == 16, "Invalid length for guid type in com+ object");
                         WriteSqlVariantHeader(18, metatype.TDSType, metatype.PropBytes, stateObj);
-#if netcoreapp
                         stateObj.WriteByteSpan(b);
-#else
-                        stateObj.WriteByteArray(b, length, 0);
-#endif
+
                         break;
                     }
 
@@ -6616,7 +6586,8 @@ namespace System.Data.SqlClient
             // read SSPI data received from server
             Debug.Assert(_physicalStateObj._syncOverAsync, "Should not attempt pends in a synchronous call");
             bool result = _physicalStateObj.TryReadByteArray(receivedBuff, receivedLength);
-            if (!result) { throw SQL.SynchronousCallMayNotPend(); }
+            if (!result)
+            { throw SQL.SynchronousCallMayNotPend(); }
 
             // allocate send buffer and initialize length
             byte[] rentedSendBuff = ArrayPool<byte>.Shared.Rent((int)s_maxSSPILength);
@@ -7553,16 +7524,16 @@ namespace System.Data.SqlClient
                                     }
 
                                     TDSExecuteRPCParameterSetupWriteCompletion(
-                                        rpcArray, 
-                                        timeout, 
-                                        inSchema, 
-                                        notificationRequest, 
-                                        stateObj, 
-                                        isCommandProc, 
-                                        sync, 
-                                        completion, 
-                                        ii, 
-                                        i+1, 
+                                        rpcArray,
+                                        timeout,
+                                        inSchema,
+                                        notificationRequest,
+                                        stateObj,
+                                        isCommandProc,
+                                        sync,
+                                        completion,
+                                        ii,
+                                        i + 1,
                                         writeParamTask
                                     );
 
@@ -8777,7 +8748,6 @@ namespace System.Data.SqlClient
                 case TdsEnums.SQLUNIQUEID:
                     {
                         Debug.Assert(actualLength == 16, "Invalid length for guid type in com+ object");
-#if netcoreapp
                         Span<byte> b = stackalloc byte[16];
                         SqlGuid sqlGuid = (SqlGuid)value;
                         if (sqlGuid.IsNull)
@@ -8786,12 +8756,9 @@ namespace System.Data.SqlClient
                         }
                         else
                         {
-                            sqlGuid.Value.TryWriteBytes(b);
+                            GetGuidBytes(sqlGuid.Value, b);
                         }
-#else
-                        byte[] b = ((SqlGuid)value).ToByteArray();
-                        stateObj.WriteByteArray(b, actualLength, 0);
-#endif
+                        stateObj.WriteByteSpan(b);
                         break;
                     }
 
@@ -9417,15 +9384,10 @@ namespace System.Data.SqlClient
                 case TdsEnums.SQLUNIQUEID:
                     {
                         Debug.Assert(actualLength == 16, "Invalid length for guid type in com+ object");
-                        System.Guid guid = (System.Guid)value;
-#if netcoreapp
-                        Span<byte> b = stackalloc byte[16];
-                        guid.TryWriteBytes(b);
+                        Span<byte> b = stackalloc byte[16];                        
+                        GetGuidBytes((System.Guid)value, b);
                         stateObj.WriteByteSpan(b);
-#else
-                        byte[] b = guid.ToByteArray();
-                        stateObj.WriteByteArray(b, actualLength, 0);
-#endif
+
                         break;
                     }
 
@@ -9714,7 +9676,8 @@ namespace System.Data.SqlClient
             int charsRead;
             Debug.Assert(stateObj._syncOverAsync, "Should not attempt pends in a synchronous call");
             bool result = TryReadPlpUnicodeChars(ref buff, offst, len, stateObj, out charsRead);
-            if (!result) { throw SQL.SynchronousCallMayNotPend(); }
+            if (!result)
+            { throw SQL.SynchronousCallMayNotPend(); }
             return charsRead;
         }
 
@@ -9908,7 +9871,8 @@ namespace System.Data.SqlClient
             ulong skipped;
             Debug.Assert(stateObj._syncOverAsync, "Should not attempt pends in a synchronous call");
             bool result = TrySkipPlpValue(cb, stateObj, out skipped);
-            if (!result) { throw SQL.SynchronousCallMayNotPend(); }
+            if (!result)
+            { throw SQL.SynchronousCallMayNotPend(); }
             return skipped;
         }
 
