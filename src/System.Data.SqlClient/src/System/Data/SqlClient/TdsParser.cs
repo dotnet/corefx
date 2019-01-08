@@ -614,13 +614,13 @@ namespace System.Data.SqlClient
                         break;
 
                     case (int)PreLoginOptions.TRACEID:
-                        GetGuidBytes(_connHandler._clientConnectionId, payload.AsSpan(payloadLength, GUID_SIZE));
+                        FillGuidBytes(_connHandler._clientConnectionId, payload.AsSpan(payloadLength, GUID_SIZE));
                         payloadLength += GUID_SIZE;
                         offset += GUID_SIZE;
                         optionDataSize = GUID_SIZE;
 
                         ActivityCorrelator.ActivityId actId = ActivityCorrelator.Next();
-                        GetGuidBytes(actId.Id, payload.AsSpan(payloadLength, GUID_SIZE));
+                        FillGuidBytes(actId.Id, payload.AsSpan(payloadLength, GUID_SIZE));
                         payloadLength += GUID_SIZE;
                         payload[payloadLength++] = (byte)(0x000000ff & actId.Sequence);
                         payload[payloadLength++] = (byte)((0x0000ff00 & actId.Sequence) >> 8);
@@ -1422,7 +1422,7 @@ namespace System.Data.SqlClient
         internal void WriteFloat(float v, TdsParserStateObject stateObj)
         {
             Span<byte> bytes = stackalloc byte[sizeof(float)];
-            GetFloatBytes(v, bytes);
+            FillFloatBytes(v, bytes);
             stateObj.WriteByteSpan(bytes);
         }
 
@@ -1496,7 +1496,7 @@ namespace System.Data.SqlClient
         internal void WriteDouble(double v, TdsParserStateObject stateObj)
         {
             Span<byte> bytes = stackalloc byte[sizeof(double)];
-            GetDoubleBytes(v, bytes);
+            FillDoubleBytes(v, bytes);
             stateObj.WriteByteSpan(bytes);
 
         }
@@ -5128,7 +5128,7 @@ namespace System.Data.SqlClient
                     {
                         System.Guid guid = (System.Guid)value;
                         Span<byte> b = stackalloc byte[16];
-                        TdsParser.GetGuidBytes(guid, b);
+                        TdsParser.FillGuidBytes(guid, b);
                         Debug.Assert((length == b.Length) && (length == 16), "Invalid length for guid type in com+ object");
                         stateObj.WriteByteSpan(b);
                         break;
@@ -5286,7 +5286,7 @@ namespace System.Data.SqlClient
                         System.Guid guid = (System.Guid)value;
 
                         Span<byte> b = stackalloc byte[16];
-                        GetGuidBytes(guid, b);
+                        FillGuidBytes(guid, b);
                         length = b.Length;
                         Debug.Assert(length == 16, "Invalid length for guid type in com+ object");
                         WriteSqlVariantHeader(18, metatype.TDSType, metatype.PropBytes, stateObj);
@@ -8756,7 +8756,7 @@ namespace System.Data.SqlClient
                         }
                         else
                         {
-                            GetGuidBytes(sqlGuid.Value, b);
+                            FillGuidBytes(sqlGuid.Value, b);
                         }
                         stateObj.WriteByteSpan(b);
                         break;
@@ -9385,7 +9385,7 @@ namespace System.Data.SqlClient
                     {
                         Debug.Assert(actualLength == 16, "Invalid length for guid type in com+ object");
                         Span<byte> b = stackalloc byte[16];                        
-                        GetGuidBytes((System.Guid)value, b);
+                        FillGuidBytes((System.Guid)value, b);
                         stateObj.WriteByteSpan(b);
 
                         break;
