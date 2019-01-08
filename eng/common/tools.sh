@@ -189,8 +189,9 @@ function InitializeBuildTool {
   
   InitializeDotNetCli $restore
 
-  # return value
+  # return values
   _InitializeBuildTool="$_InitializeDotNetCli/dotnet"  
+  _InitializeBuildToolCommand="msbuild"
 }
 
 function GetNuGetPackageCachePath {
@@ -283,7 +284,7 @@ function MSBuild {
     warnaserror_switch="/warnaserror"
   fi
 
-  "$_InitializeBuildTool" msbuild /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error "$@"
+  "$_InitializeBuildTool" "$_InitializeBuildToolCommand" /m /nologo /clp:Summary /v:$verbosity /nr:$node_reuse $warnaserror_switch /p:TreatWarningsAsErrors=$warn_as_error "$@"
   lastexitcode=$?
 
   if [[ $lastexitcode != 0 ]]; then

@@ -15,14 +15,14 @@
     <MicrosoftDotNetXUnitExtensionsPackage>Microsoft.DotNet.XUnitExtensions</MicrosoftDotNetXUnitExtensionsPackage>
   </PropertyGroup>
   <PropertyGroup>
-    <MicrosoftDotNetApiCompatPackageVersion>1.0.0-beta.19054.13</MicrosoftDotNetApiCompatPackageVersion>
-    <MicrosoftDotNetCodeAnalysisPackageVersion>1.0.0-beta.19054.13</MicrosoftDotNetCodeAnalysisPackageVersion>
-    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19054.13</MicrosoftDotNetGenAPIPackageVersion>
-    <MicrosoftDotNetGenFacadesPackageVersion>1.0.0-beta.19054.13</MicrosoftDotNetGenFacadesPackageVersion>
-    <MicrosoftDotNetXUnitExtensionsPackageVersion>2.4.0-beta.19054.13</MicrosoftDotNetXUnitExtensionsPackageVersion>
-    <MicrosoftDotNetBuildTasksPackagingPackageVersion>1.0.0-beta.19054.13</MicrosoftDotNetBuildTasksPackagingPackageVersion>
-    <MicrosoftDotNetCoreFxTestingPackageVersion>1.0.0-beta.19054.13</MicrosoftDotNetCoreFxTestingPackageVersion>
-    <MicrosoftDotNetBuildTasksConfigurationPackageVersion>1.0.0-beta.19054.13</MicrosoftDotNetBuildTasksConfigurationPackageVersion>
-    <MicrosoftDotNetBuildTasksFeedPackageVersion>2.2.0-beta.19054.13</MicrosoftDotNetBuildTasksFeedPackageVersion>
+    <MicrosoftDotNetApiCompatPackageVersion>1.0.0-beta.19057.9</MicrosoftDotNetApiCompatPackageVersion>
+    <MicrosoftDotNetCodeAnalysisPackageVersion>1.0.0-beta.19057.9</MicrosoftDotNetCodeAnalysisPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19057.9</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenFacadesPackageVersion>1.0.0-beta.19057.9</MicrosoftDotNetGenFacadesPackageVersion>
+    <MicrosoftDotNetXUnitExtensionsPackageVersion>2.4.0-beta.19057.9</MicrosoftDotNetXUnitExtensionsPackageVersion>
+    <MicrosoftDotNetBuildTasksPackagingPackageVersion>1.0.0-beta.19057.9</MicrosoftDotNetBuildTasksPackagingPackageVersion>
+    <MicrosoftDotNetCoreFxTestingPackageVersion>1.0.0-beta.19057.9</MicrosoftDotNetCoreFxTestingPackageVersion>
+    <MicrosoftDotNetBuildTasksConfigurationPackageVersion>1.0.0-beta.19057.9</MicrosoftDotNetBuildTasksConfigurationPackageVersion>
+    <MicrosoftDotNetBuildTasksFeedPackageVersion>2.2.0-beta.19057.9</MicrosoftDotNetBuildTasksFeedPackageVersion>
   </PropertyGroup>
 </Project>
