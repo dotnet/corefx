@@ -125,12 +125,9 @@ jobs:
           ${{ if and(ne(property.key, 'job'), ne(property.key, 'variables'), ne(property.key, 'enableMicrobuild')) }}:
             ${{ property.key }}: ${{ property.value }}
 
-        # enable helix telemetry
-        enableTelemetry: true
+        # enable helix telemetry -- we only send telemetry during official builds
+        enableTelemetry: ${{ parameters.isOfficialBuild }}
         helixRepo: corefx
-        ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-          # default value is build/product/ so only pass it when not in official build
-          helixType: build/ci/
 
         name: ${{ job.job }}
         workspace:
