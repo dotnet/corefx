@@ -672,8 +672,11 @@ namespace System.Diagnostics
         /// </summary>
         public TraceId(string hexString)
         {
+            _id1 = 0;
+            _id2 = 0;
             _asHexString = hexString;
         }
+#if false
         /// <summary>
         /// Creates a TraceId from a 16 byte span 'idBytes'.  
         /// </summary>
@@ -697,6 +700,7 @@ namespace System.Diagnostics
             fixed (ulong* idBytes = _id)
                 new Span<byte>(idBytes, sizeof(ulong) * 2).CopyTo(outputBuffer);
         }
+#endif 
         /// <summary>
         /// Returns the TraceId as a 32 character hexadecimal string.  
         /// </summary>
@@ -707,7 +711,7 @@ namespace System.Diagnostics
                 if (_asHexString == null)
                 {
                     // TODO figure out endian-ness
-                    _asHexString = _id[0].ToString("X8") + _id[1].ToString("X8");
+                    _asHexString = _id1.ToString("X8") + _id2.ToString("X8");
                 }
                 return _asHexString;
             }
@@ -718,10 +722,11 @@ namespace System.Diagnostics
         /// </summary>
         public override string ToString() => AsHexString;
 
-        #region private
-        fixed ulong _id[2];
+#region private
+        ulong _id1;
+        ulong _id2;
         string _asHexString;  // ultimately change to object, and allow several representations based on type.  
-        #endregion
+#endregion
     }
 
     /// <summary>
@@ -784,9 +789,9 @@ namespace System.Diagnostics
         /// </summary>
         public override string ToString() => AsHexString;
 
-        #region private
+#region private
         long _asLong;
         string _asHexString;   // ultimately change to object, and allow several representations based on type.   
-        #endregion
+#endregion
     }
 }
