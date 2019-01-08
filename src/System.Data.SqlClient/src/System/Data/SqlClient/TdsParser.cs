@@ -8780,8 +8780,14 @@ namespace System.Data.SqlClient
 #if netcoreapp
                         Span<byte> b = stackalloc byte[16];
                         SqlGuid sqlGuid = (SqlGuid)value;
-                        (sqlGuid.IsNull ? Guid.Empty : sqlGuid.Value).TryWriteBytes(b);
-                        stateObj.WriteByteSpan(b);
+                        if (sqlGuid.IsNull)
+                        {
+                            b.Clear(); // this is needed because initlocals may be supressed in framework assemblies meaning the memory is not automaticaly zeroed 
+                        }
+                        else
+                        {
+                            sqlGuid.Value.TryWriteBytes(b);
+                        }
 #else
                         byte[] b = ((SqlGuid)value).ToByteArray();
                         stateObj.WriteByteArray(b, actualLength, 0);
