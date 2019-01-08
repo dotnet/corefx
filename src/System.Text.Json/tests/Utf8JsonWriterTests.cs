@@ -825,6 +825,8 @@ namespace System.Text.Json.Tests
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
 
+            Assert.Equal(1, jsonUtf8.CurrentDepth);
+
             jsonUtf8.WriteString("message", "Hello, World!");
             jsonUtf8.WriteEndObject();
             jsonUtf8.Flush();
@@ -832,7 +834,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(jsonUtf8.BytesCommitted, jsonUtf8.BytesWritten);
 
             if (formatted)
-                Assert.Equal(26 + 2 + Environment.NewLine.Length + 1, jsonUtf8.BytesCommitted);
+                Assert.Equal(26 + 2 + (2 * Environment.NewLine.Length) + 1, jsonUtf8.BytesCommitted);
             else
                 Assert.Equal(26, jsonUtf8.BytesCommitted);
 
@@ -843,8 +845,8 @@ namespace System.Text.Json.Tests
 
             if (formatted)
             {
-                Assert.Equal(26 + 2 + Environment.NewLine.Length + 1, state.BytesCommitted);
-                Assert.Equal(26 + 2 + Environment.NewLine.Length + 1, state.BytesWritten);
+                Assert.Equal(26 + 2 + (2 * Environment.NewLine.Length) + 1, state.BytesCommitted);
+                Assert.Equal(26 + 2 + (2 * Environment.NewLine.Length) + 1, state.BytesWritten);
             }
             else
             {
@@ -924,13 +926,69 @@ namespace System.Text.Json.Tests
             Assert.Equal(jsonUtf8.BytesWritten, jsonUtf8.BytesCommitted);
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
-            Assert.Equal(0, jsonUtf8.CurrentDepth);
+            Assert.Equal(1, jsonUtf8.CurrentDepth);
             Assert.Equal(0, jsonUtf8.BytesWritten);
             Assert.Equal(0, jsonUtf8.BytesCommitted);
             jsonUtf8.WriteEndObject();
             jsonUtf8.Flush();
 
             output.Dispose();
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void WriteInvalidDepthPartial(bool formatted, bool skipValidation)
+        {
+            {
+                var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+
+                var output = new ArrayFormatter(10);
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+
+                jsonUtf8.WriteStartObject();
+                jsonUtf8.WriteEndObject();
+
+                Assert.Equal(0, jsonUtf8.CurrentDepth);
+                state = jsonUtf8.CurrentState;
+
+                jsonUtf8 = new Utf8JsonWriter(output, state);
+
+                try
+                {
+                    jsonUtf8.WriteStartObject();
+                    WriterDidNotThrow(skipValidation);
+                }
+                catch (JsonWriterException) { }
+
+                output.Dispose();
+            }
+
+            {
+                var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+
+                var output = new ArrayFormatter(10);
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+
+                jsonUtf8.WriteStartObject();
+                jsonUtf8.WriteEndObject();
+
+                Assert.Equal(0, jsonUtf8.CurrentDepth);
+                state = jsonUtf8.CurrentState;
+
+                jsonUtf8 = new Utf8JsonWriter(output, state);
+
+                try
+                {
+                    jsonUtf8.WriteStartObject("name");
+                    WriterDidNotThrow(skipValidation);
+                }
+                catch (JsonWriterException) { }
+
+                output.Dispose();
+            }
         }
 
         [Theory]

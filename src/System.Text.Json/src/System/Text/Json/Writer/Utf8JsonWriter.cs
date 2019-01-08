@@ -94,6 +94,7 @@ namespace System.Text.Json
                     _inObject = _inObject,
                     _isNotPrimitive = _isNotPrimitive,
                     _tokenType = _tokenType,
+                    _currentDepth = _currentDepth,
                     _writerOptions = _writerOptions,
                     _bitStack = _bitStack,
                 };
@@ -126,7 +127,7 @@ namespace System.Text.Json
             _writerOptions = state._writerOptions;
             _bitStack = state._bitStack;
 
-            _currentDepth = 0;
+            _currentDepth = state._currentDepth;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -258,9 +259,9 @@ namespace System.Text.Json
             else
             {
                 Debug.Assert(_tokenType != JsonTokenType.StartObject);
-                if (_tokenType != JsonTokenType.None && !_isNotPrimitive)
+                if (_tokenType != JsonTokenType.None && (!_isNotPrimitive || CurrentDepth == 0))
                 {
-                    ThrowHelper.ThrowJsonWriterException(ExceptionResource.CannotStartObjectArrayAfterPrimitive, tokenType: _tokenType);
+                    ThrowHelper.ThrowJsonWriterException(ExceptionResource.CannotStartObjectArrayAfterPrimitiveOrClose, tokenType: _tokenType);
                 }
             }
         }

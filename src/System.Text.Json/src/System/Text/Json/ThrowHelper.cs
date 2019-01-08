@@ -346,8 +346,8 @@ namespace System.Text.Json
                 case ExceptionResource.CannotStartObjectArrayWithoutProperty:
                     message = SR.Format(SR.CannotStartObjectArrayWithoutProperty, tokenType);
                     break;
-                case ExceptionResource.CannotStartObjectArrayAfterPrimitive:
-                    message = SR.Format(SR.CannotStartObjectArrayAfterPrimitive, tokenType);
+                case ExceptionResource.CannotStartObjectArrayAfterPrimitiveOrClose:
+                    message = SR.Format(SR.CannotStartObjectArrayAfterPrimitiveOrClose, tokenType);
                     break;
                 case ExceptionResource.CannotWriteValueWithinObject:
                     message = SR.Format(SR.CannotWriteValueWithinObject, tokenType);
@@ -396,7 +396,7 @@ namespace System.Text.Json
         ZeroDepthAtEnd,
         DepthTooLarge,
         CannotStartObjectArrayWithoutProperty,
-        CannotStartObjectArrayAfterPrimitive,
+        CannotStartObjectArrayAfterPrimitiveOrClose,
         CannotWriteValueWithinObject,
         CannotWriteValueAfterPrimitive,
         FailedToGetMinimumSizeSpan,

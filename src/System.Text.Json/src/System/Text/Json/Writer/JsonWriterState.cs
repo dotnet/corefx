@@ -19,6 +19,7 @@ namespace System.Text.Json
         internal bool _inObject;
         internal bool _isNotPrimitive;
         internal JsonTokenType _tokenType;
+        internal int _currentDepth;
         internal JsonWriterOptions _writerOptions;
         internal BitStack _bitStack;
 
@@ -53,6 +54,7 @@ namespace System.Text.Json
             _inObject = default;
             _isNotPrimitive = default;
             _tokenType = default;
+            _currentDepth = default;
             _writerOptions = options;
 
             // Only allocate if the user writes a JSON payload beyond the depth that the _allocationFreeContainer can handle.
