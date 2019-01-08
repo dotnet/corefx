@@ -759,5 +759,52 @@ namespace System.Net.NetworkInformation.Tests
             GC.WaitForPendingFinalizers();
             Assert.True(FinalizingPing.WasFinalized);
         }
-    }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task SendPingAsyncWithHostAndTtlAndFragmentPingOptions(bool fragment)
+        {
+            IPAddress localIpAddress = await TestSettings.GetLocalIPAddressAsync();
+
+            byte[] buffer = TestSettings.PayloadAsBytes;
+
+            PingOptions  options = new PingOptions();
+            options.Ttl = 32;
+            options.DontFragment = fragment;
+
+            await SendBatchPingAsync(
+                (ping) => ping.SendPingAsync(TestSettings.LocalHost, TestSettings.PingTimeout, buffer, options),
+                (pingReply) =>
+                {
+                    PingResultValidator(pingReply, localIpAddress);
+                });
+        }
+
+        [Fact]
+        [OuterLoop] // Depends on external host and assumption that network respects and does not change TTL
+        public async Task SendPingToExternalHostWithLowTtlTest()
+        {
+            string host = System.Net.Test.Common.Configuration.Ping.PingHost;
+            PingOptions options = new PingOptions();
+            bool reachable = false;
+
+            Ping ping = new Ping();
+            for (int i = 0; i < s_pingcount; i++)
+            {
+                PingReply pingReply = await ping.SendPingAsync(host, TestSettings.PingTimeout, TestSettings.PayloadAsBytesShort);
+                if (pingReply.Status == IPStatus.Success)
+                {
+                    reachable = true;
+                    break;
+                }
+            }
+            if (reachable) {
+                options.Ttl = 2;
+                // This should always fail unless host is one IP hop away.
+                PingReply pingReply = await ping.SendPingAsync(host, TestSettings.PingTimeout, TestSettings.PayloadAsBytesShort, options);
+                Assert.NotEqual(IPStatus.Success, pingReply.Status);
+            }
+        }
+     }
 }
