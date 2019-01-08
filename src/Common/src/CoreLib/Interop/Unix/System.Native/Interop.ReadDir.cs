@@ -34,7 +34,9 @@ internal static partial class Interop
 
             internal ReadOnlySpan<char> GetName(Span<char> buffer)
             {
-                Debug.Assert(buffer.Length >= Encoding.UTF8.GetMaxCharCount(NameBufferSize - 1), $"should have enough space for the max file name, actual {buffer.Length} expected {Encoding.UTF8.GetMaxCharCount(NameBufferSize - 1)}");
+                // -1 for null terminator (buffer will not include one),
+                //  and -1 because GetMaxCharCount pessimistically assumes the buffer may start with a partial surrogate
+                Debug.Assert(buffer.Length >= Encoding.UTF8.GetMaxCharCount(NameBufferSize - 1 - 1));
 
                 Debug.Assert(Name != null, "should not have a null name");
 
@@ -44,8 +46,6 @@ internal static partial class Interop
                     : new ReadOnlySpan<byte>(Name, NameLength);
 
                 Debug.Assert(nameBytes.Length > 0, "we shouldn't have gotten a garbage value from the OS");
-                if (nameBytes.Length == 0)
-                    return buffer.Slice(0, 0);
 
                 int charCount = Encoding.UTF8.GetChars(nameBytes, buffer);
                 ReadOnlySpan<char> value = buffer.Slice(0, charCount);
