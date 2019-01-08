@@ -2158,6 +2158,16 @@ namespace System.Text.Json
                 }
             } while (idx == -1);
 
+            // If we have encountered \r, check and advance index if next character is \n
+            if (localBuffer[idx] == JsonConstants.CarriageReturn)
+            {
+                if (idx < localBuffer.Length - 1)
+                {
+                    if (localBuffer[idx + 1] == JsonConstants.LineFeed)
+                        idx++;
+                }
+            }
+
             idx++;
             _bytePositionInLine = 0;
             _lineNumber++;
@@ -2316,7 +2326,34 @@ namespace System.Text.Json
                     localBuffer = _buffer;
                 }
             } while (idx == -1);
-            
+
+            // If we have encountered \r, check and advance index if next character is \n
+            if (localBuffer[idx] == JsonConstants.CarriageReturn)
+            {
+                if (idx < localBuffer.Length - 1)
+                {
+                    if (localBuffer[idx + 1] == JsonConstants.LineFeed)
+                        idx++;
+                }
+                else if (!IsLastSpan)
+                {
+                    prevTotalConsumed = _totalConsumed;
+                    if (!GetNextSpan())
+                    {
+                        _totalConsumed = prevTotalConsumed;
+                        return false;
+                    }
+                    
+                    HasValueSequence = true;
+                    _totalConsumed += localBuffer.Length + leftOver;
+                    leftOver = 0;
+                    localBuffer = _buffer;
+
+                    if (localBuffer[idx] != JsonConstants.LineFeed)
+                        goto Done;
+                }
+            }
+
             idx++;
             _bytePositionInLine = 0;
             _lineNumber++;
