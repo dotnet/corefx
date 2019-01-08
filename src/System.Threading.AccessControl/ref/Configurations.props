@@ -2,7 +2,6 @@
 <Project DefaultTargets="Build">
   <PropertyGroup>
     <BuildConfigurations>
-      _netfx;
       netstandard;
     </BuildConfigurations>
   </PropertyGroup>
