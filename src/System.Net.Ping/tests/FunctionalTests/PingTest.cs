@@ -800,7 +800,7 @@ namespace System.Net.NetworkInformation.Tests
                 }
             }
             if (reachable) {
-                options.Ttl = 2;
+                options.Ttl = 1;
                 // This should always fail unless host is one IP hop away.
                 PingReply pingReply = await ping.SendPingAsync(host, TestSettings.PingTimeout, TestSettings.PayloadAsBytesShort, options);
                 Assert.NotEqual(IPStatus.Success, pingReply.Status);
