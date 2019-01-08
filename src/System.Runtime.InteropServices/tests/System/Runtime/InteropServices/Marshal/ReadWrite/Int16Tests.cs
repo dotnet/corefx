@@ -120,7 +120,19 @@ namespace System.Runtime.InteropServices.Tests
             };
 
             Assert.Equal(100, Marshal.ReadInt16(structure, pointerOffset));
-            Assert.NotEqual(0, Marshal.ReadInt16(structure, stringOffset));
+
+            // The ReadInt16() for object types does an explicit marshal which requires
+            // an allocation on each read. It can occur that the allocation is aligned
+            // on a 16-byte boundary which would yield a value of 0. To mitigate the chance,
+            // marshal several times.
+            int readShorts = 0;
+            for (int i = 0; i < 3; ++i)
+            {
+                readShorts += Marshal.ReadInt16(structure, stringOffset);
+            }
+
+            Assert.NotEqual(0, readShorts);
+
             Assert.Equal(3, Marshal.ReadInt16(structure, arrayOffset + sizeof(short) * 2));
         }
 
