@@ -16,12 +16,11 @@ namespace System.Data.SqlClient.SNI
         private readonly Guid _connectionId = Guid.NewGuid();
         private readonly Dictionary<int, SNIMarsHandle> _sessions = new Dictionary<int, SNIMarsHandle>();
         private readonly byte[] _headerBytes = new byte[SNISMUXHeader.HEADER_LENGTH];
-
+        private readonly SNISMUXHeader _currentHeader = new SNISMUXHeader();
         private SNIHandle _lowerHandle;
         private ushort _nextSessionId = 0;
         private int _currentHeaderByteCount = 0;
         private int _dataBytesLeft = 0;
-        private SNISMUXHeader _currentHeader = new SNISMUXHeader();
         private SNIPacket _currentPacket;
 
         /// <summary>
