@@ -9,10 +9,34 @@ namespace System.Text.Json
 {
     public ref partial struct Utf8JsonWriter
     {
+        /// <summary>
+        /// Writes the property name and <see cref="ulong"/> value (as a JSON number) as part of a name/value pair of a JSON object.
+        /// </summary>
+        /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified property name is too large.
+        /// </exception>
+        /// <exception cref="JsonWriterException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         [CLSCompliant(false)]
         public void WriteNumber(string propertyName, ulong value, bool suppressEscaping = false)
             => WriteNumber(propertyName.AsSpan(), value, suppressEscaping);
 
+        /// <summary>
+        /// Writes the property name and <see cref="ulong"/> value (as a JSON number) as part of a name/value pair of a JSON object.
+        /// </summary>
+        /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified property name is too large.
+        /// </exception>
+        /// <exception cref="JsonWriterException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<char> propertyName, ulong value, bool suppressEscaping = false)
         {
@@ -27,6 +51,18 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.Number;
         }
 
+        /// <summary>
+        /// Writes the property name and <see cref="ulong"/> value (as a JSON number) as part of a name/value pair of a JSON object.
+        /// </summary>
+        /// <param name="propertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
+        /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified property name is too large.
+        /// </exception>
+        /// <exception cref="JsonWriterException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<byte> propertyName, ulong value, bool suppressEscaping = false)
         {
@@ -41,14 +77,50 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.Number;
         }
 
+        /// <summary>
+        /// Writes the property name and <see cref="uint"/> value (as a JSON number) as part of a name/value pair of a JSON object.
+        /// </summary>
+        /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified property name is too large.
+        /// </exception>
+        /// <exception cref="JsonWriterException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         [CLSCompliant(false)]
         public void WriteNumber(string propertyName, uint value, bool suppressEscaping = false)
             => WriteNumber(propertyName.AsSpan(), (ulong)value, suppressEscaping);
 
+        /// <summary>
+        /// Writes the property name and <see cref="uint"/> value (as a JSON number) as part of a name/value pair of a JSON object.
+        /// </summary>
+        /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified property name is too large.
+        /// </exception>
+        /// <exception cref="JsonWriterException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<char> propertyName, uint value, bool suppressEscaping = false)
             => WriteNumber(propertyName, (ulong)value, suppressEscaping);
 
+        /// <summary>
+        /// Writes the property name and <see cref="uint"/> value (as a JSON number) as part of a name/value pair of a JSON object.
+        /// </summary>
+        /// <param name="propertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
+        /// <param name="value">The value to be written as a JSON number as part of the name/value pair.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified property name is too large.
+        /// </exception>
+        /// <exception cref="JsonWriterException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<byte> propertyName, uint value, bool suppressEscaping = false)
             => WriteNumber(propertyName, (ulong)value, suppressEscaping);

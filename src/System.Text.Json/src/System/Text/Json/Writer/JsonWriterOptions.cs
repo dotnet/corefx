@@ -4,10 +4,21 @@
 
 namespace System.Text.Json
 {
+    /// <summary>
+    /// Provides the ability for the user to define custom behavior when writing JSON
+    /// using the <see cref="Utf8JsonWriter"/>. By default, the JSON is written without
+    /// any indentation or extra white space. Also, the <see cref="Utf8JsonWriter"/> will
+    /// throw an exception if the user attempts to write structurally invalid JSON.
+    /// </summary>
     public struct JsonWriterOptions
     {
         private int _optionsMask;
 
+        /// <summary>
+        /// Defines whether the <see cref="Utf8JsonWriter"/> should pretty print the JSON which includes:
+        /// indenting nested JSON tokens, adding new lines, and adding white space between property names and values.
+        /// By default, the JSON is written without any extra white space.
+        /// </summary>
         public bool Indented
         {
             get
@@ -23,6 +34,12 @@ namespace System.Text.Json
             }
         }
 
+        /// <summary>
+        /// Defines whether the <see cref="Utf8JsonWriter"/> should skip structural validation and allow
+        /// the user to write invalid JSON. For example, if the user attempts to write a value within an object
+        /// without a property name, a <exception cref="JsonReaderException"/> is thrown. If the JSON being written is known to be correct
+        /// then skipping validation could improve performance.
+        /// </summary>
         public bool SkipValidation
         {
             get

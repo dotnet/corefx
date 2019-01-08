@@ -8,9 +8,19 @@ using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
 {
+    /// <summary>
+    /// Provides a high-performance API for forward-only, non-cached writing of UTF-8 encoded JSON text.
+    /// It writes the text sequentially with no caching and adheres to the JSON RFC
+    /// by default (https://tools.ietf.org/html/rfc8259), with the exception of writing comments.
+    /// When the user attempts to write invalid JSON and validation is enabled, it throws
+    /// a JsonWriterException with a context specific error message.
+    /// Since this type is a ref struct, it does not directly support async. However, it does provide
+    /// support for reentrancy to write partial data, and continue writing in chunks.
+    /// To be able to format the output with indentation and whitespace OR to skip validation, create an instance of 
+    /// <see cref="JsonWriterState"/> and pass that in to the writer.
+    /// </summary>
     public ref partial struct Utf8JsonWriter
     {
-        private const int MinimumSizeThreshold = 256;
         private const int StackallocThreshold = 256;
         private const int MaxExpansionFactorWhileEscaping = 6;
         private const int SpacesPerIndent = 2;
@@ -20,6 +30,11 @@ namespace System.Text.Json
         private int _buffered;
         private Span<byte> _buffer;
 
+        /// <summary>
+        /// Returns the total amount of bytes written by the <see cref="Utf8JsonWriter"/> so far
+        /// for the current instance of the <see cref="Utf8JsonWriter"/>.
+        /// This includes data that has been written beyond what has already been committed.
+        /// </summary>
         public long BytesWritten
         {
             get
@@ -29,6 +44,11 @@ namespace System.Text.Json
             }
         }
 
+        /// <summary>
+        /// Returns the total amount of bytes committed to the output by the <see cref="Utf8JsonWriter"/> so far
+        /// for the current instance of the <see cref="Utf8JsonWriter"/>.
+        /// This is how much the IBufferWriter has advanced.
+        /// </summary>
         public long BytesCommitted { get; private set; }
 
         private bool _inObject;
@@ -44,8 +64,19 @@ namespace System.Text.Json
 
         private int Indentation => CurrentDepth * SpacesPerIndent;
 
+        /// <summary>
+        /// Tracks the recursive depth of the nested objects / arrays within the JSON text
+        /// written so far. This provides the depth of the current token.
+        /// </summary>
         public int CurrentDepth => _currentDepth & JsonConstants.RemoveFlagsBitMask;
 
+        /// <summary>
+        /// Returns the current snapshot of the <see cref="Utf8JsonWriter"/> state which must
+        /// be captured by the caller and passed back in to the <see cref="Utf8JsonWriter"/> ctor with more data.
+        /// Unlike the <see cref="Utf8JsonWriter"/>, which is a ref struct, the state can survive
+        /// across async/await boundaries and hence this type is required to provide support for reading
+        /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonWriter"/>.
+        /// </summary>
         public JsonWriterState CurrentState => new JsonWriterState
         {
             _bytesWritten = BytesWritten,
@@ -58,10 +89,18 @@ namespace System.Text.Json
         };
 
         /// <summary>
-        /// Constructs a JSON writer with a specified <paramref name="bufferWriter"/>.
+        /// Constructs a new <see cref="Utf8JsonWriter"/> instance with a specified <paramref name="bufferWriter"/>.
         /// </summary>
-        /// <param name="bufferWriter">An instance of <see cref="IBufferWriter{T}" /> used for writing bytes to an output channel.</param>
-        /// <param name="state">Specifies whether to add whitespace to the output text for user readability.</param>
+        /// <param name="bufferWriter">An instance of <see cref="IBufferWriter{T}" /> used as a destination for writing JSON text into.</param>
+        /// <param name="state">If this is the first call to the ctor, pass in a default state. Otherwise,
+        /// capture the state from the previous instance of the <see cref="Utf8JsonWriter"/> and pass that back.</param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when the instance of <see cref="IBufferWriter{T}" /> that is passed in is null.
+        /// </exception>
+        /// <remarks>
+        /// Since this type is a ref struct, it is a stack-only type and all the limitations of ref structs apply to it.
+        /// This is the reason why the ctor accepts a <see cref="JsonWriterState"/>.
+        /// </remarks>
         public Utf8JsonWriter(IBufferWriter<byte> bufferWriter, JsonWriterState state = default)
         {
             _output = bufferWriter ?? throw new ArgumentNullException(nameof(bufferWriter));
@@ -87,6 +126,15 @@ namespace System.Text.Json
             _buffer = _buffer.Slice(count);
         }
 
+        /// <summary>
+        /// Advances the underlying <see cref="IBufferWriter{T}" /> based on what has been written so far.
+        /// </summary>
+        /// <param name="isFinalBlock">Let's the writer know whether more data will be written. This is used to validate
+        /// that the JSON written sor far is structurally valid if no more data is to follow.</param>
+        /// <exception cref="JsonWriterException">
+        /// Thrown when incomplete JSON has been written and <paramref name="isFinalBlock"/> is true.
+        /// (for example when an open object or array needs to be closed).
+        /// </exception>
         public void Flush(bool isFinalBlock = true)
         {
             if (isFinalBlock && !_writerOptions.SkipValidation && CurrentDepth != 0)
@@ -103,12 +151,26 @@ namespace System.Text.Json
             _buffered = 0;
         }
 
+        /// <summary>
+        /// Writes the beginning of a JSON array.
+        /// </summary>
+        /// <exception cref="JsonWriterException">
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
+        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         public void WriteStartArray()
         {
             WriteStart(JsonConstants.OpenBracket);
             _tokenType = JsonTokenType.StartArray;
         }
 
+        /// <summary>
+        /// Writes the beginning of a JSON object.
+        /// </summary>
+        /// <exception cref="JsonWriterException">
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
+        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         public void WriteStartObject()
         {
             WriteStart(JsonConstants.OpenBrace);
@@ -230,6 +292,18 @@ namespace System.Text.Json
             Advance(idx);
         }
 
+        /// <summary>
+        /// Writes the beginning of a JSON array with a property name as the key.
+        /// </summary>
+        /// <param name="propertyName">The UTF-8 encoded property name of the JSON array to be written.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified property name is too large.
+        /// </exception>
+        /// <exception cref="JsonWriterException">
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
+        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         public void WriteStartArray(ReadOnlySpan<byte> propertyName, bool suppressEscaping = false)
         {
             ValidatePropertyNameAndDepth(ref propertyName);
@@ -245,6 +319,18 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartArray;
         }
 
+        /// <summary>
+        /// Writes the beginning of a JSON object with a property name as the key.
+        /// </summary>
+        /// <param name="propertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified property name is too large.
+        /// </exception>
+        /// <exception cref="JsonWriterException">
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
+        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         public void WriteStartObject(ReadOnlySpan<byte> propertyName, bool suppressEscaping = false)
         {
             ValidatePropertyNameAndDepth(ref propertyName);
@@ -340,12 +426,48 @@ namespace System.Text.Json
                 ArrayPool<byte>.Shared.Return(propertyArray);
         }
 
+        /// <summary>
+        /// Writes the beginning of a JSON array with a property name as the key.
+        /// </summary>
+        /// <param name="propertyName">The UTF-16 encoded property name of the JSON array to be transcoded and written as UTF-8.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified property name is too large.
+        /// </exception>
+        /// <exception cref="JsonWriterException">
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
+        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         public void WriteStartArray(string propertyName, bool suppressEscaping = false)
             => WriteStartArray(propertyName.AsSpan(), suppressEscaping);
 
+        /// <summary>
+        /// Writes the beginning of a JSON object with a property name as the key.
+        /// </summary>
+        /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified property name is too large.
+        /// </exception>
+        /// <exception cref="JsonWriterException">
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
+        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         public void WriteStartObject(string propertyName, bool suppressEscaping = false)
             => WriteStartObject(propertyName.AsSpan(), suppressEscaping);
 
+        /// <summary>
+        /// Writes the beginning of a JSON array with a property name as the key.
+        /// </summary>
+        /// <param name="propertyName">The UTF-16 encoded property name of the JSON array to be transcoded and written as UTF-8.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified property name is too large.
+        /// </exception>
+        /// <exception cref="JsonWriterException">
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
+        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         public void WriteStartArray(ReadOnlySpan<char> propertyName, bool suppressEscaping = false)
         {
             ValidatePropertyNameAndDepth(ref propertyName);
@@ -361,6 +483,18 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartArray;
         }
 
+        /// <summary>
+        /// Writes the beginning of a JSON object with a property name as the key.
+        /// </summary>
+        /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified property name is too large.
+        /// </exception>
+        /// <exception cref="JsonWriterException">
+        /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
+        /// OR if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         public void WriteStartObject(ReadOnlySpan<char> propertyName, bool suppressEscaping = false)
         {
             ValidatePropertyNameAndDepth(ref propertyName);
@@ -456,12 +590,24 @@ namespace System.Text.Json
                 ArrayPool<char>.Shared.Return(propertyArray);
         }
 
+        /// <summary>
+        /// Writes the end of a JSON array.
+        /// </summary>
+        /// <exception cref="JsonWriterException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         public void WriteEndArray()
         {
             WriteEnd(JsonConstants.CloseBracket);
             _tokenType = JsonTokenType.EndArray;
         }
 
+        /// <summary>
+        /// Writes the end of a JSON object.
+        /// </summary>
+        /// <exception cref="JsonWriterException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         public void WriteEndObject()
         {
             WriteEnd(JsonConstants.CloseBrace);

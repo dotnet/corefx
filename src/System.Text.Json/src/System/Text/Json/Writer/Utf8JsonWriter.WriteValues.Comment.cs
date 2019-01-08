@@ -10,9 +10,25 @@ namespace System.Text.Json
 {
     public ref partial struct Utf8JsonWriter
     {
+        /// <summary>
+        /// Writes the UTF-16 text value (as a JSON comment).
+        /// </summary>
+        /// <param name="utf16Text">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON comment within /*..*/.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified value is too large.
+        /// </exception>
         public void WriteCommentValue(string utf16Text, bool suppressEscaping = false)
             => WriteCommentValue(utf16Text.AsSpan(), suppressEscaping);
 
+        /// <summary>
+        /// Writes the UTF-16 text value (as a JSON comment).
+        /// </summary>
+        /// <param name="utf16Text">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON comment within /*..*/.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified value is too large.
+        /// </exception>
         public void WriteCommentValue(ReadOnlySpan<char> utf16Text, bool suppressEscaping = false)
         {
             JsonWriterHelper.ValidateValue(ref utf16Text);
@@ -46,18 +62,10 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingValue();
-                }
                 WriteCommentIndented(ref value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingValue();
-                }
                 WriteCommentMinimized(ref value);
             }
         }
@@ -148,6 +156,14 @@ namespace System.Text.Json
                 ArrayPool<char>.Shared.Return(valueArray);
         }
 
+        /// <summary>
+        /// Writes the UTF-8 text value (as a JSON comment).
+        /// </summary>
+        /// <param name="utf8Text">The UTF-8 encoded value to be written as a JSON comment within /*..*/.</param>
+        /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the specified value is too large.
+        /// </exception>
         public void WriteCommentValue(ReadOnlySpan<byte> utf8Text, bool suppressEscaping = false)
         {
             JsonWriterHelper.ValidateValue(ref utf8Text);
@@ -181,18 +197,10 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingValue();
-                }
                 WriteCommentIndented(ref value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingValue();
-                }
                 WriteCommentMinimized(ref value);
             }
         }

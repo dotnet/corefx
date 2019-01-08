@@ -6,6 +6,12 @@ namespace System.Text.Json
 {
     public ref partial struct Utf8JsonWriter
     {
+        /// <summary>
+        /// Writes the JSON literal "null" as an element of a JSON array.
+        /// </summary>
+        /// <exception cref="JsonWriterException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         public void WriteNullValue()
         {
             WriteLiteralByOptions(JsonConstants.NullValue);
@@ -14,6 +20,13 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.Null;
         }
 
+        /// <summary>
+        /// Writes the <see cref="bool"/> value (as a JSON literal "true" or "false") as an element of a JSON array.
+        /// </summary>
+        /// <param name="value">The value to be written as a JSON literal "true" or "false" as an element of a JSON array.</param>
+        /// <exception cref="JsonWriterException">
+        /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
+        /// </exception>
         public void WriteBooleanValue(bool value)
         {
             if (value)
