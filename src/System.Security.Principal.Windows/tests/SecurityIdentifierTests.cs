@@ -58,36 +58,39 @@ public class SecurityIdentifierTests
             librarySid = me.User.ToString();
         }
 
-        string windowsSid = null;
-        string processArguments = " /user";
-        // Call whois to get current sid
-        Process whoamiProcess = new Process();
-        whoamiProcess.StartInfo.FileName = "whoami.exe"; // whoami.exe is in system32, should already be on path
-        whoamiProcess.StartInfo.Arguments = " " + processArguments;
-        whoamiProcess.StartInfo.CreateNoWindow = true;
-        whoamiProcess.StartInfo.UseShellExecute = false;
-        whoamiProcess.StartInfo.RedirectStandardOutput = true;
-        whoamiProcess.Start();
-        string output = whoamiProcess.StandardOutput.ReadToEnd();
-        whoamiProcess.WaitForExit();
-
-        if (whoamiProcess.ExitCode == 0)
-        {
-            int startSid = output.IndexOf("S-1-");
-            Assert.InRange(startSid, 0, int.MaxValue);
-            int length = Math.Min(output.Length - startSid, librarySid.Length);
-            windowsSid = output.Substring(startSid, length);
-            if (output.Length > startSid + length)
-            {
-                Assert.True(char.IsWhiteSpace(output[startSid + length]));
-            }
-        }
-        Assert.NotNull(windowsSid);
-        Assert.NotEmpty(windowsSid);
         Assert.NotNull(librarySid);
         Assert.NotEmpty(librarySid);
 
+        string output = null;
+        string windowsSid = null;
+        string processArguments = " /user";
+        // Call whois to get current sid
+        using (var whoamiProcess = new Process())
+        {
+            whoamiProcess.StartInfo.FileName = "whoami.exe"; // whoami.exe is in system32, should already be on path
+            whoamiProcess.StartInfo.Arguments = " " + processArguments;
+            whoamiProcess.StartInfo.CreateNoWindow = true;
+            whoamiProcess.StartInfo.UseShellExecute = false;
+            whoamiProcess.StartInfo.RedirectStandardOutput = true;
+            whoamiProcess.Start();
+            output = whoamiProcess.StandardOutput.ReadToEnd();
+            whoamiProcess.WaitForExit();
+
+            Assert.Equal(0, whoamiProcess.ExitCode);
+        }
+
+        int startSid = output.IndexOf("S-1-");
+        Assert.InRange(startSid, 0, int.MaxValue);
+        int length = Math.Min(output.Length - startSid, librarySid.Length);
+        windowsSid = output.Substring(startSid, length);
+        if (output.Length > startSid + length)
+        {
+            Assert.True(char.IsWhiteSpace(output[startSid + length]));
+        }
+
+        Assert.NotNull(windowsSid);
         Assert.Equal(windowsSid, librarySid);
+        
     }
 }
 
