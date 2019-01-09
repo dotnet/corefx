@@ -139,6 +139,9 @@
 
       <UAPToolsFolder Condition="'$(UAPToolsFolder)'==''">$(PackagesDir)$(UAPToolsPackageName)\$(UAPToolsPackageVersion)\Tools\$(ArchGroup)</UAPToolsFolder>
       <UAPToolsFolder>$(UAPToolsFolder.Replace('/', '\'))</UAPToolsFolder>
+
+      <AppxManifestPath>$([MSBuild]::NormalizePath('$(TestHostRootPath)', 'Runner', 'AppxManifest.xml'))</AppxManifestPath>
+      <TestRunnerGuid>$([System.Guid]::NewGuid())</TestRunnerGuid>
     </PropertyGroup>
 
     <!-- Give a warning that the UAPToolsFolder is not set and that tests won't run -->
@@ -158,6 +161,9 @@
           SourceFiles="@(LauncherFolderContents)"
           DestinationFolder="$(TestHostRootPath)\Launcher\%(RecursiveDir)"
           SkipUnchangedFiles="true"/>
+
+    <!-- Randomize UapRunner GUID to prevent appx register errors on CI machines. -->
+    <Exec Command="powershell -Command &quot;(gc '$(AppxManifestPath)') -replace '5cd54353-3ed7-4a6e-a72f-db349f28867c', '$(TestRunnerGuid)' | Out-File '$(AppxManifestPath)'&quot;" />
 
   </Target>
 
