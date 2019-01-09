@@ -163,7 +163,7 @@
           SkipUnchangedFiles="true"/>
 
     <!-- Randomize UapRunner GUID to prevent appx register errors on CI machines. -->
-    <Exec Command="powershell -Command &quot;(gc '$(AppxManifestPath)') -replace '5cd54353-3ed7-4a6e-a72f-db349f28867c', '$(TestRunnerGuid)' | Out-File '$(AppxManifestPath)'&quot;" />
+    <Exec Command="powershell -Command &quot;(gc '$(AppxManifestPath)') -replace '5cd54353-3ed7-4a6e-a72f-db349f28867c', '$(TestRunnerGuid)' | Out-File -Encoding Default '$(AppxManifestPath)'&quot;" />
 
   </Target>
 
