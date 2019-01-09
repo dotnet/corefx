@@ -481,7 +481,7 @@ namespace System.Diagnostics
         private string GenerateW3CId()
         {
             string newSpanId = Guid.NewGuid().ToString("n").Substring(16, 16);
-            if (ParentId != null)
+            if (ParentId != null && IsW3CId(ParentId))
             {
                 return ParentId.Substring(0, 36) + newSpanId + ParentId.Substring(52, 3);
             }
@@ -676,14 +676,15 @@ namespace System.Diagnostics
             _id2 = 0;
             _asHexString = hexString;
         }
-#if false
         /// <summary>
         /// Creates a TraceId from a 16 byte span 'idBytes'.  
         /// </summary>
         public TraceId(Span<byte> idBytes)
         {
+            _id1 = 0;
+            _id2 = 0;
             _asHexString = null;
-            fixed (ulong* idPtr = _id)
+            fixed (ulong* idPtr = &_id1)
                 idBytes.CopyTo(new Span<byte>(idPtr, sizeof(ulong) * 2));
         }
 
@@ -692,15 +693,15 @@ namespace System.Diagnostics
         /// </summary>
         public void CopyToAsBinary(Span<byte> outputBuffer)
         {
-            if (_asHexString != null && _id[0] == 0 && _id[1] == 0)
+            if (_asHexString != null && _id1 == 0 && _id2 == 0)
             {
-                UInt64.TryParse(_asHexString, out _id[0]);
-                UInt64.TryParse(_asHexString.Substring(8), out _id[1]);
+                UInt64.TryParse(_asHexString, out _id1);
+                UInt64.TryParse(_asHexString.Substring(8), out _id2);
             }
-            fixed (ulong* idBytes = _id)
+            fixed (ulong* idBytes = &_id1)
                 new Span<byte>(idBytes, sizeof(ulong) * 2).CopyTo(outputBuffer);
         }
-#endif 
+ 
         /// <summary>
         /// Returns the TraceId as a 32 character hexadecimal string.  
         /// </summary>

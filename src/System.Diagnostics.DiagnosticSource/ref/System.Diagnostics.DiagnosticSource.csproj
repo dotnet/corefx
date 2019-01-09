@@ -8,6 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Diagnostics.DiagnosticSource.cs" />
+    <Reference Include="System.Memory" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard1.1'">
     <Compile Include="System.Diagnostics.DiagnosticSourceActivity.cs" />

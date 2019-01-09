@@ -66,8 +66,10 @@ namespace System.Diagnostics
     {
         private object _dummy;
         private int _dummyPrimitive;
+        public TraceId(System.Span<byte> idBytes) { throw null; }
         public TraceId(string hexString) { throw null; }
         public string AsHexString { get { throw null; } }
+        public void CopyToAsBinary(System.Span<byte> outputBuffer) { }
         public override string ToString() { throw null; }
     }
 
