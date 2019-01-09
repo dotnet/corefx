@@ -406,8 +406,8 @@ namespace System.ComponentModel.DataAnnotations
             errors.AddRange(GetObjectPropertyValidationErrors(instance, validationContext, validateAllProperties,
                 breakOnFirstError));
 
-            // We only proceed to Step 2 if there are no errors
-            if (errors.Any())
+            // We only proceed to Step 2 if there are no errors OR breakOnFirstError is false
+            if (breakOnFirstError && errors.Any())
             {
                 return errors;
             }
@@ -416,8 +416,8 @@ namespace System.ComponentModel.DataAnnotations
             var attributes = _store.GetTypeValidationAttributes(validationContext);
             errors.AddRange(GetValidationErrors(instance, validationContext, attributes, breakOnFirstError));
 
-            // We only proceed to Step 3 if there are no errors
-            if (errors.Any())
+            // We only proceed to Step 3 if there are no errors OR breakOnFirstError is false
+            if (breakOnFirstError && errors.Any())
             {
                 return errors;
             }

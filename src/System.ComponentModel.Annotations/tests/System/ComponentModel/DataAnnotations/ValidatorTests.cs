@@ -148,8 +148,10 @@ namespace System.ComponentModel.DataAnnotations.Tests
             var validationResults = new List<ValidationResult>();
             Assert.False(
                 Validator.TryValidateObject(objectToBeValidated, validationContext, validationResults, true));
-            Assert.Equal(1, validationResults.Count);
+            Assert.Equal(2, validationResults.Count);
             Assert.Equal("ValidClassAttribute.IsValid failed for class of type " + typeof(InvalidToBeValidated).FullName, validationResults[0].ErrorMessage);
+            Assert.Equal("class Validate method failed", validationResults[1].ErrorMessage);
+
         }
 
         [Fact]
@@ -961,7 +963,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         }
 
         [ValidClass]
-        public class InvalidToBeValidated
+        public class InvalidToBeValidated  : IValidatableObject
         {
             [ValidValueStringProperty]
             public string PropertyToBeTested { get; set; }
@@ -971,6 +973,11 @@ namespace System.ComponentModel.DataAnnotations.Tests
             [Required]
             [ValidValueStringProperty]
             public string PropertyWithRequiredAttribute { get; set; }
+
+            public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+            {
+                return new List<ValidationResult> {new ValidationResult("class Validate method failed")};
+            }
         }
     }
 }
