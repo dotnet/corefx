@@ -385,7 +385,24 @@ namespace System.Drawing.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ExtractAssociatedIcon_FilePath_Success()
         {
-            using (Icon icon = Icon.ExtractAssociatedIcon(Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico")))
+            ExtractAssociatedIcon_FilePath_Success(Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico"));
+        }
+
+        [ConditionalFact(Helpers.IsDrawingSupported)]
+        public void ExtractAssociatedIcon_UNCFilePath_Success()
+        {
+            string bitmapPath = Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico");
+            string bitmapPathRoot = Path.GetPathRoot(bitmapPath);
+            string bitmapUncPath = $"\\\\{Environment.MachineName}\\{bitmapPath.Substring(0, bitmapPathRoot.IndexOf(":"))}$\\{bitmapPath.Replace(bitmapPathRoot, "")}";
+
+            Assert.True(new Uri(bitmapUncPath).IsUnc);
+
+            ExtractAssociatedIcon_FilePath_Success(bitmapUncPath);
+        }
+
+        private void ExtractAssociatedIcon_FilePath_Success(string filePath)
+        {
+            using (Icon icon = Icon.ExtractAssociatedIcon(filePath))
             {
                 Assert.Equal(32, icon.Width);
                 Assert.Equal(32, icon.Height);
@@ -406,12 +423,10 @@ namespace System.Drawing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
-        [ConditionalTheory(Helpers.IsDrawingSupported)]
-        [InlineData("", "path")]
-        [InlineData("\\\\uncpath", null)]
-        public void ExtractAssociatedIcon_InvalidFilePath_ThrowsArgumentException(string filePath, string paramName)
+        [ConditionalFact(Helpers.IsDrawingSupported)]
+        public void ExtractAssociatedIcon_InvalidFilePath_ThrowsArgumentException()
         {
-            AssertExtensions.Throws<ArgumentException>(paramName, null, () => Icon.ExtractAssociatedIcon(filePath));
+            AssertExtensions.Throws<ArgumentException>("path", null, () => Icon.ExtractAssociatedIcon(""));
         }
 
 
