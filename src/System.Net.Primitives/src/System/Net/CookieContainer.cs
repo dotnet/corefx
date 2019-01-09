@@ -514,7 +514,7 @@ namespace System.Net
 
         private void DomainTableCleanup()
         {
-            var removePathList = new List<Object>();
+            var removePathList = new List<object>();
             var removeDomainList = new List<string>();
 
             string currentDomain;
@@ -522,10 +522,12 @@ namespace System.Net
 
             lock (m_domainTable.SyncRoot)
             {
-                foreach (DictionaryEntry entry in m_domainTable)
+                // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
+                IDictionaryEnumerator enumerator = m_domainTable.GetEnumerator();
+                while (enumerator.MoveNext())
                 {
-                    currentDomain = (string)entry.Key;
-                    pathList = (PathList)entry.Value;
+                    currentDomain = (string)enumerator.Key;
+                    pathList = (PathList)enumerator.Value;
 
                     lock (pathList.SyncRoot)
                     {
@@ -1082,7 +1084,7 @@ namespace System.Net
             }
         }
 
-        internal void Remove(Object key)
+        internal void Remove(object key)
         {
             lock (SyncRoot)
             {
