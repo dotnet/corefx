@@ -394,7 +394,8 @@ namespace System.Net.Sockets.Tests
             // To trigger this codepath we must call SendPacketsAsync with a wrong offset (to create an error), 
             // and twice (to avoid synchronous completion).
 
-            SendPacketsElement[] elements = new[] { new SendPacketsElement(TestFileName, 50_000, 10) };
+            SendPacketsElement[] goodElements = new[] { new SendPacketsElement(TestFileName, 0, 0) };
+            SendPacketsElement[] badElements = new[] { new SendPacketsElement(TestFileName, 50_000, 10) };
             EventWaitHandle completed1 = new ManualResetEvent(false);
             EventWaitHandle completed2 = new ManualResetEvent(false);
 
@@ -409,11 +410,11 @@ namespace System.Net.Sockets.Tests
                     {
                         args1.Completed += OnCompleted;
                         args1.UserToken = completed1;
-                        args1.SendPacketsElements = elements;
+                        args1.SendPacketsElements = goodElements;
 
                         args2.Completed += OnCompleted;
                         args2.UserToken = completed2;
-                        args2.SendPacketsElements = elements;
+                        args2.SendPacketsElements = badElements;
 
                         r1 = sock.SendPacketsAsync(args1);
                         r2 = sock.SendPacketsAsync(args2);
@@ -422,7 +423,7 @@ namespace System.Net.Sockets.Tests
                         {
                             Assert.True(completed1.WaitOne(TestSettings.PassingTestTimeout), "Timed out");
                         }
-                        Assert.Equal(SocketError.InvalidArgument, args1.SocketError);
+                        Assert.Equal(SocketError.Success, args1.SocketError);
 
                         if (r2)
                         {
