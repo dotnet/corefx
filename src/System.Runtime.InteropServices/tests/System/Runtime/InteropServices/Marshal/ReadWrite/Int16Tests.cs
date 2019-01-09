@@ -124,9 +124,10 @@ namespace System.Runtime.InteropServices.Tests
             // The ReadInt16() for object types does an explicit marshal which requires
             // an allocation on each read. It can occur that the allocation is aligned
             // on a 16-bit boundary which would yield a value of 0. To mitigate the chance,
-            // marshal several times.
+            // marshal several times, choosing 20 as an arbitrary value. If this test
+            // fails, we should reconsider whether it is worth the flakiness.
             int readShorts = 0;
-            for (int i = 0; i < 3; ++i)
+            for (int i = 0; i < 20; ++i)
             {
                 readShorts += Marshal.ReadInt16(structure, stringOffset);
             }
