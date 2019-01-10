@@ -89,7 +89,7 @@ namespace System.Net.NetworkInformation
             {
                 if (!ipv4 && s_isBSD)
                 {
-                    // OSX and FreeBSD ses -h to set hop limit for IPv6
+                    // OSX and FreeBSD use -h to set hop limit for IPv6
                     sb.Append(" -h ");
                 }
                 else
