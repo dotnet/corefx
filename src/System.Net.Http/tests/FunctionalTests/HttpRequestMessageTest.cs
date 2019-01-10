@@ -215,11 +215,12 @@ namespace System.Net.Http.Functional.Tests
                 "  Accept: text/plain; q=0.2\r\n" +
                 "  Accept: text/xml; q=0.1\r\n" +
                 "  Custom-Request-Header: value1\r\n" +
-                "  Content-Type: text/plain; charset=utf-8\r\n" +
-#if netcoreapp
-                "  Content-Length: 7\r\n" +
-#endif
-                "  Custom-Content-Header: value2\r\n" +
+                "  Content-Type: text/plain; charset=utf-8\r\n";
+            if (PlatformDetection.IsNetCore || PlatformDetection.IsUap)
+            {
+                expected += "  Content-Length: 7\r\n";
+            }
+            expected += "  Custom-Content-Header: value2\r\n" +
                 "}";
             Assert.Equal(expected, rm.ToString());
         }
