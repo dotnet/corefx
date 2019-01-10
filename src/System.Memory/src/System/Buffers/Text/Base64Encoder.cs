@@ -262,8 +262,8 @@ namespace System.Buffers.Text
                     break;
 
                 // Load at c-4, as required by enc_reshuffle
-                AssertRead<Vector256<sbyte>>(ref Unsafe.Subtract(ref src, 4), ref srcStart, sourceLength);
-                str = Unsafe.As<byte, Vector256<sbyte>>(ref Unsafe.Subtract(ref src, 4));
+                AssertRead<Vector256<sbyte>>(ref Unsafe.Add(ref src, -4), ref srcStart, sourceLength);
+                str = Unsafe.As<byte, Vector256<sbyte>>(ref Unsafe.Add(ref src, -4));
             }
 
             // Cast to ulong to avoid the overflow-check. Codegen for x86 is still good.
