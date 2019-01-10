@@ -66,7 +66,7 @@ namespace System.Buffers.Text
             }
 
             if (maxSrcLength != srcLength - 2)
-                goto DestinationSmallExit;
+                goto DestinationTooSmallExit;
 
             if (!isFinalBlock)
                 goto NeedMoreDataExit;
@@ -95,7 +95,7 @@ namespace System.Buffers.Text
             bytesWritten = (int)destIndex;
             return OperationStatus.NeedMoreData;
 
-        DestinationSmallExit:
+        DestinationTooSmallExit:
             bytesConsumed = (int)sourceIndex;
             bytesWritten = (int)destIndex;
             return OperationStatus.DestinationTooSmall;
