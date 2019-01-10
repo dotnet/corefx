@@ -34,9 +34,13 @@ namespace System.Text.Json
             JsonWriterHelper.ValidateValue(ref utf16Text);
 
             if (!suppressEscaping)
+            {
                 WriteCommentSuppressFalse(ref utf16Text);
+            }
             else
+            {
                 WriteCommentByOptions(ref utf16Text);
+            }
         }
 
         private void WriteCommentSuppressFalse(ref ReadOnlySpan<char> value)
@@ -134,7 +138,9 @@ namespace System.Text.Json
             WriteCommentByOptions(ref value);
 
             if (valueArray != null)
+            {
                 ArrayPool<char>.Shared.Return(valueArray);
+            }
         }
 
         /// <summary>
@@ -150,9 +156,13 @@ namespace System.Text.Json
             JsonWriterHelper.ValidateValue(ref utf8Text);
 
             if (!suppressEscaping)
+            {
                 WriteCommentSuppressFalse(ref utf8Text);
+            }
             else
+            {
                 WriteCommentByOptions(ref utf8Text);
+            }
         }
 
         private void WriteCommentSuppressFalse(ref ReadOnlySpan<byte> value)
@@ -250,7 +260,9 @@ namespace System.Text.Json
             WriteCommentByOptions(ref value);
 
             if (valueArray != null)
+            {
                 ArrayPool<byte>.Shared.Return(valueArray);
+            }
         }
 
         private void WriteCommentValue(ref ReadOnlySpan<char> escapedValue, ref int idx)

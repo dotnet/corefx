@@ -196,9 +196,13 @@ namespace System.Text.Json
                 ThrowHelper.ThrowJsonWriterException(ExceptionResource.DepthTooLarge, _currentDepth);
 
             if (_writerOptions.SlowPath)
+            {
                 WriteStartSlow(token);
+            }
             else
+            {
                 WriteStartMinimized(token);
+            }
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
@@ -322,9 +326,13 @@ namespace System.Text.Json
             ValidatePropertyNameAndDepth(ref propertyName);
 
             if (!suppressEscaping)
+            {
                 WriteStartSuppressFalse(ref propertyName, JsonConstants.OpenBracket);
+            }
             else
+            {
                 WriteStartByOptions(ref propertyName, JsonConstants.OpenBracket);
+            }
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
@@ -349,9 +357,13 @@ namespace System.Text.Json
             ValidatePropertyNameAndDepth(ref propertyName);
 
             if (!suppressEscaping)
+            {
                 WriteStartSuppressFalse(ref propertyName, JsonConstants.OpenBrace);
+            }
             else
+            {
                 WriteStartByOptions(ref propertyName, JsonConstants.OpenBrace);
+            }
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
@@ -436,7 +448,9 @@ namespace System.Text.Json
             WriteStartByOptions(ref propertyName, token);
 
             if (propertyArray != null)
+            {
                 ArrayPool<byte>.Shared.Return(propertyArray);
+            }
         }
 
         /// <summary>
@@ -486,9 +500,13 @@ namespace System.Text.Json
             ValidatePropertyNameAndDepth(ref propertyName);
 
             if (!suppressEscaping)
+            {
                 WriteStartSuppressFalse(ref propertyName, JsonConstants.OpenBracket);
+            }
             else
+            {
                 WriteStartByOptions(ref propertyName, JsonConstants.OpenBracket);
+            }
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
@@ -513,9 +531,13 @@ namespace System.Text.Json
             ValidatePropertyNameAndDepth(ref propertyName);
 
             if (!suppressEscaping)
+            {
                 WriteStartSuppressFalse(ref propertyName, JsonConstants.OpenBrace);
+            }
             else
+            {
                 WriteStartByOptions(ref propertyName, JsonConstants.OpenBrace);
+            }
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
             _currentDepth++;
@@ -600,7 +622,9 @@ namespace System.Text.Json
             WriteStartByOptions(ref propertyName, token);
 
             if (propertyArray != null)
+            {
                 ArrayPool<char>.Shared.Return(propertyArray);
+            }
         }
 
         /// <summary>
@@ -640,9 +664,13 @@ namespace System.Text.Json
             }
 
             if (_writerOptions.SlowPath)
+            {
                 WriteEndSlow(token);
+            }
             else
+            {
                 WriteEndMinimized(token);
+            }
         }
 
         private void WriteEndMinimized(byte token)

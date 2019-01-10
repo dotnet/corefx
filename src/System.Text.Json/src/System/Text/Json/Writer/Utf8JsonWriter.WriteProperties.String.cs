@@ -45,9 +45,13 @@ namespace System.Text.Json
             JsonWriterHelper.ValidatePropertyAndValue(ref propertyName, ref value);
 
             if (!suppressEscaping)
+            {
                 WriteStringSuppressFalse(ref propertyName, ref value);
+            }
             else
+            {
                 WriteStringSuppressTrue(ref propertyName, ref value);
+            }
 
             _currentDepth |= 1 << 31;
             _tokenType = JsonTokenType.String;
@@ -71,9 +75,13 @@ namespace System.Text.Json
             JsonWriterHelper.ValidatePropertyAndValue(ref propertyName, ref value);
 
             if (!suppressEscaping)
+            {
                 WriteStringSuppressFalse(ref propertyName, ref value);
+            }
             else
+            {
                 WriteStringSuppressTrue(ref propertyName, ref value);
+            }
 
             _currentDepth |= 1 << 31;
             _tokenType = JsonTokenType.String;
@@ -113,9 +121,13 @@ namespace System.Text.Json
             JsonWriterHelper.ValidatePropertyAndValue(ref propertyName, ref value);
 
             if (!suppressEscaping)
+            {
                 WriteStringSuppressFalse(ref propertyName, ref value);
+            }
             else
+            {
                 WriteStringSuppressTrue(ref propertyName, ref value);
+            }
 
             _currentDepth |= 1 << 31;
             _tokenType = JsonTokenType.String;
@@ -155,9 +167,13 @@ namespace System.Text.Json
             JsonWriterHelper.ValidatePropertyAndValue(ref propertyName, ref value);
 
             if (!suppressEscaping)
+            {
                 WriteStringSuppressFalse(ref propertyName, ref value);
+            }
             else
+            {
                 WriteStringSuppressTrue(ref propertyName, ref value);
+            }
 
             _currentDepth |= 1 << 31;
             _tokenType = JsonTokenType.String;
@@ -439,10 +455,14 @@ namespace System.Text.Json
             WriteStringByOptions(ref propertyName, ref value);
 
             if (valueArray != null)
+            {
                 ArrayPool<char>.Shared.Return(valueArray);
+            }
 
             if (propertyArray != null)
+            {
                 ArrayPool<char>.Shared.Return(propertyArray);
+            }
         }
 
         private void WriteStringEscapePropertyOrValue(ref ReadOnlySpan<byte> propertyName, ref ReadOnlySpan<byte> value, int firstEscapeIndexProp, int firstEscapeIndexVal)
@@ -501,10 +521,14 @@ namespace System.Text.Json
             WriteStringByOptions(ref propertyName, ref value);
 
             if (valueArray != null)
+            {
                 ArrayPool<byte>.Shared.Return(valueArray);
+            }
 
             if (propertyArray != null)
+            {
                 ArrayPool<byte>.Shared.Return(propertyArray);
+            }
         }
 
         private void WriteStringEscapePropertyOrValue(ref ReadOnlySpan<char> propertyName, ref ReadOnlySpan<byte> value, int firstEscapeIndexProp, int firstEscapeIndexVal)
@@ -563,10 +587,14 @@ namespace System.Text.Json
             WriteStringByOptions(ref propertyName, ref value);
 
             if (valueArray != null)
+            {
                 ArrayPool<byte>.Shared.Return(valueArray);
+            }
 
             if (propertyArray != null)
+            {
                 ArrayPool<char>.Shared.Return(propertyArray);
+            }
         }
 
         private void WriteStringEscapePropertyOrValue(ref ReadOnlySpan<byte> propertyName, ref ReadOnlySpan<char> value, int firstEscapeIndexProp, int firstEscapeIndexVal)
@@ -625,10 +653,14 @@ namespace System.Text.Json
             WriteStringByOptions(ref propertyName, ref value);
 
             if (valueArray != null)
+            {
                 ArrayPool<char>.Shared.Return(valueArray);
+            }
 
             if (propertyArray != null)
+            {
                 ArrayPool<byte>.Shared.Return(propertyArray);
+            }
         }
 
         private void WriteStringByOptions(ref ReadOnlySpan<char> propertyName, ref ReadOnlySpan<char> value)

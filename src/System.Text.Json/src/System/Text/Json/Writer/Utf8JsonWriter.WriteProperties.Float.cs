@@ -43,9 +43,13 @@ namespace System.Text.Json
             JsonWriterHelper.ValidateSingle(value);
 
             if (!suppressEscaping)
+            {
                 WriteNumberSuppressFalse(ref propertyName, value);
+            }
             else
+            {
                 WriteNumberByOptions(ref propertyName, value);
+            }
 
             _currentDepth |= 1 << 31;
             _tokenType = JsonTokenType.Number;
@@ -69,9 +73,13 @@ namespace System.Text.Json
             JsonWriterHelper.ValidateSingle(value);
 
             if (!suppressEscaping)
+            {
                 WriteNumberSuppressFalse(ref propertyName, value);
+            }
             else
+            {
                 WriteNumberByOptions(ref propertyName, value);
+            }
 
             _currentDepth |= 1 << 31;
             _tokenType = JsonTokenType.Number;
@@ -137,7 +145,9 @@ namespace System.Text.Json
             WriteNumberByOptions(ref propertyName, value);
 
             if (propertyArray != null)
+            {
                 ArrayPool<char>.Shared.Return(propertyArray);
+            }
         }
 
         private void WriteNumberEscapeProperty(ref ReadOnlySpan<byte> propertyName, float value, int firstEscapeIndexProp)
@@ -168,7 +178,9 @@ namespace System.Text.Json
             WriteNumberByOptions(ref propertyName, value);
 
             if (propertyArray != null)
+            {
                 ArrayPool<byte>.Shared.Return(propertyArray);
+            }
         }
 
         private void WriteNumberByOptions(ref ReadOnlySpan<char> propertyName, float value)

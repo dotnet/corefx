@@ -39,9 +39,13 @@ namespace System.Text.Json
             JsonWriterHelper.ValidateValue(ref utf16Text);
 
             if (!suppressEscaping)
+            {
                 WriteStringSuppressFalse(ref utf16Text);
+            }
             else
+            {
                 WriteStringByOptions(ref utf16Text);
+            }
 
             _currentDepth |= 1 << 31;
             _tokenType = JsonTokenType.String;
@@ -166,7 +170,9 @@ namespace System.Text.Json
             WriteStringByOptions(ref value);
 
             if (valueArray != null)
+            {
                 ArrayPool<char>.Shared.Return(valueArray);
+            }
         }
 
         /// <summary>
@@ -185,9 +191,13 @@ namespace System.Text.Json
             JsonWriterHelper.ValidateValue(ref utf8Text);
 
             if (!suppressEscaping)
+            {
                 WriteStringSuppressFalse(ref utf8Text);
+            }
             else
+            {
                 WriteStringByOptions(ref utf8Text);
+            }
 
             _currentDepth |= 1 << 31;
             _tokenType = JsonTokenType.String;
@@ -312,7 +322,9 @@ namespace System.Text.Json
             WriteStringByOptions(ref value);
 
             if (valueArray != null)
+            {
                 ArrayPool<byte>.Shared.Return(valueArray);
+            }
         }
     }
 }
