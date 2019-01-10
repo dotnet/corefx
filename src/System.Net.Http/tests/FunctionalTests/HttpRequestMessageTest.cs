@@ -197,11 +197,12 @@ namespace System.Net.Http.Functional.Tests
             // doesn't get set by StringContent..ctor, but only if someone actually accesses the ContentLength property.
             expected = "Method: PUT, RequestUri: 'http://a.com/', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
                 "{\r\n" +
-                "  Content-Type: text/plain; charset=utf-8\r\n" +
-#if netcoreapp
-                "  Content-Length: 7\r\n" +
-#endif
-                "}";
+                "  Content-Type: text/plain; charset=utf-8\r\n";
+            if (PlatformDetection.IsNetCore || PlatformDetection.IsUap)
+            {
+                expected += "  Content-Length: 7\r\n";
+            }
+            expected += "}";
             Assert.Equal(expected, rm.ToString());
 
             rm.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain", 0.2));
