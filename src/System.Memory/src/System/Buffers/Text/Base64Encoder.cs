@@ -4,6 +4,8 @@
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 
 namespace System.Buffers.Text
 {
@@ -29,25 +31,50 @@ namespace System.Buffers.Text
         /// </returns>
         public static OperationStatus EncodeToUtf8(ReadOnlySpan<byte> bytes, Span<byte> utf8, out int bytesConsumed, out int bytesWritten, bool isFinalBlock = true)
         {
+            // PERF: use uint to avoid the sign-extensions
+            uint sourceIndex = 0;
+            uint destIndex = 0;
+
+            if (bytes.IsEmpty)
+                goto DoneExit;
+
             ref byte srcBytes = ref MemoryMarshal.GetReference(bytes);
             ref byte destBytes = ref MemoryMarshal.GetReference(utf8);
 
             int srcLength = bytes.Length;
             int destLength = utf8.Length;
+            int maxSrcLength = srcLength;
 
-            int maxSrcLength = 0;
             if (srcLength <= MaximumEncodeLength && destLength >= GetMaxEncodedToUtf8Length(srcLength))
             {
-                maxSrcLength = srcLength - 2;
+                maxSrcLength = srcLength;
             }
             else
             {
-                maxSrcLength = (destLength >> 2) * 3 - 2;
+                maxSrcLength = (destLength >> 2) * 3;
             }
 
-            // PERF: use uint to avoid the sign-extensions
-            uint sourceIndex = 0;
-            uint destIndex = 0;
+            if (srcLength < 16)
+                goto Scalar;
+
+            if (Avx2.IsSupported && maxSrcLength >= 32)
+            {
+                Avx2Encode(ref srcBytes, ref destBytes, maxSrcLength, destLength, ref sourceIndex, ref destIndex);
+
+                if (sourceIndex == srcLength)
+                    goto DoneExit;
+            }
+
+            if (Ssse3.IsSupported && (maxSrcLength >= (int)sourceIndex + 16))
+            {
+                Ssse3Encode(ref srcBytes, ref destBytes, maxSrcLength, destLength, ref sourceIndex, ref destIndex);
+
+                if (sourceIndex == srcLength)
+                    goto DoneExit;
+            }
+
+        Scalar:
+            maxSrcLength -= 2;
             uint result = 0;
 
             ref byte encodingMap = ref s_encodingMap[0];
@@ -86,6 +113,7 @@ namespace System.Buffers.Text
                 sourceIndex += 2;
             }
 
+        DoneExit:
             bytesConsumed = (int)sourceIndex;
             bytesWritten = (int)destIndex;
             return OperationStatus.Done;
@@ -181,6 +209,124 @@ namespace System.Buffers.Text
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void Avx2Encode(ref byte src, ref byte dest, int sourceLength, int destLength, ref uint sourceIndex, ref uint destIndex)
+        {
+            ref byte srcStart = ref src;
+            ref byte destStart = ref dest;
+            ref byte simdSrcEnd = ref Unsafe.Add(ref src, (IntPtr)((uint)sourceLength - 28));
+
+            // The JIT won't hoist these "constants", so help him
+            Vector256<sbyte> shuffleVec = s_avxEncodeShuffleVec;
+            Vector256<sbyte> shuffleConstant0 = Vector256.Create(0x0fc0fc00).AsSByte();
+            Vector256<sbyte> shuffleConstant2 = Vector256.Create(0x003f03f0).AsSByte();
+            Vector256<ushort> shuffleConstant1 = Vector256.Create(0x04000040).AsUInt16();
+            Vector256<short> shuffleConstant3 = Vector256.Create(0x01000010).AsInt16();
+            Vector256<byte> translationContant0 = Vector256.Create((byte)51);
+            Vector256<sbyte> translationContant1 = Vector256.Create((sbyte)25);
+            Vector256<sbyte> lut = s_avxEncodeLut;
+
+            // first load is done at c-0 not to get a segfault
+            AssertRead<Vector256<sbyte>>(ref src, ref srcStart, sourceLength);
+            Vector256<sbyte> str = Unsafe.As<byte, Vector256<sbyte>>(ref src);
+
+            // shift by 4 bytes, as required by enc_reshuffle
+            str = Avx2.PermuteVar8x32(str.AsInt32(), s_avxEncodePermuteVec).AsSByte();
+
+            while (true)
+            {
+                // Reshuffle
+                str = Avx2.Shuffle(str, shuffleVec);
+                Vector256<sbyte> t0 = Avx2.And(str, shuffleConstant0);
+                Vector256<sbyte> t2 = Avx2.And(str, shuffleConstant2);
+                Vector256<ushort> t1 = Avx2.MultiplyHigh(t0.AsUInt16(), shuffleConstant1);
+                Vector256<short> t3 = Avx2.MultiplyLow(t2.AsInt16(), shuffleConstant3);
+                str = Avx2.Or(t1.AsSByte(), t3.AsSByte());
+
+                // Translation
+                Vector256<byte> indices = Avx2.SubtractSaturate(str.AsByte(), translationContant0);
+                Vector256<sbyte> mask = Avx2.CompareGreaterThan(str, translationContant1);
+                Vector256<sbyte> tmp = Avx2.Subtract(indices.AsSByte(), mask);
+                str = Avx2.Add(str, Avx2.Shuffle(lut, tmp));
+
+                AssertWrite<Vector256<sbyte>>(ref dest, ref destStart, destLength);
+                Unsafe.As<byte, Vector256<sbyte>>(ref dest) = str;
+
+                src = ref Unsafe.Add(ref src, 24);
+                dest = ref Unsafe.Add(ref dest, 32);
+
+                if (Unsafe.IsAddressGreaterThan(ref src, ref simdSrcEnd))
+                    break;
+
+                // Load at c-4, as required by enc_reshuffle
+                AssertRead<Vector256<sbyte>>(ref Unsafe.Subtract(ref src, 4), ref srcStart, sourceLength);
+                str = Unsafe.As<byte, Vector256<sbyte>>(ref Unsafe.Subtract(ref src, 4));
+            }
+
+            // Cast to ulong to avoid the overflow-check. Codegen for x86 is still good.
+            sourceIndex = (uint)(ulong)Unsafe.ByteOffset(ref srcStart, ref src);
+            destIndex = (uint)(ulong)Unsafe.ByteOffset(ref destStart, ref dest);
+
+            src = ref srcStart;
+            dest = ref destStart;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void Ssse3Encode(ref byte src, ref byte dest, int sourceLength, int destLength, ref uint sourceIndex, ref uint destIndex)
+        {
+            ref byte srcStart = ref src;
+            ref byte destStart = ref dest;
+            ref byte simdSrcEnd = ref Unsafe.Add(ref src, (IntPtr)((uint)sourceLength - 16 + 1));
+
+            // Shift to workspace
+            src = ref Unsafe.Add(ref src, (IntPtr)sourceIndex);
+            dest = ref Unsafe.Add(ref dest, (IntPtr)destIndex);
+
+            // The JIT won't hoist these "constants", so help him
+            Vector128<sbyte> shuffleVec = s_sseEncodeShuffleVec;
+            Vector128<sbyte> shuffleConstant0 = Vector128.Create(0x0fc0fc00).AsSByte();
+            Vector128<sbyte> shuffleConstant2 = Vector128.Create(0x003f03f0).AsSByte();
+            Vector128<ushort> shuffleConstant1 = Vector128.Create(0x04000040).AsUInt16();
+            Vector128<short> shuffleConstant3 = Vector128.Create(0x01000010).AsInt16();
+            Vector128<byte> translationContant0 = Vector128.Create((byte)51);
+            Vector128<sbyte> translationContant1 = Vector128.Create((sbyte)25);
+            Vector128<sbyte> lut = s_sseEncodeLut;
+
+            //while (remaining >= 16)
+            while (Unsafe.IsAddressLessThan(ref src, ref simdSrcEnd))
+            {
+                AssertRead<Vector128<sbyte>>(ref src, ref srcStart, sourceLength);
+                Vector128<sbyte> str = Unsafe.As<byte, Vector128<sbyte>>(ref src);
+
+                // Reshuffle
+                str = Ssse3.Shuffle(str, shuffleVec);
+                Vector128<sbyte> t0 = Sse2.And(str, shuffleConstant0);
+                Vector128<sbyte> t2 = Sse2.And(str, shuffleConstant2);
+                Vector128<ushort> t1 = Sse2.MultiplyHigh(t0.AsUInt16(), shuffleConstant1);
+                Vector128<short> t3 = Sse2.MultiplyLow(t2.AsInt16(), shuffleConstant3);
+                str = Sse2.Or(t1.AsSByte(), t3.AsSByte());
+
+                // Translation
+                Vector128<byte> indices = Sse2.SubtractSaturate(str.AsByte(), translationContant0);
+                Vector128<sbyte> mask = Sse2.CompareGreaterThan(str, translationContant1);
+                Vector128<sbyte> tmp = Sse2.Subtract(indices.AsSByte(), mask);
+                str = Sse2.Add(str, Ssse3.Shuffle(lut, tmp));
+
+                AssertWrite<Vector128<sbyte>>(ref dest, ref destStart, destLength);
+                Unsafe.As<byte, Vector128<sbyte>>(ref dest) = str;
+
+                src = ref Unsafe.Add(ref src, 12);
+                dest = ref Unsafe.Add(ref dest, 16);
+            }
+
+            // Cast to ulong to avoid the overflow-check. Codegen for x86 is still good.
+            sourceIndex = (uint)(ulong)Unsafe.ByteOffset(ref srcStart, ref src);
+            destIndex = (uint)(ulong)Unsafe.ByteOffset(ref destStart, ref dest);
+
+            src = ref srcStart;
+            dest = ref destStart;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint Encode(ref byte threeBytes, ref byte encodingMap)
         {
             uint i = (uint)((threeBytes << 16) | (Unsafe.Add(ref threeBytes, 1) << 8) | Unsafe.Add(ref threeBytes, 2));
@@ -227,6 +373,13 @@ namespace System.Buffers.Text
             119, 120, 121, 122, 48, 49, 50, 51,     //w..z, 0..3
             52, 53, 54, 55, 56, 57, 43, 47          //4..9, +, /
         };
+
+        private static readonly Vector128<sbyte> s_sseEncodeShuffleVec;
+        private static readonly Vector128<sbyte> s_sseEncodeLut;
+
+        private static readonly Vector256<int> s_avxEncodePermuteVec;
+        private static readonly Vector256<sbyte> s_avxEncodeShuffleVec;
+        private static readonly Vector256<sbyte> s_avxEncodeLut;
 
         private const byte EncodingPad = (byte)'='; // '=', for padding
 

@@ -4,6 +4,8 @@
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 
 namespace System.Buffers.Text
 {
@@ -28,26 +30,48 @@ namespace System.Buffers.Text
         /// </returns>
         public static OperationStatus DecodeFromUtf8(ReadOnlySpan<byte> utf8, Span<byte> bytes, out int bytesConsumed, out int bytesWritten, bool isFinalBlock = true)
         {
+            // PERF: use uint to avoid the sign-extensions
+            uint sourceIndex = 0;
+            uint destIndex = 0;
+
+            if (utf8.IsEmpty)
+                goto DoneExit;
+
             ref byte srcBytes = ref MemoryMarshal.GetReference(utf8);
             ref byte destBytes = ref MemoryMarshal.GetReference(bytes);
 
             int srcLength = utf8.Length & ~0x3;  // only decode input up to the closest multiple of 4.
             int destLength = bytes.Length;
+            int maxSrcLength = srcLength;
+            int decodedLength = GetMaxDecodedFromUtf8Length(srcLength);
 
-            uint sourceIndex = 0;
-            uint destIndex = 0;
+            // max. 2 padding chars
+            if (destLength + 2 < decodedLength)
+            {
+                // For overflow see comment below
+                maxSrcLength = destLength / 3 * 4;
+            }
 
-            if (utf8.Length == 0)
-                goto DoneExit;
+            if (Avx2.IsSupported && maxSrcLength >= 45)
+            {
+                Avx2Decode(ref srcBytes, ref destBytes, maxSrcLength, destLength, ref sourceIndex, ref destIndex);
 
-            ref sbyte decodingMap = ref s_decodingMap[0];
+                if (sourceIndex == srcLength)
+                    goto DoneExit;
+            }
+            else if (Ssse3.IsSupported && maxSrcLength >= 24)
+            {
+                Ssse3Decode(ref srcBytes, ref destBytes, maxSrcLength, destLength, ref sourceIndex, ref destIndex);
+
+                if (sourceIndex == srcLength)
+                    goto DoneExit;
+            }
 
             // Last bytes could have padding characters, so process them separately and treat them as valid only if isFinalBlock is true
             // if isFinalBlock is false, padding characters are considered invalid
             int skipLastChunk = isFinalBlock ? 4 : 0;
 
-            int maxSrcLength = 0;
-            if (destLength >= GetMaxDecodedFromUtf8Length(srcLength))
+            if (destLength >= decodedLength)
             {
                 maxSrcLength = srcLength - skipLastChunk;
             }
@@ -57,6 +81,8 @@ namespace System.Buffers.Text
                 // Therefore, (destLength / 3) * 4 will always be less than 2147483641
                 maxSrcLength = (destLength / 3) * 4;
             }
+
+            ref sbyte decodingMap = ref s_decodingMap[0];
 
             // In order to elide the movsxd in the loop
             if (sourceIndex < maxSrcLength)
@@ -238,9 +264,9 @@ namespace System.Buffers.Text
             uint t0, t1, t2, t3;
             uint n = (uint)(bufferLength - 4);
             t0 = Unsafe.Add(ref bufferBytes, (IntPtr)n);
-            t1 = Unsafe.Add(ref bufferBytes, (IntPtr)(n+1));
-            t2 = Unsafe.Add(ref bufferBytes, (IntPtr)(n+2));
-            t3 = Unsafe.Add(ref bufferBytes, (IntPtr)(n+3));
+            t1 = Unsafe.Add(ref bufferBytes, (IntPtr)(n + 1));
+            t2 = Unsafe.Add(ref bufferBytes, (IntPtr)(n + 2));
+            t3 = Unsafe.Add(ref bufferBytes, (IntPtr)(n + 3));
 
             int i0 = Unsafe.Add(ref decodingMap, (IntPtr)t0);
             int i1 = Unsafe.Add(ref decodingMap, (IntPtr)t1);
@@ -300,6 +326,119 @@ namespace System.Buffers.Text
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void Avx2Decode(ref byte src, ref byte destBytes, int sourceLength, int destLength, ref uint sourceIndex, ref uint destIndex)
+        {
+            ref byte srcStart = ref src;
+            ref byte destStart = ref destBytes;
+            ref byte simdSrcEnd = ref Unsafe.Add(ref src, (IntPtr)((uint)sourceLength - 45 + 1));
+
+            // The JIT won't hoist these "constants", so help him
+            Vector256<sbyte> lutHi = s_avxDecodeLutHi;
+            Vector256<sbyte> lutLo = s_avxDecodeLutLo;
+            Vector256<sbyte> lutShift = s_avxDecodeLutShift;
+            Vector256<sbyte> mask2F = s_avxDecodeMask2F;
+            Vector256<sbyte> shuffleConstant0 = Vector256.Create(0x01400140).AsSByte();
+            Vector256<short> shuffleConstant1 = Vector256.Create(0x00011000).AsInt16();
+            Vector256<sbyte> shuffleVec = s_avxDecodeShuffleVec;
+            Vector256<int> permuteVec = s_avxDecodePermuteVec;
+
+            //while (remaining >= 45)
+            do
+            {
+                AssertRead<Vector256<sbyte>>(ref src, ref srcStart, sourceLength);
+                Vector256<sbyte> str = Unsafe.As<byte, Vector256<sbyte>>(ref src);
+
+                Vector256<sbyte> hiNibbles = Avx2.And(Avx2.ShiftRightLogical(str.AsInt32(), 4).AsSByte(), mask2F);
+                Vector256<sbyte> loNibbles = Avx2.And(str, mask2F);
+                Vector256<sbyte> hi = Avx2.Shuffle(lutHi, hiNibbles);
+                Vector256<sbyte> lo = Avx2.Shuffle(lutLo, loNibbles);
+                Vector256<sbyte> zero = Vector256<sbyte>.Zero;
+
+                // https://github.com/dotnet/coreclr/issues/21247
+                if (Avx2.MoveMask(Avx2.CompareGreaterThan(Avx2.And(lo, hi), zero)) != 0)
+                    break;
+
+                Vector256<sbyte> eq2F = Avx2.CompareEqual(str, mask2F);
+                Vector256<sbyte> shift = Avx2.Shuffle(lutShift, Avx2.Add(eq2F, hiNibbles));
+                str = Avx2.Add(str, shift);
+
+                Vector256<short> merge_ab_and_bc = Avx2.MultiplyAddAdjacent(str.AsByte(), shuffleConstant0);
+                Vector256<int> @out = Avx2.MultiplyAddAdjacent(merge_ab_and_bc, shuffleConstant1);
+                @out = Avx2.Shuffle(@out.AsSByte(), shuffleVec).AsInt32();
+                str = Avx2.PermuteVar8x32(@out, permuteVec).AsSByte();
+
+                AssertWrite<Vector256<sbyte>>(ref destBytes, ref destStart, destLength);
+                Unsafe.As<byte, Vector256<sbyte>>(ref destBytes) = str;
+
+                src = ref Unsafe.Add(ref src, 32);
+                destBytes = ref Unsafe.Add(ref destBytes, 24);
+            }
+            while (Unsafe.IsAddressLessThan(ref src, ref simdSrcEnd));
+
+            // Cast to ulong to avoid the overflow-check. Codegen for x86 is still good.
+            sourceIndex = (uint)(ulong)Unsafe.ByteOffset(ref srcStart, ref src);
+            destIndex = (uint)(ulong)Unsafe.ByteOffset(ref destStart, ref destBytes);
+
+            src = ref srcStart;
+            destBytes = ref destStart;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void Ssse3Decode(ref byte src, ref byte destBytes, int sourceLength, int destLength, ref uint sourceIndex, ref uint destIndex)
+        {
+            ref byte srcStart = ref src;
+            ref byte destStart = ref destBytes;
+            ref byte simdSrcEnd = ref Unsafe.Add(ref src, (IntPtr)((uint)sourceLength - 24 + 1));
+
+            // The JIT won't hoist these "constants", so help him
+            Vector128<sbyte> lutHi = s_sseDecodeLutHi;
+            Vector128<sbyte> lutLo = s_sseDecodeLutLo;
+            Vector128<sbyte> lutShift = s_sseDecodeLutShift;
+            Vector128<sbyte> mask2F = s_sseDecodeMask2F;
+            Vector128<sbyte> shuffleConstant0 = Vector128.Create(0x01400140).AsSByte();
+            Vector128<short> shuffleConstant1 = Vector128.Create(0x00011000).AsInt16();
+            Vector128<sbyte> shuffleVec = s_sseDecodeShuffleVec;
+
+            //while (remaining >= 24)
+            do
+            {
+                AssertRead<Vector128<sbyte>>(ref src, ref srcStart, sourceLength);
+                Vector128<sbyte> str = Unsafe.As<byte, Vector128<sbyte>>(ref src);
+
+                Vector128<sbyte> hiNibbles = Sse2.And(Sse2.ShiftRightLogical(str.AsInt32(), 4).AsSByte(), mask2F);
+                Vector128<sbyte> loNibbles = Sse2.And(str, mask2F);
+                Vector128<sbyte> hi = Ssse3.Shuffle(lutHi, hiNibbles);
+                Vector128<sbyte> lo = Ssse3.Shuffle(lutLo, loNibbles);
+                Vector128<sbyte> zero = Vector128<sbyte>.Zero;
+
+                if (Sse2.MoveMask(Sse2.CompareGreaterThan(Sse2.And(lo, hi), zero)) != 0)
+                    break;
+
+                Vector128<sbyte> eq2F = Sse2.CompareEqual(str, mask2F);
+                Vector128<sbyte> shift = Ssse3.Shuffle(lutShift, Sse2.Add(eq2F, hiNibbles));
+                str = Sse2.Add(str, shift);
+
+                Vector128<short> merge_ab_and_bc = Ssse3.MultiplyAddAdjacent(str.AsByte(), shuffleConstant0);
+                Vector128<int> @out = Sse2.MultiplyAddAdjacent(merge_ab_and_bc, shuffleConstant1);
+                str = Ssse3.Shuffle(@out.AsSByte(), shuffleVec);
+
+                AssertWrite<Vector128<sbyte>>(ref destBytes, ref destStart, destLength);
+                Unsafe.As<byte, Vector128<sbyte>>(ref destBytes) = str;
+
+                src = ref Unsafe.Add(ref src, 16);
+                destBytes = ref Unsafe.Add(ref destBytes, 12);
+            }
+            while (Unsafe.IsAddressLessThan(ref src, ref simdSrcEnd));
+
+            // Cast to ulong to avoid the overflow-check. Codegen for x86 is still good.
+            sourceIndex = (uint)(ulong)Unsafe.ByteOffset(ref srcStart, ref src);
+            destIndex = (uint)(ulong)Unsafe.ByteOffset(ref destStart, ref destBytes);
+
+            src = ref srcStart;
+            destBytes = ref destStart;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int Decode(ref byte encodedBytes, ref sbyte decodingMap)
         {
             uint t0, t1, t2, t3;
@@ -352,5 +491,18 @@ namespace System.Buffers.Text
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         };
+
+        private static readonly Vector128<sbyte> s_sseDecodeShuffleVec;
+        private static readonly Vector128<sbyte> s_sseDecodeLutLo;
+        private static readonly Vector128<sbyte> s_sseDecodeLutHi;
+        private static readonly Vector128<sbyte> s_sseDecodeLutShift;
+        private static readonly Vector128<sbyte> s_sseDecodeMask2F;
+
+        private static readonly Vector256<sbyte> s_avxDecodeShuffleVec;
+        private static readonly Vector256<int> s_avxDecodePermuteVec;
+        private static readonly Vector256<sbyte> s_avxDecodeLutLo;
+        private static readonly Vector256<sbyte> s_avxDecodeLutHi;
+        private static readonly Vector256<sbyte> s_avxDecodeLutShift;
+        private static readonly Vector256<sbyte> s_avxDecodeMask2F;
     }
 }
