@@ -93,11 +93,12 @@ namespace System.Net.Http.Functional.Tests
             string result = new StreamReader(output).ReadToEnd();
 
             var expected = "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n" +
-                "Content-Disposition: form-data\r\n" +
-#if netcoreapp
-                "Content-Length: 11\r\n" +
-#endif
-                "\r\n" +
+                "Content-Disposition: form-data\r\n";
+            if (PlatformDetection.IsNetCore || PlatformDetection.IsUap)
+            {
+                expected += "Content-Length: 11\r\n";
+            }
+            expected += "\r\n" +
                 "Hello World\r\n--test_boundary--\r\n";
             Assert.Equal(expected, result);
         }
@@ -115,11 +116,12 @@ namespace System.Net.Http.Functional.Tests
             string result = new StreamReader(output).ReadToEnd();
 
             var expected = "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n" +
-                "Content-Disposition: form-data; name=test_name\r\n" +
-#if netcoreapp
-                "Content-Length: 11\r\n" +
-#endif
-                "\r\n" +
+                "Content-Disposition: form-data; name=test_name\r\n";
+            if (PlatformDetection.IsNetCore || PlatformDetection.IsUap)
+            {
+                expected += "Content-Length: 11\r\n";
+            }
+            expected += "\r\n" +
                 "Hello World\r\n--test_boundary--\r\n";
             Assert.Equal(expected, result);
         }
@@ -138,12 +140,13 @@ namespace System.Net.Http.Functional.Tests
 
             var expected = "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n" +
                 "Content-Disposition: form-data; name=test_name; " +
-                 "filename=test_file_name; filename*=utf-8\'\'test_file_name\r\n" +
-#if netcoreapp
-                 "Content-Length: 11\r\n" +
-#endif
-                 "\r\n" +
-                 "Hello World\r\n--test_boundary--\r\n";
+                "filename=test_file_name; filename*=utf-8\'\'test_file_name\r\n";
+            if (PlatformDetection.IsNetCore || PlatformDetection.IsUap)
+            {
+                expected += "Content-Length: 11\r\n";
+            }
+            expected += "\r\n" +
+                "Hello World\r\n--test_boundary--\r\n";
             Assert.Equal(expected, result);
         }
 
@@ -160,11 +163,12 @@ namespace System.Net.Http.Functional.Tests
             string result = new StreamReader(output).ReadToEnd();
 
             var expected = "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n" +
-                "Content-Disposition: form-data; name=\"test name\"\r\n" +
-#if netcoreapp
-                "Content-Length: 11\r\n" +
-#endif
-                "\r\n" +
+                "Content-Disposition: form-data; name=\"test name\"\r\n";
+            if (PlatformDetection.IsNetCore || PlatformDetection.IsUap)
+            {
+                expected += "Content-Length: 11\r\n";
+            }
+            expected += "\r\n" +
                 "Hello World\r\n--test_boundary--\r\n";
             Assert.Equal(expected, result);
         }
@@ -182,11 +186,12 @@ namespace System.Net.Http.Functional.Tests
             string result = new StreamReader(output).ReadToEnd();
 
             var expected = "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n" +
-                "Content-Disposition: form-data; name=\"=?utf-8?B?dGVzdOOCrw0KIG5hbcOp?=\"\r\n" +
-#if netcoreapp
-                "Content-Length: 11\r\n" +
-#endif
-                "\r\n" +
+                "Content-Disposition: form-data; name=\"=?utf-8?B?dGVzdOOCrw0KIG5hbcOp?=\"\r\n";
+            if (PlatformDetection.IsNetCore || PlatformDetection.IsUap)
+            {
+                expected += "Content-Length: 11\r\n";
+            }
+            expected += "\r\n" +
                 "Hello World\r\n--test_boundary--\r\n";
             Assert.Equal(expected, result);
         }
@@ -204,11 +209,12 @@ namespace System.Net.Http.Functional.Tests
             string result = new StreamReader(output).ReadToEnd();
 
             var expected = "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n" +
-                "Content-Disposition: form-data; name=\"=?utf-8?B?dGVzdOOCrw0KIG5hbcOp?=\"\r\n" +
-#if netcoreapp
-                "Content-Length: 11\r\n" +
-#endif
-                "\r\n" +
+                "Content-Disposition: form-data; name=\"=?utf-8?B?dGVzdOOCrw0KIG5hbcOp?=\"\r\n";
+            if (PlatformDetection.IsNetCore || PlatformDetection.IsUap)
+            {
+                expected += "Content-Length: 11\r\n";
+            }
+            expected += "\r\n" +
                 "Hello World\r\n--test_boundary--\r\n";
             Assert.Equal(expected, result);
         }
@@ -227,11 +233,12 @@ namespace System.Net.Http.Functional.Tests
 
             var expected = "--test_boundary\r\nContent-Type: text/plain; charset=utf-8\r\n" +
                 "Content-Disposition: form-data; name=\"=?utf-8?B?dGVzdOOCrw0KIG5hbcOp?=\";" +
-                " filename=\"=?utf-8?B?ZmlsZeOCrw0KIG5hbcOp?=\"; filename*=utf-8\'\'file%E3%82%AF%0D%0A%20nam%C3%A9\r\n" +
-#if netcoreapp
-                "Content-Length: 11\r\n" +
-#endif
-                "\r\n" +
+                " filename=\"=?utf-8?B?ZmlsZeOCrw0KIG5hbcOp?=\"; filename*=utf-8\'\'file%E3%82%AF%0D%0A%20nam%C3%A9\r\n";
+            if (PlatformDetection.IsNetCore || PlatformDetection.IsUap)
+            {
+                expected += "Content-Length: 11\r\n";
+            }
+            expected += "\r\n" +
                 "Hello World\r\n--test_boundary--\r\n";
             Assert.Equal(expected, result);
         }

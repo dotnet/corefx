@@ -264,11 +264,12 @@ namespace System.Net.Http.Functional.Tests
                 // doesn't get set by StringContent..ctor, but only if someone actually accesses the ContentLength property.
                 var expected = "StatusCode: 400, ReasonPhrase: 'Bad Request', Version: 1.0, Content: " + typeof(StringContent).ToString() + ", Headers:\r\n" +
                     "{\r\n" +
-                    "  Content-Type: text/plain; charset=utf-8\r\n" +
-#if netcoreapp
-                    "  Content-Length: 7\r\n" +
-#endif
-                    "}";
+                    "  Content-Type: text/plain; charset=utf-8\r\n";
+                if (PlatformDetection.IsNetCore || PlatformDetection.IsUap)
+                {
+                    expected += "  Content-Length: 7\r\n";
+                }
+                expected += "}";
                 Assert.Equal(expected, rm.ToString());
 
                 rm.Headers.AcceptRanges.Add("bytes");
@@ -281,11 +282,12 @@ namespace System.Net.Http.Functional.Tests
                     "  Accept-Ranges: bytes\r\n" +
                     "  Accept-Ranges: pages\r\n" +
                     "  Custom-Response-Header: value1\r\n" +
-                    "  Content-Type: text/plain; charset=utf-8\r\n" +
-#if netcoreapp
-                    "  Content-Length: 7\r\n" +
-#endif
-                    "  Custom-Content-Header: value2\r\n" +
+                    "  Content-Type: text/plain; charset=utf-8\r\n";
+                if (PlatformDetection.IsNetCore || PlatformDetection.IsUap)
+                {
+                    expected += "  Content-Length: 7\r\n";
+                }
+                expected += "  Custom-Content-Header: value2\r\n" +
                     "}";
                 Assert.Equal(expected, rm.ToString());
             }
