@@ -21,9 +21,6 @@ namespace System.Net.NetworkInformation
         private static readonly bool s_isBSD = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD"));
         private static readonly Lazy<bool> s_isBusybox = new Lazy<bool>(() => IsBusyboxPing(s_discoveredPing4UtilityPath));
 
-        [DllImport(Interop.Libraries.SystemNative, EntryPoint = "SystemNative_ReadLink", SetLastError = true)]
-        private static extern unsafe int ReadLink(string path, byte* buffer, int bufferSize);
-
         // We don't want to pick up an arbitrary or malicious ping
         // command, so that's why we do the path probing ourselves.
         private static string GetPingUtilityPath(bool ipv4)
