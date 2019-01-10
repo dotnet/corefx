@@ -102,9 +102,9 @@ namespace System.Text.Json
         public void WriteBoolean(System.ReadOnlySpan<char> propertyName, bool value, bool suppressEscaping = false) { }
         public void WriteBoolean(string propertyName, bool value, bool suppressEscaping = false) { }
         public void WriteBooleanValue(bool value) { }
-        public void WriteCommentValue(System.ReadOnlySpan<byte> utf8Text, bool suppressEscaping = false) { }
-        public void WriteCommentValue(System.ReadOnlySpan<char> utf16Text, bool suppressEscaping = false) { }
-        public void WriteCommentValue(string utf16Text, bool suppressEscaping = false) { }
+        public void WriteCommentValue(System.ReadOnlySpan<byte> value, bool suppressEscaping = false) { }
+        public void WriteCommentValue(System.ReadOnlySpan<char> value, bool suppressEscaping = false) { }
+        public void WriteCommentValue(string value, bool suppressEscaping = false) { }
         public void WriteEndArray() { }
         public void WriteEndObject() { }
         public void WriteNull(System.ReadOnlySpan<byte> propertyName, bool suppressEscaping = false) { }
@@ -176,8 +176,8 @@ namespace System.Text.Json
         public void WriteStringValue(System.DateTime value) { }
         public void WriteStringValue(System.DateTimeOffset value) { }
         public void WriteStringValue(System.Guid value) { }
-        public void WriteStringValue(System.ReadOnlySpan<byte> utf8Text, bool suppressEscaping = false) { }
-        public void WriteStringValue(System.ReadOnlySpan<char> utf16Text, bool suppressEscaping = false) { }
-        public void WriteStringValue(string utf16Text, bool suppressEscaping = false) { }
+        public void WriteStringValue(System.ReadOnlySpan<byte> value, bool suppressEscaping = false) { }
+        public void WriteStringValue(System.ReadOnlySpan<char> value, bool suppressEscaping = false) { }
+        public void WriteStringValue(string value, bool suppressEscaping = false) { }
     }
 }

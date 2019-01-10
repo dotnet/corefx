@@ -12,7 +12,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the UTF-16 text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="utf16Text">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
+        /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
         /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
@@ -20,13 +20,13 @@ namespace System.Text.Json
         /// <exception cref="JsonWriterException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStringValue(string utf16Text, bool suppressEscaping = false)
-           => WriteStringValue(utf16Text.AsSpan(), suppressEscaping);
+        public void WriteStringValue(string value, bool suppressEscaping = false)
+           => WriteStringValue(value.AsSpan(), suppressEscaping);
 
         /// <summary>
         /// Writes the UTF-16 text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="utf16Text">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
+        /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
         /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
@@ -34,17 +34,17 @@ namespace System.Text.Json
         /// <exception cref="JsonWriterException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStringValue(ReadOnlySpan<char> utf16Text, bool suppressEscaping = false)
+        public void WriteStringValue(ReadOnlySpan<char> value, bool suppressEscaping = false)
         {
-            JsonWriterHelper.ValidateValue(ref utf16Text);
+            JsonWriterHelper.ValidateValue(ref value);
 
             if (!suppressEscaping)
             {
-                WriteStringSuppressFalse(ref utf16Text);
+                WriteStringSuppressFalse(ref value);
             }
             else
             {
-                WriteStringByOptions(ref utf16Text);
+                WriteStringByOptions(ref value);
             }
 
             _currentDepth |= 1 << 31;
@@ -178,7 +178,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the UTF-8 text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="utf8Text">The UTF-8 encoded value to be written as a JSON string element of a JSON array.</param>
+        /// <param name="value">The UTF-8 encoded value to be written as a JSON string element of a JSON array.</param>
         /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
@@ -186,17 +186,17 @@ namespace System.Text.Json
         /// <exception cref="JsonWriterException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStringValue(ReadOnlySpan<byte> utf8Text, bool suppressEscaping = false)
+        public void WriteStringValue(ReadOnlySpan<byte> value, bool suppressEscaping = false)
         {
-            JsonWriterHelper.ValidateValue(ref utf8Text);
+            JsonWriterHelper.ValidateValue(ref value);
 
             if (!suppressEscaping)
             {
-                WriteStringSuppressFalse(ref utf8Text);
+                WriteStringSuppressFalse(ref value);
             }
             else
             {
-                WriteStringByOptions(ref utf8Text);
+                WriteStringByOptions(ref value);
             }
 
             _currentDepth |= 1 << 31;

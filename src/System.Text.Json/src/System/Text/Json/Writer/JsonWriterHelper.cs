@@ -66,14 +66,14 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateDouble(double value)
         {
-            if (double.IsPositiveInfinity(value) || double.IsNegativeInfinity(value) || double.IsNaN(value))
+            if (!double.IsFinite(value))
                 ThrowHelper.ThrowArgumentException_ValueNotSupported();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateSingle(float value)
         {
-            if (float.IsPositiveInfinity(value) || float.IsNegativeInfinity(value) || float.IsNaN(value))
+            if (!float.IsFinite(value))
                 ThrowHelper.ThrowArgumentException_ValueNotSupported();
         }
 
@@ -175,35 +175,37 @@ namespace System.Text.Json
             return digits;
         }
 
+        // TODO: Replace this with publicly shipping implementation: https://github.com/dotnet/corefx/issues/34094
+
         /// <summary>
         /// Converts a span containing a sequence of UTF-16 bytes into UTF-8 bytes.
         ///
         /// This method will consume as many of the input bytes as possible.
         ///
         /// On successful exit, the entire input was consumed and encoded successfully. In this case, <paramref name="bytesConsumed"/> will be
-        /// equal to the length of the <paramref name="source"/> and <paramref name="bytesWritten"/> will equal the total number of bytes written to
-        /// the <paramref name="destination"/>.
+        /// equal to the length of the <paramref name="utf16Source"/> and <paramref name="bytesWritten"/> will equal the total number of bytes written to
+        /// the <paramref name="utf8Destination"/>.
         /// </summary>
-        /// <param name="source">A span containing a sequence of UTF-16 bytes.</param>
-        /// <param name="destination">A span to write the UTF-8 bytes into.</param>
-        /// <param name="bytesConsumed">On exit, contains the number of bytes that were consumed from the <paramref name="source"/>.</param>
-        /// <param name="bytesWritten">On exit, contains the number of bytes written to <paramref name="destination"/></param>
+        /// <param name="utf16Source">A span containing a sequence of UTF-16 bytes.</param>
+        /// <param name="utf8Destination">A span to write the UTF-8 bytes into.</param>
+        /// <param name="bytesConsumed">On exit, contains the number of bytes that were consumed from the <paramref name="utf16Source"/>.</param>
+        /// <param name="bytesWritten">On exit, contains the number of bytes written to <paramref name="utf8Destination"/></param>
         /// <returns>A <see cref="OperationStatus"/> value representing the state of the conversion.</returns>
-        public unsafe static OperationStatus ToUtf8(ReadOnlySpan<byte> source, Span<byte> destination, out int bytesConsumed, out int bytesWritten)
+        public unsafe static OperationStatus ToUtf8(ReadOnlySpan<byte> utf16Source, Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten)
         {
             //
             //
-            // KEEP THIS IMPLEMENTATION IN SYNC WITH https://github.com/dotnet/corert/blob/8f8922888687236cc5614bc3d06663ea5986dcb7/src/System.Private.CoreLib/shared/System/Text/UTF8Encoding.cs#L841
+            // KEEP THIS IMPLEMENTATION IN SYNC WITH https://github.com/dotnet/coreclr/blob/master/src/System.Private.CoreLib/shared/System/Text/UTF8Encoding.cs#L841
             //
             //
-            fixed (byte* chars = &MemoryMarshal.GetReference(source))
-            fixed (byte* bytes = &MemoryMarshal.GetReference(destination))
+            fixed (byte* chars = &MemoryMarshal.GetReference(utf16Source))
+            fixed (byte* bytes = &MemoryMarshal.GetReference(utf8Destination))
             {
                 char* pSrc = (char*)chars;
                 byte* pTarget = bytes;
 
-                char* pEnd = (char*)(chars + source.Length);
-                byte* pAllocatedBufferEnd = pTarget + destination.Length;
+                char* pEnd = (char*)(chars + utf16Source.Length);
+                byte* pAllocatedBufferEnd = pTarget + utf8Destination.Length;
 
                 // assume that JIT will enregister pSrc, pTarget and ch
 
