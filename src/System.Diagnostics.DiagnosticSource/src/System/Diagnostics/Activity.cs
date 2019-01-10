@@ -223,7 +223,6 @@ namespace System.Diagnostics
             else
             {
                 ParentId = parentId;
-                IdFormat = Parent.IdFormat;
             }
             return this;
         }
@@ -314,16 +313,20 @@ namespace System.Diagnostics
                     StartTimeUtc = GetUtcNow();
                 }
 
-                if (IdFormat == ActivityIdFormat.W3C || (DefaultIdFormat == ActivityIdFormat.W3C && (ParentId == null || ForceDefaultIdFormat)))
-                {
-                    Id = GenerateW3CId();
-                    IdFormat = ActivityIdFormat.W3C;
-                }
+                // Figure out what format to use.  
+                if (ForceDefaultIdFormat || ParentId == null)
+                    IdFormat = DefaultIdFormat;
+                else if (Parent != null)
+                    IdFormat = Parent.IdFormat;
                 else
-                {
+                    IdFormat = IsW3CId(ParentId) ? ActivityIdFormat.W3C : ActivityIdFormat.Hierarchical;
+
+
+                if (IdFormat == ActivityIdFormat.W3C)
+                    Id = GenerateW3CId();
+                else
                     Id = GenerateId();
-                    IdFormat = ActivityIdFormat.Hierarchical;
-                }
+
                 SetCurrent(this);
             }
             return this;
