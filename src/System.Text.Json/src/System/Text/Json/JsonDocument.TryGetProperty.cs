@@ -13,7 +13,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            _parsedData.Get(index, out DbRow row);
+            DbRow row = _parsedData.Get(index);
 
             CheckExpectedType(JsonTokenType.StartObject, row.TokenType);
 
@@ -56,7 +56,7 @@ namespace System.Text.Json
 
             while (candidateIndex > index)
             {
-                _parsedData.Get(candidateIndex, out row);
+                row = _parsedData.Get(candidateIndex);
                 Debug.Assert(row.TokenType != JsonTokenType.PropertyName);
 
                 // Move before the value
@@ -70,7 +70,7 @@ namespace System.Text.Json
                     candidateIndex -= DbRow.Size * (row.NumberOfRows + 1);
                 }
 
-                _parsedData.Get(candidateIndex, out row);
+                row = _parsedData.Get(candidateIndex);
                 Debug.Assert(row.TokenType == JsonTokenType.PropertyName);
 
                 if (row.SizeOrLength >= minBytes)
@@ -113,7 +113,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            _parsedData.Get(index, out DbRow row);
+            DbRow row = _parsedData.Get(index);
 
             CheckExpectedType(JsonTokenType.StartObject, row.TokenType);
 
@@ -147,7 +147,7 @@ namespace System.Text.Json
 
             while (index > startIndex)
             {
-                _parsedData.Get(index, out row);
+                row = _parsedData.Get(index);
                 Debug.Assert(row.TokenType != JsonTokenType.PropertyName);
 
                 // Move before the value
@@ -161,7 +161,7 @@ namespace System.Text.Json
                     index -= DbRow.Size * (row.NumberOfRows + 1);
                 }
 
-                _parsedData.Get(index, out row);
+                row = _parsedData.Get(index);
                 Debug.Assert(row.TokenType == JsonTokenType.PropertyName);
 
                 ReadOnlySpan<byte> currentPropertyName = documentSpan.Slice(row.Location, row.SizeOrLength);
@@ -175,7 +175,7 @@ namespace System.Text.Json
 
                 // Move to the previous value
                 index -= DbRow.Size;
-                _parsedData.Get(index, out row);
+                row = _parsedData.Get(index);
             }
 
             value = default;

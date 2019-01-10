@@ -220,10 +220,10 @@ namespace System.Text.Json
                 return -1;
             }
 
-            internal void Get(int index, out DbRow row)
+            internal DbRow Get(int index)
             {
                 AssertValidIndex(index);
-                row = MemoryMarshal.Read<DbRow>(_rentedBuffer.AsSpan(index));
+                return MemoryMarshal.Read<DbRow>(_rentedBuffer.AsSpan(index));
             }
 
             internal JsonTokenType GetJsonTokenType(int index)

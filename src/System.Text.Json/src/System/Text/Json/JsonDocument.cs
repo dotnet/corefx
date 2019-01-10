@@ -60,7 +60,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            _parsedData.Get(index, out DbRow row);
+            DbRow row = _parsedData.Get(index);
 
             CheckExpectedType(JsonTokenType.StartArray, row.TokenType);
 
@@ -71,7 +71,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            _parsedData.Get(currentIndex, out DbRow row);
+            DbRow row = _parsedData.Get(currentIndex);
 
             CheckExpectedType(JsonTokenType.StartArray, row.TokenType);
 
@@ -97,7 +97,7 @@ namespace System.Text.Json
                     return new JsonElement(this, objectOffset);
                 }
 
-                _parsedData.Get(objectOffset, out row);
+                row = _parsedData.Get(objectOffset);
 
                 if (!row.IsSimpleValue)
                 {
@@ -116,8 +116,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            DbRow row;
-            _parsedData.Get(index, out row);
+            DbRow row = _parsedData.Get(index);
 
             if (row.IsSimpleValue)
             {
@@ -138,7 +137,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            _parsedData.Get(index, out DbRow row);
+            DbRow row = _parsedData.Get(index);
 
             if (row.IsSimpleValue)
             {
@@ -154,7 +153,7 @@ namespace System.Text.Json
 
             int endElementIdx = GetEndIndex(index, includeEndElement: false);
             int start = row.Location;
-            _parsedData.Get(endElementIdx, out row);
+            row = _parsedData.Get(endElementIdx);
             return _utf8Json.Slice(start, row.Location - start + row.SizeOrLength);
         }
 
@@ -163,14 +162,14 @@ namespace System.Text.Json
             CheckNotDisposed();
 
             // The property name is stored one row before the value
-            _parsedData.Get(valueIndex - DbRow.Size, out DbRow row);
+            DbRow row = _parsedData.Get(valueIndex - DbRow.Size);
             Debug.Assert(row.TokenType == JsonTokenType.PropertyName);
 
             // Subtract one for the open quote.
             int start = row.Location - 1;
             int end;
 
-            _parsedData.Get(valueIndex, out row);
+            row = _parsedData.Get(valueIndex);
 
             if (row.IsSimpleValue)
             {
@@ -186,7 +185,7 @@ namespace System.Text.Json
             }
 
             int endElementIdx = GetEndIndex(valueIndex, includeEndElement: false);
-            _parsedData.Get(endElementIdx, out row);
+            row = _parsedData.Get(endElementIdx);
             end = row.Location + row.SizeOrLength;
             return _utf8Json.Slice(start, end - start);
         }
@@ -202,7 +201,7 @@ namespace System.Text.Json
                 return lastString;
             }
 
-            _parsedData.Get(index, out DbRow row);
+            DbRow row = _parsedData.Get(index);
 
             JsonTokenType tokenType = row.TokenType;
 
@@ -232,7 +231,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            _parsedData.Get(index, out DbRow row);
+            DbRow row = _parsedData.Get(index);
 
             CheckExpectedType(JsonTokenType.Number, row.TokenType);
 
@@ -254,7 +253,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            _parsedData.Get(index, out DbRow row);
+            DbRow row = _parsedData.Get(index);
 
             CheckExpectedType(JsonTokenType.Number, row.TokenType);
 
@@ -276,7 +275,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            _parsedData.Get(index, out DbRow row);
+            DbRow row = _parsedData.Get(index);
 
             CheckExpectedType(JsonTokenType.Number, row.TokenType);
 
@@ -298,7 +297,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            _parsedData.Get(index, out DbRow row);
+            DbRow row = _parsedData.Get(index);
 
             CheckExpectedType(JsonTokenType.Number, row.TokenType);
 
@@ -320,7 +319,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            _parsedData.Get(index, out DbRow row);
+            DbRow row = _parsedData.Get(index);
 
             CheckExpectedType(JsonTokenType.Number, row.TokenType);
 
@@ -341,7 +340,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            _parsedData.Get(index, out DbRow row);
+            DbRow row = _parsedData.Get(index);
 
             CheckExpectedType(JsonTokenType.Number, row.TokenType);
 
@@ -362,7 +361,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            _parsedData.Get(index, out DbRow row);
+            DbRow row = _parsedData.Get(index);
 
             CheckExpectedType(JsonTokenType.Number, row.TokenType);
 
