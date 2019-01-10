@@ -19,7 +19,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         public void WriteString(string propertyName, DateTime value, bool suppressEscaping = false)
@@ -34,7 +34,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         public void WriteString(ReadOnlySpan<char> propertyName, DateTime value, bool suppressEscaping = false)
@@ -63,7 +63,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         public void WriteString(ReadOnlySpan<byte> propertyName, DateTime value, bool suppressEscaping = false)

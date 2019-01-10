@@ -17,7 +17,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         public void WriteStringValue(string value, bool suppressEscaping = false)
@@ -31,7 +31,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         public void WriteStringValue(ReadOnlySpan<char> value, bool suppressEscaping = false)
@@ -183,7 +183,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         public void WriteStringValue(ReadOnlySpan<byte> value, bool suppressEscaping = false)

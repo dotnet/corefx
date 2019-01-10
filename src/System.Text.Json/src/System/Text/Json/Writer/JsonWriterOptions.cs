@@ -37,7 +37,7 @@ namespace System.Text.Json
         /// <summary>
         /// Defines whether the <see cref="Utf8JsonWriter"/> should skip structural validation and allow
         /// the user to write invalid JSON, when set to true. If set to false, any attempts to write invalid JSON will result in
-        /// a <exception cref="JsonWriterException"/> to be thrown (for example, writing a value within an object
+        /// a <exception cref="InvalidOperationException"/> to be thrown (for example, writing a value within an object
         /// without a property name). If the JSON being written is known to be correct
         /// then skipping validation (by setting it to true) could improve performance.
         /// </summary>

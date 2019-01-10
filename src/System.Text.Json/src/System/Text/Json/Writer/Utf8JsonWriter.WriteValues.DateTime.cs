@@ -12,7 +12,7 @@ namespace System.Text.Json
         /// Writes the <see cref="DateTime"/> value (as a JSON string) as an element of a JSON array.
         /// </summary>
         /// <param name="value">The value to be written as a JSON string as an element of a JSON array.</param>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         public void WriteStringValue(DateTime value)

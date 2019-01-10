@@ -49,10 +49,6 @@ namespace System.Text.Json
         String = (byte)6,
         True = (byte)8,
     }
-    public sealed partial class JsonWriterException : System.Exception
-    {
-        public JsonWriterException(string message) { }
-    }
     public partial struct JsonWriterOptions
     {
         private object _dummy;

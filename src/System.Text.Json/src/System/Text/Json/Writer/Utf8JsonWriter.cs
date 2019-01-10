@@ -13,7 +13,7 @@ namespace System.Text.Json
     /// It writes the text sequentially with no caching and adheres to the JSON RFC
     /// by default (https://tools.ietf.org/html/rfc8259), with the exception of writing comments.
     /// When the user attempts to write invalid JSON and validation is enabled, it throws
-    /// a JsonWriterException with a context specific error message.
+    /// a <see cref="InvalidOperationException"/> with a context specific error message.
     /// Since this type is a ref struct, it does not directly support async. However, it does provide
     /// support for reentrancy to write partial data, and continue writing in chunks.
     /// To be able to format the output with indentation and whitespace OR to skip validation, create an instance of 
@@ -144,14 +144,14 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="isFinalBlock">Let's the writer know whether more data will be written. This is used to validate
         /// that the JSON written sor far is structurally valid if no more data is to follow.</param>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown when incomplete JSON has been written and <paramref name="isFinalBlock"/> is true.
         /// (for example when an open object or array needs to be closed).
         /// </exception>
         public void Flush(bool isFinalBlock = true)
         {
             if (isFinalBlock && !_writerOptions.SkipValidation && (CurrentDepth != 0 || _tokenType == JsonTokenType.None))
-                ThrowHelper.ThrowJsonWriterException_DepthNonZeroOrEmptyJson(_currentDepth);
+                ThrowHelper.ThrowInvalidOperationException_DepthNonZeroOrEmptyJson(_currentDepth);
 
             Flush();
         }
@@ -167,7 +167,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the beginning of a JSON array.
         /// </summary>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
@@ -180,7 +180,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the beginning of a JSON object.
         /// </summary>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
@@ -193,7 +193,7 @@ namespace System.Text.Json
         private void WriteStart(byte token)
         {
             if (CurrentDepth >= JsonConstants.MaxWriterDepth)
-                ThrowHelper.ThrowJsonWriterException(ExceptionResource.DepthTooLarge, _currentDepth);
+                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.DepthTooLarge, _currentDepth);
 
             if (_writerOptions.SlowPath)
             {
@@ -258,14 +258,14 @@ namespace System.Text.Json
             if (_inObject)
             {
                 Debug.Assert(_tokenType != JsonTokenType.None && _tokenType != JsonTokenType.StartArray);
-                ThrowHelper.ThrowJsonWriterException(ExceptionResource.CannotStartObjectArrayWithoutProperty, tokenType: _tokenType);
+                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotStartObjectArrayWithoutProperty, tokenType: _tokenType);
             }
             else
             {
                 Debug.Assert(_tokenType != JsonTokenType.StartObject);
                 if (_tokenType != JsonTokenType.None && (!_isNotPrimitive || CurrentDepth == 0))
                 {
-                    ThrowHelper.ThrowJsonWriterException(ExceptionResource.CannotStartObjectArrayAfterPrimitiveOrClose, tokenType: _tokenType);
+                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotStartObjectArrayAfterPrimitiveOrClose, tokenType: _tokenType);
                 }
             }
         }
@@ -317,7 +317,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
@@ -348,7 +348,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
@@ -461,7 +461,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
@@ -476,7 +476,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
@@ -491,7 +491,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
@@ -522,7 +522,7 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
@@ -630,7 +630,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the end of a JSON array.
         /// </summary>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         public void WriteEndArray()
@@ -642,7 +642,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the end of a JSON object.
         /// </summary>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         public void WriteEndObject()
@@ -707,14 +707,14 @@ namespace System.Text.Json
         private void ValidateEnd(byte token)
         {
             if (_bitStack.CurrentDepth <= 0)
-                ThrowHelper.ThrowJsonWriterException(ExceptionResource.MismatchedObjectArray, token);
+                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, token);
 
             if (token == JsonConstants.CloseBracket)
             {
                 if (_inObject)
                 {
                     Debug.Assert(_tokenType != JsonTokenType.None);
-                    ThrowHelper.ThrowJsonWriterException(ExceptionResource.MismatchedObjectArray, token);
+                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, token);
                 }
             }
             else
@@ -723,7 +723,7 @@ namespace System.Text.Json
 
                 if (!_inObject)
                 {
-                    ThrowHelper.ThrowJsonWriterException(ExceptionResource.MismatchedObjectArray, token);
+                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, token);
                 }
             }
 

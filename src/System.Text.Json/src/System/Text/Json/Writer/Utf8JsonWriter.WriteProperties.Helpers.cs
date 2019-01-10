@@ -15,14 +15,14 @@ namespace System.Text.Json
         private void ValidatePropertyNameAndDepth(ref ReadOnlySpan<char> propertyName)
         {
             if (propertyName.Length > JsonConstants.MaxCharacterTokenSize || CurrentDepth >= JsonConstants.MaxWriterDepth)
-                ThrowHelper.ThrowJsonWriterOrArgumentException(propertyName, _currentDepth);
+                ThrowHelper.ThrowInvalidOperationOrArgumentException(propertyName, _currentDepth);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ValidatePropertyNameAndDepth(ref ReadOnlySpan<byte> propertyName)
         {
             if (propertyName.Length > JsonConstants.MaxTokenSize || CurrentDepth >= JsonConstants.MaxWriterDepth)
-                ThrowHelper.ThrowJsonWriterOrArgumentException(propertyName, _currentDepth);
+                ThrowHelper.ThrowInvalidOperationOrArgumentException(propertyName, _currentDepth);
         }
 
         private void ValidateWritingProperty()
@@ -30,7 +30,7 @@ namespace System.Text.Json
             if (!_inObject)
             {
                 Debug.Assert(_tokenType != JsonTokenType.StartObject);
-                ThrowHelper.ThrowJsonWriterException(ExceptionResource.CannotWritePropertyWithinArray, tokenType: _tokenType);
+                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWritePropertyWithinArray, tokenType: _tokenType);
             }
         }
 

@@ -10,7 +10,7 @@ namespace System.Text.Json
         /// Writes the <see cref="uint"/> value (as a JSON number) as an element of a JSON array.
         /// </summary>
         /// <param name="value">The value to be written as a JSON number as an element of a JSON array.</param>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         [CLSCompliant(false)]
@@ -21,7 +21,7 @@ namespace System.Text.Json
         /// Writes the <see cref="ulong"/> value (as a JSON number) as an element of a JSON array.
         /// </summary>
         /// <param name="value">The value to be written as a JSON number as an element of a JSON array.</param>
-        /// <exception cref="JsonWriterException">
+        /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         [CLSCompliant(false)]

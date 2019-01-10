@@ -48,9 +48,9 @@ namespace System.Text.Json.Tests
             {
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
                 jsonUtf8.Flush();
-                WriterDidNotThrow(skipValidation, "Expected JsonWriterException to be thrown when calling Flush on an empty JSON payload.");
+                WriterDidNotThrow(skipValidation, "Expected InvalidOperationException to be thrown when calling Flush on an empty JSON payload.");
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             output = new FixedSizedBufferWriter(10);
             try
@@ -58,9 +58,9 @@ namespace System.Text.Json.Tests
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
                 jsonUtf8.WriteCommentValue("hi");
                 jsonUtf8.Flush();
-                WriterDidNotThrow(skipValidation, "Expected JsonWriterException to be thrown when calling Flush on an empty JSON payload.");
+                WriterDidNotThrow(skipValidation, "Expected InvalidOperationException to be thrown when calling Flush on an empty JSON payload.");
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
         }
 
         [Theory]
@@ -216,7 +216,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndArray();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -224,7 +224,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndObject();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -232,7 +232,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteStartArray("property at start", suppressEscaping: true);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -240,7 +240,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteStartObject("property at start", suppressEscaping: true);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -249,7 +249,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteStartArray("property inside array", suppressEscaping: true);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -258,7 +258,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteStartObject();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -267,7 +267,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndObject();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -276,7 +276,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteStringValue("key");
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -285,7 +285,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteString("key", "value");
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -294,7 +294,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndArray();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -305,7 +305,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndObject();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -316,7 +316,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndArray();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -327,7 +327,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndObject();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -338,7 +338,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndArray();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -348,7 +348,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndArray();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -358,7 +358,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndObject();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -368,7 +368,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndObject();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -378,7 +378,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndArray();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             output.Dispose();
         }
@@ -401,7 +401,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.Flush(isFinalBlock: true);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -410,7 +410,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.Flush(isFinalBlock: true);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -421,7 +421,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.Flush(isFinalBlock: true);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -431,7 +431,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.Flush(isFinalBlock: true);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -442,7 +442,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.Flush(isFinalBlock: true);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -453,7 +453,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.Flush(isFinalBlock: true);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             output.Dispose();
         }
@@ -476,7 +476,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteNumberValue(12345);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -485,7 +485,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteStartArray();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -494,7 +494,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteStartObject();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -503,7 +503,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteStartArray("property name", suppressEscaping: true);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -512,7 +512,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteStartObject("property name", suppressEscaping: true);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -521,7 +521,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteString("property name", "value", suppressEscaping: true);
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -530,7 +530,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndArray();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -539,7 +539,7 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteEndObject();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             output.Dispose();
         }
@@ -714,9 +714,9 @@ namespace System.Text.Json.Tests
                 {
                     jsonUtf8.WriteStartArray();
                 }
-                Assert.True(false, "Expected JsonWriterException to be thrown for depth >= 1000.");
+                Assert.True(false, "Expected InvalidOperationException to be thrown for depth >= 1000.");
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             output.Dispose();
         }
@@ -741,9 +741,9 @@ namespace System.Text.Json.Tests
                 {
                     jsonUtf8.WriteStartArray("name");
                 }
-                Assert.True(false, "Expected JsonWriterException to be thrown for depth >= 1000.");
+                Assert.True(false, "Expected InvalidOperationException to be thrown for depth >= 1000.");
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             jsonUtf8 = new Utf8JsonWriter(output, state);
 
@@ -754,9 +754,9 @@ namespace System.Text.Json.Tests
                 {
                     jsonUtf8.WriteStartArray(Encoding.UTF8.GetBytes("name"));
                 }
-                Assert.True(false, "Expected JsonWriterException to be thrown for depth >= 1000.");
+                Assert.True(false, "Expected InvalidOperationException to be thrown for depth >= 1000.");
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             output.Dispose();
         }
@@ -1045,13 +1045,13 @@ namespace System.Text.Json.Tests
                 jsonUtf8.WriteStringValue("Hello, World!");
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
             try
             {
                 jsonUtf8.WriteEndArray();
                 WriterDidNotThrow(skipValidation);
             }
-            catch (JsonWriterException) { }
+            catch (InvalidOperationException) { }
 
             output.Dispose();
         }
@@ -1133,7 +1133,7 @@ namespace System.Text.Json.Tests
                     jsonUtf8.WriteStartObject();
                     WriterDidNotThrow(skipValidation);
                 }
-                catch (JsonWriterException) { }
+                catch (InvalidOperationException) { }
 
                 output.Dispose();
             }
@@ -1158,7 +1158,7 @@ namespace System.Text.Json.Tests
                     jsonUtf8.WriteStartObject("name");
                     WriterDidNotThrow(skipValidation);
                 }
-                catch (JsonWriterException) { }
+                catch (InvalidOperationException) { }
 
                 output.Dispose();
             }
@@ -1633,7 +1633,7 @@ namespace System.Text.Json.Tests
                             break;
                     }
                 }
-                catch (JsonWriterException) { }
+                catch (ArgumentException) { }
             }
             jsonUtf8.WriteEndObject();
             jsonUtf8.Flush();
@@ -2851,9 +2851,9 @@ namespace System.Text.Json.Tests
         private static void WriterDidNotThrow(bool skipValidation)
         {
             if (skipValidation)
-                Assert.True(true, "Did not expect JsonWriterException to be thrown since validation was skipped.");
+                Assert.True(true, "Did not expect InvalidOperationException to be thrown since validation was skipped.");
             else
-                Assert.True(false, "Expected JsonWriterException to be thrown when validation is enabled.");
+                Assert.True(false, "Expected InvalidOperationException to be thrown when validation is enabled.");
         }
 
         private static void WriterDidNotThrow(bool skipValidation, string message)
@@ -2867,9 +2867,9 @@ namespace System.Text.Json.Tests
         private static void AssertWriterThrow(bool noThrow)
         {
             if (noThrow)
-                Assert.True(true, "Did not expect JsonWriterException to be thrown since input was valid (or suppressEscaping was true).");
+                Assert.True(true, "Did not expect InvalidOperationException to be thrown since input was valid (or suppressEscaping was true).");
             else
-                Assert.True(false, "Expected JsonWriterException to be thrown when user passes invalid UTF-8.");
+                Assert.True(false, "Expected InvalidOperationException to be thrown when user passes invalid UTF-8.");
         }
 
         private static string GetHelloWorldExpectedString(bool prettyPrint)

@@ -25,7 +25,6 @@
     <Compile Include="System\Text\Json\Reader\Utf8JsonReader.TryGet.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="System\Text\Json\Writer\JsonWriterException.cs" />
     <Compile Include="System\Text\Json\Writer\JsonWriterHelper.cs" />
     <Compile Include="System\Text\Json\Writer\JsonWriterHelper.Escaping.cs" />
     <Compile Include="System\Text\Json\Writer\JsonWriterOptions.cs" />

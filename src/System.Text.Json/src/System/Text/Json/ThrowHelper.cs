@@ -110,29 +110,12 @@ namespace System.Text.Json
             }
         }
 
-        public static void ThrowJsonWriterOrArgumentException(ReadOnlySpan<byte> propertyName, int currentDepth)
-        {
-            GetJsonWriterOrArgumentException(propertyName, currentDepth);
-        }
-
-        public static void ThrowJsonWriterException(string message)
-        {
-            throw GetJsonWriterException(message);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static JsonWriterException GetJsonWriterException(string message)
-        {
-            return new JsonWriterException(message);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void GetJsonWriterOrArgumentException(ReadOnlySpan<byte> propertyName, int currentDepth)
+        public static void ThrowInvalidOperationOrArgumentException(ReadOnlySpan<byte> propertyName, int currentDepth)
         {
             currentDepth &= JsonConstants.RemoveFlagsBitMask;
             if (currentDepth >= JsonConstants.MaxWriterDepth)
             {
-                ThrowJsonWriterException(SR.Format(SR.DepthTooLarge, currentDepth));
+                ThrowInvalidOperationException(SR.Format(SR.DepthTooLarge, currentDepth));
             }
             else
             {
@@ -141,37 +124,42 @@ namespace System.Text.Json
             }
         }
 
-        public static void ThrowJsonWriterException_DepthNonZeroOrEmptyJson(int currentDepth)
+        public static void ThrowInvalidOperationException(string message)
         {
-            throw GetJsonWriterException(currentDepth);
+            throw GetInvalidOperationException(message);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static JsonWriterException GetJsonWriterException(int currentDepth)
+        private static InvalidOperationException GetInvalidOperationException(string message)
+        {
+            return new InvalidOperationException(message);
+        }
+
+        public static void ThrowInvalidOperationException_DepthNonZeroOrEmptyJson(int currentDepth)
+        {
+            throw GetInvalidOperationException(currentDepth);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static InvalidOperationException GetInvalidOperationException(int currentDepth)
         {
             currentDepth &= JsonConstants.RemoveFlagsBitMask;
             if (currentDepth != 0)
             {
-                return new JsonWriterException(SR.Format(SR.ZeroDepthAtEnd, currentDepth));
+                return new InvalidOperationException(SR.Format(SR.ZeroDepthAtEnd, currentDepth));
             }
             else
             {
-                return new JsonWriterException(SR.Format(SR.EmptyJsonIsInvalid));
+                return new InvalidOperationException(SR.Format(SR.EmptyJsonIsInvalid));
             }
         }
 
-        public static void ThrowJsonWriterOrArgumentException(ReadOnlySpan<char> propertyName, int currentDepth)
-        {
-            GetJsonWriterOrArgumentException(propertyName, currentDepth);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void GetJsonWriterOrArgumentException(ReadOnlySpan<char> propertyName, int currentDepth)
+        public static void ThrowInvalidOperationOrArgumentException(ReadOnlySpan<char> propertyName, int currentDepth)
         {
             currentDepth &= JsonConstants.RemoveFlagsBitMask;
             if (currentDepth >= JsonConstants.MaxWriterDepth)
             {
-                ThrowJsonWriterException(SR.Format(SR.DepthTooLarge, currentDepth));
+                ThrowInvalidOperationException(SR.Format(SR.DepthTooLarge, currentDepth));
             }
             else
             {
@@ -312,12 +300,12 @@ namespace System.Text.Json
             return message;
         }
 
-        public static void ThrowJsonWriterException(ExceptionResource resource, int currentDepth = default, byte token = default, JsonTokenType tokenType = default)
+        public static void ThrowInvalidOperationException(ExceptionResource resource, int currentDepth = default, byte token = default, JsonTokenType tokenType = default)
         {
-            throw GetJsonReaderException(resource, currentDepth, token, tokenType);
+            throw GetInvalidOperationException(resource, currentDepth, token, tokenType);
         }
 
-        public static void ThrowJsonWriterException_InvalidUTF8(ReadOnlySpan<byte> value)
+        public static void ThrowArgumentException_InvalidUTF8(ReadOnlySpan<byte> value)
         {
             var builder = new StringBuilder();
 
@@ -336,19 +324,19 @@ namespace System.Text.Json
                 }
             }
 
-            throw new JsonWriterException(SR.Format(SR.CannotWriteInvalidUTF8, builder.ToString()));
+            throw new ArgumentException(SR.Format(SR.CannotWriteInvalidUTF8, builder.ToString()));
         }
 
-        public static void ThrowJsonWriterException_InvalidUTF16(int charAsInt)
+        public static void ThrowArgumentException_InvalidUTF16(int charAsInt)
         {
-            throw new JsonWriterException(SR.Format(SR.CannotWriteInvalidUTF16, $"0x{charAsInt:X2}"));
+            throw new ArgumentException(SR.Format(SR.CannotWriteInvalidUTF16, $"0x{charAsInt:X2}"));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static JsonWriterException GetJsonReaderException(ExceptionResource resource, int currentDepth, byte token, JsonTokenType tokenType)
+        public static InvalidOperationException GetInvalidOperationException(ExceptionResource resource, int currentDepth, byte token, JsonTokenType tokenType)
         {
             string message = GetResourceString(resource, currentDepth, token, tokenType);
-            return new JsonWriterException(message);
+            return new InvalidOperationException(message);
         }
 
         // This function will convert an ExceptionResource enum value to the resource string.
