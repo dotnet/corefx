@@ -9,6 +9,9 @@ using System.Runtime.Intrinsics.X86;
 
 namespace System.Buffers.Text
 {
+    // AVX2 version based on https://github.com/aklomp/base64/tree/e516d769a2a432c08404f1981e73b431566057be/lib/arch/avx2
+    // SSSE3 version based on https://github.com/aklomp/base64/tree/e516d769a2a432c08404f1981e73b431566057be/lib/arch/ssse3
+
     public static partial class Base64
     {
         /// <summary>
