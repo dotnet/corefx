@@ -272,7 +272,7 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     if ((processId = fork()) == 0) // processId == 0 if this is child process
 #endif
     {
-	// It turns out that child processes depend on their sigmask being set to something sane rather than mask all.
+        // It turns out that child processes depend on their sigmask being set to something sane rather than mask all.
         // On the other hand, we have to mask all to avoid our own signal handlers running in the child process, writing
         // to the pipe, and waking up the handling thread in the parent process. This also avoids third-party code getting
         // equally confused.
@@ -295,11 +295,11 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
             {
                 break; // No more signals
             }
-	    void (*oldhandler)(int) = (sa_old.sa_flags & SA_SIGINFO) ? (void (*)(int))sa_old.sa_sigaction : sa_old.sa_handler;
-	    if (oldhandler != SIG_IGN && oldhandler != SIG_DFL)
+            void (*oldhandler)(int) = (sa_old.sa_flags & SA_SIGINFO) ? (void (*)(int))sa_old.sa_sigaction : sa_old.sa_handler;
+            if (oldhandler != SIG_IGN && oldhandler != SIG_DFL)
             {
                 // It has a custom handler, put the default handler back.
-		// We check first th preserve flags on default handlers.
+                // We check first th preserve flags on default handlers.
                 sigaction(sig, &sa_default, NULL);
             }
         }
