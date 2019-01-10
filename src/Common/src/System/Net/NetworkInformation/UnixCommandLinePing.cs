@@ -19,7 +19,7 @@ namespace System.Net.NetworkInformation
         private static readonly string s_discoveredPing4UtilityPath = GetPingUtilityPath(ipv4: true);
         private static readonly string s_discoveredPing6UtilityPath = GetPingUtilityPath(ipv4: false);
         private static readonly bool s_isBSD = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD"));
-        private static Lazy<bool> s_isBusybox = new Lazy<bool>(() => IsBusyboxPing(s_discoveredPing4UtilityPath));
+        private static readonly Lazy<bool> s_isBusybox = new Lazy<bool>(() => IsBusyboxPing(s_discoveredPing4UtilityPath));
 
         [DllImport(Interop.Libraries.SystemNative, EntryPoint = "SystemNative_ReadLink", SetLastError = true)]
         private static extern unsafe int ReadLink(string path, byte* buffer, int bufferSize);
@@ -44,17 +44,12 @@ namespace System.Net.NetworkInformation
         // Check if found ping is symlink to busybox like alpine /bin/ping -> /bin/busybox
         private static unsafe bool IsBusyboxPing(string pingBinary)
         {
-            byte* buffer = stackalloc byte[4000];
-            int resultLength = ReadLink(pingBinary, buffer, 4000);
+            string linkedName = Interop.Sys.ReadLink(pingBinary);
 
-            // If pingBinary is not link resultLength will be -1
-            if (resultLength > 0 && resultLength < 4000)
+            // If pingBinary is not link linkedName will be null
+            if (linkedName != null && linkedName.EndsWith("busybox", StringComparison.Ordinal))
             {
-                string symlinkPath = Marshal.PtrToStringAnsi((IntPtr)buffer, resultLength);
-                if (symlinkPath.EndsWith("busybox"))
-                {
-                    return true;
-                }
+                return true;
             }
 
             return false;
@@ -125,7 +120,6 @@ namespace System.Net.NetworkInformation
                         sb.Append(" -M dont ");
                     }
                 }
-
             }
 
             // ping and ping6 do not report timing information unless at least 16 bytes are sent.

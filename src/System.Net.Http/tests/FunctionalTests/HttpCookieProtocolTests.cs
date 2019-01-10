@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Microsoft.DotNet.XUnitExtensions;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -157,11 +158,14 @@ namespace System.Net.Http.Functional.Tests
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "HTTP/2 is not supported on NetFX, and manually added Cookie header will be ignored if sent with container cookies")]
         [OuterLoop("Uses external server")]
-        [Theory, MemberData(nameof(EchoServers))]
+        [ConditionalTheory, MemberData(nameof(EchoServers))]
         public async Task SendAsync_RemoteServersWithCookies_Success(Uri remoteServer)
         {
             // CurlHandler: cookies from container are not sent if a Cookie header is manually added #26983.
-            if (IsCurlHandler) return;
+            if (IsCurlHandler) {
+                throw new Microsoft.DotNet.XUnitExtensions.SkipTestException("Not supported with CurlHandler");
+                //return;
+            }
 
             var expectedVersion = new Version(1,1);
             HttpClientHandler handler = CreateHttpClientHandler();
@@ -370,11 +374,15 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact]
         public async Task GetAsyncWithRedirect_SetCookieContainer_CorrectCookiesSent()
         {
             const string path1 = "/foo";
             const string path2 = "/bar";
+
+            if (IsCurlHandler) {
+                throw new Microsoft.DotNet.XUnitExtensions.SkipTestException("Not supported with CurlHandler");
+            }
 
             await LoopbackServer.CreateClientAndServerAsync(async url =>
             {
