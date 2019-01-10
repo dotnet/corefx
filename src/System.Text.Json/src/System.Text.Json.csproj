@@ -30,7 +30,6 @@
     <Compile Include="System\Text\Json\Writer\JsonWriterOptions.cs" />
     <Compile Include="System\Text\Json\Writer\JsonWriterState.cs" />
     <Compile Include="System\Text\Json\Writer\SequenceValidity.cs" />
-    <Compile Include="System\Text\Json\Writer\UnicodeScalar.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.DateTime.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.DateTimeOffset.cs" />

@@ -772,7 +772,7 @@ namespace System.Text.Json
         private void WriteNewLine(ref int idx)
         {
             // Write '\r\n' OR '\n', depending on OS
-            if (JsonWriterHelper.s_newLineUtf8.Length == 2)
+            if (Environment.NewLine.Length == 2)
             {
                 while (_buffer.Length <= idx)
                 {

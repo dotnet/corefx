@@ -11,8 +11,6 @@ namespace System.Text.Json
 {
     internal static partial class JsonWriterHelper
     {
-        public static readonly byte[] s_newLineUtf8 = Encoding.UTF8.GetBytes(Environment.NewLine);
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryWriteIndentation(Span<byte> buffer, int indent, out int bytesWritten)
         {
@@ -20,6 +18,8 @@ namespace System.Text.Json
 
             if (buffer.Length >= indent)
             {
+                // Based on perf tests, the break-even point where vectorized Fill is faster
+                // than explicitly writing the space in a loop is 8.
                 if (indent < 8)
                 {
                     int i = 0;
@@ -119,64 +119,7 @@ namespace System.Text.Json
                 ThrowHelper.ThrowArgumentException(propertyName, value);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int CountDigits(ulong value)
-        {
-            int digits = 1;
-            uint part;
-            if (value >= 10000000)
-            {
-                if (value >= 100000000000000)
-                {
-                    part = (uint)(value / 100000000000000);
-                    digits += 14;
-                }
-                else
-                {
-                    part = (uint)(value / 10000000);
-                    digits += 7;
-                }
-            }
-            else
-            {
-                part = (uint)value;
-            }
-
-            if (part < 10)
-            {
-                // no-op
-            }
-            else if (part < 100)
-            {
-                digits += 1;
-            }
-            else if (part < 1000)
-            {
-                digits += 2;
-            }
-            else if (part < 10000)
-            {
-                digits += 3;
-            }
-            else if (part < 100000)
-            {
-                digits += 4;
-            }
-            else if (part < 1000000)
-            {
-                digits += 5;
-            }
-            else
-            {
-                Debug.Assert(part < 10000000);
-                digits += 6;
-            }
-
-            return digits;
-        }
-
         // TODO: Replace this with publicly shipping implementation: https://github.com/dotnet/corefx/issues/34094
-
         /// <summary>
         /// Converts a span containing a sequence of UTF-16 bytes into UTF-8 bytes.
         ///
@@ -316,7 +259,7 @@ namespace System.Text.Json
                         else
                         {
                             // if (!IsLowSurrogate(ch) && !IsHighSurrogate(ch))
-                            if (!InRange(ch, JsonConstants.HighSurrogateStart, JsonConstants.LowSurrogateEnd))
+                            if (!IsInRangeInclusive(ch, JsonConstants.HighSurrogateStart, JsonConstants.LowSurrogateEnd))
                             {
                                 // 3 byte encoding
                                 chd = unchecked((sbyte)0xE0) | (ch >> 12);
@@ -334,7 +277,7 @@ namespace System.Text.Json
                                 chd = *pSrc;
 
                                 // if (!IsLowSurrogate(chd)) {
-                                if (!InRange(chd, JsonConstants.LowSurrogateStart, JsonConstants.LowSurrogateEnd))
+                                if (!IsInRangeInclusive(chd, JsonConstants.LowSurrogateStart, JsonConstants.LowSurrogateEnd))
                                 {
                                     // high not followed by low -> bad
                                     goto InvalidData;
@@ -405,7 +348,7 @@ namespace System.Text.Json
                     else
                     {
                         // if (!IsLowSurrogate(ch) && !IsHighSurrogate(ch))
-                        if (!InRange(ch, JsonConstants.HighSurrogateStart, JsonConstants.LowSurrogateEnd))
+                        if (!IsInRangeInclusive(ch, JsonConstants.HighSurrogateStart, JsonConstants.LowSurrogateEnd))
                         {
                             if (pAllocatedBufferEnd - pTarget <= 2)
                                 goto DestinationFull;
@@ -432,7 +375,7 @@ namespace System.Text.Json
                             chd = *pSrc;
 
                             // if (!IsLowSurrogate(chd)) {
-                            if (!InRange(chd, JsonConstants.LowSurrogateStart, JsonConstants.LowSurrogateEnd))
+                            if (!IsInRangeInclusive(chd, JsonConstants.LowSurrogateStart, JsonConstants.LowSurrogateEnd))
                             {
                                 // high not followed by low -> bad
                                 goto InvalidData;
@@ -481,98 +424,6 @@ namespace System.Text.Json
                 bytesWritten = (int)(pTarget - bytes);
                 return OperationStatus.NeedMoreData;
             }
-        }
-
-        // Borrowed from https://github.com/dotnet/corefx/blob/master/src/System.Memory/src/System/Buffers/Text/Utf8Formatter/Utf8Formatter.Integer.Signed.Default.cs#L16
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryFormatInt64Default(long value, Span<byte> destination, out int bytesWritten)
-        {
-            if ((ulong)value < 10)
-            {
-                return TryFormatUInt32SingleDigit((uint)value, destination, out bytesWritten);
-            }
-
-            return TryFormatInt64MultipleDigits(value, destination, out bytesWritten);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryFormatUInt64Default(ulong value, Span<byte> destination, out int bytesWritten)
-        {
-            if (value < 10)
-            {
-                return TryFormatUInt32SingleDigit((uint)value, destination, out bytesWritten);
-            }
-
-            return TryFormatUInt64MultipleDigits(value, destination, out bytesWritten);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool TryFormatUInt32SingleDigit(uint value, Span<byte> destination, out int bytesWritten)
-        {
-            if (destination.Length == 0)
-            {
-                bytesWritten = 0;
-                return false;
-            }
-            destination[0] = (byte)('0' + value);
-            bytesWritten = 1;
-            return true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool TryFormatInt64MultipleDigits(long value, Span<byte> destination, out int bytesWritten)
-        {
-            if (value < 0)
-            {
-                value = -value;
-                int digitCount = CountDigits((ulong)value);
-                // WriteDigits does not do bounds checks
-                if (digitCount >= destination.Length)
-                {
-                    bytesWritten = 0;
-                    return false;
-                }
-                destination[0] = (byte)'-';
-                bytesWritten = digitCount + 1;
-                WriteDigits((ulong)value, destination.Slice(1, digitCount));
-                return true;
-            }
-            else
-            {
-                return TryFormatUInt64MultipleDigits((ulong)value, destination, out bytesWritten);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool TryFormatUInt64MultipleDigits(ulong value, Span<byte> destination, out int bytesWritten)
-        {
-            int digitCount = CountDigits(value);
-            // WriteDigits does not do bounds checks
-            if (digitCount > destination.Length)
-            {
-                bytesWritten = 0;
-                return false;
-            }
-            bytesWritten = digitCount;
-            WriteDigits(value, destination.Slice(0, digitCount));
-            return true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteDigits(ulong value, Span<byte> buffer)
-        {
-            // We can mutate the 'value' parameter since it's a copy-by-value local.
-            // It'll be used to represent the value left over after each division by 10.
-
-            for (int i = buffer.Length - 1; i >= 1; i--)
-            {
-                ulong temp = '0' + value;
-                value /= 10;
-                buffer[i] = (byte)(temp - (value * 10));
-            }
-
-            Debug.Assert(value < 10);
-            buffer[0] = (byte)('0' + value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

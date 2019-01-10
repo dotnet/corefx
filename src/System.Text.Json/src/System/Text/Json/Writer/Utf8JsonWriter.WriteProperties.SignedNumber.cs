@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Buffers.Text;
 using System.Diagnostics;
 
 namespace System.Text.Json
@@ -304,10 +305,7 @@ namespace System.Text.Json
         private void WriteNumberValueFormatLoop(long value, ref int idx)
         {
             int bytesWritten;
-            // Using Utf8Formatter with default StandardFormat is roughly 30% slower (17 ns versus 12 ns)
-            // See: https://github.com/dotnet/corefx/issues/25425
-            // Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out bytesWritten);
-            while (!JsonWriterHelper.TryFormatInt64Default(value, _buffer.Slice(idx), out bytesWritten))
+            while (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out bytesWritten))
             {
                 AdvanceAndGrow(idx, JsonConstants.MaximumFormatInt64Length);
                 idx = 0;
