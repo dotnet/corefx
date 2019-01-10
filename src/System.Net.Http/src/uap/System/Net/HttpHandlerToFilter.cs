@@ -385,6 +385,12 @@ namespace System.Net.Http
             {
                 content.Headers.ContentLength = null;
             }
+            else
+            {
+                // Trigger delayed header generation via TryComputeLength. This code is needed due to an outstanding
+                // bug in HttpContentHeaders.ContentLength. See GitHub Issue #5523.
+                content.Headers.ContentLength = content.Headers.ContentLength;
+            }
 
             foreach (KeyValuePair<string, IEnumerable<string>> headerPair in content.Headers)
             {
