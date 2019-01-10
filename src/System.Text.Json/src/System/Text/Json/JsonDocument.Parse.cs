@@ -145,7 +145,7 @@ namespace System.Text.Json
                 new JsonReaderState(JsonReaderState.DefaultMaxDepth, readerOptions));
 
             var database = new CustomDb(utf8Json.Length);
-            var stack = new CustomStack(JsonReaderState.DefaultMaxDepth * StackRow.Size);
+            var stack = new StackRowStack(JsonReaderState.DefaultMaxDepth * StackRow.Size);
 
             try
             {

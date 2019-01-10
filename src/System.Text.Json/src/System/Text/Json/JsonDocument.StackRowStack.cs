@@ -10,12 +10,12 @@ namespace System.Text.Json
 {
     public sealed partial class JsonDocument
     {
-        private struct CustomStack : IDisposable
+        private struct StackRowStack : IDisposable
         {
             private byte[] _rentedBuffer;
             private int _topOfStack;
 
-            internal CustomStack(int initialSize)
+            internal StackRowStack(int initialSize)
             {
                 _rentedBuffer = ArrayPool<byte>.Shared.Rent(initialSize);
                 _topOfStack = _rentedBuffer.Length;

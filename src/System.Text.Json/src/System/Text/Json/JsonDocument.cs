@@ -395,7 +395,7 @@ namespace System.Text.Json
             ReadOnlySpan<byte> utf8JsonSpan,
             Utf8JsonReader reader,
             ref CustomDb database,
-            ref CustomStack stack)
+            ref StackRowStack stack)
         {
             bool inArray = false;
             int arrayItemsCount = 0;
