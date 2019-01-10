@@ -388,13 +388,25 @@ namespace System.Drawing.Tests
             ExtractAssociatedIcon_FilePath_Success(Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico"));
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.Windows)] // UNC
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Fix for #34122
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ExtractAssociatedIcon_UNCFilePath_Success()
         {
             string bitmapPath = Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico");
             string bitmapPathRoot = Path.GetPathRoot(bitmapPath);
             string bitmapUncPath = $"\\\\{Environment.MachineName}\\{bitmapPath.Substring(0, bitmapPathRoot.IndexOf(":"))}$\\{bitmapPath.Replace(bitmapPathRoot, "")}";
+
+            // Some path could not be accessible
+            // if so we just pass the test
+            try
+            {
+                File.Open(bitmapUncPath, FileMode.Open, FileAccess.Read, FileShare.Read).Dispose();
+            }
+            catch(IOException)
+            {
+                return;
+            }
 
             Assert.True(new Uri(bitmapUncPath).IsUnc);
 
@@ -423,7 +435,6 @@ namespace System.Drawing.Tests
             AssertExtensions.Throws<ArgumentNullException, ArgumentException>("filePath", null, () => Icon.ExtractAssociatedIcon(null));
         }
 
-        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void ExtractAssociatedIcon_InvalidFilePath_ThrowsArgumentException()
         {
