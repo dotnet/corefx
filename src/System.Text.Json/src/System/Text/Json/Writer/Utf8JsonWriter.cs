@@ -22,8 +22,6 @@ namespace System.Text.Json
     public ref partial struct Utf8JsonWriter
     {
         private const int StackallocThreshold = 256;
-        private const int MaxExpansionFactorWhileEscaping = 6;
-        private const int SpacesPerIndent = 2;
         private const int DefaultGrowthSize = 4096;
 
         private readonly IBufferWriter<byte> _output;
@@ -62,7 +60,7 @@ namespace System.Text.Json
         // else, no list separator is needed since we are writing the first item.
         private int _currentDepth;
 
-        private int Indentation => CurrentDepth * SpacesPerIndent;
+        private int Indentation => CurrentDepth * JsonConstants.SpacesPerIndent;
 
         /// <summary>
         /// Tracks the recursive depth of the nested objects / arrays within the JSON text
@@ -143,7 +141,7 @@ namespace System.Text.Json
         /// Advances the underlying <see cref="IBufferWriter{T}" /> based on what has been written so far.
         /// </summary>
         /// <param name="isFinalBlock">Let's the writer know whether more data will be written. This is used to validate
-        /// that the JSON written sor far is structurally valid if no more data is to follow.</param>
+        /// that the JSON written so far is structurally valid if no more data is to follow.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown when incomplete JSON has been written and <paramref name="isFinalBlock"/> is true.
         /// (for example when an open object or array needs to be closed).
@@ -159,8 +157,8 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Flush()
         {
-            BytesCommitted += _buffered;
             _output.Advance(_buffered);
+            BytesCommitted += _buffered;
             _buffered = 0;
         }
 
@@ -220,7 +218,7 @@ namespace System.Text.Json
 
             if (_currentDepth < 0)
             {
-                _buffer[0] = JsonConstants.ListSeperator;
+                _buffer[0] = JsonConstants.ListSeparator;
                 _buffer[1] = token;
             }
             else
@@ -279,7 +277,7 @@ namespace System.Text.Json
                 {
                     GrowAndEnsure();
                 }
-                _buffer[idx++] = JsonConstants.ListSeperator;
+                _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
             if (_tokenType != JsonTokenType.None)
@@ -422,11 +420,11 @@ namespace System.Text.Json
 
         private void WriteStartEscapeProperty(ref ReadOnlySpan<byte> propertyName, byte token, int firstEscapeIndexProp)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= propertyName.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
             byte[] propertyArray = null;
 
-            int length = firstEscapeIndexProp + MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
+            int length = firstEscapeIndexProp + JsonConstants.MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
             Span<byte> span;
             if (length > StackallocThreshold)
             {
@@ -596,11 +594,11 @@ namespace System.Text.Json
 
         private void WriteStartEscapeProperty(ref ReadOnlySpan<char> propertyName, byte token, int firstEscapeIndexProp)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= propertyName.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
             char[] propertyArray = null;
 
-            int length = firstEscapeIndexProp + MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
+            int length = firstEscapeIndexProp + JsonConstants.MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
             Span<char> span;
             if (length > StackallocThreshold)
             {
@@ -653,16 +651,6 @@ namespace System.Text.Json
 
         private void WriteEnd(byte token)
         {
-            _currentDepth |= 1 << 31;
-            _currentDepth--;
-
-            // Necessary if WriteEndX is called without a corresponding WriteStartX first.
-            // Checking for int.MaxValue because int.MinValue - 1 = int.MaxValue
-            if (_currentDepth == int.MaxValue)
-            {
-                _currentDepth = 0;
-            }
-
             if (_writerOptions.SlowPath)
             {
                 WriteEndSlow(token);
@@ -670,6 +658,13 @@ namespace System.Text.Json
             else
             {
                 WriteEndMinimized(token);
+            }
+
+            _currentDepth |= 1 << 31;
+            // Necessary if WriteEndX is called without a corresponding WriteStartX first.
+            if (CurrentDepth != 0)
+            {
+                _currentDepth--;
             }
         }
 
@@ -733,8 +728,7 @@ namespace System.Text.Json
         private void WriteEndIndented(byte token)
         {
             // Do not format/indent empty JSON object/array.
-            if ((_tokenType == JsonTokenType.StartObject && token == JsonConstants.CloseBrace)
-                || (_tokenType == JsonTokenType.StartArray && token == JsonConstants.CloseBracket))
+            if (_tokenType == JsonTokenType.StartObject || _tokenType == JsonTokenType.StartArray)
             {
                 WriteEndMinimized(token);
             }
@@ -744,6 +738,13 @@ namespace System.Text.Json
                 WriteNewLine(ref idx);
 
                 int indent = Indentation;
+                // Necessary if WriteEndX is called without a corresponding WriteStartX first.
+                if (indent != 0)
+                {
+                    // The end token should be at an outer indent and since we haven't updated
+                    // current depth yet, explicitly subtract here.
+                    indent -= JsonConstants.SpacesPerIndent;
+                }
                 while (true)
                 {
                     bool result = JsonWriterHelper.TryWriteIndentation(_buffer.Slice(idx), indent, out int bytesWritten);

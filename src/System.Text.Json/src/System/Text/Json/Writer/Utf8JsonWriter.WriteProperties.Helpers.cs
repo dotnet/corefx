@@ -43,7 +43,7 @@ namespace System.Text.Json
                 {
                     GrowAndEnsure();
                 }
-                _buffer[idx++] = JsonConstants.ListSeperator;
+                _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
             while (_buffer.Length <= idx)
@@ -81,7 +81,7 @@ namespace System.Text.Json
                 {
                     GrowAndEnsure();
                 }
-                _buffer[idx++] = JsonConstants.ListSeperator;
+                _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
             if (_tokenType != JsonTokenType.None)
@@ -143,7 +143,7 @@ namespace System.Text.Json
                 {
                     GrowAndEnsure();
                 }
-                _buffer[idx++] = JsonConstants.ListSeperator;
+                _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
             while (_buffer.Length <= idx)
@@ -194,7 +194,7 @@ namespace System.Text.Json
                 {
                     GrowAndEnsure();
                 }
-                _buffer[idx++] = JsonConstants.ListSeperator;
+                _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
             if (_tokenType != JsonTokenType.None)

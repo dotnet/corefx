@@ -269,9 +269,9 @@ namespace System.Text.Json
 
         private void WriteStringEscapeValueOnly(ref ReadOnlySpan<char> escapedPropertyName, ref ReadOnlySpan<char> value, int firstEscapeIndex)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
 
-            char[] valueArray = ArrayPool<char>.Shared.Rent(firstEscapeIndex + MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndex));
+            char[] valueArray = ArrayPool<char>.Shared.Rent(firstEscapeIndex + JsonConstants.MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndex));
             Span<char> span = valueArray;
             JsonWriterHelper.EscapeString(ref value, ref span, firstEscapeIndex, out int written);
             value = span.Slice(0, written);
@@ -283,9 +283,9 @@ namespace System.Text.Json
 
         private void WriteStringEscapeValueOnly(ref ReadOnlySpan<byte> escapedPropertyName, ref ReadOnlySpan<byte> value, int firstEscapeIndex)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
 
-            byte[] valueArray = ArrayPool<byte>.Shared.Rent(firstEscapeIndex + MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndex));
+            byte[] valueArray = ArrayPool<byte>.Shared.Rent(firstEscapeIndex + JsonConstants.MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndex));
             Span<byte> span = valueArray;
             JsonWriterHelper.EscapeString(ref value, ref span, firstEscapeIndex, out int written);
             value = span.Slice(0, written);
@@ -297,9 +297,9 @@ namespace System.Text.Json
 
         private void WriteStringEscapeValueOnly(ref ReadOnlySpan<char> escapedPropertyName, ref ReadOnlySpan<byte> value, int firstEscapeIndex)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
 
-            byte[] valueArray = ArrayPool<byte>.Shared.Rent(firstEscapeIndex + MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndex));
+            byte[] valueArray = ArrayPool<byte>.Shared.Rent(firstEscapeIndex + JsonConstants.MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndex));
             Span<byte> span = valueArray;
             JsonWriterHelper.EscapeString(ref value, ref span, firstEscapeIndex, out int written);
             value = span.Slice(0, written);
@@ -311,9 +311,9 @@ namespace System.Text.Json
 
         private void WriteStringEscapeValueOnly(ref ReadOnlySpan<byte> escapedPropertyName, ref ReadOnlySpan<char> value, int firstEscapeIndex)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
 
-            char[] valueArray = ArrayPool<char>.Shared.Rent(firstEscapeIndex + MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndex));
+            char[] valueArray = ArrayPool<char>.Shared.Rent(firstEscapeIndex + JsonConstants.MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndex));
             Span<char> span = valueArray;
             JsonWriterHelper.EscapeString(ref value, ref span, firstEscapeIndex, out int written);
             value = span.Slice(0, written);
@@ -401,15 +401,15 @@ namespace System.Text.Json
 
         private void WriteStringEscapePropertyOrValue(ref ReadOnlySpan<char> propertyName, ref ReadOnlySpan<char> value, int firstEscapeIndexProp, int firstEscapeIndexVal)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= value.Length);
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= propertyName.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
             char[] valueArray = null;
             char[] propertyArray = null;
 
             if (firstEscapeIndexVal != -1)
             {
-                int length = firstEscapeIndexVal + MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
+                int length = firstEscapeIndexVal + JsonConstants.MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
 
                 Span<char> span;
                 if (length > StackallocThreshold)
@@ -432,7 +432,7 @@ namespace System.Text.Json
 
             if (firstEscapeIndexProp != -1)
             {
-                int length = firstEscapeIndexProp + MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
+                int length = firstEscapeIndexProp + JsonConstants.MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
                 Span<char> span;
                 if (length > StackallocThreshold)
                 {
@@ -467,15 +467,15 @@ namespace System.Text.Json
 
         private void WriteStringEscapePropertyOrValue(ref ReadOnlySpan<byte> propertyName, ref ReadOnlySpan<byte> value, int firstEscapeIndexProp, int firstEscapeIndexVal)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= value.Length);
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= propertyName.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
             byte[] valueArray = null;
             byte[] propertyArray = null;
 
             if (firstEscapeIndexVal != -1)
             {
-                int length = firstEscapeIndexVal + MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
+                int length = firstEscapeIndexVal + JsonConstants.MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
 
                 Span<byte> span;
                 if (length > StackallocThreshold)
@@ -498,7 +498,7 @@ namespace System.Text.Json
 
             if (firstEscapeIndexProp != -1)
             {
-                int length = firstEscapeIndexProp + MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
+                int length = firstEscapeIndexProp + JsonConstants.MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
                 Span<byte> span;
                 if (length > StackallocThreshold)
                 {
@@ -533,15 +533,15 @@ namespace System.Text.Json
 
         private void WriteStringEscapePropertyOrValue(ref ReadOnlySpan<char> propertyName, ref ReadOnlySpan<byte> value, int firstEscapeIndexProp, int firstEscapeIndexVal)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= value.Length);
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= propertyName.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
             byte[] valueArray = null;
             char[] propertyArray = null;
 
             if (firstEscapeIndexVal != -1)
             {
-                int length = firstEscapeIndexVal + MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
+                int length = firstEscapeIndexVal + JsonConstants.MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
 
                 Span<byte> span;
                 if (length > StackallocThreshold)
@@ -564,7 +564,7 @@ namespace System.Text.Json
 
             if (firstEscapeIndexProp != -1)
             {
-                int length = firstEscapeIndexProp + MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
+                int length = firstEscapeIndexProp + JsonConstants.MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
                 Span<char> span;
                 if (length > StackallocThreshold)
                 {
@@ -599,15 +599,15 @@ namespace System.Text.Json
 
         private void WriteStringEscapePropertyOrValue(ref ReadOnlySpan<byte> propertyName, ref ReadOnlySpan<char> value, int firstEscapeIndexProp, int firstEscapeIndexVal)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= value.Length);
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= propertyName.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
             char[] valueArray = null;
             byte[] propertyArray = null;
 
             if (firstEscapeIndexVal != -1)
             {
-                int length = firstEscapeIndexVal + MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
+                int length = firstEscapeIndexVal + JsonConstants.MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
 
                 Span<char> span;
                 if (length > StackallocThreshold)
@@ -630,7 +630,7 @@ namespace System.Text.Json
 
             if (firstEscapeIndexProp != -1)
             {
-                int length = firstEscapeIndexProp + MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
+                int length = firstEscapeIndexProp + JsonConstants.MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
                 Span<byte> span;
                 if (length > StackallocThreshold)
                 {

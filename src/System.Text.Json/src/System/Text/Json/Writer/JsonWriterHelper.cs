@@ -14,7 +14,7 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool TryWriteIndentation(Span<byte> buffer, int indent, out int bytesWritten)
         {
-            Debug.Assert(indent % 2 == 0);
+            Debug.Assert(indent % JsonConstants.SpacesPerIndent == 0);
 
             if (buffer.Length >= indent)
             {

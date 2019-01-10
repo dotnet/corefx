@@ -60,7 +60,7 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                _buffer[idx++] = JsonConstants.ListSeperator;
+                _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
             Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out int bytesWritten);
@@ -77,7 +77,7 @@ namespace System.Text.Json
                 {
                     GrowAndEnsure();
                 }
-                _buffer[idx++] = JsonConstants.ListSeperator;
+                _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
             if (_tokenType != JsonTokenType.None)

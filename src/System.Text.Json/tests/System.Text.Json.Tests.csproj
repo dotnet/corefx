@@ -4,7 +4,7 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ArrayFormatter.cs" />
+    <Compile Include="ArrayBufferWriter.cs" />
     <Compile Include="BitStackTests.cs" />
     <Compile Include="BufferFactory.cs" />
     <Compile Include="BufferSegment.cs" />

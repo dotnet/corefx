@@ -75,7 +75,7 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                _buffer[idx++] = JsonConstants.ListSeperator;
+                _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
             value.CopyTo(_buffer.Slice(idx));
@@ -92,7 +92,7 @@ namespace System.Text.Json
                 {
                     GrowAndEnsure();
                 }
-                _buffer[idx++] = JsonConstants.ListSeperator;
+                _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
             if (_tokenType != JsonTokenType.None)

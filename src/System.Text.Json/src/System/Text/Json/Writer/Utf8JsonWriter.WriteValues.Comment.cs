@@ -108,13 +108,13 @@ namespace System.Text.Json
 
         private void WriteCommentEscapeValue(ref ReadOnlySpan<char> value, int firstEscapeIndexVal)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
 
             char[] valueArray = null;
 
             if (firstEscapeIndexVal != -1)
             {
-                int length = firstEscapeIndexVal + MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
+                int length = firstEscapeIndexVal + JsonConstants.MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
 
                 Span<char> span;
                 if (length > StackallocThreshold)
@@ -230,13 +230,13 @@ namespace System.Text.Json
 
         private void WriteCommentEscapeValue(ref ReadOnlySpan<byte> value, int firstEscapeIndexVal)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
 
             byte[] valueArray = null;
 
             if (firstEscapeIndexVal != -1)
             {
-                int length = firstEscapeIndexVal + MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
+                int length = firstEscapeIndexVal + JsonConstants.MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
 
                 Span<byte> span;
                 if (length > StackallocThreshold)

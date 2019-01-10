@@ -14,7 +14,7 @@ namespace System.Text.Json
         public const byte CarriageReturn = (byte)'\r';
         public const byte LineFeed = (byte)'\n';
         public const byte Tab = (byte)'\t';
-        public const byte ListSeperator = (byte)',';
+        public const byte ListSeparator = (byte)',';
         public const byte KeyValueSeperator = (byte)':';
         public const byte Quote = (byte)'"';
         public const byte BackSlash = (byte)'\\';
@@ -28,15 +28,21 @@ namespace System.Text.Json
         public static ReadOnlySpan<byte> NullValue => new byte[] { (byte)'n', (byte)'u', (byte)'l', (byte)'l' };
 
         // Used to search for the end of a number
-        public static ReadOnlySpan<byte> Delimiters => new byte[] { ListSeperator, CloseBrace, CloseBracket, Space, LineFeed, CarriageReturn, Tab, Slash };
+        public static ReadOnlySpan<byte> Delimiters => new byte[] { ListSeparator, CloseBrace, CloseBracket, Space, LineFeed, CarriageReturn, Tab, Slash };
 
         // Explicitly skipping ReverseSolidus since that is handled separately
         public static ReadOnlySpan<byte> EscapableChars => new byte[] { Quote, (byte)'n', (byte)'r', (byte)'t', Slash, (byte)'u', (byte)'b', (byte)'f' };
 
+        public const int SpacesPerIndent = 2;
         public const int RemoveFlagsBitMask = 0x7FFFFFFF;
         public const int MaxWriterDepth = 1_000;
-        public const int MaxTokenSize = 2_000_000_000 / 6;  // 357_913_941 bytes
-        public const int MaxCharacterTokenSize = 2_000_000_000 / 6; // 357_913_941 characters
+        // In the worst case, an ASCII character represented as a single utf-8 byte could expand 6x when escaped.
+        // For example: '+' becomes '\u0043'
+        // Escaping surrogate pairs (represented by 3 or 4 utf-8 bytes) would expand to 12 bytes (which is still <= 6x).
+        // The same factor applies to utf-16 characters.
+        public const int MaxExpansionFactorWhileEscaping = 6;
+        public const int MaxTokenSize = 2_000_000_000 / MaxExpansionFactorWhileEscaping;  // 357_913_941 bytes
+        public const int MaxCharacterTokenSize = 2_000_000_000 / MaxExpansionFactorWhileEscaping; // 357_913_941 characters
 
         public const int MaximumFormatInt64Length = 20;   // 19 + sign (i.e. -9223372036854775808)
         public const int MaximumFormatUInt64Length = 20;  // i.e. 18446744073709551615

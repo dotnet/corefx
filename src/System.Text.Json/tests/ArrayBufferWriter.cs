@@ -7,11 +7,11 @@ using System.Runtime.CompilerServices;
 
 namespace System.Text.Json.Tests
 {
-    internal class ArrayFormatter : IBufferWriter<byte>, IDisposable
+    internal class ArrayBufferWriter : IBufferWriter<byte>, IDisposable
     {
-        ResizableArray<byte> _buffer;
+        private ResizableArray<byte> _buffer;
 
-        public ArrayFormatter(int capacity)
+        public ArrayBufferWriter(int capacity)
         {
             _buffer = new ResizableArray<byte>(ArrayPool<byte>.Shared.Rent(capacity));
         }
@@ -30,7 +30,10 @@ namespace System.Text.Json.Tests
         public Memory<byte> GetMemory(int minimumLength = 0)
         {
             if (minimumLength < 1)
+            {
                 minimumLength = 1;
+            }
+
             if (minimumLength > _buffer.FreeCount)
             {
                 int doubleCount = _buffer.FreeCount * 2;
@@ -39,6 +42,7 @@ namespace System.Text.Json.Tests
                 byte[] oldArray = _buffer.Resize(newArray);
                 ArrayPool<byte>.Shared.Return(oldArray);
             }
+
             return _buffer.FreeMemory;
         }
 
@@ -46,7 +50,10 @@ namespace System.Text.Json.Tests
         public Span<byte> GetSpan(int minimumLength = 0)
         {
             if (minimumLength < 1)
+            {
                 minimumLength = 1;
+            }
+
             if (minimumLength > _buffer.FreeCount)
             {
                 int doubleCount = _buffer.FreeCount * 2;
@@ -55,6 +62,7 @@ namespace System.Text.Json.Tests
                 byte[] oldArray = _buffer.Resize(newArray);
                 ArrayPool<byte>.Shared.Return(oldArray);
             }
+
             return _buffer.FreeSpan;
         }
 

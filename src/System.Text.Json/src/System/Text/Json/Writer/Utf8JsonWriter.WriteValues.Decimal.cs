@@ -45,7 +45,7 @@ namespace System.Text.Json
                 {
                     GrowAndEnsure();
                 }
-                _buffer[idx++] = JsonConstants.ListSeperator;
+                _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
             WriteNumberValueFormatLoop(value, ref idx);
@@ -62,7 +62,7 @@ namespace System.Text.Json
                 {
                     GrowAndEnsure();
                 }
-                _buffer[idx++] = JsonConstants.ListSeperator;
+                _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
             if (_tokenType != JsonTokenType.None)

@@ -117,11 +117,11 @@ namespace System.Text.Json
 
         private void WriteStringEscapeProperty(ref ReadOnlySpan<char> propertyName, Guid value, int firstEscapeIndexProp)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= propertyName.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
             char[] propertyArray = null;
 
-            int length = firstEscapeIndexProp + MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
+            int length = firstEscapeIndexProp + JsonConstants.MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
             Span<char> span;
             if (length > StackallocThreshold)
             {
@@ -150,11 +150,11 @@ namespace System.Text.Json
 
         private void WriteStringEscapeProperty(ref ReadOnlySpan<byte> propertyName, Guid value, int firstEscapeIndexProp)
         {
-            Debug.Assert(int.MaxValue / MaxExpansionFactorWhileEscaping >= propertyName.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
             byte[] propertyArray = null;
 
-            int length = firstEscapeIndexProp + MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
+            int length = firstEscapeIndexProp + JsonConstants.MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
             Span<byte> span;
             if (length > StackallocThreshold)
             {

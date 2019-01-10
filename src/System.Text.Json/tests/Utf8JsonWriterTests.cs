@@ -208,7 +208,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(1024);
+            var output = new ArrayBufferWriter(1024);
 
             var jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -392,7 +392,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(1024);
+            var output = new ArrayBufferWriter(1024);
 
             var jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -467,7 +467,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(1024);
+            var output = new ArrayBufferWriter(1024);
 
             var jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -553,7 +553,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(1024);
+            var output = new ArrayBufferWriter(1024);
 
             var jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -667,7 +667,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = true });
 
-            var output = new ArrayFormatter(1024);
+            var output = new ArrayBufferWriter(1024);
 
             var jsonUtf8 = new Utf8JsonWriter(output, state);
 
@@ -687,6 +687,7 @@ namespace System.Text.Json.Tests
                     sb.Append(Environment.NewLine);
                 sb.Append("]");
             }
+            sb.Append(",");
             if (formatted)
                 sb.Append(Environment.NewLine);
             sb.Append("[]");
@@ -705,7 +706,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(1024);
+            var output = new ArrayBufferWriter(1024);
 
             var jsonUtf8 = new Utf8JsonWriter(output, state);
             try
@@ -730,7 +731,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(1024);
+            var output = new ArrayBufferWriter(1024);
 
             var jsonUtf8 = new Utf8JsonWriter(output, state);
 
@@ -771,7 +772,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(1024);
+            var output = new ArrayBufferWriter(1024);
 
             var jsonUtf8 = new Utf8JsonWriter(output, state);
 
@@ -815,7 +816,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 3; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteNumberValue(123456789012345);
@@ -844,7 +845,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 9; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -901,7 +902,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(10);
+            var output = new ArrayBufferWriter(10);
             var jsonUtf8 = new Utf8JsonWriter(output, state);
 
             jsonUtf8.WriteStartObject();
@@ -967,7 +968,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(10);
+            var output = new ArrayBufferWriter(10);
             var jsonUtf8 = new Utf8JsonWriter(output, state);
 
             Assert.Equal(0, jsonUtf8.CurrentDepth);
@@ -1023,7 +1024,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(10);
+            var output = new ArrayBufferWriter(10);
             var jsonUtf8 = new Utf8JsonWriter(output, state);
 
             jsonUtf8.WriteStartObject();
@@ -1065,7 +1066,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(10);
+            var output = new ArrayBufferWriter(10);
             var jsonUtf8 = new Utf8JsonWriter(output, state);
 
             jsonUtf8.WriteStartObject();
@@ -1115,7 +1116,7 @@ namespace System.Text.Json.Tests
             {
                 var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-                var output = new ArrayFormatter(10);
+                var output = new ArrayBufferWriter(10);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -1141,7 +1142,7 @@ namespace System.Text.Json.Tests
             {
                 var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-                var output = new ArrayFormatter(10);
+                var output = new ArrayBufferWriter(10);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -1185,7 +1186,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 3; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartArray();
@@ -1252,7 +1253,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 6; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartArray();
@@ -1324,7 +1325,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 18; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -1432,7 +1433,7 @@ namespace System.Text.Json.Tests
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
             for (int i = 0; i < 4; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -1493,7 +1494,7 @@ namespace System.Text.Json.Tests
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
             for (int i = 0; i < 4; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -1545,7 +1546,7 @@ namespace System.Text.Json.Tests
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
             for (int i = 0; i < 4; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -1589,7 +1590,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(1024);
+            var output = new ArrayBufferWriter(1024);
             var jsonUtf8 = new Utf8JsonWriter(output, state);
 
             jsonUtf8.WriteStartObject();
@@ -1650,7 +1651,7 @@ namespace System.Text.Json.Tests
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
-            var output = new ArrayFormatter(10);
+            var output = new ArrayBufferWriter(10);
             var jsonUtf8 = new Utf8JsonWriter(output, state);
 
             jsonUtf8.WriteStartObject();
@@ -1678,7 +1679,7 @@ namespace System.Text.Json.Tests
         {
             string expectedStr = GetStartEndExpectedString(prettyPrint: formatted);
 
-            var output = new ArrayFormatter(1024);
+            var output = new ArrayBufferWriter(1024);
 
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
@@ -1699,6 +1700,54 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void WriteStartEndInvalid(bool formatted)
+        {
+            {
+                string expectedStr = "[}";
+
+                var output = new ArrayBufferWriter(1024);
+
+                var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = true });
+
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+
+                jsonUtf8.WriteStartArray();
+                jsonUtf8.WriteEndObject();
+                jsonUtf8.Flush();
+
+                ArraySegment<byte> arraySegment = output.Formatted;
+                string actualStr = Encoding.UTF8.GetString(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+
+                Assert.Equal(expectedStr, actualStr);
+
+                output.Dispose();
+            }
+
+            {
+                string expectedStr = "{]";
+
+                var output = new ArrayBufferWriter(1024);
+
+                var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = true });
+
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+
+                jsonUtf8.WriteStartObject();
+                jsonUtf8.WriteEndArray();
+                jsonUtf8.Flush();
+
+                ArraySegment<byte> arraySegment = output.Formatted;
+                string actualStr = Encoding.UTF8.GetString(arraySegment.Array, arraySegment.Offset, arraySegment.Count);
+
+                Assert.Equal(expectedStr, actualStr);
+
+                output.Dispose();
+            }
+        }
+
+        [Theory]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
@@ -1711,7 +1760,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 6; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -1776,7 +1825,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 6; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -1832,7 +1881,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 6; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -1897,7 +1946,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 6; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -1953,7 +2002,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 3; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
 
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
                 jsonUtf8.WriteStartObject();
@@ -2018,7 +2067,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 6; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -2089,7 +2138,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 6; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -2169,7 +2218,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 3; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -2346,7 +2395,7 @@ namespace System.Text.Json.Tests
 
             for (int j = 0; j < 6; j++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 ReadOnlySpan<char> keyUtf16 = keyString;
@@ -2516,7 +2565,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 6; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -2609,7 +2658,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 6; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -2702,7 +2751,7 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < 6; i++)
             {
-                var output = new ArrayFormatter(1024);
+                var output = new ArrayBufferWriter(1024);
                 var jsonUtf8 = new Utf8JsonWriter(output, state);
 
                 jsonUtf8.WriteStartObject();
@@ -2775,7 +2824,7 @@ namespace System.Text.Json.Tests
             Span<byte> value = new byte[1_000_000_001];
             value.Fill((byte)'b');
 
-            var output = new ArrayFormatter(1024);
+            var output = new ArrayBufferWriter(1024);
             var jsonUtf8 = new Utf8JsonWriter(output, state);
 
             try
@@ -2820,7 +2869,7 @@ namespace System.Text.Json.Tests
 
         private static void WriteTooLargeHelper(JsonWriterState state, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value, bool noThrow = false)
         {
-            var output = new ArrayFormatter(1024);
+            var output = new ArrayBufferWriter(1024);
             var jsonUtf8 = new Utf8JsonWriter(output, state);
 
             jsonUtf8.WriteStartObject();

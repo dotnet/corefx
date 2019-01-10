@@ -115,7 +115,7 @@ namespace System.Text.Json
             currentDepth &= JsonConstants.RemoveFlagsBitMask;
             if (currentDepth >= JsonConstants.MaxWriterDepth)
             {
-                ThrowInvalidOperationException(SR.Format(SR.DepthTooLarge, currentDepth));
+                ThrowInvalidOperationException(SR.Format(SR.DepthTooLarge, currentDepth, JsonConstants.MaxWriterDepth));
             }
             else
             {
@@ -159,7 +159,7 @@ namespace System.Text.Json
             currentDepth &= JsonConstants.RemoveFlagsBitMask;
             if (currentDepth >= JsonConstants.MaxWriterDepth)
             {
-                ThrowInvalidOperationException(SR.Format(SR.DepthTooLarge, currentDepth));
+                ThrowInvalidOperationException(SR.Format(SR.DepthTooLarge, currentDepth, JsonConstants.MaxWriterDepth));
             }
             else
             {
@@ -324,6 +324,11 @@ namespace System.Text.Json
                 }
             }
 
+            if (printFirst10 < value.Length)
+            {
+                builder.Append("...");
+            }
+
             throw new ArgumentException(SR.Format(SR.CannotWriteInvalidUTF8, builder.ToString()));
         }
 
@@ -350,7 +355,7 @@ namespace System.Text.Json
                     message = SR.Format(SR.MismatchedObjectArray, token);
                     break;
                 case ExceptionResource.DepthTooLarge:
-                    message = SR.Format(SR.DepthTooLarge, currentDepth & JsonConstants.RemoveFlagsBitMask);
+                    message = SR.Format(SR.DepthTooLarge, currentDepth & JsonConstants.RemoveFlagsBitMask, JsonConstants.MaxWriterDepth);
                     break;
                 case ExceptionResource.CannotStartObjectArrayWithoutProperty:
                     message = SR.Format(SR.CannotStartObjectArrayWithoutProperty, tokenType);
