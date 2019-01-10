@@ -39,6 +39,8 @@ namespace System.Text.Json
             _utf8Json = ReadOnlyMemory<byte>.Empty;
             _parsedData.Dispose();
 
+            // When "extra rented bytes exist" they contain the document,
+            // and thus need to be cleared before being returned.
             if (_extraRentedBytes != null)
             {
                 _extraRentedBytes.AsSpan(0, length).Clear();

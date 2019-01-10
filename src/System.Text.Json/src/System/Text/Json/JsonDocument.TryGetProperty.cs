@@ -91,6 +91,11 @@ namespace System.Text.Json
                     }
                     finally
                     {
+                        // While property names aren't usually a secret, they also usually
+                        // aren't long enough to end up in the rented buffer transcode path.
+                        //
+                        // On the basis that this is user data, go ahead and clear it.
+                        utf8Name.Clear();
                         ArrayPool<byte>.Shared.Return(tmpUtf8);
                     }
                 }

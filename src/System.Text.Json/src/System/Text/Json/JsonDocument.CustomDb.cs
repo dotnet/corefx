@@ -78,11 +78,11 @@ namespace System.Text.Json
                 // Stick with ArrayPool's rent/return range if it looks feasible.
                 // If it's wrong, we'll just grow and copy as we would if the tokens
                 // were more frequent anyways.
-                const int oneMegabyte = 1024 * 1024;
+                const int OneMegabyte = 1024 * 1024;
                 
-                if (initialSize > oneMegabyte && initialSize <= 4 * oneMegabyte)
+                if (initialSize > OneMegabyte && initialSize <= 4 * OneMegabyte)
                 {
-                    initialSize = oneMegabyte;
+                    initialSize = OneMegabyte;
                 }
 
                 _rentedBuffer = ArrayPool<byte>.Shared.Rent(initialSize);
@@ -96,6 +96,9 @@ namespace System.Text.Json
                     return;
                 }
 
+                // The data in this rented buffer only conveys the positions and
+                // lengths of tokens in a document, but no content; so it does not
+                // need to be cleared.
                 ArrayPool<byte>.Shared.Return(_rentedBuffer);
                 _rentedBuffer = null;
                 Length = 0;
@@ -115,6 +118,9 @@ namespace System.Text.Json
                         _rentedBuffer = newRent;
                     }
 
+                    // The data in this rented buffer only conveys the positions and
+                    // lengths of tokens in a document, but no content; so it does not
+                    // need to be cleared.
                     ArrayPool<byte>.Shared.Return(returnBuf);
                 }
             }
@@ -138,11 +144,14 @@ namespace System.Text.Json
 
             private void Enlarge()
             {
-                int size = _rentedBuffer.Length * 2;
-                byte[] newArray = ArrayPool<byte>.Shared.Rent(size);
-                Buffer.BlockCopy(_rentedBuffer, 0, newArray, 0, Length);
-                ArrayPool<byte>.Shared.Return(_rentedBuffer);
-                _rentedBuffer = newArray;
+                byte[] toReturn = _rentedBuffer;
+                _rentedBuffer = ArrayPool<byte>.Shared.Rent(toReturn.Length * 2);
+                Buffer.BlockCopy(toReturn, 0, _rentedBuffer, 0, toReturn.Length);
+
+                // The data in this rented buffer only conveys the positions and
+                // lengths of tokens in a document, but no content; so it does not
+                // need to be cleared.
+                ArrayPool<byte>.Shared.Return(toReturn);
             }
 
             [Conditional("DEBUG")]

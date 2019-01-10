@@ -23,9 +23,17 @@ namespace System.Text.Json
 
             public void Dispose()
             {
-                ArrayPool<byte>.Shared.Return(_rentedBuffer);
-                _topOfStack = 0;
+                byte[] toReturn = _rentedBuffer;
                 _rentedBuffer = null;
+                _topOfStack = 0;
+
+                if (toReturn != null)
+                {
+                    // The data in this rented buffer only conveys the positions and
+                    // lengths of tokens in a document, but no content; so it does not
+                    // need to be cleared.
+                    ArrayPool<byte>.Shared.Return(toReturn);
+                }
             }
 
             internal void Push(StackRow row)
@@ -54,18 +62,20 @@ namespace System.Text.Json
 
             private void Enlarge()
             {
-                int size = _rentedBuffer.Length * 2;
-                byte[] newArray = ArrayPool<byte>.Shared.Rent(size);
+                byte[] toReturn = _rentedBuffer;
+                _rentedBuffer = ArrayPool<byte>.Shared.Rent(toReturn.Length * 2);
 
                 Buffer.BlockCopy(
-                    _rentedBuffer,
+                    toReturn,
                     _topOfStack,
-                    newArray,
-                    newArray.Length - _rentedBuffer.Length + _topOfStack,
-                    _rentedBuffer.Length - _topOfStack);
+                    _rentedBuffer,
+                    _rentedBuffer.Length - toReturn.Length + _topOfStack,
+                    toReturn.Length - _topOfStack);
 
-                ArrayPool<byte>.Shared.Return(_rentedBuffer);
-                _rentedBuffer = newArray;
+                // The data in this rented buffer only conveys the positions and
+                // lengths of tokens in a document, but no content; so it does not
+                // need to be cleared.
+                ArrayPool<byte>.Shared.Return(toReturn);
             }
         }
     }

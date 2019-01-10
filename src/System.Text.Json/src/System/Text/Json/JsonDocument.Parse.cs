@@ -40,6 +40,7 @@ namespace System.Text.Json
             }
             catch
             {
+                // Holds document content, clear it before returning it.
                 utf8Bytes.AsSpan(0, length).Clear();
                 ArrayPool<byte>.Shared.Return(utf8Bytes);
                 throw;
@@ -61,6 +62,7 @@ namespace System.Text.Json
             }
             catch
             {
+                // Holds document content, clear it before returning it.
                 drained.AsSpan().Clear();
                 ArrayPool<byte>.Shared.Return(drained.Array);
                 throw;
@@ -93,6 +95,7 @@ namespace System.Text.Json
             }
             catch
             {
+                // Holds document content, clear it before returning it.
                 drained.AsSpan().Clear();
                 ArrayPool<byte>.Shared.Return(drained.Array);
                 throw;
@@ -116,6 +119,7 @@ namespace System.Text.Json
             }
             catch
             {
+                // Holds document content, clear it before returning it.
                 utf8Bytes.AsSpan(0, byteCount).Clear();
                 ArrayPool<byte>.Shared.Return(utf8Bytes);
                 throw;
@@ -169,7 +173,6 @@ namespace System.Text.Json
         {
             int written = 0;
             byte[] rented = null;
-            ArrayPool<byte> pool = ArrayPool<byte>.Shared;
 
             try
             {
@@ -178,11 +181,11 @@ namespace System.Text.Json
                 if (stream.CanSeek)
                 {
                     expectedLength = Math.Max(1L, stream.Length - stream.Position);
-                    rented = pool.Rent(checked((int)expectedLength));
+                    rented = ArrayPool<byte>.Shared.Rent(checked((int)expectedLength));
                 }
                 else
                 {
-                    rented = pool.Rent(UnseekableStreamInitialRentSize);
+                    rented = ArrayPool<byte>.Shared.Rent(UnseekableStreamInitialRentSize);
                 }
 
                 int lastRead;
@@ -191,11 +194,11 @@ namespace System.Text.Json
                 {
                     if (expectedLength == 0 && rented.Length == written)
                     {
-                        byte[] tmp = pool.Rent(rented.Length * 2);
-                        Buffer.BlockCopy(rented, 0, tmp, 0, rented.Length);
-                        rented.AsSpan().Clear();
-                        pool.Return(rented);
-                        rented = tmp;
+                        byte[] toReturn = rented;
+                        rented = ArrayPool<byte>.Shared.Rent(toReturn.Length * 2);
+                        Buffer.BlockCopy(toReturn, 0, rented, 0, toReturn.Length);
+                        // Holds document content, clear it.
+                        ArrayPool<byte>.Shared.Return(toReturn, clearArray: true);
                     }
 
                     lastRead = stream.Read(rented, written, rented.Length - written);
@@ -208,21 +211,21 @@ namespace System.Text.Json
             {
                 if (rented != null)
                 {
+                    // Holds document content, clear it before returning it.
                     rented.AsSpan(0, written).Clear();
-                    pool.Return(rented);
+                    ArrayPool<byte>.Shared.Return(rented);
                 }
 
                 throw;
             }
         }
 
-        private static async Task<ArraySegment<byte>> ReadToEndAsync(
+        private static async ValueTask<ArraySegment<byte>> ReadToEndAsync(
             Stream stream,
             CancellationToken cancellationToken)
         {
             int written = 0;
             byte[] rented = null;
-            ArrayPool<byte> pool = ArrayPool<byte>.Shared;
 
             try
             {
@@ -231,11 +234,11 @@ namespace System.Text.Json
                 if (stream.CanSeek)
                 {
                     expectedLength = Math.Max(1L, stream.Length - stream.Position);
-                    rented = pool.Rent(checked((int)expectedLength));
+                    rented = ArrayPool<byte>.Shared.Rent(checked((int)expectedLength));
                 }
                 else
                 {
-                    rented = pool.Rent(UnseekableStreamInitialRentSize);
+                    rented = ArrayPool<byte>.Shared.Rent(UnseekableStreamInitialRentSize);
                 }
 
                 int lastRead;
@@ -244,11 +247,11 @@ namespace System.Text.Json
                 {
                     if (expectedLength == 0 && rented.Length == written)
                     {
-                        byte[] tmp = pool.Rent(rented.Length * 2);
-                        Buffer.BlockCopy(rented, 0, tmp, 0, rented.Length);
-                        rented.AsSpan().Clear();
-                        pool.Return(rented);
-                        rented = tmp;
+                        byte[] toReturn = rented;
+                        rented = ArrayPool<byte>.Shared.Rent(toReturn.Length * 2);
+                        Buffer.BlockCopy(toReturn, 0, rented, 0, toReturn.Length);
+                        // Holds document content, clear it.
+                        ArrayPool<byte>.Shared.Return(toReturn, clearArray: true);
                     }
 
                     lastRead = await stream.ReadAsync(
@@ -265,8 +268,9 @@ namespace System.Text.Json
             {
                 if (rented != null)
                 {
+                    // Holds document content, clear it before returning it.
                     rented.AsSpan(0, written).Clear();
-                    pool.Return(rented);
+                    ArrayPool<byte>.Shared.Return(rented);
                 }
 
                 throw;
