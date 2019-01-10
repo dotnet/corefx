@@ -44,13 +44,13 @@ namespace System.Diagnostics
 
                 do
                 {
-                    IEnumerable<Process> children = processes
+                    IEnumerable<Process> immediateChildren = processes
                         .Where(p => SafePredicateTest(() => current.IsParentOf(p)));
 
-                    if (children.Any(c => SafePredicateTest(() => c.Equals(processOfInterest))))
+                    if (immediateChildren.Any(c => SafePredicateTest(() => c.Equals(processOfInterest))))
                         return true;
 
-                    foreach (Process child in children)
+                    foreach (Process child in immediateChildren)
                         queue.Enqueue(child);
                 } while (queue.TryDequeue(out current));
             }
