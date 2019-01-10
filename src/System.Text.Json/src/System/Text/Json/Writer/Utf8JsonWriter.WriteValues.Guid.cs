@@ -41,7 +41,7 @@ namespace System.Text.Json
         private void WriteStringValueMinimized(Guid value)
         {
             // Calculated based on the following: ',"Guid value"'
-            int bytesNeeded = JsonConstants.MaximumGuidLength + 1;
+            int bytesNeeded = JsonConstants.MaximumFormatGuidLength + 3;
             if (_buffer.Length < bytesNeeded)
             {
                 GrowAndEnsure(bytesNeeded);

@@ -5,20 +5,81 @@
 using Xunit;
 using System.IO;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace System.Text.Json.Tests
 {
     public class Utf8JsonWriterTests
     {
-        [Fact]
-        public void NullCtor()
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void NullCtor(bool formatted, bool skipValidation)
         {
+            var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+
             try
             {
                 var jsonUtf8 = new Utf8JsonWriter(null);
                 Assert.True(false, "Expected ArgumentNullException to be thrown when null IBufferWriter is passed in.");
             }
             catch (ArgumentNullException) { }
+
+            try
+            {
+                var jsonUtf8 = new Utf8JsonWriter(null, state);
+                Assert.True(false, "Expected ArgumentNullException to be thrown when null IBufferWriter is passed in.");
+            }
+            catch (ArgumentNullException) { }
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void FlushEmpty(bool formatted, bool skipValidation)
+        {
+            var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+            var output = new FixedSizedBufferWriter(0);
+            try
+            {
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+                jsonUtf8.Flush();
+                WriterDidNotThrow(skipValidation, "Expected JsonWriterException to be thrown when calling Flush on an empty JSON payload.");
+            }
+            catch (JsonWriterException) { }
+
+            output = new FixedSizedBufferWriter(10);
+            try
+            {
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+                jsonUtf8.WriteCommentValue("hi");
+                jsonUtf8.Flush();
+                WriterDidNotThrow(skipValidation, "Expected JsonWriterException to be thrown when calling Flush on an empty JSON payload.");
+            }
+            catch (JsonWriterException) { }
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void FlushMultipleTimes(bool formatted, bool skipValidation)
+        {
+            var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+            var output = new FixedSizedBufferWriter(10);
+
+            var jsonUtf8 = new Utf8JsonWriter(output, state);
+            jsonUtf8.WriteStartObject();
+            jsonUtf8.WriteEndObject();
+            jsonUtf8.Flush();
+            Assert.Equal(2, jsonUtf8.BytesCommitted);
+            jsonUtf8.Flush();
+            Assert.Equal(2, jsonUtf8.BytesCommitted);
         }
 
         [Theory]
@@ -40,6 +101,102 @@ namespace System.Text.Json.Tests
                 Assert.True(false, "Expected ArgumentException to be thrown when IBufferWriter doesn't have enough space.");
             }
             catch (ArgumentException) { }
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void FixedSizeBufferWriter_Guid(bool formatted, bool skipValidation)
+        {
+            var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+
+            var output = new FixedSizedBufferWriter(37);
+
+            var jsonUtf8 = new Utf8JsonWriter(output, state);
+
+            Guid guid = Guid.NewGuid();
+
+            try
+            {
+                jsonUtf8.WriteStringValue(guid);
+                Assert.True(false, "Expected ArgumentException to be thrown when IBufferWriter doesn't have enough space.");
+            }
+            catch (ArgumentException) { }
+
+            output = new FixedSizedBufferWriter(39);
+            jsonUtf8 = new Utf8JsonWriter(output, state);
+            jsonUtf8.WriteStringValue(guid);
+            jsonUtf8.Flush();
+            string actualStr = Encoding.UTF8.GetString(output.Formatted);
+
+            Assert.Equal(38, output.Formatted.Length);
+            Assert.Equal($"\"{guid.ToString()}\"", actualStr);
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void FixedSizeBufferWriter_DateTime(bool formatted, bool skipValidation)
+        {
+            var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+
+            var output = new FixedSizedBufferWriter(20);
+
+            var jsonUtf8 = new Utf8JsonWriter(output, state);
+
+            var date = new DateTime(2019, 1, 1);
+
+            try
+            {
+                jsonUtf8.WriteStringValue(date);
+                Assert.True(false, "Expected ArgumentException to be thrown when IBufferWriter doesn't have enough space.");
+            }
+            catch (ArgumentException) { }
+
+            output = new FixedSizedBufferWriter(30);
+            jsonUtf8 = new Utf8JsonWriter(output, state);
+            jsonUtf8.WriteStringValue(date);
+            jsonUtf8.Flush();
+            string actualStr = Encoding.UTF8.GetString(output.Formatted);
+
+            Assert.Equal(21, output.Formatted.Length);
+            Assert.Equal($"\"{date.ToString("G", DateTimeFormatInfo.InvariantInfo)}\"", actualStr);
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void FixedSizeBufferWriter_DateTimeOffset(bool formatted, bool skipValidation)
+        {
+            var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+
+            var output = new FixedSizedBufferWriter(27);
+
+            var jsonUtf8 = new Utf8JsonWriter(output, state);
+
+            DateTimeOffset date = new DateTime(2019, 1, 1);
+
+            try
+            {
+                jsonUtf8.WriteStringValue(date);
+                Assert.True(false, "Expected ArgumentException to be thrown when IBufferWriter doesn't have enough space.");
+            }
+            catch (ArgumentException) { }
+
+            output = new FixedSizedBufferWriter(30);
+            jsonUtf8 = new Utf8JsonWriter(output, state);
+            jsonUtf8.WriteStringValue(date);
+            jsonUtf8.Flush();
+            string actualStr = Encoding.UTF8.GetString(output.Formatted);
+
+            Assert.Equal(28, output.Formatted.Length);
+            Assert.Equal($"\"{date.ToString("MM/dd/yyyy HH:mm:ss zzz")}\"", actualStr);
         }
 
         [Theory]
@@ -794,7 +951,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, state.BytesCommitted);
             Assert.Equal(0, state.BytesWritten);
 
-            state = jsonUtf8.CurrentState;
+            state = jsonUtf8.GetCurrentState();
             Assert.Equal(jsonUtf8.BytesCommitted, state.BytesCommitted);
             Assert.Equal(jsonUtf8.BytesWritten, state.BytesWritten);
 
@@ -818,7 +975,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(1, jsonUtf8.CurrentDepth);
             jsonUtf8.Flush(isFinalBlock: false);
 
-            state = jsonUtf8.CurrentState;
+            state = jsonUtf8.GetCurrentState();
 
             Assert.Equal(1, state.BytesCommitted);
             Assert.Equal(1, state.BytesWritten);
@@ -841,7 +998,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(1, state.BytesCommitted);
             Assert.Equal(1, state.BytesWritten);
 
-            state = jsonUtf8.CurrentState;
+            state = jsonUtf8.GetCurrentState();
 
             if (formatted)
             {
@@ -876,7 +1033,7 @@ namespace System.Text.Json.Tests
 
             jsonUtf8.Flush(isFinalBlock: false);
 
-            state = jsonUtf8.CurrentState;
+            state = jsonUtf8.GetCurrentState();
 
             Assert.Equal(1, state.BytesCommitted);
             Assert.Equal(1, state.BytesWritten);
@@ -916,7 +1073,20 @@ namespace System.Text.Json.Tests
 
             Assert.Equal(1, jsonUtf8.CurrentDepth);
 
-            state = jsonUtf8.CurrentState;
+            try
+            {
+                state = jsonUtf8.GetCurrentState();
+                Assert.True(false, "Expected InvalidOperationException when trying to get current state without flushing first.");
+            }
+            catch (InvalidOperationException)
+            {
+
+            }
+            finally
+            {
+                jsonUtf8.Flush(isFinalBlock: false);
+                state = jsonUtf8.GetCurrentState();
+            }
 
             if (formatted)
                 Assert.Equal(26 + 2 + Environment.NewLine.Length + 1, state.BytesWritten);
@@ -950,9 +1120,11 @@ namespace System.Text.Json.Tests
 
                 jsonUtf8.WriteStartObject();
                 jsonUtf8.WriteEndObject();
+                jsonUtf8.Flush();
 
                 Assert.Equal(0, jsonUtf8.CurrentDepth);
-                state = jsonUtf8.CurrentState;
+                
+                state = jsonUtf8.GetCurrentState();
 
                 jsonUtf8 = new Utf8JsonWriter(output, state);
 
@@ -974,9 +1146,10 @@ namespace System.Text.Json.Tests
 
                 jsonUtf8.WriteStartObject();
                 jsonUtf8.WriteEndObject();
+                jsonUtf8.Flush();
 
                 Assert.Equal(0, jsonUtf8.CurrentDepth);
-                state = jsonUtf8.CurrentState;
+                state = jsonUtf8.GetCurrentState();
 
                 jsonUtf8 = new Utf8JsonWriter(output, state);
 
@@ -2681,6 +2854,14 @@ namespace System.Text.Json.Tests
                 Assert.True(true, "Did not expect JsonWriterException to be thrown since validation was skipped.");
             else
                 Assert.True(false, "Expected JsonWriterException to be thrown when validation is enabled.");
+        }
+
+        private static void WriterDidNotThrow(bool skipValidation, string message)
+        {
+            if (skipValidation)
+                Assert.True(true, message);
+            else
+                Assert.True(false, message);
         }
 
         private static void AssertWriterThrow(bool noThrow)

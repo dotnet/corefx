@@ -120,6 +120,9 @@
   <data name="ArrayDepthTooLarge" xml:space="preserve">
     <value>CurrentDepth ({0}) is larger than the maximum configured depth of {1}. Cannot read next JSON array.</value>
   </data>
+  <data name="CallFlushToAvoidDataLoss" xml:space="preserve">
+    <value>The JSON writer needs to be flushed before getting the current state. There are {0} bytes that have not been committed to the output.</value>
+  </data>
   <data name="CannotStartObjectArrayAfterPrimitiveOrClose" xml:space="preserve">
     <value>Cannot write the start of an object/array after a single JSON value or outside of an existing closed object/array. Current token type is '{0}'.</value>
   </data>
@@ -143,6 +146,9 @@
   </data>
   <data name="DepthTooLarge" xml:space="preserve">
     <value>CurrentDepth ({0}) is equal to or larger than the maximum allowed depth of 1000. Cannot write the next JSON object or array.</value>
+  </data>
+  <data name="EmptyJsonIsInvalid" xml:space="preserve">
+    <value>Writing an empty JSON payload (excluding comments) is invalid.</value>
   </data>
   <data name="EndOfCommentNotFound" xml:space="preserve">
     <value>Expected end of comment, but instead reached end of data.</value>

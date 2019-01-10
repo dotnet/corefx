@@ -133,13 +133,13 @@ namespace System.Text.Json
                     break;
                 default:
                     destination[written++] = (byte)'u';
-                    if (scalar < JsonConstants.UnicodePlan01StartValue)
+                    if (scalar < JsonConstants.UnicodePlane01StartValue)
                     {
                         WriteHex(scalar, ref destination, ref written);
                     }
                     else
                     {
-                        int quotient = DivMod(scalar - JsonConstants.UnicodePlan01StartValue, 0x400, out int remainder);
+                        int quotient = DivMod(scalar - JsonConstants.UnicodePlane01StartValue, 0x400, out int remainder);
                         int firstChar = quotient + JsonConstants.HighSurrogateStartValue;
                         int nextChar = remainder + JsonConstants.LowSurrogateStartValue;
                         WriteHex(firstChar, ref destination, ref written);

@@ -297,7 +297,7 @@ namespace System.Text.Json
             // Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out bytesWritten);
             while (!JsonWriterHelper.TryFormatInt64Default(value, _buffer.Slice(idx), out bytesWritten))
             {
-                AdvanceAndGrow(idx, JsonConstants.MaximumInt64Length);
+                AdvanceAndGrow(idx, JsonConstants.MaximumFormatInt64Length);
                 idx = 0;
             }
             idx += bytesWritten;

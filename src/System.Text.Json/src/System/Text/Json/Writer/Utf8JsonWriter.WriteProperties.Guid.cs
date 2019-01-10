@@ -269,7 +269,7 @@ namespace System.Text.Json
             int bytesWritten;
             while (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out bytesWritten))
             {
-                AdvanceAndGrow(idx, JsonConstants.MaximumGuidLength);
+                AdvanceAndGrow(idx, JsonConstants.MaximumFormatGuidLength);
                 idx = 0;
             }
             idx += bytesWritten;

@@ -51,7 +51,7 @@ namespace System.Text.Json
         private void WriteNumberValueMinimized(ulong value)
         {
             // Calculated based on the following: ',ulong.MaxValue'
-            int bytesNeeded = JsonConstants.MaximumUInt64Length + 1;
+            int bytesNeeded = JsonConstants.MaximumFormatUInt64Length + 1;
             if (_buffer.Length < bytesNeeded)
             {
                 GrowAndEnsure(bytesNeeded);

@@ -41,7 +41,7 @@ namespace System.Text.Json
         private void WriteStringValueMinimized(DateTime value)
         {
             // Calculated based on the following: ',"DateTime value"'
-            int bytesNeeded = JsonConstants.MaximumDateTimeLength + 1;
+            int bytesNeeded = JsonConstants.MaximumFormatDateTimeLength + 3;
             if (_buffer.Length < bytesNeeded)
             {
                 GrowAndEnsure(bytesNeeded);

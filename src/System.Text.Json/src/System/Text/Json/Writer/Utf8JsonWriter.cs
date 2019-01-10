@@ -77,28 +77,28 @@ namespace System.Text.Json
         /// across async/await boundaries and hence this type is required to provide support for reading
         /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonWriter"/>.
         /// </summary>
-        public JsonWriterState CurrentState
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when there is JSON data that has been written and buffered but not yet flushed to the <see cref="IBufferWriter{T}" />.	
+        /// Getting the state for creating a new <see cref="Utf8JsonWriter"/> without first committing the data that has been written	
+        /// would result in an inconsistent state. Call Flush before getting the current state.	
+        /// </exception>
+        public JsonWriterState GetCurrentState()
         {
-            get
+            if (_buffered != 0)
             {
-                // Getting the state for creating a new Utf8JsonWriter without first committing the data that has been written
-                // would result in an inconsistent state. Therefore, calling Flush before getting the current state.
-                if (_buffered != 0)
-                {
-                    Flush();
-                }
-                return new JsonWriterState
-                {
-                    _bytesWritten = BytesWritten,
-                    _bytesCommitted = BytesCommitted,
-                    _inObject = _inObject,
-                    _isNotPrimitive = _isNotPrimitive,
-                    _tokenType = _tokenType,
-                    _currentDepth = _currentDepth,
-                    _writerOptions = _writerOptions,
-                    _bitStack = _bitStack,
-                };
+                throw ThrowHelper.GetInvalidOperationException_CallFlushFirst(_buffered);
             }
+            return new JsonWriterState
+            {
+                _bytesWritten = BytesWritten,
+                _bytesCommitted = BytesCommitted,
+                _inObject = _inObject,
+                _isNotPrimitive = _isNotPrimitive,
+                _tokenType = _tokenType,
+                _currentDepth = _currentDepth,
+                _writerOptions = _writerOptions,
+                _bitStack = _bitStack,
+            };
         }
 
         /// <summary>
@@ -150,8 +150,8 @@ namespace System.Text.Json
         /// </exception>
         public void Flush(bool isFinalBlock = true)
         {
-            if (isFinalBlock && !_writerOptions.SkipValidation && CurrentDepth != 0)
-                ThrowHelper.ThrowJsonWriterException(ExceptionResource.ZeroDepthAtEnd, _currentDepth);
+            if (isFinalBlock && !_writerOptions.SkipValidation && (CurrentDepth != 0 || _tokenType == JsonTokenType.None))
+                ThrowHelper.ThrowJsonWriterException_DepthNonZeroOrEmptyJson(_currentDepth);
 
             Flush();
         }

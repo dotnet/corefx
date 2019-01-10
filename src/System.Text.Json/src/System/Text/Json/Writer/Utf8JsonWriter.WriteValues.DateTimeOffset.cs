@@ -41,7 +41,7 @@ namespace System.Text.Json
         private void WriteStringValueMinimized(DateTimeOffset value)
         {
             // Calculated based on the following: ',"DateTimeOffset value"'
-            int bytesNeeded = JsonConstants.MaximumDateTimeOffsetLength + 1;
+            int bytesNeeded = JsonConstants.MaximumFormatDateTimeOffsetLength + 3;
             if (_buffer.Length < bytesNeeded)
             {
                 GrowAndEnsure(bytesNeeded);

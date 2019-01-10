@@ -25,6 +25,11 @@ namespace System.Text.Json
             throw GetArgumentException(message);
         }
 
+        public static InvalidOperationException GetInvalidOperationException_CallFlushFirst(int _buffered)
+        {
+            return new InvalidOperationException(SR.Format(SR.CallFlushToAvoidDataLoss, _buffered));
+        }
+
         public static void ThrowArgumentException_PropertyNameTooLarge(int tokenLength)
         {
             throw GetArgumentException(SR.Format(SR.PropertyNameTooLarge, tokenLength));
@@ -133,6 +138,25 @@ namespace System.Text.Json
             {
                 Debug.Assert(propertyName.Length > JsonConstants.MaxCharacterTokenSize);
                 ThrowArgumentException(SR.Format(SR.PropertyNameTooLarge, propertyName.Length));
+            }
+        }
+
+        public static void ThrowJsonWriterException_DepthNonZeroOrEmptyJson(int currentDepth)
+        {
+            throw GetJsonWriterException(currentDepth);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static JsonWriterException GetJsonWriterException(int currentDepth)
+        {
+            currentDepth &= JsonConstants.RemoveFlagsBitMask;
+            if (currentDepth != 0)
+            {
+                return new JsonWriterException(SR.Format(SR.ZeroDepthAtEnd, currentDepth));
+            }
+            else
+            {
+                return new JsonWriterException(SR.Format(SR.EmptyJsonIsInvalid));
             }
         }
 
@@ -339,9 +363,6 @@ namespace System.Text.Json
                     break;
                 case ExceptionResource.DepthTooLarge:
                     message = SR.Format(SR.DepthTooLarge, currentDepth & JsonConstants.RemoveFlagsBitMask);
-                    break;
-                case ExceptionResource.ZeroDepthAtEnd:
-                    message = SR.Format(SR.ZeroDepthAtEnd, currentDepth & JsonConstants.RemoveFlagsBitMask);
                     break;
                 case ExceptionResource.CannotStartObjectArrayWithoutProperty:
                     message = SR.Format(SR.CannotStartObjectArrayWithoutProperty, tokenType);
