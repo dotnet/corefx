@@ -14,9 +14,9 @@ namespace System.Linq.ChainLinq.GetEnumerator
                     enumerator = new SelectEnumerator<T, U>(array, select.Selector);
                     break;
 
-                case Links.Where<T> where:
+                case Links.Where<U> where:
                     Debug.Assert(typeof(T) == typeof(U));
-                    enumerator = (IEnumerator<U>)new WhereEnumerator<T>(array, where.Predicate);
+                    enumerator = new WhereEnumerator<U>((U[])(object)array, where.Predicate);
                     break;
             }
         }
