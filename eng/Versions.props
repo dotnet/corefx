@@ -28,7 +28,7 @@
   </PropertyGroup>
   <!-- Coreclr dependencies -->
   <PropertyGroup>
-    <MicrosoftNETCoreILAsmPackageVersion>3.0.0-preview-27307-72</MicrosoftNETCoreILAsmPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview-27307-72</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCoreILAsmPackageVersion>3.0.0-preview-27311-72</MicrosoftNETCoreILAsmPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview-27311-72</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
   </PropertyGroup>
 </Project>
