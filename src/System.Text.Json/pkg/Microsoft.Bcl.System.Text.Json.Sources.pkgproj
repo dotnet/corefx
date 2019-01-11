@@ -14,7 +14,7 @@
       <PackagePath>contentFiles/cs/netstandard1.1/%(RecursiveDir)%(FileName)%(Extension)</PackagePath>
     </SourcePackageFiles>
     <File Include="$(PlaceHolderFile)">
-       <TargetPath>contentFiles/cs/netcoreapp2.2/%(RecursiveDir)%(FileName)%(Extension)</TargetPath>
+       <TargetPath>contentFiles/cs/netcoreapp3.0/%(RecursiveDir)%(FileName)%(Extension)</TargetPath>
     </File>
   </ItemGroup>
 
