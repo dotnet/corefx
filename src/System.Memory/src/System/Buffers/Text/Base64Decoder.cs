@@ -336,7 +336,7 @@ namespace System.Buffers.Text
             ref byte destStart = ref destBytes;
             ref byte simdSrcEnd = ref Unsafe.Add(ref src, (IntPtr)((uint)sourceLength - 45 + 1));
 
-            // The JIT won't hoist these "constants", so help him
+            // The JIT won't hoist these "constants", so help it
             Vector256<sbyte> lutHi = s_avxDecodeLutHi;
             Vector256<sbyte> lutLo = s_avxDecodeLutLo;
             Vector256<sbyte> lutShift = s_avxDecodeLutShift;
@@ -367,9 +367,9 @@ namespace System.Buffers.Text
                 str = Avx2.Add(str, shift);
 
                 Vector256<short> merge_ab_and_bc = Avx2.MultiplyAddAdjacent(str.AsByte(), shuffleConstant0);
-                Vector256<int> @out = Avx2.MultiplyAddAdjacent(merge_ab_and_bc, shuffleConstant1);
-                @out = Avx2.Shuffle(@out.AsSByte(), shuffleVec).AsInt32();
-                str = Avx2.PermuteVar8x32(@out, permuteVec).AsSByte();
+                Vector256<int> output = Avx2.MultiplyAddAdjacent(merge_ab_and_bc, shuffleConstant1);
+                output = Avx2.Shuffle(output.AsSByte(), shuffleVec).AsInt32();
+                str = Avx2.PermuteVar8x32(output, permuteVec).AsSByte();
 
                 AssertWrite<Vector256<sbyte>>(ref destBytes, ref destStart, destLength);
                 // As has better CQ than WriteUnaligned
@@ -396,7 +396,7 @@ namespace System.Buffers.Text
             ref byte destStart = ref destBytes;
             ref byte simdSrcEnd = ref Unsafe.Add(ref src, (IntPtr)((uint)sourceLength - 24 + 1));
 
-            // The JIT won't hoist these "constants", so help him
+            // The JIT won't hoist these "constants", so help it
             Vector128<sbyte> lutHi = s_sseDecodeLutHi;
             Vector128<sbyte> lutLo = s_sseDecodeLutLo;
             Vector128<sbyte> lutShift = s_sseDecodeLutShift;
@@ -425,8 +425,8 @@ namespace System.Buffers.Text
                 str = Sse2.Add(str, shift);
 
                 Vector128<short> merge_ab_and_bc = Ssse3.MultiplyAddAdjacent(str.AsByte(), shuffleConstant0);
-                Vector128<int> @out = Sse2.MultiplyAddAdjacent(merge_ab_and_bc, shuffleConstant1);
-                str = Ssse3.Shuffle(@out.AsSByte(), shuffleVec);
+                Vector128<int> output = Sse2.MultiplyAddAdjacent(merge_ab_and_bc, shuffleConstant1);
+                str = Ssse3.Shuffle(output.AsSByte(), shuffleVec);
 
                 AssertWrite<Vector128<sbyte>>(ref destBytes, ref destStart, destLength);
                 // As has better CQ than WriteUnaligned
