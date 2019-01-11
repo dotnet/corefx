@@ -10,7 +10,7 @@ namespace System.Reflection.Emit
 {
     public sealed partial class DynamicILInfo
     {
-        internal DynamicILInfo(object scope, DynamicMethod method, byte[] methodSignature) { }
+        internal DynamicILInfo() { }
         public System.Reflection.Emit.DynamicMethod DynamicMethod { get { throw null; } }
         public int GetTokenFor(byte[] signature) { throw null; }
         public int GetTokenFor(DynamicMethod method) { throw null; }
