@@ -50,7 +50,7 @@ namespace System.Buffers.Text
             int decodedLength = GetMaxDecodedFromUtf8Length(srcLength);
 
             // max. 2 padding chars
-            if (destLength + 2 < decodedLength)
+            if (destLength < decodedLength - 2)
             {
                 // For overflow see comment below
                 maxSrcLength = destLength / 3 * 4;
@@ -372,6 +372,8 @@ namespace System.Buffers.Text
                 str = Avx2.PermuteVar8x32(@out, permuteVec).AsSByte();
 
                 AssertWrite<Vector256<sbyte>>(ref destBytes, ref destStart, destLength);
+                // As has better CQ than WriteUnaligned
+                // https://github.com/dotnet/coreclr/issues/21132
                 Unsafe.As<byte, Vector256<sbyte>>(ref destBytes) = str;
 
                 src = ref Unsafe.Add(ref src, 32);
@@ -427,6 +429,8 @@ namespace System.Buffers.Text
                 str = Ssse3.Shuffle(@out.AsSByte(), shuffleVec);
 
                 AssertWrite<Vector128<sbyte>>(ref destBytes, ref destStart, destLength);
+                // As has better CQ than WriteUnaligned
+                // https://github.com/dotnet/coreclr/issues/21132
                 Unsafe.As<byte, Vector128<sbyte>>(ref destBytes) = str;
 
                 src = ref Unsafe.Add(ref src, 16);

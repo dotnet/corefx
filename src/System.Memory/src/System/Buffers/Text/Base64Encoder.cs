@@ -145,7 +145,7 @@ namespace System.Buffers.Text
             if ((uint)length > MaximumEncodeLength)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.length);
 
-            return (((length + 2) / 3) * 4);
+            return ((length + 2) / 3) * 4;
         }
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace System.Buffers.Text
         {
             ref byte srcStart = ref src;
             ref byte destStart = ref dest;
-            ref byte simdSrcEnd = ref Unsafe.Add(ref src, (IntPtr)((uint)sourceLength - 28));
+            ref byte simdSrcEnd = ref Unsafe.Add(ref src, (IntPtr)((uint)sourceLength - 28));	// 28 = 32 - 4
 
             // The JIT won't hoist these "constants", so help him
             Vector256<sbyte> shuffleVec = s_avxEncodeShuffleVec;
@@ -253,6 +253,8 @@ namespace System.Buffers.Text
                 str = Avx2.Add(str, Avx2.Shuffle(lut, tmp));
 
                 AssertWrite<Vector256<sbyte>>(ref dest, ref destStart, destLength);
+                // As has better CQ than WriteUnaligned
+                // https://github.com/dotnet/coreclr/issues/21132
                 Unsafe.As<byte, Vector256<sbyte>>(ref dest) = str;
 
                 src = ref Unsafe.Add(ref src, 24);
@@ -316,6 +318,8 @@ namespace System.Buffers.Text
                 str = Sse2.Add(str, Ssse3.Shuffle(lut, tmp));
 
                 AssertWrite<Vector128<sbyte>>(ref dest, ref destStart, destLength);
+                // As has better CQ than WriteUnaligned
+                // https://github.com/dotnet/coreclr/issues/21132
                 Unsafe.As<byte, Vector128<sbyte>>(ref dest) = str;
 
                 src = ref Unsafe.Add(ref src, 12);

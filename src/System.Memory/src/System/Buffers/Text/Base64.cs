@@ -141,34 +141,38 @@ namespace System.Buffers.Text
         }
 
         [Conditional("DEBUG")]
-        private static void AssertRead<TVector>(ref byte src, ref byte srcStart, int srcLength)
+        private static unsafe void AssertRead<TVector>(ref byte src, ref byte srcStart, int srcLength)
         {
-            int vectorElements = Unsafe.SizeOf<TVector>();
-            ref byte readEnd = ref Unsafe.Add(ref src, vectorElements);
-            ref byte srcEnd = ref Unsafe.Add(ref srcStart, srcLength + 1);
-
-            bool isSafe = Unsafe.IsAddressLessThan(ref readEnd, ref srcEnd);
-
-            if (!isSafe)
+            fixed (byte* pSrc = &src)
+            fixed (byte* pSrcStart = &srcStart)
             {
-                int srcIndex = Unsafe.ByteOffset(ref srcStart, ref src).ToInt32();
-                throw new InvalidOperationException($"Read for {typeof(TVector)} is not within safe bounds. srcIndex: {srcIndex}, srcLength: {srcLength}");
+                int vectorElements = Unsafe.SizeOf<TVector>();
+                byte* readEnd = pSrc + vectorElements;
+                byte* srcEnd = pSrcStart + srcLength;
+
+                if (readEnd > srcEnd)
+                {
+                    int srcIndex = (int)(pSrc - pSrcStart);
+                    throw new InvalidOperationException($"Read for {typeof(TVector)} is not within safe bounds. srcIndex: {srcIndex}, srcLength: {srcLength}");
+                }
             }
         }
 
         [Conditional("DEBUG")]
-        private static void AssertWrite<TVector>(ref byte dest, ref byte destStart, int destLength)
+        private static unsafe void AssertWrite<TVector>(ref byte dest, ref byte destStart, int destLength)
         {
-            int vectorElements = Unsafe.SizeOf<TVector>();
-            ref byte writeEnd = ref Unsafe.Add(ref dest, vectorElements);
-            ref byte destEnd = ref Unsafe.Add(ref destStart, destLength + 1);
-
-            bool isSafe = Unsafe.IsAddressLessThan(ref writeEnd, ref destEnd);
-
-            if (!isSafe)
+            fixed (byte* pDest = &dest)
+            fixed (byte* pDestStart = &destStart)
             {
-                int destIndex = Unsafe.ByteOffset(ref destStart, ref dest).ToInt32();
-                throw new InvalidOperationException($"Write for {typeof(TVector)} is not within safe bounds. destIndex: {destIndex}, destLength: {destLength}");
+                int vectorElements = Unsafe.SizeOf<TVector>();
+                byte* writeEnd = pDest + vectorElements;
+                byte* destEnd = pDestStart + destLength;
+
+                if (writeEnd > destEnd)
+                {
+                    int destIndex = (int)(pDest - pDestStart);
+                    throw new InvalidOperationException($"Write for {typeof(TVector)} is not within safe bounds. destIndex: {destIndex}, destLength: {destLength}");
+                }
             }
         }
     }
