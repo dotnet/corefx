@@ -40,21 +40,21 @@ namespace System.Diagnostics
             try
             {
                 var descendantProcesses = new Queue<Process>();
-                Process currentDescendant = this;
+                Process current = this;
 
                 do
                 {
-                    foreach (Process process in allProcesses)
+                    foreach (Process candidate in allProcesses)
                     {
-                        if (SafePredicateTest(() => !currentDescendant.IsParentOf(process)))
+                        if (!SafePredicateTest(() => current.IsParentOf(candidate)))
                             continue;
 
-                        if (SafePredicateTest(() => processOfInterest.Equals(process)))
+                        if (SafePredicateTest(() => processOfInterest.Equals(candidate)))
                             return true;
 
-                        descendantProcesses.Enqueue(process);
+                        descendantProcesses.Enqueue(candidate);
                     }
-                } while (descendantProcesses.TryDequeue(out currentDescendant));
+                } while (descendantProcesses.TryDequeue(out current));
             }
             finally
             {
