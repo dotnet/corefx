@@ -1976,6 +1976,13 @@
     ]
   },
   {
+    "Name": "Microsoft.Bcl.System.Text.Json.Sources",
+    "Description": "Provides the sources of System.Text.Json as internal types.",
+    "CommonTypes": [
+      "System.Text.Json.Utf8JsonReader"
+    ]
+  },
+  {
     "Name": "System.Text.RegularExpressions",
     "Description": "Provides the System.Text.RegularExpressions.Regex class, an implementation of a regular expression engine.",
     "CommonTypes": [

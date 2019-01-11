@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
+  <UsingTask TaskName="GenerateSourceWithPublicTypesAsInternal" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll" />
+
+  <PropertyGroup>
+    <!-- We need to make sure that all of the surface area on the sources gets rewritten as internal. -->
+    <GenerateInternalTypesSource>true</GenerateInternalTypesSource>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_AllJsonSources Include="$(MSBuildThisFileDirectory)../src/**/*.cs" />
+    <SourcePackageFiles Include="@(_AllJsonSources)">
+      <PackagePath>contentFiles/cs/netstandard1.1/%(RecursiveDir)%(FileName)%(Extension)</PackagePath>
+    </SourcePackageFiles>
+    <File Include="$(PlaceHolderFile)">
+       <TargetPath>contentFiles/cs/netcoreapp2.2/%(RecursiveDir)%(FileName)%(Extension)</TargetPath>
+    </File>
+  </ItemGroup>
+
+  <!-- Given that System.Text.Json has Resources, we need to make sure we include them (and the SR.cs from Common) 
+       on the sources of the package. This target will retrieve the compiled resources file and will also add
+       the Common SR.cs into SourcePackageFiles. -->
+  <Target Name="GetCompiledResourceFile" BeforeTargets="GenerateInternalTypesSource">
+    <MSBuild Projects="../src/System.Text.Json.csproj"
+             Targets="GetCompiledResourceFile">
+      <Output TaskParameter="TargetOutputs"
+              PropertyName="CompiledResourceFileForProject" />
+    </MSBuild>
+
+    <ItemGroup>
+      <SourcePackageFiles Include="$(CompiledResourceFileForProject)">
+        <PackagePath>contentFiles/cs/netstandard1.1/SR.System.Text.Json.cs</PackagePath>
+      </SourcePackageFiles>
+      <SourcePackageFiles Include="$(CommonPath)/System/SR.cs">
+        <PackagePath>contentFiles/cs/netstandard1.1/SR.cs</PackagePath>
+      </SourcePackageFiles>
+    </ItemGroup>
+  </Target>
+  
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
+</Project>
