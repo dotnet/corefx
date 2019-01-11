@@ -9,10 +9,6 @@ using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using Internal.Win32.SafeHandles;
 
-#if !netcoreapp
-using MemoryMarshal = System.Diagnostics.PerformanceCounterLib;
-#endif
-
 namespace System.Diagnostics
 {
     internal sealed class PerformanceDataRegistryKey : IDisposable
