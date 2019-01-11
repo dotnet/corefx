@@ -20,7 +20,7 @@ namespace System.Diagnostics
             {
                 EnsureState(State.Associated | State.IsLocal | State.HaveNonExitedId);
 
-                if (IsInTreeOf(GetCurrentProcess()))
+                if (IsSelfOrDescendant(GetCurrentProcess()))
                     throw new InvalidOperationException(SR.KillEntireProcessTree_DisallowedBecauseTreeContainsCallingProcess);
 
                 IEnumerable<Exception> result = KillTree();
@@ -30,29 +30,31 @@ namespace System.Diagnostics
             }
         }
 
-        private bool IsInTreeOf(Process processOfInterest)
+        private bool IsSelfOrDescendant(Process processOfInterest)
         {
             if (SafePredicateTest(() => Equals(processOfInterest)))
                 return true;
 
-            Process[] processes = GetProcesses();
+            Process[] allProcesses = GetProcesses();
 
             try
             {
-                var queue = new Queue<Process>();
-                Process current = this;
+                var descendantProcesses = new Queue<Process>();
+                Process currentDescendant = this;
 
                 do
                 {
-                    IEnumerable<Process> immediateChildren = processes
-                        .Where(p => SafePredicateTest(() => current.IsParentOf(p)));
+                    foreach (Process process in allProcesses)
+                    {
+                        if (SafePredicateTest(() => !currentDescendant.IsParentOf(process)))
+                            continue;
 
-                    if (immediateChildren.Any(c => SafePredicateTest(() => c.Equals(processOfInterest))))
-                        return true;
+                        if (SafePredicateTest(() => processOfInterest.Equals(process)))
+                            return true;
 
-                    foreach (Process child in immediateChildren)
-                        queue.Enqueue(child);
-                } while (queue.TryDequeue(out current));
+                        descendantProcesses.Enqueue(process);
+                    }
+                } while (descendantProcesses.TryDequeue(out currentDescendant));
             }
             finally
             {
