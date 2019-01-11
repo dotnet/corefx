@@ -2019,12 +2019,8 @@ namespace System.Net.Http.Functional.Tests
             const string SetCookieExpected = "theme=light";
             const string ContentTypeHeaderExpected = "text/html";
 
-            const string CookieHeaderIgnored1 = "ignore_cookie=choco1";
-            const string CookieHeaderIgnored2 = "ignore_cookie=choco2";
             const string SetCookieIgnored1 = "hello=world";
             const string SetCookieIgnored2 = "net=core";
-            const string ContentTypeHeaderIgnored1 = "text/xml";
-            const string ContentTypeHeaderIgnored2 = "text/plain";
 
             // Set-Cookie header will not be ignored with CurlHandler.
             int containerCookiesCount = IsCurlHandler ? 3 : 1;
@@ -2059,9 +2055,9 @@ namespace System.Net.Http.Functional.Tests
                 {
                     // Send 100-Continue responses with additional headers.
                     await connection.ReadRequestHeaderAndSendResponseAsync(responseStatusCode, additionalHeaders:
-                        $"Cookie: {CookieHeaderIgnored1}\r\n" + $"Content-type: {ContentTypeHeaderIgnored1}\r\n" + $"Set-Cookie: {SetCookieIgnored1}\r\n");
+                        "Cookie: ignore_cookie=choco1\r\n" + "Content-type: text/xml\r\n" + $"Set-Cookie: {SetCookieIgnored1}\r\n");
                     await connection.SendResponseAsync(responseStatusCode, additionalHeaders:
-                        $"Cookie: {CookieHeaderIgnored2}\r\n" + $"Content-type: {ContentTypeHeaderIgnored2}\r\n" + $"Set-Cookie: {SetCookieIgnored2}\r\n");
+                        "Cookie: ignore_cookie=choco2\r\n" + "Content-type: text/plain\r\n" + $"Set-Cookie: {SetCookieIgnored2}\r\n");
 
                     var result = new char[TestString.Length];
                     await connection.Reader.ReadAsync(result, 0, TestString.Length);

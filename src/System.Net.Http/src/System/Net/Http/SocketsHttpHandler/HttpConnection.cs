@@ -342,7 +342,6 @@ namespace System.Net.Http
 
             _currentRequest = request;
             HttpMethod normalizedMethod = HttpMethod.Normalize(request.Method);
-            bool hasExpectContinueHeader = request.HasHeaders && request.Headers.ExpectContinue == true;
 
             Debug.Assert(!_canRetry);
             _canRetry = true;
@@ -451,6 +450,7 @@ namespace System.Net.Http
                 }
                 else
                 {
+                    bool hasExpectContinueHeader = request.HasHeaders && request.Headers.ExpectContinue == true;
                     if (NetEventSource.IsEnabled) Trace($"Request content is not null, start processing it. hasExpectContinueHeader = {hasExpectContinueHeader}");
 
                     // Send the body if there is one.  We prefer to serialize the sending of the content before
@@ -517,9 +517,9 @@ namespace System.Net.Http
                 // even if the client does not expect one. A user agent MAY ignore unexpected 1xx responses.
                 // In .NET Core, apart from 100 Continue, and 101 Switching Protocols, we will treat all other 1xx responses
                 // as unknown, and will discard them.
-                while ((int)response.StatusCode >= 100 && (int)response.StatusCode <= 199)
+                while ((uint)(response.StatusCode - 100) <= 199 - 100)
                 {
-                    // If other 1xx responses come before a expected 100 continue, we will wait for the 100 response before
+                    // If other 1xx responses come before an expected 100 continue, we will wait for the 100 response before
                     // sending request body (if any).
                     if (allowExpect100ToContinue != null && response.StatusCode == HttpStatusCode.Continue)
                     {
