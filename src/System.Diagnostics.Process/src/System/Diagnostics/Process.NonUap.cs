@@ -58,7 +58,7 @@ namespace System.Diagnostics
             }
             finally
             {
-                foreach (Process process in processes)
+                foreach (Process process in allProcesses)
                 {
                     process.Dispose();
                 }
