@@ -16,7 +16,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="DateTime"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 05/25/2017 10:30:15.
+        /// Writes the <see cref="DateTime"/> using the round-trippable 'O' <see cref="StandardFormat"/> , for example: 2017-06-12T05:30:45.7680000.
         /// </remarks>
         public void WriteStringValue(DateTime value)
         {
