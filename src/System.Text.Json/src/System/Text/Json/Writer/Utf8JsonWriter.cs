@@ -369,7 +369,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartObject;
         }
 
-        private void WriteStartSuppressFalse(in ReadOnlySpan<byte> propertyName, byte token)
+        private void WriteStartSuppressFalse(ReadOnlySpan<byte> propertyName, byte token)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -385,7 +385,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStartByOptions(in ReadOnlySpan<byte> propertyName, byte token)
+        private void WriteStartByOptions(ReadOnlySpan<byte> propertyName, byte token)
         {
             int idx;
             if (_writerOptions.Indented)
@@ -418,7 +418,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStartEscapeProperty(in ReadOnlySpan<byte> propertyName, byte token, int firstEscapeIndexProp)
+        private void WriteStartEscapeProperty(ReadOnlySpan<byte> propertyName, byte token, int firstEscapeIndexProp)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
@@ -543,7 +543,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartObject;
         }
 
-        private void WriteStartSuppressFalse(in ReadOnlySpan<char> propertyName, byte token)
+        private void WriteStartSuppressFalse(ReadOnlySpan<char> propertyName, byte token)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -559,7 +559,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStartByOptions(in ReadOnlySpan<char> propertyName, byte token)
+        private void WriteStartByOptions(ReadOnlySpan<char> propertyName, byte token)
         {
             int idx;
             if (_writerOptions.Indented)
@@ -592,7 +592,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStartEscapeProperty(in ReadOnlySpan<char> propertyName, byte token, int firstEscapeIndexProp)
+        private void WriteStartEscapeProperty(ReadOnlySpan<char> propertyName, byte token, int firstEscapeIndexProp)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 

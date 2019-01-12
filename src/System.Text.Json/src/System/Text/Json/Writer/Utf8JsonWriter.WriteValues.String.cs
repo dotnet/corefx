@@ -51,7 +51,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.String;
         }
 
-        private void WriteStringSuppressFalse(in ReadOnlySpan<char> value)
+        private void WriteStringSuppressFalse(ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
 
@@ -67,7 +67,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringByOptions(in ReadOnlySpan<char> value)
+        private void WriteStringByOptions(ReadOnlySpan<char> value)
         {
             if (_writerOptions.Indented)
             {
@@ -87,7 +87,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringMinimized(in ReadOnlySpan<char> escapedValue)
+        private void WriteStringMinimized(ReadOnlySpan<char> escapedValue)
         {
             int idx = 0;
             if (_currentDepth < 0)
@@ -104,7 +104,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringIndented(in ReadOnlySpan<char> escapedValue)
+        private void WriteStringIndented(ReadOnlySpan<char> escapedValue)
         {
             int idx = 0;
             if (_currentDepth < 0)
@@ -203,7 +203,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.String;
         }
 
-        private void WriteStringSuppressFalse(in ReadOnlySpan<byte> value)
+        private void WriteStringSuppressFalse(ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
 
@@ -219,7 +219,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringByOptions(in ReadOnlySpan<byte> value)
+        private void WriteStringByOptions(ReadOnlySpan<byte> value)
         {
             if (_writerOptions.Indented)
             {
@@ -239,7 +239,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringMinimized(in ReadOnlySpan<byte> escapedValue)
+        private void WriteStringMinimized(ReadOnlySpan<byte> escapedValue)
         {
             int idx = 0;
             if (_currentDepth < 0)
@@ -256,7 +256,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringIndented(in ReadOnlySpan<byte> escapedValue)
+        private void WriteStringIndented(ReadOnlySpan<byte> escapedValue)
         {
             int idx = 0;
             if (_currentDepth < 0)

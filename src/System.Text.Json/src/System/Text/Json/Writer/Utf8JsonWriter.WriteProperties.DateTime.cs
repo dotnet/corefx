@@ -83,7 +83,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.String;
         }
 
-        private void WriteStringSuppressFalse(in ReadOnlySpan<char> propertyName, DateTime value)
+        private void WriteStringSuppressFalse(ReadOnlySpan<char> propertyName, DateTime value)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -99,7 +99,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringSuppressFalse(in ReadOnlySpan<byte> propertyName, DateTime value)
+        private void WriteStringSuppressFalse(ReadOnlySpan<byte> propertyName, DateTime value)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -115,7 +115,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringEscapeProperty(in ReadOnlySpan<char> propertyName, DateTime value, int firstEscapeIndexProp)
+        private void WriteStringEscapeProperty(ReadOnlySpan<char> propertyName, DateTime value, int firstEscapeIndexProp)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
@@ -147,7 +147,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringEscapeProperty(in ReadOnlySpan<byte> propertyName, DateTime value, int firstEscapeIndexProp)
+        private void WriteStringEscapeProperty(ReadOnlySpan<byte> propertyName, DateTime value, int firstEscapeIndexProp)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
@@ -179,7 +179,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringByOptions(in ReadOnlySpan<char> propertyName, DateTime value)
+        private void WriteStringByOptions(ReadOnlySpan<char> propertyName, DateTime value)
         {
             if (_writerOptions.Indented)
             {
@@ -199,7 +199,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringByOptions(in ReadOnlySpan<byte> propertyName, DateTime value)
+        private void WriteStringByOptions(ReadOnlySpan<byte> propertyName, DateTime value)
         {
             if (_writerOptions.Indented)
             {
@@ -219,7 +219,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringMinimized(in ReadOnlySpan<char> escapedPropertyName, DateTime value)
+        private void WriteStringMinimized(ReadOnlySpan<char> escapedPropertyName, DateTime value)
         {
             int idx = WritePropertyNameMinimized(escapedPropertyName);
 
@@ -228,7 +228,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringMinimized(in ReadOnlySpan<byte> escapedPropertyName, DateTime value)
+        private void WriteStringMinimized(ReadOnlySpan<byte> escapedPropertyName, DateTime value)
         {
             int idx = WritePropertyNameMinimized(escapedPropertyName);
 
@@ -237,7 +237,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringIndented(in ReadOnlySpan<char> escapedPropertyName, DateTime value)
+        private void WriteStringIndented(ReadOnlySpan<char> escapedPropertyName, DateTime value)
         {
             int idx = WritePropertyNameIndented(escapedPropertyName);
 
@@ -246,7 +246,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringIndented(in ReadOnlySpan<byte> escapedPropertyName, DateTime value)
+        private void WriteStringIndented(ReadOnlySpan<byte> escapedPropertyName, DateTime value)
         {
             int idx = WritePropertyNameIndented(escapedPropertyName);
 

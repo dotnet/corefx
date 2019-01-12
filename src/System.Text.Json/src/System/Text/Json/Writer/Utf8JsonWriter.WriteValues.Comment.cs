@@ -43,7 +43,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteCommentSuppressFalse(in ReadOnlySpan<char> value)
+        private void WriteCommentSuppressFalse(ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
 
@@ -59,7 +59,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteCommentByOptions(in ReadOnlySpan<char> value)
+        private void WriteCommentByOptions(ReadOnlySpan<char> value)
         {
             if (_writerOptions.Indented)
             {
@@ -71,7 +71,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteCommentMinimized(in ReadOnlySpan<char> escapedValue)
+        private void WriteCommentMinimized(ReadOnlySpan<char> escapedValue)
         {
             int idx = 0;
 
@@ -80,7 +80,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteCommentIndented(in ReadOnlySpan<char> escapedValue)
+        private void WriteCommentIndented(ReadOnlySpan<char> escapedValue)
         {
             int idx = 0;
 
@@ -165,7 +165,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteCommentSuppressFalse(in ReadOnlySpan<byte> value)
+        private void WriteCommentSuppressFalse(ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
 
@@ -181,7 +181,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteCommentByOptions(in ReadOnlySpan<byte> value)
+        private void WriteCommentByOptions(ReadOnlySpan<byte> value)
         {
             if (_writerOptions.Indented)
             {
@@ -193,7 +193,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteCommentMinimized(in ReadOnlySpan<byte> escapedValue)
+        private void WriteCommentMinimized(ReadOnlySpan<byte> escapedValue)
         {
             int idx = 0;
 
@@ -202,7 +202,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteCommentIndented(in ReadOnlySpan<byte> escapedValue)
+        private void WriteCommentIndented(ReadOnlySpan<byte> escapedValue)
         {
             int idx = 0;
 
@@ -265,7 +265,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteCommentValue(in ReadOnlySpan<char> escapedValue, ref int idx)
+        private void WriteCommentValue(ReadOnlySpan<char> escapedValue, ref int idx)
         {
             while (_buffer.Length <= idx)
             {
@@ -311,7 +311,7 @@ namespace System.Text.Json
             _buffer[idx++] = JsonConstants.Slash;
         }
 
-        private void WriteCommentValue(in ReadOnlySpan<byte> escapedValue, ref int idx)
+        private void WriteCommentValue(ReadOnlySpan<byte> escapedValue, ref int idx)
         {
             while (_buffer.Length <= idx)
             {

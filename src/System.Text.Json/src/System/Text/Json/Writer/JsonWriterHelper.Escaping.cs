@@ -44,7 +44,6 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool NeedsEscaping(char value) => value > byte.MaxValue || AllowList[value] == 0;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int NeedsEscaping(ReadOnlySpan<byte> value)
         {
             int idx;
@@ -62,7 +61,6 @@ namespace System.Text.Json
             return idx;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int NeedsEscaping(ReadOnlySpan<char> value)
         {
             int idx;
@@ -80,7 +78,7 @@ namespace System.Text.Json
             return idx;
         }
 
-        public static void EscapeString(in ReadOnlySpan<byte> value, in Span<byte> destination, int indexOfFirstByteToEscape, out int written)
+        public static void EscapeString(ReadOnlySpan<byte> value, Span<byte> destination, int indexOfFirstByteToEscape, out int written)
         {
             Debug.Assert(indexOfFirstByteToEscape >= 0 && indexOfFirstByteToEscape < value.Length);
 
@@ -104,7 +102,7 @@ namespace System.Text.Json
             }
         }
 
-        private static int EscapeNextBytes(ReadOnlySpan<byte> value, in Span<byte> destination, ref int written)
+        private static int EscapeNextBytes(ReadOnlySpan<byte> value, Span<byte> destination, ref int written)
         {
             SequenceValidity status = PeekFirstSequence(value, out int numBytesConsumed, out Rune rune);
             if (status != SequenceValidity.WellFormed)
@@ -381,7 +379,7 @@ namespace System.Text.Json
             return SequenceValidity.Incomplete;
         }
 
-        public static void EscapeString(in ReadOnlySpan<char> value, in Span<char> destination, int indexOfFirstByteToEscape, out int written)
+        public static void EscapeString(ReadOnlySpan<char> value, Span<char> destination, int indexOfFirstByteToEscape, out int written)
         {
             Debug.Assert(indexOfFirstByteToEscape >= 0 && indexOfFirstByteToEscape < value.Length);
 
@@ -404,7 +402,7 @@ namespace System.Text.Json
             }
         }
 
-        private static void EscapeNextChars(in ReadOnlySpan<char> value, int firstChar, in Span<char> destination, ref int consumed, ref int written)
+        private static void EscapeNextChars(ReadOnlySpan<char> value, int firstChar, Span<char> destination, ref int consumed, ref int written)
         {
             int nextChar = -1;
             if (IsInRangeInclusive(firstChar, JsonConstants.HighSurrogateStartValue, JsonConstants.LowSurrogateEndValue))

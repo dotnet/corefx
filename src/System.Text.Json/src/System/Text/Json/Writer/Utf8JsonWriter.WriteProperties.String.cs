@@ -212,7 +212,7 @@ namespace System.Text.Json
             => WriteString(propertyName, value.AsSpan(), suppressEscaping);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void WriteStringSuppressTrue(in ReadOnlySpan<char> escapedPropertyName, in ReadOnlySpan<char> value)
+        private void WriteStringSuppressTrue(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             if (valueIdx != -1)
@@ -226,7 +226,7 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void WriteStringSuppressTrue(in ReadOnlySpan<byte> escapedPropertyName, in ReadOnlySpan<byte> value)
+        private void WriteStringSuppressTrue(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             if (valueIdx != -1)
@@ -240,7 +240,7 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void WriteStringSuppressTrue(in ReadOnlySpan<char> escapedPropertyName, in ReadOnlySpan<byte> value)
+        private void WriteStringSuppressTrue(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             if (valueIdx != -1)
@@ -254,7 +254,7 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void WriteStringSuppressTrue(in ReadOnlySpan<byte> escapedPropertyName, in ReadOnlySpan<char> value)
+        private void WriteStringSuppressTrue(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             if (valueIdx != -1)
@@ -267,7 +267,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringEscapeValueOnly(in ReadOnlySpan<char> escapedPropertyName, in ReadOnlySpan<char> value, int firstEscapeIndex)
+        private void WriteStringEscapeValueOnly(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<char> value, int firstEscapeIndex)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
 
@@ -280,7 +280,7 @@ namespace System.Text.Json
             ArrayPool<char>.Shared.Return(valueArray);
         }
 
-        private void WriteStringEscapeValueOnly(in ReadOnlySpan<byte> escapedPropertyName, in ReadOnlySpan<byte> value, int firstEscapeIndex)
+        private void WriteStringEscapeValueOnly(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<byte> value, int firstEscapeIndex)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
 
@@ -293,7 +293,7 @@ namespace System.Text.Json
             ArrayPool<byte>.Shared.Return(valueArray);
         }
 
-        private void WriteStringEscapeValueOnly(in ReadOnlySpan<char> escapedPropertyName, in ReadOnlySpan<byte> value, int firstEscapeIndex)
+        private void WriteStringEscapeValueOnly(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<byte> value, int firstEscapeIndex)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
 
@@ -306,7 +306,7 @@ namespace System.Text.Json
             ArrayPool<byte>.Shared.Return(valueArray);
         }
 
-        private void WriteStringEscapeValueOnly(in ReadOnlySpan<byte> escapedPropertyName, in ReadOnlySpan<char> value, int firstEscapeIndex)
+        private void WriteStringEscapeValueOnly(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<char> value, int firstEscapeIndex)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
 
@@ -319,7 +319,7 @@ namespace System.Text.Json
             ArrayPool<char>.Shared.Return(valueArray);
         }
 
-        private void WriteStringSuppressFalse(in ReadOnlySpan<char> propertyName, in ReadOnlySpan<char> value)
+        private void WriteStringSuppressFalse(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
@@ -338,7 +338,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringSuppressFalse(in ReadOnlySpan<byte> propertyName, in ReadOnlySpan<byte> value)
+        private void WriteStringSuppressFalse(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
@@ -357,7 +357,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringSuppressFalse(in ReadOnlySpan<char> propertyName, in ReadOnlySpan<byte> value)
+        private void WriteStringSuppressFalse(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
@@ -376,7 +376,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringSuppressFalse(in ReadOnlySpan<byte> propertyName, in ReadOnlySpan<char> value)
+        private void WriteStringSuppressFalse(ReadOnlySpan<byte> propertyName, ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
@@ -659,7 +659,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringByOptions(in ReadOnlySpan<char> propertyName, in ReadOnlySpan<char> value)
+        private void WriteStringByOptions(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value)
         {
             if (_writerOptions.Indented)
             {
@@ -679,7 +679,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringByOptions(in ReadOnlySpan<byte> propertyName, in ReadOnlySpan<byte> value)
+        private void WriteStringByOptions(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
         {
             if (_writerOptions.Indented)
             {
@@ -699,7 +699,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringByOptions(in ReadOnlySpan<char> propertyName, in ReadOnlySpan<byte> value)
+        private void WriteStringByOptions(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)
         {
             if (_writerOptions.Indented)
             {
@@ -719,7 +719,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringByOptions(in ReadOnlySpan<byte> propertyName, in ReadOnlySpan<char> value)
+        private void WriteStringByOptions(ReadOnlySpan<byte> propertyName, ReadOnlySpan<char> value)
         {
             if (_writerOptions.Indented)
             {
@@ -739,7 +739,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringMinimized(in ReadOnlySpan<char> escapedPropertyName, in ReadOnlySpan<char> escapedValue)
+        private void WriteStringMinimized(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<char> escapedValue)
         {
             int idx = WritePropertyNameMinimized(escapedPropertyName);
 
@@ -748,7 +748,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringMinimized(in ReadOnlySpan<byte> escapedPropertyName, in ReadOnlySpan<byte> escapedValue)
+        private void WriteStringMinimized(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<byte> escapedValue)
         {
             int idx = WritePropertyNameMinimized(escapedPropertyName);
 
@@ -757,7 +757,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringMinimized(in ReadOnlySpan<char> escapedPropertyName, in ReadOnlySpan<byte> escapedValue)
+        private void WriteStringMinimized(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<byte> escapedValue)
         {
             int idx = WritePropertyNameMinimized(escapedPropertyName);
 
@@ -766,7 +766,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringMinimized(in ReadOnlySpan<byte> escapedPropertyName, in ReadOnlySpan<char> escapedValue)
+        private void WriteStringMinimized(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<char> escapedValue)
         {
             int idx = WritePropertyNameMinimized(escapedPropertyName);
 
@@ -775,7 +775,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringIndented(in ReadOnlySpan<char> escapedPropertyName, in ReadOnlySpan<char> escapedValue)
+        private void WriteStringIndented(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<char> escapedValue)
         {
             int idx = WritePropertyNameIndented(escapedPropertyName);
 
@@ -784,7 +784,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringIndented(in ReadOnlySpan<byte> escapedPropertyName, in ReadOnlySpan<byte> escapedValue)
+        private void WriteStringIndented(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<byte> escapedValue)
         {
             int idx = WritePropertyNameIndented(escapedPropertyName);
 
@@ -793,7 +793,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringIndented(in ReadOnlySpan<char> escapedPropertyName, in ReadOnlySpan<byte> escapedValue)
+        private void WriteStringIndented(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<byte> escapedValue)
         {
             int idx = WritePropertyNameIndented(escapedPropertyName);
 
@@ -802,7 +802,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringIndented(in ReadOnlySpan<byte> escapedPropertyName, in ReadOnlySpan<char> escapedValue)
+        private void WriteStringIndented(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<char> escapedValue)
         {
             int idx = WritePropertyNameIndented(escapedPropertyName);
 
@@ -811,7 +811,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringValue(in ReadOnlySpan<char> escapedValue, ref int idx)
+        private void WriteStringValue(ReadOnlySpan<char> escapedValue, ref int idx)
         {
             while (_buffer.Length <= idx)
             {
@@ -843,7 +843,7 @@ namespace System.Text.Json
             _buffer[idx++] = JsonConstants.Quote;
         }
 
-        private void WriteStringValue(in ReadOnlySpan<byte> escapedValue, ref int idx)
+        private void WriteStringValue(ReadOnlySpan<byte> escapedValue, ref int idx)
         {
             while (_buffer.Length <= idx)
             {

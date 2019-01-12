@@ -43,7 +43,7 @@ namespace System.Text.Json
             _currentDepth |= 1 << 31;
         }
 
-        private void WriteLiteralByOptions(in ReadOnlySpan<byte> value)
+        private void WriteLiteralByOptions(ReadOnlySpan<byte> value)
         {
             if (_writerOptions.Indented)
             {
@@ -63,7 +63,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteLiteralMinimized(in ReadOnlySpan<byte> value)
+        private void WriteLiteralMinimized(ReadOnlySpan<byte> value)
         {
             // Calculated based on the following: ',null' OR ',true' OR ',false'
             int bytesNeeded = value.Length + 1;
@@ -83,7 +83,7 @@ namespace System.Text.Json
             Advance(idx + value.Length);
         }
 
-        private void WriteLiteralIndented(in ReadOnlySpan<byte> value)
+        private void WriteLiteralIndented(ReadOnlySpan<byte> value)
         {
             int idx = 0;
             if (_currentDepth < 0)

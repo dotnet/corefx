@@ -160,7 +160,7 @@ namespace System.Text.Json
             _tokenType = value ? JsonTokenType.True : JsonTokenType.False;
         }
 
-        private void WriteLiteralSuppressFalse(in ReadOnlySpan<char> propertyName, in ReadOnlySpan<byte> value)
+        private void WriteLiteralSuppressFalse(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -176,7 +176,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteLiteralSuppressFalse(in ReadOnlySpan<byte> propertyName, in ReadOnlySpan<byte> value)
+        private void WriteLiteralSuppressFalse(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -192,7 +192,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteLiteralEscapeProperty(in ReadOnlySpan<char> propertyName, in ReadOnlySpan<byte> value, int firstEscapeIndexProp)
+        private void WriteLiteralEscapeProperty(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value, int firstEscapeIndexProp)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
@@ -224,7 +224,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteLiteralEscapeProperty(in ReadOnlySpan<byte> propertyName, in ReadOnlySpan<byte> value, int firstEscapeIndexProp)
+        private void WriteLiteralEscapeProperty(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value, int firstEscapeIndexProp)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
@@ -256,7 +256,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteLiteralByOptions(in ReadOnlySpan<char> propertyName, in ReadOnlySpan<byte> value)
+        private void WriteLiteralByOptions(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)
         {
             int idx;
             if (_writerOptions.Indented)
@@ -288,7 +288,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteLiteralByOptions(in ReadOnlySpan<byte> propertyName, in ReadOnlySpan<byte> value)
+        private void WriteLiteralByOptions(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
         {
             int idx;
             if (_writerOptions.Indented)

@@ -12,14 +12,14 @@ namespace System.Text.Json
     public ref partial struct Utf8JsonWriter
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ValidatePropertyNameAndDepth(in ReadOnlySpan<char> propertyName)
+        private void ValidatePropertyNameAndDepth(ReadOnlySpan<char> propertyName)
         {
             if (propertyName.Length > JsonConstants.MaxCharacterTokenSize || CurrentDepth >= JsonConstants.MaxWriterDepth)
                 ThrowHelper.ThrowInvalidOperationOrArgumentException(propertyName, _currentDepth);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ValidatePropertyNameAndDepth(in ReadOnlySpan<byte> propertyName)
+        private void ValidatePropertyNameAndDepth(ReadOnlySpan<byte> propertyName)
         {
             if (propertyName.Length > JsonConstants.MaxTokenSize || CurrentDepth >= JsonConstants.MaxWriterDepth)
                 ThrowHelper.ThrowInvalidOperationOrArgumentException(propertyName, _currentDepth);
@@ -34,7 +34,7 @@ namespace System.Text.Json
             }
         }
 
-        private int WritePropertyNameMinimized(in ReadOnlySpan<byte> escapedPropertyName)
+        private int WritePropertyNameMinimized(ReadOnlySpan<byte> escapedPropertyName)
         {
             int idx = 0;
             if (_currentDepth < 0)
@@ -72,7 +72,7 @@ namespace System.Text.Json
             return idx;
         }
 
-        private int WritePropertyNameIndented(in ReadOnlySpan<byte> escapedPropertyName)
+        private int WritePropertyNameIndented(ReadOnlySpan<byte> escapedPropertyName)
         {
             int idx = 0;
             if (_currentDepth < 0)
@@ -134,7 +134,7 @@ namespace System.Text.Json
             return idx;
         }
 
-        private int WritePropertyNameMinimized(in ReadOnlySpan<char> escapedPropertyName)
+        private int WritePropertyNameMinimized(ReadOnlySpan<char> escapedPropertyName)
         {
             int idx = 0;
             if (_currentDepth < 0)
@@ -185,7 +185,7 @@ namespace System.Text.Json
             return idx;
         }
 
-        private int WritePropertyNameIndented(in ReadOnlySpan<char> escapedPropertyName)
+        private int WritePropertyNameIndented(ReadOnlySpan<char> escapedPropertyName)
         {
             int idx = 0;
             if (_currentDepth < 0)
