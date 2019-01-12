@@ -22,6 +22,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="DateTime"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 05/25/2017 10:30:15.
+        /// </remarks>
         public void WriteString(string propertyName, DateTime value, bool suppressEscaping = false)
             => WriteString(propertyName.AsSpan(), value, suppressEscaping);
 
@@ -37,6 +40,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="DateTime"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 05/25/2017 10:30:15.
+        /// </remarks>
         public void WriteString(ReadOnlySpan<char> propertyName, DateTime value, bool suppressEscaping = false)
         {
             JsonWriterHelper.ValidateProperty(propertyName);
@@ -66,6 +72,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="DateTime"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 05/25/2017 10:30:15.
+        /// </remarks>
         public void WriteString(ReadOnlySpan<byte> propertyName, DateTime value, bool suppressEscaping = false)
         {
             JsonWriterHelper.ValidateProperty(propertyName);

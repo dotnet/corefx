@@ -22,6 +22,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(string propertyName, ulong value, bool suppressEscaping = false)
             => WriteNumber(propertyName.AsSpan(), value, suppressEscaping);
@@ -38,6 +41,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<char> propertyName, ulong value, bool suppressEscaping = false)
         {
@@ -68,6 +74,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<byte> propertyName, ulong value, bool suppressEscaping = false)
         {
@@ -98,6 +107,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(string propertyName, uint value, bool suppressEscaping = false)
             => WriteNumber(propertyName.AsSpan(), (ulong)value, suppressEscaping);
@@ -114,6 +126,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<char> propertyName, uint value, bool suppressEscaping = false)
             => WriteNumber(propertyName, (ulong)value, suppressEscaping);
@@ -130,6 +145,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<byte> propertyName, uint value, bool suppressEscaping = false)
             => WriteNumber(propertyName, (ulong)value, suppressEscaping);

@@ -22,6 +22,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="float"/> using the default <see cref="StandardFormat"/> (i.e. 'G')
+        /// </remarks>
         public void WriteNumber(string propertyName, float value, bool suppressEscaping = false)
             => WriteNumber(propertyName.AsSpan(), value, suppressEscaping);
 
@@ -37,6 +40,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="float"/> using the default <see cref="StandardFormat"/> (i.e. 'G')
+        /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, float value, bool suppressEscaping = false)
         {
             JsonWriterHelper.ValidateProperty(propertyName);
@@ -67,6 +73,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="float"/> using the default <see cref="StandardFormat"/> (i.e. 'G')
+        /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> propertyName, float value, bool suppressEscaping = false)
         {
             JsonWriterHelper.ValidateProperty(propertyName);

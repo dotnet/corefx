@@ -22,6 +22,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// </remarks>
         public void WriteNumber(string propertyName, long value, bool suppressEscaping = false)
             => WriteNumber(propertyName.AsSpan(), value, suppressEscaping);
 
@@ -37,6 +40,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, long value, bool suppressEscaping = false)
         {
             JsonWriterHelper.ValidateProperty(propertyName);
@@ -66,6 +72,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> propertyName, long value, bool suppressEscaping = false)
         {
             JsonWriterHelper.ValidateProperty(propertyName);
@@ -95,6 +104,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// </remarks>
         public void WriteNumber(string propertyName, int value, bool suppressEscaping = false)
             => WriteNumber(propertyName.AsSpan(), (long)value, suppressEscaping);
 
@@ -110,6 +122,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, int value, bool suppressEscaping = false)
             => WriteNumber(propertyName, (long)value, suppressEscaping);
 
@@ -125,6 +140,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
+        /// <remarks>
+        /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> propertyName, int value, bool suppressEscaping = false)
             => WriteNumber(propertyName, (long)value, suppressEscaping);
 
