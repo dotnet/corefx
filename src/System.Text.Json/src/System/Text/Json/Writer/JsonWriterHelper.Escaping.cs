@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
 {
+    // TODO: Replace the escaping logic with publicly shipping APIs from https://github.com/dotnet/corefx/issues/33509
     internal static partial class JsonWriterHelper
     {
         // Only allow ASCII characters between ' ' (0x20) and '~' (0x7E), inclusively,
@@ -76,6 +77,13 @@ namespace System.Text.Json
 
         Return:
             return idx;
+        }
+
+        public static int GetMaxEscapedLength(int textLength, int firstIndexToEscape)
+        {
+            Debug.Assert(textLength > 0);
+            Debug.Assert(firstIndexToEscape >= 0 && firstIndexToEscape < textLength);
+            return firstIndexToEscape + JsonConstants.MaxExpansionFactorWhileEscaping * (textLength - firstIndexToEscape);
         }
 
         public static void EscapeString(ReadOnlySpan<byte> value, Span<byte> destination, int indexOfFirstByteToEscape, out int written)

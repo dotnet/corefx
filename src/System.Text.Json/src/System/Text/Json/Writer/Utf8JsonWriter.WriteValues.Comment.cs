@@ -113,7 +113,7 @@ namespace System.Text.Json
 
             if (firstEscapeIndexVal != -1)
             {
-                int length = firstEscapeIndexVal + JsonConstants.MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
+                int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndexVal);
 
                 Span<char> span;
                 if (length > StackallocThreshold)
@@ -219,7 +219,7 @@ namespace System.Text.Json
 
             if (firstEscapeIndexVal != -1)
             {
-                int length = firstEscapeIndexVal + JsonConstants.MaxExpansionFactorWhileEscaping * (value.Length - firstEscapeIndexVal);
+                int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndexVal);
 
                 Span<byte> span;
                 if (length > StackallocThreshold)

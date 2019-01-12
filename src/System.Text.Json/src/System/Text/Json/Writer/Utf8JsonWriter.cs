@@ -415,7 +415,7 @@ namespace System.Text.Json
 
             byte[] propertyArray = null;
 
-            int length = firstEscapeIndexProp + JsonConstants.MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
+            int length = JsonWriterHelper.GetMaxEscapedLength(propertyName.Length, firstEscapeIndexProp);
             Span<byte> span;
             if (length > StackallocThreshold)
             {
@@ -579,7 +579,7 @@ namespace System.Text.Json
 
             char[] propertyArray = null;
 
-            int length = firstEscapeIndexProp + JsonConstants.MaxExpansionFactorWhileEscaping * (propertyName.Length - firstEscapeIndexProp);
+            int length = JsonWriterHelper.GetMaxEscapedLength(propertyName.Length, firstEscapeIndexProp);
             Span<char> span;
             if (length > StackallocThreshold)
             {
