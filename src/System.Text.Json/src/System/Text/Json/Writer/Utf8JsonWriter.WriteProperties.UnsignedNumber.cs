@@ -41,15 +41,15 @@ namespace System.Text.Json
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<char> propertyName, ulong value, bool suppressEscaping = false)
         {
-            JsonWriterHelper.ValidateProperty(ref propertyName);
+            JsonWriterHelper.ValidateProperty(propertyName);
 
             if (!suppressEscaping)
             {
-                WriteNumberSuppressFalse(ref propertyName, value);
+                WriteNumberSuppressFalse(propertyName, value);
             }
             else
             {
-                WriteNumberByOptions(ref propertyName, value);
+                WriteNumberByOptions(propertyName, value);
             }
 
             _currentDepth |= 1 << 31;
@@ -71,15 +71,15 @@ namespace System.Text.Json
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<byte> propertyName, ulong value, bool suppressEscaping = false)
         {
-            JsonWriterHelper.ValidateProperty(ref propertyName);
+            JsonWriterHelper.ValidateProperty(propertyName);
 
             if (!suppressEscaping)
             {
-                WriteNumberSuppressFalse(ref propertyName, value);
+                WriteNumberSuppressFalse(propertyName, value);
             }
             else
             {
-                WriteNumberByOptions(ref propertyName, value);
+                WriteNumberByOptions(propertyName, value);
             }
 
             _currentDepth |= 1 << 31;
@@ -134,7 +134,7 @@ namespace System.Text.Json
         public void WriteNumber(ReadOnlySpan<byte> propertyName, uint value, bool suppressEscaping = false)
             => WriteNumber(propertyName, (ulong)value, suppressEscaping);
 
-        private void WriteNumberSuppressFalse(ref ReadOnlySpan<char> propertyName, ulong value)
+        private void WriteNumberSuppressFalse(in ReadOnlySpan<char> propertyName, ulong value)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -142,15 +142,15 @@ namespace System.Text.Json
 
             if (propertyIdx != -1)
             {
-                WriteNumberEscapeProperty(ref propertyName, value, propertyIdx);
+                WriteNumberEscapeProperty(propertyName, value, propertyIdx);
             }
             else
             {
-                WriteNumberByOptions(ref propertyName, value);
+                WriteNumberByOptions(propertyName, value);
             }
         }
 
-        private void WriteNumberSuppressFalse(ref ReadOnlySpan<byte> propertyName, ulong value)
+        private void WriteNumberSuppressFalse(in ReadOnlySpan<byte> propertyName, ulong value)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -158,15 +158,15 @@ namespace System.Text.Json
 
             if (propertyIdx != -1)
             {
-                WriteNumberEscapeProperty(ref propertyName, value, propertyIdx);
+                WriteNumberEscapeProperty(propertyName, value, propertyIdx);
             }
             else
             {
-                WriteNumberByOptions(ref propertyName, value);
+                WriteNumberByOptions(propertyName, value);
             }
         }
 
-        private void WriteNumberEscapeProperty(ref ReadOnlySpan<char> propertyName, ulong value, int firstEscapeIndexProp)
+        private void WriteNumberEscapeProperty(in ReadOnlySpan<char> propertyName, ulong value, int firstEscapeIndexProp)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
@@ -188,10 +188,9 @@ namespace System.Text.Json
                     span = new Span<char>(ptr, length);
                 }
             }
-            JsonWriterHelper.EscapeString(ref propertyName, ref span, firstEscapeIndexProp, out int written);
-            propertyName = span.Slice(0, written);
+            JsonWriterHelper.EscapeString(propertyName, span, firstEscapeIndexProp, out int written);
 
-            WriteNumberByOptions(ref propertyName, value);
+            WriteNumberByOptions(span.Slice(0, written), value);
 
             if (propertyArray != null)
             {
@@ -199,7 +198,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteNumberEscapeProperty(ref ReadOnlySpan<byte> propertyName, ulong value, int firstEscapeIndexProp)
+        private void WriteNumberEscapeProperty(in ReadOnlySpan<byte> propertyName, ulong value, int firstEscapeIndexProp)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
@@ -221,10 +220,9 @@ namespace System.Text.Json
                     span = new Span<byte>(ptr, length);
                 }
             }
-            JsonWriterHelper.EscapeString(ref propertyName, ref span, firstEscapeIndexProp, out int written);
-            propertyName = span.Slice(0, written);
+            JsonWriterHelper.EscapeString(propertyName, span, firstEscapeIndexProp, out int written);
 
-            WriteNumberByOptions(ref propertyName, value);
+            WriteNumberByOptions(span.Slice(0, written), value);
 
             if (propertyArray != null)
             {
@@ -232,7 +230,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteNumberByOptions(ref ReadOnlySpan<char> propertyName, ulong value)
+        private void WriteNumberByOptions(in ReadOnlySpan<char> propertyName, ulong value)
         {
             if (_writerOptions.Indented)
             {
@@ -240,7 +238,7 @@ namespace System.Text.Json
                 {
                     ValidateWritingProperty();
                 }
-                WriteNumberIndented(ref propertyName, value);
+                WriteNumberIndented(propertyName, value);
             }
             else
             {
@@ -248,11 +246,11 @@ namespace System.Text.Json
                 {
                     ValidateWritingProperty();
                 }
-                WriteNumberMinimized(ref propertyName, value);
+                WriteNumberMinimized(propertyName, value);
             }
         }
 
-        private void WriteNumberByOptions(ref ReadOnlySpan<byte> propertyName, ulong value)
+        private void WriteNumberByOptions(in ReadOnlySpan<byte> propertyName, ulong value)
         {
             if (_writerOptions.Indented)
             {
@@ -260,7 +258,7 @@ namespace System.Text.Json
                 {
                     ValidateWritingProperty();
                 }
-                WriteNumberIndented(ref propertyName, value);
+                WriteNumberIndented(propertyName, value);
             }
             else
             {
@@ -268,40 +266,40 @@ namespace System.Text.Json
                 {
                     ValidateWritingProperty();
                 }
-                WriteNumberMinimized(ref propertyName, value);
+                WriteNumberMinimized(propertyName, value);
             }
         }
 
-        private void WriteNumberMinimized(ref ReadOnlySpan<char> escapedPropertyName, ulong value)
+        private void WriteNumberMinimized(in ReadOnlySpan<char> escapedPropertyName, ulong value)
         {
-            int idx = WritePropertyNameMinimized(ref escapedPropertyName);
+            int idx = WritePropertyNameMinimized(escapedPropertyName);
 
             WriteNumberValueFormatLoop(value, ref idx);
 
             Advance(idx);
         }
 
-        private void WriteNumberMinimized(ref ReadOnlySpan<byte> escapedPropertyName, ulong value)
+        private void WriteNumberMinimized(in ReadOnlySpan<byte> escapedPropertyName, ulong value)
         {
-            int idx = WritePropertyNameMinimized(ref escapedPropertyName);
+            int idx = WritePropertyNameMinimized(escapedPropertyName);
 
             WriteNumberValueFormatLoop(value, ref idx);
 
             Advance(idx);
         }
 
-        private void WriteNumberIndented(ref ReadOnlySpan<char> escapedPropertyName, ulong value)
+        private void WriteNumberIndented(in ReadOnlySpan<char> escapedPropertyName, ulong value)
         {
-            int idx = WritePropertyNameIndented(ref escapedPropertyName);
+            int idx = WritePropertyNameIndented(escapedPropertyName);
 
             WriteNumberValueFormatLoop(value, ref idx);
 
             Advance(idx);
         }
 
-        private void WriteNumberIndented(ref ReadOnlySpan<byte> escapedPropertyName, ulong value)
+        private void WriteNumberIndented(in ReadOnlySpan<byte> escapedPropertyName, ulong value)
         {
-            int idx = WritePropertyNameIndented(ref escapedPropertyName);
+            int idx = WritePropertyNameIndented(escapedPropertyName);
 
             WriteNumberValueFormatLoop(value, ref idx);
 

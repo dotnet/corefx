@@ -321,15 +321,15 @@ namespace System.Text.Json
         /// </exception>
         public void WriteStartArray(ReadOnlySpan<byte> propertyName, bool suppressEscaping = false)
         {
-            ValidatePropertyNameAndDepth(ref propertyName);
+            ValidatePropertyNameAndDepth(propertyName);
 
             if (!suppressEscaping)
             {
-                WriteStartSuppressFalse(ref propertyName, JsonConstants.OpenBracket);
+                WriteStartSuppressFalse(propertyName, JsonConstants.OpenBracket);
             }
             else
             {
-                WriteStartByOptions(ref propertyName, JsonConstants.OpenBracket);
+                WriteStartByOptions(propertyName, JsonConstants.OpenBracket);
             }
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
@@ -352,15 +352,15 @@ namespace System.Text.Json
         /// </exception>
         public void WriteStartObject(ReadOnlySpan<byte> propertyName, bool suppressEscaping = false)
         {
-            ValidatePropertyNameAndDepth(ref propertyName);
+            ValidatePropertyNameAndDepth(propertyName);
 
             if (!suppressEscaping)
             {
-                WriteStartSuppressFalse(ref propertyName, JsonConstants.OpenBrace);
+                WriteStartSuppressFalse(propertyName, JsonConstants.OpenBrace);
             }
             else
             {
-                WriteStartByOptions(ref propertyName, JsonConstants.OpenBrace);
+                WriteStartByOptions(propertyName, JsonConstants.OpenBrace);
             }
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
@@ -369,7 +369,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartObject;
         }
 
-        private void WriteStartSuppressFalse(ref ReadOnlySpan<byte> propertyName, byte token)
+        private void WriteStartSuppressFalse(in ReadOnlySpan<byte> propertyName, byte token)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -377,15 +377,15 @@ namespace System.Text.Json
 
             if (propertyIdx != -1)
             {
-                WriteStartEscapeProperty(ref propertyName, token, propertyIdx);
+                WriteStartEscapeProperty(propertyName, token, propertyIdx);
             }
             else
             {
-                WriteStartByOptions(ref propertyName, token);
+                WriteStartByOptions(propertyName, token);
             }
         }
 
-        private void WriteStartByOptions(ref ReadOnlySpan<byte> propertyName, byte token)
+        private void WriteStartByOptions(in ReadOnlySpan<byte> propertyName, byte token)
         {
             int idx;
             if (_writerOptions.Indented)
@@ -395,7 +395,7 @@ namespace System.Text.Json
                     ValidateWritingProperty();
                     UpdateBitStackOnStart(token);
                 }
-                idx = WritePropertyNameIndented(ref propertyName);
+                idx = WritePropertyNameIndented(propertyName);
             }
             else
             {
@@ -404,7 +404,7 @@ namespace System.Text.Json
                     ValidateWritingProperty();
                     UpdateBitStackOnStart(token);
                 }
-                idx = WritePropertyNameMinimized(ref propertyName);
+                idx = WritePropertyNameMinimized(propertyName);
             }
 
             if (1 > _buffer.Length - idx)
@@ -418,7 +418,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStartEscapeProperty(ref ReadOnlySpan<byte> propertyName, byte token, int firstEscapeIndexProp)
+        private void WriteStartEscapeProperty(in ReadOnlySpan<byte> propertyName, byte token, int firstEscapeIndexProp)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
@@ -440,10 +440,10 @@ namespace System.Text.Json
                     span = new Span<byte>(ptr, length);
                 }
             }
-            JsonWriterHelper.EscapeString(ref propertyName, ref span, firstEscapeIndexProp, out int written);
-            propertyName = span.Slice(0, written);
 
-            WriteStartByOptions(ref propertyName, token);
+            JsonWriterHelper.EscapeString(propertyName, span, firstEscapeIndexProp, out int written);
+
+            WriteStartByOptions(span.Slice(0, written), token);
 
             if (propertyArray != null)
             {
@@ -495,15 +495,15 @@ namespace System.Text.Json
         /// </exception>
         public void WriteStartArray(ReadOnlySpan<char> propertyName, bool suppressEscaping = false)
         {
-            ValidatePropertyNameAndDepth(ref propertyName);
+            ValidatePropertyNameAndDepth(propertyName);
 
             if (!suppressEscaping)
             {
-                WriteStartSuppressFalse(ref propertyName, JsonConstants.OpenBracket);
+                WriteStartSuppressFalse(propertyName, JsonConstants.OpenBracket);
             }
             else
             {
-                WriteStartByOptions(ref propertyName, JsonConstants.OpenBracket);
+                WriteStartByOptions(propertyName, JsonConstants.OpenBracket);
             }
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
@@ -526,15 +526,15 @@ namespace System.Text.Json
         /// </exception>
         public void WriteStartObject(ReadOnlySpan<char> propertyName, bool suppressEscaping = false)
         {
-            ValidatePropertyNameAndDepth(ref propertyName);
+            ValidatePropertyNameAndDepth(propertyName);
 
             if (!suppressEscaping)
             {
-                WriteStartSuppressFalse(ref propertyName, JsonConstants.OpenBrace);
+                WriteStartSuppressFalse(propertyName, JsonConstants.OpenBrace);
             }
             else
             {
-                WriteStartByOptions(ref propertyName, JsonConstants.OpenBrace);
+                WriteStartByOptions(propertyName, JsonConstants.OpenBrace);
             }
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
@@ -543,7 +543,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartObject;
         }
 
-        private void WriteStartSuppressFalse(ref ReadOnlySpan<char> propertyName, byte token)
+        private void WriteStartSuppressFalse(in ReadOnlySpan<char> propertyName, byte token)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -551,15 +551,15 @@ namespace System.Text.Json
 
             if (propertyIdx != -1)
             {
-                WriteStartEscapeProperty(ref propertyName, token, propertyIdx);
+                WriteStartEscapeProperty(propertyName, token, propertyIdx);
             }
             else
             {
-                WriteStartByOptions(ref propertyName, token);
+                WriteStartByOptions(propertyName, token);
             }
         }
 
-        private void WriteStartByOptions(ref ReadOnlySpan<char> propertyName, byte token)
+        private void WriteStartByOptions(in ReadOnlySpan<char> propertyName, byte token)
         {
             int idx;
             if (_writerOptions.Indented)
@@ -569,7 +569,7 @@ namespace System.Text.Json
                     ValidateWritingProperty();
                     UpdateBitStackOnStart(token);
                 }
-                idx = WritePropertyNameIndented(ref propertyName);
+                idx = WritePropertyNameIndented(propertyName);
             }
             else
             {
@@ -578,7 +578,7 @@ namespace System.Text.Json
                     ValidateWritingProperty();
                     UpdateBitStackOnStart(token);
                 }
-                idx = WritePropertyNameMinimized(ref propertyName);
+                idx = WritePropertyNameMinimized(propertyName);
             }
 
             if (1 > _buffer.Length - idx)
@@ -592,7 +592,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStartEscapeProperty(ref ReadOnlySpan<char> propertyName, byte token, int firstEscapeIndexProp)
+        private void WriteStartEscapeProperty(in ReadOnlySpan<char> propertyName, byte token, int firstEscapeIndexProp)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
@@ -614,10 +614,9 @@ namespace System.Text.Json
                     span = new Span<char>(ptr, length);
                 }
             }
-            JsonWriterHelper.EscapeString(ref propertyName, ref span, firstEscapeIndexProp, out int written);
-            propertyName = span.Slice(0, written);
+            JsonWriterHelper.EscapeString(propertyName, span, firstEscapeIndexProp, out int written);
 
-            WriteStartByOptions(ref propertyName, token);
+            WriteStartByOptions(span.Slice(0, written), token);
 
             if (propertyArray != null)
             {
@@ -811,28 +810,22 @@ namespace System.Text.Json
         {
             Flush();
             int previousSpanLength = _buffer.Length;
+            Debug.Assert(previousSpanLength < DefaultGrowthSize);
             _buffer = _output.GetSpan(DefaultGrowthSize);
             if (_buffer.Length <= previousSpanLength)
             {
-                _buffer = _output.GetSpan(DefaultGrowthSize);
-                if (_buffer.Length <= previousSpanLength)
-                {
-                    ThrowHelper.ThrowArgumentException(ExceptionResource.FailedToGetLargerSpan);
-                }
+                ThrowHelper.ThrowArgumentException(ExceptionResource.FailedToGetLargerSpan);
             }
         }
 
         private void GrowAndEnsure(int minimumSize)
         {
             Flush();
+            Debug.Assert(minimumSize < DefaultGrowthSize);
             _buffer = _output.GetSpan(DefaultGrowthSize);
             if (_buffer.Length < minimumSize)
             {
-                _buffer = _output.GetSpan(DefaultGrowthSize);
-                if (_buffer.Length < minimumSize)
-                {
-                    ThrowHelper.ThrowArgumentException(ExceptionResource.FailedToGetMinimumSizeSpan, minimumSize);
-                }
+                ThrowHelper.ThrowArgumentException(ExceptionResource.FailedToGetMinimumSizeSpan, minimumSize);
             }
         }
 
@@ -850,7 +843,7 @@ namespace System.Text.Json
             GrowAndEnsure(minimumSize);
         }
 
-        private void CopyLoop(ref ReadOnlySpan<byte> span, ref int idx)
+        private void CopyLoop(ReadOnlySpan<byte> span, ref int idx)
         {
             while (true)
             {

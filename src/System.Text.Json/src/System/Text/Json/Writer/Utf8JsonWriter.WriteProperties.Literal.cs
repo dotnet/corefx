@@ -36,17 +36,17 @@ namespace System.Text.Json
         /// </exception>
         public void WriteNull(ReadOnlySpan<char> propertyName, bool suppressEscaping = false)
         {
-            JsonWriterHelper.ValidateProperty(ref propertyName);
+            JsonWriterHelper.ValidateProperty(propertyName);
 
             ReadOnlySpan<byte> span = JsonConstants.NullValue;
 
             if (!suppressEscaping)
             {
-                WriteLiteralSuppressFalse(ref propertyName, ref span);
+                WriteLiteralSuppressFalse(propertyName, span);
             }
             else
             {
-                WriteLiteralByOptions(ref propertyName, ref span);
+                WriteLiteralByOptions(propertyName, span);
             }
 
             _currentDepth |= 1 << 31;
@@ -66,17 +66,17 @@ namespace System.Text.Json
         /// </exception>
         public void WriteNull(ReadOnlySpan<byte> propertyName, bool suppressEscaping = false)
         {
-            JsonWriterHelper.ValidateProperty(ref propertyName);
+            JsonWriterHelper.ValidateProperty(propertyName);
 
             ReadOnlySpan<byte> span = JsonConstants.NullValue;
 
             if (!suppressEscaping)
             {
-                WriteLiteralSuppressFalse(ref propertyName, ref span);
+                WriteLiteralSuppressFalse(propertyName, span);
             }
             else
             {
-                WriteLiteralByOptions(ref propertyName, ref span);
+                WriteLiteralByOptions(propertyName, span);
             }
 
             _currentDepth |= 1 << 31;
@@ -112,17 +112,17 @@ namespace System.Text.Json
         /// </exception>
         public void WriteBoolean(ReadOnlySpan<char> propertyName, bool value, bool suppressEscaping = false)
         {
-            JsonWriterHelper.ValidateProperty(ref propertyName);
+            JsonWriterHelper.ValidateProperty(propertyName);
 
             ReadOnlySpan<byte> span = value ? JsonConstants.TrueValue : JsonConstants.FalseValue;
 
             if (!suppressEscaping)
             {
-                WriteLiteralSuppressFalse(ref propertyName, ref span);
+                WriteLiteralSuppressFalse(propertyName, span);
             }
             else
             {
-                WriteLiteralByOptions(ref propertyName, ref span);
+                WriteLiteralByOptions(propertyName, span);
             }
 
             _currentDepth |= 1 << 31;
@@ -143,24 +143,24 @@ namespace System.Text.Json
         /// </exception>
         public void WriteBoolean(ReadOnlySpan<byte> propertyName, bool value, bool suppressEscaping = false)
         {
-            JsonWriterHelper.ValidateProperty(ref propertyName);
+            JsonWriterHelper.ValidateProperty(propertyName);
 
             ReadOnlySpan<byte> span = value ? JsonConstants.TrueValue : JsonConstants.FalseValue;
 
             if (!suppressEscaping)
             {
-                WriteLiteralSuppressFalse(ref propertyName, ref span);
+                WriteLiteralSuppressFalse(propertyName, span);
             }
             else
             {
-                WriteLiteralByOptions(ref propertyName, ref span);
+                WriteLiteralByOptions(propertyName, span);
             }
 
             _currentDepth |= 1 << 31;
             _tokenType = value ? JsonTokenType.True : JsonTokenType.False;
         }
 
-        private void WriteLiteralSuppressFalse(ref ReadOnlySpan<char> propertyName, ref ReadOnlySpan<byte> value)
+        private void WriteLiteralSuppressFalse(in ReadOnlySpan<char> propertyName, in ReadOnlySpan<byte> value)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -168,15 +168,15 @@ namespace System.Text.Json
 
             if (propertyIdx != -1)
             {
-                WriteLiteralEscapeProperty(ref propertyName, ref value, propertyIdx);
+                WriteLiteralEscapeProperty(propertyName, value, propertyIdx);
             }
             else
             {
-                WriteLiteralByOptions(ref propertyName, ref value);
+                WriteLiteralByOptions(propertyName, value);
             }
         }
 
-        private void WriteLiteralSuppressFalse(ref ReadOnlySpan<byte> propertyName, ref ReadOnlySpan<byte> value)
+        private void WriteLiteralSuppressFalse(in ReadOnlySpan<byte> propertyName, in ReadOnlySpan<byte> value)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -184,15 +184,15 @@ namespace System.Text.Json
 
             if (propertyIdx != -1)
             {
-                WriteLiteralEscapeProperty(ref propertyName, ref value, propertyIdx);
+                WriteLiteralEscapeProperty(propertyName, value, propertyIdx);
             }
             else
             {
-                WriteLiteralByOptions(ref propertyName, ref value);
+                WriteLiteralByOptions(propertyName, value);
             }
         }
 
-        private void WriteLiteralEscapeProperty(ref ReadOnlySpan<char> propertyName, ref ReadOnlySpan<byte> value, int firstEscapeIndexProp)
+        private void WriteLiteralEscapeProperty(in ReadOnlySpan<char> propertyName, in ReadOnlySpan<byte> value, int firstEscapeIndexProp)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
@@ -214,10 +214,9 @@ namespace System.Text.Json
                     span = new Span<char>(ptr, length);
                 }
             }
-            JsonWriterHelper.EscapeString(ref propertyName, ref span, firstEscapeIndexProp, out int written);
-            propertyName = span.Slice(0, written);
+            JsonWriterHelper.EscapeString(propertyName, span, firstEscapeIndexProp, out int written);
 
-            WriteLiteralByOptions(ref propertyName, ref value);
+            WriteLiteralByOptions(span.Slice(0, written), value);
 
             if (propertyArray != null)
             {
@@ -225,7 +224,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteLiteralEscapeProperty(ref ReadOnlySpan<byte> propertyName, ref ReadOnlySpan<byte> value, int firstEscapeIndexProp)
+        private void WriteLiteralEscapeProperty(in ReadOnlySpan<byte> propertyName, in ReadOnlySpan<byte> value, int firstEscapeIndexProp)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
 
@@ -247,10 +246,9 @@ namespace System.Text.Json
                     span = new Span<byte>(ptr, length);
                 }
             }
-            JsonWriterHelper.EscapeString(ref propertyName, ref span, firstEscapeIndexProp, out int written);
-            propertyName = span.Slice(0, written);
+            JsonWriterHelper.EscapeString(propertyName, span, firstEscapeIndexProp, out int written);
 
-            WriteLiteralByOptions(ref propertyName, ref value);
+            WriteLiteralByOptions(span.Slice(0, written), value);
 
             if (propertyArray != null)
             {
@@ -258,7 +256,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteLiteralByOptions(ref ReadOnlySpan<char> propertyName, ref ReadOnlySpan<byte> value)
+        private void WriteLiteralByOptions(in ReadOnlySpan<char> propertyName, in ReadOnlySpan<byte> value)
         {
             int idx;
             if (_writerOptions.Indented)
@@ -267,7 +265,7 @@ namespace System.Text.Json
                 {
                     ValidateWritingProperty();
                 }
-                idx = WritePropertyNameIndented(ref propertyName);
+                idx = WritePropertyNameIndented(propertyName);
             }
             else
             {
@@ -275,7 +273,7 @@ namespace System.Text.Json
                 {
                     ValidateWritingProperty();
                 }
-                idx = WritePropertyNameMinimized(ref propertyName);
+                idx = WritePropertyNameMinimized(propertyName);
             }
 
             if (value.Length > _buffer.Length - idx)
@@ -290,7 +288,7 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteLiteralByOptions(ref ReadOnlySpan<byte> propertyName, ref ReadOnlySpan<byte> value)
+        private void WriteLiteralByOptions(in ReadOnlySpan<byte> propertyName, in ReadOnlySpan<byte> value)
         {
             int idx;
             if (_writerOptions.Indented)
@@ -299,7 +297,7 @@ namespace System.Text.Json
                 {
                     ValidateWritingProperty();
                 }
-                idx = WritePropertyNameIndented(ref propertyName);
+                idx = WritePropertyNameIndented(propertyName);
             }
             else
             {
@@ -307,7 +305,7 @@ namespace System.Text.Json
                 {
                     ValidateWritingProperty();
                 }
-                idx = WritePropertyNameMinimized(ref propertyName);
+                idx = WritePropertyNameMinimized(propertyName);
             }
 
             if (value.Length > _buffer.Length - idx)

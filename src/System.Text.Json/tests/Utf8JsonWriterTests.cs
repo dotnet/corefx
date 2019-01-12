@@ -1408,6 +1408,60 @@ namespace System.Text.Json.Tests
         [InlineData(true, false)]
         [InlineData(false, true)]
         [InlineData(false, false)]
+        public void EscapingLeavesInputUnchanged(bool formatted, bool skipValidation)
+        {
+            string keyStr = "mess\nage";
+            string valueStr = "Hello, \nWorld!";
+
+            ReadOnlySpan<char> keyUtf16 = keyStr;
+            ReadOnlySpan<char> valueUtf16 = valueStr;
+
+            byte[] keyUtf8 = Encoding.UTF8.GetBytes(keyStr);
+            byte[] valueUtf8 = Encoding.UTF8.GetBytes(valueStr);
+
+            var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+
+            for (int i = 0; i < 5; i++)
+            {
+                var output = new ArrayBufferWriter(1024);
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+
+                jsonUtf8.WriteStartObject();
+
+                switch (i)
+                {
+                    case 0:
+                        jsonUtf8.WriteString(keyUtf8, valueStr, suppressEscaping: false);
+                        break;
+                    case 1:
+                        jsonUtf8.WriteString(keyUtf8, valueUtf16, suppressEscaping: false);
+                        break;
+                    case 2:
+                        jsonUtf8.WriteString(keyUtf8, valueUtf8, suppressEscaping: false);
+                        break;
+                    case 3:
+                        jsonUtf8.WriteString(keyStr, valueUtf8, suppressEscaping: false);
+                        break;
+                    case 4:
+                        jsonUtf8.WriteString(keyUtf16, valueUtf8, suppressEscaping: false);
+                        break;
+                }
+
+                jsonUtf8.WriteEndObject();
+                jsonUtf8.Flush();
+
+                output.Dispose();
+
+                Assert.True(keyUtf8.AsSpan().SequenceEqual(Encoding.UTF8.GetBytes(keyStr)));
+                Assert.True(valueUtf8.AsSpan().SequenceEqual(Encoding.UTF8.GetBytes(valueStr)));
+            }
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
         public void EscapeAsciiCharacters(bool formatted, bool skipValidation)
         {
             var propertyArray = new char[128];

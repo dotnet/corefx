@@ -31,19 +31,19 @@ namespace System.Text.Json
         /// </exception>
         public void WriteCommentValue(ReadOnlySpan<char> value, bool suppressEscaping = false)
         {
-            JsonWriterHelper.ValidateValue(ref value);
+            JsonWriterHelper.ValidateValue(value);
 
             if (!suppressEscaping)
             {
-                WriteCommentSuppressFalse(ref value);
+                WriteCommentSuppressFalse(value);
             }
             else
             {
-                WriteCommentByOptions(ref value);
+                WriteCommentByOptions(value);
             }
         }
 
-        private void WriteCommentSuppressFalse(ref ReadOnlySpan<char> value)
+        private void WriteCommentSuppressFalse(in ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
 
@@ -51,36 +51,36 @@ namespace System.Text.Json
 
             if (valueIdx != -1)
             {
-                WriteCommentEscapeValue(ref value, valueIdx);
+                WriteCommentEscapeValue(value, valueIdx);
             }
             else
             {
-                WriteCommentByOptions(ref value);
+                WriteCommentByOptions(value);
             }
         }
 
-        private void WriteCommentByOptions(ref ReadOnlySpan<char> value)
+        private void WriteCommentByOptions(in ReadOnlySpan<char> value)
         {
             if (_writerOptions.Indented)
             {
-                WriteCommentIndented(ref value);
+                WriteCommentIndented(value);
             }
             else
             {
-                WriteCommentMinimized(ref value);
+                WriteCommentMinimized(value);
             }
         }
 
-        private void WriteCommentMinimized(ref ReadOnlySpan<char> escapedValue)
+        private void WriteCommentMinimized(in ReadOnlySpan<char> escapedValue)
         {
             int idx = 0;
 
-            WriteCommentValue(ref escapedValue, ref idx);
+            WriteCommentValue(escapedValue, ref idx);
 
             Advance(idx);
         }
 
-        private void WriteCommentIndented(ref ReadOnlySpan<char> escapedValue)
+        private void WriteCommentIndented(in ReadOnlySpan<char> escapedValue)
         {
             int idx = 0;
 
@@ -101,12 +101,12 @@ namespace System.Text.Json
                 idx = 0;
             }
 
-            WriteCommentValue(ref escapedValue, ref idx);
+            WriteCommentValue(escapedValue, ref idx);
 
             Advance(idx);
         }
 
-        private void WriteCommentEscapeValue(ref ReadOnlySpan<char> value, int firstEscapeIndexVal)
+        private void WriteCommentEscapeValue(ReadOnlySpan<char> value, int firstEscapeIndexVal)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
 
@@ -131,11 +131,11 @@ namespace System.Text.Json
                         span = new Span<char>(ptr, length);
                     }
                 }
-                JsonWriterHelper.EscapeString(ref value, ref span, firstEscapeIndexVal, out int written);
+                JsonWriterHelper.EscapeString(value, span, firstEscapeIndexVal, out int written);
                 value = span.Slice(0, written);
             }
 
-            WriteCommentByOptions(ref value);
+            WriteCommentByOptions(value);
 
             if (valueArray != null)
             {
@@ -153,19 +153,19 @@ namespace System.Text.Json
         /// </exception>
         public void WriteCommentValue(ReadOnlySpan<byte> value, bool suppressEscaping = false)
         {
-            JsonWriterHelper.ValidateValue(ref value);
+            JsonWriterHelper.ValidateValue(value);
 
             if (!suppressEscaping)
             {
-                WriteCommentSuppressFalse(ref value);
+                WriteCommentSuppressFalse(value);
             }
             else
             {
-                WriteCommentByOptions(ref value);
+                WriteCommentByOptions(value);
             }
         }
 
-        private void WriteCommentSuppressFalse(ref ReadOnlySpan<byte> value)
+        private void WriteCommentSuppressFalse(in ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
 
@@ -173,36 +173,36 @@ namespace System.Text.Json
 
             if (valueIdx != -1)
             {
-                WriteCommentEscapeValue(ref value, valueIdx);
+                WriteCommentEscapeValue(value, valueIdx);
             }
             else
             {
-                WriteCommentByOptions(ref value);
+                WriteCommentByOptions(value);
             }
         }
 
-        private void WriteCommentByOptions(ref ReadOnlySpan<byte> value)
+        private void WriteCommentByOptions(in ReadOnlySpan<byte> value)
         {
             if (_writerOptions.Indented)
             {
-                WriteCommentIndented(ref value);
+                WriteCommentIndented(value);
             }
             else
             {
-                WriteCommentMinimized(ref value);
+                WriteCommentMinimized(value);
             }
         }
 
-        private void WriteCommentMinimized(ref ReadOnlySpan<byte> escapedValue)
+        private void WriteCommentMinimized(in ReadOnlySpan<byte> escapedValue)
         {
             int idx = 0;
 
-            WriteCommentValue(ref escapedValue, ref idx);
+            WriteCommentValue(escapedValue, ref idx);
 
             Advance(idx);
         }
 
-        private void WriteCommentIndented(ref ReadOnlySpan<byte> escapedValue)
+        private void WriteCommentIndented(in ReadOnlySpan<byte> escapedValue)
         {
             int idx = 0;
 
@@ -223,12 +223,12 @@ namespace System.Text.Json
                 idx = 0;
             }
 
-            WriteCommentValue(ref escapedValue, ref idx);
+            WriteCommentValue(escapedValue, ref idx);
 
             Advance(idx);
         }
 
-        private void WriteCommentEscapeValue(ref ReadOnlySpan<byte> value, int firstEscapeIndexVal)
+        private void WriteCommentEscapeValue(ReadOnlySpan<byte> value, int firstEscapeIndexVal)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
 
@@ -253,11 +253,11 @@ namespace System.Text.Json
                         span = new Span<byte>(ptr, length);
                     }
                 }
-                JsonWriterHelper.EscapeString(ref value, ref span, firstEscapeIndexVal, out int written);
+                JsonWriterHelper.EscapeString(value, span, firstEscapeIndexVal, out int written);
                 value = span.Slice(0, written);
             }
 
-            WriteCommentByOptions(ref value);
+            WriteCommentByOptions(value);
 
             if (valueArray != null)
             {
@@ -265,7 +265,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteCommentValue(ref ReadOnlySpan<char> escapedValue, ref int idx)
+        private void WriteCommentValue(in ReadOnlySpan<char> escapedValue, ref int idx)
         {
             while (_buffer.Length <= idx)
             {
@@ -311,7 +311,7 @@ namespace System.Text.Json
             _buffer[idx++] = JsonConstants.Slash;
         }
 
-        private void WriteCommentValue(ref ReadOnlySpan<byte> escapedValue, ref int idx)
+        private void WriteCommentValue(in ReadOnlySpan<byte> escapedValue, ref int idx)
         {
             while (_buffer.Length <= idx)
             {
@@ -327,7 +327,7 @@ namespace System.Text.Json
             }
             _buffer[idx++] = JsonConstants.Asterisk;
 
-            CopyLoop(ref escapedValue, ref idx);
+            CopyLoop(escapedValue, ref idx);
 
             while (_buffer.Length <= idx)
             {

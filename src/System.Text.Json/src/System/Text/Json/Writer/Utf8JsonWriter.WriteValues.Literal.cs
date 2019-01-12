@@ -43,7 +43,7 @@ namespace System.Text.Json
             _currentDepth |= 1 << 31;
         }
 
-        private void WriteLiteralByOptions(ReadOnlySpan<byte> value)
+        private void WriteLiteralByOptions(in ReadOnlySpan<byte> value)
         {
             if (_writerOptions.Indented)
             {
@@ -51,7 +51,7 @@ namespace System.Text.Json
                 {
                     ValidateWritingValue();
                 }
-                WriteLiteralIndented(ref value);
+                WriteLiteralIndented(value);
             }
             else
             {
@@ -59,11 +59,11 @@ namespace System.Text.Json
                 {
                     ValidateWritingValue();
                 }
-                WriteLiteralMinimized(ref value);
+                WriteLiteralMinimized(value);
             }
         }
 
-        private void WriteLiteralMinimized(ref ReadOnlySpan<byte> value)
+        private void WriteLiteralMinimized(in ReadOnlySpan<byte> value)
         {
             // Calculated based on the following: ',null' OR ',true' OR ',false'
             int bytesNeeded = value.Length + 1;
@@ -83,7 +83,7 @@ namespace System.Text.Json
             Advance(idx + value.Length);
         }
 
-        private void WriteLiteralIndented(ref ReadOnlySpan<byte> value)
+        private void WriteLiteralIndented(in ReadOnlySpan<byte> value)
         {
             int idx = 0;
             if (_currentDepth < 0)
@@ -112,7 +112,7 @@ namespace System.Text.Json
                 idx = 0;
             }
 
-            CopyLoop(ref value, ref idx);
+            CopyLoop(value, ref idx);
 
             Advance(idx);
         }

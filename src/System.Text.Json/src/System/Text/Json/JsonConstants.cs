@@ -34,13 +34,15 @@ namespace System.Text.Json
         public static ReadOnlySpan<byte> EscapableChars => new byte[] { Quote, (byte)'n', (byte)'r', (byte)'t', Slash, (byte)'u', (byte)'b', (byte)'f' };
 
         public const int SpacesPerIndent = 2;
-        public const int RemoveFlagsBitMask = 0x7FFFFFFF;
         public const int MaxWriterDepth = 1_000;
+        public const int RemoveFlagsBitMask = 0x7FFFFFFF;
+
         // In the worst case, an ASCII character represented as a single utf-8 byte could expand 6x when escaped.
         // For example: '+' becomes '\u0043'
         // Escaping surrogate pairs (represented by 3 or 4 utf-8 bytes) would expand to 12 bytes (which is still <= 6x).
         // The same factor applies to utf-16 characters.
         public const int MaxExpansionFactorWhileEscaping = 6;
+
         public const int MaxTokenSize = 2_000_000_000 / MaxExpansionFactorWhileEscaping;  // 357_913_941 bytes
         public const int MaxCharacterTokenSize = 2_000_000_000 / MaxExpansionFactorWhileEscaping; // 357_913_941 characters
 
