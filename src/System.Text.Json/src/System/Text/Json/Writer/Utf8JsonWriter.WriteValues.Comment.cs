@@ -204,22 +204,7 @@ namespace System.Text.Json
         private void WriteCommentIndented(ReadOnlySpan<byte> escapedValue)
         {
             int idx = 0;
-
-            if (_tokenType != JsonTokenType.None)
-                WriteNewLine(ref idx);
-
-            int indent = Indentation;
-            while (true)
-            {
-                bool result = JsonWriterHelper.TryWriteIndentation(_buffer.Slice(idx), indent, out int bytesWritten);
-                idx += bytesWritten;
-                if (result)
-                {
-                    break;
-                }
-                indent -= bytesWritten;
-                AdvanceAndGrow(ref idx);
-            }
+            WriteFormattingPreamble(ref idx);
 
             WriteCommentValue(escapedValue, ref idx);
 

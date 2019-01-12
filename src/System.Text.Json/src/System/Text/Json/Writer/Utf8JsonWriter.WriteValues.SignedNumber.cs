@@ -50,14 +50,7 @@ namespace System.Text.Json
         private void WriteNumberValueMinimized(long value)
         {
             int idx = 0;
-            if (_currentDepth < 0)
-            {
-                if (_buffer.Length <= idx)
-                {
-                    GrowAndEnsure();
-                }
-                _buffer[idx++] = JsonConstants.ListSeparator;
-            }
+            WriteListSeparator(ref idx);
 
             WriteNumberValueFormatLoop(value, ref idx);
 
@@ -66,31 +59,7 @@ namespace System.Text.Json
 
         private void WriteNumberValueIndented(long value)
         {
-            int idx = 0;
-            if (_currentDepth < 0)
-            {
-                if (_buffer.Length <= idx)
-                {
-                    GrowAndEnsure();
-                }
-                _buffer[idx++] = JsonConstants.ListSeparator;
-            }
-
-            if (_tokenType != JsonTokenType.None)
-                WriteNewLine(ref idx);
-
-            int indent = Indentation;
-            while (true)
-            {
-                bool result = JsonWriterHelper.TryWriteIndentation(_buffer.Slice(idx), indent, out int bytesWritten);
-                idx += bytesWritten;
-                if (result)
-                {
-                    break;
-                }
-                indent -= bytesWritten;
-                AdvanceAndGrow(ref idx);
-            }
+            int idx = WriteCommaAndFormattingPreamble();
 
             WriteNumberValueFormatLoop(value, ref idx);
 

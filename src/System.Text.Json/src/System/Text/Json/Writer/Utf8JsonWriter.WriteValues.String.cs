@@ -83,14 +83,7 @@ namespace System.Text.Json
         private void WriteStringMinimized(ReadOnlySpan<char> escapedValue)
         {
             int idx = 0;
-            if (_currentDepth < 0)
-            {
-                if (_buffer.Length <= idx)
-                {
-                    GrowAndEnsure();
-                }
-                _buffer[idx++] = JsonConstants.ListSeparator;
-            }
+            WriteListSeparator(ref idx);
 
             WriteStringValue(escapedValue, ref idx);
 
@@ -99,31 +92,7 @@ namespace System.Text.Json
 
         private void WriteStringIndented(ReadOnlySpan<char> escapedValue)
         {
-            int idx = 0;
-            if (_currentDepth < 0)
-            {
-                if (_buffer.Length <= idx)
-                {
-                    GrowAndEnsure();
-                }
-                _buffer[idx++] = JsonConstants.ListSeparator;
-            }
-
-            if (_tokenType != JsonTokenType.None)
-                WriteNewLine(ref idx);
-
-            int indent = Indentation;
-            while (true)
-            {
-                bool result = JsonWriterHelper.TryWriteIndentation(_buffer.Slice(idx), indent, out int bytesWritten);
-                idx += bytesWritten;
-                if (result)
-                {
-                    break;
-                }
-                indent -= bytesWritten;
-                AdvanceAndGrow(ref idx);
-            }
+            int idx = WriteCommaAndFormattingPreamble();
 
             WriteStringValue(escapedValue, ref idx);
 
@@ -227,14 +196,7 @@ namespace System.Text.Json
         private void WriteStringMinimized(ReadOnlySpan<byte> escapedValue)
         {
             int idx = 0;
-            if (_currentDepth < 0)
-            {
-                if (_buffer.Length <= idx)
-                {
-                    GrowAndEnsure();
-                }
-                _buffer[idx++] = JsonConstants.ListSeparator;
-            }
+            WriteListSeparator(ref idx);
 
             WriteStringValue(escapedValue, ref idx);
 
@@ -243,31 +205,7 @@ namespace System.Text.Json
 
         private void WriteStringIndented(ReadOnlySpan<byte> escapedValue)
         {
-            int idx = 0;
-            if (_currentDepth < 0)
-            {
-                if (_buffer.Length <= idx)
-                {
-                    GrowAndEnsure();
-                }
-                _buffer[idx++] = JsonConstants.ListSeparator;
-            }
-
-            if (_tokenType != JsonTokenType.None)
-                WriteNewLine(ref idx);
-
-            int indent = Indentation;
-            while (true)
-            {
-                bool result = JsonWriterHelper.TryWriteIndentation(_buffer.Slice(idx), indent, out int bytesWritten);
-                idx += bytesWritten;
-                if (result)
-                {
-                    break;
-                }
-                indent -= bytesWritten;
-                AdvanceAndGrow(ref idx);
-            }
+            int idx = WriteCommaAndFormattingPreamble();
 
             WriteStringValue(escapedValue, ref idx);
 
