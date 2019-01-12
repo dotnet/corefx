@@ -2,14 +2,14 @@
 
 namespace System.Linq.ChainLinq.Links
 {
-    sealed class Distinct<T> : ILink<T, T>
+    sealed class Distinct<T> : Link<T, T>
     {
         private readonly IEqualityComparer<T> comparer;
 
-        public Distinct(IEqualityComparer<T> comparer) =>
+        public Distinct(IEqualityComparer<T> comparer) : base(LinkType.Distinct) =>
             this.comparer = comparer;
 
-        public Chain<T, V> Compose<V>(Chain<T, V> activity) =>
+        public override Chain<T, V> Compose<V>(Chain<T, V> activity) =>
             new Activity<V>(comparer, activity);
 
         sealed class Activity<V> : Activity<T, T, V>

@@ -9,15 +9,15 @@ namespace System.Linq.ChainLinq.Consumables
     /// <typeparam name="T"></typeparam>
     internal abstract class Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<U, T> : ConsumableForMerging<U>, IConsumableInternal
     {
-        public ILink<T, U> Link { get; }
+        public Link<T, U> Link { get; }
 
-        protected Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug(ILink<T, U> link) =>
+        protected Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug(Link<T, U> link) =>
             Link = link;
 
-        public override Consumable<V> AddTail<V>(ILink<U, V> next) =>
+        public override Consumable<V> AddTail<V>(Link<U, V> next) =>
             Create(Links.Composition.Create(Link, next));
 
-        public abstract Consumable<V> Create<V>(ILink<T, V> first);
+        public abstract Consumable<V> Create<V>(Link<T, V> first);
 
         protected bool IsIdentity => ReferenceEquals(Link, Links.Identity<T>.Instance);
 
@@ -34,7 +34,7 @@ namespace System.Linq.ChainLinq.Consumables
             }
         }
 
-        public override Consumable<V> ReplaceTailLink<Unknown,V>(ILink<Unknown,V> newLink)
+        public override Consumable<V> ReplaceTailLink<Unknown,V>(Link<Unknown,V> newLink)
         {
             if (Link is Links.Composition<T, U> composition)
             {
@@ -42,7 +42,7 @@ namespace System.Linq.ChainLinq.Consumables
             }
 
             Debug.Assert(typeof(Unknown) == typeof(T));
-            return Create((ILink<T,V>)newLink);
+            return Create((Link<T,V>)(object)newLink);
         }
     }
 }

@@ -4,8 +4,12 @@
         : Optimizations.ISkipTakeOnConsumableLinkUpdate<T, T>
         , Optimizations.ICountOnConsumableLink
     {
+        public Identity(LinkType linkType) : base(linkType)
+        {
+        }
+
         public int GetCount(int count) => count;
 
-        public ILink<T, T> Skip(int toSkip) => this;
+        public Link<T, T> Skip(int toSkip) => this;
     }
 }

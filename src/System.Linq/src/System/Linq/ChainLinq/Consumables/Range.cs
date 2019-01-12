@@ -7,10 +7,10 @@ namespace System.Linq.ChainLinq.Consumables
         private readonly int _start;
         private readonly int _count;
 
-        public Range(int start, int count, ILink<int, T> first) : base(first) =>
+        public Range(int start, int count, Link<int, T> first) : base(first) =>
             (_start, _count) = (start, count);
 
-        public override Consumable<U> Create<U>(ILink<int, U> first) =>
+        public override Consumable<U> Create<U>(Link<int, U> first) =>
             new Range<U>(_start, _count, first);
 
         public override IEnumerator<T> GetEnumerator() =>

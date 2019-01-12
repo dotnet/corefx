@@ -36,9 +36,18 @@ namespace System.Linq.ChainLinq
 
     abstract class Chain<T, U> : Chain<T> { }
 
-    internal interface ILink<T, U>
+    abstract class Link
     {
-        Chain<T, V> Compose<V>(Chain<U, V> activity);
+        protected Link(Links.LinkType linkType) => LinkType = linkType;
+
+        public Links.LinkType LinkType { get; }
+    }
+
+    abstract class Link<T, U> : Link
+    {
+        protected Link(Links.LinkType linkType) : base(linkType) {}
+
+        public abstract Chain<T, V> Compose<V>(Chain<U, V> activity);
     }
 
     abstract class Activity<T, U, V> : Chain<T, V>
@@ -80,12 +89,12 @@ namespace System.Linq.ChainLinq
 
     internal abstract class ConsumableForAddition<T> : Consumable<T>
     {
-        public abstract Consumable<U> AddTail<U>(ILink<T, U> transform);
+        public abstract Consumable<U> AddTail<U>(Link<T, U> transform);
     }
 
     abstract class ConsumableForMerging<T> : ConsumableForAddition<T>
     {
         public abstract object TailLink { get; }
-        public abstract Consumable<V> ReplaceTailLink<Unknown, V>(ILink<Unknown, V> newLink);
+        public abstract Consumable<V> ReplaceTailLink<Unknown, V>(Link<Unknown, V> newLink);
     }
 }

@@ -12,7 +12,7 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
 
         internal override Chain StartOfChain => _chain;
 
-        public Repeat(T element, int count, ILink<T, TResult> factory)
+        public Repeat(T element, int count, Link<T, TResult> factory)
         {
             Debug.Assert(count > 0);
 

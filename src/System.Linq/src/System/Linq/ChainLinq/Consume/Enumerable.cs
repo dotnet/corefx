@@ -4,7 +4,7 @@ namespace System.Linq.ChainLinq.Consume
 {
     static class Enumerable
     {
-        public static Result Invoke<T, V, Result>(IEnumerable<T> e, ILink<T, V> composition, Consumer<V, Result> consumer)
+        public static Result Invoke<T, V, Result>(IEnumerable<T> e, Link<T, V> composition, Consumer<V, Result> consumer)
         {
             var chain = composition.Compose(consumer);
             try

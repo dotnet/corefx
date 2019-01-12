@@ -110,7 +110,7 @@ namespace System.Linq.ChainLinq.Consumables
             _groupings = newGroupings;
         }
 
-        public override Consumable<U> AddTail<U>(ILink<IGrouping<TKey, TElement>, U> transform) =>
+        public override Consumable<U> AddTail<U>(Link<IGrouping<TKey, TElement>, U> transform) =>
             new Lookup<TKey, TElement, U>(_lastGrouping, transform);
 
         public override IEnumerator<IGrouping<TKey, TElement>> GetEnumerator() =>
@@ -124,10 +124,10 @@ namespace System.Linq.ChainLinq.Consumables
     {
         private readonly Grouping<TKey, TValue> _lastGrouping;
 
-        public Lookup(Grouping<TKey, TValue> lastGrouping, ILink<IGrouping<TKey, TValue>, V> first) : base(first) =>
+        public Lookup(Grouping<TKey, TValue> lastGrouping, Link<IGrouping<TKey, TValue>, V> first) : base(first) =>
             _lastGrouping = lastGrouping;
 
-        public override Consumable<W> Create<W>(ILink<IGrouping<TKey, TValue>, W> first) =>
+        public override Consumable<W> Create<W>(Link<IGrouping<TKey, TValue>, W> first) =>
             new Lookup<TKey, TValue, W>(_lastGrouping, first);
 
         public override IEnumerator<V> GetEnumerator() =>
@@ -147,7 +147,7 @@ namespace System.Linq.ChainLinq.Consumables
         public LookupResultsSelector(Grouping<TKey, TElement> lastGrouping, Func<TKey, IEnumerable<TElement>, TResult> resultSelector) =>
             (_lastGrouping, _resultSelector) = (lastGrouping, resultSelector);
 
-        public override Consumable<W> AddTail<W>(ILink<TResult, W> first) =>
+        public override Consumable<W> AddTail<W>(Link<TResult, W> first) =>
             new LookupResultsSelector<TKey, TElement, TResult, W>(_lastGrouping, _resultSelector, first);
 
         public override IEnumerator<TResult> GetEnumerator() =>
@@ -162,10 +162,10 @@ namespace System.Linq.ChainLinq.Consumables
         private readonly Grouping<TKey, TElement> _lastGrouping;
         private readonly Func<TKey, IEnumerable<TElement>, TResult> _resultSelector;
 
-        public LookupResultsSelector(Grouping<TKey, TElement> lastGrouping, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, ILink<TResult, V> first) : base(first) =>
+        public LookupResultsSelector(Grouping<TKey, TElement> lastGrouping, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, Link<TResult, V> first) : base(first) =>
             (_lastGrouping, _resultSelector) = (lastGrouping, resultSelector);
 
-        public override Consumable<W> Create<W>(ILink<TResult, W> first) =>
+        public override Consumable<W> Create<W>(Link<TResult, W> first) =>
             new LookupResultsSelector<TKey, TElement, TResult, W>(_lastGrouping, _resultSelector, first);
 
         public override IEnumerator<V> GetEnumerator() =>

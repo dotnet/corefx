@@ -17,7 +17,7 @@ namespace System.Linq.ChainLinq.Consumables
             _comparer = comparer;
         }
 
-        public override Consumable<U> AddTail<U>(ILink<IGrouping<TKey, TSource>, U> transform) =>
+        public override Consumable<U> AddTail<U>(Link<IGrouping<TKey, TSource>, U> transform) =>
             new GroupedEnumerableWithLinks<TSource, TKey, U>(_source, _keySelector, _comparer, transform);
 
         private Lookup<TKey, TSource> ToLookup() =>
@@ -36,10 +36,10 @@ namespace System.Linq.ChainLinq.Consumables
         private readonly Func<TSource, TKey> _keySelector;
         private readonly IEqualityComparer<TKey> _comparer;
 
-        public GroupedEnumerableWithLinks(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer, ILink<IGrouping<TKey, TSource>, V> link) : base(link) =>
+        public GroupedEnumerableWithLinks(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer, Link<IGrouping<TKey, TSource>, V> link) : base(link) =>
             (_source, _keySelector, _comparer) = (source, keySelector, comparer);
 
-        public override Consumable<W> Create<W>(ILink<IGrouping<TKey, TSource>, W> first) =>
+        public override Consumable<W> Create<W>(Link<IGrouping<TKey, TSource>, W> first) =>
             new GroupedEnumerableWithLinks<TSource, TKey, W>(_source, _keySelector, _comparer, first);
 
         private Consumable<V> ToConsumable()
@@ -74,7 +74,7 @@ namespace System.Linq.ChainLinq.Consumables
             _comparer = comparer;
         }
 
-        public override Consumable<U> AddTail<U>(ILink<IGrouping<TKey, TElement>, U> transform) =>
+        public override Consumable<U> AddTail<U>(Link<IGrouping<TKey, TElement>, U> transform) =>
             new GroupedEnumerableWithLinks<TSource, TKey, TElement, U>(_source, _keySelector, _elementSelector, _comparer, transform);
 
         private Lookup<TKey, TElement> ToLookup() =>
@@ -94,10 +94,10 @@ namespace System.Linq.ChainLinq.Consumables
         private readonly Func<TSource, TElement> _elementSelector;
         private readonly IEqualityComparer<TKey> _comparer;
 
-        public GroupedEnumerableWithLinks(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer, ILink<IGrouping<TKey, TElement>, V> link) : base(link) =>
+        public GroupedEnumerableWithLinks(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer, Link<IGrouping<TKey, TElement>, V> link) : base(link) =>
             (_source, _keySelector, _elementSelector, _comparer) = (source, keySelector, elementSelector, comparer);
 
-        public override Consumable<W> Create<W>(ILink<IGrouping<TKey, TElement>, W> first) =>
+        public override Consumable<W> Create<W>(Link<IGrouping<TKey, TElement>, W> first) =>
             new GroupedEnumerableWithLinks<TSource, TKey, TElement, W>(_source, _keySelector, _elementSelector, _comparer, first);
 
         private Consumable<V> ToConsumable()
@@ -132,7 +132,7 @@ namespace System.Linq.ChainLinq.Consumables
             _comparer = comparer;
         }
 
-        public override Consumable<U> AddTail<U>(ILink<TResult, U> transform) =>
+        public override Consumable<U> AddTail<U>(Link<TResult, U> transform) =>
             new GroupedResultEnumerableWithLinks<TSource, TKey, TResult, U>(_source, _keySelector, _resultSelector, _comparer, transform);
 
         private Lookup<TKey, TSource> ToLookup() =>
@@ -152,10 +152,10 @@ namespace System.Linq.ChainLinq.Consumables
         private readonly IEqualityComparer<TKey> _comparer;
         private readonly Func<TKey, IEnumerable<TSource>, TResult> _resultSelector;
 
-        public GroupedResultEnumerableWithLinks(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TKey, IEnumerable<TSource>, TResult> resultSelector, IEqualityComparer<TKey> comparer, ILink<TResult, V> link) : base(link) =>
+        public GroupedResultEnumerableWithLinks(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TKey, IEnumerable<TSource>, TResult> resultSelector, IEqualityComparer<TKey> comparer, Link<TResult, V> link) : base(link) =>
             (_source, _keySelector, _resultSelector, _comparer) = (source, keySelector, resultSelector, comparer);
 
-        public override Consumable<W> Create<W>(ILink<TResult, W> first) =>
+        public override Consumable<W> Create<W>(Link<TResult, W> first) =>
             new GroupedResultEnumerableWithLinks<TSource, TKey, TResult, W>(_source, _keySelector, _resultSelector, _comparer, first);
 
         private Consumable<V> ToConsumable()
@@ -193,7 +193,7 @@ namespace System.Linq.ChainLinq.Consumables
             _resultSelector = resultSelector ?? throw Error.ArgumentNull(nameof(resultSelector));
         }
 
-        public override Consumable<U> AddTail<U>(ILink<TResult, U> transform) =>
+        public override Consumable<U> AddTail<U>(Link<TResult, U> transform) =>
             new GroupedResultEnumerableWithLinks<TSource, TKey, TElement, TResult, U>(_source, _keySelector, _elementSelector, _resultSelector, _comparer, transform);
 
         private Lookup<TKey, TElement> ToLookup() =>
@@ -214,10 +214,10 @@ namespace System.Linq.ChainLinq.Consumables
         private readonly IEqualityComparer<TKey> _comparer;
         private readonly Func<TKey, IEnumerable<TElement>, TResult> _resultSelector;
 
-        public GroupedResultEnumerableWithLinks(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, IEqualityComparer<TKey> comparer, ILink<TResult, V> link) : base(link) =>
+        public GroupedResultEnumerableWithLinks(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, IEqualityComparer<TKey> comparer, Link<TResult, V> link) : base(link) =>
             (_source, _keySelector, _elementSelector, _resultSelector, _comparer) = (source, keySelector, elementSelector, resultSelector, comparer);
 
-        public override Consumable<W> Create<W>(ILink<TResult, W> first) =>
+        public override Consumable<W> Create<W>(Link<TResult, W> first) =>
             new GroupedResultEnumerableWithLinks<TSource, TKey, TElement, TResult, W>(_source, _keySelector, _elementSelector, _resultSelector, _comparer, first);
 
         private Consumable<V> ToConsumable()

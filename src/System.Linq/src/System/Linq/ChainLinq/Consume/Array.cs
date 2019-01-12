@@ -2,7 +2,7 @@
 {
     static class Array
     {
-        public static Result Invoke<T, V, Result>(T[] array, ILink<T, V> composition, Consumer<V, Result> consumer)
+        public static Result Invoke<T, V, Result>(T[] array, Link<T, V> composition, Consumer<V, Result> consumer)
         {
             var chain = composition.Compose(consumer);
             try

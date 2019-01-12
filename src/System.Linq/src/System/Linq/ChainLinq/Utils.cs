@@ -4,7 +4,7 @@ namespace System.Linq.ChainLinq
 {
     static class Utils
     {
-        internal static Consumable<U> CreateConsumable<T, U>(IEnumerable<T> e, ILink<T, U> transform)
+        internal static Consumable<U> CreateConsumable<T, U>(IEnumerable<T> e, Link<T, U> transform)
         {
             switch (e)
             {
@@ -40,7 +40,7 @@ namespace System.Linq.ChainLinq
             }
         }
 
-        internal static Consumable<U> PushTransform<T, U>(IEnumerable<T> e, ILink<T, U> transform)
+        internal static Consumable<U> PushTransform<T, U>(IEnumerable<T> e, Link<T, U> transform)
         {
             switch (e)
             {

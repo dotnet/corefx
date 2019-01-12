@@ -10,14 +10,14 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
         private IEnumerable<T> _thirdOrNull;
         private IEnumerator<T> _enumerator;
 
-        ILink<T, TResult> _factory;
+        Link<T, TResult> _factory;
         private Chain<T> _chain = null;
 
         int _state;
 
         internal override Chain StartOfChain => _chain;
 
-        public Concat(IEnumerable<T> firstOrNull, IEnumerable<T> second, IEnumerable<T> thirdOrNull, ILink<T, TResult> factory)
+        public Concat(IEnumerable<T> firstOrNull, IEnumerable<T> second, IEnumerable<T> thirdOrNull, Link<T, TResult> factory)
         {
             _state = Initialization;
             _firstOrNull = firstOrNull;

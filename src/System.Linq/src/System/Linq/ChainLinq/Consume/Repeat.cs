@@ -2,7 +2,7 @@
 {
     static class Repeat
     {
-        public static Result Invoke<T, V, Result>(T element, int count, ILink<T, V> composition, Consumer<V, Result> consumer)
+        public static Result Invoke<T, V, Result>(T element, int count, Link<T, V> composition, Consumer<V, Result> consumer)
         {
             var chain = composition.Compose(consumer);
             try

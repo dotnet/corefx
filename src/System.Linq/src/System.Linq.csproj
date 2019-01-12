@@ -20,6 +20,7 @@
     <Compile Include="System\Linq\ChainLinq\Consume\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Lookup.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\LinkType.cs" />
     <Compile Include="System\Linq\ChainLinq\Optimizations\Pipeline.cs" />
     <Compile Include="System\Linq\Empty.cs" />
     <Compile Include="System\Linq\ChainLinq\Chain.cs" />

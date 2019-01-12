@@ -4,9 +4,9 @@ namespace System.Linq.ChainLinq.GetEnumerator
 {
     static partial class List
     {
-        static partial void Optimized<T, U>(List<T> list, ILink<T, U> link, ref IEnumerator<U> enumerator);
+        static partial void Optimized<T, U>(List<T> list, Link<T, U> link, ref IEnumerator<U> enumerator);
 
-        public static IEnumerator<U> Get<T, U>(List<T> list, ILink<T, U> link)
+        public static IEnumerator<U> Get<T, U>(List<T> list, Link<T, U> link)
         {
             IEnumerator<U> optimized = null;
             Optimized(list, link, ref optimized);

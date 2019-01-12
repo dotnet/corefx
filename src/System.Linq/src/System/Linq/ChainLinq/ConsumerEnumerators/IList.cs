@@ -11,7 +11,7 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
 
         internal override Chain StartOfChain => _chain;
 
-        public IList(IList<T> list, int start, int count, ILink<T, TResult> factory)
+        public IList(IList<T> list, int start, int count, Link<T, TResult> factory)
         {
             _list = list;
             _idx = start;

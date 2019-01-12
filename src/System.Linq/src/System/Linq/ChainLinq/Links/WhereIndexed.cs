@@ -1,13 +1,13 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    sealed class WhereIndexed<T> : ILink<T, T>
+    sealed class WhereIndexed<T> : Link<T, T>
     {
         public Func<T, int, bool> Predicate { get; }
 
-        public WhereIndexed(Func<T, int, bool> predicate) =>
+        public WhereIndexed(Func<T, int, bool> predicate) : base(LinkType.WhereIndexed) =>
             Predicate = predicate;
 
-        public Chain<T, U> Compose<U>(Chain<T, U> activity) =>
+        public override Chain<T, U> Compose<U>(Chain<T, U> activity) =>
             new Activity<U>(Predicate, activity);
 
         sealed class Activity<U> : Activity<T, T, U>

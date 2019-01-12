@@ -8,7 +8,7 @@
 
         internal override Chain StartOfChain => _chain;
 
-        public Array(T[] array, ILink<T, TResult> factory)
+        public Array(T[] array, Link<T, TResult> factory)
         {
             _array = array;
             _chain = factory.Compose(this);

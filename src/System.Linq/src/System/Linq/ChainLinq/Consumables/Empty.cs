@@ -9,9 +9,9 @@ namespace System.Linq.ChainLinq.Consumables
 
         private Empty() { }
 
-        public Consumable<W> Create<W>(ILink<T, W> first) => Empty<W>.Instance;
+        public Consumable<W> Create<W>(Link<T, W> first) => Empty<W>.Instance;
 
-        public override Consumable<U> AddTail<U>(ILink<T, U> transform) => Empty<U>.Instance;
+        public override Consumable<U> AddTail<U>(Link<T, U> transform) => Empty<U>.Instance;
 
         public override IEnumerator<T> GetEnumerator() => this;
 

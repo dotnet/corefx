@@ -3,16 +3,16 @@
 namespace System.Linq.ChainLinq.Links
 {
     internal sealed class SelectWhere<T, U>
-        : ILink<T, U>
+        : Link<T, U>
         , Optimizations.IMergeWhere<U>
     {
         public Func<T, U> Selector { get; }
         public Func<U, bool> Predicate { get; }
 
-        public SelectWhere(Func<T, U> selector, Func<U, bool> predicate) =>
+        public SelectWhere(Func<T, U> selector, Func<U, bool> predicate) : base(LinkType.SelectWhere) =>
             (Selector, Predicate) = (selector, predicate);
 
-        public Chain<T, V> Compose<V>(Chain<U, V> activity) =>
+        public override Chain<T, V> Compose<V>(Chain<U, V> activity) =>
             new Activity<V>(Selector, Predicate, activity);
 
         public Consumable<U> MergeWhere(ConsumableForMerging<U> consumable, Func<U, bool> second) =>

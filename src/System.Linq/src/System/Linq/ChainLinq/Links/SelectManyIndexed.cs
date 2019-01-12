@@ -2,14 +2,14 @@
 
 namespace System.Linq.ChainLinq.Links
 {
-    internal sealed class SelectManyIndexed<T, U> : ILink<T, (T, IEnumerable<U>)>
+    internal sealed class SelectManyIndexed<T, U> : Link<T, (T, IEnumerable<U>)>
     {
         private readonly Func<T, int, IEnumerable<U>> collectionSelector;
 
-        public SelectManyIndexed(Func<T, int, IEnumerable<U>> collectionSelector) =>
+        public SelectManyIndexed(Func<T, int, IEnumerable<U>> collectionSelector) : base(LinkType.SelectManyIndexed) =>
             this.collectionSelector = collectionSelector;
 
-        public Chain<T, V> Compose<V>(Chain<(T, IEnumerable<U>), V> next) =>
+        public override Chain<T, V> Compose<V>(Chain<(T, IEnumerable<U>), V> next) =>
             new Activity<V>(next, collectionSelector);
 
         private sealed class Activity<V> : Activity<T, (T, IEnumerable<U>), V>

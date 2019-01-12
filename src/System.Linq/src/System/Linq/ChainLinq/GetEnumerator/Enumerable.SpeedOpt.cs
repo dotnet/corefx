@@ -6,17 +6,17 @@ namespace System.Linq.ChainLinq.GetEnumerator
 {
     static partial class Enumerable
     {
-        static partial void Optimized<T, U>(IEnumerable<T> enumerable, ILink<T, U> link, ref IEnumerator<U> enumerator)
+        static partial void Optimized<T, U>(IEnumerable<T> enumerable, Link<T, U> link, ref IEnumerator<U> enumerator)
         {
-            switch (link)
+            switch (link.LinkType)
             {
-                case Links.Select<T, U> select:
-                    enumerator = new SelectEnumerator<T, U>(enumerable, select.Selector);
+                case Links.LinkType.Select:
+                    enumerator = new SelectEnumerator<T, U>(enumerable, ((Links.Select<T, U>)link).Selector);
                     break;
 
-                case Links.Where<U> where:
+                case Links.LinkType.Where:
                     Debug.Assert(typeof(T) == typeof(U));
-                    enumerator = new WhereEnumerator<U>((IEnumerable<U>)enumerable, where.Predicate);
+                    enumerator = new WhereEnumerator<U>((IEnumerable<U>)enumerable, ((Links.Where<U>)(object)link).Predicate);
                     break;
             }
         }

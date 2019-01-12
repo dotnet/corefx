@@ -6,10 +6,10 @@ namespace System.Linq.ChainLinq.Consumables
     {
         private readonly List<T> _list;
 
-        public List(List<T> array, ILink<T, V> first) : base(first) =>
+        public List(List<T> array, Link<T, V> first) : base(first) =>
             _list = array;
 
-        public override Consumable<W> Create<W>(ILink<T, W> first) =>
+        public override Consumable<W> Create<W>(Link<T, W> first) =>
             new List<T, W>(_list, first);
 
         public override IEnumerator<V> GetEnumerator() =>

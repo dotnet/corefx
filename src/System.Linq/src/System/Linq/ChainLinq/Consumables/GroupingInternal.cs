@@ -4,7 +4,7 @@ namespace System.Linq.ChainLinq.Consumables
 {
     internal interface IConsumableProvider<TElement>
     {
-        Consumable<U> GetConsumable<U>(ILink<TElement, U> transform);
+        Consumable<U> GetConsumable<U>(Link<TElement, U> transform);
     }
 
     // Grouping is a publically exposed class, so we provide this class get the Consumable
@@ -14,7 +14,7 @@ namespace System.Linq.ChainLinq.Consumables
         : Grouping<TKey, TElement>
         , IConsumableProvider<TElement>
     {
-        public Consumable<U> GetConsumable<U>(ILink<TElement, U> transform)
+        public Consumable<U> GetConsumable<U>(Link<TElement, U> transform)
         {
             Trim();
             return new Array<TElement, U>(_elements, transform);

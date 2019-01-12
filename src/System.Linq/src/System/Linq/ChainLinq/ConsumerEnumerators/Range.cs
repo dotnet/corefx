@@ -11,7 +11,7 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
 
         internal override Chain StartOfChain => _chain;
 
-        public Range(int start, int count, ILink<int, TResult> factory)
+        public Range(int start, int count, Link<int, TResult> factory)
         {
             Debug.Assert(count > 0);
 

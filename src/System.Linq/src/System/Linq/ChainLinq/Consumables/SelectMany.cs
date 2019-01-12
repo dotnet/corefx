@@ -6,10 +6,10 @@ namespace System.Linq.ChainLinq.Consumables
     {
         private readonly Consumable<IEnumerable<T>> _selectMany;
 
-        public SelectMany(Consumable<IEnumerable<T>> enumerable, ILink<T, V> first) : base(first) =>
+        public SelectMany(Consumable<IEnumerable<T>> enumerable, Link<T, V> first) : base(first) =>
             _selectMany = enumerable;
 
-        public override Consumable<W> Create<W>(ILink<T, W> first) =>
+        public override Consumable<W> Create<W>(Link<T, W> first) =>
             new SelectMany<T, W>(_selectMany, first);
 
         public override IEnumerator<V> GetEnumerator() =>
@@ -24,10 +24,10 @@ namespace System.Linq.ChainLinq.Consumables
         private readonly Consumable<(TSource, IEnumerable<TCollection>)> _selectMany;
         private readonly Func<TSource, TCollection, T> _resultSelector;
 
-        public SelectMany(Consumable<(TSource, IEnumerable<TCollection>)> enumerable, Func<TSource, TCollection, T> resultSelector, ILink<T, V> first) : base(first) =>
+        public SelectMany(Consumable<(TSource, IEnumerable<TCollection>)> enumerable, Func<TSource, TCollection, T> resultSelector, Link<T, V> first) : base(first) =>
             (_selectMany, _resultSelector) = (enumerable, resultSelector);
 
-        public override Consumable<W> Create<W>(ILink<T, W> first) =>
+        public override Consumable<W> Create<W>(Link<T, W> first) =>
             new SelectMany<TSource, TCollection, T, W>(_selectMany, _resultSelector, first);
 
         public override IEnumerator<V> GetEnumerator() =>

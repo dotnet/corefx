@@ -39,13 +39,13 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
         int _state;
 
         Consumable<IEnumerable<T>> _consumable;
-        ILink<T, V> _link;
+        Link<T, V> _link;
         Chain<T> _chain;
         IEnumerator<IEnumerable<T>> _outer;
         IEnumerator<T> _inner;
         ChainStatus _status;
 
-        public SelectMany(Consumable<IEnumerable<T>> selectMany, ILink<T, V> link)
+        public SelectMany(Consumable<IEnumerable<T>> selectMany, Link<T, V> link)
         {
             _consumable = selectMany;
             _link = link;
@@ -193,7 +193,7 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
         int _state;
 
         Consumable<(TSource, IEnumerable<TCollection>)> _consumable;
-        ILink<T, V> _link;
+        Link<T, V> _link;
         Func<TSource, TCollection, T> _resultSelector;
         Chain<T> _chain;
         IEnumerator<(TSource, IEnumerable<TCollection>)> _outer;
@@ -201,7 +201,7 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
         IEnumerator<TCollection> _inner;
         ChainStatus _status;
 
-        public SelectMany(Consumable<(TSource, IEnumerable<TCollection>)> selectMany, Func<TSource, TCollection, T> resultSelector, ILink<T, V> link)
+        public SelectMany(Consumable<(TSource, IEnumerable<TCollection>)> selectMany, Func<TSource, TCollection, T> resultSelector, Link<T, V> link)
         {
             _consumable = selectMany;
             _link = link;

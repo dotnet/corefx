@@ -1,13 +1,13 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    sealed partial class Take<T> : ILink<T, T>
+    sealed partial class Take<T> : Link<T, T>
     {
         private int _count;
 
-        public Take(int count) =>
+        public Take(int count) : base(LinkType.Take) =>
             _count = count;
 
-        public Chain<T, V> Compose<V>(Chain<T, V> activity) =>
+        public override Chain<T, V> Compose<V>(Chain<T, V> activity) =>
             new Activity<V>(_count, activity);
 
         sealed class Activity<V> : Activity<T, T, V>

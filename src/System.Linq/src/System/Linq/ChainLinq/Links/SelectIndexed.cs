@@ -1,16 +1,16 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    sealed partial class SelectIndexed<T, U> : ILink<T, U>
+    sealed partial class SelectIndexed<T, U> : Link<T, U>
     {
         readonly int _startIndex;
         readonly Func<T, int, U> _selector;
 
-        private SelectIndexed(Func<T, int, U> selector, int startIndex) =>
+        private SelectIndexed(Func<T, int, U> selector, int startIndex) : base(LinkType.SelectIndexed) =>
             (_selector, _startIndex) = (selector, startIndex);
 
         public SelectIndexed(Func<T, int, U> selector) : this(selector, 0) { }
 
-        public Chain<T, V> Compose<V>(Chain<U, V> activity) =>
+        public override Chain<T, V> Compose<V>(Chain<U, V> activity) =>
             new Activity<V>(_selector, _startIndex, activity);
 
         sealed class Activity<V> : Activity<T, U, V>

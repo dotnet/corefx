@@ -10,10 +10,10 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
         private Chain<IGrouping<TKey, TElement>> _chain = null;
         int _state;
 
-        ILink<IGrouping<TKey, TElement>, TResult> _factory;
+        Link<IGrouping<TKey, TElement>, TResult> _factory;
         internal override Chain StartOfChain => _chain;
 
-        public Lookup(Grouping<TKey, TElement> lastGrouping, ILink<IGrouping<TKey, TElement>, TResult> factory) =>
+        public Lookup(Grouping<TKey, TElement> lastGrouping, Link<IGrouping<TKey, TElement>, TResult> factory) =>
             (_lastGrouping, _factory, _state) = (lastGrouping, factory, Initialization);
 
         public override void ChainDispose()
@@ -90,10 +90,10 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
         private Chain<TResult> _chain = null;
         int _state;
 
-        ILink<TResult, Result> _factory;
+        Link<TResult, Result> _factory;
         internal override Chain StartOfChain => _chain;
 
-        public Lookup(Grouping<TKey, TElement> lastGrouping, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, ILink<TResult, Result> factory) =>
+        public Lookup(Grouping<TKey, TElement> lastGrouping, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, Link<TResult, Result> factory) =>
             (_lastGrouping, _resultSelector, _factory, _state) = (lastGrouping, resultSelector, factory, Initialization);
 
         public override void ChainDispose()

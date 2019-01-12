@@ -4,7 +4,7 @@ namespace System.Linq.ChainLinq.Consume
 {
     static class IList
     {
-        public static Result Invoke<T, V, Result>(IList<T> array, int start, int count, ILink<T, V> composition, Consumer<V, Result> consumer)
+        public static Result Invoke<T, V, Result>(IList<T> array, int start, int count, Link<T, V> composition, Consumer<V, Result> consumer)
         {
             var chain = composition.Compose(consumer);
             try

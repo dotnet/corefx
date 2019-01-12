@@ -1,13 +1,13 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    partial class Select<T, U> : ILink<T, U>
+    partial class Select<T, U> : Link<T, U>
     {
-        public Select(Func<T, U> selector) =>
+        public Select(Func<T, U> selector) : base(LinkType.Select) =>
             Selector = selector;
 
         public Func<T, U> Selector { get; }
 
-        public Chain<T, V> Compose<V>(Chain<U, V> activity) =>
+        public override Chain<T, V> Compose<V>(Chain<U, V> activity) =>
             new Activity<V>(Selector, activity);
 
         sealed partial class Activity<V> : Activity<T, U, V>

@@ -3,16 +3,16 @@
 namespace System.Linq.ChainLinq.Links
 {
     sealed class WhereSelect<T, U>
-        : ILink<T, U>
+        : Link<T, U>
         , Optimizations.IMergeSelect<U>
     {
         public Func<T, bool> Predicate { get; }
         public Func<T, U> Selector { get; }
 
-        public WhereSelect(Func<T, bool> predicate, Func<T, U> selector) =>
+        public WhereSelect(Func<T, bool> predicate, Func<T, U> selector) : base(LinkType.WhereSelect) =>
             (Predicate, Selector) = (predicate, selector);
 
-        public Chain<T, V> Compose<V>(Chain<U, V> activity) =>
+        public override Chain<T, V> Compose<V>(Chain<U, V> activity) =>
             new Activity<V>(Predicate, Selector, activity);
 
         public Consumable<V> MergeSelect<V>(ConsumableForMerging<U> consumable, Func<U, V> u2v) =>

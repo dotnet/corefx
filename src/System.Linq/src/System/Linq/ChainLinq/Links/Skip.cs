@@ -1,13 +1,13 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    sealed partial class Skip<T> : ILink<T, T>
+    sealed partial class Skip<T> : Link<T, T>
     {
         private int _toSkip;
 
-        public Skip(int toSkip) =>
+        public Skip(int toSkip) : base(LinkType.Skip) =>
             _toSkip = toSkip;
 
-        public Chain<T, V> Compose<V>(Chain<T, V> activity) =>
+        public override Chain<T, V> Compose<V>(Chain<T, V> activity) =>
             new Activity<V>(_toSkip, activity);
 
         sealed class Activity<V> : Activity<T, T, V>

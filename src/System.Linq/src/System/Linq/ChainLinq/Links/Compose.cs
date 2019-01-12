@@ -2,20 +2,20 @@
 
 namespace System.Linq.ChainLinq.Links
 {
-    abstract class Composition<T, U> : ILink<T, U>
+    abstract class Composition<T, U> : Link<T, U>
     {
-        public abstract Chain<T, V> Compose<V>(Chain<U, V> activity);
+        protected Composition() : base(LinkType.Compose) { }
 
         public abstract object TailLink { get; }
-        public abstract ILink<T, V> ReplaceTail<Unknown, V>(ILink<Unknown, V> newLink);
+        public abstract Link<T, V> ReplaceTail<Unknown, V>(Link<Unknown, V> newLink);
     }
 
     sealed partial class Composition<T, U, V> : Composition<T, V>
     {
-        private readonly ILink<T, U> _first;
-        private readonly ILink<U, V> _second;
+        private readonly Link<T, U> _first;
+        private readonly Link<U, V> _second;
 
-        public Composition(ILink<T, U> first, ILink<U, V> second) =>
+        public Composition(Link<T, U> first, Link<U, V> second) =>
             (_first, _second) = (first, second);
 
         public override Chain<T, W> Compose<W>(Chain<V, W> next) =>
@@ -23,21 +23,21 @@ namespace System.Linq.ChainLinq.Links
 
         public override object TailLink => _second;
 
-        public override ILink<T, W> ReplaceTail<Unknown, W>(ILink<Unknown, W> newLink)
+        public override Link<T, W> ReplaceTail<Unknown, W>(Link<Unknown, W> newLink)
         {
             Debug.Assert(typeof(Unknown) == typeof(U));
 
-            return new Composition<T, U, W>(_first, (ILink<U,W>)newLink);
+            return new Composition<T, U, W>(_first, (Link<U,W>)(object)newLink);
         }
     }
 
     static class Composition
     {
-        public static ILink<T, V> Create<T, U, V>(ILink<T, U> first, ILink<U, V> second)
+        public static Link<T, V> Create<T, U, V>(Link<T, U> first, Link<U, V> second)
         {
             if (ReferenceEquals(Identity<T>.Instance, first))
             {
-                return (ILink<T, V>)second;
+                return (Link<T, V>)(object)second;
             }
 
             return new Composition<T, U, V>(first, second);

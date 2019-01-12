@@ -10,10 +10,10 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
         private Chain<T> _chain = null;
         int _state;
 
-        ILink<T, TResult> _factory;
+        Link<T, TResult> _factory;
         internal override Chain StartOfChain => _chain;
 
-        public List(List<T> enumerable, ILink<T, TResult> factory) =>
+        public List(List<T> enumerable, Link<T, TResult> factory) =>
             (_list, _factory, _state) = (enumerable, factory, Initialization);
 
         public override void ChainDispose()

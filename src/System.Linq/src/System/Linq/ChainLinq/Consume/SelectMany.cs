@@ -93,7 +93,7 @@ namespace System.Linq.ChainLinq.Consume
             }
         }
 
-        public static Result Invoke<T, V, Result>(Consumable<IEnumerable<T>> e, ILink<T, V> composition, Consumer<V, Result> consumer)
+        public static Result Invoke<T, V, Result>(Consumable<IEnumerable<T>> e, Link<T, V> composition, Consumer<V, Result> consumer)
         {
             var chain = composition.Compose(consumer);
             try
@@ -108,7 +108,7 @@ namespace System.Linq.ChainLinq.Consume
             return consumer.Result;
         }
 
-        public static Result Invoke<TSource, TCollection, T, V, Result>(Consumable<(TSource, IEnumerable<TCollection>)> e, Func<TSource, TCollection, T> resultSelector, ILink<T, V> composition, Consumer<V, Result> consumer)
+        public static Result Invoke<TSource, TCollection, T, V, Result>(Consumable<(TSource, IEnumerable<TCollection>)> e, Func<TSource, TCollection, T> resultSelector, Link<T, V> composition, Consumer<V, Result> consumer)
         {
             var chain = composition.Compose(consumer);
             try

@@ -2,7 +2,7 @@
 {
     sealed partial class SelectIndexed<T, U> : Optimizations.ISkipTakeOnConsumableLinkUpdate<T, U>
     {
-        public ILink<T, U> Skip(int toSkip)
+        public Link<T, U> Skip(int toSkip)
         {
             checked
             {

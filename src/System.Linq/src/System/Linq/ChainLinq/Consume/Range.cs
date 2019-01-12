@@ -2,7 +2,7 @@
 {
     static class Range
     {
-        public static Result Invoke<V, Result>(int start, int count, ILink<int, V> composition, Consumer<V, Result> consumer)
+        public static Result Invoke<V, Result>(int start, int count, Link<int, V> composition, Consumer<V, Result> consumer)
         {
             var chain = composition.Compose(consumer);
             try

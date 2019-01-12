@@ -1,9 +1,11 @@
 ﻿namespace System.Linq.ChainLinq.Links
 {
-    sealed partial class Identity<T> : ILink<T, T>
+    sealed partial class Identity<T> : Link<T, T>
     {
-        public static ILink<T, T> Instance { get; } = new Identity<T>();
+        public static Link<T, T> Instance { get; } = new Identity<T>();
 
-        public Chain<T, V> Compose<V>(Chain<T, V> next) => next;
+        public Identity() : base(LinkType.Identity) { }
+
+        public override Chain<T, V> Compose<V>(Chain<T, V> next) => next;
     }
 }
