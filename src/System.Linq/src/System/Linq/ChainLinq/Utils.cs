@@ -21,10 +21,14 @@ namespace System.Linq.ChainLinq
             {
                 return provider.GetConsumable(transform);
             }
+/*
+ * I don't think we should use IList in the general case?
+ * 
             else if (e is IList<T> ilist)
             {
                 return new Consumables.IList<T, U>(ilist, 0, ilist.Count, transform);
             }
+*/
             else
             {
                 return new Consumables.Enumerable<T, U>(e, transform);
