@@ -22,6 +22,27 @@ namespace System.Tests
             yield return new object[] {TimeSpan.MaxValue, 0.5, TimeSpan.FromTicks((long)(long.MaxValue * 0.5))};
         }
 
+        private static IEnumerable<object[]> ParseSpecialCasesData()
+        {
+            yield return new object[] {"00:00:00.00000001",   new TimeSpan(0)};
+            yield return new object[] {"00:00:00.00000005",   new TimeSpan(1)};
+            yield return new object[] {"00:00:00.09999999",   new TimeSpan(1_000_000)};
+            yield return new object[] {"00:00:00.0268435455", new TimeSpan(268435)};
+            yield return new object[] {"00:00:00.01",         new TimeSpan(1_00_000)};
+            yield return new object[] {"0:00:00.01000000",    new TimeSpan(100_000)};
+            yield return new object[] {"0:00:00.010000000",   new TimeSpan(100_000)};
+            yield return new object[] {"0:00:00.0123456",     new TimeSpan(123456)};
+            yield return new object[] {"0:00:00.00123456",    new TimeSpan(12346)};
+            yield return new object[] {"0:00:00.00000098",    new TimeSpan(10)};
+            yield return new object[] {"0:00:00.00000099",    new TimeSpan(10)};
+        }
+
+        [Theory, MemberData(nameof(ParseSpecialCasesData))]
+        public static void Multiplication(string input, TimeSpan expected)
+        {
+            Assert.Equal(expected, TimeSpan.Parse(input, CultureInfo.InvariantCulture));
+        }
+
         [Theory, MemberData(nameof(MultiplicationTestData))]
         public static void Multiplication(TimeSpan timeSpan, double factor, TimeSpan expected)
         {
