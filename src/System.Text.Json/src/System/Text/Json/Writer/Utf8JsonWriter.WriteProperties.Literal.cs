@@ -207,7 +207,7 @@ namespace System.Text.Json
             }
             else
             {
-                // Cannot create a span directly since the span gets exposed outside this method.
+                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
                 unsafe
                 {
                     char* ptr = stackalloc char[length];
@@ -239,7 +239,7 @@ namespace System.Text.Json
             }
             else
             {
-                // Cannot create a span directly since the span gets exposed outside this method.
+                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
                 unsafe
                 {
                     byte* ptr = stackalloc byte[length];
