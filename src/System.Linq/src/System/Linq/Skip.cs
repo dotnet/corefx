@@ -45,7 +45,7 @@ namespace System.Linq
                 return merger.AddTail(CreateSkipLink<TSource>(count));
             }
 
-            return ChainLinq.Utils.PushTransform(consumable, CreateSkipLink<TSource>(count));
+            return ChainLinq.Utils.PushTTTransform(consumable, CreateSkipLink<TSource>(count));
         }
 
         private static ChainLinq.Links.Skip<TSource> CreateSkipLink<TSource>(int count) =>

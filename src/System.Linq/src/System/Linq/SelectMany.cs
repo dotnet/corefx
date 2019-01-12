@@ -21,7 +21,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
-            var selectMany = ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Select<TSource, IEnumerable<TResult>>(selector));
+            var selectMany = ChainLinq.Utils.PushTUTransform(source, new ChainLinq.Links.Select<TSource, IEnumerable<TResult>>(selector));
             return new ChainLinq.Consumables.SelectMany<TResult, TResult>(selectMany, ChainLinq.Links.Identity<TResult>.Instance);
         }
 
@@ -36,7 +36,7 @@ namespace System.Linq
             {
                 throw Error.ArgumentNull(nameof(selector));
             }
-            var selectMany = ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectIndexed<TSource, IEnumerable<TResult>>(selector));
+            var selectMany = ChainLinq.Utils.PushTUTransform(source, new ChainLinq.Links.SelectIndexed<TSource, IEnumerable<TResult>>(selector));
             return new ChainLinq.Consumables.SelectMany<TResult, TResult>(selectMany, ChainLinq.Links.Identity<TResult>.Instance);
         }
 
@@ -57,7 +57,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(resultSelector));
             }
 
-            var selectMany = ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectManyIndexed<TSource, TCollection>(collectionSelector));
+            var selectMany = ChainLinq.Utils.PushTUTransform(source, new ChainLinq.Links.SelectManyIndexed<TSource, TCollection>(collectionSelector));
             return new ChainLinq.Consumables.SelectMany<TSource, TCollection, TResult, TResult>(selectMany, resultSelector, ChainLinq.Links.Identity<TResult>.Instance);
         }
 
@@ -78,7 +78,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(resultSelector));
             }
 
-            var selectMany = ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectMany<TSource, TCollection>(collectionSelector));
+            var selectMany = ChainLinq.Utils.PushTUTransform(source, new ChainLinq.Links.SelectMany<TSource, TCollection>(collectionSelector));
             return new ChainLinq.Consumables.SelectMany<TSource, TCollection, TResult, TResult>(selectMany, resultSelector, ChainLinq.Links.Identity<TResult>.Instance);
         }
 

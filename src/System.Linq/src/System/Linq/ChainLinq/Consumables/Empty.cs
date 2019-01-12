@@ -11,6 +11,7 @@ namespace System.Linq.ChainLinq.Consumables
 
         public Consumable<W> Create<W>(Link<T, W> first) => Empty<W>.Instance;
 
+        public override Consumable<T> AddTail(Link<T, T> transform) => this;
         public override Consumable<U> AddTail<U>(Link<T, U> transform) => Empty<U>.Instance;
 
         public override IEnumerator<T> GetEnumerator() => this;

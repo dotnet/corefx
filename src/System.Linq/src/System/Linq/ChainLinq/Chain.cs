@@ -90,6 +90,7 @@ namespace System.Linq.ChainLinq
     internal abstract class ConsumableForAddition<T> : Consumable<T>
     {
         public abstract Consumable<U> AddTail<U>(Link<T, U> transform);
+        public abstract Consumable<T> AddTail(Link<T, T> transform);
     }
 
     abstract class ConsumableForMerging<T> : ConsumableForAddition<T>

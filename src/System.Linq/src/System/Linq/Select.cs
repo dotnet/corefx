@@ -33,7 +33,7 @@ namespace System.Linq
                 return merger.AddTail(CreateSelectLink(selector));
             }
 
-            return ChainLinq.Utils.PushTransform(source, CreateSelectLink(selector));
+            return ChainLinq.Utils.PushTUTransform(source, CreateSelectLink(selector));
         }
 
         private static ChainLinq.Links.Select<TSource, TResult> CreateSelectLink<TSource, TResult>(Func<TSource, TResult> selector)
@@ -53,7 +53,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
-            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.SelectIndexed<TSource, TResult>(selector));
+            return ChainLinq.Utils.PushTUTransform(source, new ChainLinq.Links.SelectIndexed<TSource, TResult>(selector));
         }
 
     }

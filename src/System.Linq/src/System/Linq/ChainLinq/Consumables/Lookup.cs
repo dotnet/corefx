@@ -110,6 +110,9 @@ namespace System.Linq.ChainLinq.Consumables
             _groupings = newGroupings;
         }
 
+        public override Consumable<IGrouping<TKey, TElement>> AddTail(Link<IGrouping<TKey, TElement>, IGrouping<TKey, TElement>> transform) =>
+            new Lookup<TKey, TElement, IGrouping<TKey, TElement>>(_lastGrouping, transform);
+
         public override Consumable<U> AddTail<U>(Link<IGrouping<TKey, TElement>, U> transform) =>
             new Lookup<TKey, TElement, U>(_lastGrouping, transform);
 
@@ -146,6 +149,9 @@ namespace System.Linq.ChainLinq.Consumables
 
         public LookupResultsSelector(Grouping<TKey, TElement> lastGrouping, Func<TKey, IEnumerable<TElement>, TResult> resultSelector) =>
             (_lastGrouping, _resultSelector) = (lastGrouping, resultSelector);
+
+        public override Consumable<TResult> AddTail(Link<TResult, TResult> first) =>
+            new LookupResultsSelector<TKey, TElement, TResult, TResult>(_lastGrouping, _resultSelector, first);
 
         public override Consumable<W> AddTail<W>(Link<TResult, W> first) =>
             new LookupResultsSelector<TKey, TElement, TResult, W>(_lastGrouping, _resultSelector, first);

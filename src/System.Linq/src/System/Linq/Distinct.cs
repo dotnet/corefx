@@ -18,7 +18,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.Distinct<TSource>(comparer));
+            return ChainLinq.Utils.PushTTTransform(source, new ChainLinq.Links.Distinct<TSource>(comparer));
         }
     }
 }

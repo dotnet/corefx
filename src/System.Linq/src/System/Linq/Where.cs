@@ -32,7 +32,7 @@ namespace System.Linq
                 return merger.AddTail(CreateWhereLink(predicate));
             }
 
-            return ChainLinq.Utils.PushTransform(source, CreateWhereLink(predicate));
+            return ChainLinq.Utils.PushTTTransform(source, CreateWhereLink(predicate));
         }
 
         private static ChainLinq.Links.Where<TSource> CreateWhereLink<TSource>(Func<TSource, bool> predicate)
@@ -52,7 +52,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-            return ChainLinq.Utils.PushTransform(source, new ChainLinq.Links.WhereIndexed<TSource>(predicate));
+            return ChainLinq.Utils.PushTTTransform(source, new ChainLinq.Links.WhereIndexed<TSource>(predicate));
         }
     }
 }

@@ -17,6 +17,9 @@ namespace System.Linq.ChainLinq.Consumables
             _comparer = comparer;
         }
 
+        public override Consumable<IGrouping<TKey, TSource>> AddTail(Link<IGrouping<TKey, TSource>, IGrouping<TKey, TSource>> transform) =>
+            new GroupedEnumerableWithLinks<TSource, TKey, IGrouping<TKey, TSource>>(_source, _keySelector, _comparer, transform);
+
         public override Consumable<U> AddTail<U>(Link<IGrouping<TKey, TSource>, U> transform) =>
             new GroupedEnumerableWithLinks<TSource, TKey, U>(_source, _keySelector, _comparer, transform);
 
@@ -73,6 +76,9 @@ namespace System.Linq.ChainLinq.Consumables
             _elementSelector = elementSelector ?? throw Error.ArgumentNull(nameof(elementSelector));
             _comparer = comparer;
         }
+
+        public override Consumable<IGrouping<TKey, TElement>> AddTail(Link<IGrouping<TKey, TElement>, IGrouping<TKey, TElement>> transform) =>
+            new GroupedEnumerableWithLinks<TSource, TKey, TElement, IGrouping<TKey, TElement>>(_source, _keySelector, _elementSelector, _comparer, transform);
 
         public override Consumable<U> AddTail<U>(Link<IGrouping<TKey, TElement>, U> transform) =>
             new GroupedEnumerableWithLinks<TSource, TKey, TElement, U>(_source, _keySelector, _elementSelector, _comparer, transform);
@@ -131,6 +137,9 @@ namespace System.Linq.ChainLinq.Consumables
             _resultSelector = resultSelector ?? throw Error.ArgumentNull(nameof(resultSelector));
             _comparer = comparer;
         }
+
+        public override Consumable<TResult> AddTail(Link<TResult, TResult> transform) =>
+            new GroupedResultEnumerableWithLinks<TSource, TKey, TResult, TResult>(_source, _keySelector, _resultSelector, _comparer, transform);
 
         public override Consumable<U> AddTail<U>(Link<TResult, U> transform) =>
             new GroupedResultEnumerableWithLinks<TSource, TKey, TResult, U>(_source, _keySelector, _resultSelector, _comparer, transform);
@@ -192,6 +201,9 @@ namespace System.Linq.ChainLinq.Consumables
             _comparer = comparer;
             _resultSelector = resultSelector ?? throw Error.ArgumentNull(nameof(resultSelector));
         }
+
+        public override Consumable<TResult> AddTail(Link<TResult, TResult> transform) =>
+            new GroupedResultEnumerableWithLinks<TSource, TKey, TElement, TResult, TResult>(_source, _keySelector, _elementSelector, _resultSelector, _comparer, transform);
 
         public override Consumable<U> AddTail<U>(Link<TResult, U> transform) =>
             new GroupedResultEnumerableWithLinks<TSource, TKey, TElement, TResult, U>(_source, _keySelector, _elementSelector, _resultSelector, _comparer, transform);

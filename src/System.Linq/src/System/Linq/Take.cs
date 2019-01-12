@@ -26,7 +26,7 @@ namespace System.Linq
             return
                 count <= 0
                   ? ChainLinq.Consumables.Empty<TSource>.Instance
-                  : ChainLinq.Utils.PushTransform(consumable, new ChainLinq.Links.Take<TSource>(count));
+                  : ChainLinq.Utils.PushTTTransform(consumable, new ChainLinq.Links.Take<TSource>(count));
         }
 
         public static IEnumerable<TSource> TakeWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)

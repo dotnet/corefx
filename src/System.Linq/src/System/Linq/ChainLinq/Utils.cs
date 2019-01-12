@@ -43,7 +43,22 @@ namespace System.Linq.ChainLinq
             }
         }
 
-        internal static Consumable<U> PushTransform<T, U>(IEnumerable<T> e, Link<T, U> transform)
+        // TTTransform is faster tahn TUTransform as AddTail version call can avoid
+        // expensive JIT generic interface call
+        internal static Consumable<T> PushTTTransform<T>(IEnumerable<T> e, Link<T, T> transform)
+        {
+            if (e is ConsumableForAddition<T> consumable)
+            {
+                return consumable.AddTail(transform);
+            }
+            else
+            {
+                return CreateConsumable(e, transform);
+            }
+        }
+
+        // TUTrasform is more flexible but slower than TTTransform
+        internal static Consumable<U> PushTUTransform<T, U>(IEnumerable<T> e, Link<T, U> transform)
         {
             if (e is ConsumableForAddition<T> consumable)
             {
