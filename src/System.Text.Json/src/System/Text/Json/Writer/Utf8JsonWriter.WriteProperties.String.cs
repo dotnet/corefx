@@ -270,12 +270,13 @@ namespace System.Text.Json
         private void WriteStringEscapeValueOnly(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<char> value, int firstEscapeIndex)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(firstEscapeIndex >= 0 && firstEscapeIndex < value.Length);
 
             char[] valueArray = ArrayPool<char>.Shared.Rent(JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndex));
-            Span<char> span = valueArray;
-            JsonWriterHelper.EscapeString(value, span, firstEscapeIndex, out int written);
+            Span<char> escapedValue = valueArray;
+            JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndex, out int written);
 
-            WriteStringByOptions(escapedPropertyName, span.Slice(0, written));
+            WriteStringByOptions(escapedPropertyName, escapedValue.Slice(0, written));
 
             ArrayPool<char>.Shared.Return(valueArray);
         }
@@ -283,12 +284,13 @@ namespace System.Text.Json
         private void WriteStringEscapeValueOnly(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<byte> value, int firstEscapeIndex)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(firstEscapeIndex >= 0 && firstEscapeIndex < value.Length);
 
             byte[] valueArray = ArrayPool<byte>.Shared.Rent(JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndex));
-            Span<byte> span = valueArray;
-            JsonWriterHelper.EscapeString(value, span, firstEscapeIndex, out int written);
+            Span<byte> escapedValue = valueArray;
+            JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndex, out int written);
 
-            WriteStringByOptions(escapedPropertyName, span.Slice(0, written));
+            WriteStringByOptions(escapedPropertyName, escapedValue.Slice(0, written));
 
             ArrayPool<byte>.Shared.Return(valueArray);
         }
@@ -296,12 +298,13 @@ namespace System.Text.Json
         private void WriteStringEscapeValueOnly(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<byte> value, int firstEscapeIndex)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(firstEscapeIndex >= 0 && firstEscapeIndex < value.Length);
 
             byte[] valueArray = ArrayPool<byte>.Shared.Rent(JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndex));
-            Span<byte> span = valueArray;
-            JsonWriterHelper.EscapeString(value, span, firstEscapeIndex, out int written);
+            Span<byte> escapedValue = valueArray;
+            JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndex, out int written);
 
-            WriteStringByOptions(escapedPropertyName, span.Slice(0, written));
+            WriteStringByOptions(escapedPropertyName, escapedValue.Slice(0, written));
 
             ArrayPool<byte>.Shared.Return(valueArray);
         }
@@ -309,12 +312,13 @@ namespace System.Text.Json
         private void WriteStringEscapeValueOnly(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<char> value, int firstEscapeIndex)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(firstEscapeIndex >= 0 && firstEscapeIndex < value.Length);
 
             char[] valueArray = ArrayPool<char>.Shared.Rent(JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndex));
-            Span<char> span = valueArray;
-            JsonWriterHelper.EscapeString(value, span, firstEscapeIndex, out int written);
+            Span<char> escapedValue = valueArray;
+            JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndex, out int written);
 
-            WriteStringByOptions(escapedPropertyName, span.Slice(0, written));
+            WriteStringByOptions(escapedPropertyName, escapedValue.Slice(0, written));
 
             ArrayPool<char>.Shared.Return(valueArray);
         }
@@ -407,11 +411,11 @@ namespace System.Text.Json
             {
                 int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndexVal);
 
-                Span<char> span;
+                Span<char> escapedValue;
                 if (length > StackallocThreshold)
                 {
                     valueArray = ArrayPool<char>.Shared.Rent(length);
-                    span = valueArray;
+                    escapedValue = valueArray;
                 }
                 else
                 {
@@ -419,22 +423,22 @@ namespace System.Text.Json
                     unsafe
                     {
                         char* ptr = stackalloc char[length];
-                        span = new Span<char>(ptr, length);
+                        escapedValue = new Span<char>(ptr, length);
                     }
                 }
-                JsonWriterHelper.EscapeString(value, span, firstEscapeIndexVal, out int written);
-                value = span.Slice(0, written);
+                JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndexVal, out int written);
+                value = escapedValue.Slice(0, written);
             }
 
             if (firstEscapeIndexProp != -1)
             {
                 int length = JsonWriterHelper.GetMaxEscapedLength(propertyName.Length, firstEscapeIndexProp);
 
-                Span<char> span;
+                Span<char> escapedPropertyName;
                 if (length > StackallocThreshold)
                 {
                     propertyArray = ArrayPool<char>.Shared.Rent(length);
-                    span = propertyArray;
+                    escapedPropertyName = propertyArray;
                 }
                 else
                 {
@@ -442,11 +446,11 @@ namespace System.Text.Json
                     unsafe
                     {
                         char* ptr = stackalloc char[length];
-                        span = new Span<char>(ptr, length);
+                        escapedPropertyName = new Span<char>(ptr, length);
                     }
                 }
-                JsonWriterHelper.EscapeString(propertyName, span, firstEscapeIndexProp, out int written);
-                propertyName = span.Slice(0, written);
+                JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+                propertyName = escapedPropertyName.Slice(0, written);
             }
 
             WriteStringByOptions(propertyName, value);
@@ -474,11 +478,11 @@ namespace System.Text.Json
             {
                 int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndexVal);
 
-                Span<byte> span;
+                Span<byte> escapedValue;
                 if (length > StackallocThreshold)
                 {
                     valueArray = ArrayPool<byte>.Shared.Rent(length);
-                    span = valueArray;
+                    escapedValue = valueArray;
                 }
                 else
                 {
@@ -486,21 +490,21 @@ namespace System.Text.Json
                     unsafe
                     {
                         byte* ptr = stackalloc byte[length];
-                        span = new Span<byte>(ptr, length);
+                        escapedValue = new Span<byte>(ptr, length);
                     }
                 }
-                JsonWriterHelper.EscapeString(value, span, firstEscapeIndexVal, out int written);
-                value = span.Slice(0, written);
+                JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndexVal, out int written);
+                value = escapedValue.Slice(0, written);
             }
 
             if (firstEscapeIndexProp != -1)
             {
                 int length = JsonWriterHelper.GetMaxEscapedLength(propertyName.Length, firstEscapeIndexProp);
-                Span<byte> span;
+                Span<byte> escapedPropertyName;
                 if (length > StackallocThreshold)
                 {
                     propertyArray = ArrayPool<byte>.Shared.Rent(length);
-                    span = propertyArray;
+                    escapedPropertyName = propertyArray;
                 }
                 else
                 {
@@ -508,11 +512,11 @@ namespace System.Text.Json
                     unsafe
                     {
                         byte* ptr = stackalloc byte[length];
-                        span = new Span<byte>(ptr, length);
+                        escapedPropertyName = new Span<byte>(ptr, length);
                     }
                 }
-                JsonWriterHelper.EscapeString(propertyName, span, firstEscapeIndexProp, out int written);
-                propertyName = span.Slice(0, written);
+                JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+                propertyName = escapedPropertyName.Slice(0, written);
             }
 
             WriteStringByOptions(propertyName, value);
@@ -540,11 +544,11 @@ namespace System.Text.Json
             {
                 int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndexVal);
 
-                Span<byte> span;
+                Span<byte> escapedValue;
                 if (length > StackallocThreshold)
                 {
                     valueArray = ArrayPool<byte>.Shared.Rent(length);
-                    span = valueArray;
+                    escapedValue = valueArray;
                 }
                 else
                 {
@@ -552,21 +556,21 @@ namespace System.Text.Json
                     unsafe
                     {
                         byte* ptr = stackalloc byte[length];
-                        span = new Span<byte>(ptr, length);
+                        escapedValue = new Span<byte>(ptr, length);
                     }
                 }
-                JsonWriterHelper.EscapeString(value, span, firstEscapeIndexVal, out int written);
-                value = span.Slice(0, written);
+                JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndexVal, out int written);
+                value = escapedValue.Slice(0, written);
             }
 
             if (firstEscapeIndexProp != -1)
             {
                 int length = JsonWriterHelper.GetMaxEscapedLength(propertyName.Length, firstEscapeIndexProp);
-                Span<char> span;
+                Span<char> escapedPropertyName;
                 if (length > StackallocThreshold)
                 {
                     propertyArray = ArrayPool<char>.Shared.Rent(length);
-                    span = propertyArray;
+                    escapedPropertyName = propertyArray;
                 }
                 else
                 {
@@ -574,11 +578,11 @@ namespace System.Text.Json
                     unsafe
                     {
                         char* ptr = stackalloc char[length];
-                        span = new Span<char>(ptr, length);
+                        escapedPropertyName = new Span<char>(ptr, length);
                     }
                 }
-                JsonWriterHelper.EscapeString(propertyName, span, firstEscapeIndexProp, out int written);
-                propertyName = span.Slice(0, written);
+                JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+                propertyName = escapedPropertyName.Slice(0, written);
             }
 
             WriteStringByOptions(propertyName, value);
@@ -606,11 +610,11 @@ namespace System.Text.Json
             {
                 int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndexVal);
 
-                Span<char> span;
+                Span<char> escapedValue;
                 if (length > StackallocThreshold)
                 {
                     valueArray = ArrayPool<char>.Shared.Rent(length);
-                    span = valueArray;
+                    escapedValue = valueArray;
                 }
                 else
                 {
@@ -618,21 +622,21 @@ namespace System.Text.Json
                     unsafe
                     {
                         char* ptr = stackalloc char[length];
-                        span = new Span<char>(ptr, length);
+                        escapedValue = new Span<char>(ptr, length);
                     }
                 }
-                JsonWriterHelper.EscapeString(value, span, firstEscapeIndexVal, out int written);
-                value = span.Slice(0, written);
+                JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndexVal, out int written);
+                value = escapedValue.Slice(0, written);
             }
 
             if (firstEscapeIndexProp != -1)
             {
                 int length = JsonWriterHelper.GetMaxEscapedLength(propertyName.Length, firstEscapeIndexProp);
-                Span<byte> span;
+                Span<byte> escapedPropertyName;
                 if (length > StackallocThreshold)
                 {
                     propertyArray = ArrayPool<byte>.Shared.Rent(length);
-                    span = propertyArray;
+                    escapedPropertyName = propertyArray;
                 }
                 else
                 {
@@ -640,11 +644,11 @@ namespace System.Text.Json
                     unsafe
                     {
                         byte* ptr = stackalloc byte[length];
-                        span = new Span<byte>(ptr, length);
+                        escapedPropertyName = new Span<byte>(ptr, length);
                     }
                 }
-                JsonWriterHelper.EscapeString(propertyName, span, firstEscapeIndexProp, out int written);
-                propertyName = span.Slice(0, written);
+                JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+                propertyName = escapedPropertyName.Slice(0, written);
             }
 
             WriteStringByOptions(propertyName, value);

@@ -108,33 +108,30 @@ namespace System.Text.Json
         private void WriteCommentEscapeValue(ReadOnlySpan<char> value, int firstEscapeIndexVal)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(firstEscapeIndexVal >= 0 && firstEscapeIndexVal < value.Length);
 
             char[] valueArray = null;
 
-            if (firstEscapeIndexVal != -1)
+            int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndexVal);
+
+            Span<char> escapedValue;
+            if (length > StackallocThreshold)
             {
-                int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndexVal);
-
-                Span<char> span;
-                if (length > StackallocThreshold)
-                {
-                    valueArray = ArrayPool<char>.Shared.Rent(length);
-                    span = valueArray;
-                }
-                else
-                {
-                    // Cannot create a span directly since it gets passed to instance methods on a ref struct.
-                    unsafe
-                    {
-                        char* ptr = stackalloc char[length];
-                        span = new Span<char>(ptr, length);
-                    }
-                }
-                JsonWriterHelper.EscapeString(value, span, firstEscapeIndexVal, out int written);
-                value = span.Slice(0, written);
+                valueArray = ArrayPool<char>.Shared.Rent(length);
+                escapedValue = valueArray;
             }
+            else
+            {
+                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
+                unsafe
+                {
+                    char* ptr = stackalloc char[length];
+                    escapedValue = new Span<char>(ptr, length);
+                }
+            }
+            JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndexVal, out int written);
 
-            WriteCommentByOptions(value);
+            WriteCommentByOptions(escapedValue.Slice(0, written));
 
             if (valueArray != null)
             {
@@ -214,33 +211,30 @@ namespace System.Text.Json
         private void WriteCommentEscapeValue(ReadOnlySpan<byte> value, int firstEscapeIndexVal)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
+            Debug.Assert(firstEscapeIndexVal >= 0 && firstEscapeIndexVal < value.Length);
 
             byte[] valueArray = null;
 
-            if (firstEscapeIndexVal != -1)
+            int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndexVal);
+
+            Span<byte> escapedValue;
+            if (length > StackallocThreshold)
             {
-                int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndexVal);
-
-                Span<byte> span;
-                if (length > StackallocThreshold)
-                {
-                    valueArray = ArrayPool<byte>.Shared.Rent(length);
-                    span = valueArray;
-                }
-                else
-                {
-                    // Cannot create a span directly since it gets passed to instance methods on a ref struct.
-                    unsafe
-                    {
-                        byte* ptr = stackalloc byte[length];
-                        span = new Span<byte>(ptr, length);
-                    }
-                }
-                JsonWriterHelper.EscapeString(value, span, firstEscapeIndexVal, out int written);
-                value = span.Slice(0, written);
+                valueArray = ArrayPool<byte>.Shared.Rent(length);
+                escapedValue = valueArray;
             }
+            else
+            {
+                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
+                unsafe
+                {
+                    byte* ptr = stackalloc byte[length];
+                    escapedValue = new Span<byte>(ptr, length);
+                }
+            }
+            JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndexVal, out int written);
 
-            WriteCommentByOptions(value);
+            WriteCommentByOptions(escapedValue.Slice(0, written));
 
             if (valueArray != null)
             {
