@@ -661,56 +661,52 @@ namespace System.Text.Json
 
         private void WriteStringByOptions(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value)
         {
+            ValidateWritingProperty();
             if (_writerOptions.Indented)
             {
-                ValidateWritingProperty();
                 WriteStringIndented(propertyName, value);
             }
             else
             {
-                ValidateWritingProperty();
                 WriteStringMinimized(propertyName, value);
             }
         }
 
         private void WriteStringByOptions(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
         {
+            ValidateWritingProperty();
             if (_writerOptions.Indented)
             {
-                ValidateWritingProperty();
                 WriteStringIndented(propertyName, value);
             }
             else
             {
-                ValidateWritingProperty();
                 WriteStringMinimized(propertyName, value);
             }
         }
 
         private void WriteStringByOptions(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)
         {
+            ValidateWritingProperty();
             if (_writerOptions.Indented)
             {
-                ValidateWritingProperty();
                 WriteStringIndented(propertyName, value);
             }
             else
             {
-                ValidateWritingProperty();
                 WriteStringMinimized(propertyName, value);
             }
         }
 
         private void WriteStringByOptions(ReadOnlySpan<byte> propertyName, ReadOnlySpan<char> value)
         {
+            ValidateWritingProperty();
             if (_writerOptions.Indented)
             {
-                ValidateWritingProperty();
                 WriteStringIndented(propertyName, value);
             }
             else
             {
-                ValidateWritingProperty();
                 WriteStringMinimized(propertyName, value);
             }
         }

@@ -258,15 +258,14 @@ namespace System.Text.Json
 
         private void WriteLiteralByOptions(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)
         {
+            ValidateWritingProperty();
             int idx;
             if (_writerOptions.Indented)
             {
-                ValidateWritingProperty();
                 idx = WritePropertyNameIndented(propertyName);
             }
             else
             {
-                ValidateWritingProperty();
                 idx = WritePropertyNameMinimized(propertyName);
             }
 
@@ -283,15 +282,14 @@ namespace System.Text.Json
 
         private void WriteLiteralByOptions(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
         {
+            ValidateWritingProperty();
             int idx;
             if (_writerOptions.Indented)
             {
-                ValidateWritingProperty();
                 idx = WritePropertyNameIndented(propertyName);
             }
             else
             {
-                ValidateWritingProperty();
                 idx = WritePropertyNameMinimized(propertyName);
             }
 

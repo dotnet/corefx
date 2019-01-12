@@ -17,14 +17,13 @@ namespace System.Text.Json
         {
             JsonWriterHelper.ValidateDouble(value);
 
+            ValidateWritingValue();
             if (_writerOptions.Indented)
             {
-                ValidateWritingValue();
                 WriteNumberValueIndented(value);
             }
             else
             {
-                ValidateWritingValue();
                 WriteNumberValueMinimized(value);
             }
 

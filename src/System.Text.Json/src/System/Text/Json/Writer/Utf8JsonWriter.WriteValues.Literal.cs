@@ -45,14 +45,13 @@ namespace System.Text.Json
 
         private void WriteLiteralByOptions(ReadOnlySpan<byte> value)
         {
+            ValidateWritingValue();
             if (_writerOptions.Indented)
             {
-                ValidateWritingValue();
                 WriteLiteralIndented(value);
             }
             else
             {
-                ValidateWritingValue();
                 WriteLiteralMinimized(value);
             }
         }

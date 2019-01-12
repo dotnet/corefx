@@ -388,15 +388,14 @@ namespace System.Text.Json
 
         private void WriteStartByOptions(ReadOnlySpan<byte> propertyName, byte token)
         {
+            ValidateWritingProperty(token);
             int idx;
             if (_writerOptions.Indented)
             {
-                ValidateWritingProperty(token);
                 idx = WritePropertyNameIndented(propertyName);
             }
             else
             {
-                ValidateWritingProperty(token);
                 idx = WritePropertyNameMinimized(propertyName);
             }
 
@@ -553,15 +552,14 @@ namespace System.Text.Json
 
         private void WriteStartByOptions(ReadOnlySpan<char> propertyName, byte token)
         {
+            ValidateWritingProperty(token);
             int idx;
             if (_writerOptions.Indented)
             {
-                ValidateWritingProperty(token);
                 idx = WritePropertyNameIndented(propertyName);
             }
             else
             {
-                ValidateWritingProperty(token);
                 idx = WritePropertyNameMinimized(propertyName);
             }
 

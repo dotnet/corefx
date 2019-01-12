@@ -15,14 +15,13 @@ namespace System.Text.Json
         /// </exception>
         public void WriteNumberValue(decimal value)
         {
+            ValidateWritingValue();
             if (_writerOptions.Indented)
             {
-                ValidateWritingValue();
                 WriteNumberValueIndented(value);
             }
             else
             {
-                ValidateWritingValue();
                 WriteNumberValueMinimized(value);
             }
 

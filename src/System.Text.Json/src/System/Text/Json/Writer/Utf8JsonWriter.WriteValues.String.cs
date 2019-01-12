@@ -69,14 +69,13 @@ namespace System.Text.Json
 
         private void WriteStringByOptions(ReadOnlySpan<char> value)
         {
+            ValidateWritingValue();
             if (_writerOptions.Indented)
             {
-                ValidateWritingValue();
                 WriteStringIndented(value);
             }
             else
             {
-                ValidateWritingValue();
                 WriteStringMinimized(value);
             }
         }
@@ -214,14 +213,13 @@ namespace System.Text.Json
 
         private void WriteStringByOptions(ReadOnlySpan<byte> value)
         {
+            ValidateWritingValue();
             if (_writerOptions.Indented)
             {
-                ValidateWritingValue();
                 WriteStringIndented(value);
             }
             else
             {
-                ValidateWritingValue();
                 WriteStringMinimized(value);
             }
         }

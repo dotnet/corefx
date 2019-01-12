@@ -183,28 +183,26 @@ namespace System.Text.Json
 
         private void WriteNumberByOptions(ReadOnlySpan<char> propertyName, double value)
         {
+            ValidateWritingProperty();
             if (_writerOptions.Indented)
             {
-                ValidateWritingProperty();
                 WriteNumberIndented(propertyName, value);
             }
             else
             {
-                ValidateWritingProperty();
                 WriteNumberMinimized(propertyName, value);
             }
         }
 
         private void WriteNumberByOptions(ReadOnlySpan<byte> propertyName, double value)
         {
+            ValidateWritingProperty();
             if (_writerOptions.Indented)
             {
-                ValidateWritingProperty();
                 WriteNumberIndented(propertyName, value);
             }
             else
             {
-                ValidateWritingProperty();
                 WriteNumberMinimized(propertyName, value);
             }
         }

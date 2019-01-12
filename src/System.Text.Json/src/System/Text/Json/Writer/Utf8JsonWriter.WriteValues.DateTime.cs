@@ -17,14 +17,13 @@ namespace System.Text.Json
         /// </exception>
         public void WriteStringValue(DateTime value)
         {
+            ValidateWritingValue();
             if (_writerOptions.Indented)
             {
-                ValidateWritingValue();
                 WriteStringValueIndented(value);
             }
             else
             {
-                ValidateWritingValue();
                 WriteStringValueMinimized(value);
             }
 
