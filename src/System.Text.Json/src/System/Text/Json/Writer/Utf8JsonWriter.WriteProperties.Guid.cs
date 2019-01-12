@@ -15,7 +15,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The value to be written as a JSON string as part of the name/value pair.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -25,15 +25,15 @@ namespace System.Text.Json
         /// <remarks>
         /// Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
         /// </remarks>
-        public void WriteString(string propertyName, Guid value, bool suppressEscaping = false)
-            => WriteString(propertyName.AsSpan(), value, suppressEscaping);
+        public void WriteString(string propertyName, Guid value, bool escape = true)
+            => WriteString(propertyName.AsSpan(), value, escape);
 
         /// <summary>
         /// Writes the property name and <see cref="Guid"/> value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The value to be written as a JSON string as part of the name/value pair.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -43,13 +43,13 @@ namespace System.Text.Json
         /// <remarks>
         /// Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
         /// </remarks>
-        public void WriteString(ReadOnlySpan<char> propertyName, Guid value, bool suppressEscaping = false)
+        public void WriteString(ReadOnlySpan<char> propertyName, Guid value, bool escape = true)
         {
             JsonWriterHelper.ValidateProperty(propertyName);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteStringSuppressFalse(propertyName, value);
+                WriteStringEscape(propertyName, value);
             }
             else
             {
@@ -65,7 +65,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="propertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
         /// <param name="value">The value to be written as a JSON string as part of the name/value pair.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -75,13 +75,13 @@ namespace System.Text.Json
         /// <remarks>
         /// Writes the <see cref="Guid"/> using the default <see cref="StandardFormat"/> (i.e. 'D'), as the form: nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn.
         /// </remarks>
-        public void WriteString(ReadOnlySpan<byte> propertyName, Guid value, bool suppressEscaping = false)
+        public void WriteString(ReadOnlySpan<byte> propertyName, Guid value, bool escape = true)
         {
             JsonWriterHelper.ValidateProperty(propertyName);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteStringSuppressFalse(propertyName, value);
+                WriteStringEscape(propertyName, value);
             }
             else
             {
@@ -92,7 +92,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.String;
         }
 
-        private void WriteStringSuppressFalse(ReadOnlySpan<char> propertyName, Guid value)
+        private void WriteStringEscape(ReadOnlySpan<char> propertyName, Guid value)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -108,7 +108,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringSuppressFalse(ReadOnlySpan<byte> propertyName, Guid value)
+        private void WriteStringEscape(ReadOnlySpan<byte> propertyName, Guid value)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 

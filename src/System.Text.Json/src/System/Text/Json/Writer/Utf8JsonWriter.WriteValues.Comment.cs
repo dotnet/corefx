@@ -14,28 +14,28 @@ namespace System.Text.Json
         /// Writes the string text value (as a JSON comment).
         /// </summary>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON comment within /*..*/.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the value is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
-        public void WriteCommentValue(string value, bool suppressEscaping = false)
-            => WriteCommentValue(value.AsSpan(), suppressEscaping);
+        public void WriteCommentValue(string value, bool escape = true)
+            => WriteCommentValue(value.AsSpan(), escape);
 
         /// <summary>
         /// Writes the UTF-16 text value (as a JSON comment).
         /// </summary>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON comment within /*..*/.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the value is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
-        public void WriteCommentValue(ReadOnlySpan<char> value, bool suppressEscaping = false)
+        public void WriteCommentValue(ReadOnlySpan<char> value, bool escape = true)
         {
             JsonWriterHelper.ValidateValue(value);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteCommentSuppressFalse(value);
+                WriteCommentEscape(value);
             }
             else
             {
@@ -43,7 +43,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteCommentSuppressFalse(ReadOnlySpan<char> value)
+        private void WriteCommentEscape(ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
 
@@ -143,17 +143,17 @@ namespace System.Text.Json
         /// Writes the UTF-8 text value (as a JSON comment).
         /// </summary>
         /// <param name="value">The UTF-8 encoded value to be written as a JSON comment within /*..*/.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the value is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
-        public void WriteCommentValue(ReadOnlySpan<byte> value, bool suppressEscaping = false)
+        public void WriteCommentValue(ReadOnlySpan<byte> value, bool escape = true)
         {
             JsonWriterHelper.ValidateValue(value);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteCommentSuppressFalse(value);
+                WriteCommentEscape(value);
             }
             else
             {
@@ -161,7 +161,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteCommentSuppressFalse(ReadOnlySpan<byte> value)
+        private void WriteCommentEscape(ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
 

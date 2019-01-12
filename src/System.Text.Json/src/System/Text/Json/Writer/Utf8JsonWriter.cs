@@ -312,7 +312,7 @@ namespace System.Text.Json
         /// Writes the beginning of a JSON array with a property name as the key.
         /// </summary>
         /// <param name="propertyName">The UTF-8 encoded property name of the JSON array to be written.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -320,13 +320,13 @@ namespace System.Text.Json
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStartArray(ReadOnlySpan<byte> propertyName, bool suppressEscaping = false)
+        public void WriteStartArray(ReadOnlySpan<byte> propertyName, bool escape = true)
         {
             ValidatePropertyNameAndDepth(propertyName);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteStartSuppressFalse(propertyName, JsonConstants.OpenBracket);
+                WriteStartEscape(propertyName, JsonConstants.OpenBracket);
             }
             else
             {
@@ -343,7 +343,7 @@ namespace System.Text.Json
         /// Writes the beginning of a JSON object with a property name as the key.
         /// </summary>
         /// <param name="propertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -351,13 +351,13 @@ namespace System.Text.Json
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStartObject(ReadOnlySpan<byte> propertyName, bool suppressEscaping = false)
+        public void WriteStartObject(ReadOnlySpan<byte> propertyName, bool escape = true)
         {
             ValidatePropertyNameAndDepth(propertyName);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteStartSuppressFalse(propertyName, JsonConstants.OpenBrace);
+                WriteStartEscape(propertyName, JsonConstants.OpenBrace);
             }
             else
             {
@@ -370,7 +370,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartObject;
         }
 
-        private void WriteStartSuppressFalse(ReadOnlySpan<byte> propertyName, byte token)
+        private void WriteStartEscape(ReadOnlySpan<byte> propertyName, byte token)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 
@@ -447,7 +447,7 @@ namespace System.Text.Json
         /// Writes the beginning of a JSON array with a property name as the key.
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON array to be transcoded and written as UTF-8.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -455,14 +455,14 @@ namespace System.Text.Json
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStartArray(string propertyName, bool suppressEscaping = false)
-            => WriteStartArray(propertyName.AsSpan(), suppressEscaping);
+        public void WriteStartArray(string propertyName, bool escape = true)
+            => WriteStartArray(propertyName.AsSpan(), escape);
 
         /// <summary>
         /// Writes the beginning of a JSON object with a property name as the key.
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -470,14 +470,14 @@ namespace System.Text.Json
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStartObject(string propertyName, bool suppressEscaping = false)
-            => WriteStartObject(propertyName.AsSpan(), suppressEscaping);
+        public void WriteStartObject(string propertyName, bool escape = true)
+            => WriteStartObject(propertyName.AsSpan(), escape);
 
         /// <summary>
         /// Writes the beginning of a JSON array with a property name as the key.
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON array to be transcoded and written as UTF-8.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -485,13 +485,13 @@ namespace System.Text.Json
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStartArray(ReadOnlySpan<char> propertyName, bool suppressEscaping = false)
+        public void WriteStartArray(ReadOnlySpan<char> propertyName, bool escape = true)
         {
             ValidatePropertyNameAndDepth(propertyName);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteStartSuppressFalse(propertyName, JsonConstants.OpenBracket);
+                WriteStartEscape(propertyName, JsonConstants.OpenBracket);
             }
             else
             {
@@ -508,7 +508,7 @@ namespace System.Text.Json
         /// Writes the beginning of a JSON object with a property name as the key.
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
         /// </exception>
@@ -516,13 +516,13 @@ namespace System.Text.Json
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStartObject(ReadOnlySpan<char> propertyName, bool suppressEscaping = false)
+        public void WriteStartObject(ReadOnlySpan<char> propertyName, bool escape = true)
         {
             ValidatePropertyNameAndDepth(propertyName);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteStartSuppressFalse(propertyName, JsonConstants.OpenBrace);
+                WriteStartEscape(propertyName, JsonConstants.OpenBrace);
             }
             else
             {
@@ -535,7 +535,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartObject;
         }
 
-        private void WriteStartSuppressFalse(ReadOnlySpan<char> propertyName, byte token)
+        private void WriteStartEscape(ReadOnlySpan<char> propertyName, byte token)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
 

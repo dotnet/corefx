@@ -16,7 +16,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string as part of the name/value pair.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.
         /// The value is always escaped</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name or value is too large.
@@ -24,15 +24,15 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteString(string propertyName, string value, bool suppressEscaping = false)
-            => WriteString(propertyName.AsSpan(), value.AsSpan(), suppressEscaping);
+        public void WriteString(string propertyName, string value, bool escape = true)
+            => WriteString(propertyName.AsSpan(), value.AsSpan(), escape);
 
         /// <summary>
         /// Writes the UTF-16 property name and UTF-16 text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string as part of the name/value pair.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.
         /// The value is always escaped</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name or value is too large.
@@ -40,17 +40,17 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteString(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value, bool suppressEscaping = false)
+        public void WriteString(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value, bool escape = true)
         {
             JsonWriterHelper.ValidatePropertyAndValue(propertyName, value);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteStringSuppressFalse(propertyName, value);
+                WriteStringEscape(propertyName, value);
             }
             else
             {
-                WriteStringSuppressTrue(propertyName, value);
+                WriteStringDontEscape(propertyName, value);
             }
 
             SetFlagToAddListSeparatorBeforeNextItem();
@@ -62,7 +62,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="propertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
         /// <param name="value">The UTF-8 encoded value to be written as a JSON string as part of the name/value pair.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.
         /// The value is always escaped</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name or value is too large.
@@ -70,17 +70,17 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteString(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value, bool suppressEscaping = false)
+        public void WriteString(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value, bool escape = true)
         {
             JsonWriterHelper.ValidatePropertyAndValue(propertyName, value);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteStringSuppressFalse(propertyName, value);
+                WriteStringEscape(propertyName, value);
             }
             else
             {
-                WriteStringSuppressTrue(propertyName, value);
+                WriteStringDontEscape(propertyName, value);
             }
 
             SetFlagToAddListSeparatorBeforeNextItem();
@@ -92,7 +92,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string as part of the name/value pair.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.
         /// The value is always escaped</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name or value is too large.
@@ -100,15 +100,15 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteString(string propertyName, ReadOnlySpan<char> value, bool suppressEscaping = false)
-            => WriteString(propertyName.AsSpan(), value, suppressEscaping);
+        public void WriteString(string propertyName, ReadOnlySpan<char> value, bool escape = true)
+            => WriteString(propertyName.AsSpan(), value, escape);
 
         /// <summary>
         /// Writes the UTF-8 property name and UTF-16 text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string as part of the name/value pair.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.
         /// The value is always escaped</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name or value is too large.
@@ -116,17 +116,17 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteString(ReadOnlySpan<byte> propertyName, ReadOnlySpan<char> value, bool suppressEscaping = false)
+        public void WriteString(ReadOnlySpan<byte> propertyName, ReadOnlySpan<char> value, bool escape = true)
         {
             JsonWriterHelper.ValidatePropertyAndValue(propertyName, value);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteStringSuppressFalse(propertyName, value);
+                WriteStringEscape(propertyName, value);
             }
             else
             {
-                WriteStringSuppressTrue(propertyName, value);
+                WriteStringDontEscape(propertyName, value);
             }
 
             SetFlagToAddListSeparatorBeforeNextItem();
@@ -138,7 +138,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The UTF-8 encoded value to be written as a JSON string as part of the name/value pair.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.
         /// The value is always escaped</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name or value is too large.
@@ -146,15 +146,15 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteString(string propertyName, ReadOnlySpan<byte> value, bool suppressEscaping = false)
-            => WriteString(propertyName.AsSpan(), value, suppressEscaping);
+        public void WriteString(string propertyName, ReadOnlySpan<byte> value, bool escape = true)
+            => WriteString(propertyName.AsSpan(), value, escape);
 
         /// <summary>
         /// Writes the UTF-16 property name and UTF-8 text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The UTF-8 encoded value to be written as a JSON string as part of the name/value pair.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.
         /// The value is always escaped</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name or value is too large.
@@ -162,17 +162,17 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteString(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value, bool suppressEscaping = false)
+        public void WriteString(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value, bool escape = true)
         {
             JsonWriterHelper.ValidatePropertyAndValue(propertyName, value);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteStringSuppressFalse(propertyName, value);
+                WriteStringEscape(propertyName, value);
             }
             else
             {
-                WriteStringSuppressTrue(propertyName, value);
+                WriteStringDontEscape(propertyName, value);
             }
 
             SetFlagToAddListSeparatorBeforeNextItem();
@@ -184,7 +184,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string as part of the name/value pair.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.
         /// The value is always escaped</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name or value is too large.
@@ -192,15 +192,15 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteString(ReadOnlySpan<char> propertyName, string value, bool suppressEscaping = false)
-            => WriteString(propertyName, value.AsSpan(), suppressEscaping);
+        public void WriteString(ReadOnlySpan<char> propertyName, string value, bool escape = true)
+            => WriteString(propertyName, value.AsSpan(), escape);
 
         /// <summary>
         /// Writes the UTF-8 property name and string text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string as part of the name/value pair.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the property name is properly escaped and skips the escaping step.
+        /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.
         /// The value is always escaped</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name or value is too large.
@@ -208,11 +208,11 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteString(ReadOnlySpan<byte> propertyName, string value, bool suppressEscaping = false)
-            => WriteString(propertyName, value.AsSpan(), suppressEscaping);
+        public void WriteString(ReadOnlySpan<byte> propertyName, string value, bool escape = true)
+            => WriteString(propertyName, value.AsSpan(), escape);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void WriteStringSuppressTrue(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<char> value)
+        private void WriteStringDontEscape(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             if (valueIdx != -1)
@@ -226,7 +226,7 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void WriteStringSuppressTrue(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<byte> value)
+        private void WriteStringDontEscape(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             if (valueIdx != -1)
@@ -240,7 +240,7 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void WriteStringSuppressTrue(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<byte> value)
+        private void WriteStringDontEscape(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             if (valueIdx != -1)
@@ -254,7 +254,7 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void WriteStringSuppressTrue(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<char> value)
+        private void WriteStringDontEscape(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             if (valueIdx != -1)
@@ -323,7 +323,7 @@ namespace System.Text.Json
             ArrayPool<char>.Shared.Return(valueArray);
         }
 
-        private void WriteStringSuppressFalse(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value)
+        private void WriteStringEscape(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
@@ -342,7 +342,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringSuppressFalse(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
+        private void WriteStringEscape(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
@@ -361,7 +361,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringSuppressFalse(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)
+        private void WriteStringEscape(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
@@ -380,7 +380,7 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringSuppressFalse(ReadOnlySpan<byte> propertyName, ReadOnlySpan<char> value)
+        private void WriteStringEscape(ReadOnlySpan<byte> propertyName, ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);

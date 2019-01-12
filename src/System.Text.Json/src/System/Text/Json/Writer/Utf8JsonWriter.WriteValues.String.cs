@@ -13,34 +13,34 @@ namespace System.Text.Json
         /// Writes the string text value (as a JSON string) as an element of a JSON array.
         /// </summary>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the value is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStringValue(string value, bool suppressEscaping = false)
-           => WriteStringValue(value.AsSpan(), suppressEscaping);
+        public void WriteStringValue(string value, bool escape = true)
+           => WriteStringValue(value.AsSpan(), escape);
 
         /// <summary>
         /// Writes the UTF-16 text value (as a JSON string) as an element of a JSON array.
         /// </summary>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the value is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStringValue(ReadOnlySpan<char> value, bool suppressEscaping = false)
+        public void WriteStringValue(ReadOnlySpan<char> value, bool escape = true)
         {
             JsonWriterHelper.ValidateValue(value);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteStringSuppressFalse(value);
+                WriteStringEscape(value);
             }
             else
             {
@@ -51,7 +51,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.String;
         }
 
-        private void WriteStringSuppressFalse(ReadOnlySpan<char> value)
+        private void WriteStringEscape(ReadOnlySpan<char> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
 
@@ -137,20 +137,20 @@ namespace System.Text.Json
         /// Writes the UTF-8 text value (as a JSON string) as an element of a JSON array.
         /// </summary>
         /// <param name="value">The UTF-8 encoded value to be written as a JSON string element of a JSON array.</param>
-        /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
+        /// <param name="escape">If this is set to false, the writer assumes the value is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStringValue(ReadOnlySpan<byte> value, bool suppressEscaping = false)
+        public void WriteStringValue(ReadOnlySpan<byte> value, bool escape = true)
         {
             JsonWriterHelper.ValidateValue(value);
 
-            if (!suppressEscaping)
+            if (escape)
             {
-                WriteStringSuppressFalse(value);
+                WriteStringEscape(value);
             }
             else
             {
@@ -161,7 +161,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.String;
         }
 
-        private void WriteStringSuppressFalse(ReadOnlySpan<byte> value)
+        private void WriteStringEscape(ReadOnlySpan<byte> value)
         {
             int valueIdx = JsonWriterHelper.NeedsEscaping(value);
 

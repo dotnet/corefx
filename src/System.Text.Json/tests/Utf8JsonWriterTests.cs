@@ -229,7 +229,7 @@ namespace System.Text.Json.Tests
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
             {
-                jsonUtf8.WriteStartArray("property at start", suppressEscaping: true);
+                jsonUtf8.WriteStartArray("property at start", escape: false);
                 WriterDidNotThrow(skipValidation);
             }
             catch (InvalidOperationException) { }
@@ -237,7 +237,7 @@ namespace System.Text.Json.Tests
             jsonUtf8 = new Utf8JsonWriter(output, state);
             try
             {
-                jsonUtf8.WriteStartObject("property at start", suppressEscaping: true);
+                jsonUtf8.WriteStartObject("property at start", escape: false);
                 WriterDidNotThrow(skipValidation);
             }
             catch (InvalidOperationException) { }
@@ -246,7 +246,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteStartArray();
-                jsonUtf8.WriteStartArray("property inside array", suppressEscaping: true);
+                jsonUtf8.WriteStartArray("property inside array", escape: false);
                 WriterDidNotThrow(skipValidation);
             }
             catch (InvalidOperationException) { }
@@ -311,7 +311,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteStartObject();
-                jsonUtf8.WriteStartObject("some object", suppressEscaping: true);
+                jsonUtf8.WriteStartObject("some object", escape: false);
                 jsonUtf8.WriteEndObject();
                 jsonUtf8.WriteEndArray();
                 WriterDidNotThrow(skipValidation);
@@ -322,7 +322,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteStartArray();
-                jsonUtf8.WriteStartObject("some object", suppressEscaping: true);
+                jsonUtf8.WriteStartObject("some object", escape: false);
                 jsonUtf8.WriteEndObject();
                 jsonUtf8.WriteEndObject();
                 WriterDidNotThrow(skipValidation);
@@ -333,7 +333,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteStartObject();
-                jsonUtf8.WriteStartArray("test array", suppressEscaping: true);
+                jsonUtf8.WriteStartArray("test array", escape: false);
                 jsonUtf8.WriteEndArray();
                 jsonUtf8.WriteEndArray();
                 WriterDidNotThrow(skipValidation);
@@ -374,7 +374,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteStartObject();
-                jsonUtf8.WriteStartObject("test object", suppressEscaping: true);
+                jsonUtf8.WriteStartObject("test object", escape: false);
                 jsonUtf8.WriteEndArray();
                 WriterDidNotThrow(skipValidation);
             }
@@ -427,7 +427,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteStartObject();
-                jsonUtf8.WriteStartObject("some object", suppressEscaping: true);
+                jsonUtf8.WriteStartObject("some object", escape: false);
                 jsonUtf8.Flush(isFinalBlock: true);
                 WriterDidNotThrow(skipValidation);
             }
@@ -437,7 +437,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteStartArray();
-                jsonUtf8.WriteStartObject("some object", suppressEscaping: true);
+                jsonUtf8.WriteStartObject("some object", escape: false);
                 jsonUtf8.WriteEndObject();
                 jsonUtf8.Flush(isFinalBlock: true);
                 WriterDidNotThrow(skipValidation);
@@ -448,7 +448,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteStartObject();
-                jsonUtf8.WriteStartArray("test array", suppressEscaping: true);
+                jsonUtf8.WriteStartArray("test array", escape: false);
                 jsonUtf8.WriteEndArray();
                 jsonUtf8.Flush(isFinalBlock: true);
                 WriterDidNotThrow(skipValidation);
@@ -500,7 +500,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteNumberValue(12345);
-                jsonUtf8.WriteStartArray("property name", suppressEscaping: true);
+                jsonUtf8.WriteStartArray("property name", escape: false);
                 WriterDidNotThrow(skipValidation);
             }
             catch (InvalidOperationException) { }
@@ -509,7 +509,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteNumberValue(12345);
-                jsonUtf8.WriteStartObject("property name", suppressEscaping: true);
+                jsonUtf8.WriteStartObject("property name", escape: false);
                 WriterDidNotThrow(skipValidation);
             }
             catch (InvalidOperationException) { }
@@ -518,7 +518,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteNumberValue(12345);
-                jsonUtf8.WriteString("property name", "value", suppressEscaping: true);
+                jsonUtf8.WriteString("property name", "value", escape: false);
                 WriterDidNotThrow(skipValidation);
             }
             catch (InvalidOperationException) { }
@@ -853,31 +853,31 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteString("message", "Hello, World!", suppressEscaping: true);
+                        jsonUtf8.WriteString("message", "Hello, World!", escape: false);
                         break;
                     case 1:
-                        jsonUtf8.WriteString("message", "Hello, World!".AsSpan(), suppressEscaping: true);
+                        jsonUtf8.WriteString("message", "Hello, World!".AsSpan(), escape: false);
                         break;
                     case 2:
-                        jsonUtf8.WriteString("message", Encoding.UTF8.GetBytes("Hello, World!"), suppressEscaping: true);
+                        jsonUtf8.WriteString("message", Encoding.UTF8.GetBytes("Hello, World!"), escape: false);
                         break;
                     case 3:
-                        jsonUtf8.WriteString("message".AsSpan(), "Hello, World!", suppressEscaping: true);
+                        jsonUtf8.WriteString("message".AsSpan(), "Hello, World!", escape: false);
                         break;
                     case 4:
-                        jsonUtf8.WriteString("message".AsSpan(), "Hello, World!".AsSpan(), suppressEscaping: true);
+                        jsonUtf8.WriteString("message".AsSpan(), "Hello, World!".AsSpan(), escape: false);
                         break;
                     case 5:
-                        jsonUtf8.WriteString("message".AsSpan(), Encoding.UTF8.GetBytes("Hello, World!"), suppressEscaping: true);
+                        jsonUtf8.WriteString("message".AsSpan(), Encoding.UTF8.GetBytes("Hello, World!"), escape: false);
                         break;
                     case 6:
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes("message"), "Hello, World!", suppressEscaping: true);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes("message"), "Hello, World!", escape: false);
                         break;
                     case 7:
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes("message"), "Hello, World!".AsSpan(), suppressEscaping: true);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes("message"), "Hello, World!".AsSpan(), escape: false);
                         break;
                     case 8:
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes("message"), Encoding.UTF8.GetBytes("Hello, World!"), suppressEscaping: true);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes("message"), Encoding.UTF8.GetBytes("Hello, World!"), escape: false);
                         break;
                 }
 
@@ -1228,13 +1228,13 @@ namespace System.Text.Json.Tests
             switch (i)
             {
                 case 0:
-                    jsonUtf8.WriteCommentValue(comment, suppressEscaping: true);
+                    jsonUtf8.WriteCommentValue(comment, escape: false);
                     break;
                 case 1:
-                    jsonUtf8.WriteCommentValue(comment.AsSpan(), suppressEscaping: true);
+                    jsonUtf8.WriteCommentValue(comment.AsSpan(), escape: false);
                     break;
                 case 2:
-                    jsonUtf8.WriteCommentValue(Encoding.UTF8.GetBytes(comment), suppressEscaping: true);
+                    jsonUtf8.WriteCommentValue(Encoding.UTF8.GetBytes(comment), escape: false);
                     break;
             }
         }
@@ -1272,13 +1272,13 @@ namespace System.Text.Json.Tests
                             jsonUtf8.WriteStringValue(Encoding.UTF8.GetBytes(value));
                             break;
                         case 3:
-                            jsonUtf8.WriteStringValue(value, suppressEscaping: true);
+                            jsonUtf8.WriteStringValue(value, escape: false);
                             break;
                         case 4:
-                            jsonUtf8.WriteStringValue(value.AsSpan(), suppressEscaping: true);
+                            jsonUtf8.WriteStringValue(value.AsSpan(), escape: false);
                             break;
                         case 5:
-                            jsonUtf8.WriteStringValue(Encoding.UTF8.GetBytes(value), suppressEscaping: true);
+                            jsonUtf8.WriteStringValue(Encoding.UTF8.GetBytes(value), escape: false);
                             break;
                     }
                 }
@@ -1333,58 +1333,58 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteString(key, value, suppressEscaping: false);
+                        jsonUtf8.WriteString(key, value, escape: true);
                         break;
                     case 1:
-                        jsonUtf8.WriteString(key.AsSpan(), value.AsSpan(), suppressEscaping: false);
+                        jsonUtf8.WriteString(key.AsSpan(), value.AsSpan(), escape: true);
                         break;
                     case 2:
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(key), Encoding.UTF8.GetBytes(value), suppressEscaping: false);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(key), Encoding.UTF8.GetBytes(value), escape: true);
                         break;
                     case 3:
-                        jsonUtf8.WriteString(key, value.AsSpan(), suppressEscaping: false);
+                        jsonUtf8.WriteString(key, value.AsSpan(), escape: true);
                         break;
                     case 4:
-                        jsonUtf8.WriteString(key, Encoding.UTF8.GetBytes(value), suppressEscaping: false);
+                        jsonUtf8.WriteString(key, Encoding.UTF8.GetBytes(value), escape: true);
                         break;
                     case 5:
-                        jsonUtf8.WriteString(key.AsSpan(), value, suppressEscaping: false);
+                        jsonUtf8.WriteString(key.AsSpan(), value, escape: true);
                         break;
                     case 6:
-                        jsonUtf8.WriteString(key.AsSpan(), Encoding.UTF8.GetBytes(value), suppressEscaping: false);
+                        jsonUtf8.WriteString(key.AsSpan(), Encoding.UTF8.GetBytes(value), escape: true);
                         break;
                     case 7:
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(key), value, suppressEscaping: false);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(key), value, escape: true);
                         break;
                     case 8:
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(key), value.AsSpan(), suppressEscaping: false);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(key), value.AsSpan(), escape: true);
                         break;
                     case 9:
-                        jsonUtf8.WriteString(key, value, suppressEscaping: true);
+                        jsonUtf8.WriteString(key, value, escape: false);
                         break;
                     case 10:
-                        jsonUtf8.WriteString(key.AsSpan(), value.AsSpan(), suppressEscaping: true);
+                        jsonUtf8.WriteString(key.AsSpan(), value.AsSpan(), escape: false);
                         break;
                     case 11:
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(key), Encoding.UTF8.GetBytes(value), suppressEscaping: true);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(key), Encoding.UTF8.GetBytes(value), escape: false);
                         break;
                     case 12:
-                        jsonUtf8.WriteString(key, value.AsSpan(), suppressEscaping: true);
+                        jsonUtf8.WriteString(key, value.AsSpan(), escape: false);
                         break;
                     case 13:
-                        jsonUtf8.WriteString(key, Encoding.UTF8.GetBytes(value), suppressEscaping: true);
+                        jsonUtf8.WriteString(key, Encoding.UTF8.GetBytes(value), escape: false);
                         break;
                     case 14:
-                        jsonUtf8.WriteString(key.AsSpan(), value, suppressEscaping: true);
+                        jsonUtf8.WriteString(key.AsSpan(), value, escape: false);
                         break;
                     case 15:
-                        jsonUtf8.WriteString(key.AsSpan(), Encoding.UTF8.GetBytes(value), suppressEscaping: true);
+                        jsonUtf8.WriteString(key.AsSpan(), Encoding.UTF8.GetBytes(value), escape: false);
                         break;
                     case 16:
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(key), value, suppressEscaping: true);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(key), value, escape: false);
                         break;
                     case 17:
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(key), value.AsSpan(), suppressEscaping: true);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(key), value.AsSpan(), escape: false);
                         break;
                 }
 
@@ -1441,18 +1441,18 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteString(propertyName, value, suppressEscaping: false);
+                        jsonUtf8.WriteString(propertyName, value, escape: true);
                         break;
                     case 1:
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(propertyName), Encoding.UTF8.GetBytes(value), suppressEscaping: false);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(propertyName), Encoding.UTF8.GetBytes(value), escape: true);
                         break;
                     case 2:
                         expectedStr = GetEscapedExpectedString(prettyPrint: formatted, propertyName, value, StringEscapeHandling.EscapeHtml, escape: false);
-                        jsonUtf8.WriteString(propertyName, value, suppressEscaping: true);
+                        jsonUtf8.WriteString(propertyName, value, escape: false);
                         break;
                     case 3:
                         expectedStr = GetEscapedExpectedString(prettyPrint: formatted, propertyName, value, StringEscapeHandling.EscapeHtml, escape: false);
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(propertyName), Encoding.UTF8.GetBytes(value), suppressEscaping: true);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(propertyName), Encoding.UTF8.GetBytes(value), escape: false);
                         break;
                 }
 
@@ -1502,18 +1502,18 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteString(propertyName, value, suppressEscaping: false);
+                        jsonUtf8.WriteString(propertyName, value, escape: true);
                         break;
                     case 1:
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(propertyName), Encoding.UTF8.GetBytes(value), suppressEscaping: false);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(propertyName), Encoding.UTF8.GetBytes(value), escape: true);
                         break;
                     case 2:
                         expectedStr = GetEscapedExpectedString(prettyPrint: formatted, propertyName, value, StringEscapeHandling.EscapeNonAscii, escape: false);
-                        jsonUtf8.WriteString(propertyName, value, suppressEscaping: true);
+                        jsonUtf8.WriteString(propertyName, value, escape: false);
                         break;
                     case 3:
                         expectedStr = GetEscapedExpectedString(prettyPrint: formatted, propertyName, value, StringEscapeHandling.EscapeNonAscii, escape: false);
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(propertyName), Encoding.UTF8.GetBytes(value), suppressEscaping: true);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(propertyName), Encoding.UTF8.GetBytes(value), escape: false);
                         break;
                 }
 
@@ -1554,18 +1554,18 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteString(propertyName, value, suppressEscaping: false);
+                        jsonUtf8.WriteString(propertyName, value, escape: true);
                         break;
                     case 1:
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(propertyName), Encoding.UTF8.GetBytes(value), suppressEscaping: false);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(propertyName), Encoding.UTF8.GetBytes(value), escape: true);
                         break;
                     case 2:
                         expectedStr = GetEscapedExpectedString(prettyPrint: formatted, propertyName, value, StringEscapeHandling.EscapeNonAscii, escape: false);
-                        jsonUtf8.WriteString(propertyName, value, suppressEscaping: true);
+                        jsonUtf8.WriteString(propertyName, value, escape: false);
                         break;
                     case 3:
                         expectedStr = GetEscapedExpectedString(prettyPrint: formatted, propertyName, value, StringEscapeHandling.EscapeNonAscii, escape: false);
-                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(propertyName), Encoding.UTF8.GetBytes(value), suppressEscaping: true);
+                        jsonUtf8.WriteString(Encoding.UTF8.GetBytes(propertyName), Encoding.UTF8.GetBytes(value), escape: false);
                         break;
                 }
 
@@ -1601,35 +1601,35 @@ namespace System.Text.Json.Tests
                     switch (i)
                     {
                         case 0:
-                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0x28 }, new byte[2] { 0xc3, 0x28 }, suppressEscaping: true);
+                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0x28 }, new byte[2] { 0xc3, 0x28 }, escape: false);
                             AssertWriterThrow(noThrow: false);
                             break;
                         case 1:
-                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0x28 }, new byte[2] { 0xc3, 0xb1 }, suppressEscaping: true);
+                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0x28 }, new byte[2] { 0xc3, 0xb1 }, escape: false);
                             AssertWriterThrow(noThrow: true);
                             break;
                         case 2:
-                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0xb1 }, new byte[2] { 0xc3, 0x28 }, suppressEscaping: true);
+                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0xb1 }, new byte[2] { 0xc3, 0x28 }, escape: false);
                             AssertWriterThrow(noThrow: false);
                             break;
                         case 3:
-                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0xb1 }, new byte[2] { 0xc3, 0xb1 }, suppressEscaping: true);
+                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0xb1 }, new byte[2] { 0xc3, 0xb1 }, escape: false);
                             AssertWriterThrow(noThrow: true);
                             break;
                         case 4:
-                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0x28 }, new byte[2] { 0xc3, 0x28 }, suppressEscaping: false);
+                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0x28 }, new byte[2] { 0xc3, 0x28 }, escape: true);
                             AssertWriterThrow(noThrow: false);
                             break;
                         case 5:
-                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0x28 }, new byte[2] { 0xc3, 0xb1 }, suppressEscaping: false);
+                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0x28 }, new byte[2] { 0xc3, 0xb1 }, escape: true);
                             AssertWriterThrow(noThrow: false);
                             break;
                         case 6:
-                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0xb1 }, new byte[2] { 0xc3, 0x28 }, suppressEscaping: false);
+                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0xb1 }, new byte[2] { 0xc3, 0x28 }, escape: true);
                             AssertWriterThrow(noThrow: false);
                             break;
                         case 7:
-                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0xb1 }, new byte[2] { 0xc3, 0xb1 }, suppressEscaping: false);
+                            jsonUtf8.WriteString(new byte[2] { 0xc3, 0xb1 }, new byte[2] { 0xc3, 0xb1 }, escape: true);
                             AssertWriterThrow(noThrow: true);
                             break;
                     }
@@ -1657,7 +1657,7 @@ namespace System.Text.Json.Tests
             jsonUtf8.WriteStartObject();
 
             for (int i = 0; i < 1_000; i++)
-                jsonUtf8.WriteString("message", "Hello, World!", suppressEscaping: true);
+                jsonUtf8.WriteString("message", "Hello, World!", escape: false);
 
             jsonUtf8.WriteEndObject();
             jsonUtf8.Flush();
@@ -1768,22 +1768,22 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteStartArray("property name", suppressEscaping: true);
+                        jsonUtf8.WriteStartArray("property name", escape: false);
                         break;
                     case 1:
-                        jsonUtf8.WriteStartArray("property name".AsSpan(), suppressEscaping: true);
+                        jsonUtf8.WriteStartArray("property name".AsSpan(), escape: false);
                         break;
                     case 2:
-                        jsonUtf8.WriteStartArray(Encoding.UTF8.GetBytes("property name"), suppressEscaping: true);
+                        jsonUtf8.WriteStartArray(Encoding.UTF8.GetBytes("property name"), escape: false);
                         break;
                     case 3:
-                        jsonUtf8.WriteStartArray("property name", suppressEscaping: false);
+                        jsonUtf8.WriteStartArray("property name", escape: true);
                         break;
                     case 4:
-                        jsonUtf8.WriteStartArray("property name".AsSpan(), suppressEscaping: false);
+                        jsonUtf8.WriteStartArray("property name".AsSpan(), escape: true);
                         break;
                     case 5:
-                        jsonUtf8.WriteStartArray(Encoding.UTF8.GetBytes("property name"), suppressEscaping: false);
+                        jsonUtf8.WriteStartArray(Encoding.UTF8.GetBytes("property name"), escape: true);
                         break;
                 }
 
@@ -1833,22 +1833,22 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteStartArray(key, suppressEscaping: true);
+                        jsonUtf8.WriteStartArray(key, escape: false);
                         break;
                     case 1:
-                        jsonUtf8.WriteStartArray(key.AsSpan(), suppressEscaping: true);
+                        jsonUtf8.WriteStartArray(key.AsSpan(), escape: false);
                         break;
                     case 2:
-                        jsonUtf8.WriteStartArray(Encoding.UTF8.GetBytes(key), suppressEscaping: true);
+                        jsonUtf8.WriteStartArray(Encoding.UTF8.GetBytes(key), escape: false);
                         break;
                     case 3:
-                        jsonUtf8.WriteStartArray(key, suppressEscaping: false);
+                        jsonUtf8.WriteStartArray(key, escape: true);
                         break;
                     case 4:
-                        jsonUtf8.WriteStartArray(key.AsSpan(), suppressEscaping: false);
+                        jsonUtf8.WriteStartArray(key.AsSpan(), escape: true);
                         break;
                     case 5:
-                        jsonUtf8.WriteStartArray(Encoding.UTF8.GetBytes(key), suppressEscaping: false);
+                        jsonUtf8.WriteStartArray(Encoding.UTF8.GetBytes(key), escape: true);
                         break;
                 }
 
@@ -1889,22 +1889,22 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteStartObject("property name", suppressEscaping: true);
+                        jsonUtf8.WriteStartObject("property name", escape: false);
                         break;
                     case 1:
-                        jsonUtf8.WriteStartObject("property name".AsSpan(), suppressEscaping: true);
+                        jsonUtf8.WriteStartObject("property name".AsSpan(), escape: false);
                         break;
                     case 2:
-                        jsonUtf8.WriteStartObject(Encoding.UTF8.GetBytes("property name"), suppressEscaping: true);
+                        jsonUtf8.WriteStartObject(Encoding.UTF8.GetBytes("property name"), escape: false);
                         break;
                     case 3:
-                        jsonUtf8.WriteStartObject("property name", suppressEscaping: false);
+                        jsonUtf8.WriteStartObject("property name", escape: true);
                         break;
                     case 4:
-                        jsonUtf8.WriteStartObject("property name".AsSpan(), suppressEscaping: false);
+                        jsonUtf8.WriteStartObject("property name".AsSpan(), escape: true);
                         break;
                     case 5:
-                        jsonUtf8.WriteStartObject(Encoding.UTF8.GetBytes("property name"), suppressEscaping: false);
+                        jsonUtf8.WriteStartObject(Encoding.UTF8.GetBytes("property name"), escape: true);
                         break;
                 }
 
@@ -1954,22 +1954,22 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteStartObject(key, suppressEscaping: true);
+                        jsonUtf8.WriteStartObject(key, escape: false);
                         break;
                     case 1:
-                        jsonUtf8.WriteStartObject(key.AsSpan(), suppressEscaping: true);
+                        jsonUtf8.WriteStartObject(key.AsSpan(), escape: false);
                         break;
                     case 2:
-                        jsonUtf8.WriteStartObject(Encoding.UTF8.GetBytes(key), suppressEscaping: true);
+                        jsonUtf8.WriteStartObject(Encoding.UTF8.GetBytes(key), escape: false);
                         break;
                     case 3:
-                        jsonUtf8.WriteStartObject(key, suppressEscaping: false);
+                        jsonUtf8.WriteStartObject(key, escape: true);
                         break;
                     case 4:
-                        jsonUtf8.WriteStartObject(key.AsSpan(), suppressEscaping: false);
+                        jsonUtf8.WriteStartObject(key.AsSpan(), escape: true);
                         break;
                     case 5:
-                        jsonUtf8.WriteStartObject(Encoding.UTF8.GetBytes(key), suppressEscaping: false);
+                        jsonUtf8.WriteStartObject(Encoding.UTF8.GetBytes(key), escape: true);
                         break;
                 }
 
@@ -2010,13 +2010,13 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteStartArray("message", suppressEscaping: true);
+                        jsonUtf8.WriteStartArray("message", escape: false);
                         break;
                     case 1:
-                        jsonUtf8.WriteStartArray("message".AsSpan(), suppressEscaping: true);
+                        jsonUtf8.WriteStartArray("message".AsSpan(), escape: false);
                         break;
                     case 2:
-                        jsonUtf8.WriteStartArray(Encoding.UTF8.GetBytes("message"), suppressEscaping: true);
+                        jsonUtf8.WriteStartArray(Encoding.UTF8.GetBytes("message"), escape: false);
                         break;
                 }
 
@@ -2075,22 +2075,22 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteBoolean(keyString, value, suppressEscaping: true);
+                        jsonUtf8.WriteBoolean(keyString, value, escape: false);
                         break;
                     case 1:
-                        jsonUtf8.WriteBoolean(keyString.AsSpan(), value, suppressEscaping: true);
+                        jsonUtf8.WriteBoolean(keyString.AsSpan(), value, escape: false);
                         break;
                     case 2:
-                        jsonUtf8.WriteBoolean(Encoding.UTF8.GetBytes(keyString), value, suppressEscaping: true);
+                        jsonUtf8.WriteBoolean(Encoding.UTF8.GetBytes(keyString), value, escape: false);
                         break;
                     case 3:
-                        jsonUtf8.WriteBoolean(keyString, value, suppressEscaping: false);
+                        jsonUtf8.WriteBoolean(keyString, value, escape: true);
                         break;
                     case 4:
-                        jsonUtf8.WriteBoolean(keyString.AsSpan(), value, suppressEscaping: false);
+                        jsonUtf8.WriteBoolean(keyString.AsSpan(), value, escape: true);
                         break;
                     case 5:
-                        jsonUtf8.WriteBoolean(Encoding.UTF8.GetBytes(keyString), value, suppressEscaping: false);
+                        jsonUtf8.WriteBoolean(Encoding.UTF8.GetBytes(keyString), value, escape: true);
                         break;
                 }
 
@@ -2146,22 +2146,22 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteNull(keyString, suppressEscaping: true);
+                        jsonUtf8.WriteNull(keyString, escape: false);
                         break;
                     case 1:
-                        jsonUtf8.WriteNull(keyString.AsSpan(), suppressEscaping: true);
+                        jsonUtf8.WriteNull(keyString.AsSpan(), escape: false);
                         break;
                     case 2:
-                        jsonUtf8.WriteNull(Encoding.UTF8.GetBytes(keyString), suppressEscaping: true);
+                        jsonUtf8.WriteNull(Encoding.UTF8.GetBytes(keyString), escape: false);
                         break;
                     case 3:
-                        jsonUtf8.WriteNull(keyString, suppressEscaping: false);
+                        jsonUtf8.WriteNull(keyString, escape: true);
                         break;
                     case 4:
-                        jsonUtf8.WriteNull(keyString.AsSpan(), suppressEscaping: false);
+                        jsonUtf8.WriteNull(keyString.AsSpan(), escape: true);
                         break;
                     case 5:
-                        jsonUtf8.WriteNull(Encoding.UTF8.GetBytes(keyString), suppressEscaping: false);
+                        jsonUtf8.WriteNull(Encoding.UTF8.GetBytes(keyString), escape: true);
                         break;
                 }
 
@@ -2226,13 +2226,13 @@ namespace System.Text.Json.Tests
                 switch (i)
                 {
                     case 0:
-                        jsonUtf8.WriteNumber("message", value, suppressEscaping: true);
+                        jsonUtf8.WriteNumber("message", value, escape: false);
                         break;
                     case 1:
-                        jsonUtf8.WriteNumber("message".AsSpan(), value, suppressEscaping: true);
+                        jsonUtf8.WriteNumber("message".AsSpan(), value, escape: false);
                         break;
                     case 2:
-                        jsonUtf8.WriteNumber(Encoding.UTF8.GetBytes("message"), value, suppressEscaping: true);
+                        jsonUtf8.WriteNumber(Encoding.UTF8.GetBytes("message"), value, escape: false);
                         break;
                 }
 
@@ -2407,105 +2407,105 @@ namespace System.Text.Json.Tests
                 {
                     case 0:
                         for (int i = 0; i < floats.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, floats[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyString, floats[i], escape: false);
                         for (int i = 0; i < ints.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, ints[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyString, ints[i], escape: false);
                         for (int i = 0; i < uints.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, uints[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyString, uints[i], escape: false);
                         for (int i = 0; i < doubles.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, doubles[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyString, doubles[i], escape: false);
                         for (int i = 0; i < longs.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, longs[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyString, longs[i], escape: false);
                         for (int i = 0; i < ulongs.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, ulongs[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyString, ulongs[i], escape: false);
                         for (int i = 0; i < decimals.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, decimals[i], suppressEscaping: true);
-                        jsonUtf8.WriteStartArray(keyString, suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyString, decimals[i], escape: false);
+                        jsonUtf8.WriteStartArray(keyString, escape: false);
                         break;
                     case 1:
                         for (int i = 0; i < floats.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, floats[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf16, floats[i], escape: false);
                         for (int i = 0; i < ints.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, ints[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf16, ints[i], escape: false);
                         for (int i = 0; i < uints.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, uints[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf16, uints[i], escape: false);
                         for (int i = 0; i < doubles.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, doubles[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf16, doubles[i], escape: false);
                         for (int i = 0; i < longs.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, longs[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf16, longs[i], escape: false);
                         for (int i = 0; i < ulongs.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, ulongs[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf16, ulongs[i], escape: false);
                         for (int i = 0; i < decimals.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, decimals[i], suppressEscaping: true);
-                        jsonUtf8.WriteStartArray(keyUtf16, suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf16, decimals[i], escape: false);
+                        jsonUtf8.WriteStartArray(keyUtf16, escape: false);
                         break;
                     case 2:
                         for (int i = 0; i < floats.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, floats[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf8, floats[i], escape: false);
                         for (int i = 0; i < ints.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, ints[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf8, ints[i], escape: false);
                         for (int i = 0; i < uints.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, uints[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf8, uints[i], escape: false);
                         for (int i = 0; i < doubles.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, doubles[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf8, doubles[i], escape: false);
                         for (int i = 0; i < longs.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, longs[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf8, longs[i], escape: false);
                         for (int i = 0; i < ulongs.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, ulongs[i], suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf8, ulongs[i], escape: false);
                         for (int i = 0; i < decimals.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, decimals[i], suppressEscaping: true);
-                        jsonUtf8.WriteStartArray(keyUtf8, suppressEscaping: true);
+                            jsonUtf8.WriteNumber(keyUtf8, decimals[i], escape: false);
+                        jsonUtf8.WriteStartArray(keyUtf8, escape: false);
                         break;
                     case 3:
                         for (int i = 0; i < floats.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, floats[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyString, floats[i], escape: true);
                         for (int i = 0; i < ints.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, ints[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyString, ints[i], escape: true);
                         for (int i = 0; i < uints.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, uints[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyString, uints[i], escape: true);
                         for (int i = 0; i < doubles.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, doubles[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyString, doubles[i], escape: true);
                         for (int i = 0; i < longs.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, longs[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyString, longs[i], escape: true);
                         for (int i = 0; i < ulongs.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, ulongs[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyString, ulongs[i], escape: true);
                         for (int i = 0; i < decimals.Length; i++)
-                            jsonUtf8.WriteNumber(keyString, decimals[i], suppressEscaping: false);
-                        jsonUtf8.WriteStartArray(keyString, suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyString, decimals[i], escape: true);
+                        jsonUtf8.WriteStartArray(keyString, escape: true);
                         break;
                     case 4:
                         for (int i = 0; i < floats.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, floats[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf16, floats[i], escape: true);
                         for (int i = 0; i < ints.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, ints[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf16, ints[i], escape: true);
                         for (int i = 0; i < uints.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, uints[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf16, uints[i], escape: true);
                         for (int i = 0; i < doubles.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, doubles[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf16, doubles[i], escape: true);
                         for (int i = 0; i < longs.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, longs[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf16, longs[i], escape: true);
                         for (int i = 0; i < ulongs.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, ulongs[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf16, ulongs[i], escape: true);
                         for (int i = 0; i < decimals.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf16, decimals[i], suppressEscaping: false);
-                        jsonUtf8.WriteStartArray(keyUtf16, suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf16, decimals[i], escape: true);
+                        jsonUtf8.WriteStartArray(keyUtf16, escape: true);
                         break;
                     case 5:
                         for (int i = 0; i < floats.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, floats[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf8, floats[i], escape: true);
                         for (int i = 0; i < ints.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, ints[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf8, ints[i], escape: true);
                         for (int i = 0; i < uints.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, uints[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf8, uints[i], escape: true);
                         for (int i = 0; i < doubles.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, doubles[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf8, doubles[i], escape: true);
                         for (int i = 0; i < longs.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, longs[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf8, longs[i], escape: true);
                         for (int i = 0; i < ulongs.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, ulongs[i], suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf8, ulongs[i], escape: true);
                         for (int i = 0; i < decimals.Length; i++)
-                            jsonUtf8.WriteNumber(keyUtf8, decimals[i], suppressEscaping: false);
-                        jsonUtf8.WriteStartArray(keyUtf8, suppressEscaping: false);
+                            jsonUtf8.WriteNumber(keyUtf8, decimals[i], escape: true);
+                        jsonUtf8.WriteStartArray(keyUtf8, escape: true);
                         break;
                 }
 
@@ -2574,33 +2574,33 @@ namespace System.Text.Json.Tests
                 {
                     case 0:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyString, guids[j], suppressEscaping: true);
-                        jsonUtf8.WriteStartArray(keyString, suppressEscaping: true);
+                            jsonUtf8.WriteString(keyString, guids[j], escape: false);
+                        jsonUtf8.WriteStartArray(keyString, escape: false);
                         break;
                     case 1:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyUtf16, guids[j], suppressEscaping: true);
-                        jsonUtf8.WriteStartArray(keyUtf16, suppressEscaping: true);
+                            jsonUtf8.WriteString(keyUtf16, guids[j], escape: false);
+                        jsonUtf8.WriteStartArray(keyUtf16, escape: false);
                         break;
                     case 2:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyUtf8, guids[j], suppressEscaping: true);
-                        jsonUtf8.WriteStartArray(keyUtf8, suppressEscaping: true);
+                            jsonUtf8.WriteString(keyUtf8, guids[j], escape: false);
+                        jsonUtf8.WriteStartArray(keyUtf8, escape: false);
                         break;
                     case 3:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyString, guids[j], suppressEscaping: false);
-                        jsonUtf8.WriteStartArray(keyString, suppressEscaping: false);
+                            jsonUtf8.WriteString(keyString, guids[j], escape: true);
+                        jsonUtf8.WriteStartArray(keyString, escape: true);
                         break;
                     case 4:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyUtf16, guids[j], suppressEscaping: false);
-                        jsonUtf8.WriteStartArray(keyUtf16, suppressEscaping: false);
+                            jsonUtf8.WriteString(keyUtf16, guids[j], escape: true);
+                        jsonUtf8.WriteStartArray(keyUtf16, escape: true);
                         break;
                     case 5:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyUtf8, guids[j], suppressEscaping: false);
-                        jsonUtf8.WriteStartArray(keyUtf8, suppressEscaping: false);
+                            jsonUtf8.WriteString(keyUtf8, guids[j], escape: true);
+                        jsonUtf8.WriteStartArray(keyUtf8, escape: true);
                         break;
                 }
 
@@ -2667,33 +2667,33 @@ namespace System.Text.Json.Tests
                 {
                     case 0:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyString, dates[j], suppressEscaping: true);
-                        jsonUtf8.WriteStartArray(keyString, suppressEscaping: true);
+                            jsonUtf8.WriteString(keyString, dates[j], escape: false);
+                        jsonUtf8.WriteStartArray(keyString, escape: false);
                         break;
                     case 1:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyUtf16, dates[j], suppressEscaping: true);
-                        jsonUtf8.WriteStartArray(keyUtf16, suppressEscaping: true);
+                            jsonUtf8.WriteString(keyUtf16, dates[j], escape: false);
+                        jsonUtf8.WriteStartArray(keyUtf16, escape: false);
                         break;
                     case 2:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyUtf8, dates[j], suppressEscaping: true);
-                        jsonUtf8.WriteStartArray(keyUtf8, suppressEscaping: true);
+                            jsonUtf8.WriteString(keyUtf8, dates[j], escape: false);
+                        jsonUtf8.WriteStartArray(keyUtf8, escape: false);
                         break;
                     case 3:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyString, dates[j], suppressEscaping: false);
-                        jsonUtf8.WriteStartArray(keyString, suppressEscaping: false);
+                            jsonUtf8.WriteString(keyString, dates[j], escape: true);
+                        jsonUtf8.WriteStartArray(keyString, escape: true);
                         break;
                     case 4:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyUtf16, dates[j], suppressEscaping: false);
-                        jsonUtf8.WriteStartArray(keyUtf16, suppressEscaping: false);
+                            jsonUtf8.WriteString(keyUtf16, dates[j], escape: true);
+                        jsonUtf8.WriteStartArray(keyUtf16, escape: true);
                         break;
                     case 5:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyUtf8, dates[j], suppressEscaping: false);
-                        jsonUtf8.WriteStartArray(keyUtf8, suppressEscaping: false);
+                            jsonUtf8.WriteString(keyUtf8, dates[j], escape: true);
+                        jsonUtf8.WriteStartArray(keyUtf8, escape: true);
                         break;
                 }
 
@@ -2760,33 +2760,33 @@ namespace System.Text.Json.Tests
                 {
                     case 0:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyString, dates[j], suppressEscaping: true);
-                        jsonUtf8.WriteStartArray(keyString, suppressEscaping: true);
+                            jsonUtf8.WriteString(keyString, dates[j], escape: false);
+                        jsonUtf8.WriteStartArray(keyString, escape: false);
                         break;
                     case 1:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyUtf16, dates[j], suppressEscaping: true);
-                        jsonUtf8.WriteStartArray(keyUtf16, suppressEscaping: true);
+                            jsonUtf8.WriteString(keyUtf16, dates[j], escape: false);
+                        jsonUtf8.WriteStartArray(keyUtf16, escape: false);
                         break;
                     case 2:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyUtf8, dates[j], suppressEscaping: true);
-                        jsonUtf8.WriteStartArray(keyUtf8, suppressEscaping: true);
+                            jsonUtf8.WriteString(keyUtf8, dates[j], escape: false);
+                        jsonUtf8.WriteStartArray(keyUtf8, escape: false);
                         break;
                     case 3:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyString, dates[j], suppressEscaping: false);
-                        jsonUtf8.WriteStartArray(keyString, suppressEscaping: false);
+                            jsonUtf8.WriteString(keyString, dates[j], escape: true);
+                        jsonUtf8.WriteStartArray(keyString, escape: true);
                         break;
                     case 4:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyUtf16, dates[j], suppressEscaping: false);
-                        jsonUtf8.WriteStartArray(keyUtf16, suppressEscaping: false);
+                            jsonUtf8.WriteString(keyUtf16, dates[j], escape: true);
+                        jsonUtf8.WriteStartArray(keyUtf16, escape: true);
                         break;
                     case 5:
                         for (int j = 0; j < numberOfItems; j++)
-                            jsonUtf8.WriteString(keyUtf8, dates[j], suppressEscaping: false);
-                        jsonUtf8.WriteStartArray(keyUtf8, suppressEscaping: false);
+                            jsonUtf8.WriteString(keyUtf8, dates[j], escape: true);
+                        jsonUtf8.WriteStartArray(keyUtf8, escape: true);
                         break;
                 }
 
@@ -2830,7 +2830,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteStartObject();
-                jsonUtf8.WriteString(key, DateTime.Now, suppressEscaping: true);
+                jsonUtf8.WriteString(key, DateTime.Now, escape: false);
                 Assert.True(false, $"Expected ArgumentException for data too large wasn't thrown. KeyLength: {key.Length}");
             }
             catch (ArgumentException) { }
@@ -2838,7 +2838,7 @@ namespace System.Text.Json.Tests
             try
             {
                 jsonUtf8.WriteStartArray();
-                jsonUtf8.WriteStringValue(value, suppressEscaping: true);
+                jsonUtf8.WriteStringValue(value, escape: false);
                 Assert.True(false, $"Expected ArgumentException for data too large wasn't thrown. ValueLength: {value.Length}");
             }
             catch (ArgumentException) { }
@@ -2876,7 +2876,7 @@ namespace System.Text.Json.Tests
 
             try
             {
-                jsonUtf8.WriteString(key, value, suppressEscaping: true);
+                jsonUtf8.WriteString(key, value, escape: false);
 
                 if (!noThrow)
                 {
