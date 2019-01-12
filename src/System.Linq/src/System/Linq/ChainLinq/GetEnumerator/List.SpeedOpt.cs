@@ -6,19 +6,25 @@ namespace System.Linq.ChainLinq.GetEnumerator
 {
     static partial class List
     {
-        static partial void Optimized<T, U>(List<T> list, Link<T, U> link, ref IEnumerator<U> enumerator)
+        static partial void Optimized<T, U>(Consumables.List<T, U> consumable, ref IEnumerator<U> enumerator)
         {
-            switch (link.LinkType)
+            switch (consumable.Link.LinkType)
             {
                 case Links.LinkType.Select:
-                    enumerator = new SelectEnumerator<T, U>(list, ((Links.Select<T, U>)link).Selector);
+                    enumerator = new SelectEnumerator<T, U>(consumable.Underlying, ((Links.Select<T, U>)consumable.Link).Selector);
                     break;
 
                 case Links.LinkType.Where:
                     Debug.Assert(typeof(T) == typeof(U));
-                    enumerator = new WhereEnumerator<U>((List<U>)(object)list, ((Links.Where<U>)(object)link).Predicate);
+                    enumerator = GetWhereEnumerator<U>(consumable);
                     break;
             }
+        }
+
+        private static IEnumerator<T> GetWhereEnumerator<T>(object consumable)
+        {
+            var c = (Consumables.List<T, T>)consumable;
+            return new WhereEnumerator<T>(c.Underlying, ((Links.Where<T>)c.Link).Predicate);
         }
 
         abstract class EnumeratorBase<T> : IEnumerator<T>

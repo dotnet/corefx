@@ -4,18 +4,18 @@ namespace System.Linq.ChainLinq.Consumables
 {
     sealed partial class List<T, V> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, T>
     {
-        private readonly List<T> _list;
+        internal List<T> Underlying { get; }
 
         public List(List<T> array, Link<T, V> first) : base(first) =>
-            _list = array;
+            Underlying = array;
 
         public override Consumable<W> Create<W>(Link<T, W> first) =>
-            new List<T, W>(_list, first);
+            new List<T, W>(Underlying, first);
 
         public override IEnumerator<V> GetEnumerator() =>
-            ChainLinq.GetEnumerator.List.Get(_list, Link);
+            ChainLinq.GetEnumerator.List.Get(this);
 
         public override TResult Consume<TResult>(Consumer<V, TResult> consumer) =>
-            ChainLinq.Consume.List.Invoke(_list, Link, consumer);
+            ChainLinq.Consume.List.Invoke(Underlying, Link, consumer);
     }
 }
