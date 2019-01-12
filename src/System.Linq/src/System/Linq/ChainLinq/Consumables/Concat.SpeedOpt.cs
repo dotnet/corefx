@@ -11,19 +11,21 @@ namespace System.Linq.ChainLinq.Consumables
             if (e == null)
                 return 0;
 
-            switch (e)
+            if (e is ICollection<T> ct)
             {
-                case ICollection<T> ct:
-                    return ct.Count;
-
-                case Optimizations.ICountOnConsumable cc:
-                    return cc.GetCount(onlyIfCheap);
-
-                case ICollection c:
-                    return c.Count;
-
-                default:
-                    return -1;
+                return ct.Count;
+            }
+            else if (e is Optimizations.ICountOnConsumable cc)
+            {
+                return cc.GetCount(onlyIfCheap);
+            }
+            else if (e is ICollection c)
+            {
+                return c.Count;
+            }
+            else
+            { 
+                return -1;
             }
         }
 

@@ -24,19 +24,21 @@ namespace System.Linq.ChainLinq.Consume
 
         public static ChainStatus Consume<T>(IEnumerable<T> input, Chain<T> chain, ref ChainConsumer<T> consumer)
         {
-            switch (input)
+            if (input is Consumable<T> consumable)
             {
-                case Consumable<T> consumable:
-                    return consumable.Consume(GetInnerConsumer(chain, ref consumer));
-
-                case T[] array:
-                    return ConsumerArray(array, chain);
-
-                case List<T> list:
-                    return ConsumerList(list, chain);
-
-                default:
-                    return ConsumerEnumerable(input, chain);
+                return consumable.Consume(GetInnerConsumer(chain, ref consumer));
+            }
+            else if (input is T[] array)
+            {
+                return ConsumerArray(array, chain);
+            }
+            else if (input is List<T> list)
+            {
+                return ConsumerList(list, chain);
+            }
+            else
+            {
+                return ConsumerEnumerable(input, chain);
             }
         }
 

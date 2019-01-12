@@ -6,49 +6,52 @@ namespace System.Linq.ChainLinq
     {
         internal static Consumable<U> CreateConsumable<T, U>(IEnumerable<T> e, Link<T, U> transform)
         {
-            switch (e)
+            if (e is T[] array)
             {
-                case T[] array:
-                    return 
-                        array.Length == 0
-                          ? Consumables.Empty<U>.Instance
-                          : new Consumables.Array<T, U>(array, transform);
-
-                case List<T> list:
-                    return new Consumables.List<T, U>(list, transform);
-
-                case Consumables.IConsumableProvider<T> provider:
-                    return provider.GetConsumable(transform);
-
-                case IList<T> list:
-                    return new Consumables.IList<T, U>(list, 0, list.Count, transform);
-
-                default:
-                    return new Consumables.Enumerable<T, U>(e, transform);
+                return
+                    array.Length == 0
+                      ? Consumables.Empty<U>.Instance
+                      : new Consumables.Array<T, U>(array, transform);
+            }
+            else if (e is List<T> list)
+            {
+                return new Consumables.List<T, U>(list, transform);
+            }
+            else if (e is Consumables.IConsumableProvider<T> provider)
+            {
+                return provider.GetConsumable(transform);
+            }
+            else if (e is IList<T> ilist)
+            {
+                return new Consumables.IList<T, U>(ilist, 0, ilist.Count, transform);
+            }
+            else
+            {
+                return new Consumables.Enumerable<T, U>(e, transform);
             }
         }
 
         internal static Consumable<T> AsConsumable<T>(IEnumerable<T> e)
         {
-            switch (e)
+            if (e is Consumable<T> c)
             {
-                case Consumable<T> c:
-                    return c;
-
-                default:
-                    return CreateConsumable(e, Links.Identity<T>.Instance);
+                return c;
+            }
+            else
+            { 
+                return CreateConsumable(e, Links.Identity<T>.Instance);
             }
         }
 
         internal static Consumable<U> PushTransform<T, U>(IEnumerable<T> e, Link<T, U> transform)
         {
-            switch (e)
+            if (e is ConsumableForAddition<T> consumable)
             {
-                case ConsumableForAddition<T> consumable:
-                    return consumable.AddTail(transform);
-
-                default:
-                    return CreateConsumable(e, transform);
+                return consumable.AddTail(transform);
+            }
+            else
+            {
+                return CreateConsumable(e, transform);
             }
         }
 

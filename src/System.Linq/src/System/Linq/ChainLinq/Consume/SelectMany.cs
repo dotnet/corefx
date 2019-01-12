@@ -54,40 +54,38 @@ namespace System.Linq.ChainLinq.Consume
             public override ChainStatus ProcessNext((TSource, IEnumerable<TCollection>) input)
             {
                 var state = ChainStatus.Flow;
-                switch (input.Item2)
+                if (input.Item2 is Consumable<TCollection> consumable)
                 {
-                    case Consumable<TCollection> consumable:
-                        var consumer = GetInnerConsumer();
-                        consumer.Source = input.Item1;
-                        state = consumable.Consume(consumer);
-                        break;
-
-                    case TCollection[] array:
-                        foreach (var item in array)
-                        {
-                            state = _chainT.ProcessNext(_resultSelector(input.Item1, item));
-                            if (state.IsStopped())
-                                break;
-                        }
-                        break;
-
-                    case List<TCollection> list:
-                        foreach (var item in list)
-                        {
-                            state = _chainT.ProcessNext(_resultSelector(input.Item1, item));
-                            if (state.IsStopped())
-                                break;
-                        }
-                        break;
-
-                    default:
-                        foreach (var item in input.Item2)
-                        {
-                            state = _chainT.ProcessNext(_resultSelector(input.Item1, item));
-                            if (state.IsStopped())
-                                break;
-                        }
-                        break;
+                    var consumer = GetInnerConsumer();
+                    consumer.Source = input.Item1;
+                    state = consumable.Consume(consumer);
+                }
+                else if (input.Item2 is TCollection[] array)
+                {
+                    foreach (var item in array)
+                    {
+                        state = _chainT.ProcessNext(_resultSelector(input.Item1, item));
+                        if (state.IsStopped())
+                            break;
+                    }
+                }
+                else if (input.Item2 is List<TCollection> list)
+                {
+                    foreach (var item in list)
+                    {
+                        state = _chainT.ProcessNext(_resultSelector(input.Item1, item));
+                        if (state.IsStopped())
+                            break;
+                    }
+                }
+                else
+                {
+                    foreach (var item in input.Item2)
+                    {
+                        state = _chainT.ProcessNext(_resultSelector(input.Item1, item));
+                        if (state.IsStopped())
+                            break;
+                    }
                 }
                 return state;
             }
