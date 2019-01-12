@@ -10,8 +10,8 @@ namespace System.Linq.ChainLinq.Consumables
         public Range(int start, int count, Link<int, T> first) : base(first) =>
             (_start, _count) = (start, count);
 
-        public override Consumable<U> Create<U>(Link<int, U> first) =>
-            new Range<U>(_start, _count, first);
+        public override Consumable<T> Create   (Link<int, T> first) => new Range<T>(_start, _count, first);
+        public override Consumable<U> Create<U>(Link<int, U> first) => new Range<U>(_start, _count, first);
 
         public override IEnumerator<T> GetEnumerator() =>
             ChainLinq.GetEnumerator.Range.Get(_start, _count, Link);

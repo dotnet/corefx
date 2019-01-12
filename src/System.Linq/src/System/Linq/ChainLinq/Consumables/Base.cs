@@ -14,11 +14,12 @@ namespace System.Linq.ChainLinq.Consumables
         protected Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug(Link<T, U> link) =>
             Link = link;
 
+        public abstract Consumable<U> Create(Link<T, U> first);
         public override Consumable<U> AddTail(Link<U, U> next) => Create(Links.Composition.Create(Link, next));
 
+        public abstract Consumable<V> Create<V>(Link<T, V> first);
         public override Consumable<V> AddTail<V>(Link<U, V> next) => Create(Links.Composition.Create(Link, next));
 
-        public abstract Consumable<V> Create<V>(Link<T, V> first);
 
         protected bool IsIdentity => ReferenceEquals(Link, Links.Identity<T>.Instance);
 

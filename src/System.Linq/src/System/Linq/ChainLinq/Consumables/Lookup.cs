@@ -130,6 +130,8 @@ namespace System.Linq.ChainLinq.Consumables
         public Lookup(Grouping<TKey, TValue> lastGrouping, Link<IGrouping<TKey, TValue>, V> first) : base(first) =>
             _lastGrouping = lastGrouping;
 
+        public override Consumable<V> Create(Link<IGrouping<TKey, TValue>, V> first) =>
+            new Lookup<TKey, TValue, V>(_lastGrouping, first);
         public override Consumable<W> Create<W>(Link<IGrouping<TKey, TValue>, W> first) =>
             new Lookup<TKey, TValue, W>(_lastGrouping, first);
 
@@ -171,6 +173,8 @@ namespace System.Linq.ChainLinq.Consumables
         public LookupResultsSelector(Grouping<TKey, TElement> lastGrouping, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, Link<TResult, V> first) : base(first) =>
             (_lastGrouping, _resultSelector) = (lastGrouping, resultSelector);
 
+        public override Consumable<V> Create(Link<TResult, V> first) =>
+            new LookupResultsSelector<TKey, TElement, TResult, V>(_lastGrouping, _resultSelector, first);
         public override Consumable<W> Create<W>(Link<TResult, W> first) =>
             new LookupResultsSelector<TKey, TElement, TResult, W>(_lastGrouping, _resultSelector, first);
 
