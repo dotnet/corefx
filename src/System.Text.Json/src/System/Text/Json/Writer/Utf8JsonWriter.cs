@@ -12,13 +12,15 @@ namespace System.Text.Json
     /// Provides a high-performance API for forward-only, non-cached writing of UTF-8 encoded JSON text.
     /// It writes the text sequentially with no caching and adheres to the JSON RFC
     /// by default (https://tools.ietf.org/html/rfc8259), with the exception of writing comments.
+    /// </summary>
+    /// <remarks>
     /// When the user attempts to write invalid JSON and validation is enabled, it throws
     /// a <see cref="InvalidOperationException"/> with a context specific error message.
     /// Since this type is a ref struct, it does not directly support async. However, it does provide
     /// support for reentrancy to write partial data, and continue writing in chunks.
     /// To be able to format the output with indentation and whitespace OR to skip validation, create an instance of 
     /// <see cref="JsonWriterState"/> and pass that in to the writer.
-    /// </summary>
+    /// </remarks>
     public ref partial struct Utf8JsonWriter
     {
         private const int StackallocThreshold = 256;
@@ -71,15 +73,17 @@ namespace System.Text.Json
         /// <summary>
         /// Returns the current snapshot of the <see cref="Utf8JsonWriter"/> state which must
         /// be captured by the caller and passed back in to the <see cref="Utf8JsonWriter"/> ctor with more data.
-        /// Unlike the <see cref="Utf8JsonWriter"/>, which is a ref struct, the state can survive
-        /// across async/await boundaries and hence this type is required to provide support for reading
-        /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonWriter"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown when there is JSON data that has been written and buffered but not yet flushed to the <see cref="IBufferWriter{T}" />.	
         /// Getting the state for creating a new <see cref="Utf8JsonWriter"/> without first committing the data that has been written	
         /// would result in an inconsistent state. Call Flush before getting the current state.	
         /// </exception>
+        /// <remarks>
+        /// Unlike the <see cref="Utf8JsonWriter"/>, which is a ref struct, the state can survive
+        /// across async/await boundaries and hence this type is required to provide support for reading
+        /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonWriter"/>.
+        /// </remarks>
         public JsonWriterState GetCurrentState()
         {
             if (_buffered != 0)
@@ -193,7 +197,7 @@ namespace System.Text.Json
             if (CurrentDepth >= JsonConstants.MaxWriterDepth)
                 ThrowHelper.ThrowInvalidOperationException(ExceptionResource.DepthTooLarge, _currentDepth);
 
-            if (_writerOptions.SlowPath)
+            if (_writerOptions.IndentedOrNotSkipValidation)
             {
                 WriteStartSlow(token);
             }
@@ -209,24 +213,23 @@ namespace System.Text.Json
 
         private void WriteStartMinimized(byte token)
         {
-            // Calculated based on the following: ',[' OR ',{'
-            int bytesNeeded = 2;
-            while (_buffer.Length < bytesNeeded)
-            {
-                GrowAndEnsure();
-            }
-
+            int idx = 0;
             if (_currentDepth < 0)
             {
-                _buffer[0] = JsonConstants.ListSeparator;
-                _buffer[1] = token;
+                if (_buffer.Length <= idx)
+                {
+                    GrowAndEnsure();
+                }
+                _buffer[idx++] = JsonConstants.ListSeparator;
             }
-            else
+
+            if (_buffer.Length <= idx)
             {
-                bytesNeeded--;
-                _buffer[0] = token;
+                AdvanceAndGrow(ref idx);
             }
-            Advance(bytesNeeded);
+            _buffer[idx++] = token;
+
+            Advance(idx);
         }
 
         private void WriteStartSlow(byte token)
@@ -273,7 +276,7 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
                     GrowAndEnsure();
                 }
@@ -293,14 +296,12 @@ namespace System.Text.Json
                     break;
                 }
                 indent -= bytesWritten;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = token;
 
@@ -390,27 +391,18 @@ namespace System.Text.Json
             int idx;
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                    UpdateBitStackOnStart(token);
-                }
+                ValidateWritingProperty(token);
                 idx = WritePropertyNameIndented(propertyName);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                    UpdateBitStackOnStart(token);
-                }
+                ValidateWritingProperty(token);
                 idx = WritePropertyNameMinimized(propertyName);
             }
 
             if (1 > _buffer.Length - idx)
             {
-                AdvanceAndGrow(idx, 1);
-                idx = 0;
+                AdvanceAndGrow(ref idx, 1);
             }
 
             _buffer[idx++] = token;
@@ -564,27 +556,18 @@ namespace System.Text.Json
             int idx;
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                    UpdateBitStackOnStart(token);
-                }
+                ValidateWritingProperty(token);
                 idx = WritePropertyNameIndented(propertyName);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                    UpdateBitStackOnStart(token);
-                }
+                ValidateWritingProperty(token);
                 idx = WritePropertyNameMinimized(propertyName);
             }
 
             if (1 > _buffer.Length - idx)
             {
-                AdvanceAndGrow(idx, 1);
-                idx = 0;
+                AdvanceAndGrow(ref idx, 1);
             }
 
             _buffer[idx++] = token;
@@ -650,7 +633,7 @@ namespace System.Text.Json
 
         private void WriteEnd(byte token)
         {
-            if (_writerOptions.SlowPath)
+            if (_writerOptions.IndentedOrNotSkipValidation)
             {
                 WriteEndSlow(token);
             }
@@ -659,7 +642,7 @@ namespace System.Text.Json
                 WriteEndMinimized(token);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             // Necessary if WriteEndX is called without a corresponding WriteStartX first.
             if (CurrentDepth != 0)
             {
@@ -669,7 +652,7 @@ namespace System.Text.Json
 
         private void WriteEndMinimized(byte token)
         {
-            while (_buffer.Length < 1)
+            if (_buffer.Length < 1)
             {
                 GrowAndEnsure();
             }
@@ -753,14 +736,12 @@ namespace System.Text.Json
                         break;
                     }
                     indent -= bytesWritten;
-                    AdvanceAndGrow(idx);
-                    idx = 0;
+                    AdvanceAndGrow(ref idx);
                 }
 
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
-                    AdvanceAndGrow(idx);
-                    idx = 0;
+                    AdvanceAndGrow(ref idx);
                 }
                 _buffer[idx++] = token;
 
@@ -774,18 +755,16 @@ namespace System.Text.Json
             // Write '\r\n' OR '\n', depending on OS
             if (Environment.NewLine.Length == 2)
             {
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
-                    AdvanceAndGrow(idx);
-                    idx = 0;
+                    AdvanceAndGrow(ref idx);
                 }
                 _buffer[idx++] = JsonConstants.CarriageReturn;
             }
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.LineFeed;
         }
@@ -829,18 +808,20 @@ namespace System.Text.Json
             }
         }
 
-        private void AdvanceAndGrow(int alreadyWritten)
+        private void AdvanceAndGrow(ref int alreadyWritten)
         {
             Debug.Assert(alreadyWritten >= 0);
             Advance(alreadyWritten);
             GrowAndEnsure();
+            alreadyWritten = 0;
         }
 
-        private void AdvanceAndGrow(int alreadyWritten, int minimumSize)
+        private void AdvanceAndGrow(ref int alreadyWritten, int minimumSize)
         {
             Debug.Assert(minimumSize >= 1 && minimumSize <= 128);
             Advance(alreadyWritten);
             GrowAndEnsure(minimumSize);
+            alreadyWritten = 0;
         }
 
         private void CopyLoop(ReadOnlySpan<byte> span, ref int idx)
@@ -856,9 +837,14 @@ namespace System.Text.Json
 
                 span.Slice(0, _buffer.Length - idx).CopyTo(_buffer.Slice(idx));
                 span = span.Slice(_buffer.Length - idx);
-                AdvanceAndGrow(_buffer.Length);
-                idx = 0;
+                idx = _buffer.Length;
+                AdvanceAndGrow(ref idx);
             }
+        }
+
+        private void SetFlagToAddListSeparatorBeforeNextItem()
+        {
+            _currentDepth |= 1 << 31;
         }
     }
 }

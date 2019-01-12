@@ -11,7 +11,7 @@ namespace System.Text.Json
     public ref partial struct Utf8JsonWriter
     {
         /// <summary>
-        /// Writes the UTF-16 text value (as a JSON comment).
+        /// Writes the string text value (as a JSON comment).
         /// </summary>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON comment within /*..*/.</param>
         /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
@@ -97,8 +97,7 @@ namespace System.Text.Json
                     break;
                 }
                 indent -= bytesWritten;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
             WriteCommentValue(escapedValue, ref idx);
@@ -219,8 +218,7 @@ namespace System.Text.Json
                     break;
                 }
                 indent -= bytesWritten;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
             WriteCommentValue(escapedValue, ref idx);
@@ -267,17 +265,15 @@ namespace System.Text.Json
 
         private void WriteCommentValue(ReadOnlySpan<char> escapedValue, ref int idx)
         {
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Slash;
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Asterisk;
 
@@ -292,54 +288,47 @@ namespace System.Text.Json
                     break;
                 }
                 partialConsumed += consumed;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Asterisk;
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Slash;
         }
 
         private void WriteCommentValue(ReadOnlySpan<byte> escapedValue, ref int idx)
         {
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Slash;
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Asterisk;
 
             CopyLoop(escapedValue, ref idx);
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Asterisk;
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Slash;
         }

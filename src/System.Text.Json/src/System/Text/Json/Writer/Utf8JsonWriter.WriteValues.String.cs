@@ -10,7 +10,7 @@ namespace System.Text.Json
     public ref partial struct Utf8JsonWriter
     {
         /// <summary>
-        /// Writes the UTF-16 text value (as a JSON string) as an element of a JSON array.
+        /// Writes the string text value (as a JSON string) as an element of a JSON array.
         /// </summary>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string element of a JSON array.</param>
         /// <param name="suppressEscaping">If this is set, the writer assumes the value is properly escaped and skips the escaping step.</param>
@@ -47,7 +47,7 @@ namespace System.Text.Json
                 WriteStringByOptions(value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
         }
 
@@ -71,18 +71,12 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingValue();
-                }
+                ValidateWritingValue();
                 WriteStringIndented(value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingValue();
-                }
+                ValidateWritingValue();
                 WriteStringMinimized(value);
             }
         }
@@ -92,7 +86,7 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
                     GrowAndEnsure();
                 }
@@ -109,7 +103,7 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
                     GrowAndEnsure();
                 }
@@ -129,8 +123,7 @@ namespace System.Text.Json
                     break;
                 }
                 indent -= bytesWritten;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
             WriteStringValue(escapedValue, ref idx);
@@ -199,7 +192,7 @@ namespace System.Text.Json
                 WriteStringByOptions(value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
         }
 
@@ -223,18 +216,12 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingValue();
-                }
+                ValidateWritingValue();
                 WriteStringIndented(value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingValue();
-                }
+                ValidateWritingValue();
                 WriteStringMinimized(value);
             }
         }
@@ -244,7 +231,7 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
                     GrowAndEnsure();
                 }
@@ -261,7 +248,7 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
                     GrowAndEnsure();
                 }
@@ -281,8 +268,7 @@ namespace System.Text.Json
                     break;
                 }
                 indent -= bytesWritten;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
             WriteStringValue(escapedValue, ref idx);

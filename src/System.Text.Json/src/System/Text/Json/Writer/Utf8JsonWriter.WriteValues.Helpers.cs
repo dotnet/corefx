@@ -10,16 +10,19 @@ namespace System.Text.Json
     {
         private void ValidateWritingValue()
         {
-            if (_inObject)
+            if (!_writerOptions.SkipValidation)
             {
-                Debug.Assert(_tokenType != JsonTokenType.None && _tokenType != JsonTokenType.StartArray);
-                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueWithinObject, tokenType: _tokenType);
-            }
-            else
-            {
-                if (!_isNotPrimitive && _tokenType != JsonTokenType.None)
+                if (_inObject)
                 {
-                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueAfterPrimitive, tokenType: _tokenType);
+                    Debug.Assert(_tokenType != JsonTokenType.None && _tokenType != JsonTokenType.StartArray);
+                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueWithinObject, tokenType: _tokenType);
+                }
+                else
+                {
+                    if (!_isNotPrimitive && _tokenType != JsonTokenType.None)
+                    {
+                        ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWriteValueAfterPrimitive, tokenType: _tokenType);
+                    }
                 }
             }
         }

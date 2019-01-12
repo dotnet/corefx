@@ -23,39 +23,47 @@ namespace System.Text.Json
         {
             get
             {
-                return (_optionsMask & 1) != 0;
+                return (_optionsMask & IndentBit) != 0;
             }
             set
             {
                 if (value)
-                    _optionsMask |= 1;
+                    _optionsMask |= IndentBit;
                 else
-                    _optionsMask &= ~1;
+                    _optionsMask &= ~IndentBit;
             }
         }
 
         /// <summary>
         /// Defines whether the <see cref="Utf8JsonWriter"/> should skip structural validation and allow
         /// the user to write invalid JSON, when set to true. If set to false, any attempts to write invalid JSON will result in
-        /// a <exception cref="InvalidOperationException"/> to be thrown (for example, writing a value within an object
-        /// without a property name). If the JSON being written is known to be correct
-        /// then skipping validation (by setting it to true) could improve performance.
+        /// a <exception cref="InvalidOperationException"/> to be thrown.
         /// </summary>
+        /// <remarks>
+        /// If the JSON being written is known to be correct,
+        /// then skipping validation (by setting it to true) could improve performance.
+        /// An example of invalid JSON where the writer will throw (when SkipValidation
+        /// is set to false) is when you write a value within a JSON object
+        /// without a property name. 
+        /// </remarks>
         public bool SkipValidation
         {
             get
             {
-                return (_optionsMask & 2) != 0;
+                return (_optionsMask & SkipValidationBit) != 0;
             }
             set
             {
                 if (value)
-                    _optionsMask |= 2;
+                    _optionsMask |= SkipValidationBit;
                 else
-                    _optionsMask &= ~2;
+                    _optionsMask &= ~SkipValidationBit;
             }
         }
 
-        internal bool SlowPath => _optionsMask != 2; // Equivalent to: Indented || !SkipValidation;
+        internal bool IndentedOrNotSkipValidation => _optionsMask != SkipValidationBit; // Equivalent to: Indented || !SkipValidation;
+
+        private const int IndentBit = 1;
+        private const int SkipValidationBit = 2;
     }
 }

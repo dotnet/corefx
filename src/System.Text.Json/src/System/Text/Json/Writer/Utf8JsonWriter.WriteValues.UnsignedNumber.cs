@@ -31,43 +31,34 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingValue();
-                }
+                ValidateWritingValue();
                 WriteNumberValueIndented(value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingValue();
-                }
+                ValidateWritingValue();
                 WriteNumberValueMinimized(value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.Number;
         }
 
         private void WriteNumberValueMinimized(ulong value)
         {
-            // Calculated based on the following: ',ulong.MaxValue'
-            int bytesNeeded = JsonConstants.MaximumFormatUInt64Length + 1;
-            if (_buffer.Length < bytesNeeded)
-            {
-                GrowAndEnsure(bytesNeeded);
-            }
-
             int idx = 0;
             if (_currentDepth < 0)
             {
+                if (_buffer.Length <= idx)
+                {
+                    GrowAndEnsure();
+                }
                 _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
-            Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out int bytesWritten);
+            WriteNumberValueFormatLoop(value, ref idx);
 
-            Advance(idx + bytesWritten);
+            Advance(idx);
         }
 
         private void WriteNumberValueIndented(ulong value)
@@ -75,7 +66,7 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
                     GrowAndEnsure();
                 }
@@ -95,8 +86,7 @@ namespace System.Text.Json
                     break;
                 }
                 indent -= bytesWritten;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
             WriteNumberValueFormatLoop(value, ref idx);

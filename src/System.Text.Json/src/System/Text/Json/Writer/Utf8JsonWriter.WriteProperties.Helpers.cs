@@ -25,12 +25,30 @@ namespace System.Text.Json
                 ThrowHelper.ThrowInvalidOperationOrArgumentException(propertyName, _currentDepth);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ValidateWritingProperty()
         {
-            if (!_inObject)
+            if (!_writerOptions.SkipValidation)
             {
-                Debug.Assert(_tokenType != JsonTokenType.StartObject);
-                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWritePropertyWithinArray, tokenType: _tokenType);
+                if (!_inObject)
+                {
+                    Debug.Assert(_tokenType != JsonTokenType.StartObject);
+                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWritePropertyWithinArray, tokenType: _tokenType);
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ValidateWritingProperty(byte token)
+        {
+            if (!_writerOptions.SkipValidation)
+            {
+                if (!_inObject)
+                {
+                    Debug.Assert(_tokenType != JsonTokenType.StartObject);
+                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.CannotWritePropertyWithinArray, tokenType: _tokenType);
+                }
+                UpdateBitStackOnStart(token);
             }
         }
 
@@ -39,33 +57,30 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
                     GrowAndEnsure();
                 }
                 _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
 
             CopyLoop(escapedPropertyName, ref idx);
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.KeyValueSeperator;
 
@@ -77,7 +92,7 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
                     GrowAndEnsure();
                 }
@@ -97,37 +112,32 @@ namespace System.Text.Json
                     break;
                 }
                 indent -= bytesWritten;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
 
             CopyLoop(escapedPropertyName, ref idx);
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.KeyValueSeperator;
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Space;
 
@@ -139,17 +149,16 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
                     GrowAndEnsure();
                 }
                 _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
 
@@ -164,21 +173,18 @@ namespace System.Text.Json
                     break;
                 }
                 partialConsumed += consumed;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.KeyValueSeperator;
 
@@ -190,7 +196,7 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
                     GrowAndEnsure();
                 }
@@ -210,14 +216,12 @@ namespace System.Text.Json
                     break;
                 }
                 indent -= bytesWritten;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
 
@@ -232,28 +236,24 @@ namespace System.Text.Json
                     break;
                 }
                 partialConsumed += consumed;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.KeyValueSeperator;
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Space;
 

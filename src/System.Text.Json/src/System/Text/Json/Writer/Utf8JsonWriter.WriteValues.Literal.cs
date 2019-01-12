@@ -16,7 +16,7 @@ namespace System.Text.Json
         {
             WriteLiteralByOptions(JsonConstants.NullValue);
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.Null;
         }
 
@@ -40,47 +40,38 @@ namespace System.Text.Json
                 _tokenType = JsonTokenType.False;
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
         }
 
         private void WriteLiteralByOptions(ReadOnlySpan<byte> value)
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingValue();
-                }
+                ValidateWritingValue();
                 WriteLiteralIndented(value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingValue();
-                }
+                ValidateWritingValue();
                 WriteLiteralMinimized(value);
             }
         }
 
         private void WriteLiteralMinimized(ReadOnlySpan<byte> value)
         {
-            // Calculated based on the following: ',null' OR ',true' OR ',false'
-            int bytesNeeded = value.Length + 1;
-            if (_buffer.Length < bytesNeeded)
-            {
-                GrowAndEnsure(bytesNeeded);
-            }
-
             int idx = 0;
             if (_currentDepth < 0)
             {
+                if (_buffer.Length <= idx)
+                {
+                    GrowAndEnsure();
+                }
                 _buffer[idx++] = JsonConstants.ListSeparator;
             }
 
-            value.CopyTo(_buffer.Slice(idx));
+            CopyLoop(value, ref idx);
 
-            Advance(idx + value.Length);
+            Advance(idx);
         }
 
         private void WriteLiteralIndented(ReadOnlySpan<byte> value)
@@ -88,7 +79,7 @@ namespace System.Text.Json
             int idx = 0;
             if (_currentDepth < 0)
             {
-                while (_buffer.Length <= idx)
+                if (_buffer.Length <= idx)
                 {
                     GrowAndEnsure();
                 }
@@ -108,8 +99,7 @@ namespace System.Text.Json
                     break;
                 }
                 indent -= bytesWritten;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
             CopyLoop(value, ref idx);

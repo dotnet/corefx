@@ -49,7 +49,7 @@ namespace System.Text.Json
                 WriteLiteralByOptions(propertyName, span);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.Null;
         }
 
@@ -79,7 +79,7 @@ namespace System.Text.Json
                 WriteLiteralByOptions(propertyName, span);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.Null;
         }
 
@@ -125,7 +125,7 @@ namespace System.Text.Json
                 WriteLiteralByOptions(propertyName, span);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = value ? JsonTokenType.True : JsonTokenType.False;
         }
 
@@ -156,7 +156,7 @@ namespace System.Text.Json
                 WriteLiteralByOptions(propertyName, span);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = value ? JsonTokenType.True : JsonTokenType.False;
         }
 
@@ -261,25 +261,18 @@ namespace System.Text.Json
             int idx;
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 idx = WritePropertyNameIndented(propertyName);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 idx = WritePropertyNameMinimized(propertyName);
             }
 
             if (value.Length > _buffer.Length - idx)
             {
-                AdvanceAndGrow(idx, value.Length);
-                idx = 0;
+                AdvanceAndGrow(ref idx, value.Length);
             }
 
             value.CopyTo(_buffer.Slice(idx));
@@ -293,25 +286,18 @@ namespace System.Text.Json
             int idx;
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 idx = WritePropertyNameIndented(propertyName);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 idx = WritePropertyNameMinimized(propertyName);
             }
 
             if (value.Length > _buffer.Length - idx)
             {
-                AdvanceAndGrow(idx, value.Length);
-                idx = 0;
+                AdvanceAndGrow(ref idx, value.Length);
             }
 
             value.CopyTo(_buffer.Slice(idx));

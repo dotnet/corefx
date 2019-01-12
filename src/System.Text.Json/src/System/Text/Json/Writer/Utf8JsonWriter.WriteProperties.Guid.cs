@@ -50,7 +50,7 @@ namespace System.Text.Json
                 WriteStringByOptions(propertyName, value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
         }
 
@@ -79,7 +79,7 @@ namespace System.Text.Json
                 WriteStringByOptions(propertyName, value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
         }
 
@@ -183,18 +183,12 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringIndented(propertyName, value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringMinimized(propertyName, value);
             }
         }
@@ -203,18 +197,12 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringIndented(propertyName, value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringMinimized(propertyName, value);
             }
         }
@@ -257,18 +245,18 @@ namespace System.Text.Json
 
         private void WriteStringValue(Guid value, ref int idx)
         {
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
+                AdvanceAndGrow(ref idx);
                 idx = 0;
             }
             _buffer[idx++] = JsonConstants.Quote;
 
             FormatLoop(value, ref idx);
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
+                AdvanceAndGrow(ref idx);
                 idx = 0;
             }
             _buffer[idx++] = JsonConstants.Quote;
@@ -276,11 +264,10 @@ namespace System.Text.Json
 
         private void FormatLoop(Guid value, ref int idx)
         {
-            int bytesWritten;
-            while (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out bytesWritten))
+            if (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out int bytesWritten))
             {
-                AdvanceAndGrow(idx, JsonConstants.MaximumFormatGuidLength);
-                idx = 0;
+                AdvanceAndGrow(ref idx, JsonConstants.MaximumFormatGuidLength);
+                Utf8Formatter.TryFormat(value, _buffer, out bytesWritten);
             }
             idx += bytesWritten;
         }

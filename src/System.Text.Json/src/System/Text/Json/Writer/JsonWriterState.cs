@@ -7,11 +7,13 @@ namespace System.Text.Json
     /// <summary>
     /// Defines an opaque type that holds and saves all the relevant state information which must be provided
     /// to the <see cref="Utf8JsonWriter"/> to continue writing after completing a partial write.
+    /// </summary>
+    /// <remarks>
     /// This type is required to support reentrancy when writing incomplete data, and to continue
     /// writing in chunks. Unlike the <see cref="Utf8JsonWriter"/>, which is a ref struct,
     /// this type can survive across async/await boundaries and hence this type is required to provide
     /// support for writing more JSON text asynchronously before continuing with a new instance of the <see cref="Utf8JsonWriter"/>.
-    /// </summary>
+    /// </remarks>
     public struct JsonWriterState
     {
         internal long _bytesWritten;

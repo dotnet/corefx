@@ -12,7 +12,7 @@ namespace System.Text.Json
     public ref partial struct Utf8JsonWriter
     {
         /// <summary>
-        /// Writes the UTF-16 property name and UTF-16 text value (as a JSON string) as part of a name/value pair of a JSON object.
+        /// Writes the property name and string text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string as part of the name/value pair.</param>
@@ -53,7 +53,7 @@ namespace System.Text.Json
                 WriteStringSuppressTrue(propertyName, value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
         }
 
@@ -83,12 +83,12 @@ namespace System.Text.Json
                 WriteStringSuppressTrue(propertyName, value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
         }
 
         /// <summary>
-        /// Writes the UTF-16 property name and UTF-16 text value (as a JSON string) as part of a name/value pair of a JSON object.
+        /// Writes the property name and UTF-16 text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string as part of the name/value pair.</param>
@@ -129,12 +129,12 @@ namespace System.Text.Json
                 WriteStringSuppressTrue(propertyName, value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
         }
 
         /// <summary>
-        /// Writes the UTF-16 property name and UTF-8 text value (as a JSON string) as part of a name/value pair of a JSON object.
+        /// Writes the property name and UTF-8 text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The UTF-8 encoded value to be written as a JSON string as part of the name/value pair.</param>
@@ -175,12 +175,12 @@ namespace System.Text.Json
                 WriteStringSuppressTrue(propertyName, value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
         }
 
         /// <summary>
-        /// Writes the UTF-16 property name and UTF-16 text value (as a JSON string) as part of a name/value pair of a JSON object.
+        /// Writes the UTF-16 property name and string text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The UTF-16 encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string as part of the name/value pair.</param>
@@ -196,7 +196,7 @@ namespace System.Text.Json
             => WriteString(propertyName, value.AsSpan(), suppressEscaping);
 
         /// <summary>
-        /// Writes the UTF-8 property name and UTF-16 text value (as a JSON string) as part of a name/value pair of a JSON object.
+        /// Writes the UTF-8 property name and string text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
         /// <param name="value">The UTF-16 encoded value to be written as a UTF-8 transcoded JSON string as part of the name/value pair.</param>
@@ -663,18 +663,12 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringIndented(propertyName, value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringMinimized(propertyName, value);
             }
         }
@@ -683,18 +677,12 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringIndented(propertyName, value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringMinimized(propertyName, value);
             }
         }
@@ -703,18 +691,12 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringIndented(propertyName, value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringMinimized(propertyName, value);
             }
         }
@@ -723,18 +705,12 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringIndented(propertyName, value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringMinimized(propertyName, value);
             }
         }
@@ -813,10 +789,9 @@ namespace System.Text.Json
 
         private void WriteStringValue(ReadOnlySpan<char> escapedValue, ref int idx)
         {
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
 
@@ -831,33 +806,29 @@ namespace System.Text.Json
                     break;
                 }
                 partialConsumed += consumed;
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
         }
 
         private void WriteStringValue(ReadOnlySpan<byte> escapedValue, ref int idx)
         {
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
 
             CopyLoop(escapedValue, ref idx);
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
         }

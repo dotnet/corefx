@@ -50,7 +50,7 @@ namespace System.Text.Json
                 WriteStringByOptions(propertyName, value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
         }
 
@@ -79,7 +79,7 @@ namespace System.Text.Json
                 WriteStringByOptions(propertyName, value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
         }
 
@@ -183,18 +183,12 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringIndented(propertyName, value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringMinimized(propertyName, value);
             }
         }
@@ -203,18 +197,12 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringIndented(propertyName, value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteStringMinimized(propertyName, value);
             }
         }
@@ -257,30 +245,27 @@ namespace System.Text.Json
 
         private void WriteStringValue(DateTimeOffset value, ref int idx)
         {
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
 
             FormatLoop(value, ref idx);
 
-            while (_buffer.Length <= idx)
+            if (_buffer.Length <= idx)
             {
-                AdvanceAndGrow(idx);
-                idx = 0;
+                AdvanceAndGrow(ref idx);
             }
             _buffer[idx++] = JsonConstants.Quote;
         }
 
         private void FormatLoop(DateTimeOffset value, ref int idx)
         {
-            int bytesWritten;
-            while (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out bytesWritten))
+            if (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out int bytesWritten))
             {
-                AdvanceAndGrow(idx, JsonConstants.MaximumFormatDateTimeOffsetLength);
-                idx = 0;
+                AdvanceAndGrow(ref idx, JsonConstants.MaximumFormatDateTimeOffsetLength);
+                Utf8Formatter.TryFormat(value, _buffer, out bytesWritten);
             }
             idx += bytesWritten;
         }

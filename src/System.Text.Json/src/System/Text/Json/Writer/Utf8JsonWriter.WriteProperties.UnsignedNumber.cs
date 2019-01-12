@@ -52,7 +52,7 @@ namespace System.Text.Json
                 WriteNumberByOptions(propertyName, value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.Number;
         }
 
@@ -82,7 +82,7 @@ namespace System.Text.Json
                 WriteNumberByOptions(propertyName, value);
             }
 
-            _currentDepth |= 1 << 31;
+            SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.Number;
         }
 
@@ -234,18 +234,12 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteNumberIndented(propertyName, value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteNumberMinimized(propertyName, value);
             }
         }
@@ -254,18 +248,12 @@ namespace System.Text.Json
         {
             if (_writerOptions.Indented)
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteNumberIndented(propertyName, value);
             }
             else
             {
-                if (!_writerOptions.SkipValidation)
-                {
-                    ValidateWritingProperty();
-                }
+                ValidateWritingProperty();
                 WriteNumberMinimized(propertyName, value);
             }
         }
@@ -308,11 +296,10 @@ namespace System.Text.Json
 
         private void WriteNumberValueFormatLoop(ulong value, ref int idx)
         {
-            int bytesWritten;
-            while (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out bytesWritten))
+            if (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out int bytesWritten))
             {
-                AdvanceAndGrow(idx, JsonConstants.MaximumFormatUInt64Length);
-                idx = 0;
+                AdvanceAndGrow(ref idx, JsonConstants.MaximumFormatUInt64Length);
+                Utf8Formatter.TryFormat(value, _buffer, out bytesWritten);
             }
             idx += bytesWritten;
         }
