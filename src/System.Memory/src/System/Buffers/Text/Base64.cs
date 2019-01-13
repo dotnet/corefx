@@ -141,38 +141,30 @@ namespace System.Buffers.Text
         }
 
         [Conditional("DEBUG")]
-        private static unsafe void AssertRead<TVector>(ref byte src, ref byte srcStart, int srcLength)
+        private static unsafe void AssertRead<TVector>(byte* src, byte* srcStart, int srcLength)
         {
-            fixed (byte* pSrc = &src)
-            fixed (byte* pSrcStart = &srcStart)
-            {
-                int vectorElements = Unsafe.SizeOf<TVector>();
-                byte* readEnd = pSrc + vectorElements;
-                byte* srcEnd = pSrcStart + srcLength;
+            int vectorElements = Unsafe.SizeOf<TVector>();
+            byte* readEnd = src + vectorElements;
+            byte* srcEnd = srcStart + srcLength;
 
-                if (readEnd > srcEnd)
-                {
-                    int srcIndex = (int)(pSrc - pSrcStart);
-                    throw new InvalidOperationException($"Read for {typeof(TVector)} is not within safe bounds. srcIndex: {srcIndex}, srcLength: {srcLength}");
-                }
+            if (readEnd > srcEnd)
+            {
+                int srcIndex = (int)(src - srcStart);
+                throw new InvalidOperationException($"Read for {typeof(TVector)} is not within safe bounds. srcIndex: {srcIndex}, srcLength: {srcLength}");
             }
         }
 
         [Conditional("DEBUG")]
-        private static unsafe void AssertWrite<TVector>(ref byte dest, ref byte destStart, int destLength)
+        private static unsafe void AssertWrite<TVector>(byte* dest, byte* destStart, int destLength)
         {
-            fixed (byte* pDest = &dest)
-            fixed (byte* pDestStart = &destStart)
-            {
-                int vectorElements = Unsafe.SizeOf<TVector>();
-                byte* writeEnd = pDest + vectorElements;
-                byte* destEnd = pDestStart + destLength;
+            int vectorElements = Unsafe.SizeOf<TVector>();
+            byte* writeEnd = dest + vectorElements;
+            byte* destEnd = destStart + destLength;
 
-                if (writeEnd > destEnd)
-                {
-                    int destIndex = (int)(pDest - pDestStart);
-                    throw new InvalidOperationException($"Write for {typeof(TVector)} is not within safe bounds. destIndex: {destIndex}, destLength: {destLength}");
-                }
+            if (writeEnd > destEnd)
+            {
+                int destIndex = (int)(dest - destStart);
+                throw new InvalidOperationException($"Write for {typeof(TVector)} is not within safe bounds. destIndex: {destIndex}, destLength: {destLength}");
             }
         }
     }

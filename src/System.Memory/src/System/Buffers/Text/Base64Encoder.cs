@@ -3,10 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using Internal.Runtime.CompilerServices;
+
+#if BIT64
+using nuint = System.UInt64;
+#else
+using nuint = System.UInt32;
+#endif
 
 namespace System.Buffers.Text
 {
@@ -25,7 +30,7 @@ namespace System.Buffers.Text
         /// <param name="utf8">The output span which contains the result of the operation, i.e. the UTF-8 encoded text in base 64.</param>
         /// <param name="bytesConsumed">The number of input bytes consumed during the operation. This can be used to slice the input for subsequent calls, if necessary.</param>
         /// <param name="bytesWritten">The number of bytes written into the output span. This can be used to slice the output for subsequent calls, if necessary.</param>
-        /// <param name="isFinalBlock">True (default) when the input span contains the entire data to encode. 
+        /// <param name="isFinalBlock">True (default) when the input span contains the entire data to encode.
         /// Set to false only if it is known that the input span contains partial data with more data to follow.</param>
         /// <returns>It returns the OperationStatus enum values:
         /// - Done - on successful processing of the entire input span
@@ -33,104 +38,105 @@ namespace System.Buffers.Text
         /// - NeedMoreData - only if isFinalBlock is false, otherwise the output is padded if the input is not a multiple of 3
         /// It does not return InvalidData since that is not possible for base 64 encoding.
         /// </returns>
-        public static OperationStatus EncodeToUtf8(ReadOnlySpan<byte> bytes, Span<byte> utf8, out int bytesConsumed, out int bytesWritten, bool isFinalBlock = true)
+        public static unsafe OperationStatus EncodeToUtf8(ReadOnlySpan<byte> bytes, Span<byte> utf8, out int bytesConsumed, out int bytesWritten, bool isFinalBlock = true)
         {
-            // PERF: use uint to avoid the sign-extensions
-            uint sourceIndex = 0;
-            uint destIndex = 0;
-
             if (bytes.IsEmpty)
-                goto DoneExit;
-
-            ref byte srcBytes = ref MemoryMarshal.GetReference(bytes);
-            ref byte destBytes = ref MemoryMarshal.GetReference(utf8);
-
-            int srcLength = bytes.Length;
-            int destLength = utf8.Length;
-            int maxSrcLength = srcLength;
-
-            if (srcLength <= MaximumEncodeLength && destLength >= GetMaxEncodedToUtf8Length(srcLength))
             {
-                maxSrcLength = srcLength;
-            }
-            else
-            {
-                maxSrcLength = (destLength >> 2) * 3;
+                bytesConsumed = 0;
+                bytesWritten = 0;
+                return OperationStatus.Done;
             }
 
-            if (srcLength < 16)
-                goto Scalar;
-
-            if (Avx2.IsSupported && maxSrcLength >= 32)
+            fixed (byte* srcBytes = bytes)
+            fixed (byte* destBytes = utf8)
+            fixed (byte* encodingMap = s_encodingMap)
             {
-                Avx2Encode(ref srcBytes, ref destBytes, maxSrcLength, destLength, ref sourceIndex, ref destIndex);
+                int srcLength = bytes.Length;
+                int destLength = utf8.Length;
+                int maxSrcLength;
 
-                if (sourceIndex == srcLength)
-                    goto DoneExit;
-            }
-
-            if (Ssse3.IsSupported && (maxSrcLength >= (int)sourceIndex + 16))
-            {
-                Ssse3Encode(ref srcBytes, ref destBytes, maxSrcLength, destLength, ref sourceIndex, ref destIndex);
-
-                if (sourceIndex == srcLength)
-                    goto DoneExit;
-            }
-
-        Scalar:
-            maxSrcLength -= 2;
-            uint result = 0;
-
-            ref byte encodingMap = ref s_encodingMap[0];
-
-            // In order to elide the movsxd in the loop
-            if (sourceIndex < maxSrcLength)
-            {
-                do
+                if (srcLength <= MaximumEncodeLength && destLength >= GetMaxEncodedToUtf8Length(srcLength))
                 {
-                    result = Encode(ref Unsafe.Add(ref srcBytes, (IntPtr)sourceIndex), ref encodingMap);
-                    Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, (IntPtr)destIndex), result);
-                    destIndex += 4;
-                    sourceIndex += 3;
+                    maxSrcLength = srcLength;
                 }
-                while (sourceIndex < (uint)maxSrcLength);
+                else
+                {
+                    maxSrcLength = (destLength >> 2) * 3;
+                }
+
+                byte* src = srcBytes;
+                byte* dest = destBytes;
+                byte* srcEnd = srcBytes + (nuint)srcLength;
+                byte* srcMax = srcBytes + (nuint)maxSrcLength;
+
+                if (maxSrcLength >= 16)
+                {
+                    byte* end = srcMax - 32;
+                    if (Avx2.IsSupported && (end >= src))
+                    {
+                        Avx2Encode(ref src, ref dest, end, maxSrcLength, destLength, srcBytes, destBytes);
+
+                        if (src == srcEnd)
+                            goto DoneExit;
+                    }
+
+                    end = srcMax - 16;
+                    if (Ssse3.IsSupported && (end >= src))
+                    {
+                        Ssse3Encode(ref src, ref dest, end, maxSrcLength, destLength, srcBytes, destBytes);
+
+                        if (src == srcEnd)
+                            goto DoneExit;
+                    }
+                }
+
+                uint result = 0;
+
+                srcMax -= 2;
+                while (src < srcMax)
+                {
+                    result = Encode(src, encodingMap);
+                    Unsafe.WriteUnaligned(dest, result);
+                    src += 3;
+                    dest += 4;
+                }
+
+                if (srcMax + 2 != srcEnd)
+                    goto DestinationTooSmallExit;
+
+                if (!isFinalBlock)
+                    goto NeedMoreData;
+
+                if (src + 1 == srcEnd)
+                {
+                    result = EncodeAndPadTwo(src, encodingMap);
+                    Unsafe.WriteUnaligned(dest, result);
+                    src += 1;
+                    dest += 4;
+                }
+                else if (src + 2 == srcEnd)
+                {
+                    result = EncodeAndPadOne(src, encodingMap);
+                    Unsafe.WriteUnaligned(dest, result);
+                    src += 2;
+                    dest += 4;
+                }
+
+            DoneExit:
+                bytesConsumed = (int)(src - srcBytes);
+                bytesWritten = (int)(dest - destBytes);
+                return OperationStatus.Done;
+
+            DestinationTooSmallExit:
+                bytesConsumed = (int)(src - srcBytes);
+                bytesWritten = (int)(dest - destBytes);
+                return OperationStatus.DestinationTooSmall;
+
+            NeedMoreData:
+                bytesConsumed = (int)(src - srcBytes);
+                bytesWritten = (int)(dest - destBytes);
+                return OperationStatus.NeedMoreData;
             }
-
-            if (maxSrcLength != srcLength - 2)
-                goto DestinationTooSmallExit;
-
-            if (!isFinalBlock)
-                goto NeedMoreDataExit;
-
-            if (sourceIndex == srcLength - 1)
-            {
-                result = EncodeAndPadTwo(ref Unsafe.Add(ref srcBytes, (IntPtr)sourceIndex), ref encodingMap);
-                Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, (IntPtr)destIndex), result);
-                destIndex += 4;
-                sourceIndex += 1;
-            }
-            else if (sourceIndex == srcLength - 2)
-            {
-                result = EncodeAndPadOne(ref Unsafe.Add(ref srcBytes, (IntPtr)sourceIndex), ref encodingMap);
-                Unsafe.WriteUnaligned(ref Unsafe.Add(ref destBytes, (IntPtr)destIndex), result);
-                destIndex += 4;
-                sourceIndex += 2;
-            }
-
-        DoneExit:
-            bytesConsumed = (int)sourceIndex;
-            bytesWritten = (int)destIndex;
-            return OperationStatus.Done;
-
-        NeedMoreDataExit:
-            bytesConsumed = (int)sourceIndex;
-            bytesWritten = (int)destIndex;
-            return OperationStatus.NeedMoreData;
-
-        DestinationTooSmallExit:
-            bytesConsumed = (int)sourceIndex;
-            bytesWritten = (int)destIndex;
-            return OperationStatus.DestinationTooSmall;
         }
 
         /// <summary>
@@ -149,12 +155,12 @@ namespace System.Buffers.Text
         }
 
         /// <summary>
-        /// Encode the span of binary data (in-place) into UTF-8 encoded text represented as base 64. 
+        /// Encode the span of binary data (in-place) into UTF-8 encoded text represented as base 64.
         /// The encoded text output is larger than the binary data contained in the input (the operation inflates the data).
         /// </summary>
-        /// <param name="buffer">The input span which contains binary data that needs to be encoded. 
+        /// <param name="buffer">The input span which contains binary data that needs to be encoded.
         /// It needs to be large enough to fit the result of the operation.</param>
-        /// <param name="dataLength">The amount of binary data contained within the buffer that needs to be encoded 
+        /// <param name="dataLength">The amount of binary data contained within the buffer that needs to be encoded
         /// (and needs to be smaller than the buffer length).</param>
         /// <param name="bytesWritten">The number of bytes written into the buffer.</param>
         /// <returns>It returns the OperationStatus enum values:
@@ -163,62 +169,59 @@ namespace System.Buffers.Text
         /// It does not return NeedMoreData since this method tramples the data in the buffer and hence can only be called once with all the data in the buffer.
         /// It does not return InvalidData since that is not possible for base 64 encoding.
         /// </returns>
-        public static OperationStatus EncodeToUtf8InPlace(Span<byte> buffer, int dataLength, out int bytesWritten)
+        public static unsafe OperationStatus EncodeToUtf8InPlace(Span<byte> buffer, int dataLength, out int bytesWritten)
         {
-            int encodedLength = GetMaxEncodedToUtf8Length(dataLength);
-            if (buffer.Length < encodedLength)
-                goto FalseExit;
-
-            int leftover = dataLength - (dataLength / 3) * 3; // how many bytes after packs of 3
-
-            // PERF: use uint to avoid the sign-extensions
-            uint destinationIndex = (uint)(encodedLength - 4);
-            uint sourceIndex = (uint)(dataLength - leftover);
-            uint result = 0;
-
-            ref byte encodingMap = ref s_encodingMap[0];
-            ref byte bufferBytes = ref MemoryMarshal.GetReference(buffer);
-
-            // encode last pack to avoid conditional in the main loop
-            if (leftover != 0)
+            fixed (byte* bufferBytes = buffer)
+            fixed (byte* encodingMap = s_encodingMap)
             {
-                if (leftover == 1)
+                int encodedLength = GetMaxEncodedToUtf8Length(dataLength);
+                if (buffer.Length < encodedLength)
+                    goto FalseExit;
+
+                int leftover = dataLength - (dataLength / 3) * 3; // how many bytes after packs of 3
+
+                // PERF: use nuint to avoid the sign-extensions
+                nuint destinationIndex = (nuint)(encodedLength - 4);
+                nuint sourceIndex = (nuint)(dataLength - leftover);
+                uint result = 0;
+
+                // encode last pack to avoid conditional in the main loop
+                if (leftover != 0)
                 {
-                    result = EncodeAndPadTwo(ref Unsafe.Add(ref bufferBytes, (IntPtr)sourceIndex), ref encodingMap);
-                }
-                else
-                {
-                    result = EncodeAndPadOne(ref Unsafe.Add(ref bufferBytes, (IntPtr)sourceIndex), ref encodingMap);
+                    if (leftover == 1)
+                    {
+                        result = EncodeAndPadTwo(bufferBytes + sourceIndex, encodingMap);
+                    }
+                    else
+                    {
+                        result = EncodeAndPadOne(bufferBytes + sourceIndex, encodingMap);
+                    }
+
+                    Unsafe.WriteUnaligned(bufferBytes + destinationIndex, result);
+                    destinationIndex -= 4;
                 }
 
-                Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferBytes, (IntPtr)destinationIndex), result);
-                destinationIndex -= 4;
-            }
-
-            sourceIndex -= 3;
-            while ((int)sourceIndex >= 0)
-            {
-                result = Encode(ref Unsafe.Add(ref bufferBytes, (IntPtr)sourceIndex), ref encodingMap);
-                Unsafe.WriteUnaligned(ref Unsafe.Add(ref bufferBytes, (IntPtr)destinationIndex), result);
-                destinationIndex -= 4;
                 sourceIndex -= 3;
+                while ((int)sourceIndex >= 0)
+                {
+                    result = Encode(bufferBytes + sourceIndex, encodingMap);
+                    Unsafe.WriteUnaligned(bufferBytes + destinationIndex, result);
+                    destinationIndex -= 4;
+                    sourceIndex -= 3;
+                }
+
+                bytesWritten = encodedLength;
+                return OperationStatus.Done;
+
+            FalseExit:
+                bytesWritten = 0;
+                return OperationStatus.DestinationTooSmall;
             }
-
-            bytesWritten = encodedLength;
-            return OperationStatus.Done;
-
-        FalseExit:
-            bytesWritten = 0;
-            return OperationStatus.DestinationTooSmall;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void Avx2Encode(ref byte src, ref byte dest, int sourceLength, int destLength, ref uint sourceIndex, ref uint destIndex)
+        private static unsafe void Avx2Encode(ref byte* srcBytes, ref byte* destBytes, byte* srcEnd, int sourceLength, int destLength, byte* srcStart, byte* destStart)
         {
-            ref byte srcStart = ref src;
-            ref byte destStart = ref dest;
-            ref byte simdSrcEnd = ref Unsafe.Add(ref src, (IntPtr)((uint)sourceLength - 28));	// 28 = 32 - 4
-
             // The JIT won't hoist these "constants", so help it
             Vector256<sbyte> shuffleVec = s_avxEncodeShuffleVec;
             Vector256<sbyte> shuffleConstant0 = Vector256.Create(0x0fc0fc00).AsSByte();
@@ -229,12 +232,18 @@ namespace System.Buffers.Text
             Vector256<sbyte> translationContant1 = Vector256.Create((sbyte)25);
             Vector256<sbyte> lut = s_avxEncodeLut;
 
-            // first load is done at c-0 not to get a segfault
-            AssertRead<Vector256<sbyte>>(ref src, ref srcStart, sourceLength);
-            Vector256<sbyte> str = Unsafe.As<byte, Vector256<sbyte>>(ref src);
+            byte* src = srcBytes;
+            byte* dest = destBytes;
 
-            // shift by 4 bytes, as required by enc_reshuffle
+            // first load is done at c-0 not to get a segfault
+            AssertRead<Vector256<sbyte>>(src, srcStart, sourceLength);
+            Vector256<sbyte> str = Avx.LoadVector256(src).AsSByte();
+
+            // shift by 4 bytes, as required by Reshuffle
             str = Avx2.PermuteVar8x32(str.AsInt32(), s_avxEncodePermuteVec).AsSByte();
+
+            // Next loads are done at src-4, as required by Reshuffle, so shift it once
+            src -= 4;
 
             while (true)
             {
@@ -252,41 +261,27 @@ namespace System.Buffers.Text
                 Vector256<sbyte> tmp = Avx2.Subtract(indices.AsSByte(), mask);
                 str = Avx2.Add(str, Avx2.Shuffle(lut, tmp));
 
-                AssertWrite<Vector256<sbyte>>(ref dest, ref destStart, destLength);
-                // As has better CQ than WriteUnaligned
-                // https://github.com/dotnet/coreclr/issues/21132
-                Unsafe.As<byte, Vector256<sbyte>>(ref dest) = str;
+                AssertWrite<Vector256<sbyte>>(dest, destStart, destLength);
+                Avx.Store(dest, str.AsByte());
 
-                src = ref Unsafe.Add(ref src, 24);
-                dest = ref Unsafe.Add(ref dest, 32);
+                src += 24;
+                dest += 32;
 
-                if (Unsafe.IsAddressGreaterThan(ref src, ref simdSrcEnd))
+                if (src > srcEnd)
                     break;
 
-                // Load at c-4, as required by enc_reshuffle
-                AssertRead<Vector256<sbyte>>(ref Unsafe.Add(ref src, -4), ref srcStart, sourceLength);
-                str = Unsafe.As<byte, Vector256<sbyte>>(ref Unsafe.Add(ref src, -4));
+                // Load at src-4, as required by Reshuffle (already shifted by -4)
+                AssertRead<Vector256<sbyte>>(src, srcStart, sourceLength);
+                str = Avx.LoadVector256(src).AsSByte();
             }
 
-            // Cast to ulong to avoid the overflow-check. Codegen for x86 is still good.
-            sourceIndex = (uint)(ulong)Unsafe.ByteOffset(ref srcStart, ref src);
-            destIndex = (uint)(ulong)Unsafe.ByteOffset(ref destStart, ref dest);
-
-            src = ref srcStart;
-            dest = ref destStart;
+            srcBytes = src + 4;
+            destBytes = dest;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void Ssse3Encode(ref byte src, ref byte dest, int sourceLength, int destLength, ref uint sourceIndex, ref uint destIndex)
+        private static unsafe void Ssse3Encode(ref byte* srcBytes, ref byte* destBytes, byte* srcEnd, int sourceLength, int destLength, byte* srcStart, byte* destStart)
         {
-            ref byte srcStart = ref src;
-            ref byte destStart = ref dest;
-            ref byte simdSrcEnd = ref Unsafe.Add(ref src, (IntPtr)((uint)sourceLength - 16 + 1));
-
-            // Shift to workspace
-            src = ref Unsafe.Add(ref src, (IntPtr)sourceIndex);
-            dest = ref Unsafe.Add(ref dest, (IntPtr)destIndex);
-
             // The JIT won't hoist these "constants", so help it
             Vector128<sbyte> shuffleVec = s_sseEncodeShuffleVec;
             Vector128<sbyte> shuffleConstant0 = Vector128.Create(0x0fc0fc00).AsSByte();
@@ -297,11 +292,14 @@ namespace System.Buffers.Text
             Vector128<sbyte> translationContant1 = Vector128.Create((sbyte)25);
             Vector128<sbyte> lut = s_sseEncodeLut;
 
+            byte* src = srcBytes;
+            byte* dest = destBytes;
+
             //while (remaining >= 16)
-            while (Unsafe.IsAddressLessThan(ref src, ref simdSrcEnd))
+            do
             {
-                AssertRead<Vector128<sbyte>>(ref src, ref srcStart, sourceLength);
-                Vector128<sbyte> str = Unsafe.As<byte, Vector128<sbyte>>(ref src);
+                AssertRead<Vector128<sbyte>>(src, srcStart, sourceLength);
+                Vector128<sbyte> str = Sse2.LoadVector128(src).AsSByte();
 
                 // Reshuffle
                 str = Ssse3.Shuffle(str, shuffleVec);
@@ -317,57 +315,61 @@ namespace System.Buffers.Text
                 Vector128<sbyte> tmp = Sse2.Subtract(indices.AsSByte(), mask);
                 str = Sse2.Add(str, Ssse3.Shuffle(lut, tmp));
 
-                AssertWrite<Vector128<sbyte>>(ref dest, ref destStart, destLength);
-                // As has better CQ than WriteUnaligned
-                // https://github.com/dotnet/coreclr/issues/21132
-                Unsafe.As<byte, Vector128<sbyte>>(ref dest) = str;
+                AssertWrite<Vector128<sbyte>>(dest, destStart, destLength);
+                Sse2.Store(dest, str.AsByte());
 
-                src = ref Unsafe.Add(ref src, 12);
-                dest = ref Unsafe.Add(ref dest, 16);
+                src += 12;
+                dest += 16;
             }
+            while (src <= srcEnd);
 
-            // Cast to ulong to avoid the overflow-check. Codegen for x86 is still good.
-            sourceIndex = (uint)(ulong)Unsafe.ByteOffset(ref srcStart, ref src);
-            destIndex = (uint)(ulong)Unsafe.ByteOffset(ref destStart, ref dest);
-
-            src = ref srcStart;
-            dest = ref destStart;
+            srcBytes = src;
+            destBytes = dest;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static uint Encode(ref byte threeBytes, ref byte encodingMap)
+        private static unsafe uint Encode(byte* threeBytes, byte* encodingMap)
         {
-            uint i = (uint)((threeBytes << 16) | (Unsafe.Add(ref threeBytes, 1) << 8) | Unsafe.Add(ref threeBytes, 2));
+            nuint t0 = threeBytes[0];
+            nuint t1 = threeBytes[1];
+            nuint t2 = threeBytes[2];
 
-            uint i0 = Unsafe.Add(ref encodingMap, (IntPtr)(i >> 18));
-            uint i1 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 12) & 0x3F));
-            uint i2 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 6) & 0x3F));
-            uint i3 = Unsafe.Add(ref encodingMap, (IntPtr)(i & 0x3F));
+            nuint i = (t0 << 16) | (t1 << 8) | t2;
 
-            return i0 | (i1 << 8) | (i2 << 16) | (i3 << 24);
+            nuint i0 = encodingMap[i >> 18];
+            nuint i1 = encodingMap[(i >> 12) & 0x3F];
+            nuint i2 = encodingMap[(i >> 6) & 0x3F];
+            nuint i3 = encodingMap[i & 0x3F];
+
+            return (uint)(i0 | (i1 << 8) | (i2 << 16) | (i3 << 24));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static uint EncodeAndPadOne(ref byte twoBytes, ref byte encodingMap)
+        private static unsafe uint EncodeAndPadOne(byte* twoBytes, byte* encodingMap)
         {
-            uint i = (uint)((twoBytes << 16) | (Unsafe.Add(ref twoBytes, 1) << 8));
+            nuint t0 = twoBytes[0];
+            nuint t1 = twoBytes[1];
 
-            uint i0 = Unsafe.Add(ref encodingMap, (IntPtr)(i >> 18));
-            uint i1 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 12) & 0x3F));
-            uint i2 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 6) & 0x3F));
+            nuint i = (t0 << 16) | (t1 << 8);
 
-            return i0 | (i1 << 8) | (i2 << 16) | (EncodingPad << 24);
+            nuint i0 = encodingMap[i >> 18];
+            nuint i1 = encodingMap[(i >> 12) & 0x3F];
+            nuint i2 = encodingMap[(i >> 6) & 0x3F];
+
+            return (uint)(i0 | (i1 << 8) | (i2 << 16) | (EncodingPad << 24));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static uint EncodeAndPadTwo(ref byte oneByte, ref byte encodingMap)
+        private static unsafe uint EncodeAndPadTwo(byte* oneByte, byte* encodingMap)
         {
-            uint i = (uint)(oneByte << 8);
+            nuint t0 = oneByte[0];
 
-            uint i0 = Unsafe.Add(ref encodingMap, (IntPtr)(i >> 10));
-            uint i1 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 4) & 0x3F));
+            nuint i = t0 << 8;
 
-            return i0 | (i1 << 8) | (EncodingPad << 16) | (EncodingPad << 24);
+            nuint i0 = encodingMap[i >> 10];
+            nuint i1 = encodingMap[(i >> 4) & 0x3F];
+
+            return (uint)(i0 | (i1 << 8) | (EncodingPad << 16) | (EncodingPad << 24));
         }
 
         // Pre-computing this table using a custom string(s_characters) and GenerateEncodingMapAndVerify (found in tests)
