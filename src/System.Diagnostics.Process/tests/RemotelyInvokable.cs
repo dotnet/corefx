@@ -5,10 +5,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace System.Diagnostics.Tests
 {
@@ -208,6 +210,55 @@ namespace System.Diagnostics.Tests
         public static void FireClosedEvent()
         {
             ClosedEvent?.Invoke(null, EventArgs.Empty);
+        }
+
+        public static int TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable(string pipesHandle)
+        {
+            string[] pipeHandlers = pipesHandle.Split(' ');
+            using (AnonymousPipeClientStream pipeRead = new AnonymousPipeClientStream(PipeDirection.In, pipeHandlers[0]))
+            using (AnonymousPipeClientStream pipeWrite = new AnonymousPipeClientStream(PipeDirection.Out, pipeHandlers[1]))
+            {
+                // Signal child process start
+                pipeWrite.WriteByte(0);
+
+                // Wait parent signal to produce number 1
+                // Generate output 1 and signal parent
+                Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 1");
+                Console.WriteLine(1);
+                pipeWrite.WriteByte(0);
+
+                // Wait parent signal to produce number 2
+                // Generate output 2 and signal parent
+                Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 2");
+                Console.WriteLine(2);
+                pipeWrite.WriteByte(0);
+
+                // Wait parent signal to produce number 3
+                // Generate output 3 and signal parent
+                Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 3");
+                Console.WriteLine(3);
+                pipeWrite.WriteByte(0);
+
+                return SuccessExitCode;
+            }
+        }
+
+        public static bool WaitPipeSignal(PipeStream pipe, int millisecond)
+        {
+            CancellationTokenSource stopTimer = new CancellationTokenSource();
+            try
+            {
+                if (Task.WaitAny(Task.Delay(TimeSpan.FromMilliseconds(millisecond), stopTimer.Token), Task.Run(() => Task.FromResult(pipe.ReadByte()))) == 0)
+                {
+                    return false;
+                }
+            }
+            finally
+            {
+                stopTimer.Cancel();
+            }
+
+            return true;
         }
     }
 }
