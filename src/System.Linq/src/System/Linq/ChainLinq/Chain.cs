@@ -47,7 +47,7 @@ namespace System.Linq.ChainLinq
     {
         protected Link(Links.LinkType linkType) : base(linkType) {}
 
-        public abstract Chain<T, V> Compose<V>(Chain<U, V> activity);
+        public abstract Chain<T, ChainEnd> Compose(Chain<U, ChainEnd> activity);
     }
 
     abstract class Activity<T, U, V> : Chain<T, V>

@@ -11,7 +11,7 @@ namespace System.Linq.ChainLinq.Links
 
         public Link<T, U> Skip(int toSkip) => this;
 
-        sealed partial class Activity<V>
+        sealed partial class Activity
             : Optimizations.IPipelineArray<T>
             , Optimizations.IPipelineList<T>
             , Optimizations.IPipelineEnumerable<T>

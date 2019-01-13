@@ -9,10 +9,10 @@ namespace System.Linq.ChainLinq.Links
         public SelectMany(Func<T, IEnumerable<U>> collectionSelector) : base(LinkType.SelectMany) =>
             this.collectionSelector = collectionSelector;
 
-        public override Chain<T, V> Compose<V>(Chain<(T, IEnumerable<U>), V> next) =>
-            new Activity<V>(next, collectionSelector);
+        public override Chain<T, ChainEnd> Compose(Chain<(T, IEnumerable<U>), ChainEnd> next) =>
+            new Activity(next, collectionSelector);
 
-        private sealed class Activity<V> : Activity<T, (T, IEnumerable<U>), V>
+        private sealed class Activity : Activity<T, (T, IEnumerable<U>), ChainEnd>
         {
             private readonly Func<T, IEnumerable<U>> collectionSelector;
 

@@ -7,16 +7,16 @@
         public Skip(int toSkip) : base(LinkType.Skip) =>
             _toSkip = toSkip;
 
-        public override Chain<T, V> Compose<V>(Chain<T, V> activity) =>
-            new Activity<V>(_toSkip, activity);
+        public override Chain<T, ChainEnd> Compose(Chain<T, ChainEnd> activity) =>
+            new Activity(_toSkip, activity);
 
-        sealed class Activity<V> : Activity<T, T, V>
+        sealed class Activity : Activity<T, T, ChainEnd>
         {
             private readonly int _toSkip;
 
             private int _index;
 
-            public Activity(int toSkip, Chain<T, V> next) : base(next) =>
+            public Activity(int toSkip, Chain<T, ChainEnd> next) : base(next) =>
                 (_toSkip, _index) = (toSkip, 0);
 
             public override ChainStatus ProcessNext(T input)

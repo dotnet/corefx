@@ -12,7 +12,7 @@ namespace System.Linq.ChainLinq.Links
         public virtual Consumable<T> MergeWhere(ConsumableForMerging<T> consumable, Func<T, bool> second) =>
             consumable.ReplaceTailLink(new Where2<T>(Predicate, second));
 
-        sealed partial class Activity<U>
+        sealed partial class Activity
             : Optimizations.IPipelineArray<T>
             , Optimizations.IPipelineList<T>
             , Optimizations.IPipelineEnumerable<T>

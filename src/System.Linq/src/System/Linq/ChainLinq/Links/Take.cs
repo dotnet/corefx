@@ -7,16 +7,16 @@
         public Take(int count) : base(LinkType.Take) =>
             _count = count;
 
-        public override Chain<T, V> Compose<V>(Chain<T, V> activity) =>
-            new Activity<V>(_count, activity);
+        public override Chain<T, ChainEnd> Compose(Chain<T, ChainEnd> activity) =>
+            new Activity(_count, activity);
 
-        sealed class Activity<V> : Activity<T, T, V>
+        sealed class Activity : Activity<T, T, ChainEnd>
         {
             private readonly int count;
 
             private int index;
 
-            public Activity(int count, Chain<T, V> next) : base(next) =>
+            public Activity(int count, Chain<T, ChainEnd> next) : base(next) =>
                 (this.count, index) = (count, 0);
 
             public override ChainStatus ProcessNext(T input)

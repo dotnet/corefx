@@ -10,16 +10,16 @@
 
         public SelectIndexed(Func<T, int, U> selector) : this(selector, 0) { }
 
-        public override Chain<T, V> Compose<V>(Chain<U, V> activity) =>
-            new Activity<V>(_selector, _startIndex, activity);
+        public override Chain<T, ChainEnd> Compose(Chain<U, ChainEnd> activity) =>
+            new Activity(_selector, _startIndex, activity);
 
-        sealed class Activity<V> : Activity<T, U, V>
+        sealed class Activity : Activity<T, U, ChainEnd>
         {
             private readonly Func<T, int, U> _selector;
 
             private int _index;
 
-            public Activity(Func<T, int, U> selector, int startIndex, Chain<U, V> next) : base(next)
+            public Activity(Func<T, int, U> selector, int startIndex, Chain<U, ChainEnd> next) : base(next)
             {
                 _selector = selector;
                 checked
