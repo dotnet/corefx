@@ -212,6 +212,11 @@ namespace System.Diagnostics.Tests
             ClosedEvent?.Invoke(null, EventArgs.Empty);
         }
 
+        public static int TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokableUapCmd(string pipesHandle)
+        {
+            return TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable(pipesHandle);
+        }
+
         public static int TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable(string pipesHandle)
         {
             string[] pipeHandlers = pipesHandle.Split(' ');
