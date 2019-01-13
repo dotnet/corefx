@@ -156,7 +156,7 @@ namespace System.Diagnostics.Tests
 
         private int TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable(string pipesHandle)
         {
-            string[] pipeHandlers = pipesHandle.Split(" ");
+            string[] pipeHandlers = pipesHandle.Split(' ');
             using (AnonymousPipeClientStream pipeRead = new AnonymousPipeClientStream(PipeDirection.In, pipeHandlers[0]))
             using (AnonymousPipeClientStream pipeWrite = new AnonymousPipeClientStream(PipeDirection.Out, pipeHandlers[1]))
             {
