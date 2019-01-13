@@ -22,7 +22,9 @@ namespace System.Tests
             yield return new object[] {TimeSpan.MaxValue, 0.5, TimeSpan.FromTicks((long)(long.MaxValue * 0.5))};
         }
 
-        private static IEnumerable<object[]> ParseSpecialCasesData()
+        // ParseDifferentLengthFractionWithLeadingZerosData mainly testing the behavior we have fixed in net core
+        // which is the way we normalize the parsed fraction and possibly rounding it.
+        private static IEnumerable<object[]> ParseDifferentLengthFractionWithLeadingZerosData()
         {
             yield return new object[] {"00:00:00.00000001",   new TimeSpan(0)};
             yield return new object[] {"00:00:00.00000005",   new TimeSpan(1)};
@@ -37,10 +39,11 @@ namespace System.Tests
             yield return new object[] {"0:00:00.00000099",    new TimeSpan(10)};
         }
 
-        [Theory, MemberData(nameof(ParseSpecialCasesData))]
+        [Theory, MemberData(nameof(ParseDifferentLengthFractionWithLeadingZerosData))]
         public static void Multiplication(string input, TimeSpan expected)
         {
             Assert.Equal(expected, TimeSpan.Parse(input, CultureInfo.InvariantCulture));
+            Assert.Equal(expected, TimeSpan.ParseExact(input, "g", CultureInfo.InvariantCulture));
         }
 
         [Theory, MemberData(nameof(MultiplicationTestData))]

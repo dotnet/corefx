@@ -541,6 +541,9 @@ namespace System.Tests
 
             if (PlatformDetection.IsFullFramework)
             {
+                // Full framework can produce some incorrect results in some cases involving leading zeros when
+                // parsing fraction more than 7 digits. we test the expected full framework results here and we have
+                // have more net core tests to validate the correct the results.
                 yield return new object[] { "1:1:1.00000001", CultureInfo.InvariantCulture, new TimeSpan(36610000001) };
             }
 
@@ -567,6 +570,9 @@ namespace System.Tests
 
             if (PlatformDetection.IsFullFramework)
             {
+                // Full framework can produce some incorrect results in some cases involving leading zeros when
+                // parsing fraction more than 7 digits. we test the expected full framework results here and we have
+                // have more net core tests to validate the correct the results.
                 yield return new object[] { "1:1:.00000001", CultureInfo.InvariantCulture, new TimeSpan(36600000001) };
             }
 
@@ -637,6 +643,9 @@ namespace System.Tests
             if (PlatformDetection.IsFullFramework)
             {
                 // on non full framework we now succeed parsing the fraction .000000001
+                // Full framework can produce some incorrect results in some cases involving leading zeros when
+                // parsing fraction more than 7 digits. we test the expected full framework results here and we have
+                // have more net core tests to validate the correct the results.
                 yield return new object[] { "1:1:1.000000001", null, typeof(OverflowException) }; // too many leading zeroes in fraction
             }
 
