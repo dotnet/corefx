@@ -3,9 +3,11 @@
 // See the LICENSE file in the project root for more information.
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -89,164 +91,116 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        // On this test RemotelyInvokable.WriteLoop never returns, we cannot use RemotelyInvokable.WriteLoopUapCmd workaround
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void TestAsyncOutputStream_BeginCancelBegin_OutputReadLine()
         {
-            // We use file system lock technique to sync process
-            // We cannot use named wait event because are not supported on all platform
+            using (AnonymousPipeServerStream pipeWrite = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable))
+            using (AnonymousPipeServerStream pipeRead = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable))
+            {
+                var dataReceived = new List<int>();
+                var dataArrivedEvent = new AutoResetEvent(false);
 
-            Dictionary<string, FileSystemLock> parentLockList = TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper(nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine));
-
-            var dataReceived = new List<int>();
-            var dataArrivedEvent = new AutoResetEvent(false);
-            var dataConfirmedEvent = new AutoResetEvent(false);
-
-            using (Process p = CreateProcessPortable(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable))
-            { 
-                p.StartInfo.RedirectStandardOutput = true;
-                p.OutputDataReceived += (s, e) =>
+                using (Process p = CreateProcessPortable(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable, $"{pipeWrite.GetClientHandleAsString()} {pipeRead.GetClientHandleAsString()}"))
                 {
-                    if (e.Data != null)
+                    p.StartInfo.RedirectStandardOutput = true;
+                    p.OutputDataReceived += (s, e) =>
                     {
-                        dataReceived.Add(int.Parse(e.Data));
-                        dataArrivedEvent.Set();
-                        dataConfirmedEvent.WaitOne();
-                    }
-                };
+                        if (e.Data != null)
+                        {
+                            dataReceived.Add(int.Parse(e.Data));
+                            dataArrivedEvent.Set();
+                        }
+                    };
 
-                // Start child process
-                p.Start();
+                    // Start child process
+                    p.Start();
 
-                // Wait for child process
-                Assert.True(parentLockList["childStarted"].WaitSignal(WaitInMS), "Child process not started");
+                    pipeWrite.DisposeLocalCopyOfClientHandle();
+                    pipeRead.DisposeLocalCopyOfClientHandle();
 
-                // Start listen
-                p.BeginOutputReadLine();
+                    // Wait child process start
+                    Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Child process not started");
 
-                // Signal start listening
-                Assert.True(parentLockList["parentFirstBeginOutputReadLine"].TryAcquire(WaitInMS), "Parent process should acquire 'parentFirstBeginOutputReadLine'");
+                    //Start listening and produce output 1
+                    p.BeginOutputReadLine();
+                    pipeWrite.WriteByte(0);
 
-                // Wait for production of 1,2,3
-                Assert.True(parentLockList["childProduced123"].WaitSignal(WaitInMS), "Child process not produced expected data");
+                    // Wait child signal produce number 1
+                    Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 1");
+                    Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Value 1 not received");
 
-                // Wait signal for 1,2,3
-                for (int i = 0; i < 3; i++)
-                {
-                    Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "1,2,3 signal expected");
-                    dataConfirmedEvent.Set();
-                }
+                    //Stop listening and signal to produce value 2
+                    p.CancelOutputRead();
+                    pipeWrite.WriteByte(0);
 
-                // Verify we received 1,2,3
-                Assert.Equal(3, dataReceived.Count);
-                for (int i = 0; i < dataReceived.Count; i++)
-                {
-                    Assert.Equal(i + 1, dataReceived[i]);
-                }
+                    // Wait child signal produce number 2
+                    Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 2");
+                    // We need to sleep to be sure to drain async queue
+                    Thread.Sleep(500);
 
-                // Stop listen
-                p.CancelOutputRead();
+                    //Start listening and produce output 3
+                    p.BeginOutputReadLine();
+                    pipeWrite.WriteByte(0);
 
-                // Signal stop listening
-                Assert.True(parentLockList["parentCancelOutputRead"].TryAcquire(WaitInMS), "Parent process should acquire 'CancelOutputRead'");
+                    // Wait child signal produce number 3
+                    Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 3");
+                    Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Value 3 not received");
 
-                // Wait for production of 4,5,6
-                Assert.True(parentLockList["childProduced456"].WaitSignal(WaitInMS), "Child process not produced expected data");
+                    Assert.Equal(2, dataReceived.Count);
+                    Assert.Equal(1, dataReceived[0]);
+                    Assert.Equal(3, dataReceived[1]);
 
-                // Re-start listen
-                p.BeginOutputReadLine();
-
-                // Signal re-start listening
-                Assert.True(parentLockList["parentSecondBeginOutputReadLine"].TryAcquire(WaitInMS), "Parent process should acquire 'parentSecondBeginOutputReadLine'");
-
-                // Wait for production of 7,8,9
-                Assert.True(parentLockList["childProduced789"].WaitSignal(WaitInMS), "Child process not produced expected data");
-
-                // Wait signal for 7,8,9
-                for (int i = 0; i < 3; i++)
-                {
-                    Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "7,8,9 signal expected");
-                    dataConfirmedEvent.Set();
-                }
-
-                // Verify we received 1,2,3,7,8,9
-                Assert.Equal(6, dataReceived.Count);
-                // Ensure gap between CancelOutputRead() and BeginOutputReadLine()
-                Assert.Empty(dataReceived.Except(new int[] { 1, 2, 3, 7, 8, 9 }));
-
-                // shutdown child process
-                Assert.True(parentLockList["shutdownChildProcess"].TryAcquire(WaitInMS), "Parent process should acquire 'shutdownChildProcess'");
-                p.WaitForExit(WaitInMS);
-
-                // Cleanup
-                foreach (KeyValuePair<string, FileSystemLock> fileLock in parentLockList)
-                {
-                    fileLock.Value.Dispose();
+                    p.WaitForExit();
                 }
             }
         }
 
-        private int TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable()
+        private int TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable(string pipesHandle)
         {
-            Dictionary<string, FileSystemLock> childLockList = TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper(nameof(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine));
+            string[] pipeHandlers = pipesHandle.Split(" ");
+            using (AnonymousPipeClientStream pipeRead = new AnonymousPipeClientStream(PipeDirection.In, pipeHandlers[0]))
+            using (AnonymousPipeClientStream pipeWrite = new AnonymousPipeClientStream(PipeDirection.Out, pipeHandlers[1]))
+            {
+                // Signal child process start
+                pipeWrite.WriteByte(0);
 
-            int counter = 0;
+                // Wait parent signal to produce number 1
+                // Generate output 1 and signal parent
+                Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 1");
+                Console.WriteLine(1);
+                pipeWrite.WriteByte(0);
 
-            // Signal child process started
-            Assert.True(childLockList["childStarted"].TryAcquire(WaitInMS), "Child process should acquire 'childStarted' lock");
+                // Wait parent signal to produce number 2
+                // Generate output 2 and signal parent
+                Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 2");
+                Console.WriteLine(2);
+                pipeWrite.WriteByte(0);
 
-            // Wait fist BeginOutputReadLine() from parent
-            Assert.True(childLockList["parentFirstBeginOutputReadLine"].WaitSignal(WaitInMS), "Parent signal missing");
+                // Wait parent signal to produce number 3
+                // Generate output 3 and signal parent
+                Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 3");
+                Console.WriteLine(3);
+                pipeWrite.WriteByte(0);
 
-            // Produce 1,2,3
-            Console.WriteLine(++counter);
-            Console.WriteLine(++counter);
-            Console.WriteLine(++counter);
-
-            // Signal 1,2,3 produced
-            Assert.True(childLockList["childProduced123"].TryAcquire(WaitInMS), "Child process should acquire 'childProduced123' lock");
-
-            // Wait call to CancelOutputRead() from parent
-            Assert.True(childLockList["parentCancelOutputRead"].WaitSignal(WaitInMS), "Signal to shutdown not come after 'WaitInMS'");
-
-            // Produce 4,5,6
-            Console.WriteLine(++counter);
-            Console.WriteLine(++counter);
-            Console.WriteLine(++counter);
-
-            // Signal 4,5,6 produced
-            Assert.True(childLockList["childProduced456"].TryAcquire(WaitInMS), "Child process should acquire 'childProduced456' lock");
-
-            // Wait second BeginOutputReadLine() from parent
-            Assert.True(childLockList["parentSecondBeginOutputReadLine"].WaitSignal(WaitInMS), "Parent signal missing");
-
-            // Produce 7,8,9
-            Console.WriteLine(++counter);
-            Console.WriteLine(++counter);
-            Console.WriteLine(++counter);
-
-            // Signal 7,8,9 produced
-            Assert.True(childLockList["childProduced789"].TryAcquire(WaitInMS), "Child process should acquire 'childProduced789' lock");
-
-            // Shutdown process
-            Assert.True(childLockList["shutdownChildProcess"].WaitSignal(WaitInMS), "Signal to shutdown not come after 'WaitInMS'");
-
-            return SuccessExitCode;
+                return SuccessExitCode;
+            }
         }
 
-        private Dictionary<string, FileSystemLock> TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_LockHelper(string directoryName)
+        private bool WaitPipeSignal(PipeStream pipe, int millisecond)
         {
-            return new Dictionary<string, FileSystemLock>
+            CancellationTokenSource stopTimer = new CancellationTokenSource();
+            try
             {
-                { "childStarted", new FileSystemLock("childStarted", directoryName) },
-                { "parentFirstBeginOutputReadLine", new FileSystemLock("parentFirstBeginOutputReadLine", directoryName) },
-                { "parentSecondBeginOutputReadLine", new FileSystemLock("parentSecondBeginOutputReadLine", directoryName) },
-                { "parentCancelOutputRead", new FileSystemLock("parentCancelOutputRead", directoryName)},
-                { "childProduced123", new FileSystemLock("childProduced123", directoryName) },
-                { "childProduced456", new FileSystemLock("childProduced456", directoryName) },
-                { "childProduced789", new FileSystemLock("childProduced789", directoryName) },
-                { "shutdownChildProcess", new FileSystemLock("shutdownChildProcess", directoryName) }
-            };
+                if (Task.WaitAny(Task.Delay(TimeSpan.FromMilliseconds(millisecond), stopTimer.Token), Task.Run(() => Task.FromResult(pipe.ReadByte()))) == 0)
+                {
+                    return false;
+                }
+            }
+            finally
+            {
+                stopTimer.Cancel();
+            }
+
+            return true;
         }
 
         /// <summary>
