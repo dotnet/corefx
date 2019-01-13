@@ -242,12 +242,12 @@ namespace System.Security.Cryptography.X509Certificates
             }
         }
 
-        public DateTime NotAfter
+        public DateTimeOffset NotAfter
         {
             get { return GetNotAfter(); }
         }
 
-        public DateTime NotBefore
+        public DateTimeOffset NotBefore
         {
             get { return GetNotBefore(); }
         }
