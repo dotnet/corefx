@@ -7,15 +7,15 @@
         public WhereIndexed(Func<T, int, bool> predicate) : base(LinkType.WhereIndexed) =>
             Predicate = predicate;
 
-        public override Chain<T, ChainEnd> Compose(Chain<T, ChainEnd> activity) =>
+        public override Chain<T> Compose(Chain<T> activity) =>
             new Activity(Predicate, activity);
 
-        sealed class Activity : Activity<T, T, ChainEnd>
+        sealed class Activity : Activity<T, T>
         {
             private readonly Func<T, int, bool> _predicate;
             private int _index;
 
-            public Activity(Func<T, int, bool> predicate, Chain<T, ChainEnd> next) : base(next) =>
+            public Activity(Func<T, int, bool> predicate, Chain<T> next) : base(next) =>
                 (_predicate, _index) = (predicate, -1);
 
             public override ChainStatus ProcessNext(T input)

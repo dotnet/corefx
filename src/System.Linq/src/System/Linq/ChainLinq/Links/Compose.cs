@@ -18,7 +18,7 @@ namespace System.Linq.ChainLinq.Links
         public Composition(Link<T, U> first, Link<U, V> second) =>
             (_first, _second) = (first, second);
 
-        public override Chain<T, ChainEnd> Compose(Chain<V, ChainEnd> next) =>
+        public override Chain<T> Compose(Chain<V> next) =>
             _first.Compose(_second.Compose(next));
 
         public override object TailLink => _second;

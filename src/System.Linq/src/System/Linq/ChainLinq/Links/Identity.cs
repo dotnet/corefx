@@ -6,6 +6,6 @@
 
         public Identity() : base(LinkType.Identity) { }
 
-        public override Chain<T, ChainEnd> Compose(Chain<T, ChainEnd> next) => next;
+        public override Chain<T> Compose(Chain<T> next) => next;
     }
 }

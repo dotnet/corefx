@@ -7,14 +7,14 @@
         public Where(Func<T, bool> predicate) : base(LinkType.Where) =>
             Predicate = predicate;
 
-        public override Chain<T, ChainEnd> Compose(Chain<T, ChainEnd> activity) =>
+        public override Chain<T> Compose(Chain<T> activity) =>
             new Activity(Predicate, activity);
 
-        sealed partial class Activity : Activity<T, T, ChainEnd>
+        sealed partial class Activity : Activity<T, T>
         {
             private readonly Func<T, bool> _predicate;
 
-            public Activity(Func<T, bool> predicate, Chain<T, ChainEnd> next) : base(next) =>
+            public Activity(Func<T, bool> predicate, Chain<T> next) : base(next) =>
                 _predicate = predicate;
 
             public override ChainStatus ProcessNext(T input) =>

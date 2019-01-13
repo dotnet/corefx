@@ -9,10 +9,10 @@ namespace System.Linq.ChainLinq.Links
         public SelectManyIndexed(Func<T, int, IEnumerable<U>> collectionSelector) : base(LinkType.SelectManyIndexed) =>
             this.collectionSelector = collectionSelector;
 
-        public override Chain<T, ChainEnd> Compose(Chain<(T, IEnumerable<U>), ChainEnd> next) =>
+        public override Chain<T> Compose(Chain<(T, IEnumerable<U>)> next) =>
             new Activity(next, collectionSelector);
 
-        private sealed class Activity : Activity<T, (T, IEnumerable<U>), ChainEnd>
+        private sealed class Activity : Activity<T, (T, IEnumerable<U>)>
         {
             private readonly Func<T, int, IEnumerable<U>> collectionSelector;
             private int index = 0;

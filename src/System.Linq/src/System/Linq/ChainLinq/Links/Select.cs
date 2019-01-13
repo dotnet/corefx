@@ -7,14 +7,14 @@
 
         public Func<T, U> Selector { get; }
 
-        public override Chain<T, ChainEnd> Compose(Chain<U, ChainEnd> activity) =>
+        public override Chain<T> Compose(Chain<U> activity) =>
             new Activity(Selector, activity);
 
-        sealed partial class Activity : Activity<T, U, ChainEnd>
+        sealed partial class Activity : Activity<T, U>
         {
             private readonly Func<T, U> _selector;
 
-            public Activity(Func<T, U> selector, Chain<U, ChainEnd> next) : base(next) =>
+            public Activity(Func<T, U> selector, Chain<U> next) : base(next) =>
                 _selector = selector;
 
             public override ChainStatus ProcessNext(T input) =>

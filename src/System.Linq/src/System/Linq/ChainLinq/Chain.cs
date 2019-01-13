@@ -34,8 +34,6 @@ namespace System.Linq.ChainLinq
         public abstract ChainStatus ProcessNext(T input);
     }
 
-    abstract class Chain<T, U> : Chain<T> { }
-
     abstract class Link
     {
         protected Link(Links.LinkType linkType) => LinkType = linkType;
@@ -47,10 +45,10 @@ namespace System.Linq.ChainLinq
     {
         protected Link(Links.LinkType linkType) : base(linkType) {}
 
-        public abstract Chain<T, ChainEnd> Compose(Chain<U, ChainEnd> activity);
+        public abstract Chain<T> Compose(Chain<U> activity);
     }
 
-    abstract class Activity<T, U, V> : Chain<T, V>
+    abstract class Activity<T, U> : Chain<T>
     {
         private readonly Chain<U> next;
 
@@ -66,7 +64,7 @@ namespace System.Linq.ChainLinq
 
     sealed class ChainEnd { private ChainEnd() { } }
 
-    abstract class Consumer<T, R> : Chain<T, ChainEnd>
+    abstract class Consumer<T, R> : Chain<T>
     {
         protected Consumer(R initalResult)
         {

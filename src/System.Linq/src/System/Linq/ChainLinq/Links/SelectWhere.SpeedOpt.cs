@@ -12,14 +12,14 @@ namespace System.Linq.ChainLinq.Links
         public SelectWhere(Func<T, U> selector, Func<U, bool> predicate) : base(LinkType.SelectWhere) =>
             (Selector, Predicate) = (selector, predicate);
 
-        public override Chain<T, ChainEnd> Compose(Chain<U, ChainEnd> activity) =>
+        public override Chain<T> Compose(Chain<U> activity) =>
             new Activity(Selector, Predicate, activity);
 
         public Consumable<U> MergeWhere(ConsumableForMerging<U> consumable, Func<U, bool> second) =>
             consumable.ReplaceTailLink(new SelectWhere<T, U>(Selector, t => Predicate(t) && second(t)));
 
         sealed class Activity
-            : Activity<T, U, ChainEnd>
+            : Activity<T, U>
             , Optimizations.IPipelineArray<T>
             , Optimizations.IPipelineList<T>
             , Optimizations.IPipelineEnumerable<T>
@@ -27,7 +27,7 @@ namespace System.Linq.ChainLinq.Links
             private readonly Func<T, U> _selector;
             private readonly Func<U, bool> _predicate;
 
-            public Activity(Func<T, U> selector, Func<U, bool> predicate, Chain<U, ChainEnd> next) : base(next) =>
+            public Activity(Func<T, U> selector, Func<U, bool> predicate, Chain<U> next) : base(next) =>
                 (_selector, _predicate) = (selector, predicate);
 
             public override ChainStatus ProcessNext(T input)
