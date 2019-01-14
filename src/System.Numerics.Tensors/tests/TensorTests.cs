@@ -1396,7 +1396,7 @@ namespace System.Numerics.Tensors.Tests
         [MemberData(nameof(GetSingleTensorConstructors))]
         public void PrefixIncrement(TensorConstructor tensorConstructor)
         {
-            Tensor<int> tensor = tensorConstructor.CreateFromArray<int>(
+            ITensor<int> tensor = tensorConstructor.CreateFromArray<int>(
                 new[,]
                 {
                     {0, 1, 2},
@@ -1425,7 +1425,7 @@ namespace System.Numerics.Tensors.Tests
         [MemberData(nameof(GetSingleTensorConstructors))]
         public void PostfixIncrement(TensorConstructor tensorConstructor)
         {
-            Tensor<int> tensor = tensorConstructor.CreateFromArray<int>(
+            ITensor<int> tensor = tensorConstructor.CreateFromArray<int>(
                 new[,]
                 {
                     {0, 1, 2},
@@ -1461,7 +1461,7 @@ namespace System.Numerics.Tensors.Tests
         [MemberData(nameof(GetSingleTensorConstructors))]
         public void PrefixDecrement(TensorConstructor tensorConstructor)
         {
-            Tensor<int> tensor = tensorConstructor.CreateFromArray<int>(
+            ITensor<int> tensor = tensorConstructor.CreateFromArray<int>(
                 new[,]
                 {
                     {0, 1, 2},
@@ -1489,7 +1489,7 @@ namespace System.Numerics.Tensors.Tests
         [MemberData(nameof(GetSingleTensorConstructors))]
         public void PostfixDecrement(TensorConstructor tensorConstructor)
         {
-            Tensor<int> tensor = tensorConstructor.CreateFromArray<int>(
+            ITensor<int> tensor = tensorConstructor.CreateFromArray<int>(
                 new[,]
                 {
                     {0, 1, 2},
@@ -2205,7 +2205,7 @@ namespace System.Numerics.Tensors.Tests
 
             Tensor<int> expected = resultConstructor.CreateFromArray<int>(array);
 
-            Tensor<int> actual;
+            ITensor<int> actual;
 
             switch (resultConstructor.TensorType)
             {
