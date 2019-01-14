@@ -214,7 +214,7 @@ namespace System.Diagnostics.Tests
 
         public static string TestAsyncOutputStream_BeginCancelBegin_OutputReadLineUapCmd(string pipesHandle)
         {
-            return TestAsyncOutputStream_BeginCancelBegin_OutputReadLine(pipesHandle).ToString();
+            return $@"exit {TestAsyncOutputStream_BeginCancelBegin_OutputReadLine(pipesHandle)}";
         }
 
         public static int TestAsyncOutputStream_BeginCancelBegin_OutputReadLine(string pipesHandle)
