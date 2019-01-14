@@ -44,7 +44,7 @@ namespace System.Diagnostics
 
                 do
                 {
-                    foreach (Process candidate in GetChildProcesses(current))
+                    foreach (Process candidate in current.GetChildProcesses(allProcesses))
                     {
                         if (SafePredicateTest(() => processOfInterest.Equals(candidate)))
                             return true;
