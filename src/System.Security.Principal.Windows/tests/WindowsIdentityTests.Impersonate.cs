@@ -68,12 +68,14 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [OuterLoop]
     public void Impersonate_WindowsIdentityObject()
     {
         Impersonate(() => new WindowsIdentity(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()).Impersonate(), _fixture.TestAccount1);
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [OuterLoop]
     public void Impersonate_UserTokenObject()
     {
         Impersonate(() => WindowsIdentity.Impersonate(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()), _fixture.TestAccount1);
@@ -111,12 +113,14 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [OuterLoop]
     public void Impersonate_WindowsIdentityObject_InvalidToken()
     {
         Assert.Throws<ArgumentException>(() => new WindowsIdentity(SafeAccessTokenHandle.InvalidHandle.DangerousGetHandle()).Impersonate());
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [OuterLoop]
     public void Impersonate_UserTokenObject_ZeroToken_NOP()
     {
         // Users on same machine could return different case for machine/domain name
@@ -133,6 +137,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [OuterLoop]
     public void Impersonate_IsImpersonating_UserTokenObject_ZeroToken_ClearThreadToken()
     {
         // Users on same machine could return different case for machine/domain name
@@ -157,6 +162,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [OuterLoop]
     public void Impersonate_IsImpersonating_WindowsIdentityObject()
     {
         Impersonate_IsImpersonating(
@@ -165,6 +171,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [OuterLoop]
     public void Impersonate_IsImpersonating_UserTokenObject()
     {
         Impersonate_IsImpersonating(
@@ -231,6 +238,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     // On full framework 'RunImpersonate' doesn't capture/revert Execution context
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+    [OuterLoop]
     public void Impersonate_ExecutionContext_NotReverted()
     {
         AsyncLocal<string> impersonatedContextValue = new AsyncLocal<string>
@@ -254,6 +262,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [OuterLoop]
     public async Task Impersonate_FlowExecutionContext_RunImpersonate()
     {
         // To be sure to not use ThreadPool thread
@@ -270,12 +279,13 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
             {
                 await Impersonate_FlowExecutionContext_Body(checkResult, customFactory, _fixture.TestAccount1);
             });
-        });
+        }).Unwrap();
 
         Impersonate_FlowExecutionContext_Asserts(customTaskScheduler, checkResult, current);
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [OuterLoop]
     public async Task Impersonate_FlowExecutionContext_WindowsImpersonationContext()
     {
         // To be sure to not use ThreadPool thread
@@ -292,7 +302,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
             {
                 await Impersonate_FlowExecutionContext_Body(checkResult, customFactory, _fixture.TestAccount1);
             }
-        });
+        }).Unwrap();
 
         Impersonate_FlowExecutionContext_Asserts(customTaskScheduler, checkResult, current);
     }
@@ -315,10 +325,10 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
                 });
 
                 checkResult.Add(testAccount.AccountName.Equals(InteropHelper.GetCurrentUserName(), StringComparison.InvariantCultureIgnoreCase));
-            });
+            }).Unwrap();
 
             checkResult.Add(testAccount.AccountName.Equals(InteropHelper.GetCurrentUserName(), StringComparison.InvariantCultureIgnoreCase));
-        });
+        }).Unwrap();
     }
 
     private void Impersonate_FlowExecutionContext_Asserts(CustomTaskScheduler customTaskScheduler, List<bool> checkResult, string current)
@@ -340,6 +350,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [OuterLoop]
     public async Task Impersonate_FlowExecutionContext_WindowsImpersonationContext_Nested()
     {
         using (WindowsImpersonationContext windowsImpersonationContext = WindowsIdentity.Impersonate(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()))
@@ -367,6 +378,7 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+    [OuterLoop]
     public async Task Impersonate_FlowExecutionContext_WindowsImpersonationContextRunImpersonate_Nested()
     {
         using (WindowsImpersonationContext windowsImpersonationContext = WindowsIdentity.Impersonate(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()))
@@ -447,7 +459,10 @@ public class CustomTaskScheduler : TaskScheduler
             ThreadsData.Add((InteropHelper.GetCurrentUserName(), Thread.CurrentThread.ManagedThreadId));
 
             Interlocked.Decrement(ref _outstandingThread);
-        });
+        })
+        {
+            IsBackground = true
+        };
         thread.Start();
     }
 

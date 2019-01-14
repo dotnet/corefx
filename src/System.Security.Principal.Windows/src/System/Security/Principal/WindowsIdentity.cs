@@ -771,7 +771,7 @@ namespace System.Security.Principal
         // internal.
         //
 
-        private static AsyncLocal<SafeAccessTokenHandle> s_currentImpersonatedToken = new AsyncLocal<SafeAccessTokenHandle>(CurrentImpersonatedTokenChanged);
+        internal static AsyncLocal<SafeAccessTokenHandle> s_currentImpersonatedToken = new AsyncLocal<SafeAccessTokenHandle>(CurrentImpersonatedTokenChanged);
 
         private static void RunImpersonatedInternal(SafeAccessTokenHandle token, Action action)
         {
@@ -1383,7 +1383,7 @@ namespace System.Security.Principal
                 throw new SecurityException(new Win32Exception().Message);
             }
 
-            WindowsImpersonationContext context = new WindowsImpersonationContext(currentUserToken, isImpersonating, s_currentImpersonatedToken);
+            WindowsImpersonationContext context = new WindowsImpersonationContext(currentUserToken, isImpersonating);
 
             // revert existent impersonating token if existent and impersonate with new token identity
             if (!Interop.Advapi32.RevertToSelf())

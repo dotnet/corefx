@@ -11,11 +11,10 @@ namespace System.Security.Principal
     public class WindowsImpersonationContext : IDisposable
     {
         private readonly SafeAccessTokenHandle _previousUserToken = SafeAccessTokenHandle.InvalidHandle;
-        private readonly AsyncLocal<SafeAccessTokenHandle> _currentImpersonatedToken;
 
         private WindowsImpersonationContext() { }
 
-        internal WindowsImpersonationContext(SafeAccessTokenHandle currentUserToken, bool isImpersonating, AsyncLocal<SafeAccessTokenHandle> currentImpersonatedToken)
+        internal WindowsImpersonationContext(SafeAccessTokenHandle currentUserToken, bool isImpersonating)
         {
             if (currentUserToken.IsInvalid)
             {
@@ -24,13 +23,10 @@ namespace System.Security.Principal
 
             if (isImpersonating)
             {
-                // if we'are in a impersonated context we need to duplicate current token to allow revert to correct identity 
+                // if we're in a impersonated context we need to duplicate current token to allow revert to correct identity 
                 // after impersonation
                 _previousUserToken = WindowsIdentity.DuplicateAccessToken(currentUserToken);
             }
-
-            // save current impersonated token to revert context on Undo()
-            _currentImpersonatedToken = currentImpersonatedToken;
         }
 
         public void Undo()
@@ -40,7 +36,7 @@ namespace System.Security.Principal
                 Environment.FailFast(new Win32Exception().Message);
             }
 
-            _currentImpersonatedToken.Value = null;
+            WindowsIdentity.s_currentImpersonatedToken.Value = null;
 
             // revert impersonating token and impersonate previous identity
             if (!_previousUserToken.IsInvalid)
@@ -51,7 +47,7 @@ namespace System.Security.Principal
                 }
 
                 // reset AsyncLocal to allow impersonation context flow in case of async/await
-                _currentImpersonatedToken.Value = _previousUserToken;
+                WindowsIdentity.s_currentImpersonatedToken.Value = _previousUserToken;
             }
         }
 
