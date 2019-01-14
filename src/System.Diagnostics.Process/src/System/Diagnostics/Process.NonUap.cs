@@ -44,11 +44,8 @@ namespace System.Diagnostics
 
                 do
                 {
-                    foreach (Process candidate in allProcesses)
+                    foreach (Process candidate in GetChildProcesses(current))
                     {
-                        if (!SafePredicateTest(() => current.IsParentOf(candidate)))
-                            continue;
-
                         if (SafePredicateTest(() => processOfInterest.Equals(candidate)))
                             return true;
 
@@ -65,6 +62,44 @@ namespace System.Diagnostics
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Returns all immediate child processes.
+        /// </summary>
+        private IReadOnlyList<Process> GetChildProcesses(Process[] processes = null)
+        {
+            bool internallyInitializedProcesses = false;
+
+            if (processes == null)
+            {
+                processes = GetProcesses();
+                internallyInitializedProcesses = true;
+            }
+
+            List<Process> childProcesses = new List<Process>();
+
+            foreach (Process possibleChildProcess in processes)
+            {
+                // Only support disposing if this method initialized the set of processes being searched
+                bool dispose = internallyInitializedProcesses;
+
+                try
+                {
+                    if (SafePredicateTest(() => IsParentOf(possibleChildProcess)))
+                    {
+                        childProcesses.Add(possibleChildProcess);
+                        dispose = false;
+                    }
+                }
+                finally
+                {
+                    if (dispose)
+                        possibleChildProcess.Dispose();
+                }
+            }
+
+            return childProcesses;
         }
 
         private bool SafePredicateTest(Func<bool> predicate)

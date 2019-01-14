@@ -304,35 +304,6 @@ namespace System.Diagnostics
             return Interop.Sys.GetPid();
         }
 
-        /// <summary>
-        /// Returns all immediate child processes.
-        /// </summary>
-        private IReadOnlyList<Process> GetChildProcesses()
-        {
-            List<Process> childProcesses = new List<Process>();
-
-            foreach (Process possibleChildProcess in GetProcesses())
-            {
-                bool keep = false;
-
-                try
-                {
-                    if (SafePredicateTest(() => IsParentOf(possibleChildProcess)))
-                    {
-                        childProcesses.Add(possibleChildProcess);
-                        keep = true;
-                    }
-                }
-                finally
-                {
-                    if (!keep)
-                        possibleChildProcess.Dispose();
-                }
-            }
-
-            return childProcesses;
-        }
-
         /// <summary>Checks whether the argument is a direct child of this process.</summary>
         private bool IsParentOf(Process possibleChildProcess) =>
             Id == possibleChildProcess.ParentProcessId;
