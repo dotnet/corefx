@@ -220,12 +220,9 @@
       }
     },
     "Microsoft.VisualBasic.Core": {
-      "BaselineVersion": "10.4.0",
       "InboxOn": {
-          "netcoreapp3.0": "10.0.4.0"
-      },
-      "AssemblyVersionInPackageVersion": {
-        "10.0.4.0": "10.4.0"
+          "netcoreapp3.0": "10.0.4.0",
+          "uap10.0.16300": "10.0.4.0"
       }
     },
     "Microsoft.VisualBasic.Compatibility": {
