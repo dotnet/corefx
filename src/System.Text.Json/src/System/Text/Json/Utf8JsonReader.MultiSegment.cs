@@ -34,7 +34,7 @@ namespace System.Text.Json
             _maxDepth = state._maxDepth == 0 ? JsonReaderState.DefaultMaxDepth : state._maxDepth; // If max depth is not set, revert to the default depth.
             _inObject = state._inObject;
             _isNotPrimitive = state._isNotPrimitive;
-            _numberHasExponent = state._numberHasExponent;
+            _numberFormat = state._numberFormat;
             _tokenType = state._tokenType;
             _previousTokenType = state._previousTokenType;
             _readerOptions = state._readerOptions;
@@ -1109,7 +1109,7 @@ namespace System.Text.Json
             // TODO: https://github.com/dotnet/corefx/issues/33294
             Debug.Assert(data.Length > 0);
 
-            _numberHasExponent = false;
+            _numberFormat = default;
             SequencePosition startPosition = _currentPosition;
             int startConsumed = _consumed;
             consumed = 0;
@@ -1201,7 +1201,7 @@ namespace System.Text.Json
 
             Debug.Assert(nextByte == 'E' || nextByte == 'e');
             i++;
-            _numberHasExponent = true;
+            _numberFormat = 'e';
             _bytePositionInLine++;
 
             signResult = ConsumeSignMultiSegment(ref data, ref i);

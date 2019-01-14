@@ -22,7 +22,7 @@ namespace System.Text.Json
         internal int _maxDepth;
         internal bool _inObject;
         internal bool _isNotPrimitive;
-        internal bool _numberHasExponent;
+        internal char _numberFormat;
         internal JsonTokenType _tokenType;
         internal JsonTokenType _previousTokenType;
         internal JsonReaderOptions _readerOptions;
@@ -70,7 +70,7 @@ namespace System.Text.Json
             _maxDepth = maxDepth;
             _inObject = default;
             _isNotPrimitive = default;
-            _numberHasExponent = default;
+            _numberFormat = default;
             _tokenType = default;
             _previousTokenType = default;
             _readerOptions = options;
