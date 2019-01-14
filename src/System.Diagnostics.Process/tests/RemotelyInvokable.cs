@@ -212,9 +212,9 @@ namespace System.Diagnostics.Tests
             ClosedEvent?.Invoke(null, EventArgs.Empty);
         }
 
-        public static int TestAsyncOutputStream_BeginCancelBegin_OutputReadLineUapCmd(string pipesHandle)
+        public static string TestAsyncOutputStream_BeginCancelBegin_OutputReadLineUapCmd(string pipesHandle)
         {
-            return TestAsyncOutputStream_BeginCancelBegin_OutputReadLine(pipesHandle);
+            return TestAsyncOutputStream_BeginCancelBegin_OutputReadLine(pipesHandle).ToString();
         }
 
         public static int TestAsyncOutputStream_BeginCancelBegin_OutputReadLine(string pipesHandle)
