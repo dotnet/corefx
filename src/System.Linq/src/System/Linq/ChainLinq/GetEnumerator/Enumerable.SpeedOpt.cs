@@ -37,7 +37,7 @@ namespace System.Linq.ChainLinq.GetEnumerator
             public abstract bool MoveNext();
         }
 
-        internal class WhereEnumerator<T> : EnumeratorBase<T>
+        internal sealed class WhereEnumerator<T> : EnumeratorBase<T>
         {
             private readonly Func<T, bool> _predicate;
 
@@ -76,9 +76,7 @@ namespace System.Linq.ChainLinq.GetEnumerator
             }
         }
 
-
-
-        class SelectEnumerator<T, U> : EnumeratorBase<U>
+        sealed class SelectEnumerator<T, U> : EnumeratorBase<U>
         {
             private Func<T, U> _selector;
 
