@@ -265,88 +265,70 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
     [OuterLoop]
     public async Task Impersonate_FlowExecutionContext_RunImpersonate()
     {
-        // To be sure to not use ThreadPool thread
-        CustomTaskScheduler customTaskScheduler = new CustomTaskScheduler();
-        TaskFactory customFactory = new TaskFactory(customTaskScheduler);
         List<bool> checkResult = new List<bool>();
         string current = null;
 
-        await customFactory.StartNew(async () =>
+        await Task.Factory.StartNew(async () =>
         {
             current = InteropHelper.GetCurrentUserName();
 
             await WindowsIdentity.RunImpersonated(_fixture.TestAccount1.AccountTokenHandle, async () =>
             {
-                await Impersonate_FlowExecutionContext_Body(checkResult, customFactory, _fixture.TestAccount1);
+                await Impersonate_FlowExecutionContext_Body(checkResult, _fixture.TestAccount1);
             });
-        }).Unwrap();
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
 
-        Impersonate_FlowExecutionContext_Asserts(customTaskScheduler, checkResult, current);
+        Impersonate_FlowExecutionContext_Asserts(checkResult, current);
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
     [OuterLoop]
     public async Task Impersonate_FlowExecutionContext_WindowsImpersonationContext()
     {
-        // To be sure to not use ThreadPool thread
-        CustomTaskScheduler customTaskScheduler = new CustomTaskScheduler();
-        TaskFactory customFactory = new TaskFactory(customTaskScheduler);
         List<bool> checkResult = new List<bool>();
         string current = null;
 
-        await customFactory.StartNew(async () =>
+        await Task.Factory.StartNew(async () =>
         {
             current = InteropHelper.GetCurrentUserName();
 
             using (WindowsImpersonationContext windowsImpersonationContext = WindowsIdentity.Impersonate(_fixture.TestAccount1.AccountTokenHandle.DangerousGetHandle()))
             {
-                await Impersonate_FlowExecutionContext_Body(checkResult, customFactory, _fixture.TestAccount1);
+                await Impersonate_FlowExecutionContext_Body(checkResult, _fixture.TestAccount1);
             }
-        }).Unwrap();
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
 
-        Impersonate_FlowExecutionContext_Asserts(customTaskScheduler, checkResult, current);
+        Impersonate_FlowExecutionContext_Asserts(checkResult, current);
     }
 
-    private async Task Impersonate_FlowExecutionContext_Body(List<bool> checkResult, TaskFactory customFactory, WindowsTestAccount testAccount)
+    private async Task Impersonate_FlowExecutionContext_Body(List<bool> checkResult, WindowsTestAccount testAccount)
     {
         checkResult.Add(testAccount.AccountName.Equals(InteropHelper.GetCurrentUserName(), StringComparison.InvariantCultureIgnoreCase));
 
-        await customFactory.StartNew(async () =>
+        await Task.Factory.StartNew(async () =>
         {
             checkResult.Add(testAccount.AccountName.Equals(InteropHelper.GetCurrentUserName(), StringComparison.InvariantCultureIgnoreCase));
 
-            await customFactory.StartNew(async () =>
+            await Task.Factory.StartNew(async () =>
             {
                 checkResult.Add(testAccount.AccountName.Equals(InteropHelper.GetCurrentUserName(), StringComparison.InvariantCultureIgnoreCase));
 
-                await customFactory.StartNew(() =>
+                await Task.Factory.StartNew(() =>
                 {
                     checkResult.Add(testAccount.AccountName.Equals(InteropHelper.GetCurrentUserName(), StringComparison.InvariantCultureIgnoreCase));
-                });
+                }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
                 checkResult.Add(testAccount.AccountName.Equals(InteropHelper.GetCurrentUserName(), StringComparison.InvariantCultureIgnoreCase));
-            }).Unwrap();
+            }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
 
             checkResult.Add(testAccount.AccountName.Equals(InteropHelper.GetCurrentUserName(), StringComparison.InvariantCultureIgnoreCase));
-        }).Unwrap();
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
     }
 
-    private void Impersonate_FlowExecutionContext_Asserts(CustomTaskScheduler customTaskScheduler, List<bool> checkResult, string current)
+    private void Impersonate_FlowExecutionContext_Asserts(List<bool> checkResult, string current)
     {
-        customTaskScheduler.WaitOutstandingThread();
-
         Assert.Equal(current, InteropHelper.GetCurrentUserName());
         Assert.False(checkResult.Exists(check => !check), $"At least one context doesn't flow impersonation, {checkResult.Count(check => !check)} of {checkResult.Count}");
-
-        Assert.Equal(customTaskScheduler.ThreadsData.Count, customTaskScheduler.ThreadsData.Select(td => td.Item2).Distinct().Count());
-
-        // Verify if all thread are clean
-        foreach ((string afterInvocationThreadIdentity, int threadId) afterInvocationThreadIdentity in customTaskScheduler.ThreadsData)
-        {
-            // Temporary disabled because could be meaningless
-            // Thread could return to the pool with dirty token on netcoreapp?Or ThreadPool cleanup token before reuse?
-            // Assert.Equal(current, afterInvocationThreadIdentity);
-        }
     }
 
     [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
@@ -424,58 +406,6 @@ public class WindowsIdentityTestsImpersonate : IClassFixture<WindowsIdentityImpe
 
             Assert.Equal(_fixture.TestAccount1.AccountName, InteropHelper.GetCurrentUserName(), ignoreCase: true);
 
-        }
-    }
-}
-
-// For context flow tests we use custom task scheduler to be sure that 
-// we're using "clean identity token thread". 
-// If we do bug it's possible return impersonated thread to thread pool
-// and pick up the same for continuation task generating false positive.
-public class CustomTaskScheduler : TaskScheduler
-{
-    public ConcurrentBag<(string, int)> ThreadsData { get; } = new ConcurrentBag<(string, int)>();
-
-    private volatile int _outstandingThread = 0;
-
-    protected override IEnumerable<Task> GetScheduledTasks()
-    {
-        throw new NotImplementedException();
-    }
-
-    protected override bool TryDequeue(Task task)
-    {
-        throw new NotImplementedException();
-    }
-
-    protected override void QueueTask(Task task)
-    {
-        Interlocked.Increment(ref _outstandingThread);
-        var thread = new Thread(_ =>
-        {
-            TryExecuteTask(task);
-
-            // we verify if thread is "clean"
-            ThreadsData.Add((InteropHelper.GetCurrentUserName(), Thread.CurrentThread.ManagedThreadId));
-
-            Interlocked.Decrement(ref _outstandingThread);
-        })
-        {
-            IsBackground = true
-        };
-        thread.Start();
-    }
-
-    protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
-    {
-        return false;
-    }
-
-    public void WaitOutstandingThread()
-    {
-        while (_outstandingThread > 0)
-        {
-            Thread.Sleep(100);
         }
     }
 }
