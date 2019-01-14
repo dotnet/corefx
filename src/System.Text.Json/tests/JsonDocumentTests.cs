@@ -1694,7 +1694,7 @@ namespace System.Text.Json.Tests
             // This synchronously throws the ArgumentNullException
             AssertExtensions.Throws<ArgumentNullException>(
                 "utf8Json",
-                () => JsonDocument.ParseAsync(null));
+                () => { JsonDocument.ParseAsync(null); });
         }
 
         [Fact]
