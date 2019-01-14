@@ -10,7 +10,7 @@ namespace System.Numerics.Tensors
     {
         public const int StackallocMax = 16;
 
-        public static long GetProduct(ReadOnlySpan<int> dimensions, int startIndex = 0)
+        public static long GetProduct(ReadOnlySpan<int> dimensions)
         {
             if (dimensions.Length == 0)
             {
@@ -18,7 +18,7 @@ namespace System.Numerics.Tensors
             }
 
             long product = 1;
-            for (int i = startIndex; i < dimensions.Length; i++)
+            for (int i = 0; i < dimensions.Length; i++)
             {
                 if (dimensions[i] < 0)
                 {
@@ -93,7 +93,7 @@ namespace System.Numerics.Tensors
             return strides;
         }
 
-        public static void SplitStrides(int[] strides, int[] splitAxes, int[] newStrides, int stridesOffset, int[] splitStrides, int splitStridesOffset)
+        public static void SplitStrides(ReadOnlySpan<int> strides, ReadOnlySpan<int> splitAxes, Span<int> newStrides, Span<int> splitStrides)
         {
             int newStrideIndex = 0;
             for (int i = 0; i < strides.Length; i++)
@@ -104,7 +104,7 @@ namespace System.Numerics.Tensors
                 {
                     if (splitAxes[j] == i)
                     {
-                        splitStrides[splitStridesOffset + j] = stride;
+                        splitStrides[j] = stride;
                         isSplit = true;
                         break;
                     }
@@ -112,7 +112,7 @@ namespace System.Numerics.Tensors
 
                 if (!isSplit)
                 {
-                    newStrides[stridesOffset + newStrideIndex++] = stride;
+                    newStrides[newStrideIndex++] = stride;
                 }
             }
         }
@@ -124,7 +124,7 @@ namespace System.Numerics.Tensors
         /// <param name="indices"></param>
         /// <param name="startFromDimension"></param>
         /// <returns></returns>
-        public static int GetIndex(int[] strides, ReadOnlySpan<int> indices, int startFromDimension = 0)
+        public static int GetIndex(ReadOnlySpan<int> strides, ReadOnlySpan<int> indices, int startFromDimension = 0)
         {
             Debug.Assert(strides.Length == indices.Length);
 
@@ -135,31 +135,6 @@ namespace System.Numerics.Tensors
             }
 
             return index;
-        }
-
-        /// <summary>
-        /// Calculates the n-d indices from the 1-d index in a layout specificed by strides
-        /// </summary>
-        /// <param name="strides"></param>
-        /// <param name="reverseStride"></param>
-        /// <param name="index"></param>
-        /// <param name="indices"></param>
-        /// <param name="startFromDimension"></param>
-        public static void GetIndices(ReadOnlySpan<int> strides, bool reverseStride, int index, int[] indices, int startFromDimension = 0)
-        {
-            Debug.Assert(reverseStride ? IsAscending(strides) : IsDescending(strides), "Index decomposition requires ordered strides");
-            Debug.Assert(strides.Length == indices.Length);
-
-            int remainder = index;
-            for (int i = startFromDimension; i < strides.Length; i++)
-            {
-                // reverse the index for reverseStride so that we divide by largest stride first
-                var nIndex = reverseStride ? strides.Length - 1 - i : i;
-
-                var stride = strides[nIndex];
-                indices[nIndex] = remainder / stride;
-                remainder %= stride;
-            }
         }
 
         /// <summary>
@@ -190,7 +165,7 @@ namespace System.Numerics.Tensors
         /// <summary>
         /// Takes an 1-d index over n-d sourceStrides and recalculates it assuming same n-d coordinates over a different n-d strides
         /// </summary>
-        public static int TransformIndexByStrides(int index, int[] sourceStrides, bool sourceReverseStride, int[] transformStrides)
+        public static int TransformIndexByStrides(int index, ReadOnlySpan<int> sourceStrides, bool sourceReverseStride, ReadOnlySpan<int> transformStrides)
         {
             Debug.Assert(index >= 0);
             Debug.Assert(sourceReverseStride ? IsAscending(sourceStrides) : IsDescending(sourceStrides), "Index decomposition requires ordered strides");

@@ -12,7 +12,7 @@ namespace System.Numerics.Tensors
         T One { get; }
         T Zero { get; }
 <# foreach (MethodConfiguration method in methodConfiguration) { #>
-        <#= method.GetResultMethodSignature("Tensor", "T")#>;
+        <#= method.GetResultMethodSignature("ITensor", "T")#>;
 <# } #>
     }
 
@@ -42,7 +42,7 @@ namespace System.Numerics.Tensors
         public <#=type.TypeName#> Zero => <#=type.ZeroLiteral#>;
 
 <# foreach (MethodConfiguration method in methodConfiguration) { #>
-        public <#= method.GetResultMethodSignature("Tensor", type.TypeName)#>
+        public <#= method.GetResultMethodSignature("ITensor", type.TypeName)#>
         {
 <# if ((method.IsNumeric && !type.SupportsNumeric) ||  (method.IsBitwise && !type.SupportsBitwise) || (type.UnsupportedMethods.Contains(method.MethodName))) { #>
             throw new NotSupportedException();
@@ -51,7 +51,7 @@ namespace System.Numerics.Tensors
             Span<int> indices = new Span<int>(new int[result.Rank]);
             for(int i = 0; i < <#= method.ResultName #>.Length; i++)
             {
-                ArrayUtilities.GetIndices(result.strides, result.IsReversedStride, i, indices);
+                ArrayUtilities.GetIndices(result.Strides, result.IsReversedStride, i, indices);
                 <#=method.GetElementOperation(type.TypeName, "[indices]")#>;
             }
             
@@ -63,13 +63,13 @@ namespace System.Numerics.Tensors
             var summingDimensions = new int[leftAxes.Length];
             for(int i = 0; i < leftAxes.Length; i++)
             {
-                summingDimensions[i] = left.dimensions[leftAxes[i]];
+                summingDimensions[i] = left.Dimensions[leftAxes[i]];
             }
 
             var summingStrides = ArrayUtilities.GetStrides(summingDimensions);
             int summingLength = (int)ArrayUtilities.GetProduct(summingDimensions);
 
-            var resultStrides = result.strides;
+            var resultStrides = result.Strides;
 
             // translates from result index to left non-summing dimensions' index portion
             // since left non-summing dimensions are given precedence in result, the end is zero-padded
@@ -77,7 +77,7 @@ namespace System.Numerics.Tensors
 
             // translates from summing index to left summing dimensions' index portion
             int[] leftSummingStrides = new int[leftAxes.Length];
-            ArrayUtilities.SplitStrides(left.strides, leftAxes, leftNonSummingStrides, 0, leftSummingStrides, 0);
+            ArrayUtilities.SplitStrides(left.Strides, leftAxes, leftNonSummingStrides, 0, leftSummingStrides, 0);
 
             // translates from result index to right non-summing dimensions' index portion
             int[] rightNonSummingStrides = new int[result.Rank];
@@ -86,13 +86,13 @@ namespace System.Numerics.Tensors
 
             // translates from summing index to right summing dimensions' index portion
             int[] rightSummingStrides = new int[rightAxes.Length];
-            ArrayUtilities.SplitStrides(right.strides, rightAxes, rightNonSummingStrides, rightNonSummingStridesOffset, rightSummingStrides, 0);
+            ArrayUtilities.SplitStrides(right.Strides, rightAxes, rightNonSummingStrides, rightNonSummingStridesOffset, rightSummingStrides, 0);
 
             for (int resultIndex = 0; resultIndex < result.Length; resultIndex++)
             {
                 <#=type.TypeName#> sum = (<#=type.TypeName#>)0;
                 
-                ArrayUtilities.GetIndices(result.strides, result.IsReversedStride, resultIndex, resultIndices);
+                ArrayUtilities.GetIndices(result.Strides, result.IsReversedStride, resultIndex, resultIndices);
 
                 int leftIndexNonSumming = ArrayUtilities.TransformIndexByStrides(resultIndex, resultStrides, result.IsReversedStride, leftNonSummingStrides);
                 int rightIndexNonSumming = ArrayUtilities.TransformIndexByStrides(resultIndex, resultStrides, result.IsReversedStride, rightNonSummingStrides);
@@ -106,8 +106,8 @@ namespace System.Numerics.Tensors
                     int rightIndex = rightIndexNonSumming + rightIndexSumming;
 
                     // todo, make this more efficient
-                    ArrayUtilities.GetIndices(left.strides, left.IsReversedStride, leftIndex, leftIndices);
-                    ArrayUtilities.GetIndices(right.strides, right.IsReversedStride, rightIndex, rightIndices);
+                    ArrayUtilities.GetIndices(left.Strides, left.IsReversedStride, leftIndex, leftIndices);
+                    ArrayUtilities.GetIndices(right.Strides, right.IsReversedStride, rightIndex, rightIndices);
 
                     sum += (<#=type.TypeName#>)(left[leftIndices] * right[rightIndices]);
                 }
@@ -156,17 +156,17 @@ namespace System.Numerics.Tensors
 <# if ((method.MethodType == MethodType.Binary) || (method.MethodType == MethodType.Comparison)) {#>
                 ref int op2Index = ref <#= method.Op2Name #>.IsReversedStride ? ref colMajorIndex : ref rowMajorIndex;
 
-                var rowMajorStrides = !<#= method.ResultName #>.IsReversedStride ? <#= method.ResultName #>.strides :
-                                      !<#= method.Op1Name #>.IsReversedStride ? <#= method.Op1Name #>.strides : 
-                                      <#= method.Op2Name #>.strides;
-                var columnMajorStrides = <#= method.ResultName #>.IsReversedStride ? <#= method.ResultName #>.strides :
-                                         <#= method.Op1Name #>.IsReversedStride ? <#= method.Op1Name #>.strides : 
-                                         <#= method.Op2Name #>.strides;
+                var rowMajorStrides = !<#= method.ResultName #>.IsReversedStride ? <#= method.ResultName #>.Strides :
+                                      !<#= method.Op1Name #>.IsReversedStride ? <#= method.Op1Name #>.Strides : 
+                                      <#= method.Op2Name #>.Strides;
+                var columnMajorStrides = <#= method.ResultName #>.IsReversedStride ? <#= method.ResultName #>.Strides :
+                                         <#= method.Op1Name #>.IsReversedStride ? <#= method.Op1Name #>.Strides : 
+                                         <#= method.Op2Name #>.Strides;
 <# } else {#>
-                var rowMajorStrides = !<#= method.ResultName #>.IsReversedStride ? <#= method.ResultName #>.strides :
-                                      <#= method.Op1Name #>.strides;
-                var columnMajorStrides = <#= method.ResultName #>.IsReversedStride ? <#= method.ResultName #>.strides :
-                                         <#= method.Op1Name #>.strides;
+                var rowMajorStrides = !<#= method.ResultName #>.IsReversedStride ? <#= method.ResultName #>.Strides :
+                                      <#= method.Op1Name #>.Strides;
+                var columnMajorStrides = <#= method.ResultName #>.IsReversedStride ? <#= method.ResultName #>.Strides :
+                                         <#= method.Op1Name #>.Strides;
 <# } #>
                 for(;rowMajorIndex < <#= method.ResultName #>Span.Length; rowMajorIndex++)
                 {
@@ -181,13 +181,13 @@ namespace System.Numerics.Tensors
             var summingDimensions = new int[leftAxes.Length];
             for(int i = 0; i < leftAxes.Length; i++)
             {
-                summingDimensions[i] = left.dimensions[leftAxes[i]];
+                summingDimensions[i] = left.Dimensions[leftAxes[i]];
             }
 
             var summingStrides = ArrayUtilities.GetStrides(summingDimensions);
             int summingLength = (int)ArrayUtilities.GetProduct(summingDimensions);
 
-            var resultStrides = result.strides;
+            var resultStrides = result.Strides;
 
             // translates from result index to left non-summing dimensions' index portion
             // since left non-summing dimensions are given precedence in result, the end is zero-padded
@@ -195,7 +195,7 @@ namespace System.Numerics.Tensors
 
             // translates from summing index to left summing dimensions' index portion
             int[] leftSummingStrides = new int[leftAxes.Length];
-            ArrayUtilities.SplitStrides(left.strides, leftAxes, leftNonSummingStrides, 0, leftSummingStrides, 0);
+            ArrayUtilities.SplitStrides(left.Strides, leftAxes, leftNonSummingStrides, 0, leftSummingStrides, 0);
 
             // translates from result index to right non-summing dimensions' index portion
             int[] rightNonSummingStrides = new int[result.Rank];
@@ -204,7 +204,7 @@ namespace System.Numerics.Tensors
 
             // translates from summing index to right summing dimensions' index portion
             int[] rightSummingStrides = new int[rightAxes.Length];
-            ArrayUtilities.SplitStrides(right.strides, rightAxes, rightNonSummingStrides, rightNonSummingStridesOffset, rightSummingStrides, 0);
+            ArrayUtilities.SplitStrides(right.Strides, rightAxes, rightNonSummingStrides, rightNonSummingStridesOffset, rightSummingStrides, 0);
             
             var resultSpan = result.Buffer.Span;
             var leftSpan = left.Buffer.Span;

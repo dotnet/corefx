@@ -9,7 +9,7 @@ namespace System.Numerics.Tensors
         private static int[] s_zeroArray = new[] { 0 };
         private static int[] s_oneArray = new[] { 1 };
 
-        internal static Tensor<T> MatrixMultiply<T>(this Tensor<T> left, Tensor<T> right)
+        internal static ITensor<T> MatrixMultiply<T>(this ITensor<T> left, ITensor<T> right)
         {
             if (left.Rank != 2)
             {
@@ -21,9 +21,9 @@ namespace System.Numerics.Tensors
                 throw new ArgumentException($"{nameof(Tensor<T>)} {nameof(right)} must have {nameof(left.Rank)} 2.", nameof(right));
             }
 
-            if (left.dimensions[1] != right.dimensions[0])
+            if (left.Dimensions[1] != right.Dimensions[0])
             {
-                throw new ArgumentException($"{nameof(Tensor<T>)} {nameof(right)} must have first dimension of {left.dimensions[1]}.", nameof(right));
+                throw new ArgumentException($"{nameof(Tensor<T>)} {nameof(right)} must have first dimension of {left.Dimensions[1]}.", nameof(right));
             }
 
             return TensorOperations.Contract(left, right, s_oneArray, s_zeroArray);
