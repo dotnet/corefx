@@ -79,7 +79,7 @@ namespace System.Linq.ChainLinq
 
     internal abstract class Consumable<T> : IEnumerable<T>
     {
-        public abstract Result Consume<Result>(Consumer<T, Result> consumer);
+        public abstract void Consume(Chain<T> consumer);
 
         public abstract IEnumerator<T> GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

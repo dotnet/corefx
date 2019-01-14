@@ -16,7 +16,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<T> GetEnumerator() =>
             ChainLinq.GetEnumerator.Range.Get(_start, _count, Link);
 
-        public override TResult Consume<TResult>(Consumer<T, TResult> consumer) =>
+        public override void Consume(Chain<T> consumer) =>
             ChainLinq.Consume.Range.Invoke(_start, _count, Link, consumer);
     }
 }

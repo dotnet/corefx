@@ -19,7 +19,7 @@ namespace System.Linq.ChainLinq.Consumables
         public Prepender<T> Push(T element) =>
             new Prepender<T>(this, element, AddCount());
 
-        public override Result Consume<Result>(Consumer<T, Result> consumer)
+        public override void Consume(Chain<T> consumer)
         {
             try
             {
@@ -30,8 +30,6 @@ namespace System.Linq.ChainLinq.Consumables
                     next = next._previous;
                 } while (next != null);
                 consumer.ChainComplete();
-
-                return consumer.Result;
             }
             finally
             {

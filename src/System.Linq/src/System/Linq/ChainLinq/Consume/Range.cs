@@ -2,7 +2,7 @@
 {
     static class Range
     {
-        public static Result Invoke<V, Result>(int start, int count, Link<int, V> composition, Consumer<V, Result> consumer)
+        public static void Invoke<V>(int start, int count, Link<int, V> composition, Chain<V> consumer)
         {
             var chain = composition.Compose(consumer);
             try
@@ -14,7 +14,6 @@
             {
                 chain.ChainDispose();
             }
-            return consumer.Result;
         }
 
         private static void Pipeline(int start, int count, Chain<int> chain)

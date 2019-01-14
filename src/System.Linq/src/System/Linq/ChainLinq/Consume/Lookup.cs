@@ -4,7 +4,7 @@ namespace System.Linq.ChainLinq.Consume
 {
     static class Lookup
     {
-        public static Result Invoke<TKey, TElement, V, Result>(Grouping<TKey, TElement> lastGrouping, Link<IGrouping<TKey, TElement>, V> composition, Consumer<V, Result> consumer)
+        public static void Invoke<TKey, TElement, V>(Grouping<TKey, TElement> lastGrouping, Link<IGrouping<TKey, TElement>, V> composition, Chain<V> consumer)
         {
             var chain = composition.Compose(consumer);
             try
@@ -16,10 +16,9 @@ namespace System.Linq.ChainLinq.Consume
             {
                 chain.ChainDispose();
             }
-            return consumer.Result;
         }
 
-        public static Result Invoke<TKey, TElement, TResult, V, Result>(Grouping<TKey, TElement> lastGrouping, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, Link<TResult, V> composition, Consumer<V, Result> consumer)
+        public static void Invoke<TKey, TElement, TResult, V>(Grouping<TKey, TElement> lastGrouping, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, Link<TResult, V> composition, Chain<V> consumer)
         {
             var chain = composition.Compose(consumer);
             try
@@ -31,7 +30,6 @@ namespace System.Linq.ChainLinq.Consume
             {
                 chain.ChainDispose();
             }
-            return consumer.Result;
         }
 
         private static void Pipeline<TKey, TElement>(Grouping<TKey, TElement> lastGrouping, Chain<IGrouping<TKey, TElement>> chain)

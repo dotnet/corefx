@@ -34,7 +34,9 @@ namespace System.Linq
                 return opt.Last(orDefault);
             }
 
-            return consumable.Consume(new ChainLinq.Consumer.Last<TSource>(orDefault));
+            var last = new ChainLinq.Consumer.Last<TSource>(orDefault);
+            consumable.Consume(last);
+            return last.Result;
         }
 
         private static TSource GetLast<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate, bool orDefault)

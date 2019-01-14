@@ -13,14 +13,23 @@
                     return count;
             }
 
-            return onlyIfCheap ? -1 : Consume(new Consumer.Count<T>());
+            if (onlyIfCheap)
+            {
+                return -1;
+            }
+
+            var counter = new Consumer.Count<T>();
+            Consume(counter);
+            return counter.Result;
         }
 
         public T Last(bool orDefault)
         {
             var skipped = Skip(_count - 1);
 
-            return skipped.Consume(new Consumer.Last<T>(orDefault));
+            var last = new Consumer.Last<T>(orDefault);
+            skipped.Consume(last);
+            return last.Result;
         }
 
         public Consumable<T> Skip(int toSkip)

@@ -4,7 +4,7 @@ namespace System.Linq.ChainLinq.Consume
 {
     static class IList
     {
-        public static Result Invoke<T, V, Result>(IList<T> array, int start, int count, Link<T, V> composition, Consumer<V, Result> consumer)
+        public static void Invoke<T, V>(IList<T> array, int start, int count, Link<T, V> composition, Chain<V> consumer)
         {
             var chain = composition.Compose(consumer);
             try
@@ -23,7 +23,6 @@ namespace System.Linq.ChainLinq.Consume
             {
                 chain.ChainDispose();
             }
-            return consumer.Result;
         }
 
         private static void Pipeline<T>(IList<T> list, int start, int count, Chain<T> chain)

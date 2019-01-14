@@ -11,7 +11,14 @@
                     return count;
             }
 
-            return onlyIfCheap ? -1 : c.Consume(new Consumer.Count<V>());
+            if (onlyIfCheap)
+            {
+                return -1;
+            }
+
+            var counter = new Consumer.Count<V>();
+            c.Consume(counter);
+            return counter.Result;
         }
     }
 }

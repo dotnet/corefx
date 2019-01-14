@@ -24,9 +24,9 @@ namespace System.Linq.ChainLinq.Consumables
             new GroupedEnumerableWithLinks<TSource, TKey, U>(_source, _keySelector, _comparer, transform);
 
         private Lookup<TKey, TSource> ToLookup() =>
-            Utils.AsConsumable(_source).Consume(new Consumer.Lookup<TSource, TKey>(_keySelector, _comparer));
+            Utils.Consume(_source, new Consumer.Lookup<TSource, TKey>(_keySelector, _comparer));
 
-        public override Result Consume<Result>(Consumer<IGrouping<TKey, TSource>, Result> consumer) =>
+        public override void Consume(Chain<IGrouping<TKey, TSource>> consumer) =>
             ToLookup().Consume(consumer);
 
         public override IEnumerator<IGrouping<TKey, TSource>> GetEnumerator() =>
@@ -51,14 +51,15 @@ namespace System.Linq.ChainLinq.Consumables
         {
             Consumable<TSource> source = Utils.AsConsumable(_source);
             Consumer.Lookup<TSource, TKey> consumerLookup = new Consumer.Lookup<TSource, TKey>(_keySelector, _comparer);
-            Lookup<TKey, TSource> lookup = source.Consume(consumerLookup);
+            source.Consume(consumerLookup);
+            Lookup<TKey, TSource> lookup = consumerLookup.Result;
             return lookup.AddTail(Link);
         }
 
         public override IEnumerator<V> GetEnumerator() =>
             ToConsumable().GetEnumerator();
 
-        public override TResult Consume<TResult>(Consumer<V, TResult> consumer) =>
+        public override void Consume(Chain<V> consumer) =>
             ToConsumable().Consume(consumer);
     }
 
@@ -86,9 +87,9 @@ namespace System.Linq.ChainLinq.Consumables
             new GroupedEnumerableWithLinks<TSource, TKey, TElement, U>(_source, _keySelector, _elementSelector, _comparer, transform);
 
         private Lookup<TKey, TElement> ToLookup() =>
-            Utils.AsConsumable(_source).Consume(new Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer));
+            Utils.Consume(_source, new Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer));
 
-        public override Result Consume<Result>(Consumer<IGrouping<TKey, TElement>, Result> consumer) =>
+        public override void Consume(Chain<IGrouping<TKey, TElement>> consumer) =>
             ToLookup().Consume(consumer);
 
         public override IEnumerator<IGrouping<TKey, TElement>> GetEnumerator() =>
@@ -114,14 +115,15 @@ namespace System.Linq.ChainLinq.Consumables
         {
             Consumable<TSource> source = Utils.AsConsumable(_source);
             Consumer.LookupSplit<TSource, TKey, TElement> consumerLookup = new Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer);
-            Lookup<TKey, TElement> lookup = source.Consume(consumerLookup);
+            source.Consume(consumerLookup);
+            Lookup<TKey, TElement> lookup = consumerLookup.Result;
             return lookup.AddTail(Link);
         }
 
         public override IEnumerator<V> GetEnumerator() =>
             ToConsumable().GetEnumerator();
 
-        public override TResult Consume<TResult>(Consumer<V, TResult> consumer) =>
+        public override void Consume(Chain<V> consumer) =>
             ToConsumable().Consume(consumer);
     }
 
@@ -149,9 +151,9 @@ namespace System.Linq.ChainLinq.Consumables
             new GroupedResultEnumerableWithLinks<TSource, TKey, TResult, U>(_source, _keySelector, _resultSelector, _comparer, transform);
 
         private Lookup<TKey, TSource> ToLookup() =>
-            Utils.AsConsumable(_source).Consume(new Consumer.Lookup<TSource, TKey>(_keySelector, _comparer));
+            Utils.Consume(_source, new Consumer.Lookup<TSource, TKey>(_keySelector, _comparer));
 
-        public override Result Consume<Result>(Consumer<TResult, Result> consumer) =>
+        public override void Consume(Chain<TResult> consumer) =>
             ToLookup().ApplyResultSelector(_resultSelector).Consume(consumer);
 
         public override IEnumerator<TResult> GetEnumerator() =>
@@ -177,7 +179,8 @@ namespace System.Linq.ChainLinq.Consumables
         {
             Consumable<TSource> source = Utils.AsConsumable(_source);
             Consumer.Lookup<TSource, TKey> consumerLookup = new Consumer.Lookup<TSource, TKey>(_keySelector, _comparer);
-            Lookup<TKey, TSource> lookup = source.Consume(consumerLookup);
+            source.Consume(consumerLookup);
+            Lookup<TKey, TSource> lookup = consumerLookup.Result;
             ConsumableForAddition<TResult> appliedSelector = lookup.ApplyResultSelector(_resultSelector);
             return appliedSelector.AddTail(Link);
         }
@@ -185,7 +188,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ToConsumable().GetEnumerator();
 
-        public override Result Consume<Result>(Consumer<V, Result> consumer) =>
+        public override void Consume(Chain<V> consumer) =>
             ToConsumable().Consume(consumer);
     }
 
@@ -215,9 +218,9 @@ namespace System.Linq.ChainLinq.Consumables
             new GroupedResultEnumerableWithLinks<TSource, TKey, TElement, TResult, U>(_source, _keySelector, _elementSelector, _resultSelector, _comparer, transform);
 
         private Lookup<TKey, TElement> ToLookup() =>
-            Utils.AsConsumable(_source).Consume(new Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer));
+            Utils.Consume(_source, new Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer));
 
-        public override Result Consume<Result>(Consumer<TResult, Result> consumer) =>
+        public override void Consume(Chain<TResult> consumer) =>
             ToLookup().ApplyResultSelector(_resultSelector).Consume(consumer);
 
         public override IEnumerator<TResult> GetEnumerator() =>
@@ -244,7 +247,8 @@ namespace System.Linq.ChainLinq.Consumables
         {
             Consumable<TSource> source = Utils.AsConsumable(_source);
             Consumer.LookupSplit<TSource, TKey, TElement> consumerLookup = new Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer);
-            Lookup<TKey, TElement> lookup = source.Consume(consumerLookup);
+            source.Consume(consumerLookup);
+            Lookup<TKey, TElement> lookup = consumerLookup.Result;
             ConsumableForAddition<TResult> appliedSelector = lookup.ApplyResultSelector(_resultSelector);
             return appliedSelector.AddTail(Link);
         }
@@ -252,7 +256,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ToConsumable().GetEnumerator();
 
-        public override Result Consume<Result>(Consumer<V, Result> consumer) =>
+        public override void Consume(Chain<V> consumer) =>
             ToConsumable().Consume(consumer);
     }
 

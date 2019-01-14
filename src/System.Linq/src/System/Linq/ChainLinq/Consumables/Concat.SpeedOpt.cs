@@ -58,7 +58,14 @@ namespace System.Linq.ChainLinq.Consumables
                 }
             }
 
-            return onlyIfCheap ? -1 : Consume(new Consumer.Count<V>());
+            if (onlyIfCheap)
+            {
+                return -1;
+            }
+
+            var counter = new Consumer.Count<V>();
+            Consume(counter);
+            return counter.Result;
         }
     }
 }

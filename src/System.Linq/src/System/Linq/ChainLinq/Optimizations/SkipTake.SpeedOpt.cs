@@ -9,10 +9,14 @@ namespace System.Linq.ChainLinq.Optimizations
             if (c.Link is ISkipTakeOnConsumableLinkUpdate<T, V> skipLink)
             {
                 var skipped = Skip(c, list, start, count, count - 1);
-                return skipped.Consume(new Consumer.Last<V>(orDefault));
+                var skippedLast = new Consumer.Last<V>(orDefault);
+                skipped.Consume(skippedLast);
+                return skippedLast.Result;;
             }
 
-            return c.Consume(new Consumer.Last<V>(orDefault));
+            var last = new Consumer.Last<V>(orDefault);
+            c.Consume(last);
+            return last.Result;
         }
 
         public static Consumable<V> Skip<T, V>(Consumables.Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, T> c, IList<T> list, int start, int count, int toSkip)

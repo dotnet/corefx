@@ -26,7 +26,9 @@ namespace System.Linq
                     }
                 }
 
-                return consumable.Consume(new ChainLinq.Consumer.ToArrayViaBuilder<TSource>());
+                var builder = new ChainLinq.Consumer.ToArrayViaBuilder<TSource>();
+                consumable.Consume(builder);
+                return builder.Result;
             }
 
             return EnumerableHelpers.ToArray(source);
@@ -50,7 +52,9 @@ namespace System.Linq
                     }
                 }
 
-                return consumable.Consume(new ChainLinq.Consumer.ToList<TSource>());
+                var builder = new ChainLinq.Consumer.ToList<TSource>();
+                consumable.Consume(builder);
+                return builder.Result;
             }
 
             return new List<TSource>(source);
@@ -78,11 +82,15 @@ namespace System.Linq
                 var count = counter.GetCount(true);
                 if (count >= 0)
                 {
-                    consumable.Consume(new ChainLinq.Consumer.ToDictionary<TSource, TKey>(keySelector, count, comparer));
+                    var builder = new ChainLinq.Consumer.ToDictionary<TSource, TKey>(keySelector, count, comparer);
+                    consumable.Consume(builder);
+                    return builder.Result;
                 }
             }
 
-            return consumable.Consume(new ChainLinq.Consumer.ToDictionary<TSource, TKey>(keySelector, comparer));
+            var builder2 = new ChainLinq.Consumer.ToDictionary<TSource, TKey>(keySelector, comparer);
+            consumable.Consume(builder2);
+            return builder2.Result;
         }
 
         public static Dictionary<TKey, TElement> ToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) =>
@@ -112,11 +120,15 @@ namespace System.Linq
                 var count = counter.GetCount(true);
                 if (count >= 0)
                 {
-                    consumable.Consume(new ChainLinq.Consumer.ToDictionary<TSource, TKey, TElement>(keySelector, elementSelector, count, comparer));
+                    var builder = new ChainLinq.Consumer.ToDictionary<TSource, TKey, TElement>(keySelector, elementSelector, count, comparer);
+                    consumable.Consume(builder);
+                    return builder.Result;
                 }
             }
 
-            return consumable.Consume(new ChainLinq.Consumer.ToDictionary<TSource, TKey, TElement>(keySelector, elementSelector, comparer));
+            var builder2 = new ChainLinq.Consumer.ToDictionary<TSource, TKey, TElement>(keySelector, elementSelector, comparer);
+            consumable.Consume(builder2);
+            return builder2.Result;
         }
 
         public static HashSet<TSource> ToHashSet<TSource>(this IEnumerable<TSource> source) => source.ToHashSet(comparer: null);

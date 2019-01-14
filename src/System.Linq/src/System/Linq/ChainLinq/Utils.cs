@@ -21,14 +21,14 @@ namespace System.Linq.ChainLinq
             {
                 return provider.GetConsumable(transform);
             }
-/*
- * I don't think we should use IList in the general case?
- * 
-            else if (e is IList<T> ilist)
-            {
-                return new Consumables.IList<T, U>(ilist, 0, ilist.Count, transform);
-            }
-*/
+            /*
+             * I don't think we should use IList in the general case?
+             * 
+                        else if (e is IList<T> ilist)
+                        {
+                            return new Consumables.IList<T, U>(ilist, 0, ilist.Count, transform);
+                        }
+            */
             else
             {
                 return new Consumables.Enumerable<T, U>(e, transform);
@@ -42,7 +42,7 @@ namespace System.Linq.ChainLinq
                 return c;
             }
             else
-            { 
+            {
                 return CreateConsumable(e, Links.Identity<T>.Instance);
             }
         }
@@ -74,7 +74,11 @@ namespace System.Linq.ChainLinq
             }
         }
 
-        internal static Result Consume<T, Result>(IEnumerable<T> e, Consumer<T, Result> consumer) =>
-            AsConsumable(e).Consume(consumer);
+        internal static Result Consume<T, Result>(IEnumerable<T> e, Consumer<T, Result> consumer)
+        {
+            var c = AsConsumable(e);
+            c.Consume(consumer);
+            return consumer.Result;
+        }
     }
 }

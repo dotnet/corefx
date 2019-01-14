@@ -16,7 +16,7 @@ namespace System.Linq.ChainLinq.Consumables
 
         public override IEnumerator<T> GetEnumerator() => this;
 
-        public override TResult Consume<TResult>(Consumer<T, TResult> consumer)
+        public override void Consume(Chain<T> consumer)
         {
             try
             {
@@ -26,7 +26,6 @@ namespace System.Linq.ChainLinq.Consumables
             {
                 consumer.ChainDispose();
             }
-            return consumer.Result;
         }
 
         void IDisposable.Dispose() { }

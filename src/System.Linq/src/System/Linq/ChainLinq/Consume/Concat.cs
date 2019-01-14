@@ -4,7 +4,7 @@ namespace System.Linq.ChainLinq.Consume
 {
     static class Concat
     {
-        public static Result Invoke<T, V, Result>(IEnumerable<T> firstOrNull, IEnumerable<T> second, IEnumerable<T> thirdOrNull, Link<T, V> composition, Consumer<V, Result> consumer)
+        public static void Invoke<T, V>(IEnumerable<T> firstOrNull, IEnumerable<T> second, IEnumerable<T> thirdOrNull, Link<T, V> composition, Chain<V> consumer)
         {
             var chain = composition.Compose(consumer);
             try
@@ -16,7 +16,6 @@ namespace System.Linq.ChainLinq.Consume
             {
                 chain.ChainDispose();
             }
-            return consumer.Result;
         }
 
         private static void Pipeline<T>(IEnumerable<T> firstOrNull, IEnumerable<T> second, IEnumerable<T> thirdOrNull, Chain<T> chain)

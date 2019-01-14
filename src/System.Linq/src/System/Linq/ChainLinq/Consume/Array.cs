@@ -2,7 +2,7 @@
 {
     static class Array
     {
-        public static Result Invoke<T, V, Result>(T[] array, Link<T, V> composition, Consumer<V, Result> consumer)
+        public static void Invoke<T, V>(T[] array, Link<T, V> composition, Chain<V> consumer)
         {
             var chain = composition.Compose(consumer);
             try
@@ -21,7 +21,6 @@
             {
                 chain.ChainDispose();
             }
-            return consumer.Result;
         }
 
         private static void Pipeline<T>(T[] array, Chain<T> chain)

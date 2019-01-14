@@ -2,7 +2,7 @@
 {
     static class Repeat
     {
-        public static Result Invoke<T, V, Result>(T element, int count, Link<T, V> composition, Consumer<V, Result> consumer)
+        public static void Invoke<T, V>(T element, int count, Link<T, V> composition, Chain<V> consumer)
         {
             var chain = composition.Compose(consumer);
             try
@@ -14,7 +14,6 @@
             {
                 chain.ChainDispose();
             }
-            return consumer.Result;
         }
 
         private static void Pipeline<T>(T element, int count, Chain<T> chain)

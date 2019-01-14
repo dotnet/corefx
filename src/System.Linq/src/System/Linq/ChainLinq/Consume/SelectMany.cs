@@ -58,7 +58,8 @@ namespace System.Linq.ChainLinq.Consume
                 {
                     var consumer = GetInnerConsumer();
                     consumer.Source = input.Item1;
-                    state = consumable.Consume(consumer);
+                    consumable.Consume(consumer);
+                    state = consumer.Result;
                 }
                 else if (input.Item2 is TCollection[] array)
                 {
@@ -91,7 +92,7 @@ namespace System.Linq.ChainLinq.Consume
             }
         }
 
-        public static Result Invoke<T, V, Result>(Consumable<IEnumerable<T>> e, Link<T, V> composition, Consumer<V, Result> consumer)
+        public static void Invoke<T, V>(Consumable<IEnumerable<T>> e, Link<T, V> composition, Chain<V> consumer)
         {
             var chain = composition.Compose(consumer);
             try
@@ -103,10 +104,9 @@ namespace System.Linq.ChainLinq.Consume
             {
                 chain.ChainDispose();
             }
-            return consumer.Result;
         }
 
-        public static Result Invoke<TSource, TCollection, T, V, Result>(Consumable<(TSource, IEnumerable<TCollection>)> e, Func<TSource, TCollection, T> resultSelector, Link<T, V> composition, Consumer<V, Result> consumer)
+        public static void Invoke<TSource, TCollection, T, V>(Consumable<(TSource, IEnumerable<TCollection>)> e, Func<TSource, TCollection, T> resultSelector, Link<T, V> composition, Chain<V> consumer)
         {
             var chain = composition.Compose(consumer);
             try
@@ -118,7 +118,6 @@ namespace System.Linq.ChainLinq.Consume
             {
                 chain.ChainDispose();
             }
-            return consumer.Result;
         }
     }
 }

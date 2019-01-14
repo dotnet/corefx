@@ -26,7 +26,9 @@ namespace System.Linq.ChainLinq.Consume
         {
             if (input is Consumable<T> consumable)
             {
-                return consumable.Consume(GetInnerConsumer(chain, ref consumer));
+                var c = GetInnerConsumer(chain, ref consumer);
+                consumable.Consume(c);
+                return c.Result;
             }
             else if (input is T[] array)
             {

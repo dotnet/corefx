@@ -74,7 +74,7 @@ namespace System.Linq
             {
                 if (e.MoveNext())
                 {
-                    ChainLinq.Consumables.Lookup<TKey, TInner> lookup = ChainLinq.Utils.AsConsumable(inner).Consume(new ChainLinq.Consumer.LookupForJoin<TInner, TKey>(innerKeySelector, comparer));
+                    ChainLinq.Consumables.Lookup<TKey, TInner> lookup = ChainLinq.Utils.Consume(inner, new ChainLinq.Consumer.LookupForJoin<TInner, TKey>(innerKeySelector, comparer));
                     do
                     {
                         TOuter item = e.Current;

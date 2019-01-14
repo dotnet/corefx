@@ -28,14 +28,18 @@ namespace System.Linq.ChainLinq.Consumables
 
             if (Link is Optimizations.ICountOnConsumableLink countLink)
             {
-                var underlyingCount = _selectMany.Consume(new SelectManyCount<T>());
+                var selectManyCount = new SelectManyCount<T>();
+                _selectMany.Consume(selectManyCount);
+                var underlyingCount = selectManyCount.Result;
 
-                var count = countLink.GetCount(underlyingCount);
+                var c = countLink.GetCount(underlyingCount);
                 if (underlyingCount >= 0)
                     return underlyingCount;
             }
 
-            return Consume(new Consumer.Count<V>());
+            var counter = new Consumer.Count<V>();
+            Consume(counter);
+            return counter.Result;
         }
     }
 }
