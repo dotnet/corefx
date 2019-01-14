@@ -43,7 +43,7 @@ namespace System.Net.Http.Functional.Tests
         /// This test must be in the same test collection as any others testing HttpClient/WinHttpHandler
         /// DiagnosticSources, since the global logging mechanism makes them conflict inherently.
         /// </remarks>
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceLogging()
         {
@@ -111,7 +111,7 @@ namespace System.Net.Http.Functional.Tests
         /// This test must be in the same test collection as any others testing HttpClient/WinHttpHandler
         /// DiagnosticSources, since the global logging mechanism makes them conflict inherently.
         /// </remarks>
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceNoLogging()
         {
@@ -167,7 +167,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(23771, TestPlatforms.AnyUnix)]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -214,7 +214,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString(), useSsl.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticExceptionLogging()
         {
@@ -260,7 +260,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(23209)]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticCancelledLogging()
         {
@@ -305,7 +305,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceActivityLogging()
         {
@@ -381,7 +381,58 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
+        [Fact]
+        public void SendAsync_ExpectedDiagnosticSourceActivityLoggingDoesNotOverwriteHeader()
+        {
+            RemoteInvoke(useSocketsHttpHandlerString =>
+            {
+                bool activityStartLogged = false;
+                bool activityStopLogged = false;
+
+                Activity parentActivity = new Activity("parent");
+                parentActivity.AddBaggage("correlationId", Guid.NewGuid().ToString());
+                parentActivity.Start();
+
+                string customRequestIdHeader = "|foo.bar.";
+                var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(kvp =>
+                {
+                    if (kvp.Key.Equals("System.Net.Http.HttpRequestOut.Start"))
+                    {
+                        var request = GetPropertyValueFromAnonymousTypeInstance<HttpRequestMessage>(kvp.Value, "Request");
+                        request.Headers.Add("Request-Id", customRequestIdHeader);
+
+                        activityStartLogged = true;
+                    }
+                    else if (kvp.Key.Equals("System.Net.Http.HttpRequestOut.Stop"))
+                    {
+                        var request = GetPropertyValueFromAnonymousTypeInstance<HttpRequestMessage>(kvp.Value, "Request");
+                        Assert.Single(request.Headers.GetValues("Request-Id"));
+                        Assert.Equal(customRequestIdHeader, request.Headers.GetValues("Request-Id").Single());
+                        activityStopLogged = true;
+                    }
+                });
+
+                using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
+                {
+                    diagnosticListenerObserver.Enable();
+                    using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString))
+                    {
+                        client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
+                    }
+
+                    Assert.True(activityStartLogged, "HttpRequestOut.Start was not logged.");
+
+                    // Poll with a timeout since logging response is not synchronized with returning a response.
+                    WaitForTrue(() => activityStopLogged, TimeSpan.FromSeconds(1), "HttpRequestOut.Stop was not logged within 1 second timeout.");
+                    diagnosticListenerObserver.Disable();
+                }
+
+                return SuccessExitCode;
+            }, UseSocketsHttpHandler.ToString()).Dispose();
+        }
+
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceUrlFilteredActivityLogging()
         {
@@ -422,7 +473,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticExceptionActivityLogging()
         {
@@ -468,7 +519,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSynchronousExceptionActivityLogging()
         {
@@ -530,7 +581,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceNewAndDeprecatedEventsLogging()
         {
@@ -569,7 +620,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticExceptionOnlyActivityLogging()
         {
@@ -607,7 +658,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticStopOnlyActivityLogging()
         {
@@ -645,7 +696,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(23209)]
-        [OuterLoop] // TODO: Issue #11345
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticCancelledActivityLogging()
         {
