@@ -23,7 +23,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(string propertyName, ulong value, bool escape = true)
@@ -42,7 +42,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<char> propertyName, ulong value, bool escape = true)
@@ -75,7 +75,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// Writes the <see cref="ulong"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<byte> propertyName, ulong value, bool escape = true)
@@ -108,7 +108,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(string propertyName, uint value, bool escape = true)
@@ -127,7 +127,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<char> propertyName, uint value, bool escape = true)
@@ -146,7 +146,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// Writes the <see cref="uint"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
         /// </remarks>
         [CLSCompliant(false)]
         public void WriteNumber(ReadOnlySpan<byte> propertyName, uint value, bool escape = true)
@@ -317,7 +317,8 @@ namespace System.Text.Json
             if (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out int bytesWritten))
             {
                 AdvanceAndGrow(ref idx, JsonConstants.MaximumFormatUInt64Length);
-                Utf8Formatter.TryFormat(value, _buffer, out bytesWritten);
+                bool result = Utf8Formatter.TryFormat(value, _buffer, out bytesWritten);
+                Debug.Assert(result);
             }
             idx += bytesWritten;
         }

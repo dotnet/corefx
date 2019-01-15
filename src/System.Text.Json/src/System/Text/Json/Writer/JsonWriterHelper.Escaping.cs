@@ -145,7 +145,8 @@ namespace System.Text.Json
                     destination[written++] = (byte)'u';
                     if (scalar < JsonConstants.UnicodePlane01StartValue)
                     {
-                        Utf8Formatter.TryFormat(scalar, destination.Slice(written), out int bytesWritten, format: s_hexStandardFormat);
+                        bool result = Utf8Formatter.TryFormat(scalar, destination.Slice(written), out int bytesWritten, format: s_hexStandardFormat);
+                        Debug.Assert(result);
                         Debug.Assert(bytesWritten == 4);
                         written += bytesWritten;
                     }
@@ -157,12 +158,14 @@ namespace System.Text.Json
                         int quotient = Math.DivRem(scalar - JsonConstants.UnicodePlane01StartValue, JsonConstants.ShiftRightBy10, out int remainder);
                         int firstChar = quotient + JsonConstants.HighSurrogateStartValue;
                         int nextChar = remainder + JsonConstants.LowSurrogateStartValue;
-                        Utf8Formatter.TryFormat(firstChar, destination.Slice(written), out int bytesWritten, format: s_hexStandardFormat);
+                        bool result = Utf8Formatter.TryFormat(firstChar, destination.Slice(written), out int bytesWritten, format: s_hexStandardFormat);
+                        Debug.Assert(result);
                         Debug.Assert(bytesWritten == 4);
                         written += bytesWritten;
                         destination[written++] = (byte)'\\';
                         destination[written++] = (byte)'u';
-                        Utf8Formatter.TryFormat(nextChar, destination.Slice(written), out bytesWritten, format: s_hexStandardFormat);
+                        result = Utf8Formatter.TryFormat(nextChar, destination.Slice(written), out bytesWritten, format: s_hexStandardFormat);
+                        Debug.Assert(result);
                         Debug.Assert(bytesWritten == 4);
                         written += bytesWritten;
                     }

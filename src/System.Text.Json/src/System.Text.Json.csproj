@@ -23,6 +23,7 @@
     <Compile Include="System\Text\Json\Reader\Utf8JsonReader.TryGet.cs" />
     <Compile Include="System\Text\Json\Writer\JsonWriterHelper.cs" />
     <Compile Include="System\Text\Json\Writer\JsonWriterHelper.Escaping.cs" />
+    <Compile Include="System\Text\Json\Writer\JsonWriterHelper.Transcoding.cs" />
     <Compile Include="System\Text\Json\Writer\JsonWriterOptions.cs" />
     <Compile Include="System\Text\Json\Writer\JsonWriterState.cs" />
     <Compile Include="System\Text\Json\Writer\SequenceValidity.cs" />

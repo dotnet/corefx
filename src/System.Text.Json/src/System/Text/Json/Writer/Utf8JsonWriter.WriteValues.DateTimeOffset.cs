@@ -16,7 +16,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="DateTimeOffset"/> using the round-trippable 'O' <see cref="StandardFormat"/> , for example: 2017-06-12T05:30:45.7680000-07:00.
+        /// Writes the <see cref="DateTimeOffset"/> using the round-trippable ('O') <see cref="StandardFormat"/> , for example: 2017-06-12T05:30:45.7680000-07:00.
         /// </remarks>
         public void WriteStringValue(DateTimeOffset value)
         {

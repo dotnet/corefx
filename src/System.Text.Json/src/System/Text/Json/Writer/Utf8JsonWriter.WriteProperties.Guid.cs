@@ -276,7 +276,8 @@ namespace System.Text.Json
             if (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out int bytesWritten))
             {
                 AdvanceAndGrow(ref idx, JsonConstants.MaximumFormatGuidLength);
-                Utf8Formatter.TryFormat(value, _buffer, out bytesWritten);
+                bool result = Utf8Formatter.TryFormat(value, _buffer, out bytesWritten);
+                Debug.Assert(result);
             }
             idx += bytesWritten;
         }

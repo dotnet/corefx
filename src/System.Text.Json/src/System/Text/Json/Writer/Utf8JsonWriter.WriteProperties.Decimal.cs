@@ -23,7 +23,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G')
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
         /// </remarks>
         public void WriteNumber(string propertyName, decimal value, bool escape = true)
             => WriteNumber(propertyName.AsSpan(), value, escape);
@@ -41,7 +41,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G')
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, decimal value, bool escape = true)
         {
@@ -73,7 +73,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G')
+        /// Writes the <see cref="decimal"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> propertyName, decimal value, bool escape = true)
         {
@@ -257,7 +257,8 @@ namespace System.Text.Json
             if (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out int bytesWritten))
             {
                 AdvanceAndGrow(ref idx, JsonConstants.MaximumFormatDecimalLength);
-                Utf8Formatter.TryFormat(value, _buffer, out bytesWritten);
+                bool result = Utf8Formatter.TryFormat(value, _buffer, out bytesWritten);
+                Debug.Assert(result);
             }
             idx += bytesWritten;
         }

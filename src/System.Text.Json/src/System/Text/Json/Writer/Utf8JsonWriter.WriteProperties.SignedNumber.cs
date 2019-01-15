@@ -23,7 +23,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
         /// </remarks>
         public void WriteNumber(string propertyName, long value, bool escape = true)
             => WriteNumber(propertyName.AsSpan(), value, escape);
@@ -41,7 +41,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, long value, bool escape = true)
         {
@@ -73,7 +73,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// Writes the <see cref="long"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> propertyName, long value, bool escape = true)
         {
@@ -105,7 +105,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
         /// </remarks>
         public void WriteNumber(string propertyName, int value, bool escape = true)
             => WriteNumber(propertyName.AsSpan(), (long)value, escape);
@@ -123,7 +123,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<char> propertyName, int value, bool escape = true)
             => WriteNumber(propertyName, (long)value, escape);
@@ -141,7 +141,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767
+        /// Writes the <see cref="int"/> using the default <see cref="StandardFormat"/> (i.e. 'G'), for example: 32767.
         /// </remarks>
         public void WriteNumber(ReadOnlySpan<byte> propertyName, int value, bool escape = true)
             => WriteNumber(propertyName, (long)value, escape);
@@ -311,7 +311,8 @@ namespace System.Text.Json
             if (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out int bytesWritten))
             {
                 AdvanceAndGrow(ref idx, JsonConstants.MaximumFormatInt64Length);
-                Utf8Formatter.TryFormat(value, _buffer, out bytesWritten);
+                bool result = Utf8Formatter.TryFormat(value, _buffer, out bytesWritten);
+                Debug.Assert(result);
             }
             idx += bytesWritten;
         }

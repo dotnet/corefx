@@ -23,7 +23,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="DateTime"/> using the round-trippable 'O' <see cref="StandardFormat"/> , for example: 2017-06-12T05:30:45.7680000.
+        /// Writes the <see cref="DateTime"/> using the round-trippable ('O') <see cref="StandardFormat"/> , for example: 2017-06-12T05:30:45.7680000.
         /// </remarks>
         public void WriteString(string propertyName, DateTime value, bool escape = true)
             => WriteString(propertyName.AsSpan(), value, escape);
@@ -41,7 +41,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="DateTime"/> using the round-trippable 'O' <see cref="StandardFormat"/> , for example: 2017-06-12T05:30:45.7680000.
+        /// Writes the <see cref="DateTime"/> using the round-trippable ('O') <see cref="StandardFormat"/> , for example: 2017-06-12T05:30:45.7680000.
         /// </remarks>
         public void WriteString(ReadOnlySpan<char> propertyName, DateTime value, bool escape = true)
         {
@@ -73,7 +73,7 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="DateTime"/> using the round-trippable 'O' <see cref="StandardFormat"/> , for example: 2017-06-12T05:30:45.7680000.
+        /// Writes the <see cref="DateTime"/> using the round-trippable ('O') <see cref="StandardFormat"/> , for example: 2017-06-12T05:30:45.7680000.
         /// </remarks>
         public void WriteString(ReadOnlySpan<byte> propertyName, DateTime value, bool escape = true)
         {
@@ -276,7 +276,8 @@ namespace System.Text.Json
             if (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out int bytesWritten, s_dateTimeStandardFormat))
             {
                 AdvanceAndGrow(ref idx, JsonConstants.MaximumFormatDateTimeLength);
-                Utf8Formatter.TryFormat(value, _buffer, out bytesWritten, s_dateTimeStandardFormat);
+                bool result = Utf8Formatter.TryFormat(value, _buffer, out bytesWritten, s_dateTimeStandardFormat);
+                Debug.Assert(result);
             }
             idx += bytesWritten;
         }
