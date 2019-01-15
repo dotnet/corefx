@@ -204,6 +204,98 @@ namespace System.Text.Json.Tests
         [InlineData(true, false)]
         [InlineData(false, true)]
         [InlineData(false, false)]
+        public void FixedSizeBufferWriter_Decimal(bool formatted, bool skipValidation)
+        {
+            var random = new Random(42);
+
+            for (int i = 0; i < 1_000; i++)
+            {
+                var output = new FixedSizedBufferWriter(31);
+                decimal value = JsonTestHelper.NextDecimal(random, 78E14, -78E14);
+                var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+                jsonUtf8.WriteNumberValue(value);
+
+                jsonUtf8.Flush();
+                string actualStr = Encoding.UTF8.GetString(output.Formatted);
+
+                Assert.True(output.Formatted.Length <= 31);
+                Assert.Equal(decimal.Parse(actualStr), value);
+            }
+
+            for (int i = 0; i < 1_000; i++)
+            {
+                var output = new FixedSizedBufferWriter(31);
+                decimal value = JsonTestHelper.NextDecimal(random, 1_000_000, -1_000_000);
+                var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+                jsonUtf8.WriteNumberValue(value);
+
+                jsonUtf8.Flush();
+                string actualStr = Encoding.UTF8.GetString(output.Formatted);
+
+                Assert.True(output.Formatted.Length <= 31);
+                Assert.Equal(decimal.Parse(actualStr), value);
+            }
+
+            {
+                var output = new FixedSizedBufferWriter(31);
+                decimal value = 9999999999999999999999999999m;
+                var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+                jsonUtf8.WriteNumberValue(value);
+
+                jsonUtf8.Flush();
+                string actualStr = Encoding.UTF8.GetString(output.Formatted);
+
+                Assert.Equal(value.ToString().Length, output.Formatted.Length);
+                Assert.Equal(decimal.Parse(actualStr), value);
+            }
+
+            {
+                var output = new FixedSizedBufferWriter(31);
+                decimal value = -9999999999999999999999999999m;
+                var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+                jsonUtf8.WriteNumberValue(value);
+
+                jsonUtf8.Flush();
+                string actualStr = Encoding.UTF8.GetString(output.Formatted);
+
+                Assert.Equal(value.ToString().Length, output.Formatted.Length);
+                Assert.Equal(decimal.Parse(actualStr), value);
+            }
+
+            {
+                var output = new FixedSizedBufferWriter(30);
+                decimal value = -0.9999999999999999999999999999m;
+                var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+
+                try
+                {
+                    jsonUtf8.WriteNumberValue(value);
+                    Assert.True(false, "Expected ArgumentException to be thrown when IBufferWriter doesn't have enough space.");
+                }
+                catch (ArgumentException) { }
+
+                output = new FixedSizedBufferWriter(31);
+                jsonUtf8 = new Utf8JsonWriter(output, state);
+                jsonUtf8.WriteNumberValue(value);
+
+                jsonUtf8.Flush();
+                string actualStr = Encoding.UTF8.GetString(output.Formatted);
+
+                Assert.Equal(value.ToString().Length, output.Formatted.Length);
+                Assert.Equal(decimal.Parse(actualStr), value);
+            }
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
         public void InvalidJsonMismatch(bool formatted, bool skipValidation)
         {
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
