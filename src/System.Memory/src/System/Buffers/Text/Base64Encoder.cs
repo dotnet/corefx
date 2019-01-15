@@ -372,6 +372,10 @@ namespace System.Buffers.Text
             return (uint)(i0 | (i1 << 8) | (EncodingPad << 16) | (EncodingPad << 24));
         }
 
+        private const uint EncodingPad = '='; // '=', for padding
+
+        private const int MaximumEncodeLength = (int.MaxValue / 4) * 3; // 1610612733
+
         // Pre-computing this table using a custom string(s_characters) and GenerateEncodingMapAndVerify (found in tests)
         private static readonly byte[] s_encodingMap = {
             65, 66, 67, 68, 69, 70, 71, 72,         //A..H
@@ -384,15 +388,42 @@ namespace System.Buffers.Text
             52, 53, 54, 55, 56, 57, 43, 47          //4..9, +, /
         };
 
-        private static readonly Vector128<sbyte> s_sseEncodeShuffleVec;
-        private static readonly Vector128<sbyte> s_sseEncodeLut;
+        private static readonly Vector128<sbyte> s_sseEncodeShuffleVec = Ssse3.IsSupported ? Vector128.Create(
+            1, 0, 2, 1,
+            4, 3, 5, 4,
+            7, 6, 8, 7,
+            10, 9, 11, 10
+        ) : default;
 
-        private static readonly Vector256<int> s_avxEncodePermuteVec;
-        private static readonly Vector256<sbyte> s_avxEncodeShuffleVec;
-        private static readonly Vector256<sbyte> s_avxEncodeLut;
+        private static readonly Vector128<sbyte> s_sseEncodeLut = Ssse3.IsSupported ? Vector128.Create(
+            65, 71, -4, -4,
+            -4, -4, -4, -4,
+            -4, -4, -4, -4,
+            -19, -16, 0, 0
+        ) : default;
 
-        private const byte EncodingPad = (byte)'='; // '=', for padding
+        private static readonly Vector256<int> s_avxEncodePermuteVec = Avx2.IsSupported ? Vector256.Create(0, 0, 1, 2, 3, 4, 5, 6) : default;
 
-        private const int MaximumEncodeLength = (int.MaxValue / 4) * 3; // 1610612733
+        private static readonly Vector256<sbyte> s_avxEncodeShuffleVec = Avx2.IsSupported ? Vector256.Create(
+            5, 4, 6, 5,
+            8, 7, 9, 8,
+            11, 10, 12, 11,
+            14, 13, 15, 14,
+            1, 0, 2, 1,
+            4, 3, 5, 4,
+            7, 6, 8, 7,
+            10, 9, 11, 10
+        ) : default;
+
+        private static readonly Vector256<sbyte> s_avxEncodeLut = Avx2.IsSupported ? Vector256.Create(
+            65, 71, -4, -4,
+            -4, -4, -4, -4,
+            -4, -4, -4, -4,
+            -19, -16, 0, 0,
+            65, 71, -4, -4,
+            -4, -4, -4, -4,
+            -4, -4, -4, -4,
+            -19, -16, 0, 0
+        ) : default;
     }
 }

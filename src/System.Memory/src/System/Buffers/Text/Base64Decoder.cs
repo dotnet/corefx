@@ -496,17 +496,81 @@ namespace System.Buffers.Text
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         };
 
-        private static readonly Vector128<sbyte> s_sseDecodeShuffleVec;
-        private static readonly Vector128<sbyte> s_sseDecodeLutLo;
-        private static readonly Vector128<sbyte> s_sseDecodeLutHi;
-        private static readonly Vector128<sbyte> s_sseDecodeLutShift;
-        private static readonly Vector128<sbyte> s_sseDecodeMask2F;
+        private static readonly Vector128<sbyte> s_sseDecodeShuffleVec = Ssse3.IsSupported ? Vector128.Create(
+            2, 1, 0, 6,
+            5, 4, 10, 9,
+            8, 14, 13, 12,
+            -1, -1, -1, -1
+        ) : default;
 
-        private static readonly Vector256<sbyte> s_avxDecodeShuffleVec;
-        private static readonly Vector256<int> s_avxDecodePermuteVec;
-        private static readonly Vector256<sbyte> s_avxDecodeLutLo;
-        private static readonly Vector256<sbyte> s_avxDecodeLutHi;
-        private static readonly Vector256<sbyte> s_avxDecodeLutShift;
-        private static readonly Vector256<sbyte> s_avxDecodeMask2F;
+        private static readonly Vector128<sbyte> s_sseDecodeLutLo = Sse3.IsSupported ? Vector128.Create(
+            0x15, 0x11, 0x11, 0x11,
+            0x11, 0x11, 0x11, 0x11,
+            0x11, 0x11, 0x13, 0x1A,
+            0x1B, 0x1B, 0x1B, 0x1A
+        ) : default;
+
+        private static readonly Vector128<sbyte> s_sseDecodeLutHi = Sse3.IsSupported ? Vector128.Create(
+            0x10, 0x10, 0x01, 0x02,
+            0x04, 0x08, 0x04, 0x08,
+            0x10, 0x10, 0x10, 0x10,
+            0x10, 0x10, 0x10, 0x10
+        ) : default;
+
+        private static readonly Vector128<sbyte> s_sseDecodeLutShift = Sse3.IsSupported ? Vector128.Create(
+            0, 16, 19, 4,
+            -65, -65, -71, -71,
+            0, 0, 0, 0,
+            0, 0, 0, 0
+        ) : default;
+
+        private static readonly Vector128<sbyte> s_sseDecodeMask2F = Sse3.IsSupported ? Vector128.Create((sbyte)0x2F) : default;    // ASCII: /
+
+        private static readonly Vector256<sbyte> s_avxDecodeShuffleVec = Avx2.IsSupported ? Vector256.Create(
+            2, 1, 0, 6,
+            5, 4, 10, 9,
+            8, 14, 13, 12,
+            -1, -1, -1, -1,
+            2, 1, 0, 6,
+            5, 4, 10, 9,
+            8, 14, 13, 12,
+            -1, -1, -1, -1
+        ) : default;
+
+        private static readonly Vector256<int> s_avxDecodePermuteVec = Avx2.IsSupported ? Vector256.Create(0, 1, 2, 4, 5, 6, -1, -1) : default;
+        private static readonly Vector256<sbyte> s_avxDecodeMask2F = Avx2.IsSupported ? Vector256.Create((sbyte)0x2F) : default;        // ASCII: /
+
+        private static readonly Vector256<sbyte> s_avxDecodeLutLo = Avx2.IsSupported ? Vector256.Create(
+            0x15, 0x11, 0x11, 0x11,
+            0x11, 0x11, 0x11, 0x11,
+            0x11, 0x11, 0x13, 0x1A,
+            0x1B, 0x1B, 0x1B, 0x1A,
+            0x15, 0x11, 0x11, 0x11,
+            0x11, 0x11, 0x11, 0x11,
+            0x11, 0x11, 0x13, 0x1A,
+            0x1B, 0x1B, 0x1B, 0x1A
+        ) : default;
+
+        private static readonly Vector256<sbyte> s_avxDecodeLutHi = Avx2.IsSupported ? Vector256.Create(
+            0x10, 0x10, 0x01, 0x02,
+            0x04, 0x08, 0x04, 0x08,
+            0x10, 0x10, 0x10, 0x10,
+            0x10, 0x10, 0x10, 0x10,
+            0x10, 0x10, 0x01, 0x02,
+            0x04, 0x08, 0x04, 0x08,
+            0x10, 0x10, 0x10, 0x10,
+            0x10, 0x10, 0x10, 0x10
+        ) : default;
+
+        private static readonly Vector256<sbyte> s_avxDecodeLutShift = Avx2.IsSupported ? Vector256.Create(
+            0, 16, 19, 4,
+            -65, -65, -71, -71,
+            0, 0, 0, 0,
+            0, 0, 0, 0,
+            0, 16, 19, 4,
+            -65, -65, -71, -71,
+            0, 0, 0, 0,
+            0, 0, 0, 0
+        ) : default;
     }
 }
