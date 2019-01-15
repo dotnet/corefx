@@ -63,7 +63,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the property name and <see cref="DateTimeOffset"/> value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
-        /// <param name="propertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
+        /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
         /// <param name="value">The value to be written as a JSON string as part of the name/value pair.</param>
         /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
@@ -75,17 +75,17 @@ namespace System.Text.Json
         /// <remarks>
         /// Writes the <see cref="DateTimeOffset"/> using the round-trippable ('O') <see cref="StandardFormat"/> , for example: 2017-06-12T05:30:45.7680000-07:00.
         /// </remarks>
-        public void WriteString(ReadOnlySpan<byte> propertyName, DateTimeOffset value, bool escape = true)
+        public void WriteString(ReadOnlySpan<byte> utf8PropertyName, DateTimeOffset value, bool escape = true)
         {
-            JsonWriterHelper.ValidateProperty(propertyName);
+            JsonWriterHelper.ValidateProperty(utf8PropertyName);
 
             if (escape)
             {
-                WriteStringEscape(propertyName, value);
+                WriteStringEscape(utf8PropertyName, value);
             }
             else
             {
-                WriteStringByOptions(propertyName, value);
+                WriteStringByOptions(utf8PropertyName, value);
             }
 
             SetFlagToAddListSeparatorBeforeNextItem();
@@ -108,19 +108,19 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringEscape(ReadOnlySpan<byte> propertyName, DateTimeOffset value)
+        private void WriteStringEscape(ReadOnlySpan<byte> utf8PropertyName, DateTimeOffset value)
         {
-            int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
+            int propertyIdx = JsonWriterHelper.NeedsEscaping(utf8PropertyName);
 
             Debug.Assert(propertyIdx >= -1 && propertyIdx < int.MaxValue / 2);
 
             if (propertyIdx != -1)
             {
-                WriteStringEscapeProperty(propertyName, value, propertyIdx);
+                WriteStringEscapeProperty(utf8PropertyName, value, propertyIdx);
             }
             else
             {
-                WriteStringByOptions(propertyName, value);
+                WriteStringByOptions(utf8PropertyName, value);
             }
         }
 
@@ -157,14 +157,14 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringEscapeProperty(ReadOnlySpan<byte> propertyName, DateTimeOffset value, int firstEscapeIndexProp)
+        private void WriteStringEscapeProperty(ReadOnlySpan<byte> utf8PropertyName, DateTimeOffset value, int firstEscapeIndexProp)
         {
-            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
-            Debug.Assert(firstEscapeIndexProp >= 0 && firstEscapeIndexProp < propertyName.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= utf8PropertyName.Length);
+            Debug.Assert(firstEscapeIndexProp >= 0 && firstEscapeIndexProp < utf8PropertyName.Length);
 
             byte[] propertyArray = null;
 
-            int length = JsonWriterHelper.GetMaxEscapedLength(propertyName.Length, firstEscapeIndexProp);
+            int length = JsonWriterHelper.GetMaxEscapedLength(utf8PropertyName.Length, firstEscapeIndexProp);
             Span<byte> escapedPropertyName;
             if (length > StackallocThreshold)
             {
@@ -180,7 +180,7 @@ namespace System.Text.Json
                     escapedPropertyName = new Span<byte>(ptr, length);
                 }
             }
-            JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+            JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
 
             WriteStringByOptions(escapedPropertyName.Slice(0, written), value);
 
@@ -203,16 +203,16 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteStringByOptions(ReadOnlySpan<byte> propertyName, DateTimeOffset value)
+        private void WriteStringByOptions(ReadOnlySpan<byte> utf8PropertyName, DateTimeOffset value)
         {
             ValidateWritingProperty();
             if (_writerOptions.Indented)
             {
-                WriteStringIndented(propertyName, value);
+                WriteStringIndented(utf8PropertyName, value);
             }
             else
             {
-                WriteStringMinimized(propertyName, value);
+                WriteStringMinimized(utf8PropertyName, value);
             }
         }
 

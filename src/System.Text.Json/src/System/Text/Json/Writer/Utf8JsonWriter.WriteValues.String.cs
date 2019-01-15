@@ -136,7 +136,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the UTF-8 text value (as a JSON string) as an element of a JSON array.
         /// </summary>
-        /// <param name="value">The UTF-8 encoded value to be written as a JSON string element of a JSON array.</param>
+        /// <param name="utf8Value">The UTF-8 encoded value to be written as a JSON string element of a JSON array.</param>
         /// <param name="escape">If this is set to false, the writer assumes the value is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
@@ -144,49 +144,49 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStringValue(ReadOnlySpan<byte> value, bool escape = true)
+        public void WriteStringValue(ReadOnlySpan<byte> utf8Value, bool escape = true)
         {
-            JsonWriterHelper.ValidateValue(value);
+            JsonWriterHelper.ValidateValue(utf8Value);
 
             if (escape)
             {
-                WriteStringEscape(value);
+                WriteStringEscape(utf8Value);
             }
             else
             {
-                WriteStringByOptions(value);
+                WriteStringByOptions(utf8Value);
             }
 
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
         }
 
-        private void WriteStringEscape(ReadOnlySpan<byte> value)
+        private void WriteStringEscape(ReadOnlySpan<byte> utf8Value)
         {
-            int valueIdx = JsonWriterHelper.NeedsEscaping(value);
+            int valueIdx = JsonWriterHelper.NeedsEscaping(utf8Value);
 
             Debug.Assert(valueIdx >= -1 && valueIdx < int.MaxValue / 2);
 
             if (valueIdx != -1)
             {
-                WriteStringEscapeValue(value, valueIdx);
+                WriteStringEscapeValue(utf8Value, valueIdx);
             }
             else
             {
-                WriteStringByOptions(value);
+                WriteStringByOptions(utf8Value);
             }
         }
 
-        private void WriteStringByOptions(ReadOnlySpan<byte> value)
+        private void WriteStringByOptions(ReadOnlySpan<byte> utf8Value)
         {
             ValidateWritingValue();
             if (_writerOptions.Indented)
             {
-                WriteStringIndented(value);
+                WriteStringIndented(utf8Value);
             }
             else
             {
-                WriteStringMinimized(value);
+                WriteStringMinimized(utf8Value);
             }
         }
 
@@ -209,14 +209,14 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStringEscapeValue(ReadOnlySpan<byte> value, int firstEscapeIndexVal)
+        private void WriteStringEscapeValue(ReadOnlySpan<byte> utf8Value, int firstEscapeIndexVal)
         {
-            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
-            Debug.Assert(firstEscapeIndexVal >= 0 && firstEscapeIndexVal < value.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= utf8Value.Length);
+            Debug.Assert(firstEscapeIndexVal >= 0 && firstEscapeIndexVal < utf8Value.Length);
 
             byte[] valueArray = null;
 
-            int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndexVal);
+            int length = JsonWriterHelper.GetMaxEscapedLength(utf8Value.Length, firstEscapeIndexVal);
 
             Span<byte> escapedValue;
             if (length > StackallocThreshold)
@@ -233,7 +233,7 @@ namespace System.Text.Json
                     escapedValue = new Span<byte>(ptr, length);
                 }
             }
-            JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndexVal, out int written);
+            JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndexVal, out int written);
 
             WriteStringByOptions(escapedValue.Slice(0, written));
 

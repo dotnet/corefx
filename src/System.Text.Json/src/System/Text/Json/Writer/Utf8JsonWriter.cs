@@ -311,7 +311,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the beginning of a JSON array with a property name as the key.
         /// </summary>
-        /// <param name="propertyName">The UTF-8 encoded property name of the JSON array to be written.</param>
+        /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON array to be written.</param>
         /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
@@ -320,17 +320,17 @@ namespace System.Text.Json
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStartArray(ReadOnlySpan<byte> propertyName, bool escape = true)
+        public void WriteStartArray(ReadOnlySpan<byte> utf8PropertyName, bool escape = true)
         {
-            ValidatePropertyNameAndDepth(propertyName);
+            ValidatePropertyNameAndDepth(utf8PropertyName);
 
             if (escape)
             {
-                WriteStartEscape(propertyName, JsonConstants.OpenBracket);
+                WriteStartEscape(utf8PropertyName, JsonConstants.OpenBracket);
             }
             else
             {
-                WriteStartByOptions(propertyName, JsonConstants.OpenBracket);
+                WriteStartByOptions(utf8PropertyName, JsonConstants.OpenBracket);
             }
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
@@ -342,7 +342,7 @@ namespace System.Text.Json
         /// <summary>
         /// Writes the beginning of a JSON object with a property name as the key.
         /// </summary>
-        /// <param name="propertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
+        /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
         /// <param name="escape">If this is set to false, the writer assumes the property name is properly escaped and skips the escaping step.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified property name is too large.
@@ -351,17 +351,17 @@ namespace System.Text.Json
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000 
         /// OR if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteStartObject(ReadOnlySpan<byte> propertyName, bool escape = true)
+        public void WriteStartObject(ReadOnlySpan<byte> utf8PropertyName, bool escape = true)
         {
-            ValidatePropertyNameAndDepth(propertyName);
+            ValidatePropertyNameAndDepth(utf8PropertyName);
 
             if (escape)
             {
-                WriteStartEscape(propertyName, JsonConstants.OpenBrace);
+                WriteStartEscape(utf8PropertyName, JsonConstants.OpenBrace);
             }
             else
             {
-                WriteStartByOptions(propertyName, JsonConstants.OpenBrace);
+                WriteStartByOptions(utf8PropertyName, JsonConstants.OpenBrace);
             }
 
             _currentDepth &= JsonConstants.RemoveFlagsBitMask;
@@ -370,33 +370,33 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartObject;
         }
 
-        private void WriteStartEscape(ReadOnlySpan<byte> propertyName, byte token)
+        private void WriteStartEscape(ReadOnlySpan<byte> utf8PropertyName, byte token)
         {
-            int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
+            int propertyIdx = JsonWriterHelper.NeedsEscaping(utf8PropertyName);
 
             Debug.Assert(propertyIdx >= -1 && propertyIdx < int.MaxValue / 2);
 
             if (propertyIdx != -1)
             {
-                WriteStartEscapeProperty(propertyName, token, propertyIdx);
+                WriteStartEscapeProperty(utf8PropertyName, token, propertyIdx);
             }
             else
             {
-                WriteStartByOptions(propertyName, token);
+                WriteStartByOptions(utf8PropertyName, token);
             }
         }
 
-        private void WriteStartByOptions(ReadOnlySpan<byte> propertyName, byte token)
+        private void WriteStartByOptions(ReadOnlySpan<byte> utf8PropertyName, byte token)
         {
             ValidateWritingProperty(token);
             int idx;
             if (_writerOptions.Indented)
             {
-                idx = WritePropertyNameIndented(propertyName);
+                idx = WritePropertyNameIndented(utf8PropertyName);
             }
             else
             {
-                idx = WritePropertyNameMinimized(propertyName);
+                idx = WritePropertyNameMinimized(utf8PropertyName);
             }
 
             if (1 > _buffer.Length - idx)
@@ -409,14 +409,14 @@ namespace System.Text.Json
             Advance(idx);
         }
 
-        private void WriteStartEscapeProperty(ReadOnlySpan<byte> propertyName, byte token, int firstEscapeIndexProp)
+        private void WriteStartEscapeProperty(ReadOnlySpan<byte> utf8PropertyName, byte token, int firstEscapeIndexProp)
         {
-            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
-            Debug.Assert(firstEscapeIndexProp >= 0 && firstEscapeIndexProp < propertyName.Length);
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= utf8PropertyName.Length);
+            Debug.Assert(firstEscapeIndexProp >= 0 && firstEscapeIndexProp < utf8PropertyName.Length);
 
             byte[] propertyArray = null;
 
-            int length = JsonWriterHelper.GetMaxEscapedLength(propertyName.Length, firstEscapeIndexProp);
+            int length = JsonWriterHelper.GetMaxEscapedLength(utf8PropertyName.Length, firstEscapeIndexProp);
             Span<byte> escapedPropertyName;
             if (length > StackallocThreshold)
             {
@@ -433,7 +433,7 @@ namespace System.Text.Json
                 }
             }
 
-            JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
+            JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
 
             WriteStartByOptions(escapedPropertyName.Slice(0, written), token);
 

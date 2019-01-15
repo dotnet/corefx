@@ -43,34 +43,34 @@ namespace System.Text.Json
             SetFlagToAddListSeparatorBeforeNextItem();
         }
 
-        private void WriteLiteralByOptions(ReadOnlySpan<byte> value)
+        private void WriteLiteralByOptions(ReadOnlySpan<byte> utf8Value)
         {
             ValidateWritingValue();
             if (_writerOptions.Indented)
             {
-                WriteLiteralIndented(value);
+                WriteLiteralIndented(utf8Value);
             }
             else
             {
-                WriteLiteralMinimized(value);
+                WriteLiteralMinimized(utf8Value);
             }
         }
 
-        private void WriteLiteralMinimized(ReadOnlySpan<byte> value)
+        private void WriteLiteralMinimized(ReadOnlySpan<byte> utf8Value)
         {
             int idx = 0;
             WriteListSeparator(ref idx);
 
-            CopyLoop(value, ref idx);
+            CopyLoop(utf8Value, ref idx);
 
             Advance(idx);
         }
 
-        private void WriteLiteralIndented(ReadOnlySpan<byte> value)
+        private void WriteLiteralIndented(ReadOnlySpan<byte> utf8Value)
         {
             int idx = WriteCommaAndFormattingPreamble();
 
-            CopyLoop(value, ref idx);
+            CopyLoop(utf8Value, ref idx);
 
             Advance(idx);
         }
