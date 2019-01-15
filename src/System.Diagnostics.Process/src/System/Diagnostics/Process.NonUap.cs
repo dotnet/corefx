@@ -69,13 +69,8 @@ namespace System.Diagnostics
         /// </summary>
         private IReadOnlyList<Process> GetChildProcesses(Process[] processes = null)
         {
-            bool internallyInitializedProcesses = false;
-
-            if (processes == null)
-            {
-                processes = GetProcesses();
-                internallyInitializedProcesses = true;
-            }
+            bool internallyInitializedProcesses = processes == null;
+            processes = processes ?? GetProcesses();
 
             List<Process> childProcesses = new List<Process>();
 

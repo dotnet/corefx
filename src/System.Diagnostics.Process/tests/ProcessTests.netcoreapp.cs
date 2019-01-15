@@ -147,7 +147,6 @@ namespace System.Diagnostics.Tests
             var process = new Process();
             Assert.Throws<InvalidOperationException>(() => process.Kill(entireProcessTree: true));
         }
-
         
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // Currently, remote processes are only supported on Windows. If that changes, adjust accordingly.
@@ -170,7 +169,6 @@ namespace System.Diagnostics.Tests
             }
 
             Assert.Throws<NotSupportedException>(() => process.Kill(entireProcessTree: true));
-
         }
 
         [Fact]
@@ -201,7 +199,6 @@ namespace System.Diagnostics.Tests
 
             if (containingProcess.ExitCode != 10)
                 Assert.True(false, "attempt to terminate a process tree containing the calling process did not throw the expected exception");
-
 
             int RunProcessAttemptingToKillEntireTreeOnParent()
             {
@@ -340,7 +337,6 @@ namespace System.Diagnostics.Tests
 
                 return root;
             });
-
 
             IEnumerable<Process> childProcesses = rootResult.Message
                 .Split(';')

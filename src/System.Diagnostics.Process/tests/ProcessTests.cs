@@ -1007,7 +1007,7 @@ namespace System.Diagnostics.Tests
         public void TestGetProcesses()
         {
             Process currentProcess = Process.GetCurrentProcess();
-            
+
             // Get all the processes running on the machine, and check if the current process is one of them.
             var foundCurrentProcess = (from p in Process.GetProcesses()
                                        where (p.Id == currentProcess.Id) && (p.ProcessName.Equals(currentProcess.ProcessName))
