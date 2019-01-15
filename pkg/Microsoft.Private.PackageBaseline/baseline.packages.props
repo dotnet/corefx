@@ -427,7 +427,7 @@
       <Version>4.1.2</Version>
     </BaseLinePackage>
     <BaseLinePackage Include="System.Private.Uri">
-      <Version>4.0.1</Version>
+      <Version>4.0.2</Version>
     </BaseLinePackage>
   </ItemGroup>
 </Project>
