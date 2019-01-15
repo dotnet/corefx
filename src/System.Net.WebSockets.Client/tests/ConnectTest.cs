@@ -90,7 +90,7 @@ namespace System.Net.WebSockets.Client.Tests
 
         [ActiveIssue(18784, TargetFrameworkMonikers.NetFramework)]
         [OuterLoop]
-        [ConditionalTheory(nameof(WebSocketsSupported))]
+        [ConditionalFact(nameof(WebSocketsSupported))]
         public async Task ConnectAsync_AddHostHeader_Success()
         {
             Uri server = System.Net.Test.Common.Configuration.WebSockets.RemoteEchoServer;

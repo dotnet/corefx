@@ -15,7 +15,6 @@ namespace System.IO.Tests
         public void DefaultFiltersValue()
         {
             var watcher = new FileSystemWatcher();
-            Assert.Equal(0, watcher.Filters.Count);
             Assert.Empty(watcher.Filters);
             Assert.NotNull(watcher.Filters);
             Assert.Equal(new string[] { }, watcher.Filters);
@@ -120,7 +119,7 @@ namespace System.IO.Tests
             watcher.Filters.Add("*.dll");
             
             watcher.Filters.RemoveAt(0);
-            Assert.Equal(1, watcher.Filters.Count);
+            Assert.Single(watcher.Filters);
             Assert.Equal("*.dll", watcher.Filter);
             Assert.Equal(new string[] {"*.dll" }, watcher.Filters);
         }
@@ -132,7 +131,7 @@ namespace System.IO.Tests
             watcher.Filters.Add("*.pdb");
 
             watcher.Filters.RemoveAt(0);
-            Assert.Equal(0, watcher.Filters.Count);
+            Assert.Empty(watcher.Filters);
             Assert.Equal("*", watcher.Filter);
             Assert.Equal(new string[] { }, watcher.Filters);
         }
@@ -284,7 +283,7 @@ namespace System.IO.Tests
             watcher.Filters.Add("*.dll");
 
             watcher.Filters.Clear();
-            Assert.Equal(0, watcher.Filters.Count);
+            Assert.Empty(watcher.Filters);
             Assert.Equal(new string[] { }, watcher.Filters) ;
         }
 
@@ -314,7 +313,6 @@ namespace System.IO.Tests
 
                 watcher.Filters.Clear();
                 Assert.Throws<ArgumentOutOfRangeException>(() => watcher.Filters[0]);
-                Assert.Equal(0, watcher.Filters.Count);
                 Assert.Empty(watcher.Filters);
                 Assert.NotNull(watcher.Filters);
             }
@@ -343,7 +341,7 @@ namespace System.IO.Tests
                 Assert.Equal(new string[] { "*.pdb", "foo" }, watcher.Filters);
 
                 watcher.Filter = "*.doc";
-                Assert.Equal(1, watcher.Filters.Count);
+                Assert.Single(watcher.Filters);
                 Assert.Equal("*.doc", watcher.Filter);
                 Assert.Equal("*.doc", watcher.Filters[0]);
                 Assert.Equal(new string[] { "*.doc" }, watcher.Filters);
