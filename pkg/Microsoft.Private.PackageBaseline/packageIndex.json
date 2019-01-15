@@ -1794,7 +1794,7 @@
         "4.0.1",
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.1"
     },
     "System.Reflection": {
       "StableVersions": [
