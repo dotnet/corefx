@@ -12,8 +12,8 @@ internal static partial class Interop
     {
         [DllImport(Libraries.Ole32, PreserveSig = false)]
         internal static extern IntPtr CoUnmarshalInterface(
-            [In] IStream pStm,     // Pointer to the stream
-            [In] ref Guid riid     // Reference to the identifier of the interface
+            IStream pStm,                                  // Pointer to the stream
+            [MarshalAs(UnmanagedType.LPStruct)] Guid riid  // Reference to the identifier of the interface
             );
     }
 }

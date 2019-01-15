@@ -11,5 +11,8 @@ internal partial class Interop
     {
         [DllImport(Libraries.Kernel32, PreserveSig = true)]
         internal static extern IntPtr GlobalLock([In] IntPtr hMem);
+
+        [DllImport(Libraries.Kernel32, PreserveSig = true)]
+        internal static extern int GlobalUnlock([In] IntPtr hMem);
     }
 }

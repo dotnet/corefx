@@ -12,12 +12,12 @@ internal static partial class Interop
     {
         [DllImport(Libraries.Ole32, PreserveSig = false)]
         internal static extern void CoMarshalInterface(
-            [In] IStream pStm,           // Pointer to the stream used for marshaling
-            [In] ref Guid riid,          // Reference to the identifier of the 
-            [In] IntPtr pUnk,            // Pointer to the interface to be marshaled
-            [In] uint dwDestContext,     // Destination process
-            [In] IntPtr pvDestContext,   // Reserved for future use
-            [In] uint mshlflags          // Reason for marshaling
+            IStream pStm,                                    // Pointer to the stream used for marshaling
+            [MarshalAs(UnmanagedType.LPStruct)] Guid riid,   // Reference to the identifier of the 
+            IntPtr pUnk,                                     // Pointer to the interface to be marshaled
+            uint dwDestContext,                              // Destination process
+            IntPtr pvDestContext,                            // Reserved for future use
+            uint mshlflags                                   // Reason for marshaling
             );
     }
 }

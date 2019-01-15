@@ -23,9 +23,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GlobalLock.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.GlobalLock.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GlobalUnlock.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GlobalUnlock.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.LoadLibrary.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.LoadLibrary.cs</Link>
     </Compile>

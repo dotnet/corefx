@@ -11,6 +11,6 @@ internal static partial class Interop
     internal static partial class Ole32
     {
         [DllImport(Libraries.Ole32, PreserveSig = false)]
-        internal static extern IntPtr GetHGlobalFromStream([In] IStream pstm);
+        internal static extern IntPtr GetHGlobalFromStream(IStream pstm);
     }
 }

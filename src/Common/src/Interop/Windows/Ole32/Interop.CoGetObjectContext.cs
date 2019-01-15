@@ -11,6 +11,6 @@ internal static partial class Interop
     internal static partial class Ole32
     {
         [DllImport(Libraries.Ole32, PreserveSig = false)]
-        internal static extern IStream CreateStreamOnHGlobal(IntPtr hGlobal, int fDeleteOnRelease);
+        internal static extern IStream CreateStreamOnHGlobal(IntPtr hGlobal, bool fDeleteOnRelease);
     }
 }

@@ -88,8 +88,8 @@ namespace System.Management
 
                 hGlobal = Marshal.AllocHGlobal(rg.Length);
                 Marshal.Copy(rg, 0, hGlobal, rg.Length);
-                stream = Interop.Ole32.CreateStreamOnHGlobal(hGlobal, 0);
-                pWbemClassObject = Interop.Ole32.CoUnmarshalInterface(stream, ref IID_IWbemClassObject);
+                stream = Interop.Ole32.CreateStreamOnHGlobal(hGlobal, false);
+                pWbemClassObject = Interop.Ole32.CoUnmarshalInterface(stream, IID_IWbemClassObject);
             }
             finally
             {
@@ -108,9 +108,9 @@ namespace System.Management
             try
             {
                 // Stream will own the HGlobal
-                stream = Interop.Ole32.CreateStreamOnHGlobal(IntPtr.Zero, 1);
+                stream = Interop.Ole32.CreateStreamOnHGlobal(IntPtr.Zero, true);
 
-                Interop.Ole32.CoMarshalInterface(stream, ref IID_IWbemClassObject, pWbemClassObject, (uint)MSHCTX.MSHCTX_DIFFERENTMACHINE, IntPtr.Zero, (uint)MSHLFLAGS.MSHLFLAGS_TABLEWEAK);
+                Interop.Ole32.CoMarshalInterface(stream, IID_IWbemClassObject, pWbemClassObject, (uint)MSHCTX.MSHCTX_DIFFERENTMACHINE, IntPtr.Zero, (uint)MSHLFLAGS.MSHLFLAGS_TABLEWEAK);
 
                 System.Runtime.InteropServices.ComTypes.STATSTG statstg;
                 stream.Stat(out statstg, (int)STATFLAG.STATFLAG_DEFAULT);
@@ -1909,7 +1909,7 @@ namespace System.Management
             {
                 // If we CANNOT call CoGetObjectContext, assume we are not in the 'no context MTA' for safety
                 // (NOTE: This call is expected to always succeed)
-                if(0 != Interop.Ole32.CoGetObjectContext(ref IID_IComThreadingInfo, out pComThreadingInfo))
+                if(0 != Interop.Ole32.CoGetObjectContext(IID_IComThreadingInfo, out pComThreadingInfo))
                     return false;
 
                 WmiNetUtilsHelper.APTTYPE aptType;
