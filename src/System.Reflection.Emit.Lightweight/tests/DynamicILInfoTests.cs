@@ -113,7 +113,7 @@ namespace System.Reflection.Emit.Tests
         [Fact]
         public unsafe void SetX_LengthNotZero_Success()
         {
-            DynamicMethod dynamicMethod = new DynamicMethod("DynamicMethod5", typeof(void), null, typeof(Int32), true);
+            DynamicMethod dynamicMethod = new DynamicMethod(nameof(DynamicMethod), typeof(void), null, typeof(Int32), true);
             Byte[] brCode = new Byte[] { 0x03, 0x30, 0x0A, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x17, 0x2a };
             // Get the pointer to the byte array.
             GCHandle hmem = GCHandle.Alloc((Object) brCode, GCHandleType.Pinned);
@@ -132,7 +132,7 @@ namespace System.Reflection.Emit.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void GetDynamicILInfo_IsNotUniqueNotNull(bool skipVisibility)
+        public void GetDynamicILInfo_NotSameNotNull(bool skipVisibility)
         {
             DynamicMethod method = GetDynamicMethod(skipVisibility);
             DynamicILInfo dynamicILInfo = method.GetDynamicILInfo();
@@ -144,7 +144,7 @@ namespace System.Reflection.Emit.Tests
         
         private DynamicMethod GetDynamicMethod(bool skipVisibility)
         {
-            return new DynamicMethod("DynamicMethod", typeof(void), 
+            return new DynamicMethod(nameof(DynamicMethod), typeof(void), 
                 new Type[] { typeof(object), typeof(int), typeof(string) },
                 typeof(Object),
                 skipVisibility);
