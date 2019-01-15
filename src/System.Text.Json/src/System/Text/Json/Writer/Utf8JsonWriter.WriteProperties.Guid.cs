@@ -257,7 +257,6 @@ namespace System.Text.Json
             if (_buffer.Length <= idx)
             {
                 AdvanceAndGrow(ref idx);
-                idx = 0;
             }
             _buffer[idx++] = JsonConstants.Quote;
 
@@ -266,7 +265,6 @@ namespace System.Text.Json
             if (_buffer.Length <= idx)
             {
                 AdvanceAndGrow(ref idx);
-                idx = 0;
             }
             _buffer[idx++] = JsonConstants.Quote;
         }
