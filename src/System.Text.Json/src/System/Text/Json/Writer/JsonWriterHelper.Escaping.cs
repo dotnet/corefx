@@ -132,9 +132,6 @@ namespace System.Text.Json
                 case JsonConstants.BackSlash:
                     destination[written++] = (byte)'\\';
                     break;
-                case JsonConstants.Slash:
-                    destination[written++] = (byte)'/';
-                    break;
                 case JsonConstants.BackSpace:
                     destination[written++] = (byte)'b';
                     break;
@@ -445,9 +442,6 @@ namespace System.Text.Json
                     break;
                 case JsonConstants.BackSlash:
                     destination[written++] = '\\';
-                    break;
-                case JsonConstants.Slash:
-                    destination[written++] = '/';
                     break;
                 case JsonConstants.BackSpace:
                     destination[written++] = 'b';

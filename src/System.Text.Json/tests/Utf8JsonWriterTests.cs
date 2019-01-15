@@ -220,7 +220,7 @@ namespace System.Text.Json.Tests
                 string actualStr = Encoding.UTF8.GetString(output.Formatted);
 
                 Assert.True(output.Formatted.Length <= 31);
-                Assert.Equal(decimal.Parse(actualStr), value);
+                Assert.Equal(decimal.Parse(actualStr, CultureInfo.InvariantCulture), value);
             }
 
             for (int i = 0; i < 1_000; i++)
@@ -235,7 +235,7 @@ namespace System.Text.Json.Tests
                 string actualStr = Encoding.UTF8.GetString(output.Formatted);
 
                 Assert.True(output.Formatted.Length <= 31);
-                Assert.Equal(decimal.Parse(actualStr), value);
+                Assert.Equal(decimal.Parse(actualStr, CultureInfo.InvariantCulture), value);
             }
 
             {
@@ -249,7 +249,7 @@ namespace System.Text.Json.Tests
                 string actualStr = Encoding.UTF8.GetString(output.Formatted);
 
                 Assert.Equal(value.ToString().Length, output.Formatted.Length);
-                Assert.Equal(decimal.Parse(actualStr), value);
+                Assert.Equal(decimal.Parse(actualStr, CultureInfo.InvariantCulture), value);
             }
 
             {
@@ -263,7 +263,7 @@ namespace System.Text.Json.Tests
                 string actualStr = Encoding.UTF8.GetString(output.Formatted);
 
                 Assert.Equal(value.ToString().Length, output.Formatted.Length);
-                Assert.Equal(decimal.Parse(actualStr), value);
+                Assert.Equal(decimal.Parse(actualStr, CultureInfo.InvariantCulture), value);
             }
 
             {
@@ -287,7 +287,7 @@ namespace System.Text.Json.Tests
                 string actualStr = Encoding.UTF8.GetString(output.Formatted);
 
                 Assert.Equal(value.ToString().Length, output.Formatted.Length);
-                Assert.Equal(decimal.Parse(actualStr), value);
+                Assert.Equal(decimal.Parse(actualStr, CultureInfo.InvariantCulture), value);
             }
         }
 
