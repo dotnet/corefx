@@ -288,7 +288,7 @@
 
     <!-- Rhel 6 and FreeBSD doesn't support the source control git package so disable SourceLink -->
     <EnableSourceLink Condition="$(RuntimeOS.StartsWith('rhel.6')) OR '$(_runtimeOSFamily)' == 'FreeBSD'">false</EnableSourceLink>
-    <EnableSourceLinkCondition="'$(HostArch)' == 'Arm' OR '$(HostArch)' == 'Arm64'">false</EnableSourceLink>
+    <EnableSourceLink Condition="'$(HostArch)' == 'Arm' OR '$(HostArch)' == 'Arm64'">false</EnableSourceLink>
 
   </PropertyGroup>
 
