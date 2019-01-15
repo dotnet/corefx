@@ -154,6 +154,7 @@
   <!-- Enable the analyzers for this repo -->
   <PropertyGroup>
     <EnableAnalyzers Condition="'$(EnableAnalyzers)' == '' AND ('$(IsSourceProject)' == 'true' OR '$(IsTestProject)' == 'true')">true</EnableAnalyzers>
+    <NoWarn>$(NoWarn);xUnit1013;xUnit2004;xUnit1003;xUnit1024;xUnit1026;xUnit2017;xUnit2007;xUnit2000;xUnit2003;xUnit2008;xUnit2009;xUnit2010;xUnit1016;xUnit1025;xUnit1008;xUnit1010;xUnit1019;xUnit2005;xUnit2002;xUnit2015;xUnit2012</NoWarn>
   </PropertyGroup>
 
   <!-- Define analyzers for source projects and test projects -->
