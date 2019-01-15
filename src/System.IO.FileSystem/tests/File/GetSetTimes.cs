@@ -14,7 +14,7 @@ namespace System.IO.Tests
     {
         // OSX has the limitation of setting upto 2262-04-11T23:47:16 (long.Max) date.
         // 32bit Unix has time_t up to ~ 2038.
-        private static bool OsHasMaxTime => PlatformDetection.IsWindows || (RuntimeInformation.ProcessArchitecture != Architecture.Arm && RuntimeInformation.ProcessArchitecture != Architecture.X86 && !PlatformDetection.IsOSX);
+        private static bool SupportsLongMaxDateTime => PlatformDetection.IsWindows || (RuntimeInformation.ProcessArchitecture != Architecture.Arm && RuntimeInformation.ProcessArchitecture != Architecture.X86 && !PlatformDetection.IsOSX);
 
         public override string GetExistingItem()
         {
@@ -149,7 +149,7 @@ namespace System.IO.Tests
             Assert.Equal(ticks, dateTime.Ticks);
         }
 
-        [ConditionalFact(nameof(OsHasMaxTime))]
+        [ConditionalFact(nameof(SupportsLongMaxDateTime))]
         public void SetDateTimeMax()
         {
             string file = GetTestFilePath();
