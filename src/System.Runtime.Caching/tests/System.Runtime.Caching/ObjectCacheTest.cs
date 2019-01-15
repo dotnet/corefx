@@ -120,7 +120,7 @@ namespace MonoTests.System.Runtime.Caching
 
             IDictionary<string, object> values = poker.GetValues(null, (string[])null);
             Assert.NotNull(values);
-            Assert.Equal(0, values.Count);
+            Assert.Empty(values);
             Assert.Equal("IDictionary<string, object> GetValues (IEnumerable<string> keys, string regionName = null)", poker.MethodCalled);
 
             poker.Add("key1", 1, null);

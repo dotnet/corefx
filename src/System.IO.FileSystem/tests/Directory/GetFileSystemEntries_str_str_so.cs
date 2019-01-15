@@ -42,7 +42,7 @@ namespace System.IO.Tests
                 if (TestFiles && TestDirectories)
                     Assert.Equal(3, results.Length);
                 else
-                    Assert.Equal(1, results.Length);
+                    Assert.Single(results);
             }
         }
 

@@ -65,7 +65,7 @@ namespace Microsoft.Win32.RegistryTests
                 {
                     Assert.IsType<string[]>(o);
                     var strings = (string[])o;
-                    Assert.Equal(1, strings.Length);
+                    Assert.Single(strings);
                     s = strings[0];
                 }
                 else

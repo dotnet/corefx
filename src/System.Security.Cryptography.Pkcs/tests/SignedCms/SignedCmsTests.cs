@@ -24,8 +24,8 @@ namespace System.Security.Cryptography.Pkcs.Tests
             X509Certificate2Collection certificates2 = cms.Certificates;
 
             Assert.NotSame(certificates, certificates2);
-            Assert.Equal(0, certificates.Count);
-            Assert.Equal(0, certificates2.Count);
+            Assert.Empty(certificates);
+            Assert.Empty(certificates2);
 
             ContentInfo content = cms.ContentInfo;
             ContentInfo content2 = cms.ContentInfo;
@@ -38,8 +38,8 @@ namespace System.Security.Cryptography.Pkcs.Tests
             SignerInfoCollection signers2 = cms.SignerInfos;
 
             Assert.NotSame(signers, signers2);
-            Assert.Equal(0, signers.Count);
-            Assert.Equal(0, signers2.Count);
+            Assert.Empty(signers);
+            Assert.Empty(signers2);
 
             Assert.Throws<InvalidOperationException>(() => cms.CheckSignature(true));
             Assert.Throws<InvalidOperationException>(() => cms.CheckHash());
@@ -410,7 +410,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 cms.ComputeSignature();
 
                 SignerInfoCollection signers = cms.SignerInfos;
-                Assert.Equal(1, signers.Count);
+                Assert.Single(signers);
                 Assert.Equal(SubjectIdentifierType.NoSignature, signers[0].SignerIdentifier.Type);
                 cms.CheckHash();
                 Assert.Throws<CryptographicException>(() => cms.CheckSignature(true));
@@ -519,7 +519,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             }
 
             SignerInfoCollection signers = cms.SignerInfos;
-            Assert.Equal(1, signers.Count);
+            Assert.Single(signers);
 
             SignerInfo signerInfo = signers[0];
             Assert.Equal(SubjectIdentifierType.IssuerAndSerialNumber, signerInfo.SignerIdentifier.Type);
@@ -699,12 +699,12 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
                 if (includeExtraCert)
                 {
-                    Assert.Equal(1, certs.Count);
+                    Assert.Single(certs);
                     Assert.Equal(cert2.RawData, certs[0].RawData);
                 }
                 else
                 {
-                    Assert.Equal(0, certs.Count);
+                    Assert.Empty(certs);
                 }
             }
 
@@ -727,7 +727,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             cms.CheckHash();
 
             SignerInfoCollection signerInfos = cms.SignerInfos;
-            Assert.Equal(1, signerInfos.Count);
+            Assert.Single(signerInfos);
 
             SignerInfo firstSigner = signerInfos[0];
             Assert.ThrowsAny<CryptographicException>(() => firstSigner.CheckSignature(true));
@@ -737,12 +737,12 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
             if (includeExtraCert)
             {
-                Assert.Equal(1, certs.Count);
+                Assert.Single(certs);
                 Assert.Equal("CN=DfHelleKeyAgreement1", certs[0].SubjectName.Name);
             }
             else
             {
-                Assert.Equal(0, certs.Count);
+                Assert.Empty(certs);
             }
         }
 
@@ -770,7 +770,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 sign();
                 Assert.ThrowsAny<CryptographicException>(() => cms.CheckSignature(true));
                 cms.CheckHash();
-                Assert.Equal(1, cms.SignerInfos.Count);
+                Assert.Single(cms.SignerInfos);
             }
         }
 
@@ -799,7 +799,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                             }));
             }
 
-            Assert.Equal(1, cms.SignerInfos.Count);
+            Assert.Single(cms.SignerInfos);
             Assert.ThrowsAny<CryptographicException>(() => cms.CheckSignature(true));
             cms.CheckHash();
         }
@@ -842,7 +842,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                             }));
             }
 
-            Assert.Equal(0, cms.SignerInfos.Count);
+            Assert.Empty(cms.SignerInfos);
         }
 
         [Theory]
@@ -897,7 +897,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                             }));
             }
 
-            Assert.Equal(0, cms.SignerInfos.Count);
+            Assert.Empty(cms.SignerInfos);
         }
 
         [Theory]
@@ -1256,20 +1256,20 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 signedCms.CheckSignature(true);
 
                 SignerInfoCollection signers = signedCms.SignerInfos;
-                Assert.Equal(1, signers.Count);
+                Assert.Single(signers);
 
                 CryptographicAttributeObjectCollection attrs = signers[0].SignedAttributes;
                 Assert.Equal(2, attrs.Count);
 
                 CryptographicAttributeObject firstAttrSet = attrs[0];
                 Assert.Equal(Oids.ContentType, firstAttrSet.Oid.Value);
-                Assert.Equal(1, firstAttrSet.Values.Count);
+                Assert.Single(firstAttrSet.Values);
                 Assert.Equal(Oids.ContentType, firstAttrSet.Values[0].Oid.Value);
                 Assert.Equal("06092A864886F70D010703", firstAttrSet.Values[0].RawData.ByteArrayToHex());
 
                 CryptographicAttributeObject secondAttrSet = attrs[1];
                 Assert.Equal(Oids.MessageDigest, secondAttrSet.Oid.Value);
-                Assert.Equal(1, secondAttrSet.Values.Count);
+                Assert.Single(secondAttrSet.Values);
                 Assert.Equal(Oids.MessageDigest, secondAttrSet.Values[0].Oid.Value);
             }
         }
@@ -1487,7 +1487,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(Oids.Pkcs7Enveloped, signedCms.ContentInfo.ContentType.Value);
 
             SignerInfoCollection signers = signedCms.SignerInfos;
-            Assert.Equal(1, signers.Count);
+            Assert.Single(signers);
             Assert.Equal(expectedType, signers[0].SignerIdentifier.Type);
 
             // Assert.NotThrows
@@ -1582,7 +1582,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             SignedCms cms = new SignedCms();
             cms.Decode(encoded);
             SignerInfoCollection signers = cms.SignerInfos;
-            Assert.Equal(1, signers.Count);
+            Assert.Single(signers);
             Assert.Equal(SubjectIdentifierType.IssuerAndSerialNumber, signers[0].SignerIdentifier.Type);
             Assert.ThrowsAny<CryptographicException>(() => cms.CheckSignature(true));
             Assert.ThrowsAny<CryptographicException>(() => signers[0].CheckSignature(true));
@@ -1597,7 +1597,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             SignedCms cms = new SignedCms();
             cms.Decode(encoded);
             SignerInfoCollection signers = cms.SignerInfos;
-            Assert.Equal(1, signers.Count);
+            Assert.Single(signers);
             Assert.Equal(SubjectIdentifierType.NoSignature, signers[0].SignerIdentifier.Type);
             Assert.Throws<CryptographicException>(() => cms.CheckSignature(true));
 

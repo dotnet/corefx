@@ -68,7 +68,7 @@ namespace System.Dynamic.Tests
             BindingRestrictionsProxyProxy view = GetDebugViewObject(empty);
             Assert.True(view.IsEmpty);
             BindingRestrictions[] restrictions = view.Restrictions;
-            Assert.Equal(1, restrictions.Length);
+            Assert.Single(restrictions);
             Assert.Same(empty, restrictions[0]);
             Assert.Same(empty.ToExpression(), view.Test);
             Assert.Equal(empty.ToExpression().ToString(), view.ToString());
@@ -82,7 +82,7 @@ namespace System.Dynamic.Tests
             BindingRestrictionsProxyProxy view = GetDebugViewObject(custom);
             Assert.False(view.IsEmpty);
             BindingRestrictions[] restrictions = view.Restrictions;
-            Assert.Equal(1, restrictions.Length);
+            Assert.Single(restrictions);
             Assert.Same(custom, restrictions[0]);
             Assert.NotSame(BindingRestrictions.Empty.ToExpression(), view.Test);
             Assert.Same(exp, view.Test);

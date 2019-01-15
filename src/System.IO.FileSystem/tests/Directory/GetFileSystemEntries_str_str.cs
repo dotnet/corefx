@@ -176,13 +176,13 @@ namespace System.IO.Tests
                 if (TestFiles)
                 {
                     string[] results = GetEntries(testDir.FullName, "AAABB");
-                    Assert.Equal(1, results.Length);
+                    Assert.Single(results);
                     Assert.Contains(Path.Combine(testDir.FullName, "AAABB"), results);
                 }
                 if (TestDirectories)
                 {
                     string[] results = GetEntries(testDir.FullName, "AAA");
-                    Assert.Equal(1, results.Length);
+                    Assert.Single(results);
                     Assert.Contains(Path.Combine(testDir.FullName, "AAA"), results);
                 }
             }
@@ -201,7 +201,7 @@ namespace System.IO.Tests
                 if (TestDirectories && TestFiles)
                     Assert.Equal(2, results.Length);
                 else
-                    Assert.Equal(1, results.Length);
+                    Assert.Single(results);
             }
         }
 
@@ -927,7 +927,7 @@ namespace System.IO.Tests
                 if (TestFiles && TestDirectories)
                     Assert.Equal(2, results.Length);
                 else
-                    Assert.Equal(1, results.Length);
+                    Assert.Single(results);
             }
         }
 
@@ -977,11 +977,11 @@ namespace System.IO.Tests
 
             if (TestDirectories)
             {
-                Assert.Equal(1, GetEntries(testDir.FullName, "*ZZ*").Length);
+                Assert.Single(GetEntries(testDir.FullName, "*ZZ*"));
             }
             if (TestFiles)
             {
-                Assert.Equal(1, GetEntries(testDir.FullName, "*YY*").Length);
+                Assert.Single(GetEntries(testDir.FullName, "*YY*"));
             }
         }
 

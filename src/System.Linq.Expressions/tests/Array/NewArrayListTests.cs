@@ -1730,7 +1730,7 @@ namespace System.Linq.Expressions.Tests
                 );
             Func<Func<int, int>[]> del = unquoted.Compile(useInterpreter);
             Func<int, int>[] arr = del();
-            Assert.Equal(1, arr.Length);
+            Assert.Single(arr);
             Assert.Equal(26, arr[0](13));
         }
 

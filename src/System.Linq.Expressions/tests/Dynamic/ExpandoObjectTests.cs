@@ -17,7 +17,7 @@ namespace System.Dynamic.Tests
         public void InitialState()
         {
             IDictionary<string, object> eo = new ExpandoObject();
-            Assert.Equal(0, eo.Count);
+            Assert.Empty(eo);
             Assert.False(eo.IsReadOnly);
         }
 

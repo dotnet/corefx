@@ -54,21 +54,21 @@ namespace System.Net.Http.Tests
             AssertExtensions.Throws<ArgumentException>("item", () => { cacheControl.NoCacheHeaders.Add(null); });
             Assert.Throws<FormatException>(() => { cacheControl.NoCacheHeaders.Add("invalid token"); });
             cacheControl.NoCacheHeaders.Add("token");
-            Assert.Equal(1, cacheControl.NoCacheHeaders.Count);
+            Assert.Single(cacheControl.NoCacheHeaders);
             Assert.Equal("token", cacheControl.NoCacheHeaders.First());
 
             Assert.NotNull(cacheControl.PrivateHeaders);
             AssertExtensions.Throws<ArgumentException>("item", () => { cacheControl.PrivateHeaders.Add(null); });
             Assert.Throws<FormatException>(() => { cacheControl.PrivateHeaders.Add("invalid token"); });
             cacheControl.PrivateHeaders.Add("token");
-            Assert.Equal(1, cacheControl.PrivateHeaders.Count);
+            Assert.Single(cacheControl.PrivateHeaders);
             Assert.Equal("token", cacheControl.PrivateHeaders.First());
 
             // NameValueHeaderValue collection property
             Assert.NotNull(cacheControl.Extensions);
             Assert.Throws<ArgumentNullException>(() => { cacheControl.Extensions.Add(null); });
             cacheControl.Extensions.Add(new NameValueHeaderValue("name", "value"));
-            Assert.Equal(1, cacheControl.Extensions.Count);
+            Assert.Single(cacheControl.Extensions);
             Assert.Equal(new NameValueHeaderValue("name", "value"), cacheControl.Extensions.First());
         }
 

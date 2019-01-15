@@ -57,10 +57,10 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal("1.2.840.113549.1.9.4", signedAttrs[2].Oid.Value);
             Assert.Equal("1.2.840.113549.1.9.15", signedAttrs[3].Oid.Value);
 
-            Assert.Equal(1, signedAttrs[0].Values.Count);
-            Assert.Equal(1, signedAttrs[1].Values.Count);
-            Assert.Equal(1, signedAttrs[2].Values.Count);
-            Assert.Equal(1, signedAttrs[3].Values.Count);
+            Assert.Single(signedAttrs[0].Values);
+            Assert.Single(signedAttrs[1].Values);
+            Assert.Single(signedAttrs[2].Values);
+            Assert.Single(signedAttrs[3].Values);
 
             Pkcs9ContentType contentTypeAttr = (Pkcs9ContentType)signedAttrs[0].Values[0];
             Assert.Equal("1.2.840.113549.1.7.1", contentTypeAttr.ContentType.Value);

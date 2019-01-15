@@ -30,7 +30,7 @@ namespace System.Security.Cryptography.Encryption.Aes.Tests
                 KeySizes[] blockSizes = aes.LegalBlockSizes;
 
                 Assert.NotNull(blockSizes);
-                Assert.Equal(1, blockSizes.Length);
+                Assert.Single(blockSizes);
 
                 KeySizes blockSizeLimits = blockSizes[0];
 
@@ -48,7 +48,7 @@ namespace System.Security.Cryptography.Encryption.Aes.Tests
                 KeySizes[] keySizes = aes.LegalKeySizes;
 
                 Assert.NotNull(keySizes);
-                Assert.Equal(1, keySizes.Length);
+                Assert.Single(keySizes);
 
                 KeySizes keySizeLimits = keySizes[0];
 

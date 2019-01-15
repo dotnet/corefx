@@ -16,7 +16,7 @@ namespace System.Net.Primitives.Functional.Tests
             ICollection<Cookie> cc = CreateCookieCollection1();
             Assert.InRange(cc.Count, 1, int.MaxValue);
             cc.Clear();
-            Assert.Equal(0, cc.Count);
+            Assert.Empty(cc);
         }
 
         [Fact]

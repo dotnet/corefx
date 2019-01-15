@@ -16,7 +16,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(0, ai.KeyLength);
             Assert.Equal(Oids.TripleDesCbc, ai.Oid.Value);
             Assert.NotNull(ai.Parameters);
-            Assert.Equal(0, ai.Parameters.Length);
+            Assert.Empty(ai.Parameters);
         }
 
         [Fact]
@@ -27,7 +27,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(0, ai.KeyLength);
             Assert.Equal(Oids.Rsa, ai.Oid.Value);
             Assert.NotNull(ai.Parameters);
-            Assert.Equal(0, ai.Parameters.Length);
+            Assert.Empty(ai.Parameters);
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Null(ai.Oid);
             Assert.Equal(0, ai.KeyLength);
             Assert.NotNull(ai.Parameters);
-            Assert.Equal(0, ai.Parameters.Length);
+            Assert.Empty(ai.Parameters);
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(128, ai.KeyLength);
             Assert.Equal(Oids.Rsa, ai.Oid.Value);
             Assert.NotNull(ai.Parameters);
-            Assert.Equal(0, ai.Parameters.Length);
+            Assert.Empty(ai.Parameters);
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Null(ai.Oid);
             Assert.Equal(128, ai.KeyLength);
             Assert.NotNull(ai.Parameters);
-            Assert.Equal(0, ai.Parameters.Length);
+            Assert.Empty(ai.Parameters);
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(-1, ai.KeyLength);
             Assert.Equal(Oids.Rsa, ai.Oid.Value);
             Assert.NotNull(ai.Parameters);
-            Assert.Equal(0, ai.Parameters.Length);
+            Assert.Empty(ai.Parameters);
         }
 
         [Fact]

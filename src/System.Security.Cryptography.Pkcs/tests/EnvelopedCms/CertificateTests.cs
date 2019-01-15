@@ -55,7 +55,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
             X509Certificate2Collection certs = ecms.Certificates;
-            Assert.Equal(0, certs.Count);
+            Assert.Empty(certs);
         }
 
         [Fact]

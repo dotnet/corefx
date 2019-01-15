@@ -88,7 +88,7 @@ namespace System.Net.Http.Functional.Tests
         {
             var content = new MultipartContent("test_subtype", "test_boundary");
             Assert.Equal("multipart/test_subtype", content.Headers.ContentType.MediaType);
-            Assert.Equal(1, content.Headers.ContentType.Parameters.Count);
+            Assert.Single(content.Headers.ContentType.Parameters);
         }
 
         [Fact]

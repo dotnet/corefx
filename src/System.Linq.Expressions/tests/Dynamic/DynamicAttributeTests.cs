@@ -20,7 +20,7 @@ namespace System.Runtime.CompilerServices.Tests
         public void DefaultCtorSingleTrueFlag()
         {
             IList<bool> flags = new DynamicAttribute().TransformFlags;
-            Assert.Equal(1, flags.Count);
+            Assert.Single(flags);
             Assert.True(flags[0]);
         }
 
@@ -36,7 +36,7 @@ namespace System.Runtime.CompilerServices.Tests
         {
             IList<bool> flags = ((DynamicAttribute)GetType().GetMethod(nameof(ParamsAndReturns)).GetParameters()[0]
                 .GetCustomAttribute(typeof(DynamicAttribute))).TransformFlags;
-            Assert.Equal(1, flags.Count);
+            Assert.Single(flags);
             Assert.True(flags[0]);
         }
 
@@ -46,7 +46,7 @@ namespace System.Runtime.CompilerServices.Tests
         {
             IList<bool> flags = ((DynamicAttribute)GetType().GetMethod(nameof(ParamsAndReturns)).ReturnParameter
                 .GetCustomAttribute(typeof(DynamicAttribute))).TransformFlags;
-            Assert.Equal(1, flags.Count);
+            Assert.Single(flags);
             Assert.True(flags[0]);
         }
 

@@ -26,7 +26,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(TestData.EmptyPfx))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(0, collection.Count);
+                Assert.Empty(collection);
             }
         }
 
@@ -36,7 +36,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(TestData.MsCertificate))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(1, collection.Count);
+                Assert.Single(collection);
             }
         }
 
@@ -46,7 +46,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(TestData.MsCertificatePemBytes))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(1, collection.Count);
+                Assert.Single(collection);
             }
         }
 
@@ -56,7 +56,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(Path.Combine("TestData", "MS.cer")))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(1, collection.Count);
+                Assert.Single(collection);
             }
         }
 
@@ -66,7 +66,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(Path.Combine("TestData", "MS.pem")))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(1, collection.Count);
+                Assert.Single(collection);
             }
         }
 
@@ -76,7 +76,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(TestData.Pkcs7EmptyDerBytes))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(0, collection.Count);
+                Assert.Empty(collection);
             }
         }
 
@@ -86,7 +86,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(TestData.Pkcs7EmptyPemBytes))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(0, collection.Count);
+                Assert.Empty(collection);
             }
         }
 
@@ -96,7 +96,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(Path.Combine("TestData", "empty.p7b")))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(0, collection.Count);
+                Assert.Empty(collection);
             }
         }
 
@@ -106,7 +106,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(Path.Combine("TestData", "empty.p7c")))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(0, collection.Count);
+                Assert.Empty(collection);
             }
         }
 
@@ -116,7 +116,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(TestData.Pkcs7SingleDerBytes))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(1, collection.Count);
+                Assert.Single(collection);
 
                 Assert.Equal("D5B5BC1C458A558845BFF51CB4DFF31C", collection[0].SerialNumber);
             }
@@ -128,7 +128,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(TestData.Pkcs7SinglePemBytes))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(1, collection.Count);
+                Assert.Single(collection);
 
                 Assert.Equal("D5B5BC1C458A558845BFF51CB4DFF31C", collection[0].SerialNumber);
             }
@@ -140,7 +140,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(Path.Combine("TestData", "singlecert.p7b")))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(1, collection.Count);
+                Assert.Single(collection);
 
                 Assert.Equal("D5B5BC1C458A558845BFF51CB4DFF31C", collection[0].SerialNumber);
             }
@@ -152,7 +152,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (ImportedCollection ic = Cert.Import(Path.Combine("TestData", "singlecert.p7c")))
             {
                 X509Certificate2Collection collection = ic.Collection;
-                Assert.Equal(1, collection.Count);
+                Assert.Single(collection);
 
                 Assert.Equal("D5B5BC1C458A558845BFF51CB4DFF31C", collection[0].SerialNumber);
             }

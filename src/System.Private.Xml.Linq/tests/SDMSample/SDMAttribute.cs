@@ -118,7 +118,7 @@ namespace XDocumentTests.SDMSample
             Assert.Throws<InvalidOperationException>(() => a.Remove());
 
             e.Add(a);
-            Assert.Equal(1, e.Attributes().Count());
+            Assert.Single(e.Attributes());
 
             a.Remove();
             Assert.Empty(e.Attributes());

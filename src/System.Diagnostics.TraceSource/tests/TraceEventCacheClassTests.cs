@@ -68,7 +68,7 @@ namespace System.Diagnostics.TraceSourceTests
         {
             var cache = new TraceEventCache();
             var logicalOperationStack = cache.LogicalOperationStack; 
-            Assert.Equal(0, logicalOperationStack.Count);
+            Assert.Empty(logicalOperationStack);
             Trace.CorrelationManager.StartLogicalOperation("SecondaryThread");
             Trace.CorrelationManager.StartLogicalOperation("MainThread");
             Assert.NotNull(logicalOperationStack);
@@ -76,7 +76,7 @@ namespace System.Diagnostics.TraceSourceTests
             Assert.Equal("MainThread", logicalOperationStack.Pop().ToString());
             Assert.Equal("SecondaryThread", logicalOperationStack.Peek().ToString());
             Trace.CorrelationManager.StopLogicalOperation();
-            Assert.Equal(0, logicalOperationStack.Count);
+            Assert.Empty(logicalOperationStack);
         }
     }
 }

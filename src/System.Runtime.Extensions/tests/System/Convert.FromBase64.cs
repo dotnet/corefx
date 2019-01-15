@@ -47,7 +47,7 @@ namespace System.Tests
             Verify(input, result =>
             {
                 Assert.NotNull(result);
-                Assert.Equal(0, result.Length);
+                Assert.Empty(result);
             });
         }
 
@@ -59,7 +59,7 @@ namespace System.Tests
             byte[] result = Convert.FromBase64CharArray(inputChars, 0, 0);
 
             Assert.NotNull(result);
-            Assert.Equal(0, result.Length);
+            Assert.Empty(result);
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace System.Tests
             string input = "ab==";
             Verify(input, result =>
             {
-                Assert.Equal(1, result.Length);
+                Assert.Single(result);
 
                 string roundtrippedString = Convert.ToBase64String(result);
                 Assert.NotEqual(input, roundtrippedString);

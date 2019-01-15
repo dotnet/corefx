@@ -45,7 +45,7 @@ namespace System.Net.Sockets.Tests
                 var list = new List<Socket> { receiver };
                 Socket.Select(list, null, null, SelectSuccessTimeoutMicroseconds);
 
-                Assert.Equal(1, list.Count);
+                Assert.Single(list);
                 Assert.Equal(receiver, list[0]);
             }
         }
@@ -60,7 +60,7 @@ namespace System.Net.Sockets.Tests
                 var list = new List<Socket> { receiver };
                 Socket.Select(list, null, null, SelectTimeout);
 
-                Assert.Equal(0, list.Count);
+                Assert.Empty(list);
             }
         }
 
@@ -112,7 +112,7 @@ namespace System.Net.Sockets.Tests
                 var list = new List<Socket> { firstReceiver, secondReceiver };
                 Socket.Select(list, null, null, SelectTimeout);
 
-                Assert.Equal(0, list.Count);
+                Assert.Empty(list);
             }
         }
 
@@ -136,7 +136,7 @@ namespace System.Net.Sockets.Tests
                 var list = new List<Socket> { firstReceiver, secondReceiver };
                 Socket.Select(list, null, null, SelectSuccessTimeoutMicroseconds);
 
-                Assert.Equal(1, list.Count);
+                Assert.Single(list);
                 Assert.Equal(secondReceiver, list[0]);
             }
         }
@@ -156,7 +156,7 @@ namespace System.Net.Sockets.Tests
                 var list = new List<Socket> { sender };
                 Socket.Select(null, list, null, SelectSuccessTimeoutMicroseconds);
 
-                Assert.Equal(1, list.Count);
+                Assert.Single(list);
                 Assert.Equal(sender, list[0]);
             }
         }
@@ -173,7 +173,7 @@ namespace System.Net.Sockets.Tests
                 var list = new List<Socket> { listener };
                 Socket.Select(null, list, null, SelectTimeout);
 
-                Assert.Equal(0, list.Count);
+                Assert.Empty(list);
             }
         }
 
@@ -209,7 +209,7 @@ namespace System.Net.Sockets.Tests
                 var list = new List<Socket> { firstListener, secondListener };
                 Socket.Select(null, list, null, SelectTimeout);
 
-                Assert.Equal(0, list.Count);
+                Assert.Empty(list);
             }
         }
 
@@ -226,7 +226,7 @@ namespace System.Net.Sockets.Tests
                 var list = new List<Socket> { listener, sender };
                 Socket.Select(null, list, null, SelectSuccessTimeoutMicroseconds);
 
-                Assert.Equal(1, list.Count);
+                Assert.Single(list);
                 Assert.Equal(sender, list[0]);
             }
         }
@@ -248,7 +248,7 @@ namespace System.Net.Sockets.Tests
                 var list = new List<Socket> { receiver };
                 Socket.Select(null, null, list, SelectTimeout);
 
-                Assert.Equal(0, list.Count);
+                Assert.Empty(list);
             }
         }
 
@@ -264,7 +264,7 @@ namespace System.Net.Sockets.Tests
                 var list = new List<Socket> { firstReceiver, secondReceiver };
                 Socket.Select(null, null, list, SelectTimeout);
 
-                Assert.Equal(0, list.Count);
+                Assert.Empty(list);
             }
         }
 

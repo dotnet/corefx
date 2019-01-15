@@ -16,7 +16,7 @@ namespace System.Diagnostics.Tests
         public static void CounterCreationDataCollection_CreateCounterCreationDataCollection_Empty()
         {
             CounterCreationDataCollection ccdc = new CounterCreationDataCollection();
-            Assert.Equal(0, ccdc.Count);
+            Assert.Empty(ccdc);
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.IsElevatedAndCanWriteToPerfCounters))]

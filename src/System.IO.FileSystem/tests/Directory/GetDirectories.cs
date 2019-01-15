@@ -31,21 +31,21 @@ namespace System.IO.Tests
                 Assert.True(MountHelper.CreateSymbolicLink(linkPath, targetDir.FullName, isDirectory: true));
 
                 Assert.True(Directory.Exists(linkPath));
-                Assert.Equal(1, GetEntries(containingFolder.FullName).Count());
+                Assert.Single(GetEntries(containingFolder.FullName));
             }
             targetDir.Delete(recursive: true);
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Assert.Equal(1, GetEntries(containingFolder.FullName).Count());
-                Assert.Equal(0, Directory.GetFiles(containingFolder.FullName).Count());
+                Assert.Single(GetEntries(containingFolder.FullName));
+                Assert.Empty(Directory.GetFiles(containingFolder.FullName));
             }
             else
             {
                 // The target file is gone and the symlink still exists; since it can't be resolved,
                 // on Unix it's treated as a file rather than as a directory.
-                Assert.Equal(0, GetEntries(containingFolder.FullName).Count());
-                Assert.Equal(1, Directory.GetFiles(containingFolder.FullName).Count());
+                Assert.Empty(GetEntries(containingFolder.FullName));
+                Assert.Single(Directory.GetFiles(containingFolder.FullName));
             }
         }
     }

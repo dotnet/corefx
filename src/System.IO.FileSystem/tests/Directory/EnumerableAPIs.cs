@@ -102,7 +102,7 @@ namespace System.IO.Tests
             {
                 Directory.Delete(dir);
             }
-            Assert.Equal(0, enumerator.ToArray().Length);
+            Assert.Empty(enumerator.ToArray());
         }
 
 
@@ -114,7 +114,7 @@ namespace System.IO.Tests
             DirectoryInfo subDir1 = Directory.CreateDirectory(Path.Combine(testDir.FullName, "a"));
             DirectoryInfo subDir2 = Directory.CreateDirectory(Path.Combine(testDir.FullName, "b"));
             var enumerator = Directory.EnumerateDirectories(testDir.FullName, "a" + Path.DirectorySeparatorChar);
-            Assert.Equal(0, enumerator.ToArray().Length);
+            Assert.Empty(enumerator.ToArray());
         }
     }
 

@@ -133,7 +133,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ecms2.Decode(encodedMessage);
 
             RecipientInfoCollection recipients = ecms2.RecipientInfos;
-            Assert.Equal(1, recipients.Count);
+            Assert.Single(recipients);
             RecipientInfo recipientInfo = recipients[0];
             Assert.IsType<KeyTransRecipientInfo>(recipientInfo);
             KeyTransRecipientInfo recipient = (KeyTransRecipientInfo)recipientInfo;
@@ -210,7 +210,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ecms2.Decode(encodedMessage);
 
             RecipientInfoCollection recipients = ecms2.RecipientInfos;
-            Assert.Equal(1, recipients.Count);
+            Assert.Single(recipients);
             RecipientInfo recipientInfo = recipients[0];
             Assert.IsType<KeyTransRecipientInfo>(recipientInfo);
             return (KeyTransRecipientInfo)recipientInfo;
@@ -237,7 +237,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ecms.Decode(encodedMessage);
 
             RecipientInfoCollection recipients = ecms.RecipientInfos;
-            Assert.Equal(1, recipients.Count);
+            Assert.Single(recipients);
             RecipientInfo recipientInfo = recipients[0];
             Assert.IsType<KeyTransRecipientInfo>(recipientInfo);
             return (KeyTransRecipientInfo)recipientInfo;

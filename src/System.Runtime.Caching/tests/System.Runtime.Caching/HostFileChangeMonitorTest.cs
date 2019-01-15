@@ -113,7 +113,7 @@ namespace MonoTests.System.Runtime.Caching
             paths.Clear();
             paths.Add(missingFile);
             monitor = new HostFileChangeMonitor(paths);
-            Assert.Equal(1, monitor.FilePaths.Count);
+            Assert.Single(monitor.FilePaths);
             Assert.Equal(missingFile, monitor.FilePaths[0]);
             //??
             Assert.Equal(missingFile + "701CE1722770000FFFFFFFFFFFFFFFF", monitor.UniqueId);

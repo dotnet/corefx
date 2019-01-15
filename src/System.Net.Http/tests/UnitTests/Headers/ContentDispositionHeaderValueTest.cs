@@ -81,7 +81,7 @@ namespace System.Net.Http.Tests
             ContentDispositionHeaderValue contentDisposition = new ContentDispositionHeaderValue("inline");
             contentDisposition.Name = "myname";
             Assert.Equal("myname", contentDisposition.Name);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("name", contentDisposition.Parameters.First().Name);
 
             contentDisposition.Name = null;
@@ -98,12 +98,12 @@ namespace System.Net.Http.Tests
             // Note that uppercase letters are used. Comparison should happen case-insensitive.
             NameValueHeaderValue name = new NameValueHeaderValue("NAME", "old_name");
             contentDisposition.Parameters.Add(name);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("NAME", contentDisposition.Parameters.First().Name);
 
             contentDisposition.Name = "new_name";
             Assert.Equal("new_name", contentDisposition.Name);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("NAME", contentDisposition.Parameters.First().Name);
 
             contentDisposition.Parameters.Remove(name);
@@ -118,12 +118,12 @@ namespace System.Net.Http.Tests
             // Note that uppercase letters are used. Comparison should happen case-insensitive.
             NameValueHeaderValue fileName = new NameValueHeaderValue("FILENAME", "old_name");
             contentDisposition.Parameters.Add(fileName);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("FILENAME", contentDisposition.Parameters.First().Name);
 
             contentDisposition.FileName = "new_name";
             Assert.Equal("new_name", contentDisposition.FileName);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("FILENAME", contentDisposition.Parameters.First().Name);
 
             contentDisposition.Parameters.Remove(fileName);
@@ -137,7 +137,7 @@ namespace System.Net.Http.Tests
 
             contentDisposition.FileName = "File\u00C3Name.bat";
             Assert.Equal("File\u00C3Name.bat", contentDisposition.FileName);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("filename", contentDisposition.Parameters.First().Name);
             Assert.Equal("\"=?utf-8?B?RmlsZcODTmFtZS5iYXQ=?=\"", contentDisposition.Parameters.First().Value);
 
@@ -153,14 +153,14 @@ namespace System.Net.Http.Tests
             // Note that uppercase letters are used. Comparison should happen case-insensitive.
             NameValueHeaderValue fileName = new NameValueHeaderValue("FILENAME", "\"=?utf-99?Q?R=mlsZcODTmFtZS5iYXQ=?=\"");
             contentDisposition.Parameters.Add(fileName);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("FILENAME", contentDisposition.Parameters.First().Name);
             Assert.Equal("\"=?utf-99?Q?R=mlsZcODTmFtZS5iYXQ=?=\"", contentDisposition.Parameters.First().Value);
             Assert.Equal("\"=?utf-99?Q?R=mlsZcODTmFtZS5iYXQ=?=\"", contentDisposition.FileName);
 
             contentDisposition.FileName = "new_name";
             Assert.Equal("new_name", contentDisposition.FileName);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("FILENAME", contentDisposition.Parameters.First().Name);
 
             contentDisposition.Parameters.Remove(fileName);
@@ -175,13 +175,13 @@ namespace System.Net.Http.Tests
             // Note that uppercase letters are used. Comparison should happen case-insensitive.
             NameValueHeaderValue fileNameStar = new NameValueHeaderValue("FILENAME*", "old_name");
             contentDisposition.Parameters.Add(fileNameStar);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("FILENAME*", contentDisposition.Parameters.First().Name);
             Assert.Null(contentDisposition.FileNameStar); // Decode failure
 
             contentDisposition.FileNameStar = "new_name";
             Assert.Equal("new_name", contentDisposition.FileNameStar);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("FILENAME*", contentDisposition.Parameters.First().Name);
             Assert.Equal("utf-8\'\'new_name", contentDisposition.Parameters.First().Value);
 
@@ -200,7 +200,7 @@ namespace System.Net.Http.Tests
             // Note that uppercase letters are used. Comparison should happen case-insensitive.
             NameValueHeaderValue fileNameStar = new NameValueHeaderValue("FILENAME*", value);
             contentDisposition.Parameters.Add(fileNameStar);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Same(fileNameStar, contentDisposition.Parameters.First());
             Assert.Null(contentDisposition.FileNameStar); // Decode failure
         }
@@ -212,7 +212,7 @@ namespace System.Net.Http.Tests
 
             contentDisposition.FileNameStar = "File\u00C3Name.bat";
             Assert.Equal("File\u00C3Name.bat", contentDisposition.FileNameStar);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("filename*", contentDisposition.Parameters.First().Name);
             Assert.Equal("utf-8\'\'File%C3%83Name.bat", contentDisposition.Parameters.First().Value);
 
@@ -228,13 +228,13 @@ namespace System.Net.Http.Tests
             // Note that uppercase letters are used. Comparison should happen case-insensitive.
             NameValueHeaderValue fileNameStar = new NameValueHeaderValue("FILENAME*", "utf-99'lang'File%CZName.bat");
             contentDisposition.Parameters.Add(fileNameStar);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Same(fileNameStar, contentDisposition.Parameters.First());
             Assert.Null(contentDisposition.FileNameStar); // Decode failure
 
             contentDisposition.FileNameStar = "new_name";
             Assert.Equal("new_name", contentDisposition.FileNameStar);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("FILENAME*", contentDisposition.Parameters.First().Name);
 
             contentDisposition.Parameters.Remove(fileNameStar);
@@ -252,7 +252,7 @@ namespace System.Net.Http.Tests
             // Note that uppercase letters are used. Comparison should happen case-insensitive.
             NameValueHeaderValue dateParameter = new NameValueHeaderValue("Creation-DATE", validDateString);
             contentDisposition.Parameters.Add(dateParameter);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("Creation-DATE", contentDisposition.Parameters.First().Name);
 
             Assert.Equal(validDate, contentDisposition.CreationDate);
@@ -260,7 +260,7 @@ namespace System.Net.Http.Tests
             DateTimeOffset newDate = validDate.AddSeconds(1);
             contentDisposition.CreationDate = newDate;
             Assert.Equal(newDate, contentDisposition.CreationDate);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("Creation-DATE", contentDisposition.Parameters.First().Name);
             Assert.Equal("\"Tue, 15 Nov 1994 08:12:32 GMT\"", contentDisposition.Parameters.First().Value);
 
@@ -278,7 +278,7 @@ namespace System.Net.Http.Tests
             // Note that uppercase letters are used. Comparison should happen case-insensitive.
             NameValueHeaderValue dateParameter = new NameValueHeaderValue("read-DATE", invalidDateString);
             contentDisposition.Parameters.Add(dateParameter);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("read-DATE", contentDisposition.Parameters.First().Name);
 
             Assert.Null(contentDisposition.ReadDate);
@@ -296,13 +296,13 @@ namespace System.Net.Http.Tests
             // Note that uppercase letters are used. Comparison should happen case-insensitive.
             NameValueHeaderValue sizeParameter = new NameValueHeaderValue("SIZE", "279172874239");
             contentDisposition.Parameters.Add(sizeParameter);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("SIZE", contentDisposition.Parameters.First().Name);
             Assert.Equal(279172874239, contentDisposition.Size);
 
             contentDisposition.Size = 279172874240;
             Assert.Equal(279172874240, contentDisposition.Size);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("SIZE", contentDisposition.Parameters.First().Name);
 
             contentDisposition.Parameters.Remove(sizeParameter);
@@ -317,7 +317,7 @@ namespace System.Net.Http.Tests
             // Note that uppercase letters are used. Comparison should happen case-insensitive.
             NameValueHeaderValue sizeParameter = new NameValueHeaderValue("SIZE", "-279172874239");
             contentDisposition.Parameters.Add(sizeParameter);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("SIZE", contentDisposition.Parameters.First().Name);
             Assert.Null(contentDisposition.Size);
 
@@ -325,7 +325,7 @@ namespace System.Net.Http.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => { contentDisposition.Size = -279172874240; });
             
             Assert.Null(contentDisposition.Size);
-            Assert.Equal(1, contentDisposition.Parameters.Count);
+            Assert.Single(contentDisposition.Parameters);
             Assert.Equal("SIZE", contentDisposition.Parameters.First().Name);
 
             contentDisposition.Parameters.Remove(sizeParameter);
@@ -437,7 +437,7 @@ namespace System.Net.Http.Tests
             clone = (ContentDispositionHeaderValue)((ICloneable)source).Clone();
             Assert.Equal(source.DispositionType, clone.DispositionType);
             Assert.Equal("myName", clone.Name);
-            Assert.Equal(1, clone.Parameters.Count);
+            Assert.Single(clone.Parameters);
 
             source.Parameters.Add(new NameValueHeaderValue("custom", "customValue"));
             clone = (ContentDispositionHeaderValue)((ICloneable)source).Clone();
@@ -470,7 +470,7 @@ namespace System.Net.Http.Tests
             value = (ContentDispositionHeaderValue)result;
             Assert.Equal("inline", value.DispositionType);
             Assert.Equal("MyName", value.Name);
-            Assert.Equal(1, value.Parameters.Count);
+            Assert.Single(value.Parameters);
 
             Assert.Equal(32, ContentDispositionHeaderValue.GetDispositionTypeLength(" inline; custom=value;name=myName",
                 1, out result));
@@ -484,7 +484,7 @@ namespace System.Net.Http.Tests
             value = (ContentDispositionHeaderValue)result;
             Assert.Equal("inline", value.DispositionType);
             Assert.Null(value.Name);
-            Assert.Equal(1, value.Parameters.Count);
+            Assert.Single(value.Parameters);
             Assert.Equal("custom", value.Parameters.ElementAt(0).Name);
             Assert.Null(value.Parameters.ElementAt(0).Value);
 

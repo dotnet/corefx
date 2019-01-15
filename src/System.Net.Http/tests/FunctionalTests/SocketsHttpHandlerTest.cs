@@ -1429,7 +1429,7 @@ namespace System.Net.Http.Functional.Tests
                 Assert.Empty(props);
 
                 props.Add("hello", "world");
-                Assert.Equal(1, props.Count);
+                Assert.Single(props);
                 Assert.Equal("world", props["hello"]);
             }
         }

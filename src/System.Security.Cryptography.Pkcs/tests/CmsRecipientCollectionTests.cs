@@ -41,7 +41,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         {
             CmsRecipient a0 = s_cr0;
             CmsRecipientCollection c = new CmsRecipientCollection(SubjectIdentifierType.IssuerAndSerialNumber, new X509Certificate2Collection(a0.Certificate));
-            Assert.Equal(1, c.Count);
+            Assert.Single(c);
             CmsRecipient actual = c[0];
             Assert.Equal(a0.RecipientIdentifierType, actual.RecipientIdentifierType);
             Assert.Equal(a0.Certificate, actual.Certificate);
@@ -52,7 +52,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
         {
             CmsRecipient a0 = s_cr0;
             CmsRecipientCollection c = new CmsRecipientCollection(SubjectIdentifierType.SubjectKeyIdentifier, new X509Certificate2Collection(a0.Certificate));
-            Assert.Equal(1, c.Count);
+            Assert.Single(c);
             CmsRecipient actual = c[0];
             Assert.Equal(SubjectIdentifierType.SubjectKeyIdentifier, actual.RecipientIdentifierType);
             Assert.Equal(a0.Certificate, actual.Certificate);

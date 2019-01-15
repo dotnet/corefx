@@ -50,7 +50,7 @@ namespace System.Diagnostics.Tests
 
             //Clear
             environment.Clear();
-            Assert.Equal(0, environment.Count);
+            Assert.Empty(environment);
 
             //ContainsKey 
             environment.Add("NewKey", "NewValue");
@@ -494,7 +494,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal("NewValue3Overridden", psi.Environment["NewKey3"]);
 
             psi.EnvironmentVariables.Clear();
-            Assert.Equal(0, psi.Environment.Count);
+            Assert.Empty(psi.Environment);
 
             psi.EnvironmentVariables.Add("NewKey", "NewValue");
             psi.EnvironmentVariables.Add("NewKey2", "NewValue2");
@@ -526,7 +526,7 @@ namespace System.Diagnostics.Tests
             if (PlatformDetection.IsNetNative)
             {
                 // UapAot doesn't have RegistryKey apis available so ProcessStartInfo.Verbs returns Array<string>.Empty().
-                Assert.Equal(0, psi.Verbs.Length);
+                Assert.Empty(psi.Verbs);
                 return;
             }
 
@@ -717,7 +717,7 @@ namespace System.Diagnostics.Tests
 
             environmentVariables.Clear();
 
-            Assert.Equal(0, environmentVariables.Count);
+            Assert.Empty(environmentVariables);
 
             environmentVariables.Add("NewKey", "newvalue");
             environmentVariables.Add("newkey2", "NewValue2");

@@ -34,17 +34,17 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
 
             List<Pkcs12SafeBag> safe0Bags = new List<Pkcs12SafeBag>(authSafe[0].GetBags());
 
-            Assert.Equal(1, safe0Bags.Count);
+            Assert.Single(safe0Bags);
             Pkcs12ShroudedKeyBag shroudedKeyBag = Assert.IsType<Pkcs12ShroudedKeyBag>(safe0Bags[0]);
 
             CryptographicAttributeObjectCollection keyBagAttrs = shroudedKeyBag.Attributes;
             Assert.Same(keyBagAttrs, shroudedKeyBag.Attributes);
             Assert.Equal(2, keyBagAttrs.Count);
             Assert.Equal(Oids.LocalKeyId, keyBagAttrs[0].Oid.Value);
-            Assert.Equal(1, keyBagAttrs[0].Values.Count);
+            Assert.Single(keyBagAttrs[0].Values);
             Pkcs9LocalKeyId keyKeyId = Assert.IsType<Pkcs9LocalKeyId>(keyBagAttrs[0].Values[0]);
             Assert.Equal("1.3.6.1.4.1.311.17.1", keyBagAttrs[1].Oid.Value);
-            Assert.Equal(1, keyBagAttrs[1].Values.Count);
+            Assert.Single(keyBagAttrs[1].Values);
             Pkcs9AttributeObject cspNameAttr = Assert.IsType<Pkcs9AttributeObject>(keyBagAttrs[1].Values[0]);
 
             byte[] cspNameBytes = Encoding.BigEndianUnicode.GetBytes("Microsoft Strong Cryptographic Provider");
@@ -55,7 +55,7 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
 
             List<Pkcs12SafeBag> safe1Bags = new List<Pkcs12SafeBag>(authSafe[1].GetBags());
 
-            Assert.Equal(1, safe0Bags.Count);
+            Assert.Single(safe0Bags);
             Assert.IsType<Pkcs12CertBag>(safe1Bags[0]);
             Pkcs12CertBag certBag = (Pkcs12CertBag)safe1Bags[0];
 
@@ -64,9 +64,9 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
 
             CryptographicAttributeObjectCollection certBagAttrs = certBag.Attributes;
             Assert.Same(certBagAttrs, certBag.Attributes);
-            Assert.Equal(1, certBagAttrs.Count);
+            Assert.Single(certBagAttrs);
             Assert.Equal(Oids.LocalKeyId, certBagAttrs[0].Oid.Value);
-            Assert.Equal(1, certBagAttrs[0].Values.Count);
+            Assert.Single(certBagAttrs[0].Values);
             Pkcs9LocalKeyId certKeyId = Assert.IsType<Pkcs9LocalKeyId>(certBagAttrs[0].Values[0]);
 
             Assert.Equal(keyKeyId.KeyId.ByteArrayToHex(), certKeyId.KeyId.ByteArrayToHex());
@@ -126,14 +126,14 @@ namespace System.Security.Cryptography.Pkcs.Tests.Pkcs12
             Assert.Equal(Pkcs12ConfidentialityMode.None, authSafe[0].ConfidentialityMode);
 
             List<Pkcs12SafeBag> safe0Bags = new List<Pkcs12SafeBag>(authSafe[0].GetBags());
-            Assert.Equal(1, safe0Bags.Count);
+            Assert.Single(safe0Bags);
             Pkcs12CertBag certBag = Assert.IsType<Pkcs12CertBag>(safe0Bags[0]);
 
             Assert.True(certBag.IsX509Certificate, "certBag.IsX509Certificate");
             Assert.InRange(certBag.EncodedCertificate.Length, loader.CerData.Length + 2, int.MaxValue);
 
             List<Pkcs12SafeBag> safe1Bags = new List<Pkcs12SafeBag>(authSafe[1].GetBags());
-            Assert.Equal(1, safe0Bags.Count);
+            Assert.Single(safe0Bags);
             Pkcs12ShroudedKeyBag shroudedKeyBag = Assert.IsType<Pkcs12ShroudedKeyBag>(safe1Bags[0]);
 
             byte[] data = { 9, 8, 7, 6, 5, 4, 3, 2, 1 };

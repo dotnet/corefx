@@ -101,7 +101,7 @@ namespace System.DirectoryServices.Tests
             using (DirectoryEntry de = schema.GetDirectoryEntry())
             {
                 // by default there is no filters
-                Assert.Equal(0, de.Children.SchemaFilter.Count);
+                Assert.Empty(de.Children.SchemaFilter);
 
                 int topClassCount = 0;
 
@@ -112,7 +112,7 @@ namespace System.DirectoryServices.Tests
                 }
 
                 de.Children.SchemaFilter.Add("top");
-                Assert.Equal(1, de.Children.SchemaFilter.Count);
+                Assert.Single(de.Children.SchemaFilter);
                 Assert.True(de.Children.SchemaFilter.Contains("top"));
                 Assert.Equal(0, de.Children.SchemaFilter.IndexOf("top"));
                 Assert.Equal("top", de.Children.SchemaFilter[0]);
@@ -130,12 +130,12 @@ namespace System.DirectoryServices.Tests
                 Assert.Equal(topClassCount, newTopClassCount);
 
                 de.Children.SchemaFilter.Remove("top");
-                Assert.Equal(0, de.Children.SchemaFilter.Count);
+                Assert.Empty(de.Children.SchemaFilter);
 
                 de.Children.SchemaFilter.Add("top");
-                Assert.Equal(1, de.Children.SchemaFilter.Count);
+                Assert.Single(de.Children.SchemaFilter);
                 de.Children.SchemaFilter.RemoveAt(0);
-                Assert.Equal(0, de.Children.SchemaFilter.Count);
+                Assert.Empty(de.Children.SchemaFilter);
 
                 de.Children.SchemaFilter.AddRange(new string [] {"top", "user"});
                 Assert.Equal(2, de.Children.SchemaFilter.Count);
@@ -145,7 +145,7 @@ namespace System.DirectoryServices.Tests
                 Assert.Equal("user", de.Children.SchemaFilter[2]);
 
                 de.Children.SchemaFilter.Clear();
-                Assert.Equal(0, de.Children.SchemaFilter.Count);
+                Assert.Empty(de.Children.SchemaFilter);
             }
         }
 

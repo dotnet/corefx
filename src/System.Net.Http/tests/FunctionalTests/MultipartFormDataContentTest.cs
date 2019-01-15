@@ -17,7 +17,7 @@ namespace System.Net.Http.Functional.Tests
         {
             var content = new MultipartFormDataContent();
             Assert.Equal("multipart/form-data", content.Headers.ContentType.MediaType);
-            Assert.Equal(1, content.Headers.ContentType.Parameters.Count);
+            Assert.Single(content.Headers.ContentType.Parameters);
         }
 
         [Fact]

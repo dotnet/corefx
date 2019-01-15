@@ -241,7 +241,7 @@ namespace MonoTests.System.Runtime.Caching
 
             mc.Calls.Clear();
             object value = mc["key"];
-            Assert.Equal(1, mc.Calls.Count);
+            Assert.Single(mc.Calls);
             Assert.Equal("get_this [string key]", mc.Calls[0]);
             Assert.Equal("value", value);
         }
@@ -943,7 +943,7 @@ namespace MonoTests.System.Runtime.Caching
             };
 
             mc.Set("key", "value", cip);
-            Assert.Equal(0, monitor.Calls.Count);
+            Assert.Empty(monitor.Calls);
 
             monitor.SignalChange();
             Assert.True(removed);

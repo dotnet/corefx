@@ -154,7 +154,7 @@ namespace System.Xml.Linq.Tests
         {
             // The Empty CData text node is not preserved in the tree
             XDocument d = XDocument.Parse("<root><![CDATA[]]></root>");
-            Assert.Equal(1, d.Element("root").Nodes().Count());
+            Assert.Single(d.Element("root").Nodes());
             Assert.IsType<XCData>(d.Root.FirstNode);
             Assert.Equal(string.Empty, (d.Root.FirstNode as XCData).Value);
         }

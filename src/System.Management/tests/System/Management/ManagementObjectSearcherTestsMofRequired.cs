@@ -37,7 +37,7 @@ namespace System.Management.Tests
                 searcher.Scope.Path.NamespacePath = WmiTestHelper.Namespace;
                 searcher.Query = relatedObjectQuery;
                 ManagementObjectCollection instances = searcher.Get();
-                Assert.Equal(1, instances.Count);
+                Assert.Single(instances);
 
                 foreach (ManagementObject instance in instances)
                     Assert.Equal("Class4", instance.Path.ClassName);
@@ -54,7 +54,7 @@ namespace System.Management.Tests
                 searcher.Scope.Path.NamespacePath = WmiTestHelper.Namespace;
                 searcher.Query = relationshipQuery;
                 ManagementObjectCollection instances = searcher.Get();
-                Assert.Equal(1, instances.Count);
+                Assert.Single(instances);
 
                 foreach (ManagementObject instance in instances)
                     Assert.Equal("AssocA", instance.Path.ClassName);

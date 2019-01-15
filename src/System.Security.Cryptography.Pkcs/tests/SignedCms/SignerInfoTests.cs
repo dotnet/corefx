@@ -356,7 +356,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
             Assert.Equal(2, signerInfo.CounterSignerInfos.Count);
             signerInfo.RemoveCounterSignature(indexToRemove);
-            Assert.Equal(1, signerInfo.CounterSignerInfos.Count);
+            Assert.Single(signerInfo.CounterSignerInfos);
 
             cms.CheckSignature(true);
         }
@@ -573,7 +573,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             cms.CheckSignature(true);
 
             SignerInfoCollection signers = cms.SignerInfos;
-            Assert.Equal(1, signers.Count);
+            Assert.Single(signers);
             SignerInfo signerInfo = signers[0];
 
             using (X509Certificate2 cert = Certificates.RSAKeyTransferCapi1.TryGetCertificateWithPrivateKey())
@@ -878,7 +878,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 }
                 else
                 {
-                    Assert.Equal(1, certs.Count);
+                    Assert.Single(certs);
                     Assert.NotEqual(cert2.RawData, certs[0].RawData);
                 }
             }
@@ -921,7 +921,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             }
             else
             {
-                Assert.Equal(1, certs.Count);
+                Assert.Single(certs);
             }
 
             Assert.Equal("CN=RSAKeyTransferCapi1", certs[0].SubjectName.Name);

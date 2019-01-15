@@ -20,19 +20,19 @@ namespace System.Security.Cryptography.Pkcs.Tests
             SignedCms cms = new SignedCms();
             cms.Decode(SignedDocuments.RsaPkcs1OneSignerIssuerAndSerialNumber);
 
-            Assert.Equal(0, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Empty(cms.SignerInfos[0].UnsignedAttributes);
 
             AsnEncodedData attribute1 = CreateTimestampToken(1);
             cms.SignerInfos[0].AddUnsignedAttribute(attribute1);
 
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes[0].Values);
             VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
 
             ReReadSignedCms(ref cms);
 
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes[0].Values);
             VerifyAttributesAreEqual(cms.SignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
 
             AsnEncodedData attribute2 = CreateTimestampToken(2);
@@ -43,13 +43,13 @@ namespace System.Security.Cryptography.Pkcs.Tests
             expectedAttributes.Add(attribute1);
             expectedAttributes.Add(attribute2);
 
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes);
             Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
             VerifyAttributesContainsAll(cms.SignerInfos[0].UnsignedAttributes, expectedAttributes);
 
             ReReadSignedCms(ref cms);
 
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes);
             Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
             VerifyAttributesContainsAll(cms.SignerInfos[0].UnsignedAttributes, expectedAttributes);
         }
@@ -66,14 +66,14 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
             cms.SignerInfos[0].RemoveUnsignedAttribute(cms.SignerInfos[0].UnsignedAttributes[0].Values[0]);
 
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
-            Assert.Equal(1, cms.SignerInfos[0].CounterSignerInfos.Count);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes);
+            Assert.Single(cms.SignerInfos[0].CounterSignerInfos);
             Assert.Equal(secondSignerCounterSignature, cms.SignerInfos[0].CounterSignerInfos[0].GetSignature());
 
             ReReadSignedCms(ref cms);
 
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
-            Assert.Equal(1, cms.SignerInfos[0].CounterSignerInfos.Count);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes);
+            Assert.Single(cms.SignerInfos[0].CounterSignerInfos);
             Assert.Equal(secondSignerCounterSignature, cms.SignerInfos[0].CounterSignerInfos[0].GetSignature());
         }
 
@@ -161,23 +161,23 @@ namespace System.Security.Cryptography.Pkcs.Tests
             SignedCms cms = new SignedCms();
             cms.Decode(SignedDocuments.RsaPkcs1OneSignerIssuerAndSerialNumber);
 
-            Assert.Equal(0, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Empty(cms.SignerInfos[0].UnsignedAttributes);
 
             AsnEncodedData attribute1 = CreateTimestampToken(1);
             AsnEncodedData attribute2 = CreateTimestampToken(2);
             cms.SignerInfos[0].AddUnsignedAttribute(attribute1);
             cms.SignerInfos[0].AddUnsignedAttribute(attribute2);
             
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes);
             Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
 
             cms.SignerInfos[0].RemoveUnsignedAttribute(attribute1);
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes[0].Values);
             Assert.True(AsnEncodedDataEqual(attribute2, cms.SignerInfos[0].UnsignedAttributes[0].Values[0]));
 
             cms.SignerInfos[0].RemoveUnsignedAttribute(attribute2);
-            Assert.Equal(0, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Empty(cms.SignerInfos[0].UnsignedAttributes);
         }
 
         [Fact]
@@ -208,15 +208,15 @@ namespace System.Security.Cryptography.Pkcs.Tests
             }
 
             Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes.Count);
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes[1].Values.Count);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes[0].Values);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes[1].Values);
             cms.CheckSignature(true);
 
             AsnEncodedData counterSignature = cms.SignerInfos[0].UnsignedAttributes[0].Values[0];
             cms.SignerInfos[0].RemoveUnsignedAttribute(counterSignature);
             cms.SignerInfos[0].AddUnsignedAttribute(counterSignature);
 
-            Assert.Equal(1, cms.SignerInfos[0].UnsignedAttributes.Count);
+            Assert.Single(cms.SignerInfos[0].UnsignedAttributes);
             Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes[0].Values.Count);
             cms.CheckSignature(true);
         }

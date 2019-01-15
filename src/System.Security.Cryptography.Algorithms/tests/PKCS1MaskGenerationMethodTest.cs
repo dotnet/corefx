@@ -50,7 +50,7 @@ namespace System.Security.Cryptography.Algorithms.Tests
             PKCS1MaskGenerationMethod pkcs1 = new PKCS1MaskGenerationMethod();
             byte[] random = { 0x01 };
             byte[] mask = pkcs1.GenerateMask(random, 0);
-            Assert.Equal(0, mask.Length);
+            Assert.Empty(mask);
         }
 
         [Fact]

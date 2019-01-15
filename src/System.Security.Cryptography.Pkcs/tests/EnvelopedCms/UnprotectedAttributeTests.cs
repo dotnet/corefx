@@ -39,7 +39,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
             AsnEncodedData[] attributes = ecms.UnprotectedAttributes.FlattenAndSort();
-            Assert.Equal(0, attributes.Length);
+            Assert.Empty(attributes);
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
             AsnEncodedData[] attributes = ecms.UnprotectedAttributes.FlattenAndSort();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             attributes[0].AssertIsDocumentationDescription("My Description");
         }
 
@@ -98,7 +98,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
             AsnEncodedData[] attributes = ecms.UnprotectedAttributes.FlattenAndSort();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             attributes[0].AssertIsDocumentationName("My Name");
         }
 
@@ -129,7 +129,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
             AsnEncodedData[] attributes = ecms.UnprotectedAttributes.FlattenAndSort();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             DateTime expectedSigningTIme = new DateTime(2018, 4, 1, 8, 30, 05);
             attributes[0].AssertIsSigningTime(expectedSigningTIme);
         }
@@ -163,7 +163,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
             AsnEncodedData[] attributes = ecms.UnprotectedAttributes.FlattenAndSort();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             attributes[0].AssertIsContentType("1.2.512256.47488");
         }
 
@@ -197,7 +197,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
             AsnEncodedData[] attributes = ecms.UnprotectedAttributes.FlattenAndSort();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             attributes[0].AssertIsMessageDigest(expectedMessageDigest);
         }
 
@@ -310,7 +310,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 collection[0] :
                 collection[1];
 
-            Assert.Equal(0, documentNameObj.Values.Count);
+            Assert.Empty(documentNameObj.Values);
             Assert.Equal(2, documentDescObj.Values.Count);
         }
 
@@ -341,7 +341,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
             AsnEncodedData[] attributes = ecms.UnprotectedAttributes.FlattenAndSort();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             AsnEncodedData a = attributes[0];
             Assert.Equal(Oids.Pkcs7Data, a.Oid.Value);
             byte[] expectedRawData = { 4, 3, 6, 7, 8 };
@@ -380,7 +380,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
             AsnEncodedData[] attributes = ecms.UnprotectedAttributes.FlattenAndSort();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             AsnEncodedData a = attributes[0];
             Assert.Equal(Oids.BasicConstraints2, a.Oid.Value);
             Assert.Equal<byte>(constraintsRawData, a.RawData);
@@ -400,7 +400,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             EnvelopedCms ecms = new EnvelopedCms();
             ecms.Decode(encodedMessage);
             AsnEncodedData[] attributes = ecms.UnprotectedAttributes.FlattenAndSort();
-            Assert.Equal(1, attributes.Length);
+            Assert.Single(attributes);
             AsnEncodedData a = attributes[0];
             Assert.True(a is Pkcs9AttributeObject);
         }

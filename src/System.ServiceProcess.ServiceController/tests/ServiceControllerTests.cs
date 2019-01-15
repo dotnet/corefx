@@ -153,12 +153,12 @@ namespace System.ServiceProcess.Tests
             // The test service creates a number of dependent services, each of which is depended on
             // by all the services created after it.
             var controller = new ServiceController(_testService.TestServiceName);
-            Assert.Equal(0, controller.DependentServices.Length);
-            Assert.Equal(1, controller.ServicesDependedOn.Length);
+            Assert.Empty(controller.DependentServices);
+            Assert.Single(controller.ServicesDependedOn);
 
             var dependentController = new ServiceController(_testService.TestServiceName + ".Dependent");
-            Assert.Equal(1, dependentController.DependentServices.Length);
-            Assert.Equal(0, dependentController.ServicesDependedOn.Length);
+            Assert.Single(dependentController.DependentServices);
+            Assert.Empty(dependentController.ServicesDependedOn);
 
             Assert.Equal(controller.ServicesDependedOn[0].ServiceName, dependentController.ServiceName);
             Assert.Equal(dependentController.DependentServices[0].ServiceName, controller.ServiceName);

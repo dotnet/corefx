@@ -30,16 +30,16 @@ namespace System.IO.Tests
             Assert.True(MountHelper.CreateSymbolicLink(linkPath, targetFile.FullName, isDirectory: false));
 
             Assert.True(File.Exists(linkPath));
-            Assert.Equal(1, GetEntries(containingFolder.FullName).Count());
+            Assert.Single(GetEntries(containingFolder.FullName));
 
             targetFile.Delete();
 
             // The symlink still exists even though the target file is gone.
-            Assert.Equal(1, GetEntries(containingFolder.FullName).Count());
+            Assert.Single(GetEntries(containingFolder.FullName));
 
             // The symlink is gone
             File.Delete(linkPath);
-            Assert.Equal(0, GetEntries(containingFolder.FullName).Count());
+            Assert.Empty(GetEntries(containingFolder.FullName));
         }
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]

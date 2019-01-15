@@ -436,19 +436,19 @@ namespace System.DirectoryServices.Tests
                             Assert.Equal(2, ds.FindAll().Count);
 
                             ds.Filter = "(ou=SearchRoot)";
-                            Assert.Equal(1, ds.FindAll().Count);
+                            Assert.Single(ds.FindAll());
 
                             ds.Filter = "(ou=Search.Child1)";
-                            Assert.Equal(1, ds.FindAll().Count);
+                            Assert.Single(ds.FindAll());
                             
                             ds.Filter = "(ou=Search.Child2)";
-                            Assert.Equal(1, ds.FindAll().Count);
+                            Assert.Single(ds.FindAll());
                             
                             ds.Filter = "(ou=Search.GrandChild)";
-                            Assert.Equal(1, ds.FindAll().Count);
+                            Assert.Single(ds.FindAll());
 
                             ds.Filter = "(description=Grand Child OU)";
-                            Assert.Equal(1, ds.FindAll().Count);
+                            Assert.Single(ds.FindAll());
 
                             ds.Filter = "(description=*)";
                             Assert.Equal(6, ds.FindAll().Count);
@@ -460,18 +460,18 @@ namespace System.DirectoryServices.Tests
                             Assert.Equal(2, ds.FindAll().Count);
 
                             ds.Filter = "(&(description=No Description)(objectClass=organizationalRole))";
-                            Assert.Equal(0, ds.FindAll().Count);
+                            Assert.Empty(ds.FindAll());
 
                             ds.Filter = "(postalCode=*)";
                             Assert.Equal(2, ds.FindAll().Count);
 
                             ds.Filter = "(postalCode=98052)";
-                            Assert.Equal(1, ds.FindAll().Count);
+                            Assert.Single(ds.FindAll());
                             SearchResult sr = ds.FindOne();
                             Assert.Equal("98052", sr.Properties["postalCode"][0]);
 
                             ds.Filter = "(postalCode=98088)";
-                            Assert.Equal(1, ds.FindAll().Count);
+                            Assert.Single(ds.FindAll());
                             sr = ds.FindOne();
                             Assert.Equal("98088", sr.Properties["postalCode"][0]);
                         }

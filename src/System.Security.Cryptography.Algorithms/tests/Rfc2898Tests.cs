@@ -177,7 +177,7 @@ namespace System.Security.Cryptography.DeriveBytesTests
                 output = deriveBytes.GetBytes(1);
             }
 
-            Assert.Equal(1, output.Length);
+            Assert.Single(output);
             Assert.Equal(0xA6, output[0]);
         }
 

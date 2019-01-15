@@ -42,14 +42,14 @@ namespace System.Net.Http.Tests
             HttpHeaderValueCollection<string> collection = new HttpHeaderValueCollection<string>(knownStringHeader, headers,
                 "special");
 
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
 
             headers.Add(knownStringHeader, "value2");
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
 
             headers.Clear();
             headers.Add(knownStringHeader, "special");
-            Assert.Equal(1, collection.Count);
+            Assert.Single(collection);
             headers.Add(knownStringHeader, "special");
             headers.Add(knownStringHeader, "special");
             Assert.Equal(3, collection.Count);
@@ -62,7 +62,7 @@ namespace System.Net.Http.Tests
             HttpHeaderValueCollection<string> collection = new HttpHeaderValueCollection<string>(knownStringHeader, headers,
                 "special");
 
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
 
             collection.Add("value1");
             headers.Add(knownStringHeader, "special");
@@ -102,13 +102,13 @@ namespace System.Net.Http.Tests
         {
             HttpRequestHeaders headers = new HttpRequestHeaders();
             Assert.Null(headers.TransferEncodingChunked);
-            Assert.Equal(0, headers.TransferEncoding.Count);
+            Assert.Empty(headers.TransferEncoding);
             Assert.Equal(string.Empty, headers.TransferEncoding.ToString());
 
             headers.TransferEncoding.Add(specialChunked);
 
             Assert.True((bool)headers.TransferEncodingChunked);
-            Assert.Equal(1, headers.TransferEncoding.Count);
+            Assert.Single(headers.TransferEncoding);
             Assert.Equal(specialChunked, headers.TransferEncoding.First());
             Assert.Equal(specialChunked.ToString(), headers.TransferEncoding.ToString());
         }
@@ -120,7 +120,7 @@ namespace System.Net.Http.Tests
             headers.TransferEncodingChunked = true;
 
             Assert.True((bool)headers.TransferEncodingChunked);
-            Assert.Equal(1, headers.TransferEncoding.Count);
+            Assert.Single(headers.TransferEncoding);
             Assert.Equal(specialChunked.ToString(), headers.TransferEncoding.ToString());
 
             headers.TransferEncoding.Add(specialChunked);
@@ -133,14 +133,14 @@ namespace System.Net.Http.Tests
             headers.TransferEncodingChunked = false;
 
             Assert.True((bool)headers.TransferEncodingChunked);
-            Assert.Equal(1, headers.TransferEncoding.Count);
+            Assert.Single(headers.TransferEncoding);
             Assert.Equal(specialChunked.ToString(), headers.TransferEncoding.ToString());
 
             // does not add duplicate
             headers.TransferEncodingChunked = true;
 
             Assert.True((bool)headers.TransferEncodingChunked);
-            Assert.Equal(1, headers.TransferEncoding.Count);
+            Assert.Single(headers.TransferEncoding);
             Assert.Equal(specialChunked.ToString(), headers.TransferEncoding.ToString());
         }
 
@@ -152,7 +152,7 @@ namespace System.Net.Http.Tests
 
             collection.ParseAdd(null);
             Assert.False(collection.IsSpecialValueSet);
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
             Assert.Equal(string.Empty, collection.ToString());
         }
 
@@ -200,7 +200,7 @@ namespace System.Net.Http.Tests
             Assert.True(headers.WwwAuthenticate.TryParseAdd(null));
 
             Assert.False(headers.WwwAuthenticate.IsSpecialValueSet);
-            Assert.Equal(0, headers.WwwAuthenticate.Count);
+            Assert.Empty(headers.WwwAuthenticate);
             Assert.Equal(string.Empty, headers.WwwAuthenticate.ToString());
         }
 
@@ -266,7 +266,7 @@ namespace System.Net.Http.Tests
 
             collection.Clear();
 
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
         }
 
         [Fact]
@@ -286,7 +286,7 @@ namespace System.Net.Http.Tests
 
             collection.Clear();
 
-            Assert.Equal(0, collection.Count);
+            Assert.Empty(collection);
             Assert.False(collection.IsSpecialValueSet, "Special value was removed by Clear().");
         }
 
@@ -561,12 +561,12 @@ namespace System.Net.Http.Tests
         {
             HttpRequestHeaders headers = new HttpRequestHeaders();
             Assert.Null(headers.TransferEncodingChunked);
-            Assert.Equal(0, headers.TransferEncoding.Count);
+            Assert.Empty(headers.TransferEncoding);
 
             Assert.False(headers.TransferEncoding.Remove(specialChunked));
 
             Assert.Null(headers.TransferEncodingChunked);
-            Assert.Equal(0, headers.TransferEncoding.Count);
+            Assert.Empty(headers.TransferEncoding);
         }
 
         [Fact]
@@ -575,13 +575,13 @@ namespace System.Net.Http.Tests
             HttpRequestHeaders headers = new HttpRequestHeaders();
             headers.TransferEncodingChunked = true;
             Assert.True((bool)headers.TransferEncodingChunked);
-            Assert.Equal(1, headers.TransferEncoding.Count);
+            Assert.Single(headers.TransferEncoding);
             Assert.True(headers.TransferEncoding.Contains(specialChunked));
 
             Assert.True(headers.TransferEncoding.Remove(specialChunked));
 
             Assert.False((bool)headers.TransferEncodingChunked);
-            Assert.Equal(0, headers.TransferEncoding.Count);
+            Assert.Empty(headers.TransferEncoding);
             Assert.False(headers.TransferEncoding.Contains(specialChunked));
         }
 
@@ -591,13 +591,13 @@ namespace System.Net.Http.Tests
             HttpRequestHeaders headers = new HttpRequestHeaders();
             headers.TransferEncoding.Add(specialChunked);
             Assert.True((bool)headers.TransferEncodingChunked);
-            Assert.Equal(1, headers.TransferEncoding.Count);
+            Assert.Single(headers.TransferEncoding);
             Assert.True(headers.TransferEncoding.Contains(specialChunked));
 
             Assert.True(headers.TransferEncoding.Remove(specialChunked));
 
             Assert.Null(headers.TransferEncodingChunked);
-            Assert.Equal(0, headers.TransferEncoding.Count);
+            Assert.Empty(headers.TransferEncoding);
             Assert.False(headers.TransferEncoding.Contains(specialChunked));
         }
 
@@ -756,7 +756,7 @@ namespace System.Net.Http.Tests
 
             collection.SetSpecialValue();
             Assert.True(collection.IsSpecialValueSet, "Special value not set.");
-            Assert.Equal(1, headers.GetValues(knownUriHeader).Count());
+            Assert.Single(headers.GetValues(knownUriHeader));
 
             collection.RemoveSpecialValue();
             Assert.False(collection.IsSpecialValueSet, "Special value is set.");
@@ -780,7 +780,7 @@ namespace System.Net.Http.Tests
 
             collection.RemoveSpecialValue();
             Assert.False(collection.IsSpecialValueSet, "Special value is set.");
-            Assert.Equal(1, headers.GetValues(knownUriHeader).Count());
+            Assert.Single(headers.GetValues(knownUriHeader));
         }
 
         [Fact]

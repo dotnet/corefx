@@ -35,13 +35,13 @@ namespace BasicEventSourceTests
 
                     log.Event0();
                     Assert.Equal(1, LoudListener.t_lastEvent.EventId);
-                    Assert.Equal(0, LoudListener.t_lastEvent.Payload.Count);
+                    Assert.Empty(LoudListener.t_lastEvent.Payload);
 
                     #region Validate "int" arguments
 
                     log.EventI(10);
                     Assert.Equal(2, LoudListener.t_lastEvent.EventId);
-                    Assert.Equal(1, LoudListener.t_lastEvent.Payload.Count);
+                    Assert.Single(LoudListener.t_lastEvent.Payload);
                     Assert.Equal(10, (int)LoudListener.t_lastEvent.Payload[0]);
 
                     log.EventII(10, 11);
@@ -63,7 +63,7 @@ namespace BasicEventSourceTests
 
                     log.EventL(10);
                     Assert.Equal(5, LoudListener.t_lastEvent.EventId);
-                    Assert.Equal(1, LoudListener.t_lastEvent.Payload.Count);
+                    Assert.Single(LoudListener.t_lastEvent.Payload);
                     Assert.Equal(10, (long)LoudListener.t_lastEvent.Payload[0]);
 
                     log.EventLL(10, 11);
@@ -85,7 +85,7 @@ namespace BasicEventSourceTests
 
                     log.EventS("10");
                     Assert.Equal(8, LoudListener.t_lastEvent.EventId);
-                    Assert.Equal(1, LoudListener.t_lastEvent.Payload.Count);
+                    Assert.Single(LoudListener.t_lastEvent.Payload);
                     Assert.Equal("10", (string)LoudListener.t_lastEvent.Payload[0]);
 
                     log.EventSS("10", "11");
@@ -108,7 +108,7 @@ namespace BasicEventSourceTests
                     byte[] arr = new byte[20];
                     log.EventWithByteArray(arr);
                     Assert.Equal(52, LoudListener.t_lastEvent.EventId);
-                    Assert.Equal(1, LoudListener.t_lastEvent.Payload.Count);
+                    Assert.Single(LoudListener.t_lastEvent.Payload);
                     Assert.Equal(arr.Length, ((byte[])LoudListener.t_lastEvent.Payload[0]).Length);
 
                     #endregion
@@ -140,22 +140,22 @@ namespace BasicEventSourceTests
 
                     log.EventEnum(MyColor.Blue);
                     Assert.Equal(19, LoudListener.t_lastEvent.EventId);
-                    Assert.Equal(1, LoudListener.t_lastEvent.Payload.Count);
+                    Assert.Single(LoudListener.t_lastEvent.Payload);
                     Assert.Equal(MyColor.Blue, (MyColor)LoudListener.t_lastEvent.Payload[0]);
 
                     log.EventEnum1(MyColor.Green);
                     Assert.Equal(20, LoudListener.t_lastEvent.EventId);
-                    Assert.Equal(1, LoudListener.t_lastEvent.Payload.Count);
+                    Assert.Single(LoudListener.t_lastEvent.Payload);
                     Assert.Equal(MyColor.Green, (MyColor)LoudListener.t_lastEvent.Payload[0]);
 
                     log.EventFlags(MyFlags.Flag1);
                     Assert.Equal(21, LoudListener.t_lastEvent.EventId);
-                    Assert.Equal(1, LoudListener.t_lastEvent.Payload.Count);
+                    Assert.Single(LoudListener.t_lastEvent.Payload);
                     Assert.Equal(MyFlags.Flag1, (MyFlags)LoudListener.t_lastEvent.Payload[0]);
 
                     log.EventFlags1(MyFlags.Flag1);
                     Assert.Equal(22, LoudListener.t_lastEvent.EventId);
-                    Assert.Equal(1, LoudListener.t_lastEvent.Payload.Count);
+                    Assert.Single(LoudListener.t_lastEvent.Payload);
                     Assert.Equal(MyFlags.Flag1, (MyFlags)LoudListener.t_lastEvent.Payload[0]);
 
                     #endregion
@@ -215,12 +215,12 @@ namespace BasicEventSourceTests
                 {
                     log.WriteTooManyArgs("Hello");
                     Assert.Equal(2, LoudListener.t_lastEvent.EventId);
-                    Assert.Equal(1, LoudListener.t_lastEvent.Payload.Count);           // Faked count (compat)
+                    Assert.Single(LoudListener.t_lastEvent.Payload);           // Faked count (compat)
                     Assert.Equal("Hello", LoudListener.t_lastEvent.Payload[0]);
 
                     log.WriteTooFewArgs(10, 100);
                     Assert.Equal(1, LoudListener.t_lastEvent.EventId);
-                    Assert.Equal(1, LoudListener.t_lastEvent.Payload.Count);           // Real # of args passed to WriteEvent
+                    Assert.Single(LoudListener.t_lastEvent.Payload);           // Real # of args passed to WriteEvent
                     Assert.Equal(10, LoudListener.t_lastEvent.Payload[0]);
                 }
             }

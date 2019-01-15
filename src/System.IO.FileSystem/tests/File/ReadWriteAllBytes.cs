@@ -127,7 +127,7 @@ namespace System.IO.Tests
         {
             string path = GetTestFilePath();
             File.Create(path).Dispose();
-            Assert.Equal(0, File.ReadAllBytes(path).Length);
+            Assert.Empty(File.ReadAllBytes(path));
         }
 
         [Theory]

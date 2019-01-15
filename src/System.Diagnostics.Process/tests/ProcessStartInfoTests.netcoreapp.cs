@@ -13,10 +13,10 @@ namespace System.Diagnostics.Tests
         public void UnintializedArgumentList()
         {
             ProcessStartInfo psi = new ProcessStartInfo();
-            Assert.Equal(0, psi.ArgumentList.Count);
+            Assert.Empty(psi.ArgumentList);
 
             psi = new ProcessStartInfo("filename", "-arg1 -arg2");
-            Assert.Equal(0, psi.ArgumentList.Count);
+            Assert.Empty(psi.ArgumentList);
         }
 
         [Fact]

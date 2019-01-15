@@ -31,14 +31,14 @@ namespace BasicEventSourceTests
                     log.LogTaskScheduled(actid, "Hello from a test");
                     Assert.Equal(17, LoudListener.LastEvent.EventId);
                     Assert.Equal(actid, LoudListener.LastEvent.RelatedActivityId);
-                    Assert.Equal(1, LoudListener.LastEvent.Payload.Count);
+                    Assert.Single(LoudListener.LastEvent.Payload);
                     Assert.Equal("Hello from a test", (string)LoudListener.LastEvent.Payload[0]);
 
                     actid = Guid.NewGuid();
                     log.LogTaskScheduledBad(actid, "Hello again");
                     Assert.Equal(23, LoudListener.LastEvent.EventId);
                     Assert.Equal(actid, LoudListener.LastEvent.RelatedActivityId);
-                    Assert.Equal(1, LoudListener.LastEvent.Payload.Count);
+                    Assert.Single(LoudListener.LastEvent.Payload);
                     Assert.Equal("Hello again", (string)LoudListener.LastEvent.Payload[0]);
 
                     actid = Guid.NewGuid();
@@ -81,7 +81,7 @@ namespace BasicEventSourceTests
             DateTime now = DateTime.Now;
             log.EventDateTime(now);
             Assert.Equal(24, LoudListener.LastEvent.EventId);
-            Assert.Equal(1, LoudListener.LastEvent.Payload.Count);
+            Assert.Single(LoudListener.LastEvent.Payload);
             Assert.Equal((DateTime)LoudListener.LastEvent.Payload[0], now);
         }
 

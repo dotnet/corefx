@@ -32,7 +32,7 @@ namespace Microsoft.Win32.RegistryTests
         public void TestGetValueNames()
         {
             // [] Add several values and get the values then check the names
-            Assert.Equal(expected: 0, actual: TestRegistryKey.GetValueNames().Length);
+            Assert.Empty(TestRegistryKey.GetValueNames());
 
             string[] expected = { TestRegistryKeyName };
             foreach (string valueName in expected)
@@ -43,7 +43,7 @@ namespace Microsoft.Win32.RegistryTests
             Assert.Equal(expected, TestRegistryKey.GetValueNames());
             
             TestRegistryKey.DeleteValue(TestRegistryKeyName);
-            Assert.Equal(expected: 0, actual: TestRegistryKey.GetValueNames().Length);
+            Assert.Empty(TestRegistryKey.GetValueNames());
         }
 
         [Fact]

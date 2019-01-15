@@ -19,7 +19,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             using (X509Certificate2 cert = Certificates.RSAKeyTransfer_ExplicitSki.GetCertificate())
             {
                 EnvelopedCms cms = GetDocWithRecipient(type, cert);
-                Assert.Equal(1, cms.RecipientInfos.Count);
+                Assert.Single(cms.RecipientInfos);
                 Assert.True(cms.RecipientInfos[0].RecipientIdentifier.MatchesCertificate(cert));
             }
         }
@@ -34,7 +34,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             using (X509Certificate2 notMatchingCert = Certificates.RSAKeyTransfer4_ExplicitSki.GetCertificate())
             {
                 EnvelopedCms cms = GetDocWithRecipient(type, cert);
-                Assert.Equal(1, cms.RecipientInfos.Count);
+                Assert.Single(cms.RecipientInfos);
                 Assert.False(cms.RecipientInfos[0].RecipientIdentifier.MatchesCertificate(notMatchingCert));
             }
         }

@@ -119,12 +119,12 @@ namespace System.Tests
         public static void RoundtripBoolean()
         {
             byte[] bytes = BitConverter.GetBytes(true);
-            Assert.Equal(1, bytes.Length);
+            Assert.Single(bytes);
             Assert.Equal(1, bytes[0]);
             Assert.True(BitConverter.ToBoolean(bytes, 0));
 
             bytes = BitConverter.GetBytes(false);
-            Assert.Equal(1, bytes.Length);
+            Assert.Single(bytes);
             Assert.Equal(0, bytes[0]);
             Assert.False(BitConverter.ToBoolean(bytes, 0));
         }
