@@ -355,7 +355,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             else // Any Unix
             {
                 Assert.Equal(0x0D07803A, ex.HResult);
-                Assert.Equal("error:0D07803A:asn1 encoding routines:ASN1_ITEM_EX_D2I:nested asn1 error", ex.Message);
             }
         }
 
