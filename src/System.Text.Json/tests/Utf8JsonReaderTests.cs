@@ -1524,8 +1524,9 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void EmptyJsonWithinSequenceIsInvalid(ReadOnlySpan<byte> dataUtf8)
+        public static void EmptyJsonWithinSequenceIsInvalid()
         {
+            var dataUtf8 = ReadOnlySpan<byte>.Empty;
             ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(new byte[0], 1);
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
 
