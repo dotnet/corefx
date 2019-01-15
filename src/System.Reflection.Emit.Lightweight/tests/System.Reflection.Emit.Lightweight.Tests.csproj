@@ -6,7 +6,6 @@
     <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="DynamicILInfoGetTokenForTests.cs" />
     <Compile Include="DynamicILInfoTests.cs" />
     <Compile Include="DynamicMethodCreateDelegate.cs" />
     <Compile Include="DynamicMethodCtor.cs" />
