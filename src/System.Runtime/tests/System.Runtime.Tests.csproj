@@ -85,7 +85,6 @@
     <Compile Include="System\ExecutionEngineExceptionTests.cs" />
     <Compile Include="System\ExternalExceptionTests.cs" />
     <Compile Include="System\EventArgsTests.cs" />
-    <Compile Include="System\ExitCodeTests.cs" />
     <Compile Include="System\FieldAccessExceptionTests.cs" />
     <Compile Include="System\FlagsAttributeTests.cs" />
     <Compile Include="System\FormattableStringTests.cs" />
@@ -207,6 +206,9 @@
     <Compile Include="$(CommonTestPath)\System\RandomDataGenerator.cs">
       <Link>Common\System\RandomDataGenerator.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true'">
+    <Compile Include="System\ExitCodeTests.Unix.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'netstandard'">
     <Compile Include="System\HashCodeTests.netcoreapp.cs" />

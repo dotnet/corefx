@@ -26,8 +26,10 @@ namespace System.Tests
             {
                 if (!string.IsNullOrEmpty(sigTermExitCode))
                 {
-                    AppDomain.CurrentDomain.ProcessExit += (_1, _2) =>
+                    AppDomain.CurrentDomain.ProcessExit += delegate
+                    {
                         Environment.ExitCode = int.Parse(sigTermExitCode);
+                    };
                 }
 
                 Console.WriteLine("Application started");
