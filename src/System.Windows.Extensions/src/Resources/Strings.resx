@@ -156,7 +156,6 @@
   <data name="SoundAPIReadError" xml:space="preserve">
     <value>=There was an error reading the file located at {0}. Please make sure that a valid wave file exists at the specified location.</value>
   </data>
-</root>
   <data name="TextParseFailedFormat" xml:space="preserve">
     <value>Text "{0}" cannot be parsed. The expected text format is "{1}".</value>
   </data>
