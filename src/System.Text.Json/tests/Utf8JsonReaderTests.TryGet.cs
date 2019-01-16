@@ -22,7 +22,7 @@ namespace System.Text.Json.Tests
             List<double> doubles = JsonNumberTestData.Doubles;
             List<decimal> decimals = JsonNumberTestData.Decimals;
 
-            var json = new Utf8JsonReader(dataUtf8, true, default);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
             string key = "";
             int count = 0;
             while (json.Read())
@@ -132,7 +132,7 @@ namespace System.Text.Json.Tests
             List<double> doubles = JsonNumberTestData.Doubles;
             List<decimal> decimals = JsonNumberTestData.Decimals;
 
-            var json = new Utf8JsonReader(dataUtf8, true, default);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
             string key = "";
             int count = 0;
             while (json.Read())
@@ -243,18 +243,15 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var json = new Utf8JsonReader(dataUtf8, true, default);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
             while (json.Read())
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    #region TryGet calls
                     Assert.False(json.TryGetInt32(out int value));
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
-                    #endregion
 
-                    #region Get calls
                     try
                     {
                         json.GetInt32();
@@ -266,7 +263,6 @@ namespace System.Text.Json.Tests
                     }
                     doubleValue = json.GetDouble();
                     Assert.Equal(expected, doubleValue);
-                    #endregion
                 }
             }
 
@@ -285,18 +281,15 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var json = new Utf8JsonReader(dataUtf8, true, default);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
             while (json.Read())
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    #region TryGet calls
                     Assert.False(json.TryGetInt64(out long value));
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
-                    #endregion
 
-                    #region Get calls
                     try
                     {
                         json.GetInt64();
@@ -308,7 +301,6 @@ namespace System.Text.Json.Tests
                     }
                     doubleValue = json.GetDouble();
                     Assert.Equal(expected, doubleValue);
-                    #endregion
                 }
             }
 
@@ -328,18 +320,15 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var json = new Utf8JsonReader(dataUtf8, true, default);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
             while (json.Read())
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    #region TryGet calls
                     Assert.False(json.TryGetUInt32(out uint value));
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
-                    #endregion
 
-                    #region Get calls
                     try
                     {
                         json.GetUInt32();
@@ -351,7 +340,6 @@ namespace System.Text.Json.Tests
                     }
                     doubleValue = json.GetDouble();
                     Assert.Equal(expected, doubleValue);
-                    #endregion
                 }
             }
 
@@ -370,18 +358,15 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var json = new Utf8JsonReader(dataUtf8, true, default);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
             while (json.Read())
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    #region TryGet calls
                     Assert.False(json.TryGetUInt64(out ulong value));
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
-                    #endregion
 
-                    #region Get calls
                     try
                     {
                         json.GetUInt64();
@@ -393,7 +378,6 @@ namespace System.Text.Json.Tests
                     }
                     doubleValue = json.GetDouble();
                     Assert.Equal(expected, doubleValue);
-                    #endregion
                 }
             }
 
@@ -402,25 +386,25 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("-4.402823E+38", float.NegativeInfinity)] // float.MinValue - 1
-        [InlineData("4.402823E+38", float.PositiveInfinity)]  // float.MaxValue + 1
-        public static void TestingNumbersInvalidConversionToSingle(string jsonString, float expected)
+        [InlineData("-4.402823E+38", float.NegativeInfinity, -4.402823E+38)] // float.MinValue - 1
+        [InlineData("4.402823E+38", float.PositiveInfinity, 4.402823E+38)]  // float.MaxValue + 1
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Utf8Parser does not support parsing really large float and double values to infinity.")]
+        public static void TestingTooLargeSingleConversionToInfinity(string jsonString, float expectedFloat, double expectedDouble)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var json = new Utf8JsonReader(dataUtf8, true, default);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
             while (json.Read())
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    #region TryGet calls
-                    Assert.True(json.TryGetSingle(out float actual));
-                    Assert.Equal(expected, actual);
-                    #endregion
+                    Assert.True(json.TryGetSingle(out float floatValue));
+                    Assert.Equal(expectedFloat, floatValue);
+                    Assert.True(json.TryGetDouble(out double doubleValue));
+                    Assert.Equal(expectedDouble, doubleValue);
 
-                    #region Get calls
-                    Assert.Equal(expected, json.GetSingle());
-                    #endregion
+                    Assert.Equal(expectedFloat, json.GetSingle());
+                    Assert.Equal(expectedDouble, json.GetDouble());
                 }
             }
 
@@ -431,23 +415,20 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData("-2.79769313486232E+308", double.NegativeInfinity)] // double.MinValue - 1
         [InlineData("2.79769313486232E+308", double.PositiveInfinity)]  // double.MaxValue + 1
-        public static void TestingNumbersInvalidConversionToDouble(string jsonString, double expected)
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Utf8Parser does not support parsing really large float and double values to infinity.")]
+        public static void TestingTooLargeDoubleConversionToInfinity(string jsonString, double expected)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var json = new Utf8JsonReader(dataUtf8, true, default);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
             while (json.Read())
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    #region TryGet calls
                     Assert.True(json.TryGetDouble(out double actual));
                     Assert.Equal(expected, actual);
-                    #endregion
 
-                    #region Get calls
                     Assert.Equal(expected, json.GetDouble());
-                    #endregion
                 }
             }
 
@@ -462,18 +443,15 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var json = new Utf8JsonReader(dataUtf8, true, default);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
             while (json.Read())
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    #region TryGet calls
                     Assert.False(json.TryGetDecimal(out decimal value));
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
-                    #endregion
 
-                    #region Get calls
                     try
                     {
                         json.GetDecimal();
@@ -485,7 +463,6 @@ namespace System.Text.Json.Tests
                     }
                     doubleValue = json.GetDouble();
                     Assert.Equal(expected, doubleValue);
-                    #endregion
                 }
             }
 
@@ -499,7 +476,7 @@ namespace System.Text.Json.Tests
             string jsonString = "[\"stringValue\", true, 1234]";
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var json = new Utf8JsonReader(dataUtf8, true, default);
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
             while (json.Read())
             {
                 if (json.TokenType != JsonTokenType.String)

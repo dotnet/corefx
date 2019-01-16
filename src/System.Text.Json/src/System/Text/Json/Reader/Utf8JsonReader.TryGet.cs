@@ -42,7 +42,7 @@ namespace System.Text.Json
         /// Returns true if the TokenType is JsonTokenType.True and false if the TokenType is JsonTokenType.False.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a boolean (i.e. <see cref="JsonTokenType.True"/> or <see cref="JsonTokenType.False"/>).
+        /// Thrown if trying to get the value of a Json token that is not a boolean (i.e. <see cref="JsonTokenType.True"/> or <see cref="JsonTokenType.False"/>).
         /// <seealso cref="TokenType" />
         /// </exception>
         public bool GetBoolean()
@@ -72,7 +72,7 @@ namespace System.Text.Json
         /// Throws exceptions otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
@@ -96,7 +96,7 @@ namespace System.Text.Json
         /// Throws exceptions otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
@@ -120,7 +120,7 @@ namespace System.Text.Json
         /// Throws exceptions otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
@@ -145,7 +145,7 @@ namespace System.Text.Json
         /// Throws exceptions otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
@@ -170,7 +170,7 @@ namespace System.Text.Json
         /// Throws exceptions otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
@@ -193,7 +193,7 @@ namespace System.Text.Json
         /// Throws exceptions otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
@@ -216,7 +216,7 @@ namespace System.Text.Json
         /// Throws exceptions otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
@@ -239,7 +239,7 @@ namespace System.Text.Json
         /// Returns false otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         public bool TryGetInt32(out int value)
@@ -260,7 +260,7 @@ namespace System.Text.Json
         /// Returns false otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         public bool TryGetInt64(out long value)
@@ -281,7 +281,7 @@ namespace System.Text.Json
         /// Returns false otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         [System.CLSCompliantAttribute(false)]
@@ -303,7 +303,7 @@ namespace System.Text.Json
         /// Returns false otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         [System.CLSCompliantAttribute(false)]
@@ -325,7 +325,7 @@ namespace System.Text.Json
         /// Returns false otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         public bool TryGetSingle(out float value)
@@ -346,7 +346,7 @@ namespace System.Text.Json
         /// Returns false otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         public bool TryGetDouble(out double value)
@@ -367,7 +367,7 @@ namespace System.Text.Json
         /// Returns false otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if trying to get the value of JSON token that is not a <see cref="JsonTokenType.Number"/>.
+        /// Thrown if trying to get the value of a Json token that is not a <see cref="JsonTokenType.Number"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
         public bool TryGetDecimal(out decimal value)
