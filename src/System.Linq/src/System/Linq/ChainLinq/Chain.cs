@@ -64,22 +64,23 @@ namespace System.Linq.ChainLinq
 
     sealed class ChainEnd { private ChainEnd() { } }
 
-    abstract class Consumer<T, R> : Chain<T>
+    abstract class Consumer<T> : Chain<T>
     {
-        protected Consumer(R initalResult)
-        {
-            Result = initalResult;
-        }
-
-        public R Result { get; protected set; }
-
         public override void ChainComplete() { }
         public override void ChainDispose() { }
     }
 
+    abstract class Consumer<T, R> : Consumer<T>
+    {
+        protected Consumer(R initalResult) =>
+            Result = initalResult;
+
+        public R Result { get; protected set; }
+    }
+
     internal abstract class Consumable<T> : IEnumerable<T>
     {
-        public abstract void Consume(Chain<T> consumer);
+        public abstract void Consume(Consumer<T> consumer);
 
         public abstract IEnumerator<T> GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -87,8 +88,8 @@ namespace System.Linq.ChainLinq
 
     internal abstract class ConsumableForAddition<T> : Consumable<T>
     {
-        public abstract Consumable<U> AddTail<U>(Link<T, U> transform);
         public abstract Consumable<T> AddTail(Link<T, T> transform);
+        public abstract Consumable<U> AddTail<U>(Link<T, U> transform);
     }
 
     abstract class ConsumableForMerging<T> : ConsumableForAddition<T>

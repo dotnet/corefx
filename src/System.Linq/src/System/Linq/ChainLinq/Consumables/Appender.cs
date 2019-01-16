@@ -33,7 +33,7 @@ namespace System.Linq.ChainLinq.Consumables
             return p;
         }
 
-        public override void Consume(Chain<T> consumer)
+        public override void Consume(Consumer<T> consumer)
         {
             var reversed = Reverse();
             reversed.Consume(consumer);

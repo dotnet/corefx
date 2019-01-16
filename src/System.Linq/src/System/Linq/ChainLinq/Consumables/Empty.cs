@@ -16,7 +16,7 @@ namespace System.Linq.ChainLinq.Consumables
 
         public override IEnumerator<T> GetEnumerator() => this;
 
-        public override void Consume(Chain<T> consumer)
+        public override void Consume(Consumer<T> consumer)
         {
             try
             {

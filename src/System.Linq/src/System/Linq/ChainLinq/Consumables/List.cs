@@ -15,7 +15,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ChainLinq.GetEnumerator.List.Get(this);
 
-        public override void Consume(Chain<V> consumer) =>
+        public override void Consume(Consumer<V> consumer) =>
             ChainLinq.Consume.List.Invoke(Underlying, Link, consumer);
     }
 }

@@ -24,7 +24,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ChainLinq.GetEnumerator.Concat.Get(_firstOrNull, _second, _thirdOrNull, Link);
 
-        public override void Consume(Chain<V> consumer) =>
+        public override void Consume(Consumer<V> consumer) =>
             ChainLinq.Consume.Concat.Invoke(_firstOrNull, _second, _thirdOrNull, Link, consumer);
 
         public Consumable<V> Append(IEnumerable<V> next)

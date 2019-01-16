@@ -15,7 +15,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ChainLinq.GetEnumerator.SelectMany.Get(_selectMany, Link);
 
-        public override void Consume(Chain<V> consumer) =>
+        public override void Consume(Consumer<V> consumer) =>
             ChainLinq.Consume.SelectMany.Invoke(_selectMany, Link, consumer);
     }
 
@@ -33,7 +33,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ChainLinq.GetEnumerator.SelectMany.Get(_selectMany, _resultSelector, Link);
 
-        public override void Consume(Chain<V> consumer) =>
+        public override void Consume(Consumer<V> consumer) =>
             ChainLinq.Consume.SelectMany.Invoke(_selectMany, _resultSelector, Link, consumer);
     }
 }

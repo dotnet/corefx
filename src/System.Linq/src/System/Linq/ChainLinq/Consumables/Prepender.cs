@@ -19,7 +19,7 @@ namespace System.Linq.ChainLinq.Consumables
         public Prepender<T> Push(T element) =>
             new Prepender<T>(this, element, AddCount());
 
-        public override void Consume(Chain<T> consumer)
+        public override void Consume(Consumer<T> consumer)
         {
             try
             {

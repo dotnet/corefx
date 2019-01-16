@@ -26,7 +26,7 @@ namespace System.Linq.ChainLinq.Consumables
         private Lookup<TKey, TSource> ToLookup() =>
             Utils.Consume(_source, new Consumer.Lookup<TSource, TKey>(_keySelector, _comparer));
 
-        public override void Consume(Chain<IGrouping<TKey, TSource>> consumer) =>
+        public override void Consume(Consumer<IGrouping<TKey, TSource>> consumer) =>
             ToLookup().Consume(consumer);
 
         public override IEnumerator<IGrouping<TKey, TSource>> GetEnumerator() =>
@@ -59,7 +59,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ToConsumable().GetEnumerator();
 
-        public override void Consume(Chain<V> consumer) =>
+        public override void Consume(Consumer<V> consumer) =>
             ToConsumable().Consume(consumer);
     }
 
@@ -89,7 +89,7 @@ namespace System.Linq.ChainLinq.Consumables
         private Lookup<TKey, TElement> ToLookup() =>
             Utils.Consume(_source, new Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer));
 
-        public override void Consume(Chain<IGrouping<TKey, TElement>> consumer) =>
+        public override void Consume(Consumer<IGrouping<TKey, TElement>> consumer) =>
             ToLookup().Consume(consumer);
 
         public override IEnumerator<IGrouping<TKey, TElement>> GetEnumerator() =>
@@ -123,7 +123,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ToConsumable().GetEnumerator();
 
-        public override void Consume(Chain<V> consumer) =>
+        public override void Consume(Consumer<V> consumer) =>
             ToConsumable().Consume(consumer);
     }
 
@@ -153,7 +153,7 @@ namespace System.Linq.ChainLinq.Consumables
         private Lookup<TKey, TSource> ToLookup() =>
             Utils.Consume(_source, new Consumer.Lookup<TSource, TKey>(_keySelector, _comparer));
 
-        public override void Consume(Chain<TResult> consumer) =>
+        public override void Consume(Consumer<TResult> consumer) =>
             ToLookup().ApplyResultSelector(_resultSelector).Consume(consumer);
 
         public override IEnumerator<TResult> GetEnumerator() =>
@@ -188,7 +188,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ToConsumable().GetEnumerator();
 
-        public override void Consume(Chain<V> consumer) =>
+        public override void Consume(Consumer<V> consumer) =>
             ToConsumable().Consume(consumer);
     }
 
@@ -220,7 +220,7 @@ namespace System.Linq.ChainLinq.Consumables
         private Lookup<TKey, TElement> ToLookup() =>
             Utils.Consume(_source, new Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer));
 
-        public override void Consume(Chain<TResult> consumer) =>
+        public override void Consume(Consumer<TResult> consumer) =>
             ToLookup().ApplyResultSelector(_resultSelector).Consume(consumer);
 
         public override IEnumerator<TResult> GetEnumerator() =>
@@ -256,7 +256,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ToConsumable().GetEnumerator();
 
-        public override void Consume(Chain<V> consumer) =>
+        public override void Consume(Consumer<V> consumer) =>
             ToConsumable().Consume(consumer);
     }
 

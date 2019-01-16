@@ -119,7 +119,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<IGrouping<TKey, TElement>> GetEnumerator() =>
             ChainLinq.GetEnumerator.Lookup.Get(_lastGrouping, Links.Identity<IGrouping<TKey, TElement>>.Instance);
 
-        public override void Consume(Chain<IGrouping<TKey, TElement>> consumer) =>
+        public override void Consume(Consumer<IGrouping<TKey, TElement>> consumer) =>
             ChainLinq.Consume.Lookup.Invoke(_lastGrouping, Links.Identity<IGrouping<TKey,TElement>>.Instance, consumer);
     }
 
@@ -138,7 +138,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ChainLinq.GetEnumerator.Lookup.Get(_lastGrouping, Link);
 
-        public override void Consume(Chain<V> consumer) =>
+        public override void Consume(Consumer<V> consumer) =>
             ChainLinq.Consume.Lookup.Invoke(_lastGrouping, Link, consumer);
     }
 
@@ -161,7 +161,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<TResult> GetEnumerator() =>
             ChainLinq.GetEnumerator.Lookup.Get(_lastGrouping, _resultSelector, Links.Identity<TResult>.Instance);
 
-        public override void Consume(Chain<TResult> consumer) =>
+        public override void Consume(Consumer<TResult> consumer) =>
             ChainLinq.Consume.Lookup.Invoke(_lastGrouping, _resultSelector, Links.Identity<TResult>.Instance, consumer);
     }
 
@@ -181,7 +181,7 @@ namespace System.Linq.ChainLinq.Consumables
         public override IEnumerator<V> GetEnumerator() =>
             ChainLinq.GetEnumerator.Lookup.Get(_lastGrouping, _resultSelector, Link);
 
-        public override void Consume(Chain<V> consumer) =>
+        public override void Consume(Consumer<V> consumer) =>
             ChainLinq.Consume.Lookup.Invoke(_lastGrouping, _resultSelector, Link, consumer);
     }
 
