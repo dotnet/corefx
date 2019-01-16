@@ -191,7 +191,7 @@ namespace System.Text.Json
         /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool IsInRangeInclusive(uint value, uint lowerBound, uint upperBound)
+        private static bool IsInRangeInclusive(uint value, uint lowerBound, uint upperBound)
             => (value - lowerBound) <= (upperBound - lowerBound);
 
         /// <summary>
