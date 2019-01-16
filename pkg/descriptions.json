@@ -1976,8 +1976,8 @@
     ]
   },
   {
-    "Name": "Microsoft.Bcl.System.Text.Json.Sources",
-    "Description": "Provides the sources of System.Text.Json as internal types.",
+    "Name": "Microsoft.Bcl.Json.Sources",
+    "Description": "Provides the source code implementation of System.Text.Json as internal types. This package is only required for projects targeting .NET Framework 4.6.1+ or .NET Core 2.x; and is not for projects that can target .NET Core 3.0 and higher.",
     "CommonTypes": [
       "System.Text.Json.Utf8JsonReader"
     ]

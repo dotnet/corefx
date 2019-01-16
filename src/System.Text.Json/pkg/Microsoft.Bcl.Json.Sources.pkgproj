@@ -11,7 +11,7 @@
   <ItemGroup>
     <_AllJsonSources Include="$(MSBuildThisFileDirectory)../src/**/*.cs" />
     <SourcePackageFiles Include="@(_AllJsonSources)">
-      <PackagePath>contentFiles/cs/netstandard1.1/%(RecursiveDir)%(FileName)%(Extension)</PackagePath>
+      <PackagePath>contentFiles/cs/netstandard2.0/%(RecursiveDir)%(FileName)%(Extension)</PackagePath>
     </SourcePackageFiles>
     <File Include="$(PlaceHolderFile)">
        <TargetPath>contentFiles/cs/netcoreapp3.0/%(RecursiveDir)%(FileName)%(Extension)</TargetPath>

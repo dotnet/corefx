@@ -27,7 +27,7 @@
         "net45": "4.0.0.0"
       }
     },
-    "Microsoft.Bcl.System.Text.Json.Sources": {
+    "Microsoft.Bcl.Json.Sources": {
       "InboxOn": {}
     },
     "Microsoft.Build": {
