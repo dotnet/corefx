@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview-27315-73">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview-27315-74">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>35c8c4e01066e50756c04893e535777b50e6f0e0</Sha>
+      <Sha>a4a45721628a0a5721c57be4e230cda37bb3b8b9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.0.0-preview-27315-73">
+    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.0.0-preview-27315-74">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>35c8c4e01066e50756c04893e535777b50e6f0e0</Sha>
+      <Sha>a4a45721628a0a5721c57be4e230cda37bb3b8b9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.0.0-preview-27315-73">
+    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.0.0-preview-27315-74">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>35c8c4e01066e50756c04893e535777b50e6f0e0</Sha>
+      <Sha>a4a45721628a0a5721c57be4e230cda37bb3b8b9</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview-27314-4">
       <Uri>https://github.com/dotnet/core-setup</Uri>
