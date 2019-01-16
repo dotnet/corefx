@@ -30,10 +30,10 @@
 
     <ItemGroup>
       <SourcePackageFiles Include="$(CompiledResourceFileForProject)">
-        <PackagePath>contentFiles/cs/netstandard1.1/SR.System.Text.Json.cs</PackagePath>
+        <PackagePath>contentFiles/cs/netstandard2.0/SR.System.Text.Json.cs</PackagePath>
       </SourcePackageFiles>
       <SourcePackageFiles Include="$(CommonPath)/System/SR.cs">
-        <PackagePath>contentFiles/cs/netstandard1.1/SR.cs</PackagePath>
+        <PackagePath>contentFiles/cs/netstandard2.0/SR.cs</PackagePath>
       </SourcePackageFiles>
     </ItemGroup>
   </Target>
