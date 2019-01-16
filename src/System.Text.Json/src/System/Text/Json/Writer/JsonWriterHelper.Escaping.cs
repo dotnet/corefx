@@ -112,12 +112,11 @@ namespace System.Text.Json
 
         private static int EscapeNextBytes(ReadOnlySpan<byte> value, Span<byte> destination, ref int written)
         {
-            SequenceValidity status = PeekFirstSequence(value, out int numBytesConsumed, out Rune rune);
+            SequenceValidity status = PeekFirstSequence(value, out int numBytesConsumed, out int scalar);
             if (status != SequenceValidity.WellFormed)
                 ThrowHelper.ThrowArgumentException_InvalidUTF8(value);
 
             destination[written++] = (byte)'\\';
-            int scalar = rune.Value;
             switch (scalar)
             {
                 case JsonConstants.LineFeed:
@@ -192,7 +191,7 @@ namespace System.Text.Json
         /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsInRangeInclusive(uint value, uint lowerBound, uint upperBound)
+        internal static bool IsInRangeInclusive(uint value, uint lowerBound, uint upperBound)
             => (value - lowerBound) <= (upperBound - lowerBound);
 
         /// <summary>
@@ -202,7 +201,7 @@ namespace System.Text.Json
         private static bool IsLowWordSurrogate(uint @char)
             => (@char & 0xF800U) == 0xD800U;
 
-        public static SequenceValidity PeekFirstSequence(ReadOnlySpan<byte> data, out int numBytesConsumed, out Rune rune)
+        public static SequenceValidity PeekFirstSequence(ReadOnlySpan<byte> data, out int numBytesConsumed, out int rune)
         {
             // This method is implemented to match the behavior of System.Text.Encoding.UTF8 in terms of
             // how many bytes it consumes when reporting invalid sequences. The behavior is as follows:
@@ -217,7 +216,8 @@ namespace System.Text.Json
             // - Multi-byte sequences which are improperly terminated (no continuation byte when one is
             //   expected) are reported as invalid sequences up to and including the last seen continuation byte.
 
-            rune = Rune.ReplacementChar;
+            Debug.Assert(IsValidUnicodeScalar(ReplacementChar));
+            rune = ReplacementChar;
 
             if (data.IsEmpty)
             {
@@ -231,7 +231,8 @@ namespace System.Text.Json
             if (IsAsciiValue(firstByte))
             {
                 // ASCII byte = well-formed one-byte sequence.
-                rune = new Rune(firstByte);
+                Debug.Assert(IsValidUnicodeScalar(firstByte));
+                rune = firstByte;
                 numBytesConsumed = 1;
                 return SequenceValidity.WellFormed;
             }
@@ -262,7 +263,9 @@ namespace System.Text.Json
             if (firstByte < (byte)0xE0U)
             {
                 // Well-formed two-byte sequence.
-                rune = new Rune((((uint)firstByte & 0x1FU) << 6) | ((uint)secondByte & 0x3FU));
+                uint scalar = (((uint)firstByte & 0x1FU) << 6) | ((uint)secondByte & 0x3FU);
+                Debug.Assert(IsValidUnicodeScalar(scalar));
+                rune = (int)scalar;
                 numBytesConsumed = 2;
                 return SequenceValidity.WellFormed;
             }
@@ -292,7 +295,8 @@ namespace System.Text.Json
                     {
                         // Well-formed three-byte sequence.
                         scalar |= (uint)thirdByte & 0x3FU;
-                        rune = new Rune(scalar);
+                        Debug.Assert(IsValidUnicodeScalar(scalar));
+                        rune = (int)scalar;
                         numBytesConsumed = 3;
                         return SequenceValidity.WellFormed;
                     }
@@ -309,6 +313,7 @@ namespace System.Text.Json
                 // Need to check for overlong or out-of-range sequences.
 
                 uint scalar = (((uint)firstByte & 0x07U) << 18) | (((uint)secondByte & 0x3FU) << 12);
+                Debug.Assert(IsValidUnicodeScalar(scalar));
                 if (!IsInRangeInclusive(scalar, 0x10000U, 0x10FFFFU))
                 {
                     goto OverlongOutOfRangeOrSurrogateSequence;
@@ -340,7 +345,8 @@ namespace System.Text.Json
                             {
                                 // Well-formed four-byte sequence.
                                 scalar |= (((uint)thirdByte & 0x3FU) << 6) | ((uint)fourthByte & 0x3FU);
-                                rune = new Rune(scalar);
+                                Debug.Assert(IsValidUnicodeScalar(scalar));
+                                rune = (int)scalar;
                                 numBytesConsumed = 4;
                                 return SequenceValidity.WellFormed;
                             }
@@ -451,16 +457,24 @@ namespace System.Text.Json
                     break;
                 default:
                     destination[written++] = 'u';
+#if !netstandard
                     firstChar.TryFormat(destination.Slice(written), out int charsWritten, s_hexFormat);
                     Debug.Assert(charsWritten == 4);
                     written += charsWritten;
+#else
+                    WriteHex(firstChar, ref destination, ref written);
+#endif
                     if (nextChar != -1)
                     {
                         destination[written++] = '\\';
                         destination[written++] = 'u';
+#if !netstandard
                         nextChar.TryFormat(destination.Slice(written), out charsWritten, s_hexFormat);
                         Debug.Assert(charsWritten == 4);
                         written += charsWritten;
+#else
+                        WriteHex(nextChar, ref destination, ref written);
+#endif
                     }
                     break;
             }
@@ -471,5 +485,45 @@ namespace System.Text.Json
         {
             return (uint)(ch - start) <= (uint)(end - start);
         }
+
+        /// <summary>
+        /// A scalar that represents the Unicode replacement character U+FFFD.
+        /// </summary>
+        private const int ReplacementChar = 0xFFFD;
+
+         /// <summary>
+        /// Returns <see langword="true"/> iff <paramref name="value"/> is a valid Unicode scalar
+        /// value, i.e., is in [ U+0000..U+D7FF ], inclusive; or [ U+E000..U+10FFFF ], inclusive.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool IsValidUnicodeScalar(uint value)
+        {
+            // By XORing the incoming value with 0xD800, surrogate code points
+            // are moved to the range [ U+0000..U+07FF ], and all valid scalar
+            // values are clustered into the single range [ U+0800..U+10FFFF ],
+            // which allows performing a single fast range check.
+
+             return IsInRangeInclusive(value ^ 0xD800U, 0x800U, 0x10FFFFU);
+        }
+
+#if netstandard
+        private static void WriteHex(int value, ref Span<char> destination, ref int written)
+        {
+            destination[written++] = (char)Int32LsbToHexDigit(value >> 12);
+            destination[written++] = (char)Int32LsbToHexDigit((int)((value >> 8) & 0xFU));
+            destination[written++] = (char)Int32LsbToHexDigit((int)((value >> 4) & 0xFU));
+            destination[written++] = (char)Int32LsbToHexDigit((int)(value & 0xFU));
+        }
+
+         /// <summary>
+        /// Converts a number 0 - 15 to its associated hex character '0' - 'f' as byte.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static byte Int32LsbToHexDigit(int value)
+        {
+            Debug.Assert(value < 16);
+            return (byte)((value < 10) ? ('0' + value) : ('a' + (value - 10)));
+        }
+#endif
     }
 }

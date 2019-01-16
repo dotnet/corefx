@@ -63,15 +63,25 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateDouble(double value)
         {
+#if !netstandard
             if (!double.IsFinite(value))
                 ThrowHelper.ThrowArgumentException_ValueNotSupported();
+#else
+            if (double.IsNaN(value) || double.IsInfinity(value))
+                ThrowHelper.ThrowArgumentException_ValueNotSupported();
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateSingle(float value)
         {
+#if !netstandard
             if (!float.IsFinite(value))
                 ThrowHelper.ThrowArgumentException_ValueNotSupported();
+#else
+            if (float.IsNaN(value) || float.IsInfinity(value))
+                ThrowHelper.ThrowArgumentException_ValueNotSupported();
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
