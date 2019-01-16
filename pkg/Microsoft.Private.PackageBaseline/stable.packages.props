@@ -1508,5 +1508,10 @@
       <Version>4.0.4</Version>
     </StablePackage>
 
+    <!-- Servicing 1.0.14 wave -->
+    <StablePackage Include="System.Private.Uri">
+      <Version>4.0.2</Version>
+    </StablePackage>
+
   </ItemGroup>
 </Project>
