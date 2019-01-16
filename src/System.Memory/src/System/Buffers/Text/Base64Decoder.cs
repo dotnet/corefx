@@ -89,19 +89,17 @@ namespace System.Buffers.Text
 
                 // Last bytes could have padding characters, so process them separately and treat them as valid only if isFinalBlock is true
                 // if isFinalBlock is false, padding characters are considered invalid
-                bool isDestinationTooSmall;
+                int skipLastChunk = isFinalBlock ? 4 : 0;
 
                 if (destLength >= decodedLength)
                 {
-                    isDestinationTooSmall = false;
-                    maxSrcLength = isFinalBlock ? srcLength - 4 : srcLength;
+                    maxSrcLength = srcLength - skipLastChunk;
                 }
                 else
                 {
                     // This should never overflow since destLength here is less than int.MaxValue / 4 * 3 (i.e. 1610612733)
                     // Therefore, (destLength / 3) * 4 will always be less than 2147483641
                     maxSrcLength = (destLength / 3) * 4;
-                    isDestinationTooSmall = true;
                 }
 
                 srcMax = srcBytes + (nuint)maxSrcLength;
@@ -117,7 +115,7 @@ namespace System.Buffers.Text
                     dest += 3;
                 }
 
-                if (isDestinationTooSmall)
+                if (maxSrcLength != srcLength - skipLastChunk)
                     goto DestinationTooSmallExit;
 
                 // If input is less than 4 bytes, srcLength == sourceIndex == 0
