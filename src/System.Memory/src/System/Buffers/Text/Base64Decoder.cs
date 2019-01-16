@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
+using Internal.Runtime.CompilerServices;
 
 #if BIT64
 using nuint = System.UInt64;
@@ -45,10 +47,12 @@ namespace System.Buffers.Text
                 return OperationStatus.Done;
             }
 
-            fixed (byte* srcBytes = utf8)
-            fixed (byte* destBytes = bytes)
-            fixed (sbyte* decodingMap = s_decodingMap)
+            fixed (byte* srcBytes = &MemoryMarshal.GetReference(utf8))
+            fixed (byte* destBytes = &MemoryMarshal.GetReference(bytes))
             {
+                // PERF: needs to be initialized here, for good codegen
+                ref sbyte decodingMap = ref s_decodingMap[0];
+
                 int srcLength = utf8.Length & ~0x3;  // only decode input up to the closest multiple of 4.
                 int destLength = bytes.Length;
                 int maxSrcLength = srcLength;
@@ -105,7 +109,7 @@ namespace System.Buffers.Text
                 srcMax = srcBytes + (nuint)maxSrcLength;
                 while (src < srcMax)
                 {
-                    int result = Decode(src, decodingMap);
+                    int result = Decode(src, ref decodingMap);
 
                     if (result < 0)
                         goto InvalidDataExit;
@@ -135,8 +139,8 @@ namespace System.Buffers.Text
                 uint t2 = srcEnd[-2];
                 uint t3 = srcEnd[-1];
 
-                int i0 = decodingMap[t0];
-                int i1 = decodingMap[t1];
+                int i0 = Unsafe.Add(ref decodingMap, (IntPtr)t0);
+                int i1 = Unsafe.Add(ref decodingMap, (IntPtr)t1);
 
                 i0 <<= 18;
                 i1 <<= 12;
@@ -147,8 +151,8 @@ namespace System.Buffers.Text
 
                 if (t3 != EncodingPad)
                 {
-                    int i2 = decodingMap[t2];
-                    int i3 = decodingMap[t3];
+                    int i2 = Unsafe.Add(ref decodingMap, (IntPtr)t2);
+                    int i3 = Unsafe.Add(ref decodingMap, (IntPtr)t3);
 
                     i2 <<= 6;
 
@@ -165,7 +169,7 @@ namespace System.Buffers.Text
                 }
                 else if (t2 != EncodingPad)
                 {
-                    int i2 = decodingMap[t2];
+                    int i2 = Unsafe.Add(ref decodingMap, (IntPtr)t2);
 
                     i2 <<= 6;
 
@@ -253,9 +257,16 @@ namespace System.Buffers.Text
         /// </returns>
         public static unsafe OperationStatus DecodeFromUtf8InPlace(Span<byte> buffer, out int bytesWritten)
         {
-            fixed (byte* bufferBytes = buffer)
-            fixed (sbyte* decodingMap = s_decodingMap)
+            if (buffer.IsEmpty)
             {
+                bytesWritten = 0;
+                return OperationStatus.Done;
+            }
+
+            fixed (byte* bufferBytes = &MemoryMarshal.GetReference(buffer))
+            {
+                ref sbyte decodingMap = ref s_decodingMap[0];
+
                 int bufferLength = buffer.Length;
                 uint sourceIndex = 0;
                 uint destIndex = 0;
@@ -268,7 +279,7 @@ namespace System.Buffers.Text
 
                 while (sourceIndex < bufferLength - 4)
                 {
-                    int result = Decode(bufferBytes + sourceIndex, decodingMap);
+                    int result = Decode(bufferBytes + sourceIndex, ref decodingMap);
                     if (result < 0)
                         goto InvalidExit;
                     WriteThreeLowOrderBytes(bufferBytes + destIndex, result);
@@ -281,8 +292,8 @@ namespace System.Buffers.Text
                 uint t2 = bufferBytes[bufferLength - 2];
                 uint t3 = bufferBytes[bufferLength - 1];
 
-                int i0 = decodingMap[t0];
-                int i1 = decodingMap[t1];
+                int i0 = Unsafe.Add(ref decodingMap, (IntPtr)t0);
+                int i1 = Unsafe.Add(ref decodingMap, (IntPtr)t1);
 
                 i0 <<= 18;
                 i1 <<= 12;
@@ -291,8 +302,8 @@ namespace System.Buffers.Text
 
                 if (t3 != EncodingPad)
                 {
-                    int i2 = decodingMap[t2];
-                    int i3 = decodingMap[t3];
+                    int i2 = Unsafe.Add(ref decodingMap, (IntPtr)t2);
+                    int i3 = Unsafe.Add(ref decodingMap, (IntPtr)t3);
 
                     i2 <<= 6;
 
@@ -307,7 +318,7 @@ namespace System.Buffers.Text
                 }
                 else if (t2 != EncodingPad)
                 {
-                    int i2 = decodingMap[t2];
+                    int i2 = Unsafe.Add(ref decodingMap, (IntPtr)t2);
 
                     i2 <<= 6;
 
@@ -443,17 +454,17 @@ namespace System.Buffers.Text
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe int Decode(byte* encodedBytes, sbyte* decodingMap)
+        private static unsafe int Decode(byte* encodedBytes, ref sbyte decodingMap)
         {
             nuint t0 = encodedBytes[0];
             nuint t1 = encodedBytes[1];
             nuint t2 = encodedBytes[2];
             nuint t3 = encodedBytes[3];
 
-            int i0 = decodingMap[t0];
-            int i1 = decodingMap[t1];
-            int i2 = decodingMap[t2];
-            int i3 = decodingMap[t3];
+            int i0 = Unsafe.Add(ref decodingMap, (IntPtr)t0);
+            int i1 = Unsafe.Add(ref decodingMap, (IntPtr)t1);
+            int i2 = Unsafe.Add(ref decodingMap, (IntPtr)t2);
+            int i3 = Unsafe.Add(ref decodingMap, (IntPtr)t3);
 
             i0 <<= 18;
             i1 <<= 12;
