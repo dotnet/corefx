@@ -33,7 +33,7 @@ namespace System.Data
         private const string KEY_XMLSCHEMA = "XmlSchema";
         private const string KEY_XMLDIFFGRAM = "XmlDiffGram";
 
-        private DataViewManager _defaultViewManager;
+        private volatile DataViewManager _defaultViewManager;
 
         // Public Collections
         private readonly DataTableCollection _tableCollection;

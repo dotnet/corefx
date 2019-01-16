@@ -15,7 +15,7 @@ namespace System.CodeDom.Compiler
         internal CompilerParameters _compilerParams; // This can never by null
         internal string[] _compilerLanguages; // This can never by null
         internal string[] _compilerExtensions; // This can never by null
-        private Type _type;
+        private volatile Type _type;
 
         private CompilerInfo() { } // Not createable
 

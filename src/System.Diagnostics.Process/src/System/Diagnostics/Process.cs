@@ -44,7 +44,7 @@ namespace System.Diagnostics
         private ProcessStartInfo _startInfo;
 
         private bool _watchForExit;
-        private bool _watchingForExit;
+        private volatile bool _watchingForExit;
         private EventHandler _onExited;
         private bool _exited;
         private int _exitCode;
@@ -56,7 +56,7 @@ namespace System.Diagnostics
         private bool _priorityBoostEnabled;
         private bool _havePriorityBoostEnabled;
 
-        private bool _raisedOnExited;
+        private volatile bool _raisedOnExited;
         private RegisteredWaitHandle _registeredWaitHandle;
         private WaitHandle _waitHandle;
         private StreamReader _standardOutput;

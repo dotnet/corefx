@@ -16,7 +16,7 @@ namespace System.Net
         private Uri _responseUri;
         private FtpStatusCode _statusCode;
         private string _statusLine;
-        private WebHeaderCollection _ftpRequestHeaders;
+        private volatile WebHeaderCollection _ftpRequestHeaders;
         private DateTime _lastModified;
         private string _bannerMessage;
         private string _welcomeMessage;

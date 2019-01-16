@@ -169,7 +169,7 @@ namespace System.ComponentModel.DataAnnotations
         {
             private readonly object _syncRoot = new object();
             private readonly Type _type;
-            private Dictionary<string, PropertyStoreItem> _propertyStoreItems;
+            private volatile Dictionary<string, PropertyStoreItem> _propertyStoreItems;
 
             internal TypeStoreItem(Type type, IEnumerable<Attribute> attributes)
                 : base(attributes)

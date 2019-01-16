@@ -287,7 +287,7 @@ namespace System.Net
         /// </summary>
         private class TimerNode : Timer
         {
-            private TimerState _timerState;
+            private volatile TimerState _timerState;
             private Callback _callback;
             private object _context;
             private object _queueLock;

@@ -31,7 +31,7 @@ namespace System.Runtime.Serialization
 
         public XmlDictionaryString[] MemberNamespaces;
 
-        private XmlDictionaryString[] _childElementNamespaces;
+        private volatile XmlDictionaryString[] _childElementNamespaces;
 
         private ClassDataContractCriticalHelper _helper;
 

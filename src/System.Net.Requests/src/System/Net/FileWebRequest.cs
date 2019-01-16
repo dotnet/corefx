@@ -21,8 +21,8 @@ namespace System.Net
         private long _contentLength;
         private int _timeout = DefaultTimeoutMilliseconds;
         private bool _readPending;
-        private bool _writePending;
-        private bool _writing;
+        private volatile bool _writePending;
+        private volatile bool _writing;
         private bool _syncHint;
         private int _aborted;
 

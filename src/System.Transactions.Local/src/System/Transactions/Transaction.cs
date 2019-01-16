@@ -242,7 +242,7 @@ namespace System.Transactions
         // Internal synchronization object for transactions.  It is not safe to lock on the 
         // transaction object because it is public and users of the object may lock it for 
         // other purposes.
-        internal InternalTransaction _internalTransaction;
+        internal volatile InternalTransaction _internalTransaction;
 
         // The TransactionTraceIdentifier for the transaction instance.
         internal TransactionTraceIdentifier _traceIdentifier;

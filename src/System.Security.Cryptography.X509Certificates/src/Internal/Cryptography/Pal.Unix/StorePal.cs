@@ -17,7 +17,7 @@ namespace Internal.Cryptography.Pal
 {
     internal sealed partial class StorePal
     {
-        private static CollectionBackedStoreProvider s_machineRootStore;
+        private static volatile CollectionBackedStoreProvider s_machineRootStore;
         private static CollectionBackedStoreProvider s_machineIntermediateStore;
         private static readonly object s_machineLoadLock = new object();
 

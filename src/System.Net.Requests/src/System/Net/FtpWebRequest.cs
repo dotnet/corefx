@@ -212,11 +212,11 @@ namespace System.Net
 
         private bool _enableSsl;
         private FtpControlStream _connection;
-        private Stream _stream;
+        private volatile Stream _stream;
         private RequestStage _requestStage;
         private bool _onceFailed;
         private WebHeaderCollection _ftpRequestHeaders;
-        private FtpWebResponse _ftpWebResponse;
+        private volatile FtpWebResponse _ftpWebResponse;
         private int _readWriteTimeout = 5 * 60 * 1000;  // 5 minutes.
 
         private ContextAwareResult _writeAsyncResult;

@@ -15,7 +15,7 @@ namespace System.Xml
     public class XmlElement : XmlLinkedNode
     {
         private XmlName _name;
-        private XmlAttributeCollection _attributes;
+        private volatile XmlAttributeCollection _attributes;
         private XmlLinkedNode _lastChild; // == this for empty elements otherwise it is the last child
 
         internal XmlElement(XmlName name, bool empty, XmlDocument doc) : base(doc)

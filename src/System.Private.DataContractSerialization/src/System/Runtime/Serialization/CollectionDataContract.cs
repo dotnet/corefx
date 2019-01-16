@@ -144,7 +144,7 @@ namespace System.Runtime.Serialization
     {
         private XmlDictionaryString _collectionItemName;
 
-        private XmlDictionaryString _childElementNamespace;
+        private volatile XmlDictionaryString _childElementNamespace;
 
         private DataContract _itemContract;
 

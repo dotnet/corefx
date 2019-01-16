@@ -34,7 +34,7 @@ namespace System.Net.Http
 
         private bool _http2Enabled;
         private Http2Connection _http2Connection;
-        private SemaphoreSlim _http2ConnectionCreateLock;
+        private volatile SemaphoreSlim _http2ConnectionCreateLock;
 
         /// <summary>For non-proxy connection pools, this is the host name in bytes; for proxies, null.</summary>
         private readonly byte[] _hostHeaderValueBytes;

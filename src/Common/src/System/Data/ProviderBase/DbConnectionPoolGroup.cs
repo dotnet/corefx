@@ -31,7 +31,7 @@ namespace System.Data.ProviderBase
         private readonly DbConnectionOptions _connectionOptions;
         private readonly DbConnectionPoolKey _poolKey;
         private readonly DbConnectionPoolGroupOptions _poolGroupOptions;
-        private ConcurrentDictionary<DbConnectionPoolIdentity, DbConnectionPool> _poolCollection;
+        private volatile ConcurrentDictionary<DbConnectionPoolIdentity, DbConnectionPool> _poolCollection;
 
         private int _state;          // see PoolGroupState* below
 
