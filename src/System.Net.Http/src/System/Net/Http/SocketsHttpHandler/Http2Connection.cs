@@ -269,8 +269,9 @@ namespace System.Net.Http
                 _incomingBuffer.Discard(frameHeader.Length);
 
                 // Don't wait for completion, which could happen asynchronously.
-                ValueTask ignored = SendRstStreamAsync(streamId, Http2ProtocolErrorCode.StreamClosed);
-                return;
+                // TODO: Track the last completed stream ID and include it in the GoAway frame.
+                ValueTask ignored = SendGoAwayAsync(MaxStreamId, Http2ProtocolErrorCode.ProtocolError, new Memory<byte>(Encoding.UTF8.GetBytes("Header frame received on non-open stream.")));
+                throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
             }
 
             // TODO: Figure out how to cache this delegate.
@@ -347,8 +348,9 @@ namespace System.Net.Http
                 _incomingBuffer.Discard(frameHeader.Length);
 
                 // Don't wait for completion, which could happen asynchronously.
-                ValueTask ignored = SendRstStreamAsync(frameHeader.StreamId, Http2ProtocolErrorCode.StreamClosed);
-                return;
+                // TODO: Track the last completed stream ID and include it in the GoAway frame.
+                ValueTask ignored = SendGoAwayAsync(MaxStreamId, Http2ProtocolErrorCode.ProtocolError, new Memory<byte>(Encoding.UTF8.GetBytes("Data frame received on non-open stream.")));
+                throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
             }
 
             ReadOnlySpan<byte> frameData = GetFrameData(_incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length), hasPad: frameHeader.PaddedFlag, hasPriority: false);
@@ -677,6 +679,37 @@ namespace System.Net.Http
                 _outgoingBuffer.AvailableSpan[2] = (byte)(((int)errorCode & 0x0000FF00) >> 8);
                 _outgoingBuffer.AvailableSpan[3] = (byte)((int)errorCode & 0x000000FF);
                 _outgoingBuffer.Commit(FrameHeader.RstStreamLength);
+
+                await FlushOutgoingBytesAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                ReleaseWriteLock();
+            }
+        }
+
+        private async ValueTask SendGoAwayAsync(int lastStreamId, Http2ProtocolErrorCode errorCode, ReadOnlyMemory<byte> additionalDebugData)
+        {
+            await AcquireWriteLockAsync().ConfigureAwait(false);
+            try
+            {
+                int length = FrameHeader.Size + FrameHeader.GoAwayMinLength + additionalDebugData.Length;
+                _outgoingBuffer.EnsureAvailableSpace(length);
+                WriteFrameHeader(new FrameHeader(length, FrameType.GoAway, FrameFlags.None, 0));
+
+                _outgoingBuffer.AvailableSpan[0] = (byte)(((int)lastStreamId & 0xFF000000) >> 24);
+                _outgoingBuffer.AvailableSpan[1] = (byte)(((int)lastStreamId & 0x00FF0000) >> 16);
+                _outgoingBuffer.AvailableSpan[2] = (byte)(((int)lastStreamId & 0x0000FF00) >> 8);
+                _outgoingBuffer.AvailableSpan[3] = (byte)((int)lastStreamId & 0x000000FF);
+
+                _outgoingBuffer.AvailableSpan[4] = (byte)(((int)errorCode & 0xFF000000) >> 24);
+                _outgoingBuffer.AvailableSpan[5] = (byte)(((int)errorCode & 0x00FF0000) >> 16);
+                _outgoingBuffer.AvailableSpan[6] = (byte)(((int)errorCode & 0x0000FF00) >> 8);
+                _outgoingBuffer.AvailableSpan[7] = (byte)((int)errorCode & 0x000000FF);
+
+                additionalDebugData.CopyTo(_outgoingBuffer.AvailableMemory.Slice(8));
+
+                _outgoingBuffer.Commit(length);
 
                 await FlushOutgoingBytesAsync().ConfigureAwait(false);
             }

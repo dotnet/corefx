@@ -344,7 +344,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ConditionalFact(nameof(SupportsAlpn))]
-        public async Task CompletedResponse_FrameReceived_ResetsStream()
+        public async Task CompletedResponse_FrameReceived_ConnectionError()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
@@ -370,22 +370,14 @@ namespace System.Net.Http.Functional.Tests
                 DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, streamId);
                 await server.WriteFrameAsync(invalidFrame);
 
-                // Receive a RST_STREAM frame.
+                // Receive a GoAway frame, as this is a connection level error.
                 Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
-                Assert.Equal(FrameType.RstStream, receivedFrame.Type);
-                Assert.Equal(streamId, receivedFrame.StreamId);
-
-                // Connection should still be usable.
-                sendTask = client.GetAsync(server.Address);
-                streamId = await server.ReadRequestHeaderAsync();
-                await server.SendDefaultResponseAsync(streamId);
-                response = await sendTask;
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal(FrameType.GoAway, receivedFrame.Type);
             }
         }
 
         [ConditionalFact(nameof(SupportsAlpn))]
-        public async Task EmptyResponse_FrameReceived_ResetsStream()
+        public async Task EmptyResponse_FrameReceived_ConnectionError()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
@@ -408,22 +400,14 @@ namespace System.Net.Http.Functional.Tests
                 DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, streamId);
                 await server.WriteFrameAsync(invalidFrame);
 
-                // Receive a RST_STREAM frame.
+                // Receive a GoAway frame, as this is a connection level error.
                 Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
-                Assert.Equal(FrameType.RstStream, receivedFrame.Type);
-                Assert.Equal(streamId, receivedFrame.StreamId);
-
-                // Connection should still be usable.
-                sendTask = client.GetAsync(server.Address);
-                streamId = await server.ReadRequestHeaderAsync();
-                await server.SendDefaultResponseAsync(streamId);
-                response = await sendTask;
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal(FrameType.GoAway, receivedFrame.Type);
             }
         }
 
         [ConditionalFact(nameof(SupportsAlpn))]
-        public async Task ResetResponseStream_FrameReceived_ResetsStream()
+        public async Task ResetResponseStream_FrameReceived_ConnectionError()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
@@ -446,17 +430,9 @@ namespace System.Net.Http.Functional.Tests
                 DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, streamId);
                 await server.WriteFrameAsync(invalidFrame);
 
-                // Receive a RST_STREAM frame.
+                // Receive a GoAway frame, as this is a connection level error.
                 Frame receivedFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
-                Assert.Equal(FrameType.RstStream, receivedFrame.Type);
-                Assert.Equal(streamId, receivedFrame.StreamId);
-
-                // Connection should still be usable.
-                sendTask = client.GetAsync(server.Address);
-                streamId = await server.ReadRequestHeaderAsync();
-                await server.SendDefaultResponseAsync(streamId);
-                HttpResponseMessage response = await sendTask;
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal(FrameType.GoAway, receivedFrame.Type);
             }
         }
 
