@@ -7,7 +7,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-#if !netstandard
+#if BUILDING_INBOX_LIBRARY
 using Internal.Runtime.CompilerServices;
 #endif
 

@@ -63,7 +63,7 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateDouble(double value)
         {
-#if !netstandard
+#if BUILDING_INBOX_LIBRARY
             if (!double.IsFinite(value))
 #else
             if (double.IsNaN(value) || double.IsInfinity(value))
@@ -76,7 +76,7 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateSingle(float value)
         {
-#if !netstandard
+#if BUILDING_INBOX_LIBRARY
             if (!float.IsFinite(value))
 #else
             if (float.IsNaN(value) || float.IsInfinity(value))

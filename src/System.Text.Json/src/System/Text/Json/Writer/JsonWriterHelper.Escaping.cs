@@ -459,7 +459,7 @@ namespace System.Text.Json
                     break;
                 default:
                     destination[written++] = 'u';
-#if !netstandard
+#if BUILDING_INBOX_LIBRARY
                     firstChar.TryFormat(destination.Slice(written), out int charsWritten, HexFormatString);
                     Debug.Assert(charsWritten == 4);
                     written += charsWritten;
@@ -470,7 +470,7 @@ namespace System.Text.Json
                     {
                         destination[written++] = '\\';
                         destination[written++] = 'u';
-#if !netstandard
+#if BUILDING_INBOX_LIBRARY
                         nextChar.TryFormat(destination.Slice(written), out charsWritten, HexFormatString);
                         Debug.Assert(charsWritten == 4);
                         written += charsWritten;
@@ -508,7 +508,7 @@ namespace System.Text.Json
             return IsInRangeInclusive(value ^ 0xD800U, 0x800U, 0x10FFFFU);
         }
 
-#if netstandard
+#if !BUILDING_INBOX_LIBRARY
         private static int WriteHex(int value, Span<char> destination, int written)
         {
             destination[written++] = (char)Int32LsbToHexDigit(value >> 12);

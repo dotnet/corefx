@@ -33,7 +33,7 @@ namespace System.Text.Json
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
 
-#if !netstandard
+#if BUILDING_INBOX_LIBRARY
             // TODO: https://github.com/dotnet/corefx/issues/33292
             return s_utf8Encoding.GetString(span);
 #else
