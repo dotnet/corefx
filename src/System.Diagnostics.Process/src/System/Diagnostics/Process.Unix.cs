@@ -89,7 +89,7 @@ namespace System.Diagnostics
             }
             catch (Win32Exception e)
             {
-                return new { e };
+                return new[] { e };
             }
 
 
