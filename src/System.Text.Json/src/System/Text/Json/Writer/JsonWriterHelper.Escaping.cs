@@ -36,7 +36,7 @@ namespace System.Text.Json
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         };
 
-        private static readonly char[] s_hexFormat = { 'x', '4' };
+        private const string HexFormatString = "x4";
         private static readonly StandardFormat s_hexStandardFormat = new StandardFormat('x', 4);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -201,6 +201,8 @@ namespace System.Text.Json
         private static bool IsLowWordSurrogate(uint @char)
             => (@char & 0xF800U) == 0xD800U;
 
+        // We can't use the type Rune since it is not available on netstandard2.0
+        // To avoid extensive ifdefs and for simplicity, just using an int to reprepsent the scalar value, instead.
         public static SequenceValidity PeekFirstSequence(ReadOnlySpan<byte> data, out int numBytesConsumed, out int rune)
         {
             // This method is implemented to match the behavior of System.Text.Encoding.UTF8 in terms of
@@ -458,22 +460,22 @@ namespace System.Text.Json
                 default:
                     destination[written++] = 'u';
 #if !netstandard
-                    firstChar.TryFormat(destination.Slice(written), out int charsWritten, s_hexFormat);
+                    firstChar.TryFormat(destination.Slice(written), out int charsWritten, HexFormatString);
                     Debug.Assert(charsWritten == 4);
                     written += charsWritten;
 #else
-                    WriteHex(firstChar, ref destination, ref written);
+                    written = WriteHex(firstChar, destination, written);
 #endif
                     if (nextChar != -1)
                     {
                         destination[written++] = '\\';
                         destination[written++] = 'u';
 #if !netstandard
-                        nextChar.TryFormat(destination.Slice(written), out charsWritten, s_hexFormat);
+                        nextChar.TryFormat(destination.Slice(written), out charsWritten, HexFormatString);
                         Debug.Assert(charsWritten == 4);
                         written += charsWritten;
 #else
-                        WriteHex(nextChar, ref destination, ref written);
+                        written = WriteHex(nextChar, destination, written);
 #endif
                     }
                     break;
@@ -507,12 +509,13 @@ namespace System.Text.Json
         }
 
 #if netstandard
-        private static void WriteHex(int value, ref Span<char> destination, ref int written)
+        private static int WriteHex(int value, Span<char> destination, int written)
         {
             destination[written++] = (char)Int32LsbToHexDigit(value >> 12);
             destination[written++] = (char)Int32LsbToHexDigit((int)((value >> 8) & 0xFU));
             destination[written++] = (char)Int32LsbToHexDigit((int)((value >> 4) & 0xFU));
             destination[written++] = (char)Int32LsbToHexDigit((int)(value & 0xFU));
+            return written;
         }
 
          /// <summary>

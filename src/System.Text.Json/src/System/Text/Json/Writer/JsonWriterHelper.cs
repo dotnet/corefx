@@ -65,11 +65,12 @@ namespace System.Text.Json
         {
 #if !netstandard
             if (!double.IsFinite(value))
-                ThrowHelper.ThrowArgumentException_ValueNotSupported();
 #else
             if (double.IsNaN(value) || double.IsInfinity(value))
-                ThrowHelper.ThrowArgumentException_ValueNotSupported();
 #endif
+            {
+                ThrowHelper.ThrowArgumentException_ValueNotSupported();
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,11 +78,12 @@ namespace System.Text.Json
         {
 #if !netstandard
             if (!float.IsFinite(value))
-                ThrowHelper.ThrowArgumentException_ValueNotSupported();
 #else
             if (float.IsNaN(value) || float.IsInfinity(value))
-                ThrowHelper.ThrowArgumentException_ValueNotSupported();
 #endif
+            {
+                ThrowHelper.ThrowArgumentException_ValueNotSupported();
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

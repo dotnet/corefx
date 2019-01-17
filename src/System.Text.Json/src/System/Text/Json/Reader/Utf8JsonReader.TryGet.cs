@@ -37,12 +37,12 @@ namespace System.Text.Json
             // TODO: https://github.com/dotnet/corefx/issues/33292
             return s_utf8Encoding.GetString(span);
 #else
+            if (span.IsEmpty)
+            {
+                return string.Empty;
+            }
             unsafe
             {
-                if (span.IsEmpty)
-                {
-                    return string.Empty;
-                }
                 fixed (byte* bytePtr = span)
                 {
                     // TODO: https://github.com/dotnet/corefx/issues/33292
