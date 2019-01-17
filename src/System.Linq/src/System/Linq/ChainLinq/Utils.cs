@@ -76,8 +76,24 @@ namespace System.Linq.ChainLinq
 
         internal static Result Consume<T, Result>(IEnumerable<T> e, Consumer<T, Result> consumer)
         {
-            var c = AsConsumable(e);
-            c.Consume(consumer);
+            if (e is T[] array)
+            {
+                ChainLinq.Consume.Array.Invoke(array, Links.Identity<T>.Instance, consumer);
+            }
+            else if (e is List<T> list)
+            {
+                ChainLinq.Consume.List.Invoke(list, Links.Identity<T>.Instance, consumer);
+            }
+            else if (e is Consumables.IConsumableProvider<T> provider)
+            {
+                var c = provider.GetConsumable(Links.Identity<T>.Instance);
+                c.Consume(consumer);
+            }
+            else
+            {
+                ChainLinq.Consume.Enumerable.Invoke(e, Links.Identity<T>.Instance, consumer);
+            }
+
             return consumer.Result;
         }
     }

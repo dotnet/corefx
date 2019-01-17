@@ -49,10 +49,8 @@ namespace System.Linq.ChainLinq.Consumables
 
         private Consumable<V> ToConsumable()
         {
-            Consumable<TSource> source = Utils.AsConsumable(_source);
             Consumer.Lookup<TSource, TKey> consumerLookup = new Consumer.Lookup<TSource, TKey>(_keySelector, _comparer);
-            source.Consume(consumerLookup);
-            Lookup<TKey, TSource> lookup = consumerLookup.Result;
+            Lookup<TKey, TSource> lookup = Utils.Consume(_source, consumerLookup);
             return lookup.AddTail(Link);
         }
 
@@ -113,10 +111,8 @@ namespace System.Linq.ChainLinq.Consumables
 
         private Consumable<V> ToConsumable()
         {
-            Consumable<TSource> source = Utils.AsConsumable(_source);
             Consumer.LookupSplit<TSource, TKey, TElement> consumerLookup = new Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer);
-            source.Consume(consumerLookup);
-            Lookup<TKey, TElement> lookup = consumerLookup.Result;
+            Lookup<TKey, TElement> lookup = Utils.Consume(_source, consumerLookup);
             return lookup.AddTail(Link);
         }
 
@@ -177,10 +173,8 @@ namespace System.Linq.ChainLinq.Consumables
 
         private Consumable<V> ToConsumable()
         {
-            Consumable<TSource> source = Utils.AsConsumable(_source);
             Consumer.Lookup<TSource, TKey> consumerLookup = new Consumer.Lookup<TSource, TKey>(_keySelector, _comparer);
-            source.Consume(consumerLookup);
-            Lookup<TKey, TSource> lookup = consumerLookup.Result;
+            Lookup<TKey, TSource> lookup = Utils.Consume(_source, consumerLookup);
             ConsumableForAddition<TResult> appliedSelector = lookup.ApplyResultSelector(_resultSelector);
             return appliedSelector.AddTail(Link);
         }
@@ -245,10 +239,8 @@ namespace System.Linq.ChainLinq.Consumables
 
         private Consumable<V> ToConsumable()
         {
-            Consumable<TSource> source = Utils.AsConsumable(_source);
             Consumer.LookupSplit<TSource, TKey, TElement> consumerLookup = new Consumer.LookupSplit<TSource, TKey, TElement>(_keySelector, _elementSelector, _comparer);
-            source.Consume(consumerLookup);
-            Lookup<TKey, TElement> lookup = consumerLookup.Result;
+            Lookup<TKey, TElement> lookup = Utils.Consume(_source, consumerLookup);
             ConsumableForAddition<TResult> appliedSelector = lookup.ApplyResultSelector(_resultSelector);
             return appliedSelector.AddTail(Link);
         }
