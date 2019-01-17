@@ -57,7 +57,7 @@ namespace System.Text.Json
         // * Third int
         //   * 4 bits JsonTokenType
         //   * 28 bits for the number of rows until the next value (never 0)
-        private struct CustomDb : IDisposable
+        private struct MetadataDb : IDisposable
         {
             private const int SizeOrLengthOffset = 4;
             private const int NumberOfRowsOffset = 8;
@@ -65,7 +65,7 @@ namespace System.Text.Json
             internal int Length { get; private set; }
             private byte[] _rentedBuffer;
 
-            internal CustomDb(int payloadLength)
+            internal MetadataDb(int payloadLength)
             {
                 // Assume that a token happens approximately every 12 bytes.
                 // int estimatedTokens = payloadLength / 12

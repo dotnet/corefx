@@ -153,7 +153,7 @@ namespace System.Text.Json
                 isFinalBlock: true,
                 new JsonReaderState(options: readerOptions));
 
-            var database = new CustomDb(utf8Json.Length);
+            var database = new MetadataDb(utf8Json.Length);
             var stack = new StackRowStack(JsonReaderState.DefaultMaxDepth * StackRow.Size);
 
             try

@@ -13,13 +13,13 @@ namespace System.Text.Json
     public sealed partial class JsonDocument : IDisposable
     {
         private ReadOnlyMemory<byte> _utf8Json;
-        private CustomDb _parsedData;
+        private MetadataDb _parsedData;
         private byte[] _extraRentedBytes;
         private (int, string) _lastIndexAndString = (-1, null);
 
         public JsonElement RootElement => new JsonElement(this, 0);
 
-        private JsonDocument(ReadOnlyMemory<byte> utf8Json, CustomDb parsedData, byte[] extraRentedBytes)
+        private JsonDocument(ReadOnlyMemory<byte> utf8Json, MetadataDb parsedData, byte[] extraRentedBytes)
         {
             Debug.Assert(!utf8Json.IsEmpty);
 
@@ -399,7 +399,7 @@ namespace System.Text.Json
         private static void Parse(
             ReadOnlySpan<byte> utf8JsonSpan,
             Utf8JsonReader reader,
-            ref CustomDb database,
+            ref MetadataDb database,
             ref StackRowStack stack)
         {
             bool inArray = false;
