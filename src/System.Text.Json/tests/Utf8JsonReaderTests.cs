@@ -1526,9 +1526,8 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void EmptyJsonWithinSequenceIsInvalid()
         {
-            var dataUtf8 = ReadOnlySpan<byte>.Empty;
             ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(new byte[0], 1);
-            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            var json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
 
             try
             {
@@ -1564,7 +1563,7 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [InlineData("//", 2)]
-        [InlineData("//\n", 3)]
+        [InlineData("//\n", 0)]
         [InlineData("/**/", 4)]
         [InlineData("/*/*/", 5)]
         [InlineData("// just a comment", 17)]
