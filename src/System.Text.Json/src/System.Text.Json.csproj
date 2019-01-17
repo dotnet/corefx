@@ -20,6 +20,8 @@
     <Compile Include="System\Text\Json\JsonDocument.StackRowStack.cs" />
     <Compile Include="System\Text\Json\JsonDocument.TryGetProperty.cs" />
     <Compile Include="System\Text\Json\JsonElement.cs" />
+    <Compile Include="System\Text\Json\JsonElement.ArrayEnumerator.cs" />
+    <Compile Include="System\Text\Json\JsonElement.ObjectEnumerator.cs" />
     <Compile Include="System\Text\Json\JsonProperty.cs" />
     <Compile Include="System\Text\Json\JsonReaderException.cs" />
     <Compile Include="System\Text\Json\JsonReaderHelper.cs" />
