@@ -72,9 +72,11 @@
 
   <!-- The Source Package will call into this target in order to retrieve the compiled resources file as
        it will need to be part of the source package contents. -->
-  <Target Name="GetCompiledResourceFile" Returns="$(CompiledResourceFileForProject)" DependsOnTargets="_GenerateResxSource">
-    <PropertyGroup>
-      <CompiledResourceFileForProject>@(GeneratedResxSource)</CompiledResourceFileForProject>
-    </PropertyGroup>
+  <Target Name="GetSourcesToPackage" Returns="@(_sourceToPackage)" DependsOnTargets="Compile">
+      <ItemGroup>
+        <_sourceToExclude Include="@(Compile)" Condition="$([System.String]::Copy('%(Compile.Identity)').ToLower().EndsWith('assemblyinfo.cs'))" />
+        <_sourceToPackage Include="@(Compile->'%(FullPath)')" PackagePath="contentFiles/cs/netstandard2.0/%(RecursiveDir)%(FileName)%(Extension)" Exclude="@(_sourceToExclude)"/>
+        <_sourceToPackage Condition="'%(Extension)' == '.resx'" Include="@(EmbeddedResource->'%(FullPath)')"  PackagePath="build/netstandard2.0/%(EmbeddedResource.ManifestResourceName).resx" />
+      </ItemGroup>
   </Target>
 </Project>

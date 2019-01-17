@@ -9,33 +9,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <_AllJsonSources Include="$(MSBuildThisFileDirectory)../src/**/*.cs" />
-    <SourcePackageFiles Include="@(_AllJsonSources)">
-      <PackagePath>contentFiles/cs/netstandard2.0/%(RecursiveDir)%(FileName)%(Extension)</PackagePath>
-    </SourcePackageFiles>
-    <File Include="$(PlaceHolderFile)">
-       <TargetPath>contentFiles/cs/netcoreapp3.0/%(RecursiveDir)%(FileName)%(Extension)</TargetPath>
+    <File Include="$(MSBuildThisFileDirectory)$(MSBuildProjectName).targets">
+      <TargetPath>/build/netstandard2.0</TargetPath>
     </File>
   </ItemGroup>
 
   <!-- Given that System.Text.Json has Resources, we need to make sure we include them (and the SR.cs from Common) 
        on the sources of the package. This target will retrieve the compiled resources file and will also add
        the Common SR.cs into SourcePackageFiles. -->
-  <Target Name="GetCompiledResourceFile" BeforeTargets="GenerateInternalTypesSource">
-    <MSBuild Projects="../src/System.Text.Json.csproj"
-             Targets="GetCompiledResourceFile">
-      <Output TaskParameter="TargetOutputs"
-              PropertyName="CompiledResourceFileForProject" />
-    </MSBuild>
-
+  <Target Name="GetSourcesToPackage" BeforeTargets="ExpandProjectReferences">
     <ItemGroup>
-      <SourcePackageFiles Include="$(CompiledResourceFileForProject)">
-        <PackagePath>contentFiles/cs/netstandard2.0/SR.System.Text.Json.cs</PackagePath>
-      </SourcePackageFiles>
-      <SourcePackageFiles Include="$(CommonPath)/System/SR.cs">
-        <PackagePath>contentFiles/cs/netstandard2.0/SR.cs</PackagePath>
-      </SourcePackageFiles>
+      <_ProjectsToBuild Include="../src/System.Text.Json.csproj" UndefineProperties="Configuration" />
     </ItemGroup>
+
+    <MSBuild Projects="@(_ProjectsToBuild)"
+             Targets="GetSourcesToPackage">
+      <Output TaskParameter="TargetOutputs"
+              ItemName="SourcePackageFiles" />
+    </MSBuild>
   </Target>
   
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
