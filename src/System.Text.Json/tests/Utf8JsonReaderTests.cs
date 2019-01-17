@@ -560,38 +560,34 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("{\"nam\\\"e\":\"ah\\\"son\"}", JsonCommentHandling.Disallow, "nam\\\"e, ah\\\"son, ")]
+        [InlineData("{\"nam\\\"e\":\"ah\\\"son\"}", "nam\\\"e, ah\\\"son, ", "nam\"e, ah\"son, ")]
         [InlineData("{\"Here is a string: \\\"\\\"\":\"Here is a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str\":\"\\\"\\\"\"}",
-            JsonCommentHandling.Disallow,
-            "Here is a string: \\\"\\\", Here is a, Here is a back slash\\\\, Multiline\\r\\n String\\r\\n, \\tMul\\r\\ntiline String, \\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\, str, \\\"\\\", ")]
-
-        [InlineData("{\"nam\\\"e\":\"ah\\\"son\"}", JsonCommentHandling.Allow, "nam\\\"e, ah\\\"son, ")]
-        [InlineData("{\"Here is a string: \\\"\\\"\":\"Here is a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str\":\"\\\"\\\"\"}",
-            JsonCommentHandling.Allow,
-            "Here is a string: \\\"\\\", Here is a, Here is a back slash\\\\, Multiline\\r\\n String\\r\\n, \\tMul\\r\\ntiline String, \\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\, str, \\\"\\\", ")]
-
-        [InlineData("{\"nam\\\"e\":\"ah\\\"son\"}", JsonCommentHandling.Skip, "nam\\\"e, ah\\\"son, ")]
-        [InlineData("{\"Here is a string: \\\"\\\"\":\"Here is a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str\":\"\\\"\\\"\"}",
-            JsonCommentHandling.Skip,
-            "Here is a string: \\\"\\\", Here is a, Here is a back slash\\\\, Multiline\\r\\n String\\r\\n, \\tMul\\r\\ntiline String, \\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\, str, \\\"\\\", ")]
-        public static void TestJsonReaderUtf8SpecialString(string jsonString, JsonCommentHandling commentHandling, string expectedStr)
+            "Here is a string: \\\"\\\", Here is a, Here is a back slash\\\\, Multiline\\r\\n String\\r\\n, \\tMul\\r\\ntiline String, \\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\, str, \\\"\\\", ",
+            "Here is a string: \"\", Here is a, Here is a back slash\\, Multiline\r\n String\r\n, \tMul\r\ntiline String, \"somequote\"\tMu\"\"l\r\ntiline\"another\" String\\, str, \"\", ")]
+        public static void TestJsonReaderUtf8SpecialString(string jsonString, string expectedStr, string expectedEscapedStr)
         {
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int length, commentHandling);
-            string actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+                byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int length, commentHandling);
+                string actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
 
-            Assert.Equal(expectedStr, actualStr);
+                Assert.Equal(expectedStr, actualStr);
 
-            result = JsonTestHelper.SequenceReturnBytesHelper(dataUtf8, out length, commentHandling);
-            actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
+                result = JsonTestHelper.SequenceReturnBytesHelper(dataUtf8, out length, commentHandling);
+                actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
 
-            Assert.Equal(expectedStr, actualStr);
+                Assert.Equal(expectedStr, actualStr);
 
-            object jsonValues = JsonTestHelper.ReturnObjectHelper(dataUtf8, commentHandling);
-            string str = JsonTestHelper.ObjectToString(jsonValues);
-            ReadOnlySpan<char> expectedSpan = expectedStr.AsSpan(0, expectedStr.Length - 2);
-            ReadOnlySpan<char> actualSpan = str.AsSpan(0, str.Length - 2);
-            Assert.True(expectedSpan.SequenceEqual(actualSpan));
+                object jsonValues = JsonTestHelper.ReturnObjectHelper(dataUtf8, commentHandling);
+                string str = JsonTestHelper.ObjectToString(jsonValues);
+                Assert.Equal(expectedEscapedStr, str);
+
+                Stream stream = new MemoryStream(dataUtf8);
+                TextReader reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
+                expectedEscapedStr = JsonTestHelper.NewtonsoftReturnStringHelper(reader);
+                Assert.Equal(expectedEscapedStr, str);
+            }
         }
 
         [Theory]
@@ -1720,14 +1716,14 @@ namespace System.Text.Json.Tests
                     new object[] {"   true  ", true, "True"},
                     new object[] {"   false   ", true, "False"},
                     new object[] {"   null   ", true, "null"},
-                    new object[] {"   \" Test string with \\\"nested quotes \\\" and hex: \\uABCD values! \"   ", true, " Test string with \\\"nested quotes \\\" and hex: \\uABCD values! "},
+                    new object[] {"   \" Test string with \\\"nested quotes \\\" and hex: \\uABCD values! \"   ", true, " Test string with \"nested quotes \" and hex: \uABCD values! "},
 
                     new object[] {"   12345   ", false, "12345"},
                     new object[] {"   12345.67890e-12   ", false, "1.23456789E-08"},
                     new object[] {"   true  ", false, "True"},
                     new object[] {"   false   ", false, "False"},
                     new object[] {"   null   ", false, "null"},
-                    new object[] {"   \" Test string with \\\"nested quotes \\\" and hex: \\uABCD values! \"   ", false, " Test string with \\\"nested quotes \\\" and hex: \\uABCD values! "},
+                    new object[] {"   \" Test string with \\\"nested quotes \\\" and hex: \\uABCD values! \"   ", false, " Test string with \"nested quotes \" and hex: \uABCD values! "},
                 };
             }
         }

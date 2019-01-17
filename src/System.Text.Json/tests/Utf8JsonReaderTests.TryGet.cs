@@ -4,6 +4,8 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace System.Text.Json.Tests
@@ -346,6 +348,64 @@ namespace System.Text.Json.Tests
                     catch (InvalidOperationException)
                     { }
                 }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("{\"message\":\"Hello, I am \\\"Ahson!\\\"\"}")]
+        [InlineData("{\"nam\\\"e\":\"ah\\\"son\"}")]
+        [InlineData("{\"Here is a string: \\\"\\\"\":\"Here is a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str\":\"\\\"\\\"\"}")]
+        [InlineData("[\"\\u0030\\u0031\\u0032\\u0033\\u0034\\u0035\", \"\\u0000\\u002B\", \"a\\u005C\\u0072b\", \"a\\\\u005C\\u0072b\"]")]
+        [InlineData("{\"message\":\"Hello \\r\\b\\n\\f\\t\"}")]
+        public static void TestingGetString(string jsonString)
+        {
+            var expectedPropertyNames = new List<string>();
+            var expectedValues = new List<string>();
+
+            var jsonNewtonsoft = new JsonTextReader(new StringReader(jsonString));
+            while (jsonNewtonsoft.Read())
+            {
+                if (jsonNewtonsoft.TokenType == JsonToken.String)
+                {
+                    expectedValues.Add(jsonNewtonsoft.Value.ToString());
+                }
+                else if (jsonNewtonsoft.TokenType == JsonToken.PropertyName)
+                {
+                    expectedPropertyNames.Add(jsonNewtonsoft.Value.ToString());
+                }
+            }
+
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var actualPropertyNames = new List<string>();
+            var actualValues = new List<string>();
+
+            var json = new Utf8JsonReader(dataUtf8, true, default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    actualValues.Add(json.GetStringValue());
+                }
+                else if (json.TokenType == JsonTokenType.PropertyName)
+                {
+                    actualPropertyNames.Add(json.GetStringValue());
+                }
+            }
+
+            Assert.Equal(expectedPropertyNames.Count, actualPropertyNames.Count);
+            for (int i = 0; i < expectedPropertyNames.Count; i++)
+            {
+                Assert.Equal(expectedPropertyNames[i], actualPropertyNames[i]);
+            }
+
+            Assert.Equal(expectedValues.Count, actualValues.Count);
+            for (int i = 0; i < expectedValues.Count; i++)
+            {
+                Assert.Equal(expectedValues[i], actualValues[i]);
             }
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);

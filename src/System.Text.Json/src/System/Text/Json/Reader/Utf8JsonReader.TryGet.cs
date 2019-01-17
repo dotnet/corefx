@@ -10,11 +10,8 @@ namespace System.Text.Json
 {
     public ref partial struct Utf8JsonReader
     {
-        // Reject any invalid UTF-8 data rather than silently replacing.
-        private static readonly UTF8Encoding s_utf8Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
-
         /// <summary>
-        /// Reads the next JSON token value from the source transcoded as a <see cref="string"/>.
+        /// Reads the next JSON token value from the source, unescaped, and transcoded as a <see cref="string"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of the JSON token that is not a string
@@ -33,8 +30,13 @@ namespace System.Text.Json
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
 
-            // TODO: https://github.com/dotnet/corefx/issues/33292
-            return s_utf8Encoding.GetString(span);
+            int idx = span.IndexOf(JsonConstants.BackSlash);
+            if (idx != -1)
+            {
+                return JsonReaderHelper.GetUnescapedString(span, idx);
+            }
+
+            return JsonReaderHelper.s_utf8Encoding.GetString(span);
         }
 
         /// <summary>
