@@ -152,7 +152,7 @@ namespace System.Text.Json
                         // Divide by 0x400 to shift right by 10 in order to find the surrogate pairs from the scalar
                         // High surrogate = ((scalar -  0x10000) / 0x400) + D800
                         // Low surrogate = ((scalar -  0x10000) % 0x400) + DC00
-                        int quotient = Math.DivRem(scalar - JsonConstants.UnicodePlane01StartValue, JsonConstants.ShiftRightBy10, out int remainder);
+                        int quotient = Math.DivRem(scalar - JsonConstants.UnicodePlane01StartValue, JsonConstants.BitShiftBy10, out int remainder);
                         int firstChar = quotient + JsonConstants.HighSurrogateStartValue;
                         int nextChar = remainder + JsonConstants.LowSurrogateStartValue;
                         bool result = Utf8Formatter.TryFormat(firstChar, destination.Slice(written), out int bytesWritten, format: s_hexStandardFormat);

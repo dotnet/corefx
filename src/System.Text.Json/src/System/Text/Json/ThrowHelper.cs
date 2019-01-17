@@ -337,6 +337,16 @@ namespace System.Text.Json
             throw new ArgumentException(SR.Format(SR.CannotWriteInvalidUTF16, $"0x{charAsInt:X2}"));
         }
 
+        public static void ThrowInvalidOperationException_ReadInvalidUTF16(int charAsInt)
+        {
+            throw new InvalidOperationException(SR.Format(SR.CannotReadInvalidUTF16, $"0x{charAsInt:X2}"));
+        }
+
+        public static void ThrowInvalidOperationException_ReadInvalidUTF16()
+        {
+            throw new InvalidOperationException(SR.CannotReadIncompleteUTF16);
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static InvalidOperationException GetInvalidOperationException(ExceptionResource resource, int currentDepth, byte token, JsonTokenType tokenType)
         {

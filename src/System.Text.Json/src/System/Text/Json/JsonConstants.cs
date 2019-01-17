@@ -66,6 +66,6 @@ namespace System.Text.Json
         public const int HighSurrogateEndValue = 0xDBFF;
         public const int LowSurrogateStartValue = 0xDC00;
         public const int LowSurrogateEndValue = 0xDFFF;
-        public const int ShiftRightBy10 = 0x400;
+        public const int BitShiftBy10 = 0x400;
     }
 }

@@ -16,6 +16,7 @@ namespace System.Text.Json
 
         private const int StackallocThreshold = 256;
 
+        // TODO: Similar to escaping, replace the unescaping logic with publicly shipping APIs from https://github.com/dotnet/corefx/issues/33509
         public static string GetUnescapedString(ReadOnlySpan<byte> utf8Source, int idx)
         {
             byte[] unescapedArray = null;
@@ -84,14 +85,50 @@ namespace System.Text.Json
                     else if (currentByte == 'u')
                     {
                         Debug.Assert(source.Length >= idx + 5);
+
                         bool result = Utf8Parser.TryParse(source.Slice(idx + 1, 4), out int scalar, out int bytesConsumed, 'x');
                         Debug.Assert(result);
                         Debug.Assert(bytesConsumed == 4);
+                        idx += bytesConsumed;     // The loop iteration will increment idx past the last hex digit
+
+                        if (IsInRangeInclusive((uint)scalar, JsonConstants.HighSurrogateStartValue, JsonConstants.LowSurrogateEndValue))
+                        {
+                            // The first hex value cannot be a low surrogate
+                            if (scalar >= JsonConstants.LowSurrogateStartValue)
+                            {
+                                ThrowHelper.ThrowInvalidOperationException_ReadInvalidUTF16(scalar);
+                            }
+
+                            // If the first hex value is a high surrogate, the next one must be a low surrogate
+                            Debug.Assert(IsInRangeInclusive((uint)scalar, JsonConstants.HighSurrogateStartValue, JsonConstants.HighSurrogateEndValue));
+
+                            idx += 3;   // Skip the last hex digit and \u
+
+                            if (source.Length < idx + 4 || source[idx - 2] != '\\' || source[idx - 1] != 'u')
+                            {
+                                ThrowHelper.ThrowInvalidOperationException_ReadInvalidUTF16();
+                            }
+
+                            result = Utf8Parser.TryParse(source.Slice(idx, 4), out int lowSurrogate, out bytesConsumed, 'x');
+                            Debug.Assert(result);
+                            Debug.Assert(bytesConsumed == 4);
+
+                            if (!IsInRangeInclusive((uint)lowSurrogate, JsonConstants.LowSurrogateStartValue, JsonConstants.LowSurrogateEndValue))
+                            {
+                                ThrowHelper.ThrowInvalidOperationException_ReadInvalidUTF16(lowSurrogate);
+                            }
+
+                            idx += bytesConsumed - 1;  // The loop iteration will increment idx past the last hex digit
+
+                            // To find the unicode scalar:
+                            // (0x400 * (High surrogate - 0xD800)) + Low surrogate - 0xDC00 + 0x10000
+                            scalar = (JsonConstants.BitShiftBy10 * (scalar - JsonConstants.HighSurrogateStartValue))
+                                + (lowSurrogate - JsonConstants.LowSurrogateStartValue)
+                                + JsonConstants.UnicodePlane01StartValue;
+                        }
 
                         EncodeToUtf8Bytes((uint)scalar, destination.Slice(written), out int bytesWritten);
                         Debug.Assert(bytesWritten <= 4);
-
-                        idx += bytesConsumed;
                         written += bytesWritten;
                     }
                 }

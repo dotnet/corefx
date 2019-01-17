@@ -358,10 +358,27 @@ namespace System.Text.Json.Tests
         [InlineData("{\"message\":\"Hello, I am \\\"Ahson!\\\"\"}")]
         [InlineData("{\"nam\\\"e\":\"ah\\\"son\"}")]
         [InlineData("{\"Here is a string: \\\"\\\"\":\"Here is a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str\":\"\\\"\\\"\"}")]
-        [InlineData("[\"\\u0030\\u0031\\u0032\\u0033\\u0034\\u0035\", \"\\u0000\\u002B\", \"a\\u005C\\u0072b\", \"a\\\\u005C\\u0072b\"]")]
+        [InlineData("[\"\\u0030\\u0031\\u0032\\u0033\\u0034\\u0035\", \"\\u0000\\u002B\", \"a\\u005C\\u0072b\", \"a\\\\u005C\\u0072b\", \"a\\u008E\\u008Fb\", \"a\\uD803\\uDE6Db\", \"a\\uD834\\uDD1Eb\", \"a\\\\uD834\\\\uDD1Eb\"]")]
         [InlineData("{\"message\":\"Hello \\r\\b\\n\\f\\t\"}")]
+        [InlineData(null)]  // Large randomly generated string
         public static void TestingGetString(string jsonString)
         {
+            if (jsonString == null)
+            {
+                var random = new Random(42);
+                var charArray = new char[500];
+                charArray[0] = '"';
+                for (int i = 1; i < charArray.Length; i++)
+                {
+                    charArray[i] = (char)random.Next('?', '\\'); // ASCII values (between 63 and 91) that don't need to be escaped.
+                }
+
+                charArray[256] = '\\';
+                charArray[257] = '"';
+                charArray[charArray.Length - 1] = '"';
+                jsonString = new string(charArray);
+            }
+
             var expectedPropertyNames = new List<string>();
             var expectedValues = new List<string>();
 
@@ -410,6 +427,29 @@ namespace System.Text.Json.Tests
 
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
             Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("\"a\\uDD1E\"")]
+        [InlineData("\"a\\uDD1Eb\"")]
+        [InlineData("\"a\\uD834\"")]
+        [InlineData("\"a\\uD834b\"")]
+        [InlineData("\"a\\uDD1E\\uD834b\"")]
+        [InlineData("\"a\\\\uD834\\uDD1Eb\"")]
+        [InlineData("\"a\\uDD1E\\\\uD834b\"")]
+        public static void TestingGetStringInvalidUTF16(string jsonString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, true, default);
+            Assert.True(json.Read());
+            Assert.Equal(JsonTokenType.String, json.TokenType);
+            try
+            {
+                string val = json.GetStringValue();
+                Assert.True(false, "Expected InvalidOperationException when trying to get string value for invalid UTF-16 JSON text.");
+            }
+            catch (InvalidOperationException) { }
         }
     }
 }
