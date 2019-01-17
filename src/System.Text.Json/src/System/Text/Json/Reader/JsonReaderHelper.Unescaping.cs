@@ -70,6 +70,10 @@ namespace System.Text.Json
                     {
                         destination[written++] = JsonConstants.BackSlash;
                     }
+                    else if (currentByte == JsonConstants.Slash)
+                    {
+                        destination[written++] = JsonConstants.Slash;
+                    }
                     else if (currentByte == 't')
                     {
                         destination[written++] = JsonConstants.Tab;
