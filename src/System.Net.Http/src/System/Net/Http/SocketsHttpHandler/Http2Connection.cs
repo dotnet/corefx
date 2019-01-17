@@ -270,7 +270,7 @@ namespace System.Net.Http
 
                 // Don't wait for completion, which could happen asynchronously.
                 // TODO: Track the last completed stream ID and include it in the GoAway frame.
-                ValueTask ignored = SendGoAwayAsync(MaxStreamId, Http2ProtocolErrorCode.ProtocolError, new Memory<byte>(Encoding.UTF8.GetBytes("Header frame received on non-open stream.")));
+                Task ignored = SendGoAwayAsync(MaxStreamId, Http2ProtocolErrorCode.ProtocolError, new Memory<byte>(Encoding.UTF8.GetBytes("Header frame received on non-open stream.")));
                 throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
             }
 
@@ -349,7 +349,7 @@ namespace System.Net.Http
 
                 // Don't wait for completion, which could happen asynchronously.
                 // TODO: Track the last completed stream ID and include it in the GoAway frame.
-                ValueTask ignored = SendGoAwayAsync(MaxStreamId, Http2ProtocolErrorCode.ProtocolError, new Memory<byte>(Encoding.UTF8.GetBytes("Data frame received on non-open stream.")));
+                Task ignored = SendGoAwayAsync(MaxStreamId, Http2ProtocolErrorCode.ProtocolError, new Memory<byte>(Encoding.UTF8.GetBytes("Data frame received on non-open stream.")));
                 throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
             }
 
@@ -548,7 +548,7 @@ namespace System.Net.Http
                 if (http2Stream == null)
                 {
                     // Don't wait for completion, which could happen asynchronously.
-                    ValueTask ignored = SendRstStreamAsync(frameHeader.StreamId, Http2ProtocolErrorCode.StreamClosed);
+                    Task ignored = SendRstStreamAsync(frameHeader.StreamId, Http2ProtocolErrorCode.StreamClosed);
                     return;
                 }
 
@@ -667,17 +667,16 @@ namespace System.Net.Http
             }
         }
 
-        private async ValueTask SendRstStreamAsync(int streamId, Http2ProtocolErrorCode errorCode)
+        private async Task SendRstStreamAsync(int streamId, Http2ProtocolErrorCode errorCode)
         {
             await AcquireWriteLockAsync().ConfigureAwait(false);
             try
             {
                 _outgoingBuffer.EnsureAvailableSpace(FrameHeader.Size + FrameHeader.RstStreamLength);
                 WriteFrameHeader(new FrameHeader(FrameHeader.RstStreamLength, FrameType.RstStream, FrameFlags.None, streamId));
-                _outgoingBuffer.AvailableSpan[0] = (byte)(((int)errorCode & 0xFF000000) >> 24);
-                _outgoingBuffer.AvailableSpan[1] = (byte)(((int)errorCode & 0x00FF0000) >> 16);
-                _outgoingBuffer.AvailableSpan[2] = (byte)(((int)errorCode & 0x0000FF00) >> 8);
-                _outgoingBuffer.AvailableSpan[3] = (byte)((int)errorCode & 0x000000FF);
+
+                BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, (int)errorCode);
+
                 _outgoingBuffer.Commit(FrameHeader.RstStreamLength);
 
                 await FlushOutgoingBytesAsync().ConfigureAwait(false);
@@ -688,7 +687,7 @@ namespace System.Net.Http
             }
         }
 
-        private async ValueTask SendGoAwayAsync(int lastStreamId, Http2ProtocolErrorCode errorCode, ReadOnlyMemory<byte> additionalDebugData)
+        private async Task SendGoAwayAsync(int lastStreamId, Http2ProtocolErrorCode errorCode, ReadOnlyMemory<byte> additionalDebugData)
         {
             await AcquireWriteLockAsync().ConfigureAwait(false);
             try
@@ -697,15 +696,8 @@ namespace System.Net.Http
                 _outgoingBuffer.EnsureAvailableSpace(length);
                 WriteFrameHeader(new FrameHeader(length, FrameType.GoAway, FrameFlags.None, 0));
 
-                _outgoingBuffer.AvailableSpan[0] = (byte)(((int)lastStreamId & 0xFF000000) >> 24);
-                _outgoingBuffer.AvailableSpan[1] = (byte)(((int)lastStreamId & 0x00FF0000) >> 16);
-                _outgoingBuffer.AvailableSpan[2] = (byte)(((int)lastStreamId & 0x0000FF00) >> 8);
-                _outgoingBuffer.AvailableSpan[3] = (byte)((int)lastStreamId & 0x000000FF);
-
-                _outgoingBuffer.AvailableSpan[4] = (byte)(((int)errorCode & 0xFF000000) >> 24);
-                _outgoingBuffer.AvailableSpan[5] = (byte)(((int)errorCode & 0x00FF0000) >> 16);
-                _outgoingBuffer.AvailableSpan[6] = (byte)(((int)errorCode & 0x0000FF00) >> 8);
-                _outgoingBuffer.AvailableSpan[7] = (byte)((int)errorCode & 0x000000FF);
+                BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, lastStreamId);
+                BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan.Slice(4), (int)errorCode);
 
                 additionalDebugData.CopyTo(_outgoingBuffer.AvailableMemory.Slice(8));
 
