@@ -283,7 +283,7 @@ namespace System.Text.Json.Tests
                 type,
                 jsonString,
                 null,
-                bytes => JsonDocument.Parse(SegmentInto(bytes, 31)));
+                bytes => JsonDocument.Parse(JsonTestHelper.SegmentInto(bytes, 31)));
         }
 
         private static void ParseJson(
@@ -1105,7 +1105,7 @@ namespace System.Text.Json.Tests
             ReadOnlySequence<byte> singleSeq = new ReadOnlySequence<byte>(utf8);
             Assert.Throws<JsonReaderException>(() => JsonDocument.Parse(singleSeq));
 
-            ReadOnlySequence<byte> multiSegment = SegmentInto(utf8, 6);
+            ReadOnlySequence<byte> multiSegment = JsonTestHelper.SegmentInto(utf8, 6);
             Assert.Throws<JsonReaderException>(() => JsonDocument.Parse(multiSegment));
 
             Stream stream = new MemoryStream(utf8);
@@ -1119,12 +1119,26 @@ namespace System.Text.Json.Tests
         public static void CheckParseDepth()
         {
             const int OkayCount = 64;
-            string okayJson = new string('[', OkayCount) + "1" + new string(']', OkayCount);
+            string okayJson = new string('[', OkayCount) + "2" + new string(']', OkayCount);
+            int depth = 0;
 
             using (JsonDocument doc = JsonDocument.Parse(okayJson))
             {
                 JsonElement root = doc.RootElement;
                 Assert.Equal(JsonValueType.Array, root.Type);
+
+                JsonElement cur = root;
+
+                while (cur.Type == JsonValueType.Array)
+                {
+                    Assert.Equal(1, cur.GetArrayLength());
+                    cur = cur[0];
+                    depth++;
+                }
+
+                Assert.Equal(JsonValueType.Number, cur.Type);
+                Assert.Equal(2, cur.GetInt32());
+                Assert.Equal(OkayCount, depth);
             }
 
             string badJson = $"[{okayJson}]";
@@ -1155,7 +1169,7 @@ namespace System.Text.Json.Tests
                 "readerOptions",
                 () => JsonDocument.Parse(singleSeq, options));
 
-            ReadOnlySequence<byte> multiSegment = SegmentInto(utf8, 6);
+            ReadOnlySequence<byte> multiSegment = JsonTestHelper.SegmentInto(utf8, 6);
             AssertExtensions.Throws<ArgumentException>(
                 "readerOptions",
                 () => JsonDocument.Parse(multiSegment, options));
@@ -1684,8 +1698,9 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void ParseNull()
         {
-            // This succeeds as the empty string, then fails to parse the empty document.
-            Assert.Throws<JsonReaderException>(() => JsonDocument.Parse((string)null));
+            Assert.Throws<ArgumentNullException>(
+                "json",
+                () => JsonDocument.Parse((string)null));
 
             AssertExtensions.Throws<ArgumentNullException>(
                 "utf8Json",
@@ -1766,40 +1781,6 @@ namespace System.Text.Json.Tests
             int actualLength = Encoding.UTF8.GetBytes(testString, buffer.AsSpan());
             
             return new ArraySegment<byte>(buffer, 0, actualLength);
-        }
-
-        private static ReadOnlySequence<byte> SegmentInto(ReadOnlyMemory<byte> data, int segmentCount)
-        {
-            if (segmentCount < 2)
-                throw new ArgumentOutOfRangeException(nameof(segmentCount));
-
-            int perSegment = data.Length / segmentCount;
-            BufferSegment<byte> first;
-
-            if (perSegment == 0 && data.Length > 0)
-            {
-                first = new BufferSegment<byte>(data.Slice(0, 1));
-                data = data.Slice(1);
-            }
-            else
-            {
-                first = new BufferSegment<byte>(data.Slice(0, perSegment));
-                data = data.Slice(perSegment);
-            }
-
-            BufferSegment<byte> last = first;
-            segmentCount--;
-
-            while (segmentCount > 1)
-            {
-                perSegment = data.Length / segmentCount;
-                last = last.Append(data.Slice(0, perSegment));
-                data = data.Slice(perSegment);
-                segmentCount--;
-            }
-
-            last = last.Append(data);
-            return new ReadOnlySequence<byte>(first, 0, last, data.Length);
         }
 
         private static string GetExpectedConcat(TestCaseType testCaseType, string jsonString)

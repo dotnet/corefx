@@ -62,7 +62,7 @@ namespace System.Text.Json
             private const int SizeOrLengthOffset = 4;
             private const int NumberOfRowsOffset = 8;
 
-            internal int Length;
+            internal int Length { get; private set; }
             private byte[] _rentedBuffer;
 
             internal CustomDb(int payloadLength)
@@ -106,6 +106,10 @@ namespace System.Text.Json
 
             internal void TrimExcess()
             {
+                // There's a chance that the size we have is the size we'd get for this
+                // amount of usage (particularly if Enlarge ever got called); and there's
+                // the small copy-cost associated with trimming anyways. "Is half-empty" is
+                // just a rough metric for "is trimming worth it?".
                 if (Length <= _rentedBuffer.Length / 2)
                 {
                     byte[] newRent = ArrayPool<byte>.Shared.Rent(Length);

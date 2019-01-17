@@ -15,7 +15,7 @@ namespace System.Text.Json
         private ReadOnlyMemory<byte> _utf8Json;
         private CustomDb _parsedData;
         private byte[] _extraRentedBytes;
-        private (int, string) _lastString = (-1, null);
+        private (int, string) _lastIndexAndString = (-1, null);
 
         public JsonElement RootElement => new JsonElement(this, 0);
 
@@ -84,6 +84,9 @@ namespace System.Text.Json
 
             if (!row.HasComplexChildren)
             {
+                // Since we wouldn't be here without having completed the document parse, and we
+                // already vetted the index against the length, this new index will always be
+                // within the table.
                 return new JsonElement(this, currentIndex + ((arrayIndex + 1) * DbRow.Size));
             }
 
@@ -161,6 +164,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
+            // TODO(#33292): Comparison has to be against the unescaped property name.
             // The property name is stored one row before the value
             DbRow row = _parsedData.Get(valueIndex - DbRow.Size);
             Debug.Assert(row.TokenType == JsonTokenType.PropertyName);
@@ -194,7 +198,7 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            (int lastIdx, string lastString) = _lastString;
+            (int lastIdx, string lastString) = _lastIndexAndString;
 
             if (lastIdx == index)
             {
@@ -216,8 +220,8 @@ namespace System.Text.Json
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
             // TODO(#33292): Unescape this.
-            lastString = Utf8JsonReader.Utf8Encoding.GetString(segment);
-            _lastString = (index, lastString);
+            lastString = Utf8JsonReader.s_utf8Encoding.GetString(segment);
+            _lastIndexAndString = (index, lastString);
             return lastString;
         }
 
@@ -326,7 +330,8 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            if (Utf8JsonReader.TryGetDoubleValue(segment, out double tmp))
+            char standardFormat = segment.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            if (Utf8Parser.TryParse(segment, out double tmp, out int bytesConsumed, standardFormat) && segment.Length == bytesConsumed)
             {
                 value = tmp;
                 return true;
@@ -347,7 +352,8 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            if (Utf8JsonReader.TryGetSingleValue(segment, out float tmp))
+            char standardFormat = segment.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            if (Utf8Parser.TryParse(segment, out float tmp, out int bytesConsumed, standardFormat) && segment.Length == bytesConsumed)
             {
                 value = tmp;
                 return true;
@@ -381,13 +387,13 @@ namespace System.Text.Json
         internal string GetRawValueAsString(int index)
         {
             ReadOnlyMemory<byte> segment = GetRawValue(index, includeQuotes: true);
-            return Utf8JsonReader.Utf8Encoding.GetString(segment.Span);
+            return Utf8JsonReader.s_utf8Encoding.GetString(segment.Span);
         }
 
         internal string GetPropertyRawValueAsString(int valueIndex)
         {
             ReadOnlyMemory<byte> segment = GetPropertyRawValue(valueIndex);
-            return Utf8JsonReader.Utf8Encoding.GetString(segment.Span);
+            return Utf8JsonReader.s_utf8Encoding.GetString(segment.Span);
         }
 
         private static void Parse(
@@ -510,6 +516,7 @@ namespace System.Text.Json
                 inArray = reader.IsInArray;
             }
 
+            Debug.Assert(reader.BytesConsumed == utf8JsonSpan.Length);
             database.TrimExcess();
         }
 

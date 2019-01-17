@@ -50,7 +50,9 @@ namespace System.Text.Json
         public static JsonDocument Parse(Stream utf8Json, JsonReaderOptions readerOptions = default)
         {
             if (utf8Json == null)
+            {
                 throw new ArgumentNullException(nameof(utf8Json));
+            }
 
             CheckSupportedOptions(readerOptions);
 
@@ -75,7 +77,9 @@ namespace System.Text.Json
             CancellationToken cancellationToken = default)
         {
             if (utf8Json == null)
+            {
                 throw new ArgumentNullException(nameof(utf8Json));
+            }
 
             CheckSupportedOptions(readerOptions);
 
@@ -107,12 +111,12 @@ namespace System.Text.Json
             CheckSupportedOptions(readerOptions);
 
             ReadOnlySpan<char> jsonChars = json.Span;
-            int byteCount = Utf8JsonReader.Utf8Encoding.GetByteCount(jsonChars);
+            int byteCount = Utf8JsonReader.s_utf8Encoding.GetByteCount(jsonChars);
             byte[] utf8Bytes = ArrayPool<byte>.Shared.Rent(byteCount);
 
             try
             {
-                int byteCount2 = Utf8JsonReader.Utf8Encoding.GetBytes(jsonChars, utf8Bytes);
+                int byteCount2 = Utf8JsonReader.s_utf8Encoding.GetBytes(jsonChars, utf8Bytes);
                 Debug.Assert(byteCount == byteCount2);
 
                 return Parse(utf8Bytes.AsMemory(0, byteCount2), readerOptions, utf8Bytes);
@@ -128,6 +132,11 @@ namespace System.Text.Json
 
         public static JsonDocument Parse(string json, JsonReaderOptions readerOptions = default)
         {
+            if (json == null)
+            {
+                throw new ArgumentNullException(nameof(json));
+            }
+
             CheckSupportedOptions(readerOptions);
 
             return Parse(json.AsMemory(), readerOptions);
@@ -142,7 +151,7 @@ namespace System.Text.Json
             Utf8JsonReader reader = new Utf8JsonReader(
                 utf8JsonSpan,
                 isFinalBlock: true,
-                new JsonReaderState(JsonReaderState.DefaultMaxDepth, readerOptions));
+                new JsonReaderState(options: readerOptions));
 
             var database = new CustomDb(utf8Json.Length);
             var stack = new StackRowStack(JsonReaderState.DefaultMaxDepth * StackRow.Size);
@@ -151,6 +160,7 @@ namespace System.Text.Json
             {
                 Parse(utf8JsonSpan, reader, ref database, ref stack);
 
+                // TODO(#34155): Remove this if/throw after the reader throws this exception for us.
                 if (database.Length == 0)
                 {
                     throw new JsonReaderException("Cannot load the empty document", -1, -1);
@@ -195,7 +205,7 @@ namespace System.Text.Json
                     if (expectedLength == 0 && rented.Length == written)
                     {
                         byte[] toReturn = rented;
-                        rented = ArrayPool<byte>.Shared.Rent(toReturn.Length * 2);
+                        rented = ArrayPool<byte>.Shared.Rent(checked(toReturn.Length * 2));
                         Buffer.BlockCopy(toReturn, 0, rented, 0, toReturn.Length);
                         // Holds document content, clear it.
                         ArrayPool<byte>.Shared.Return(toReturn, clearArray: true);

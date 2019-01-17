@@ -15,20 +15,18 @@ namespace System.Text.Json
 
         internal JsonElement(JsonDocument parent, int idx)
         {
+            // parent is usually not null, but the Current property
+            // on the enumerators (when initialized as `default`) can
+            // get here with a null.
+            Debug.Assert(idx >= 0);
+
             _parent = parent;
             _idx = idx;
         }
 
         internal JsonTokenType TokenType => _parent?.GetJsonTokenType(_idx) ?? JsonTokenType.None;
 
-        public JsonValueType Type
-        {
-            get
-            {
-                JsonTokenType tokenType = TokenType;
-                return tokenType.ToValueType();
-            }
-        }
+        public JsonValueType Type => TokenType.ToValueType();
 
         public JsonElement this[int index]
         {
@@ -376,7 +374,9 @@ namespace System.Text.Json
             public bool MoveNext()
             {
                 if (_curIdx >= _endIdx)
+                {
                     return false;
+                }
 
                 if (_curIdx < 0)
                 {
@@ -437,7 +437,9 @@ namespace System.Text.Json
             public bool MoveNext()
             {
                 if (_curIdx >= _endIdx)
+                {
                     return false;
+                }
 
                 if (_curIdx < 0)
                 {

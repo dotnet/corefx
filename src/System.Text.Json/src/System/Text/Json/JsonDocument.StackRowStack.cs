@@ -49,15 +49,10 @@ namespace System.Text.Json
 
             internal StackRow Pop()
             {
-                StackRow row = Peek();
+                Debug.Assert(_topOfStack <= _rentedBuffer.Length - StackRow.Size);
+                StackRow row = MemoryMarshal.Read<StackRow>(_rentedBuffer.AsSpan(_topOfStack));
                 _topOfStack += StackRow.Size;
                 return row;
-            }
-
-            internal StackRow Peek()
-            {
-                Debug.Assert(_topOfStack <= _rentedBuffer.Length - StackRow.Size);
-                return MemoryMarshal.Read<StackRow>(_rentedBuffer.AsSpan(_topOfStack));
             }
 
             private void Enlarge()
