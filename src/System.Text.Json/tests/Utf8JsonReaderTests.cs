@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1524,25 +1523,6 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void EmptyJsonWithinSequenceIsInvalid()
-        {
-            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(new byte[0], 1);
-            var json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
-
-            try
-            {
-                while (json.Read())
-                    ;
-                Assert.True(false, "Expected JsonReaderException was not thrown with single-segment data.");
-            }
-            catch (JsonReaderException ex)
-            {
-                Assert.Equal(0, ex.LineNumber);
-                Assert.Equal(0, ex.BytePositionInLine);
-            }
-        }
-
-        [Fact]
         public static void JsonContainingOnlyWhitespaceIsInvalid()
         {
             var dataUtf8 = new byte[] { 0x20 };
@@ -1562,13 +1542,13 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("//", 2)]
-        [InlineData("//\n", 0)]
-        [InlineData("/**/", 4)]
-        [InlineData("/*/*/", 5)]
-        [InlineData("// just a comment", 17)]
-        [InlineData(" /* comment and whitespace */ ", 30)]
-        public static void JsonContainingOnlyCommentsIsInvalid(string jsonString, int expectedConsumed)
+        [InlineData("//", 2, 0)]
+        [InlineData("//\n", 0, 1)]
+        [InlineData("/**/", 4, 0)]
+        [InlineData("/*/*/", 5, 0)]
+        [InlineData("// just a comment", 17, 0)]
+        [InlineData(" /* comment and whitespace */ ", 30, 0)]
+        public static void JsonContainingOnlyCommentsIsInvalid(string jsonString, int expectedConsumed, int expectedLineNumber)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
@@ -1582,6 +1562,7 @@ namespace System.Text.Json.Tests
             }
             catch (JsonReaderException ex)
             {
+                Assert.Equal(expectedLineNumber, ex.LineNumber);
                 Assert.Equal(expectedConsumed, ex.BytePositionInLine);
             }
         }
