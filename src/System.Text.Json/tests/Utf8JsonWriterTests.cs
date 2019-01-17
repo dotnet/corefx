@@ -855,7 +855,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        //[OuterLoop]
+        [OuterLoop]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
@@ -2902,7 +2902,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        //[OuterLoop]
+        [OuterLoop]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
@@ -2940,7 +2940,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        //[OuterLoop]
+        [OuterLoop]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
