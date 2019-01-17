@@ -14,6 +14,11 @@ namespace System.Diagnostics.Tests
     {
         public static async Task RetryWithBackoff(Action action, int delayInMilliseconds = 10, int times = 10)
         {
+            const int maxDelayInMilliseconds = 1000;
+
+            if (delayInMilliseconds > maxDelayInMilliseconds)
+                throw new ArgumentOutOfRangeException(nameof(delayInMilliseconds), $"Exceeds maximum allowed delay of {maxDelayInMilliseconds}");
+
             for (; times > 0; times--)
             {
                 try
@@ -24,7 +29,7 @@ namespace System.Diagnostics.Tests
                 catch (XunitException) when (times > 1)
                 {
                     await Task.Delay(delayInMilliseconds);
-                    delayInMilliseconds *= 2;
+                    delayInMilliseconds = Math.Min(maxDelayInMilliseconds, delayInMilliseconds * 2);
                 }
             }
         }
