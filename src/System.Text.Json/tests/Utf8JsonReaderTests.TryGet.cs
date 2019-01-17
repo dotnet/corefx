@@ -433,6 +433,7 @@ namespace System.Text.Json.Tests
         [InlineData("\"a\\uDD1E\"")]
         [InlineData("\"a\\uDD1Eb\"")]
         [InlineData("\"a\\uD834\"")]
+        [InlineData("\"a\\uD834\\uD834\"")]
         [InlineData("\"a\\uD834b\"")]
         [InlineData("\"a\\uDD1E\\uD834b\"")]
         [InlineData("\"a\\\\uD834\\uDD1Eb\"")]
