@@ -493,7 +493,7 @@ namespace System.Text.Json
         /// </summary>
         private const int ReplacementChar = 0xFFFD;
 
-         /// <summary>
+        /// <summary>
         /// Returns <see langword="true"/> iff <paramref name="value"/> is a valid Unicode scalar
         /// value, i.e., is in [ U+0000..U+D7FF ], inclusive; or [ U+E000..U+10FFFF ], inclusive.
         /// </summary>
@@ -505,7 +505,7 @@ namespace System.Text.Json
             // values are clustered into the single range [ U+0800..U+10FFFF ],
             // which allows performing a single fast range check.
 
-             return IsInRangeInclusive(value ^ 0xD800U, 0x800U, 0x10FFFFU);
+            return IsInRangeInclusive(value ^ 0xD800U, 0x800U, 0x10FFFFU);
         }
 
 #if netstandard
@@ -518,7 +518,7 @@ namespace System.Text.Json
             return written;
         }
 
-         /// <summary>
+        /// <summary>
         /// Converts a number 0 - 15 to its associated hex character '0' - 'f' as byte.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
