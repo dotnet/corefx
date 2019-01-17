@@ -22,7 +22,7 @@ namespace System.Media
         private int _loadTimeout = DefaultLoadTimeout;
 
         // used to lock all synchronous calls to the SoundPlayer object
-        private ManualResetEvent _semaphore = new ManualResetEvent(true);
+        private readonly ManualResetEvent _semaphore = new ManualResetEvent(true);
 
         // the worker copyThread
         // we start the worker copyThread ONLY from entry points in the SoundPlayer API
