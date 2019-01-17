@@ -20,7 +20,7 @@ namespace System.Diagnostics
             {
                 EnsureState(State.Associated | State.IsLocal | State.HaveNonExitedId);
 
-                if (IsSelfOrDescendant(GetCurrentProcess()))
+                if (IsSelfOrDescendantOf(GetCurrentProcess()))
                     throw new InvalidOperationException(SR.KillEntireProcessTree_DisallowedBecauseTreeContainsCallingProcess);
 
                 IEnumerable<Exception> result = KillTree();
@@ -30,7 +30,7 @@ namespace System.Diagnostics
             }
         }
 
-        private bool IsSelfOrDescendant(Process processOfInterest)
+        private bool IsSelfOrDescendantOf(Process processOfInterest)
         {
             if (SafePredicateTest(() => Equals(processOfInterest)))
                 return true;
