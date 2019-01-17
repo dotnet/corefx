@@ -152,6 +152,14 @@ enum
 };
 
 /**
+ * Constants for interpreting FileStatus.UserFlags.
+ */
+enum
+{
+    PAL_UF_HIDDEN = 0x8000
+};
+
+/**
  * Constants from dirent.h for the inode type returned from readdir variants
  */
 typedef enum

@@ -177,8 +177,8 @@ static void ConvertFileStatus(const struct stat_* src, FileStatus* dst)
     dst->BirthTimeNsec = 0;
 #endif
 
-#if HAVE_STAT_FLAGS
-    dst->UserFlags = src->st_flags;
+#if defined(HAVE_STAT_FLAGS) && defined(UF_HIDDEN)
+    dst->UserFlags = (src->st_flags & UF_HIDDEN == UF_HIDDEN) ? PAL_UF_HIDDEN : 0;
 #else
     dst->UserFlags = 0;
 #endif

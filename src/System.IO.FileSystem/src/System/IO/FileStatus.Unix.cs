@@ -115,15 +115,21 @@ namespace System.IO
 
             if (Interop.Sys.CanSetHiddenFlag)
             {
-                if ((attributes & FileAttributes.Hidden) != 0 && (_fileStatus.UserFlags & (uint)Interop.Sys.UserFlags.UF_HIDDEN) != (uint)Interop.Sys.UserFlags.UF_HIDDEN)
+                if ((attributes & FileAttributes.Hidden) != 0)
                 {
-                    // If Hidden flag is set and cached file status does not have the flag set then set it
-                    Interop.Sys.LChflags(path, (uint)Interop.Sys.UserFlags.UF_HIDDEN);
+                    if ((_fileStatus.UserFlags & (uint)Interop.Sys.UserFlags.UF_HIDDEN) != (uint)Interop.Sys.UserFlags.UF_HIDDEN)
+                    {
+                        // If Hidden flag is set and cached file status does not have the flag set then set it
+                        Interop.CheckIo(Interop.Sys.LChflags(path, (uint)Interop.Sys.UserFlags.UF_HIDDEN), path, InitiallyDirectory);
+                    }
                 }
-                else if ((attributes & FileAttributes.Hidden) == 0 && (_fileStatus.UserFlags & (uint)Interop.Sys.UserFlags.UF_HIDDEN) == (uint)Interop.Sys.UserFlags.UF_HIDDEN)
+                else
                 {
-                    // If Hidden flag is not set and cached file status does have the flag set then remove it
-                    Interop.Sys.LChflags(path, (_fileStatus.UserFlags & ~(uint)Interop.Sys.UserFlags.UF_HIDDEN));
+                    if ((_fileStatus.UserFlags & (uint)Interop.Sys.UserFlags.UF_HIDDEN) == (uint)Interop.Sys.UserFlags.UF_HIDDEN)
+                    {
+                        // If Hidden flag is not set and cached file status does have the flag set then remove it
+                        Interop.CheckIo(Interop.Sys.LChflags(path, (_fileStatus.UserFlags & ~(uint)Interop.Sys.UserFlags.UF_HIDDEN)), path, InitiallyDirectory);
+                    }
                 }
             }
 
