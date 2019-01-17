@@ -60,6 +60,10 @@ namespace System.Diagnostics.Tests
                                 }
                             }
                             Assert.Contains("EventLogMessages.dll", providerMetadata.MessageFilePath);
+                            if (providerMetadata.HelpLink != null)
+                            {
+                                Assert.Contains("EventLogMessages.dll", providerMetadata.HelpLink.ToString());
+                            }
                         }
                         else
                         {
