@@ -76,8 +76,6 @@ namespace System.Diagnostics
 
         private IEnumerable<Exception> KillTree()
         {
-            List<Exception> exceptions = new List<Exception>();
-
             try
             {
                 // Stop but don't kill the process. Keeps additional children from being started but leaves the process alive 
@@ -91,9 +89,11 @@ namespace System.Diagnostics
             }
             catch (Win32Exception e)
             {
-                exceptions.Add(e);
+                return new { e };
             }
 
+
+            List<Exception> exceptions = new List<Exception>();
             IReadOnlyList<Process> children = GetChildProcesses();
 
             try
