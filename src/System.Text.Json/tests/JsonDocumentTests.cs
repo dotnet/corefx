@@ -1050,7 +1050,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void CheckInvalidString()
         {
-            Assert.Throws<EncoderFallbackException>(() => JsonDocument.Parse("{ \"unpaired\uDFFE\": true }", default));
+            Assert.Throws<EncoderFallbackException>(() => JsonDocument.Parse("{ \"unpaired\uDFFE\": true }"));
         }
 
         [Theory]
@@ -1062,6 +1062,22 @@ namespace System.Text.Json.Tests
             using (JsonDocument doc = JsonDocument.Parse(json))
             {
                 Assert.Equal(expectedValue, doc.RootElement.GetString());
+            }
+        }
+
+        [Fact]
+        public static void GetString_BadUtf8()
+        {
+
+            // The Arabic ligature Lam-Alef (U+FEFB) (which happens to, as a standalone, mean "no" in English)
+            // is UTF-8 EF BB BB.  So let's leave out a BB and put it in quotes.
+            using (JsonDocument doc = JsonDocument.Parse(new byte[] { 0x22, 0xEF, 0xBB, 0x22 }))
+            {
+                JsonElement root = doc.RootElement;
+
+                Assert.Equal(JsonValueType.String, root.Type);
+                Assert.Throws<DecoderFallbackException>(() => root.GetString());
+                Assert.Throws<DecoderFallbackException>(() => root.GetRawText());
             }
         }
 
