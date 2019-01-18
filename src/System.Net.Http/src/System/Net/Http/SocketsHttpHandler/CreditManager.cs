@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net.Http
@@ -14,6 +15,7 @@ namespace System.Net.Http
         {
             public int Amount;
             public TaskCompletionSource<int> TaskCompletionSource;
+            public CancellationTokenRegistration TokenRegistration;
         }
 
         private int _current;
@@ -37,7 +39,7 @@ namespace System.Net.Http
             }
         }
 
-        public ValueTask<int> RequestCreditAsync(int amount)
+        public ValueTask<int> RequestCreditAsync(int amount, CancellationToken cancellationToken)
         {
             lock (SyncObject)
             {
@@ -62,7 +64,11 @@ namespace System.Net.Http
                     _waiters = new Queue<Waiter>();
                 }
 
-                _waiters.Enqueue(new Waiter { Amount = amount, TaskCompletionSource = tcs });
+                Waiter waiter = new Waiter { Amount = amount,
+                                             TaskCompletionSource = tcs,
+                                             TokenRegistration = cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken)) };
+
+                _waiters.Enqueue(waiter);
 
                 return new ValueTask<int>(tcs.Task);
             }
@@ -91,9 +97,25 @@ namespace System.Net.Http
                 {
                     while (_current > 0 && _waiters.TryDequeue(out Waiter waiter))
                     {
+                        waiter.TokenRegistration.Dispose();
+
+                        // If we have the code below (TrySetResult), do we even actually need this?
+                        // Might be worth optimizing for case where operation is not cancelled.
+                        if (waiter.TaskCompletionSource.Task.IsCanceled)
+                        {
+                            continue;
+                        }
+
                         int granted = Math.Min(waiter.Amount, _current);
                         _current -= granted;
-                        waiter.TaskCompletionSource.SetResult(granted);
+
+                        // TODO: Determine what happens if a cancellation callback is in-progress when the
+                        // TokenRegistration is disposed. It's possible I don't need this code (but I doubt it).
+                        // Handle a race between the the Dispose() on TokenRegistration and a call to the cancellation callback.
+                        if (!waiter.TaskCompletionSource.TrySetResult(granted))
+                        {
+                            _current += granted;
+                        }
                     }
                 }
             }
@@ -114,7 +136,8 @@ namespace System.Net.Http
                 {
                     while (_waiters.TryDequeue(out Waiter waiter))
                     {
-                        waiter.TaskCompletionSource.SetException(new ObjectDisposedException(nameof(CreditManager)));
+                        waiter.TokenRegistration.Dispose();
+                        waiter.TaskCompletionSource.TrySetException(new ObjectDisposedException(nameof(CreditManager)));
                     }
                 }
             }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Net.Test.Common;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -953,6 +954,51 @@ namespace System.Net.Http.Functional.Tests
                 await server.SendDefaultResponseAsync(streamId);
                 response = await sendTask;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+        }
+
+        [OuterLoop("Uses Task.Delay")]
+        [ConditionalFact(nameof(SupportsAlpn))]
+        public async Task Http2_MaxConcurrentStreams_Cancellation()
+        {
+            HttpClientHandler handler = CreateHttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+
+            using (var server = Http2LoopbackServer.CreateServer())
+            using (var client = new HttpClient(handler))
+            {
+                Task<HttpResponseMessage> sendTask = client.GetAsync(server.Address);
+
+                await server.EstablishConnectionAsync();
+                server.IgnoreWindowUpdates();
+
+                // Process first request and send response.
+                int streamId = await server.ReadRequestHeaderAsync();
+                await server.SendDefaultResponseAsync(streamId);
+
+                HttpResponseMessage response = await sendTask;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                // Change MaxConcurrentStreams setting and wait for ack.
+                // (We don't want to send any new requests until we receive the ack, otherwise we may have a timing issue.)
+                SettingsFrame settingsFrame = new SettingsFrame(new SettingsEntry { SettingId = SettingId.MaxConcurrentStreams, Value = 0 });
+                await server.WriteFrameAsync(settingsFrame);
+                Frame settingsAckFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
+                Assert.Equal(FrameType.Settings, settingsAckFrame.Type);
+                Assert.Equal(FrameFlags.Ack, settingsAckFrame.Flags);
+
+                // Issue a new request, so that we can cancel it while it waits for a stream.
+                var cts = new CancellationTokenSource();
+                sendTask = client.GetAsync(server.Address, cts.Token);
+
+                // Make sure that the request makes it to the point where it's waiting for a connection.
+                // It's possible that we'll still initiate a cancellation before it makes it to the queue,
+                // but it should still behave in the same way if so.
+                await Task.Delay(500);
+
+                cts.Cancel();
+
+                await Assert.ThrowsAsync<OperationCanceledException>(async () => await sendTask);
             }
         }
     }
