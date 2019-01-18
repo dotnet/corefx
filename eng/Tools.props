@@ -31,7 +31,7 @@
     <PackageReference Include="Microsoft.DotNet.Build.Tasks.Feed" Version="$(MicrosoftDotNetBuildTasksFeedPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.Build.Tasks.Packaging" Version="$(MicrosoftDotNetBuildTasksPackagingPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.CoreFxTesting" Version="$(MicrosoftDotNetCoreFxTestingPackageVersion)" />
-    <PackageReference Include="Microsoft.DotNet.Build.Tasks.Configuration" Version="1.0.0-ericstj.19067.1" />
+    <PackageReference Include="Microsoft.DotNet.Build.Tasks.Configuration" Version="1.0.0-ericstj.19067.2" />
 
     <!-- Include the SourceLink packages -->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="$(MicrosoftSourceLinkVersion)" PrivateAssets="all" IsImplicitlyDefined="true" />
