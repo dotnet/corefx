@@ -68,6 +68,9 @@
     <Compile Include="System\Drawing\ImageConverter.cs" />
     <Compile Include="System\Drawing\ImageFormatConverter.cs" />
     <Compile Include="System\Drawing\Printing\MarginsConverter.cs" />
+    <Compile Include="System\Media\SoundPlayer.cs" />
+    <Compile Include="System\Media\SystemSound.cs" />
+    <Compile Include="System\Media\SystemSounds.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Reference Include="System.Buffers" />
@@ -89,10 +92,5 @@
     <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Threading" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="System\Media\SoundPlayer.cs" />
-    <Compile Include="System\Media\SystemSound.cs" />
-    <Compile Include="System\Media\SystemSounds.cs" />
   </ItemGroup>
 </Project>
