@@ -268,6 +268,9 @@ namespace System.Text.Json
                 {
                     break;
                 }
+                // _currentPosition needs to point to last non-empty segment
+                // Since memory.Length == 0, we need to revert back to previous.
+                _currentPosition = copy;
             }
 
             if (_isFinalBlock)

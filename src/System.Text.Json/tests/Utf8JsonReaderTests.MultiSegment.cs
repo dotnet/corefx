@@ -477,6 +477,8 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [InlineData("\"abcdefg\"")]
+        [InlineData("12345")]
+        [InlineData("12345.0e-3")]
         [InlineData("true")]
         [InlineData("false")]
         [InlineData("null")]
