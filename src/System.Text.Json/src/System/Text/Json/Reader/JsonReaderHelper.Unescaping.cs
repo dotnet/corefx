@@ -101,6 +101,8 @@ namespace System.Text.Json
                     }
                     else if (currentByte == 'u')
                     {
+                        // The source is known to be valid JSON, and hence if we see a \u, it is guaranteed to have 4 hex digits following it
+                        // Otherwise, the Utf8JsonReader would have alreayd thrown an exception.
                         Debug.Assert(source.Length >= idx + 5);
 
                         bool result = Utf8Parser.TryParse(source.Slice(idx + 1, 4), out int scalar, out int bytesConsumed, 'x');
@@ -110,26 +112,29 @@ namespace System.Text.Json
 
                         if (JsonHelpers.IsInRangeInclusive((uint)scalar, JsonConstants.HighSurrogateStartValue, JsonConstants.LowSurrogateEndValue))
                         {
-                            // The first hex value cannot be a low surrogate
+                            // The first hex value cannot be a low surrogate.
                             if (scalar >= JsonConstants.LowSurrogateStartValue)
                             {
                                 ThrowHelper.ThrowInvalidOperationException_ReadInvalidUTF16(scalar);
                             }
 
-                            // If the first hex value is a high surrogate, the next one must be a low surrogate
                             Debug.Assert(JsonHelpers.IsInRangeInclusive((uint)scalar, JsonConstants.HighSurrogateStartValue, JsonConstants.HighSurrogateEndValue));
 
-                            idx += 3;   // Skip the last hex digit and \u
+                            idx += 3;   // Skip the last hex digit and the next \u
 
+                            // We must have a low surrogate following a high surrogate.
                             if (source.Length < idx + 4 || source[idx - 2] != '\\' || source[idx - 1] != 'u')
                             {
                                 ThrowHelper.ThrowInvalidOperationException_ReadInvalidUTF16();
                             }
 
+                            // The source is known to be valid JSON, and hence if we see a \u, it is guaranteed to have 4 hex digits following it
+                            // Otherwise, the Utf8JsonReader would have alreayd thrown an exception.
                             result = Utf8Parser.TryParse(source.Slice(idx, 4), out int lowSurrogate, out bytesConsumed, 'x');
                             Debug.Assert(result);
                             Debug.Assert(bytesConsumed == 4);
 
+                            // If the first hex value is a high surrogate, the next one must be a low surrogate.
                             if (!JsonHelpers.IsInRangeInclusive((uint)lowSurrogate, JsonConstants.LowSurrogateStartValue, JsonConstants.LowSurrogateEndValue))
                             {
                                 ThrowHelper.ThrowInvalidOperationException_ReadInvalidUTF16(lowSurrogate);

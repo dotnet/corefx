@@ -45,6 +45,6 @@ namespace System.Text.Json
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInRangeInclusive(int value, int lowerBound, int upperBound)
-            => (value - lowerBound) <= (upperBound - lowerBound);
+            => (uint)(value - lowerBound) <= (uint)(upperBound - lowerBound);
     }
 }
