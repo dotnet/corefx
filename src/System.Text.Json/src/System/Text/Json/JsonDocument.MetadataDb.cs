@@ -14,7 +14,18 @@ namespace System.Text.Json
         //
         // Every token from the document gets a row, which has one of the following forms:
         //
-        // Value types (String, Number, True, False, Null, PropertyName)
+        // Number
+        // * First int
+        //   * Top bit is unassigned / always clear
+        //   * 31 bits for token offset
+        // * Second int
+        //   * Top bit is set of the number uses scientific notation
+        //   * 31 bits for the token length
+        // * Third int
+        //   * 4 bits JsonTokenType
+        //   * 28 bits unassigned / always clear
+        //
+        // Other value types (String, True, False, Null, PropertyName)
         // * First int
         //   * Top bit is unassigned / always clear
         //   * 31 bits for token offset

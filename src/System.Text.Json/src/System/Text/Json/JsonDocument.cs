@@ -330,7 +330,8 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            char standardFormat = segment.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            char standardFormat = row.HasComplexChildren ? JsonConstants.ScientificNotationFormat : default;
+
             if (Utf8Parser.TryParse(segment, out double tmp, out int bytesConsumed, standardFormat) &&
                 segment.Length == bytesConsumed)
             {
@@ -353,7 +354,8 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            char standardFormat = segment.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            char standardFormat = row.HasComplexChildren ? JsonConstants.ScientificNotationFormat : default;
+
             if (Utf8Parser.TryParse(segment, out float tmp, out int bytesConsumed, standardFormat) &&
                 segment.Length == bytesConsumed)
             {
@@ -376,7 +378,7 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            char standardFormat = segment.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+            char standardFormat = row.HasComplexChildren ? JsonConstants.ScientificNotationFormat : default;
 
             if (Utf8Parser.TryParse(segment, out decimal tmp, out int bytesConsumed, standardFormat) &&
                 segment.Length == bytesConsumed)
@@ -515,6 +517,21 @@ namespace System.Text.Json
                     if (inArray)
                     {
                         arrayItemsCount++;
+                    }
+
+                    if (tokenType == JsonTokenType.Number)
+                    {
+                        switch (reader._numberFormat)
+                        {
+                            case JsonConstants.ScientificNotationFormat:
+                                database.SetHasComplexChildren(database.Length - DbRow.Size);
+                                break;
+                            default:
+                                Debug.Assert(
+                                    reader._numberFormat == default,
+                                    $"Unhandled numeric format {reader._numberFormat}");
+                                break;
+                        }
                     }
                 }
 

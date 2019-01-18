@@ -30,7 +30,7 @@ namespace System.Text.Json
         private int _maxDepth;
         private bool _inObject;
         private bool _isNotPrimitive;
-        private char _numberFormat;
+        internal char _numberFormat;
         private JsonTokenType _tokenType;
         private JsonTokenType _previousTokenType;
         private JsonReaderOptions _readerOptions;
@@ -988,7 +988,7 @@ namespace System.Text.Json
 
             Debug.Assert(nextByte == 'E' || nextByte == 'e');
             i++;
-            _numberFormat = 'e';
+            _numberFormat = JsonConstants.ScientificNotationFormat;
 
             signResult = ConsumeSign(ref data, ref i);
             if (signResult == ConsumeNumberResult.NeedMoreData)

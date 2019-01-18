@@ -1193,7 +1193,7 @@ namespace System.Text.Json
 
             Debug.Assert(nextByte == 'E' || nextByte == 'e');
             i++;
-            _numberFormat = 'e';
+            _numberFormat = JsonConstants.ScientificNotationFormat;
             _bytePositionInLine++;
 
             signResult = ConsumeSignMultiSegment(ref data, ref i);

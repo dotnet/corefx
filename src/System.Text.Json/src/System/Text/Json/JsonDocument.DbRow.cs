@@ -38,7 +38,11 @@ namespace System.Text.Json
 
             internal bool IsUnknownSize => _sizeOrLengthUnion == UnknownSize;
 
-            // True only if there are nested objects or arrays within the current JSON element
+            /// <summary>
+            /// Number: Use scientific format.
+            /// Array: At least one element is an object/array.
+            /// Otherwise; false
+            /// </summary>
             internal bool HasComplexChildren => _sizeOrLengthUnion < 0;
 
             internal int NumberOfRows =>
