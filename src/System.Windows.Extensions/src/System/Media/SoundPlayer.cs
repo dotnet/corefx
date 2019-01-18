@@ -220,13 +220,13 @@ namespace System.Media
                 IsLoadCompleted = true;
 
                 ValidateSoundFile(localPath);
-                Interop.WinMM.PlaySoundW(localPath, IntPtr.Zero, Interop.WinMM.SND_NODEFAULT | flags);
+                Interop.WinMM.PlaySound(localPath, IntPtr.Zero, Interop.WinMM.SND_NODEFAULT | flags);
             }
             else
             {
                 LoadSync();
                 ValidateSoundData(_streamData);
-                Interop.WinMM.PlaySoundW(_streamData, IntPtr.Zero, Interop.WinMM.SND_MEMORY | Interop.WinMM.SND_NODEFAULT | flags);
+                Interop.WinMM.PlaySound(_streamData, IntPtr.Zero, Interop.WinMM.SND_MEMORY | Interop.WinMM.SND_NODEFAULT | flags);
             }
         }
 
@@ -409,7 +409,7 @@ namespace System.Media
 
         public void Stop()
         {
-            Interop.WinMM.PlaySoundW((byte[])null, IntPtr.Zero, Interop.WinMM.SND_PURGE);
+            Interop.WinMM.PlaySound((byte[])null, IntPtr.Zero, Interop.WinMM.SND_PURGE);
         }
 
         public event AsyncCompletedEventHandler LoadCompleted
