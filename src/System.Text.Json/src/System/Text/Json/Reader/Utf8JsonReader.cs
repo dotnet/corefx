@@ -687,11 +687,6 @@ namespace System.Text.Json
             {
                 Debug.Assert(IsLastSpan);
 
-                if (!_isNotPrimitive)
-                {
-                    return true;
-                }
-
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, _buffer[_consumed - 1]);
             }
 
