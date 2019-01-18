@@ -485,6 +485,7 @@ namespace System.Text.Json.Tests
                     var builder = new StringBuilder();
                     while (json.Read())
                     {
+                        Assert.True(json.ValueSequence.IsEmpty);
                         if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
                             builder.Append(Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
                     }
@@ -494,6 +495,7 @@ namespace System.Text.Json.Tests
                     json = new Utf8JsonReader(data.AsSpan((int)consumed), true, json.CurrentState);
                     while (json.Read())
                     {
+                        Assert.True(json.ValueSequence.IsEmpty);
                         if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
                             builder.Append(Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
                     }
@@ -609,6 +611,7 @@ namespace System.Text.Json.Tests
                     var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), false, state);
                     while (json.Read())
                     {
+                        Assert.True(json.ValueSequence.IsEmpty);
                         // Check if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
                         Assert.True(json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null);
                         Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
@@ -619,6 +622,7 @@ namespace System.Text.Json.Tests
                     json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), true, json.CurrentState);
                     while (json.Read())
                     {
+                        Assert.True(json.ValueSequence.IsEmpty);
                         // Check if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
                         Assert.True(json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null);
                         Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
@@ -907,6 +911,7 @@ namespace System.Text.Json.Tests
             long indexAfterFirstComment = 0;
             while (json.Read())
             {
+                Assert.True(json.ValueSequence.IsEmpty);
                 JsonTokenType tokenType = json.TokenType;
                 switch (tokenType)
                 {
@@ -973,6 +978,7 @@ namespace System.Text.Json.Tests
             long indexAfterFirstComment = 0;
             while (json.Read())
             {
+                Assert.True(json.ValueSequence.IsEmpty);
                 JsonTokenType tokenType = json.TokenType;
                 switch (tokenType)
                 {
@@ -999,6 +1005,7 @@ namespace System.Text.Json.Tests
                 indexAfterFirstComment = 0;
                 while (jsonSlice.Read())
                 {
+                    Assert.True(json.ValueSequence.IsEmpty);
                     JsonTokenType tokenType = jsonSlice.TokenType;
                     switch (tokenType)
                     {
@@ -1022,6 +1029,7 @@ namespace System.Text.Json.Tests
                 {
                     while (jsonSlice.Read())
                     {
+                        Assert.True(json.ValueSequence.IsEmpty);
                         JsonTokenType tokenType = jsonSlice.TokenType;
                         switch (tokenType)
                         {
@@ -1545,6 +1553,7 @@ namespace System.Text.Json.Tests
 
             if (json.Read())
             {
+                Assert.True(json.ValueSequence.IsEmpty);
                 bool isTokenPrimitive = json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null;
                 Assert.True(isTokenPrimitive);
                 switch (json.TokenType)
@@ -1614,6 +1623,7 @@ namespace System.Text.Json.Tests
             bool foundPrimitiveValue = false;
             while (json.Read())
             {
+                Assert.True(json.ValueSequence.IsEmpty);
                 bool isTokenPrimitive = json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null;
 
                 if (insideArray)
