@@ -1,27 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace System.Linq.ChainLinq.Consumables
 {
+
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(SystemLinq_ConsumablesLookupDebugView<,>))]
-    internal partial class Lookup<TKey, TElement> 
+    internal abstract partial class Lookup<TKey, TElement> 
         : ConsumableForAddition<IGrouping<TKey, TElement>>
         , ILookup<TKey, TElement>
         , IConsumableInternal
     {
-        private readonly IEqualityComparer<TKey> _comparer;
-        private GroupingInternal<TKey, TElement>[] _groupings;
-        private GroupingInternal<TKey, TElement> _lastGrouping;
+        protected GroupingInternal<TKey, TElement>[] _groupings;
+        protected GroupingInternal<TKey, TElement> _lastGrouping;
 
-        internal Lookup(IEqualityComparer<TKey> comparer)
+        internal Lookup()
         {
-            _comparer = comparer ?? EqualityComparer<TKey>.Default;
             _groupings = new GroupingInternal<TKey, TElement>[7];
         }
 
-        public int Count { get; private set; }
+        public int Count { get; protected set; }
 
         public IEnumerable<TElement> this[TKey key]
         {
@@ -44,56 +44,21 @@ namespace System.Linq.ChainLinq.Consumables
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        private int InternalGetHashCode(TKey key)
-        {
-            // Handle comparer implementations that throw when passed null
-            return (key == null) ? 0 : _comparer.GetHashCode(key) & 0x7FFFFFFF;
-        }
+        public override Consumable<IGrouping<TKey, TElement>> AddTail(Link<IGrouping<TKey, TElement>, IGrouping<TKey, TElement>> transform) =>
+            new Lookup<TKey, TElement, IGrouping<TKey, TElement>>(_lastGrouping, transform);
 
-        internal GroupingInternal<TKey, TElement> GetGrouping(TKey key, bool create)
-        {
-            int hashCode = InternalGetHashCode(key);
-            for (GroupingInternal<TKey, TElement> g = _groupings[hashCode % _groupings.Length]; g != null; g = g._hashNext)
-            {
-                if (g._hashCode == hashCode && _comparer.Equals(g._key, key))
-                {
-                    return g;
-                }
-            }
+        public override Consumable<U> AddTail<U>(Link<IGrouping<TKey, TElement>, U> transform) =>
+            new Lookup<TKey, TElement, U>(_lastGrouping, transform);
 
-            if (create)
-            {
-                if (Count == _groupings.Length)
-                {
-                    Resize();
-                }
+        public override IEnumerator<IGrouping<TKey, TElement>> GetEnumerator() =>
+            ChainLinq.GetEnumerator.Lookup.Get(_lastGrouping, Links.Identity<IGrouping<TKey, TElement>>.Instance);
 
-                int index = hashCode % _groupings.Length;
-                GroupingInternal<TKey, TElement> g = new GroupingInternal<TKey, TElement>();
-                g._key = key;
-                g._hashCode = hashCode;
-                g._elements = new TElement[1];
-                g._hashNext = _groupings[index];
-                _groupings[index] = g;
-                if (_lastGrouping == null)
-                {
-                    g._next = g;
-                }
-                else
-                {
-                    g._next = _lastGrouping._next;
-                    _lastGrouping._next = g;
-                }
+        public override void Consume(Consumer<IGrouping<TKey, TElement>> consumer) =>
+            ChainLinq.Consume.Lookup.Invoke(_lastGrouping, Links.Identity<IGrouping<TKey,TElement>>.Instance, consumer);
 
-                _lastGrouping = g;
-                Count++;
-                return g;
-            }
+        internal abstract GroupingInternal<TKey, TElement> GetGrouping(TKey key, bool create);
 
-            return null;
-        }
-
-        private void Resize()
+        private GroupingInternal<TKey, TElement>[] Resize()
         {
             int newSize = checked((Count * 2) + 1);
             GroupingInternal<TKey, TElement>[] newGroupings = new GroupingInternal<TKey, TElement>[newSize];
@@ -107,20 +72,94 @@ namespace System.Linq.ChainLinq.Consumables
             }
             while (g != _lastGrouping);
 
-            _groupings = newGroupings;
+            return newGroupings;
         }
 
-        public override Consumable<IGrouping<TKey, TElement>> AddTail(Link<IGrouping<TKey, TElement>, IGrouping<TKey, TElement>> transform) =>
-            new Lookup<TKey, TElement, IGrouping<TKey, TElement>>(_lastGrouping, transform);
+        protected GroupingInternal<TKey, TElement> Create(TKey key, int hashCode)
+        {
+            if (Count == _groupings.Length)
+            {
+                _groupings = Resize();
+            }
 
-        public override Consumable<U> AddTail<U>(Link<IGrouping<TKey, TElement>, U> transform) =>
-            new Lookup<TKey, TElement, U>(_lastGrouping, transform);
+            int index = hashCode % _groupings.Length;
+            GroupingInternal<TKey, TElement> g = new GroupingInternal<TKey, TElement>();
+            g._key = key;
+            g._hashCode = hashCode;
+            g._elements = new TElement[1];
+            g._hashNext = _groupings[index];
+            _groupings[index] = g;
+            if (_lastGrouping == null)
+            {
+                g._next = g;
+            }
+            else
+            {
+                g._next = _lastGrouping._next;
+                _lastGrouping._next = g;
+            }
 
-        public override IEnumerator<IGrouping<TKey, TElement>> GetEnumerator() =>
-            ChainLinq.GetEnumerator.Lookup.Get(_lastGrouping, Links.Identity<IGrouping<TKey, TElement>>.Instance);
+            _lastGrouping = g;
+            Count++;
+            return g;
+        }
+    }
 
-        public override void Consume(Consumer<IGrouping<TKey, TElement>> consumer) =>
-            ChainLinq.Consume.Lookup.Invoke(_lastGrouping, Links.Identity<IGrouping<TKey,TElement>>.Instance, consumer);
+    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerTypeProxy(typeof(SystemLinq_ConsumablesLookupDebugView<,>))]
+    internal sealed partial class LookupWithComparer<TKey, TElement> : Lookup<TKey, TElement>
+    {
+        private readonly IEqualityComparer<TKey> _comparer;
+
+        internal LookupWithComparer(IEqualityComparer<TKey> comparer) =>
+            _comparer = comparer;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int InternalGetHashCode(TKey key)
+        {
+            // Handle comparer implementations that throw when passed null
+            return (key == null) ? 0 : _comparer.GetHashCode(key) & 0x7FFFFFFF;
+        }
+
+        internal sealed override GroupingInternal<TKey, TElement> GetGrouping(TKey key, bool create)
+        {
+            int hashCode = InternalGetHashCode(key);
+            for (GroupingInternal<TKey, TElement> g = _groupings[hashCode % _groupings.Length]; g != null; g = g._hashNext)
+            {
+                if (g._hashCode == hashCode && _comparer.Equals(g._key, key))
+                {
+                    return g;
+                }
+            }
+
+            return create ? Create(key, hashCode) : null;
+        }
+    }
+
+    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerTypeProxy(typeof(SystemLinq_ConsumablesLookupDebugView<,>))]
+    internal sealed partial class LookupDefaultComparer<TKey, TElement> : Lookup<TKey, TElement>
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int InternalGetHashCode(TKey key)
+        {
+            // Handle comparer implementations that throw when passed null
+            return (key == null) ? 0 : EqualityComparer<TKey>.Default.GetHashCode(key) & 0x7FFFFFFF;
+        }
+
+        internal sealed override GroupingInternal<TKey, TElement> GetGrouping(TKey key, bool create)
+        {
+            int hashCode = InternalGetHashCode(key);
+            for (GroupingInternal<TKey, TElement> g = _groupings[hashCode % _groupings.Length]; g != null; g = g._hashNext)
+            {
+                if (g._hashCode == hashCode && EqualityComparer<TKey>.Default.Equals(g._key, key))
+                {
+                    return g;
+                }
+            }
+
+            return create ? Create(key, hashCode) : null;
+        }
     }
 
     sealed partial class Lookup<TKey, TValue, V> : Base_Generic_Arguments_Reversed_To_Work_Around_XUnit_Bug<V, IGrouping<TKey, TValue>>

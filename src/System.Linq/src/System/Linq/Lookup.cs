@@ -25,7 +25,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(keySelector));
             }
 
-            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Lookup<TSource, TKey>(keySelector, comparer));
+            return ChainLinq.Consumer.Lookup.Consume(source, keySelector, comparer);
         }
 
         public static ILookup<TKey, TElement> ToLookup<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) =>
@@ -48,7 +48,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(elementSelector));
             }
 
-            return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.LookupSplit<TSource, TKey, TElement>(keySelector, elementSelector, comparer));
+            return ChainLinq.Consumer.Lookup.Consume(source, keySelector, elementSelector, comparer);
         }
     }
 
