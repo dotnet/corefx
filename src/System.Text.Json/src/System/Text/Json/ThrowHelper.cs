@@ -347,6 +347,11 @@ namespace System.Text.Json
             throw new InvalidOperationException(SR.CannotReadIncompleteUTF16);
         }
 
+        public static InvalidOperationException GetInvalidOperationException_ReadInvalidUTF8()
+        {
+            return new InvalidOperationException(SR.CannotTranscodeInvalidUtf8);
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static InvalidOperationException GetInvalidOperationException(ExceptionResource resource, int currentDepth, byte token, JsonTokenType tokenType)
         {

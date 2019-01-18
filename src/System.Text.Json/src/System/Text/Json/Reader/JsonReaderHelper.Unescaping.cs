@@ -17,7 +17,6 @@ namespace System.Text.Json
         public static string GetUnescapedString(ReadOnlySpan<byte> utf8Source, int idx)
         {
             byte[] unescapedArray = null;
-            string utf8String;
 
             Span<byte> utf8Unescaped = utf8Source.Length <= JsonConstants.StackallocThreshold ?
                 stackalloc byte[utf8Source.Length] :
@@ -29,17 +28,7 @@ namespace System.Text.Json
             utf8Unescaped = utf8Unescaped.Slice(0, written);
             Debug.Assert(!utf8Unescaped.IsEmpty);
 
-#if BUILDING_INBOX_LIBRARY
-            utf8String = s_utf8Encoding.GetString(utf8Unescaped);
-#else
-            unsafe
-            {
-                fixed (byte* bytePtr = utf8Unescaped)
-                {
-                    utf8String = s_utf8Encoding.GetString(bytePtr, utf8Unescaped.Length);
-                }
-            }
-#endif
+            string utf8String = TranscodeHelper(utf8Unescaped);
 
             if (unescapedArray != null)
             {
@@ -50,7 +39,37 @@ namespace System.Text.Json
             return utf8String;
         }
 
-        public static void Unescape(ReadOnlySpan<byte> source, Span<byte> destination, int idx, out int written)
+        public static string TranscodeHelper(ReadOnlySpan<byte> utf8Unescaped)
+        {
+            try
+            {
+#if BUILDING_INBOX_LIBRARY
+                return s_utf8Encoding.GetString(utf8Unescaped);
+#else
+                if (utf8Unescaped.IsEmpty)
+                {
+                    return string.Empty;
+                }
+                unsafe
+                {
+                    fixed (byte* bytePtr = utf8Unescaped)
+                    {
+                        return s_utf8Encoding.GetString(bytePtr, utf8Unescaped.Length);
+                    }
+                }
+#endif
+            }
+            catch (DecoderFallbackException)
+            {
+                // We want to be consistent with the exception being thrown
+                // so the user only has to catch a single exception.
+                // Since we already throw InvalidOperationException for mismatch token type,
+                // and while unescaping, using that exception for failure to decode invalid UTF-8 bytes as well.
+                throw ThrowHelper.GetInvalidOperationException_ReadInvalidUTF8();
+            }
+        }
+
+        private static void Unescape(ReadOnlySpan<byte> source, Span<byte> destination, int idx, out int written)
         {
             Debug.Assert(idx >= 0 && idx < source.Length);
             Debug.Assert(source[idx] == JsonConstants.BackSlash);

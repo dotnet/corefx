@@ -135,6 +135,9 @@
   <data name="CannotStartObjectArrayWithoutProperty" xml:space="preserve">
     <value>Cannot write the start of an object or array without a property name. Current token type is '{0}'.</value>
   </data>
+  <data name="CannotTranscodeInvalidUtf8" xml:space="preserve">
+    <value>Cannot transcode invalid UTF-8 JSON text to UTF-16 string.</value>
+  </data>
   <data name="CannotWriteInvalidUTF16" xml:space="preserve">
     <value>Cannot write invalid UTF-16 text as JSON. Invalid surrogate value: '{0}'.</value>
   </data>

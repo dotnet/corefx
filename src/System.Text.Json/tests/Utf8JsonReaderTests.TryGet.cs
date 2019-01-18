@@ -433,6 +433,7 @@ namespace System.Text.Json.Tests
         [InlineData("\"a\\uDD1E\"")]
         [InlineData("\"a\\uDD1Eb\"")]
         [InlineData("\"a\\uD834\"")]
+        [InlineData("\"a\\uD834\\u0030\"")]
         [InlineData("\"a\\uD834\\uD834\"")]
         [InlineData("\"a\\uD834b\"")]
         [InlineData("\"a\\uDD1E\\uD834b\"")]
@@ -442,15 +443,55 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var json = new Utf8JsonReader(dataUtf8, true, default);
-            Assert.True(json.Read());
-            Assert.Equal(JsonTokenType.String, json.TokenType);
-            try
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                string val = json.GetStringValue();
-                Assert.True(false, "Expected InvalidOperationException when trying to get string value for invalid UTF-16 JSON text.");
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+                Assert.True(json.Read());
+                Assert.Equal(JsonTokenType.String, json.TokenType);
+                try
+                {
+                    string val = json.GetStringValue();
+                    Assert.True(false, "Expected InvalidOperationException when trying to get string value for invalid UTF-16 JSON text.");
+                }
+                catch (InvalidOperationException) { }
             }
-            catch (InvalidOperationException) { }
+        }
+
+
+
+        [Theory]
+        [MemberData(nameof(InvalidUTF8Strings))]
+        public static void TestingGetStringInvalidUTF8(byte[] dataUtf8)
+        {
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+                // It is expected that the Utf8JsonReader won't throw an exception here
+                Assert.True(json.Read());
+                Assert.Equal(JsonTokenType.String, json.TokenType);
+
+                while (json.Read())
+                    ;
+
+                json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+                while (json.Read())
+                {
+                    if (json.TokenType == JsonTokenType.String)
+                    {
+                        try
+                        {
+                            string val = json.GetStringValue();
+                            Assert.True(false, "Expected InvalidOperationException when trying to get string value for invalid UTF-8 JSON text.");
+                        }
+                        catch (InvalidOperationException) { }
+                    }
+                }
+            }
         }
     }
 }

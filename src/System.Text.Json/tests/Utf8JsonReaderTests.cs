@@ -1821,5 +1821,22 @@ namespace System.Text.Json.Tests
                 };
             }
         }
+
+        public static IEnumerable<object[]> InvalidUTF8Strings
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] { new byte[] { 34, 97, 0xc3, 0x28, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xa0, 0xa1, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xe2, 0x28, 0xa1, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xe2, 0x82, 0x28, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0xbc, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xf0, 0x90, 0x28, 0xbc, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0x28, 98, 34 } },
+                };
+            }
+        }
     }
 }
