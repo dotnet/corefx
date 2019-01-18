@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);CS1573</NoWarn>
     <ClsCompliant>true</ClsCompliant>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'uapaot'">true</IsPartialFacadeAssembly>
     <!-- CS1698 - Disable warning about reference to 4.0.0.0 System.Runtime.WindowsRuntime having same simple name as target assembly -->
@@ -81,7 +82,7 @@
     <Compile Include="System\WindowsRuntimeSystemExtensions.CoreRT.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNETCoreApp)'=='true' or '$(TargetsUAP)'=='true'">
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.ResolveLocaleName.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.ResolveLocaleName.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.ResolveLocaleName.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">

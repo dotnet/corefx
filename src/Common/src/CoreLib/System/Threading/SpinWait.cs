@@ -89,21 +89,11 @@ namespace System.Threading
         /// </remarks>
         internal static readonly int SpinCountforSpinBeforeWait = PlatformHelper.IsSingleProcessor ? 1 : 35;
 
-        /// <summary>
-        /// Typically, Sleep(1) should not be issued for a spin-wait before a proper wait because it is usually more beneficial
-        /// to just issue the proper wait. For longer spin-waits (when the spin count is configurable), this value may be used as
-        /// a threshold for issuing Sleep(1).
-        /// </summary>
-        /// <remarks>
-        /// Should be greater than <see cref="SpinCountforSpinBeforeWait"/> so that Sleep(1) would not be used by default.
-        /// </remarks>
-        internal const int Sleep1ThresholdForLongSpinBeforeWait = 40;
-
         // The number of times we've spun already.
         private int _count;
 
         /// <summary>
-        /// Gets the number of times <see cref="SpinOnce"/> has been called on this instance.
+        /// Gets the number of times <see cref="SpinOnce()"/> has been called on this instance.
         /// </summary>
         public int Count
         {
@@ -116,14 +106,14 @@ namespace System.Threading
         }
 
         /// <summary>
-        /// Gets whether the next call to <see cref="SpinOnce"/> will yield the processor, triggering a
+        /// Gets whether the next call to <see cref="SpinOnce()"/> will yield the processor, triggering a
         /// forced context switch.
         /// </summary>
-        /// <value>Whether the next call to <see cref="SpinOnce"/> will yield the processor, triggering a
+        /// <value>Whether the next call to <see cref="SpinOnce()"/> will yield the processor, triggering a
         /// forced context switch.</value>
         /// <remarks>
-        /// On a single-CPU machine, <see cref="SpinOnce"/> always yields the processor. On machines with
-        /// multiple CPUs, <see cref="SpinOnce"/> may yield after an unspecified number of calls.
+        /// On a single-CPU machine, <see cref="SpinOnce()"/> always yields the processor. On machines with
+        /// multiple CPUs, <see cref="SpinOnce()"/> may yield after an unspecified number of calls.
         /// </remarks>
         public bool NextSpinWillYield => _count >= YieldThreshold || PlatformHelper.IsSingleProcessor;
 
@@ -132,7 +122,7 @@ namespace System.Threading
         /// </summary>
         /// <remarks>
         /// This is typically called in a loop, and may change in behavior based on the number of times a
-        /// <see cref="SpinOnce"/> has been called thus far on this instance.
+        /// <see cref="SpinOnce()"/> has been called thus far on this instance.
         /// </remarks>
         public void SpinOnce()
         {
@@ -151,7 +141,7 @@ namespace System.Threading
         /// </exception>
         /// <remarks>
         /// This is typically called in a loop, and may change in behavior based on the number of times a
-        /// <see cref="SpinOnce"/> has been called thus far on this instance.
+        /// <see cref="SpinOnce()"/> has been called thus far on this instance.
         /// </remarks>
         public void SpinOnce(int sleep1Threshold)
         {
@@ -257,8 +247,8 @@ namespace System.Threading
         /// Resets the spin counter.
         /// </summary>
         /// <remarks>
-        /// This makes <see cref="SpinOnce"/> and <see cref="NextSpinWillYield"/> behave as though no calls
-        /// to <see cref="SpinOnce"/> had been issued on this instance. If a <see cref="SpinWait"/> instance
+        /// This makes <see cref="SpinOnce()"/> and <see cref="NextSpinWillYield"/> behave as though no calls
+        /// to <see cref="SpinOnce()"/> had been issued on this instance. If a <see cref="SpinWait"/> instance
         /// is reused many times, it may be useful to reset it to avoid yielding too soon.
         /// </remarks>
         public void Reset()

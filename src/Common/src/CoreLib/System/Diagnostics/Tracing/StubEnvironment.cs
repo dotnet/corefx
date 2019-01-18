@@ -324,39 +324,6 @@ namespace Microsoft.Reflection
     }
 }
 
-// Defining some no-ops in PCL builds
-#if ES_BUILD_PCL
-namespace System.Security
-{
-    class SuppressUnmanagedCodeSecurityAttribute : Attribute { }
-
-    enum SecurityAction { Demand }
-}
-
-namespace System.Security.Permissions
-{
-    class HostProtectionAttribute : Attribute { public bool MayLeakOnAbort { get; set; } }
-    class PermissionSetAttribute : Attribute
-    { 
-        public PermissionSetAttribute(System.Security.SecurityAction action) { }
-        public bool Unrestricted { get; set; }
-    }
-}
-#endif
-
-#if ES_BUILD_PN
-namespace System
-{
-    internal static class AppDomain
-    {
-        public static int GetCurrentThreadId()
-        {
-            return Internal.Runtime.Augments.RuntimeThread.CurrentThread.ManagedThreadId;
-        }
-    }    
-}
-#endif
-
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Win32
 {
@@ -366,7 +333,10 @@ namespace Microsoft.Win32
     [SuppressUnmanagedCodeSecurityAttribute()]
     internal static class Win32Native
     {
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        public static extern int GetCurrentThreadId();
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         internal static extern uint GetCurrentProcessId();
     }
 }

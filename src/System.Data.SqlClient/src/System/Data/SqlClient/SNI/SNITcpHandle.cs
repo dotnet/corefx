@@ -511,7 +511,6 @@ namespace System.Data.SqlClient.SNI
         /// </summary>
         /// <param name="receiveCallback">Receive callback</param>
         /// <param name="sendCallback">Send callback</param>
-        /// <summary>
         public override void SetAsyncCallbacks(SNIAsyncCallback receiveCallback, SNIAsyncCallback sendCallback)
         {
             _receiveCallback = receiveCallback;
@@ -557,7 +556,6 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Check SNI handle connection
         /// </summary>
-        /// <param name="handle"></param>
         /// <returns>SNI error status</returns>
         public override uint CheckConnection()
         {

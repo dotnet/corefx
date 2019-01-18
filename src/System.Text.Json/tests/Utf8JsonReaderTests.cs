@@ -39,10 +39,10 @@ namespace System.Text.Json.Tests
             SpanSequenceStatesAreEqual(dataUtf8);
 
             byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int length);
-            string actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
+            string actualStr = Encoding.UTF8.GetString(result, 0, length);
 
             byte[] resultSequence = JsonTestHelper.SequenceReturnBytesHelper(dataUtf8, out length);
-            string actualStrSequence = Encoding.UTF8.GetString(resultSequence.AsSpan(0, length));
+            string actualStrSequence = Encoding.UTF8.GetString(resultSequence, 0, length);
 
             Stream stream = new MemoryStream(dataUtf8);
             TextReader reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
@@ -62,17 +62,17 @@ namespace System.Text.Json.Tests
             }
 
             result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out length, JsonCommentHandling.Skip);
-            actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
+            actualStr = Encoding.UTF8.GetString(result, 0, length);
             resultSequence = JsonTestHelper.SequenceReturnBytesHelper(dataUtf8, out length, JsonCommentHandling.Skip);
-            actualStrSequence = Encoding.UTF8.GetString(resultSequence.AsSpan(0, length));
+            actualStrSequence = Encoding.UTF8.GetString(resultSequence, 0, length);
 
             Assert.Equal(expectedStr, actualStr);
             Assert.Equal(expectedStr, actualStrSequence);
 
             result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out length, JsonCommentHandling.Allow);
-            actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
+            actualStr = Encoding.UTF8.GetString(result, 0, length);
             resultSequence = JsonTestHelper.SequenceReturnBytesHelper(dataUtf8, out length, JsonCommentHandling.Allow);
-            actualStrSequence = Encoding.UTF8.GetString(resultSequence.AsSpan(0, length));
+            actualStrSequence = Encoding.UTF8.GetString(resultSequence, 0, length);
 
             Assert.Equal(expectedStr, actualStr);
             Assert.Equal(expectedStr, actualStrSequence);
@@ -107,7 +107,8 @@ namespace System.Text.Json.Tests
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
             byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int outputLength);
-            Span<byte> outputSpan = new byte[outputLength];
+            var outputArray = new byte[outputLength];
+            Span<byte> outputSpan = outputArray;
 
             Stream stream = new MemoryStream(dataUtf8);
             TextReader reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
@@ -136,7 +137,7 @@ namespace System.Text.Json.Tests
                     Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
 
                     Assert.Equal(outputSpan.Length, written);
-                    string actualStr = Encoding.UTF8.GetString(outputSpan);
+                    string actualStr = Encoding.UTF8.GetString(outputArray);
                     Assert.Equal(expectedStr, actualStr);
                 }
                 else
@@ -167,7 +168,7 @@ namespace System.Text.Json.Tests
                         Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
 
                         Assert.Equal(outputSpan.Length, written);
-                        string actualStr = Encoding.UTF8.GetString(outputSpan);
+                        string actualStr = Encoding.UTF8.GetString(outputArray);
                         Assert.Equal(expectedStr, actualStr);
                     }
                 }
@@ -295,7 +296,7 @@ namespace System.Text.Json.Tests
             // Set the max depth sufficiently large to account for the depth padding.
             byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int outputLength, maxDepth: 256);
             Span<byte> outputSpan = new byte[outputLength];
-            string actualStr = Encoding.UTF8.GetString(result.AsSpan(0, outputLength));
+            string actualStr = Encoding.UTF8.GetString(result, 0, outputLength);
 
             Stream stream = new MemoryStream(dataUtf8);
             TextReader reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
@@ -485,7 +486,7 @@ namespace System.Text.Json.Tests
                     while (json.Read())
                     {
                         if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
-                            builder.Append(Encoding.UTF8.GetString(json.ValueSpan));
+                            builder.Append(Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
                     }
 
                     long consumed = json.BytesConsumed;
@@ -494,7 +495,7 @@ namespace System.Text.Json.Tests
                     while (json.Read())
                     {
                         if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
-                            builder.Append(Encoding.UTF8.GetString(json.ValueSpan));
+                            builder.Append(Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
                     }
                     Assert.Equal(data.Length - consumed, json.BytesConsumed);
                     Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
@@ -578,12 +579,12 @@ namespace System.Text.Json.Tests
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int length, commentHandling);
-            string actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
+            string actualStr = Encoding.UTF8.GetString(result, 0, length);
 
             Assert.Equal(expectedStr, actualStr);
 
             result = JsonTestHelper.SequenceReturnBytesHelper(dataUtf8, out length, commentHandling);
-            actualStr = Encoding.UTF8.GetString(result.AsSpan(0, length));
+            actualStr = Encoding.UTF8.GetString(result, 0, length);
 
             Assert.Equal(expectedStr, actualStr);
 
@@ -610,7 +611,7 @@ namespace System.Text.Json.Tests
                     {
                         // Check if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
                         Assert.True(json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null);
-                        Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan));
+                        Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
                     }
 
                     long consumed = json.BytesConsumed;
@@ -620,7 +621,7 @@ namespace System.Text.Json.Tests
                     {
                         // Check if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
                         Assert.True(json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null);
-                        Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan));
+                        Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
                     }
                     Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
                     Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
@@ -850,8 +851,8 @@ namespace System.Text.Json.Tests
                     catch (JsonReaderException ex)
                     {
                         string errorMessage = $"expectedLineNumber: {expectedlineNumber} | actual: {ex.LineNumber} | index: {i} | option: {commentHandling}";
-                        string firstSegmentString = Encoding.UTF8.GetString(dataUtf8.AsSpan(0, i));
-                        string secondSegmentString = Encoding.UTF8.GetString(dataUtf8.AsSpan(i));
+                        string firstSegmentString = Encoding.UTF8.GetString(dataUtf8, 0, i);
+                        string secondSegmentString = Encoding.UTF8.GetString(dataUtf8, i, dataUtf8.Length - i);
                         errorMessage += " | " + firstSegmentString + " | " + secondSegmentString;
                         Assert.True(expectedlineNumber == ex.LineNumber, errorMessage);
                         errorMessage = $"expectedBytePosition: {expectedBytePosition} | actual: {ex.BytePositionInLine} | index: {i} | option: {commentHandling}";
@@ -915,7 +916,7 @@ namespace System.Text.Json.Tests
                         foundComment = true;
                         indexAfterFirstComment = json.BytesConsumed;
                         Assert.Equal(indexAfterFirstComment, json.CurrentState.BytesConsumed);
-                        string actualComment = Encoding.UTF8.GetString(json.ValueSpan); // TODO: https://github.com/dotnet/corefx/issues/33347
+                        string actualComment = Encoding.UTF8.GetString(json.ValueSpan.ToArray()); // TODO: https://github.com/dotnet/corefx/issues/33347
                         Assert.Equal(expectedComment, actualComment);
                         break;
                 }
@@ -981,7 +982,7 @@ namespace System.Text.Json.Tests
                         foundComment = true;
                         indexAfterFirstComment = json.BytesConsumed;
                         Assert.Equal(indexAfterFirstComment, json.CurrentState.BytesConsumed);
-                        string actualComment = Encoding.UTF8.GetString(json.ValueSpan);
+                        string actualComment = Encoding.UTF8.GetString(json.ValueSpan.ToArray());
                         Assert.Equal(expectedComment, actualComment);
                         break;
                 }
@@ -1007,7 +1008,7 @@ namespace System.Text.Json.Tests
                             foundComment = true;
                             indexAfterFirstComment = jsonSlice.BytesConsumed;
                             Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
-                            string actualComment = Encoding.UTF8.GetString(jsonSlice.ValueSpan);
+                            string actualComment = Encoding.UTF8.GetString(jsonSlice.ValueSpan.ToArray());
                             Assert.Equal(expectedComment, actualComment);
                             break;
                     }
@@ -1030,7 +1031,7 @@ namespace System.Text.Json.Tests
                                 foundComment = true;
                                 indexAfterFirstComment = jsonSlice.BytesConsumed;
                                 Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
-                                string actualComment = Encoding.UTF8.GetString(jsonSlice.ValueSpan);
+                                string actualComment = Encoding.UTF8.GetString(jsonSlice.ValueSpan.ToArray());
                                 Assert.Equal(expectedComment, actualComment);
                                 break;
                         }
@@ -1044,11 +1045,6 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("//", 2)]
-        [InlineData("//\n", 3)]
-        [InlineData("/**/", 4)]
-        [InlineData("/*/*/", 5)]
-
         [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", 32)]
         [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", 37)]
         [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n", 38)]
@@ -1101,11 +1097,6 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("//", 2)]
-        [InlineData("//\n", 3)]
-        [InlineData("/**/", 4)]
-        [InlineData("/*/*/", 5)]
-
         [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", 32)]
         [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", 37)]
         [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n", 38)]
@@ -1512,6 +1503,70 @@ namespace System.Text.Json.Tests
             }
         }
 
+        [Fact]
+        public static void EmptyJsonIsInvalid()
+        {
+            var dataUtf8 = ReadOnlySpan<byte>.Empty;
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+
+            try
+            {
+                while (json.Read())
+                    ;
+                Assert.True(false, "Expected JsonReaderException was not thrown with single-segment data.");
+            }
+            catch (JsonReaderException ex)
+            {
+                Assert.Equal(0, ex.LineNumber);
+                Assert.Equal(0, ex.BytePositionInLine);
+            }
+        }
+
+        [Fact]
+        public static void JsonContainingOnlyWhitespaceIsInvalid()
+        {
+            var dataUtf8 = new byte[] { 0x20 };
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+
+            try
+            {
+                while (json.Read())
+                    ;
+                Assert.True(false, "Expected JsonReaderException was not thrown with single-segment data.");
+            }
+            catch (JsonReaderException ex)
+            {
+                Assert.Equal(0, ex.LineNumber);
+                Assert.Equal(1, ex.BytePositionInLine);
+            }
+        }
+
+        [Theory]
+        [InlineData("//", 2, 0)]
+        [InlineData("//\n", 0, 1)]
+        [InlineData("/**/", 4, 0)]
+        [InlineData("/*/*/", 5, 0)]
+        [InlineData("// just a comment", 17, 0)]
+        [InlineData(" /* comment and whitespace */ ", 30, 0)]
+        public static void JsonContainingOnlyCommentsIsInvalid(string jsonString, int expectedConsumed, int expectedLineNumber)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+            try
+            {
+                while (json.Read())
+                    ;
+                Assert.True(false, "Expected JsonReaderException was not thrown with single-segment data.");
+            }
+            catch (JsonReaderException ex)
+            {
+                Assert.Equal(expectedLineNumber, ex.LineNumber);
+                Assert.Equal(expectedConsumed, ex.BytePositionInLine);
+            }
+        }
+
         [Theory]
         [MemberData(nameof(LotsOfCommentsTests))]
         public static void SkipLotsOfComments(string valueString, bool insideArray, string expectedString)
@@ -1549,10 +1604,10 @@ namespace System.Text.Json.Tests
                 switch (json.TokenType)
                 {
                     case JsonTokenType.Null:
-                        Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan));
+                        Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
                         break;
                     case JsonTokenType.Number:
-                        if (json.ValueSpan.Contains((byte)'.'))
+                        if (json.ValueSpan.IndexOf((byte)'.') != -1)
                         {
                             Assert.True(json.TryGetDoubleValue(out double numberValue));
                             // Use InvariantCulture to format the numbers to make sure they retain the decimal point '.'
@@ -1627,11 +1682,11 @@ namespace System.Text.Json.Tests
                 switch (json.TokenType)
                 {
                     case JsonTokenType.Null:
-                        Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan));
+                        Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
                         foundPrimitiveValue = true;
                         break;
                     case JsonTokenType.Number:
-                        if (json.ValueSpan.Contains((byte)'.'))
+                        if (json.ValueSpan.IndexOf((byte)'.') != -1)
                         {
                             Assert.True(json.TryGetDoubleValue(out double numberValue));
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));

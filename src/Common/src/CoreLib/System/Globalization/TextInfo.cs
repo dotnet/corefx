@@ -451,7 +451,7 @@ namespace System.Globalization
             }
         }
 
-        private static unsafe string ToLowerAsciiInvariant(string s)
+        internal static unsafe string ToLowerAsciiInvariant(string s)
         {
             if (s.Length == 0)
             {
@@ -654,9 +654,7 @@ namespace System.Globalization
         ////////////////////////////////////////////////////////////////////////
         public override bool Equals(object obj)
         {
-            TextInfo that = obj as TextInfo;
-
-            if (that != null)
+            if (obj is TextInfo that)
             {
                 return CultureName.Equals(that.CultureName);
             }

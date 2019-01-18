@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
-    public class SendPacketsAsync
+    public partial class SendPacketsAsync
     {
         private readonly ITestOutputHelper _log;
 
@@ -357,7 +357,7 @@ namespace System.Net.Sockets.Tests
         [InlineData(SocketImplementationType.Async)]
         public void SendPacketsElement_FileMultiPart_Success(SocketImplementationType type)
         {
-            SendPacketsElement[] elements = new SendPacketsElement[]
+            var elements = new[]
             {
                 new SendPacketsElement(TestFileName, 10, 20),
                 new SendPacketsElement(TestFileName, 30, 10),
@@ -382,6 +382,63 @@ namespace System.Net.Sockets.Tests
         {
             // Length is validated on Send
             SendPackets(type, new SendPacketsElement(TestFileName, 5, 10000), SocketError.InvalidArgument, 0);
+        }
+
+        [Theory]
+        [InlineData(SocketImplementationType.APM)]
+        [InlineData(SocketImplementationType.Async)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The fix was made in corefx that is not in netfx. See https://github.com/dotnet/corefx/pull/34331")]
+        public void SendPacketsElement_FileStreamIsReleasedOnError(SocketImplementationType type)
+        {
+            // this test checks that FileStreams opened by the implementation of SendPacketsAsync
+            // are properly disposed of when the SendPacketsAsync operation fails asynchronously.
+            // To trigger this codepath we must call SendPacketsAsync with a wrong offset (to create an error), 
+            // and twice (to avoid synchronous completion).
+
+            SendPacketsElement[] goodElements = new[] { new SendPacketsElement(TestFileName, 0, 0) };
+            SendPacketsElement[] badElements = new[] { new SendPacketsElement(TestFileName, 50_000, 10) };
+            EventWaitHandle completed1 = new ManualResetEvent(false);
+            EventWaitHandle completed2 = new ManualResetEvent(false);
+
+            using (SocketTestServer.SocketTestServerFactory(type, _serverAddress, out int port))
+            {
+                using (Socket sock = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp))
+                {
+                    sock.Connect(new IPEndPoint(_serverAddress, port));
+                    bool r1, r2;
+                    using (SocketAsyncEventArgs args1 = new SocketAsyncEventArgs())
+                    using (SocketAsyncEventArgs args2 = new SocketAsyncEventArgs())
+                    {
+                        args1.Completed += OnCompleted;
+                        args1.UserToken = completed1;
+                        args1.SendPacketsElements = goodElements;
+
+                        args2.Completed += OnCompleted;
+                        args2.UserToken = completed2;
+                        args2.SendPacketsElements = badElements;
+
+                        r1 = sock.SendPacketsAsync(args1);
+                        r2 = sock.SendPacketsAsync(args2);
+
+                        if (r1)
+                        {
+                            Assert.True(completed1.WaitOne(TestSettings.PassingTestTimeout), "Timed out");
+                        }
+                        Assert.Equal(SocketError.Success, args1.SocketError);
+
+                        if (r2)
+                        {
+                            Assert.True(completed2.WaitOne(TestSettings.PassingTestTimeout), "Timed out");
+                        }
+                        Assert.Equal(SocketError.InvalidArgument, args2.SocketError);
+
+                        using (var fs = new FileStream(TestFileName, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
+                        {
+                            // If a SendPacketsAsync call did not dispose of its FileStreams, the FileStream ctor throws.
+                        }
+                    }
+                }
+            }
         }
 
         #endregion Files
@@ -429,17 +486,17 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        private void SendPackets(SocketImplementationType type, SendPacketsElement element, int bytesExpected)
+        private void SendPackets(SocketImplementationType type, SendPacketsElement element, int bytesExpected, byte[] contentExpected = null)
         {
-            SendPackets(type, new SendPacketsElement[] { element }, SocketError.Success, bytesExpected);
+            SendPackets(type, new[] {element}, SocketError.Success, bytesExpected, contentExpected);
         }
 
-        private void SendPackets(SocketImplementationType type, SendPacketsElement element, SocketError expectedResut, int bytesExpected)
+        private void SendPackets(SocketImplementationType type, SendPacketsElement element, SocketError expectedResult, int bytesExpected)
         {
-            SendPackets(type, new SendPacketsElement[] { element }, expectedResut, bytesExpected);
+            SendPackets(type, new[] {element}, expectedResult, bytesExpected);
         }
 
-        private void SendPackets(SocketImplementationType type, SendPacketsElement[] elements, SocketError expectedResut, int bytesExpected)
+        private void SendPackets(SocketImplementationType type, SendPacketsElement[] elements, SocketError expectedResult, int bytesExpected, byte[] contentExpected = null)
         {
             Assert.True(Capability.IPv6Support());
 
@@ -461,8 +518,20 @@ namespace System.Net.Sockets.Tests
                         {
                             Assert.True(completed.WaitOne(TestSettings.PassingTestTimeout), "Timed out");
                         }
-                        Assert.Equal(expectedResut, args.SocketError);
+                        Assert.Equal(expectedResult, args.SocketError);
                         Assert.Equal(bytesExpected, args.BytesTransferred);
+                    
+                    }
+
+                    if (contentExpected != null) {
+                        // test server just echos back, so read number of expected bytes from the stream
+                        var contentActual = new byte[bytesExpected];
+                        int bytesReceived = 0;
+                        while (bytesReceived < bytesExpected) {
+                            bytesReceived += sock.Receive(contentActual, bytesReceived, bytesExpected-bytesReceived, SocketFlags.None);
+                        }
+                        Assert.Equal(bytesExpected, bytesReceived);
+                        Assert.Equal(contentExpected, contentActual);
                     }
                 }
             }

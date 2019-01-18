@@ -5,15 +5,62 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Numerics;
+using System.Runtime.Intrinsics.X86;
 
-#if !netstandard
 using Internal.Runtime.CompilerServices;
+
+#if BIT64
+using nuint = System.UInt64;
+#else
+using nuint = System.UInt32;
 #endif
 
 namespace System
 {
     internal static partial class SpanHelpers // .Char
     {
+        public static int IndexOf(ref char searchSpace, int searchSpaceLength, ref char value, int valueLength)
+        {
+            Debug.Assert(searchSpaceLength >= 0);
+            Debug.Assert(valueLength >= 0);
+
+            if (valueLength == 0)
+                return 0;  // A zero-length sequence is always treated as "found" at the start of the search space.
+
+            char valueHead = value;
+            ref char valueTail = ref Unsafe.Add(ref value, 1);
+            int valueTailLength = valueLength - 1;
+            int remainingSearchSpaceLength = searchSpaceLength - valueTailLength;
+
+            int index = 0;
+            while (remainingSearchSpaceLength > 0)
+            {
+                // Do a quick search for the first element of "value".
+                int relativeIndex = IndexOf(ref Unsafe.Add(ref searchSpace, index), valueHead, remainingSearchSpaceLength);
+                if (relativeIndex == -1)
+                    break;
+
+                remainingSearchSpaceLength -= relativeIndex;
+                index += relativeIndex;
+
+                if (remainingSearchSpaceLength <= 0)
+                    break;  // The unsearched portion is now shorter than the sequence we're looking for. So it can't be there.
+
+                // Found the first element of "value". See if the tail matches.
+                if (SequenceEqual(
+                    ref Unsafe.As<char, byte>(ref Unsafe.Add(ref searchSpace, index + 1)),
+                    ref Unsafe.As<char, byte>(ref valueTail),
+                    (nuint)valueTailLength * 2))
+                {
+                    return index;  // The tail matched. Return a successful find.
+                }
+
+                remainingSearchSpaceLength--;
+                index++;
+            }
+            return -1;
+        }
+
         public static unsafe int SequenceCompareTo(ref char first, int firstLength, ref char second, int secondLength)
         {
             Debug.Assert(firstLength >= 0);
@@ -774,12 +821,20 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int LocateFirstFoundChar(ulong match)
         {
-            unchecked
+            // TODO: Arm variants
+            if (Bmi1.X64.IsSupported)
             {
-                // Flag least significant power of two bit
-                var powerOfTwoFlag = match ^ (match - 1);
-                // Shift all powers of two into the high byte and extract
-                return (int)((powerOfTwoFlag * XorPowerOfTwoToHighChar) >> 49);
+                return (int)(Bmi1.X64.TrailingZeroCount(match) >> 4);
+            }
+            else
+            {
+                unchecked
+                {
+                    // Flag least significant power of two bit
+                    var powerOfTwoFlag = match ^ (match - 1);
+                    // Shift all powers of two into the high byte and extract
+                    return (int)((powerOfTwoFlag * XorPowerOfTwoToHighChar) >> 49);
+                }
             }
         }
 
@@ -811,14 +866,22 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int LocateLastFoundChar(ulong match)
         {
-            // Find the most significant char that has its highest bit set
-            int index = 3;
-            while ((long)match > 0)
+            // TODO: Arm variants
+            if (Lzcnt.X64.IsSupported)
             {
-                match = match << 16;
-                index--;
+                return 3 - (int)(Lzcnt.X64.LeadingZeroCount(match) >> 4);
             }
-            return index;
+            else
+            {
+                // Find the most significant char that has its highest bit set
+                int index = 3;
+                while ((long)match > 0)
+                {
+                    match = match << 16;
+                    index--;
+                }
+                return index;
+            }
         }
     }
 }

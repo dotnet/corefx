@@ -17,7 +17,7 @@ namespace System.Data.SqlClient
 {
     internal static class AsyncHelper
     {
-        internal static Task CreateContinuationTask(Task task, Action onSuccess, SqlInternalConnectionTds connectionToDoom = null, Action<Exception> onFailure = null)
+        internal static Task CreateContinuationTask(Task task, Action onSuccess, Action<Exception> onFailure = null)
         {
             if (task == null)
             {
@@ -27,29 +27,61 @@ namespace System.Data.SqlClient
             else
             {
                 TaskCompletionSource<object> completion = new TaskCompletionSource<object>();
-                ContinueTask(task, completion,
-                    () => { onSuccess(); completion.SetResult(null); },
-                    connectionToDoom, onFailure);
+                ContinueTaskWithState(task, completion,
+                    state: Tuple.Create(onSuccess, onFailure,completion),
+                    onSuccess: (state) => {
+                        var parameters = (Tuple<Action, Action<Exception>, TaskCompletionSource<object>>)state;
+                        Action success = parameters.Item1;
+                        TaskCompletionSource<object> taskCompletionSource = parameters.Item3;
+                        success();
+                        taskCompletionSource.SetResult(null);
+                    },
+                    onFailure: (exception,state) =>
+                    {
+                        var parameters = (Tuple<Action, Action<Exception>, TaskCompletionSource<object>>)state;
+                        Action<Exception> failure = parameters.Item2;
+                        failure?.Invoke(exception);
+                    }
+                );
                 return completion.Task;
             }
         }
 
-        internal static Task CreateContinuationTask<T1, T2>(Task task, Action<T1, T2> onSuccess, T1 arg1, T2 arg2, SqlInternalConnectionTds connectionToDoom = null, Action<Exception> onFailure = null)
+        internal static Task CreateContinuationTaskWithState(Task task, object state, Action<object> onSuccess, Action<Exception,object> onFailure = null)
         {
-            return CreateContinuationTask(task, () => onSuccess(arg1, arg2), connectionToDoom, onFailure);
+            if (task == null)
+            {
+                onSuccess(state);
+                return null;
+            }
+            else
+            {
+                var completion = new TaskCompletionSource<object>();
+                ContinueTaskWithState(task, completion, state,
+                    onSuccess: (continueState) => {
+                        onSuccess(continueState);
+                        completion.SetResult(null);
+                    },
+                    onFailure: onFailure
+                );
+                return completion.Task;
+            }
         }
+
+        internal static Task CreateContinuationTask<T1, T2>(Task task, Action<T1, T2> onSuccess, T1 arg1, T2 arg2, Action<Exception> onFailure = null)
+        {
+            return CreateContinuationTask(task, () => onSuccess(arg1, arg2), onFailure);
+        }
+
 
         internal static void ContinueTask(Task task,
                 TaskCompletionSource<object> completion,
                 Action onSuccess,
-                SqlInternalConnectionTds connectionToDoom = null,
                 Action<Exception> onFailure = null,
                 Action onCancellation = null,
-                Func<Exception, Exception> exceptionConverter = null,
-                SqlConnection connectionToAbort = null
+                Func<Exception, Exception> exceptionConverter = null
             )
         {
-            Debug.Assert((connectionToAbort == null) || (connectionToDoom == null), "Should not specify both connectionToDoom and connectionToAbort");
             task.ContinueWith(
                 tsk =>
                 {
@@ -62,10 +94,7 @@ namespace System.Data.SqlClient
                         }
                         try
                         {
-                            if (onFailure != null)
-                            {
-                                onFailure(exc);
-                            }
+                            onFailure?.Invoke(exc);
                         }
                         finally
                         {
@@ -76,10 +105,7 @@ namespace System.Data.SqlClient
                     {
                         try
                         {
-                            if (onCancellation != null)
-                            {
-                                onCancellation();
-                            }
+                            onCancellation?.Invoke();
                         }
                         finally
                         {
@@ -101,6 +127,61 @@ namespace System.Data.SqlClient
             );
         }
 
+        // the same logic as ContinueTask but with an added state parameter to allow the caller to avoid the use of a closure
+        // the parameter allocation cannot be avoided here and using closure names is clearer than Tuple numbered properties
+        internal static void ContinueTaskWithState(Task task,
+            TaskCompletionSource<object> completion,
+            object state,
+            Action<object> onSuccess,
+            Action<Exception, object> onFailure = null,
+            Action<object> onCancellation = null,
+            Func<Exception, Exception> exceptionConverter = null
+        )
+        {
+            task.ContinueWith(
+                tsk =>
+                {
+                    if (tsk.Exception != null)
+                    {
+                        Exception exc = tsk.Exception.InnerException;
+                        if (exceptionConverter != null)
+                        {
+                            exc = exceptionConverter(exc);
+                        }
+                        try
+                        {
+                            onFailure?.Invoke(exc, state);
+                        }
+                        finally
+                        {
+                            completion.TrySetException(exc);
+                        }
+                    }
+                    else if (tsk.IsCanceled)
+                    {
+                        try
+                        {
+                            onCancellation?.Invoke(state);
+                        }
+                        finally
+                        {
+                            completion.TrySetCanceled();
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            onSuccess(state);
+                        }
+                        catch (Exception e)
+                        {
+                            completion.SetException(e);
+                        }
+                    }
+                }, TaskScheduler.Default
+            );
+        }
 
         internal static void WaitForCompletion(Task task, int timeout, Action onTimeout = null, bool rethrowExceptions = true)
         {

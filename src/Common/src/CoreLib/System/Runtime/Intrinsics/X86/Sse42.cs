@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 
 namespace System.Runtime.Intrinsics.X86
@@ -10,6 +11,7 @@ namespace System.Runtime.Intrinsics.X86
     /// <summary>
     /// This class provides access to Intel SSE4.2 hardware instructions via intrinsics
     /// </summary>
+    [Intrinsic]
     [CLSCompliant(false)]
     public abstract class Sse42 : Sse41
     {
@@ -17,6 +19,7 @@ namespace System.Runtime.Intrinsics.X86
 
         public new static bool IsSupported { get => IsSupported; }
 
+        [Intrinsic]
         public new abstract class X64 : Sse41.X64
         {
             internal X64() { }
@@ -52,10 +55,5 @@ namespace System.Runtime.Intrinsics.X86
         ///   CRC32 reg, reg/m32
         /// </summary>
         public static uint Crc32(uint crc, uint data) => Crc32(crc, data);
-        /// <summary>
-        /// unsigned __int64 _mm_crc32_u64 (unsigned __int64 crc, unsigned __int64 v)
-        ///   CRC32 reg, reg/m64
-        /// </summary>
-        public static ulong Crc32(ulong crc, ulong data) => Crc32(crc, data);
     }
 }

@@ -13,7 +13,7 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public abstract class HttpCookieProtocolTests : HttpClientTestBase
+    public abstract class HttpCookieProtocolTests : HttpClientHandlerTestBase
     {
         public static readonly object[][] EchoServers = Configuration.Http.EchoServers;
 
@@ -172,7 +172,6 @@ namespace System.Net.Http.Functional.Tests
                 if (IsWinHttpHandler && !PlatformDetection.IsWindows10Version1607OrGreater) return;
 
                 expectedVersion = new Version(2,0);
-                TestHelper.EnsureHttp2Feature(handler);
             }
 
             using (HttpClient client = new HttpClient(handler))

@@ -352,41 +352,10 @@ static void ConvertDirent(const struct dirent* entry, DirectoryEntry* outputEntr
     // location of the start of the string that exists in their own byte buffer.
     outputEntry->Name = entry->d_name;
 #if !defined(DT_UNKNOWN)
-    /* AIX has no d_type, make a substitute */
-    struct stat s;
-    stat(entry->d_name, &s);
-    if (S_ISDIR(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_DIR;
-    }
-    else if (S_ISFIFO(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_FIFO;
-    }
-    else if (S_ISCHR(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_CHR;
-    }
-    else if (S_ISBLK(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_BLK;
-    }
-    else if (S_ISREG(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_REG;
-    }
-    else if (S_ISLNK(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_LNK;
-    }
-    else if (S_ISSOCK(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_SOCK;
-    }
-    else
-    {
-        outputEntry->InodeType = PAL_DT_UNKNOWN;
-    }
+    // AIX has no d_type, and since we can't get the directory that goes with
+    // the filename from ReadDir, we can't stat the file. Return unknown and
+    // hope that managed code can properly stat the file.
+    outputEntry->InodeType = PAL_DT_UNKNOWN;
 #else
     outputEntry->InodeType = (int32_t)entry->d_type;
 #endif
@@ -439,6 +408,23 @@ int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, Dir
     }
 
     struct dirent* result = NULL;
+#ifdef _AIX
+    // AIX returns 0 on success, but bizarrely, it returns 9 for both error and
+    // end-of-directory. result is NULL for both cases. The API returns the
+    // same thing for EOD/error, so disambiguation between the two is nearly
+    // impossible without clobbering errno for yourself and seeing if the API
+    // changed it. See:
+    // https://www.ibm.com/support/knowledgecenter/ssw_aix_71/com.ibm.aix.basetrf2/readdir_r.htm
+
+    errno = 0; // create a success condition for the API to clobber
+    int error = readdir_r(dir, entry, &result);
+
+    if (error == 9)
+    {
+        memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
+        return errno == 0 ? -1 : errno;
+    }
+#else
     int error = readdir_r(dir, entry, &result);
 
     // positive error number returned -> failure
@@ -455,6 +441,7 @@ int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, Dir
         memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
         return -1;         // shim convention for end-of-stream
     }
+#endif
 
     // 0 returned with non-null result (guaranteed to be set to entry arg) -> success
     assert(result == entry);
@@ -1264,22 +1251,21 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
     while ((ret = fstat_(inFd, &sourceStat)) < 0 && errno == EINTR);
     if (ret == 0)
     {
-#if HAVE_FUTIMES
-        struct timeval origTimes[2];
-        origTimes[0].tv_sec = sourceStat.st_atime;
-        origTimes[0].tv_usec = ST_ATIME_NSEC(&sourceStat) / 1000;
-        origTimes[1].tv_sec = sourceStat.st_mtime;
-        origTimes[1].tv_usec = ST_MTIME_NSEC(&sourceStat) / 1000;
-        while ((ret = futimes(outFd, origTimes)) < 0 && errno == EINTR);
-#elif HAVE_FUTIMENS
-        // futimes is not a POSIX function, and not available on Android,
-        // but futimens is
+#if HAVE_FUTIMENS
+        // futimens is prefered because it has a higher resolution.
         struct timespec origTimes[2];
         origTimes[0].tv_sec = (time_t)sourceStat.st_atime;
         origTimes[0].tv_nsec = ST_ATIME_NSEC(&sourceStat);
         origTimes[1].tv_sec = (time_t)sourceStat.st_mtime;
         origTimes[1].tv_nsec = ST_MTIME_NSEC(&sourceStat);
         while ((ret = futimens(outFd, origTimes)) < 0 && errno == EINTR);
+#elif HAVE_FUTIMES
+        struct timeval origTimes[2];
+        origTimes[0].tv_sec = sourceStat.st_atime;
+        origTimes[0].tv_usec = ST_ATIME_NSEC(&sourceStat) / 1000;
+        origTimes[1].tv_sec = sourceStat.st_mtime;
+        origTimes[1].tv_usec = ST_MTIME_NSEC(&sourceStat) / 1000;
+        while ((ret = futimes(outFd, origTimes)) < 0 && errno == EINTR);
 #endif
     }
     if (ret != 0)

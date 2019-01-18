@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
+using Internal.Runtime.CompilerServices;
 
 namespace System
 {
@@ -162,11 +163,7 @@ namespace System
             if (pb == null)
                 return Empty;
 
-            int numBytes = new ReadOnlySpan<byte>((byte*)value, int.MaxValue).IndexOf<byte>(0);
-
-            // Check for overflow
-            if (numBytes < 0)
-                throw new ArgumentException(SR.Arg_MustBeNullTerminatedString);
+            int numBytes = strlen((byte*)value);
 
             return CreateStringForSByteConstructor(pb, numBytes);
         }
@@ -499,6 +496,14 @@ namespace System
             return result;
         }
 
+        internal static string CreateFromChar(char c1, char c2)
+        {
+            string result = FastAllocateString(2);
+            result._firstChar = c1;
+            Unsafe.Add(ref result._firstChar, 1) = c2;
+            return result;
+        }
+
         internal static unsafe void wstrcpy(char* dmem, char* smem, int charCount)
         {
             Buffer.Memmove((byte*)dmem, (byte*)smem, ((uint)charCount) * 2);
@@ -644,6 +649,25 @@ namespace System
 #endif
 
             return count;
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static unsafe int strlen(byte* ptr)
+        {
+            // IndexOf processes memory in aligned chunks, and thus it won't crash even if it accesses memory beyond the null terminator.
+            int length = SpanHelpers.IndexOf(ref *ptr, (byte)'\0', int.MaxValue);
+            if (length < 0)
+            {
+                ThrowMustBeNullTerminatedString();
+            }
+
+            return length;
+        }
+
+        private static void ThrowMustBeNullTerminatedString()
+        {
+            throw new ArgumentException(SR.Arg_MustBeNullTerminatedString);
         }
 
         //

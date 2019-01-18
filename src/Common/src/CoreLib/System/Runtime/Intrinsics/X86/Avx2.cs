@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 
 namespace System.Runtime.Intrinsics.X86
@@ -10,6 +11,7 @@ namespace System.Runtime.Intrinsics.X86
     /// <summary>
     /// This class provides access to Intel AVX2 hardware instructions via intrinsics
     /// </summary>
+    [Intrinsic]
     [CLSCompliant(false)]
     public abstract class Avx2 : Avx
     {
@@ -659,11 +661,6 @@ namespace System.Runtime.Intrinsics.X86
         public static Vector256<long> CompareGreaterThan(Vector256<long> left, Vector256<long> right) => CompareGreaterThan(left, right);
 
         /// <summary>
-        /// double _mm256_cvtsd_f64 (__m256d a)
-        ///   HELPER: MOVSD
-        /// </summary>
-        public static double ConvertToDouble(Vector256<double> value) => ConvertToDouble(value);
-        /// <summary>
         /// int _mm256_cvtsi256_si32 (__m256i a)
         ///   MOVD reg/m32, xmm
         /// </summary>
@@ -740,7 +737,8 @@ namespace System.Runtime.Intrinsics.X86
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
         public new static Vector128<sbyte> ExtractVector128(Vector256<sbyte> value, byte index) => ExtractVector128(value, index);
-        // <summary>
+
+        /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 m128, ymm, imm8
         /// </summary>

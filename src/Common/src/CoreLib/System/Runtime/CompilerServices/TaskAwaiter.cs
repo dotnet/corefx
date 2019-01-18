@@ -41,7 +41,7 @@ using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Threading;
 using System.Threading.Tasks;
-#if !CORECLR
+#if CORERT
 using Internal.Threading.Tasks.Tracing;
 #endif
 
@@ -210,10 +210,10 @@ namespace System.Runtime.CompilerServices
             // If TaskWait* ETW events are enabled, trace a beginning event for this await
             // and set up an ending event to be traced when the asynchronous await completes.
             if (
-#if CORECLR
-                TplEtwProvider.Log.IsEnabled() || Task.s_asyncDebuggingEnabled
-#else
+#if CORERT
                 TaskTrace.Enabled
+#else
+                TplEtwProvider.Log.IsEnabled() || Task.s_asyncDebuggingEnabled
 #endif
                 )
             {
@@ -224,22 +224,23 @@ namespace System.Runtime.CompilerServices
             task.SetContinuationForAwait(continuation, continueOnCapturedContext, flowExecutionContext);
         }
 
-#if CORECLR
         /// <summary>Schedules the continuation onto the <see cref="System.Threading.Tasks.Task"/> associated with this <see cref="TaskAwaiter"/>.</summary>
         /// <param name="task">The task being awaited.</param>
-        /// <param name="continuation">The action to invoke when the await operation completes.</param>
+        /// <param name="stateMachineBox">The box to invoke when the await operation completes.</param>
         /// <param name="continueOnCapturedContext">Whether to capture and marshal back to the current context.</param>
-        /// <param name="flowExecutionContext">Whether to flow ExecutionContext across the await.</param>
-        /// <exception cref="System.ArgumentNullException">The <paramref name="continuation"/> argument is null (Nothing in Visual Basic).</exception>
-        /// <exception cref="System.NullReferenceException">The awaiter was not properly initialized.</exception>
-        /// <remarks>This method is intended for compiler user rather than use directly in code.</remarks>
         internal static void UnsafeOnCompletedInternal(Task task, IAsyncStateMachineBox stateMachineBox, bool continueOnCapturedContext)
         {
             Debug.Assert(stateMachineBox != null);
 
             // If TaskWait* ETW events are enabled, trace a beginning event for this await
             // and set up an ending event to be traced when the asynchronous await completes.
-            if (TplEtwProvider.Log.IsEnabled() || Task.s_asyncDebuggingEnabled)
+            if (
+#if CORERT
+                TaskTrace.Enabled
+#else
+                TplEtwProvider.Log.IsEnabled() || Task.s_asyncDebuggingEnabled
+#endif
+                )
             {
                 task.SetContinuationForAwait(OutputWaitEtwEvents(task, stateMachineBox.MoveNextAction), continueOnCapturedContext, flowExecutionContext: false);
             }
@@ -248,7 +249,7 @@ namespace System.Runtime.CompilerServices
                 task.UnsafeSetContinuationForAwait(stateMachineBox, continueOnCapturedContext);
             }
         }
-#endif
+
         /// <summary>
         /// Outputs a WaitBegin ETW event, and augments the continuation action to output a WaitEnd ETW event.
         /// </summary>
@@ -259,7 +260,16 @@ namespace System.Runtime.CompilerServices
         {
             Debug.Assert(task != null, "Need a task to wait on");
             Debug.Assert(continuation != null, "Need a continuation to invoke when the wait completes");
-#if CORECLR
+#if CORERT
+            Debug.Assert(TaskTrace.Enabled, "Should only be used when ETW tracing is enabled");
+
+            // ETW event for Task Wait Begin
+            var currentTaskAtBegin = Task.InternalCurrent;
+            TaskTrace.TaskWaitBegin_Asynchronous(
+                (currentTaskAtBegin != null ? currentTaskAtBegin.m_taskScheduler.Id : TaskScheduler.Default.Id),
+                (currentTaskAtBegin != null ? currentTaskAtBegin.Id : 0),
+                task.Id);
+#else
             if (Task.s_asyncDebuggingEnabled)
             {
                 Task.AddToActiveTasks(task);
@@ -280,15 +290,6 @@ namespace System.Runtime.CompilerServices
                     task.Id, TplEtwProvider.TaskWaitBehavior.Asynchronous,
                     (continuationTask != null ? continuationTask.Id : 0));
             }
-#else
-            Debug.Assert(TaskTrace.Enabled, "Should only be used when ETW tracing is enabled");
-
-            // ETW event for Task Wait Begin
-            var currentTaskAtBegin = Task.InternalCurrent;
-            TaskTrace.TaskWaitBegin_Asynchronous(
-                (currentTaskAtBegin != null ? currentTaskAtBegin.m_taskScheduler.Id : TaskScheduler.Default.Id),
-                (currentTaskAtBegin != null ? currentTaskAtBegin.Id : 0),
-                task.Id);
 #endif
 
             // Create a continuation action that outputs the end event and then invokes the user
@@ -296,7 +297,23 @@ namespace System.Runtime.CompilerServices
             // is enabled, and in doing so it allows us to pass the awaited task's information into the end event
             // in a purely pay-for-play manner (the alternatively would be to increase the size of TaskAwaiter
             // just for this ETW purpose, not pay-for-play, since GetResult would need to know whether a real yield occurred).
-#if CORECLR
+#if CORERT
+            return () =>
+            {
+                // ETW event for Task Wait End.
+                if (TaskTrace.Enabled)
+                {
+                    var currentTaskAtEnd = Task.InternalCurrent;
+                    TaskTrace.TaskWaitEnd(
+                        (currentTaskAtEnd != null ? currentTaskAtEnd.m_taskScheduler.Id : TaskScheduler.Default.Id),
+                        (currentTaskAtEnd != null ? currentTaskAtEnd.Id : 0),
+                        task.Id);
+                }
+
+                // Invoke the original continuation provided to OnCompleted.
+                continuation();
+            };
+#else
             return AsyncMethodBuilderCore.CreateContinuationWrapper(continuation, (innerContinuation,innerTask) =>
             {
                 if (Task.s_asyncDebuggingEnabled)
@@ -333,22 +350,6 @@ namespace System.Runtime.CompilerServices
                         EventSource.SetCurrentThreadActivityId(prevActivityId);
                 }
             }, task);
-#else
-            return () =>
-            {
-                // ETW event for Task Wait End.
-                if (TaskTrace.Enabled)
-                {
-                    var currentTaskAtEnd = Task.InternalCurrent;
-                    TaskTrace.TaskWaitEnd(
-                        (currentTaskAtEnd != null ? currentTaskAtEnd.m_taskScheduler.Id : TaskScheduler.Default.Id),
-                        (currentTaskAtEnd != null ? currentTaskAtEnd.Id : 0),
-                        task.Id);
-                }
-
-                // Invoke the original continuation provided to OnCompleted.
-                continuation();
-            };
 #endif
         }
     }

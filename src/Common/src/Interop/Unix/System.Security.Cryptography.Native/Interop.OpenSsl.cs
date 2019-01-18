@@ -199,7 +199,7 @@ internal static partial class Interop
         {
             sendBuf = null;
             sendCount = 0;
-            
+
             if ((recvBuf != null) && (recvCount > 0))
             {
                 if (BioWrite(context.InputBio, recvBuf, recvOffset, recvCount) <= 0)
@@ -403,14 +403,14 @@ internal static partial class Interop
             GCHandle protocolHandle = GCHandle.FromIntPtr(arg);
             if (!(protocolHandle.Target is List<SslApplicationProtocol> protocolList))
             {
-                return Ssl.SSL_TLSEXT_ERR_NOACK;
+                return Ssl.SSL_TLSEXT_ERR_ALERT_FATAL;
             }
 
             try
             {
                 for (int i = 0; i < protocolList.Count; i++)
                 {
-                    Span<byte> clientList = new Span<byte>(inp, (int)inlen);
+                    var clientList = new Span<byte>(inp, (int)inlen);
                     while (clientList.Length > 0)
                     {
                         byte length = clientList[0];
@@ -432,14 +432,14 @@ internal static partial class Interop
                 // It is ok to clear the handle value here, this results in handshake failure, so the SslStream object is disposed.
                 protocolHandle.Target = null;
 
-                return Ssl.SSL_TLSEXT_ERR_NOACK;
+                return Ssl.SSL_TLSEXT_ERR_ALERT_FATAL;
             }
 
             // No common application protocol was negotiated, set the target on the alpnHandle to null.
             // It is ok to clear the handle value here, this results in handshake failure, so the SslStream object is disposed.
             protocolHandle.Target = null;
 
-            return Ssl.SSL_TLSEXT_ERR_NOACK;
+            return Ssl.SSL_TLSEXT_ERR_ALERT_FATAL;
         }
 
         private static int BioRead(SafeBioHandle bio, byte[] buffer, int count)

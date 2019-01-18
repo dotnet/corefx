@@ -47,7 +47,7 @@ namespace System.Text.Json.Tests
             {
                 var utf8JsonReader = new Utf8JsonReader(sequence, isFinalBlock: true, default);
                 byte[] resultSequence = JsonTestHelper.ReaderLoop(dataUtf8.Length, out int length, ref utf8JsonReader);
-                string actualStrSequence = Encoding.UTF8.GetString(resultSequence.AsSpan(0, length));
+                string actualStrSequence = Encoding.UTF8.GetString(resultSequence, 0, length);
                 Assert.Equal(expectedStr, actualStrSequence);
                 return;
             }
@@ -56,13 +56,13 @@ namespace System.Text.Json.Tests
             {
                 var utf8JsonReader = new Utf8JsonReader(sequence.Slice(0, j), isFinalBlock: false, default);
                 byte[] resultSequence = JsonTestHelper.ReaderLoop(dataUtf8.Length, out int length, ref utf8JsonReader);
-                string actualStrSequence = Encoding.UTF8.GetString(resultSequence.AsSpan(0, length));
+                string actualStrSequence = Encoding.UTF8.GetString(resultSequence, 0, length);
 
                 long consumed = utf8JsonReader.BytesConsumed;
                 Assert.Equal(consumed, utf8JsonReader.CurrentState.BytesConsumed);
                 utf8JsonReader = new Utf8JsonReader(sequence.Slice(consumed), isFinalBlock: true, utf8JsonReader.CurrentState);
                 resultSequence = JsonTestHelper.ReaderLoop(dataUtf8.Length, out length, ref utf8JsonReader);
-                actualStrSequence += Encoding.UTF8.GetString(resultSequence.AsSpan(0, length));
+                actualStrSequence += Encoding.UTF8.GetString(resultSequence, 0, length);
                 string message = $"Expected consumed: {dataUtf8.Length - consumed}, Actual consumed: {utf8JsonReader.BytesConsumed}, Index: {j}";
                 Assert.Equal(utf8JsonReader.BytesConsumed, utf8JsonReader.CurrentState.BytesConsumed);
                 Assert.True(dataUtf8.Length - consumed == utf8JsonReader.BytesConsumed, message);
@@ -202,6 +202,25 @@ namespace System.Text.Json.Tests
             }
         }
 
+        [Fact]
+        public static void EmptyJsonWithinSequenceIsInvalid()
+        {
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(new byte[0], 1);
+            var json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
+
+            try
+            {
+                while (json.Read())
+                    ;
+                Assert.True(false, "Expected JsonReaderException was not thrown with single-segment data.");
+            }
+            catch (JsonReaderException ex)
+            {
+                Assert.Equal(0, ex.LineNumber);
+                Assert.Equal(0, ex.BytePositionInLine);
+            }
+        }
+
         private static void SpanSequenceStatesAreEqualInvalidJson(byte[] dataUtf8, ReadOnlySequence<byte> sequence, int maxDepth, JsonCommentHandling commentHandling)
         {
             var stateSpan = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
@@ -292,7 +311,7 @@ namespace System.Text.Json.Tests
             while (json.Read())
             {
                 if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
-                    builder.Append(Encoding.UTF8.GetString(json.HasValueSequence ? json.ValueSequence.ToArray() : json.ValueSpan));
+                    builder.Append(Encoding.UTF8.GetString(json.HasValueSequence ? json.ValueSequence.ToArray() : json.ValueSpan.ToArray()));
             }
 
             Assert.Equal(expectedWithComments, builder.ToString());
@@ -304,7 +323,7 @@ namespace System.Text.Json.Tests
             while (json.Read())
             {
                 if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
-                    builder.Append(Encoding.UTF8.GetString(json.HasValueSequence ? json.ValueSequence.ToArray() : json.ValueSpan));
+                    builder.Append(Encoding.UTF8.GetString(json.HasValueSequence ? json.ValueSequence.ToArray() : json.ValueSpan.ToArray()));
             }
 
             Assert.Equal(expectedWithoutComments, builder.ToString());
@@ -338,7 +357,7 @@ namespace System.Text.Json.Tests
                 {
                     // Check if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
                     Assert.True(json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null);
-                    Assert.Equal(expectedString, Encoding.UTF8.GetString(json.HasValueSequence ? json.ValueSequence.ToArray() : json.ValueSpan));
+                    Assert.Equal(expectedString, Encoding.UTF8.GetString(json.HasValueSequence ? json.ValueSequence.ToArray() : json.ValueSpan.ToArray()));
                 }
 
                 Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
