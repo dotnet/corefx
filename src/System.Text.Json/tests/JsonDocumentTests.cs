@@ -1106,6 +1106,86 @@ namespace System.Text.Json.Tests
             }
         }
 
+        [Fact]
+        public static void TryGetProperty_CaseSensitive()
+        {
+            const string PascalString = "Needle";
+            const string CamelString = "needle";
+            const string OddString = "nEeDle";
+            const string InverseOddString = "NeEdLE";
+
+            string json = $"{{ \"{PascalString}\": \"no\", \"{CamelString}\": 42, \"{OddString}\": false }}";
+
+            using (JsonDocument doc = JsonDocument.Parse(json))
+            {
+                JsonElement root = doc.RootElement;
+
+                byte[] pascalBytes = Encoding.UTF8.GetBytes(PascalString);
+                byte[] camelBytes = Encoding.UTF8.GetBytes(CamelString);
+                byte[] oddBytes = Encoding.UTF8.GetBytes(OddString);
+                byte[] inverseOddBytes = Encoding.UTF8.GetBytes(InverseOddString);
+
+                void assertPascal(JsonElement elem)
+                {
+                    Assert.Equal(JsonValueType.String, elem.Type);
+                    Assert.Equal("no", elem.GetString());
+                }
+
+                void assertCamel(JsonElement elem)
+                {
+                    Assert.Equal(JsonValueType.Number, elem.Type);
+                    Assert.Equal(42, elem.GetInt32());
+                }
+
+                void assertOdd(JsonElement elem)
+                {
+                    Assert.Equal(JsonValueType.False, elem.Type);
+                    Assert.Equal(false, elem.GetBoolean());
+                }
+
+                Assert.True(root.TryGetProperty(PascalString, out JsonElement pascal));
+                assertPascal(pascal);
+                Assert.True(root.TryGetProperty(PascalString.AsSpan(), out pascal));
+                assertPascal(pascal);
+                Assert.True(root.TryGetProperty(pascalBytes, out pascal));
+                assertPascal(pascal);
+
+                Assert.True(root.TryGetProperty(CamelString, out JsonElement camel));
+                assertCamel(camel);
+                Assert.True(root.TryGetProperty(CamelString.AsSpan(), out camel));
+                assertCamel(camel);
+                Assert.True(root.TryGetProperty(camelBytes, out camel));
+                assertCamel(camel);
+
+                Assert.True(root.TryGetProperty(OddString, out JsonElement odd));
+                assertOdd(odd);
+                Assert.True(root.TryGetProperty(OddString.AsSpan(), out odd));
+                assertOdd(odd);
+                Assert.True(root.TryGetProperty(oddBytes, out odd));
+                assertOdd(odd);
+
+                Assert.False(root.TryGetProperty(InverseOddString, out _));
+                Assert.False(root.TryGetProperty(InverseOddString.AsSpan(), out _));
+                Assert.False(root.TryGetProperty(inverseOddBytes, out _));
+
+                assertPascal(root.GetProperty(PascalString));
+                assertPascal(root.GetProperty(PascalString.AsSpan()));
+                assertPascal(root.GetProperty(pascalBytes));
+
+                assertCamel(root.GetProperty(CamelString));
+                assertCamel(root.GetProperty(CamelString.AsSpan()));
+                assertCamel(root.GetProperty(camelBytes));
+
+                assertOdd(root.GetProperty(OddString));
+                assertOdd(root.GetProperty(OddString.AsSpan()));
+                assertOdd(root.GetProperty(oddBytes));
+
+                Assert.Throws<KeyNotFoundException>(() => root.GetProperty(InverseOddString));
+                Assert.Throws<KeyNotFoundException>(() => root.GetProperty(InverseOddString.AsSpan()));
+                Assert.Throws<KeyNotFoundException>(() => root.GetProperty(inverseOddBytes));
+            }
+        }
+
         [Theory]
         [InlineData("")]
         [InlineData("    ")]
