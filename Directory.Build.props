@@ -42,7 +42,6 @@
     <DefaultOSGroup Condition="'$(DefaultOSGroup)'=='' AND '$(OS)'=='Unix' AND $([MSBuild]::IsOSPlatform('NETBSD'))">NetBSD</DefaultOSGroup>
     <DefaultOSGroup Condition="'$(DefaultOSGroup)'=='' AND '$(OS)'=='Unix'">Linux</DefaultOSGroup>
     <DefaultOSGroup Condition="'$(DefaultOSGroup)'==''">$(OS)</DefaultOSGroup>
-    <RunningOnUnix Condition="'$(OS)'!='Windows_NT'">true</RunningOnUnix>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -143,7 +142,7 @@
   <PropertyGroup Condition="'$(IsTestProject)' == 'true' and '$(ContinuousIntegrationBuild)' == 'true' and '$(OfficialBuildId)' == ''">
     <WithoutCategories>IgnoreForCI</WithoutCategories>
     <EnableDumpling>false</EnableDumpling>
-    <CrashDumpFolder Condition="'$(RunningOnUnix)' != 'true'">%TMP%\CoreRunCrashDumps</CrashDumpFolder>
+    <CrashDumpFolder Condition="'$(OS)' == 'Windows_NT'">%TMP%\CoreRunCrashDumps</CrashDumpFolder>
   </PropertyGroup>
   <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true' and '$(OfficialBuildId)' == ''">
     <!-- Disable F5 and test explorer support for CI builds. -->
@@ -265,7 +264,7 @@
     <DebugType>portable</DebugType>
 
     <!-- Empty DebugType when building for netfx and in windows so that it is set to full or pdbonly later -->
-    <DebugType Condition="'$(TargetsNetFx)' == 'true' AND '$(RunningOnUnix)' != 'true'"></DebugType>
+    <DebugType Condition="'$(TargetsNetFx)' == 'true' AND '$(OS)' == 'Windows_NT'"></DebugType>
 
     <!-- Rhel 6 and FreeBSD doesn't support the source control git package so disable SourceLink -->
     <EnableSourceLink Condition="$(RuntimeOS.StartsWith('rhel.6')) OR '$(_runtimeOSFamily)' == 'FreeBSD'">false</EnableSourceLink>
@@ -465,16 +464,12 @@
   </ItemDefinitionGroup>
 
   <!-- Import it at the end of the props file to override the OutputPath for reference assemblies and use common directory props -->
-  <Import Project="$(MSBuildThisFileDirectory)eng\ReferenceAssemblies.props" />
+  <Import Project="$(RepositoryEngineeringDir)ReferenceAssemblies.props" />
 
   <PropertyGroup Condition="'$(IsSourceProject)' == 'true'">
     <!-- Set the documentation output file globally. -->
     <DocumentationFile Condition="'$(DocumentationFile)' == ''">$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
   </PropertyGroup>
-
-  <!-- Use Roslyn Compilers to build -->
-  <Import Project="$(RoslynPropsFile)" Condition="'$(RunningOnUnix)'!='true' and Exists('$(RoslynPropsFile)') and '$(UseRoslynCompilers)'!='false' and '$(RoslynIncompatibleMsbuildVersion)' != 'true'" />
-  <Import Project="$(RoslynPropsFile)" Condition="'$(RunningOnUnix)'=='true' and Exists('$(RoslynPropsFile)') and '$(RoslynIncompatibleMsbuildVersion)' != 'true'" />
 
   <!-- Additional optimizations -->
   <PropertyGroup>
