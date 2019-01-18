@@ -23,6 +23,7 @@
     <ProjectProperties>Configuration=$(BuildConfiguration)</ProjectProperties>
   </PropertyGroup>
 
+  <!-- remove once we no longer use maestro v1 updating -->
   <Import Project="$(ToolsDir)VersionTools.targets" Condition="Exists('$(ToolsDir)VersionTools.targets')" />
 
   <Import Project="Directory.Build.targets" />

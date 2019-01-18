@@ -16,8 +16,7 @@
   </ItemGroup>
   
   <PropertyGroup>
-    <GenerateDepsJsonTaskDll Condition="'$(MSBuildRuntimeType)' == 'core'">$(ToolsDir)Microsoft.DotNet.Build.Tasks.dll</GenerateDepsJsonTaskDll>
-    <GenerateDepsJsonTaskDll Condition="'$(MSBuildRuntimeType)' != 'core'">$(ToolsDir)net46/Microsoft.DotNet.Build.Tasks.dll</GenerateDepsJsonTaskDll>
+    <GenerateDepsJsonTaskDll>$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll</GenerateDepsJsonTaskDll>
   </PropertyGroup>
 
   <UsingTask TaskName="GenerateDepsJson" AssemblyFile="$(GenerateDepsJsonTaskDll)"/>
@@ -49,8 +48,6 @@
   </ItemGroup>
 
   <Import Project="..\dir.traversal.targets" />
-
-  <Import Project="$(ToolsDir)UpdateBuildValues.targets" Condition="Exists('$(ToolsDir)UpdateBuildValues.targets')" />
 
   <!-- Generate the shared library for running ILC tests for configuration Release-x64 -->
   <Target Name="GenerateSharedLibraryForILC" AfterTargets="BuildAllProjects" Condition="'$(EnableMultiFileILCTests)' == 'true'">

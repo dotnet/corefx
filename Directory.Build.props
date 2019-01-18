@@ -103,6 +103,10 @@
     <!-- Properties to remove with buildtools removal -->
     <ProjectDir>$(RepoRoot)</ProjectDir>
     <BinDir>$(ProjectDir)artifacts\bin\</BinDir>
+    <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
+    <BuildToolsTaskDir Condition="'$(MSBuildRuntimeType)' != 'core'">$(ToolsDir)net46/</BuildToolsTaskDir>
+    <BuildToolsTaskDir Condition="'$(MSBuildRuntimeType)' == 'core'">$(ToolsDir)</BuildToolsTaskDir>
+    
     <!-- Need to try and keep the same logic as the native builds as we need this for packaging -->
     <NativeBinDir>$(BinDir)native/$(BuildConfiguration)</NativeBinDir>
 
@@ -113,8 +117,6 @@
     <PackagesDir>$(DotNetRestorePackagesPath)</PackagesDir>
     <PackagesDir Condition="'$(PackagesDir)'=='' AND '$(NuGetPackageRoot)' != ''">$([MSBuild]::EnsureTrailingSlash('$(NuGetPackageRoot)'))</PackagesDir>
     <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir).packages/</PackagesDir>
-    <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
-    <IlasmToolPath>$(ToolsDir)ilasm/ilasm</IlasmToolPath>
     <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>
     <!-- Respect environment variable for the .NET install directory if set; otherwise, use the current default location -->
     <DotNetRoot Condition="'$(DotNetRoot)' == ''">$(DOTNET_INSTALL_DIR)</DotNetRoot>
