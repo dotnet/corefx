@@ -501,17 +501,11 @@ namespace System.Text.Json.Tests
                 Assert.True(json.ValueSpan.IsEmpty);
                 Assert.False(json.ValueSequence.IsEmpty);
 
-                byte[] previousValue = json.ValueSequence.ToArray();
-
-                // Subsequent calls to Read leaves the value properties unchanged.
+                // Subsequent calls to Read clears the value properties since Read returned false.
                 Assert.False(json.Read());
                 Assert.False(json.HasValueSequence);
                 Assert.True(json.ValueSpan.IsEmpty);
-                Assert.False(json.ValueSequence.IsEmpty);
-
-                byte[] currentValue = json.ValueSequence.ToArray();
-
-                Assert.Equal(previousValue, currentValue);
+                Assert.True(json.ValueSequence.IsEmpty);
             }
         }
     }

@@ -81,6 +81,8 @@ namespace System.Text.Json
         {
             bool retVal = false;
             HasValueSequence = false;
+            ValueSpan = default;
+            ValueSequence = default;
 
             if (!HasMoreDataMultiSegment())
             {
@@ -119,7 +121,6 @@ namespace System.Text.Json
                 if (first == JsonConstants.CloseBrace)
                 {
                     EndObject();
-                    ValueSequence = default;
                 }
                 else
                 {
@@ -150,7 +151,6 @@ namespace System.Text.Json
                 if (first == JsonConstants.CloseBracket)
                 {
                     EndArray();
-                    ValueSequence = default;
                 }
                 else
                 {
@@ -402,12 +402,10 @@ namespace System.Text.Json
                 else if (marker == JsonConstants.OpenBrace)
                 {
                     StartObject();
-                    ValueSequence = default;
                 }
                 else if (marker == JsonConstants.OpenBracket)
                 {
                     StartArray();
-                    ValueSequence = default;
                 }
                 else if (JsonReaderHelper.IsDigit(marker) || marker == '-')
                 {
@@ -508,7 +506,6 @@ namespace System.Text.Json
 
             ValueSpan = span.Slice(0, literal.Length);
             HasValueSequence = false;
-            ValueSequence = default;
         Done:
             _tokenType = tokenType;
             _consumed += consumed;
@@ -576,7 +573,6 @@ namespace System.Text.Json
                         SequencePosition start = new SequencePosition(startPosition.GetObject(), startPosition.GetInteger() + startConsumed);
                         SequencePosition end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + leftToMatch.Length);
                         ValueSequence = _sequence.Slice(start, end);
-                        ValueSpan = default;
                         consumed = leftToMatch.Length;
                         return true;
                     }
@@ -737,7 +733,6 @@ namespace System.Text.Json
                     _bytePositionInLine += idx + 2; // Add 2 for the start and end quotes.
                     ValueSpan = localBuffer.Slice(0, idx);
                     HasValueSequence = false;
-                    ValueSequence = default;
                     _tokenType = JsonTokenType.String;
                     _consumed += idx + 2;
                     return true;
@@ -939,7 +934,6 @@ namespace System.Text.Json
 
             SequencePosition start = new SequencePosition(startPosition.GetObject(), startPosition.GetInteger() + startConsumed);
             ValueSequence = _sequence.Slice(start, end);
-            ValueSpan = default;
             _tokenType = JsonTokenType.String;
             return true;
         }
@@ -1105,14 +1099,12 @@ namespace System.Text.Json
                 end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + idx);
                 SequencePosition start = new SequencePosition(startPosition.GetObject(), startPosition.GetInteger() + startConsumed);
                 ValueSequence = _sequence.Slice(start, end);
-                ValueSpan = default;
             }
             else
             {
                 _bytePositionInLine++;  // Add 1 for the end quote
                 _consumed += idx + 2;
                 ValueSpan = data.Slice(0, idx);
-                ValueSequence = default;
             }
             _tokenType = JsonTokenType.String;
             return true;
@@ -1255,13 +1247,11 @@ namespace System.Text.Json
                 SequencePosition start = new SequencePosition(startPosition.GetObject(), startPosition.GetInteger() + startConsumed);
                 SequencePosition end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + i);
                 ValueSequence = _sequence.Slice(start, end);
-                ValueSpan = default;
                 consumed = i;
             }
             else
             {
                 ValueSpan = data.Slice(0, i);
-                ValueSequence = default;
                 consumed = i;
             }
             return true;
@@ -1636,12 +1626,10 @@ namespace System.Text.Json
             else if (marker == JsonConstants.CloseBrace)
             {
                 EndObject();
-                ValueSequence = default;
             }
             else if (marker == JsonConstants.CloseBracket)
             {
                 EndArray();
-                ValueSequence = default;
             }
             else
             {
@@ -1756,12 +1744,10 @@ namespace System.Text.Json
             else if (first == JsonConstants.CloseBrace)
             {
                 EndObject();
-                ValueSequence = default;
             }
             else if (first == JsonConstants.CloseBracket)
             {
                 EndArray();
-                ValueSequence = default;
             }
             else if (_tokenType == JsonTokenType.None)
             {
@@ -1779,7 +1765,6 @@ namespace System.Text.Json
                 if (first == JsonConstants.CloseBrace)
                 {
                     EndObject();
-                    ValueSequence = default;
                 }
                 else
                 {
@@ -1810,7 +1795,6 @@ namespace System.Text.Json
                 if (first == JsonConstants.CloseBracket)
                 {
                     EndArray();
-                    ValueSequence = default;
                 }
                 else
                 {
@@ -1925,7 +1909,6 @@ namespace System.Text.Json
                 if (marker == JsonConstants.CloseBrace)
                 {
                     EndObject();
-                    ValueSequence = default;
                 }
                 else
                 {
@@ -1956,7 +1939,6 @@ namespace System.Text.Json
                 if (marker == JsonConstants.CloseBracket)
                 {
                     EndArray();
-                    ValueSequence = default;
                 }
                 else
                 {
@@ -2038,12 +2020,10 @@ namespace System.Text.Json
             else if (marker == JsonConstants.CloseBrace)
             {
                 EndObject();
-                ValueSequence = default;
             }
             else if (marker == JsonConstants.CloseBracket)
             {
                 EndArray();
-                ValueSequence = default;
             }
             else
             {
@@ -2303,18 +2283,15 @@ namespace System.Text.Json
                 {
                     ValueSpan = commentSequence.First.Span;
                     HasValueSequence = false;
-                    ValueSequence = default;
                 }
                 else
                 {
                     ValueSequence = commentSequence;
-                    ValueSpan = default;
                 }
             }
             else
             {
                 ValueSpan = _buffer.Slice(previousConsumed, idx + 2);   // Include the double slash and potential line feed at the end of the comment as part of it.
-                ValueSequence = default;
             }
 
             if (_tokenType != JsonTokenType.Comment)
@@ -2430,19 +2407,15 @@ namespace System.Text.Json
                 {
                     ValueSpan = commentSequence.First.Span;
                     HasValueSequence = false;
-                    ValueSequence = default;
                 }
                 else
                 {
                     ValueSequence = commentSequence;
-                    ValueSpan = default;
                 }
             }
             else
             {
-
                 ValueSpan = _buffer.Slice(previousConsumed, i + 3); // Include the slash/asterisk and final slash at the end of the comment as part of it.
-                ValueSequence = default;
             }
 
             if (_tokenType != JsonTokenType.Comment)
