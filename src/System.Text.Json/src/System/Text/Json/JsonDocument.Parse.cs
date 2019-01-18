@@ -111,20 +111,20 @@ namespace System.Text.Json
             CheckSupportedOptions(readerOptions);
 
             ReadOnlySpan<char> jsonChars = json.Span;
-            int byteCount = Utf8JsonReader.s_utf8Encoding.GetByteCount(jsonChars);
-            byte[] utf8Bytes = ArrayPool<byte>.Shared.Rent(byteCount);
+            int expectedByteCount = Utf8JsonReader.s_utf8Encoding.GetByteCount(jsonChars);
+            byte[] utf8Bytes = ArrayPool<byte>.Shared.Rent(expectedByteCount);
 
             try
             {
-                int byteCount2 = Utf8JsonReader.s_utf8Encoding.GetBytes(jsonChars, utf8Bytes);
-                Debug.Assert(byteCount == byteCount2);
+                int actualByteCount = Utf8JsonReader.s_utf8Encoding.GetBytes(jsonChars, utf8Bytes);
+                Debug.Assert(expectedByteCount == actualByteCount);
 
-                return Parse(utf8Bytes.AsMemory(0, byteCount2), readerOptions, utf8Bytes);
+                return Parse(utf8Bytes.AsMemory(0, actualByteCount), readerOptions, utf8Bytes);
             }
             catch
             {
                 // Holds document content, clear it before returning it.
-                utf8Bytes.AsSpan(0, byteCount).Clear();
+                utf8Bytes.AsSpan(0, expectedByteCount).Clear();
                 ArrayPool<byte>.Shared.Return(utf8Bytes);
                 throw;
             }

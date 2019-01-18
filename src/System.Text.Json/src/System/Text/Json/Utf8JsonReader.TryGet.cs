@@ -172,11 +172,5 @@ namespace System.Text.Json
             char standardFormat = span.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
             return Utf8Parser.TryParse(span, out value, out int bytesConsumed, standardFormat) && span.Length == bytesConsumed;
         }
-
-        internal static bool TryGetDecimalValue(ReadOnlySpan<byte> span, out decimal value)
-        {
-            char standardFormat = span.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed, standardFormat) && span.Length == bytesConsumed;
-        }
     }
 }

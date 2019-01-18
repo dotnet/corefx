@@ -331,7 +331,8 @@ namespace System.Text.Json
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
             char standardFormat = segment.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
-            if (Utf8Parser.TryParse(segment, out double tmp, out int bytesConsumed, standardFormat) && segment.Length == bytesConsumed)
+            if (Utf8Parser.TryParse(segment, out double tmp, out int bytesConsumed, standardFormat) &&
+                segment.Length == bytesConsumed)
             {
                 value = tmp;
                 return true;
@@ -353,7 +354,8 @@ namespace System.Text.Json
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
             char standardFormat = segment.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
-            if (Utf8Parser.TryParse(segment, out float tmp, out int bytesConsumed, standardFormat) && segment.Length == bytesConsumed)
+            if (Utf8Parser.TryParse(segment, out float tmp, out int bytesConsumed, standardFormat) &&
+                segment.Length == bytesConsumed)
             {
                 value = tmp;
                 return true;
@@ -374,7 +376,10 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            if (Utf8JsonReader.TryGetDecimalValue(segment, out decimal tmp))
+            char standardFormat = segment.IndexOfAny((byte)'e', (byte)'E') >= 0 ? 'e' : default;
+
+            if (Utf8Parser.TryParse(segment, out decimal tmp, out int bytesConsumed, standardFormat) &&
+                segment.Length == bytesConsumed)
             {
                 value = tmp;
                 return true;
