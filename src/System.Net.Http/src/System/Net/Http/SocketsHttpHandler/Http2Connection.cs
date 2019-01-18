@@ -857,16 +857,17 @@ namespace System.Net.Http
             }
         }
 
-        private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request)
+        private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             // Ensure we don't exceed the max concurrent streams setting.
-            await _concurrentStreams.RequestCreditAsync(1).ConfigureAwait(false);
+            // TODO: Cancellation when requesting credit.
+            await _concurrentStreams.RequestCreditAsync(1, cancellationToken).ConfigureAwait(false);
 
             // Note, HEADERS and CONTINUATION frames must be together, so hold the writer lock across sending all of them.
             // We also serialize usage of the header encoder and the header buffer this way.
             // (If necessary, we could have a separate semaphore just for creating and encoding header blocks,
             // and defer taking the actual _writerLock until we're ready to do the write below.)
-            await _writerLock.WaitAsync().ConfigureAwait(false);
+            await _writerLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             Http2Stream http2Stream = AddStream(request);
             int streamId = http2Stream.StreamId;
@@ -896,6 +897,11 @@ namespace System.Net.Http
 
                 while (remaining.Length > 0)
                 {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        // TODO: Should we decide the correct exception type here, or at a higher level?
+                        throw new OperationCanceledException();
+                    }
                     (current, remaining) = SplitBuffer(remaining, FrameHeader.MaxLength);
 
                     flags = (remaining.Length == 0 ? FrameFlags.EndHeaders : FrameFlags.None);
@@ -907,6 +913,12 @@ namespace System.Net.Http
 
                     await FlushOutgoingBytesAsync().ConfigureAwait(false);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                ValueTask ignored = SendRstStreamAsync(streamId, Http2ProtocolErrorCode.StreamClosed);
+                http2Stream.Dispose();
+                throw;
             }
             catch
             {
@@ -930,7 +942,8 @@ namespace System.Net.Http
             {
                 int frameSize = Math.Min(remaining.Length, FrameHeader.MaxLength);
 
-                frameSize = await _connectionWindow.RequestCreditAsync(frameSize).ConfigureAwait(false);
+                // TODO: Wire this up.
+                frameSize = await _connectionWindow.RequestCreditAsync(frameSize, CancellationToken.None).ConfigureAwait(false);
 
                 ReadOnlyMemory<byte> current;
                 (current, remaining) = SplitBuffer(remaining, frameSize);
@@ -1226,13 +1239,13 @@ namespace System.Net.Http
             try
             {
                 // Send headers
-                http2Stream = await SendHeadersAsync(request).ConfigureAwait(false);
+                http2Stream = await SendHeadersAsync(request, cancellationToken).ConfigureAwait(false);
 
                 // Send request body, if any
-                await http2Stream.SendRequestBodyAsync().ConfigureAwait(false);
+                await http2Stream.SendRequestBodyAsync(cancellationToken).ConfigureAwait(false);
 
                 // Wait for response headers to be read.
-                await http2Stream.ReadResponseHeadersAsync().ConfigureAwait(false);
+                await http2Stream.ReadResponseHeadersAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -1249,6 +1262,11 @@ namespace System.Net.Http
                 else if (e is Http2ProtocolException)
                 {
                     // ISSUE 31315: Determine if/how to expose HTTP2 error codes
+                    throw new HttpRequestException(SR.net_http_client_execution_error);
+                }
+                else if (e is OperationCanceledException)
+                {
+                    // TODO: decide on the right exception to throw.
                     throw new HttpRequestException(SR.net_http_client_execution_error);
                 }
                 else

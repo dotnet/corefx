@@ -67,7 +67,7 @@ namespace System.Net.Http
             public HttpRequestMessage Request => _request;
             public HttpResponseMessage Response => _response;
 
-            public async Task SendRequestBodyAsync()
+            public async Task SendRequestBodyAsync(CancellationToken cancellationToken)
             {
                 // TODO: ISSUE 31312: Expect: 100-continue and early response handling
                 // Note that in an "early response" scenario, where we get a response before we've finished sending the request body
@@ -79,13 +79,15 @@ namespace System.Net.Http
                 {
                     using (Http2WriteStream writeStream = new Http2WriteStream(this))
                     {
+                        // TODO: Figure out if this is cancellable, and if not how it is handled in Http 1.1.
                         await _request.Content.CopyToAsync(writeStream).ConfigureAwait(false);
                     }
                 }
             }
 
-            public async Task ReadResponseHeadersAsync()
+            public async Task ReadResponseHeadersAsync(CancellationToken cancellationToken)
             {
+                // TODO: Plumb in cancellation.
                 // Wait for response headers to be read.
                 bool emptyResponse = await _responseHeadersAvailable.Task.ConfigureAwait(false);
 
@@ -312,7 +314,8 @@ namespace System.Net.Http
 
                 while (remaining.Length > 0)
                 {
-                    int sendSize = await _streamWindow.RequestCreditAsync(remaining.Length).ConfigureAwait(false);
+                    // TODO: Wire up cancellation here.
+                    int sendSize = await _streamWindow.RequestCreditAsync(remaining.Length, CancellationToken.None).ConfigureAwait(false);
 
                     ReadOnlyMemory<byte> current;
                     (current, remaining) = SplitBuffer(remaining, sendSize);
