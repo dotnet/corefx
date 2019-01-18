@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
 
@@ -36,10 +35,8 @@ namespace System.Text.Json
                 return JsonReaderHelper.GetUnescapedString(span, idx);
             }
 
-            return JsonReaderHelper.s_utf8Encoding.GetString(span);
 #if BUILDING_INBOX_LIBRARY
-            // TODO: https://github.com/dotnet/corefx/issues/33292
-            return s_utf8Encoding.GetString(span);
+            return JsonReaderHelper.s_utf8Encoding.GetString(span);
 #else
             if (span.IsEmpty)
             {
@@ -49,8 +46,7 @@ namespace System.Text.Json
             {
                 fixed (byte* bytePtr = span)
                 {
-                    // TODO: https://github.com/dotnet/corefx/issues/33292
-                    return s_utf8Encoding.GetString(bytePtr, span.Length);
+                    return JsonReaderHelper.s_utf8Encoding.GetString(bytePtr, span.Length);
                 }
             }
 #endif

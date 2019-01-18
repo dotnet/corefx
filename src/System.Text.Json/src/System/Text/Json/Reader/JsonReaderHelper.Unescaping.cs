@@ -5,7 +5,6 @@
 using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
 {
@@ -14,30 +13,29 @@ namespace System.Text.Json
         // Reject any invalid UTF-8 data rather than silently replacing.
         public static readonly UTF8Encoding s_utf8Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
-        private const int StackallocThreshold = 256;
-
         // TODO: Similar to escaping, replace the unescaping logic with publicly shipping APIs from https://github.com/dotnet/corefx/issues/33509
         public static string GetUnescapedString(ReadOnlySpan<byte> utf8Source, int idx)
         {
             byte[] unescapedArray = null;
             string utf8String;
 
-            Span<byte> unescaped = utf8Source.Length <= StackallocThreshold ?
+            Span<byte> utf8Unescaped = utf8Source.Length <= JsonConstants.StackallocThreshold ?
                 stackalloc byte[utf8Source.Length] :
                 (unescapedArray = ArrayPool<byte>.Shared.Rent(utf8Source.Length));
 
-            Unescape(utf8Source, unescaped, idx, out int written);
-            utf8String = s_utf8Encoding.GetString(unescaped.Slice(0, written));
+            Unescape(utf8Source, utf8Unescaped, idx, out int written);
+            utf8String = s_utf8Encoding.GetString(utf8Unescaped.Slice(0, written));
 
             if (unescapedArray != null)
             {
+                utf8Unescaped.Slice(0, written).Clear();
                 ArrayPool<byte>.Shared.Return(unescapedArray);
             }
 
             return utf8String;
         }
 
-        private static void Unescape(ReadOnlySpan<byte> source, Span<byte> destination, int idx, out int written)
+        public static void Unescape(ReadOnlySpan<byte> source, Span<byte> destination, int idx, out int written)
         {
             Debug.Assert(idx >= 0 && idx < source.Length);
             Debug.Assert(source[idx] == JsonConstants.BackSlash);
@@ -95,7 +93,7 @@ namespace System.Text.Json
                         Debug.Assert(bytesConsumed == 4);
                         idx += bytesConsumed;     // The loop iteration will increment idx past the last hex digit
 
-                        if (IsInRangeInclusive((uint)scalar, JsonConstants.HighSurrogateStartValue, JsonConstants.LowSurrogateEndValue))
+                        if (JsonHelpers.IsInRangeInclusive((uint)scalar, JsonConstants.HighSurrogateStartValue, JsonConstants.LowSurrogateEndValue))
                         {
                             // The first hex value cannot be a low surrogate
                             if (scalar >= JsonConstants.LowSurrogateStartValue)
@@ -104,7 +102,7 @@ namespace System.Text.Json
                             }
 
                             // If the first hex value is a high surrogate, the next one must be a low surrogate
-                            Debug.Assert(IsInRangeInclusive((uint)scalar, JsonConstants.HighSurrogateStartValue, JsonConstants.HighSurrogateEndValue));
+                            Debug.Assert(JsonHelpers.IsInRangeInclusive((uint)scalar, JsonConstants.HighSurrogateStartValue, JsonConstants.HighSurrogateEndValue));
 
                             idx += 3;   // Skip the last hex digit and \u
 
@@ -117,7 +115,7 @@ namespace System.Text.Json
                             Debug.Assert(result);
                             Debug.Assert(bytesConsumed == 4);
 
-                            if (!IsInRangeInclusive((uint)lowSurrogate, JsonConstants.LowSurrogateStartValue, JsonConstants.LowSurrogateEndValue))
+                            if (!JsonHelpers.IsInRangeInclusive((uint)lowSurrogate, JsonConstants.LowSurrogateStartValue, JsonConstants.LowSurrogateEndValue))
                             {
                                 ThrowHelper.ThrowInvalidOperationException_ReadInvalidUTF16(lowSurrogate);
                             }
@@ -131,7 +129,13 @@ namespace System.Text.Json
                                 + JsonConstants.UnicodePlane01StartValue;
                         }
 
+#if BUILDING_INBOX_LIBRARY
+                        var rune = new Rune(scalar);
+                        result = rune.TryEncodeToUtf8Bytes(destination.Slice(written), out int bytesWritten);
+                        Debug.Assert(result);
+#else
                         EncodeToUtf8Bytes((uint)scalar, destination.Slice(written), out int bytesWritten);
+#endif
                         Debug.Assert(bytesWritten <= 4);
                         written += bytesWritten;
                     }
@@ -143,13 +147,14 @@ namespace System.Text.Json
             }
         }
 
+#if !BUILDING_INBOX_LIBRARY
         /// <summary>
         /// Copies the UTF-8 code unit representation of this scalar to an output buffer.
         /// The buffer must be large enough to hold the required number of <see cref="byte"/>s.
         /// </summary>
         private static void EncodeToUtf8Bytes(uint scalar, Span<byte> utf8Destination, out int bytesWritten)
         {
-            Debug.Assert(IsValidUnicodeScalar(scalar));
+            Debug.Assert(JsonHelpers.IsValidUnicodeScalar(scalar));
             Debug.Assert(utf8Destination.Length >= 4);
 
             if (scalar < 0x80U)
@@ -183,28 +188,6 @@ namespace System.Text.Json
                 bytesWritten = 4;
             }
         }
-
-        /// <summary>
-        /// Returns <see langword="true"/> iff <paramref name="value"/> is a valid Unicode scalar
-        /// value, i.e., is in [ U+0000..U+D7FF ], inclusive; or [ U+E000..U+10FFFF ], inclusive.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsValidUnicodeScalar(uint value)
-        {
-            // By XORing the incoming value with 0xD800, surrogate code points
-            // are moved to the range [ U+0000..U+07FF ], and all valid scalar
-            // values are clustered into the single range [ U+0800..U+10FFFF ],
-            // which allows performing a single fast range check.
-
-            return IsInRangeInclusive(value ^ 0xD800U, 0x800U, 0x10FFFFU);
-        }
-
-        /// <summary>
-        /// Returns <see langword="true"/> iff <paramref name="value"/> is between
-        /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsInRangeInclusive(uint value, uint lowerBound, uint upperBound)
-            => (value - lowerBound) <= (upperBound - lowerBound);
+#endif
     }
 }
