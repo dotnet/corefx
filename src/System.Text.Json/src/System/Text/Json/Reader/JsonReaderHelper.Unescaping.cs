@@ -24,11 +24,26 @@ namespace System.Text.Json
                 (unescapedArray = ArrayPool<byte>.Shared.Rent(utf8Source.Length));
 
             Unescape(utf8Source, utf8Unescaped, idx, out int written);
-            utf8String = s_utf8Encoding.GetString(utf8Unescaped.Slice(0, written));
+            Debug.Assert(written > 0);
+
+            utf8Unescaped = utf8Unescaped.Slice(0, written);
+            Debug.Assert(!utf8Unescaped.IsEmpty);
+
+#if BUILDING_INBOX_LIBRARY
+            utf8String = s_utf8Encoding.GetString(utf8Unescaped);
+#else
+            unsafe
+            {
+                fixed (byte* bytePtr = utf8Unescaped)
+                {
+                    utf8String = s_utf8Encoding.GetString(bytePtr, utf8Unescaped.Length);
+                }
+            }
+#endif
 
             if (unescapedArray != null)
             {
-                utf8Unescaped.Slice(0, written).Clear();
+                utf8Unescaped.Clear();
                 ArrayPool<byte>.Shared.Return(unescapedArray);
             }
 
