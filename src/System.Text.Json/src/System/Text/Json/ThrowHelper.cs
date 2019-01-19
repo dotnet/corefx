@@ -350,9 +350,9 @@ namespace System.Text.Json
             throw new InvalidOperationException(SR.CannotReadIncompleteUTF16);
         }
 
-        public static InvalidOperationException GetInvalidOperationException_ReadInvalidUTF8()
+        public static InvalidOperationException GetInvalidOperationException_ReadInvalidUTF8(DecoderFallbackException innerException)
         {
-            return new InvalidOperationException(SR.CannotTranscodeInvalidUtf8);
+            return new InvalidOperationException(SR.CannotTranscodeInvalidUtf8, innerException);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

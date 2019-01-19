@@ -59,13 +59,14 @@ namespace System.Text.Json
                 }
 #endif
             }
-            catch (DecoderFallbackException)
+            catch (DecoderFallbackException ex)
             {
                 // We want to be consistent with the exception being thrown
                 // so the user only has to catch a single exception.
                 // Since we already throw InvalidOperationException for mismatch token type,
                 // and while unescaping, using that exception for failure to decode invalid UTF-8 bytes as well.
-                throw ThrowHelper.GetInvalidOperationException_ReadInvalidUTF8();
+                // Therefore, wrapping the DecoderFallbackException around an InvalidOperationException.
+                throw ThrowHelper.GetInvalidOperationException_ReadInvalidUTF8(ex);
             }
         }
 

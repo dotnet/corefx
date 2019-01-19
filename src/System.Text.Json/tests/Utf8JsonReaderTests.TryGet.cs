@@ -488,7 +488,10 @@ namespace System.Text.Json.Tests
                             string val = json.GetStringValue();
                             Assert.True(false, "Expected InvalidOperationException when trying to get string value for invalid UTF-8 JSON text.");
                         }
-                        catch (InvalidOperationException) { }
+                        catch (InvalidOperationException ex)
+                        {
+                            Assert.Equal(ex.InnerException.GetType(), typeof(DecoderFallbackException));
+                        }
                     }
                 }
             }
