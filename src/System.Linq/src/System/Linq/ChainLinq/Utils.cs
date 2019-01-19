@@ -76,6 +76,10 @@ namespace System.Linq.ChainLinq
 
         internal static Result Consume<T, Result>(IEnumerable<T> e, Consumer<T, Result> consumer)
         {
+            if (e is Consumable<T> consumable)
+            {
+                consumable.Consume(consumer);
+            }
             if (e is T[] array)
             {
                 ChainLinq.Consume.Array.Invoke(array, Links.Identity<T>.Instance, consumer);
