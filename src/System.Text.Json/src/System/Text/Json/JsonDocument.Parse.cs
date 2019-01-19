@@ -111,12 +111,12 @@ namespace System.Text.Json
             CheckSupportedOptions(readerOptions);
 
             ReadOnlySpan<char> jsonChars = json.Span;
-            int expectedByteCount = Utf8JsonReader.s_utf8Encoding.GetByteCount(jsonChars);
+            int expectedByteCount = JsonReaderHelper.GetUtf8ByteCount(jsonChars);
             byte[] utf8Bytes = ArrayPool<byte>.Shared.Rent(expectedByteCount);
 
             try
             {
-                int actualByteCount = Utf8JsonReader.s_utf8Encoding.GetBytes(jsonChars, utf8Bytes);
+                int actualByteCount = JsonReaderHelper.GetUtf8FromText(jsonChars, utf8Bytes);
                 Debug.Assert(expectedByteCount == actualByteCount);
 
                 return Parse(utf8Bytes.AsMemory(0, actualByteCount), readerOptions, utf8Bytes);
@@ -230,7 +230,13 @@ namespace System.Text.Json
             }
         }
 
-        private static async ValueTask<ArraySegment<byte>> ReadToEndAsync(
+        private static async
+#if BUILDING_INBOX_LIBRARY
+            ValueTask<ArraySegment<byte>>
+#else
+            Task<ArraySegment<byte>>
+#endif
+            ReadToEndAsync(
             Stream stream,
             CancellationToken cancellationToken)
         {
@@ -265,7 +271,9 @@ namespace System.Text.Json
                     }
 
                     lastRead = await stream.ReadAsync(
-                        rented.AsMemory(written, rented.Length - written),
+                        rented,
+                        written,
+                        rented.Length - written,
                         cancellationToken).ConfigureAwait(false);
 
                     written += lastRead;

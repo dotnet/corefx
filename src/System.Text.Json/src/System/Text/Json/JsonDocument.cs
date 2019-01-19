@@ -6,7 +6,11 @@ using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+#if BUILDING_INBOX_LIBRARY
 using Internal.Runtime.CompilerServices;
+#else
+using System.Runtime.CompilerServices;
+#endif
 
 namespace System.Text.Json
 {
@@ -220,7 +224,7 @@ namespace System.Text.Json
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
             // TODO(#33292): Unescape this.
-            lastString = Utf8JsonReader.s_utf8Encoding.GetString(segment);
+            lastString = JsonReaderHelper.GetStringFromUtf8(segment);
             _lastIndexAndString = (index, lastString);
             return lastString;
         }
@@ -394,13 +398,13 @@ namespace System.Text.Json
         internal string GetRawValueAsString(int index)
         {
             ReadOnlyMemory<byte> segment = GetRawValue(index, includeQuotes: true);
-            return Utf8JsonReader.s_utf8Encoding.GetString(segment.Span);
+            return JsonReaderHelper.GetStringFromUtf8(segment.Span);
         }
 
         internal string GetPropertyRawValueAsString(int valueIndex)
         {
             ReadOnlyMemory<byte> segment = GetPropertyRawValue(valueIndex);
-            return Utf8JsonReader.s_utf8Encoding.GetString(segment.Span);
+            return JsonReaderHelper.GetStringFromUtf8(segment.Span);
         }
 
         private static void Parse(

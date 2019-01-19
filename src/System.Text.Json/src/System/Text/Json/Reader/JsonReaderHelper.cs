@@ -15,6 +15,9 @@ namespace System.Text.Json
 {
     internal static class JsonReaderHelper
     {
+        // Reject any invalid UTF-8 data rather than silently replacing.
+        internal static readonly UTF8Encoding s_utf8Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+
         public static (int, int) CountNewLines(ReadOnlySpan<byte> data)
         {
             int lastLineFeedIndex = -1;
@@ -50,6 +53,64 @@ namespace System.Text.Json
                     Debug.Fail($"No mapping for token type {tokenType}");
                     return JsonValueType.Undefined;
             }
+        }
+
+        internal static string GetStringFromUtf8(ReadOnlySpan<byte> utf8)
+        {
+#if BUILDING_INBOX_LIBRARY
+            return s_utf8Encoding.GetString(utf8);
+#else
+            if (utf8.IsEmpty)
+            {
+                return string.Empty;
+            }
+            unsafe
+            {
+                fixed (byte* bytePtr = utf8)
+                {
+                    return s_utf8Encoding.GetString(bytePtr, utf8.Length);
+                }
+            }
+#endif
+        }
+
+        internal static int GetUtf8ByteCount(ReadOnlySpan<char> text)
+        {
+#if BUILDING_INBOX_LIBRARY
+            return s_utf8Encoding.GetByteCount(text);
+#else
+            if (text.IsEmpty)
+            {
+                return 0;
+            }
+            unsafe
+            {
+                fixed (char* charPtr = text)
+                {
+                    return s_utf8Encoding.GetByteCount(charPtr, text.Length);
+                }
+            }
+#endif
+        }
+
+        internal static int GetUtf8FromText(ReadOnlySpan<char> text, Span<byte> dest)
+        {
+#if BUILDING_INBOX_LIBRARY
+            return s_utf8Encoding.GetBytes(text, dest);
+#else
+            if (text.IsEmpty)
+            {
+                return 0;
+            }
+            unsafe
+            {
+                fixed (char* charPtr = text)
+                fixed (byte* destPtr = dest)
+                {
+                    return s_utf8Encoding.GetBytes(charPtr, text.Length, destPtr, dest.Length);
+                }
+            }
+#endif
         }
 
         // A digit is valid if it is in the range: [0..9]
