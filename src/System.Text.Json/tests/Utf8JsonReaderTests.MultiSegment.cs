@@ -297,7 +297,7 @@ namespace System.Text.Json.Tests
                     builder.Append(Encoding.UTF8.GetString(json.HasValueSequence ? json.ValueSequence.ToArray() : json.ValueSpan.ToArray()));
                     if (json.HasValueSequence)
                     {
-                        Assert.True(json.ValueSpan.IsEmpty);
+                        Assert.True(json.ValueSpan == default);
                     }
                     else
                     {
@@ -319,7 +319,7 @@ namespace System.Text.Json.Tests
                     builder.Append(Encoding.UTF8.GetString(json.HasValueSequence ? json.ValueSequence.ToArray() : json.ValueSpan.ToArray()));
                     if (json.HasValueSequence)
                     {
-                        Assert.True(json.ValueSpan.IsEmpty);
+                        Assert.True(json.ValueSpan == default);
                     }
                     else
                     {
@@ -363,7 +363,7 @@ namespace System.Text.Json.Tests
 
                     if (json.HasValueSequence)
                     {
-                        Assert.True(json.ValueSpan.IsEmpty);
+                        Assert.True(json.ValueSpan == default);
                     }
                     else
                     {
@@ -461,13 +461,13 @@ namespace System.Text.Json.Tests
                     }
                     if (json.HasValueSequence)
                     {
-                        Assert.True(json.ValueSpan.IsEmpty, $"Escaped ValueSpan to be empty when HasValueSequence is true. Test case: {testCase}");
+                        Assert.True(json.ValueSpan == default, $"Escaped ValueSpan to be empty when HasValueSequence is true. Test case: {testCase}");
                         Assert.False(json.ValueSequence.IsEmpty, $"Escaped ValueSequence to not be empty when HasValueSequence is true. Test case: {testCase}");
                     }
                     else
                     {
                         Assert.True(json.ValueSequence.IsEmpty, $"Escaped ValueSequence to be empty when HasValueSequence is false. Test case: {testCase}");
-                        Assert.False(json.ValueSpan.IsEmpty, $"Escaped ValueSpan to not be empty when HasValueSequence is false. Test case: {testCase}");
+                        Assert.False(json.ValueSpan == default, $"Escaped ValueSpan to not be empty when HasValueSequence is false. Test case: {testCase}");
                     }
 
                     index++;
@@ -493,18 +493,18 @@ namespace System.Text.Json.Tests
                 var json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
 
                 Assert.False(json.HasValueSequence);
-                Assert.True(json.ValueSpan.IsEmpty);
+                Assert.True(json.ValueSpan == default);
                 Assert.True(json.ValueSequence.IsEmpty);
 
                 Assert.True(json.Read());
                 Assert.True(json.HasValueSequence);
-                Assert.True(json.ValueSpan.IsEmpty);
+                Assert.True(json.ValueSpan == default);
                 Assert.False(json.ValueSequence.IsEmpty);
 
                 // Subsequent calls to Read clears the value properties since Read returned false.
                 Assert.False(json.Read());
                 Assert.False(json.HasValueSequence);
-                Assert.True(json.ValueSpan.IsEmpty);
+                Assert.True(json.ValueSpan == default);
                 Assert.True(json.ValueSequence.IsEmpty);
             }
         }
