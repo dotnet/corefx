@@ -309,11 +309,11 @@ namespace System.Text.Json.Tests
                         root = valueSpan[0] == 't';
                         break;
                     case JsonTokenType.Number:
-                        json.TryGetDouble(out double valueDouble);
+                        json.TryGetDoubleValue(out double valueDouble);
                         root = valueDouble;
                         break;
                     case JsonTokenType.String:
-                        string valueString = json.GetString();
+                        string valueString = json.GetStringValue();
                         root = valueString;
                         break;
                     case JsonTokenType.Null:
@@ -355,7 +355,7 @@ namespace System.Text.Json.Tests
                 switch (tokenType)
                 {
                     case JsonTokenType.PropertyName:
-                        key = json.GetString();
+                        key = json.GetStringValue();
                         dictionary.Add(key, null);
                         break;
                     case JsonTokenType.True:
@@ -371,7 +371,7 @@ namespace System.Text.Json.Tests
                         }
                         break;
                     case JsonTokenType.Number:
-                        json.TryGetDouble(out double valueDouble);
+                        json.TryGetDoubleValue(out double valueDouble);
                         if (dictionary.TryGetValue(key, out _))
                         {
                             dictionary[key] = valueDouble;
@@ -382,7 +382,7 @@ namespace System.Text.Json.Tests
                         }
                         break;
                     case JsonTokenType.String:
-                        string valueString = json.GetString();
+                        string valueString = json.GetStringValue();
                         if (dictionary.TryGetValue(key, out _))
                         {
                             dictionary[key] = valueString;
@@ -457,11 +457,11 @@ namespace System.Text.Json.Tests
                         arrayList.Add(value);
                         break;
                     case JsonTokenType.Number:
-                        json.TryGetDouble(out double doubleValue);
+                        json.TryGetDoubleValue(out double doubleValue);
                         arrayList.Add(doubleValue);
                         break;
                     case JsonTokenType.String:
-                        string valueString = json.GetString();
+                        string valueString = json.GetStringValue();
                         arrayList.Add(valueString);
                         break;
                     case JsonTokenType.Null:

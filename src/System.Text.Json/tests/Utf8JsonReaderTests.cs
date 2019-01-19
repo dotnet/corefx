@@ -1614,23 +1614,23 @@ namespace System.Text.Json.Tests
                     case JsonTokenType.Number:
                         if (json.ValueSpan.IndexOf((byte)'.') != -1)
                         {
-                            Assert.True(json.TryGetDouble(out double numberValue));
+                            Assert.True(json.TryGetDoubleValue(out double numberValue));
                             // Use InvariantCulture to format the numbers to make sure they retain the decimal point '.'
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         else
                         {
-                            Assert.True(json.TryGetInt32(out int numberValue));
+                            Assert.True(json.TryGetInt32Value(out int numberValue));
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         break;
                     case JsonTokenType.String:
-                        string stringValue = json.GetString();
+                        string stringValue = json.GetStringValue();
                         Assert.Equal(expectedString, stringValue);
                         break;
                     case JsonTokenType.False:
                     case JsonTokenType.True:
-                        bool boolValue = json.GetBoolean();
+                        bool boolValue = json.GetBooleanValue();
                         Assert.Equal(expectedString, boolValue.ToString(CultureInfo.InvariantCulture));
                         break;
                 }
@@ -1694,24 +1694,24 @@ namespace System.Text.Json.Tests
                     case JsonTokenType.Number:
                         if (json.ValueSpan.IndexOf((byte)'.') != -1)
                         {
-                            Assert.True(json.TryGetDouble(out double numberValue));
+                            Assert.True(json.TryGetDoubleValue(out double numberValue));
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         else
                         {
-                            Assert.True(json.TryGetInt32(out int numberValue));
+                            Assert.True(json.TryGetInt32Value(out int numberValue));
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         foundPrimitiveValue = true;
                         break;
                     case JsonTokenType.String:
-                        string stringValue = json.GetString();
+                        string stringValue = json.GetStringValue();
                         Assert.Equal(expectedString, stringValue);
                         foundPrimitiveValue = true;
                         break;
                     case JsonTokenType.False:
                     case JsonTokenType.True:
-                        bool boolValue = json.GetBoolean();
+                        bool boolValue = json.GetBooleanValue();
                         Assert.Equal(expectedString, boolValue.ToString(CultureInfo.InvariantCulture));
                         foundPrimitiveValue = true;
                         break;
