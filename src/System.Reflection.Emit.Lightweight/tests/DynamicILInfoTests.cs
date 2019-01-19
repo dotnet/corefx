@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Xunit;
 
@@ -14,7 +15,7 @@ namespace System.Reflection.Emit.Tests
         [Fact]
         public void GetTokenFor_String_Success()
         {
-            DynamicMethod dynamicMethod = new DynamicMethod(nameof(HelloWorld), typeof(string), new Type[] { }, typeof(DynamicILInfoGetTokenForTests), false);
+            DynamicMethod dynamicMethod = new DynamicMethod(nameof(HelloWorld), typeof(string), new Type[] { }, typeof(DynamicILInfoTests), false);
             DynamicILInfo dynamicILInfo = dynamicMethod.GetDynamicILInfo();
 
             SignatureHelper sigHelper = SignatureHelper.GetLocalVarSigHelper();
@@ -45,7 +46,7 @@ namespace System.Reflection.Emit.Tests
         public void GetTokenFor_DynamicMethod_Success()
         {
             // Calling DynamicMethod recursively
-            DynamicMethod dynamicMethod = new DynamicMethod(nameof(Fib), typeof(long), new Type[] { typeof(long) }, typeof(DynamicILInfoGetTokenForTests), false);
+            DynamicMethod dynamicMethod = new DynamicMethod(nameof(Fib), typeof(long), new Type[] { typeof(long) }, typeof(DynamicILInfoTests), false);
             DynamicILInfo dynamicILInfo = dynamicMethod.GetDynamicILInfo();
 
             SignatureHelper sigHelper = SignatureHelper.GetLocalVarSigHelper();
@@ -118,7 +119,7 @@ namespace System.Reflection.Emit.Tests
         [Fact]
         public void GetTokenFor_CtorMethodAndField_Success()
         {
-            DynamicMethod dynamicMethod = new DynamicMethod(nameof(Mock), typeof(Person), new Type[] { }, typeof(DynamicILInfoGetTokenForTests), false);
+            DynamicMethod dynamicMethod = new DynamicMethod(nameof(Mock), typeof(Person), new Type[] { }, typeof(DynamicILInfoTests), false);
             DynamicILInfo dynamicILInfo = dynamicMethod.GetDynamicILInfo();
 
             SignatureHelper sigHelper = SignatureHelper.GetLocalVarSigHelper();
@@ -185,7 +186,7 @@ namespace System.Reflection.Emit.Tests
         [Fact]
         public void GetTokenFor_IntGenerics_Success()
         {
-            DynamicMethod dynamicMethod = new DynamicMethod(nameof(SumInteger), typeof(int), new Type[] { }, typeof(DynamicILInfoGetTokenForTests), false);
+            DynamicMethod dynamicMethod = new DynamicMethod(nameof(SumInteger), typeof(int), new Type[] { }, typeof(DynamicILInfoTests), false);
             DynamicILInfo dynamicILInfo = dynamicMethod.GetDynamicILInfo();
 
             SignatureHelper sigHelper = SignatureHelper.GetLocalVarSigHelper();
@@ -248,7 +249,7 @@ namespace System.Reflection.Emit.Tests
         [Fact]
         public void GetTokenFor_StringGenerics_Success()
         {
-            DynamicMethod dynamicMethod = new DynamicMethod(nameof(ContactString), typeof(string), Type.EmptyTypes, typeof(DynamicILInfoGetTokenForTests), false);
+            DynamicMethod dynamicMethod = new DynamicMethod(nameof(ContactString), typeof(string), Type.EmptyTypes, typeof(DynamicILInfoTests), false);
             DynamicILInfo dynamicILInfo = dynamicMethod.GetDynamicILInfo();
 
             SignatureHelper sigHelper = SignatureHelper.GetLocalVarSigHelper();
@@ -343,7 +344,7 @@ namespace System.Reflection.Emit.Tests
         [Fact]
         public void GetTokenFor_Exception_Success()
         {
-            DynamicMethod dynamicMethod = new DynamicMethod(nameof(ExceptionTest), typeof(int), Type.EmptyTypes, typeof(DynamicILInfoGetTokenForTests), false);
+            DynamicMethod dynamicMethod = new DynamicMethod(nameof(ExceptionTest), typeof(int), Type.EmptyTypes, typeof(DynamicILInfoTests), false);
             DynamicILInfo dynamicILInfo = dynamicMethod.GetDynamicILInfo();
 
             SignatureHelper sigHelper = SignatureHelper.GetLocalVarSigHelper();
@@ -416,7 +417,7 @@ namespace System.Reflection.Emit.Tests
             int i = Finder.Find(intarray, MyRule);
 
             string[] strarray = new string[] { "Hello", "1", "world", "dynamicmethod", "find it already" };
-            string s = Finder.Find(strarray, new DynamicILInfoGetTokenForTests().MyRule);
+            string s = Finder.Find(strarray, new DynamicILInfoTests().MyRule);
 
             return (i == intarray[3] && s == strarray[3]);
         }
@@ -424,7 +425,7 @@ namespace System.Reflection.Emit.Tests
         [Fact]
         public void Test_GenericMethod()
         {
-            DynamicMethod dynamicMethod = new DynamicMethod(nameof(GenericMethod), typeof(bool), Type.EmptyTypes, typeof(DynamicILInfoGetTokenForTests), false);
+            DynamicMethod dynamicMethod = new DynamicMethod(nameof(GenericMethod), typeof(bool), Type.EmptyTypes, typeof(DynamicILInfoTests), false);
             DynamicILInfo dynamicILInfo = dynamicMethod.GetDynamicILInfo();
 
             SignatureHelper sigHelper = SignatureHelper.GetLocalVarSigHelper();
@@ -449,7 +450,7 @@ namespace System.Reflection.Emit.Tests
                 0x3c, 0x00, 0x00, 0x0a, 0x2b, 0x01, 0x16, 0x13, 0x04, 0x2b, 0x00, 0x11, 0x04, 0x2a
                 };
             int token0 = dynamicILInfo.GetTokenFor(typeof(int).TypeHandle);
-            int token1 = dynamicILInfo.GetTokenFor(typeof(DynamicILInfoGetTokenForTests).GetMethod("MyRule", BindingFlags.NonPublic | BindingFlags.Static).MethodHandle);
+            int token1 = dynamicILInfo.GetTokenFor(typeof(DynamicILInfoTests).GetMethod("MyRule", BindingFlags.NonPublic | BindingFlags.Static).MethodHandle);
             int token2 = dynamicILInfo.GetTokenFor(typeof(Satisfy<int>).GetConstructor(new Type[] { typeof(System.Object), typeof(System.IntPtr) }).MethodHandle, typeof(Satisfy<int>).TypeHandle);
             int token3 = dynamicILInfo.GetTokenFor(typeof(Finder).GetMethod("Find").MakeGenericMethod(typeof(int)).MethodHandle);
             int token4 = dynamicILInfo.GetTokenFor(typeof(string).TypeHandle);
@@ -458,8 +459,8 @@ namespace System.Reflection.Emit.Tests
             int token7 = dynamicILInfo.GetTokenFor("world");
             int token8 = dynamicILInfo.GetTokenFor("dynamicmethod");
             int token9 = dynamicILInfo.GetTokenFor("find it already");
-            int token10 = dynamicILInfo.GetTokenFor(typeof(DynamicILInfoGetTokenForTests).GetConstructor(Type.EmptyTypes).MethodHandle);
-            int token11 = dynamicILInfo.GetTokenFor(typeof(DynamicILInfoGetTokenForTests).GetMethod("MyRule", BindingFlags.NonPublic | BindingFlags.Instance).MethodHandle);
+            int token10 = dynamicILInfo.GetTokenFor(typeof(DynamicILInfoTests).GetConstructor(Type.EmptyTypes).MethodHandle);
+            int token11 = dynamicILInfo.GetTokenFor(typeof(DynamicILInfoTests).GetMethod("MyRule", BindingFlags.NonPublic | BindingFlags.Instance).MethodHandle);
             int token12 = dynamicILInfo.GetTokenFor(typeof(Satisfy<string>).GetConstructor(new Type[] { typeof(System.Object), typeof(System.IntPtr) }).MethodHandle, typeof(Satisfy<string>).TypeHandle);
             int token13 = dynamicILInfo.GetTokenFor(typeof(Finder).GetMethod("Find").MakeGenericMethod(typeof(string)).MethodHandle);
             int token14 = dynamicILInfo.GetTokenFor(typeof(string).GetMethod("op_Equality").MethodHandle);
@@ -504,7 +505,7 @@ namespace System.Reflection.Emit.Tests
         public void Test_TwoDimTest()
         {
             // 2-D array (set/address/get)
-            DynamicMethod dynamicMethod = new DynamicMethod(nameof(TwoDimTest), typeof(int), Type.EmptyTypes, typeof(DynamicILInfoGetTokenForTests), false);
+            DynamicMethod dynamicMethod = new DynamicMethod(nameof(TwoDimTest), typeof(int), Type.EmptyTypes, typeof(DynamicILInfoTests), false);
             DynamicILInfo dynamicILInfo = dynamicMethod.GetDynamicILInfo();
 
             SignatureHelper sigHelper = SignatureHelper.GetLocalVarSigHelper();
@@ -577,7 +578,7 @@ namespace System.Reflection.Emit.Tests
         public void Test_CallGM()
         {
             // GenericMethod inside GenericType
-            DynamicMethod dynamicMethod = new DynamicMethod(nameof(CallGM), typeof(string), Type.EmptyTypes, typeof(DynamicILInfoGetTokenForTests), false);
+            DynamicMethod dynamicMethod = new DynamicMethod(nameof(CallGM), typeof(string), Type.EmptyTypes, typeof(DynamicILInfoTests), false);
             DynamicILInfo dynamicILInfo = dynamicMethod.GetDynamicILInfo();
 
             SignatureHelper sigHelper = SignatureHelper.GetLocalVarSigHelper();
