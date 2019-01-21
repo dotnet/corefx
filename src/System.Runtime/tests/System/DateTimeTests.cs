@@ -2036,6 +2036,30 @@ namespace System.Tests
         }
 
         [Fact]
+        public void ToString_Years_VariousLengthsAndCultures()
+        {
+            var enUS = new CultureInfo("en-US");
+            Assert.Equal("34", new DateTime(1234, 5, 6).ToString("yy", enUS));
+            for (int i = 3; i < 32; i++)
+            {
+                Assert.Equal(1234.ToString("D" + i), new DateTime(1234, 5, 6).ToString(new string('y', i), enUS));
+            }
+
+            Assert.Equal("99", DateTime.MaxValue.ToString("yy", enUS));
+            for (int i = 3; i < 32; i++)
+            {
+                Assert.Equal(9999.ToString("D" + i), DateTime.MaxValue.ToString(new string('y', i), enUS));
+            }
+
+            var thTH = new CultureInfo("th-TH");
+            Assert.Equal("42", DateTime.MaxValue.ToString("yy", thTH));
+            for (int i = 3; i < 32; i++)
+            {
+                Assert.Equal(10542.ToString("D" + i), DateTime.MaxValue.ToString(new string('y', i), thTH));
+            }
+        }
+
+        [Fact]
         public void ToLongDateString_Invoke_ReturnsExpected()
         {
             DateTime date = DateTime.Now;
