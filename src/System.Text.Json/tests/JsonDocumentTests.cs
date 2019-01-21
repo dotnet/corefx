@@ -208,7 +208,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
-                str => JsonDocument.Parse(str), 
+                str => JsonDocument.Parse(str),
                 null);
         }
 
@@ -1369,7 +1369,7 @@ namespace System.Text.Json.Tests
                 JsonElement.ObjectEnumerator enumerator = doc.RootElement.EnumerateObject();
                 Assert.True(enumerator.MoveNext(), "Move to first property");
                 JsonProperty property = enumerator.Current;
-                
+
                 Assert.Equal("  weird  property  name", property.Name);
                 string rawText = property.ToString();
                 int crCount = rawText.Count(c => c == '\r');

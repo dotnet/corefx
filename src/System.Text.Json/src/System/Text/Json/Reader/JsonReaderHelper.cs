@@ -52,64 +52,6 @@ namespace System.Text.Json
             }
         }
 
-        internal static string GetStringFromUtf8(ReadOnlySpan<byte> utf8)
-        {
-#if BUILDING_INBOX_LIBRARY
-            return s_utf8Encoding.GetString(utf8);
-#else
-            if (utf8.IsEmpty)
-            {
-                return string.Empty;
-            }
-            unsafe
-            {
-                fixed (byte* bytePtr = utf8)
-                {
-                    return s_utf8Encoding.GetString(bytePtr, utf8.Length);
-                }
-            }
-#endif
-        }
-
-        internal static int GetUtf8ByteCount(ReadOnlySpan<char> text)
-        {
-#if BUILDING_INBOX_LIBRARY
-            return s_utf8Encoding.GetByteCount(text);
-#else
-            if (text.IsEmpty)
-            {
-                return 0;
-            }
-            unsafe
-            {
-                fixed (char* charPtr = text)
-                {
-                    return s_utf8Encoding.GetByteCount(charPtr, text.Length);
-                }
-            }
-#endif
-        }
-
-        internal static int GetUtf8FromText(ReadOnlySpan<char> text, Span<byte> dest)
-        {
-#if BUILDING_INBOX_LIBRARY
-            return s_utf8Encoding.GetBytes(text, dest);
-#else
-            if (text.IsEmpty)
-            {
-                return 0;
-            }
-            unsafe
-            {
-                fixed (char* charPtr = text)
-                fixed (byte* destPtr = dest)
-                {
-                    return s_utf8Encoding.GetBytes(charPtr, text.Length, destPtr, dest.Length);
-                }
-            }
-#endif
-        }
-
         // A digit is valid if it is in the range: [0..9]
         // Otherwise, return false.
         public static bool IsDigit(byte nextByte) => (uint)(nextByte - '0') <= '9' - '0';

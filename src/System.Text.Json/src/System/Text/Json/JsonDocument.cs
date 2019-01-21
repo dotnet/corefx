@@ -224,7 +224,7 @@ namespace System.Text.Json
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
             // TODO(#33292): Unescape this.
-            lastString = JsonReaderHelper.GetStringFromUtf8(segment);
+            lastString = JsonReaderHelper.TranscodeHelper(segment);
             _lastIndexAndString = (index, lastString);
             return lastString;
         }
@@ -398,13 +398,13 @@ namespace System.Text.Json
         internal string GetRawValueAsString(int index)
         {
             ReadOnlyMemory<byte> segment = GetRawValue(index, includeQuotes: true);
-            return JsonReaderHelper.GetStringFromUtf8(segment.Span);
+            return JsonReaderHelper.TranscodeHelper(segment.Span);
         }
 
         internal string GetPropertyRawValueAsString(int valueIndex)
         {
             ReadOnlyMemory<byte> segment = GetPropertyRawValue(valueIndex);
-            return JsonReaderHelper.GetStringFromUtf8(segment.Span);
+            return JsonReaderHelper.TranscodeHelper(segment.Span);
         }
 
         private static void Parse(

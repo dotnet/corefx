@@ -90,7 +90,7 @@ namespace System.Text.Json
                 // If it's wrong, we'll just grow and copy as we would if the tokens
                 // were more frequent anyways.
                 const int OneMegabyte = 1024 * 1024;
-                
+
                 if (initialSize > OneMegabyte && initialSize <= 4 * OneMegabyte)
                 {
                     initialSize = OneMegabyte;
@@ -219,7 +219,7 @@ namespace System.Text.Json
             private int FindOpenElement(JsonTokenType lookupType)
             {
                 Span<byte> data = _rentedBuffer.AsSpan(0, Length);
-               
+
                 for (int i = Length - DbRow.Size; i >= 0; i -= DbRow.Size)
                 {
                     DbRow row = MemoryMarshal.Read<DbRow>(data.Slice(i));
