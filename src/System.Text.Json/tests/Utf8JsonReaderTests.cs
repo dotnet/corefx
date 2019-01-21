@@ -485,6 +485,7 @@ namespace System.Text.Json.Tests
                     var builder = new StringBuilder();
                     while (json.Read())
                     {
+                        Assert.True(json.ValueSequence.IsEmpty);
                         if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
                             builder.Append(Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
                     }
@@ -494,6 +495,7 @@ namespace System.Text.Json.Tests
                     json = new Utf8JsonReader(data.AsSpan((int)consumed), true, json.CurrentState);
                     while (json.Read())
                     {
+                        Assert.True(json.ValueSequence.IsEmpty);
                         if (json.TokenType == JsonTokenType.Number || json.TokenType == JsonTokenType.Comment || json.TokenType == JsonTokenType.PropertyName)
                             builder.Append(Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
                     }
@@ -561,38 +563,34 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("{\"nam\\\"e\":\"ah\\\"son\"}", JsonCommentHandling.Disallow, "nam\\\"e, ah\\\"son, ")]
+        [InlineData("{\"nam\\\"e\":\"ah\\\"son\"}", "nam\\\"e, ah\\\"son, ", "nam\"e, ah\"son, ")]
         [InlineData("{\"Here is a string: \\\"\\\"\":\"Here is a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str\":\"\\\"\\\"\"}",
-            JsonCommentHandling.Disallow,
-            "Here is a string: \\\"\\\", Here is a, Here is a back slash\\\\, Multiline\\r\\n String\\r\\n, \\tMul\\r\\ntiline String, \\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\, str, \\\"\\\", ")]
-
-        [InlineData("{\"nam\\\"e\":\"ah\\\"son\"}", JsonCommentHandling.Allow, "nam\\\"e, ah\\\"son, ")]
-        [InlineData("{\"Here is a string: \\\"\\\"\":\"Here is a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str\":\"\\\"\\\"\"}",
-            JsonCommentHandling.Allow,
-            "Here is a string: \\\"\\\", Here is a, Here is a back slash\\\\, Multiline\\r\\n String\\r\\n, \\tMul\\r\\ntiline String, \\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\, str, \\\"\\\", ")]
-
-        [InlineData("{\"nam\\\"e\":\"ah\\\"son\"}", JsonCommentHandling.Skip, "nam\\\"e, ah\\\"son, ")]
-        [InlineData("{\"Here is a string: \\\"\\\"\":\"Here is a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str\":\"\\\"\\\"\"}",
-            JsonCommentHandling.Skip,
-            "Here is a string: \\\"\\\", Here is a, Here is a back slash\\\\, Multiline\\r\\n String\\r\\n, \\tMul\\r\\ntiline String, \\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\, str, \\\"\\\", ")]
-        public static void TestJsonReaderUtf8SpecialString(string jsonString, JsonCommentHandling commentHandling, string expectedStr)
+            "Here is a string: \\\"\\\", Here is a, Here is a back slash\\\\, Multiline\\r\\n String\\r\\n, \\tMul\\r\\ntiline String, \\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\, str, \\\"\\\", ",
+            "Here is a string: \"\", Here is a, Here is a back slash\\, Multiline\r\n String\r\n, \tMul\r\ntiline String, \"somequote\"\tMu\"\"l\r\ntiline\"another\" String\\, str, \"\", ")]
+        public static void TestJsonReaderUtf8SpecialString(string jsonString, string expectedStr, string expectedEscapedStr)
         {
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int length, commentHandling);
-            string actualStr = Encoding.UTF8.GetString(result, 0, length);
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+                byte[] result = JsonTestHelper.ReturnBytesHelper(dataUtf8, out int length, commentHandling);
+                string actualStr = Encoding.UTF8.GetString(result, 0, length);
 
-            Assert.Equal(expectedStr, actualStr);
+                Assert.Equal(expectedStr, actualStr);
 
-            result = JsonTestHelper.SequenceReturnBytesHelper(dataUtf8, out length, commentHandling);
-            actualStr = Encoding.UTF8.GetString(result, 0, length);
+                result = JsonTestHelper.SequenceReturnBytesHelper(dataUtf8, out length, commentHandling);
+                actualStr = Encoding.UTF8.GetString(result, 0, length);
 
-            Assert.Equal(expectedStr, actualStr);
+                Assert.Equal(expectedStr, actualStr);
 
-            object jsonValues = JsonTestHelper.ReturnObjectHelper(dataUtf8, commentHandling);
-            string str = JsonTestHelper.ObjectToString(jsonValues);
-            ReadOnlySpan<char> expectedSpan = expectedStr.AsSpan(0, expectedStr.Length - 2);
-            ReadOnlySpan<char> actualSpan = str.AsSpan(0, str.Length - 2);
-            Assert.True(expectedSpan.SequenceEqual(actualSpan));
+                object jsonValues = JsonTestHelper.ReturnObjectHelper(dataUtf8, commentHandling);
+                string str = JsonTestHelper.ObjectToString(jsonValues);
+                Assert.Equal(expectedEscapedStr, str);
+
+                Stream stream = new MemoryStream(dataUtf8);
+                TextReader reader = new StreamReader(stream, Encoding.UTF8, false, 1024, true);
+                expectedEscapedStr = JsonTestHelper.NewtonsoftReturnStringHelper(reader);
+                Assert.Equal(expectedEscapedStr, str);
+            }
         }
 
         [Theory]
@@ -609,6 +607,7 @@ namespace System.Text.Json.Tests
                     var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), false, state);
                     while (json.Read())
                     {
+                        Assert.True(json.ValueSequence.IsEmpty);
                         // Check if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
                         Assert.True(json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null);
                         Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
@@ -619,6 +618,7 @@ namespace System.Text.Json.Tests
                     json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), true, json.CurrentState);
                     while (json.Read())
                     {
+                        Assert.True(json.ValueSequence.IsEmpty);
                         // Check if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
                         Assert.True(json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null);
                         Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
@@ -907,6 +907,7 @@ namespace System.Text.Json.Tests
             long indexAfterFirstComment = 0;
             while (json.Read())
             {
+                Assert.True(json.ValueSequence.IsEmpty);
                 JsonTokenType tokenType = json.TokenType;
                 switch (tokenType)
                 {
@@ -973,6 +974,7 @@ namespace System.Text.Json.Tests
             long indexAfterFirstComment = 0;
             while (json.Read())
             {
+                Assert.True(json.ValueSequence.IsEmpty);
                 JsonTokenType tokenType = json.TokenType;
                 switch (tokenType)
                 {
@@ -999,6 +1001,7 @@ namespace System.Text.Json.Tests
                 indexAfterFirstComment = 0;
                 while (jsonSlice.Read())
                 {
+                    Assert.True(json.ValueSequence.IsEmpty);
                     JsonTokenType tokenType = jsonSlice.TokenType;
                     switch (tokenType)
                     {
@@ -1022,6 +1025,7 @@ namespace System.Text.Json.Tests
                 {
                     while (jsonSlice.Read())
                     {
+                        Assert.True(json.ValueSequence.IsEmpty);
                         JsonTokenType tokenType = jsonSlice.TokenType;
                         switch (tokenType)
                         {
@@ -1599,6 +1603,7 @@ namespace System.Text.Json.Tests
 
             if (json.Read())
             {
+                Assert.True(json.ValueSequence.IsEmpty);
                 bool isTokenPrimitive = json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null;
                 Assert.True(isTokenPrimitive);
                 switch (json.TokenType)
@@ -1609,23 +1614,23 @@ namespace System.Text.Json.Tests
                     case JsonTokenType.Number:
                         if (json.ValueSpan.IndexOf((byte)'.') != -1)
                         {
-                            Assert.True(json.TryGetDoubleValue(out double numberValue));
+                            Assert.True(json.TryGetDouble(out double numberValue));
                             // Use InvariantCulture to format the numbers to make sure they retain the decimal point '.'
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         else
                         {
-                            Assert.True(json.TryGetInt32Value(out int numberValue));
+                            Assert.True(json.TryGetInt32(out int numberValue));
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         break;
                     case JsonTokenType.String:
-                        string stringValue = json.GetStringValue();
+                        string stringValue = json.GetString();
                         Assert.Equal(expectedString, stringValue);
                         break;
                     case JsonTokenType.False:
                     case JsonTokenType.True:
-                        bool boolValue = json.GetBooleanValue();
+                        bool boolValue = json.GetBoolean();
                         Assert.Equal(expectedString, boolValue.ToString(CultureInfo.InvariantCulture));
                         break;
                 }
@@ -1668,6 +1673,7 @@ namespace System.Text.Json.Tests
             bool foundPrimitiveValue = false;
             while (json.Read())
             {
+                Assert.True(json.ValueSequence.IsEmpty);
                 bool isTokenPrimitive = json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null;
 
                 if (insideArray)
@@ -1688,24 +1694,24 @@ namespace System.Text.Json.Tests
                     case JsonTokenType.Number:
                         if (json.ValueSpan.IndexOf((byte)'.') != -1)
                         {
-                            Assert.True(json.TryGetDoubleValue(out double numberValue));
+                            Assert.True(json.TryGetDouble(out double numberValue));
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         else
                         {
-                            Assert.True(json.TryGetInt32Value(out int numberValue));
+                            Assert.True(json.TryGetInt32(out int numberValue));
                             Assert.Equal(expectedString, numberValue.ToString(CultureInfo.InvariantCulture));
                         }
                         foundPrimitiveValue = true;
                         break;
                     case JsonTokenType.String:
-                        string stringValue = json.GetStringValue();
+                        string stringValue = json.GetString();
                         Assert.Equal(expectedString, stringValue);
                         foundPrimitiveValue = true;
                         break;
                     case JsonTokenType.False:
                     case JsonTokenType.True:
-                        bool boolValue = json.GetBooleanValue();
+                        bool boolValue = json.GetBoolean();
                         Assert.Equal(expectedString, boolValue.ToString(CultureInfo.InvariantCulture));
                         foundPrimitiveValue = true;
                         break;
@@ -1775,14 +1781,14 @@ namespace System.Text.Json.Tests
                     new object[] {"   true  ", true, "True"},
                     new object[] {"   false   ", true, "False"},
                     new object[] {"   null   ", true, "null"},
-                    new object[] {"   \" Test string with \\\"nested quotes \\\" and hex: \\uABCD values! \"   ", true, " Test string with \\\"nested quotes \\\" and hex: \\uABCD values! "},
+                    new object[] {"   \" Test string with \\\"nested quotes \\\" and hex: \\uABCD values! \"   ", true, " Test string with \"nested quotes \" and hex: \uABCD values! "},
 
                     new object[] {"   12345   ", false, "12345"},
                     new object[] {"   12345.67890e-12   ", false, "1.23456789E-08"},
                     new object[] {"   true  ", false, "True"},
                     new object[] {"   false   ", false, "False"},
                     new object[] {"   null   ", false, "null"},
-                    new object[] {"   \" Test string with \\\"nested quotes \\\" and hex: \\uABCD values! \"   ", false, " Test string with \\\"nested quotes \\\" and hex: \\uABCD values! "},
+                    new object[] {"   \" Test string with \\\"nested quotes \\\" and hex: \\uABCD values! \"   ", false, " Test string with \"nested quotes \" and hex: \uABCD values! "},
                 };
             }
         }
@@ -1876,6 +1882,23 @@ namespace System.Text.Json.Tests
                     new object[] {"\"he\\nl\nlo", 1, 1},
                     new object[] {"\"he\\nl\\uABCXlo", 1, 6},
                     new object[] {"\"he\\nl\\\tlo", 1, 2},
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> InvalidUTF8Strings
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] { new byte[] { 34, 97, 0xc3, 0x28, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xa0, 0xa1, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xe2, 0x28, 0xa1, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xe2, 0x82, 0x28, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0xbc, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xf0, 0x90, 0x28, 0xbc, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0x28, 98, 34 } },
                 };
             }
         }

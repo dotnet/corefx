@@ -13,11 +13,8 @@ using Internal.Runtime.CompilerServices;
 
 namespace System.Text.Json
 {
-    internal static class JsonReaderHelper
+    internal static partial class JsonReaderHelper
     {
-        // Reject any invalid UTF-8 data rather than silently replacing.
-        internal static readonly UTF8Encoding s_utf8Encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
-
         public static (int, int) CountNewLines(ReadOnlySpan<byte> data)
         {
             int lastLineFeedIndex = -1;

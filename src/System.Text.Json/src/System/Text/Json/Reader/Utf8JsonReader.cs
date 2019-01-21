@@ -266,6 +266,7 @@ namespace System.Text.Json
         private bool ReadSingleSegment()
         {
             bool retVal = false;
+            ValueSpan = default;
 
             if (!HasMoreData())
             {
