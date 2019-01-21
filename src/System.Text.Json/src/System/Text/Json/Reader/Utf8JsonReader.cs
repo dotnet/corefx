@@ -255,6 +255,7 @@ namespace System.Text.Json
 
             _tokenType = JsonTokenType.EndArray;
             ValueSpan = _buffer.Slice(_consumed, 1);
+
             UpdateBitStackOnEndToken();
         }
 
