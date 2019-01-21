@@ -99,8 +99,6 @@ namespace System.Text.Json
                 return 0;
             }
 
-            Debug.Assert(!dest.IsEmpty)
-
             unsafe
             {
                 fixed (char* charPtr = text)

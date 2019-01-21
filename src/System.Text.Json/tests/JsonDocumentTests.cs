@@ -1339,7 +1339,7 @@ namespace System.Text.Json.Tests
             StringBuilder builder = new StringBuilder(propertyName.Length * 6);
 
             int half = propertyName.Length / 2;
-            builder.Append(propertyName.AsSpan(0, half));
+            builder.Append(propertyName.Substring(0, half));
 
             for (int i = half; i < propertyName.Length; i++)
             {
