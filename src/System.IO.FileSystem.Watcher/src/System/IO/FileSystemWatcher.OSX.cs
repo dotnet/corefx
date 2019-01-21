@@ -351,13 +351,9 @@ namespace System.IO
                 IntPtr clientCallBackInfo,
                 size_t numEvents,
                 byte** eventPaths,
-                [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-                Interop.EventStream.FSEventStreamEventFlags[] eventFlags,
-                [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-                FSEventStreamEventId[] eventIds)
+                Interop.EventStream.FSEventStreamEventFlags* eventFlags,
+                FSEventStreamEventId* eventIds)
             {
-                Debug.Assert((eventPaths != null) && (numEvents.ToInt32() == eventFlags.Length) && (numEvents.ToInt32() == eventIds.Length));
-
                 // Try to get the actual watcher from our weak reference.  We maintain a weak reference most of the time
                 // so as to avoid a rooted cycle that would prevent our processing loop from ever ending
                 // if the watcher is dropped by the user without being disposed. If we can't get the watcher,
@@ -386,8 +382,8 @@ namespace System.IO
 
             private unsafe void ProcessEvents(int numEvents,
                 byte** eventPaths,
-                Interop.EventStream.FSEventStreamEventFlags[] eventFlags,
-                FSEventStreamEventId[] eventIds,
+                Interop.EventStream.FSEventStreamEventFlags* eventFlags,
+                FSEventStreamEventId* eventIds,
                 FileSystemWatcher watcher)
             {
                 // Since renames come in pairs, when we find the first we need to search for the next one. Once we find it, we'll add it to this
@@ -396,7 +392,7 @@ namespace System.IO
                 Memory<char>[] events = new Memory<char>[numEvents];
                 ParseEvents();
 
-                for (long i = 0; i < numEvents; i++)
+                for (int i = 0; i < numEvents; i++)
                 {
                     ReadOnlySpan<char> path = events[i].Span;
                     Debug.Assert(path[path.Length - 1] != '/', "Trailing slashes on events is not supported");
@@ -446,8 +442,8 @@ namespace System.IO
                         if (((eventType & WatcherChangeTypes.Renamed) > 0))
                         {
                             // Find the rename that is paired to this rename, which should be the next rename in the list
-                            long pairedId = FindRenameChangePairedChange(i, eventFlags);
-                            if (pairedId == long.MinValue)
+                            int pairedId = FindRenameChangePairedChange(i, eventFlags, numEvents);
+                            if (pairedId == int.MinValue)
                             {
                                 // Getting here means we have a rename without a pair, meaning it should be a create for the 
                                 // move from unwatched folder to watcher folder scenario or a move from the watcher folder out.
@@ -579,12 +575,13 @@ namespace System.IO
                 return _includeChildren || _fullDirectory.AsSpan().StartsWith(System.IO.Path.GetDirectoryName(eventPath), StringComparison.OrdinalIgnoreCase);
             }
 
-            private long FindRenameChangePairedChange(
-                long currentIndex, 
-                Interop.EventStream.FSEventStreamEventFlags[] eventFlags)
+            private unsafe int FindRenameChangePairedChange(
+                int currentIndex, 
+                Interop.EventStream.FSEventStreamEventFlags* eventFlags,
+                int numEvents)
             {
                 // Start at one past the current index and try to find the next Rename item, which should be the old path.
-                for (long i = currentIndex + 1; i < eventFlags.Length; i++)
+                for (int i = currentIndex + 1; i < numEvents; i++)
                 {
                     if (IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
                     {
@@ -593,7 +590,7 @@ namespace System.IO
                     }
                 }
 
-                return long.MinValue;
+                return int.MinValue;
             }
 
             private static bool IsFlagSet(Interop.EventStream.FSEventStreamEventFlags flags, Interop.EventStream.FSEventStreamEventFlags value)
