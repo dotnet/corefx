@@ -80,7 +80,7 @@ namespace System.Linq.ChainLinq
             {
                 consumable.Consume(consumer);
             }
-            if (e is T[] array)
+            else if (e is T[] array)
             {
                 ChainLinq.Consume.Array.Invoke(array, Links.Identity<T>.Instance, consumer);
             }

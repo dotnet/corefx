@@ -11,6 +11,7 @@
     <Compile Include="System\Linq\ChainLinq\Consumables\GroupingInternal.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Lookup.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Select.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Lookup.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Last.cs" />

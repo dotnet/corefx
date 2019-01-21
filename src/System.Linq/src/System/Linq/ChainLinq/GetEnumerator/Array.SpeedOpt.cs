@@ -10,10 +10,6 @@ namespace System.Linq.ChainLinq.GetEnumerator
         {
             switch (consumable.Link.LinkType)
             {
-                case Links.LinkType.Select:
-                    enumerator = new SelectEnumerator<T, U>(consumable.Underlying, ((Links.Select<T, U>)consumable.Link).Selector);
-                    break;
-
                 case Links.LinkType.Where:
                     Debug.Assert(typeof(T) == typeof(U));
                     enumerator = GetWhereEnumerator<U>(consumable);
@@ -63,29 +59,6 @@ namespace System.Linq.ChainLinq.GetEnumerator
                 _idx = _array.Length;
                 Current = default;
                 return false;
-            }
-        }
-
-        sealed class SelectEnumerator<T, U> : EnumeratorBase<U>
-        {
-            private T[] _array;
-            private Func<T, U> _selector;
-
-            int _idx;
-
-            public SelectEnumerator(T[] array, Func<T, U> selector) =>
-                (_array, _selector) = (array, selector);
-
-            public override bool MoveNext()
-            {
-                if (_idx >= _array.Length)
-                {
-                    Current = default;
-                    return false;
-                }
-
-                Current = _selector(_array[_idx++]);
-                return true;
             }
         }
     }
