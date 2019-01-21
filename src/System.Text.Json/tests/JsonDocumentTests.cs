@@ -12,6 +12,7 @@ using Xunit;
 using System.Buffers.Text;
 using System.IO.Tests;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace System.Text.Json.Tests
@@ -426,9 +427,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void ParseArray()
         {
-            ArraySegment<byte> buffer = StringToUtf8BufferWithEmptySpace(SR.SimpleArrayJson, 60);
-
-            using (JsonDocument doc = JsonDocument.Parse(buffer, default))
+            using (JsonDocument doc = JsonDocument.Parse(SR.SimpleArrayJson))
             {
                 JsonElement root = doc.RootElement;
 
@@ -447,9 +446,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void ParseSimpleObject()
         {
-            ArraySegment<byte> buffer = StringToUtf8BufferWithEmptySpace(SR.SimpleObjectJson);
-
-            using (JsonDocument doc = JsonDocument.Parse(buffer, default))
+            using (JsonDocument doc = JsonDocument.Parse(SR.SimpleObjectJson))
             {
                 JsonElement parsedObject = doc.RootElement;
 
@@ -479,9 +476,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void ParseNestedJson()
         {
-            ArraySegment<byte> buffer = StringToUtf8BufferWithEmptySpace(SR.ParseJson);
-
-            using (JsonDocument doc = JsonDocument.Parse(buffer, default))
+            using (JsonDocument doc = JsonDocument.Parse(SR.ParseJson))
             {
                 JsonElement parsedObject = doc.RootElement;
 
@@ -523,9 +518,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void ParseBoolean()
         {
-            ArraySegment<byte> buffer = StringToUtf8BufferWithEmptySpace("[true,false]", 60);
-
-            using (JsonDocument doc = JsonDocument.Parse(buffer, default))
+            using (JsonDocument doc = JsonDocument.Parse("[true,false]"))
             {
                 JsonElement parsedObject = doc.RootElement;
                 bool first = parsedObject[0].GetBoolean();
@@ -538,9 +531,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void JsonArrayToString()
         {
-            ArraySegment<byte> buffer = StringToUtf8BufferWithEmptySpace(SR.ParseJson);
-
-            using (JsonDocument doc = JsonDocument.Parse(buffer, default))
+            using (JsonDocument doc = JsonDocument.Parse(SR.ParseJson))
             {
                 JsonElement root = doc.RootElement;
 
@@ -552,9 +543,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void JsonObjectToString()
         {
-            ArraySegment<byte> buffer = StringToUtf8BufferWithEmptySpace(SR.BasicJson);
-
-            using (JsonDocument doc = JsonDocument.Parse(buffer, default))
+            using (JsonDocument doc = JsonDocument.Parse(SR.BasicJson))
             {
                 JsonElement root = doc.RootElement;
 
@@ -919,11 +908,22 @@ namespace System.Text.Json.Tests
 
                 Assert.Equal(JsonValueType.Number, root.Type);
 
-                Assert.True(root.TryGetSingle(out float floatVal));
-                Assert.Equal(float.PositiveInfinity, floatVal);
+                if (PlatformDetection.IsFullFramework)
+                {
+                    Assert.False(root.TryGetSingle(out float floatVal));
+                    Assert.Equal(0f, floatVal);
 
-                Assert.True(root.TryGetDouble(out double doubleVal));
-                Assert.Equal(double.PositiveInfinity, doubleVal);
+                    Assert.False(root.TryGetDouble(out double doubleVal));
+                    Assert.Equal(0d, doubleVal);
+                }
+                else
+                {
+                    Assert.True(root.TryGetSingle(out float floatVal));
+                    Assert.Equal(float.PositiveInfinity, floatVal);
+
+                    Assert.True(root.TryGetDouble(out double doubleVal));
+                    Assert.Equal(double.PositiveInfinity, doubleVal);
+                }
 
                 Assert.False(root.TryGetDecimal(out decimal decimalVal));
                 Assert.Equal(0m, decimalVal);
@@ -937,8 +937,17 @@ namespace System.Text.Json.Tests
                 Assert.False(root.TryGetUInt64(out ulong ulongVal));
                 Assert.Equal(0UL, ulongVal);
 
-                Assert.Equal(float.PositiveInfinity, root.GetSingle());
-                Assert.Equal(double.PositiveInfinity, root.GetDouble());
+                if (PlatformDetection.IsFullFramework)
+                {
+                    Assert.Throws<FormatException>(() => root.GetSingle());
+                    Assert.Throws<FormatException>(() => root.GetDouble());
+                }
+                else
+                {
+                    Assert.Equal(float.PositiveInfinity, root.GetSingle());
+                    Assert.Equal(double.PositiveInfinity, root.GetDouble());
+                }
+
                 Assert.Throws<FormatException>(() => root.GetDecimal());
                 Assert.Throws<FormatException>(() => root.GetInt32());
                 Assert.Throws<FormatException>(() => root.GetInt64());
@@ -1867,15 +1876,6 @@ namespace System.Text.Json.Tests
                     Assert.Equal(i, int.Parse(root[i].GetString()));
                 }
             }
-        }
-
-        private static ArraySegment<byte> StringToUtf8BufferWithEmptySpace(string testString, int emptySpaceSize = 2048)
-        {
-            int expectedLength = Encoding.UTF8.GetByteCount(testString);
-            var buffer = new byte[expectedLength + emptySpaceSize];
-            int actualLength = Encoding.UTF8.GetBytes(testString, buffer.AsSpan());
-            
-            return new ArraySegment<byte>(buffer, 0, actualLength);
         }
 
         private static string GetExpectedConcat(TestCaseType testCaseType, string jsonString)
