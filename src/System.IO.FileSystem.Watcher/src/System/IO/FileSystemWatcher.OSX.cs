@@ -13,6 +13,7 @@ using CFStringRef = System.IntPtr;
 using FSEventStreamRef = System.IntPtr;
 using size_t = System.IntPtr;
 using FSEventStreamEventId = System.UInt64;
+using FSEventStreamEventFlags = Interop.EventStream.FSEventStreamEventFlags;
 using CFRunLoopRef = System.IntPtr;
 using Microsoft.Win32.SafeHandles;
 
@@ -79,38 +80,38 @@ namespace System.IO
 
         private CancellationTokenSource _cancellation;
 
-        private static Interop.EventStream.FSEventStreamEventFlags TranslateFlags(NotifyFilters flagsToTranslate)
+        private static FSEventStreamEventFlags TranslateFlags(NotifyFilters flagsToTranslate)
         {
-            Interop.EventStream.FSEventStreamEventFlags flags = 0;
+            FSEventStreamEventFlags flags = 0;
 
             // Always re-create the filter flags when start is called since they could have changed
             if ((flagsToTranslate & (NotifyFilters.Attributes | NotifyFilters.CreationTime | NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.Size)) != 0)
             {
-                flags = Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemInodeMetaMod  |
-                        Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemFinderInfoMod |
-                        Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemModified      |
-                        Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemChangeOwner;
+                flags = FSEventStreamEventFlags.kFSEventStreamEventFlagItemInodeMetaMod  |
+                        FSEventStreamEventFlags.kFSEventStreamEventFlagItemFinderInfoMod |
+                        FSEventStreamEventFlags.kFSEventStreamEventFlagItemModified      |
+                        FSEventStreamEventFlags.kFSEventStreamEventFlagItemChangeOwner;
             }
             if ((flagsToTranslate & NotifyFilters.Security) != 0)
             {
-                flags |= Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemChangeOwner |
-                         Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemXattrMod;
+                flags |= FSEventStreamEventFlags.kFSEventStreamEventFlagItemChangeOwner |
+                         FSEventStreamEventFlags.kFSEventStreamEventFlagItemXattrMod;
             }
             if ((flagsToTranslate & NotifyFilters.DirectoryName) != 0)
             {
-                flags |= Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsDir |
-                         Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsSymlink |
-                         Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemCreated |
-                         Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRemoved |
-                         Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed;
+                flags |= FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsDir |
+                         FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsSymlink |
+                         FSEventStreamEventFlags.kFSEventStreamEventFlagItemCreated |
+                         FSEventStreamEventFlags.kFSEventStreamEventFlagItemRemoved |
+                         FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed;
             }
             if ((flagsToTranslate & NotifyFilters.FileName) != 0)
             {
-                flags |= Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile |
-                         Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsSymlink |
-                         Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemCreated |
-                         Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRemoved |
-                         Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed;
+                flags |= FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile |
+                         FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsSymlink |
+                         FSEventStreamEventFlags.kFSEventStreamEventFlagItemCreated |
+                         FSEventStreamEventFlags.kFSEventStreamEventFlagItemRemoved |
+                         FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed;
             }
 
             return flags;
@@ -135,7 +136,7 @@ namespace System.IO
             private bool _includeChildren;
 
             // The bitmask of events that we want to send to the user
-            private Interop.EventStream.FSEventStreamEventFlags _filterFlags;
+            private FSEventStreamEventFlags _filterFlags;
 
             // The EventStream to listen for events on
             private SafeEventStreamHandle _eventStream;
@@ -157,7 +158,7 @@ namespace System.IO
                 FileSystemWatcher watcher,
                 string directory,
                 bool includeChildren,
-                Interop.EventStream.FSEventStreamEventFlags filter,
+                FSEventStreamEventFlags filter,
                 CancellationToken cancelToken)
             {
                 Debug.Assert(string.IsNullOrEmpty(directory) == false);
@@ -351,7 +352,7 @@ namespace System.IO
                 IntPtr clientCallBackInfo,
                 size_t numEvents,
                 byte** eventPaths,
-                Interop.EventStream.FSEventStreamEventFlags* eventFlags,
+                FSEventStreamEventFlags* eventFlags,
                 FSEventStreamEventId* eventIds)
             {
                 // Try to get the actual watcher from our weak reference.  We maintain a weak reference most of the time
@@ -382,7 +383,7 @@ namespace System.IO
 
             private unsafe void ProcessEvents(int numEvents,
                 byte** eventPaths,
-                Interop.EventStream.FSEventStreamEventFlags* eventFlags,
+                FSEventStreamEventFlags* eventFlags,
                 FSEventStreamEventId* eventIds,
                 FileSystemWatcher watcher)
             {
@@ -449,7 +450,7 @@ namespace System.IO
                                 // move from unwatched folder to watcher folder scenario or a move from the watcher folder out.
                                 // Check if the item exists on disk to check which it is
                                 // Don't send a new notification if we already sent one for this event.
-                                if (DoesItemExist(path, IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)))
+                                if (DoesItemExist(path, IsFlagSet(eventFlags[i], FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)))
                                 {
                                     if ((eventType & WatcherChangeTypes.Created) == 0)
                                     {
@@ -515,13 +516,13 @@ namespace System.IO
             /// Compares the given event flags to the filter flags and returns which event (if any) corresponds
             /// to those flags.
             /// </summary>
-            private WatcherChangeTypes FilterEvents(Interop.EventStream.FSEventStreamEventFlags eventFlags)
+            private WatcherChangeTypes FilterEvents(FSEventStreamEventFlags eventFlags)
             {
-                const Interop.EventStream.FSEventStreamEventFlags changedFlags = Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemInodeMetaMod |
-                                                                                 Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemFinderInfoMod |
-                                                                                 Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemModified |
-                                                                                 Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemChangeOwner |
-                                                                                 Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemXattrMod;
+                const FSEventStreamEventFlags changedFlags = FSEventStreamEventFlags.kFSEventStreamEventFlagItemInodeMetaMod |
+                                                                                 FSEventStreamEventFlags.kFSEventStreamEventFlagItemFinderInfoMod |
+                                                                                 FSEventStreamEventFlags.kFSEventStreamEventFlagItemModified |
+                                                                                 FSEventStreamEventFlags.kFSEventStreamEventFlagItemChangeOwner |
+                                                                                 FSEventStreamEventFlags.kFSEventStreamEventFlagItemXattrMod;
                 WatcherChangeTypes eventType = 0;
                 // If any of the Changed flags are set in both Filter and Event then a Changed event has occurred.
                 if (((_filterFlags & changedFlags) & (eventFlags & changedFlags)) > 0)
@@ -530,25 +531,25 @@ namespace System.IO
                 }
 
                 // Notify created/deleted/renamed events if they pass through the filters
-                bool allowDirs = (_filterFlags & Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsDir) > 0;
-                bool allowFiles = (_filterFlags & Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile) > 0;
-                bool isDir = (eventFlags & Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsDir) > 0;
-                bool isFile = (eventFlags & Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile) > 0;
+                bool allowDirs = (_filterFlags & FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsDir) > 0;
+                bool allowFiles = (_filterFlags & FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile) > 0;
+                bool isDir = (eventFlags & FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsDir) > 0;
+                bool isFile = (eventFlags & FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile) > 0;
                 bool eventIsCorrectType = (isDir && allowDirs) || (isFile && allowFiles);
-                bool eventIsLink = (eventFlags & (Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsHardlink | Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsSymlink | Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsLastHardlink)) > 0;
+                bool eventIsLink = (eventFlags & (FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsHardlink | FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsSymlink | FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsLastHardlink)) > 0;
 
                 if (eventIsCorrectType || ((allowDirs || allowFiles) && (eventIsLink)))
                 {
                     // Notify Created/Deleted/Renamed events.
-                    if (IsFlagSet(eventFlags, Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
+                    if (IsFlagSet(eventFlags, FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
                     {
                         eventType |= WatcherChangeTypes.Renamed;
                     }
-                    if (IsFlagSet(eventFlags, Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemCreated))
+                    if (IsFlagSet(eventFlags, FSEventStreamEventFlags.kFSEventStreamEventFlagItemCreated))
                     {
                         eventType |= WatcherChangeTypes.Created;
                     }
-                    if (IsFlagSet(eventFlags, Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRemoved))
+                    if (IsFlagSet(eventFlags, FSEventStreamEventFlags.kFSEventStreamEventFlagItemRemoved))
                     {
                         eventType |= WatcherChangeTypes.Deleted;
                     }
@@ -556,15 +557,15 @@ namespace System.IO
                 return eventType;
             }
 
-            private bool ShouldRescanOccur(Interop.EventStream.FSEventStreamEventFlags flags)
+            private bool ShouldRescanOccur(FSEventStreamEventFlags flags)
             {
                 // Check if any bit is set that signals that the caller should rescan
-                return (IsFlagSet(flags, Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagMustScanSubDirs) ||
-                        IsFlagSet(flags, Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagUserDropped)     ||
-                        IsFlagSet(flags, Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagKernelDropped)   ||
-                        IsFlagSet(flags, Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagRootChanged)     ||
-                        IsFlagSet(flags, Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagMount)           ||
-                        IsFlagSet(flags, Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagUnmount));
+                return (IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagMustScanSubDirs) ||
+                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagUserDropped)     ||
+                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagKernelDropped)   ||
+                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagRootChanged)     ||
+                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagMount)           ||
+                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagUnmount));
             }
 
             private bool CheckIfPathIsNested(ReadOnlySpan<char> eventPath)
@@ -577,13 +578,13 @@ namespace System.IO
 
             private unsafe int FindRenameChangePairedChange(
                 int currentIndex, 
-                Interop.EventStream.FSEventStreamEventFlags* eventFlags,
+                FSEventStreamEventFlags* eventFlags,
                 int numEvents)
             {
                 // Start at one past the current index and try to find the next Rename item, which should be the old path.
                 for (int i = currentIndex + 1; i < numEvents; i++)
                 {
-                    if (IsFlagSet(eventFlags[i], Interop.EventStream.FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
+                    if (IsFlagSet(eventFlags[i], FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
                     {
                         // We found match, stop looking
                         return i;
@@ -593,7 +594,7 @@ namespace System.IO
                 return int.MinValue;
             }
 
-            private static bool IsFlagSet(Interop.EventStream.FSEventStreamEventFlags flags, Interop.EventStream.FSEventStreamEventFlags value)
+            private static bool IsFlagSet(FSEventStreamEventFlags flags, FSEventStreamEventFlags value)
             {
                 return (value & flags) == value;
             }
