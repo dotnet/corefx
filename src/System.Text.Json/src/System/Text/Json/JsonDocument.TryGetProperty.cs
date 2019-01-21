@@ -25,6 +25,7 @@ namespace System.Text.Json
             }
 
             int maxBytes = JsonReaderHelper.s_utf8Encoding.GetMaxByteCount(propertyName.Length);
+            int startIndex = index + DbRow.Size;
             int endIndex = checked(row.NumberOfRows * DbRow.Size + index);
 
             // The biggest number of bytes we're willing to pre-UTF8
@@ -37,7 +38,7 @@ namespace System.Text.Json
                 utf8Name = utf8Name.Slice(0, len);
 
                 return TryGetNamedPropertyValue(
-                    index + DbRow.Size,
+                    startIndex,
                     endIndex,
                     utf8Name,
                     out value);
@@ -56,6 +57,8 @@ namespace System.Text.Json
 
             while (candidateIndex > index)
             {
+                int passedIndex = candidateIndex;
+
                 row = _parsedData.Get(candidateIndex);
                 Debug.Assert(row.TokenType != JsonTokenType.PropertyName);
 
@@ -84,8 +87,8 @@ namespace System.Text.Json
                         utf8Name = tmpUtf8.AsSpan(0, len);
 
                         return TryGetNamedPropertyValue(
-                            candidateIndex,
-                            endIndex,
+                            startIndex,
+                            passedIndex + DbRow.Size,
                             utf8Name,
                             out value);
                     }
