@@ -116,7 +116,7 @@ namespace System.Media.Test
         [Fact]
         public void Load_NoSuchFile_ThrowsFileNotFoundException()
         {
-            var soundPlayer = new SoundPlayer("file://noSuchFile");
+            var soundPlayer = new SoundPlayer("noSuchFile");
             Assert.Throws<FileNotFoundException>(() => soundPlayer.Load());
         }
 
@@ -164,10 +164,10 @@ namespace System.Media.Test
             soundPlayer.Load();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void Play_NoSuchFile_ThrowsFileNotFoundException()
         {
-            var soundPlayer = new SoundPlayer("file://noSuchFile");
+            var soundPlayer = new SoundPlayer("noSuchFile");
             Assert.Throws<FileNotFoundException>(() => soundPlayer.Play());
         }
 
@@ -200,7 +200,7 @@ namespace System.Media.Test
             player.Play();
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [MemberData(nameof(Play_InvalidString_TestData))]
         [InlineData("http://google.com")]
         public void Play_InvalidFile_ThrowsInvalidOperationException(string sourceLocation)
