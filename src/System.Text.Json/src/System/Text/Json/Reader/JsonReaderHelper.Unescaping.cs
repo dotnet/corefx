@@ -112,7 +112,7 @@ namespace System.Text.Json
 #endif
         }
 
-        private static void Unescape(ReadOnlySpan<byte> source, Span<byte> destination, int idx, out int written)
+        internal static void Unescape(ReadOnlySpan<byte> source, Span<byte> destination, int idx, out int written)
         {
             Debug.Assert(idx >= 0 && idx < source.Length);
             Debug.Assert(source[idx] == JsonConstants.BackSlash);

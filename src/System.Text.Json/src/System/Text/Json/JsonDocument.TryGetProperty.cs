@@ -166,16 +166,60 @@ namespace System.Text.Json
 
                 ReadOnlySpan<byte> currentPropertyName = documentSpan.Slice(row.Location, row.SizeOrLength);
 
-                // If the property name is a match, the answer is the next element.
-                if (currentPropertyName.SequenceEqual(propertyName))
+                if (row.HasComplexChildren)
                 {
+                    // An escaped property name will be longer than an unescaped candidate, so only unescape
+                    // when the lengths are compatible.
+                    if (currentPropertyName.Length > propertyName.Length)
+                    {
+                        int idx = currentPropertyName.IndexOf(JsonConstants.BackSlash);
+                        Debug.Assert(idx >= 0);
+
+                        // If everything up to where the property name has a backslash matches, keep going.
+                        if (propertyName.Length > idx &&
+                            currentPropertyName.Slice(0, idx).SequenceEqual(propertyName.Slice(0, idx)))
+                        {
+                            int remaining = currentPropertyName.Length - idx;
+                            int written = 0;
+                            byte[] rented = null;
+                            
+                            try
+                            {
+                                Span<byte> utf8Unescaped = remaining <= JsonConstants.StackallocThreshold ?
+                                    stackalloc byte[remaining] :
+                                    (rented = ArrayPool<byte>.Shared.Rent(remaining));
+
+                                // Only unescape the part we haven't processed.
+                                JsonReaderHelper.Unescape(currentPropertyName.Slice(idx), utf8Unescaped, 0, out written);
+
+                                // If the unescaped remainder matches the input remainder, it's a match.
+                                if (utf8Unescaped.Slice(0, written).SequenceEqual(propertyName.Slice(idx)))
+                                {
+                                    // If the property name is a match, the answer is the next element.
+                                    value = new JsonElement(this, index + DbRow.Size);
+                                    return true;
+                                }
+                            }
+                            finally
+                            {
+                                if (rented != null)
+                                {
+                                    rented.AsSpan(0, written).Clear();
+                                    ArrayPool<byte>.Shared.Return(rented);
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (currentPropertyName.SequenceEqual(propertyName))
+                {
+                    // If the property name is a match, the answer is the next element.
                     value = new JsonElement(this, index + DbRow.Size);
                     return true;
                 }
 
                 // Move to the previous value
                 index -= DbRow.Size;
-                row = _parsedData.Get(index);
             }
 
             value = default;

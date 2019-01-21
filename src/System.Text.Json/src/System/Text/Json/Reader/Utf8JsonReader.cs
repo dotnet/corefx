@@ -38,6 +38,7 @@ namespace System.Text.Json
 
         private long _totalConsumed;
         private bool _isLastSegment;
+        internal bool _stringHasEscaping;
         private readonly bool _isSingleSegment;
 
         private SequencePosition _nextPosition;
@@ -134,6 +135,7 @@ namespace System.Text.Json
             _inObject = _inObject,
             _isNotPrimitive = _isNotPrimitive,
             _numberFormat = _numberFormat,
+            _stringHasEscaping = _stringHasEscaping,
             _tokenType = _tokenType,
             _previousTokenType = _previousTokenType,
             _readerOptions = _readerOptions,
@@ -165,6 +167,7 @@ namespace System.Text.Json
             _inObject = state._inObject;
             _isNotPrimitive = state._isNotPrimitive;
             _numberFormat = state._numberFormat;
+            _stringHasEscaping = state._stringHasEscaping;
             _tokenType = state._tokenType;
             _previousTokenType = state._previousTokenType;
             _readerOptions = state._readerOptions;
@@ -772,6 +775,7 @@ namespace System.Text.Json
                 {
                     _bytePositionInLine += idx + 2; // Add 2 for the start and end quotes.
                     ValueSpan = localBuffer.Slice(0, idx);
+                    _stringHasEscaping = false;
                     _tokenType = JsonTokenType.String;
                     _consumed += idx + 2;
                     return true;
@@ -881,6 +885,7 @@ namespace System.Text.Json
         Done:
             _bytePositionInLine++;  // Add 1 for the end quote
             ValueSpan = data.Slice(0, idx);
+            _stringHasEscaping = true;
             _tokenType = JsonTokenType.String;
             _consumed += idx + 2;
             return true;

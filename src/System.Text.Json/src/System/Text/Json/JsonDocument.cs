@@ -168,7 +168,6 @@ namespace System.Text.Json
         {
             CheckNotDisposed();
 
-            // TODO(#33292): Comparison has to be against the unescaped property name.
             // The property name is stored one row before the value
             DbRow row = _parsedData.Get(valueIndex - DbRow.Size);
             Debug.Assert(row.TokenType == JsonTokenType.PropertyName);
@@ -223,8 +222,16 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            // TODO(#33292): Unescape this.
-            lastString = JsonReaderHelper.TranscodeHelper(segment);
+            if (row.HasComplexChildren)
+            {
+                int backslash = segment.IndexOf(JsonConstants.BackSlash);
+                lastString = JsonReaderHelper.GetUnescapedString(segment, backslash);
+            }
+            else
+            {
+                lastString = JsonReaderHelper.TranscodeHelper(segment);
+            }
+
             _lastIndexAndString = (index, lastString);
             return lastString;
         }
@@ -509,6 +516,11 @@ namespace System.Text.Json
                     numberOfRowsForMembers++;
                     database.Append(tokenType, tokenStart, reader.ValueSpan.Length);
 
+                    if (reader._stringHasEscaping)
+                    {
+                        database.SetHasComplexChildren(database.Length - DbRow.Size);
+                    }
+
                     Debug.Assert(!inArray);
                 }
                 else
@@ -535,6 +547,13 @@ namespace System.Text.Json
                                     reader._numberFormat == default,
                                     $"Unhandled numeric format {reader._numberFormat}");
                                 break;
+                        }
+                    }
+                    else if (tokenType == JsonTokenType.String)
+                    {
+                        if (reader._stringHasEscaping)
+                        {
+                            database.SetHasComplexChildren(database.Length - DbRow.Size);
                         }
                     }
                 }

@@ -1065,7 +1065,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData("\"hello\"    ", "hello")]
         [InlineData("    null     ", (string)null)]
-        // TODO(#33292) [InlineData("\"\\u0030\\u0031\"", "31")]
+        [InlineData("\"\\u0033\\u0031\"", "31")]
         public static void ReadString(string json, string expectedValue)
         {
             using (JsonDocument doc = JsonDocument.Parse(json))
@@ -1084,8 +1084,8 @@ namespace System.Text.Json.Tests
                 JsonElement root = doc.RootElement;
 
                 Assert.Equal(JsonValueType.String, root.Type);
-                Assert.Throws<DecoderFallbackException>(() => root.GetString());
-                Assert.Throws<DecoderFallbackException>(() => root.GetRawText());
+                Assert.Throws<InvalidOperationException>(() => root.GetString());
+                Assert.Throws<InvalidOperationException>(() => root.GetRawText());
             }
         }
 
@@ -1330,6 +1330,90 @@ namespace System.Text.Json.Tests
             }
         }
 
+        [Theory]
+        [InlineData("short")]
+        [InlineData("thisValueIsLongerThan86CharsSoWeDeferTheTranscodingUntilWeFindAViableCandidateAsAPropertyMatch")]
+        public static void GetPropertyFindsLast_WithEscaping(string propertyName)
+        {
+            string first = $"\\u{(int)propertyName[0]:X4}{propertyName.Substring(1)}";
+            StringBuilder builder = new StringBuilder(propertyName.Length * 6);
+
+            int half = propertyName.Length / 2;
+            builder.Append(propertyName.AsSpan(0, half));
+
+            for (int i = half; i < propertyName.Length; i++)
+            {
+                builder.AppendFormat("\\u{0:X4}", (int)propertyName[i]);
+            }
+
+            builder.Append('2');
+            string second = builder.ToString();
+            builder.Clear();
+
+            for (int i = 0; i < propertyName.Length; i++)
+            {
+                if ((i & 1) == 0)
+                {
+                    builder.Append(propertyName[i]);
+                }
+                else
+                {
+                    builder.AppendFormat("\\u{0:X4}", (int)propertyName[i]);
+                }
+            }
+
+            builder.Append('3');
+            string third = builder.ToString();
+
+            string pn2 = propertyName + "2";
+            string pn3 = propertyName + "3";
+
+            string json =
+                $"{{ \"{propertyName}\": 0, \"{first}\": 1, \"{pn2}\": 0, \"{second}\": 2, \"{pn3}\": 0, \"nope\": -1, \"{third}\": 3 }}";
+
+            using (JsonDocument doc = JsonDocument.Parse(json))
+            {
+                JsonElement root = doc.RootElement;
+                byte[] utf8PropertyName = Encoding.UTF8.GetBytes(propertyName);
+                byte[] utf8PropertyName2 = Encoding.UTF8.GetBytes(pn2);
+                byte[] utf8PropertyName3 = Encoding.UTF8.GetBytes(pn3);
+
+                Assert.Equal(1, root.GetProperty(propertyName).GetInt32());
+                Assert.Equal(1, root.GetProperty(propertyName.AsSpan()).GetInt32());
+                Assert.Equal(1, root.GetProperty(utf8PropertyName).GetInt32());
+
+                Assert.Equal(2, root.GetProperty(pn2).GetInt32());
+                Assert.Equal(2, root.GetProperty(pn2.AsSpan()).GetInt32());
+                Assert.Equal(2, root.GetProperty(utf8PropertyName2).GetInt32());
+
+                Assert.Equal(3, root.GetProperty(pn3).GetInt32());
+                Assert.Equal(3, root.GetProperty(pn3.AsSpan()).GetInt32());
+                Assert.Equal(3, root.GetProperty(utf8PropertyName3).GetInt32());
+
+                JsonElement matchedProperty;
+                Assert.True(root.TryGetProperty(propertyName, out matchedProperty));
+                Assert.Equal(1, matchedProperty.GetInt32());
+                Assert.True(root.TryGetProperty(propertyName.AsSpan(), out matchedProperty));
+                Assert.Equal(1, matchedProperty.GetInt32());
+                Assert.True(root.TryGetProperty(utf8PropertyName, out matchedProperty));
+                Assert.Equal(1, matchedProperty.GetInt32());
+
+                Assert.True(root.TryGetProperty(pn2, out matchedProperty));
+                Assert.Equal(2, matchedProperty.GetInt32());
+                Assert.True(root.TryGetProperty(pn2.AsSpan(), out matchedProperty));
+                Assert.Equal(2, matchedProperty.GetInt32());
+                Assert.True(root.TryGetProperty(utf8PropertyName2, out matchedProperty));
+                Assert.Equal(2, matchedProperty.GetInt32());
+
+                Assert.True(root.TryGetProperty(pn3, out matchedProperty));
+                Assert.Equal(3, matchedProperty.GetInt32());
+                Assert.True(root.TryGetProperty(pn3.AsSpan(), out matchedProperty));
+                Assert.Equal(3, matchedProperty.GetInt32());
+                Assert.True(root.TryGetProperty(utf8PropertyName3, out matchedProperty));
+                Assert.Equal(3, matchedProperty.GetInt32());
+            }
+        }
+
         [Fact]
         public static void GetRawText()
         {
@@ -1398,9 +1482,10 @@ namespace System.Text.Json.Tests
                 Assert.True(enumerator.MoveNext(), "Move to null property");
                 property = enumerator.Current;
 
-                // TODO(#33292) Assert.Equal("null", property.Name);
+                Assert.Equal("null", property.Name);
                 Assert.Equal("null", property.Value.GetRawText());
                 Assert.Equal(string.Empty, property.Value.ToString());
+                Assert.Equal("\"n\\u0075ll\": null", property.ToString());
 
                 Assert.True(enumerator.MoveNext(), "Move to multiLineArray property");
                 property = enumerator.Current;
@@ -1421,13 +1506,14 @@ namespace System.Text.Json.Tests
                 Assert.Equal('\"', rawText[0]);
                 Assert.Equal('\"', rawText[rawText.Length - 1]);
                 string strValue = property.Value.GetString();
+                int newlineIdx = strValue.IndexOf('\r');
                 int colonIdx = strValue.IndexOf(':');
                 int escapedQuoteIdx = colonIdx + 2;
-                Assert.Equal(rawText.Substring(1, escapedQuoteIdx), strValue.Substring(0, escapedQuoteIdx));
-                Assert.Equal('\\', rawText[escapedQuoteIdx + 1]);
-                Assert.Equal('\"', rawText[escapedQuoteIdx + 2]);
-                // TODO(#33292) Assert.Equal('\"', strValue[escapedQuoteIdx]);
-                // TODO(#33292) Assert.Contains("\r", strValue);
+                Assert.Equal(rawText.Substring(1, newlineIdx), strValue.Substring(0, newlineIdx));
+                Assert.Equal('\\', rawText[escapedQuoteIdx + 3]);
+                Assert.Equal('\"', rawText[escapedQuoteIdx + 4]);
+                Assert.Equal('\"', strValue[escapedQuoteIdx]);
+                Assert.Contains("\r", strValue);
                 Assert.Contains(@"\r", rawText);
                 string valueText = rawText;
                 rawText = property.ToString();

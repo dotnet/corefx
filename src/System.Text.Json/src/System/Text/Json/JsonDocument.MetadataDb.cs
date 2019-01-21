@@ -19,13 +19,24 @@ namespace System.Text.Json
         //   * Top bit is unassigned / always clear
         //   * 31 bits for token offset
         // * Second int
-        //   * Top bit is set of the number uses scientific notation
+        //   * Top bit is set if the number uses scientific notation
         //   * 31 bits for the token length
         // * Third int
         //   * 4 bits JsonTokenType
         //   * 28 bits unassigned / always clear
         //
-        // Other value types (String, True, False, Null, PropertyName)
+        // String, PropertyName
+        // * First int
+        //   * Top bit is unassigned / always clear
+        //   * 31 bits for token offset
+        // * Second int
+        //   * Top bit is set if the string requires unescaping
+        //   * 31 bits for the token length
+        // * Third int
+        //   * 4 bits JsonTokenType
+        //   * 28 bits unassigned / always clear
+        //
+        // Other value types (True, False, Null)
         // * First int
         //   * Top bit is unassigned / always clear
         //   * 31 bits for token offset
