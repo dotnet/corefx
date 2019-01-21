@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
-using static System.Linq.Utilities;
 
 namespace System.Linq
 {
@@ -22,22 +20,27 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-            if (source is ChainLinq.ConsumableForMerging<TSource> merger)
+            if (source is ChainLinq.ConsumableForMerging<TSource> consumable)
             {
-                if (merger.TailLink is ChainLinq.Optimizations.IMergeWhere<TSource> whereMerge)
+                if (consumable.TailLink is ChainLinq.Optimizations.IMergeWhere<TSource> optimization)
                 {
-                    return whereMerge.MergeWhere(merger, predicate);
+                    return optimization.MergeWhere(consumable, predicate);
                 }
 
-                return merger.AddTail(CreateWhereLink(predicate));
+                return consumable.AddTail(new ChainLinq.Links.Where<TSource>(predicate));
             }
-
-            return ChainLinq.Utils.PushTTTransform(source, CreateWhereLink(predicate));
-        }
-
-        private static ChainLinq.Links.Where<TSource> CreateWhereLink<TSource>(Func<TSource, bool> predicate)
-        {
-            return new ChainLinq.Links.Where<TSource>(predicate);
+            else if (source is TSource[] array)
+            {
+                return new ChainLinq.Consumables.WhereArray<TSource>(array, predicate);
+            }
+            else if (source is List<TSource> list)
+            {
+                return new ChainLinq.Consumables.WhereList<TSource>(list, predicate);
+            }
+            else
+            {
+                return new ChainLinq.Consumables.WhereEnumerable<TSource>(source, predicate);
+            }
         }
 
         public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
