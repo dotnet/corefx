@@ -2348,6 +2348,7 @@ namespace System.Text.Json
                     _totalConsumed += localBuffer.Length + leftOver;
                     leftOver = 0;
                     localBuffer = _buffer;
+                    idx = 0;
 
                     if (localBuffer[idx] != JsonConstants.LineFeed)
                         goto Done;

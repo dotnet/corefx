@@ -1731,7 +1731,9 @@ namespace System.Text.Json
                 if (idx < localBuffer.Length - 1)
                 {
                     if (localBuffer[idx + 1] == JsonConstants.LineFeed)
+                    {
                         idx++;
+                    }
                 }
                 else if (!IsLastSpan)
                 {
