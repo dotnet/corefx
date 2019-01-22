@@ -72,9 +72,31 @@ namespace System.SpanTests
         }
 
         [Fact]
+        public static void SequenceCompareToEqual_Byte()
+        {
+            for (int length = 1; length < 128; length++)
+            {
+                var first = new byte[length];
+                var second = new byte[length];
+                for (int i = 0; i < length; i++)
+                {
+                    first[i] = second[i] = (byte)(i + 1);
+                }
+
+                var firstSpan = new ReadOnlySpan<byte>(first);
+                var secondSpan = new ReadOnlySpan<byte>(second);
+                int result = firstSpan.SequenceCompareTo<byte>(secondSpan);
+                Assert.True(result == 0);
+
+                result = secondSpan.SequenceCompareTo<byte>(firstSpan);
+                Assert.True(result == 0);
+            }
+        }
+
+        [Fact]
         public static void SequenceCompareToWithSingleMismatch_Byte()
         {
-            for (int length = 1; length < 32; length++)
+            for (int length = 1; length < 128; length++)
             {
                 for (int mismatchIndex = 0; mismatchIndex < length; mismatchIndex++)
                 {
@@ -101,7 +123,7 @@ namespace System.SpanTests
         [Fact]
         public static void SequenceCompareToNoMatch_Byte()
         {
-            for (int length = 1; length < 32; length++)
+            for (int length = 1; length < 128; length++)
             {
                 var first = new byte[length];
                 var second = new byte[length];
