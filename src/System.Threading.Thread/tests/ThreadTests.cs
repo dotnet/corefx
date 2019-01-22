@@ -472,7 +472,8 @@ namespace System.Threading.Threads.Tests
 
                 await Task.Run(() => Assert.Null(Thread.CurrentPrincipal));
 
-                Assert.Null(Thread.CurrentPrincipal);
+                // defaults are null for netcorepp and GenericPrincipal for netfx
+                Assert.True(Thread.CurrentPrincipal is null || Thread.CurrentPrincipal is GenericPrincipal);
             });
         }
 
