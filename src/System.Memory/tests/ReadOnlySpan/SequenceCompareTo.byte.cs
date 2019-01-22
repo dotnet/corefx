@@ -85,11 +85,9 @@ namespace System.SpanTests
 
                 var firstSpan = new ReadOnlySpan<byte>(first);
                 var secondSpan = new ReadOnlySpan<byte>(second);
-                int result = firstSpan.SequenceCompareTo<byte>(secondSpan);
-                Assert.True(result == 0);
 
-                result = secondSpan.SequenceCompareTo<byte>(firstSpan);
-                Assert.True(result == 0);
+                Assert.Equal(0, firstSpan.SequenceCompareTo<byte>(secondSpan));
+                Assert.Equal(0, secondSpan.SequenceCompareTo<byte>(firstSpan));
             }
         }
 
