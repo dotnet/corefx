@@ -21,6 +21,7 @@ namespace System.Threading
         private CultureInfo _startCulture;
         private CultureInfo _startUICulture;
         private IPrincipal _principal;
+        private static AsyncLocal<IPrincipal> s_asyncLocalPrincipal;
 
         private Thread(RuntimeThread runtimeThread)
         {
@@ -190,12 +191,42 @@ namespace System.Threading
         {
             get
             {
-                return CurrentThread._principal ?? (CurrentThread._principal = AppDomain.CurrentDomain.GetThreadPrincipal());
+                if (CurrentThread._principal is null)
+                {
+                    IPrincipal principal = AppDomain.CurrentDomain.GetThreadPrincipal();
+                    if (principal is null)
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        SetAsyncLocalPrincipal(principal);
+                    }
+                }
+                return CurrentThread._principal;
             }
             set
             {
-                CurrentThread._principal = value;
+                SetAsyncLocalPrincipal(value);
             }
+        }
+
+        private static void SetAsyncLocalPrincipal(IPrincipal principal)
+        {
+            if (s_asyncLocalPrincipal is null)
+            {
+                if (principal is null)
+                {
+                    return;
+                }
+                Interlocked.CompareExchange(ref s_asyncLocalPrincipal, new AsyncLocal<IPrincipal>(CurrentPrincipalContextChanged), null);
+            }
+            s_asyncLocalPrincipal.Value = principal;
+        }
+
+        private static void CurrentPrincipalContextChanged(AsyncLocalValueChangedArgs<IPrincipal> valueChangedHandler)
+        {
+            CurrentThread._principal = valueChangedHandler.CurrentValue;
         }
 
         public ExecutionContext ExecutionContext => ExecutionContext.Capture();
