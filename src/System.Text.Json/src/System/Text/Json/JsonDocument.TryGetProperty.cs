@@ -28,12 +28,9 @@ namespace System.Text.Json
             int startIndex = index + DbRow.Size;
             int endIndex = checked(row.NumberOfRows * DbRow.Size + index);
 
-            // The biggest number of bytes we're willing to pre-UTF8
-            const int StackUtf8Max = 256;
-
-            if (maxBytes < StackUtf8Max)
+            if (maxBytes < JsonConstants.StackallocThreshold)
             {
-                Span<byte> utf8Name = stackalloc byte[StackUtf8Max];
+                Span<byte> utf8Name = stackalloc byte[JsonConstants.StackallocThreshold];
                 int len = JsonReaderHelper.GetUtf8FromText(propertyName, utf8Name);
                 utf8Name = utf8Name.Slice(0, len);
 
@@ -142,7 +139,6 @@ namespace System.Text.Json
             ReadOnlySpan<byte> propertyName,
             out JsonElement value)
         {
-            DbRow row;
             ReadOnlySpan<byte> documentSpan = _utf8Json.Span;
 
             // Move to the row before the EndObject
@@ -150,7 +146,7 @@ namespace System.Text.Json
 
             while (index > startIndex)
             {
-                row = _parsedData.Get(index);
+                DbRow row = _parsedData.Get(index);
                 Debug.Assert(row.TokenType != JsonTokenType.PropertyName);
 
                 // Move before the value

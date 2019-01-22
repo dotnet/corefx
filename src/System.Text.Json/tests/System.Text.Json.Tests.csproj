@@ -29,8 +29,6 @@
     <Compile Include="..\src\System\Text\Json\BitStack.cs" Link="BitStack.cs" />
   </ItemGroup>
   <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
     <ReferenceFromRuntime Include="Newtonsoft.Json" />
   </ItemGroup>
 </Project>
