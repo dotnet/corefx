@@ -11,10 +11,6 @@
 
   <Import Project="Directory.Build.props" />
 
-  <PropertyGroup>
-    <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == ''">$(TargetFramework)</NuGetTargetMoniker>
-  </PropertyGroup>
-
   <Target Name="GetGenFacadesInputs">
     <ItemGroup>
       <NetFxContracts Include="@(NetFxReference->'$(NetFxRefPath)%(Identity).dll')" Condition="'$(TargetGroup)' != 'netfx'">
