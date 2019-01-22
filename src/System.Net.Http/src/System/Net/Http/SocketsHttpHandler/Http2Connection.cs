@@ -268,9 +268,6 @@ namespace System.Net.Http
             {
                 _incomingBuffer.Discard(frameHeader.Length);
 
-                // Don't wait for completion, which could happen asynchronously.
-                // TODO: Track the last completed stream ID and include it in the GoAway frame.
-                Task ignored = SendGoAwayAsync(MaxStreamId, Http2ProtocolErrorCode.ProtocolError, new Memory<byte>(Encoding.UTF8.GetBytes("Header frame received on non-open stream.")));
                 throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
             }
 
@@ -347,9 +344,6 @@ namespace System.Net.Http
             {
                 _incomingBuffer.Discard(frameHeader.Length);
 
-                // Don't wait for completion, which could happen asynchronously.
-                // TODO: Track the last completed stream ID and include it in the GoAway frame.
-                Task ignored = SendGoAwayAsync(MaxStreamId, Http2ProtocolErrorCode.ProtocolError, new Memory<byte>(Encoding.UTF8.GetBytes("Data frame received on non-open stream.")));
                 throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
             }
 
@@ -678,30 +672,6 @@ namespace System.Net.Http
                 BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, (int)errorCode);
 
                 _outgoingBuffer.Commit(FrameHeader.RstStreamLength);
-
-                await FlushOutgoingBytesAsync().ConfigureAwait(false);
-            }
-            finally
-            {
-                ReleaseWriteLock();
-            }
-        }
-
-        private async Task SendGoAwayAsync(int lastStreamId, Http2ProtocolErrorCode errorCode, ReadOnlyMemory<byte> additionalDebugData)
-        {
-            await AcquireWriteLockAsync().ConfigureAwait(false);
-            try
-            {
-                int length = FrameHeader.Size + FrameHeader.GoAwayMinLength + additionalDebugData.Length;
-                _outgoingBuffer.EnsureAvailableSpace(length);
-                WriteFrameHeader(new FrameHeader(length, FrameType.GoAway, FrameFlags.None, 0));
-
-                BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, lastStreamId);
-                BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan.Slice(4), (int)errorCode);
-
-                additionalDebugData.CopyTo(_outgoingBuffer.AvailableMemory.Slice(8));
-
-                _outgoingBuffer.Commit(length);
 
                 await FlushOutgoingBytesAsync().ConfigureAwait(false);
             }
