@@ -678,6 +678,7 @@ namespace System.Text.Json.Tests
         public static void PartialJson(string jsonString, int splitLocation, int consumed)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
                 var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
@@ -1001,13 +1002,12 @@ namespace System.Text.Json.Tests
         [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", "/*This is a split multi-line \n\u6F22\u5B57comment after json*/", 72)]
         [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", "/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/", 85)]
         [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", "/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/", 103)]
+
         [InlineData("{\r\n   \"value\": 11,\r\n   /* yes, it's mis-spelled */\r\n   \"deelay\": 3\r\n}", "/* yes, it's mis-spelled */", 50)]
         [InlineData("[\r\n   12,\r\n   87,\r\n   /* Isn't it \"nice\" that JSON provides no limits on the length of numbers? */\r\n   123456789012345678901234567890123456789.01234567890123456789e+9876543218976543219876543210\r\n]",
             "/* Isn't it \"nice\" that JSON provides no limits on the length of numbers? */", 98)]
-        
         public static void AllowSingleSegment(string jsonString, string expectedComment, int expectedIndex)
         {
-            System.Diagnostics.Debugger.Break();
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
@@ -1177,7 +1177,7 @@ namespace System.Text.Json.Tests
         [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 60)]
         [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", 73)]
         [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", 91)]
-        
+
         [InlineData("{\r\n   \"value\": 11,\r\n   /* yes, it's mis-spelled */\r\n   \"deelay\": 3\r\n}", 50)]
         [InlineData("[\r\n   12,\r\n   87,\r\n   /* Isn't it \"nice\" that JSON provides no limits on the length of numbers? */\r\n   123456789012345678901234567890123456789.01234567890123456789e+9876543218976543219876543210\r\n]", 98)]
         public static void SkipSingleSegment(string jsonString, int expectedConsumed)
