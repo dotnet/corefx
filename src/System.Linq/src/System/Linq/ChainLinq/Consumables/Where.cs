@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq.ChainLinq.Optimizations;
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    sealed partial class WhereArray<T> : ConsumableEnumerator<T>, /*Optimizations.IMergeSelect<T>,*/ Optimizations.IMergeWhere<T>
+    sealed partial class WhereArray<T> : ConsumableEnumerator<T>
     {
         internal T[] Underlying { get; }
         internal Func<T, bool> Predicate { get; }
@@ -51,15 +50,9 @@ namespace System.Linq.ChainLinq.Consumables
 
         public override Consumable<U> AddTail<U>(Link<T, U> transform) =>
             new Array<T, U>(Underlying, Links.Composition.Create(new Links.Where<T>(Predicate), transform));
-
-        //Consumable<V> IMergeSelect<T>.MergeSelect<V>(ConsumableForMerging<T> _, Func<T, V> u2v) =>
-        //    new WhereArray<T, V>(Underlying, t => u2v(Predicate(t)));
-
-        Consumable<T> IMergeWhere<T>.MergeWhere(ConsumableForMerging<T> _, Func<T, bool> predicate) =>
-            new WhereArray<T>(Underlying, t => Predicate(t) && predicate(t));
     }
 
-    sealed partial class WhereList<T> : ConsumableEnumerator<T>, /*IMergeSelect<T>,*/ IMergeWhere<T>
+    sealed partial class WhereList<T> : ConsumableEnumerator<T>
     {
         internal List<T> Underlying { get; }
         internal Func<T, bool> Predicate { get; }
@@ -115,15 +108,9 @@ namespace System.Linq.ChainLinq.Consumables
 
         public override Consumable<V> AddTail<V>(Link<T, V> transform) =>
             new List<T, V>(Underlying, Links.Composition.Create(new Links.Where<T>(Predicate), transform));
-
-        //Consumable<V> IMergeSelect<T>.MergeSelect<V>(ConsumableForMerging<T> _, Func<T, V> u2v) =>
-        //    new WhereList<T, V>(Underlying, t=> u2v(Predicate(t)));
-
-        Consumable<T> IMergeWhere<T>.MergeWhere(ConsumableForMerging<T> consumable, Func<T, bool> predicate) =>
-            new WhereList<T>(Underlying, t => Predicate(t) && predicate(t));
     }
 
-    sealed partial class WhereEnumerable<T> : ConsumableEnumerator<T>, /*IMergeSelect<T>,*/ IMergeWhere<T>
+    sealed partial class WhereEnumerable<T> : ConsumableEnumerator<T>
     {
         internal IEnumerable<T> Underlying { get; }
         internal Func<T, bool> Predicate { get; }
@@ -192,11 +179,5 @@ namespace System.Linq.ChainLinq.Consumables
 
         public override Consumable<V> AddTail<V>(Link<T, V> transform) =>
             new Enumerable<T, V>(Underlying, Links.Composition.Create(new Links.Where<T>(Predicate), transform));
-
-        //Consumable<V> IMergeSelect<T>.MergeSelect<V>(ConsumableForMerging<T> consumable, Func<T, V> u2v) =>
-        //    new WhereEnumerable<T, V>(Underlying, t => u2v(Predicate(t)));
-
-        public Consumable<T> MergeWhere(ConsumableForMerging<T> consumable, Func<T, bool> predicate) =>
-            new WhereEnumerable<T>(Underlying, t => Predicate(t) && predicate(t));
     }
 }

@@ -103,7 +103,9 @@
     <Compile Include="System\Linq\ChainLinq\Consumables\List.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Prepender.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Range.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Select.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\SelectMany.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\Where.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Compose.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Identity.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Take.SpeedOpt.cs" />
