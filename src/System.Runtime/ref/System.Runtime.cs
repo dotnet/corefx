@@ -175,6 +175,7 @@ namespace System
         public bool IsFixedSize { get { throw null; } }
         public bool IsReadOnly { get { throw null; } }
         public bool IsSynchronized { get { throw null; } }
+        public bool IsSorted { get { throw null; } }
         public int Length { get { throw null; } }
         public long LongLength { get { throw null; } }
         public int Rank { get { throw null; } }
