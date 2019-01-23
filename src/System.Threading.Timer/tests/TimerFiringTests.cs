@@ -254,7 +254,7 @@ public partial class TimerFiringTests
     {
         const int MillisecondsPadding = 100; // for each timer, out of range == Math.Abs(actualTime - dueTime) > MillisecondsPadding
         const int MaxAllowedOutOfRangePercentage = 20; // max % allowed out of range to pass test
-        
+
         for (int tries = 0; ; tries++)
         {
             try
@@ -310,7 +310,10 @@ public partial class TimerFiringTests
             {
                 // This test will occasionally fail apparently because it was switched out
                 // for a short period. Eat and go around again
+                continue;
             }
+
+            return;
         }
     }
 
