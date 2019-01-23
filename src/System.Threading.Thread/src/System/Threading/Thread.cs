@@ -17,13 +17,13 @@ namespace System.Threading
         private static Thread t_currentThread;
 
         [ThreadStatic]
-        private static IPrincipal s_principal;
+        private static IPrincipal t_principal;
+        private static AsyncLocal<IPrincipal> s_asyncLocalPrincipal;
 
         private readonly RuntimeThread _runtimeThread;
         private Delegate _start;
         private CultureInfo _startCulture;
         private CultureInfo _startUICulture;
-        private static AsyncLocal<IPrincipal> s_asyncLocalPrincipal;
 
         private Thread(RuntimeThread runtimeThread)
         {
@@ -193,11 +193,11 @@ namespace System.Threading
         {
             get
             {
-                if (s_principal is null)
+                if (t_principal is null)
                 {
                    CurrentPrincipal = AppDomain.CurrentDomain.GetThreadPrincipal();
                 }
-                return s_principal;
+                return t_principal;
             }
             set
             {
@@ -215,7 +215,7 @@ namespace System.Threading
 
         private static void CurrentPrincipalContextChanged(AsyncLocalValueChangedArgs<IPrincipal> valueChangedHandler)
         {
-            s_principal = valueChangedHandler.CurrentValue;
+            t_principal = valueChangedHandler.CurrentValue;
         }
 
         public ExecutionContext ExecutionContext => ExecutionContext.Capture();
