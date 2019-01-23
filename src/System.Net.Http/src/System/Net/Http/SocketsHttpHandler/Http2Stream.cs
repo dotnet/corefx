@@ -79,15 +79,15 @@ namespace System.Net.Http
                 {
                     using (Http2WriteStream writeStream = new Http2WriteStream(this))
                     {
-                        // TODO: Figure out if this is cancellable, and if not how it is handled in Http 1.1.
-                        await _request.Content.CopyToAsync(writeStream).ConfigureAwait(false);
+                        // MAX TODO: Make sure that this does not leave the stream in a bad state.
+                        await _request.Content.CopyToAsync(writeStream, null, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
 
             public async Task ReadResponseHeadersAsync(CancellationToken cancellationToken)
             {
-                // TODO: Plumb in cancellation.
+                // MAX TODO: Plumb in cancellation.
                 // Wait for response headers to be read.
                 bool emptyResponse = await _responseHeadersAvailable.Task.ConfigureAwait(false);
 
@@ -308,19 +308,19 @@ namespace System.Net.Http
                 }
             }
 
-            private async ValueTask SendDataAsync(ReadOnlyMemory<byte> buffer)
+            private async ValueTask SendDataAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
             {
                 ReadOnlyMemory<byte> remaining = buffer;
 
                 while (remaining.Length > 0)
                 {
-                    // TODO: Wire up cancellation here.
-                    int sendSize = await _streamWindow.RequestCreditAsync(remaining.Length, CancellationToken.None).ConfigureAwait(false);
+                    // MAX TODO: We currently only handle cancellation in-between frames. I think that's the right approach, but verify that with Geoff.
+                    int sendSize = await _streamWindow.RequestCreditAsync(remaining.Length, cancellationToken).ConfigureAwait(false);
 
                     ReadOnlyMemory<byte> current;
                     (current, remaining) = SplitBuffer(remaining, sendSize);
 
-                    await _connection.SendStreamDataAsync(_streamId, current).ConfigureAwait(false);
+                    await _connection.SendStreamDataAsync(_streamId, current, cancellationToken).ConfigureAwait(false);
                 }
             }
 
@@ -423,7 +423,7 @@ namespace System.Net.Http
                         return new ValueTask(Task.FromException(new ObjectDisposedException(nameof(Http2WriteStream))));
                     }
 
-                    return http2Stream.SendDataAsync(buffer);
+                    return http2Stream.SendDataAsync(buffer, cancellationToken);
                 }
 
                 public override Task FlushAsync(CancellationToken cancellationToken) => Task.CompletedTask;

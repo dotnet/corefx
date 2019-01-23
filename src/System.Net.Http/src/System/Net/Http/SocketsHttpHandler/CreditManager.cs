@@ -107,14 +107,13 @@ namespace System.Net.Http
                         }
 
                         int granted = Math.Min(waiter.Amount, _current);
-                        _current -= granted;
 
                         // TODO: Determine what happens if a cancellation callback is in-progress when the
                         // TokenRegistration is disposed. It's possible I don't need this code (but I doubt it).
                         // Handle a race between the the Dispose() on TokenRegistration and a call to the cancellation callback.
-                        if (!waiter.TaskCompletionSource.TrySetResult(granted))
+                        if (waiter.TaskCompletionSource.TrySetResult(granted))
                         {
-                            _current += granted;
+                            _current -= granted;
                         }
                     }
                 }
