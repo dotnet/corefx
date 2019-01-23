@@ -125,7 +125,7 @@ namespace System.Threading.Channels
                             // is being used for the result, set where we should return to when it completes,
                             // store the awaiter, and hook up the continuation.
                             _usePromiseForResult = true;
-                            _state = 1;
+                            _state = (int)State.FinishingAwait;
                             _waitToReadAwaiter = waitToReadTask.ConfigureAwait(false).GetAwaiter();
                             AsyncEnumerable inst = this;
                             _builder.AwaitUnsafeOnCompleted(ref _waitToReadAwaiter, ref inst);
