@@ -29,6 +29,4 @@
     and all generated props and targets imported in the test step. This is used to be able to call RestoreAndTest target when running in helix. -->
     <MSBuild Projects="@(Project)" Targets="Test" BuildInParallel="true" Properties="$(_projectProperties);ForceMsbuildEvaluation=true" />
   </Target>
-
-  <Target Name="RestoreAndTest" DependsOnTargets="Restore;Test" />
 </Project>
