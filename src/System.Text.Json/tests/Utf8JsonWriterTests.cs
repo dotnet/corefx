@@ -11,6 +11,8 @@ namespace System.Text.Json.Tests
 {
     public class Utf8JsonWriterTests
     {
+        public static bool IsX64 { get; } = IntPtr.Size >= 8;
+
         [Theory]
         [InlineData(true, true)]
         [InlineData(true, false)]
@@ -854,7 +856,7 @@ namespace System.Text.Json.Tests
             output.Dispose();
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(IsX64))]
         [OuterLoop]
         [InlineData(true, true)]
         [InlineData(true, false)]
@@ -862,51 +864,47 @@ namespace System.Text.Json.Tests
         [InlineData(false, false)]
         public void WritingTooLargeProperty(bool formatted, bool skipValidation)
         {
-            if (IntPtr.Size < 8)
-            {
-                // Do not run these tests on X86 architecture since they will almost certainly OOM.
-                return;
-            }
-
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
 
             var output = new ArrayBufferWriter(1024);
 
             var jsonUtf8 = new Utf8JsonWriter(output, state);
 
+            Span<byte> key;
+            Span<char> keyChars;
+
             try
             {
-
-                Span<byte> key = new byte[1_000_000_000];
-                key.Fill((byte)'a');
-
-                var keyChars = new char[1_000_000_000];
-                keyChars.AsSpan().Fill('a');
-
-                try
-                {
-                    jsonUtf8.WriteStartObject();
-                    jsonUtf8.WriteStartArray(keyChars);
-                    Assert.True(false, "Expected ArgumentException to be thrown for depth >= 1000.");
-                }
-                catch (ArgumentException) { }
-
-                jsonUtf8 = new Utf8JsonWriter(output, state);
-
-                try
-                {
-                    jsonUtf8.WriteStartObject();
-                    jsonUtf8.WriteStartArray(key);
-                    Assert.True(false, "Expected ArgumentException to be thrown for depth >= 1000.");
-                }
-                catch (ArgumentException) { }
-
-                output.Dispose();
+                key = new byte[1_000_000_000];
+                keyChars = new char[1_000_000_000];
             }
             catch (OutOfMemoryException)
             {
                 return;
             }
+
+            key.Fill((byte)'a');
+            keyChars.Fill('a');
+
+            try
+            {
+                jsonUtf8.WriteStartObject();
+                jsonUtf8.WriteStartArray(keyChars);
+                Assert.True(false, "Expected ArgumentException to be thrown for depth >= 1000.");
+            }
+            catch (ArgumentException) { }
+
+            jsonUtf8 = new Utf8JsonWriter(output, state);
+
+            try
+            {
+                jsonUtf8.WriteStartObject();
+                jsonUtf8.WriteStartArray(key);
+                Assert.True(false, "Expected ArgumentException to be thrown for depth >= 1000.");
+            }
+            catch (ArgumentException) { }
+
+            output.Dispose();
         }
 
         [Theory]
@@ -2915,7 +2913,7 @@ namespace System.Text.Json.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(IsX64))]
         [OuterLoop]
         [InlineData(true, true)]
         [InlineData(true, false)]
@@ -2923,50 +2921,48 @@ namespace System.Text.Json.Tests
         [InlineData(false, false)]
         public void WriteLargeKeyOrValue(bool formatted, bool skipValidation)
         {
-            if (IntPtr.Size < 8)
-            {
-                // Do not run these tests on X86 architecture since they will almost certainly OOM.
-                return;
-            }
-
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+
+            Span<byte> key;
+            Span<byte> value;
 
             try
             {
-                Span<byte> key = new byte[1_000_000_001];
-                key.Fill((byte)'a');
-                Span<byte> value = new byte[1_000_000_001];
-                value.Fill((byte)'b');
-
-                var output = new ArrayBufferWriter(1024);
-
-                try
-                {
-                    var jsonUtf8 = new Utf8JsonWriter(output, state);
-                    jsonUtf8.WriteStartObject();
-                    jsonUtf8.WriteString(key, DateTime.Now, escape: false);
-                    Assert.True(false, $"Expected ArgumentException for data too large wasn't thrown. KeyLength: {key.Length}");
-                }
-                catch (ArgumentException) { }
-
-                try
-                {
-                    var jsonUtf8 = new Utf8JsonWriter(output, state);
-                    jsonUtf8.WriteStartArray();
-                    jsonUtf8.WriteStringValue(value, escape: false);
-                    Assert.True(false, $"Expected ArgumentException for data too large wasn't thrown. ValueLength: {value.Length}");
-                }
-                catch (ArgumentException) { }
-
-                output.Dispose();
+                key = new byte[1_000_000_001];
+                value = new byte[1_000_000_001];
             }
             catch (OutOfMemoryException)
             {
                 return;
             }
+
+            key.Fill((byte)'a');
+            value.Fill((byte)'b');
+
+            var output = new ArrayBufferWriter(1024);
+
+            try
+            {
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+                jsonUtf8.WriteStartObject();
+                jsonUtf8.WriteString(key, DateTime.Now, escape: false);
+                Assert.True(false, $"Expected ArgumentException for data too large wasn't thrown. KeyLength: {key.Length}");
+            }
+            catch (ArgumentException) { }
+
+            try
+            {
+                var jsonUtf8 = new Utf8JsonWriter(output, state);
+                jsonUtf8.WriteStartArray();
+                jsonUtf8.WriteStringValue(value, escape: false);
+                Assert.True(false, $"Expected ArgumentException for data too large wasn't thrown. ValueLength: {value.Length}");
+            }
+            catch (ArgumentException) { }
+
+            output.Dispose();
         }
 
-        [Theory]
+        [ConditionalTheory(nameof(IsX64))]
         [OuterLoop]
         [InlineData(true, true)]
         [InlineData(true, false)]
@@ -2974,30 +2970,25 @@ namespace System.Text.Json.Tests
         [InlineData(false, false)]
         public void WriteLargeKeyValue(bool formatted, bool skipValidation)
         {
-            if (IntPtr.Size < 8)
-            {
-                // Do not run these tests on X86 architecture since they will almost certainly OOM.
-                return;
-            }
-
             var state = new JsonWriterState(options: new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation });
+
+            Span<byte> key;
+            Span<byte> value;
 
             try
             {
-                Span<byte> key = new byte[1_000_000_001];
-                key.Fill((byte)'a');
-                Span<byte> value = new byte[1_000_000_001];
-                value.Fill((byte)'b');
-
-                WriteTooLargeHelper(state, key, value);
-                WriteTooLargeHelper(state, key.Slice(0, 1_000_000_000), value);
-                WriteTooLargeHelper(state, key, value.Slice(0, 1_000_000_000));
-                WriteTooLargeHelper(state, key.Slice(0, 10_000_000 / 3), value.Slice(0, 10_000_000 / 3), noThrow: true);
+                key = new byte[1_000_000_001];
+                value = new byte[1_000_000_001];
             }
             catch (OutOfMemoryException)
             {
                 return;
             }
+
+            WriteTooLargeHelper(state, key, value);
+            WriteTooLargeHelper(state, key.Slice(0, 1_000_000_000), value);
+            WriteTooLargeHelper(state, key, value.Slice(0, 1_000_000_000));
+            WriteTooLargeHelper(state, key.Slice(0, 10_000_000 / 3), value.Slice(0, 10_000_000 / 3), noThrow: true);
         }
 
         private static void WriteTooLargeHelper(JsonWriterState state, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value, bool noThrow = false)
