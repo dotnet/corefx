@@ -166,6 +166,9 @@ jobs:
                 helixQueues: $(_helixQueues)
                 msbuildScript: $(_msbuildCommand)
                 framework: $(_framework)
+                ${{ if ne(job.helixExtraArguments, '') }}:
+                  msbuilExtraArguments: ${{ job.helixExtraArguments }}
+
                 ${{ if eq(parameters.isOfficialBuild, 'true') }}:
                   isExternal: false
                   waitForCompletion: false

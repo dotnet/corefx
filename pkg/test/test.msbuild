@@ -4,10 +4,18 @@
     <TestPackages Condition="'$(TestPackages)' != ''" Include="$(TestPackages)" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <PackageTestProjectsDir Condition="'$(PackageTestProjectsDir)' == ''">$(MSBuildThisFileDirectory)..\projects</PackageTestProjectsDir>
+    <_projectProperties>SupportFilesDir=$(MSBuildThisFileDirectory)</_projectProperties>
+
+    <!-- We need this to be able to pass restore sources from command line when running tests in helix -->
+    <_restoreSources Condition="'$(PackageTestSources)' != ''">$([System.String]::Copy('$(PackageTestSources)').Replace('+',';'))</_restoreSources>
+  </PropertyGroup>
+
   <Target Name="GetProjects">
     <ItemGroup>
-      <Project Condition="'@(TestPackages)' == ''" Include="projects\**\*.csproj" />
-      <Project Condition="'@(TestPackages)' != ''" Include="projects\%(TestPackages.Identity)\**\*.csproj" />
+      <Project Condition="'@(TestPackages)' == ''" Include="$(PackageTestProjectsDir)\**\*.csproj" />
+      <Project Condition="'@(TestPackages)' != ''" Include="$(PackageTestProjectsDir)\%(TestPackages.Identity)\**\*.csproj" />
     </ItemGroup>
   </Target>
 
@@ -15,11 +23,25 @@
           Inputs="@(Project)"
           Outputs="@(Project->'%(RootDir)%(Directory)obj\project.assets.json')"
           DependsOnTargets="GetProjects">
-    <MSBuild Projects="@(Project)" Targets="Restore" BuildInParallel="true" />
+
+    <ItemGroup>
+      <!-- This Split() is needed since the semicolon in ProcessedTargetQueues is now a literal -->
+      <_normalizedRestoreSources Condition="'$(_restoreSources)' != ''" Include="$(_restoreSources.Split(';'))" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_projectProperties Condition="'@(_normalizedRestoreSources)' != ''">$(_projectProperties);RestoreSources=@(_normalizedRestoreSources)</_projectProperties>
+    </PropertyGroup>
+
+    <MSBuild Projects="@(Project)" Targets="Restore" BuildInParallel="true" Properties="$(_projectProperties)" />
     <Touch Files="@(Project->'%(RootDir)%(Directory)obj\project.assets.json')" />
   </Target>
 
   <Target Name="Test" DependsOnTargets="GetProjects">
-    <MSBuild Projects="@(Project)" Targets="Test" BuildInParallel="true" />
+    <!-- We need to pass a dummy global property to force msbuild reevaluation after restoring the project to get implicit references added
+    and all generated props and targets imported in the test step. This is used to be able to call RestoreAndTest target when running in helix. -->
+    <MSBuild Projects="@(Project)" Targets="Test" BuildInParallel="true" Properties="$(_projectProperties);ForceMsbuildEvaluation=true" />
   </Target>
+
+  <Target Name="RestoreAndTest" DependsOnTargets="Restore;Test" />
 </Project>

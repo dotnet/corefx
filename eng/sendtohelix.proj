@@ -13,10 +13,12 @@
     <TimeoutInSeconds Condition="'$(TimeoutInSeconds)' == ''">600</TimeoutInSeconds>
     <_timeoutSpan>$([System.TimeSpan]::FromSeconds($(TimeoutInSeconds)))</_timeoutSpan>
     
-    <!-- We need to enable xunit reporter so that it parses test results -->
-    <EnableXunitReporter>true</EnableXunitReporter>
+    <!-- We need to enable xunit reporter so that it parses test results
+         Package testing doesn't run on xunit. -->
+    <EnableXunitReporter Condition="'$(IsPackageTesting)' != 'true'">true</EnableXunitReporter>
     
     <TestArchiveRuntimeFile>$(TestArchiveRuntimeRoot)test-runtime-$(BuildConfiguration).zip</TestArchiveRuntimeFile>
+    <TestArchiveRuntimeFile Condition="'$(IsPackageTesting)' == 'true'">$(TestArchiveRuntimeRoot)packages-testPayload-$(ConfigurationGroup).zip</TestArchiveRuntimeFile>
 
     <!-- The helix runtime payload and the tests to run -->
     <HelixCorrelationPayload Condition="'$(HelixCorrelationPayload)' == ''">$(TestArchiveRuntimeFile)</HelixCorrelationPayload>
@@ -28,8 +30,9 @@
     <!-- This property is used to show the tests results in Azure Dev Ops. By setting this property the
     test run name will be displayed as $(BuildConfiguration)-$(HelixTargetQueue) -->
     <TestRunNamePrefix>$(BuildConfiguration)-</TestRunNamePrefix>
+    <TestRunNamePrefix Condition="'$(IsPackageTesting)' == 'true'">PackageTests-$(ConfiguratioNGroup)-$(ArchGroup)</TestRunNamePrefix>
 
-    <MaxRetryCount Condition="'$(MaxRetryCount)' == ''">4</MaxRetryCount>
+	<MaxRetryCount Condition="'$(MaxRetryCount)' == ''">4</MaxRetryCount>
   </PropertyGroup>
 
   <!-- If mission control reports a test failure then fail the build whenever helix wait runs. -->
@@ -45,20 +48,18 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(HelixType)' == ''">
-    <!-- For PRs we want helixtype to be the same for all frameworks -->
+    <!-- For PRs we want helixtype to be the same for all frameworks except package testing-->
     <HelixType>test/functional/cli/</HelixType>
+    <HelixType Condition="'$(IsPackageTesting)' == 'true'">test/functional/packaging/</HelixType>
     <HelixType Condition="'$(TargetGroup)' == 'netfx' AND '$(OfficialBuildId)' != ''">test/functional/desktop/cli/</HelixType>
     <HelixType Condition="'$(TargetGroup)' == 'uap' AND '$(OfficialBuildId)' != ''">test/functional/uwp/</HelixType>
     <HelixType Condition="'$(TargetGroup)' == 'uapaot' AND '$(OfficialBuildId)' != ''">test/functional/ilc/</HelixType>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(HelixCommand)' == ''">
-    <!-- For windows we need to use call, since the command is going to be called from a bat script created by Helix
-    and we exit /b at the end of RunTests.cmd, Helix runs some other commands after ours within the bat script,
-    if we don't use call, then we cause the parent script to exit, and anything after will not be executed. -->
-    <HelixCommand Condition="'$(TargetsWindows)' == 'true'">call RunTests.cmd %HELIX_CORRELATION_PAYLOAD%</HelixCommand>
-    <HelixCommand Condition="'$(TargetsWindows)' != 'true'">./RunTests.sh $HELIX_CORRELATION_PAYLOAD</HelixCommand>
-  </PropertyGroup>
+  <ItemGroup Condition="'$(IsPackageTesting)' == 'true'">
+    <PackageTestRestoreSources Remove="$(PackageOutputPath)" />
+    <PackageTestRestoreSources Include="%HELIX_CORRELATION_PAYLOAD%\packages\" />
+  </ItemGroup>
 
   <!-- We need to include all dlls in the runtime path as inputs to make it really incremental
   if we use the root folder, if a dll is updated, the folder's timestamp is not updated, therefore skipped. -->
@@ -68,7 +69,8 @@
 
   <Target Name="CompressRuntimeDirectory"
           Inputs="@(_RuntimeInputs)"
-          Outputs="$(TestArchiveRuntimeFile)">
+          Outputs="$(TestArchiveRuntimeFile)"
+          Condition="'$(IsPackageTesting)' != 'true'">
 
     <MakeDir Directories="$(TestArchiveRuntimeRoot)" />
     <ZipDirectory
@@ -78,7 +80,33 @@
 
   </Target>
 
-  <Target Name="BuildHelixWorkItems" DependsOnTargets="CompressRuntimeDirectory">
+  <Target Name="BuildHelixCommands">
+    <!-- We need to do this in a target in order to be able to transform package restore sources item into a string -->
+    <PropertyGroup Condition="'$(HelixCommand)' == '' AND '$(IsPackageTesting)' == 'true'">
+      <HelixPreCommands>set DOTNET_CLI_TELEMETRY_OPTOUT=1;set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1;set DOTNET_MULTILEVEL_LOOKUP=0</HelixPreCommands>
+
+      <HelixCommand>%HELIX_CORRELATION_PAYLOAD%\tools\dotnet.exe msbuild %HELIX_CORRELATION_PAYLOAD%\test.msbuild</HelixCommand>
+      <HelixCommand>$(HelixCommand) /t:RestoreAndTest</HelixCommand>
+      <HelixCommand>$(HelixCommand) /p:PackageTestProjectsDir=%HELIX_WORKITEM_PAYLOAD%</HelixCommand>
+      <HelixCommand>$(HelixCommand) /p:RestorePackagesPath=%HELIX_WORKITEM_PAYLOAD%\packages</HelixCommand>
+
+      <!-- %3B is ; literal, we use it for the command line to avoid trying to be parsed -->
+      <HelixCommand>$(HelixCommand) /p:RestoreSources=@(PackageTestRestoreSources -> '%(Identity)', '%3B')</HelixCommand>
+    </PropertyGroup>
+
+
+    <PropertyGroup Condition="'$(HelixCommand)' == ''">
+      <!-- For windows we need to use call, since the command is going to be called from a bat script created by Helix
+      and we exit /b at the end of RunTests.cmd, Helix runs some other commands after ours within the bat script,
+      if we don't use call, then we cause the parent script to exit, and anything after will not be executed. -->
+      <HelixCommand Condition="'$(TargetsWindows)' == 'true'">call RunTests.cmd %HELIX_CORRELATION_PAYLOAD%</HelixCommand>
+      <HelixCommand Condition="'$(TargetsWindows)' != 'true'">./RunTests.sh $HELIX_CORRELATION_PAYLOAD</HelixCommand>
+    </PropertyGroup>
+
+  </Target>
+
+  <Target Name="BuildHelixWorkItems"
+          DependsOnTargets="CompressRuntimeDirectory;BuildHelixCommands">
     <ItemGroup>
 
       <HelixCorrelationPayload Include="$(HelixCorrelationPayload)" />

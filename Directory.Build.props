@@ -479,6 +479,19 @@
     </ProjectReference>
   </ItemDefinitionGroup>
 
+  <ItemGroup>
+    <PackageTestRestoreSources Include="https:%2F%2Fapi.nuget.org/v3/index.json" />
+
+    <!-- needed for SQLClient's SNI packages -->
+    <PackageTestRestoreSources Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json" />
+
+    <!-- Needed for full framework targetting pack packages -->
+    <PackageTestRestoreSources Include="https:%2F%2Fdotnet.myget.org/F/roslyn-tools/api/v3/index.json" />
+
+    <!-- ideally this would be first, but we need to list last to workaround https://github.com/NuGet/Home/issues/6678 -->
+    <PackageTestRestoreSources Include="$(PackageOutputPath)" />
+  </ItemGroup>
+
   <!-- Import it at the end of the props file to override the OutputPath for reference assemblies and use common directory props -->
   <Import Project="$(MSBuildThisFileDirectory)eng\ReferenceAssemblies.props" />
 
