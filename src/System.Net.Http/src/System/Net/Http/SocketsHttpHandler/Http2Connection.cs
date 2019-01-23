@@ -860,7 +860,6 @@ namespace System.Net.Http
         private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             // Ensure we don't exceed the max concurrent streams setting.
-            // TODO: Cancellation when requesting credit.
             await _concurrentStreams.RequestCreditAsync(1, cancellationToken).ConfigureAwait(false);
 
             // Note, HEADERS and CONTINUATION frames must be together, so hold the writer lock across sending all of them.
@@ -899,9 +898,9 @@ namespace System.Net.Http
                 {
                     if (cancellationToken.IsCancellationRequested)
                     {
-                        // TODO: Should we decide the correct exception type here, or at a higher level?
-                        throw new OperationCanceledException();
+                        throw new OperationCanceledException(cancellationToken);
                     }
+
                     (current, remaining) = SplitBuffer(remaining, FrameHeader.MaxLength);
 
                     flags = (remaining.Length == 0 ? FrameFlags.EndHeaders : FrameFlags.None);
@@ -914,10 +913,10 @@ namespace System.Net.Http
                     await FlushOutgoingBytesAsync().ConfigureAwait(false);
                 }
             }
+            
             catch (OperationCanceledException)
             {
-                ValueTask ignored = SendRstStreamAsync(streamId, Http2ProtocolErrorCode.StreamClosed);
-                http2Stream.Dispose();
+                // MAX NOTE: this case should actually be handled by the caller.
                 throw;
             }
             catch
@@ -934,7 +933,7 @@ namespace System.Net.Http
             return http2Stream;
         }
 
-        private async ValueTask SendStreamDataAsync(int streamId, ReadOnlyMemory<byte> buffer)
+        private async ValueTask SendStreamDataAsync(int streamId, ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
             ReadOnlyMemory<byte> remaining = buffer;
 
@@ -942,8 +941,8 @@ namespace System.Net.Http
             {
                 int frameSize = Math.Min(remaining.Length, FrameHeader.MaxLength);
 
-                // TODO: Wire this up.
-                frameSize = await _connectionWindow.RequestCreditAsync(frameSize, CancellationToken.None).ConfigureAwait(false);
+                // MAX TODO: handle cancellation later in this method, if it can be done without screwing up credit management.
+                frameSize = await _connectionWindow.RequestCreditAsync(frameSize, cancellationToken).ConfigureAwait(false);
 
                 ReadOnlyMemory<byte> current;
                 (current, remaining) = SplitBuffer(remaining, frameSize);
@@ -1247,32 +1246,36 @@ namespace System.Net.Http
                 // Wait for response headers to be read.
                 await http2Stream.ReadResponseHeadersAsync(cancellationToken).ConfigureAwait(false);
             }
-            catch (Exception e)
+            catch (IOException ioe)
             {
                 http2Stream?.Dispose();
-
-                if (e is IOException ioe)
+                throw new HttpRequestException(SR.net_http_client_execution_error, ioe);
+            }
+            catch (ObjectDisposedException)
+            {
+                http2Stream?.Dispose();
+                throw new HttpRequestException(SR.net_http_client_execution_error);
+            }
+            catch (Http2ProtocolException)
+            {
+                http2Stream?.Dispose();
+                // ISSUE 31315: Determine if/how to expose HTTP2 error codes
+                throw new HttpRequestException(SR.net_http_client_execution_error);
+            }
+            catch (OperationCanceledException)
+            {
+                // In
+                // MAX TODO: decide on the right exception to throw.
+                if ( http2Stream != null && http2Stream.StreamId != 0 )
                 {
-                    throw new HttpRequestException(SR.net_http_client_execution_error, ioe);
+                    ValueTask ignored = SendRstStreamAsync(http2Stream.StreamId, Http2ProtocolErrorCode.StreamClosed);
                 }
-                else if (e is ObjectDisposedException)
-                {
-                    throw new HttpRequestException(SR.net_http_client_execution_error);
-                }
-                else if (e is Http2ProtocolException)
-                {
-                    // ISSUE 31315: Determine if/how to expose HTTP2 error codes
-                    throw new HttpRequestException(SR.net_http_client_execution_error);
-                }
-                else if (e is OperationCanceledException)
-                {
-                    // TODO: decide on the right exception to throw.
-                    throw new HttpRequestException(SR.net_http_client_execution_error);
-                }
-                else
-                {
-                    throw;
-                }
+                throw new OperationCanceledException(cancellationToken);
+            }
+            catch
+            {
+                http2Stream?.Dispose();
+                throw;
             }
 
             return http2Stream.Response;
