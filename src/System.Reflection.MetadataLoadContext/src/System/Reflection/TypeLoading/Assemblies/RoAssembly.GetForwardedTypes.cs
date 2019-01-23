@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Reflection.Metadata;
 
 namespace System.Reflection.TypeLoading
 {
@@ -18,7 +19,7 @@ namespace System.Reflection.TypeLoading
             List<Exception> exceptions = null;
 
             IterateTypeForwards(
-                delegate (RoAssembly redirectedAssembly, ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name)
+                delegate (RoAssembly redirectedAssembly, BlobReader ns, BlobReader name)
                 {
                     Type type = null;
                     Exception exception = null;
@@ -78,7 +79,7 @@ namespace System.Reflection.TypeLoading
         /// <summary>
         /// Intentionally excludes forwards to nested types.
         /// </summary>
-        protected delegate void TypeForwardHandler(RoAssembly redirectedAssembly, ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name);
+        protected delegate void TypeForwardHandler(RoAssembly redirectedAssembly, BlobReader ns, BlobReader name);
         protected abstract void IterateTypeForwards(TypeForwardHandler handler);
     }
 }

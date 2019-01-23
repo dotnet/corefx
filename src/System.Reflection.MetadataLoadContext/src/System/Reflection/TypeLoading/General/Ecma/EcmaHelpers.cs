@@ -109,12 +109,6 @@ namespace System.Reflection.TypeLoading.Ecma
             return stringComparer.Equals(nameHandle, ConstructorInfo.ConstructorName) || stringComparer.Equals(nameHandle, ConstructorInfo.TypeConstructorName);
         }
 
-        public static unsafe ReadOnlySpan<byte> AsReadOnlySpan(this StringHandle handle, MetadataReader reader)
-        {
-            BlobReader br = handle.GetBlobReader(reader);
-            return new ReadOnlySpan<byte>(br.CurrentPointer, br.Length);
-        }
-
         public static RoMethod ToMethodOrNull(this MethodDefinitionHandle handle, RoInstantiationProviderType declaringType, Type reflectedType)
         {
             if (handle.IsNil)

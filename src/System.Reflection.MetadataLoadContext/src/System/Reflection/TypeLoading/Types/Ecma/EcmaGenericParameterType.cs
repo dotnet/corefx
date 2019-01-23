@@ -32,8 +32,8 @@ namespace System.Reflection.TypeLoading.Ecma
         public sealed override GenericParameterAttributes GenericParameterAttributes => GenericParameter.Attributes;
 
         public sealed override IEnumerable<CustomAttributeData> CustomAttributes => GenericParameter.GetCustomAttributes().ToTrueCustomAttributes(GetEcmaModule());
-        internal sealed override bool IsCustomAttributeDefined(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name) => GenericParameter.GetCustomAttributes().IsCustomAttributeDefined(ns, name, GetEcmaModule());
-        internal sealed override CustomAttributeData TryFindCustomAttribute(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name) => GenericParameter.GetCustomAttributes().TryFindCustomAttribute(ns, name, GetEcmaModule());
+        internal sealed override bool IsCustomAttributeDefined(byte[] ns, byte[] name) => GenericParameter.GetCustomAttributes().IsCustomAttributeDefined(ns, name, GetEcmaModule());
+        internal sealed override CustomAttributeData TryFindCustomAttribute(byte[] ns, byte[] name) => GenericParameter.GetCustomAttributes().TryFindCustomAttribute(ns, name, GetEcmaModule());
 
         public sealed override int MetadataToken => Handle.GetToken();
 

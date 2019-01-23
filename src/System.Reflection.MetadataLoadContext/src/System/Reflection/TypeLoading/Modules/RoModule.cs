@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Runtime.Serialization;
 
 namespace System.Reflection.TypeLoading
@@ -102,7 +103,7 @@ namespace System.Reflection.TypeLoading
         /// If a type is not contained or forwarded from the module, this method returns null (does not throw.)
         /// This supports the "throwOnError: false" behavior of Module.GetType(string, bool).
         /// </summary>
-        internal RoDefinitionType GetTypeCore(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name, bool ignoreCase, out Exception e)
+        internal RoDefinitionType GetTypeCore(BlobReader ns, BlobReader name, bool ignoreCase, out Exception e)
         {
             if (ignoreCase)
                 throw new NotSupportedException(SR.NotSupported_CaseInsensitive);
@@ -123,7 +124,7 @@ namespace System.Reflection.TypeLoading
             e = null;
             return type;
         }
-        protected abstract RoDefinitionType GetTypeCoreNoCache(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name, out Exception e);
+        protected abstract RoDefinitionType GetTypeCoreNoCache(BlobReader ns, BlobReader name, out Exception e);
         internal readonly GetTypeCoreCache _getTypeCoreCache = new GetTypeCoreCache();
 
         internal MetadataLoadContext Loader => GetRoAssembly().Loader;

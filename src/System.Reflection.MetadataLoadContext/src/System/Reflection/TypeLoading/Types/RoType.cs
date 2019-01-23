@@ -111,8 +111,8 @@ namespace System.Reflection.TypeLoading
         public abstract override IEnumerable<CustomAttributeData> CustomAttributes { get; }
 
         // Optimized routines that find a custom attribute by type name only.
-        internal abstract bool IsCustomAttributeDefined(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name);
-        internal abstract CustomAttributeData TryFindCustomAttribute(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name);
+        internal abstract bool IsCustomAttributeDefined(byte[] ns, byte[] name);
+        internal abstract CustomAttributeData TryFindCustomAttribute(byte[] ns, byte[] name);
 
         // Inheritance
         public sealed override Type BaseType => GetRoBaseType();

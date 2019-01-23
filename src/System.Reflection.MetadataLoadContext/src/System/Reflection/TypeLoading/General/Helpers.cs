@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Reflection.Metadata;
 using System.Text;
 
 namespace System.Reflection.TypeLoading
@@ -355,7 +356,6 @@ namespace System.Reflection.TypeLoading
 
         public static byte[] ToUtf8(this string s) => Encoding.UTF8.GetBytes(s);
 
-        public static string ToUtf16(this ReadOnlySpan<byte> utf8) => ToUtf16(utf8.ToArray());
         public static string ToUtf16(this byte[] utf8) => Encoding.UTF8.GetString(utf8);
 
         // Guards ToString() implementations. Sample usage: 
@@ -365,5 +365,36 @@ namespace System.Reflection.TypeLoading
         public static string GetDisposedString(this MetadataLoadContext loader) => loader.IsDisposed ? SR.MetadataLoadContextDisposed : null;
 
         public static TypeContext ToTypeContext(this RoType[] instantiation) => new TypeContext(instantiation, null);
+
+        public static unsafe bool SequenceEqual(this BlobReader left, byte[] right)
+        {
+            if (left.Length != right.Length)
+            {
+                return false;
+            }
+
+            byte* leftPtr = left.StartPointer;
+            for (int i = 0; i < left.Length; i++)
+            {
+                if (leftPtr[i] != right[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static unsafe string ToUtf16(this BlobReader reader)
+        {
+            string str = ToUtf16(reader.ReadAll());
+            return str;
+        }
+
+        public static unsafe byte[] ReadAll(this BlobReader reader)
+        {
+            byte[] bytes = reader.ReadBytes(reader.Length);
+            return bytes;
+        }
     }
 }

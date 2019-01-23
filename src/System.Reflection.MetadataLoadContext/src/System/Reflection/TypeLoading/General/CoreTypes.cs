@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Reflection.Metadata;
+
 namespace System.Reflection.TypeLoading
 {
     /// <summary>
@@ -28,7 +30,15 @@ namespace System.Reflection.TypeLoading
                 for (int i = 0; i < numCoreTypes; i++)
                 {
                     ((CoreType)i).GetFullName(out byte[] ns, out byte[] name);
-                    RoType type = coreAssembly.GetTypeCore(ns, name, ignoreCase: false, out e);
+                    RoType type;
+                    unsafe
+                    {
+                        fixed (byte* nsPtr = ns)
+                        fixed (byte* namePtr = name)
+                        {
+                            type = coreAssembly.GetTypeCore(new BlobReader(nsPtr, ns.Length), new BlobReader(namePtr, name.Length), ignoreCase: false, out e);
+                        }
+                    }
                     coreTypes[i] = type;
                     if (type == null)
                     {

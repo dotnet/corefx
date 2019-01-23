@@ -50,8 +50,8 @@ namespace System.Reflection.TypeLoading
         protected sealed override RoType ComputeDeclaringType() => null;
 
         public sealed override IEnumerable<CustomAttributeData> CustomAttributes => Array.Empty<CustomAttributeData>();
-        internal sealed override bool IsCustomAttributeDefined(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name) => false;
-        internal sealed override CustomAttributeData TryFindCustomAttribute(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name) => null;
+        internal sealed override bool IsCustomAttributeDefined(byte[] ns, byte[] name) => false;
+        internal sealed override CustomAttributeData TryFindCustomAttribute(byte[] ns, byte[] name) => null;
 
         public sealed override int MetadataToken => 0x02000000; // nil TypeDef token
 

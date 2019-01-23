@@ -5,6 +5,7 @@
 using System.Collections.Immutable;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
+using System.Linq;
 
 namespace System.Reflection.TypeLoading.Ecma
 {
@@ -79,13 +80,21 @@ namespace System.Reflection.TypeLoading.Ecma
         // 
         // utf8.Length does *not* include NUL terminator.
         //
-        public static unsafe bool Equals(this StringHandle handle, ReadOnlySpan<byte> utf8, MetadataReader reader)
+        public static unsafe bool Equals(this StringHandle handle, byte[] utf8, MetadataReader reader)
         {
             //TODO: Perf - GetBlobReader() scans the string handle for a NUL terminator to compute the length making it an O(N)
             // operation. It might be worth memoizing the pointer/length combo per TypeDefToken and ExportedTypeToken. But even better
             // would be to get UTF8 Equals overloads added to MetadataStringComparer.
             BlobReader br = handle.GetBlobReader(reader);
-            ReadOnlySpan<byte> actual = new ReadOnlySpan<byte>(br.CurrentPointer, br.Length);
+            byte[] actual = br.ReadAll();
+            return utf8.SequenceEqual(actual);
+        }
+
+        public static unsafe bool Equals(this StringHandle handle, BlobReader utf8, MetadataReader reader)
+        {
+            //TODO: Perf - GetBlobReader() as explained above.
+            BlobReader br = handle.GetBlobReader(reader);
+            byte[] actual = br.ReadAll();
             return utf8.SequenceEqual(actual);
         }
 

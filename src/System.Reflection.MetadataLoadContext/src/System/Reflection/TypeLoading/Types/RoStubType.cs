@@ -44,8 +44,8 @@ namespace System.Reflection.TypeLoading
         protected sealed override RoType ComputeDeclaringType() => throw null;
 
         public sealed override IEnumerable<CustomAttributeData> CustomAttributes => throw null;
-        internal sealed override bool IsCustomAttributeDefined(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name) => throw null;
-        internal sealed override CustomAttributeData TryFindCustomAttribute(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name) => throw null;
+        internal sealed override bool IsCustomAttributeDefined(byte[] ns, byte[] name) => throw null;
+        internal sealed override CustomAttributeData TryFindCustomAttribute(byte[] ns, byte[] name) => throw null;
 
         public sealed override int MetadataToken => throw null;
 

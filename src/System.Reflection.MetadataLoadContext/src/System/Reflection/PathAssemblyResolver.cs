@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace System.Reflection
 {
@@ -58,7 +59,7 @@ namespace System.Reflection
             Assembly candidateIgnoringPkt = null;
             if (_fileToPaths.TryGetValue(assemblyName.Name, out List<string> paths))
             {
-                ReadOnlySpan<byte> pktFromName = assemblyName.GetPublicKeyToken();
+                byte[] pktFromName = assemblyName.GetPublicKeyToken();
 
                 foreach (string path in paths)
                 {
@@ -66,7 +67,7 @@ namespace System.Reflection
                     AssemblyName assemblyNameFromPath = assemblyFromPath.GetName();
                     if (assemblyName.Name.Equals(assemblyNameFromPath.Name, StringComparison.OrdinalIgnoreCase))
                     {
-                        ReadOnlySpan<byte> pktFromAssembly = assemblyNameFromPath.GetPublicKeyToken();
+                        byte[] pktFromAssembly = assemblyNameFromPath.GetPublicKeyToken();
 
                         // Find exact match on PublicKeyToken including treating no PublicKeyToken as its own entry.
                         if (pktFromName.SequenceEqual(pktFromAssembly))
@@ -78,7 +79,7 @@ namespace System.Reflection
                             }
                         }
                         // If assemblyName does not specify a PublicKeyToken, then still consider those with a PublicKeyToken.
-                        else if (candidateWithSamePkt == null && pktFromName.IsEmpty)
+                        else if (candidateWithSamePkt == null && pktFromName.Length == 0)
                         {
                             // Pick the highest version.
                             if (candidateIgnoringPkt == null || assemblyNameFromPath.Version > candidateIgnoringPkt.GetName().Version)

@@ -27,12 +27,12 @@ namespace System.Reflection.TypeLoading.Ecma
 
         public static CustomAttributeData ToCustomAttributeData(this CustomAttributeHandle handle, EcmaModule module) => new EcmaCustomAttributeData(handle, module);
 
-        public static bool IsCustomAttributeDefined(this CustomAttributeHandleCollection handles, ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name, EcmaModule module)
+        public static bool IsCustomAttributeDefined(this CustomAttributeHandleCollection handles, byte[] ns, byte[] name, EcmaModule module)
         {
             return !handles.FindCustomAttributeByName(ns, name, module).IsNil;
         }
 
-        public static CustomAttributeData TryFindCustomAttribute(this CustomAttributeHandleCollection handles, ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name, EcmaModule module)
+        public static CustomAttributeData TryFindCustomAttribute(this CustomAttributeHandleCollection handles, byte[] ns, byte[] name, EcmaModule module)
         {
             CustomAttributeHandle handle = handles.FindCustomAttributeByName(ns, name, module);
             if (handle.IsNil)
@@ -40,7 +40,7 @@ namespace System.Reflection.TypeLoading.Ecma
             return handle.ToCustomAttributeData(module);
         }
 
-        private static CustomAttributeHandle FindCustomAttributeByName(this CustomAttributeHandleCollection handles, ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name, EcmaModule module)
+        private static CustomAttributeHandle FindCustomAttributeByName(this CustomAttributeHandleCollection handles, byte[] ns, byte[] name, EcmaModule module)
         {
             MetadataReader reader = module.Reader;
             foreach (CustomAttributeHandle handle in handles)
@@ -56,7 +56,7 @@ namespace System.Reflection.TypeLoading.Ecma
             return default;
         }
 
-        public static bool TypeMatchesNameAndNamespace(this EntityHandle handle, ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name, MetadataReader reader)
+        public static bool TypeMatchesNameAndNamespace(this EntityHandle handle, byte[] ns, byte[] name, MetadataReader reader)
         {
             switch (handle.Kind)
             {

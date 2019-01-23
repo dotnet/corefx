@@ -102,8 +102,8 @@ namespace System.Reflection.TypeLoading
         protected sealed override IEnumerable<RoType> ComputeDirectlyImplementedInterfaces() => _genericTypeDefinition.SpecializeInterfaces(Instantiation);
 
         public sealed override IEnumerable<CustomAttributeData> CustomAttributes => _genericTypeDefinition.CustomAttributes;
-        internal sealed override bool IsCustomAttributeDefined(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name) => _genericTypeDefinition.IsCustomAttributeDefined(ns, name);
-        internal sealed override CustomAttributeData TryFindCustomAttribute(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name) => _genericTypeDefinition.TryFindCustomAttribute(ns, name);
+        internal sealed override bool IsCustomAttributeDefined(byte[] ns, byte[] name) => _genericTypeDefinition.IsCustomAttributeDefined(ns, name);
+        internal sealed override CustomAttributeData TryFindCustomAttribute(byte[] ns, byte[] name) => _genericTypeDefinition.TryFindCustomAttribute(ns, name);
 
         protected sealed override TypeAttributes ComputeAttributeFlags() => _genericTypeDefinition.Attributes;
         protected sealed override TypeCode GetTypeCodeImpl() => Type.GetTypeCode(_genericTypeDefinition);

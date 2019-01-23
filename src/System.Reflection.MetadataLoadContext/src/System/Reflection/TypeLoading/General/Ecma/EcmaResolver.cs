@@ -60,8 +60,8 @@ namespace System.Reflection.TypeLoading.Ecma
         {
             MetadataReader reader = module.Reader;
             TypeReference tr = handle.GetTypeReference(reader);
-            ReadOnlySpan<byte> ns = tr.Namespace.AsReadOnlySpan(reader);
-            ReadOnlySpan<byte> name = tr.Name.AsReadOnlySpan(reader);
+            BlobReader ns = tr.Namespace.GetBlobReader(reader);
+            BlobReader name = tr.Name.GetBlobReader(reader);
 
             EntityHandle scope = tr.ResolutionScope;
             if (scope.IsNil)

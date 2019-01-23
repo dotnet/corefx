@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -107,8 +108,19 @@ namespace System.Reflection.TypeLoading
         /// If a type is not contained or forwarded from the assembly, this method returns null (does not throw.)
         /// This supports the "throwOnError: false" behavior of Assembly.GetType(string, bool).
         /// </summary>
-        internal RoDefinitionType GetTypeCore(string ns, string name, bool ignoreCase, out Exception e) => GetTypeCore(ns.ToUtf8(), name.ToUtf8(), ignoreCase, out e);
-        internal RoDefinitionType GetTypeCore(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name, bool ignoreCase, out Exception e)
+        internal RoDefinitionType GetTypeCore(string ns, string name, bool ignoreCase, out Exception e)
+        {
+            unsafe
+            {
+                fixed (byte* nsPtr = ns.ToUtf8())
+                fixed (byte* namePtr = name.ToUtf8())
+                {
+                    return GetTypeCore(new BlobReader(nsPtr, ns.Length), new BlobReader(namePtr, name.Length), ignoreCase, out e);
+                }
+            }
+        }
+
+        internal RoDefinitionType GetTypeCore(BlobReader ns, BlobReader name, bool ignoreCase, out Exception e)
         {
             RoDefinitionType result = GetRoManifestModule().GetTypeCore(ns, name, ignoreCase, out e);
             if (IsSingleModule || result != null)

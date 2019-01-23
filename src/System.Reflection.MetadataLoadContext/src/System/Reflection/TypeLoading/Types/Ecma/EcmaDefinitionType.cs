@@ -72,8 +72,8 @@ namespace System.Reflection.TypeLoading.Ecma
 
         protected sealed override IEnumerable<CustomAttributeData> GetTrueCustomAttributes() => TypeDefinition.GetCustomAttributes().ToTrueCustomAttributes(GetEcmaModule());
 
-        internal sealed override bool IsCustomAttributeDefined(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name) => TypeDefinition.GetCustomAttributes().IsCustomAttributeDefined(ns, name, GetEcmaModule());
-        internal sealed override CustomAttributeData TryFindCustomAttribute(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name) => TypeDefinition.GetCustomAttributes().TryFindCustomAttribute(ns, name, GetEcmaModule());
+        internal sealed override bool IsCustomAttributeDefined(byte[] ns, byte[] name) => TypeDefinition.GetCustomAttributes().IsCustomAttributeDefined(ns, name, GetEcmaModule());
+        internal sealed override CustomAttributeData TryFindCustomAttribute(byte[] ns, byte[] name) => TypeDefinition.GetCustomAttributes().TryFindCustomAttribute(ns, name, GetEcmaModule());
 
         public sealed override int MetadataToken => _handle.GetToken();
 
@@ -132,7 +132,7 @@ namespace System.Reflection.TypeLoading.Ecma
             size = layout.Size;
         }
 
-        internal sealed override bool IsTypeNameEqual(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name)
+        internal sealed override bool IsTypeNameEqual(BlobReader ns, BlobReader name)
         {
             MetadataReader reader = Reader;
             TypeDefinition td = TypeDefinition;

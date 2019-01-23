@@ -85,7 +85,7 @@ namespace System.Reflection.TypeLoading.Ecma
             }
         }
 
-        internal sealed override RoDefinitionType GetNestedTypeCore(ReadOnlySpan<byte> utf8Name)
+        internal sealed override RoDefinitionType GetNestedTypeCore(BlobReader utf8Name)
         {
             RoDefinitionType match = null;
             MetadataReader reader = Reader;
