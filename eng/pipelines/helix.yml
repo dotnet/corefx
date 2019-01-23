@@ -11,7 +11,7 @@ parameters:
   waitForCompletion: '' # true | false
   officialBuildId: ''
   enableAzurePipelinesReporter: '' # true | false
-  msbuilExtraArguments: ''
+  msbuildExtraArguments: ''
 
 steps:
   - script: ${{ parameters.msbuildScript }}

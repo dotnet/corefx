@@ -213,20 +213,7 @@
     <Exec Command="$(TestBuildCommand) &quot;$(TestProject)&quot;" EnvironmentVariables="@(CliEnvironment)" StandardOutputImportance="High" />
   </Target>
 
-  <PropertyGroup>
-    <_BuildDependsOn>
-      BuildProjects
-    </_BuildDependsOn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(ArchiveTests)' == 'true'">
-    <_BuildDependsOn>
-      $(BuildDependsOn);
-      ArchiveHelixItems
-    </_BuildDependsOn>
-  </PropertyGroup>
-
-  <Target Name="Build" DependsOnTargets="$(_BuildDependsOn)" />
+  <Target Name="Build" DependsOnTargets="BuildProjects;ArchiveHelixItems" />
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>

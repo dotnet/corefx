@@ -7,9 +7,6 @@
   <PropertyGroup>
     <PackageTestProjectsDir Condition="'$(PackageTestProjectsDir)' == ''">$(MSBuildThisFileDirectory)..\projects</PackageTestProjectsDir>
     <_projectProperties>SupportFilesDir=$(MSBuildThisFileDirectory)</_projectProperties>
-
-    <!-- We need this to be able to pass restore sources from command line when running tests in helix -->
-    <_restoreSources Condition="'$(PackageTestSources)' != ''">$([System.String]::Copy('$(PackageTestSources)').Replace('+',';'))</_restoreSources>
   </PropertyGroup>
 
   <Target Name="GetProjects">
@@ -23,16 +20,6 @@
           Inputs="@(Project)"
           Outputs="@(Project->'%(RootDir)%(Directory)obj\project.assets.json')"
           DependsOnTargets="GetProjects">
-
-    <ItemGroup>
-      <!-- This Split() is needed since the semicolon in ProcessedTargetQueues is now a literal -->
-      <_normalizedRestoreSources Condition="'$(_restoreSources)' != ''" Include="$(_restoreSources.Split(';'))" />
-    </ItemGroup>
-
-    <PropertyGroup>
-      <_projectProperties Condition="'@(_normalizedRestoreSources)' != ''">$(_projectProperties);RestoreSources=@(_normalizedRestoreSources)</_projectProperties>
-    </PropertyGroup>
-
     <MSBuild Projects="@(Project)" Targets="Restore" BuildInParallel="true" Properties="$(_projectProperties)" />
     <Touch Files="@(Project->'%(RootDir)%(Directory)obj\project.assets.json')" />
   </Target>
