@@ -468,11 +468,15 @@ namespace System.Threading.Threads.Tests
             {
                 Thread.CurrentPrincipal = new ClaimsPrincipal();
 
+                // TaskCreationOptions.LongRunning to have fresh new thread with clean execution context
+                await Task.Factory.StartNew(() => Assert.IsType<ClaimsPrincipal>(Thread.CurrentPrincipal), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
                 ExecutionContext.SuppressFlow();
 
-                await Task.Run(() => Assert.Null(Thread.CurrentPrincipal));
+                // TaskCreationOptions.LongRunning to have fresh new thread with clean execution context
+                await Task.Factory.StartNew(() => Assert.Null(Thread.CurrentPrincipal), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-                // defaults are null for netcorepp and GenericPrincipal for netfx
+                // defaults are null for netcorapp and GenericPrincipal for netfx
                 Assert.True(Thread.CurrentPrincipal is null || Thread.CurrentPrincipal is GenericPrincipal);
             });
         }

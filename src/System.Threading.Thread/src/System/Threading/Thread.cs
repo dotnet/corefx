@@ -16,11 +16,13 @@ namespace System.Threading
         [ThreadStatic]
         private static Thread t_currentThread;
 
+        [ThreadStatic]
+        private static IPrincipal s_principal;
+
         private readonly RuntimeThread _runtimeThread;
         private Delegate _start;
         private CultureInfo _startCulture;
         private CultureInfo _startUICulture;
-        private IPrincipal _principal;
         private static AsyncLocal<IPrincipal> s_asyncLocalPrincipal;
 
         private Thread(RuntimeThread runtimeThread)
@@ -191,42 +193,29 @@ namespace System.Threading
         {
             get
             {
-                if (CurrentThread._principal is null)
+                if (s_principal is null)
                 {
-                    IPrincipal principal = AppDomain.CurrentDomain.GetThreadPrincipal();
-                    if (principal is null)
-                    {
-                        return null;
-                    }
-                    else
-                    {
-                        SetAsyncLocalPrincipal(principal);
-                    }
+                   CurrentPrincipal = AppDomain.CurrentDomain.GetThreadPrincipal();
                 }
-                return CurrentThread._principal;
+                return s_principal;
             }
             set
             {
-                SetAsyncLocalPrincipal(value);
-            }
-        }
-
-        private static void SetAsyncLocalPrincipal(IPrincipal principal)
-        {
-            if (s_asyncLocalPrincipal is null)
-            {
-                if (principal is null)
+                if (s_asyncLocalPrincipal is null)
                 {
-                    return;
+                    if (value is null)
+                    {
+                        return;
+                    }
+                    Interlocked.CompareExchange(ref s_asyncLocalPrincipal, new AsyncLocal<IPrincipal>(CurrentPrincipalContextChanged), null);
                 }
-                Interlocked.CompareExchange(ref s_asyncLocalPrincipal, new AsyncLocal<IPrincipal>(CurrentPrincipalContextChanged), null);
+                s_asyncLocalPrincipal.Value = value;
             }
-            s_asyncLocalPrincipal.Value = principal;
         }
 
         private static void CurrentPrincipalContextChanged(AsyncLocalValueChangedArgs<IPrincipal> valueChangedHandler)
         {
-            CurrentThread._principal = valueChangedHandler.CurrentValue;
+            s_principal = valueChangedHandler.CurrentValue;
         }
 
         public ExecutionContext ExecutionContext => ExecutionContext.Capture();
