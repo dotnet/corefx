@@ -41,8 +41,8 @@
 
     <TestRestoreCommand>$(TestDotNetPath)</TestRestoreCommand>
     <TestRestoreCommand>$(TestRestoreCommand) restore</TestRestoreCommand>
-    <TestRestoreCommand>$(TestRestoreCommand) @(PackageTestRestoreSources->'-s %(Identity)', ' ')</TestRestoreCommand>
     <TestRestoreCommand>$(TestRestoreCommand) --packages "$(TestPackageDir)"</TestRestoreCommand>
+    <TestRestoreCommand>$(TestRestoreCommand) /p:LocalPackagesPath=$(PackageOutputPath)</TestRestoreCommand>
     <TestRestoreCommand  Condition="'$(TestPackages)' != ''">$(TestRestoreCommand) /p:TestPackages=$(TestPackages)</TestRestoreCommand>
 
     <TestBuildCommand>$(TestDotNetPath)</TestBuildCommand>
