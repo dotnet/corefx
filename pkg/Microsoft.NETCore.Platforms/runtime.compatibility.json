@@ -325,6 +325,10 @@
   "alpine.3.9-x64-corert": [
     "alpine.3.9-x64-corert",
     "alpine.3.9-corert",
+    "alpine.3.9-x64",
+    "alpine.3.9",
+    "alpine.3.8-x64-corert",
+    "alpine.3.8-corert",
     "alpine.3.8-x64",
     "alpine.3.8",
     "alpine.3.7-x64-corert",
