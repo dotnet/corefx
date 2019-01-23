@@ -446,6 +446,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(SSL_free) \
     REQUIRED_FUNCTION(SSL_get_client_CA_list) \
     REQUIRED_FUNCTION(SSL_get_current_cipher) \
+    REQUIRED_FUNCTION(SSL_CIPHER_get_id) \
     REQUIRED_FUNCTION(SSL_get_error) \
     REQUIRED_FUNCTION(SSL_get_finished) \
     REQUIRED_FUNCTION(SSL_get_peer_cert_chain) \
@@ -542,7 +543,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     LIGHTUP_FUNCTION(EC_GROUP_set_curve_GF2m) \
     LIGHTUP_FUNCTION(EC_POINT_get_affine_coordinates_GF2m) \
     LIGHTUP_FUNCTION(EC_POINT_set_affine_coordinates_GF2m) \
-    
+
 // Declare pointers to all the used OpenSSL functions
 #define REQUIRED_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
 #define NEW_REQUIRED_FUNCTION(fn) extern __typeof(fn)* fn##_ptr;
@@ -831,6 +832,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_free SSL_free_ptr
 #define SSL_get_client_CA_list SSL_get_client_CA_list_ptr
 #define SSL_get_current_cipher SSL_get_current_cipher_ptr
+#define SSL_CIPHER_get_id SSL_CIPHER_get_id_ptr
 #define SSL_get_error SSL_get_error_ptr
 #define SSL_get_finished SSL_get_finished_ptr
 #define SSL_get_peer_cert_chain SSL_get_peer_cert_chain_ptr

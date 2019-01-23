@@ -2,9 +2,28 @@
   <PropertyGroup>
     <ProjectGuid>{A7488FC0-9A8F-4EF9-BC3E-C5EBA47E13F8}</ProjectGuid>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <!-- This is needed so that code for TlsCipherSuite will have no namespace (causes compile errors) when used within T4 template  -->
+    <DefineConstants>PRODUCT</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Net.Security.cs" />
+  </ItemGroup>
+  <!-- This file depends on IANA registry. We do not want anyone's build to break after the update-->
+  <!-- or if they don't have internet connection -->
+  <ItemGroup Condition="'$(AllowTlsCipherSuiteGeneration)' == 'true'">
+    <Compile Include="TlsCipherSuite.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TlsCipherSuite.tt</DependentUpon>
+    </Compile>
+    <None Include="TlsCipherSuite.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TlsCipherSuite.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition="'$(AllowTlsCipherSuiteGeneration)' != 'true'">
+    <Compile Include="TlsCipherSuite.cs" />
+    <None Include="TlsCipherSuite.tt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\System.Collections.NonGeneric\ref\System.Collections.NonGeneric.csproj" />
@@ -19,5 +38,8 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Memory" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 </Project>

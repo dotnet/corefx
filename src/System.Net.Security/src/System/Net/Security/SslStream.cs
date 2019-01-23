@@ -518,6 +518,15 @@ namespace System.Net.Security
             }
         }
 
+        [CLSCompliant(false)]
+        public virtual TlsCipherSuite NegotiatedCipherSuite
+        {
+            get
+            {
+                return _sslState.TlsCipherSuite;
+            }
+        }
+
         public virtual bool CheckCertRevocationStatus => _context != null && _context.CheckCertRevocationStatus != X509RevocationMode.NoCheck;
 
         //

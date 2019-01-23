@@ -4,6 +4,8 @@
     <ProjectGuid>{89F37791-6254-4D60-AB96-ACD3CCA0E771}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <!-- This is needed so that code for TlsCipherSuite will have no namespace (causes compile errors) when used within T4 template  -->
+    <DefineConstants>PRODUCT</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsOSX)' == 'true' ">
     <DefineConstants>$(DefineConstants);SYSNETSECURITY_NO_OPENSSL</DefineConstants>
@@ -98,6 +100,9 @@
     <Compile Include="$(CommonPath)\System\Net\SecurityStatusPal.cs">
       <Link>Common\System\Net\SecurityStatusPal.cs</Link>
     </Compile>
+    <Compile Include="..\ref\TlsCipherSuite.cs">
+      <Link>System\Net\Security\TlsCipherSuite.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
     <Compile Include="System\Net\CertificateValidationPal.Windows.cs" />
@@ -152,6 +157,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\SecPkgContext_ConnectionInfo.cs">
       <Link>Common\Interop\Windows\SChannel\SecPkgContext_ConnectionInfo.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\SChannel\SecPkgContext_CipherInfo.cs">
+      <Link>Common\Interop\Windows\SChannel\SecPkgContext_CipherInfo.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\Interop.SecPkgContext_ApplicationProtocol.cs">
       <Link>Common\Interop\Windows\SChannel\Interop.SecPkgContext_ApplicationProtocol.cs</Link>
@@ -214,6 +222,32 @@
       <Link>Common\Interop\Windows\SspiCli\SecPkgContext_StreamSizes.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="System\Net\Security\TlsCipherSuiteNameParser.ttinclude" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' and '$(AllowTlsCipherSuiteGeneration)' == 'true' ">
+    <Compile Include="System\Net\Security\TlsCipherSuiteData.Lookup.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>System\Net\Security\TlsCipherSuiteData.Lookup.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsUnix)' != 'true' and '$(AllowTlsCipherSuiteGeneration)' == 'true'">
+    <!-- Needed so that file can be generated on Windows from VS -->
+    <None Include="System\Net\Security\TlsCipherSuiteData.Lookup.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TlsCipherSuiteData.Lookup.tt</DependentUpon>
+    </None>
+    <None Include="System\Net\Security\TlsCipherSuiteData.Lookup.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TlsCipherSuiteData.Lookup.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' and '$(AllowTlsCipherSuiteGeneration)' != 'true' ">
+    <Compile Include="System\Net\Security\TlsCipherSuiteData.Lookup.cs" />
+    <None Include="System\Net\Security\TlsCipherSuiteData.Lookup.tt" />
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
@@ -269,11 +303,13 @@
     <Compile Include="System\Net\Security\NegotiateStreamPal.Unix.cs" />
     <Compile Include="System\Net\Security\Pal.Managed\EndpointChannelBindingToken.cs" />
     <Compile Include="System\Net\Security\Pal.Managed\SafeChannelBindingHandle.cs" />
+    <Compile Include="System\Net\Security\SslConnectionInfo.Unix.cs" />
+    <Compile Include="System\Net\Security\TlsCipherSuiteData.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' AND '$(TargetsOSX)' != 'true' ">
     <Compile Include="System\Net\CertificateValidationPal.Unix.cs" />
     <Compile Include="System\Net\Security\SslStreamPal.Unix.cs" />
-    <Compile Include="System\Net\Security\SslConnectionInfo.Unix.cs" />
+    <Compile Include="System\Net\Security\SslConnectionInfo.Linux.cs" />
     <Compile Include="System\Net\Security\StreamSizes.Unix.cs" />
     <Compile Include="$(CommonPath)\System\Net\Security\CertificateValidation.Unix.cs">
       <Link>Common\System\Net\Security\CertificateValidation.Unix.cs</Link>
@@ -420,5 +456,8 @@
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.OpenSsl" />
     <Reference Include="System.Security.Cryptography.Primitives" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 </Project>
