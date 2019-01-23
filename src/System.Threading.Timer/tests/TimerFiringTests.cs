@@ -310,6 +310,7 @@ public partial class TimerFiringTests
             {
                 // This test will occasionally fail apparently because it was switched out
                 // for a short period. Eat and go around again
+                await Task.Delay(TimeSpan.FromSeconds(10)); // Should be very rare: wait for machine to settle
                 continue;
             }
 
