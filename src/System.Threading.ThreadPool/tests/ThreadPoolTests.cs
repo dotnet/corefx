@@ -350,9 +350,29 @@ namespace System.Threading.ThreadPools.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 ThreadPool.RegisterWaitForSingleObject(waitHandle, callback, null, (long)-2, true));
             Assert.Throws<ArgumentOutOfRangeException>(() =>
+                ThreadPool.RegisterWaitForSingleObject(waitHandle, callback, null, (long)int.MaxValue + 1, true));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
                 ThreadPool.RegisterWaitForSingleObject(waitHandle, callback, null, TimeSpan.FromMilliseconds(-2), true));
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 ThreadPool.RegisterWaitForSingleObject(
+                    waitHandle,
+                    callback,
+                    null,
+                    TimeSpan.FromMilliseconds((double)int.MaxValue + 1),
+                    true));
+
+            Assert.Throws<ArgumentNullException>(() => ThreadPool.UnsafeRegisterWaitForSingleObject(null, callback, null, 0, true));
+            Assert.Throws<ArgumentNullException>(() => ThreadPool.UnsafeRegisterWaitForSingleObject(waitHandle, null, null, 0, true));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                ThreadPool.UnsafeRegisterWaitForSingleObject(waitHandle, callback, null, -2, true));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                ThreadPool.UnsafeRegisterWaitForSingleObject(waitHandle, callback, null, (long)-2, true));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                ThreadPool.UnsafeRegisterWaitForSingleObject(waitHandle, callback, null, (long)int.MaxValue + 1, true));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                ThreadPool.UnsafeRegisterWaitForSingleObject(waitHandle, callback, null, TimeSpan.FromMilliseconds(-2), true));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                ThreadPool.UnsafeRegisterWaitForSingleObject(
                     waitHandle,
                     callback,
                     null,
