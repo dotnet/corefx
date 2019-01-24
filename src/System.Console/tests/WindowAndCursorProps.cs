@@ -235,7 +235,7 @@ public class WindowAndCursorProps : RemoteExecutorTestBase
     {
         string title = Console.Title;
         string trimmedTitle = title.TrimEnd('\0');
-        Assert.Contains(title, trimmedTitle);
+        Assert.Equal(title, trimmedTitle);
     }
 
     [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Nano currently ignores set title
