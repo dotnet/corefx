@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Text;
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
     using System.Security;
 #endif
@@ -228,6 +229,28 @@ namespace System.Diagnostics
         }
 
         /// <summary>
+        /// Set the parent ID using the W3C convention using a TraceId and a SpanId.   This
+        /// constructor has the advantage that no string manipulation is needed to set the ID.  
+        /// </summary>
+        public Activity SetParentId(in TraceId traceId, in SpanId spanId)
+        {
+            if (Parent != null)
+            {
+                NotifyError(new InvalidOperationException($"Trying to set {nameof(ParentId)} on activity which has {nameof(Parent)}"));
+            }
+            else if (ParentId != null)
+            {
+                NotifyError(new InvalidOperationException($"{nameof(ParentId)} is already set"));
+            }
+            else
+            {
+                _traceId = traceId;
+                _spanId = spanId;
+            }
+            return this;
+        }
+
+        /// <summary>
         /// Update the Activity to set start time
         /// </summary>
         /// <param name="startTimeUtc">Activity start time in UTC (Greenwich Mean Time)</param>
@@ -397,7 +420,7 @@ namespace System.Diagnostics
         /// If the Activity has the W3C format, this returns the ID for the SPAN part of the Id.  
         /// Otherwise it returns a zero SpanId. 
         /// </summary>
-        public ref SpanId SpanId
+        public ref readonly SpanId SpanId
         {
             get
             {
@@ -415,7 +438,7 @@ namespace System.Diagnostics
         /// If the Activity has the W3C format, this returns the ID for the TraceId part of the Id.  
         /// Otherwise it returns a zero TraceId. 
         /// </summary>
-        public ref TraceId TraceId
+        public ref readonly TraceId TraceId
         {
             get
             {
@@ -478,7 +501,7 @@ namespace System.Diagnostics
         }
         private static bool IsW3CId(Span<byte> id)
         {
-            return id.Length == 55 && char.IsDigit((char) id[0]);
+            return id.Length == 55 && char.IsDigit((char)id[0]);
         }
 
         private string GenerateW3CId()
@@ -671,40 +694,66 @@ namespace System.Diagnostics
     public unsafe struct TraceId
     {
         /// <summary>
-        /// Creates a TraceId from a 32 character hexadecimal string representation 'hexString'
+        /// Creates a TraceId from a 16 byte span 'idBytes'.   The bytes are copied.  
         /// </summary>
-        public TraceId(string hexString)
-        {
-            _id1 = 0;
-            _id2 = 0;
-            _asHexString = hexString;
-        }
-        /// <summary>
-        /// Creates a TraceId from a 16 byte span 'idBytes'.  
-        /// </summary>
-        public TraceId(Span<byte> idBytes)
+        public TraceId(ReadOnlySpan<byte> idData, bool isUtf8Chars = false)
         {
             _id1 = 0;
             _id2 = 0;
             _asHexString = null;
             fixed (ulong* idPtr = &_id1)
-                idBytes.CopyTo(new Span<byte>(idPtr, sizeof(ulong) * 2));
+            {
+                var outBuff = new Span<byte>(idPtr, sizeof(ulong) * 2);
+                if (isUtf8Chars)
+                {
+                    if (idData.Length != 32)
+                        throw new ArgumentOutOfRangeException(nameof(idData));
+                    TraceId.SetSpanFromHexUtf8Chars(outBuff, idData);
+                }
+                else
+                {
+                    if (idData.Length != 16)
+                        throw new ArgumentOutOfRangeException(nameof(idData));
+                    idData.CopyTo(outBuff);
+                }
+            }
+        }
+
+        public TraceId(ReadOnlySpan<char> idData)
+        {
+            _id1 = 0;
+            _id2 = 0;
+            _asHexString = null;
+            fixed (ulong* idPtr = &_id1)
+            {
+                if (idData.Length != 32)
+                    throw new ArgumentOutOfRangeException(nameof(idData));
+                TraceId.SetSpanFromHexChars(new Span<byte>(idPtr, sizeof(ulong) * 2), idData);
+            }
         }
 
         /// <summary>
-        /// Copies the 16 byte binary trace Id int 'outputBuffer'. 
+        /// Create a new TraceId with at random number in it (very likely to be unique)
         /// </summary>
-        public void CopyToAsBinary(Span<byte> outputBuffer)
+        public static TraceId NewTraceId()
         {
-            if (_asHexString != null && _id1 == 0 && _id2 == 0)
-            {
-                UInt64.TryParse(_asHexString, out _id1);
-                UInt64.TryParse(_asHexString.Substring(8), out _id2);
-            }
-            fixed (ulong* idBytes = &_id1)
-                new Span<byte>(idBytes, sizeof(ulong) * 2).CopyTo(outputBuffer);
+            TraceId ret = new TraceId();
+            SetToRandomBytes(new Span<byte>(&ret._id1, sizeof(ulong) * 2));
+            return ret;
         }
- 
+
+        /// <summary>
+        /// Return the bytes of the ID.  Its length is always 16
+        /// </summary>
+        public ReadOnlySpan<byte> AsBytes
+        {
+            get
+            {
+                fixed (ulong* idPtr = &_id1)
+                    return new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2);
+            }
+        }
+
         /// <summary>
         /// Returns the TraceId as a 32 character hexadecimal string.  
         /// </summary>
@@ -713,10 +762,7 @@ namespace System.Diagnostics
             get
             {
                 if (_asHexString == null)
-                {
-                    // TODO figure out endian-ness
-                    _asHexString = _id1.ToString("X8") + _id2.ToString("X8");
-                }
+                    _asHexString = SpanToHexString(AsBytes);
                 return _asHexString;
             }
         }
@@ -726,11 +772,68 @@ namespace System.Diagnostics
         /// </summary>
         public override string ToString() => AsHexString;
 
-#region private
+        #region private
+        internal static void SetToRandomBytes(Span<byte> outBytes)
+        {
+            Debug.Assert(outBytes.Length <= sizeof(Guid));     // Guid is 16 bytes, and so is TraceId 
+            Guid guid = Guid.NewGuid();
+            ReadOnlySpan<byte> guidBytes = new ReadOnlySpan<byte>(&guid, sizeof(Guid));
+            guidBytes.Slice(0, outBytes.Length).CopyTo(outBytes);
+        }
+
+        internal static string SpanToHexString(ReadOnlySpan<byte> bytes)
+        {
+            // TODO replace with ValueStringBuilder when available.  
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in bytes)
+                sb.Append(BinaryToHexDigit(b >> 4)).Append(BinaryToHexDigit(b));
+            return sb.ToString();
+        }
+
+        internal static void SetSpanFromHexUtf8Chars(Span<byte> outBytes, ReadOnlySpan<byte> idData)
+        {
+            Debug.Assert(outBytes.Length * 2 == idData.Length);
+            for (int i = 0; i < outBytes.Length; i++)
+                outBytes[i] = HexByteFromChars((char)idData[i * 2], (char)idData[i * 2 + 1]);
+        }
+
+        internal static void SetSpanFromHexChars(Span<byte> outBytes, ReadOnlySpan<char> charData)
+        {
+            Debug.Assert(outBytes.Length * 2 == charData.Length);
+            for (int i = 0; i < outBytes.Length; i++)
+                outBytes[i] = HexByteFromChars(charData[i * 2], charData[i * 2 + 1]);
+        }
+        internal static byte HexByteFromChars(char char1, char char2)
+        {
+            return (byte)(HexDigitToBinary(char1) * 16 + HexDigitToBinary(char2));
+        }
+
+        internal static byte HexDigitToBinary(char c)
+        {
+            if (Char.IsDigit(c))
+                return (byte)(c - '0');
+
+            if ('A' <= c && c <= 'F')
+                return (byte)(c - ('A' + 10));
+
+            if ('a' <= c && c <= 'f')
+                return (byte)(c - ('a' + 10));
+
+            throw new ArgumentOutOfRangeException("idData");
+        }
+
+        internal static char BinaryToHexDigit(int val)
+        {
+            val &= 0xF;
+            if (val <= 9)
+                return (char)('0' + val);
+            return (char)(('A' - 10) + val);
+        }
+
         ulong _id1;
         ulong _id2;
         string _asHexString;  // ultimately change to object, and allow several representations based on type.  
-#endregion
+        #endregion
     }
 
     /// <summary>
@@ -742,23 +845,123 @@ namespace System.Diagnostics
     /// it has to, and caches the string representation after it was created.   
     /// It is mostly useful as an exchange type.  
     /// </summary>
-    public struct SpanId
+    public unsafe struct SpanId
     {
         /// <summary>
-        /// Creates a SpanId from a 16 character hexadecimal string representation 'hexString'
+        /// Creates a new SpanId from a given set of bytes 'idData'   idData 
+        /// can either be an 8 byte Span of bytes, or a 16 byte Span of Utf8 characters
+        /// and 'isUtf8Chars' indicates which of these it is.   
         /// </summary>
-        public SpanId(string hexId)
+        public SpanId(ReadOnlySpan<byte> idData, bool isUtf8Chars = false)
         {
-            _asLong = 0;
-            _asHexString = hexId;
+            _id1 = 0;
+            _asHexString = null;
+            fixed (ulong* idPtr = &_id1)
+            {
+                var outBuff = new Span<byte>(idPtr, sizeof(ulong));
+                if (isUtf8Chars)
+                {
+                    if (idData.Length != 16)
+                        throw new ArgumentOutOfRangeException(nameof(idData));
+                    TraceId.SetSpanFromHexUtf8Chars(outBuff, idData);
+                }
+                else
+                {
+                    if (idData.Length != 8)
+                        throw new ArgumentOutOfRangeException(nameof(idData));
+                    idData.CopyTo(outBuff);
+                }
+            }
         }
+
+        /// <summary>
+        /// Creates a new SpanId from the give characters in 'idData'   IdData
+        /// must be exactly 16 bytes long and contain only Hex digits.   
+        /// </summary>
+        /// <param name="idData"></param>
+        public SpanId(ReadOnlySpan<char> idData)
+        {
+            _id1 = 0;
+            _asHexString = null;
+            fixed (ulong* idPtr = &_id1)
+            {
+                if (idData.Length != 16)
+                    throw new ArgumentOutOfRangeException(nameof(idData));
+                TraceId.SetSpanFromHexChars(new Span<byte>(idPtr, sizeof(ulong)), idData);
+            }
+        }
+
+        /// <summary>
+        /// Create a new SpanId with at random number in it (very likely to be unique)
+        /// </summary>
+        public static SpanId NewSpanId()
+        {
+            SpanId ret = new SpanId();
+            TraceId.SetToRandomBytes(new Span<byte>(&ret._id1, sizeof(ulong)));
+            return ret;
+        }
+
+        /// <summary>
+        /// Return the bytes of the ID.  Its length is always 8
+        /// </summary>
+        public ReadOnlySpan<byte> AsBytes
+        {
+            get
+            {
+                fixed (ulong* idPtr = &_id1)
+                    return new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2);
+            }
+        }
+
+        /// <summary>
+        /// Returns the TraceId as a 16 character hexadecimal string.  
+        /// </summary>
+        /// <returns></returns>
+        public string AsHexString
+        {
+            get
+            {
+                if (_asHexString == null)
+                    _asHexString = TraceId.SpanToHexString(AsBytes);
+                return _asHexString;
+            }
+        }
+
+        /// <summary>
+        /// Returns SpanId as a hex string. 
+        /// </summary>
+        public override string ToString() => AsHexString;
+
+        #region private
+        ulong _id1;
+        string _asHexString;   // ultimately change to object, and allow several representations based on type.   
+        #endregion
+    }
+}
+
+#if false
+
+        /// <summary>
+        /// Copies the 16 byte binary trace Id int 'outputBuffer'. 
+        /// </summary>
+        public void CopyTo(Span<byte> outputBuffer)
+        {
+            if (_asHexString != null && _id1 == 0 && _id2 == 0)
+            {
+                UInt64.TryParse(_asHexString, out _id1);
+                UInt64.TryParse(_asHexString.Substring(8), out _id2);
+            }
+            fixed (ulong* idBytes = &_id1)
+                new ReadOnlySpan<byte>(idBytes, sizeof(ulong) * 2).CopyTo(outputBuffer);
+        }
+
         /// <summary>
         /// Creates a SpanId from a long id.  
         /// </summary>
         /// <param name="id"></param>
         public SpanId(long id)
         {
-            _asLong = id;
+            _id1 = id;
             _asHexString = null;
         }
 
@@ -769,33 +972,9 @@ namespace System.Diagnostics
         {
             get
             {
-                if (_asHexString != null && _asLong == 0)
-                    Int64.TryParse(_asHexString, out _asLong);
-                return _asLong;
+                if (_asHexString != null && _id1 == 0)
+                    Int64.TryParse(_asHexString, out _id1);
+                return _id1;
             }
         }
-        /// <summary>
-        /// Returns the TraceId as a 16 character hexadecimal string.  
-        /// </summary>
-        /// <returns></returns>
-        public string AsHexString
-        {
-            get
-            {
-                if (_asHexString == null)
-                    _asHexString = _asLong.ToString("X8");
-                return _asHexString;
-            }
-        }
-
-        /// <summary>
-        /// Returns SpanId as a hex string. 
-        /// </summary>
-        public override string ToString() => AsHexString;
-
-#region private
-        long _asLong;
-        string _asHexString;   // ultimately change to object, and allow several representations based on type.   
-#endregion
-    }
-}
+#endif
