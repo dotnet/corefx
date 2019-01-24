@@ -68,51 +68,16 @@ namespace System.Linq
 
             return count <= 0 ?
                 ChainLinq.Consumables.Empty<TSource>.Instance :
-                TakeLastIterator(source, count);
+                TakeLastDelayed(source, count);
         }
 
-        private static IEnumerable<TSource> TakeLastIterator<TSource>(IEnumerable<TSource> source, int count)
+        private static IEnumerable<TSource> TakeLastDelayed<TSource>(IEnumerable<TSource> source, int count)
         {
-            Debug.Assert(source != null);
-            Debug.Assert(count > 0);
-
-            Queue<TSource> queue;
-
-            using (IEnumerator<TSource> e = source.GetEnumerator())
-            {
-                if (!e.MoveNext())
-                {
-                    yield break;
-                }
-
-                queue = new Queue<TSource>();
-                queue.Enqueue(e.Current);
-
-                while (e.MoveNext())
-                {
-                    if (queue.Count < count)
-                    {
-                        queue.Enqueue(e.Current);
-                    }
-                    else
-                    {
-                        do
-                        {
-                            queue.Dequeue();
-                            queue.Enqueue(e.Current);
-                        }
-                        while (e.MoveNext());
-                        break;
-                    }
-                }
-            }
-
-            Debug.Assert(queue.Count <= count);
-            do
+            var queue = ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.TakeLast<TSource>(count));
+            while (queue.Count > 0)
             {
                 yield return queue.Dequeue();
             }
-            while (queue.Count > 0);
         }
     }
 }
