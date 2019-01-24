@@ -14,7 +14,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helpers.cs" />
     <Compile Include="System\Drawing\FontConverterTests.cs" />
     <Compile Include="System\Drawing\IconConverterTests.cs" />
     <Compile Include="System\Drawing\ImageConverterTests.cs" />

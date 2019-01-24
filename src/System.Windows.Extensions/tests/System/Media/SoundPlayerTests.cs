@@ -80,7 +80,7 @@ namespace System.Media.Test
             yield return new object[] { "ima.wav" };
         }
 
-        [ConditionalTheory(typeof(PlatformDetection), nameof(Helpers.IsSoundPlaySupported))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))] 
         [MemberData(nameof(Play_String_TestData))]
         [OuterLoop]
         public void Load_SourceLocation_Success(string sourceLocation)
@@ -95,7 +95,7 @@ namespace System.Media.Test
             soundPlayer.Play();
         }
 
-        [ConditionalTheory(typeof(PlatformDetection), nameof(Helpers.IsSoundPlaySupported))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))] 
         [MemberData(nameof(Play_String_TestData))]
         [OuterLoop]
         public void Load_Stream_Success(string sourceLocation)
@@ -149,7 +149,7 @@ namespace System.Media.Test
             }
         }
 
-        [ConditionalTheory(typeof(PlatformDetection), nameof(Helpers.IsSoundPlaySupported))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))] 
         [MemberData(nameof(Play_String_TestData))]
         [OuterLoop]
         public void Play_SourceLocation_Success(string sourceLocation)
@@ -164,14 +164,14 @@ namespace System.Media.Test
             soundPlayer.Load();
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(Helpers.IsSoundPlaySupported))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))] 
         public void Play_NoSuchFile_ThrowsFileNotFoundException()
         {
             var soundPlayer = new SoundPlayer("noSuchFile");
             Assert.Throws<FileNotFoundException>(() => soundPlayer.Play());
         }
 
-        [ConditionalTheory(typeof(PlatformDetection), nameof(Helpers.IsSoundPlaySupported))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))] 
         [MemberData(nameof(Play_String_TestData))]
         [OuterLoop]
         public void Play_Stream_Success(string sourceLocation)
@@ -200,7 +200,7 @@ namespace System.Media.Test
             player.Play();
         }
 
-        [ConditionalTheory(typeof(PlatformDetection), nameof(Helpers.IsSoundPlaySupported))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))]
         [MemberData(nameof(Play_InvalidString_TestData))]
         [InlineData("http://google.com")]
         public void Play_InvalidFile_ThrowsInvalidOperationException(string sourceLocation)
