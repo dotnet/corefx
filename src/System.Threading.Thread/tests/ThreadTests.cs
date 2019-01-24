@@ -462,6 +462,7 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "ExecutionContext.SuppressFlow() doesn't work for Task.Factory.StartNew")]
         public static void CurrentPrincipalContextFlowTest_NotFlow()
         {
             ThreadTestHelpers.RunTestInBackgroundThread(async () =>
@@ -474,10 +475,7 @@ namespace System.Threading.Threads.Tests
                 ExecutionContext.SuppressFlow();
 
                 // TaskCreationOptions.LongRunning to have fresh new thread with clean execution context
-                await Task.Factory.StartNew(() => Assert.Null(Thread.CurrentPrincipal), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-
-                // defaults are null for netcorapp and GenericPrincipal for netfx
-                Assert.True(Thread.CurrentPrincipal is null || Thread.CurrentPrincipal is GenericPrincipal);
+                await Task.Factory.StartNew(() => Assert.True(Thread.CurrentPrincipal is null), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             });
         }
 
