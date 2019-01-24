@@ -154,12 +154,19 @@ int32_t SystemNative_GetTimebaseInfo(uint32_t* numer, uint32_t* denom)
     return 1;
 }
 
-static long numProcessors = 0;
+#if defined(_ARM_) || defined(_ARM64_)
+#define SYSCONF_GET_NUMPROCS _SC_NPROCESSORS_CONF
+#else
+#define SYSCONF_GET_NUMPROCS _SC_NPROCESSORS_ONLN
+#endif
+
 int32_t SystemNative_GetCpuUtilization(ProcessCpuInformation* previousCpuInfo)
 {
+    static long numProcessors = 0;
+
     if (numProcessors <= 0)
     {
-        numProcessors = sysconf(_SC_NPROCESSORS_CONF);
+        numProcessors = sysconf(SYSCONF_GET_NUMPROCS);
         if (numProcessors <= 0)
         {
             return 0;
