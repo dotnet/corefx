@@ -41,20 +41,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-            return TakeWhileIterator(source, predicate);
-        }
-
-        private static IEnumerable<TSource> TakeWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate)
-        {
-            foreach (TSource element in source)
-            {
-                if (!predicate(element))
-                {
-                    break;
-                }
-
-                yield return element;
-            }
+            return ChainLinq.Utils.PushTTTransform(source, new ChainLinq.Links.TakeWhile<TSource>(predicate));
         }
 
         public static IEnumerable<TSource> TakeWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
@@ -69,26 +56,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(predicate));
             }
 
-            return TakeWhileIterator(source, predicate);
-        }
-
-        private static IEnumerable<TSource> TakeWhileIterator<TSource>(IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
-        {
-            int index = -1;
-            foreach (TSource element in source)
-            {
-                checked
-                {
-                    index++;
-                }
-
-                if (!predicate(element, index))
-                {
-                    break;
-                }
-
-                yield return element;
-            }
+            return ChainLinq.Utils.PushTTTransform(source, new ChainLinq.Links.TakeWhileIndexed<TSource>(predicate));
         }
 
         public static IEnumerable<TSource> TakeLast<TSource>(this IEnumerable<TSource> source, int count)

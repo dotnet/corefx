@@ -14,6 +14,8 @@
         SelectWhere,
         Skip,
         Take,
+        TakeWhile,
+        TakeWhileIndexed,
         Where,
         WhereIndexed,
         WhereSelect,
