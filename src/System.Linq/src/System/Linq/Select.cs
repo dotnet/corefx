@@ -21,27 +21,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
-            if (source is ChainLinq.ConsumableForMerging<TSource> consumable)
-            {
-                if (consumable.TailLink is ChainLinq.Optimizations.IMergeSelect<TSource> optimization)
-                {
-                    return optimization.MergeSelect(consumable, selector);
-                }
-
-                return consumable.AddTail(new ChainLinq.Links.Select<TSource, TResult>(selector));
-            }
-            else if (source is TSource[] array)
-            {
-                return new ChainLinq.Consumables.SelectArray<TSource, TResult>(array, selector);
-            }
-            else if (source is List<TSource> list)
-            {
-                return new ChainLinq.Consumables.SelectList<TSource, TResult>(list, selector);
-            }
-            else
-            {
-                return new ChainLinq.Consumables.SelectEnumerable<TSource, TResult>(source, selector);
-            }
+            return ChainLinq.Utils.Select(source, selector);
         }
 
         public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, int, TResult> selector)

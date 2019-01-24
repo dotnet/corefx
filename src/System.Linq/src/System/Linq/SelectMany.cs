@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace System.Linq
 {
@@ -21,7 +20,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(selector));
             }
 
-            var selectMany = ChainLinq.Utils.PushTUTransform(source, new ChainLinq.Links.Select<TSource, IEnumerable<TResult>>(selector));
+            var selectMany = ChainLinq.Utils.Select(source, selector);
             return new ChainLinq.Consumables.SelectMany<TResult, TResult>(selectMany, ChainLinq.Links.Identity<TResult>.Instance);
         }
 

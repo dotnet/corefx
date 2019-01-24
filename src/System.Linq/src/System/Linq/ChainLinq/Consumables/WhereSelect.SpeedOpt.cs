@@ -2,22 +2,22 @@
 
 namespace System.Linq.ChainLinq.Consumables
 {
-    sealed partial class SelectWhereArray<T, U> : ConsumableEnumerator<U>
+    sealed partial class WhereSelectArray<T, U> : ConsumableEnumerator<U>
     {
         internal T[] Underlying { get; }
+        internal Func<T, bool> Predicate { get; }
         internal Func<T, U> Selector { get; }
-        internal Func<U, bool> Predicate { get; }
 
         int _idx;
 
-        public SelectWhereArray(T[] array, Func<T, U> selector, Func<U, bool> predicate) =>
-            (Underlying, Selector, Predicate) = (array, selector, predicate);
+        public WhereSelectArray(T[] array, Func<T, bool> predicate, Func<T, U> selector) =>
+            (Underlying, Predicate, Selector) = (array, predicate, selector);
 
         public override void Consume(Consumer<U> consumer) =>
-            ChainLinq.Consume.Array.Invoke(Underlying, new Links.SelectWhere<T, U>(Selector, Predicate), consumer);
+            ChainLinq.Consume.Array.Invoke(Underlying, new Links.WhereSelect<T, U>(Predicate, Selector), consumer);
 
         internal override ConsumableEnumerator<U> Clone() =>
-            new SelectWhereArray<T, U>(Underlying, Selector, Predicate);
+            new WhereSelectArray<T, U>(Underlying, Predicate, Selector);
 
         public override bool MoveNext()
         {
@@ -26,10 +26,10 @@ namespace System.Linq.ChainLinq.Consumables
 
             while (_idx < Underlying.Length)
             {
-                var current = Selector(Underlying[_idx++]);
+                var current = Underlying[_idx++];
                 if (Predicate(current))
                 {
-                    _current = current;
+                    _current = Selector(current);
                     return true;
                 }
             }
@@ -44,28 +44,28 @@ namespace System.Linq.ChainLinq.Consumables
             throw new NotImplementedException();
 
         public override Consumable<U> AddTail(Link<U, U> transform) =>
-            new Array<T, U>(Underlying, Links.Composition.Create(new Links.SelectWhere<T, U>(Selector, Predicate), transform));
+            new Array<T, U>(Underlying, Links.Composition.Create(new Links.WhereSelect<T, U>(Predicate, Selector), transform));
 
         public override Consumable<V> AddTail<V>(Link<U, V> transform) =>
-            new Array<T, V>(Underlying, Links.Composition.Create(new Links.SelectWhere<T, U>(Selector, Predicate), transform));
+            new Array<T, V>(Underlying, Links.Composition.Create(new Links.WhereSelect<T, U>(Predicate, Selector), transform));
     }
 
-    sealed partial class SelectWhereList<T, U> : ConsumableEnumerator<U>
+    sealed partial class WhereSelectList<T, U> : ConsumableEnumerator<U>
     {
         internal List<T> Underlying { get; }
+        internal Func<T, bool> Predicate { get; }
         internal Func<T, U> Selector { get; }
-        internal Func<U, bool> Predicate { get; }
 
         List<T>.Enumerator _enumerator;
 
-        public SelectWhereList(List<T> list, Func<T, U> selector, Func<U, bool> predicate) =>
-            (Underlying, Selector, Predicate) = (list, selector, predicate);
+        public WhereSelectList(List<T> list, Func<T, bool> predicate, Func<T, U> selector) =>
+            (Underlying, Predicate, Selector) = (list, predicate, selector);
 
         public override void Consume(Consumer<U> consumer) =>
-            ChainLinq.Consume.List.Invoke(Underlying, new Links.SelectWhere<T, U>(Selector, Predicate), consumer);
+            ChainLinq.Consume.List.Invoke(Underlying, new Links.WhereSelect<T, U>(Predicate, Selector), consumer);
 
         internal override ConsumableEnumerator<U> Clone() =>
-            new SelectWhereList<T, U>(Underlying, Selector, Predicate);
+            new WhereSelectList<T, U>(Underlying, Predicate, Selector);
 
         public override bool MoveNext()
         {
@@ -77,12 +77,12 @@ namespace System.Linq.ChainLinq.Consumables
                     goto case 2;
 
                 case 2:
-                    while(_enumerator.MoveNext())
+                    while (_enumerator.MoveNext())
                     {
-                        var current = Selector(_enumerator.Current);
+                        var current = _enumerator.Current;
                         if (Predicate(current))
                         {
-                            _current = current;
+                            _current = Selector(current);
                             return true;
                         }
                     }
@@ -101,28 +101,28 @@ namespace System.Linq.ChainLinq.Consumables
             throw new NotImplementedException();
 
         public override Consumable<U> AddTail(Link<U, U> transform) =>
-            new List<T, U>(Underlying, Links.Composition.Create(new Links.SelectWhere<T, U>(Selector, Predicate), transform));
+            new List<T, U>(Underlying, Links.Composition.Create(new Links.WhereSelect<T, U>(Predicate, Selector), transform));
 
         public override Consumable<V> AddTail<V>(Link<U, V> transform) =>
-            new List<T, V>(Underlying, Links.Composition.Create(new Links.SelectWhere<T, U>(Selector, Predicate), transform));
+            new List<T, V>(Underlying, Links.Composition.Create(new Links.WhereSelect<T, U>(Predicate, Selector), transform));
     }
 
-    sealed partial class SelectWhereEnumerable<T, U> : ConsumableEnumerator<U>
+    sealed partial class WhereSelectEnumerable<T, U> : ConsumableEnumerator<U>
     {
         internal IEnumerable<T> Underlying { get; }
+        internal Func<T, bool> Predicate { get; }
         internal Func<T, U> Selector { get; }
-        internal Func<U, bool> Predicate { get; }
 
         IEnumerator<T> _enumerator;
 
-        public SelectWhereEnumerable(IEnumerable<T> enumerable, Func<T, U> selector, Func<U, bool> predicate) =>
-            (Underlying, Selector, Predicate) = (enumerable, selector, predicate);
+        public WhereSelectEnumerable(IEnumerable<T> enumerable, Func<T, bool> predicate, Func<T, U> selector) =>
+            (Underlying, Predicate, Selector) = (enumerable, predicate, selector);
 
         public override void Consume(Consumer<U> consumer) =>
-            ChainLinq.Consume.Enumerable.Invoke(Underlying, new Links.SelectWhere<T, U>(Selector, Predicate), consumer);
+            ChainLinq.Consume.Enumerable.Invoke(Underlying, new Links.WhereSelect<T, U>(Predicate, Selector), consumer);
 
         internal override ConsumableEnumerator<U> Clone() =>
-            new SelectWhereEnumerable<T, U>(Underlying, Selector, Predicate);
+            new WhereSelectEnumerable<T, U>(Underlying, Predicate, Selector);
 
         public override void Dispose()
         {
@@ -146,10 +146,10 @@ namespace System.Linq.ChainLinq.Consumables
                 case 2:
                     while (_enumerator.MoveNext())
                     {
-                        var current = Selector(_enumerator.Current);
+                        var current = _enumerator.Current;
                         if (Predicate(current))
                         {
-                            _current = current;
+                            _current = Selector(current);
                             return true;
                         }
                     }
@@ -173,9 +173,9 @@ namespace System.Linq.ChainLinq.Consumables
             throw new NotImplementedException();
 
         public override Consumable<U> AddTail(Link<U, U> transform) =>
-            new Enumerable<T, U>(Underlying, Links.Composition.Create(new Links.SelectWhere<T, U>(Selector, Predicate), transform));
+            new Enumerable<T, U>(Underlying, Links.Composition.Create(new Links.WhereSelect<T, U>(Predicate, Selector), transform));
 
         public override Consumable<V> AddTail<V>(Link<U, V> transform) =>
-            new Enumerable<T, V>(Underlying, Links.Composition.Create(new Links.SelectWhere<T, U>(Selector, Predicate), transform));
+            new Enumerable<T, V>(Underlying, Links.Composition.Create(new Links.WhereSelect<T, U>(Predicate, Selector), transform));
     }
 }

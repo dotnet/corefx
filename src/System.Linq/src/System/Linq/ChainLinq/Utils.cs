@@ -35,6 +35,56 @@ namespace System.Linq.ChainLinq
             }
         }
 
+        internal static Consumable<TSource> Where<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate)
+        {
+            if (source is ConsumableForMerging<TSource> consumable)
+            {
+                if (consumable.TailLink is Optimizations.IMergeWhere<TSource> optimization)
+                {
+                    return optimization.MergeWhere(consumable, predicate);
+                }
+
+                return consumable.AddTail(new Links.Where<TSource>(predicate));
+            }
+            else if (source is TSource[] array)
+            {
+                return new Consumables.WhereArray<TSource>(array, predicate);
+            }
+            else if (source is List<TSource> list)
+            {
+                return new Consumables.WhereList<TSource>(list, predicate);
+            }
+            else
+            {
+                return new Consumables.WhereEnumerable<TSource>(source, predicate);
+            }
+        }
+
+        internal static Consumable<TResult> Select<TSource, TResult>(IEnumerable<TSource> source, Func<TSource, TResult> selector)
+        {
+            if (source is ConsumableForMerging<TSource> consumable)
+            {
+                if (consumable.TailLink is Optimizations.IMergeSelect<TSource> optimization)
+                {
+                    return optimization.MergeSelect(consumable, selector);
+                }
+
+                return consumable.AddTail(new Links.Select<TSource, TResult>(selector));
+            }
+            else if (source is TSource[] array)
+            {
+                return new Consumables.SelectArray<TSource, TResult>(array, selector);
+            }
+            else if (source is List<TSource> list)
+            {
+                return new Consumables.SelectList<TSource, TResult>(list, selector);
+            }
+            else
+            {
+                return new Consumables.SelectEnumerable<TSource, TResult>(source, selector);
+            }
+        }
+
         internal static Consumable<T> AsConsumable<T>(IEnumerable<T> e)
         {
             if (e is Consumable<T> c)
