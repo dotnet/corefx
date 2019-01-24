@@ -99,18 +99,9 @@ namespace System.Net.Http
                     {
                         waiter.TokenRegistration.Dispose();
 
-                        // If we have the code below (TrySetResult), do we even actually need this?
-                        // Might be worth optimizing for case where operation is not cancelled.
-                        if (waiter.TaskCompletionSource.Task.IsCanceled)
-                        {
-                            continue;
-                        }
-
                         int granted = Math.Min(waiter.Amount, _current);
 
-                        // TODO: Determine what happens if a cancellation callback is in-progress when the
-                        // TokenRegistration is disposed. It's possible I don't need this code (but I doubt it).
-                        // Handle a race between the the Dispose() on TokenRegistration and a call to the cancellation callback.
+                        // Ensure that we grant credit only if the task has not been cancelled.
                         if (waiter.TaskCompletionSource.TrySetResult(granted))
                         {
                             _current -= granted;
@@ -135,8 +126,8 @@ namespace System.Net.Http
                 {
                     while (_waiters.TryDequeue(out Waiter waiter))
                     {
-                        waiter.TokenRegistration.Dispose();
                         waiter.TaskCompletionSource.TrySetException(new ObjectDisposedException(nameof(CreditManager)));
+                        waiter.TokenRegistration.Dispose();
                     }
                 }
             }

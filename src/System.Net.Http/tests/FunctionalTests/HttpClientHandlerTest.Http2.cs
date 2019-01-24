@@ -650,7 +650,7 @@ namespace System.Net.Http.Functional.Tests
             return bytesReceived;
         }
 
-        [OuterLoop("Uses Task.Delay")]
+        //[OuterLoop("Uses Task.Delay")]
         [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2_FlowControl_ClientDoesNotExceedWindows()
         {
@@ -758,7 +758,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop("Uses Task.Delay")]
+        //[OuterLoop("Uses Task.Delay")]
         [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2_InitialWindowSize_ClientDoesNotExceedWindows()
         {
@@ -886,7 +886,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop("Uses Task.Delay")]
+        //[OuterLoop("Uses Task.Delay")]
         [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2_MaxConcurrentStreams_LimitEnforced()
         {
@@ -1000,51 +1000,8 @@ namespace System.Net.Http.Functional.Tests
 
                 await Assert.ThrowsAsync<OperationCanceledException>(async () => await sendTask);
 
-                // If the client has not allocated a stream ID when the corresponding request is cancelled,
+                // As the client has not allocated a stream ID when the corresponding request is cancelled,
                 // we do not send a RST stream frame.
-            }
-        }
-
-        [ConditionalFact(nameof(SupportsAlpn))]
-        public async Task Http2_SerializingHeaders_Cancellation()
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
-
-            using (var server = Http2LoopbackServer.CreateServer())
-            using (var client = new HttpClient(handler))
-            {
-                Task<HttpResponseMessage> sendTask = client.GetAsync(server.Address);
-
-                await server.EstablishConnectionAsync();
-                server.IgnoreWindowUpdates();
-
-                // Process first request and send response.
-                int streamId = await server.ReadRequestHeaderAsync();
-                await server.SendDefaultResponseAsync(streamId);
-
-                HttpResponseMessage response = await sendTask;
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-                // Change MaxConcurrentStreams setting and wait for ack.
-                // (We don't want to send any new requests until we receive the ack, otherwise we may have a timing issue.)
-                SettingsFrame settingsFrame = new SettingsFrame(new SettingsEntry { SettingId = SettingId.MaxConcurrentStreams, Value = 0 });
-                await server.WriteFrameAsync(settingsFrame);
-                Frame settingsAckFrame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
-                Assert.Equal(FrameType.Settings, settingsAckFrame.Type);
-                Assert.Equal(FrameFlags.Ack, settingsAckFrame.Flags);
-
-                // Issue a new request, so that we can cancel it while it waits for a stream.
-                var cts = new CancellationTokenSource();
-                sendTask = client.GetAsync(server.Address, cts.Token);
-
-                // We can't actually guarantee that this happens while headers are being serialized.
-                // The behavior should be the same if we catch it in the waiter queue instead,
-                // so the test shoudn't be flaky -- but it also might not fail consistently if we
-                // do break cancellation while serializing the headers.
-                cts.Cancel();
-
-                await Assert.ThrowsAsync<OperationCanceledException>(async () => await sendTask);
             }
         }
 
@@ -1095,14 +1052,7 @@ namespace System.Net.Http.Functional.Tests
 
                 await Assert.ThrowsAsync<OperationCanceledException>(async () => await clientTask);
 
-                // MAX TODO: Is this right?
                 frame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
-                if (frame.Type == FrameType.Data)
-                {
-                    Console.WriteLine("Received data frame before RstStream.");
-                    frame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
-                }
-
                 Assert.Equal(FrameType.RstStream, frame.Type);
             }
         }
