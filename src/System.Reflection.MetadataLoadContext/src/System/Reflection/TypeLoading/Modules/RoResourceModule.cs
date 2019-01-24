@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection.Metadata;
 
 namespace System.Reflection.TypeLoading
 {
@@ -49,7 +48,7 @@ namespace System.Reflection.TypeLoading
         public sealed override bool IsResource() => true;
 
         public sealed override Type[] GetTypes() => Array.Empty<Type>();
-        protected sealed override RoDefinitionType GetTypeCoreNoCache(BlobReader ns, BlobReader name, out Exception e)
+        protected sealed override RoDefinitionType GetTypeCoreNoCache(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name, out Exception e)
         {
             e = new TypeLoadException(SR.Format(SR.TypeNotFound, ns.ToUtf16().AppendTypeName(name.ToUtf16()), Assembly));
             return null;

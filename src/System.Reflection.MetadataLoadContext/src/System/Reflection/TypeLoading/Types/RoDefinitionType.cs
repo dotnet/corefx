@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 
 namespace System.Reflection.TypeLoading
@@ -254,8 +253,8 @@ namespace System.Reflection.TypeLoading
         internal abstract IEnumerable<PropertyInfo> SpecializeProperties(NameFilter filter, Type reflectedType, RoInstantiationProviderType declaringType);
 
         // Helpers for the typeref-resolution/name lookup logic.
-        internal abstract bool IsTypeNameEqual(BlobReader ns, BlobReader name);
-        internal abstract RoDefinitionType GetNestedTypeCore(BlobReader utf8Name);
+        internal abstract bool IsTypeNameEqual(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name);
+        internal abstract RoDefinitionType GetNestedTypeCore(ReadOnlySpan<byte> utf8Name);
 
         internal sealed override RoType[] Instantiation => GetGenericTypeParametersNoCopy();
     }

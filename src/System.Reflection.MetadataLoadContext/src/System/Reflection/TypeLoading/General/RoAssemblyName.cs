@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Linq;
 
 namespace System.Reflection.TypeLoading
 {
@@ -56,7 +55,7 @@ namespace System.Reflection.TypeLoading
                 return false;
             if (CultureName != other.CultureName)
                 return false;
-            if (!PublicKeyToken.SequenceEqual(other.PublicKeyToken))
+            if (!(((ReadOnlySpan<byte>)PublicKeyToken).SequenceEqual(other.PublicKeyToken)))
                 return false;
             return true;
         }

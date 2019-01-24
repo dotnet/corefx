@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Reflection.Metadata;
 using System.Threading;
 
 namespace System.Reflection.TypeLoading
@@ -19,12 +18,12 @@ namespace System.Reflection.TypeLoading
             _container = new Container(this);
         }
 
-        public bool TryGet(BlobReader ns, BlobReader name, int hashCode, out RoDefinitionType type)
+        public bool TryGet(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name, int hashCode, out RoDefinitionType type)
         {
             return _container.TryGetValue(ns, name, hashCode, out type);
         }
 
-        public RoDefinitionType GetOrAdd(BlobReader ns, BlobReader name, int hashCode, RoDefinitionType type)
+        public RoDefinitionType GetOrAdd(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name, int hashCode, RoDefinitionType type)
         {
             bool found = _container.TryGetValue(ns, name, hashCode, out RoDefinitionType prior);
             if (found)
@@ -46,12 +45,12 @@ namespace System.Reflection.TypeLoading
             }
         }
 
-        public static int ComputeHashCode(BlobReader name)
+        public static int ComputeHashCode(ReadOnlySpan<byte> name)
         {
             int hashCode = 0x38723781;
             for (int i = 0; i < name.Length; i++)
             {
-                hashCode = (hashCode << 8) ^ name.ReadByte();
+                hashCode = (hashCode << 8) ^ name[i];
             }
             return hashCode;
         }
@@ -78,7 +77,7 @@ namespace System.Reflection.TypeLoading
                 _owner = owner;
             }
 
-            public bool TryGetValue(BlobReader ns, BlobReader name, int hashCode, out RoDefinitionType value)
+            public bool TryGetValue(ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name, int hashCode, out RoDefinitionType value)
             {
                 // Lock acquistion NOT required.
 

@@ -93,8 +93,8 @@ namespace System.Reflection.TypeLoading.Ecma
                     continue;
 
                 RoAssembly redirectedAssembly = ((AssemblyReferenceHandle)implementation).ResolveToAssemblyOrExceptionAssembly(GetEcmaManifestModule());
-                BlobReader ns = exportedType.Namespace.GetBlobReader(reader);
-                BlobReader name = exportedType.Name.GetBlobReader(reader);
+                ReadOnlySpan<byte> ns = exportedType.Namespace.AsReadOnlySpan(reader);
+                ReadOnlySpan<byte> name = exportedType.Name.AsReadOnlySpan(reader);
                 handler(redirectedAssembly, ns, name);
             }
         }

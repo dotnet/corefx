@@ -150,7 +150,7 @@
     <Reference Include="System.Collections.Immutable" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.IO.FileSystem" />
-    <Reference Include="System.Linq" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Reflection.Metadata" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
