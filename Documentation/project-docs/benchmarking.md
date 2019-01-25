@@ -86,7 +86,7 @@ You should notice that given `.dll` file have been updated in the `CoreRun` fold
 
 10. Compare the results and repeat steps `7 - 9` until you are happy about the results.
 
-# Benchmarking APIs implemented within System.Private.Corelib
+## Benchmarking APIs implemented within System.Private.Corelib
 
 1. The steps for this scenario are very similar to the above recommended workflow with a couple of extra steps to copy bits from one repo to the other. Before you start benchmarking the code you need to build entire CoreCLR in Release which is going to generate the `System.Private.Corelib.dll` for you:
 
