@@ -248,9 +248,18 @@ namespace System.Media.Test
             player.Play();
         }
 
+        [Fact]
+        [OuterLoop]
+        public void Play_InvalidFile_ShortLoadTimeout_ThrowsWebException()
+        {
+            string sourceLocation = "http://google.com";
+            var soundPlayer = new SoundPlayer(sourceLocation);
+            soundPlayer.LoadTimeout = 1;
+            Assert.Throws<WebException>(() => soundPlayer.Play());
+        }
+
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))]
         [MemberData(nameof(Play_InvalidString_TestData))]
-        [InlineData("http://google.com")]
         public void Play_InvalidFile_ThrowsInvalidOperationException(string sourceLocation)
         {
             var soundPlayer = new SoundPlayer(sourceLocation);
