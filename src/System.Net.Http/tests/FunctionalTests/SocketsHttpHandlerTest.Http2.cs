@@ -370,7 +370,7 @@ namespace System.Net.Http.Functional.Tests
                 DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, streamId);
                 await server.WriteFrameAsync(invalidFrame);
 
-                // The server should close the connection, as this is a fatal connection level error.
+                // The server should close the connection as this is a fatal connection level error.
                 Exception ex = await Assert.ThrowsAsync<Exception>(async () => await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
                 Assert.Equal("Connection stream closed while attempting to read frame header.", ex.Message);
 
@@ -401,7 +401,7 @@ namespace System.Net.Http.Functional.Tests
                 DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, streamId);
                 await server.WriteFrameAsync(invalidFrame);
 
-                // The server should close the connection, as this is a fatal connection level error.
+                // The server should close the connection as this is a fatal connection level error.
                 Exception ex = await Assert.ThrowsAsync<Exception>(async () => await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
                 Assert.Equal("Connection stream closed while attempting to read frame header.", ex.Message);
             }
@@ -431,7 +431,7 @@ namespace System.Net.Http.Functional.Tests
                 DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, streamId);
                 await server.WriteFrameAsync(invalidFrame);
 
-                // The server should close the connection, as this is a fatal connection level error.
+                // The server should close the connection as this is a fatal connection level error.
                 Exception ex = await Assert.ThrowsAsync<Exception>(async () => await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
                 Assert.Equal("Connection stream closed while attempting to read frame header.", ex.Message);
             }
