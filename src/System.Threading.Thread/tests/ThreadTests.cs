@@ -476,7 +476,6 @@ namespace System.Threading.Threads.Tests
                     // Default principal policy for netcoreapp is null and for netfx is GenericPrincipal
                     await Task.Run(() => Assert.True(Thread.CurrentPrincipal is null || Thread.CurrentPrincipal is GenericPrincipal));
                 });
-
             }).Dispose();
         }
 
