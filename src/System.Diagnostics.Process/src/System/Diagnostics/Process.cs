@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 
@@ -80,6 +81,8 @@ namespace System.Diagnostics
         internal AsyncStreamReader _error;
         internal bool _pendingOutputRead;
         internal bool _pendingErrorRead;
+
+        private static int s_cachedSerializationSwitch = 0;
 
         /// <devdoc>
         ///    <para>
@@ -1213,6 +1216,8 @@ namespace System.Diagnostics
             {
                 throw new ObjectDisposedException(GetType().Name);
             }
+
+            SerializationInfo.ThrowIfDeserializationInProgress("AllowProcessCreation", ref s_cachedSerializationSwitch);
 
             return StartCore(startInfo);
         }
