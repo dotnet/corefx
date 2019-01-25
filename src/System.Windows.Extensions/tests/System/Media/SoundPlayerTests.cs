@@ -147,16 +147,12 @@ namespace System.Media.Test
         [OuterLoop]
         public void Play_InvalidFile_ShortTimeout_ThrowsWebException()
         {
-            var player = new SoundPlayer();
-
             using (Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
                 listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
                 listener.Listen(1);
                 var ep = (IPEndPoint)listener.LocalEndPoint;
-
-                var tcs = new TaskCompletionSource<AsyncCompletedEventArgs>();
-                player.LoadCompleted += (s, e) => tcs.TrySetResult(e);
+                var player = new SoundPlayer();
                 player.SoundLocation = $"http://{ep.Address}:{ep.Port}";
                 player.LoadTimeout = 1;
                 Assert.Throws<WebException>(() => player.Play());
