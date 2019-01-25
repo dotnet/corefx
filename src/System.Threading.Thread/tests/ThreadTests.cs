@@ -480,7 +480,7 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
-        public static void CurrentPrincipalContextFlowTest_CurrentPrincipal_SetNull()
+        public static void CurrentPrincipal_SetNull()
         {
             // We run test on remote process because we need to set same principal policy
             // on netfx defaul principal policy is PrincipalPolicy.UnauthenticatedPrincipal
