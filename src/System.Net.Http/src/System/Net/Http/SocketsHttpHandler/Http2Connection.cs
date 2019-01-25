@@ -941,7 +941,18 @@ namespace System.Net.Http
                 ReadOnlyMemory<byte> current;
                 (current, remaining) = SplitBuffer(remaining, frameSize);
 
-                await AcquireWriteLockAsync(cancellationToken).ConfigureAwait(false);
+                // It's possible that a cancellation will occur while we wait for the write lock. In that case, we need to
+                // return the credit that we have acquired and don't plan to use.
+                try
+                {
+                    await AcquireWriteLockAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    _connectionWindow.AdjustCredit(frameSize);
+                    throw;
+                }
+
                 try
                 {
                     _outgoingBuffer.EnsureAvailableSpace(FrameHeader.Size + current.Length);
