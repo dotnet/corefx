@@ -50,7 +50,6 @@ namespace System.Reflection.TypeLoading
                     (immediateTypeOnly ? _perNameQueryCaches_CaseSensitive_ImmediateTypeOnly : _perNameQueryCaches_CaseSensitive);
 
                 object unifierAsObject = cacheArray[index];
-                Debug.Assert(unifierAsObject is PerNameQueryCache<M>);
                 PerNameQueryCache<M> unifier = (PerNameQueryCache<M>)unifierAsObject;
                 QueriedMemberList<M> result = unifier.GetOrAdd(name);
                 return result;
@@ -73,7 +72,6 @@ namespace System.Reflection.TypeLoading
                     Volatile.Write(ref _nameAgnosticQueryCaches[index], newResult);
                     return newResult;
                 }
-                Debug.Assert(result is QueriedMemberList<M>);
                 QueriedMemberList<M> list = (QueriedMemberList<M>)result;
                 if (list.ImmediateTypeOnly && !immediateTypeOnly)
                 {
