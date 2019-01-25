@@ -480,6 +480,32 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
+        public static void CurrentPrincipalContextFlowTest_CurrentPrincipal_SetNull()
+        {
+            // We run test on remote process because we need to set same principal policy
+            // on netfx defaul principal policy is PrincipalPolicy.UnauthenticatedPrincipal
+            DummyClass.RemoteInvoke(() =>
+            {
+                AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.NoPrincipal);
+
+                Assert.Null(Thread.CurrentPrincipal);
+
+                Thread.CurrentPrincipal = null;
+                Assert.Null(Thread.CurrentPrincipal);
+
+                Thread.CurrentPrincipal = new ClaimsPrincipal();
+                Assert.IsType<ClaimsPrincipal>(Thread.CurrentPrincipal);
+
+                Thread.CurrentPrincipal = null;
+                Assert.Null(Thread.CurrentPrincipal);
+
+                Thread.CurrentPrincipal = new ClaimsPrincipal();
+                Assert.IsType<ClaimsPrincipal>(Thread.CurrentPrincipal);
+
+            }).Dispose();
+        }
+
+        [Fact]
         public static void CurrentThreadTest()
         {
             Thread otherThread = null;
