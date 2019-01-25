@@ -501,7 +501,6 @@ namespace System.Threading.Threads.Tests
 
                 Thread.CurrentPrincipal = new ClaimsPrincipal();
                 Assert.IsType<ClaimsPrincipal>(Thread.CurrentPrincipal);
-
             }).Dispose();
         }
 
