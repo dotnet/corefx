@@ -464,19 +464,27 @@ namespace System.Threading.Threads.Tests
         [Fact]
         public static void CurrentPrincipalContextFlowTest_NotFlow()
         {
-            // We run test on remote process to avoid to return dirty context to thread pool
-            DummyClass.RemoteInvoke(() =>
+            ThreadTestHelpers.RunTestInBackgroundThread(async () =>
             {
-                ThreadTestHelpers.RunTestInBackgroundThread(async () =>
+                Thread.CurrentPrincipal = new ClaimsPrincipal();
+
+                Task task;
+                using(ExecutionContext.SuppressFlow())
                 {
-                    Thread.CurrentPrincipal = new ClaimsPrincipal();
+                    Assert.True(ExecutionContext.IsFlowSuppressed());
 
-                    ExecutionContext.SuppressFlow();
+                    task = Task.Run(() => 
+                    {
+                        // Default PrincipalPolicy for netcoreapp is null and for netfx is ClaimsPrincipal
+                        Assert.True(Thread.CurrentPrincipal is null || Thread.CurrentPrincipal is ClaimsPrincipal);
+                        Assert.False(ExecutionContext.IsFlowSuppressed());
+                    });
+                }
 
-                    // Default principal policy for netcoreapp is null and for netfx is GenericPrincipal
-                    await Task.Run(() => Assert.True(Thread.CurrentPrincipal is null || Thread.CurrentPrincipal is GenericPrincipal));
-                });
-            }).Dispose();
+                Assert.False(ExecutionContext.IsFlowSuppressed());
+
+                await task;
+            });
         }
 
         [Fact]
