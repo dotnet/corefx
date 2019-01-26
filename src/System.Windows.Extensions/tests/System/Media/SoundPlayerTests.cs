@@ -159,7 +159,7 @@ namespace System.Media.Test
             } 
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))]
         [MemberData(nameof(Play_String_TestData))]
         [OuterLoop]
         public void Load_Stream_Success(string sourceLocation)
@@ -253,7 +253,7 @@ namespace System.Media.Test
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))]
         [OuterLoop]
         public void Play_NullStream_Success()
         {
@@ -272,7 +272,7 @@ namespace System.Media.Test
             Assert.Throws<InvalidOperationException>(() => soundPlayer.Play());
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))]
         [MemberData(nameof(Play_InvalidString_TestData))]
         public void Play_InvalidStream_ThrowsInvalidOperationException(string sourceLocation)
         {
@@ -283,7 +283,7 @@ namespace System.Media.Test
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))]
         [OuterLoop]
         public void PlayLooping_NullStream_Success()
         {
@@ -294,7 +294,7 @@ namespace System.Media.Test
             player.PlayLooping();
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))]
         [OuterLoop]
         public void PlaySync_NullStream_Success()
         {
@@ -495,7 +495,7 @@ namespace System.Media.Test
             Assert.Null(ea.UserState);
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsSoundPlaySupported))]
         [MemberData(nameof(Play_String_TestData))]
         [OuterLoop]
         public async Task CancelDuringLoad_ThenPlay_Success(string sourceLocation)
