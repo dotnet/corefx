@@ -124,7 +124,7 @@ class Program
 
         C:\Projects\coreclr>build.cmd -release -skiptests -skipnative
 
-10. For the next step you have one of two options depending:
+10. For the next step, you have one of two options:
 
   - Rebuild given CoreFX part in Release:
 
