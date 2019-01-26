@@ -123,7 +123,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
                 MethodInfo trackerMethod = threadType.GetMethod("GetThreadDeserializationTracker", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
                 if (trackerMethod != null)
                 {
-                    Console.WriteLine("Found tracker method");
                     object[] args = new object[trackerMethod.GetParameters().Length]; // The number of arguments differs by runtime
                     try
                     {

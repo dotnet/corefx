@@ -3,13 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace System.Runtime.Serialization.Formatters.Binary
 {
     internal sealed class ObjectWriter
     {
-        private Queue<object> _objectQueue;
+        private Queue _objectQueue;
         private ObjectIDGenerator _idGenerator;
         private int _currentId;
 
@@ -68,7 +69,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
 
             // allocations if methodCall or methodResponse and no graph
             _idGenerator = new ObjectIDGenerator();
-            _objectQueue = new Queue<object>();
+            _objectQueue = new Queue();
             _formatterConverter = new FormatterConverter();
             _serObjectInfoInit = new SerObjectInfoInit();
 

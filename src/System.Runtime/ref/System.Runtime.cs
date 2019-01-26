@@ -7117,10 +7117,6 @@ namespace System.Runtime.Serialization
         public DeserializationBlockedException(String message) { }
         public DeserializationBlockedException(Exception innerException) { }
     }
-    public partial struct DeserializationToken : System.IDisposable
-    {
-        public void Dispose() { }
-    }
     public partial interface IDeserializationCallback
     {
         void OnDeserialization(object sender);
@@ -7211,7 +7207,6 @@ namespace System.Runtime.Serialization
         [System.CLSCompliantAttribute(false)]
         public SerializationInfo(System.Type type, System.Runtime.Serialization.IFormatterConverter converter, bool requireSameTokenInPartialTrust) { }
         public string AssemblyName { get { throw null; } set { } }
-        public static bool DeserializationInProgress { get { throw null; } }
         public string FullTypeName { get { throw null; } set { } }
         public bool IsAssemblyNameSetExplicit { get { throw null; } }
         public bool IsFullTypeNameSetExplicit { get { throw null; } }
@@ -7259,9 +7254,6 @@ namespace System.Runtime.Serialization
         public ulong GetUInt64(string name) { throw null; }
         public object GetValue(string name, System.Type type) { throw null; }
         public void SetType(System.Type type) { }
-        public static DeserializationToken StartDeserialization() { throw null; }
-        public static void ThrowIfDeserializationInProgress() { }
-        public static void ThrowIfDeserializationInProgress(string switchSuffix, ref int cachedValue) { }
     }
     public sealed partial class SerializationInfoEnumerator : System.Collections.IEnumerator
     {
