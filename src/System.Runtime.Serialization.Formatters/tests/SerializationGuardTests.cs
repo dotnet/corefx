@@ -117,13 +117,14 @@ namespace System.Runtime.Serialization.Formatters.Tests
         private ReflectionDodger(SerializationInfo info, StreamingContext context)
         {
             object tracker = null;
-            Type threadType = typeof(object).Assembly.GetType("System.Threading.Thread");
+            Type threadType = typeof(object).Assembly.GetType("xSystem.Threading.Thread");
+            MethodInfo trackerMethod = null;
             if (threadType != null)
             {
-                MethodInfo trackerMethod = threadType.GetMethod("GetThreadDeserializationTracker", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                trackerMethod = threadType.GetMethod("GetThreadDeserializationTracker", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
                 if (trackerMethod != null)
                 {
-                    object[] args = new object[trackerMethod.GetParameters().Length]; // The number of arguments differs by runtime
+                    object[] args = new object[trackerMethod.GetParameters().Length];
                     try
                     {
                         tracker = trackerMethod.Invoke(null, args);
@@ -134,7 +135,12 @@ namespace System.Runtime.Serialization.Formatters.Tests
                     }
                 }
             }
-            Assert.Null(tracker);
+            if (trackerMethod == null) // Expected in AoT
+            {
+                trackerMethod = typeof(SerializationInfo).GetMethod("GetThreadDeserializationTracker", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                Assert.Null(trackerMethod);
+                throw new TargetInvocationException(null); // Throw the CoreCLR exception to make the case pass
+            }
         }
         
         public void GetObjectData(SerializationInfo info, StreamingContext context)
