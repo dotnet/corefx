@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -29,6 +30,11 @@ namespace System.Diagnostics.Tests
         }
 
         protected Process CreateProcessPortable(Func<string, int> func, string arg)
+        {
+            return CreateProcess(func, arg);
+        }
+
+        protected Process CreateProcessPortable(Func<string, Task<int>> func, string arg)
         {
             return CreateProcess(func, arg);
         }

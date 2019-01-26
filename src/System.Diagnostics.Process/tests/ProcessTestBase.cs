@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -62,6 +63,18 @@ namespace System.Diagnostics.Tests
         }
 
         protected Process CreateProcess(Func<string, int> method, string arg)
+        {
+            Process p = null;
+            using (RemoteInvokeHandle handle = RemoteInvoke(method, arg, new RemoteInvokeOptions { Start = false }))
+            {
+                p = handle.Process;
+                handle.Process = null;
+            }
+            AddProcessForDispose(p);
+            return p;
+        }
+
+        protected Process CreateProcess(Func<string, Task<int>> method, string arg)
         {
             Process p = null;
             using (RemoteInvokeHandle handle = RemoteInvoke(method, arg, new RemoteInvokeOptions { Start = false }))

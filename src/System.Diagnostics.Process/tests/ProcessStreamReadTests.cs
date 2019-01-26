@@ -92,7 +92,7 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Pipe doesn't work well on UAP")]
-        public void TestAsyncOutputStream_BeginCancelBegin_OutputReadLine()
+        async public Task TestAsyncOutputStream_BeginCancelBegin_OutputReadLine()
         {
             using (AnonymousPipeServerStream pipeWrite = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable))
             using (AnonymousPipeServerStream pipeRead = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable))
@@ -119,14 +119,14 @@ namespace System.Diagnostics.Tests
                     pipeRead.DisposeLocalCopyOfClientHandle();
 
                     // Wait child process start
-                    Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Child process not started");
+                    Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Child process not started");
 
                     //Start listening and produce output 1
                     p.BeginOutputReadLine();
                     pipeWrite.WriteByte(0);
 
                     // Wait child signal produce number 1
-                    Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 1");
+                    Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 1");
                     Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Value 1 not received");
 
                     //Stop listening and signal to produce value 2
@@ -134,7 +134,7 @@ namespace System.Diagnostics.Tests
                     pipeWrite.WriteByte(0);
 
                     // Wait child signal produce number 2
-                    Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 2");
+                    Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 2");
                     // We need to sleep to be sure to drain async queue
                     Thread.Sleep(500);
 
@@ -143,7 +143,7 @@ namespace System.Diagnostics.Tests
                     pipeWrite.WriteByte(0);
 
                     // Wait child signal produce number 3
-                    Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 3");
+                    Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 3");
                     Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Value 3 not received");
 
                     Assert.Equal(2, dataReceived.Count);
@@ -155,7 +155,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        private int TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable(string pipesHandle)
+        async private Task<int> TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable(string pipesHandle)
         {
             string[] pipeHandlers = pipesHandle.Split(' ');
             using (AnonymousPipeClientStream pipeRead = new AnonymousPipeClientStream(PipeDirection.In, pipeHandlers[0]))
@@ -166,19 +166,19 @@ namespace System.Diagnostics.Tests
 
                 // Wait parent signal to produce number 1
                 // Generate output 1 and signal parent
-                Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 1");
+                Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 1");
                 Console.WriteLine(1);
                 pipeWrite.WriteByte(0);
 
                 // Wait parent signal to produce number 2
                 // Generate output 2 and signal parent
-                Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 2");
+                Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 2");
                 Console.WriteLine(2);
                 pipeWrite.WriteByte(0);
 
                 // Wait parent signal to produce number 3
                 // Generate output 3 and signal parent
-                Assert.True(WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 3");
+                Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 3");
                 Console.WriteLine(3);
                 pipeWrite.WriteByte(0);
 
@@ -186,22 +186,20 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        private bool WaitPipeSignal(PipeStream pipe, int millisecond)
+        async private Task<bool> WaitPipeSignal(PipeStream pipe, int millisecond)
         {
-            CancellationTokenSource stopTimer = new CancellationTokenSource();
-            try
+            using (var cts = new CancellationTokenSource(millisecond))
             {
-                if (Task.WaitAny(Task.Delay(TimeSpan.FromMilliseconds(millisecond), stopTimer.Token), Task.Run(() => Task.FromResult(pipe.ReadByte()))) == 0)
+                try
+                {
+                    await pipe.ReadAsync(new byte[1], 0, 1, cts.Token);
+                    return true;
+                }
+                catch (OperationCanceledException)
                 {
                     return false;
                 }
             }
-            finally
-            {
-                stopTimer.Cancel();
-            }
-
-            return true;
         }
 
         [Fact]
