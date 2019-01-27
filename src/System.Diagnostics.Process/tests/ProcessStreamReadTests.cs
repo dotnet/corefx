@@ -92,24 +92,24 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Pipe doesn't work well on UAP")]
-        async public Task TestAsyncOutputStream_BeginCancelBegin_OutputReadLine()
+        async public Task TestAsyncOutputStream_CancelOutputRead()
         {
             using (AnonymousPipeServerStream pipeWrite = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable))
             using (AnonymousPipeServerStream pipeRead = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable))
             {
-                var dataReceived = new List<int>();
-                var dataArrivedEvent = new AutoResetEvent(false);
-
-                using (Process p = CreateProcessPortable(TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable, $"{pipeWrite.GetClientHandleAsString()} {pipeRead.GetClientHandleAsString()}"))
+                using (Process p = CreateProcessPortable(TestAsyncOutputStream_CancelOutputRead_RemotelyInvokable, $"{pipeWrite.GetClientHandleAsString()} {pipeRead.GetClientHandleAsString()}"))
                 {
+                    var dataReceived = new List<int>();
+                    var dataArrivedEvent = new AutoResetEvent(false);
+
                     p.StartInfo.RedirectStandardOutput = true;
                     p.OutputDataReceived += (s, e) =>
                     {
                         if (e.Data != null)
                         {
                             dataReceived.Add(int.Parse(e.Data));
-                            dataArrivedEvent.Set();
                         }
+                        dataArrivedEvent.Set();
                     };
 
                     // Start child process
@@ -123,64 +123,143 @@ namespace System.Diagnostics.Tests
 
                     //Start listening and produce output 1
                     p.BeginOutputReadLine();
-                    pipeWrite.WriteByte(0);
+                    await pipeWrite.WriteAsync(new byte[1], 0, 1);
 
                     // Wait child signal produce number 1
                     Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 1");
                     Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Value 1 not received");
 
-                    //Stop listening and signal to produce value 2
+                    // Stop listening and signal to produce value 2
                     p.CancelOutputRead();
-                    pipeWrite.WriteByte(0);
+                    await pipeWrite.WriteAsync(new byte[1], 0, 1);
 
                     // Wait child signal produce number 2
                     Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 2");
-                    // We need to sleep to be sure to drain async queue
-                    Thread.Sleep(500);
 
-                    //Start listening and produce output 3
-                    p.BeginOutputReadLine();
-                    pipeWrite.WriteByte(0);
+                    // Wait child process close
+                    Assert.True(p.WaitForExit(WaitInMS), "Child process didn't close");
 
-                    // Wait child signal produce number 3
-                    Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 3");
-                    Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Value 3 not received");
-
-                    Assert.Equal(2, dataReceived.Count);
-                    Assert.Equal(1, dataReceived[0]);
-                    Assert.Equal(3, dataReceived[1]);
-
-                    p.WaitForExit();
+                    Assert.Equal(1, dataReceived.Count);
                 }
             }
         }
 
-        async private Task<int> TestAsyncOutputStream_BeginCancelBegin_OutputReadLine_RemotelyInvokable(string pipesHandle)
+        async private Task<int> TestAsyncOutputStream_CancelOutputRead_RemotelyInvokable(string pipesHandle)
         {
             string[] pipeHandlers = pipesHandle.Split(' ');
             using (AnonymousPipeClientStream pipeRead = new AnonymousPipeClientStream(PipeDirection.In, pipeHandlers[0]))
             using (AnonymousPipeClientStream pipeWrite = new AnonymousPipeClientStream(PipeDirection.Out, pipeHandlers[1]))
             {
                 // Signal child process start
-                pipeWrite.WriteByte(0);
+                await pipeWrite.WriteAsync(new byte[1], 0, 1);
 
                 // Wait parent signal to produce number 1
                 // Generate output 1 and signal parent
                 Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 1");
                 Console.WriteLine(1);
-                pipeWrite.WriteByte(0);
+                await pipeWrite.WriteAsync(new byte[1], 0, 1);
 
                 // Wait parent signal to produce number 2
                 // Generate output 2 and signal parent
                 Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 2");
                 Console.WriteLine(2);
-                pipeWrite.WriteByte(0);
+                await pipeWrite.WriteAsync(new byte[1], 0, 1);
+
+                return SuccessExitCode;
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Pipe doesn't work well on UAP")]
+        async public Task TestAsyncOutputStream_BeginCancelBeinOutputRead()
+        {
+            using (AnonymousPipeServerStream pipeWrite = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable))
+            using (AnonymousPipeServerStream pipeRead = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable))
+            {
+                using (Process p = CreateProcessPortable(TestAsyncOutputStream_BeginCancelBeinOutputRead_RemotelyInvokable, $"{pipeWrite.GetClientHandleAsString()} {pipeRead.GetClientHandleAsString()}"))
+                {
+                    var dataReceived = new List<int>();
+                    var dataArrivedEvent = new AutoResetEvent(false);
+
+                    p.StartInfo.RedirectStandardOutput = true;
+                    p.OutputDataReceived += (s, e) =>
+                    {
+                        if (e.Data != null)
+                        {
+                            dataReceived.Add(int.Parse(e.Data));
+                        }
+                        dataArrivedEvent.Set();
+                    };
+
+                    // Start child process
+                    p.Start();
+
+                    pipeWrite.DisposeLocalCopyOfClientHandle();
+                    pipeRead.DisposeLocalCopyOfClientHandle();
+
+                    // Wait child process start
+                    Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Child process not started");
+
+                    //Start listening and produce output 1
+                    p.BeginOutputReadLine();
+                    await pipeWrite.WriteAsync(new byte[1], 0, 1);
+
+                    // Wait child signal produce number 1
+                    Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 1");
+                    Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Value 1 not received");
+
+                    // Stop listen
+                    p.CancelOutputRead();
+
+                    // clean signal list
+                    dataReceived.Clear();
+
+                    // Produce new value
+                    await pipeWrite.WriteAsync(new byte[1], 0, 1);
+
+                    // Wait child signal produce number 2
+                    Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 2");
+
+                    // Stop listen
+                    p.BeginOutputReadLine();
+
+                    // Produce new value and wait
+                    await pipeWrite.WriteAsync(new byte[1], 0, 1);
+                    Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "New value didn't arrived");
+
+                    // Wait child process close
+                    Assert.True(p.WaitForExit(WaitInMS), "Child process didn't close");
+                    Assert.Equal(1, dataReceived.Count);
+                }
+            }
+        }
+
+        async private Task<int> TestAsyncOutputStream_BeginCancelBeinOutputRead_RemotelyInvokable(string pipesHandle)
+        {
+            string[] pipeHandlers = pipesHandle.Split(' ');
+            using (AnonymousPipeClientStream pipeRead = new AnonymousPipeClientStream(PipeDirection.In, pipeHandlers[0]))
+            using (AnonymousPipeClientStream pipeWrite = new AnonymousPipeClientStream(PipeDirection.Out, pipeHandlers[1]))
+            {
+                // Signal child process start
+                await pipeWrite.WriteAsync(new byte[1], 0, 1);
+
+                // Wait parent signal to produce number 1
+                // Generate output 1 and signal parent
+                Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 1");
+                Console.WriteLine(1);
+                await pipeWrite.WriteAsync(new byte[1], 0, 1);
+
+                // Wait parent signal to produce number 2
+                // Generate output 2 and signal parent
+                Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 2");
+                Console.WriteLine(2);
+                await pipeWrite.WriteAsync(new byte[1], 0, 1);
 
                 // Wait parent signal to produce number 3
                 // Generate output 3 and signal parent
                 Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 3");
                 Console.WriteLine(3);
-                pipeWrite.WriteByte(0);
+                await pipeWrite.WriteAsync(new byte[1], 0, 1);
 
                 return SuccessExitCode;
             }
