@@ -171,7 +171,7 @@ namespace System.Diagnostics.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Pipe doesn't work well on UAP")]
-        async public Task TestAsyncOutputStream_BeginCancelBeinOutputRead()
+        async public Task TestAsyncOutputStream_BeginCancelBeginOutputRead()
         {
             using (AnonymousPipeServerStream pipeWrite = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable))
             using (AnonymousPipeServerStream pipeRead = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable))
