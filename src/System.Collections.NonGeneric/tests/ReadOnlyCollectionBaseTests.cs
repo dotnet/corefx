@@ -20,10 +20,12 @@ namespace System.Collections.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Changed behavior
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.UapAot, "Test now represents upstream behavior, and is correct in uapaot due to upstream changes: https://github.com/dotnet/coreclr/pull/21628")]
         public static void SyncRoot()
         {
             MyReadOnlyCollectionBase collection = CreateCollection();
-            Assert.False(collection.SyncRoot is ArrayList);
+            Assert.True(collection.SyncRoot is ArrayList);
             Assert.Same(collection.SyncRoot, collection.SyncRoot);
         }
 
@@ -33,7 +35,7 @@ namespace System.Collections.Tests
             MyReadOnlyCollectionBase collection = CreateCollection();
             Assert.Equal(100, collection.Count);
         }
-        
+
         [Fact]
         public static void CopyTo_ZeroIndex()
         {

@@ -635,11 +635,13 @@ namespace System.Collections.Specialized.Tests
         [Theory]
         [MemberData(nameof(StringCollection_Data))]
         [MemberData(nameof(StringCollection_Duplicates_Data))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Changed behavior
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.UapAot, "Test now represents upstream behavior, and is correct in uapaot due to upstream changes: https://github.com/dotnet/coreclr/pull/21628")]
         public static void SyncRootTest(StringCollection collection, string[] data)
         {
             object syncRoot = collection.SyncRoot;
             Assert.NotNull(syncRoot);
-            Assert.IsType<object>(syncRoot);
+            Assert.IsType<ArrayList>(syncRoot);
 
             Assert.Same(syncRoot, collection.SyncRoot);
             Assert.NotSame(syncRoot, new StringCollection().SyncRoot);

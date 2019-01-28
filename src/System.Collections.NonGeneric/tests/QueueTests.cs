@@ -834,6 +834,8 @@ namespace System.Collections.Tests
         }
     }
 
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Changed behavior
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.UapAot, "Test now represents upstream behavior, and is correct in uapaot due to upstream changes: https://github.com/dotnet/coreclr/pull/21628")]
     public class Queue_SyncRootTests
     {
         private const int NumberOfElements = 1000;
@@ -850,7 +852,7 @@ namespace System.Collections.Tests
             {
                 queueMother.Enqueue(i);
             }
-            Assert.Equal(queueMother.SyncRoot.GetType(), typeof(object));
+            Assert.IsType<Queue>(queueMother.SyncRoot);
 
             var queueSon = Queue.Synchronized(queueMother);
             _queueGrandDaughter = Queue.Synchronized(queueSon);

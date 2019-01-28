@@ -540,6 +540,8 @@ namespace System.Collections.Tests
         }
     }
 
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Changed behavior
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.UapAot, "Test now represents upstream behavior, and is correct in uapaot due to upstream changes: https://github.com/dotnet/coreclr/pull/21628")]
     public class Stack_SyncRootTests
     {
         private Stack _stackDaughter;
@@ -563,7 +565,7 @@ namespace System.Collections.Tests
                 stackMother.Push(i);
             }
 
-            Assert.Equal(typeof(object), stackMother.SyncRoot.GetType());
+            Assert.IsType<Stack>(stackMother.SyncRoot);
 
             Stack stackSon = Stack.Synchronized(stackMother);
             _stackGrandDaughter = Stack.Synchronized(stackSon);

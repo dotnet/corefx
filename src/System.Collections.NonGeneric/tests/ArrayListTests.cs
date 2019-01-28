@@ -2548,6 +2548,8 @@ namespace System.Collections.Tests
         }
     }
 
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Changed behavior
+    [SkipOnTargetFramework(~TargetFrameworkMonikers.UapAot, "Test now represents upstream behavior, and is correct in uapaot due to upstream changes: https://github.com/dotnet/coreclr/pull/21628")]
     public class ArrayList_SyncRootTests
     {
         private ArrayList _arrDaughter;
@@ -2576,12 +2578,12 @@ namespace System.Collections.Tests
                 _arrGrandDaughter = ArrayList.Synchronized(arrMother2);
                 _arrDaughter = ArrayList.Synchronized(arrMother2);
 
-                Assert.False(arrMother2.SyncRoot is ArrayList);
-                Assert.False(arrSon1.SyncRoot is ArrayList);
-                Assert.False(arrSon2.SyncRoot is ArrayList);
-                Assert.False(_arrDaughter.SyncRoot is ArrayList);
+                Assert.True(arrMother2.SyncRoot is ArrayList);
+                Assert.True(arrSon1.SyncRoot is ArrayList);
+                Assert.True(arrSon2.SyncRoot is ArrayList);
+                Assert.True(_arrDaughter.SyncRoot is ArrayList);
                 Assert.Equal(arrSon1.SyncRoot, arrMother2.SyncRoot);
-                Assert.False(_arrGrandDaughter.SyncRoot is ArrayList);
+                Assert.True(_arrGrandDaughter.SyncRoot is ArrayList);
 
                 arrMother2 = new ArrayList();
                 for (int i = 0; i < NumberOfElements; i++)

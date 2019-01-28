@@ -288,13 +288,14 @@ namespace System.Collections.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.UapAot, "Test now represents upstream behavior, and is correct in uapaot due to upstream changes: https://github.com/dotnet/coreclr/pull/21628")]
         public static void SyncRoot()
         {
             // SyncRoot should be the reference to the underlying collection, not to MyCollection
             var collBase = new MyCollection();
             object syncRoot = collBase.SyncRoot;
-            Assert.NotEqual(syncRoot, collBase);
-            Assert.Equal(collBase.SyncRoot, collBase.SyncRoot);
+            Assert.NotNull(syncRoot);
+            Assert.Same(collBase.SyncRoot, collBase.SyncRoot);
         }
 
         [Fact]
