@@ -50,6 +50,7 @@
     <Compile Include="System\Diagnostics\Stopwatch.cs" />
     <Compile Include="System\Environment.MachineName.cs" />
     <Compile Include="System\IO\PathTests_Combine.cs" />
+    <Compile Include="System\Runtime\CompilerServices\SwitchExpressionExceptionTests.cs" />
     <Compile Include="System\Runtime\Versioning\FrameworkName.cs" />
     <Compile Include="System\IO\PathTestsBase.cs" />
     <Compile Include="System\Net\WebUtility.cs" />

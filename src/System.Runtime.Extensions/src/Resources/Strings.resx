@@ -166,6 +166,9 @@
   <data name="Arg_AppDomainUnloadedException" xml:space="preserve">
     <value>Attempted to access an unloaded AppDomain.</value>
   </data>
+  <data name="Arg_SwitchExpressionException" xml:space="preserve">
+    <value>Non-exhaustive switch expression failed to match its input.</value>
+  </data>
   <data name="ZeroLengthString" xml:space="preserve">
     <value>String cannot have zero length.</value>
   </data>

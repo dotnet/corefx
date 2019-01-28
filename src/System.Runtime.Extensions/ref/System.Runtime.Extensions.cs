@@ -1842,6 +1842,17 @@ namespace System.Runtime
         public static void StartProfile(string profile) { throw null; }
     }
 }
+namespace System.Runtime.CompilerServices
+{
+    [Serializable]
+    public sealed class SwitchExpressionException : System.InvalidOperationException
+    {
+        public SwitchExpressionException() { }
+        public SwitchExpressionException(object unmatchedValue) { }
+        public object UnmatchedValue { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+    }
+}
 namespace System.Runtime.Versioning
 {
     public sealed partial class FrameworkName : System.IEquatable<System.Runtime.Versioning.FrameworkName>
