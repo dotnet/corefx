@@ -12,6 +12,7 @@ parameters:
   officialBuildId: ''
   enableAzurePipelinesReporter: '' # true | false
   outerloop: '' # true | false
+  buildExtraArguments: ''
 
 steps:
   - script: ${{ parameters.msbuildScript }}
@@ -29,6 +30,7 @@ steps:
             /p:IsExternal=${{ parameters.isExternal }}
             /p:Creator=${{ parameters.creator }}
             /p:OfficialBuildId=${{ parameters.officialBuildId }}
+            /p:ContinuousIntegrationBuild=true
             /p:EnableAzurePipelinesReporter=${{ parameters.enableAzurePipelinesReporter }}
             /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
     displayName: Send to Helix
