@@ -12,7 +12,6 @@
     <Compile Include="System\Linq\ChainLinq\Consumables\GroupingInternal.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Lookup.cs" />
-    <Compile Include="System\Linq\ChainLinq\Consumables\WhereSelect.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Where.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Select.cs" />
     <Compile Include="System\Linq\ChainLinq\ConsumerEnumerators\Lookup.cs" />
@@ -112,6 +111,7 @@
     <Compile Include="System\Linq\ChainLinq\Consumables\SelectMany.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\SelectWhere.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumables\Where.SpeedOpt.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consumables\WhereSelect.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Compose.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Identity.SpeedOpt.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\Take.SpeedOpt.cs" />
