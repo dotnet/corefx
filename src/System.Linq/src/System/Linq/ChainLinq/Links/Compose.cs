@@ -35,9 +35,16 @@ namespace System.Linq.ChainLinq.Links
     {
         public static Link<T, V> Create<T, U, V>(Link<T, U> first, Link<U, V> second)
         {
-            if (ReferenceEquals(Identity<T>.Instance, first))
+            var identity = Identity<U>.Instance;
+
+            if (ReferenceEquals(identity, first))
             {
                 return (Link<T, V>)(object)second;
+            }
+
+            if (ReferenceEquals(identity, second))
+            {
+                return (Link<T, V>)(object)first;
             }
 
             return new Composition<T, U, V>(first, second);
