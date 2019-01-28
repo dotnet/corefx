@@ -49,8 +49,6 @@
     <Project Include="$(ProjectDir)pkg\test\testPackages.proj" />
   </ItemGroup>
 
-  <Import Project="$(ToolsDir)Build.Post.targets" Condition="Exists('$(ToolsDir)Build.Post.targets')" />
-
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.traversal.targets))\dir.traversal.targets" />
 
   <PropertyGroup Condition="'$(BuildingUAPVertical)' == 'true'">

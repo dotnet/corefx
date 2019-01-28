@@ -76,8 +76,6 @@
     <MSBuild Projects="@(_PackProjects)" Properties="$(ProjectProperties)" />
   </Target>
 
-  <Import Project="$(ToolsDir)clean.targets" />
-
   <Target Name="Build" DependsOnTargets="$(BuildDependsOn)" />
 
   <Target Name="Clean">
