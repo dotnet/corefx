@@ -491,7 +491,7 @@ namespace System.Threading.Threads.Tests
         public static void CurrentPrincipal_SetNull()
         {
             // We run test on remote process because we need to set same principal policy
-            // on netfx defaul principal policy is PrincipalPolicy.UnauthenticatedPrincipal
+            // On netfx default principal policy is PrincipalPolicy.UnauthenticatedPrincipal
             DummyClass.RemoteInvoke(() =>
             {
                 AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.NoPrincipal);
