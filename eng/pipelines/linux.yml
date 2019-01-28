@@ -37,6 +37,25 @@ jobs:
             _dockerContainer: ubuntu_1604_arm64_cross_container
             _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
             _buildExtraArguments: ''
+
+          ${{ if eq(parameters.isOuterloopBuild, 'true') }}:
+            x64_Debug:
+              _BuildConfig: Debug
+              _architecture: x64
+              _framework: netcoreapp
+              _helixQueues: $(linuxDefaultQueues)
+              _dockerContainer: rhel7_container
+              _buildScriptPrefix: ''
+              _buildExtraArguments: ''
+
+            arm64_Debug:
+              _BuildConfig: Debug
+              _architecture: arm64
+              _framework: netcoreapp
+              _helixQueues: $(linuxArm64Queues)
+              _dockerContainer: ubuntu_1604_arm64_cross_container
+              _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
+              _buildExtraArguments: ''
           
           ${{ if eq(parameters.isOfficialBuild, 'true') }}:
             musl_x64_Release:
