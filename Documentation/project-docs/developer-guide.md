@@ -208,9 +208,7 @@ One can build 32- or 64-bit binaries or for any architecture by specifying in th
 
 ### Tests
 
-We use the OSS testing framework [xunit](http://xunit.github.io/) with the [BuildTools test targets](https://github.com/dotnet/buildtools/blob/master/Documentation/test-targets-usage.md).  
-Tests run inside Microsoft internal-build massive parallel job execution system called **Helix**.  
-Tests result are show through *Mission Control* reporting site https://mc.dot.net/
+We use the OSS testing framework [xunit](http://xunit.github.io/) with the [BuildTools test targets](https://github.com/dotnet/buildtools/blob/master/Documentation/test-targets-usage.md).
 
 #### Running tests on the command line
 
