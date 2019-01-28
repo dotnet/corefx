@@ -142,4 +142,4 @@ The .NET platform currently doesn't contain a cross-platform XAML-based UI stack
 
 ## Engineering system
 
-* **Helix**. Microsoft internal massive parallel job execution system used to run [xunit](http://xunit.github.io/) tests. Tests result are shown through *Mission Control* reporting site https://mc.dot.net/
+* **Helix**. It's a massive parallel general purpose job processing and result aggregation system running in cloud. The workitems that corefx sends to Helix are [xunit](https://github.com/xunit) tests. Tests result are shown through *Mission Control* reporting site https://mc.dot.net/
