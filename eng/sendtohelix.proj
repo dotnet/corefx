@@ -126,19 +126,37 @@
 
   </Target>
 
-  <Target Name="BuildHelixWorkItems"
-          DependsOnTargets="CompressRuntimeDirectory">
-    <ItemGroup>
+  <PropertyGroup>
+    <TestAssetBlobFeedUrl>https://dotnetfeed.blob.core.windows.net/dotnet-core</TestAssetBlobFeedUrl>
+  </PropertyGroup>
 
+  <Target Name="GetTestAssetManifest" 
+          Outputs="$(TestAssetBlobInfos)">
+
+    <PropertyGroup>
+      <RuntimeOS Condition="'$(RuntimeOS)' == ''">$(OSGroup)</RuntimeOS>
+      <_TestAssetVersion>$(PackageVersion)-$(VersionSuffix)</_TestAssetVersion>
+      <_AssetManifestPath>$(TestAssetBlobFeedUrl)/corefx-tests/$(_TestAssetVersion)/$(RuntimeOS).$(ArchGroup).$(ConfigurationGroup)/$(TargetGroup)/corefx-test-assets.xml</_AssetManifestPath>
+    </PropertyGroup>
+
+    <ParseBuildManifest AssetManifestPath="$(_AssetManifestPath)">
+      <Output TaskParameter="BlobInfos" ItemName="TestAssetBlobInfos" />
+    </ParseBuildManifest>
+
+  </Target>
+
+  <Target Name="BuildHelixWorkItems"
+          DependsOnTargets="CompressRuntimeDirectory;GetTestAssetManifest">
+
+    <ItemGroup>
       <HelixCorrelationPayload Include="$(HelixCorrelationPayload)" />
 
-      <_WorkItem Include="$(WorkItemArchiveWildCard)" Exclude="$(HelixCorrelationPayload)" />
-
-      <HelixWorkItem Include="@(_WorkItem -> '%(FileName)')">
-        <PayloadArchive>%(Identity)</PayloadArchive>
+      <HelixWorkItem Include="@(TestAssetBlobInfos -> '%(FileName)')">
+        <PayloadUri>$(TestAssetBlobFeedUrl)/%(Identity)</PayloadUri>
         <Command>$(HelixCommand)</Command>
         <Timeout>$(_timeoutSpan)</Timeout>
       </HelixWorkItem>
     </ItemGroup>
+
   </Target>
 </Project>

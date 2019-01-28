@@ -104,4 +104,57 @@
 
     <Message Importance="High" Text="Publishing %(SymbolPackagesToPublish.Identity) to $(SymbolServerPath)"/>
   </Target>
+
+  <Target Name="PublishTestAssets">
+    <Error Text="The ExpectedFeedUrl property wasn't supplied." Condition="'$(ExpectedFeedUrl)' == ''" />
+    <Error Text="The AccountKey property wasn't supplied." Condition="'$(AccountKey)' == ''" />
+    <Error Text="FilesToPublishPattern property wasn't supplied." Condition="'$(FilesToPublishPattern)' == ''" />
+
+    <PropertyGroup>
+      <RuntimeOS Condition="'$(RuntimeOS)' == ''">$(OSGroup)</RuntimeOS>
+      <_TestAssetVersion>$(PackageVersion)-$(VersionSuffix)</_TestAssetVersion>
+      <_FileRelativePathBase>corefx-tests/$(_TestAssetVersion)/$(RuntimeOS).$(ArchGroup).$(ConfigurationGroup)/$(TargetGroup)/</_FileRelativePathBase>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_ItemsToPush Remove="@(_ItemsToPush)" />
+      <_ItemsToPush Include="$(FilesToPublishPattern)" />
+      <_ItemsToPush>
+        <RelativeBlobPath>$(_FileRelativePathBase)$([System.String]::Copy('%(RecursiveDir)%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
+      </_ItemsToPush>
+    </ItemGroup>
+
+    <Error Condition="'@(_ItemsToPush)' == ''" Text="No files to push." />
+
+    <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"
+                    AccountKey="$(AccountKey)"
+                    ItemsToPush="@(_ItemsToPush)"
+                    PublishFlatContainer="true"
+                    ManifestBuildId="$(ManifestBuildId)"
+                    ManifestBranch="$(ManifestBranch)"
+                    ManifestCommit="$(ManifestCommit)"
+                    ManifestBuildData="$(ManifestBuildData)"
+                    ManifestRepoUri="$(ManifestRepoUri)"
+                    AssetManifestPath="$(AssetManifestFilePath)" />
+
+    <ItemGroup>
+      <_ManifestToPush Remove="@(_ManifestToPush)" />
+      <_ManifestToPush Include="$(AssetManifestFilePath)">
+        <RelativeBlobPath>$(_FileRelativePathBase)corefx-test-assets.xml</RelativeBlobPath>
+      </_ManifestToPush>
+    </ItemGroup>
+
+    <Message Importance="High" Text="PublishTestAssets: $(_FileRelativePathBase)corefx-test-assets.xml" />
+
+    <PushToBlobFeed ExpectedFeedUrl="$(ExpectedFeedUrl)"
+                    AccountKey="$(AccountKey)"
+                    ItemsToPush="@(_ManifestToPush)"
+                    PublishFlatContainer="true"
+                    ManifestBuildId="$(ManifestBuildId)"
+                    ManifestBranch="$(ManifestBranch)"
+                    ManifestCommit="$(ManifestCommit)"
+                    ManifestBuildData="$(ManifestBuildData)"
+                    ManifestRepoUri="$(ManifestRepoUri)"
+                    AssetManifestPath="$(ArtifactsDir)AssetManifests\ManifestUpload.xml" />
+  </Target>
 </Project>
