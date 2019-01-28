@@ -85,6 +85,19 @@
           Outputs="$(TestArchiveRuntimeFile)"
           Condition="'$(TargetGroup)' != 'AllConfigurations'">
 
+    <!-- Add global tools -->
+    <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
+      <TestArchiveRuntimeDependencies Include="$(GlobalToolsDir)**\*.*" />
+    </ItemGroup>
+
+    <!-- Copy additional test dependencies. -->
+    <Copy SourceFiles="@(TestArchiveRuntimeDependencies)"
+          DestinationFolder="$(TestHostRootPath)\%(RecursiveDir)"
+          SkipUnchangedFiles="true"
+          OverwriteReadOnlyFiles="true"
+          Retries="3"
+          RetryDelayMilliseconds="300" />
+
     <MakeDir Directories="$(TestArchiveRuntimeRoot)" />
     <ZipDirectory
         SourceDirectory="$(TestHostRootPath)"
