@@ -250,9 +250,9 @@
           Condition="'$(TargetsUap)' == 'true'"
           BeforeTargets="ResolveReferences">
 
-    <Error Condition="'$(TargetsUap)' == 'true' AND '$(EnableVSTestReferences)' == 'true' AND !Exists('$(PackagesDir)$(XUnitTestAdapterPackageId)\$(XUnitPackageVersion)\build\uap10.0\$(XUnitAdapter).dll')"
+    <Error Condition="'$(EnableVSTestReferences)' == 'true' AND !Exists('$(PackagesDir)$(XUnitTestAdapterPackageId)\$(XUnitPackageVersion)\build\uap10.0\$(XUnitAdapter).dll')"
             Text="Error: looks the package $(PackagesDir)$(XUnitTestAdapterPackageId)\$(XUnitPackageVersion) not restored or missing $(XUnitAdapter).dll." />
-    <Error Condition="'$(TargetsUap)' == 'true' AND '$(EnableVSTestReferences)' == 'true' AND !Exists('$(PackagesDir)$(TestPlatformHostPackageId)\$(MicrosoftNetTestSdkPackageVersion)\lib\uap10.0\$(TestPlatformHost).dll')"
+    <Error Condition="'$(EnableVSTestReferences)' == 'true' AND !Exists('$(PackagesDir)$(TestPlatformHostPackageId)\$(MicrosoftNetTestSdkPackageVersion)\lib\uap10.0\$(TestPlatformHost).dll')"
             Text="Error: looks the package $(PackagesDir)$(TestPlatformHostPackageId)\$(MicrosoftNetTestSdkPackageVersion) not restored or missing $(TestPlatformHost).dll." />
 
     <ItemGroup>
