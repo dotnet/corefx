@@ -396,6 +396,8 @@ namespace System.Diagnostics
             try
             {
                 // Kill the process, so that no further children can be created.
+                //
+                // This method can return before stopping has completed. Down the road, could possibly wait for termination to complete before continuing.
                 Kill();
             }
             catch (InvalidOperationException)

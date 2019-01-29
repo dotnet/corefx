@@ -80,6 +80,8 @@ namespace System.Diagnostics
             {
                 // Stop but don't kill the process. Keeps additional children from being started but leaves the process alive 
                 // so that its children can be enumerated.
+                //
+                // This method can return before stopping has completed. Down the road, could possibly wait for stopping to complete (e.g. using waitid) before continuing.
                 Stop();
             }
             catch (InvalidOperationException)
