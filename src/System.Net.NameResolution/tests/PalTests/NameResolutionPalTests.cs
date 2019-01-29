@@ -118,7 +118,7 @@ namespace System.Net.NameResolution.PalTests
             }
 
             // Temporary instrumentation for #32797
-            if (error == SocketError.TryAgain && (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD)))
+            if (error == SocketError.TryAgain && Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 error = NameResolutionPal.TryGetAddrInfo(hostName, out hostEntry, out nativeErrorCode);
                 if (error != SocketError.TryAgain)
