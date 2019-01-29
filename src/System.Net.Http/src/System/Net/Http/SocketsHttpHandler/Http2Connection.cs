@@ -1251,36 +1251,35 @@ namespace System.Net.Http
                 // Wait for response headers to be read.
                 await http2Stream.ReadResponseHeadersAsync(cancellationToken).ConfigureAwait(false);
             }
-            catch (IOException ioe)
+            catch (Exception e)
             {
                 http2Stream?.Dispose();
-                throw new HttpRequestException(SR.net_http_client_execution_error, ioe);
-            }
-            catch (ObjectDisposedException)
-            {
-                http2Stream?.Dispose();
-                throw new HttpRequestException(SR.net_http_client_execution_error);
-            }
-            catch (Http2ProtocolException)
-            {
-                http2Stream?.Dispose();
-                // ISSUE 31315: Determine if/how to expose HTTP2 error codes
-                throw new HttpRequestException(SR.net_http_client_execution_error);
-            }
-            catch (OperationCanceledException)
-            {
-                // In
-                // MAX TODO: decide on the right exception to throw.
-                if ( http2Stream != null && http2Stream.StreamId != 0 )
+
+                if (e is IOException ioe)
                 {
-                    ValueTask ignored = SendRstStreamAsync(http2Stream.StreamId, Http2ProtocolErrorCode.StreamClosed);
+                    throw new HttpRequestException(SR.net_http_client_execution_error, ioe);
                 }
-                throw new OperationCanceledException(cancellationToken);
-            }
-            catch
-            {
-                http2Stream?.Dispose();
-                throw;
+                else if (e is ObjectDisposedException)
+                {
+                    throw new HttpRequestException(SR.net_http_client_execution_error);
+                }
+                else if (e is Http2ProtocolException)
+                {
+                    // ISSUE 31315: Determine if/how to expose HTTP2 error codes
+                    throw new HttpRequestException(SR.net_http_client_execution_error);
+                }
+                else if (e is OperationCanceledException)
+                {
+                    if ( http2Stream != null && http2Stream.StreamId != 0 )
+                    {
+                        ValueTask ignored = SendRstStreamAsync(http2Stream.StreamId, Http2ProtocolErrorCode.StreamClosed);
+                    }
+                    throw new OperationCanceledException(cancellationToken);
+                }
+                else
+                {
+                    throw;
+                }
             }
 
             return http2Stream.Response;
