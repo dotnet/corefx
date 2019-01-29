@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
@@ -136,10 +137,11 @@ namespace System.Diagnostics.Tests
                     // Wait child signal produce number 2
                     Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 2");
 
-                    // Wait child process close
+                    // Wait child process close to be sure that output buffer has been flushed
                     Assert.True(p.WaitForExit(WaitInMS), "Child process didn't close");
 
                     Assert.Equal(1, dataReceived.Count);
+                    Assert.Equal(1, dataReceived[0]);
                 }
             }
         }
@@ -178,8 +180,7 @@ namespace System.Diagnostics.Tests
             {
                 using (Process p = CreateProcess(TestAsyncOutputStream_BeginCancelBeinOutputRead_RemotelyInvokable, $"{pipeWrite.GetClientHandleAsString()} {pipeRead.GetClientHandleAsString()}"))
                 {
-                    var dataReceived = new List<int>();
-                    var dataArrivedEvent = new AutoResetEvent(false);
+                    var dataReceived = new BlockingCollection<int>();
 
                     p.StartInfo.RedirectStandardOutput = true;
                     p.OutputDataReceived += (s, e) =>
@@ -188,7 +189,6 @@ namespace System.Diagnostics.Tests
                         {
                             dataReceived.Add(int.Parse(e.Data));
                         }
-                        dataArrivedEvent.Set();
                     };
 
                     // Start child process
@@ -200,36 +200,63 @@ namespace System.Diagnostics.Tests
                     // Wait child process start
                     Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Child process not started");
 
-                    //Start listening and produce output 1
+                    //Start listening and signal client to produce 1,2,3
                     p.BeginOutputReadLine();
                     await pipeWrite.WriteAsync(new byte[1], 0, 1);
 
-                    // Wait child signal produce number 1
-                    Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 1");
-                    Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "Value 1 not received");
-
-                    // Stop listen
+                    // Wait child signal produce number 1,2,3
+                    Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 1,2,3");
+                    using (CancellationTokenSource cts = new CancellationTokenSource(WaitInMS))
+                    {
+                        try
+                        {
+                            List<int> expectedValue123 = new List<int>() { 1, 2, 3 };
+                            foreach (int value in dataReceived.GetConsumingEnumerable(cts.Token)) 
+                            {
+                                expectedValue123.Remove(value);
+                                if (expectedValue123.Count == 0)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        catch(OperationCanceledException)
+                        {
+                            Assert.False(cts.IsCancellationRequested, "Values 1,2,3 not arrived");
+                        }
+                    }
+                    
+                    // Cancel and signal child
                     p.CancelOutputRead();
-
-                    // clean signal list
-                    dataReceived.Clear();
-
-                    // Produce new value
                     await pipeWrite.WriteAsync(new byte[1], 0, 1);
 
-                    // Wait child signal produce number 2
-                    Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing child signal for value 2");
-
-                    // Stop listen
+                    // Re-start listening and signal child
                     p.BeginOutputReadLine();
-
-                    // Produce new value and wait
                     await pipeWrite.WriteAsync(new byte[1], 0, 1);
-                    Assert.True(dataArrivedEvent.WaitOne(WaitInMS), "New value didn't arrived");
 
                     // Wait child process close
                     Assert.True(p.WaitForExit(WaitInMS), "Child process didn't close");
-                    Assert.Equal(1, dataReceived.Count);
+
+                    // Wait for value 7,8,9
+                    using (CancellationTokenSource cts = new CancellationTokenSource(WaitInMS))
+                    {
+                        try
+                        {
+                            List<int> expectedValue789 = new List<int>() { 7, 8, 9 };
+                            foreach (int value in dataReceived.GetConsumingEnumerable(cts.Token))
+                            {
+                                expectedValue789.Remove(value);
+                                if (expectedValue789.Count == 0)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                        catch(OperationCanceledException)
+                        {
+                            Assert.False(cts.IsCancellationRequested, "Values 7,8,9 not arrived");
+                        }
+                    }
                 }
             }
         }
@@ -243,23 +270,24 @@ namespace System.Diagnostics.Tests
                 // Signal child process start
                 await pipeWrite.WriteAsync(new byte[1], 0, 1);
 
-                // Wait parent signal to produce number 1
-                // Generate output 1 and signal parent
-                Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 1");
+                // Wait parent signal to produce number 1,2,3
+                Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 1,2,3");
                 Console.WriteLine(1);
-                await pipeWrite.WriteAsync(new byte[1], 0, 1);
-
-                // Wait parent signal to produce number 2
-                // Generate output 2 and signal parent
-                Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 2");
                 Console.WriteLine(2);
-                await pipeWrite.WriteAsync(new byte[1], 0, 1);
-
-                // Wait parent signal to produce number 3
-                // Generate output 3 and signal parent
-                Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 3");
                 Console.WriteLine(3);
                 await pipeWrite.WriteAsync(new byte[1], 0, 1);
+
+                // Wait parent cancellation signal and produce new values 4,5,6
+                Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent signal to produce number 4,5,6");
+                Console.WriteLine(4);
+                Console.WriteLine(5);
+                Console.WriteLine(6);
+
+                // Wait parent re-start listening signal and produce 7,8,9
+                Assert.True(await WaitPipeSignal(pipeRead, WaitInMS), "Missing parent re-start listening signal");
+                Console.WriteLine(7);
+                Console.WriteLine(8);
+                Console.WriteLine(9);
 
                 return SuccessExitCode;
             }
