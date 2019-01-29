@@ -15,9 +15,6 @@ namespace System.Threading
     {
         [ThreadStatic]
         private static Thread t_currentThread;
-
-        [ThreadStatic]
-        private static IPrincipal t_principal;
         private static AsyncLocal<IPrincipal> s_asyncLocalPrincipal;
 
         private readonly RuntimeThread _runtimeThread;
@@ -193,11 +190,11 @@ namespace System.Threading
         {
             get
             {
-                if (t_principal is null)
+                if (s_asyncLocalPrincipal is null)
                 {
-                   CurrentPrincipal = AppDomain.CurrentDomain.GetThreadPrincipal();
+                    CurrentPrincipal = AppDomain.CurrentDomain.GetThreadPrincipal();
                 }
-                return t_principal;
+                return s_asyncLocalPrincipal?.Value;
             }
             set
             {
@@ -207,15 +204,10 @@ namespace System.Threading
                     {
                         return;
                     }
-                    Interlocked.CompareExchange(ref s_asyncLocalPrincipal, new AsyncLocal<IPrincipal>(CurrentPrincipalContextChanged), null);
+                    Interlocked.CompareExchange(ref s_asyncLocalPrincipal, new AsyncLocal<IPrincipal>(), null);
                 }
                 s_asyncLocalPrincipal.Value = value;
             }
-        }
-
-        private static void CurrentPrincipalContextChanged(AsyncLocalValueChangedArgs<IPrincipal> valueChangedHandler)
-        {
-            t_principal = valueChangedHandler.CurrentValue;
         }
 
         public ExecutionContext ExecutionContext => ExecutionContext.Capture();

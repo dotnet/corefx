@@ -475,8 +475,16 @@ namespace System.Threading.Threads.Tests
 
                     task = Task.Run(() => 
                     {
-                        // Default PrincipalPolicy for netcoreapp is null and for netfx is ClaimsPrincipal
-                        Assert.True(Thread.CurrentPrincipal is null || Thread.CurrentPrincipal is ClaimsPrincipal);
+                        // Default PrincipalPolicy for netcoreapp is null and for netfx is GenericPrincipal
+                        if (PlatformDetection.IsNetCore)
+                        {
+                            Assert.Null(Thread.CurrentPrincipal);
+                        }
+                        else
+                        {
+                            Assert.IsType<GenericPrincipal>(Thread.CurrentPrincipal);
+                        }
+
                         Assert.False(ExecutionContext.IsFlowSuppressed());
                     });
                 }
