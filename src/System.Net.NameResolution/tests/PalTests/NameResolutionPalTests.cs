@@ -43,7 +43,7 @@ namespace System.Net.NameResolution.PalTests
             IPHostEntry hostEntry;
             int nativeErrorCode;
             SocketError error = NameResolutionPal.TryGetAddrInfo(hostName, out hostEntry, out nativeErrorCode);
-            if (error == SocketError.HostNotFound && (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD)))
+            if (error == SocketError.HostNotFound && (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX)))
             {
                 // On Unix, we are not guaranteed to be able to resove the local host. The ability to do so depends on the 
                 // machine configurations, which varies by distro and is often inconsistent.
@@ -51,7 +51,7 @@ namespace System.Net.NameResolution.PalTests
             }
 
             // Temporary instrumentation for #32797
-            if (error == SocketError.TryAgain && (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD)))
+            if (error == SocketError.TryAgain && Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 if (error != SocketError.TryAgain)
                 {
@@ -112,7 +112,7 @@ namespace System.Net.NameResolution.PalTests
             {
                 // On Unix, getaddrinfo returns host not found, if all the machine discovery settings on the local network
                 // is turned off. Hence dns lookup for it's own hostname fails.
-                Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD));
+                Assert.Equal(PlatformID.Unix, Environment.OSVersion.Platform);
                 return;
             }
 
@@ -133,7 +133,7 @@ namespace System.Net.NameResolution.PalTests
             {
                 // On Unix, getaddrinfo returns private ipv4 address for hostname. If the OS doesn't have the
                 // reverse dns lookup entry for this address, getnameinfo returns host not found.
-                Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX));
+                Assert.Equal(PlatformID.Unix, Environment.OSVersion.Platform);
                 return;
             }
 
