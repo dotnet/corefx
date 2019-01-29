@@ -475,7 +475,7 @@ namespace System.Threading.Threads.Tests
 
                     task = Task.Run(() => 
                     {
-                        // Default PrincipalPolicy for netcoreapp is null and for netfx is GenericPrincipal
+                        // Default PrincipalPolicy for netcoreapp is null
                         if (PlatformDetection.IsNetCore)
                         {
                             Assert.Null(Thread.CurrentPrincipal);
