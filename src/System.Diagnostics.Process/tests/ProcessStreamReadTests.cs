@@ -70,7 +70,7 @@ namespace System.Diagnostics.Tests
             for (int i = 0; i < 2; ++i)
             {
                 StringBuilder sb = new StringBuilder();
-                Process p = CreateProcessPortable(RemotelyInvokable.StreamBody);
+                Process p = CreateProcess(RemotelyInvokable.StreamBody);
                 p.StartInfo.RedirectStandardOutput = true;
                 p.OutputDataReceived += (s, e) =>
                 {
@@ -97,7 +97,7 @@ namespace System.Diagnostics.Tests
             using (AnonymousPipeServerStream pipeWrite = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable))
             using (AnonymousPipeServerStream pipeRead = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable))
             {
-                using (Process p = CreateProcessPortable(TestAsyncOutputStream_CancelOutputRead_RemotelyInvokable, $"{pipeWrite.GetClientHandleAsString()} {pipeRead.GetClientHandleAsString()}"))
+                using (Process p = CreateProcess(TestAsyncOutputStream_CancelOutputRead_RemotelyInvokable, $"{pipeWrite.GetClientHandleAsString()} {pipeRead.GetClientHandleAsString()}"))
                 {
                     var dataReceived = new List<int>();
                     var dataArrivedEvent = new AutoResetEvent(false);
@@ -176,7 +176,7 @@ namespace System.Diagnostics.Tests
             using (AnonymousPipeServerStream pipeWrite = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable))
             using (AnonymousPipeServerStream pipeRead = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable))
             {
-                using (Process p = CreateProcessPortable(TestAsyncOutputStream_BeginCancelBeinOutputRead_RemotelyInvokable, $"{pipeWrite.GetClientHandleAsString()} {pipeRead.GetClientHandleAsString()}"))
+                using (Process p = CreateProcess(TestAsyncOutputStream_BeginCancelBeinOutputRead_RemotelyInvokable, $"{pipeWrite.GetClientHandleAsString()} {pipeRead.GetClientHandleAsString()}"))
                 {
                     var dataReceived = new List<int>();
                     var dataArrivedEvent = new AutoResetEvent(false);
