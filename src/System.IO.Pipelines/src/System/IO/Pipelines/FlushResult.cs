@@ -5,7 +5,7 @@
 namespace System.IO.Pipelines
 {
     /// <summary>
-    /// Result returned by <see cref="PipeWriter.FlushAsync"/> call
+    /// Result returned by <see cref="PipeWriter{T}.FlushAsync"/> call
     /// </summary>
     public struct FlushResult
     {
@@ -30,7 +30,7 @@ namespace System.IO.Pipelines
         }
 
         /// <summary>
-        /// True if the current <see cref="PipeWriter.FlushAsync"/> operation was canceled, otherwise false.
+        /// True if the current <see cref="PipeWriter{T}.FlushAsync"/> operation was canceled, otherwise false.
         /// </summary>
         public bool IsCanceled => (_resultFlags & ResultFlags.Canceled) != 0;
 

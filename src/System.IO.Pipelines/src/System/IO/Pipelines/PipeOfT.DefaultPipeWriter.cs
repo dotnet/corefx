@@ -11,13 +11,13 @@ namespace System.IO.Pipelines
     /// <summary>
     /// Default <see cref="PipeWriter"/> and <see cref="PipeReader"/> implementation.
     /// </summary>
-    public sealed partial class Pipe
+    public sealed partial class Pipe<T>
     {
-        private sealed class DefaultPipeWriter : PipeWriter, IValueTaskSource<FlushResult>
+        internal sealed class DefaultPipeWriter : PipeWriter<T>, IValueTaskSource<FlushResult>
         {
-            private readonly Pipe _pipe;
+            internal readonly Pipe<T> _pipe;
 
-            public DefaultPipeWriter(Pipe pipe)
+            public DefaultPipeWriter(Pipe<T> pipe)
             {
                 _pipe = pipe;
             }
@@ -30,11 +30,11 @@ namespace System.IO.Pipelines
 
             public override ValueTask<FlushResult> FlushAsync(CancellationToken cancellationToken = default) => _pipe.FlushAsync(cancellationToken);
 
-            public override void Advance(int bytes) => _pipe.Advance(bytes);
+            public override void Advance(int count) => _pipe.Advance(count);
 
-            public override Memory<byte> GetMemory(int sizeHint = 0) => _pipe.GetMemory(sizeHint);
+            public override Memory<T> GetMemory(int sizeHint = 0) => _pipe.GetMemory(sizeHint);
 
-            public override Span<byte> GetSpan(int sizeHint = 0) => _pipe.GetSpan(sizeHint);
+            public override Span<T> GetSpan(int sizeHint = 0) => _pipe.GetSpan(sizeHint);
 
             public ValueTaskSourceStatus GetStatus(short token) => _pipe.GetFlushAsyncStatus();
 

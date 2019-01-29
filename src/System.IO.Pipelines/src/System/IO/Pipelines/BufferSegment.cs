@@ -8,10 +8,10 @@ using System.Runtime.CompilerServices;
 
 namespace System.IO.Pipelines
 {
-    internal sealed class BufferSegment : ReadOnlySequenceSegment<byte>
+    internal sealed class BufferSegment<T> : ReadOnlySequenceSegment<T>
     {
-        private IMemoryOwner<byte> _memoryOwner;
-        private BufferSegment _next;
+        private IMemoryOwner<T> _memoryOwner;
+        private BufferSegment<T> _next;
         private int _end;
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace System.IO.Pipelines
         /// working memory. The "active" memory is grown when bytes are copied in, End is increased, and Next is assigned. The "active"
         /// memory is shrunk when bytes are consumed, Start is increased, and blocks are returned to the pool.
         /// </summary>
-        public BufferSegment NextSegment
+        public BufferSegment<T> NextSegment
         {
             get => _next;
             set
@@ -47,7 +47,7 @@ namespace System.IO.Pipelines
             }
         }
 
-        public void SetMemory(IMemoryOwner<byte> memoryOwner)
+        public void SetMemory(IMemoryOwner<T> memoryOwner)
         {
             _memoryOwner = memoryOwner;
 
@@ -64,9 +64,9 @@ namespace System.IO.Pipelines
             AvailableMemory = default;
         }
 
-        internal IMemoryOwner<byte> MemoryOwner => _memoryOwner;
+        internal IMemoryOwner<T> MemoryOwner => _memoryOwner;
 
-        public Memory<byte> AvailableMemory { get; private set; }
+        public Memory<T> AvailableMemory { get; private set; }
 
         public int Length => End;
 
@@ -79,7 +79,7 @@ namespace System.IO.Pipelines
             get => AvailableMemory.Length - End;
         }
 
-        public void SetNext(BufferSegment segment)
+        public void SetNext(BufferSegment<T> segment)
         {
             Debug.Assert(segment != null);
             Debug.Assert(Next == null);

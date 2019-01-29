@@ -1,26 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.IO.Pipelines
 {
-    public abstract class PipeReader
+    /// <summary>
+    /// Defines a class that provides access to a read side of pipe.
+    /// </summary>
+    public abstract class PipeReader<T>
     {
         /// <summary>
-        /// Attempt to synchronously read data the <see cref="PipeReader"/>.
+        /// Attempt to synchronously read data the <see cref="PipeReader{T}"/>.
         /// </summary>
-        /// <param name="result">The <see cref="ReadResult"/></param>
+        /// <param name="result">The <see cref="ReadResult{T}"/></param>
         /// <returns>True if data was available, or if the call was canceled or the writer was completed.</returns>
         /// <remarks>If the pipe returns false, there's no need to call <see cref="AdvanceTo(SequencePosition, SequencePosition)"/>.</remarks>
-        public abstract bool TryRead(out ReadResult result);
+        public abstract bool TryRead(out ReadResult<T> result);
 
         /// <summary>
-        /// Asynchronously reads a sequence of bytes from the current <see cref="PipeReader"/>.
+        /// Asynchronously reads a sequence of bytes from the current <see cref="PipeReader{T}"/>.
         /// </summary>
-        /// <returns>A <see cref="ValueTask"/> representing the asynchronous read operation.</returns>
-        public abstract ValueTask<ReadResult> ReadAsync(CancellationToken cancellationToken = default);
+        /// <returns>A <see cref="ValueTask{T}"/> representing the asynchronous read operation.</returns>
+        public abstract ValueTask<ReadResult<T>> ReadAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Moves forward the pipeline's read cursor to after the consumed data.
@@ -44,7 +48,7 @@ namespace System.IO.Pipelines
         public abstract void AdvanceTo(SequencePosition consumed, SequencePosition examined);
 
         /// <summary>
-        /// Cancel to currently pending or if none is pending next call to <see cref="ReadAsync"/>, without completing the <see cref="PipeReader"/>.
+        /// Cancel to currently pending or if none is pending next call to <see cref="ReadAsync"/>, without completing the <see cref="PipeReader{T}"/>.
         /// </summary>
         public abstract void CancelPendingRead();
 
@@ -55,7 +59,7 @@ namespace System.IO.Pipelines
         public abstract void Complete(Exception exception = null);
 
         /// <summary>
-        /// Cancel the pending <see cref="ReadAsync"/> operation. If there is none, cancels next <see cref="ReadAsync"/> operation, without completing the <see cref="PipeWriter"/>.
+        /// Cancel the pending <see cref="ReadAsync"/> operation. If there is none, cancels next <see cref="ReadAsync"/> operation, without completing the <see cref="PipeWriter{T}"/>.
         /// </summary>
         public abstract void OnWriterCompleted(Action<Exception, object> callback, object state);
     }
