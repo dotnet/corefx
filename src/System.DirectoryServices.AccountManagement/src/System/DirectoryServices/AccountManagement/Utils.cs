@@ -45,12 +45,12 @@ namespace System.DirectoryServices.AccountManagement
 
         internal static void ClearBit(ref int value, uint bitmask)
         {
-            value = (int)(((uint)value) & ((uint)(~bitmask)));
+            BitOps.ClearBit(ref value, (int)bitmask);
         }
 
         internal static void SetBit(ref int value, uint bitmask)
         {
-            value = (int)(((uint)value) | ((uint)bitmask));
+            BitOps.InsertBit(ref value, (uint)bitmask);
         }
 
         // {0xa2, 0x3f,...} --> "a23f..."
