@@ -242,7 +242,7 @@ namespace System.Net.Http
             // addition to the highest ID used by the client.
             if (streamId <= 0 || streamId >= _nextStream)
             {
-                throw new Http2ProtocolException(Http2ProtocolErrorCode.StreamClosed);
+                throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
             }
 
             lock (_syncObject)
@@ -268,7 +268,7 @@ namespace System.Net.Http
             {
                 _incomingBuffer.Discard(frameHeader.Length);
 
-                throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                throw new Http2ProtocolException(Http2ProtocolErrorCode.StreamClosed);
             }
 
             // TODO: Figure out how to cache this delegate.
