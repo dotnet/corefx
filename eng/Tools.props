@@ -70,7 +70,7 @@
 
     <Exec Condition="!Exists('$(BuildToolsSemaphore)')"
           Command="$(InitToolsCmdLine) &gt; &quot;$(RepoRoot)init-tools.log&quot;" />
-    <Touch Files="$(BuildToolsSemaphore)" 
+    <Touch Files="$(BuildToolsSemaphore)"
            AlwaysCreate="true" />
     <OnError ExecuteTargets="DumpInitToolsLog" />
 
@@ -105,13 +105,13 @@
           Command="$(DotNetCmd) tool install --tool-path &quot;$(GlobalToolsDir)&quot; %(RepoTool.Identity) --version %(RepoTool.Version) --add-source https:%2F%2Fapi.nuget.org/v3/index.json"
           WorkingDirectory="$(RepoRoot)"
           ContinueOnError="WarnAndContinue" />
-    
+
   </Target>
 
   <Target Name="DumpInitToolsLog">
 
     <Message Text="Init-tools failed dumping log file $(RepoRoot)init-tools.log" />
-    <Message Condition="Exists('$(RepoRoot)init-tools.log')" 
+    <Message Condition="Exists('$(RepoRoot)init-tools.log')"
              Text="$([System.IO.File]::ReadAllText('$(RepoRoot)init-tools.log'))" />
 
   </Target>
