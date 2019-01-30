@@ -1,4 +1,4 @@
-# Guide to porting from Newtonsoft.Json to System.Text.Json
+# Guide to Porting from Newtonsoft.Json to System.Text.Json
 
 ## Overview
 
@@ -84,7 +84,7 @@ jsonWriter.WriteNumber(PropertyNameBytes, 42, escape: false);
 // ...
 ```
 
-### Using a read-only JsonDocument
+### Using a Read-only JsonDocument
 
 * `JsonDocument` provides the ability to parse JSON data and build a **read-only** Document Object Model (DOM) with low allocations for common payload sizes (i.e. < 1 MB). It does this by building an in-memory view of the data into a pooled buffer. Therefore, unlike `JObject`/`JArray`, this type is `IDisposable` and needs to be used inside a using block. Additionally, since the DOM is read-only, it doesn't provide the ability to add/remove JSON elements. If your scenario requires a writable DOM or if you need to build up a JSON payload from scratch, continue to use `Newtonsoft.Json` and `JObject`/`JArray` since that is currently an unsupported feature in the new stack.
   - `JsonDocument` exposes the `RootElement` as a property of type `JsonElement` which is the type that encompasses any JSON element (this concept is represented by dedicated types like `JObject`/`JArray`/`JToken`/etc. in `Newtonsoft.Json`). `JsonElement` is what you can search and enumerate over, and you can use the found `JsonElement` to materialize JSON elements into .NET types.
@@ -121,7 +121,7 @@ static double ParseJson()
 }
 ```
 
-### Multi-Targeting various TFMs
+### Multi-Targeting Various TFMs
 
 * If possible, you should target .NET Core 3.0 and get the in-box `System.Text.Json` APIs. However, if you need to support netstandard2.0 (for example, if you are a library developer), you can try to use the **unsupported** source package (see guidance [here](https://github.com/dotnet/corefx/tree/master/src/System.Text.Json/source_package)). If, however, you need to target an older platform or standard, or for some other reason would like to continue to use `Newtonsoft.Json` on certain platforms, you can try to multi-target and have two implementations. However, this is not trivial and would require some `#ifdefs` and source duplication especially if you heavily rely on features that only exist in `Newtonsoft.Json`. One pattern to try to share as much code as possible is to create a `ref struct` wrapper around types like `Utf8JsonReader`/`JsonTextReader` and `Utf8JsonWriter`/`JsonTextWriter` to unify the public surface area used while isolating the behavioral differences. This way you can isolate the changes mainly to the construction of the type (along with passing the new type around by ref). In fact, that is the pattern we currently follow in [core-setup](https://github.com/dotnet/core-setup):
   - [UnifiedJsonReader.Utf8JsonReader.cs](https://github.com/dotnet/core-setup/blob/45f9401bf62faf0d3446cfd8681d35cc3487367a/src/managed/Microsoft.Extensions.DependencyModel/UnifiedJsonReader.Utf8JsonReader.cs)
@@ -129,7 +129,7 @@ static double ParseJson()
   - [UnifiedJsonWriter.Utf8JsonWriter.cs](https://github.com/dotnet/core-setup/blob/45f9401bf62faf0d3446cfd8681d35cc3487367a/src/managed/Microsoft.Extensions.DependencyModel/UnifiedJsonWriter.Utf8JsonWriter.cs)
   - [UnifiedJsonWriter.JsonTextWriter.cs](https://github.com/dotnet/core-setup/blob/45f9401bf62faf0d3446cfd8681d35cc3487367a/src/managed/Microsoft.Extensions.DependencyModel/UnifiedJsonWriter.JsonTextWriter.cs)
 
-## Discrepancies between Newtonsoft.Json and System.Text.Json
+## Discrepancies Between Newtonsoft.Json and System.Text.Json
 
 ### Support for JSON RFC
 
