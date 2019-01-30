@@ -523,6 +523,44 @@ namespace System.Diagnostics.Tests
             RunTestAsSudo(TestStartWithUserName, GetCurrentRealUserName());
         }
 
+        /// <summary>
+        /// Tests when running as root and starting a new process as a normal user,
+        /// the new process doesn't have elevated privileges.
+        /// </summary>
+        [Fact]
+        [OuterLoop("Needs sudo access")]
+        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
+        public void TestCheckChildProcessUserIds()
+        {
+            Func<string, string, string, string, int> runsAsRoot = (string username, string arg1, string arg2, string arg3) =>
+            {
+                Func<string, string, string, int> runsAsUser = (string uid, string gid, string groupsJoined) =>
+                {
+                    uint[] groups = groupsJoined.Split(',').Select(s => uint.Parse(s)).ToArray();
+
+                    Assert.Equal(uid, getuid().ToString());
+                    Assert.Equal(gid, getgid().ToString());
+                    Assert.Equal(groups, GetGroups());
+
+                    return SuccessExitCode;
+                };
+
+                var invokeOptions = new RemoteInvokeOptions();
+                invokeOptions.StartInfo.UserName = username;
+                using (RemoteInvokeHandle handle = RemoteInvoke(runsAsUser, arg1, arg2, arg3, invokeOptions))
+                { }
+
+                return SuccessExitCode;
+            };
+
+            string currentUid = getuid().ToString();
+            string currentGid = getgid().ToString();
+            string currentGroups = string.Join(",", GetGroups());
+            using (RemoteInvokeHandle handle = RemoteInvoke(runsAsRoot, GetCurrentRealUserName(), currentUid, currentGid, currentGroups,
+                                                            new RemoteInvokeOptions { RunAsSudo = true }))
+            { }
+        }
+
         public static int TestStartWithUserName(string realUserName)
         {
             Assert.NotNull(realUserName);
@@ -815,6 +853,36 @@ namespace System.Diagnostics.Tests
 
         [DllImport("libc")]
         private static extern uint geteuid();
+
+        [DllImport("libc")]
+        private static extern uint getuid();
+
+        [DllImport("libc")]
+        private static extern uint getgid();
+
+        [DllImport("libc", SetLastError = true)]
+        private unsafe static extern int getgroups(int size, uint* list);
+
+        private unsafe static uint[] GetGroups()
+        {
+            int maxSize = 128;
+            Span<uint> groups = stackalloc uint[maxSize];
+            fixed (uint* pGroups = groups)
+            {
+                int rv = getgroups(maxSize, pGroups);
+                if (rv == -1)
+                {
+                    // If this throws with EINVAL, maxSize should be increased.
+                    throw new Win32Exception();
+                }
+
+                uint[] groupsArray = groups.Slice(0, rv).ToArray();
+                // Order the groups, so we can use them with xUnit's Assert.Equal.
+                Array.Sort(groupsArray);
+
+                return groupsArray;
+            }
+        }
 
         [DllImport("libc")]
         private static extern int seteuid(uint euid);

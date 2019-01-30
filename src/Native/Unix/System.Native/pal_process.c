@@ -9,6 +9,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <grp.h>
 #include <limits.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -156,6 +157,8 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
                                       int32_t setCredentials,
                                       uint32_t userId,
                                       uint32_t groupId,
+                                      uint32_t* groups,
+                                      int32_t groupsLength,
                                       int32_t* childPid,
                                       int32_t* stdinFd,
                                       int32_t* stdoutFd,
@@ -253,7 +256,9 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
 
         if (setCredentials)
         {
-            if (setgid(groupId) == -1 || setuid(userId) == -1)
+            if (setgroups(Int32ToSizeT(groupsLength), groups) == -1 ||
+                setgid(groupId) == -1 ||
+                setuid(userId) == -1)
             {
                 ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno);
             }

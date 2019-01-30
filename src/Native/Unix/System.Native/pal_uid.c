@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <grp.h>
 #include <pwd.h>
 
 static int32_t ConvertNativePasswdToPalPasswd(int error, struct passwd* nativePwd, struct passwd* result, Passwd* pwd)
@@ -86,7 +87,44 @@ uint32_t SystemNative_GetEGid()
     return getegid();
 }
 
-int32_t SystemNative_SetEUid(uid_t euid)
+int32_t SystemNative_SetEUid(uint32_t euid)
 {
     return seteuid(euid);
+}
+
+uint32_t SystemNative_GetUid()
+{
+    return getuid();
+}
+
+int32_t SystemNative_GetGroupList(const char* name, uint32_t group, uint32_t* groups, int32_t* ngroups)
+{
+    assert(name != NULL);
+    assert(groups != NULL);
+    assert(ngroups != NULL);
+    assert(*ngroups >= 0);
+
+    // The man page of getgrouplist doesn't explicitly mention the use of errno on error.
+    // glibc and musl implementation look like they return -1 for functions that fail with errno set.
+    // To be safe, we'll assume errno is set on error and handle EINTR.
+    int rv;
+    int groupsAvailable;
+    do
+    {
+        errno = 0;
+        groupsAvailable = *ngroups;
+
+        rv = getgrouplist(name, group, groups, &groupsAvailable);
+
+        if (rv == -1 && groupsAvailable > *ngroups)
+        {
+            // group list is too small, return available groups.
+            *ngroups = groupsAvailable;
+            return rv;
+        }
+    } while (rv == -1 && errno == EINTR);
+
+    *ngroups = rv >= 0 ? groupsAvailable : 0;
+
+    return rv;
 }
