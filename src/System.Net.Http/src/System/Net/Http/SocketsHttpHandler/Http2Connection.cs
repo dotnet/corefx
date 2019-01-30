@@ -242,7 +242,7 @@ namespace System.Net.Http
             // addition to the highest ID used by the client.
             if (streamId <= 0 || streamId >= _nextStream)
             {
-                throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                throw new Http2ProtocolException(Http2ProtocolErrorCode.StreamClosed);
             }
 
             lock (_syncObject)
@@ -344,7 +344,7 @@ namespace System.Net.Http
             {
                 _incomingBuffer.Discard(frameHeader.Length);
 
-                throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                throw new Http2ProtocolException(Http2ProtocolErrorCode.StreamClosed);
             }
 
             ReadOnlySpan<byte> frameData = GetFrameData(_incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length), hasPad: frameHeader.PaddedFlag, hasPriority: false);
