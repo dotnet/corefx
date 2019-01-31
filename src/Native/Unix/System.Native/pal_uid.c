@@ -117,8 +117,13 @@ int32_t SystemNative_GetGroupList(const char* name, uint32_t group, uint32_t* gr
         errno = 0;
         groupsAvailable = *ngroups;
 
-        // on some platforms gid_t is signed, so we need to cast it
-        rv = getgrouplist(name, group, (gid_t*)groups, &groupsAvailable);
+#ifdef __APPLE__
+        // On OSX groups is passed as a signed int.
+        int* _groups = (int*)groups;
+#else
+        gid_t* _groups = groups;
+#endif
+        rv = getgrouplist(name, group, _groups, &groupsAvailable);
 
         if (rv == -1 && groupsAvailable > *ngroups)
         {
