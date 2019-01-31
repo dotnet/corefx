@@ -118,12 +118,11 @@ int32_t SystemNative_GetGroupList(const char* name, uint32_t group, uint32_t* gr
         groupsAvailable = *ngroups;
 
 #ifdef __APPLE__
-        // On OSX groups is passed as a signed int.
-        int* _groups = (int*)groups;
+        // On OSX groups are passed as a signed int.
+        rv = getgrouplist(name, (int)group, (int*)groups, &groupsAvailable);
 #else
-        gid_t* _groups = groups;
+        rv = getgrouplist(name, group, groups, &groupsAvailable);
 #endif
-        rv = getgrouplist(name, group, _groups, &groupsAvailable);
 
         if (rv == -1 && groupsAvailable > *ngroups)
         {
