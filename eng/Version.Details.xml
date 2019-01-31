@@ -14,17 +14,17 @@
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>988132f2a89decd7203d665d26df53bc1c8f9eec</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview-27330-71">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview-27330-72">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>81e12aaff1d8671f1e7709afa3183458eaa79673</Sha>
+      <Sha>1b43bd8139d053e24ec51c193054555e3352371a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.0.0-preview-27330-71">
+    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.0.0-preview-27330-72">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>81e12aaff1d8671f1e7709afa3183458eaa79673</Sha>
+      <Sha>1b43bd8139d053e24ec51c193054555e3352371a</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.0.0-preview-27330-71">
+    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.0.0-preview-27330-72">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>81e12aaff1d8671f1e7709afa3183458eaa79673</Sha>
+      <Sha>1b43bd8139d053e24ec51c193054555e3352371a</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19080.6">
       <Uri>https://github.com/dotnet/arcade</Uri>
