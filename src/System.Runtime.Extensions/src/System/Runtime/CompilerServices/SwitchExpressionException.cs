@@ -12,7 +12,6 @@ namespace System.Runtime.CompilerServices
     /// The exception optionally contains an object representing the unmatched value.
     /// </summary>
     [Serializable]
-    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class SwitchExpressionException : InvalidOperationException
     {
         public SwitchExpressionException()
@@ -27,10 +26,6 @@ namespace System.Runtime.CompilerServices
         private SwitchExpressionException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            if (info == null)
-            {
-                throw new ArgumentNullException(nameof(info));
-            }
             UnmatchedValue = info.GetValue(nameof(UnmatchedValue), typeof(object));
         }
 
@@ -39,26 +34,27 @@ namespace System.Runtime.CompilerServices
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
-            if (info == null)
+            if (UnmatchedValue is null) 
             {
-                throw new ArgumentNullException(nameof(info));
+                info.AddValue(nameof(UnmatchedValue), null, typeof(object));
             }
-            info.AddValue(nameof(UnmatchedValue), UnmatchedValue, typeof(object));
+            else
+            {
+                info.AddValue(nameof(UnmatchedValue), UnmatchedValue.GetType().IsSerializable ? 
+                    UnmatchedValue : UnmatchedValue.ToString(), typeof(object));
+            }
         }
 
         public override string Message
         {
             get
             {
-                string s = base.Message;
-                if (UnmatchedValue != null)
+                if (UnmatchedValue is null) 
                 {
-                    string valueMessage = SR.Format(SR.SwitchExpressionException_UnmatchedValue, UnmatchedValue?.ToString());
-                    if (s == null)
-                        return valueMessage;
-                    return s + Environment.NewLine + valueMessage;
+                    return base.Message;
                 }
-                return s;
+                string valueMessage = SR.Format(SR.SwitchExpressionException_UnmatchedValue, UnmatchedValue.ToString());
+                return base.Message + Environment.NewLine + valueMessage;
             }
         }
     }
