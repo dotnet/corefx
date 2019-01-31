@@ -117,7 +117,8 @@ int32_t SystemNative_GetGroupList(const char* name, uint32_t group, uint32_t* gr
         errno = 0;
         groupsAvailable = *ngroups;
 
-        rv = getgrouplist(name, group, groups, &groupsAvailable);
+        // on some platforms gid_t is signed, so we need to cast it
+        rv = getgrouplist(name, group, (gid_t*)groups, &groupsAvailable);
 
         if (rv == -1 && groupsAvailable > *ngroups)
         {
