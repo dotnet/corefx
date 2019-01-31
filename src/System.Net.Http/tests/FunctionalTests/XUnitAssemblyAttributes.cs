@@ -4,6 +4,5 @@
 
 using Xunit;
 
-// [ActiveIssue(20103)]: Disabling parallel execution of HttpListener tests
-// until all of the hangs can be addressed
+// [ActiveIssue(35002)]: Disabling parallel execution of System.Net.Http.FunctionalTests
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly, DisableTestParallelization = true, MaxParallelThreads = 1)]
