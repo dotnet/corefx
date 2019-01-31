@@ -295,6 +295,9 @@
   <data name="PlatformNotSupported_Principal" xml:space="preserve">
     <value>Windows Principal functionality is not supported on this platform.</value>
   </data>
+  <data name="SwitchExpressionException_UnmatchedValue" xml:space="preserve">
+    <value>Unmatched value was {0}.</value>
+  </data>
   <data name="IO_PathTooLong_Path" xml:space="preserve">
     <value>The path '{0}' is too long, or a component of the specified path is too long.</value>
   </data>

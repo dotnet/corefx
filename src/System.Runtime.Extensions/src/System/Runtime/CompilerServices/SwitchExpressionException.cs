@@ -13,29 +13,53 @@ namespace System.Runtime.CompilerServices
     /// </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public sealed class SwitchExpressionException : InvalidOperationException//, ISerializable
+    public sealed class SwitchExpressionException : InvalidOperationException
     {
         public SwitchExpressionException()
             : base(SR.Arg_SwitchExpressionException) { }
 
         public SwitchExpressionException(object unmatchedValue)
-            : base()
+            : this()
         {
             UnmatchedValue = unmatchedValue;
         }
 
-        private SwitchExpressionException(SerializationInfo info, StreamingContext context) 
+        private SwitchExpressionException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            info.AddValue(nameof(UnmatchedValue), UnmatchedValue, typeof(object));
+            if (info == null)
+            {
+                throw new ArgumentNullException(nameof(info));
+            }
+            UnmatchedValue = info.GetValue(nameof(UnmatchedValue), typeof(object));
         }
 
         public object UnmatchedValue { get; }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-           base.GetObjectData(info, context);
+            base.GetObjectData(info, context);
+            if (info == null)
+            {
+                throw new ArgumentNullException(nameof(info));
+            }
             info.AddValue(nameof(UnmatchedValue), UnmatchedValue, typeof(object));
+        }
+
+        public override string Message
+        {
+            get
+            {
+                string s = base.Message;
+                if (UnmatchedValue != null)
+                {
+                    string valueMessage = SR.Format(SR.SwitchExpressionException_UnmatchedValue, UnmatchedValue?.ToString());
+                    if (s == null)
+                        return valueMessage;
+                    return s + Environment.NewLine + valueMessage;
+                }
+                return s;
+            }
         }
     }
 }

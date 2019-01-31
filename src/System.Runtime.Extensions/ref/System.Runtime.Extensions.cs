@@ -1844,7 +1844,6 @@ namespace System.Runtime
 }
 namespace System.Runtime.CompilerServices
 {
-    [Serializable]
     public sealed class SwitchExpressionException : System.InvalidOperationException
     {
         public SwitchExpressionException() { }

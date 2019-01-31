@@ -24,7 +24,7 @@ namespace System.Runtime.CompilerServices.Tests
             var ex = new SwitchExpressionException(message);
 
             Assert.NotEqual(message, ex.Message);
-            Assert.Equal(message, ex.UnmatchedValue);
+            Assert.Same(message, ex.UnmatchedValue);
         }
 
         [Fact]
@@ -32,16 +32,23 @@ namespace System.Runtime.CompilerServices.Tests
         {
             var ex = new SwitchExpressionException(34);
             Assert.Equal(34, ex.UnmatchedValue);
+            Assert.Contains(ex.UnmatchedValue.ToString(), ex.Message);
 
             var data = new byte[] { 1, 2, 3 };
             ex = new SwitchExpressionException(data);
-            Assert.Equal(data, ex.UnmatchedValue);
+            Assert.Same(data, ex.UnmatchedValue);
+            Assert.Contains(ex.UnmatchedValue.ToString(), ex.Message);
 
             ex = new SwitchExpressionException(true);
             Assert.Equal(true, ex.UnmatchedValue);
+            Assert.Contains(ex.UnmatchedValue.ToString(), ex.Message);
 
             ex = new SwitchExpressionException("34");
-            Assert.Equal("34", ex.UnmatchedValue);
+            Assert.Same("34", ex.UnmatchedValue);
+            Assert.Contains(ex.UnmatchedValue.ToString(), ex.Message);
+
+            ex = new SwitchExpressionException(null);
+            Assert.Null(ex.UnmatchedValue);
         }
     }
 }
