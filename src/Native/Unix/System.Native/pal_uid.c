@@ -132,7 +132,7 @@ int32_t SystemNative_GetGroupList(const char* name, uint32_t group, uint32_t* gr
         }
     } while (rv == -1 && errno == EINTR);
 
-    *ngroups = rv >= 0 ? groupsAvailable : 0;
+    *ngroups = rv >= 0 ? groupsAvailable : -1;
 
     return rv;
 }
