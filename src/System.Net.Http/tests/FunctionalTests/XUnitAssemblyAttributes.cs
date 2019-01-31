@@ -4,5 +4,5 @@
 
 using Xunit;
 
-// [ActiveIssue(35002)]: Disabling parallel execution of System.Net.Http.FunctionalTests
-[assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly, DisableTestParallelization = true, MaxParallelThreads = 1)]
+// [ActiveIssue(35002)]: Disable parallel execution of System.Net.Http.FunctionalTests on UAP test runs
+[assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly, DisableTestParallelization = true)]
