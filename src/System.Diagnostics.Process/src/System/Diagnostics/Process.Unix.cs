@@ -301,10 +301,7 @@ namespace System.Diagnostics
             uint[] groups = null;
             if (setCredentials)
             {
-                (userId, groupId, groups) = GetUserAndGroupIds(startInfo);
-                // We can get permission errors when setting credentials to ourself,
-                // so we only set credentials when we need to run as a different user.
-                setCredentials = userId != Interop.Sys.GetUid();
+                (userId, groupId, groups, setCredentials) = GetUserAndGroupIds(startInfo);
             }
 
             if (startInfo.UseShellExecute)
@@ -779,10 +776,11 @@ namespace System.Diagnostics
             return _waitStateHolder._state;
         }
 
-        private static (uint userId, uint groupId, uint[] groups) GetUserAndGroupIds(ProcessStartInfo startInfo)
+        private static (uint userId, uint groupId, uint[] groups, bool setCredentials) GetUserAndGroupIds(ProcessStartInfo startInfo)
         {
             Debug.Assert(!string.IsNullOrEmpty(startInfo.UserName));
 
+            uint[] groups = null;
             (uint? userId, uint? groupId) = GetUserAndGroupIds(startInfo.UserName);
 
             Debug.Assert(userId.HasValue == groupId.HasValue, "userId and groupId both need to have values, or both need to be null.");
@@ -791,13 +789,20 @@ namespace System.Diagnostics
                 throw new Win32Exception(SR.Format(SR.UserDoesNotExist, startInfo.UserName));
             }
 
-            uint[] groups = Interop.Sys.GetGroupList(startInfo.UserName, groupId.Value);
-            if (groups == null)
+            // We can get permission errors when setting credentials to ourself,
+            // so we only set credentials when we need to run as a different user.
+            bool setCredentials = userId.Value != Interop.Sys.GetUid();
+
+            if (setCredentials)
             {
-                throw new Win32Exception(SR.Format(SR.UserGroupsCannotBeDetermined, startInfo.UserName));
+                groups = Interop.Sys.GetGroupList(startInfo.UserName, groupId.Value);
+                if (groups == null)
+                {
+                    throw new Win32Exception(SR.Format(SR.UserGroupsCannotBeDetermined, startInfo.UserName));
+                }
             }
 
-            return (userId.Value, groupId.Value, groups);
+            return (userId.Value, groupId.Value, groups, setCredentials);
         }
 
         private unsafe static (uint? userId, uint? groupId) GetUserAndGroupIds(string userName)

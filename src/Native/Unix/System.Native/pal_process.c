@@ -256,7 +256,12 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
 
         if (setCredentials)
         {
-            if (setgroups(Int32ToSizeT(groupsLength), groups) == -1 ||
+#ifdef __linux__
+            size_t platformGroupsLength = Int32ToSizeT(groupsLength);
+#else // BSD
+            int platformGroupsLength = groupsLength;
+#endif
+            if (setgroups(platformGroupsLength, groups) == -1 ||
                 setgid(groupId) == -1 ||
                 setuid(userId) == -1)
             {

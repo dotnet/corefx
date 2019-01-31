@@ -530,7 +530,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         [OuterLoop("Needs sudo access")]
         [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
-        public void TestCheckChildProcessUserIds()
+        public void TestCheckChildProcessUserAndGroupIds()
         {
             Func<string, string, string, string, int> runsAsRoot = (string username, string arg1, string arg2, string arg3) =>
             {
@@ -545,6 +545,10 @@ namespace System.Diagnostics.Tests
                     return SuccessExitCode;
                 };
 
+                // Verify we are root
+                Assert.Equal(0U, getuid());
+
+                // Start as username
                 var invokeOptions = new RemoteInvokeOptions();
                 invokeOptions.StartInfo.UserName = username;
                 using (RemoteInvokeHandle handle = RemoteInvoke(runsAsUser, arg1, arg2, arg3, invokeOptions))

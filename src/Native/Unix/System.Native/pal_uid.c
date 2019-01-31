@@ -14,6 +14,9 @@
 #include <grp.h>
 #include <pwd.h>
 
+c_static_assert(sizeof(gid_t) == sizeof(uint32_t));
+c_static_assert(sizeof(uid_t) == sizeof(uint32_t));
+
 static int32_t ConvertNativePasswdToPalPasswd(int error, struct passwd* nativePwd, struct passwd* result, Passwd* pwd)
 {
     // positive error number returned -> failure other than entry-not-found

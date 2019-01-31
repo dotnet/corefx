@@ -11,7 +11,13 @@ internal static partial class Interop
     {
         internal unsafe static uint[] GetGroupList(string userName, uint primaryGroupId)
         {
-            Span<uint> groups = stackalloc uint[64];
+            const int InitialGroupsLength =
+#if DEBUG
+                1;
+#else
+                64;
+#endif
+            Span<uint> groups = stackalloc uint[InitialGroupsLength];
             do
             {
                 int rv;
@@ -28,7 +34,7 @@ internal static partial class Interop
                 else if (rv == -1 && ngroups > groups.Length)
                 {
                     // increase buffer size
-                    groups = new uint[groups.Length * 2];
+                    groups = new uint[ngroups];
                 }
                 else
                 {
