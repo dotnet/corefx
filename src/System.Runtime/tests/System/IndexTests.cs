@@ -14,13 +14,47 @@ namespace System.Tests
         {
             Index index = new Index(1, fromEnd: false);
             Assert.Equal(1, index.Value);
-            Assert.False(index.FromEnd);
+            Assert.False(index.IsFromEnd);
 
             index = new Index(11, fromEnd: true);
             Assert.Equal(11, index.Value);
-            Assert.True(index.FromEnd);
+            Assert.True(index.IsFromEnd);
+
+            index = Index.Start;
+            Assert.Equal(0, index.Value);
+            Assert.False(index.IsFromEnd);
+
+            index = Index.End;
+            Assert.Equal(0, index.Value);
+            Assert.True(index.IsFromEnd);
+
+            index = Index.FromStart(3);
+            Assert.Equal(3, index.Value);
+            Assert.False(index.IsFromEnd);
+
+            index = Index.FromEnd(10);
+            Assert.Equal(10, index.Value);
+            Assert.True(index.IsFromEnd);
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => new Index(-1, fromEnd: false));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => Index.FromStart(-3));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => Index.FromEnd(-1));
+        }
+
+        [Fact]
+        public static void GetOffsetTest()
+        {
+            Index index = Index.FromStart(3);
+            Assert.Equal(3, index.GetOffset(3));
+            Assert.Equal(3, index.GetOffset(10));
+            Assert.Equal(3, index.GetOffset(20));
+            Assert.Throws<ArgumentException>(() => index.GetOffset(2));
+
+            index = Index.FromEnd(3);
+            Assert.Equal(0, index.GetOffset(3));
+            Assert.Equal(7, index.GetOffset(10));
+            Assert.Equal(17, index.GetOffset(20));
+            Assert.Throws<ArgumentException>(() => index.GetOffset(2));
         }
 
         [Fact]
@@ -28,7 +62,9 @@ namespace System.Tests
         {
             Index index = 10;
             Assert.Equal(10, index.Value);
-            Assert.False(index.FromEnd);
+            Assert.False(index.IsFromEnd);
+
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => index = -10 );
         }
 
         [Fact]
