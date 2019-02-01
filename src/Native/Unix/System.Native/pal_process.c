@@ -163,20 +163,28 @@ static int SetGroups(uint32_t* userGroups, int32_t userGroupsLength, uint32_t* p
         int processGroupsLength = getgroups(userGroupsLength, processGroups);
         if (processGroupsLength >= 0)
         {
-            errno = 0;
-            rv = 0;
-            for (int i = 0; i < processGroupsLength; i++)
+            if (userGroupsLength == 0)
             {
-                bool isUserGroup = false;
-                for (int j = 0; j < userGroupsLength && !isUserGroup; j++)
+                // calling setgroups with zero size returns number of groups.
+                rv = processGroupsLength == 0 ? 0 : -1;
+            }
+            else
+            {
+                errno = 0;
+                rv = 0;
+                for (int i = 0; i < processGroupsLength; i++)
                 {
-                    isUserGroup = processGroups[i] == userGroups[j];
-                }
-                if (!isUserGroup)
-                {
-                    errno = EPERM;
-                    rv = -1;
-                    break;
+                    bool isUserGroup = false;
+                    for (int j = 0; j < userGroupsLength && !isUserGroup; j++)
+                    {
+                        isUserGroup = processGroups[i] == userGroups[j];
+                    }
+                    if (!isUserGroup)
+                    {
+                        errno = EPERM;
+                        rv = -1;
+                        break;
+                    }
                 }
             }
         }
@@ -212,7 +220,7 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
 
     // Validate arguments
     if (NULL == filename || NULL == argv || NULL == envp || NULL == stdinFd || NULL == stdoutFd ||
-        NULL == stderrFd || NULL == childPid)
+        NULL == stderrFd || NULL == childPid || (groupsLength > 0 && groups == NULL))
     {
         assert(false && "null argument.");
         errno = EINVAL;
@@ -228,7 +236,7 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         goto done;
     }
 
-    if (setCredentials)
+    if (setCredentials && groupsLength > 0)
     {
         getGroupsBuffer = malloc(sizeof(uint32_t) * Int32ToSizeT(groupsLength));
         if (getGroupsBuffer == NULL)
