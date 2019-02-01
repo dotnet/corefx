@@ -50,18 +50,17 @@ namespace System.Text.Json
             _tokenType = ToTokenType(valueType);
         }
 
-        private static JsonTokenType ToTokenType(JsonValueType valueType)
+        private JsonTokenType ToTokenType(JsonValueType valueType)
         {
             switch (valueType)
             {
                 case JsonValueType.Undefined:
                     return JsonTokenType.None;
                 case JsonValueType.Array:
-                    return JsonTokenType.EndArray;
+                    return JsonTokenType.StartObject;
                 case JsonValueType.Object:
-                    return JsonTokenType.EndObject;
+                    return JsonTokenType.StartArray;
                 case JsonValueType.String:
-                    return JsonTokenType.EndObject;
                 case JsonValueType.Number:
                 case JsonValueType.True:
                 case JsonValueType.False:

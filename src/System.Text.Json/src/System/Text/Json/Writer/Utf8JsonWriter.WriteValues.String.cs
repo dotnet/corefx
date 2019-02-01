@@ -24,12 +24,15 @@ namespace System.Text.Json
         public void WriteStringValue(string value, bool escape = true)
            => WriteStringValue(value.AsSpan(), escape);
 
+        // TODO: Move to separate file
         public void WriteElementValue(JsonElement value)
         {
             ValidateWritingValue();
             ReadOnlySpan<char> escapedValue = value.GetRawText().AsSpan();
 
             int idx = 0;
+            WriteListSeparator(ref idx);
+
             ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(escapedValue);
             int partialConsumed = 0;
             while (true)
