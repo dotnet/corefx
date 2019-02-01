@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace System.Text.Json
 {
@@ -22,6 +23,31 @@ namespace System.Text.Json
         /// </exception>
         public void WriteStringValue(string value, bool escape = true)
            => WriteStringValue(value.AsSpan(), escape);
+
+        public void WriteElementValue(JsonElement value)
+        {
+            ValidateWritingValue();
+            ReadOnlySpan<char> escapedValue = value.GetRawText().AsSpan();
+
+            int idx = 0;
+            ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(escapedValue);
+            int partialConsumed = 0;
+            while (true)
+            {
+                OperationStatus status = JsonWriterHelper.ToUtf8(byteSpan.Slice(partialConsumed), _buffer.Slice(idx), out int consumed, out int written);
+                idx += written;
+                if (status == OperationStatus.Done)
+                {
+                    break;
+                }
+                partialConsumed += consumed;
+                AdvanceAndGrow(ref idx);
+            }
+            Advance(idx);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = ToTokenType(value.Type);
+        }
 
         /// <summary>
         /// Writes the UTF-16 text value (as a JSON string) as an element of a JSON array.
