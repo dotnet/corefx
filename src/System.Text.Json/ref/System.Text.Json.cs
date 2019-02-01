@@ -206,6 +206,7 @@ namespace System.Text.Json
         public void WriteCommentValue(System.ReadOnlySpan<char> value, bool escape = true) { }
         public void WriteCommentValue(string value, bool escape = true) { }
         public void WriteElement(string propertyName, System.Text.Json.JsonElement value, bool escape = true) { }
+        public void WriteElement(System.ReadOnlySpan<char> propertyName, System.Text.Json.JsonElement value, bool escape = true) { }
         public void WriteElementValue(System.Text.Json.JsonElement value) { }
         public void WriteEndArray() { }
         public void WriteEndObject() { }
