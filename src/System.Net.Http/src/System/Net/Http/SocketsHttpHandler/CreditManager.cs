@@ -100,11 +100,12 @@ namespace System.Net.Http
                         waiter.TokenRegistration.Dispose();
 
                         int granted = Math.Min(waiter.Amount, _current);
+                        _current -= granted;
 
                         // Ensure that we grant credit only if the task has not been cancelled.
-                        if (waiter.TaskCompletionSource.TrySetResult(granted))
+                        if (!waiter.TaskCompletionSource.TrySetResult(granted))
                         {
-                            _current -= granted;
+                            _current += granted;
                         }
                     }
                 }
