@@ -301,7 +301,7 @@ namespace System.Diagnostics
             uint[] groups = null;
             if (setCredentials)
             {
-                (userId, groupId, groups, setCredentials) = GetUserAndGroupIds(startInfo);
+                (userId, groupId, groups) = GetUserAndGroupIds(startInfo);
             }
 
             if (startInfo.UseShellExecute)
@@ -776,7 +776,7 @@ namespace System.Diagnostics
             return _waitStateHolder._state;
         }
 
-        private static (uint userId, uint groupId, uint[] groups, bool setCredentials) GetUserAndGroupIds(ProcessStartInfo startInfo)
+        private static (uint userId, uint groupId, uint[] groups) GetUserAndGroupIds(ProcessStartInfo startInfo)
         {
             Debug.Assert(!string.IsNullOrEmpty(startInfo.UserName));
 
@@ -789,20 +789,13 @@ namespace System.Diagnostics
                 throw new Win32Exception(SR.Format(SR.UserDoesNotExist, startInfo.UserName));
             }
 
-            // We can get permission errors when setting credentials to ourself,
-            // so we only set credentials when we need to run as a different user.
-            bool setCredentials = userId.Value != Interop.Sys.GetUid();
-
-            if (setCredentials)
+            groups = Interop.Sys.GetGroupList(startInfo.UserName, groupId.Value);
+            if (groups == null)
             {
-                groups = Interop.Sys.GetGroupList(startInfo.UserName, groupId.Value);
-                if (groups == null)
-                {
-                    throw new Win32Exception(SR.Format(SR.UserGroupsCannotBeDetermined, startInfo.UserName));
-                }
+                throw new Win32Exception(SR.Format(SR.UserGroupsCannotBeDetermined, startInfo.UserName));
             }
 
-            return (userId.Value, groupId.Value, groups, setCredentials);
+            return (userId.Value, groupId.Value, groups);
         }
 
         private unsafe static (uint? userId, uint? groupId) GetUserAndGroupIds(string userName)

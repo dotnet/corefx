@@ -147,6 +147,44 @@ static void ExitChild(int pipeToParent, int error)
     _exit(error != 0 ? error : EXIT_FAILURE);
 }
 
+static int SetGroups(uint32_t* userGroups, int32_t userGroupsLength, uint32_t* processGroups)
+{
+#ifdef __linux__
+    size_t platformGroupsLength = Int32ToSizeT(userGroupsLength);
+#else // BSD
+    int platformGroupsLength = userGroupsLength;
+#endif
+    int rv = setgroups(platformGroupsLength, userGroups);
+
+    // In case we don't have permission to call setgroups, we fall back to using the current
+    // process' groups, if they are a subset if the user groups.
+    if (rv == -1 && errno == EPERM)
+    {
+        int processGroupsLength = getgroups(userGroupsLength, processGroups);
+        if (processGroupsLength >= 0)
+        {
+            errno = 0;
+            rv = 0;
+            for (int i = 0; i < processGroupsLength; i++)
+            {
+                bool isUserGroup = false;
+                for (int j = 0; j < userGroupsLength && !isUserGroup; j++)
+                {
+                    isUserGroup = processGroups[i] == userGroups[j];
+                }
+                if (!isUserGroup)
+                {
+                    errno = EPERM;
+                    rv = -1;
+                    break;
+                }
+            }
+        }
+    }
+
+    return rv;
+}
+
 int32_t SystemNative_ForkAndExecProcess(const char* filename,
                                       char* const argv[],
                                       char* const envp[],
@@ -170,6 +208,7 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     bool success = true;
     int stdinFds[2] = {-1, -1}, stdoutFds[2] = {-1, -1}, stderrFds[2] = {-1, -1}, waitForChildToExecPipe[2] = {-1, -1};
     int processId = -1;
+    uint32_t* getGroupsBuffer = NULL;
 
     // Validate arguments
     if (NULL == filename || NULL == argv || NULL == envp || NULL == stdinFd || NULL == stdoutFd ||
@@ -187,6 +226,16 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         errno = EINVAL;
         success = false;
         goto done;
+    }
+
+    if (setCredentials)
+    {
+        getGroupsBuffer = malloc(sizeof(uint32_t) * Int32ToSizeT(groupsLength));
+        if (getGroupsBuffer == NULL)
+        {
+            success = false;
+            goto done;
+        }
     }
 
     // Make sure we can find and access the executable. exec will do this, of course, but at that point it's already
@@ -256,12 +305,7 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
 
         if (setCredentials)
         {
-#ifdef __linux__
-            size_t platformGroupsLength = Int32ToSizeT(groupsLength);
-#else // BSD
-            int platformGroupsLength = groupsLength;
-#endif
-            if (setgroups(platformGroupsLength, groups) == -1 ||
+            if (SetGroups(groups, groupsLength, getGroupsBuffer) == -1 ||
                 setgid(groupId) == -1 ||
                 setuid(userId) == -1)
             {
@@ -348,6 +392,8 @@ done:;
         errno = priorErrno;
         return -1;
     }
+
+    free(getGroupsBuffer);
 
     return 0;
 }
