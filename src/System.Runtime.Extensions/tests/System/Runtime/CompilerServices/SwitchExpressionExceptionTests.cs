@@ -10,45 +10,55 @@ namespace System.Runtime.CompilerServices.Tests
     public class SwitchExpressionExceptionTests
     {
         [Fact]
-        public static void DefaultConstructor()
+        public void Constructors()
         {
-            var ex = new SwitchExpressionException();
+            string message = "exception message";
+            var e = new SwitchExpressionException();
+            Assert.NotEmpty(e.Message);
+            Assert.Null(e.InnerException);
 
-            Assert.NotNull(ex.Message);
+            e = new SwitchExpressionException(message);
+            Assert.Equal(message, e.Message);
+            Assert.Null(e.InnerException);
+
+            var inner = new Exception();
+            e = new SwitchExpressionException(message, inner);
+            Assert.Equal(message, e.Message);
+            Assert.Same(inner, e.InnerException);
         }
 
         [Fact]
-        public static void Constructor_StringAsObjectArg()
+        public static void Constructor_StringVsObjectArg()
         {
-            string message = "stringInput";
-            var ex = new SwitchExpressionException(message);
+            object message = "exception message";
+            var ex = new SwitchExpressionException(message as object);
 
             Assert.NotEqual(message, ex.Message);
             Assert.Same(message, ex.UnmatchedValue);
+
+            ex = new SwitchExpressionException(message as string);
+
+            Assert.Same(message, ex.Message);
+            Assert.Null(ex.UnmatchedValue);
         }
 
         [Fact]
-        public void UnmatchedValue()
+        public void UnmatchedValue_Null()
         {
-            var ex = new SwitchExpressionException(34);
-            Assert.Equal(34, ex.UnmatchedValue);
-            Assert.Contains(ex.UnmatchedValue.ToString(), ex.Message);
-
-            var data = new byte[] { 1, 2, 3 };
-            ex = new SwitchExpressionException(data);
-            Assert.Same(data, ex.UnmatchedValue);
-            Assert.Contains(ex.UnmatchedValue.ToString(), ex.Message);
-
-            ex = new SwitchExpressionException(true);
-            Assert.Equal(true, ex.UnmatchedValue);
-            Assert.Contains(ex.UnmatchedValue.ToString(), ex.Message);
-
-            ex = new SwitchExpressionException("34");
-            Assert.Same("34", ex.UnmatchedValue);
-            Assert.Contains(ex.UnmatchedValue.ToString(), ex.Message);
-
-            ex = new SwitchExpressionException(null);
+            var ex = new SwitchExpressionException((object)null);
             Assert.Null(ex.UnmatchedValue);
+        }
+
+        [Theory]
+        [InlineData(34)]
+        [InlineData(new byte[] { 1, 2, 3 })]
+        [InlineData(true)]
+        [InlineData("34")]
+        public void UnmatchedValue_NotNull(object unmatchedValue)
+        {
+            var ex = new SwitchExpressionException(unmatchedValue);
+            Assert.Equal(unmatchedValue, ex.UnmatchedValue);
+            Assert.Contains(ex.UnmatchedValue.ToString(), ex.Message);
         }
     }
 }

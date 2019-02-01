@@ -17,8 +17,10 @@ namespace System.Runtime.CompilerServices
         public SwitchExpressionException()
             : base(SR.Arg_SwitchExpressionException) { }
 
-        public SwitchExpressionException(object unmatchedValue)
-            : this()
+        public SwitchExpressionException(Exception innerException) :
+            base(SR.Arg_SwitchExpressionException, innerException) { }
+
+        public SwitchExpressionException(object unmatchedValue) : this()
         {
             UnmatchedValue = unmatchedValue;
         }
@@ -28,6 +30,11 @@ namespace System.Runtime.CompilerServices
         {
             UnmatchedValue = info.GetValue(nameof(UnmatchedValue), typeof(object));
         }
+
+        public SwitchExpressionException(string message) : base(message) { }
+
+        public SwitchExpressionException(string message, Exception innerException)
+            : base(message, innerException) { }
 
         public object UnmatchedValue { get; }
 
