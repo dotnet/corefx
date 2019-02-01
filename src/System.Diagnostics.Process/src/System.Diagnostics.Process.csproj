@@ -412,9 +412,6 @@
     <Compile Include="$(CommonPath)\Interop\FreeBSD\Interop.Process.cs">
       <Link>Common\Interop\FreeBSD\Interop.Process.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetAbsoluteTime.cs">
-      <Link>Common\Unix\System.Native\Interop.GetAbsoluteTime.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.Stat.cs">
       <Link>Common\Unix\System.Native\Interop.Stat.cs</Link>
     </Compile>
