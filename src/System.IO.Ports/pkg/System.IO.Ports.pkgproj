@@ -8,8 +8,14 @@
     <File Include="$(PlaceHolderFile)">
       <TargetPath>runtimes/win/lib/uap10.0.16299</TargetPath>
     </File>
+    <File Include="runtime.json" />
     <InboxOnTargetFramework Include="uap10.0.16299" />
     <ProjectReference Include="..\src\System.IO.Ports.csproj" />
   </ItemGroup>
+  <Target Name="GenerateRuntimeJson" BeforeTargets="Build">
+    <WriteLinesToFile File="runtime.json"
+                      Lines="$([System.IO.File]::ReadAllText('runtime.json.template').Replace('[[PackageVersion]]', '$(PackageVersion)'))"
+                      Overwrite="true" />
+  </Target>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>

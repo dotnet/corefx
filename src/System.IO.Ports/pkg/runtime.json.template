@@ -1,0 +1,24 @@
+{
+  "runtimes": {
+    "linux-arm": {
+      "runtime.native.System.IO.Ports": {
+        "runtime.linux-arm.runtime.native.System.IO.Ports": "[[PackageVersion]]"
+      }
+    },
+    "linux-arm64": {
+      "runtime.native.System.IO.Ports": {
+        "runtime.linux-arm64.runtime.native.System.IO.Ports": "[[PackageVersion]]"
+      }
+    },
+    "linux-x64": {
+      "runtime.native.System.IO.Ports": {
+        "runtime.linux-x64.runtime.native.System.IO.Ports": "[[PackageVersion]]"
+      }
+    },
+    "osx-x64": {
+      "runtime.native.System.IO.Ports": {
+        "runtime.osx-x64.runtime.native.System.IO.Ports": "[[PackageVersion]]"
+      }
+    }
+  }
+}

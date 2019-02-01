@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
+  <PropertyGroup>
+    <PackageTargetRuntime>$(PackageRID)</PackageTargetRuntime>
+    <SkipPackageFileCheck>true</SkipPackageFileCheck>
+    <SkipValidatePackage>true</SkipValidatePackage>
+    <SystemIOPortsNativePath>$(ArtifactsBinDir)\native\$(TargetGroup)-$(DefaultOSGroup)-$(Configuration)-$(ArchGroup)</SystemIOPortsNativePath>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
+    <NativeFile Include="$(SystemIOPortsNativePath)\System.IO.Ports.Native$(LibraryFileExtension)" >
+      <TargetPath>runtimes/$(PackageRID)/native</TargetPath>
+    </NativeFile>
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
+</Project>
