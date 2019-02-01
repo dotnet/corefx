@@ -53,6 +53,7 @@
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.Float.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.Guid.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.Helpers.cs" />
+    <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.JsonElement.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.Literal.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.SignedNumber.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.String.cs" />
@@ -65,6 +66,7 @@
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.Float.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.Guid.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.Helpers.cs" />
+    <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.JsonElement.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.Literal.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.SignedNumber.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.String.cs" />
