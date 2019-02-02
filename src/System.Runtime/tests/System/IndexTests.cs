@@ -48,13 +48,17 @@ namespace System.Tests
             Assert.Equal(3, index.GetOffset(3));
             Assert.Equal(3, index.GetOffset(10));
             Assert.Equal(3, index.GetOffset(20));
-            Assert.Throws<ArgumentException>(() => index.GetOffset(2));
+
+            // we don't validate the length in the GetOffset so passing short length will just return the regular calculation according to the length value.
+            Assert.Equal(3, index.GetOffset(2));
 
             index = Index.FromEnd(3);
             Assert.Equal(0, index.GetOffset(3));
             Assert.Equal(7, index.GetOffset(10));
             Assert.Equal(17, index.GetOffset(20));
-            Assert.Throws<ArgumentException>(() => index.GetOffset(2));
+
+            // we don't validate the length in the GetOffset so passing short length will just return the regular calculation according to the length value.
+            Assert.Equal(-1, index.GetOffset(2));
         }
 
         [Fact]

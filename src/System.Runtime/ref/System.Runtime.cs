@@ -1982,7 +1982,7 @@ namespace System
         public System.Index End { get { throw null; } }
         public System.Index Start { get { throw null; } }
         public Range(System.Index start, System.Index end) { throw null; }
-        public (int, int) GetOffsetLength(int length) { throw null; }
+        public OffsetAndLength GetOffsetAndLength(int length) { throw null; }
         public override bool Equals(object value) { throw null; }
         public bool Equals(System.Range other) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -1990,6 +1990,15 @@ namespace System
         public static System.Range StartAt(System.Index start) { throw null; }
         public static System.Range EndAt(System.Index end) { throw null; }
         public static System.Range All { get { throw null; } }
+
+        public readonly struct OffsetAndLength
+        {
+            private readonly int _dummyPrimitive;
+            public int Offset { get { throw null; } }
+            public int Length { get { throw null; } }
+            public OffsetAndLength(int offset, int length) { throw null; }
+            public void Deconstruct(out int offset, out int length) { throw null; }
+        }
     }
     public partial class RankException : System.SystemException
     {

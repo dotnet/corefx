@@ -38,25 +38,29 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void GetOffsetLengthTest()
+        public static void GetOffsetAndLengthTest()
         {
             Range range = Range.StartAt(new Index(5));
-            (int offset, int length) = range.GetOffsetLength(20);
+            (int offset, int length) = range.GetOffsetAndLength(20);
             Assert.Equal(5, offset);
             Assert.Equal(15, length);
 
-            (offset, length) = range.GetOffsetLength(5);
+            (offset, length) = range.GetOffsetAndLength(5);
             Assert.Equal(5, offset);
             Assert.Equal(0, length);
 
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () => range.GetOffsetLength(-10));
-            Assert.Throws<ArgumentException>(() => range.GetOffsetLength(4));
+            // we don't validate the length in the GetOffsetAndLength so passing negative length will just return the regular calculation according to the length value.
+            (offset, length) = range.GetOffsetAndLength(-10);
+            Assert.Equal(5, offset);
+            Assert.Equal(-15, length);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => range.GetOffsetAndLength(4));
 
             range = Range.EndAt(new Index(4));
-            (offset, length) = range.GetOffsetLength(20);
+            (offset, length) = range.GetOffsetAndLength(20);
             Assert.Equal(0, offset);
             Assert.Equal(4, length);
-            Assert.Throws<ArgumentException>(() => range.GetOffsetLength(1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => range.GetOffsetAndLength(1));
         }
 
         [Fact]
