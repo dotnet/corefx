@@ -55,7 +55,7 @@ namespace System.IO.Enumeration
             // We'll only suppress the media insertion prompt on the topmost directory as that is the
             // most likely scenario and we don't want to take the perf hit for large enumerations.
             // (We weren't consistent with how we handled this historically.)
-            using (new DisableMediaInsertionPrompt())
+            using (DisableMediaInsertionPrompt.Create())
             {
                 // We need to initialize the directory handle up front to ensure
                 // we immediately throw IO exceptions for missing directory/etc.
