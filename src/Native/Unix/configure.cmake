@@ -6,6 +6,7 @@ include(CheckPrototypeDefinition)
 include(CheckStructHasMember)
 include(CheckSymbolExists)
 include(CheckTypeSize)
+include(CheckLibraryExists)
 
 if (CMAKE_SYSTEM_NAME STREQUAL Linux)
     set(PAL_UNIX_NAME \"LINUX\")
@@ -385,6 +386,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL Linux)
     set(HAVE_SUPPORT_FOR_DUAL_MODE_IPV4_PACKET_INFO 1)
     
 endif ()
+
+check_library_exists(pthread pthread_condattr_setclock "" HAVE_PTHREAD_CONDATTR_SETCLOCK)
 
 check_c_source_runs(
     "
