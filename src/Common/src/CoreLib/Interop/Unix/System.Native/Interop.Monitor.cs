@@ -18,9 +18,6 @@ internal static partial class Interop
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_MonitorAcquire")]
         internal static extern void MonitorAcquire(IntPtr mutex);
 
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_MonitorTryAcquire")]
-        internal static extern int MonitorTryAcquire(IntPtr mutex);
-
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_MonitorRelease")]
         internal static extern void MonitorRelease(IntPtr mutex);
 
@@ -32,8 +29,5 @@ internal static partial class Interop
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_MonitorSignalAndRelease")]
         internal static extern void MonitorSignalAndRelease(IntPtr monitor);
-
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_MonitorBroadcastAndRelease")]
-        internal static extern void MonitorBroadcastAndRelease(IntPtr monitor);
-    }
+   }
 }

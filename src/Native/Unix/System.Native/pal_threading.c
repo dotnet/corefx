@@ -100,13 +100,6 @@ void SystemNative_MonitorAcquire(Monitor *monitor)
     assert_no_error(error);
 }
 
-int32_t SystemNative_MonitorTryAcquire(Monitor *monitor)
-{
-    int error = pthread_mutex_trylock(&monitor->Mutex);
-    assert(error == 0 || error == EBUSY);
-    return error == 0;
-}
-
 void SystemNative_MonitorRelease(Monitor *monitor)
 {
     int error = pthread_mutex_unlock(&monitor->Mutex);
@@ -156,12 +149,5 @@ void SystemNative_MonitorSignalAndRelease(Monitor *monitor)
 {
     int error = pthread_cond_signal(&monitor->Condition);
     assert_no_error(error);
-    SystemNative_MonitorRelease(monitor);
-}
-
-void SystemNative_MonitorBroadcastAndRelease(Monitor *monitor)
-{
-    int error = pthread_cond_broadcast(&monitor->Condition);
-    assert(error == 0);
     SystemNative_MonitorRelease(monitor);
 }

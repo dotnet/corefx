@@ -31,13 +31,6 @@ DLLEXPORT void SystemNative_MonitorDelete(Monitor *monitor);
 DLLEXPORT void SystemNative_MonitorAcquire(Monitor *monitor);
 
 /**
- * Attempts to acquire the lock on the low-level monitor object.
- *
- * Returns 1 if the lock is acquired, or 0 if it was already held by someone else.
- */
-DLLEXPORT int32_t SystemNative_MonitorTryAcquire(Monitor *monitor);
-
-/**
  * Releases the lock on the low-level monitor object.
  */
 DLLEXPORT void SystemNative_MonitorRelease(Monitor *monitor);
@@ -63,10 +56,3 @@ DLLEXPORT int32_t SystemNative_MonitorTimedWait(Monitor *monitor, int32_t timeou
  * managed code it doesn't reacquire the lock.
  */
 DLLEXPORT void SystemNative_MonitorSignalAndRelease(Monitor *monitor);
-
-/**
- * Wakes all threads in the waiting queue (enqueued by either SystemNative_MonitorWait or
- * SystemNative_MonitorTimedWait) and releases the lock. Unlike Monitor.PulseAll in
- * managed code it doesn't reacquire the lock.
- */
-DLLEXPORT void SystemNative_MonitorBroadcastAndRelease(Monitor *monitor);
