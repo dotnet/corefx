@@ -28,7 +28,7 @@ namespace System.Text.Json
             }
             else
             {
-                WriteElementDontEscape(propertyName, value);
+                WriteElementByOptions(propertyName, value);
             }
 
             SetFlagToAddListSeparatorBeforeNextItem();
@@ -84,12 +84,6 @@ namespace System.Text.Json
             WriteElementByOptions(escapedPropertyName.Slice(0, written), escapedValue);
 
             ArrayPool<char>.Shared.Return(propertyArray);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void WriteElementDontEscape(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<char> value)
-        {
-            WriteElementByOptions(escapedPropertyName, value);
         }
 
         private void WriteElementByOptions(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value)

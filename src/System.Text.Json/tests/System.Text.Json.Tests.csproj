@@ -24,6 +24,7 @@
     <Compile Include="Utf8JsonReaderTests.MultiSegment.cs" />
     <Compile Include="Utf8JsonReaderTests.TryGet.cs" />
     <Compile Include="Utf8JsonWriterTests.cs" />
+    <Compile Include="Utf8JsonWriterTests.WriteElement.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\src\System\Text\Json\BitStack.cs" Link="BitStack.cs" />
