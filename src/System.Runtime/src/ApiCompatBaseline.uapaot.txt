@@ -20,7 +20,7 @@ MembersMustExist : Member 'System.String.Chars.get(System.Index)' does not exist
 MembersMustExist : Member 'System.String.Chars.get(System.Range)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.String.Substring(System.Index)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.String.Substring(System.Range)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.CompilerServices.RuntimeHelpers.GetArrayRange<T>(T[], System.Range)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Runtime.CompilerServices.RuntimeHelpers.GetSubArray<T>(T[], System.Range)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Index.End.get()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Index.FromEnd(System.Int32)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Index.FromStart(System.Int32)' does not exist in the implementation but it does exist in the contract.

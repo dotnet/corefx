@@ -6809,7 +6809,7 @@ namespace System.Runtime.CompilerServices
         public static int GetHashCode(object o) { throw null; }
         public static object GetObjectValue(object obj) { throw null; }
         public static object GetUninitializedObject(System.Type type) { throw null; }
-        public static T[] GetArrayRange<T>(T[] array, System.Range range) { throw null; }
+        public static T[] GetSubArray<T>(T[] array, System.Range range) { throw null; }
         public static void InitializeArray(System.Array array, System.RuntimeFieldHandle fldHandle) { }
         public static bool IsReferenceOrContainsReferences<T>() { throw null; }
         public static void PrepareConstrainedRegions() { }
