@@ -127,11 +127,12 @@ namespace System.Diagnostics
         internal static ProcessInfo CreateProcessInfo(Interop.procfs.ParsedStat procFsStat, ReusableTextReader reusableReader)
         {
             int pid = procFsStat.pid;
+			string[] fullPathArray = Process.GetExePath(pid).Split('\\');
 
             var pi = new ProcessInfo()
             {
                 ProcessId = pid,
-                ProcessName = procFsStat.comm,
+                ProcessName = fullPathArray.Last(),
                 BasePriority = (int)procFsStat.nice,
                 VirtualBytes = (long)procFsStat.vsize,
                 WorkingSet = procFsStat.rss * Environment.SystemPageSize,
