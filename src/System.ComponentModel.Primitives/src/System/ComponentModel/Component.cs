@@ -77,67 +77,6 @@ namespace System.ComponentModel
 
         /// <summary>
         /// Disposes all the resources associated with this component.
-        /// If disposing is false then you must never touch any other managed objects, as
-        /// they may already be finalized. When in this state you should dispose any native
-        /// resources  that you have a reference to.
-        /// 
-        /// When disposing is true then you should dispose all data and objects you have
-        /// references to.
-        /// The normal implementation of this method would look something like:
-        /// 
-        /// <code>
-        /// public void Dispose()
-        /// {
-        ///     Dispose(true);
-        ///     GC.SuppressFinalize(this);
-        /// }
-        ///
-        /// protected virtual void Dispose(bool disposing)
-        /// {
-        ///     if (disposing)
-        ///     {
-        ///         if (myobject != null)
-        ///         {
-        ///             myobject.Dispose();
-        ///             myobject = null;
-        ///         }
-        ///     }
-        ///     if (myhandle != IntPtr.Zero)
-        ///     {
-        ///         NativeMethods.Release(myhandle);
-        ///         myhandle = IntPtr.Zero;
-        ///     }
-        /// }
-        ///
-        /// ~MyClass()
-        /// {
-        ///     Dispose(false);
-        /// }
-        /// </code>
-        /// 
-        /// For base classes, you should never override the Finalizer (~Class in C#)
-        /// or the Dispose method that takes no arguments, rather you should
-        /// always override the Dispose method that takes a bool. 
-        /// 
-        /// <code>
-        /// protected override void Dispose(bool disposing)
-        /// {
-        ///     if (disposing)
-        ///     {
-        ///         if (myobject != null)
-        ///         {
-        ///             myobject.Dispose();
-        ///             myobject = null;
-        ///         }
-        ///     }
-        ///     if (myhandle != IntPtr.Zero)
-        ///     {
-        ///         NativeMethods.Release(myhandle);
-        ///         myhandle = IntPtr.Zero;
-        ///     }
-        ///     base.Dispose(disposing);
-        /// }
-        /// </code>
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {

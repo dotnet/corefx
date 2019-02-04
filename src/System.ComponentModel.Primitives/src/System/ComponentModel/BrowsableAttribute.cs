@@ -19,14 +19,14 @@ namespace System.ComponentModel
 
         /// <summary>
         /// Specifies that a property or event cannot be modified at design time.'
-        /// This <see langword='static '/>field is read-only.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly BrowsableAttribute No = new BrowsableAttribute(false);
 
         /// <summary>
         /// Specifies the default value for the <see cref='System.ComponentModel.BrowsableAttribute'/>,
         /// which is <see cref='System.ComponentModel.BrowsableAttribute.Yes'/>.
-        /// This <see langword='static '/>field is read-only.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly BrowsableAttribute Default = Yes;
 

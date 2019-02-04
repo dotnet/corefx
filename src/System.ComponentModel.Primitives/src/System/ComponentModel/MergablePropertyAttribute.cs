@@ -14,14 +14,14 @@ namespace System.ComponentModel
         /// <summary>
         /// Specifies that a property can be combined with properties belonging to other
         /// objects in a properties window.
-        /// This <see langword='static '/>field is read-only.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly MergablePropertyAttribute Yes = new MergablePropertyAttribute(true);
 
         /// <summary>
         /// Specifies that a property cannot be combined with properties belonging to
         /// other objects in a properties window.
-        /// This <see langword='static '/>field is read-only.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly MergablePropertyAttribute No = new MergablePropertyAttribute(false);
 
@@ -29,7 +29,7 @@ namespace System.ComponentModel
         /// Specifies the default value, which is <see cref='System.ComponentModel.MergablePropertyAttribute.Yes'/>,
         /// that is a property can be combined with properties belonging to other objects
         /// in a properties window.
-        /// This <see langword='static '/>field is read-only.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly MergablePropertyAttribute Default = Yes;
 

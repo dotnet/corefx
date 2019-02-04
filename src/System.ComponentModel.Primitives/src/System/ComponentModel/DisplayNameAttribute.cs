@@ -35,9 +35,7 @@ namespace System.ComponentModel
         public virtual string DisplayName => DisplayNameValue;
 
         /// <summary>
-        /// Read/Write property that directly modifies the string stored in the description
-        /// attribute. The default implementation of the Description property simply returns
-        /// this value.
+        /// Gets or sets the display name.
         /// </summary>
         protected string DisplayNameValue { get; set; }
 

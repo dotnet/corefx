@@ -14,13 +14,13 @@ namespace System.ComponentModel
         /// <summary>
         /// Specifies that the property this attribute is bound to is read-only and
         /// cannot be modified in the server explorer.
-        /// This <see langword='static '/>field is read-only.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly ReadOnlyAttribute Yes = new ReadOnlyAttribute(true);
 
         /// <summary>
         /// Specifies that the property this attribute is bound to is read/write and can
-        /// be modified at design time. This <see langword='static '/>field is read-only.
+        /// be modified at design time. This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly ReadOnlyAttribute No = new ReadOnlyAttribute(false);
 

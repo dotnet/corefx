@@ -12,25 +12,25 @@ namespace System.ComponentModel
     {
         /// <summary>
         /// Specifies that a component marked with this category uses a component
-        /// designer. This <see langword='static '/>field is read-only.
+        /// designer. This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly DesignerCategoryAttribute Component = new DesignerCategoryAttribute("Component");
 
         /// <summary>
         /// Specifies that a component marked with this category cannot use a visual
-        /// designer. This <see langword='static '/>field is read-only.
+        /// designer. This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly DesignerCategoryAttribute Default = new DesignerCategoryAttribute();
 
         /// <summary>
         /// Specifies that a component marked with this category uses a form designer.
-        /// This <see langword='static '/>field is read-only.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly DesignerCategoryAttribute Form = new DesignerCategoryAttribute("Form");
 
         /// <summary>
         /// Specifies that a component marked with this category uses a generic designer.
-        /// This <see langword='static '/>field is read-only.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly DesignerCategoryAttribute Generic = new DesignerCategoryAttribute("Designer");
 

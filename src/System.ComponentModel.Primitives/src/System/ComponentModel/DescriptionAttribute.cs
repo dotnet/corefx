@@ -34,9 +34,9 @@ namespace System.ComponentModel
         public virtual string Description => DescriptionValue;
 
         /// <summary>
-        /// Read/Write property that directly modifies the string stored in the
-        /// description attribute. The default implementation of the Description
-        /// property simply returns this value.
+        /// Read/Write property that directly modifies the string stored in the description
+        /// attribute. The default implementation of the <see cref="Description"/> property
+        /// simply returns this value.
         /// </summary>
         protected string DescriptionValue { get; set; }
 

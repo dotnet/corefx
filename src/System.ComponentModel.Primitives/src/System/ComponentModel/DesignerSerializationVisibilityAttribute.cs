@@ -14,27 +14,27 @@ namespace System.ComponentModel
         /// <summary>
         /// Specifies that a visual designer should serialize the contents of this property,
         /// rather than the property itself.
-        /// This <see langword='static '/>field is read-only.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly DesignerSerializationVisibilityAttribute Content = new DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Content);
 
         /// <summary>
         /// Specifies that a visual designer will not serialize the value of this property.
-        /// This <see langword='static '/>field is read-only.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly DesignerSerializationVisibilityAttribute Hidden = new DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Hidden);
 
         /// <summary>
         /// Specifies that a visual designer may use default rules when serializing the
         /// value of a property.
-        /// This <see langword='static '/>field is read-only.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly DesignerSerializationVisibilityAttribute Visible = new DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Visible);
 
         /// <summary>
         /// Specifies the default value, which is <see cref='System.ComponentModel.DesignerSerializationVisibilityAttribute.Visible'/>,
         /// that is, a visual designer  uses default rules to generate the value of a property.
-        /// This <see langword='static '/>field is read-only. 
+        /// This <see langword='static'/> field is read-only. 
         /// </summary>
         public static readonly DesignerSerializationVisibilityAttribute Default = Visible;
 
