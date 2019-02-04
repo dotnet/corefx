@@ -557,10 +557,12 @@ namespace System.Diagnostics.Tests
                 return SuccessExitCode;
             };
 
-            string currentUid = getuid().ToString();
-            string currentGid = getgid().ToString();
-            string currentGroups = string.Join(",", GetGroups());
-            using (RemoteInvokeHandle handle = RemoteInvoke(runsAsRoot, GetCurrentRealUserName(), currentUid, currentGid, currentGroups,
+            string userName =  GetCurrentRealUserName();
+            string currentUid = StartAndReadToEnd("id", new[] { "-u", userName }).Trim('\n');
+            string currentGid = StartAndReadToEnd("id", new[] { "-g", userName }).Trim('\n');
+            string[] groupIds = StartAndReadToEnd("id", new[] { "-G", userName }).Trim('\n').Split(' ');
+            string currentGroups = string.Join(",", groupIds.Select(s => uint.Parse(s)).OrderBy(id => id));
+            using (RemoteInvokeHandle handle = RemoteInvoke(runsAsRoot, userName, currentUid, currentGid, currentGroups,
                                                             new RemoteInvokeOptions { RunAsSudo = true }))
             { }
         }
@@ -901,6 +903,23 @@ namespace System.Diagnostics.Tests
             int mode = Convert.ToInt32("744", 8);
             Assert.Equal(0, chmod(filename, mode));
             return filename;
+        }
+
+        private static string StartAndReadToEnd(string filename, string[] arguments)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = filename,
+                RedirectStandardOutput = true
+            };
+            foreach (var arg in arguments)
+            {
+                psi.ArgumentList.Add(arg);
+            }
+            using (Process process = Process.Start(psi))
+            {
+                return process.StandardOutput.ReadToEnd();
+            }
         }
     }
 }
