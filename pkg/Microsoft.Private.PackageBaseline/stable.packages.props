@@ -1521,6 +1521,24 @@
     <StablePackage Include="Microsoft.NETCore.Targets">
       <Version>1.0.6</Version>
     </StablePackage>
+    <StablePackage Include="System.Runtime">
+      <Version>4.1.1</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.any.System.Runtime">
+      <Version>4.1.1</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.aot.System.Runtime">
+      <Version>4.1.1</Version>
+    </StablePackage>
+    <StablePackage Include="System.Runtime.Extensions">
+      <Version>4.1.1</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.unix.System.Runtime.Extensions">
+      <Version>4.1.1</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.win.System.Runtime.Extensions">
+      <Version>4.1.1</Version>
+    </StablePackage>
 
   </ItemGroup>
 </Project>
