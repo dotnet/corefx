@@ -328,6 +328,26 @@ namespace System.Net.Http
             Http2Connection http2Connection = _http2Connection;
             if (http2Connection != null)
             {
+                TimeSpan lifetime = _poolManager.Settings._pooledConnectionLifetime;
+                bool lifetimeExpired = lifetime != Timeout.InfiniteTimeSpan &&
+                                        (lifetime == TimeSpan.Zero || http2Connection.CreationTime + lifetime <= DateTime.UtcNow);
+
+                if (lifetimeExpired)
+                {
+                    _http2Connection = null;
+                    if (NetEventSource.IsEnabled)
+                    {
+                        Trace( "Connection lifetime expired.");
+                    }
+
+                    // Connection will be closed immediately or later if there are pending streams.
+                    http2Connection.Dispose();
+                    http2Connection = null;
+                }
+            }
+
+            if (http2Connection != null)
+            {
                 if (NetEventSource.IsEnabled) Trace("Using existing HTTP2 connection.");
                 return (http2Connection, false, null);
             }

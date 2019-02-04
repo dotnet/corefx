@@ -55,6 +55,8 @@ namespace System.Net.Http
         // So set the connection window size to a large value.
         private const int ConnectionWindowSize = 64 * 1024 * 1024;
 
+        public DateTimeOffset CreationTime { get; } = DateTimeOffset.UtcNow;
+
         public Http2Connection(HttpConnectionPool pool, SslStream stream)
         {
             _pool = pool;
