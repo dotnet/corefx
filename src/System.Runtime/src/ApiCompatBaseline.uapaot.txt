@@ -1,4 +1,5 @@
 TypesMustExist : Type 'System.ArgIterator' does not exist in the implementation but it does exist in the contract.
+TypesMustExist : Type 'System.Range.OffsetAndLength' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Index.GetOffset(System.Int32)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Index.IsFromEnd.get()' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.Memory<T>.Item.get(System.Range)' does not exist in the implementation but it does exist in the contract.
