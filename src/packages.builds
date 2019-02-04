@@ -27,7 +27,10 @@
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
-    <Project Include="$(MSBuildThisFileDirectory)System.Private.Uri\pkg\System.Private.Uri.pkgproj">
+    <Project Include="$(MSBuildThisFileDirectory)System.Private.Uri\pkg\System.Private.Uri.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="..\pkg\Microsoft.NETCore.Targets\Microsoft.NETCore.Targets.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
   </ItemGroup>

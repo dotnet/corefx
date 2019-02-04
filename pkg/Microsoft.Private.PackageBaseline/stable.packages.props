@@ -1510,7 +1510,16 @@
 
     <!-- Servicing 1.0.14 wave -->
     <StablePackage Include="System.Private.Uri">
-      <Version>4.0.2</Version>
+      <Version>4.1.0</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.unix.System.Private.Uri">
+      <Version>4.1.0</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.win7.System.Private.Uri">
+      <Version>4.1.0</Version>
+    </StablePackage>
+    <StablePackage Include="Microsoft.NETCore.Targets">
+      <Version>1.0.6</Version>
     </StablePackage>
 
   </ItemGroup>
