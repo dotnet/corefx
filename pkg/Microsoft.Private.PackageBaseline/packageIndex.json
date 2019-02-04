@@ -31,7 +31,8 @@
         "1.1.0",
         "1.1.1",
         "1.1.2",
-        "1.1.3"
+        "1.1.3",
+        "1.1.4"
       ],
       "BaselineVersion": "1.1.0"
     },
@@ -829,9 +830,10 @@
     "runtime.unix.System.Private.Uri": {
       "StableVersions": [
         "4.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.1"
     },
     "runtime.unix.System.Runtime.Extensions": {
       "StableVersions": [
@@ -930,9 +932,10 @@
       "StableVersions": [
         "4.0.1",
         "4.0.2",
-        "4.3.0"
+        "4.3.0",
+        "4.3.1"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.1"
     },
     "runtime.win8-arm.runtime.native.System.IO.Compression": {
       "StableVersions": [
