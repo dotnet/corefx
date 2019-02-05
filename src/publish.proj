@@ -25,7 +25,6 @@
   <PropertyGroup>
     <PackageDownloadDirectory Condition="'$(DownloadDirectory)' == ''">$(PackagesDir)AzureTransfer\$(ConfigurationGroup)</PackageDownloadDirectory>
     <FinalPublishPattern>$(PackageDownloadDirectory)\**\*.nupkg</FinalPublishPattern>
-    <FinalPublishPrivatePattern>$(PackageDownloadDirectory)\**\*Private*.nupkg</FinalPublishPrivatePattern>
     <FinalSymbolsPackagesPattern>$(PackageDownloadDirectory)\**\*.symbols.nupkg</FinalSymbolsPackagesPattern>
     <!-- The SignFiles target needs OutDir to be defined -->
     <OutDir>$(PackageDownloadDirectory)</OutDir>
@@ -43,7 +42,7 @@
 
   <Target Name="GetPackagesToSign">
     <ItemGroup>
-      <FilesToSign Include="$(FinalPublishPattern)" Exclude="$(FinalPublishPrivatePattern);$(FinalSymbolsPackagesPattern)">
+      <FilesToSign Include="$(FinalPublishPattern)" Exclude="$(FinalSymbolsPackagesPattern)">
         <Authenticode>NuGet</Authenticode>
       </FilesToSign>
     </ItemGroup>
