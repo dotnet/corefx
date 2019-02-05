@@ -156,9 +156,11 @@ static int SetGroups(uint32_t* userGroups, int32_t userGroupsLength, uint32_t* p
 #endif
     int rv = setgroups(platformGroupsLength, userGroups);
 
-    // In case we don't have permission to call setgroups, we fall back to using the current
-    // process' groups, if they are a subset if the user groups.
-    if (rv == -1 && errno == EPERM)
+    // We fall back to using the current process' groups, if they are a subset of the user groups.
+    // We do this when the current user doesn't have permission to call setgroups.
+    // And when the number is more than NGROUPS_MAX, which is low on some platforms (e.g. 16 on OSX).
+    if (rv == -1 && ((errno == EPERM) ||
+                     (errno == EINVAL && userGroupsLength > NGROUPS_MAX)))
     {
         int processGroupsLength = getgroups(userGroupsLength, processGroups);
         if (processGroupsLength >= 0)

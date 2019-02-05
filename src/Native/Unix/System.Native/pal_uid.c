@@ -127,7 +127,7 @@ int32_t SystemNative_GetGroupList(const char* name, uint32_t group, uint32_t* gr
             groupsAvailable >= *ngroups)
         {
             // When the buffer is too small, some platforms (Linux) return the number of groups
-            // found for the user. While other platforms (OSX), return truncate to ngroups.
+            // found for the user. While other platforms (OSX), truncate to ngroups.
             *ngroups = groupsAvailable > *ngroups ? groupsAvailable : *ngroups * 2;
             return rv;
         }
