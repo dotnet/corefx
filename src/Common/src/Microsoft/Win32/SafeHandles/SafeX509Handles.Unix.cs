@@ -3,21 +3,28 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Win32.SafeHandles
 {
     internal sealed class SafeX509Handle : SafeHandle
     {
-#if DEBUG_FINALIZATIONS
-        private string _stacktrace = Environment.StackTrace;
+#if DEBUG
+        private static readonly bool s_captureTrace =
+            Environment.GetEnvironmentVariable("DEBUG_SAFEX509HANDLE_FINALIZATION") != null;
 
-        [DllImport("libc")]
-        private static extern int printf(string f, IntPtr arg0, string arg);
+        private readonly StackTrace _stacktrace =
+            s_captureTrace ? new StackTrace(fNeedFileInfo: true) : null;
 
         ~SafeX509Handle()
         {
-            printf("%p: %s\n\n", handle, _stacktrace ?? "no stacktrace...");
+            if (s_captureTrace)
+            {
+                Interop.Sys.PrintF(
+                    "%s\n\n",
+                    $"0x{handle.ToInt64():x} {_stacktrace?.ToString() ?? "no stacktrace..."}");
+            }
         }
 #endif
 
