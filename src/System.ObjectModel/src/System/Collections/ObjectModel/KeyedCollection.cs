@@ -164,7 +164,7 @@ namespace System.Collections.ObjectModel
         {
             if (!ContainsItem(item))
             {
-                throw new ArgumentException(SR.Argument_ItemNotExist);
+                throw new ArgumentException(SR.Argument_ItemNotExist, nameof(item));
             }
 
             TKey oldKey = GetKeyForItem(item);
@@ -255,7 +255,7 @@ namespace System.Collections.ObjectModel
             {
                 if (Contains(key))
                 {
-                    throw new ArgumentException(SR.Format(SR.Argument_AddingDuplicate, key));
+                    throw new ArgumentException(SR.Format(SR.Argument_AddingDuplicate, key), nameof(key));
                 }
 
                 keyCount++;

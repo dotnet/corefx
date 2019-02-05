@@ -175,11 +175,11 @@ namespace System.Collections.ObjectModel
             }
             if (array.Rank != 1)
             {
-                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported);
+                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, nameof(array));
             }
             if (array.GetLowerBound(0) != 0)
             {
-                throw new ArgumentException(SR.Arg_NonZeroLowerBound);
+                throw new ArgumentException(SR.Arg_NonZeroLowerBound, nameof(array));
             }
             if (index < 0 || index > array.Length)
             {
@@ -210,7 +210,7 @@ namespace System.Collections.ObjectModel
                     object[] objects = array as object[];
                     if (objects == null)
                     {
-                        throw new ArgumentException(SR.Argument_InvalidArrayType);
+                        throw new ArgumentException(SR.Argument_InvalidArrayType, nameof(array));
                     }
 
                     try
@@ -222,7 +222,7 @@ namespace System.Collections.ObjectModel
                     }
                     catch (ArrayTypeMismatchException)
                     {
-                        throw new ArgumentException(SR.Argument_InvalidArrayType);
+                        throw new ArgumentException(SR.Argument_InvalidArrayType, nameof(array));
                     }
                 }
             }
@@ -380,11 +380,11 @@ namespace System.Collections.ObjectModel
             }
             if (array.Rank != 1)
             {
-                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported);
+                throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, nameof(array));
             }
             if (array.GetLowerBound(0) != 0)
             {
-                throw new ArgumentException(SR.Arg_NonZeroLowerBound);
+                throw new ArgumentException(SR.Arg_NonZeroLowerBound, nameof(array));
             }
             if (index < 0)
             {
@@ -415,7 +415,7 @@ namespace System.Collections.ObjectModel
                 object[] objects = array as object[];
                 if (objects == null)
                 {
-                    throw new ArgumentException(SR.Argument_InvalidArrayType);
+                    throw new ArgumentException(SR.Argument_InvalidArrayType, nameof(array));
                 }
 
                 try
@@ -427,7 +427,7 @@ namespace System.Collections.ObjectModel
                 }
                 catch (ArrayTypeMismatchException)
                 {
-                    throw new ArgumentException(SR.Argument_InvalidArrayType);
+                    throw new ArgumentException(SR.Argument_InvalidArrayType, nameof(array));
                 }
             }
         }
