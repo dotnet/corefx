@@ -110,7 +110,7 @@ namespace System.Data.SqlClient.SNI
             string serverSPN = System.Text.Encoding.UTF8.GetString(serverName);
 
             SecurityStatusPal statusCode = NegotiateStreamPal.InitializeSecurityContext(
-                       credentialsHandle,
+                       ref credentialsHandle,
                        ref securityContext,
                        serverSPN,
                        requestedContextFlags,
@@ -121,8 +121,7 @@ namespace System.Data.SqlClient.SNI
             if (statusCode.ErrorCode == SecurityStatusPalErrorCode.CompleteNeeded ||
                 statusCode.ErrorCode == SecurityStatusPalErrorCode.CompAndContinue)
             {
-                inSecurityBufferArray = new SecurityBuffer[] { outSecurityBuffer };
-                statusCode = NegotiateStreamPal.CompleteAuthToken(ref securityContext, inSecurityBufferArray);
+                statusCode = NegotiateStreamPal.CompleteAuthToken(ref securityContext, outSecurityBuffer);
                 outSecurityBuffer.token = null;
             }
 

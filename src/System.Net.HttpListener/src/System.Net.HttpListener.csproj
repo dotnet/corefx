@@ -14,6 +14,7 @@
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.Tracing" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Net.NameResolution" />
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.Net.Requests" />
@@ -351,7 +352,7 @@
     </Compile>
     <Reference Include="System.Buffers" />
     <Reference Include="System.Net.Sockets" />
-    <Reference Include="System.Threading.ThreadPool" />
     <Reference Include="System.Net.ServicePoint" />
+    <Reference Include="System.Threading.ThreadPool" />
   </ItemGroup>
 </Project>

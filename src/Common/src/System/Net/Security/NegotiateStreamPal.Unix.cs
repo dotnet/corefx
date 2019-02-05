@@ -233,11 +233,11 @@ namespace System.Net.Security
         }
 
         internal static SecurityStatusPal InitializeSecurityContext(
-            SafeFreeCredentials credentialsHandle,
+            ref SafeFreeCredentials credentialsHandle,
             ref SafeDeleteContext securityContext,
             string spn,
             ContextFlagsPal requestedContextFlags,
-            SecurityBuffer[] inSecurityBufferArray,
+            Span<SecurityBuffer> inSecurityBufferArray,
             SecurityBuffer outSecurityBuffer,
             ref ContextFlagsPal contextFlags)
         {
@@ -249,7 +249,7 @@ namespace System.Net.Security
             }
 
             SecurityBuffer cbtBuffer = null;
-            if ((inSecurityBufferArray != null) && (inSecurityBufferArray.Length > 1))
+            if (inSecurityBufferArray.Length > 1)
             {
                 Debug.Assert(inSecurityBufferArray[1].type == SecurityBufferType.SECBUFFER_CHANNEL_BINDINGS);
                 cbtBuffer = inSecurityBufferArray[1];
@@ -261,7 +261,7 @@ namespace System.Net.Security
                 cbtBuffer,
                 spn,
                 requestedContextFlags,
-                ((inSecurityBufferArray != null && inSecurityBufferArray.Length != 0) ? inSecurityBufferArray[0] : null),
+                inSecurityBufferArray.Length != 0 ? inSecurityBufferArray[0] : null,
                 outSecurityBuffer,
                 ref contextFlags);
 
@@ -282,7 +282,7 @@ namespace System.Net.Security
             SafeFreeCredentials credentialsHandle,
             ref SafeDeleteContext securityContext,
             ContextFlagsPal requestedContextFlags,
-            SecurityBuffer[] inSecurityBufferArray,
+            Span<SecurityBuffer> inSecurityBufferArray,
             SecurityBuffer outSecurityBuffer,
             ref ContextFlagsPal contextFlags)
         {
@@ -335,7 +335,7 @@ namespace System.Net.Security
 
         internal static SecurityStatusPal CompleteAuthToken(
             ref SafeDeleteContext securityContext,
-            SecurityBuffer[] inSecurityBufferArray)
+            SecurityBuffer inSecurityBuffer)
         {
             return new SecurityStatusPal(SecurityStatusPalErrorCode.OK);
         }

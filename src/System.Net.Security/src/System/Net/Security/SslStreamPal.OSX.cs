@@ -35,11 +35,11 @@ namespace System.Net.Security
         public static SecurityStatusPal AcceptSecurityContext(
             ref SafeFreeCredentials credential,
             ref SafeDeleteContext context,
-            SecurityBuffer[] inputBuffers,
+            ReadOnlySpan<SecurityBuffer> inputBuffers,
             SecurityBuffer outputBuffer,
             SslAuthenticationOptions sslAuthenticationOptions)
         {
-            if (inputBuffers != null)
+            if (inputBuffers.Length != 0)
             {
                 Debug.Assert(inputBuffers.Length == 2);
                 Debug.Assert(inputBuffers[1].token == null);
@@ -56,40 +56,32 @@ namespace System.Net.Security
             ref SafeFreeCredentials credential,
             ref SafeDeleteContext context,
             string targetName,
-            SecurityBuffer inputBuffer,
+            ReadOnlySpan<SecurityBuffer> inputBuffers,
             SecurityBuffer outputBuffer,
             SslAuthenticationOptions sslAuthenticationOptions)
         {
-            return HandshakeInternal(credential, ref context, inputBuffer, outputBuffer, sslAuthenticationOptions);
-        }
-
-        public static SecurityStatusPal InitializeSecurityContext(
-            SafeFreeCredentials credential,
-            ref SafeDeleteContext context,
-            string targetName,
-            SecurityBuffer[] inputBuffers,
-            SecurityBuffer outputBuffer,
-            SslAuthenticationOptions sslAuthenticationOptions)
-        {
-            Debug.Assert(inputBuffers.Length == 2);
-            Debug.Assert(inputBuffers[1].token == null);
+#if DEBUG
+            Debug.Assert(inputBuffers.Length == 1 || inputBuffers.Length == 2);
+            if (inputBuffers.Length == 2)
+            {
+                Debug.Assert(inputBuffers[1].token == null);
+            }
+#endif
             return HandshakeInternal(credential, ref context, inputBuffers[0], outputBuffer, sslAuthenticationOptions);
         }
 
-        public static SecurityBuffer[] GetIncomingSecurityBuffers(SslAuthenticationOptions options, ref SecurityBuffer incomingSecurity)
+        public static void GetIncomingSecurityBuffers(SslAuthenticationOptions options, ref SecurityBuffer incomingSecurity, ref Span<SecurityBuffer> incomingSecurityBuffers)
         {
-            SecurityBuffer[] incomingSecurityBuffers = null;
-
             if (incomingSecurity != null)
             {
-                incomingSecurityBuffers = new SecurityBuffer[]
-                {
-                    incomingSecurity,
-                    new SecurityBuffer(null, 0, 0, SecurityBufferType.SECBUFFER_EMPTY)
-                };
+                incomingSecurityBuffers[0] = incomingSecurity;
+                incomingSecurityBuffers[1] = new SecurityBuffer(null, 0, 0, SecurityBufferType.SECBUFFER_EMPTY);
+                incomingSecurityBuffers = incomingSecurityBuffers.Slice(0, 2);
             }
-
-            return incomingSecurityBuffers;
+            else
+            {
+                incomingSecurityBuffers = default;
+            }
         }
 
         public static SafeFreeCredentials AcquireCredentialsHandle(

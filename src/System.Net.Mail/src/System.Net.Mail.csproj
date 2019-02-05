@@ -292,6 +292,7 @@
     <Reference Include="System.Diagnostics.Tracing" />
     <Reference Include="System.Globalization.Extensions" />
     <Reference Include="System.IO.FileSystem" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Net.NetworkInformation" />
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.Net.Requests" />

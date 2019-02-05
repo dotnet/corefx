@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Net.Security;
+using System.Runtime.InteropServices;
 using System.Security.Authentication.ExtendedProtection;
-using System.Threading;
 
 namespace System.Net
 {
@@ -214,22 +212,23 @@ namespace System.Net
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, incomingBlob);
 
-            SecurityBuffer[] inSecurityBufferArray = null;
+            TwoSecurityBuffers stackBuffers = default;
+            Span<SecurityBuffer> inSecurityBufferArray = default;
             if (incomingBlob != null && _channelBinding != null)
             {
-                inSecurityBufferArray = new SecurityBuffer[2]
-                {
-                    new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN),
-                    new SecurityBuffer(_channelBinding)
-                };
+                inSecurityBufferArray = MemoryMarshal.CreateSpan(ref stackBuffers._item0, 2);
+                inSecurityBufferArray[0] = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
+                inSecurityBufferArray[1] = new SecurityBuffer(_channelBinding);
             }
             else if (incomingBlob != null)
             {
-                inSecurityBufferArray = new SecurityBuffer[1] { new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN) };
+                inSecurityBufferArray = MemoryMarshal.CreateSpan(ref stackBuffers._item0, 1);
+                inSecurityBufferArray[0] = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
             }
             else if (_channelBinding != null)
             {
-                inSecurityBufferArray = new SecurityBuffer[1] { new SecurityBuffer(_channelBinding) };
+                inSecurityBufferArray = MemoryMarshal.CreateSpan(ref stackBuffers._item0, 1);
+                inSecurityBufferArray[0] = new SecurityBuffer(_channelBinding);
             }
 
             var outSecurityBuffer = new SecurityBuffer(_tokenSize, SecurityBufferType.SECBUFFER_TOKEN);
@@ -241,7 +240,7 @@ namespace System.Net
                 {
                     // client session
                     statusCode = NegotiateStreamPal.InitializeSecurityContext(
-                        _credentialsHandle,
+                        ref _credentialsHandle,
                         ref _securityContext,
                         _spn,
                         _requestedContextFlags,
@@ -253,10 +252,7 @@ namespace System.Net
 
                     if (statusCode.ErrorCode == SecurityStatusPalErrorCode.CompleteNeeded)
                     {
-                        var inSecurityBuffers = new SecurityBuffer[1];
-                        inSecurityBuffers[0] = outSecurityBuffer;
-
-                        statusCode = NegotiateStreamPal.CompleteAuthToken(ref _securityContext, inSecurityBuffers);
+                        statusCode = NegotiateStreamPal.CompleteAuthToken(ref _securityContext, outSecurityBuffer);
 
                         if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"SSPIWrapper.CompleteAuthToken() returns statusCode:0x{((int)statusCode.ErrorCode):x8} ({statusCode})");
 
@@ -285,9 +281,9 @@ namespace System.Net
                 // The real dispose will happen when the security context is closed.
                 // Note if the first call was not successful the handle is physically destroyed here.
                 //
-                if (firstTime && _credentialsHandle != null)
+                if (firstTime)
                 {
-                    _credentialsHandle.Dispose();
+                    _credentialsHandle?.Dispose();
                 }
             }
 

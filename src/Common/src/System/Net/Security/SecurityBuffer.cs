@@ -2,12 +2,32 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Authentication.ExtendedProtection;
 
 namespace System.Net.Security
 {
+    // Until we have stackalloc Span<ReferenceType> support, these two
+    // structs allow us to do the equivalent of stackalloc SecurityBuffer[2]
+    // and stackalloc SecurityBuffer[3], with code like:
+    //     TwoSecurityBuffers tmp = default;
+    //     Span<SecurityBuffer> buffers = MemoryMarshal.CreateSpan<ref tmp._item0, 2);
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct TwoSecurityBuffers
+    {
+        internal SecurityBuffer _item0;
+        private SecurityBuffer _item1;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct ThreeSecurityBuffers
+    {
+        internal SecurityBuffer _item0;
+        private SecurityBuffer _item1;
+        private SecurityBuffer _item2;
+    }
+
     internal class SecurityBuffer
     {
         public int size;
