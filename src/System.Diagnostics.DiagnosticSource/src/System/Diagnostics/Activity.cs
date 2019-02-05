@@ -92,8 +92,13 @@ namespace System.Diagnostics
             get
             {
                 // if we represented it as a traceId-spanId, convert it to a string.  
-                if (_parentId == null && _parentSpanIdSet)
-                    _parentId = "00-" + _traceId.AsHexString + "-" + _parentSpanId.AsHexString + "-00";
+                if (_parentId == null)
+                {
+                    if (_parentSpanIdSet)
+                        _parentId = "00-" + _traceId.AsHexString + "-" + _parentSpanId.AsHexString + "-00";
+                    else if (Parent != null)
+                        _parentId = Parent.ParentId;
+                }
                 return _parentId;
             }
         }
@@ -331,19 +336,18 @@ namespace System.Diagnostics
         /// <seealso cref="SetStartTime(DateTime)"/>
         public Activity Start()
         {
-            if (Id != null)
+            // Has the ID already been set (have we called Start()).  
+            if (_id != null || _spanIdSet)
             {
                 NotifyError(new InvalidOperationException("Trying to start an Activity that was already started"));
             }
             else
             {
-                if (ParentId == null)
+                if (_parentId == null && !_parentSpanIdSet)
                 {
                     var parent = Current;
                     if (parent != null)
                     {
-                        _parentId = parent.Id;
-
                         // The parent change should not form a loop.   We are actually guaranteed this because
                         // 1. Unstarted activities can't be 'Current' (thus can't be 'parent'), we throw if you try.  
                         // 2. All started activities have a finite parent change (by inductive reasoning).  
@@ -366,7 +370,7 @@ namespace System.Diagnostics
                 else
                     IdFormat = DefaultIdFormat;
 
-                // Generate the appropriate ID.  
+                // Generate the ID in the appropriate format.  
                 if (IdFormat == ActivityIdFormat.W3C)
                     GenerateW3CId();
                 else
@@ -543,10 +547,6 @@ namespace System.Diagnostics
             //  = 55 chars (see https://w3c.github.io/trace-context)
             // We require that all non-WC3IDs NOT start with a digit.  
             return id.Length == 55 && char.IsDigit(id[0]);
-        }
-        private static bool IsW3CId(Span<byte> id)
-        {
-            return id.Length == 55 && char.IsDigit((char)id[0]);
         }
 
         /// <summary>

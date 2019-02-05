@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -275,6 +276,128 @@ namespace System.Diagnostics.Tests
                 activity.SetParentId(parentId);
                 Assert.Equal("123", activity.RootId);
             }
+        }
+
+
+        public static bool IdIsW3CFormat(string id)
+        {
+            if (id.Length != 55)
+                return false;
+            if (id[2] != '-')
+                return false;
+            if (id[35] != '-')
+                return false;
+            if (id[52] != '-')
+                return false;
+            return Regex.IsMatch(id, "^[0-9A-Fa-f][0-9A-Fa-f]-[0-9A-Fa-f]*-[0-9A-Fa-f]*-[0-9A-Fa-f][0-9A-Fa-f]$");
+        }
+
+        public static bool IsHex(string s)
+        {
+            return Regex.IsMatch(s, "^[0-9A-Fa-f]*$");
+        }
+
+
+        /****** TraceId tests *****/
+        [Fact]
+        public void TraceIdTests()
+        {
+            // Empty Constructor 
+            string zeros = "00000000000000000000000000000000";
+            TraceId emptySpan = new TraceId();
+            Assert.Equal(zeros, emptySpan.AsHexString);
+            Assert.Equal(16, emptySpan.AsBytes.Length);
+            Assert.Equal(new byte[16], emptySpan.AsBytes.ToArray());
+
+            // NewTraceId
+            TraceId newId1 = TraceId.NewTraceId();
+            Assert.True(IsHex(newId1.AsHexString));
+
+            TraceId newId2 = TraceId.NewTraceId();
+            Assert.NotEqual(newId1.AsHexString, newId2.AsHexString);
+
+            // AsBytes and Byte constructor.  
+            TraceId newId2Clone = new TraceId(newId2.AsBytes);
+            Assert.Equal(newId2.AsHexString, newId2Clone.AsHexString);
+
+            // String constructor and AsHexString.  
+            string idStr = "0123456789ABCDEF0123456789ABCDEF";
+            ReadOnlySpan<char> idSpan = idStr.ToCharArray();
+            TraceId id = new TraceId(idSpan);
+            Assert.Equal(idStr, id.AsHexString);
+
+            // Utf8 Constructor. 
+            byte[] idUtf8 = Encoding.UTF8.GetBytes(idStr);
+            TraceId id1 = new TraceId(idUtf8, true);
+            Assert.Equal(idStr, id1.AsHexString);
+
+            // ToString
+            Assert.Equal(idStr, id.ToString());
+        }
+
+        /****** SpanId tests *****/
+        [Fact]
+        public void SpanIdTests()
+        {
+            // Empty Constructor 
+            string zeros = "0000000000000000";
+            SpanId emptySpan = new SpanId();
+            Assert.Equal(zeros, emptySpan.AsHexString);
+            Assert.Equal(16, emptySpan.AsBytes.Length);
+            Assert.Equal(new byte[8], emptySpan.AsBytes.ToArray());
+
+            // NewSpanId
+            SpanId newId1 = SpanId.NewSpanId();
+            Assert.True(IsHex(newId1.AsHexString));
+
+            SpanId newId2 = SpanId.NewSpanId();
+            Assert.NotEqual(newId1.AsHexString, newId2.AsHexString);
+
+            // AsBytes and Byte constructor.  
+            SpanId newId2Clone = new SpanId(newId2.AsBytes);
+            Assert.Equal(newId2.AsHexString, newId2Clone.AsHexString);
+
+            // String constructor and AsHexString.  
+            string idStr = "0123456789ABCDEF";
+            ReadOnlySpan<char> idSpan = idStr.ToCharArray();
+            SpanId id = new SpanId(idSpan);
+            Assert.Equal(idStr, id.AsHexString);
+
+            // Utf8 Constructor. 
+            byte[] idUtf8 = Encoding.UTF8.GetBytes(idStr);
+            SpanId id1 = new SpanId(idUtf8, true);
+            Assert.Equal(idStr, id1.AsHexString);
+
+            // ToString
+            Assert.Equal(idStr, id.ToString());
+        }
+
+        /****** WC3 Format tests *****/
+        [Fact]
+        public void IdFormatTests()
+        {
+            Activity activity;
+            
+            activity = new Activity("activity1");
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+            Assert.True(IdIsW3CFormat(activity.Id));
+            activity.Stop();
+
+
+            activity = new Activity("activity2");
+            activity.SetParentId("00-0123456789ABCDEF0123456789ABCDEF-0123456789ABCDEF-01");
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            activity.Stop();
+
+            activity = new Activity("activity3");
+            activity.SetParentId(TraceId.NewTraceId(), SpanId.NewSpanId());
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            activity.Stop();
+
+            Assert.Equal(default(DateTime), activity.StartTimeUtc);
         }
 
         /// <summary>
