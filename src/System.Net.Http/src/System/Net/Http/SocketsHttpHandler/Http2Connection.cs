@@ -1272,7 +1272,7 @@ namespace System.Net.Http
                 {
                     if ( http2Stream != null && http2Stream.StreamId != 0 )
                     {
-                        ValueTask ignored = SendRstStreamAsync(http2Stream.StreamId, Http2ProtocolErrorCode.StreamClosed);
+                        http2Stream.Cancel();
                     }
                     throw new OperationCanceledException(cancellationToken);
                 }
