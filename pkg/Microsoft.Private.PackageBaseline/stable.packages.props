@@ -1528,7 +1528,7 @@
       <Version>4.1.1</Version>
     </StablePackage>
     <StablePackage Include="runtime.aot.System.Runtime">
-      <Version>4.1.1</Version>
+      <Version>4.0.21</Version>
     </StablePackage>
     <StablePackage Include="System.Runtime.Extensions">
       <Version>4.1.1</Version>
