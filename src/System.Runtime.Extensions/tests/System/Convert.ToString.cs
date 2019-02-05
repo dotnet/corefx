@@ -181,7 +181,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot)]
         public static void FromBoxedObject_NotNetFramework()
         {
             object[] testValues =
