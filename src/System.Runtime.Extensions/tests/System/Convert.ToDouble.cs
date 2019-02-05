@@ -103,7 +103,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot)]
         public void FromString_NetFramework()
         {
             string[] overflowValues = { Double.MaxValue.ToString(), Double.MinValue.ToString() };
@@ -111,7 +111,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework | TargetFrameworkMonikers.UapAot)]
         public void FromString_NotNetFramework()
         {
             string[] overflowValues = { Double.MaxValue.ToString(), Double.MinValue.ToString() };
