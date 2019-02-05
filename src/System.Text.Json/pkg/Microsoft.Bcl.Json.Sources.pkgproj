@@ -8,6 +8,12 @@
     <GenerateInternalTypesSource>true</GenerateInternalTypesSource>
   </PropertyGroup>
 
+  <ItemGroup>
+    <File Include="$(MSBuildThisFileDirectory)../source_package/README.md">
+      <TargetPath>README.md</TargetPath>
+    </File>
+  </ItemGroup>
+
   <!-- Given that System.Text.Json has Resources, we need to make sure we include them (and the SR.cs from Common) 
        on the sources of the package. This target will retrieve the compiled resources file and will also add
        the Common SR.cs into SourcePackageFiles. -->
