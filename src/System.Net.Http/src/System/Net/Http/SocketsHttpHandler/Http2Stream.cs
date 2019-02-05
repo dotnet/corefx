@@ -88,7 +88,7 @@ namespace System.Net.Http
                         catch (OperationCanceledException)
                         {
                             // We must handle cancellation before disposing the stream, so that we can make a decision about
-                            // how to close the stream (with a )
+                            // how to close the stream (with a RST_STREAM or an END_STREAM).
                             Cancel();
                             throw;
                         }
@@ -98,7 +98,6 @@ namespace System.Net.Http
 
             public async Task ReadResponseHeadersAsync(CancellationToken cancellationToken)
             {
-                // MAX TODO: Plumb in cancellation.
                 // Wait for response headers to be read.
                 bool emptyResponse = await _responseHeadersAvailable.Task.ConfigureAwait(false);
 
@@ -325,7 +324,6 @@ namespace System.Net.Http
 
                 while (remaining.Length > 0)
                 {
-                    // MAX TODO: We currently only handle cancellation in-between frames. I think that's the right approach, but verify that with Geoff.
                     int sendSize = await _streamWindow.RequestCreditAsync(remaining.Length, cancellationToken).ConfigureAwait(false);
 
                     ReadOnlyMemory<byte> current;

@@ -1270,6 +1270,7 @@ namespace System.Net.Http
                 }
                 else if (e is OperationCanceledException)
                 {
+                    // If the operation has been cancelled after the stream was allocated an ID, send a RST_STREAM.
                     if ( http2Stream != null && http2Stream.StreamId != 0 )
                     {
                         http2Stream.Cancel();
