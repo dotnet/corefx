@@ -99,6 +99,15 @@ namespace System.Buffers.Tests
         {
             using (var output = new ArrayBufferWriter())
             {
+                int capacity = output.Capacity;
+                Assert.Equal(capacity, output.BytesAvailable);
+                ((IBufferWriter<byte>)output).Advance(output.BytesAvailable);
+                Assert.Equal(capacity, output.BytesWritten);
+                Assert.Equal(0, output.BytesAvailable);
+            }
+
+            using (var output = new ArrayBufferWriter())
+            {
                 IBufferWriter<byte> bufferWriter = output;
                 bufferWriter.Advance(output.Capacity);
                 Assert.Equal(0, output.TotalBytesWritten);
@@ -141,9 +150,17 @@ namespace System.Buffers.Tests
                 Assert.Throws<ArgumentException>(() => bufferWriter.Advance(-1));
                 Assert.Throws<InvalidOperationException>(() => bufferWriter.Advance(output.Capacity + 1));
             }
+
+            using (var output = new ArrayBufferWriter())
+            {
+                WriteData(output, 100);
+                IBufferWriter<byte> bufferWriter = output;
+                Assert.Throws<InvalidOperationException>(() => bufferWriter.Advance(output.BytesAvailable + 1));
+            }
         }
 
         [Fact]
+        [OuterLoop]
         public static void InvalidAdvance_Large()
         {
             using (var output = new ArrayBufferWriter(2_000_000_000))
@@ -151,6 +168,7 @@ namespace System.Buffers.Tests
                 WriteData(output, 1_000);
                 IBufferWriter<byte> bufferWriter = output;
                 Assert.Throws<InvalidOperationException>(() => bufferWriter.Advance(int.MaxValue));
+                Assert.Throws<InvalidOperationException>(() => bufferWriter.Advance(2_000_000_000 - 1_000 + 1));
             }
         }
 

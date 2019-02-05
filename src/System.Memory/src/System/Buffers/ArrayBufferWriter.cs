@@ -161,7 +161,7 @@ namespace System.Buffers
                 throw new ArgumentException(nameof(count));
 
             if (_written > _rentedBuffer.Length - count)
-                throw new InvalidOperationException("Cannot advance past the end of the buffer.");
+                ThrowHelper.ThrowInvalidOperationException(_rentedBuffer.Length);
 
             _written += count;
         }
