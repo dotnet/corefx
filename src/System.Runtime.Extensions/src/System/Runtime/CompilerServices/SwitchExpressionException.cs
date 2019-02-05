@@ -41,15 +41,7 @@ namespace System.Runtime.CompilerServices
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
-            if (UnmatchedValue is null) 
-            {
-                info.AddValue(nameof(UnmatchedValue), null, typeof(object));
-            }
-            else
-            {
-                info.AddValue(nameof(UnmatchedValue), UnmatchedValue.GetType().IsSerializable ? 
-                    UnmatchedValue : UnmatchedValue.ToString(), typeof(object));
-            }
+            info.AddValue(nameof(UnmatchedValue), UnmatchedValue, typeof(object));
         }
 
         public override string Message
