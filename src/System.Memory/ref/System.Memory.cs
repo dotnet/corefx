@@ -112,7 +112,7 @@ namespace System
 }
 namespace System.Buffers
 {
-    public sealed partial class ArrayBufferWriter : System.IDisposable
+    public sealed partial class ArrayBufferWriter : System.Buffers.IBufferWriter<byte>, System.IDisposable
     {
         public ArrayBufferWriter() { }
         public ArrayBufferWriter(int initialCapacity) { }
@@ -122,13 +122,13 @@ namespace System.Buffers
         public System.ReadOnlyMemory<byte> OutputAsMemory { get { throw null; } }
         public System.ReadOnlySpan<byte> OutputAsSpan { get { throw null; } }
         public long TotalBytesWritten { get { throw null; } }
-        public void Advance(int count) { }
         public void CopyToAndReset(System.IO.Stream stream) { }
         public System.Threading.Tasks.Task CopyToAndResetAsync(System.IO.Stream stream, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public void Dispose() { }
-        public System.Memory<byte> GetMemory(int sizeHint = 0) { throw null; }
-        public System.Span<byte> GetSpan(int sizeHint = 0) { throw null; }
         public void Reset() { }
+        void System.Buffers.IBufferWriter<System.Byte>.Advance(int count) { }
+        System.Memory<byte> System.Buffers.IBufferWriter<System.Byte>.GetMemory(int sizeHint) { throw null; }
+        System.Span<byte> System.Buffers.IBufferWriter<System.Byte>.GetSpan(int sizeHint) { throw null; }
     }
     public static partial class BuffersExtensions
     {

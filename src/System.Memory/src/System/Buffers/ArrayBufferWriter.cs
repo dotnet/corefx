@@ -144,6 +144,7 @@ namespace System.Buffers
             ArrayPool<byte>.Shared.Return(_rentedBuffer, clearArray: true);
             _rentedBuffer = null;
             _written = 0;
+            _totalWritten = 0;
         }
 
         private void CheckIfDisposed()
