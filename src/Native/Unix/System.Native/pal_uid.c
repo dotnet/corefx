@@ -121,10 +121,14 @@ int32_t SystemNative_GetGroupList(const char* name, uint32_t group, uint32_t* gr
         rv = getgrouplist(name, group, groups, &groupsAvailable);
 #endif
 
-        if (rv == -1 && groupsAvailable > *ngroups)
+        // Check if the buffer is too small.
+        if (rv == -1 &&
+            errno == 0 && /* musl doesn't update ngroups when it encounters an error */
+            groupsAvailable >= *ngroups)
         {
-            // group list is too small, return available groups.
-            *ngroups = groupsAvailable;
+            // When the buffer is too small, some platforms (Linux) return the number of groups
+            // found for the user. While other platforms (OSX), return truncate to ngroups.
+            *ngroups = groupsAvailable > *ngroups ? groupsAvailable : *ngroups * 2;
             return rv;
         }
     } while (rv == -1 && errno == EINTR);
