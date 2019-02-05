@@ -54,7 +54,16 @@ namespace System.Diagnostics
         ///  - '|a000b421-5d183ab6.1.8e2d4c28_' - Id of the grand child activity. It was started in another process and ends with '_'<para />
         /// 'a000b421-5d183ab6' is a <see cref="RootId"/> for the first Activity and all its children
         /// </example>
-        public string Id { get; private set; }
+        public string Id
+        {
+            get
+            {
+                // if we represented it as a traceId-spanId, convert it to a string.  
+                if (_id == null && _spanIdSet)
+                    _id = "00-" + _traceId.AsHexString + "-" + _spanId.AsHexString + "-00";
+                return _id;
+            }
+        }
 
         /// <summary>
         /// The time that operation started.  It will typically be initialized when <see cref="Start"/>
@@ -78,7 +87,16 @@ namespace System.Diagnostics
         /// <para/>
         /// See <see href="https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#id-format"/> for more details
         /// </summary>
-        public string ParentId { get; private set; }
+        public string ParentId
+        {
+            get
+            {
+                // if we represented it as a traceId-spanId, convert it to a string.  
+                if (_parentId == null && _parentSpanIdSet)
+                    _parentId = "00-" + _traceId.AsHexString + "-" + _parentSpanId.AsHexString + "-00";
+                return _parentId;
+            }
+        }
 
         /// <summary>
         /// Root Id is substring from Activity.Id (or ParentId) between '|' (or beginning) and first '.'.
@@ -213,7 +231,7 @@ namespace System.Diagnostics
             {
                 NotifyError(new InvalidOperationException($"Trying to set {nameof(ParentId)} on activity which has {nameof(Parent)}"));
             }
-            else if (ParentId != null)
+            else if (ParentId != null || _parentSpanIdSet)
             {
                 NotifyError(new InvalidOperationException($"{nameof(ParentId)} is already set"));
             }
@@ -223,7 +241,7 @@ namespace System.Diagnostics
             }
             else
             {
-                ParentId = parentId;
+                _parentId = parentId;
             }
             return this;
         }
@@ -238,14 +256,16 @@ namespace System.Diagnostics
             {
                 NotifyError(new InvalidOperationException($"Trying to set {nameof(ParentId)} on activity which has {nameof(Parent)}"));
             }
-            else if (ParentId != null)
+            else if (ParentId != null || _parentSpanIdSet)
             {
                 NotifyError(new InvalidOperationException($"{nameof(ParentId)} is already set"));
             }
             else
             {
-                _traceId = traceId;
-                _spanId = spanId;
+                _traceId = traceId;     // The child will share the parent's traceId.  
+                _traceIdSet = true;
+                _parentSpanId = spanId;
+                _parentSpanIdSet = true;
             }
             return this;
         }
@@ -322,7 +342,7 @@ namespace System.Diagnostics
                     var parent = Current;
                     if (parent != null)
                     {
-                        ParentId = parent.Id;
+                        _parentId = parent.Id;
 
                         // The parent change should not form a loop.   We are actually guaranteed this because
                         // 1. Unstarted activities can't be 'Current' (thus can't be 'parent'), we throw if you try.  
@@ -332,23 +352,25 @@ namespace System.Diagnostics
                 }
 
                 if (StartTimeUtc == default(DateTime))
-                {
                     StartTimeUtc = GetUtcNow();
-                }
 
                 // Figure out what format to use.  
-                if (ForceDefaultIdFormat || ParentId == null)
+                if (ForceDefaultIdFormat)
                     IdFormat = DefaultIdFormat;
                 else if (Parent != null)
                     IdFormat = Parent.IdFormat;
+                else if (_parentSpanIdSet)
+                    IdFormat = ActivityIdFormat.W3C;
+                else if (_parentId != null)
+                    IdFormat = IsW3CId(_parentId) ? ActivityIdFormat.W3C : ActivityIdFormat.Hierarchical;
                 else
-                    IdFormat = IsW3CId(ParentId) ? ActivityIdFormat.W3C : ActivityIdFormat.Hierarchical;
+                    IdFormat = DefaultIdFormat;
 
-
+                // Generate the appropriate ID.  
                 if (IdFormat == ActivityIdFormat.W3C)
-                    Id = GenerateW3CId();
+                    GenerateW3CId();
                 else
-                    Id = GenerateId();
+                    _id = GenerateHierarchicalId();
 
                 SetCurrent(this);
             }
@@ -426,9 +448,11 @@ namespace System.Diagnostics
             {
                 if (!_spanIdSet)
                 {
-                    if (IdFormat == ActivityIdFormat.W3C)
-                        _spanId = new SpanId(Id.Substring(35, 16));
-                    _spanIdSet = true;
+                    if (_id != null && IdFormat == ActivityIdFormat.W3C)
+                    {
+                        _spanId = new SpanId(((ReadOnlySpan<char>)_id).Slice(36, 16));
+                        _spanIdSet = true;
+                    }
                 }
                 return ref _spanId;
             }
@@ -444,11 +468,30 @@ namespace System.Diagnostics
             {
                 if (!_traceIdSet)
                 {
-                    if (IdFormat == ActivityIdFormat.W3C)
-                        _traceId = new TraceId(RootId);
-                    _traceIdSet = true;
+                    if (_id != null && IdFormat == ActivityIdFormat.W3C)
+                    {
+                        _traceId = new TraceId(((ReadOnlySpan<char>)_id).Slice(3, 32));
+                        _traceIdSet = true;
+                    }
                 }
                 return ref _traceId;
+            }
+        }
+
+        /// <summary>
+        /// If the parent Activity ID has the W3C format, this returns the ID for the SpanId part of the ParentId.  
+        /// Otherwise it returns a zero SpanId. 
+        /// </summary>
+        public ref readonly SpanId ParentSpanId
+        {
+            get
+            {
+                if (!_parentSpanIdSet && _parentId != null && IsW3CId(_parentId))
+                {
+                    _parentSpanId = new SpanId(((ReadOnlySpan<char>)_parentId).Slice(36, 16));
+                    _parentSpanIdSet = true;
+                }
+                return ref _parentSpanId;
             }
         }
 
@@ -481,7 +524,7 @@ namespace System.Diagnostics
         /// ID format will always be the DefaultIdFormat even if the ParentID is define and is
         /// a different format. 
         /// </summary>
-        public bool ForceDefaultIdFormat { get; set; }
+        public static bool ForceDefaultIdFormat { get; set; }
 
         #region private 
         /// <summary>
@@ -491,10 +534,12 @@ namespace System.Diagnostics
         {
             // A W3CId is  
             //  * 2 chars Version
+            //  * 1 char - char
             //  * 32 chars traceId
+            //  * 1 char - char 
             //  * 16 chars spanId
+            //  * 1 char - char
             //  * 2 chars flags 
-            //  * 3 chars - separators.  
             //  = 55 chars (see https://w3c.github.io/trace-context)
             // We require that all non-WC3IDs NOT start with a digit.  
             return id.Length == 55 && char.IsDigit(id[0]);
@@ -504,18 +549,26 @@ namespace System.Diagnostics
             return id.Length == 55 && char.IsDigit((char)id[0]);
         }
 
-        private string GenerateW3CId()
+        /// <summary>
+        /// Set the ID (lazily, avoiding strings if possible) to a W3C ID (using the
+        /// traceId from the parent if possible 
+        /// </summary>
+        private void GenerateW3CId()
         {
-            string newSpanId = Guid.NewGuid().ToString("n").Substring(16, 16);
-            if (ParentId != null && IsW3CId(ParentId))
+            // Get the TraceId from the parent or make a new one.  
+            if (!_traceIdSet)
             {
-                return ParentId.Substring(0, 36) + newSpanId + ParentId.Substring(52, 3);
+                if (Parent != null && Parent.IdFormat == ActivityIdFormat.W3C)
+                    _traceId = Parent.TraceId;
+                else if (_parentId != null && IsW3CId(_parentId))
+                    _traceId = new TraceId(((ReadOnlySpan<char>)_parentId).Slice(3, 32));
+                else
+                    _traceId = TraceId.NewTraceId();
+                _traceIdSet = true;
             }
-            else
-            {
-                string newTraceId = Guid.NewGuid().ToString("n");
-                return "00-" + newTraceId + "-" + newSpanId + "-00";
-            }
+            // Create a new SpanID. 
+            _spanId = SpanId.NewSpanId();
+            _spanIdSet = true;
         }
 
         private static void NotifyError(Exception exception)
@@ -531,7 +584,10 @@ namespace System.Diagnostics
             catch { }
         }
 
-        private string GenerateId()
+        /// <summary>
+        /// Returns a new ID using the Hierarchical Id 
+        /// </summary>
+        private string GenerateHierarchicalId()
         {
             string ret;
             if (Parent != null)
@@ -664,10 +720,19 @@ namespace System.Diagnostics
         private KeyValueListNode _tags;
         private KeyValueListNode _baggage;
         private string _traceState;
-        private SpanId _spanId;
-        private bool _spanIdSet;
+
+        // State associated with ID.  It can be represented by a string or by TraceId, SpanId.  
+        private string _id;
         private TraceId _traceId;
         private bool _traceIdSet;
+        private SpanId _spanId;
+        private bool _spanIdSet;
+
+        // State associated with ParentId.  It can be represented by a string or by TraceId, SpanId.  
+        private string _parentId;
+        private SpanId _parentSpanId;
+        private bool _parentSpanIdSet;
+
         private bool isFinished;
         #endregion // private
     }

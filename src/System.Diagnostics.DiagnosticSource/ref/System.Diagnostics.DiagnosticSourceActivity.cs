@@ -24,12 +24,13 @@ namespace System.Diagnostics
         }
         public static System.Diagnostics.ActivityIdFormat DefaultIdFormat { get { throw null; } set { } }
         public System.TimeSpan Duration { get { throw null; } }
-        public bool ForceDefaultIdFormat { get { throw null; } set { } }
+        public static bool ForceDefaultIdFormat { get { throw null; } set { } }
         public string Id { get { throw null; } }
         public System.Diagnostics.ActivityIdFormat IdFormat { get { throw null; } }
         public string OperationName { get { throw null; } }
         public System.Diagnostics.Activity Parent { get { throw null; } }
         public string ParentId { get { throw null; } }
+        public ref readonly System.Diagnostics.SpanId ParentSpanId { get { throw null; } }
         public string RootId { get { throw null; } }
         public ref readonly System.Diagnostics.SpanId SpanId { get { throw null; } }
         public System.DateTime StartTimeUtc { get { throw null; } }
