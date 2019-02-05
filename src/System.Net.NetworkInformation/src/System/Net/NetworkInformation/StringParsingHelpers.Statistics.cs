@@ -124,7 +124,7 @@ namespace System.Net.NetworkInformation
         // In the snmp6 file, each name is prefixed with "IP6".
 
         public bool Forwarding; // Forwarding
-        public long DefaultTtl; // DefaultTTL
+        public int DefaultTtl; // DefaultTTL
 
         public long InReceives; // InReceives
         public long InHeaderErrors; // InHdrErrors
@@ -277,7 +277,7 @@ namespace System.Net.NetworkInformation
             return new IPGlobalStatisticsTable()
             {
                 Forwarding = parser.MoveAndExtractNext() == "1",
-                DefaultTtl = parser.ParseNextInt64(),
+                DefaultTtl = parser.ParseNextInt32(),
                 InReceives = parser.ParseNextInt64(),
                 InHeaderErrors = parser.ParseNextInt64(),
                 InAddressErrors = parser.ParseNextInt64(),
