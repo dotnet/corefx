@@ -123,7 +123,7 @@ namespace System.Buffers
             _index += count;
         }
 
-        public Memory<T> GetMemory(int sizeHint)
+        public Memory<T> GetMemory(int sizeHint = 0)
         {
             CheckIfDisposed();
 
@@ -131,7 +131,7 @@ namespace System.Buffers
             return _rentedBuffer.AsMemory(_index);
         }
 
-        public Span<T> GetSpan(int sizeHint)
+        public Span<T> GetSpan(int sizeHint = 0)
         {
             CheckIfDisposed();
 
