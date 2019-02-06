@@ -13,7 +13,7 @@
     <ProjectReference Include="..\src\System.IO.Ports.csproj" />
   </ItemGroup>
   <Target Name="GenerateRuntimeJson"
-          BeforeTargets="Build"
+          BeforeTargets="CreatePackage"
           Inputs="runtime.json.template"
           Outputs="runtime.json">
     <WriteLinesToFile File="runtime.json"
