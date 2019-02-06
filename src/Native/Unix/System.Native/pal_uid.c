@@ -14,6 +14,17 @@
 #include <grp.h>
 #include <pwd.h>
 
+// Linux c-libraries (glibc, musl) provide a thread-safe getgrouplist.
+// OSX man page mentions explicitly the implementation is not thread safe,
+// due to using getgrent.
+#ifndef __linux__
+#define USE_GROUPLIST_LOCK
+#endif
+
+#ifdef USE_GROUPLIST_LOCK
+#include <pthread.h>
+#endif
+
 static int32_t ConvertNativePasswdToPalPasswd(int error, struct passwd* nativePwd, struct passwd* result, Passwd* pwd)
 {
     // positive error number returned -> failure other than entry-not-found
@@ -97,6 +108,10 @@ uint32_t SystemNative_GetUid()
     return getuid();
 }
 
+#ifdef USE_GROUPLIST_LOCK
+static pthread_mutex_t s_groupLock = PTHREAD_MUTEX_INITIALIZER;
+#endif
+
 int32_t SystemNative_GetGroupList(const char* name, uint32_t group, uint32_t* groups, int32_t* ngroups)
 {
     assert(name != NULL);
@@ -114,11 +129,25 @@ int32_t SystemNative_GetGroupList(const char* name, uint32_t group, uint32_t* gr
         errno = 0;
         groupsAvailable = *ngroups;
 
+#ifdef USE_GROUPLIST_LOCK
+        rv = pthread_mutex_lock(&s_groupLock);
+        if (rv != 0)
+        {
+            errno = rv;
+            rv = -1;
+            break;
+        }
+#endif
+
 #ifdef __APPLE__
         // On OSX groups are passed as a signed int.
         rv = getgrouplist(name, (int)group, (int*)groups, &groupsAvailable);
 #else
         rv = getgrouplist(name, group, groups, &groupsAvailable);
+#endif
+
+#ifdef USE_GROUPLIST_LOCK
+        pthread_mutex_unlock(&s_groupLock);
 #endif
 
         // Check if the buffer is too small.
