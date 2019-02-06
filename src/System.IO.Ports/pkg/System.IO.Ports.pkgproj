@@ -12,7 +12,10 @@
     <InboxOnTargetFramework Include="uap10.0.16299" />
     <ProjectReference Include="..\src\System.IO.Ports.csproj" />
   </ItemGroup>
-  <Target Name="GenerateRuntimeJson" BeforeTargets="Build">
+  <Target Name="GenerateRuntimeJson"
+          BeforeTargets="Build"
+          Inputs="runtime.json.template"
+          Outputs="runtime.json">
     <WriteLinesToFile File="runtime.json"
                       Lines="$([System.IO.File]::ReadAllText('runtime.json.template').Replace('[[PackageVersion]]', '$(PackageVersion)'))"
                       Overwrite="true" />
