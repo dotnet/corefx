@@ -329,11 +329,11 @@
   </ItemGroup>
   <!-- Windows dependencies for Integrated Authentication for MANAGED_SNI build -->
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' And '$(IsPartialFacadeAssembly)' != 'true' ">
-    <Compile Include="$(CommonPath)\System\Net\Security\SecurityBufferType.cs">
-      <Link>Common\System\Net\Security\SecurityBufferType.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\Security\SecurityBufferType.Windows.cs">
+      <Link>Common\System\Net\Security\SecurityBufferType.Windows.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Net\Security\SecurityBuffer.cs">
-      <Link>Common\System\Net\Security\SecurityBuffer.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\Security\SecurityBuffer.Windows.cs">
+      <Link>Common\System\Net\Security\SecurityBuffer.Windows.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\Interop.SecPkgContext_ApplicationProtocol.cs">
       <Link>Common\Interop\Windows\SChannel\Interop.SecPkgContext_ApplicationProtocol.cs</Link>
