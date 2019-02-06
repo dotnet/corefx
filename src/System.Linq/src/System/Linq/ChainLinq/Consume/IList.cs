@@ -9,9 +9,9 @@ namespace System.Linq.ChainLinq.Consume
             var chain = composition.Compose(consumer);
             try
             {
-                if (chain is Optimizations.IPipelineIList<T> optimized)
+                if (chain is Optimizations.IPipeline<(IList<T>,int,int)> optimized)
                 {
-                    optimized.Pipeline(array, start, count);
+                    optimized.Pipeline((array, start, count));
                 }
                 else
                 {

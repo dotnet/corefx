@@ -12,9 +12,9 @@ namespace System.Linq.ChainLinq.Links
         public Link<T, U> Skip(int toSkip) => this;
 
         sealed partial class Activity
-            : Optimizations.IPipelineArray<T>
-            , Optimizations.IPipelineList<T>
-            , Optimizations.IPipelineEnumerable<T>
+            : Optimizations.IPipeline<T[]>
+            , Optimizations.IPipeline<List<T>>
+            , Optimizations.IPipeline<IEnumerable<T>>
         {
             public void Pipeline(T[] array)
             {

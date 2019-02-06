@@ -20,9 +20,9 @@ namespace System.Linq.ChainLinq.Links
 
         sealed class Activity
             : Activity<T, U>
-            , Optimizations.IPipelineArray<T>
-            , Optimizations.IPipelineList<T>
-            , Optimizations.IPipelineEnumerable<T>
+            , Optimizations.IPipeline<T[]>
+            , Optimizations.IPipeline<List<T>>
+            , Optimizations.IPipeline<IEnumerable<T>>
         {
             private readonly Func<T, U> _selector;
             private readonly Func<U, bool> _predicate;
