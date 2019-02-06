@@ -779,21 +779,8 @@ namespace System.Net.Security
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            ThreeSecurityBuffers stackBuffers = default;
-            Span<SecurityBuffer> incomingSecurityBuffers = MemoryMarshal.CreateSpan(ref stackBuffers._item0, 3);
-            SecurityBuffer incomingSecurity = null;
-
-            if (input != null)
-            {
-                incomingSecurity = new SecurityBuffer(input, offset, count, SecurityBufferType.SECBUFFER_TOKEN);
-            }
-
-            SslStreamPal.GetIncomingSecurityBuffers(_sslAuthenticationOptions, ref incomingSecurity, ref incomingSecurityBuffers);
-
-            SecurityBuffer outgoingSecurity = new SecurityBuffer(null, SecurityBufferType.SECBUFFER_TOKEN);
-
+            byte[] result = Array.Empty<byte>();
             SecurityStatusPal status = default;
-
             bool cachedCreds = false;
             byte[] thumbPrint = null;
 
@@ -818,8 +805,8 @@ namespace System.Net.Security
                         status = SslStreamPal.AcceptSecurityContext(
                                       ref _credentialsHandle,
                                       ref _securityContext,
-                                      incomingSecurityBuffers,
-                                      outgoingSecurity,
+                                      input != null ? new ArraySegment<byte>(input, offset, count) : default,
+                                      ref result,
                                       _sslAuthenticationOptions);
                     }
                     else
@@ -828,8 +815,8 @@ namespace System.Net.Security
                                        ref _credentialsHandle,
                                        ref _securityContext,
                                        _sslAuthenticationOptions.TargetHost,
-                                       incomingSecurityBuffers,
-                                       outgoingSecurity,
+                                      input != null ? new ArraySegment<byte>(input, offset, count) : default,
+                                       ref result,
                                        _sslAuthenticationOptions);
                     }
                 } while (cachedCreds && _credentialsHandle == null);
@@ -857,7 +844,7 @@ namespace System.Net.Security
                 }
             }
 
-            output = outgoingSecurity.token;
+            output = result;
             if (_negotiatedApplicationProtocol == default)
             {
                 // try to get ALPN info unless we already have it. (this function can be called multiple times)

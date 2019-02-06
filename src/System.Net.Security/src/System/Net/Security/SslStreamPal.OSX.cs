@@ -35,53 +35,22 @@ namespace System.Net.Security
         public static SecurityStatusPal AcceptSecurityContext(
             ref SafeFreeCredentials credential,
             ref SafeDeleteContext context,
-            ReadOnlySpan<SecurityBuffer> inputBuffers,
-            SecurityBuffer outputBuffer,
+            ArraySegment<byte> inputBuffer,
+            ref byte[] outputBuffer,
             SslAuthenticationOptions sslAuthenticationOptions)
         {
-            if (inputBuffers.Length != 0)
-            {
-                Debug.Assert(inputBuffers.Length == 2);
-                Debug.Assert(inputBuffers[1].token == null);
-
-                return HandshakeInternal(credential, ref context, inputBuffers[0], outputBuffer, sslAuthenticationOptions);
-            }
-            else
-            {
-                return HandshakeInternal(credential, ref context, inputBuffer: null, outputBuffer, sslAuthenticationOptions);
-            }
+            return HandshakeInternal(credential, ref context, inputBuffer, ref outputBuffer, sslAuthenticationOptions);
         }
 
         public static SecurityStatusPal InitializeSecurityContext(
             ref SafeFreeCredentials credential,
             ref SafeDeleteContext context,
             string targetName,
-            ReadOnlySpan<SecurityBuffer> inputBuffers,
-            SecurityBuffer outputBuffer,
+            ArraySegment<byte> inputBuffer,
+            ref byte[] outputBuffer,
             SslAuthenticationOptions sslAuthenticationOptions)
         {
-#if DEBUG
-            Debug.Assert(inputBuffers.Length == 1 || inputBuffers.Length == 2);
-            if (inputBuffers.Length == 2)
-            {
-                Debug.Assert(inputBuffers[1].token == null);
-            }
-#endif
-            return HandshakeInternal(credential, ref context, inputBuffers[0], outputBuffer, sslAuthenticationOptions);
-        }
-
-        public static void GetIncomingSecurityBuffers(SslAuthenticationOptions options, ref SecurityBuffer incomingSecurity, ref Span<SecurityBuffer> incomingSecurityBuffers)
-        {
-            if (incomingSecurity != null)
-            {
-                incomingSecurityBuffers[0] = incomingSecurity;
-                incomingSecurityBuffers[1] = new SecurityBuffer(null, 0, 0, SecurityBufferType.SECBUFFER_EMPTY);
-                incomingSecurityBuffers = incomingSecurityBuffers.Slice(0, 2);
-            }
-            else
-            {
-                incomingSecurityBuffers = default;
-            }
+            return HandshakeInternal(credential, ref context, inputBuffer, ref outputBuffer, sslAuthenticationOptions);
         }
 
         public static SafeFreeCredentials AcquireCredentialsHandle(
@@ -264,8 +233,8 @@ namespace System.Net.Security
         private static SecurityStatusPal HandshakeInternal(
             SafeFreeCredentials credential,
             ref SafeDeleteContext context,
-            SecurityBuffer inputBuffer,
-            SecurityBuffer outputBuffer,
+            ArraySegment<byte> inputBuffer,
+            ref byte[] outputBuffer,
             SslAuthenticationOptions sslAuthenticationOptions)
         {
             Debug.Assert(!credential.IsInvalid);
@@ -291,9 +260,9 @@ namespace System.Net.Security
                     }
                 }
 
-                if (inputBuffer != null && inputBuffer.size > 0)
+                if (inputBuffer.Array != null && inputBuffer.Count > 0)
                 {
-                    sslContext.Write(inputBuffer.token, inputBuffer.offset, inputBuffer.size);
+                    sslContext.Write(inputBuffer.Array, inputBuffer.Offset, inputBuffer.Count);
                 }
 
                 SafeSslHandle sslHandle = sslContext.SslContext;
@@ -304,11 +273,7 @@ namespace System.Net.Security
                     status = PerformHandshake(sslHandle);
                 }
 
-                byte[] output = sslContext.ReadPendingWrites();
-                outputBuffer.offset = 0;
-                outputBuffer.size = output?.Length ?? 0;
-                outputBuffer.token = output;
-
+                outputBuffer = sslContext.ReadPendingWrites();
                 return status;
             }
             catch (Exception exc)

@@ -399,7 +399,7 @@ namespace System.Net.Security
             Interop.SspiCli.ContextFlags inFlags,
             Interop.SspiCli.Endianness endianness,
             ReadOnlySpan<SecurityBuffer> inSecBuffers,
-            SecurityBuffer outSecBuffer,
+            ref SecurityBuffer outSecBuffer,
             ref Interop.SspiCli.ContextFlags outFlags)
         {
 #if TRACE_VERBOSE
@@ -447,7 +447,7 @@ namespace System.Net.Security
                     inSecurityBufferDescriptor.pBuffers = inUnmanagedBufferPtr;
                     for (int index = 0; index < inSecurityBufferDescriptor.cBuffers; ++index)
                     {
-                        SecurityBuffer securityBuffer = inSecBuffers[index];
+                        ref readonly SecurityBuffer securityBuffer = ref inSecBuffers[index];
 
                         // Copy the SecurityBuffer content into unmanaged place holder.
                         inUnmanagedBuffer[index].cbBuffer = securityBuffer.size;
@@ -629,7 +629,7 @@ namespace System.Net.Security
             Interop.SspiCli.ContextFlags inFlags,
             Interop.SspiCli.Endianness endianness,
             ReadOnlySpan<SecurityBuffer> inSecBuffers,
-            SecurityBuffer outSecBuffer,
+            ref SecurityBuffer outSecBuffer,
             ref Interop.SspiCli.ContextFlags outFlags)
         {
 #if TRACE_VERBOSE
@@ -675,10 +675,9 @@ namespace System.Net.Security
 
                     // Fix Descriptor pointer that points to unmanaged SecurityBuffers.
                     inSecurityBufferDescriptor.pBuffers = inUnmanagedBufferPtr;
-                    SecurityBuffer securityBuffer;
                     for (int index = 0; index < inSecurityBufferDescriptor.cBuffers; ++index)
                     {
-                        securityBuffer = inSecBuffers[index];
+                        ref readonly SecurityBuffer securityBuffer = ref inSecBuffers[index];
 
                         // Copy the SecurityBuffer content into unmanaged place holder.
                         inUnmanagedBuffer[index].cbBuffer = securityBuffer.size;
@@ -844,13 +843,13 @@ namespace System.Net.Security
 
         internal static unsafe int CompleteAuthToken(
             ref SafeDeleteContext refContext,
-            SecurityBuffer inSecBuffer)
+            in SecurityBuffer inSecBuffer)
         {
             if (NetEventSource.IsEnabled)
             {
                 NetEventSource.Enter(null, "SafeDeleteContext::CompleteAuthToken");
                 NetEventSource.Info(null, $"    refContext       = {refContext}");
-                NetEventSource.Info(null, $"    inSecBuffer   = {inSecBuffer}");
+                NetEventSource.Info(null, $"    inSecBuffer      = {inSecBuffer}");
             }
 
             var inSecurityBufferDescriptor = new Interop.SspiCli.SecBufferDesc(1);
@@ -907,7 +906,7 @@ namespace System.Net.Security
 
         internal static unsafe int ApplyControlToken(
             ref SafeDeleteContext refContext,
-            SecurityBuffer inSecBuffer)
+            in SecurityBuffer inSecBuffer)
         {
             if (NetEventSource.IsEnabled)
             {
@@ -933,7 +932,7 @@ namespace System.Net.Security
                     inSecBuffer.token == null || inSecBuffer.token.Length == 0 ? IntPtr.Zero :
                     (IntPtr)(pinnedInSecBufferToken + inSecBuffer.offset);
 #if TRACE_VERBOSE
-                    if (NetEventSource.IsEnabled) NetEventSource.Info(null, $"SecBuffer: cbBuffer:{securityBuffer.size} BufferType:{securityBuffer.type}");
+                if (NetEventSource.IsEnabled) NetEventSource.Info(null, $"SecBuffer: cbBuffer:{inSecBuffer.size} BufferType:{inSecBuffer.type}");
 #endif
 
                 Interop.SspiCli.CredHandle contextHandle = refContext != null ? refContext._handle : default;

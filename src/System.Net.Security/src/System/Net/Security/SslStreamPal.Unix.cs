@@ -28,28 +28,15 @@ namespace System.Net.Security
         }
 
         public static SecurityStatusPal AcceptSecurityContext(ref SafeFreeCredentials credential, ref SafeDeleteContext context,
-            ReadOnlySpan<SecurityBuffer> inputBuffers, SecurityBuffer outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)
+            ArraySegment<byte> inputBuffer, ref byte[] outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)
         {
-            return HandshakeInternal(credential, ref context, inputBuffers.Length != 0 ? inputBuffers[0] : null, outputBuffer, sslAuthenticationOptions);
+            return HandshakeInternal(credential, ref context, inputBuffer, ref outputBuffer, sslAuthenticationOptions);
         }
 
-        public static SecurityStatusPal InitializeSecurityContext(ref SafeFreeCredentials credential, ref SafeDeleteContext context, string targetName, ReadOnlySpan<SecurityBuffer> inputBuffers, SecurityBuffer outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)
+        public static SecurityStatusPal InitializeSecurityContext(ref SafeFreeCredentials credential, ref SafeDeleteContext context, string targetName,
+            ArraySegment<byte> inputBuffer, ref byte[] outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)
         {
-            return HandshakeInternal(credential, ref context, inputBuffers.Length != 0 ? inputBuffers[0] : null, outputBuffer, sslAuthenticationOptions);
-        }
-
-        public static void GetIncomingSecurityBuffers(SslAuthenticationOptions options, ref SecurityBuffer incomingSecurity, ref Span<SecurityBuffer> incomingSecurityBuffers)
-        {
-            if (incomingSecurity != null)
-            {
-                incomingSecurityBuffers[0] = incomingSecurity;
-                incomingSecurityBuffers[1] = new SecurityBuffer(null, 0, 0, SecurityBufferType.SECBUFFER_EMPTY);
-                incomingSecurityBuffers = incomingSecurityBuffers.Slice(0, 2);
-            }
-            else
-            {
-                incomingSecurityBuffers = default;
-            }
+            return HandshakeInternal(credential, ref context, inputBuffer, ref outputBuffer, sslAuthenticationOptions);
         }
 
         public static SafeFreeCredentials AcquireCredentialsHandle(X509Certificate certificate,
@@ -112,8 +99,8 @@ namespace System.Net.Security
             return Interop.Ssl.ConvertAlpnProtocolListToByteArray(applicationProtocols);
         }
 
-        private static SecurityStatusPal HandshakeInternal(SafeFreeCredentials credential, ref SafeDeleteContext context, SecurityBuffer inputBuffer,
-            SecurityBuffer outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)
+        private static SecurityStatusPal HandshakeInternal(SafeFreeCredentials credential, ref SafeDeleteContext context,
+            ArraySegment<byte> inputBuffer, ref byte[] outputBuffer, SslAuthenticationOptions sslAuthenticationOptions)
         {
             Debug.Assert(!credential.IsInvalid);
 
@@ -128,13 +115,13 @@ namespace System.Net.Security
                 int outputSize;
                 bool done;
 
-                if (null == inputBuffer)
+                if (inputBuffer.Array == null)
                 {
                     done = Interop.OpenSsl.DoSslHandshake(((SafeDeleteSslContext)context).SslContext, null, 0, 0, out output, out outputSize);
                 }
                 else
                 {
-                    done = Interop.OpenSsl.DoSslHandshake(((SafeDeleteSslContext)context).SslContext, inputBuffer.token, inputBuffer.offset, inputBuffer.size, out output, out outputSize);
+                    done = Interop.OpenSsl.DoSslHandshake(((SafeDeleteSslContext)context).SslContext, inputBuffer.Array, inputBuffer.Offset, inputBuffer.Count, out output, out outputSize);
                 }
 
                 // When the handshake is done, and the context is server, check if the alpnHandle target was set to null during ALPN.
@@ -147,9 +134,10 @@ namespace System.Net.Security
                     return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, Interop.OpenSsl.CreateSslException(SR.net_alpn_failed));
                 }
 
-                outputBuffer.size = outputSize;
-                outputBuffer.offset = 0;
-                outputBuffer.token = outputSize > 0 ? output : null;
+                outputBuffer =
+                    outputSize == 0 ? null :
+                    outputSize == output.Length ? output :
+                    new Span<byte>(output, 0, outputSize).ToArray();
 
                 return new SecurityStatusPal(done ? SecurityStatusPalErrorCode.OK : SecurityStatusPalErrorCode.ContinueNeeded);
             }

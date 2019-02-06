@@ -1606,7 +1606,7 @@ namespace System.Net.Security
 #if TRACE_VERBOSE
                 if (bytes[1] != 3 && NetEventSource.IsEnabled)
                 {
-                    if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"WARNING: SslState::DetectFraming() SSL protocol is > 3, trying SSL3 framing in retail = {bytes[i]:x}");
+                    if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"WARNING: SslState::DetectFraming() SSL protocol is > 3, trying SSL3 framing in retail = {bytes[1]:x}");
                 }
 #endif
 

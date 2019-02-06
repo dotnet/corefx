@@ -212,26 +212,7 @@ namespace System.Net
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, incomingBlob);
 
-            TwoSecurityBuffers stackBuffers = default;
-            Span<SecurityBuffer> inSecurityBufferArray = default;
-            if (incomingBlob != null && _channelBinding != null)
-            {
-                inSecurityBufferArray = MemoryMarshal.CreateSpan(ref stackBuffers._item0, 2);
-                inSecurityBufferArray[0] = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
-                inSecurityBufferArray[1] = new SecurityBuffer(_channelBinding);
-            }
-            else if (incomingBlob != null)
-            {
-                inSecurityBufferArray = MemoryMarshal.CreateSpan(ref stackBuffers._item0, 1);
-                inSecurityBufferArray[0] = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
-            }
-            else if (_channelBinding != null)
-            {
-                inSecurityBufferArray = MemoryMarshal.CreateSpan(ref stackBuffers._item0, 1);
-                inSecurityBufferArray[0] = new SecurityBuffer(_channelBinding);
-            }
-
-            var outSecurityBuffer = new SecurityBuffer(_tokenSize, SecurityBufferType.SECBUFFER_TOKEN);
+            var result = new byte[_tokenSize];
 
             bool firstTime = _securityContext == null;
             try
@@ -244,19 +225,20 @@ namespace System.Net
                         ref _securityContext,
                         _spn,
                         _requestedContextFlags,
-                        inSecurityBufferArray,
-                        outSecurityBuffer,
+                        incomingBlob,
+                        _channelBinding,
+                        ref result,
                         ref _contextFlags);
 
                     if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"SSPIWrapper.InitializeSecurityContext() returns statusCode:0x{((int)statusCode.ErrorCode):x8} ({statusCode})");
 
                     if (statusCode.ErrorCode == SecurityStatusPalErrorCode.CompleteNeeded)
                     {
-                        statusCode = NegotiateStreamPal.CompleteAuthToken(ref _securityContext, outSecurityBuffer);
+                        statusCode = NegotiateStreamPal.CompleteAuthToken(ref _securityContext, result);
 
                         if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"SSPIWrapper.CompleteAuthToken() returns statusCode:0x{((int)statusCode.ErrorCode):x8} ({statusCode})");
 
-                        outSecurityBuffer.token = null;
+                        result = null;
                     }
                 }
                 else
@@ -266,8 +248,9 @@ namespace System.Net
                         _credentialsHandle,
                         ref _securityContext,
                         _requestedContextFlags,
-                        inSecurityBufferArray,
-                        outSecurityBuffer,
+                        incomingBlob,
+                        _channelBinding,
+                        ref result,
                         ref _contextFlags);
 
                     if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"SSPIWrapper.AcceptSecurityContext() returns statusCode:0x{((int)statusCode.ErrorCode):x8} ({statusCode})");
@@ -325,7 +308,7 @@ namespace System.Net
                 if (NetEventSource.IsEnabled) NetEventSource.Exit(this, $"IsCompleted: {IsCompleted}");
             }
 
-            return outSecurityBuffer.token;
+            return result;
         }
 
         private string GetClientSpecifiedSpn()
