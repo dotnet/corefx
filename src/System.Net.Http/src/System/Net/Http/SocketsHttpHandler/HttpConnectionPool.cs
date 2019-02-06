@@ -270,7 +270,7 @@ namespace System.Net.Http
                 }
 
                 HttpConnection conn = cachedConnection._connection;
-                if (cachedConnection.IsUsable(now, pooledConnectionLifetime, Timeout.InfiniteTimeSpan) &&
+                if (!conn.LifetimeExpired(now, pooledConnectionLifetime) &&
                     !conn.EnsureReadAheadAndPollRead())
                 {
                     // We found a valid connection.  Return it.
@@ -326,13 +326,16 @@ namespace System.Net.Http
 
             // See if we have an HTTP2 connection
             Http2Connection http2Connection = _http2Connection;
-            TimeSpan pooledConnectionLifetime = _poolManager.Settings._pooledConnectionLifetime;
 
-            // Check only lifetime. There is no need to check idle if we are about to use it.
-            if (http2Connection != null && http2Connection.IsExpired(DateTimeOffset.UtcNow, pooledConnectionLifetime, Timeout.InfiniteTimeSpan))
+            if (http2Connection != null)
             {
-                http2Connection.Dispose();
-                InvalidateHttp2Connection(http2Connection);
+                TimeSpan pooledConnectionLifetime = _poolManager.Settings._pooledConnectionLifetime;
+                // Check only lifetime expiration. There is no need to check idle if we are about to use it.
+                if (http2Connection.LifetimeExpired(DateTimeOffset.UtcNow, pooledConnectionLifetime))
+                {
+                    http2Connection.Dispose();
+                    InvalidateHttp2Connection(http2Connection);
+                }
             }
 
             if (http2Connection != null)
@@ -757,15 +760,12 @@ namespace System.Net.Http
                 _associatedConnectionCount--;
             }
         }
-        
+
         /// <summary>Returns the connection to the pool for subsequent reuse.</summary>
         /// <param name="connection">The connection to return.</param>
         public void ReturnConnection(HttpConnection connection)
         {
-            TimeSpan lifetime = _poolManager.Settings._pooledConnectionLifetime;
-            bool lifetimeExpired = 
-                lifetime != Timeout.InfiniteTimeSpan &&
-                (lifetime == TimeSpan.Zero || connection.CreationTime + lifetime <= DateTime.UtcNow);
+            bool lifetimeExpired = connection.LifetimeExpired(DateTime.UtcNow, _poolManager.Settings._pooledConnectionLifetime);
 
             if (!lifetimeExpired)
             {
@@ -891,7 +891,8 @@ namespace System.Net.Http
                     if (http2Connection.IsExpired(now, pooledConnectionLifetime, pooledConnectionIdleTimeout))
                     {
                         http2Connection.Dispose();
-                        InvalidateHttp2Connection(http2Connection);
+                        // We can set _http2Connection directly while holding lock instead of calling InvalidateHttp2Connection().
+                        _http2Connection = null;
                     }
                 }
 
@@ -1042,9 +1043,8 @@ namespace System.Net.Http
                 }
 
                 // Validate that the connection hasn't been alive for longer than is allowed.
-                if ((pooledConnectionLifetime != Timeout.InfiniteTimeSpan) && (now - _connection.CreationTime > pooledConnectionLifetime))
+                if (_connection.LifetimeExpired(now, pooledConnectionLifetime))
                 {
-                    if (NetEventSource.IsEnabled) _connection.Trace($"Connection no longer usable. Alive {now - _connection.CreationTime} > {pooledConnectionLifetime}.");
                     return false;
                 }
 

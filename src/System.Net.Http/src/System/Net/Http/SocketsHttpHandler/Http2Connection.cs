@@ -947,10 +947,22 @@ namespace System.Net.Http
             return _disposed;
         }
 
+
+        // Check if lifetime expired on connection.
+        public bool LifetimeExpired(DateTimeOffset now, TimeSpan lifetime)
+        {
+            bool expired = lifetime != Timeout.InfiniteTimeSpan &&
+                   (lifetime == TimeSpan.Zero || CreationTime + lifetime <= now);
+
+                if (expired && NetEventSource.IsEnabled) Trace($"Connection no longer usable. Alive {now - CreationTime} > {lifetime}.");
+                return expired;
+        }
+
+
         /// <summary>Gets whether the connection exceeded any of the connection limits.</summary>
         /// <param name="now">The current time.  Passed in to amortize the cost of calling DateTime.UtcNow.</param>
-        /// <param name="pooledConnectionLifetime">How long a connection can be open to be considered reusable.</param>
-        /// <param name="pooledConnectionIdleTimeout">How long a connection can have been idle in the pool to be considered reusable.</param>
+        /// <param name="connectionLifetime">How long a connection can be open to be considered reusable.</param>
+        /// <param name="connectionIdleTimeout">How long a connection can have been idle in the pool to be considered reusable.</param>
         /// <returns>
         /// true if we believe the connection is expired; otherwise, false.  There is an inherent race condition here,
         /// in that the server could terminate the connection or otherwise make it unusable immediately after we check it,
@@ -960,8 +972,8 @@ namespace System.Net.Http
         /// </returns>
 
         public bool IsExpired(DateTimeOffset now,
-                              TimeSpan pooledConnectionLifetime,
-                              TimeSpan pooledConnectionIdleTimeout)
+                              TimeSpan connectionLifetime,
+                              TimeSpan connectionIdleTimeout)
 
         {
             if (_disposed)
@@ -970,24 +982,15 @@ namespace System.Net.Http
             }
 
             // Check idle timeout when there are not pending requests for a while.
-            if ((_httpStreams.Count == 0) && (pooledConnectionIdleTimeout != Timeout.InfiniteTimeSpan) &&
-                    (now - _idleSinceTime > pooledConnectionIdleTimeout))
+            if ((connectionIdleTimeout != Timeout.InfiniteTimeSpan) && (_httpStreams.Count == 0) &&
+                    (now - _idleSinceTime > connectionIdleTimeout))
             {
-               if (NetEventSource.IsEnabled) Trace($"Connection no longer usable. Idle {now - _idleSinceTime} > {pooledConnectionIdleTimeout}.");
+                if (NetEventSource.IsEnabled) Trace($"Connection no longer usable. Idle {now - _idleSinceTime} > {connectionIdleTimeout}.");
 
                 return true;
             }
 
-            // Lifetime can expire even with pending streams.
-            if ((pooledConnectionLifetime != Timeout.InfiniteTimeSpan) &&
-                    (pooledConnectionLifetime == TimeSpan.Zero || now - pooledConnectionLifetime > CreationTime))
-            {
-                if (NetEventSource.IsEnabled) Trace( "Connection lifetime expired.");
-
-                return true;
-            }
-
-            return false;
+            return LifetimeExpired(now, connectionLifetime);
         }
 
         private void AbortStreams(int lastValidStream)
