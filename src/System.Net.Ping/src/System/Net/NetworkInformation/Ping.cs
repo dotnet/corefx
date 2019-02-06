@@ -324,7 +324,7 @@ namespace System.Net.NetworkInformation
             return SendPingAsync(hostNameOrAddress, timeout, buffer, null);
         }
 
-        public Task<PingReply> SendPingAsync(IPAddress address, int timeout, byte[] buffer, PingOptions options)
+        public async Task<PingReply> SendPingAsync(IPAddress address, int timeout, byte[] buffer, PingOptions options)
         {
             CheckArgs(address, timeout, buffer, options);
 
@@ -335,11 +335,12 @@ namespace System.Net.NetworkInformation
             CheckStart();
             try
             {
-                return SendPingAsyncCore(addressSnapshot, buffer, timeout, options);
+                Task<PingReply> pingReplyTask = SendPingAsyncCore(addressSnapshot, buffer, timeout, options);
+                return await pingReplyTask.ConfigureAwait(false);
             }
             catch (Exception e)
             {
-                return Task.FromException<PingReply>(new PingException(SR.net_ping, e));
+                throw new PingException(SR.net_ping, e);
             }
             finally
             {
