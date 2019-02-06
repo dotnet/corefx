@@ -714,9 +714,6 @@ namespace System.Tests
         [InlineData(float.PositiveInfinity,  float.PositiveInfinity, 0.0f)]
         public static void Ceiling(float value, float expectedResult, float allowedVariance)
         {
-            if (expectedResult == -0.0f && PlatformDetection.IsNetNative)
-                return; // does not have -0 conformance changes
-
             AssertEqual(expectedResult, MathF.Ceiling(value), allowedVariance);
         }
 

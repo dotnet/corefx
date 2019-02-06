@@ -755,9 +755,6 @@ namespace System.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Ceiling_Double_IEEE(double value, double expectedResult, double allowedVariance)
         {
-            if (expectedResult == -0.0D && PlatformDetection.IsNetNative)
-                return; // does not have -0 conformance changes
-
             AssertEqual(expectedResult, Math.Ceiling(value), allowedVariance);
         }
 
