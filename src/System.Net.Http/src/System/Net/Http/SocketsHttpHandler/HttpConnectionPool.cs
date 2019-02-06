@@ -326,25 +326,6 @@ namespace System.Net.Http
 
             // See if we have an HTTP2 connection
             Http2Connection http2Connection = _http2Connection;
-            if (http2Connection != null)
-            {
-                TimeSpan lifetime = _poolManager.Settings._pooledConnectionLifetime;
-                bool lifetimeExpired = lifetime != Timeout.InfiniteTimeSpan &&
-                                        (lifetime == TimeSpan.Zero || http2Connection.CreationTime + lifetime <= DateTime.UtcNow);
-
-                if (lifetimeExpired)
-                {
-                    _http2Connection = null;
-                    if (NetEventSource.IsEnabled)
-                    {
-                        Trace( "Connection lifetime expired.");
-                    }
-
-                    // Connection will be closed immediately or later if there are pending streams.
-                    http2Connection.Dispose();
-                    http2Connection = null;
-                }
-            }
 
             if (http2Connection != null)
             {
@@ -352,7 +333,7 @@ namespace System.Net.Http
                 return (http2Connection, false, null);
             }
 
-            // Ensure that the connection creation semaphore is created 
+            // Ensure that the connection creation semaphore is created
             if (_http2ConnectionCreateLock == null)
             {
                 lock (SyncObj)
@@ -835,8 +816,13 @@ namespace System.Net.Http
 
         public void InvalidateHttp2Connection(Http2Connection connection)
         {
-            Debug.Assert(_http2Connection == connection);
-            _http2Connection = null;
+            lock (SyncObj)
+            {
+                if (_http2Connection == connection)
+                {
+                    _http2Connection = null;
+                }
+            }
         }
 
         /// <summary>
@@ -880,6 +866,8 @@ namespace System.Net.Http
             List<CachedConnection> list = _idleConnections;
             List<HttpConnection> toDispose = null;
             bool tookLock = false;
+            Http2Connection http2Connection = _http2Connection;
+
             try
             {
                 if (NetEventSource.IsEnabled) Trace("Cleaning pool.");
@@ -888,6 +876,15 @@ namespace System.Net.Http
                 // Get the current time.  This is compared against each connection's last returned
                 // time to determine whether a connection is too old and should be closed.
                 DateTimeOffset now = DateTimeOffset.UtcNow;
+
+                if (http2Connection != null)
+                {
+                    if (http2Connection.IsExpired(now, pooledConnectionLifetime, pooledConnectionIdleTimeout))
+                    {
+                        http2Connection.Dispose();
+                        InvalidateHttp2Connection(http2Connection);
+                    }
+                }
 
                 // Find the first item which needs to be removed.
                 int freeIndex = 0;
@@ -934,7 +931,7 @@ namespace System.Net.Http
                     // if a pool was used since the last time we cleaned up, give it another chance. New pools
                     // start out saying they've recently been used, to give them a bit of breathing room and time
                     // for the initial collection to be added to it.
-                    if (_associatedConnectionCount == 0 && !_usedSinceLastCleanup)
+                    if (_associatedConnectionCount == 0 && !_usedSinceLastCleanup && _http2Connection == null)
                     {
                         Debug.Assert(list.Count == 0, $"Expected {nameof(list)}.{nameof(list.Count)} == 0");
                         _disposed = true;
