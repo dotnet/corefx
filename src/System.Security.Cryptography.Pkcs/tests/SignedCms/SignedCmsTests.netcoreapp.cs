@@ -422,7 +422,10 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 {
                     ContentInfo content = new ContentInfo(new byte[] { 1, 2, 3 });
                     SignedCms cms = new SignedCms(content, false);
-                    CmsSigner signer = new CmsSigner(certWithEphemeralKey);
+                    CmsSigner signer = new CmsSigner(certWithEphemeralKey)
+                    {
+                        DigestAlgorithm = new Oid(Oids.Sha1, Oids.Sha1)
+                    };
                     cms.ComputeSignature(signer);
                 }
             }
