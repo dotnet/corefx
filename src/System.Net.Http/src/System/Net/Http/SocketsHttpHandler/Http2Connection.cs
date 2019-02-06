@@ -40,7 +40,7 @@ namespace System.Net.Http
         private bool _expectingSettingsAck;
         private int _initialWindowSize;
         private int _maxConcurrentStreams;
-        private DateTimeOffset _lastFinishedStream;
+        private DateTimeOffset _idleSinceTime;
 
         private bool _disposed;
 
@@ -57,7 +57,7 @@ namespace System.Net.Http
         // So set the connection window size to a large value.
         private const int ConnectionWindowSize = 64 * 1024 * 1024;
 
-        public DateTimeOffset CreationTime { get; } = DateTimeOffset.UtcNow;
+        private DateTimeOffset CreationTime { get; } = DateTimeOffset.UtcNow;
 
         public Http2Connection(HttpConnectionPool pool, SslStream stream)
         {
@@ -971,9 +971,9 @@ namespace System.Net.Http
 
             // Check idle timeout when there are not pending requests for a while.
             if ((_httpStreams.Count == 0) && (pooledConnectionIdleTimeout != Timeout.InfiniteTimeSpan) &&
-                    (now - _lastFinishedStream > pooledConnectionIdleTimeout))
+                    (now - _idleSinceTime > pooledConnectionIdleTimeout))
             {
-               if (NetEventSource.IsEnabled) Trace($"Connection no longer usable. Idle {now - _lastFinishedStream } > {pooledConnectionIdleTimeout}.");
+               if (NetEventSource.IsEnabled) Trace($"Connection no longer usable. Idle {now - _idleSinceTime} > {pooledConnectionIdleTimeout}.");
 
                 return true;
             }
@@ -1241,7 +1241,7 @@ namespace System.Net.Http
                 if (_httpStreams.Count == 0)
                 {
                     // If this was last pending request, get timestamp so we can monitor idle time.
-                    _lastFinishedStream = DateTimeOffset.UtcNow;
+                    _idleSinceTime = DateTimeOffset.UtcNow;
                 }
 
                 if (_disposed)

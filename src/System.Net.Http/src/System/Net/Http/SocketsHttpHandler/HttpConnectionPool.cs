@@ -270,7 +270,7 @@ namespace System.Net.Http
                 }
 
                 HttpConnection conn = cachedConnection._connection;
-                if (cachedConnection.IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout) &&
+                if (cachedConnection.IsUsable(now, pooledConnectionLifetime, Timeout.InfiniteTimeSpan) &&
                     !conn.EnsureReadAheadAndPollRead())
                 {
                     // We found a valid connection.  Return it.
@@ -326,10 +326,19 @@ namespace System.Net.Http
 
             // See if we have an HTTP2 connection
             Http2Connection http2Connection = _http2Connection;
+            TimeSpan pooledConnectionLifetime = _poolManager.Settings._pooledConnectionLifetime;
+
+            // Check only lifetime. There is no need to check idle if we are about to use it.
+            if (http2Connection != null && http2Connection.IsExpired(DateTimeOffset.UtcNow, pooledConnectionLifetime, Timeout.InfiniteTimeSpan))
+            {
+                http2Connection.Dispose();
+                InvalidateHttp2Connection(http2Connection);
+            }
 
             if (http2Connection != null)
             {
                 if (NetEventSource.IsEnabled) Trace("Using existing HTTP2 connection.");
+                _usedSinceLastCleanup = true;
                 return (http2Connection, false, null);
             }
 
