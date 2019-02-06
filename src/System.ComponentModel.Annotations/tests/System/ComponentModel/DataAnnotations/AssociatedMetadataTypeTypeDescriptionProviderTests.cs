@@ -30,88 +30,80 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [Fact]
         public void GetTypeDescriptorGetAttributes_NoAssociatedMetadataTypeWithoutMetadataTypeAttribute_ReturnsExpected()
         {
-            void PerformTest(AssociatedMetadataTypeTypeDescriptionProvider provider)
+            // Perform multiple times to test static caching behaviour.
+            for (int i = 0; i < 2; i++)
             {
+                var provider = new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata));
                 ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(typeof(ClassWithMetadata), null);
                 AttributeCollection attributes = typeDescriptor.GetAttributes();
                 Assert.Equal(1, attributes.Count);
                 Assert.Equal("typeName", Assert.IsType<TypeConverterAttribute>(attributes[typeof(TypeConverterAttribute)]).ConverterTypeName);
             }
-
-            // Perform multiple times to test caching behaviour.
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata)));
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata)));
         }
 
         [Fact]
         public void GetTypeDescriptorGetAttributes_NoAssociatedMetadataTypeWithMetadataTypeAttribute_ReturnsExpected()
         {
-            void PerformTest(AssociatedMetadataTypeTypeDescriptionProvider provider)
+            // Perform multiple times to test static caching behaviour.
+            for (int i = 0; i < 2; i++)
             {
+                var provider = new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadataOnAnotherClass));
                 ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(typeof(ClassWithMetadataOnAnotherClass), null);
                 AttributeCollection attributes = typeDescriptor.GetAttributes();
                 Assert.Equal(2, attributes.Count);
                 Assert.Equal(typeof(ClassWithMetadata), Assert.IsType<MetadataTypeAttribute>(attributes[typeof(MetadataTypeAttribute)]).MetadataClassType);
                 Assert.Equal("typeName", Assert.IsType<TypeConverterAttribute>(attributes[typeof(TypeConverterAttribute)]).ConverterTypeName);
             }
-
-            // Perform multiple times to test caching behaviour.
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadataOnAnotherClass)));
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadataOnAnotherClass)));
         }
 
         [Fact]
         public void GetTypeDescriptorGetAttributes_WithAssociatedMetadataType_ReturnsExpected()
         {
-            void PerformTest(AssociatedMetadataTypeTypeDescriptionProvider provider)
+            // Perform multiple times to test static caching behaviour.
+            for (int i = 0; i < 2; i++)
             {
+                var provider = new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadataOnAnotherClass), typeof(ClassWithAttributes));
                 ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(typeof(ClassWithMetadataOnAnotherClass), null);
                 AttributeCollection attributes = typeDescriptor.GetAttributes();
                 Assert.Equal(2, attributes.Count);
                 Assert.Equal(typeof(ClassWithMetadata), Assert.IsType<MetadataTypeAttribute>(attributes[typeof(MetadataTypeAttribute)]).MetadataClassType);
                 Assert.Equal(EditorBrowsableState.Always, Assert.IsType<EditorBrowsableAttribute>(attributes[typeof(EditorBrowsableAttribute)]).State);
             }
-
-            // Perform multiple times to test caching behaviour.
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadataOnAnotherClass), typeof(ClassWithAttributes)));
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadataOnAnotherClass), typeof(ClassWithAttributes)));
         }
 
         [Fact]
         public void GetTypeDescriptorGetAttributes_SameAssociatedMetadataType_ReturnsExpected()
         {
-            void PerformTest(AssociatedMetadataTypeTypeDescriptionProvider provider)
+            // Perform multiple times to test static caching behaviour.
+            for (int i = 0; i < 2; i++)
             {
+                var provider = new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata), typeof(ClassWithMetadata));
                 ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(typeof(ClassWithMetadata));
                 AttributeCollection attributes = typeDescriptor.GetAttributes();
                 Assert.Equal("typeName", Assert.IsType<TypeConverterAttribute>(attributes[typeof(TypeConverterAttribute)]).ConverterTypeName);
             }
-
-            // Perform multiple times to test caching behaviour.
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata), typeof(ClassWithMetadata)));
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata), typeof(ClassWithMetadata)));
         }
 
         [Fact]
         public void GetTypeDescriptorGetAttributes_SelfAssociatedMetadataType_ReturnsExpected()
         {
-            void PerformTest(AssociatedMetadataTypeTypeDescriptionProvider provider)
+            // Perform multiple times to test static caching behaviour.
+            for (int i = 0; i < 2; i++)
             {
+                var provider = new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithSelfAssociatedMetadata));
                 ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(typeof(ClassWithSelfAssociatedMetadata));
                 AttributeCollection attributes = typeDescriptor.GetAttributes();
                 Assert.Equal("typeName", Assert.IsType<TypeConverterAttribute>(attributes[typeof(TypeConverterAttribute)]).ConverterTypeName);
             }
-
-            // Perform multiple times to test caching behaviour.
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithSelfAssociatedMetadata)));
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithSelfAssociatedMetadata)));
         }
 
         [Fact]
         public void GetTypeDescriptorGetProperties_NoAssociatedMetadataTypeWithoutMetadataTypeAttribute_ReturnsExpected()
         {
-            void PerformTest(AssociatedMetadataTypeTypeDescriptionProvider provider)
+            // Perform multiple times to test static caching behaviour.
+            for (int i = 0; i < 2; i++)
             {
+                var provider = new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata));
                 ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(typeof(ClassWithMetadata), null);
                 PropertyDescriptorCollection properties = typeDescriptor.GetProperties();
                 PropertyDescriptor firstNameProperty = properties[nameof(ClassWithMetadata.FirstName)];
@@ -129,17 +121,15 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 Assert.False(lastNameProperty.IsReadOnly);
                 Assert.False(lastNameProperty.SupportsChangeEvents);
             }
-
-            // Perform multiple times to test caching behaviour.
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata)));
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata)));
         }
 
         [Fact]
         public void GetTypeDescriptorGetProperties_NoAssociatedMetadataTypeWithMetadataTypeAttribute_ReturnsExpected()
         {
-            void PerformTest(AssociatedMetadataTypeTypeDescriptionProvider provider)
+            // Perform multiple times to test static caching behaviour.
+            for (int i = 0; i < 2; i++)
             {
+                var provider = new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata));
                 ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(typeof(ClassWithMetadata), null);
                 PropertyDescriptorCollection properties = typeDescriptor.GetProperties(new Attribute[] { new RequiredAttribute() });
                 PropertyDescriptor firstNameProperty = properties[nameof(ClassWithMetadata.FirstName)];
@@ -157,10 +147,6 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 Assert.False(lastNameProperty.IsReadOnly);
                 Assert.False(lastNameProperty.SupportsChangeEvents);
             }
-
-            // Perform multiple times to test caching behaviour.
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata)));
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata)));
         }
 
         [Theory]
@@ -169,8 +155,10 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [InlineData(typeof(EmptyClass), "LastName")]
         public void GetTypeDescriptorGetProperties_WithAssociatedMetadataType_ReturnsExpected(Type associatedMetadataType, string expectedLastName)
         {
-            void PerformTest(AssociatedMetadataTypeTypeDescriptionProvider provider)
+            // Perform multiple times to test static caching behaviour.
+            for (int i = 0; i < 2; i++)
             {
+                var provider = new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata), associatedMetadataType);
                 ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(typeof(ClassWithMetadata), null);
                 PropertyDescriptorCollection properties = typeDescriptor.GetProperties();
                 PropertyDescriptor firstNameProperty = properties[nameof(ClassWithMetadata.FirstName)];
@@ -188,17 +176,15 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 Assert.False(lastNameProperty.IsReadOnly);
                 Assert.False(lastNameProperty.SupportsChangeEvents);
             }
-
-            // Perform multiple times to test caching behaviour.
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata), associatedMetadataType));
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadata), associatedMetadataType));
         }
 
         [Fact]
         public void GetTypeDescriptorGetProperties_WithMetadataTypeAttribute_ReturnsExpected()
         {
-            void PerformTest(AssociatedMetadataTypeTypeDescriptionProvider provider)
+            // Perform multiple times to test static caching behaviour.
+            for (int i = 0; i < 2; i++)
             {
+                var provider = new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadataOnAnotherClass));
                 ICustomTypeDescriptor typeDescriptor = provider.GetTypeDescriptor(typeof(ClassWithMetadataOnAnotherClass), null);
                 PropertyDescriptorCollection properties = typeDescriptor.GetProperties();
                 PropertyDescriptor firstNameProperty = properties[nameof(ClassWithMetadataOnAnotherClass.FirstName)];
@@ -216,10 +202,6 @@ namespace System.ComponentModel.DataAnnotations.Tests
                 Assert.False(lastNameProperty.IsReadOnly);
                 Assert.False(lastNameProperty.SupportsChangeEvents);
             }
-
-            // Perform multiple times to test caching behaviour.
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadataOnAnotherClass)));
-            PerformTest(new AssociatedMetadataTypeTypeDescriptionProvider(typeof(ClassWithMetadataOnAnotherClass)));
         }
 
         [Fact]
@@ -296,10 +278,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             var component = new ClassWithMetadataOnAnotherClass();
             int callCount = 0;
-            EventHandler handler = (sender, e) =>
-            {
-                callCount++;
-            };
+            EventHandler handler = (sender, e) => callCount++;
             descriptor.AddValueChanged(component, handler);
             descriptor.SetValue(component, "value");
             Assert.Equal(1, callCount);
@@ -314,10 +293,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
 
             var component = new ClassWithMetadataOnAnotherClass();
             int callCount = 0;
-            EventHandler handler = (sender, e) =>
-            {
-                callCount++;
-            };
+            EventHandler handler = (sender, e) => callCount++;
             descriptor.AddValueChanged(component, handler);
             descriptor.RemoveValueChanged(component, handler);
             descriptor.SetValue(component, "value");
