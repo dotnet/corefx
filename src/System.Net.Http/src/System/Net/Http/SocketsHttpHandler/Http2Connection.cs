@@ -896,11 +896,6 @@ namespace System.Net.Http
 
                 while (remaining.Length > 0)
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        throw new OperationCanceledException(cancellationToken);
-                    }
-
                     (current, remaining) = SplitBuffer(remaining, FrameHeader.MaxLength);
 
                     flags = (remaining.Length == 0 ? FrameFlags.EndHeaders : FrameFlags.None);
