@@ -3,25 +3,20 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.Buffers
 {
-    public sealed class ArrayBufferWriter : IBufferWriter<byte>, IDisposable
+    public sealed class ArrayBufferWriter<T> : IBufferWriter<T>, IDisposable
     {
-        private byte[] _rentedBuffer;
-        private int _written;
-        private long _totalWritten;
+        private T[] _rentedBuffer;
+        private int _index;
 
         private const int MinimumBufferSize = 256;
 
         public ArrayBufferWriter()
         {
-            _rentedBuffer = ArrayPool<byte>.Shared.Rent(MinimumBufferSize);
-            _written = 0;
-            _totalWritten = 0;
+            _rentedBuffer = ArrayPool<T>.Shared.Rent(MinimumBufferSize);
+            _index = 0;
         }
 
         public ArrayBufferWriter(int initialCapacity)
@@ -29,38 +24,37 @@ namespace System.Buffers
             if (initialCapacity <= 0)
                 throw new ArgumentException(nameof(initialCapacity));
 
-            _rentedBuffer = ArrayPool<byte>.Shared.Rent(initialCapacity);
-            _written = 0;
-            _totalWritten = 0;
+            _rentedBuffer = ArrayPool<T>.Shared.Rent(initialCapacity);
+            _index = 0;
         }
 
-        public ReadOnlyMemory<byte> OutputAsMemory
+        public ReadOnlyMemory<T> OutputAsMemory
         {
             get
             {
                 CheckIfDisposed();
 
-                return _rentedBuffer.AsMemory(0, _written);
+                return _rentedBuffer.AsMemory(0, _index);
             }
         }
 
-        public ReadOnlySpan<byte> OutputAsSpan
+        public ReadOnlySpan<T> OutputAsSpan
         {
             get
             {
                 CheckIfDisposed();
 
-                return _rentedBuffer.AsSpan(0, _written);
+                return _rentedBuffer.AsSpan(0, _index);
             }
         }
 
-        public int BytesWritten
+        public int CurrentIndex
         {
             get
             {
                 CheckIfDisposed();
 
-                return _written;
+                return _index;
             }
         }
 
@@ -74,63 +68,27 @@ namespace System.Buffers
             }
         }
 
-        public int BytesAvailable
+        public int AvailableSpace
         {
             get
             {
                 CheckIfDisposed();
 
-                return _rentedBuffer.Length - _written;
+                return _rentedBuffer.Length - _index;
             }
         }
 
-        public long TotalBytesWritten
-        {
-            get
-            {
-                CheckIfDisposed();
-
-                return _totalWritten;
-            }
-        }
-
-        public void Reset()
+        public void Clear()
         {
             CheckIfDisposed();
 
-            ResetHelper();
+            ClearHelper();
         }
 
-        private void ResetHelper()
+        private void ClearHelper()
         {
-            _rentedBuffer.AsSpan(0, _written).Clear();
-            _written = 0;
-        }
-
-        public async Task CopyToAndResetAsync(Stream stream, CancellationToken cancellationToken = default)
-        {
-            CheckIfDisposed();
-
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
-
-            await stream.WriteAsync(_rentedBuffer, 0, _written, cancellationToken).ConfigureAwait(false);
-            _totalWritten += _written;
-
-            ResetHelper();
-        }
-
-        public void CopyToAndReset(Stream stream)
-        {
-            CheckIfDisposed();
-
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
-
-            stream.Write(_rentedBuffer, 0, _written);
-            _totalWritten += _written;
-
-            ResetHelper();
+            _rentedBuffer.AsSpan(0, _index).Clear();
+            _index = 0;
         }
 
         // Returns the rented buffer back to the pool
@@ -141,83 +99,79 @@ namespace System.Buffers
                 return;
             }
 
-            ArrayPool<byte>.Shared.Return(_rentedBuffer, clearArray: true);
+            ArrayPool<T>.Shared.Return(_rentedBuffer, clearArray: true);
             _rentedBuffer = null;
-            _written = 0;
-            _totalWritten = 0;
+            _index = 0;
         }
 
         private void CheckIfDisposed()
         {
             if (_rentedBuffer == null)
-                throw new ObjectDisposedException(nameof(ArrayBufferWriter));
+                throw new ObjectDisposedException(nameof(ArrayBufferWriter<T>));
         }
 
-        void IBufferWriter<byte>.Advance(int count)
+        public void Advance(int count)
         {
             CheckIfDisposed();
 
             if (count < 0)
                 throw new ArgumentException(nameof(count));
 
-            if (_written > _rentedBuffer.Length - count)
+            if (_index > _rentedBuffer.Length - count)
                 ThrowHelper.ThrowInvalidOperationException(_rentedBuffer.Length);
 
-            _written += count;
+            _index += count;
         }
 
-        Memory<byte> IBufferWriter<byte>.GetMemory(int sizeHint)
+        public Memory<T> GetMemory(int sizeHint)
         {
             CheckIfDisposed();
 
-            if (sizeHint < 0)
-                throw new ArgumentException(nameof(sizeHint));
-
             CheckAndResizeBuffer(sizeHint);
-            return _rentedBuffer.AsMemory(_written);
+            return _rentedBuffer.AsMemory(_index);
         }
 
-        Span<byte> IBufferWriter<byte>.GetSpan(int sizeHint)
+        public Span<T> GetSpan(int sizeHint)
         {
             CheckIfDisposed();
 
-            if (sizeHint < 0)
-                throw new ArgumentException(nameof(sizeHint));
-
             CheckAndResizeBuffer(sizeHint);
-            return _rentedBuffer.AsSpan(_written);
+            return _rentedBuffer.AsSpan(_index);
         }
 
         private void CheckAndResizeBuffer(int sizeHint)
         {
-            Debug.Assert(sizeHint >= 0);
+            if (sizeHint < 0)
+                throw new ArgumentException(nameof(sizeHint));
 
             if (sizeHint == 0)
             {
                 sizeHint = MinimumBufferSize;
             }
 
-            int availableSpace = _rentedBuffer.Length - _written;
+            int availableSpace = _rentedBuffer.Length - _index;
 
             if (sizeHint > availableSpace)
             {
-                int growBy = sizeHint > _rentedBuffer.Length ? sizeHint : _rentedBuffer.Length;
+                int growBy = Math.Max(sizeHint, _rentedBuffer.Length);
 
                 int newSize = checked(_rentedBuffer.Length + growBy);
 
-                byte[] oldBuffer = _rentedBuffer;
+                T[] oldBuffer = _rentedBuffer;
 
-                _rentedBuffer = ArrayPool<byte>.Shared.Rent(newSize);
+                _rentedBuffer = ArrayPool<T>.Shared.Rent(newSize);
 
-                Debug.Assert(oldBuffer.Length >= _written);
-                Debug.Assert(_rentedBuffer.Length >= _written);
+                Debug.Assert(oldBuffer.Length >= _index);
+                Debug.Assert(_rentedBuffer.Length >= _index);
 
-                oldBuffer.AsSpan(0, _written).CopyTo(_rentedBuffer);
-                ArrayPool<byte>.Shared.Return(oldBuffer, clearArray: true);
+                Span<T> previousBuffer = oldBuffer.AsSpan(0, _index);
+                previousBuffer.CopyTo(_rentedBuffer);
+                previousBuffer.Clear();
+                ArrayPool<T>.Shared.Return(oldBuffer);
             }
 
-            Debug.Assert(_rentedBuffer.Length - _written > 0);
-            Debug.Assert(_rentedBuffer.Length - _written >= sizeHint);
+            Debug.Assert(_rentedBuffer.Length - _index > 0);
+            Debug.Assert(_rentedBuffer.Length - _index >= sizeHint);
         }
     }
 }

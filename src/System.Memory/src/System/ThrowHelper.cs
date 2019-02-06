@@ -36,11 +36,9 @@ namespace System
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static Exception CreateInvalidOperationException() { return new InvalidOperationException(); }
 
-        internal static void ThrowInvalidOperationException(int capacity) { throw CreateInvalidOperationException(capacity); }
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static InvalidOperationException CreateInvalidOperationException(int capacity)
+        internal static void ThrowInvalidOperationException(int capacity)
         {
-            return new InvalidOperationException(SR.Format(SR.AdvancingTooFar, capacity));
+            throw new InvalidOperationException(SR.Format(SR.AdvancingTooFar, capacity));
         }
 
         internal static void ThrowInvalidOperationException_EndPositionNotReached() { throw CreateInvalidOperationException_EndPositionNotReached(); }
