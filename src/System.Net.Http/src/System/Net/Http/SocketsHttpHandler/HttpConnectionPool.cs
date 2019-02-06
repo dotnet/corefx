@@ -330,19 +330,19 @@ namespace System.Net.Http
             if (http2Connection != null)
             {
                 TimeSpan pooledConnectionLifetime = _poolManager.Settings._pooledConnectionLifetime;
-                // Check only lifetime expiration. There is no need to check idle if we are about to use it.
                 if (http2Connection.LifetimeExpired(DateTimeOffset.UtcNow, pooledConnectionLifetime))
                 {
+                    // Connection expired.
                     http2Connection.Dispose();
                     InvalidateHttp2Connection(http2Connection);
                 }
-            }
-
-            if (http2Connection != null)
-            {
-                if (NetEventSource.IsEnabled) Trace("Using existing HTTP2 connection.");
-                _usedSinceLastCleanup = true;
-                return (http2Connection, false, null);
+                else
+                {
+                    // Connection exist and it is still good to use.
+                    if (NetEventSource.IsEnabled) Trace("Using existing HTTP2 connection.");
+                    _usedSinceLastCleanup = true;
+                    return (http2Connection, false, null);
+                }
             }
 
             // Ensure that the connection creation semaphore is created
@@ -875,7 +875,6 @@ namespace System.Net.Http
             List<CachedConnection> list = _idleConnections;
             List<HttpConnection> toDispose = null;
             bool tookLock = false;
-            Http2Connection http2Connection = _http2Connection;
 
             try
             {
@@ -885,6 +884,7 @@ namespace System.Net.Http
                 // Get the current time.  This is compared against each connection's last returned
                 // time to determine whether a connection is too old and should be closed.
                 DateTimeOffset now = DateTimeOffset.UtcNow;
+                Http2Connection http2Connection = _http2Connection;
 
                 if (http2Connection != null)
                 {

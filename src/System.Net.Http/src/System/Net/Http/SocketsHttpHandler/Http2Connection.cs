@@ -57,8 +57,6 @@ namespace System.Net.Http
         // So set the connection window size to a large value.
         private const int ConnectionWindowSize = 64 * 1024 * 1024;
 
-        private DateTimeOffset CreationTime { get; } = DateTimeOffset.UtcNow;
-
         public Http2Connection(HttpConnectionPool pool, SslStream stream)
         {
             _pool = pool;
@@ -947,18 +945,6 @@ namespace System.Net.Http
             return _disposed;
         }
 
-
-        // Check if lifetime expired on connection.
-        public bool LifetimeExpired(DateTimeOffset now, TimeSpan lifetime)
-        {
-            bool expired = lifetime != Timeout.InfiniteTimeSpan &&
-                   (lifetime == TimeSpan.Zero || CreationTime + lifetime <= now);
-
-                if (expired && NetEventSource.IsEnabled) Trace($"Connection no longer usable. Alive {now - CreationTime} > {lifetime}.");
-                return expired;
-        }
-
-
         /// <summary>Gets whether the connection exceeded any of the connection limits.</summary>
         /// <param name="now">The current time.  Passed in to amortize the cost of calling DateTime.UtcNow.</param>
         /// <param name="connectionLifetime">How long a connection can be open to be considered reusable.</param>
@@ -1308,7 +1294,7 @@ namespace System.Net.Http
 
         public sealed override string ToString() => $"{nameof(Http2Connection)}({_pool})"; // Description for diagnostic purposes
 
-        internal void Trace(string message, [CallerMemberName] string memberName = null) =>
+        internal override void Trace(string message, [CallerMemberName] string memberName = null) =>
             NetEventSource.Log.HandlerMessage(
                 _pool?.GetHashCode() ?? 0,    // pool ID
                 GetHashCode(),                // connection ID

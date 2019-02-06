@@ -199,18 +199,6 @@ namespace System.Net.Http
             return null;
         }
 
-        public DateTimeOffset CreationTime { get; } = DateTimeOffset.UtcNow;
-
-        // Check if lifetime expired on connection.
-        public bool LifetimeExpired(DateTimeOffset now, TimeSpan lifetime)
-        {
-            bool expired = lifetime != Timeout.InfiniteTimeSpan &&
-                   (lifetime == TimeSpan.Zero || CreationTime + lifetime <= now);
-
-                if (expired && NetEventSource.IsEnabled) Trace($"Connection no longer usable. Alive {now - CreationTime} > {lifetime}.");
-                return expired;
-        }
-
         public TransportContext TransportContext => _transportContext;
 
         public HttpConnectionKind Kind => _pool.Kind;
@@ -1669,7 +1657,7 @@ namespace System.Net.Http
 
         private static void ThrowInvalidHttpResponse(Exception innerException) => throw new HttpRequestException(SR.net_http_invalid_response, innerException);
 
-        internal void Trace(string message, [CallerMemberName] string memberName = null) =>
+        internal override void Trace(string message, [CallerMemberName] string memberName = null) =>
             NetEventSource.Log.HandlerMessage(
                 _pool?.GetHashCode() ?? 0,    // pool ID
                 GetHashCode(),                // connection ID
