@@ -17,9 +17,9 @@ namespace System
 {
     public static partial class MathF
     {
-        public const float E = 2.71828175;
+        public const float E = 2.71828175f;
 
-        public const float PI = 3.14159274;
+        public const float PI = 3.14159274f;
 
         private const int maxRoundingDigits = 6;
 
