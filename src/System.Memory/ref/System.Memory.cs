@@ -117,13 +117,13 @@ namespace System.Buffers
         public ArrayBufferWriter() { }
         public ArrayBufferWriter(int initialCapacity) { }
         public int AvailableSpace { get { throw null; } }
-        public int CurrentIndex { get { throw null; } }
         public int Capacity { get { throw null; } }
+        public int CurrentIndex { get { throw null; } }
         public System.ReadOnlyMemory<T> OutputAsMemory { get { throw null; } }
         public System.ReadOnlySpan<T> OutputAsSpan { get { throw null; } }
-        public void Dispose() { }
-        public void Clear () { }
         public void Advance(int count) { }
+        public void Clear() { }
+        public void Dispose() { }
         public System.Memory<T> GetMemory(int sizeHint = 0) { throw null; }
         public System.Span<T> GetSpan(int sizeHint = 0) { throw null; }
     }
