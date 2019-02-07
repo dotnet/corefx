@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Internal;
@@ -436,7 +437,9 @@ namespace System.ComponentModel.Composition.Hosting
 
                 if (_innerCatalog == null)
                 {
-                    var catalogReflectionContextAttribute = _assembly.GetFirstAttribute<CatalogReflectionContextAttribute>();
+                    var catalogReflectionContextAttribute = (CatalogReflectionContextAttribute)_assembly
+                        .GetCustomAttributes(typeof(CatalogReflectionContextAttribute), false)
+                        .FirstOrDefault();
                     var assembly = (catalogReflectionContextAttribute != null)
                         ? catalogReflectionContextAttribute.CreateReflectionContext().MapAssembly(_assembly)
                         : _assembly;

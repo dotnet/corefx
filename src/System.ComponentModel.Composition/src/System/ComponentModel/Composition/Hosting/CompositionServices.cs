@@ -198,7 +198,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
                 dictionary.Add(CompositionConstants.PartCreationPolicyMetadataName, creationPolicy);
             }
 
-            foreach (PartMetadataAttribute partMetadata in type.GetAttributes<PartMetadataAttribute>())
+            foreach (PartMetadataAttribute partMetadata in type.GetCustomAttributes<PartMetadataAttribute>(false))
             {
                 if (reservedMetadataNames.Contains(partMetadata.Name, StringComparers.MetadataKeyNames) 
                     || dictionary.ContainsKey(partMetadata.Name))
@@ -265,7 +265,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
         {
             dictionary = new Dictionary<string, object>();
 
-            foreach (var attr in member.GetAttributes<Attribute>())
+            foreach (Attribute attr in member.GetCustomAttributes<Attribute>(false))
             {
                 var provider = attr as ExportMetadataAttribute;
 
@@ -287,10 +287,11 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
                 {
                     Type attrType = attr.GetType();
                     // Perf optimization, relies on short circuit evaluation, often a property attribute is an ExportAttribute
-                    if ((attrType != CompositionServices.ExportAttributeType) && attrType.IsAttributeDefined<MetadataAttributeAttribute>(true))
+                    if ((attrType != CompositionServices.ExportAttributeType) && attrType.IsDefined(typeof(MetadataAttributeAttribute), true))
                     {
                         bool allowsMultiple = false;
-                        AttributeUsageAttribute usage = attrType.GetFirstAttribute<AttributeUsageAttribute>(true);
+
+                        AttributeUsageAttribute usage = attrType.GetCustomAttributes<AttributeUsageAttribute>().FirstOrDefault();
 
                         if (usage != null)
                         {
@@ -489,7 +490,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
 
             // A metadata view is required to be an Intrerface, and therefore only properties are allowed
             List<PropertyInfo> properties = metadataViewType.GetAllProperties().
-                Where(property => property.GetFirstAttribute<DefaultValueAttribute>() == null).
+                Where(property => !property.GetCustomAttributes<DefaultValueAttribute>(false).Any()).
                 ToList();
 
             // NOTE : this is a carefully found balance between eager and delay-evaluation - the properties are filtered once and upfront

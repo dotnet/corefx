@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using Microsoft.Internal;
@@ -247,7 +248,7 @@ namespace System.ComponentModel.Composition
                 Label tryCastValue = proxyCtorIL.BeginExceptionBlock();
                 Label innerTryCastValue;
 
-                DefaultValueAttribute[] attrs = propertyInfo.GetAttributes<DefaultValueAttribute>(false);
+                DefaultValueAttribute[] attrs = propertyInfo.GetCustomAttributes<DefaultValueAttribute>(false).ToArray();
                 if(attrs.Length > 0)
                 {
                     innerTryCastValue = proxyCtorIL.BeginExceptionBlock();

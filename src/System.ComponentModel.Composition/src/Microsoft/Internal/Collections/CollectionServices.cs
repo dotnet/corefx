@@ -111,7 +111,7 @@ namespace Microsoft.Internal.Collections
             // if there's nothing in the source, return the second
             if ((source == null) || (source.Count == 0))
             {
-                return second.AsList();
+                return second as List<T> ?? second.ToList();
             }
 
             // if the second is List<T>, and contains very few elements there's no need for AddRange
@@ -251,18 +251,6 @@ namespace Microsoft.Internal.Collections
             return enumerable.ToArray();
         }
 
-        public static List<T> AsList<T>(this IEnumerable<T> enumerable)
-        {
-            List<T> list = enumerable as List<T>;
-
-            if (list != null)
-            {
-                return list;
-            }
-
-            return enumerable.ToList();
-        }
-
         public static bool IsArrayEqual<T>(this T[] thisArray, T[] thatArray)
         {
             if (thisArray.Length != thatArray.Length)
@@ -273,24 +261,6 @@ namespace Microsoft.Internal.Collections
             for (int i = 0; i < thisArray.Length; i++)
             {
                 if (!thisArray[i].Equals(thatArray[i]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public static bool IsCollectionEqual<T>(this IList<T> thisList, IList<T> thatList)
-        {
-            if (thisList.Count != thatList.Count)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < thisList.Count; i++)
-            {
-                if (!thisList[i].Equals(thatList[i]))
                 {
                     return false;
                 }

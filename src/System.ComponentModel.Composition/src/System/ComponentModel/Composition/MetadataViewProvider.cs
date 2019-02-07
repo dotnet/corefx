@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Internal;
 
@@ -34,7 +35,7 @@ namespace System.ComponentModel.Composition
                 MetadataViewGenerator.MetadataViewFactory metadataViewFactory = null;
                 if (metadataViewType.IsInterface)
                 {
-                    if(!metadataViewType.IsAttributeDefined<MetadataViewImplementationAttribute>())
+                    if(!metadataViewType.IsDefined(typeof(MetadataViewImplementationAttribute), false))
                     {
                         try
                         {
@@ -47,7 +48,8 @@ namespace System.ComponentModel.Composition
                     }
                     else
                     {
-                        var implementationAttribute = metadataViewType.GetFirstAttribute<MetadataViewImplementationAttribute>();
+                        MetadataViewImplementationAttribute implementationAttribute = metadataViewType.GetCustomAttributes<MetadataViewImplementationAttribute>(false)
+                            .FirstOrDefault();
                         proxyType = implementationAttribute.ImplementationType;
                         if(proxyType == null)
                         {

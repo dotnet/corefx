@@ -24,15 +24,6 @@ namespace Microsoft.Internal
         }
 
         [DebuggerStepThrough]
-        public static void NullOrNotNullElements<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> values, string parameterName)
-            where TKey : class
-            where TValue : class
-        {
-            NotNullElements(values, parameterName);
-            Contract.EndContractBlock();
-        }
-
-        [DebuggerStepThrough]
         public static void NullOrNotNullElements<T>(IEnumerable<T> values, string parameterName)
             where T : class
         {
@@ -75,18 +66,6 @@ namespace Microsoft.Internal
         }
 
         [DebuggerStepThrough]
-        private static void NotNullElements<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> values, string parameterName)
-            where TKey : class
-            where TValue : class
-        {
-            if (values != null && !Contract.ForAll(values, (keyValue) => keyValue.Key != null && keyValue.Value != null))
-            {
-                throw ExceptionBuilder.CreateContainsNullElement(parameterName);
-            }
-            Contract.EndContractBlock();
-        }
-
-        [DebuggerStepThrough]
         public static void IsInMembertypeSet(MemberTypes value, string parameterName, MemberTypes enumFlagSet)
         {
             if ((value & enumFlagSet) != value || // Ensure the member is in the set
@@ -115,6 +94,5 @@ namespace Microsoft.Internal
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, parameterName), parameterName);
             }
         }
-
     }
 }

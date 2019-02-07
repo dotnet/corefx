@@ -9,6 +9,7 @@ using System.ComponentModel.Composition.ReflectionModel;
 using System.Globalization;
 using System.Reflection;
 using Microsoft.Internal;
+using System.Linq;
 
 namespace System.ComponentModel.Composition.AttributedModel
 {
@@ -153,7 +154,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             else
             {
                 //Does this Import re-export the value if so, make it a rpe-requisite
-                bool isPrerequisite = member.GetAttributes<ExportAttribute>().Length > 0;
+                bool isPrerequisite = member.GetCustomAttributes<ExportAttribute>(false).Any();
                 return new ReflectionMemberImportDefinition(
                     new LazyMemberInfo(member),
                     attributedImport.GetContractNameFromImport(importType),
@@ -170,7 +171,7 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         private static IAttributedImport GetAttributedImport(ReflectionItem item, ICustomAttributeProvider attributeProvider)
         {
-            IAttributedImport[] imports = attributeProvider.GetAttributes<IAttributedImport>(false);
+            var imports = (IAttributedImport[])attributeProvider.GetCustomAttributes(typeof(IAttributedImport), false);
 
             // For constructor parameters they may not have an ImportAttribute
             if (imports.Length == 0)

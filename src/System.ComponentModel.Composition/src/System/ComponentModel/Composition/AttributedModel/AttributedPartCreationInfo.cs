@@ -93,7 +93,7 @@ namespace System.ComponentModel.Composition.AttributedModel
         public bool IsPartDiscoverable()
         {
             // The part should not be marked with the "NonDiscoverable"
-            if (_type.IsAttributeDefined<PartNotDiscoverableAttribute>())
+            if (_type.IsDefined(typeof(PartNotDiscoverableAttribute), false))
             {
                 CompositionTrace.DefinitionMarkedWithPartNotDiscoverableAttribute(_type);
                 return false;
@@ -181,7 +181,8 @@ namespace System.ComponentModel.Composition.AttributedModel
             {
                 if (_partCreationPolicy == null)
                 {
-                    _partCreationPolicy = _type.GetFirstAttribute<PartCreationPolicyAttribute>() ?? PartCreationPolicyAttribute.Default;
+                    _partCreationPolicy = _type.GetCustomAttributes<PartCreationPolicyAttribute>(false)
+                        .FirstOrDefault() ?? PartCreationPolicyAttribute.Default;
                 }
 
                 return _partCreationPolicy.CreationPolicy;
@@ -223,7 +224,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             foreach (ConstructorInfo constructor in constructors)
             {
                 // an importing constructor found
-                if (constructor.IsAttributeDefined<ImportingConstructorAttribute>())
+                if (constructor.IsDefined(typeof(ImportingConstructorAttribute), false))
                 {
                     if (importingConstructor != null)
                     {
@@ -272,7 +273,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             // it should not contain any base types, members on base types or interfaces on the type.
             foreach (MemberInfo member in GetExportMembers(_type))
             {
-                foreach (ExportAttribute exportAttribute in member.GetAttributes<ExportAttribute>())
+                foreach (ExportAttribute exportAttribute in member.GetCustomAttributes<ExportAttribute>(false))
                 {
                     AttributedExportDefinition attributedExportDefinition = CreateExportDefinition(member, exportAttribute);
 
@@ -301,7 +302,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             // by all the interfaces that this type implements.
             foreach (Type type in GetInheritedExports(_type))
             {
-                foreach (InheritedExportAttribute exportAttribute in type.GetAttributes<InheritedExportAttribute>())
+                foreach (InheritedExportAttribute exportAttribute in type.GetCustomAttributes<InheritedExportAttribute>(false))
                 {
                     AttributedExportDefinition attributedExportDefinition = CreateExportDefinition(type, exportAttribute);
 
@@ -418,12 +419,12 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         private static bool IsExport(ICustomAttributeProvider attributeProvider)
         {
-            return attributeProvider.IsAttributeDefined<ExportAttribute>(false);
+            return attributeProvider.IsDefined(typeof(ExportAttribute), false);
         }
 
         private static bool IsInheritedExport(ICustomAttributeProvider attributedProvider)
         {
-            return attributedProvider.IsAttributeDefined<InheritedExportAttribute>(false);
+            return attributedProvider.IsDefined(typeof(InheritedExportAttribute), false);
         }
 
         private IEnumerable<ImportDefinition> GetImportDefinitions()
@@ -506,7 +507,7 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         private static bool IsImport(ICustomAttributeProvider attributeProvider)
         {
-            return attributeProvider.IsAttributeDefined<IAttributedImport>(false);
+            return attributeProvider.IsDefined(typeof(IAttributedImport), false);
         }
     }
 }
