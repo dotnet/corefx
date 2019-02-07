@@ -7,7 +7,7 @@
 
 namespace System.Buffers
 {
-#if !NETSTANDARD
+#if INBOX_APIS
     public sealed partial class ArrayBufferWriter<T> : System.Buffers.IBufferWriter<T>, System.IDisposable
     {
         public ArrayBufferWriter() { }
