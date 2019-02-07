@@ -346,11 +346,8 @@ namespace System.Net.Http
             {
                 lock (_syncObject)
                 {
-                    if(!_disposed)
-                    {
-                        _cancelled = true;
-                        Task ignored = _connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel);
-                    }
+                    _cancelled = true;
+                    Task ignored = _connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel);
                 }
             }
 
