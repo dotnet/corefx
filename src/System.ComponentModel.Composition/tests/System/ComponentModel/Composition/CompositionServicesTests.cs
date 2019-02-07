@@ -7,10 +7,9 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.UnitTesting;
-using Tests.Integration;
 using Xunit;
 
-namespace System.ComponentModel.Composition
+namespace System.ComponentModel.Composition.Tests
 {
     public class CompositionServicesTests
     {
@@ -25,17 +24,17 @@ namespace System.ComponentModel.Composition
                 });
         }        
 
-        [Fact]
-        [Description("Verifies adding custom modifiers to contract name.")]
-        public void ContractNameServicesAddCustomModifiersTest()
-        {
-            Type[] modifiers = new Type[] { typeof(int), typeof(List<int>), typeof(double) };
-            StringBuilder typeName = new StringBuilder();
-            ContractNameServices.WriteCustomModifiers(typeName, "test", modifiers, false);
-            Assert.Equal(
-                string.Format(" {0}(System.Int32,System.Collections.Generic.List(System.Int32),System.Double)", "test"),
-                typeName.ToString());
-        }
+        //[Fact]
+        //[Description("Verifies adding custom modifiers to contract name.")]
+        //public void ContractNameServicesAddCustomModifiersTest()
+        //{
+        //    Type[] modifiers = new Type[] { typeof(int), typeof(List<int>), typeof(double) };
+        //    StringBuilder typeName = new StringBuilder();
+        //    ContractNameServices.WriteCustomModifiers(typeName, "test", modifiers, false);
+        //    Assert.Equal(
+        //        string.Format(" {0}(System.Int32,System.Collections.Generic.List(System.Int32),System.Double)", "test"),
+        //        typeName.ToString());
+        //}
 
         [Fact]
         [Description("Verifies CompositionServices.GetDefaultContractName method.")]

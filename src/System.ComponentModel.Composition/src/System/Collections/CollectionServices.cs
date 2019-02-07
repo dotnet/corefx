@@ -5,58 +5,11 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reflection;
 
 namespace System.Collections
 {
     internal static partial class CollectionServices
     {
-        private static readonly Type s_stringType = typeof(string);
-        private static readonly Type s_iEnumerableType = typeof(IEnumerable);
-        private static readonly Type s_iEnumerableOfTType = typeof(IEnumerable<>);
-        private static readonly Type s_iCollectionOfTType = typeof(ICollection<>);
-
-        public static bool IsEnumerableOfT(Type type)
-        {
-            if (type.IsGenericType)
-            {
-                Type genericType = type.GetGenericTypeDefinition().UnderlyingSystemType;
-
-                if (genericType == s_iEnumerableOfTType)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public static Type GetEnumerableElementType(Type type)
-        {
-            if (type.UnderlyingSystemType == s_stringType || !s_iEnumerableType.IsAssignableFrom(type))
-            {
-                return null;
-            }
-
-            Type closedType;
-            if (ReflectionServices.TryGetGenericInterfaceType(type, s_iEnumerableOfTType, out closedType))
-            {
-                return closedType.GetGenericArguments()[0];
-            }
-
-            return null;
-        }
-
-        public static Type GetCollectionElementType(Type type)
-        {
-            Type closedType;
-            if (ReflectionServices.TryGetGenericInterfaceType(type, s_iCollectionOfTType, out closedType))
-            {
-                return closedType.GetGenericArguments()[0];
-            }
-
-            return null;
-        }
-
         public static ReadOnlyCollection<T> ToReadOnlyCollection<T>(this IEnumerable<T> source)
         {
             if(source == null)
@@ -80,24 +33,6 @@ namespace System.Collections
             }
 
             return source.Concat(second);
-        }
-
-        public static ICollection<T> ConcatAllowingNull<T>(this ICollection<T> source, ICollection<T> second)
-        {
-            if (second == null || (second.Count == 0))
-            {
-                return source;
-            }
-
-            if (source == null || (source.Count == 0))
-            {
-                return second;
-            }
-
-            List<T> result = new List<T>(source);
-            result.AddRange(second);
-
-            return result;
         }
 
         public static List<T> FastAppendToListAllowNulls<T>(this List<T> source, IEnumerable<T> second)
@@ -156,51 +91,6 @@ namespace System.Collections
             return source;
         }
 
-        public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
-        {
-            foreach (T t in source)
-            {
-                action.Invoke(t);
-            }
-        }
-
-        public static EnumerableCardinality GetCardinality<T>(this IEnumerable<T> source)
-        {
-            if(source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            // Cast to ICollection instead of ICollection<T> for performance reasons.
-            if (source is ICollection collection)
-            {
-                switch (collection.Count)
-                {
-                    case 0:
-                        return EnumerableCardinality.Zero;
-                    case 1:
-                        return EnumerableCardinality.One;
-                    default:
-                        return EnumerableCardinality.TwoOrMore;
-                }
-            }
-
-            using (IEnumerator<T> enumerator = source.GetEnumerator())
-            {
-                if (!enumerator.MoveNext())
-                {
-                    return EnumerableCardinality.Zero;
-                }
-
-                if (!enumerator.MoveNext())
-                {
-                    return EnumerableCardinality.One;
-                }
-
-                return EnumerableCardinality.TwoOrMore;
-            }
-        }
-
         public static bool FastAny<T>(this IEnumerable<T> source)
         {
             // Enumerable.Any<T> underneath doesn't cast to ICollection, 
@@ -218,41 +108,9 @@ namespace System.Collections
             return source.Any();
         }
 
-        public static Stack<T> Copy<T>(this Stack<T> stack)
-        {
-            if(stack == null)
-            {
-                throw new ArgumentNullException(nameof(stack));
-            }
-
-            // Stack<T>.GetEnumerator walks from top to bottom 
-            // of the stack, whereas Stack<T>(IEnumerable<T>) 
-            // pushes to bottom from top, so we need to reverse 
-            // the stack to get them in the right order.
-            return new Stack<T>(stack.Reverse());
-        }
-
         public static T[] AsArray<T>(this IEnumerable<T> enumerable)
         {
             return enumerable as T[] ?? enumerable.ToArray();
-        }
-
-        public static bool IsArrayEqual<T>(this T[] thisArray, T[] thatArray)
-        {
-            if (thisArray.Length != thatArray.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < thisArray.Length; i++)
-            {
-                if (!thisArray[i].Equals(thatArray[i]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
     }
 }

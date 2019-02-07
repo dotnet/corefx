@@ -10,7 +10,7 @@ using System.Linq;
 using System.UnitTesting;
 using Xunit;
 
-namespace Tests.Integration
+namespace System.ComponentModel.Composition.Tests
 {
     public class CompositionContainerAttributedModelCycleTests
     {

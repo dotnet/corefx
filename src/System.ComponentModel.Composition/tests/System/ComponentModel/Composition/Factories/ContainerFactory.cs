@@ -47,16 +47,17 @@ namespace System.ComponentModel.Composition.Factories
 
         public static CompositionContainer CreateAttributed(params object[] parts)
         {
-            var container = new CompositionContainer();
-            var partsArray = new ComposablePart[parts.Length];
+            throw new NotImplementedException();
+            //var container = new CompositionContainer();
+            //var partsArray = new ComposablePart[parts.Length];
 
-            for (int i = 0; i < parts.Length; i++)
-            {
-                Assert.IsNotType<Type>(parts[i]);
-                partsArray[i] = PartFactory.CreateAttributed(parts[i]);
-            }
+            //for (int i = 0; i < parts.Length; i++)
+            //{
+            //    Assert.IsNotType<Type>(parts[i]);
+            //    partsArray[i] = PartFactory.CreateAttributed(parts[i]);
+            //}
 
-            return Create(partsArray);
+            //return Create(partsArray);
         }
 
         public static CompositionContainer Create(CompositionContainer parent, params ComposablePart[] parts)
@@ -82,16 +83,18 @@ namespace System.ComponentModel.Composition.Factories
 
         public static CompositionContainer Create(params MicroExport[] exports)
         {
-            var part = PartFactory.CreateExporter(exports);
+            throw new NotImplementedException();
+            //var part = PartFactory.CreateExporter(exports);
 
-            return Create(part);
+            //return Create(part);
         }
 
         public static CompositionContainer Create(CompositionContainer parent, params MicroExport[] exports)
         {
-            var part = PartFactory.CreateExporter(exports);
+            throw new NotImplementedException();
+            //var part = PartFactory.CreateExporter(exports);
 
-            return Create(parent, part);
+            //return Create(parent, part);
         }
 
         public static CompositionContainer CreateDisposable(Action<bool> disposeCallback)

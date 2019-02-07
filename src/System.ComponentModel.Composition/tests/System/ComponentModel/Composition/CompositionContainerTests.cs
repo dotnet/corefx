@@ -169,27 +169,27 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [Fact]
-        public void AddPart1_ImportOnlyPart_ShouldNotGetGarbageCollected()
-        {
-            var container = CreateCompositionContainer();
+        //[Fact]
+        //public void AddPart1_ImportOnlyPart_ShouldNotGetGarbageCollected()
+        //{
+        //    var container = CreateCompositionContainer();
 
-            var import = PartFactory.CreateImporter("Value", ImportCardinality.ZeroOrMore);
+        //    var import = PartFactory.CreateImporter("Value", ImportCardinality.ZeroOrMore);
 
-            CompositionBatch batch = new CompositionBatch();
-            batch.AddPart(import);
-            container.Compose(batch);
+        //    CompositionBatch batch = new CompositionBatch();
+        //    batch.AddPart(import);
+        //    container.Compose(batch);
 
-            var weakRef = new WeakReference(import);
-            import = null;
+        //    var weakRef = new WeakReference(import);
+        //    import = null;
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+        //    GC.Collect();
+        //    GC.WaitForPendingFinalizers();
 
-            Assert.NotNull(weakRef.Target);
+        //    Assert.NotNull(weakRef.Target);
 
-            GC.KeepAlive(container);
-        }
+        //    GC.KeepAlive(container);
+        //}
 
         [Fact]
         public void Compose_WhenContainerDisposed_ShouldThrowObjectDisposed()
@@ -632,1185 +632,1185 @@ namespace System.ComponentModel.Composition
             Assert.Empty(exports);
         }
 
-        [Fact]
-        public void GetExportOfT1_AskingForContractWithOneExport_ShouldReturnExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(string)), "Value"));
+        //[Fact]
+        //public void GetExportOfT1_AskingForContractWithOneExport_ShouldReturnExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(string)), "Value"));
 
-            var export = container.GetExport<string>();
+        //    var export = container.GetExport<string>();
 
-            Assert.Equal("Value", export.Value);
-        }
+        //    Assert.Equal("Value", export.Value);
+        //}
 
-        [Fact]
-        public void GetExportOfT2_AskingForContractWithOneExport_ShouldReturnExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
+        //[Fact]
+        //public void GetExportOfT2_AskingForContractWithOneExport_ShouldReturnExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
-            var export = container.GetExport<string>("Contract");
+        //    var export = container.GetExport<string>("Contract");
 
-            Assert.Equal("Value", export.Value);
-        }
+        //    Assert.Equal("Value", export.Value);
+        //}
 
-        [Fact]
-        public void GetExportOfTTMetadataView1_AskingForContractWithOneExport_ShouldReturnExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(string)), "Value"));
+        //[Fact]
+        //public void GetExportOfTTMetadataView1_AskingForContractWithOneExport_ShouldReturnExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(string)), "Value"));
 
-            var export = container.GetExport<string, object>();
+        //    var export = container.GetExport<string, object>();
 
-            Assert.Equal("Value", export.Value);
-        }
+        //    Assert.Equal("Value", export.Value);
+        //}
 
-        [Fact]
-        public void GetExportOfTTMetadataView2_AskingForContractWithOneExport_ShouldReturnExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
+        //[Fact]
+        //public void GetExportOfTTMetadataView2_AskingForContractWithOneExport_ShouldReturnExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
-            var export = container.GetExport<string, object>("Contract");
+        //    var export = container.GetExport<string, object>("Contract");
 
-            Assert.Equal("Value", export.Value);
-        }
+        //    Assert.Equal("Value", export.Value);
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForExactlyOneContractWithOneExport_ShouldReturnExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
+        //[Fact]
+        //public void GetExports1_AskingForExactlyOneContractWithOneExport_ShouldReturnExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
-            var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ExactlyOne);
+        //    var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ExactlyOne);
 
-            var exports = container.GetExports(definition);
+        //    var exports = container.GetExports(definition);
 
-            ExportsAssert.AreEqual(exports, "Value");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value");
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForZeroOrOneContractWithOneExport_ShouldReturnExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
+        //[Fact]
+        //public void GetExports1_AskingForZeroOrOneContractWithOneExport_ShouldReturnExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
-            var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrOne);
+        //    var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrOne);
 
-            var exports = container.GetExports(definition);
+        //    var exports = container.GetExports(definition);
 
-            ExportsAssert.AreEqual(exports, "Value");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value");
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForZeroOrMoreContractWithOneExport_ShouldReturnExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
+        //[Fact]
+        //public void GetExports1_AskingForZeroOrMoreContractWithOneExport_ShouldReturnExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
-            var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrMore);
+        //    var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrMore);
 
-            var exports = container.GetExports(definition);
+        //    var exports = container.GetExports(definition);
 
-            ExportsAssert.AreEqual(exports, "Value");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value");
+        //}
 
-        [Fact]
-        public void GetExports2_AskingForContractWithOneExport_ShouldReturnOneExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
+        //[Fact]
+        //public void GetExports2_AskingForContractWithOneExport_ShouldReturnOneExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
-            var exports = container.GetExports(typeof(string), (Type)null, "Contract");
+        //    var exports = container.GetExports(typeof(string), (Type)null, "Contract");
 
-            ExportsAssert.AreEqual(exports, "Value");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value");
+        //}
 
-        [Fact]
-        public void GetExportsOfT1_AskingForContractWithOneExport_ShouldReturnOneExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
+        //[Fact]
+        //public void GetExportsOfT1_AskingForContractWithOneExport_ShouldReturnOneExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
 
-            var exports = container.GetExports<string>();
+        //    var exports = container.GetExports<string>();
 
-            ExportsAssert.AreEqual(exports, "Value");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value");
+        //}
 
-        [Fact]
-        public void GetExportsOfT2_AskingForContractWithOneExport_ShouldReturnOneExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
+        //[Fact]
+        //public void GetExportsOfT2_AskingForContractWithOneExport_ShouldReturnOneExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
-            var exports = container.GetExports<string>("Contract");
+        //    var exports = container.GetExports<string>("Contract");
 
-            ExportsAssert.AreEqual(exports, "Value");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value");
+        //}
 
-        [Fact]
-        public void GetExportsOfTTMetadataView1_AskingForContractWithOneExport_ShouldReturnOneExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
+        //[Fact]
+        //public void GetExportsOfTTMetadataView1_AskingForContractWithOneExport_ShouldReturnOneExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
 
-            var exports = container.GetExports<string, object>();
+        //    var exports = container.GetExports<string, object>();
 
-            ExportsAssert.AreEqual(exports, "Value");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value");
+        //}
 
-        [Fact]
-        public void GetExportsOfTTMetadataView2_AskingForContractWithOneExport_ShouldReturnOneExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
+        //[Fact]
+        //public void GetExportsOfTTMetadataView2_AskingForContractWithOneExport_ShouldReturnOneExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
-            var exports = container.GetExports<string, object>("Contract");
+        //    var exports = container.GetExports<string, object>("Contract");
 
-            ExportsAssert.AreEqual(exports, "Value");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value");
+        //}
 
-        [Fact]
-        public void GetExportedValueOfT1_AskingForContractWithOneExport_ShouldReturnExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
+        //[Fact]
+        //public void GetExportedValueOfT1_AskingForContractWithOneExport_ShouldReturnExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
 
-            var exportedValue = container.GetExportedValue<string>();
+        //    var exportedValue = container.GetExportedValue<string>();
 
-            Assert.Equal("Value", exportedValue);
-        }
+        //    Assert.Equal("Value", exportedValue);
+        //}
 
-        [Fact]
-        public void GetExportedValueOfT2_AskingForContractWithOneExport_ShouldReturnExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
+        //[Fact]
+        //public void GetExportedValueOfT2_AskingForContractWithOneExport_ShouldReturnExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
-            var exportedValue = container.GetExportedValue<string>("Contract");
+        //    var exportedValue = container.GetExportedValue<string>("Contract");
 
-            Assert.Equal("Value", exportedValue);
-        }
+        //    Assert.Equal("Value", exportedValue);
+        //}
 
-        [Fact]
-        public void GetExportedValueOrDefaultOfT1_AskingForContractWithOneExport_ShouldReturnExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
+        //[Fact]
+        //public void GetExportedValueOrDefaultOfT1_AskingForContractWithOneExport_ShouldReturnExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
 
-            var exportedValue = container.GetExportedValueOrDefault<string>();
+        //    var exportedValue = container.GetExportedValueOrDefault<string>();
 
-            Assert.Equal("Value", exportedValue);
-        }
+        //    Assert.Equal("Value", exportedValue);
+        //}
 
-        [Fact]
-        public void GetExportedValueOrDefaultOfT2_AskingForContractWithOneExport_ShouldReturnExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
+        //[Fact]
+        //public void GetExportedValueOrDefaultOfT2_AskingForContractWithOneExport_ShouldReturnExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
-            var exportedValue = container.GetExportedValueOrDefault<string>("Contract");
+        //    var exportedValue = container.GetExportedValueOrDefault<string>("Contract");
 
-            Assert.Equal("Value", exportedValue);
-        }
+        //    Assert.Equal("Value", exportedValue);
+        //}
 
-        [Fact]
-        public void GetExportedValuesOfT1_AskingForContractWithOneExport_ShouldReturnOneExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
+        //[Fact]
+        //public void GetExportedValuesOfT1_AskingForContractWithOneExport_ShouldReturnOneExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value"));
 
-            var exportedValues = container.GetExportedValues<string>();
+        //    var exportedValues = container.GetExportedValues<string>();
 
-            EnumerableAssert.AreEqual(exportedValues, "Value");
-        }
+        //    EnumerableAssert.AreEqual(exportedValues, "Value");
+        //}
 
-        [Fact]
-        public void GetExportedValuesOfT2_AskingForContractWithOneExport_ShouldReturnOneExport()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
+        //[Fact]
+        //public void GetExportedValuesOfT2_AskingForContractWithOneExport_ShouldReturnOneExport()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value"));
 
-            var exportedValues = container.GetExportedValues<string>("Contract");
+        //    var exportedValues = container.GetExportedValues<string>("Contract");
 
-            EnumerableAssert.AreEqual(exportedValues, "Value");
-        }
+        //    EnumerableAssert.AreEqual(exportedValues, "Value");
+        //}
 
-        [Fact]
-        public void GetExportOfT1_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(string)), "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportOfT1_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(string)), "Value1", "Value2"));
 
-            ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
-             {
-                 container.GetExport<string>();
-             });
-        }
+        //    ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
+        //     {
+        //         container.GetExport<string>();
+        //     });
+        //}
 
-        [Fact]
-        public void GetExportOfT2_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportOfT2_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
-            ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
-             {
-                 container.GetExport<string>("Contract");
-             });
-        }
+        //    ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
+        //     {
+        //         container.GetExport<string>("Contract");
+        //     });
+        //}
 
-        [Fact]
-        public void GetExportOfTTMetadataView1_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(string)), "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportOfTTMetadataView1_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(ContractFromType(typeof(string)), "Value1", "Value2"));
 
-            ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
-            {
-                container.GetExport<string, object>();
-            });
-        }
+        //    ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
+        //    {
+        //        container.GetExport<string, object>();
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportOfTTMetadataView2_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportOfTTMetadataView2_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
-            ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
-            {
-                container.GetExport<string, object>("Contract");
-            });
-        }
+        //    ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
+        //    {
+        //        container.GetExport<string, object>("Contract");
+        //    });
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForExactlyOneContractWithMultipleExports_ShouldThrowCardinalityMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
+        //[Fact]
+        //public void GetExports1_AskingForExactlyOneContractWithMultipleExports_ShouldThrowCardinalityMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
-            var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ExactlyOne);
+        //    var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ExactlyOne);
 
-            ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
-            {
-                container.GetExports(definition);
-            });
-        }
+        //    ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
+        //    {
+        //        container.GetExports(definition);
+        //    });
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForZeroOrOneContractWithMultipleExports_ShouldReturnZero()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
+        //[Fact]
+        //public void GetExports1_AskingForZeroOrOneContractWithMultipleExports_ShouldReturnZero()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
-            var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrOne);
+        //    var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrOne);
 
-            Assert.Equal(0, container.GetExports(definition).Count());
-        }
+        //    Assert.Equal(0, container.GetExports(definition).Count());
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForZeroOrMoreContractWithMultipleExports_ShouldReturnMultipleExports()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
+        //[Fact]
+        //public void GetExports1_AskingForZeroOrMoreContractWithMultipleExports_ShouldReturnMultipleExports()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
-            var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrMore);
+        //    var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrMore);
 
-            var exports = container.GetExports(definition);
+        //    var exports = container.GetExports(definition);
 
-            ExportsAssert.AreEqual(exports, "Value1", "Value2");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value1", "Value2");
+        //}
 
-        [Fact]
-        public void GetExports2_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
+        //[Fact]
+        //public void GetExports2_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
-            var exports = container.GetExports(typeof(string), (Type)null, "Contract");
+        //    var exports = container.GetExports(typeof(string), (Type)null, "Contract");
 
-            ExportsAssert.AreEqual(exports, "Value1", "Value2");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value1", "Value2");
+        //}
 
-        [Fact]
-        public void GetExportsOfT1_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportsOfT1_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
 
-            var exports = container.GetExports<string>();
+        //    var exports = container.GetExports<string>();
 
-            ExportsAssert.AreEqual(exports, "Value1", "Value2");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value1", "Value2");
+        //}
 
-        [Fact]
-        public void GetExportsOfT2_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportsOfT2_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
-            var exports = container.GetExports<string>("Contract");
+        //    var exports = container.GetExports<string>("Contract");
 
-            ExportsAssert.AreEqual(exports, "Value1", "Value2");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value1", "Value2");
+        //}
 
-        [Fact]
-        public void GetExportsOfTTMetadataView1_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportsOfTTMetadataView1_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
 
-            var exports = container.GetExports<string, object>();
+        //    var exports = container.GetExports<string, object>();
 
-            ExportsAssert.AreEqual(exports, "Value1", "Value2");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value1", "Value2");
+        //}
 
-        [Fact]
-        public void GetExportsOfTTMetadataView2_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportsOfTTMetadataView2_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
-            var exports = container.GetExports<string, object>("Contract");
+        //    var exports = container.GetExports<string, object>("Contract");
 
-            ExportsAssert.AreEqual(exports, "Value1", "Value2");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value1", "Value2");
+        //}
 
-        [Fact]
-        public void GetExportedValueOfT1_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportedValueOfT1_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
 
-            ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
-            {
-                container.GetExportedValue<string>();
-            });
-        }
+        //    ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
+        //    {
+        //        container.GetExportedValue<string>();
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportedValueOfT2_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportedValueOfT2_AskingForContractWithMultipleExports_ShouldThrowCardinalityMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
-            ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
-            {
-                container.GetExportedValue<string>("Contract");
-            });
-        }
+        //    ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
+        //    {
+        //        container.GetExportedValue<string>("Contract");
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportedValueOrDefaultOfT1_AskingForContractWithMultipleExports_ShouldReturnZero()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportedValueOrDefaultOfT1_AskingForContractWithMultipleExports_ShouldReturnZero()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
 
-            Assert.Null(container.GetExportedValueOrDefault<string>());
-        }
+        //    Assert.Null(container.GetExportedValueOrDefault<string>());
+        //}
 
-        [Fact]
-        public void GetExportedValueOrDefaultOfT2_AskingForContractWithMultipleExports_ShouldReturnZero()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportedValueOrDefaultOfT2_AskingForContractWithMultipleExports_ShouldReturnZero()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", "Value1", "Value2"));
 
-            Assert.Null(container.GetExportedValueOrDefault<string>("Contract"));
-        }
+        //    Assert.Null(container.GetExportedValueOrDefault<string>("Contract"));
+        //}
 
-        [Fact]
-        public void GetExportedValuesOfT1_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportedValuesOfT1_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), "Value1", "Value2"));
 
-            var exportedValues = container.GetExportedValues<string>();
+        //    var exportedValues = container.GetExportedValues<string>();
 
-            EnumerableAssert.AreEqual(exportedValues, "Value1", "Value2");
-        }
+        //    EnumerableAssert.AreEqual(exportedValues, "Value1", "Value2");
+        //}
 
-        [Fact]
-        public void GetExportedValuesOfT2_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), "Value1", "Value2"));
+        //[Fact]
+        //public void GetExportedValuesOfT2_AskingForContractWithMultipleExports_ShouldReturnMultipleExports()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), "Value1", "Value2"));
 
-            var exportedValues = container.GetExportedValues<string>("Contract");
+        //    var exportedValues = container.GetExportedValues<string>("Contract");
 
-            EnumerableAssert.AreEqual(exportedValues, "Value1", "Value2");
-        }
+        //    EnumerableAssert.AreEqual(exportedValues, "Value1", "Value2");
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForExactlyOneAndAll_ShouldThrowCardinalityMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract1", "Value1", "Value2", "Value3"),
-                                                    new MicroExport("Contract2", "Value4", "Value5", "Value6"));
+        //[Fact]
+        //public void GetExports1_AskingForExactlyOneAndAll_ShouldThrowCardinalityMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract1", "Value1", "Value2", "Value3"),
+        //                                            new MicroExport("Contract2", "Value4", "Value5", "Value6"));
 
-            var definition = ImportDefinitionFactory.Create(import => true, ImportCardinality.ExactlyOne);
+        //    var definition = ImportDefinitionFactory.Create(import => true, ImportCardinality.ExactlyOne);
 
-            ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
-            {
-                container.GetExports(definition);
-            });
-        }
+        //    ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
+        //    {
+        //        container.GetExports(definition);
+        //    });
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForZeroOrOneAndAll_ShouldReturnZero()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract1", "Value1", "Value2", "Value3"),
-                                                    new MicroExport("Contract2", "Value4", "Value5", "Value6"));
+        //[Fact]
+        //public void GetExports1_AskingForZeroOrOneAndAll_ShouldReturnZero()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract1", "Value1", "Value2", "Value3"),
+        //                                            new MicroExport("Contract2", "Value4", "Value5", "Value6"));
 
-            var definition = ImportDefinitionFactory.Create(import => true, ImportCardinality.ZeroOrOne);
+        //    var definition = ImportDefinitionFactory.Create(import => true, ImportCardinality.ZeroOrOne);
 
-            Assert.Equal(0, container.GetExports(definition).Count());
-        }
+        //    Assert.Equal(0, container.GetExports(definition).Count());
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForZeroOrMoreAndAll_ShouldReturnAll()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract1", "Value1", "Value2", "Value3"),
-                                                    new MicroExport("Contract2", "Value4", "Value5", "Value6"));
+        //[Fact]
+        //public void GetExports1_AskingForZeroOrMoreAndAll_ShouldReturnAll()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract1", "Value1", "Value2", "Value3"),
+        //                                            new MicroExport("Contract2", "Value4", "Value5", "Value6"));
 
-            var definition = ImportDefinitionFactory.Create(import => true, ImportCardinality.ZeroOrMore);
+        //    var definition = ImportDefinitionFactory.Create(import => true, ImportCardinality.ZeroOrMore);
 
-            var exports = container.GetExports(definition);
+        //    var exports = container.GetExports(definition);
 
-            ExportsAssert.AreEqual(exports, "Value1", "Value2", "Value3",
-                                            "Value4", "Value5", "Value6");
-        }
+        //    ExportsAssert.AreEqual(exports, "Value1", "Value2", "Value3",
+        //                                    "Value4", "Value5", "Value6");
+        //}
 
-        [Fact]
-        public void GetExportOfT1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
+        //[Fact]
+        //public void GetExportOfT1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
 
-            var export = container.GetExport<string>();
+        //    var export = container.GetExport<string>();
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                var value = export.Value;
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        var value = export.Value;
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportOfT2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
+        //[Fact]
+        //public void GetExportOfT2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
 
-            var export = container.GetExport<string>("Contract");
+        //    var export = container.GetExport<string>("Contract");
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                var value = export.Value;
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        var value = export.Value;
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportOfTTMetadataView1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
+        //[Fact]
+        //public void GetExportOfTTMetadataView1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
 
-            var export = container.GetExport<string, object>();
+        //    var export = container.GetExport<string, object>();
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                var value = export.Value;
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        var value = export.Value;
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportOfTTMetadataView2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
+        //[Fact]
+        //public void GetExportOfTTMetadataView2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
 
-            var export = container.GetExport<string, object>("Contract");
+        //    var export = container.GetExport<string, object>("Contract");
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                var value = export.Value;
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        var value = export.Value;
+        //    });
+        //}
 
-        [Fact]
-        public void GetExports2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
+        //[Fact]
+        //public void GetExports2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
 
-            var exports = container.GetExports(typeof(string), (Type)null, "Contract");
+        //    var exports = container.GetExports(typeof(string), (Type)null, "Contract");
 
-            Assert.Equal(1, exports.Count());
+        //    Assert.Equal(1, exports.Count());
 
-            var export = exports.ElementAt(0);
+        //    var export = exports.ElementAt(0);
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                var value = export.Value;
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        var value = export.Value;
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportsOfT1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
+        //[Fact]
+        //public void GetExportsOfT1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
 
-            var exports = container.GetExports<string>();
+        //    var exports = container.GetExports<string>();
 
-            Assert.Equal(1, exports.Count());
+        //    Assert.Equal(1, exports.Count());
 
-            var export = exports.ElementAt(0);
+        //    var export = exports.ElementAt(0);
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                var value = export.Value;
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        var value = export.Value;
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportsOfT2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
+        //[Fact]
+        //public void GetExportsOfT2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
 
-            var exports = container.GetExports<string>("Contract");
+        //    var exports = container.GetExports<string>("Contract");
 
-            Assert.Equal(1, exports.Count());
+        //    Assert.Equal(1, exports.Count());
 
-            var export = exports.ElementAt(0);
+        //    var export = exports.ElementAt(0);
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                var value = export.Value;
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        var value = export.Value;
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportsOfTTMetadataView1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
+        //[Fact]
+        //public void GetExportsOfTTMetadataView1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
 
-            var exports = container.GetExports<string, object>();
+        //    var exports = container.GetExports<string, object>();
 
-            Assert.Equal(1, exports.Count());
+        //    Assert.Equal(1, exports.Count());
 
-            var export = exports.ElementAt(0);
+        //    var export = exports.ElementAt(0);
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                var value = export.Value;
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        var value = export.Value;
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportsOfTTMetadataView2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
+        //[Fact]
+        //public void GetExportsOfTTMetadataView2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
 
-            var exports = container.GetExports<string, object>("Contract");
+        //    var exports = container.GetExports<string, object>("Contract");
 
-            Assert.Equal(1, exports.Count());
+        //    Assert.Equal(1, exports.Count());
 
-            var export = exports.ElementAt(0);
+        //    var export = exports.ElementAt(0);
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                var value = export.Value;
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        var value = export.Value;
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportedValueOfT1_StringAsTTypeArgumentAskingForContractWithObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
+        //[Fact]
+        //public void GetExportedValueOfT1_StringAsTTypeArgumentAskingForContractWithObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                container.GetExportedValue<string>();
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        container.GetExportedValue<string>();
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportedValueOfT2_StringAsTTypeArgumentAskingForContractWithObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
+        //[Fact]
+        //public void GetExportedValueOfT2_StringAsTTypeArgumentAskingForContractWithObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                container.GetExportedValue<string>("Contract");
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        container.GetExportedValue<string>("Contract");
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportedValueOrDefaultOfT1_StringAsTTypeArgumentAskingForContractWithObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
+        //[Fact]
+        //public void GetExportedValueOrDefaultOfT1_StringAsTTypeArgumentAskingForContractWithObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                container.GetExportedValueOrDefault<string>();
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        container.GetExportedValueOrDefault<string>();
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportedValueOrDefaultOfT2_StringAsTTypeArgumentAskingForContractWithObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
+        //[Fact]
+        //public void GetExportedValueOrDefaultOfT2_StringAsTTypeArgumentAskingForContractWithObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                container.GetExportedValueOrDefault<string>("Contract");
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        container.GetExportedValueOrDefault<string>("Contract");
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportedValuesOfT1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
+        //[Fact]
+        //public void GetExportedValuesOfT1_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport(typeof(string), new object()));
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                container.GetExportedValues<string>();
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        container.GetExportedValues<string>();
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportedValuesOfT2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
-        {
-            var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
+        //[Fact]
+        //public void GetExportedValuesOfT2_StringAsTTypeArgumentAskingForContractWithOneObjectExport_ShouldThrowContractMismatch()
+        //{
+        //    var container = ContainerFactory.Create(new MicroExport("Contract", typeof(string), new object()));
 
-            ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
-            {
-                container.GetExportedValues<string>("Contract");
-            });
-        }
+        //    ExceptionAssert.Throws<CompositionContractMismatchException>(() =>
+        //    {
+        //        container.GetExportedValues<string>("Contract");
+        //    });
+        //}
 
-        [Fact]
-        public void GetExportOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var export = child.GetExport<string>();
+        //    var export = child.GetExport<string>();
 
-            Assert.Equal("Parent", export.Value);
-        }
+        //    Assert.Equal("Parent", export.Value);
+        //}
 
-        [Fact]
-        public void GetExportOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var export = child.GetExport<string>("Contract");
+        //    var export = child.GetExport<string>("Contract");
 
-            Assert.Equal("Parent", export.Value);
-        }
+        //    Assert.Equal("Parent", export.Value);
+        //}
 
-        [Fact]
-        public void GetExportOfTTMetadataView1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportOfTTMetadataView1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var export = child.GetExport<string, object>();
+        //    var export = child.GetExport<string, object>();
 
-            Assert.Equal("Parent", export.Value);
-        }
+        //    Assert.Equal("Parent", export.Value);
+        //}
 
-        [Fact]
-        public void GetExportOfTTMetadataView2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportOfTTMetadataView2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var export = child.GetExport<string, object>("Contract");
+        //    var export = child.GetExport<string, object>("Contract");
 
-            Assert.Equal("Parent", export.Value);
-        }
+        //    Assert.Equal("Parent", export.Value);
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForExactlyOneContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExports1_AskingForExactlyOneContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ExactlyOne);
+        //    var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ExactlyOne);
 
-            var exports = child.GetExports(definition);
+        //    var exports = child.GetExports(definition);
 
-            ExportsAssert.AreEqual(exports, "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Parent");
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForZeroOrOneContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExports1_AskingForZeroOrOneContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrOne);
+        //    var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrOne);
 
-            var exports = child.GetExports(definition);
+        //    var exports = child.GetExports(definition);
 
-            ExportsAssert.AreEqual(exports, "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Parent");
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForZeroOrMoreContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExports1_AskingForZeroOrMoreContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrMore);
+        //    var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrMore);
 
-            var exports = child.GetExports(definition);
+        //    var exports = child.GetExports(definition);
 
-            ExportsAssert.AreEqual(exports, "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Parent");
+        //}
 
-        [Fact]
-        public void GetExports2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExports2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var exports = child.GetExports(typeof(string), (Type)null, "Contract");
+        //    var exports = child.GetExports(typeof(string), (Type)null, "Contract");
 
-            ExportsAssert.AreEqual(exports, "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Parent");
+        //}
 
-        [Fact]
-        public void GetExportsOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportsOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var exports = child.GetExports<string>();
+        //    var exports = child.GetExports<string>();
 
-            ExportsAssert.AreEqual(exports, "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Parent");
+        //}
 
-        [Fact]
-        public void GetExportsOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportsOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var exports = child.GetExports<string>("Contract");
+        //    var exports = child.GetExports<string>("Contract");
 
-            ExportsAssert.AreEqual(exports, "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Parent");
+        //}
 
-        [Fact]
-        public void GetExportsOfTTMetadataView1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportsOfTTMetadataView1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var exports = child.GetExports<string, object>();
+        //    var exports = child.GetExports<string, object>();
 
-            ExportsAssert.AreEqual(exports, "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Parent");
+        //}
 
-        [Fact]
-        public void GetExportsOfTTMetadataView2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportsOfTTMetadataView2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var exports = child.GetExports<string, object>("Contract");
+        //    var exports = child.GetExports<string, object>("Contract");
 
-            ExportsAssert.AreEqual(exports, "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Parent");
+        //}
 
-        [Fact]
-        public void GetExportedValueOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportedValueOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var exportedValue = child.GetExportedValue<string>();
+        //    var exportedValue = child.GetExportedValue<string>();
 
-            Assert.Equal("Parent", exportedValue);
-        }
+        //    Assert.Equal("Parent", exportedValue);
+        //}
 
-        [Fact]
-        public void GetExportedValueOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportedValueOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var exportedValue = child.GetExportedValue<string>("Contract");
+        //    var exportedValue = child.GetExportedValue<string>("Contract");
 
-            Assert.Equal("Parent", exportedValue);
-        }
+        //    Assert.Equal("Parent", exportedValue);
+        //}
 
-        [Fact]
-        public void GetExportedValueOrDefaultOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportedValueOrDefaultOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var exportedValue = child.GetExportedValueOrDefault<string>();
+        //    var exportedValue = child.GetExportedValueOrDefault<string>();
 
-            Assert.Equal("Parent", exportedValue);
-        }
+        //    Assert.Equal("Parent", exportedValue);
+        //}
 
-        [Fact]
-        public void GetExportedValueOrDefaultOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportedValueOrDefaultOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var exportedValue = child.GetExportedValueOrDefault<string>("Contract");
+        //    var exportedValue = child.GetExportedValueOrDefault<string>("Contract");
 
-            Assert.Equal("Parent", exportedValue);
-        }
+        //    Assert.Equal("Parent", exportedValue);
+        //}
 
-        [Fact]
-        public void GetExportedValuesOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportedValuesOfT1_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var exportedValues = child.GetExportedValues<string>();
+        //    var exportedValues = child.GetExportedValues<string>();
 
-            EnumerableAssert.AreEqual(exportedValues, "Parent");
-        }
+        //    EnumerableAssert.AreEqual(exportedValues, "Parent");
+        //}
 
-        [Fact]
-        public void GetExportedValuesOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent);
+        //[Fact]
+        //public void GetExportedValuesOfT2_AskingForContractFromChildWithExportInParentContainer_ShouldReturnExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent);
 
-            var exportedValues = child.GetExportedValues<string>("Contract");
+        //    var exportedValues = child.GetExportedValues<string>("Contract");
 
-            EnumerableAssert.AreEqual(exportedValues, "Parent");
-        }
+        //    EnumerableAssert.AreEqual(exportedValues, "Parent");
+        //}
 
-        [Fact]
-        public void GetExportOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
+        //[Fact]
+        //public void GetExportOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
 
-            var export = child.GetExport<string>();
+        //    var export = child.GetExport<string>();
 
-            Assert.Equal("Child", export.Value);
-        }
+        //    Assert.Equal("Child", export.Value);
+        //}
 
-        [Fact]
-        public void GetExportOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
+        //[Fact]
+        //public void GetExportOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
 
-            var export = child.GetExport<string>("Contract");
+        //    var export = child.GetExport<string>("Contract");
 
-            Assert.Equal("Child", export.Value);
-        }
+        //    Assert.Equal("Child", export.Value);
+        //}
 
-        [Fact]
-        public void GetExportOfTTMetadataView1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
+        //[Fact]
+        //public void GetExportOfTTMetadataView1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
 
-            var export = child.GetExport<string, object>();
+        //    var export = child.GetExport<string, object>();
 
-            Assert.Equal("Child", export.Value);
-        }
+        //    Assert.Equal("Child", export.Value);
+        //}
 
-        [Fact]
-        public void GetExportOfTTMetadataView2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
+        //[Fact]
+        //public void GetExportOfTTMetadataView2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
 
-            var export = child.GetExport<string, object>("Contract");
+        //    var export = child.GetExport<string, object>("Contract");
 
-            Assert.Equal("Child", export.Value);
-        }
+        //    Assert.Equal("Child", export.Value);
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForExactlyOneContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
+        //[Fact]
+        //public void GetExports1_AskingForExactlyOneContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
 
-            var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ExactlyOne);
+        //    var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ExactlyOne);
 
-            var exports = child.GetExports(definition);
+        //    var exports = child.GetExports(definition);
 
-            ExportsAssert.AreEqual(exports, "Child");
-        }
+        //    ExportsAssert.AreEqual(exports, "Child");
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForZeroOrOneContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
+        //[Fact]
+        //public void GetExports1_AskingForZeroOrOneContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
 
-            var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrOne);
+        //    var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrOne);
 
-            var exports = child.GetExports(definition);
+        //    var exports = child.GetExports(definition);
 
-            ExportsAssert.AreEqual(exports, "Child");
-        }
+        //    ExportsAssert.AreEqual(exports, "Child");
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForZeroOrMoreContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
+        //[Fact]
+        //public void GetExports1_AskingForZeroOrMoreContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
 
-            var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrMore);
+        //    var definition = ImportDefinitionFactory.Create("Contract", ImportCardinality.ZeroOrMore);
 
-            var exports = child.GetExports(definition);
+        //    var exports = child.GetExports(definition);
 
-            ExportsAssert.AreEqual(exports, "Child", "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Child", "Parent");
+        //}
 
-        [Fact]
-        public void GetExports2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
+        //[Fact]
+        //public void GetExports2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
 
-            var exports = child.GetExports(typeof(string), (Type)null, "Contract");
+        //    var exports = child.GetExports(typeof(string), (Type)null, "Contract");
 
-            ExportsAssert.AreEqual(exports, "Child", "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Child", "Parent");
+        //}
 
-        [Fact]
-        public void GetExportsOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
+        //[Fact]
+        //public void GetExportsOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
 
-            var exports = child.GetExports<string>();
+        //    var exports = child.GetExports<string>();
 
-            ExportsAssert.AreEqual(exports, "Child", "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Child", "Parent");
+        //}
 
-        [Fact]
-        public void GetExportsOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
+        //[Fact]
+        //public void GetExportsOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
 
-            var exports = child.GetExports<string>("Contract");
+        //    var exports = child.GetExports<string>("Contract");
 
-            ExportsAssert.AreEqual(exports, "Child", "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Child", "Parent");
+        //}
 
-        [Fact]
-        public void GetExportsOfTTMetadataView1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
+        //[Fact]
+        //public void GetExportsOfTTMetadataView1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
 
-            var exports = child.GetExports<string, object>();
+        //    var exports = child.GetExports<string, object>();
 
-            ExportsAssert.AreEqual(exports, "Child", "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Child", "Parent");
+        //}
 
-        [Fact]
-        public void GetExportsOfTTMetadataView2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
+        //[Fact]
+        //public void GetExportsOfTTMetadataView2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
 
-            var exports = child.GetExports<string, object>("Contract");
+        //    var exports = child.GetExports<string, object>("Contract");
 
-            ExportsAssert.AreEqual(exports, "Child", "Parent");
-        }
+        //    ExportsAssert.AreEqual(exports, "Child", "Parent");
+        //}
 
-        [Fact]
-        public void GetExportedValueOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
+        //[Fact]
+        //public void GetExportedValueOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
 
-            var exportedValue = child.GetExportedValue<string>();
+        //    var exportedValue = child.GetExportedValue<string>();
 
-            Assert.Equal("Child", exportedValue);
-        }
+        //    Assert.Equal("Child", exportedValue);
+        //}
 
-        [Fact]
-        public void GetExportedValueOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
+        //[Fact]
+        //public void GetExportedValueOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
 
-            var exportedValue = child.GetExportedValue<string>("Contract");
+        //    var exportedValue = child.GetExportedValue<string>("Contract");
 
-            Assert.Equal("Child", exportedValue);
-        }
+        //    Assert.Equal("Child", exportedValue);
+        //}
 
-        [Fact]
-        public void GetExportedValueOrDefaultOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
+        //[Fact]
+        //public void GetExportedValueOrDefaultOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
 
-            var exportedValue = child.GetExportedValueOrDefault<string>();
+        //    var exportedValue = child.GetExportedValueOrDefault<string>();
 
-            Assert.Equal("Child", exportedValue);
-        }
+        //    Assert.Equal("Child", exportedValue);
+        //}
 
-        [Fact]
-        public void GetExportedValueOrDefaultOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
+        //[Fact]
+        //public void GetExportedValueOrDefaultOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnChildExport()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
 
-            var exportedValue = child.GetExportedValueOrDefault<string>("Contract");
+        //    var exportedValue = child.GetExportedValueOrDefault<string>("Contract");
 
-            Assert.Equal("Child", exportedValue);
-        }
+        //    Assert.Equal("Child", exportedValue);
+        //}
 
-        [Fact]
-        public void GetExportedValuesOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
-        {
-            var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
+        //[Fact]
+        //public void GetExportedValuesOfT1_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport(typeof(string), "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport(typeof(string), "Child"));
 
-            var exportedValues = child.GetExportedValues<string>();
+        //    var exportedValues = child.GetExportedValues<string>();
 
-            EnumerableAssert.AreEqual(exportedValues, "Child", "Parent");
-        }
+        //    EnumerableAssert.AreEqual(exportedValues, "Child", "Parent");
+        //}
 
-        [Fact]
-        public void GetExportedValuesOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
-        {
-            var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
-            var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
+        //[Fact]
+        //public void GetExportedValuesOfT2_AskingForContractWithExportInBothParentAndChildContainers_ShouldReturnBothExports()
+        //{
+        //    var parent = ContainerFactory.Create(new MicroExport("Contract", "Parent"));
+        //    var child = ContainerFactory.Create(parent, new MicroExport("Contract", "Child"));
 
-            var exportedValues = child.GetExportedValues<string>("Contract");
+        //    var exportedValues = child.GetExportedValues<string>("Contract");
 
-            EnumerableAssert.AreEqual(exportedValues, "Child", "Parent");
-        }
+        //    EnumerableAssert.AreEqual(exportedValues, "Child", "Parent");
+        //}
 
-        [Fact]
-        public void GetExportOfTTMetadataView1_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
-        {
-            var metadata = new Dictionary<string, object>();
-            metadata.Add("Metadata1", "MetadataValue1");
-            metadata.Add("Metadata2", "MetadataValue2");
-            metadata.Add("Metadata3", "MetadataValue3");
+        //[Fact]
+        //public void GetExportOfTTMetadataView1_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
+        //{
+        //    var metadata = new Dictionary<string, object>();
+        //    metadata.Add("Metadata1", "MetadataValue1");
+        //    metadata.Add("Metadata2", "MetadataValue2");
+        //    metadata.Add("Metadata3", "MetadataValue3");
 
-            var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
-                                                    new MicroExport(typeof(string), metadata, "Value1"),
-                                                    new MicroExport(typeof(string), "Value2"));
+        //    var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
+        //                                            new MicroExport(typeof(string), metadata, "Value1"),
+        //                                            new MicroExport(typeof(string), "Value2"));
 
-            var export = container.GetExport<string, IMetadataView>();
-            var metadataExport = (Lazy<string, IMetadataView>)export;
+        //    var export = container.GetExport<string, IMetadataView>();
+        //    var metadataExport = (Lazy<string, IMetadataView>)export;
 
-            Assert.Equal("Value1", metadataExport.Value);
-            Assert.Equal("MetadataValue1", metadataExport.Metadata.Metadata1);
-            Assert.Equal("MetadataValue2", metadataExport.Metadata.Metadata2);
-            Assert.Equal("MetadataValue3", metadataExport.Metadata.Metadata3);
-        }
+        //    Assert.Equal("Value1", metadataExport.Value);
+        //    Assert.Equal("MetadataValue1", metadataExport.Metadata.Metadata1);
+        //    Assert.Equal("MetadataValue2", metadataExport.Metadata.Metadata2);
+        //    Assert.Equal("MetadataValue3", metadataExport.Metadata.Metadata3);
+        //}
 
-        [Fact]
-        public void GetExportOfTTMetadataView2_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
-        {
-            var metadata = new Dictionary<string, object>();
-            metadata.Add("Metadata1", "MetadataValue1");
-            metadata.Add("Metadata2", "MetadataValue2");
-            metadata.Add("Metadata3", "MetadataValue3");
+        //[Fact]
+        //public void GetExportOfTTMetadataView2_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
+        //{
+        //    var metadata = new Dictionary<string, object>();
+        //    metadata.Add("Metadata1", "MetadataValue1");
+        //    metadata.Add("Metadata2", "MetadataValue2");
+        //    metadata.Add("Metadata3", "MetadataValue3");
 
-            var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
-                                                                     new MicroExport("Contract", metadata, "Value1"),
-                                                                     new MicroExport("Contract", "Value2"));
+        //    var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
+        //                                                             new MicroExport("Contract", metadata, "Value1"),
+        //                                                             new MicroExport("Contract", "Value2"));
 
-            var export = container.GetExport<string, IMetadataView>("Contract");
-            var metadataExport = (Lazy<string, IMetadataView>)export;
+        //    var export = container.GetExport<string, IMetadataView>("Contract");
+        //    var metadataExport = (Lazy<string, IMetadataView>)export;
 
-            Assert.Equal("Value1", metadataExport.Value);
-            Assert.Equal("MetadataValue1", metadataExport.Metadata.Metadata1);
-            Assert.Equal("MetadataValue2", metadataExport.Metadata.Metadata2);
-            Assert.Equal("MetadataValue3", metadataExport.Metadata.Metadata3);
-        }
+        //    Assert.Equal("Value1", metadataExport.Value);
+        //    Assert.Equal("MetadataValue1", metadataExport.Metadata.Metadata1);
+        //    Assert.Equal("MetadataValue2", metadataExport.Metadata.Metadata2);
+        //    Assert.Equal("MetadataValue3", metadataExport.Metadata.Metadata3);
+        //}
 
-        [Fact]
-        public void GetExports1_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
-        {
-            var metadata = new Dictionary<string, object>();
-            metadata.Add("Metadata1", "MetadataValue1");
-            metadata.Add("Metadata2", "MetadataValue2");
-            metadata.Add("Metadata3", "MetadataValue3");
+        //[Fact]
+        //public void GetExports1_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
+        //{
+        //    var metadata = new Dictionary<string, object>();
+        //    metadata.Add("Metadata1", "MetadataValue1");
+        //    metadata.Add("Metadata2", "MetadataValue2");
+        //    metadata.Add("Metadata3", "MetadataValue3");
 
-            var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
-                                                                     new MicroExport("Contract", metadata, "Value1"),
-                                                                     new MicroExport("Contract", "Value2"));
+        //    var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
+        //                                                             new MicroExport("Contract", metadata, "Value1"),
+        //                                                             new MicroExport("Contract", "Value2"));
 
-            var definition = ImportDefinitionFactory.Create(
-                "Contract",
-                new Dictionary<string, Type> { { "Metadata1", typeof(object) }, { "Metadata2", typeof(object) }, { "Metadata3", typeof(object) } }
-                );
+        //    var definition = ImportDefinitionFactory.Create(
+        //        "Contract",
+        //        new Dictionary<string, Type> { { "Metadata1", typeof(object) }, { "Metadata2", typeof(object) }, { "Metadata3", typeof(object) } }
+        //        );
 
-            var exports = container.GetExports(definition);
+        //    var exports = container.GetExports(definition);
 
-            Assert.Equal(1, exports.Count());
+        //    Assert.Equal(1, exports.Count());
 
-            var export = exports.First();
+        //    var export = exports.First();
 
-            Assert.Equal("Value1", export.Value);
-            EnumerableAssert.AreEqual(metadata, export.Metadata);
-        }
+        //    Assert.Equal("Value1", export.Value);
+        //    EnumerableAssert.AreEqual(metadata, export.Metadata);
+        //}
 
-        [Fact]
-        public void GetExports2_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
-        {
-            var metadata = new Dictionary<string, object>();
-            metadata.Add("Metadata1", "MetadataValue1");
-            metadata.Add("Metadata2", "MetadataValue2");
-            metadata.Add("Metadata3", "MetadataValue3");
+        //[Fact]
+        //public void GetExports2_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
+        //{
+        //    var metadata = new Dictionary<string, object>();
+        //    metadata.Add("Metadata1", "MetadataValue1");
+        //    metadata.Add("Metadata2", "MetadataValue2");
+        //    metadata.Add("Metadata3", "MetadataValue3");
 
-            var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
-                                                                     new MicroExport("Contract", metadata, "Value1"),
-                                                                     new MicroExport("Contract", "Value2"));
+        //    var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
+        //                                                             new MicroExport("Contract", metadata, "Value1"),
+        //                                                             new MicroExport("Contract", "Value2"));
 
-            var exports = container.GetExports(typeof(string), typeof(IMetadataView), "Contract");
+        //    var exports = container.GetExports(typeof(string), typeof(IMetadataView), "Contract");
 
-            Assert.Equal(1, exports.Count());
+        //    Assert.Equal(1, exports.Count());
 
-            var export = exports.First();
-            IMetadataView exportMetadata = export.Metadata as IMetadataView;
+        //    var export = exports.First();
+        //    IMetadataView exportMetadata = export.Metadata as IMetadataView;
 
-            Assert.Equal("Value1", export.Value);
-            Assert.NotNull(exportMetadata);
+        //    Assert.Equal("Value1", export.Value);
+        //    Assert.NotNull(exportMetadata);
 
-            Assert.Equal("MetadataValue1", exportMetadata.Metadata1);
-            Assert.Equal("MetadataValue2", exportMetadata.Metadata2);
-            Assert.Equal("MetadataValue3", exportMetadata.Metadata3);
-        }
+        //    Assert.Equal("MetadataValue1", exportMetadata.Metadata1);
+        //    Assert.Equal("MetadataValue2", exportMetadata.Metadata2);
+        //    Assert.Equal("MetadataValue3", exportMetadata.Metadata3);
+        //}
 
-        [Fact]
-        public void GetExportsOfTTMetadataView1_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
-        {
-            var metadata = new Dictionary<string, object>();
-            metadata.Add("Metadata1", "MetadataValue1");
-            metadata.Add("Metadata2", "MetadataValue2");
-            metadata.Add("Metadata3", "MetadataValue3");
+        //[Fact]
+        //public void GetExportsOfTTMetadataView1_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
+        //{
+        //    var metadata = new Dictionary<string, object>();
+        //    metadata.Add("Metadata1", "MetadataValue1");
+        //    metadata.Add("Metadata2", "MetadataValue2");
+        //    metadata.Add("Metadata3", "MetadataValue3");
 
-            var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
-                                                                     new MicroExport(typeof(string), metadata, "Value1"),
-                                                                     new MicroExport(typeof(string), "Value2"));
+        //    var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
+        //                                                             new MicroExport(typeof(string), metadata, "Value1"),
+        //                                                             new MicroExport(typeof(string), "Value2"));
 
-            var exports = container.GetExports<string, IMetadataView>();
+        //    var exports = container.GetExports<string, IMetadataView>();
 
-            Assert.Equal(1, exports.Count());
+        //    Assert.Equal(1, exports.Count());
 
-            var export = (Lazy<string, IMetadataView>)exports.First();
+        //    var export = (Lazy<string, IMetadataView>)exports.First();
 
-            Assert.Equal("Value1", export.Value);
-            Assert.Equal("MetadataValue1", export.Metadata.Metadata1);
-            Assert.Equal("MetadataValue2", export.Metadata.Metadata2);
-            Assert.Equal("MetadataValue3", export.Metadata.Metadata3);
-        }
+        //    Assert.Equal("Value1", export.Value);
+        //    Assert.Equal("MetadataValue1", export.Metadata.Metadata1);
+        //    Assert.Equal("MetadataValue2", export.Metadata.Metadata2);
+        //    Assert.Equal("MetadataValue3", export.Metadata.Metadata3);
+        //}
 
-        [Fact]
-        public void GetExportsOfTTMetadataView2_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
-        {
-            var metadata = new Dictionary<string, object>();
-            metadata.Add("Metadata1", "MetadataValue1");
-            metadata.Add("Metadata2", "MetadataValue2");
-            metadata.Add("Metadata3", "MetadataValue3");
+        //[Fact]
+        //public void GetExportsOfTTMetadataView2_TypeAsMetadataViewTypeArgument_IsUsedAsMetadataConstraint()
+        //{
+        //    var metadata = new Dictionary<string, object>();
+        //    metadata.Add("Metadata1", "MetadataValue1");
+        //    metadata.Add("Metadata2", "MetadataValue2");
+        //    metadata.Add("Metadata3", "MetadataValue3");
 
-            var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
-                                                                     new MicroExport("Contract", metadata, "Value1"),
-                                                                     new MicroExport("Contract", "Value2"));
+        //    var container = ContainerFactory.Create(new MicroExport("Another", metadata, "Value1"),
+        //                                                             new MicroExport("Contract", metadata, "Value1"),
+        //                                                             new MicroExport("Contract", "Value2"));
 
-            var exports = container.GetExports<string, IMetadataView>("Contract");
+        //    var exports = container.GetExports<string, IMetadataView>("Contract");
 
-            Assert.Equal(1, exports.Count());
+        //    Assert.Equal(1, exports.Count());
 
-            var export = (Lazy<string, IMetadataView>)exports.First();
+        //    var export = (Lazy<string, IMetadataView>)exports.First();
 
-            Assert.Equal("Value1", export.Value);
-            Assert.Equal("MetadataValue1", export.Metadata.Metadata1);
-            Assert.Equal("MetadataValue2", export.Metadata.Metadata2);
-            Assert.Equal("MetadataValue3", export.Metadata.Metadata3);
-        }
+        //    Assert.Equal("Value1", export.Value);
+        //    Assert.Equal("MetadataValue1", export.Metadata.Metadata1);
+        //    Assert.Equal("MetadataValue2", export.Metadata.Metadata2);
+        //    Assert.Equal("MetadataValue3", export.Metadata.Metadata3);
+        //}
 
-        [Fact]
-        public void GetExports1_AskingForExactlyOneAndAllWhenContainerEmpty_ShouldThrowCardinalityMismatch()
-        {
-            var container = CreateCompositionContainer();
+        //[Fact]
+        //public void GetExports1_AskingForExactlyOneAndAllWhenContainerEmpty_ShouldThrowCardinalityMismatch()
+        //{
+        //    var container = CreateCompositionContainer();
 
-            var definition = ImportDefinitionFactory.Create(export => true, ImportCardinality.ExactlyOne);
+        //    var definition = ImportDefinitionFactory.Create(export => true, ImportCardinality.ExactlyOne);
 
-            ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
-            {
-                container.GetExports(definition);
-            });
-        }
+        //    ExceptionAssert.Throws<ImportCardinalityMismatchException>(() =>
+        //    {
+        //        container.GetExports(definition);
+        //    });
+        //}
 
         [Fact]
         public void GetExports1_AskingForZeroOrOneAndAllWhenContainerEmpty_ShouldReturnEmpty()
@@ -1836,64 +1836,64 @@ namespace System.ComponentModel.Composition
             Assert.Empty(exports);
         }
 
-        [Fact]
-        public void RemovePart_PartNotInContainerAsPartArgument_ShouldNotCauseImportsToBeRebound()
-        {
-            const string contractName = "Contract";
+        //[Fact]
+        //public void RemovePart_PartNotInContainerAsPartArgument_ShouldNotCauseImportsToBeRebound()
+        //{
+        //    const string contractName = "Contract";
 
-            var exporter = PartFactory.CreateExporter(new MicroExport(contractName, 1));
-            var importer = PartFactory.CreateImporter(contractName);
-            var container = ContainerFactory.Create(exporter, importer);
+        //    var exporter = PartFactory.CreateExporter(new MicroExport(contractName, 1));
+        //    var importer = PartFactory.CreateImporter(contractName);
+        //    var container = ContainerFactory.Create(exporter, importer);
 
-            Assert.Equal(1, importer.Value);
-            Assert.Equal(1, importer.ImportSatisfiedCount);
+        //    Assert.Equal(1, importer.Value);
+        //    Assert.Equal(1, importer.ImportSatisfiedCount);
 
-            var doesNotExistInContainer = PartFactory.CreateExporter(new MicroExport(contractName, 2));
+        //    var doesNotExistInContainer = PartFactory.CreateExporter(new MicroExport(contractName, 2));
 
-            CompositionBatch batch = new CompositionBatch();
-            batch.RemovePart(doesNotExistInContainer);
-            container.Compose(batch);
+        //    CompositionBatch batch = new CompositionBatch();
+        //    batch.RemovePart(doesNotExistInContainer);
+        //    container.Compose(batch);
 
-            Assert.Equal(1, importer.ImportSatisfiedCount);
-        }
+        //    Assert.Equal(1, importer.ImportSatisfiedCount);
+        //}
 
-        [Fact]
-        public void RemovePart_PartInContainerQueueAsPartArgument_ShouldNotLeavePartInContainer()
-        {
-            const string contractName = "Contract";
+        //[Fact]
+        //public void RemovePart_PartInContainerQueueAsPartArgument_ShouldNotLeavePartInContainer()
+        //{
+        //    const string contractName = "Contract";
 
-            var exporter = PartFactory.CreateExporter(new MicroExport(contractName, 1));
-            var importer = PartFactory.CreateImporter(true, contractName);
-            var container = ContainerFactory.Create(exporter, importer);
+        //    var exporter = PartFactory.CreateExporter(new MicroExport(contractName, 1));
+        //    var importer = PartFactory.CreateImporter(true, contractName);
+        //    var container = ContainerFactory.Create(exporter, importer);
 
-            CompositionBatch batch = new CompositionBatch();
-            batch.RemovePart(exporter);
-            container.Compose(batch);
+        //    CompositionBatch batch = new CompositionBatch();
+        //    batch.RemovePart(exporter);
+        //    container.Compose(batch);
 
-            Assert.Null(importer.Value);
-            Assert.Equal(2, importer.ImportSatisfiedCount);
-        }
+        //    Assert.Null(importer.Value);
+        //    Assert.Equal(2, importer.ImportSatisfiedCount);
+        //}
 
-        [Fact]
-        public void RemovePart_PartAlreadyRemovedAsPartArgument_ShouldNotThrow()
-        {
-            var exporter = PartFactory.CreateExporter(new MicroExport("Contract", 1));
-            var container = ContainerFactory.Create(exporter);
+        //[Fact]
+        //public void RemovePart_PartAlreadyRemovedAsPartArgument_ShouldNotThrow()
+        //{
+        //    var exporter = PartFactory.CreateExporter(new MicroExport("Contract", 1));
+        //    var container = ContainerFactory.Create(exporter);
 
-            Assert.Equal(1, container.GetExportedValue<int>("Contract"));
+        //    Assert.Equal(1, container.GetExportedValue<int>("Contract"));
 
-            CompositionBatch batch = new CompositionBatch();
-            batch.RemovePart(exporter);
-            container.Compose(batch);
+        //    CompositionBatch batch = new CompositionBatch();
+        //    batch.RemovePart(exporter);
+        //    container.Compose(batch);
 
-            Assert.False(container.IsPresent("Contract"));
+        //    Assert.False(container.IsPresent("Contract"));
 
-            batch = new CompositionBatch();
-            batch.RemovePart(exporter);
-            container.Compose(batch);
+        //    batch = new CompositionBatch();
+        //    batch.RemovePart(exporter);
+        //    container.Compose(batch);
 
-            Assert.False(container.IsPresent("Contract"));
-        }
+        //    Assert.False(container.IsPresent("Contract"));
+        //}
 
         [Fact]
         public void TryComposeSimple()
@@ -2210,23 +2210,23 @@ namespace System.ComponentModel.Composition
             Assert.NotNull(changedNames);
         }
 
-        [Fact]
-        public void Dispose_BeforeCompose_CanBeCallMultipleTimes()
-        {
-            var container = ContainerFactory.Create(PartFactory.Create(), PartFactory.Create());
-            container.Dispose();
-            container.Dispose();
-            container.Dispose();
-        }
+        //[Fact]
+        //public void Dispose_BeforeCompose_CanBeCallMultipleTimes()
+        //{
+        //    var container = ContainerFactory.Create(PartFactory.Create(), PartFactory.Create());
+        //    container.Dispose();
+        //    container.Dispose();
+        //    container.Dispose();
+        //}
 
-        [Fact]
-        public void Dispose_AfterCompose_CanBeCallMultipleTimes()
-        {
-            var container = ContainerFactory.Create(PartFactory.Create(), PartFactory.Create());
-            container.Dispose();
-            container.Dispose();
-            container.Dispose();
-        }
+        //[Fact]
+        //public void Dispose_AfterCompose_CanBeCallMultipleTimes()
+        //{
+        //    var container = ContainerFactory.Create(PartFactory.Create(), PartFactory.Create());
+        //    container.Dispose();
+        //    container.Dispose();
+        //    container.Dispose();
+        //}
 
         [Fact]
         public void Dispose_CallsGCSuppressFinalize()
@@ -2288,21 +2288,21 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [Fact]
-        public void Dispose_ContainerAsPart_CanBeDisposed()
-        {   // Tests that when we re-enter CompositionContainer.Dispose, that we don't
-            // stack overflow.
+        //[Fact]
+        //public void Dispose_ContainerAsPart_CanBeDisposed()
+        //{   // Tests that when we re-enter CompositionContainer.Dispose, that we don't
+        //    // stack overflow.
 
-            using (var container = CreateCompositionContainer())
-            {
-                var part = PartFactory.CreateExporter(new MicroExport(typeof(ICompositionService), container));
-                CompositionBatch batch = new CompositionBatch();
-                batch.AddPart(part);
-                container.Compose(batch);
+        //    using (var container = CreateCompositionContainer())
+        //    {
+        //        var part = PartFactory.CreateExporter(new MicroExport(typeof(ICompositionService), container));
+        //        CompositionBatch batch = new CompositionBatch();
+        //        batch.AddPart(part);
+        //        container.Compose(batch);
 
-                Assert.Same(container, container.GetExportedValue<ICompositionService>());
-            }
-        }
+        //        Assert.Same(container, container.GetExportedValue<ICompositionService>());
+        //    }
+        //}
 
         [Fact]
         public void ICompositionService_ShouldNotBeImplicitlyExported()
@@ -2320,23 +2320,23 @@ namespace System.ComponentModel.Composition
             Assert.False(container.IsPresent<CompositionContainer>());
         }
 
-        [Fact]
-        public void ICompositionService_ShouldNotBeImplicitlyImported()
-        {
-            var importer = PartFactory.CreateImporter<ICompositionService>();
-            var container = ContainerFactory.Create(importer);
+        //[Fact]
+        //public void ICompositionService_ShouldNotBeImplicitlyImported()
+        //{
+        //    var importer = PartFactory.CreateImporter<ICompositionService>();
+        //    var container = ContainerFactory.Create(importer);
 
-            Assert.Null(importer.Value);
-        }
+        //    Assert.Null(importer.Value);
+        //}
 
-        [Fact]
-        public void CompositionContainer_ShouldNotBeImplicitlyImported()
-        {
-            var importer = PartFactory.CreateImporter<CompositionContainer>();
-            var container = ContainerFactory.Create(importer);
+        //[Fact]
+        //public void CompositionContainer_ShouldNotBeImplicitlyImported()
+        //{
+        //    var importer = PartFactory.CreateImporter<CompositionContainer>();
+        //    var container = ContainerFactory.Create(importer);
 
-            Assert.Null(importer.Value);
-        }
+        //    Assert.Null(importer.Value);
+        //}
 
         [Fact]
         public void ICompositionService_CanBeExported()

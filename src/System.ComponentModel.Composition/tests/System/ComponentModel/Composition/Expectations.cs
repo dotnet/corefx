@@ -87,7 +87,7 @@ namespace System.ComponentModel.Composition
 
             yield return new CompositionError[] { new CompositionError("") };
             yield return new CompositionError[] { new CompositionError(""), new CompositionError("Description") };
-            yield return new CompositionError[] { new CompositionError(""), new CompositionError("Description"), ErrorFactory.Create(CompositionErrorId.InvalidExportMetadata, "Description", (Exception)null), ErrorFactory.Create(CompositionErrorId.Unknown, "Description", new Exception()) };
+            //yield return new CompositionError[] { new CompositionError(""), new CompositionError("Description"), ErrorFactory.Create(CompositionErrorId.InvalidExportMetadata, "Description", (Exception)null), ErrorFactory.Create(CompositionErrorId.Unknown, "Description", new Exception()) };
         }
 
         public static IEnumerable<string> GetContractNames()
@@ -224,13 +224,13 @@ namespace System.ComponentModel.Composition
             yield return true;
         }
 
-        public static IEnumerable<ReflectionComposablePartDefinition> GetAttributedDefinitions()
-        {
-            foreach (var type in GetAttributedTypes())
-            {
-                yield return PartDefinitionFactory.CreateAttributed(type);
-            }
-        }
+        //public static IEnumerable<ReflectionComposablePartDefinition> GetAttributedDefinitions()
+        //{
+        //    foreach (var type in GetAttributedTypes())
+        //    {
+        //        yield return PartDefinitionFactory.CreateAttributed(type);
+        //    }
+        //}
 
         public static IEnumerable<Type> GetTypes()
         {
@@ -239,22 +239,22 @@ namespace System.ComponentModel.Composition
             yield return typeof(double);
             yield return typeof(string);
             yield return typeof(int);
-            yield return typeof(CompositionServices);
+            //yield return typeof(CompositionServices);
             yield return typeof(ICompositionService);
         }
 
-        public static IEnumerable<Type> GetAttributedTypes()
-        {
-            foreach (Type type in typeof(Expectations).Assembly.GetTypes())
-            {
-                var definition = AttributedModelDiscovery.CreatePartDefinitionIfDiscoverable(type, (ICompositionElement)null);
-                if (definition != null)
-                {
-                    yield return type;
-                }
+        //public static IEnumerable<Type> GetAttributedTypes()
+        //{
+        //    foreach (Type type in typeof(Expectations).Assembly.GetTypes())
+        //    {
+        //        var definition = AttributedModelDiscovery.CreatePartDefinitionIfDiscoverable(type, (ICompositionElement)null);
+        //        if (definition != null)
+        //        {
+        //            yield return type;
+        //        }
 
-            }
-        }
+        //    }
+        //}
 
         public static IEnumerable<MemberInfo> GetMembers()
         {

@@ -195,7 +195,10 @@ namespace System.ComponentModel.Composition.Hosting
 
                     _importedDisposableExports = null;
 
-                    dependencies.ForEach(disposableExport => disposableExport.Dispose());
+                    foreach (IDisposable dependency in dependencies)
+                    {
+                        dependency.Dispose();
+                    }
                 }
             }
         }

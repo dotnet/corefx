@@ -3,16 +3,19 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.Linq.Expressions;
 using System.Reflection;
 
-// NOTE : this is a helper class for exosig the EditorFactory functionality to tests until ExportFactory can be moved where it belongs
+// NOTE : this is a helper class for exposig the EditorFactory functionality to tests until ExportFactory can be moved where it belongs
 namespace System.ComponentModel.Composition.ReflectionModel
 {
     public static class ReflectionModelServicesEx
     {
+        public static readonly IDictionary<string, object> EmptyMetadata = new ReadOnlyDictionary<string, object>(new Dictionary<string, object>(0));
+
         public static ContractBasedImportDefinition CreateImportDefinition(
             Lazy<ParameterInfo> parameter,
             string contractName,
@@ -23,7 +26,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             bool isExportFactory,
             ICompositionElement origin)
         {
-            return ReflectionModelServicesEx.CreateImportDefinition(parameter, contractName, requiredTypeIdentity, requiredMetadata, cardinality, requiredCreationPolicy, MetadataServices.EmptyMetadata, isExportFactory, origin);
+            return ReflectionModelServicesEx.CreateImportDefinition(parameter, contractName, requiredTypeIdentity, requiredMetadata, cardinality, requiredCreationPolicy, EmptyMetadata, isExportFactory, origin);
         }
 
         public static ContractBasedImportDefinition CreateImportDefinition(
@@ -51,7 +54,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                         bool isExportFactory,
                         ICompositionElement origin)
         {
-            return ReflectionModelServicesEx.CreateImportDefinition(importingMember, contractName, requiredTypeIdentity, requiredMetadata, cardinality, isRecomposable, requiredCreationPolicy, MetadataServices.EmptyMetadata, isExportFactory, origin);
+            return ReflectionModelServicesEx.CreateImportDefinition(importingMember, contractName, requiredTypeIdentity, requiredMetadata, cardinality, isRecomposable, requiredCreationPolicy, EmptyMetadata, isExportFactory, origin);
         }
 
         public static ContractBasedImportDefinition CreateImportDefinition(
@@ -84,7 +87,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             private readonly ContractBasedImportDefinition _productImportDefinition;
 
             public ExportFactoryImportDefinition(ContractBasedImportDefinition productImportDefinition)
-                : base(CompositionConstants.PartCreatorContractName, CompositionConstants.PartCreatorTypeIdentity, productImportDefinition.RequiredMetadata,
+                : base(CompositionConstantsEx.PartCreatorContractName, CompositionConstantsEx.PartCreatorTypeIdentity, productImportDefinition.RequiredMetadata,
                     productImportDefinition.Cardinality, productImportDefinition.IsRecomposable, false, CreationPolicy.Any)
             {
                 _productImportDefinition = productImportDefinition;
@@ -119,7 +122,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             private static bool IsProductConstraintSatisfiedBy(ImportDefinition productImportDefinition, ExportDefinition exportDefinition)
             {
                 object productValue = null;
-                if (exportDefinition.Metadata.TryGetValue(CompositionConstants.ProductDefinitionMetadataName, out productValue))
+                if (exportDefinition.Metadata.TryGetValue(CompositionConstantsEx.ProductDefinitionMetadataName, out productValue))
                 {
                     ExportDefinition productDefinition = productValue as ExportDefinition;
 
@@ -147,13 +150,13 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 Expression containsProductExpression = Expression.Call(
                     metadataExpression,
                     _metadataContainsKeyMethod,
-                    Expression.Constant(CompositionConstants.ProductDefinitionMetadataName));
+                    Expression.Constant(CompositionConstantsEx.ProductDefinitionMetadataName));
 
                 // exportDefinition.Metadata["ProductDefinition"]
                 Expression productExportDefinitionExpression = Expression.Call(
                         metadataExpression,
                         _metadataItemMethod,
-                        Expression.Constant(CompositionConstants.ProductDefinitionMetadataName));
+                        Expression.Constant(CompositionConstantsEx.ProductDefinitionMetadataName));
 
                 // ProductImportDefinition.Contraint((ExportDefinition)exportDefinition.Metadata["ProductDefinition"])
                 Expression productMatchExpression =

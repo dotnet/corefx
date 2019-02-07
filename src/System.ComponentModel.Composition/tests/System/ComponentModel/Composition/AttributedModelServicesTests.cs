@@ -75,29 +75,29 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [Fact]
-        public void Exports_Throws_OnNullContractType()
-        {
-            ComposablePartDefinition part = typeof(PartExportingContract1).AsPart();
-            Type contractType = null;
-            Assert.Throws<ArgumentNullException>("contractType", () =>
-            {
-                part.Exports(contractType);
-            });
-        }
+        //[Fact]
+        //public void Exports_Throws_OnNullContractType()
+        //{
+        //    ComposablePartDefinition part = typeof(PartExportingContract1).AsPart();
+        //    Type contractType = null;
+        //    Assert.Throws<ArgumentNullException>("contractType", () =>
+        //    {
+        //        part.Exports(contractType);
+        //    });
+        //}
 
-        [Fact]
-        public void Exports()
-        {
-            ComposablePartDefinition part1 = typeof(PartExportingContract1).AsPart();
-            ComposablePartDefinition part2 = typeof(PartExportingContract2).AsPart();
+        //[Fact]
+        //public void Exports()
+        //{
+        //    ComposablePartDefinition part1 = typeof(PartExportingContract1).AsPart();
+        //    ComposablePartDefinition part2 = typeof(PartExportingContract2).AsPart();
 
-            Assert.True(part1.Exports(typeof(IContract1)));
-            Assert.True(part2.Exports(typeof(IContract2)));
+        //    Assert.True(part1.Exports(typeof(IContract1)));
+        //    Assert.True(part2.Exports(typeof(IContract2)));
 
-            Assert.False(part2.Exports(typeof(IContract1)));
-            Assert.False(part1.Exports(typeof(IContract2)));
-        }
+        //    Assert.False(part2.Exports(typeof(IContract1)));
+        //    Assert.False(part1.Exports(typeof(IContract2)));
+        //}
 
         [Fact]
         public void ExportsGeneric_Throws_OnNullPart()
@@ -109,18 +109,18 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [Fact]
-        public void ExportsGeneric()
-        {
-            ComposablePartDefinition part1 = typeof(PartExportingContract1).AsPart();
-            ComposablePartDefinition part2 = typeof(PartExportingContract2).AsPart();
+        //[Fact]
+        //public void ExportsGeneric()
+        //{
+        //    ComposablePartDefinition part1 = typeof(PartExportingContract1).AsPart();
+        //    ComposablePartDefinition part2 = typeof(PartExportingContract2).AsPart();
 
-            Assert.True(part1.Exports<IContract1>());
-            Assert.True(part2.Exports<IContract2>());
+        //    Assert.True(part1.Exports<IContract1>());
+        //    Assert.True(part2.Exports<IContract2>());
 
-            Assert.False(part2.Exports<IContract1>());
-            Assert.False(part1.Exports<IContract2>());
-        }
+        //    Assert.False(part2.Exports<IContract1>());
+        //    Assert.False(part1.Exports<IContract2>());
+        //}
 
         [Fact]
         public void Imports_Throws_OnNullPart()
@@ -133,61 +133,61 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [Fact]
-        public void Imports_Throws_OnNullContractName()
-        {
-            ComposablePartDefinition part = typeof(PartImportingContract1).AsPart();
-            Type contractType = null;
-            Assert.Throws<ArgumentNullException>("contractType", () =>
-            {
-                part.Imports(contractType);
-            });
-        }
+        //[Fact]
+        //public void Imports_Throws_OnNullContractName()
+        //{
+        //    ComposablePartDefinition part = typeof(PartImportingContract1).AsPart();
+        //    Type contractType = null;
+        //    Assert.Throws<ArgumentNullException>("contractType", () =>
+        //    {
+        //        part.Imports(contractType);
+        //    });
+        //}
 
-        [Fact]
-        public void Imports()
-        {
-            ComposablePartDefinition part1 = typeof(PartImportingContract1).AsPart();
-            ComposablePartDefinition part2 = typeof(PartImportingContract2).AsPart();
+        //[Fact]
+        //public void Imports()
+        //{
+        //    ComposablePartDefinition part1 = typeof(PartImportingContract1).AsPart();
+        //    ComposablePartDefinition part2 = typeof(PartImportingContract2).AsPart();
 
-            Assert.True(part1.Imports(typeof(IContract1)));
-            Assert.True(part2.Imports(typeof(IContract2)));
+        //    Assert.True(part1.Imports(typeof(IContract1)));
+        //    Assert.True(part2.Imports(typeof(IContract2)));
 
-            Assert.False(part2.Imports(typeof(IContract1)));
-            Assert.False(part1.Imports(typeof(IContract2)));
-        }
+        //    Assert.False(part2.Imports(typeof(IContract1)));
+        //    Assert.False(part1.Imports(typeof(IContract2)));
+        //}
 
-        [Fact]
-        public void Imports_CardinalityIgnored_WhenNotSpecified()
-        {
-            ComposablePartDefinition part1 = typeof(PartImportingContract1).AsPart();
-            ComposablePartDefinition part1Multiple = typeof(PartImportingContract1Multiple).AsPart();
-            ComposablePartDefinition part1Optional = typeof(PartImportingContract1Optionally).AsPart();
+        //[Fact]
+        //public void Imports_CardinalityIgnored_WhenNotSpecified()
+        //{
+        //    ComposablePartDefinition part1 = typeof(PartImportingContract1).AsPart();
+        //    ComposablePartDefinition part1Multiple = typeof(PartImportingContract1Multiple).AsPart();
+        //    ComposablePartDefinition part1Optional = typeof(PartImportingContract1Optionally).AsPart();
 
-            Assert.True(part1.Imports(typeof(IContract1)));
-            Assert.True(part1Optional.Imports(typeof(IContract1)));
-            Assert.True(part1Multiple.Imports(typeof(IContract1)));
-        }
+        //    Assert.True(part1.Imports(typeof(IContract1)));
+        //    Assert.True(part1Optional.Imports(typeof(IContract1)));
+        //    Assert.True(part1Multiple.Imports(typeof(IContract1)));
+        //}
 
-        [Fact]
-        public void Imports_CardinalityNotIgnored_WhenSpecified()
-        {
-            ComposablePartDefinition part1 = typeof(PartImportingContract1).AsPart();
-            ComposablePartDefinition part1Multiple = typeof(PartImportingContract1Multiple).AsPart();
-            ComposablePartDefinition part1Optional = typeof(PartImportingContract1Optionally).AsPart();
+        //[Fact]
+        //public void Imports_CardinalityNotIgnored_WhenSpecified()
+        //{
+        //    ComposablePartDefinition part1 = typeof(PartImportingContract1).AsPart();
+        //    ComposablePartDefinition part1Multiple = typeof(PartImportingContract1Multiple).AsPart();
+        //    ComposablePartDefinition part1Optional = typeof(PartImportingContract1Optionally).AsPart();
 
-            Assert.True(part1.Imports(typeof(IContract1), ImportCardinality.ExactlyOne));
-            Assert.False(part1.Imports(typeof(IContract1), ImportCardinality.ZeroOrMore));
-            Assert.False(part1.Imports(typeof(IContract1), ImportCardinality.ZeroOrOne));
+        //    Assert.True(part1.Imports(typeof(IContract1), ImportCardinality.ExactlyOne));
+        //    Assert.False(part1.Imports(typeof(IContract1), ImportCardinality.ZeroOrMore));
+        //    Assert.False(part1.Imports(typeof(IContract1), ImportCardinality.ZeroOrOne));
 
-            Assert.False(part1Multiple.Imports(typeof(IContract1), ImportCardinality.ExactlyOne));
-            Assert.True(part1Multiple.Imports(typeof(IContract1), ImportCardinality.ZeroOrMore));
-            Assert.False(part1Multiple.Imports(typeof(IContract1), ImportCardinality.ZeroOrOne));
+        //    Assert.False(part1Multiple.Imports(typeof(IContract1), ImportCardinality.ExactlyOne));
+        //    Assert.True(part1Multiple.Imports(typeof(IContract1), ImportCardinality.ZeroOrMore));
+        //    Assert.False(part1Multiple.Imports(typeof(IContract1), ImportCardinality.ZeroOrOne));
 
-            Assert.False(part1Optional.Imports(typeof(IContract1), ImportCardinality.ExactlyOne));
-            Assert.False(part1Optional.Imports(typeof(IContract1), ImportCardinality.ZeroOrMore));
-            Assert.True(part1Optional.Imports(typeof(IContract1), ImportCardinality.ZeroOrOne));
-        }
+        //    Assert.False(part1Optional.Imports(typeof(IContract1), ImportCardinality.ExactlyOne));
+        //    Assert.False(part1Optional.Imports(typeof(IContract1), ImportCardinality.ZeroOrMore));
+        //    Assert.True(part1Optional.Imports(typeof(IContract1), ImportCardinality.ZeroOrOne));
+        //}
 
         [Fact]
         public void ImportsGeneric_Throws_OnNullPart()
@@ -199,50 +199,50 @@ namespace System.ComponentModel.Composition.AttributedModel
             });
         }
 
-        [Fact]
-        public void ImportsGeneric()
-        {
-            ComposablePartDefinition part1 = typeof(PartImportingContract1).AsPart();
-            ComposablePartDefinition part2 = typeof(PartImportingContract2).AsPart();
+        //[Fact]
+        //public void ImportsGeneric()
+        //{
+        //    ComposablePartDefinition part1 = typeof(PartImportingContract1).AsPart();
+        //    ComposablePartDefinition part2 = typeof(PartImportingContract2).AsPart();
 
-            Assert.True(part1.Imports<IContract1>());
-            Assert.True(part2.Imports<IContract2>());
+        //    Assert.True(part1.Imports<IContract1>());
+        //    Assert.True(part2.Imports<IContract2>());
 
-            Assert.False(part2.Imports<IContract1>());
-            Assert.False(part1.Imports<IContract2>());
-        }
+        //    Assert.False(part2.Imports<IContract1>());
+        //    Assert.False(part1.Imports<IContract2>());
+        //}
 
-        [Fact]
-        public void ImportsGeneric_CardinalityIgnored_WhenNotSpecified()
-        {
-            ComposablePartDefinition part1 = typeof(PartImportingContract1).AsPart();
-            ComposablePartDefinition part1Multiple = typeof(PartImportingContract1Multiple).AsPart();
-            ComposablePartDefinition part1Optional = typeof(PartImportingContract1Optionally).AsPart();
+        //[Fact]
+        //public void ImportsGeneric_CardinalityIgnored_WhenNotSpecified()
+        //{
+        //    ComposablePartDefinition part1 = typeof(PartImportingContract1).AsPart();
+        //    ComposablePartDefinition part1Multiple = typeof(PartImportingContract1Multiple).AsPart();
+        //    ComposablePartDefinition part1Optional = typeof(PartImportingContract1Optionally).AsPart();
 
-            Assert.True(part1.Imports<IContract1>());
-            Assert.True(part1Optional.Imports<IContract1>());
-            Assert.True(part1Multiple.Imports<IContract1>());
-        }
+        //    Assert.True(part1.Imports<IContract1>());
+        //    Assert.True(part1Optional.Imports<IContract1>());
+        //    Assert.True(part1Multiple.Imports<IContract1>());
+        //}
 
-        [Fact]
-        public void ImportsGeneric_CardinalityNotIgnored_WhenSpecified()
-        {
-            ComposablePartDefinition part1 = typeof(PartImportingContract1).AsPart();
-            ComposablePartDefinition part1Multiple = typeof(PartImportingContract1Multiple).AsPart();
-            ComposablePartDefinition part1Optional = typeof(PartImportingContract1Optionally).AsPart();
+        //[Fact]
+        //public void ImportsGeneric_CardinalityNotIgnored_WhenSpecified()
+        //{
+        //    ComposablePartDefinition part1 = typeof(PartImportingContract1).AsPart();
+        //    ComposablePartDefinition part1Multiple = typeof(PartImportingContract1Multiple).AsPart();
+        //    ComposablePartDefinition part1Optional = typeof(PartImportingContract1Optionally).AsPart();
 
-            Assert.True(part1.Imports<IContract1>(ImportCardinality.ExactlyOne));
-            Assert.False(part1.Imports<IContract1>(ImportCardinality.ZeroOrMore));
-            Assert.False(part1.Imports<IContract1>(ImportCardinality.ZeroOrOne));
+        //    Assert.True(part1.Imports<IContract1>(ImportCardinality.ExactlyOne));
+        //    Assert.False(part1.Imports<IContract1>(ImportCardinality.ZeroOrMore));
+        //    Assert.False(part1.Imports<IContract1>(ImportCardinality.ZeroOrOne));
 
-            Assert.False(part1Multiple.Imports<IContract1>(ImportCardinality.ExactlyOne));
-            Assert.True(part1Multiple.Imports<IContract1>(ImportCardinality.ZeroOrMore));
-            Assert.False(part1Multiple.Imports<IContract1>(ImportCardinality.ZeroOrOne));
+        //    Assert.False(part1Multiple.Imports<IContract1>(ImportCardinality.ExactlyOne));
+        //    Assert.True(part1Multiple.Imports<IContract1>(ImportCardinality.ZeroOrMore));
+        //    Assert.False(part1Multiple.Imports<IContract1>(ImportCardinality.ZeroOrOne));
 
-            Assert.False(part1Optional.Imports<IContract1>(ImportCardinality.ExactlyOne));
-            Assert.False(part1Optional.Imports<IContract1>(ImportCardinality.ZeroOrMore));
-            Assert.True(part1Optional.Imports<IContract1>(ImportCardinality.ZeroOrOne));
-        }
+        //    Assert.False(part1Optional.Imports<IContract1>(ImportCardinality.ExactlyOne));
+        //    Assert.False(part1Optional.Imports<IContract1>(ImportCardinality.ZeroOrMore));
+        //    Assert.True(part1Optional.Imports<IContract1>(ImportCardinality.ZeroOrOne));
+        //}
 
         public interface IContract1
         {

@@ -8,24 +8,24 @@ using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
 using Xunit;
 
-namespace Tests.Integration
+namespace System.ComponentModel.Composition.Tests
 {
     public class ConstructorInjectionTests
     {
-        [Fact]
-        public void SimpleConstructorInjection()
-        {
-            var container = ContainerFactory.Create();
+        //[Fact]
+        //public void SimpleConstructorInjection()
+        //{
+        //    var container = ContainerFactory.Create();
 
-            CompositionBatch batch = new CompositionBatch();
-            batch.AddPart(PartFactory.CreateAttributed(typeof(SimpleConstructorInjectedObject)));
-            batch.AddExportedValue("CISimpleValue", 42);
-            container.Compose(batch);
+        //    CompositionBatch batch = new CompositionBatch();
+        //    batch.AddPart(PartFactory.CreateAttributed(typeof(SimpleConstructorInjectedObject)));
+        //    batch.AddExportedValue("CISimpleValue", 42);
+        //    container.Compose(batch);
 
-            SimpleConstructorInjectedObject simple = container.GetExportedValue<SimpleConstructorInjectedObject>();
+        //    SimpleConstructorInjectedObject simple = container.GetExportedValue<SimpleConstructorInjectedObject>();
 
-            Assert.Equal(42, simple.CISimpleValue);
-        }
+        //    Assert.Equal(42, simple.CISimpleValue);
+        //}
 
         public interface IOptionalRef { }
 

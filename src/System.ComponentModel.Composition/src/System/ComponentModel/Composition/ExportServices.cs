@@ -159,9 +159,46 @@ namespace System.ComponentModel.Composition
 
         internal static ExportCardinalityCheckResult CheckCardinality<T>(ImportDefinition definition, IEnumerable<T> enumerable)
         {
-            EnumerableCardinality actualCardinality = (enumerable != null) ? enumerable.GetCardinality() : EnumerableCardinality.Zero;
+            EnumerableCardinality actualCardinality = (enumerable != null) ? GetCardinality(enumerable) : EnumerableCardinality.Zero;
 
             return MatchCardinality(actualCardinality, definition.Cardinality);
+        }
+
+        private static EnumerableCardinality GetCardinality<T>(IEnumerable<T> source)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            // Cast to ICollection instead of ICollection<T> for performance reasons.
+            if (source is ICollection collection)
+            {
+                switch (collection.Count)
+                {
+                    case 0:
+                        return EnumerableCardinality.Zero;
+                    case 1:
+                        return EnumerableCardinality.One;
+                    default:
+                        return EnumerableCardinality.TwoOrMore;
+                }
+            }
+
+            using (IEnumerator<T> enumerator = source.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                {
+                    return EnumerableCardinality.Zero;
+                }
+
+                if (!enumerator.MoveNext())
+                {
+                    return EnumerableCardinality.One;
+                }
+
+                return EnumerableCardinality.TwoOrMore;
+            }
         }
 
         private static ExportCardinalityCheckResult MatchCardinality(EnumerableCardinality actualCardinality, ImportCardinality importCardinality)

@@ -4,10 +4,8 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
-using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.Internal;
 using Xunit;
 
 namespace System.ComponentModel.Composition
@@ -164,7 +162,7 @@ namespace System.ComponentModel.Composition
             }
             if (outerMethodCall.Arguments.Count != 1)
             {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+                throw new Exception("");
             }
 
             // 'this' should be a constant expression pointing at a Type object
@@ -202,7 +200,7 @@ namespace System.ComponentModel.Composition
             // we've got the wrong IDictionary.get_Item method.
             if(methodCall.Arguments.Count != 1)
             {
-                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+                throw new Exception("");
             }
             // Argument should a constant expression containing the metadata key
             ConstantExpression requiredMetadataKeyConstant = methodCall.Arguments[0] as ConstantExpression;

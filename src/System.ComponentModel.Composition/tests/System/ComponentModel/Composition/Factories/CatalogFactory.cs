@@ -28,9 +28,10 @@ namespace System.ComponentModel.Composition.Factories
 
         public static ComposablePartCatalog Create(params ComposablePart[] parts)
         {
-            var definitions = parts.Select(part => PartDefinitionFactory.Create(part));
+            throw new NotImplementedException();
+            //var definitions = parts.Select(part => PartDefinitionFactory.Create(part));
 
-            return Create(definitions.ToArray());
+            //return Create(definitions.ToArray());
         }
 
         public static ComposablePartCatalog Create(params ComposablePartDefinition[] definitions)

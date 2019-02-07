@@ -2,13 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Linq.Expressions;
-using Microsoft.Internal;
 using System.Diagnostics.Contracts;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 
@@ -37,7 +32,6 @@ namespace System.ComponentModel.Composition.Hosting
 
             public NonImportSourceImportDefinition(ContractBasedImportDefinition sourceDefinition)
             {
-                Assumes.NotNull(sourceDefinition);
                 this._sourceDefinition = sourceDefinition;
                 this._metadata = null;
             }
@@ -87,8 +81,6 @@ namespace System.ComponentModel.Composition.Hosting
 
             public override bool IsConstraintSatisfiedBy(ExportDefinition exportDefinition)
             {
-                Requires.NotNull(exportDefinition, "exportDefinition");
-
                 return this._sourceDefinition.IsConstraintSatisfiedBy(exportDefinition);
             }
 

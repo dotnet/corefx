@@ -5,12 +5,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
+using System.Reflection;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
     // Describes the import type of a Reflection-based import definition
     internal class ImportType
     {
+        private static readonly Type s_stringType = typeof(string);
+        private static readonly Type s_iEnumerableType = typeof(IEnumerable);
+        private static readonly Type s_iEnumerableOfTType = typeof(IEnumerable<>);
         private static readonly Type s_lazyOfTType = typeof(Lazy<>);
         private static readonly Type s_lazyOfTMType = typeof(Lazy<,>);
         private static readonly Type s_exportFactoryOfTType = typeof(ExportFactory<>);
@@ -71,12 +75,27 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private Type CheckForCollection(Type type)
         {
-            ElementType = CollectionServices.GetEnumerableElementType(type);
+            ElementType = GetEnumerableElementType(type);
             if (ElementType != null)
             {
                 return ElementType;
             }
             return type;
+        }
+
+        private static Type GetEnumerableElementType(Type type)
+        {
+            if (type.UnderlyingSystemType == s_stringType || !s_iEnumerableType.IsAssignableFrom(type))
+            {
+                return null;
+            }
+
+            if (ReflectionServices.TryGetGenericInterfaceType(type, s_iEnumerableOfTType, out Type closedType))
+            {
+                return closedType.GetGenericArguments()[0];
+            }
+
+            return null;
         }
 
         private static bool IsGenericDescendentOf(Type type, Type baseGenericTypeDefinition)
@@ -206,9 +225,24 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private static bool IsTypeAssignableCollectionType(Type type)
         {
-            if (type.IsArray || CollectionServices.IsEnumerableOfT(type))
+            if (type.IsArray || IsEnumerableOfT(type))
             {
                 return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsEnumerableOfT(Type type)
+        {
+            if (type.IsGenericType)
+            {
+                Type genericType = type.GetGenericTypeDefinition().UnderlyingSystemType;
+
+                if (genericType == s_iEnumerableOfTType)
+                {
+                    return true;
+                }
             }
 
             return false;

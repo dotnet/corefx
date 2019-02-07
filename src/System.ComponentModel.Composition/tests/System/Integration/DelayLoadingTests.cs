@@ -9,10 +9,9 @@ using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.ComponentModel.Composition.ReflectionModel;
 using System.Linq;
-using Microsoft.Internal;
 using Xunit;
 
-namespace Tests.Integration
+namespace System.ComponentModel.Composition.Tests
 {
     public class DelayLoadingTests
     {

@@ -261,12 +261,26 @@ namespace System.ComponentModel.Composition
             context.LeafVisitor = path =>
             {
                 // Take a snapshot of the path
-                paths.Add(path.Copy());
+                paths.Add(CopyStack(path));
             };
 
             VisitCompositionException(exception, context);
 
             return paths;
+        }
+
+        private static Stack<T> CopyStack<T>(Stack<T> stack)
+        {
+            if (stack == null)
+            {
+                throw new ArgumentNullException(nameof(stack));
+            }
+
+            // Stack<T>.GetEnumerator walks from top to bottom 
+            // of the stack, whereas Stack<T>(IEnumerable<T>) 
+            // pushes to bottom from top, so we need to reverse 
+            // the stack to get them in the right order.
+            return new Stack<T>(stack.Reverse());
         }
 
         private static void VisitCompositionException(CompositionException exception, VisitContext context)

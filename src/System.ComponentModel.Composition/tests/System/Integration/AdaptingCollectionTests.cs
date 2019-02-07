@@ -9,7 +9,7 @@ using System.ComponentModel.Composition.Primitives;
 using System.Linq;
 using Xunit;
 
-namespace System.ComponentModel.Composition
+namespace System.ComponentModel.Composition.Tests
 {
     public class FilteringCollection<T, M> : AdaptingCollection<T, M>
     {

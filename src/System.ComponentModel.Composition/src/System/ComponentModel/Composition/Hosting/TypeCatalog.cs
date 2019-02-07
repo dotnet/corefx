@@ -316,7 +316,26 @@ namespace System.ComponentModel.Composition.Hosting
             List<ComposablePartDefinition> nonGenericMatches = GetCandidateParts(contractName);
             List<ComposablePartDefinition> genericMatches = GetCandidateParts(genericContractName);
 
-            return nonGenericMatches.ConcatAllowingNull(genericMatches);
+            return ConcatAllowingNull(nonGenericMatches, genericMatches);
+        }
+
+        private static ICollection<T> ConcatAllowingNull<T>(ICollection<T> source, ICollection<T> second)
+        {
+            if (second == null || (second.Count == 0))
+            {
+                return source;
+            }
+
+            if (source == null || (source.Count == 0))
+            {
+                return second;
+            }
+
+            source.Concat(second);
+            List<T> result = new List<T>(source);
+            result.AddRange(second);
+
+            return result;
         }
 
         private List<ComposablePartDefinition> GetCandidateParts(string contractName)

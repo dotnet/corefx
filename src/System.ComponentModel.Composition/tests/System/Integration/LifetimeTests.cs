@@ -12,7 +12,7 @@ using System.Reflection;
 using System.UnitTesting;
 using Xunit;
 
-namespace Tests.Integration
+namespace System.ComponentModel.Composition.Tests
 {
     public class LifetimeTests
     {

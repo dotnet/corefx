@@ -39,32 +39,32 @@ namespace System.ComponentModel.Composition
         private static bool CheckComImportAvailable() => PlatformDetection.IsWindows && PlatformDetection.IsNotWindowsNanoServer && !PlatformDetection.IsUap;
     }
     
-    public class ComposablePartDefinitionTests
-    {
-        [Fact]
-        public void Constructor1_ShouldNotThrow()
-        {
-            PartDefinitionFactory.Create();
-        }
+    //public class ComposablePartDefinitionTests
+    //{
+    //    [Fact]
+    //    public void Constructor1_ShouldNotThrow()
+    //    {
+    //        PartDefinitionFactory.Create();
+    //    }
 
-        [Fact]
-        public void Constructor1_ShouldSetMetadataPropertyToEmptyDictionary()
-        {
-            var definition = PartDefinitionFactory.Create();
+    //    [Fact]
+    //    public void Constructor1_ShouldSetMetadataPropertyToEmptyDictionary()
+    //    {
+    //        var definition = PartDefinitionFactory.Create();
 
-            Assert.Empty(definition.Metadata);
-        }
+    //        Assert.Empty(definition.Metadata);
+    //    }
 
-        [Fact]
-        public void Constructor1_ShouldSetMetadataPropertyToReadOnlyDictionary()
-        {
-            var definition = PartDefinitionFactory.Create();
+    //    [Fact]
+    //    public void Constructor1_ShouldSetMetadataPropertyToReadOnlyDictionary()
+    //    {
+    //        var definition = PartDefinitionFactory.Create();
 
-            Assert.Throws<NotSupportedException>(() =>
-            {
-                definition.Metadata["Value"] = "Value";
-            });
-        }
-    }
+    //        Assert.Throws<NotSupportedException>(() =>
+    //        {
+    //            definition.Metadata["Value"] = "Value";
+    //        });
+    //    }
+    //}
 }
 

@@ -27,170 +27,170 @@ namespace System.ComponentModel.Composition
             Assert.Empty(batch.PartsToRemove);
         }
 
-        [Fact]
-        public void Constructor2_PropertiesShouldBeSetAndMatchArguments()
-        {
-            ComposablePart[] partsToAdd = new ComposablePart[] { PartFactory.Create(), PartFactory.Create(), PartFactory.Create() };
-            ComposablePart[] partsToRemove = new ComposablePart[] { PartFactory.Create(), PartFactory.Create(), PartFactory.Create() };
+        //[Fact]
+        //public void Constructor2_PropertiesShouldBeSetAndMatchArguments()
+        //{
+        //    ComposablePart[] partsToAdd = new ComposablePart[] { PartFactory.Create(), PartFactory.Create(), PartFactory.Create() };
+        //    ComposablePart[] partsToRemove = new ComposablePart[] { PartFactory.Create(), PartFactory.Create(), PartFactory.Create() };
 
-            CompositionBatch batch = new CompositionBatch(partsToAdd, partsToRemove);
+        //    CompositionBatch batch = new CompositionBatch(partsToAdd, partsToRemove);
 
-            Assert.NotNull(batch.PartsToAdd);
-            Assert.NotNull(batch.PartsToRemove);
+        //    Assert.NotNull(batch.PartsToAdd);
+        //    Assert.NotNull(batch.PartsToRemove);
 
-            EqualityExtensions.CheckEquals(batch.PartsToAdd, partsToAdd);
-            EqualityExtensions.CheckEquals(batch.PartsToRemove, partsToRemove);
-        }
+        //    EqualityExtensions.CheckEquals(batch.PartsToAdd, partsToAdd);
+        //    EqualityExtensions.CheckEquals(batch.PartsToRemove, partsToRemove);
+        //}
 
-        [Fact]
-        public void Constructor2_PartsToAddAsNull_PartsToAddShouldBeEmpty()
-        {
-            ComposablePart[] partsToRemove = new ComposablePart[] { PartFactory.Create(), PartFactory.Create(), PartFactory.Create() };
+        //[Fact]
+        //public void Constructor2_PartsToAddAsNull_PartsToAddShouldBeEmpty()
+        //{
+        //    ComposablePart[] partsToRemove = new ComposablePart[] { PartFactory.Create(), PartFactory.Create(), PartFactory.Create() };
 
-            var batch = new CompositionBatch(null, partsToRemove);
+        //    var batch = new CompositionBatch(null, partsToRemove);
 
-            Assert.Equal(0, batch.PartsToAdd.Count);
-            Assert.Equal(partsToRemove.Length, batch.PartsToRemove.Count);
-        }
+        //    Assert.Equal(0, batch.PartsToAdd.Count);
+        //    Assert.Equal(partsToRemove.Length, batch.PartsToRemove.Count);
+        //}
 
-        [Fact]
-        public void Constructor2_PartsToRemoveAsNull_PartsToRemoveShouldBeEmpty()
-        {
-            ComposablePart[] partsToAdd = new ComposablePart[] { PartFactory.Create(), PartFactory.Create(), PartFactory.Create() };
+        //[Fact]
+        //public void Constructor2_PartsToRemoveAsNull_PartsToRemoveShouldBeEmpty()
+        //{
+        //    ComposablePart[] partsToAdd = new ComposablePart[] { PartFactory.Create(), PartFactory.Create(), PartFactory.Create() };
 
-            var batch = new CompositionBatch(partsToAdd, null);
+        //    var batch = new CompositionBatch(partsToAdd, null);
 
-            Assert.Equal(partsToAdd.Length, batch.PartsToAdd.Count);
-            Assert.Equal(0, batch.PartsToRemove.Count);
-        }
+        //    Assert.Equal(partsToAdd.Length, batch.PartsToAdd.Count);
+        //    Assert.Equal(0, batch.PartsToRemove.Count);
+        //}
 
-        [Fact]
-        public void Constructor2_PartsToAddHasNull_ShouldThrowArgumentNullException()
-        {
-            ComposablePart[] partsToAdd = new ComposablePart[] { PartFactory.Create(), null, PartFactory.Create() };
-            ComposablePart[] partsToRemove = new ComposablePart[] { PartFactory.Create(), PartFactory.Create(), PartFactory.Create() };
+        //[Fact]
+        //public void Constructor2_PartsToAddHasNull_ShouldThrowArgumentNullException()
+        //{
+        //    ComposablePart[] partsToAdd = new ComposablePart[] { PartFactory.Create(), null, PartFactory.Create() };
+        //    ComposablePart[] partsToRemove = new ComposablePart[] { PartFactory.Create(), PartFactory.Create(), PartFactory.Create() };
 
-            Assert.Throws<ArgumentException>("partsToAdd", () =>
-            {
-                new CompositionBatch(partsToAdd, partsToRemove);
-            });
-        }
+        //    Assert.Throws<ArgumentException>("partsToAdd", () =>
+        //    {
+        //        new CompositionBatch(partsToAdd, partsToRemove);
+        //    });
+        //}
 
-        [Fact]
-        public void Constructor2_PartsToRemoveHasNull_ShouldThrowArgumentNullException()
-        {
-            ComposablePart[] partsToAdd = new ComposablePart[] { PartFactory.Create(), PartFactory.Create(), PartFactory.Create() };
-            ComposablePart[] partsToRemove = new ComposablePart[] { PartFactory.Create(), null, PartFactory.Create() };
+        //[Fact]
+        //public void Constructor2_PartsToRemoveHasNull_ShouldThrowArgumentNullException()
+        //{
+        //    ComposablePart[] partsToAdd = new ComposablePart[] { PartFactory.Create(), PartFactory.Create(), PartFactory.Create() };
+        //    ComposablePart[] partsToRemove = new ComposablePart[] { PartFactory.Create(), null, PartFactory.Create() };
 
-            Assert.Throws<ArgumentException>("partsToRemove", () =>
-            {
-                new CompositionBatch(partsToAdd, partsToRemove);
-            });
-        }
+        //    Assert.Throws<ArgumentException>("partsToRemove", () =>
+        //    {
+        //        new CompositionBatch(partsToAdd, partsToRemove);
+        //    });
+        //}
 
-        [Fact]
-        public void AddPart_PartIsInPartsToAdd()
-        {
-            CompositionBatch batch = new CompositionBatch();
-            ComposablePart part = PartFactory.Create();
+        //[Fact]
+        //public void AddPart_PartIsInPartsToAdd()
+        //{
+        //    CompositionBatch batch = new CompositionBatch();
+        //    ComposablePart part = PartFactory.Create();
 
-            batch.AddPart(part);
+        //    batch.AddPart(part);
 
-            Assert.Equal(1, batch.PartsToAdd.Count);
-            Assert.Same(part, batch.PartsToAdd[0]);
+        //    Assert.Equal(1, batch.PartsToAdd.Count);
+        //    Assert.Same(part, batch.PartsToAdd[0]);
 
-            Assert.Empty(batch.PartsToRemove);
-        }
+        //    Assert.Empty(batch.PartsToRemove);
+        //}
 
-        [Fact]
-        public void AddPart_PartAsNull_ShouldThrowArgumentNullException()
-        {
-            CompositionBatch batch = new CompositionBatch();
+        //[Fact]
+        //public void AddPart_PartAsNull_ShouldThrowArgumentNullException()
+        //{
+        //    CompositionBatch batch = new CompositionBatch();
 
-            Assert.Throws<ArgumentNullException>("part", () =>
-            {
-                batch.AddPart(null);
-            });
-        }
+        //    Assert.Throws<ArgumentNullException>("part", () =>
+        //    {
+        //        batch.AddPart(null);
+        //    });
+        //}
 
-        [Fact]
-        public void RemovePart_PartIsInPartsToRemove()
-        {
-            CompositionBatch batch = new CompositionBatch();
-            ComposablePart part = PartFactory.Create();
+        //[Fact]
+        //public void RemovePart_PartIsInPartsToRemove()
+        //{
+        //    CompositionBatch batch = new CompositionBatch();
+        //    ComposablePart part = PartFactory.Create();
 
-            batch.RemovePart(part);
+        //    batch.RemovePart(part);
 
-            Assert.Equal(1, batch.PartsToRemove.Count);
-            Assert.Same(part, batch.PartsToRemove[0]);
+        //    Assert.Equal(1, batch.PartsToRemove.Count);
+        //    Assert.Same(part, batch.PartsToRemove[0]);
 
-            Assert.Empty(batch.PartsToAdd);
-        }
+        //    Assert.Empty(batch.PartsToAdd);
+        //}
 
-        [Fact]
-        public void RemovePart_PartAsNull_ShouldThrowArgumentNullException()
-        {
-            CompositionBatch batch = new CompositionBatch();
+        //[Fact]
+        //public void RemovePart_PartAsNull_ShouldThrowArgumentNullException()
+        //{
+        //    CompositionBatch batch = new CompositionBatch();
 
-            Assert.Throws<ArgumentNullException>("part", () =>
-            {
-                batch.RemovePart(null);
-            });
-        }
+        //    Assert.Throws<ArgumentNullException>("part", () =>
+        //    {
+        //        batch.RemovePart(null);
+        //    });
+        //}
 
-        [Fact]
-        public void PartsToAdd_ShouldGetCopiedAfterAdd()
-        {
-            CompositionBatch batch = new CompositionBatch();
-            ComposablePart part1 = PartFactory.Create();
-            ComposablePart part2 = PartFactory.Create();
+        //[Fact]
+        //public void PartsToAdd_ShouldGetCopiedAfterAdd()
+        //{
+        //    CompositionBatch batch = new CompositionBatch();
+        //    ComposablePart part1 = PartFactory.Create();
+        //    ComposablePart part2 = PartFactory.Create();
 
-            batch.AddPart(part1);
-            Assert.True(batch.PartsToAdd.Contains(part1));
+        //    batch.AddPart(part1);
+        //    Assert.True(batch.PartsToAdd.Contains(part1));
 
-            ReadOnlyCollection<ComposablePart> partsToAddBeforeCopy = batch.PartsToAdd;
-            Assert.Same(partsToAddBeforeCopy, batch.PartsToAdd);
+        //    ReadOnlyCollection<ComposablePart> partsToAddBeforeCopy = batch.PartsToAdd;
+        //    Assert.Same(partsToAddBeforeCopy, batch.PartsToAdd);
 
-            Assert.Equal(1, partsToAddBeforeCopy.Count);
-            Assert.True(partsToAddBeforeCopy.Contains(part1));
+        //    Assert.Equal(1, partsToAddBeforeCopy.Count);
+        //    Assert.True(partsToAddBeforeCopy.Contains(part1));
 
-            batch.AddPart(part2);
+        //    batch.AddPart(part2);
 
-            ReadOnlyCollection<ComposablePart> partsToAddAfterCopy = batch.PartsToAdd;
-            Assert.Same(partsToAddAfterCopy, batch.PartsToAdd);
+        //    ReadOnlyCollection<ComposablePart> partsToAddAfterCopy = batch.PartsToAdd;
+        //    Assert.Same(partsToAddAfterCopy, batch.PartsToAdd);
 
-            Assert.Equal(2, partsToAddAfterCopy.Count);
-            Assert.True(partsToAddAfterCopy.Contains(part1));
-            Assert.True(partsToAddAfterCopy.Contains(part2));
-            Assert.NotSame(partsToAddBeforeCopy, partsToAddAfterCopy);
-        }
+        //    Assert.Equal(2, partsToAddAfterCopy.Count);
+        //    Assert.True(partsToAddAfterCopy.Contains(part1));
+        //    Assert.True(partsToAddAfterCopy.Contains(part2));
+        //    Assert.NotSame(partsToAddBeforeCopy, partsToAddAfterCopy);
+        //}
 
-        [Fact]
-        public void PartsToRemove_ShouldGetCopiedAfterRemove()
-        {
-            CompositionBatch batch = new CompositionBatch();
-            ComposablePart part1 = PartFactory.Create();
-            ComposablePart part2 = PartFactory.Create();
+        //[Fact]
+        //public void PartsToRemove_ShouldGetCopiedAfterRemove()
+        //{
+        //    CompositionBatch batch = new CompositionBatch();
+        //    ComposablePart part1 = PartFactory.Create();
+        //    ComposablePart part2 = PartFactory.Create();
 
-            batch.RemovePart(part1);
-            Assert.True(batch.PartsToRemove.Contains(part1));
+        //    batch.RemovePart(part1);
+        //    Assert.True(batch.PartsToRemove.Contains(part1));
 
-            ReadOnlyCollection<ComposablePart> partsToRemoveBeforeCopy = batch.PartsToRemove;
-            Assert.Same(partsToRemoveBeforeCopy, batch.PartsToRemove);
+        //    ReadOnlyCollection<ComposablePart> partsToRemoveBeforeCopy = batch.PartsToRemove;
+        //    Assert.Same(partsToRemoveBeforeCopy, batch.PartsToRemove);
 
-            Assert.Equal(1, partsToRemoveBeforeCopy.Count);
-            Assert.True(partsToRemoveBeforeCopy.Contains(part1));
+        //    Assert.Equal(1, partsToRemoveBeforeCopy.Count);
+        //    Assert.True(partsToRemoveBeforeCopy.Contains(part1));
 
-            batch.RemovePart(part2);
+        //    batch.RemovePart(part2);
 
-            ReadOnlyCollection<ComposablePart> partsToRemoveAfterCopy = batch.PartsToRemove;
-            Assert.Same(partsToRemoveAfterCopy, batch.PartsToRemove);
+        //    ReadOnlyCollection<ComposablePart> partsToRemoveAfterCopy = batch.PartsToRemove;
+        //    Assert.Same(partsToRemoveAfterCopy, batch.PartsToRemove);
 
-            Assert.Equal(2, partsToRemoveAfterCopy.Count);
-            Assert.True(partsToRemoveAfterCopy.Contains(part1));
-            Assert.True(partsToRemoveAfterCopy.Contains(part2));
-            Assert.NotSame(partsToRemoveBeforeCopy, partsToRemoveAfterCopy);
-        }
+        //    Assert.Equal(2, partsToRemoveAfterCopy.Count);
+        //    Assert.True(partsToRemoveAfterCopy.Contains(part1));
+        //    Assert.True(partsToRemoveAfterCopy.Contains(part2));
+        //    Assert.NotSame(partsToRemoveBeforeCopy, partsToRemoveAfterCopy);
+        //}
 
         [Fact]
         public void AddExportedValue_NullAsContractNameArgument_ShouldThrowArgumentNull()

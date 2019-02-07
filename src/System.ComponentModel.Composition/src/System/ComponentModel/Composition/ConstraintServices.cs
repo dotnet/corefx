@@ -14,29 +14,29 @@ namespace System.ComponentModel.Composition
     {
         // NOTE : these are here as Reflection member search is pretty expensive, and we want that to be done once.
         // Also, making these static would cause this class to fail loading if we rename members of ExportDefinition.
-        private static readonly PropertyInfo _exportDefinitionContractNameProperty = typeof(ExportDefinition).GetProperty("ContractName");
-        private static readonly PropertyInfo _exportDefinitionMetadataProperty = typeof(ExportDefinition).GetProperty("Metadata");
-        private static readonly MethodInfo _metadataContainsKeyMethod = typeof(IDictionary<string, object>).GetMethod("ContainsKey");
-        private static readonly MethodInfo _metadataItemMethod = typeof(IDictionary<string, object>).GetMethod("get_Item");
-        private static readonly MethodInfo _metadataEqualsMethod = typeof(object).GetMethod("Equals", new Type[] { typeof(object) });
-        private static readonly MethodInfo _typeIsInstanceOfTypeMethod = typeof(Type).GetMethod("IsInstanceOfType");
+        private static readonly PropertyInfo s_exportDefinitionContractNameProperty = typeof(ExportDefinition).GetProperty("ContractName");
+        private static readonly PropertyInfo s_exportDefinitionMetadataProperty = typeof(ExportDefinition).GetProperty("Metadata");
+        private static readonly MethodInfo s_metadataContainsKeyMethod = typeof(IDictionary<string, object>).GetMethod("ContainsKey");
+        private static readonly MethodInfo s_metadataItemMethod = typeof(IDictionary<string, object>).GetMethod("get_Item");
+        private static readonly MethodInfo s_metadataEqualsMethod = typeof(object).GetMethod("Equals", new Type[] { typeof(object) });
+        private static readonly MethodInfo s_typeIsInstanceOfTypeMethod = typeof(Type).GetMethod("IsInstanceOfType");
 
         public static Expression<Func<ExportDefinition, bool>> CreateConstraint(string contractName, string requiredTypeIdentity, IEnumerable<KeyValuePair<string, Type>> requiredMetadata, CreationPolicy requiredCreationPolicy)
         {
             ParameterExpression parameter = Expression.Parameter(typeof(ExportDefinition), "exportDefinition");
 
-            Expression constraintBody = ConstraintServices.CreateContractConstraintBody(contractName, parameter);
+            Expression constraintBody = CreateContractConstraintBody(contractName, parameter);
 
             if (!string.IsNullOrEmpty(requiredTypeIdentity))
             {
-                Expression typeIdentityConstraintBody = ConstraintServices.CreateTypeIdentityContraint(requiredTypeIdentity, parameter);
+                Expression typeIdentityConstraintBody = CreateTypeIdentityContraint(requiredTypeIdentity, parameter);
 
                 constraintBody = Expression.AndAlso(constraintBody, typeIdentityConstraintBody);
             }
 
             if (requiredMetadata != null)
             {
-                Expression metadataConstraintBody = ConstraintServices.CreateMetadataConstraintBody(requiredMetadata, parameter);
+                Expression metadataConstraintBody = CreateMetadataConstraintBody(requiredMetadata, parameter);
                 if (metadataConstraintBody != null)
                 {
                     constraintBody = Expression.AndAlso(constraintBody, metadataConstraintBody);
@@ -45,7 +45,7 @@ namespace System.ComponentModel.Composition
 
             if (requiredCreationPolicy != CreationPolicy.Any)
             {
-                Expression policyConstraintBody = ConstraintServices.CreateCreationPolicyContraint(requiredCreationPolicy, parameter);
+                Expression policyConstraintBody = CreateCreationPolicyContraint(requiredCreationPolicy, parameter);
 
                 constraintBody = Expression.AndAlso(constraintBody, policyConstraintBody);
             }
@@ -63,7 +63,7 @@ namespace System.ComponentModel.Composition
 
             // export.ContractName=<contract>;
             return Expression.Equal(
-                    Expression.Property(parameter, ConstraintServices._exportDefinitionContractNameProperty),
+                    Expression.Property(parameter, s_exportDefinitionContractNameProperty),
                     Expression.Constant(contractName ?? string.Empty, typeof(string)));
         }
 
@@ -149,8 +149,8 @@ namespace System.ComponentModel.Composition
 
             // definition.Metadata.ContainsKey(constantKey)
             return  Expression.Call(
-                        Expression.Property(parameter, ConstraintServices._exportDefinitionMetadataProperty),
-                        ConstraintServices._metadataContainsKeyMethod,
+                        Expression.Property(parameter, s_exportDefinitionMetadataProperty),
+                        s_metadataContainsKeyMethod,
                         Expression.Constant(constantKey));
         }
 
@@ -174,10 +174,10 @@ namespace System.ComponentModel.Composition
             // constantType.IsInstanceOfType(definition.Metadata[constantKey])
             return Expression.Call(
                             Expression.Constant(constantType, typeof(Type)),
-                            ConstraintServices._typeIsInstanceOfTypeMethod,
+                            s_typeIsInstanceOfTypeMethod,
                             Expression.Call(
-                                Expression.Property(parameter, ConstraintServices._exportDefinitionMetadataProperty),
-                                ConstraintServices._metadataItemMethod,
+                                Expression.Property(parameter, s_exportDefinitionMetadataProperty),
+                                s_metadataItemMethod,
                                 Expression.Constant(constantKey))
                             );
         }
@@ -197,10 +197,10 @@ namespace System.ComponentModel.Composition
             // constantValue.Equals(definition.Metadata[CompositionServices.PartCreationPolicyMetadataName])
             return  Expression.Call(
                         Expression.Constant(constantValue),
-                        ConstraintServices._metadataEqualsMethod,
+                        s_metadataEqualsMethod,
                         Expression.Call(
-                            Expression.Property(parameter, ConstraintServices._exportDefinitionMetadataProperty),
-                            ConstraintServices._metadataItemMethod,
+                            Expression.Property(parameter, s_exportDefinitionMetadataProperty),
+                            s_metadataItemMethod,
                             Expression.Constant(metadataName)));
         }
 
@@ -209,18 +209,18 @@ namespace System.ComponentModel.Composition
             ParameterExpression exportDefinitionParameter = baseConstraint.Parameters[0];
 
             // exportDefinition.Metadata
-            Expression metadataExpression = Expression.Property(exportDefinitionParameter, _exportDefinitionMetadataProperty);
+            Expression metadataExpression = Expression.Property(exportDefinitionParameter, s_exportDefinitionMetadataProperty);
 
             // exportDefinition.Metadata.ContainsKey("ProductDefinition")
             Expression containsProductExpression = Expression.Call(
                 metadataExpression,
-                _metadataContainsKeyMethod,
+                s_metadataContainsKeyMethod,
                 Expression.Constant(CompositionConstants.ProductDefinitionMetadataName));
 
             // exportDefinition.Metadata["ProductDefinition"]
             Expression productExportDefinitionExpression = Expression.Call(
                     metadataExpression,
-                    _metadataItemMethod,
+                    s_metadataItemMethod,
                     Expression.Constant(CompositionConstants.ProductDefinitionMetadataName));
 
             // ProductImportDefinition.Contraint((ExportDefinition)exportDefinition.Metadata["ProductDefinition"])

@@ -365,79 +365,79 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [Fact]
-        public void Value_SingleValueAsErrorsArgument_ShouldThrowComposition()
-        {
-            var errorIds = Expectations.GetEnumValues<CompositionErrorId>();
+        //[Fact]
+        //public void Value_SingleValueAsErrorsArgument_ShouldThrowComposition()
+        //{
+        //    var errorIds = Expectations.GetEnumValues<CompositionErrorId>();
 
-            foreach (var errorId in errorIds)
-            {
-                var result = CreateCompositionResult<string>(errorId);
+        //    foreach (var errorId in errorIds)
+        //    {
+        //        var result = CreateCompositionResult<string>(errorId);
 
-                CompositionAssert.ThrowsError((ErrorId)errorId, () =>
-                {
-                    var value = result.Value;
-                });
-            }
-        }
+        //        CompositionAssert.ThrowsError((ErrorId)errorId, () =>
+        //        {
+        //            var value = result.Value;
+        //        });
+        //    }
+        //}
 
-        [Fact]
-        public void Value_TwoSameValuesAsErrorsArgument_ShouldThrowComposition()
-        {
-            var errorIds = Expectations.GetEnumValues<CompositionErrorId>();
+        //[Fact]
+        //public void Value_TwoSameValuesAsErrorsArgument_ShouldThrowComposition()
+        //{
+        //    var errorIds = Expectations.GetEnumValues<CompositionErrorId>();
 
-            foreach (var errorId in errorIds)
-            {
-                var result = CreateCompositionResult<string>(errorId, errorId);
+        //    foreach (var errorId in errorIds)
+        //    {
+        //        var result = CreateCompositionResult<string>(errorId, errorId);
 
-                CompositionAssert.ThrowsErrors((ErrorId)errorId, (ErrorId)errorId, () =>
-                {
-                    var value = result.Value;
-                });
-            }
-        }
+        //        CompositionAssert.ThrowsErrors((ErrorId)errorId, (ErrorId)errorId, () =>
+        //        {
+        //            var value = result.Value;
+        //        });
+        //    }
+        //}
 
-        [Fact]
-        public void Value_TwoDifferentValuesAsErrorsArgument_ShouldThrowComposition()
-        {
-            var errorIds1 = Expectations.GetEnumValues<CompositionErrorId>();
-            var errorIds2 = Expectations.GetEnumValues<CompositionErrorId>();
+        //[Fact]
+        //public void Value_TwoDifferentValuesAsErrorsArgument_ShouldThrowComposition()
+        //{
+        //    var errorIds1 = Expectations.GetEnumValues<CompositionErrorId>();
+        //    var errorIds2 = Expectations.GetEnumValues<CompositionErrorId>();
 
-            for (int i = 0; i < errorIds1.Count(); i++)
-            {
-                var errorId1 = errorIds1.ElementAt(i);
-                var errorId2 = errorIds1.ElementAt(errorIds2.Count() - 1 - i);
+        //    for (int i = 0; i < errorIds1.Count(); i++)
+        //    {
+        //        var errorId1 = errorIds1.ElementAt(i);
+        //        var errorId2 = errorIds1.ElementAt(errorIds2.Count() - 1 - i);
 
-                var result = CreateCompositionResult<string>(errorId1, errorId2);
+        //        var result = CreateCompositionResult<string>(errorId1, errorId2);
 
-                CompositionAssert.ThrowsErrors((ErrorId)errorId1, (ErrorId)errorId2, () =>
-                {
-                    var value = result.Value;
-                });
-            }
-        }
+        //        CompositionAssert.ThrowsErrors((ErrorId)errorId1, (ErrorId)errorId2, () =>
+        //        {
+        //            var value = result.Value;
+        //        });
+        //    }
+        //}
 
-        private CompositionResult<T> CreateCompositionResult<T>(params CompositionErrorId[] errorIds)
-        {
-            return new CompositionResult<T>(errorIds.Select(id =>
-            {
-                return ErrorFactory.Create(id);
-            }));
-        }
+        //private CompositionResult<T> CreateCompositionResult<T>(params CompositionErrorId[] errorIds)
+        //{
+        //    return new CompositionResult<T>(errorIds.Select(id =>
+        //    {
+        //        return ErrorFactory.Create(id);
+        //    }));
+        //}
 
-        private CompositionResult<T> CreateCompositionResult<T>(int count)
-        {
-            var expectations = Expectations.GetEnumValues<CompositionErrorId>();
+        //private CompositionResult<T> CreateCompositionResult<T>(int count)
+        //{
+        //    var expectations = Expectations.GetEnumValues<CompositionErrorId>();
 
-            List<CompositionError> errors = new List<CompositionError>();
+        //    List<CompositionError> errors = new List<CompositionError>();
 
-            foreach (var e in expectations.Take(count))
-            {
-                errors.Add(ErrorFactory.Create(e));
-            }
+        //    foreach (var e in expectations.Take(count))
+        //    {
+        //        errors.Add(ErrorFactory.Create(e));
+        //    }
 
-            return CreateCompositionResult<T>(errors);
-        }
+        //    return CreateCompositionResult<T>(errors);
+        //}
 
         private CompositionResult<T> CreateCompositionResult<T>(IEnumerable<CompositionError> errors)
         {

@@ -11,23 +11,23 @@ namespace System.ComponentModel.Composition
 {
     public class CompositionServiceExtensionsTests
     {
-        [Fact]
-        public void SatisfyImports_BooleanOverride_PartAndFalseHaveBeenPassed()
-        {
-            MockCompositionService compositionService = new MockCompositionService();
-            ComposablePart part = PartFactory.Create();
+        //[Fact]
+        //public void SatisfyImports_BooleanOverride_PartAndFalseHaveBeenPassed()
+        //{
+        //    MockCompositionService compositionService = new MockCompositionService();
+        //    ComposablePart part = PartFactory.Create();
 
-            bool importsSatisfiedCalled = false;
-            compositionService.ImportsSatisfied += delegate (object sender, SatisfyImportsEventArgs e)
-            {
-                Assert.False(importsSatisfiedCalled);
-                Assert.Equal(part, e.Part);
-                importsSatisfiedCalled = true;
-            };
+        //    bool importsSatisfiedCalled = false;
+        //    compositionService.ImportsSatisfied += delegate (object sender, SatisfyImportsEventArgs e)
+        //    {
+        //        Assert.False(importsSatisfiedCalled);
+        //        Assert.Equal(part, e.Part);
+        //        importsSatisfiedCalled = true;
+        //    };
 
-            compositionService.SatisfyImportsOnce(part);
-            Assert.True(importsSatisfiedCalled);
-        }
+        //    compositionService.SatisfyImportsOnce(part);
+        //    Assert.True(importsSatisfiedCalled);
+        //}
 
         [Fact]
         public void SatisfyImports_AttributedOverride_NullAsCompositionService()
@@ -49,24 +49,24 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [Fact]
-        public void SatisfyImports_AttributedOverride_PartAndFalseHaveBeenPassed()
-        {
-            MockCompositionService compositionService = new MockCompositionService();
-            object attributedPart = new MockAttributedPart();
+        //[Fact]
+        //public void SatisfyImports_AttributedOverride_PartAndFalseHaveBeenPassed()
+        //{
+        //    MockCompositionService compositionService = new MockCompositionService();
+        //    object attributedPart = new MockAttributedPart();
 
-            bool importsSatisfiedCalled = false;
-            compositionService.ImportsSatisfied += delegate (object sender, SatisfyImportsEventArgs e)
-            {
-                Assert.False(importsSatisfiedCalled);
-                Assert.True(e.Part is ReflectionComposablePart);
-                Assert.True(((ReflectionComposablePart)e.Part).Definition.GetPartType() == typeof(MockAttributedPart));
-                importsSatisfiedCalled = true;
-            };
+        //    bool importsSatisfiedCalled = false;
+        //    compositionService.ImportsSatisfied += delegate (object sender, SatisfyImportsEventArgs e)
+        //    {
+        //        Assert.False(importsSatisfiedCalled);
+        //        Assert.True(e.Part is ReflectionComposablePart);
+        //        Assert.True(((ReflectionComposablePart)e.Part).Definition.GetPartType() == typeof(MockAttributedPart));
+        //        importsSatisfiedCalled = true;
+        //    };
 
-            compositionService.SatisfyImportsOnce(attributedPart);
-            Assert.True(importsSatisfiedCalled);
-        }
+        //    compositionService.SatisfyImportsOnce(attributedPart);
+        //    Assert.True(importsSatisfiedCalled);
+        //}
 
         [Fact]
         public void SatisfyImports_AttributedAndBooleanOverride_NullAsCompositionService()
@@ -88,24 +88,24 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [Fact]
-        public void SatisfyImports_AttributedAndBooleanOverride_PartAndFalseHaveBeenPassed()
-        {
-            MockCompositionService compositionService = new MockCompositionService();
-            object attributedPart = new MockAttributedPart();
+        //[Fact]
+        //public void SatisfyImports_AttributedAndBooleanOverride_PartAndFalseHaveBeenPassed()
+        //{
+        //    MockCompositionService compositionService = new MockCompositionService();
+        //    object attributedPart = new MockAttributedPart();
 
-            bool importsSatisfiedCalled = false;
-            compositionService.ImportsSatisfied += delegate (object sender, SatisfyImportsEventArgs e)
-            {
-                Assert.False(importsSatisfiedCalled);
-                Assert.True(e.Part is ReflectionComposablePart);
-                Assert.True(((ReflectionComposablePart)e.Part).Definition.GetPartType() == typeof(MockAttributedPart));
-                importsSatisfiedCalled = true;
-            };
+        //    bool importsSatisfiedCalled = false;
+        //    compositionService.ImportsSatisfied += delegate (object sender, SatisfyImportsEventArgs e)
+        //    {
+        //        Assert.False(importsSatisfiedCalled);
+        //        Assert.True(e.Part is ReflectionComposablePart);
+        //        Assert.True(((ReflectionComposablePart)e.Part).Definition.GetPartType() == typeof(MockAttributedPart));
+        //        importsSatisfiedCalled = true;
+        //    };
 
-            compositionService.SatisfyImportsOnce(attributedPart);
-            Assert.True(importsSatisfiedCalled);
-        }
+        //    compositionService.SatisfyImportsOnce(attributedPart);
+        //    Assert.True(importsSatisfiedCalled);
+        //}
 
         internal class SatisfyImportsEventArgs : EventArgs
         {

@@ -99,13 +99,6 @@ namespace System.ComponentModel.Composition
 
             Assert.Equal(1, disposeCount);
         }
-
-        private IQueryable<ComposablePartDefinition> GetPartDefinitions(ExportDefinition definition)
-        {
-            var partDefinition = PartDefinitionFactory.Create(null, () => null, Enumerable.Empty<ImportDefinition>(), new ExportDefinition[] { definition });
-
-            return new ComposablePartDefinition[] { partDefinition }.AsQueryable();
-        }
     }
 }
 

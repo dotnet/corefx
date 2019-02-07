@@ -179,7 +179,7 @@ namespace System.UnitTesting
         {
             if (expectation.IdSpecified)
             {
-                AssertCore(retryCount, prefix, "Id", expectation.Id, (ErrorId)error.Id);
+                //AssertCore(retryCount, prefix, "Id", expectation.Id, (ErrorId)error.Id);
             }
 
             if (expectation.ElementSpecified)
@@ -189,17 +189,17 @@ namespace System.UnitTesting
 
             if (expectation.InnerExceptionSpecified)
             {
-                AssertCore(retryCount, prefix, "InnerException", expectation.InnerException, error.InnerException);
+                AssertCore(retryCount, prefix, "InnerException", expectation.InnerException, error.Exception);
             }
 
             if (expectation.InnerExceptionTypeSpecified)
             {
-                AssertCore(retryCount, prefix, "InnerException.GetType()", expectation.InnerExceptionType, error.InnerException == null ? null : error.InnerException.GetType());
+                AssertCore(retryCount, prefix, "InnerException.GetType()", expectation.InnerExceptionType, error.Exception == null ? null : error.Exception.GetType());
             }
 
             if (expectation.InnerExpectationsSpecified)
             {
-                var innerError = error.InnerException as ComposablePartException;
+                var innerError = error.Exception as ComposablePartException;
                 if (innerError != null)
                 {
                     Assert.Equal(1, expectation.InnerExpectations.Length);
@@ -207,7 +207,7 @@ namespace System.UnitTesting
                 }
                 else
                 {
-                    AssertCore(retryCount, prefix + ".InnerException", (CompositionException)error.InnerException, expectation.InnerExpectations);
+                    AssertCore(retryCount, prefix + ".InnerException", (CompositionException)error.Exception, expectation.InnerExpectations);
                 }
             }
         }

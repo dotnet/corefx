@@ -287,7 +287,10 @@ namespace System.ComponentModel.Composition.Hosting
                         if (catalogs != null)
                         {
                             UnsubscribeFromCatalogNotifications(catalogs);
-                            catalogs.ForEach(catalog => catalog.Dispose());
+                            foreach (ComposablePartCatalog catalog in catalogs)
+                            {
+                                catalog.Dispose();
+                            }
                         }
 
                         if (disposeLock)

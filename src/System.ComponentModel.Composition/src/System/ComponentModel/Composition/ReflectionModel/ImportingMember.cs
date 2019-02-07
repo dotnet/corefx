@@ -14,6 +14,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
     internal class ImportingMember : ImportingItem
     {
         private readonly ReflectionWritableMember _member;
+        private static readonly Type s_iCollectionOfTType = typeof(ICollection<>);
 
         public ImportingMember(ContractBasedImportDefinition definition, ReflectionWritableMember member, ImportType importType)
             : base(definition, importType)
@@ -107,7 +108,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
 
             ICollection<object> collection = null;
-            Type itemType = CollectionServices.GetCollectionElementType(ImportType.ActualType);
+            Type itemType = GetCollectionElementType(ImportType.ActualType);
             if (itemType != null)
             {
                 collection = GetNormalizedCollection(itemType, instance);
@@ -115,6 +116,16 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
             EnsureCollectionIsWritable(collection);
             PopulateCollection(collection, values);
+        }
+
+        private static Type GetCollectionElementType(Type type)
+        {
+            if (ReflectionServices.TryGetGenericInterfaceType(type, s_iCollectionOfTType, out Type closedType))
+            {
+                return closedType.GetGenericArguments()[0];
+            }
+
+            return null;
         }
 
         private ICollection<object> GetNormalizedCollection(Type itemType, object instance)

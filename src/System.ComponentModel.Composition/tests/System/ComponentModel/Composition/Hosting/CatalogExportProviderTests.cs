@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
+using System.Diagnostics;
 using System.Linq;
 using System.UnitTesting;
 using Xunit;
@@ -73,83 +74,83 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [Fact]
-        public void GetExports_WhenRejectedDefinitionRequiredImportIsAdded_ShouldBeResurrected()
-        {
-            var part = PartFactory.CreateImporterExporter("Export", "Import");
+        //[Fact]
+        //public void GetExports_WhenRejectedDefinitionRequiredImportIsAdded_ShouldBeResurrected()
+        //{
+        //    var part = PartFactory.CreateImporterExporter("Export", "Import");
 
-            var provider = CreateCatalogExportProvider(part);
-            var sourceProvider = ExportProviderFactory.CreateRecomposable();
-            provider.SourceProvider = sourceProvider;
+        //    var provider = CreateCatalogExportProvider(part);
+        //    var sourceProvider = ExportProviderFactory.CreateRecomposable();
+        //    provider.SourceProvider = sourceProvider;
 
-            var exports = provider.GetExports<object>("Export");
+        //    var exports = provider.GetExports<object>("Export");
 
-            Assert.Empty(exports);
+        //    Assert.Empty(exports);
 
-            // Resurrect the definition
-            sourceProvider.AddExport("Import", new object());
+        //    // Resurrect the definition
+        //    sourceProvider.AddExport("Import", new object());
 
-            exports = provider.GetExports<object>("Export");
+        //    exports = provider.GetExports<object>("Export");
 
-            Assert.Equal(1, exports.Count());
-        }
+        //    Assert.Equal(1, exports.Count());
+        //}
 
-        [Fact]
-        public void GetExports_WhenMultipleRejectedDefinitionsRequiredImportsAreAdded_ShouldBeResurrected()
-        {
-            var part1 = PartFactory.CreateImporterExporter("Export", "Import");
-            var part2 = PartFactory.CreateImporterExporter("Export", "Import");
+        //[Fact]
+        //public void GetExports_WhenMultipleRejectedDefinitionsRequiredImportsAreAdded_ShouldBeResurrected()
+        //{
+        //    var part1 = PartFactory.CreateImporterExporter("Export", "Import");
+        //    var part2 = PartFactory.CreateImporterExporter("Export", "Import");
 
-            var provider = CreateCatalogExportProvider(part1, part2);
-            var sourceProvider = ExportProviderFactory.CreateRecomposable();
-            provider.SourceProvider = sourceProvider;
+        //    var provider = CreateCatalogExportProvider(part1, part2);
+        //    var sourceProvider = ExportProviderFactory.CreateRecomposable();
+        //    provider.SourceProvider = sourceProvider;
 
-            var exports = provider.GetExports<object>("Export");
+        //    var exports = provider.GetExports<object>("Export");
 
-            Assert.Empty(exports);
+        //    Assert.Empty(exports);
 
-            // Resurrect both definitions
-            sourceProvider.AddExport("Import", new object());
+        //    // Resurrect both definitions
+        //    sourceProvider.AddExport("Import", new object());
 
-            exports = provider.GetExports<object>("Export");
+        //    exports = provider.GetExports<object>("Export");
 
-            Assert.Equal(2, exports.Count());
-        }
+        //    Assert.Equal(2, exports.Count());
+        //}
 
-        [Fact]
-        [ActiveIssue(743740)]
-        public void GetExports_AfterResurrectedDefinitionHasBeenRemovedAndReaddedToCatalog_ShouldNotBeTreatedAsRejected()
-        {
-            var definition1 = PartDefinitionFactory.Create(PartFactory.CreateImporterExporter("Export", "Import"));
-            var definition2 = PartDefinitionFactory.Create(PartFactory.CreateImporterExporter("Export", "Import"));
-            var catalog = CatalogFactory.CreateMutable(definition1, definition2);
+        //[Fact]
+        //[ActiveIssue(743740)]
+        //public void GetExports_AfterResurrectedDefinitionHasBeenRemovedAndReaddedToCatalog_ShouldNotBeTreatedAsRejected()
+        //{
+        //    var definition1 = PartDefinitionFactory.Create(PartFactory.CreateImporterExporter("Export", "Import"));
+        //    var definition2 = PartDefinitionFactory.Create(PartFactory.CreateImporterExporter("Export", "Import"));
+        //    var catalog = CatalogFactory.CreateMutable(definition1, definition2);
 
-            var provider = CreateCatalogExportProvider(catalog);
-            var sourceProvider = ExportProviderFactory.CreateRecomposable();
-            provider.SourceProvider = sourceProvider;
+        //    var provider = CreateCatalogExportProvider(catalog);
+        //    var sourceProvider = ExportProviderFactory.CreateRecomposable();
+        //    provider.SourceProvider = sourceProvider;
 
-            var exports = provider.GetExports<object>("Export");
+        //    var exports = provider.GetExports<object>("Export");
 
-            Assert.Empty(exports);
+        //    Assert.Empty(exports);
 
-            // Resurrect both definitions
-            sourceProvider.AddExport("Import", new object());
+        //    // Resurrect both definitions
+        //    sourceProvider.AddExport("Import", new object());
 
-            exports = provider.GetExports<object>("Export");
+        //    exports = provider.GetExports<object>("Export");
 
-            Assert.Equal(2, exports.Count());
+        //    Assert.Equal(2, exports.Count());
 
-            catalog.RemoveDefinition(definition1);
+        //    catalog.RemoveDefinition(definition1);
 
-            exports = provider.GetExports<object>("Export");
-            Assert.Equal(1, exports.Count());
+        //    exports = provider.GetExports<object>("Export");
+        //    Assert.Equal(1, exports.Count());
 
-            catalog.AddDefinition(definition1);
+        //    catalog.AddDefinition(definition1);
 
-            exports = provider.GetExports<object>("Export");
+        //    exports = provider.GetExports<object>("Export");
 
-            Assert.Equal(2, exports.Count());
-        }
+        //    Assert.Equal(2, exports.Count());
+        //}
 
         [Fact]
         [Trait("Type", "Integration")]
@@ -362,61 +363,61 @@ namespace System.ComponentModel.Composition
                 provider.GetExports(ImportFromContract("Foo")));
         }
 
-        [Fact]
-        [Trait("Type", "Integration")]
-        [ActiveIssue(561310)]
-        public void Recomposition_PartDefWithRecomposableImportIsRemoved_ExportsMatchingImportChanged_ShouldNotBeRecomposed()
-        {
-            string dependencyContractName = "dependency";
-            var exportValue = new object();
+        //[Fact]
+        //[Trait("Type", "Integration")]
+        //[ActiveIssue(561310)]
+        //public void Recomposition_PartDefWithRecomposableImportIsRemoved_ExportsMatchingImportChanged_ShouldNotBeRecomposed()
+        //{
+        //    string dependencyContractName = "dependency";
+        //    var exportValue = new object();
 
-            var exporterPart = PartFactory.CreateExporter(dependencyContractName, exportValue);
-            var importerPart = PartFactory.CreateImporter(dependencyContractName, true);
+        //    var exporterPart = PartFactory.CreateExporter(dependencyContractName, exportValue);
+        //    var importerPart = PartFactory.CreateImporter(dependencyContractName, true);
 
-            var exporterCatalog = CatalogFactory.Create(exporterPart);
-            var importerCatalog = CatalogFactory.Create(importerPart);
+        //    var exporterCatalog = CatalogFactory.Create(exporterPart);
+        //    var importerCatalog = CatalogFactory.Create(importerPart);
 
-            var aggregateCatalog = CatalogFactory.CreateAggregateCatalog(importerCatalog, exporterCatalog);
+        //    var aggregateCatalog = CatalogFactory.CreateAggregateCatalog(importerCatalog, exporterCatalog);
 
-            var provider = new CatalogExportProvider(aggregateCatalog);
-            provider.SourceProvider = provider;
+        //    var provider = new CatalogExportProvider(aggregateCatalog);
+        //    provider.SourceProvider = provider;
 
-            var exports = provider.GetExports(importerPart.ImportDefinitions.Single());
-            Assert.Equal(exportValue, importerPart.Value);
+        //    var exports = provider.GetExports(importerPart.ImportDefinitions.Single());
+        //    Assert.Equal(exportValue, importerPart.Value);
 
-            aggregateCatalog.Catalogs.Remove(importerCatalog);
-            aggregateCatalog.Catalogs.Remove(exporterCatalog);
+        //    aggregateCatalog.Catalogs.Remove(importerCatalog);
+        //    aggregateCatalog.Catalogs.Remove(exporterCatalog);
 
-            Assert.Equal(exportValue, importerPart.Value);
-        }
+        //    Assert.Equal(exportValue, importerPart.Value);
+        //}
 
-        [Fact]
-        [Trait("Type", "Integration")]
-        [ActiveIssue(561310)]
-        public void Recomposition_PartDefWithNonRecomposableImportIsRemoved_ExportsMatchingImportChanged_ShouldNotBeRejected()
-        {
-            string dependencyContractName = "dependency";
-            var exportValue = new object();
+        //[Fact]
+        //[Trait("Type", "Integration")]
+        //[ActiveIssue(561310)]
+        //public void Recomposition_PartDefWithNonRecomposableImportIsRemoved_ExportsMatchingImportChanged_ShouldNotBeRejected()
+        //{
+        //    string dependencyContractName = "dependency";
+        //    var exportValue = new object();
 
-            var exporterPart = PartFactory.CreateExporter(dependencyContractName, exportValue);
-            var importerPart = PartFactory.CreateImporter(dependencyContractName, false);
+        //    var exporterPart = PartFactory.CreateExporter(dependencyContractName, exportValue);
+        //    var importerPart = PartFactory.CreateImporter(dependencyContractName, false);
 
-            var exporterCatalog = CatalogFactory.Create(exporterPart);
-            var importerCatalog = CatalogFactory.Create(importerPart);
+        //    var exporterCatalog = CatalogFactory.Create(exporterPart);
+        //    var importerCatalog = CatalogFactory.Create(importerPart);
 
-            var aggregateCatalog = CatalogFactory.CreateAggregateCatalog(importerCatalog, exporterCatalog);
+        //    var aggregateCatalog = CatalogFactory.CreateAggregateCatalog(importerCatalog, exporterCatalog);
 
-            var provider = new CatalogExportProvider(aggregateCatalog);
-            provider.SourceProvider = provider;
+        //    var provider = new CatalogExportProvider(aggregateCatalog);
+        //    provider.SourceProvider = provider;
 
-            var exports = provider.GetExports(importerPart.ImportDefinitions.Single());
-            Assert.Equal(exportValue, importerPart.Value);
+        //    var exports = provider.GetExports(importerPart.ImportDefinitions.Single());
+        //    Assert.Equal(exportValue, importerPart.Value);
 
-            aggregateCatalog.Catalogs.Remove(importerCatalog);
-            aggregateCatalog.Catalogs.Remove(exporterCatalog);
+        //    aggregateCatalog.Catalogs.Remove(importerCatalog);
+        //    aggregateCatalog.Catalogs.Remove(exporterCatalog);
 
-            Assert.Equal(exportValue, importerPart.Value);
-        }
+        //    Assert.Equal(exportValue, importerPart.Value);
+        //}
 
         [Fact]
         [ActiveIssue(25498)]

@@ -232,7 +232,7 @@ namespace System.ComponentModel.Composition
 
         private object GetInstance()
         {
-            var result = CompositionResult.s_succeededResult;
+            //var result = CompositionResult.s_succeededResult;
 
             // We only need this guard if we are pulling on the lazy exports during this call
             // but if we do the pulling in SetImport it isn't needed.
@@ -253,8 +253,8 @@ namespace System.ComponentModel.Composition
                     object importValue;
                     if (!this._imports.TryGetValue(import, out importValue))
                     {
-                        result = result.MergeError(CompositionError.Create(CompositionErrorId.ImportNotSetOnPart,
-                            "The import '{0}' is required for construction of '{1}'", import.ToString(), _type.FullName));
+                        //result = result.MergeError(CompositionError.Create(CompositionErrorId.ImportNotSetOnPart,
+                        //    "The import '{0}' is required for construction of '{1}'", import.ToString(), _type.FullName));
 
                         continue;
                     }
@@ -262,10 +262,10 @@ namespace System.ComponentModel.Composition
                     constructorArgs.Add(importValue);
                 }
 
-                if (!result.Succeeded)
-                {
-                    throw new CompositionException(result.Errors);
-                }
+                //if (!result.Succeeded)
+                //{
+                //    throw new CompositionException(result.Errors);
+                //}
 
                 object obj = this._constructor.Invoke(constructorArgs.ToArray());
 

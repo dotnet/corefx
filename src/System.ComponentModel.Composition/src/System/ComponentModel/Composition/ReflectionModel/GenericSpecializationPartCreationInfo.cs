@@ -528,7 +528,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             if (obj is GenericSpecializationPartCreationInfo that)
             {
                 return _originalPartCreationInfo.Equals(that._originalPartCreationInfo) &&
-                    _specialization.IsArrayEqual(that._specialization);
+                    IsArrayEqual(_specialization, that._specialization);
             }
 
             return false;
@@ -573,6 +573,24 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     specialization[i],
                     (genericParameterConstraints[i] as Type[]).CreateTypeSpecializations(specialization),
                     genericParameterAttributes[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsArrayEqual<T>(T[] thisArray, T[] thatArray)
+        {
+            if (thisArray.Length != thatArray.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < thisArray.Length; i++)
+            {
+                if (!thisArray[i].Equals(thatArray[i]))
                 {
                     return false;
                 }

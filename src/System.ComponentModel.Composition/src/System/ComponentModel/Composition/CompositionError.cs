@@ -14,12 +14,6 @@ namespace System.ComponentModel.Composition
     [DebuggerTypeProxy(typeof(CompositionErrorDebuggerProxy))]
     public class CompositionError
     {
-        private readonly CompositionErrorId _id;
-        private readonly string _description;
-        private readonly Exception _exception;
-
-        private readonly ICompositionElement _element;
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="CompositionError"/> class
         ///     with the specified error message.
@@ -103,10 +97,10 @@ namespace System.ComponentModel.Composition
 
         internal CompositionError(CompositionErrorId id, string description, ICompositionElement element, Exception exception)
         {
-            _id = id;
-            _description = description ?? string.Empty;
-            _element = element;
-            _exception = exception;
+            Id = id;
+            Description = description ?? string.Empty;
+            Element = element;
+            Exception = exception;
         }
 
         /// <summary>
@@ -116,10 +110,7 @@ namespace System.ComponentModel.Composition
         ///     The <see cref="ICompositionElement"/> that is the cause of the
         ///     <see cref="CompositionError"/>. The default is <see langword="null"/>.
         /// </value>
-        public ICompositionElement Element
-        {
-            get { return _element; }
-        }
+        public ICompositionElement Element { get; }
 
         /// <summary>
         ///     Gets the message that describes the composition error.
@@ -128,10 +119,7 @@ namespace System.ComponentModel.Composition
         ///     A <see cref="string"/> containing a message that describes the
         ///     <see cref="CompositionError"/>.
         /// </value>
-        public string Description
-        {
-            get { return _description; }
-        }
+        public string Description { get; }
 
         /// <summary>
         ///     Gets the exception that is the underlying cause of the composition error.
@@ -140,20 +128,9 @@ namespace System.ComponentModel.Composition
         ///     The <see cref="Exception"/> that is the underlying cause of the 
         ///     <see cref="CompositionError"/>. The default is <see langword="null"/>.
         /// </value>
-        public Exception Exception
-        {
-            get { return _exception; }
-        }
+        public Exception Exception { get; }
 
-        internal CompositionErrorId Id
-        {
-            get { return _id; }
-        }
-
-        internal Exception InnerException
-        {
-            get { return Exception; }
-        }
+        internal CompositionErrorId Id { get; }
 
         /// <summary>
         ///     Returns a string representation of the composition error.

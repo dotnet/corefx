@@ -51,13 +51,13 @@ namespace System.ComponentModel.Composition
             ExceptionAssert.HasDefaultMessage(exception);
         }
 
-        [Fact]
-        public void Constructor5_NullAsMessageArgument_ShouldSetMessagePropertyToDefault()
-        {
-            var exception = new CompositionException((string)null, new Exception(), Enumerable.Empty<CompositionError>());
+        //[Fact]
+        //public void Constructor5_NullAsMessageArgument_ShouldSetMessagePropertyToDefault()
+        //{
+        //    var exception = new CompositionException((string)null, new Exception(), Enumerable.Empty<CompositionError>());
 
-            ExceptionAssert.HasDefaultMessage(exception);
-        }
+        //    ExceptionAssert.HasDefaultMessage(exception);
+        //}
 
         [Fact]
         public void Constructor2_ValueAsMessageArgument_ShouldSetMessageProperty()
@@ -85,18 +85,18 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [Fact]
-        public void Constructor5_ValueAsMessageArgument_ShouldSetMessageProperty()
-        {
-            var expectations = Expectations.GetExceptionMessages();
+        //[Fact]
+        //public void Constructor5_ValueAsMessageArgument_ShouldSetMessageProperty()
+        //{
+        //    var expectations = Expectations.GetExceptionMessages();
 
-            foreach (var e in expectations)
-            {
-                var exception = new CompositionException(e, new Exception(), Enumerable.Empty<CompositionError>());
+        //    foreach (var e in expectations)
+        //    {
+        //        var exception = new CompositionException(e, new Exception(), Enumerable.Empty<CompositionError>());
 
-                Assert.Equal(e, exception.Message);
-            }
-        }
+        //        Assert.Equal(e, exception.Message);
+        //    }
+        //}
 
         [Fact]
         public void Constructor1_ShouldSetInnerExceptionPropertyToNull()
@@ -130,13 +130,13 @@ namespace System.ComponentModel.Composition
             Assert.Null(exception.InnerException);
         }
 
-        [Fact]
-        public void Constructor5_NullAsInnerExceptionArgument_ShouldSetInnerExceptionPropertyToNull()
-        {
-            var exception = new CompositionException("Message", (Exception)null, Enumerable.Empty<CompositionError>());
+        //[Fact]
+        //public void Constructor5_NullAsInnerExceptionArgument_ShouldSetInnerExceptionPropertyToNull()
+        //{
+        //    var exception = new CompositionException("Message", (Exception)null, Enumerable.Empty<CompositionError>());
 
-            Assert.Null(exception.InnerException);
-        }
+        //    Assert.Null(exception.InnerException);
+        //}
 
         [Fact]
         public void Constructor4_ValueAsInnerExceptionArgument_ShouldSetInnerExceptionProperty()
@@ -151,18 +151,18 @@ namespace System.ComponentModel.Composition
             }
         }
 
-        [Fact]
-        public void Constructor5_ValueAsInnerExceptionArgument_ShouldSetInnerExceptionProperty()
-        {
-            var expectations = Expectations.GetInnerExceptions();
+        //[Fact]
+        //public void Constructor5_ValueAsInnerExceptionArgument_ShouldSetInnerExceptionProperty()
+        //{
+        //    var expectations = Expectations.GetInnerExceptions();
 
-            foreach (var e in expectations)
-            {
-                var exception = new CompositionException("Message", e, Enumerable.Empty<CompositionError>());
+        //    foreach (var e in expectations)
+        //    {
+        //        var exception = new CompositionException("Message", e, Enumerable.Empty<CompositionError>());
 
-                Assert.Same(e, exception.InnerException);
-            }
-        }
+        //        Assert.Same(e, exception.InnerException);
+        //    }
+        //}
 
         [Fact]
         public void Constructor2_ArrayWithNullAsErrorsArgument_ShouldThrowArgument()
@@ -175,16 +175,16 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [Fact]
-        public void Constructor5_ArrayWithNullAsErrorsArgument_ShouldThrowArgument()
-        {
-            var errors = new CompositionError[] { null };
+        //[Fact]
+        //public void Constructor5_ArrayWithNullAsErrorsArgument_ShouldThrowArgument()
+        //{
+        //    var errors = new CompositionError[] { null };
 
-            Assert.Throws<ArgumentException>("errors", () =>
-            {
-                new CompositionException("Message", new Exception(), errors);
-            });
-        }
+        //    Assert.Throws<ArgumentException>("errors", () =>
+        //    {
+        //        new CompositionException("Message", new Exception(), errors);
+        //    });
+        //}
 
         [Fact]
         public void Constructor1_ShouldSetErrorsPropertyToEmpty()
@@ -252,208 +252,208 @@ namespace System.ComponentModel.Composition
             Assert.Empty(exception.Errors);
         }
 
-        [Fact]
-        public void Constructor5_NullAsErrorsArgument_ShouldSetErrorsPropertyToEmptyEnumerable()
-        {
-            var exception = new CompositionException("Message", new Exception(), (IEnumerable<CompositionError>)null);
+        //[Fact]
+        //public void Constructor5_NullAsErrorsArgument_ShouldSetErrorsPropertyToEmptyEnumerable()
+        //{
+        //    var exception = new CompositionException("Message", new Exception(), (IEnumerable<CompositionError>)null);
 
-            Assert.Empty(exception.Errors);
-        }
+        //    Assert.Empty(exception.Errors);
+        //}
 
-        [Fact]
-        public void Constructor5_EmptyEnumerableAsErrorsArgument_ShouldSetErrorsPropertyToEmptyEnumerable()
-        {
-            var exception = new CompositionException("Message", new Exception(), Enumerable.Empty<CompositionError>());
+        //[Fact]
+        //public void Constructor5_EmptyEnumerableAsErrorsArgument_ShouldSetErrorsPropertyToEmptyEnumerable()
+        //{
+        //    var exception = new CompositionException("Message", new Exception(), Enumerable.Empty<CompositionError>());
 
-            Assert.Empty(exception.Errors);
-        }
+        //    Assert.Empty(exception.Errors);
+        //}
 
-        [Fact]
-        public void Constructor5_ValueAsErrorsArgument_ShouldSetErrorsProperty()
-        {
-            var expectations = Expectations.GetCompositionErrors();
+        //[Fact]
+        //public void Constructor5_ValueAsErrorsArgument_ShouldSetErrorsProperty()
+        //{
+        //    var expectations = Expectations.GetCompositionErrors();
 
-            foreach (var e in expectations)
-            {
-                var exception = new CompositionException("Message", new Exception(), e);
+        //    foreach (var e in expectations)
+        //    {
+        //        var exception = new CompositionException("Message", new Exception(), e);
 
-                EqualityExtensions.CheckEquals(e, exception.Errors);
-            }
-        }
+        //        EqualityExtensions.CheckEquals(e, exception.Errors);
+        //    }
+        //}
 
-        [Fact]
-        public void Constructor5_ArrayAsAsErrorsArgument_ShouldNotAllowModificationAfterConstruction()
-        {
-            var error = CreateCompositionError();
-            var errors = new CompositionError[] { error };
+        //[Fact]
+        //public void Constructor5_ArrayAsAsErrorsArgument_ShouldNotAllowModificationAfterConstruction()
+        //{
+        //    var error = CreateCompositionError();
+        //    var errors = new CompositionError[] { error };
 
-            var exception = new CompositionException("Message", new Exception(), errors);
+        //    var exception = new CompositionException("Message", new Exception(), errors);
 
-            errors[0] = null;
+        //    errors[0] = null;
 
-            EnumerableAssert.AreEqual(exception.Errors, error);
-        }
+        //    EnumerableAssert.AreEqual(exception.Errors, error);
+        //}
 
-        [Fact]
-        public void Message_ShouldIncludeElementGraph()
-        {
-            var expectations = new ExpectationCollection<CompositionError, string>();
-            CompositionError error = null;
+        //[Fact]
+        //public void Message_ShouldIncludeElementGraph()
+        //{
+        //    var expectations = new ExpectationCollection<CompositionError, string>();
+        //    CompositionError error = null;
 
-            error = CreateCompositionErrorWithElementChain(1);
-            expectations.Add(error, GetElementGraphString(error));
+        //    error = CreateCompositionErrorWithElementChain(1);
+        //    expectations.Add(error, GetElementGraphString(error));
 
-            error = CreateCompositionErrorWithElementChain(2);
-            expectations.Add(error, GetElementGraphString(error));
+        //    error = CreateCompositionErrorWithElementChain(2);
+        //    expectations.Add(error, GetElementGraphString(error));
 
-            error = CreateCompositionErrorWithElementChain(3);
-            expectations.Add(error, GetElementGraphString(error));
+        //    error = CreateCompositionErrorWithElementChain(3);
+        //    expectations.Add(error, GetElementGraphString(error));
 
-            error = CreateCompositionErrorWithElementChain(10);
-            expectations.Add(error, GetElementGraphString(error));
+        //    error = CreateCompositionErrorWithElementChain(10);
+        //    expectations.Add(error, GetElementGraphString(error));
 
-            foreach (var e in expectations)
-            {
-                var exception = CreateCompositionException(new CompositionError[] { e.Input });
+        //    foreach (var e in expectations)
+        //    {
+        //        var exception = CreateCompositionException(new CompositionError[] { e.Input });
 
-                string result = exception.ToString();
-                string expected = FixMessage(e.Output);
-                AssertExtensions.Contains(result, expected);
-            }
-        }
+        //        string result = exception.ToString();
+        //        string expected = FixMessage(e.Output);
+        //        AssertExtensions.Contains(result, expected);
+        //    }
+        //}
 
-        [Fact]
-        public void Message_ShouldIncludeErrors()
-        {
-            var expectations = new ExpectationCollection<IEnumerable<CompositionError>, string>();
-            expectations.Add(ErrorFactory.CreateFromDsl("Error"), "1<Separator> Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error|Error"), "1<Separator> Error|2<Separator> Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error|Error|Error"), "1<Separator> Error|2<Separator> Error|3<Separator> Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)"), "1<Separator> Error|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error)"), "1<Separator> Error|<Prefix>Error|2<Separator> Error|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error|Error)"), "1<Separator> Error|<Prefix>Error|2<Separator> Error|<Prefix>Error|3<Separator> Error|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error(Exception))"), "1<Separator> Exception|<Prefix>Error|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Exception)"), "1<Separator> Error|<Prefix>Error|2<Separator> Exception|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Exception)"), "1<Separator> Exception|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Exception(Exception))"), "1<Separator> Exception|<Prefix>Exception|<Prefix>Error");
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error(Exception)|Error)"), "1<Separator> Exception|<Prefix>Error|<Prefix>Error|2<Separator> Error|<Prefix>Error");
+        //[Fact]
+        //public void Message_ShouldIncludeErrors()
+        //{
+        //    var expectations = new ExpectationCollection<IEnumerable<CompositionError>, string>();
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error"), "1<Separator> Error");
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error|Error"), "1<Separator> Error|2<Separator> Error");
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error|Error|Error"), "1<Separator> Error|2<Separator> Error|3<Separator> Error");
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)"), "1<Separator> Error|<Prefix>Error");
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error)"), "1<Separator> Error|<Prefix>Error|2<Separator> Error|<Prefix>Error");
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error|Error)"), "1<Separator> Error|<Prefix>Error|2<Separator> Error|<Prefix>Error|3<Separator> Error|<Prefix>Error");
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error(Error(Exception))"), "1<Separator> Exception|<Prefix>Error|<Prefix>Error");
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Exception)"), "1<Separator> Error|<Prefix>Error|2<Separator> Exception|<Prefix>Error");
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error(Exception)"), "1<Separator> Exception|<Prefix>Error");
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error(Exception(Exception))"), "1<Separator> Exception|<Prefix>Exception|<Prefix>Error");
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error(Error(Exception)|Error)"), "1<Separator> Exception|<Prefix>Error|<Prefix>Error|2<Separator> Error|<Prefix>Error");
 
-            foreach (var e in expectations)
-            {
-                var exception = CreateCompositionException(e.Input);
+        //    foreach (var e in expectations)
+        //    {
+        //        var exception = CreateCompositionException(e.Input);
 
-                AssertMessage(exception, e.Output.Split('|'));
-            }
-        }
+        //        AssertMessage(exception, e.Output.Split('|'));
+        //    }
+        //}
 
-        [Fact]
-        public void Messsage_ShouldIncludeCountOfRootCauses()
-        {
-            var expectations = new ExpectationCollection<IEnumerable<CompositionError>, int>();
-            expectations.Add(ErrorFactory.CreateFromDsl("Error"), 1);
-            expectations.Add(ErrorFactory.CreateFromDsl("Error|Error"), 2);
-            expectations.Add(ErrorFactory.CreateFromDsl("Error|Error|Error"), 3);
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)"), 1);
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)|Error(Error)"), 2);
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error)"), 2);
-            expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error|Exception)"), 3);
+        //[Fact]
+        //public void Messsage_ShouldIncludeCountOfRootCauses()
+        //{
+        //    var expectations = new ExpectationCollection<IEnumerable<CompositionError>, int>();
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error"), 1);
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error|Error"), 2);
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error|Error|Error"), 3);
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)"), 1);
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error(Error)|Error(Error)"), 2);
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error)"), 2);
+        //    expectations.Add(ErrorFactory.CreateFromDsl("Error(Error|Error|Exception)"), 3);
 
-            foreach (var e in expectations)
-            {
-                var exception = CreateCompositionException(e.Input);
+        //    foreach (var e in expectations)
+        //    {
+        //        var exception = CreateCompositionException(e.Input);
 
-                AssertMessage(exception, e.Output, CultureInfo.CurrentCulture);
-            }
-        }
+        //        AssertMessage(exception, e.Output, CultureInfo.CurrentCulture);
+        //    }
+        //}
 
-        [Fact]
-        public void Message_ShouldFormatCountOfRootCausesUsingTheCurrentCulture()
-        {
-            RemoteInvoke(() =>
-            {
-                IEnumerable<CultureInfo> cultures = Expectations.GetCulturesForFormatting();
-                foreach (CultureInfo culture in cultures)
-                {
-                    // Save old culture and set a fixed culture for object instantiation
-                    using (new ThreadCultureChange(culture))
-                    {
-                        CompositionError[] errors = CreateCompositionErrors(1000);
-                        CompositionException exception = CreateCompositionException(errors);
-                        AssertMessage(exception, 1000, culture);
+        //[Fact]
+        //public void Message_ShouldFormatCountOfRootCausesUsingTheCurrentCulture()
+        //{
+        //    RemoteInvoke(() =>
+        //    {
+        //        IEnumerable<CultureInfo> cultures = Expectations.GetCulturesForFormatting();
+        //        foreach (CultureInfo culture in cultures)
+        //        {
+        //            // Save old culture and set a fixed culture for object instantiation
+        //            using (new ThreadCultureChange(culture))
+        //            {
+        //                CompositionError[] errors = CreateCompositionErrors(1000);
+        //                CompositionException exception = CreateCompositionException(errors);
+        //                AssertMessage(exception, 1000, culture);
 
-                        errors = CreateCompositionErrors(1);
-                        exception = CreateCompositionException(errors);
-                        AssertMessage(exception, 1, culture);
-                    }
-                }
-                return SuccessExitCode;
-            }).Dispose();
-        }
+        //                errors = CreateCompositionErrors(1);
+        //                exception = CreateCompositionException(errors);
+        //                AssertMessage(exception, 1, culture);
+        //            }
+        //        }
+        //        return SuccessExitCode;
+        //    }).Dispose();
+        //}
 
-        private string GetElementGraphString(CompositionError error)
-        {
-            StringBuilder writer = new StringBuilder();
-            ICompositionElement element = error.Element;
-            writer.AppendFormat(CultureInfo.CurrentCulture, SR.CompositionException_ElementPrefix, element.DisplayName);
+        //private string GetElementGraphString(CompositionError error)
+        //{
+        //    StringBuilder writer = new StringBuilder();
+        //    ICompositionElement element = error.Element;
+        //    writer.AppendFormat(CultureInfo.CurrentCulture, SR.CompositionException_ElementPrefix, element.DisplayName);
 
-            while ((element = element.Origin) != null)
-            {
-                writer.AppendFormat(CultureInfo.CurrentCulture, SR.CompositionException_OriginFormat, SR.CompositionException_OriginSeparator, element.DisplayName);
-            }
+        //    while ((element = element.Origin) != null)
+        //    {
+        //        writer.AppendFormat(CultureInfo.CurrentCulture, SR.CompositionException_OriginFormat, SR.CompositionException_OriginSeparator, element.DisplayName);
+        //    }
 
-            return writer.ToString();
-        }
+        //    return writer.ToString();
+        //}
 
-        private void AssertMessage(CompositionException exception, int rootCauseCount, CultureInfo culture)
-        {
-            if (PlatformDetection.IsNetNative)
-            {
-                return;
-            }
-            using (StringReader reader = new StringReader(exception.Message))
-            {
-                string line = reader.ReadLine();
+        //private void AssertMessage(CompositionException exception, int rootCauseCount, CultureInfo culture)
+        //{
+        //    if (PlatformDetection.IsNetNative)
+        //    {
+        //        return;
+        //    }
+        //    using (StringReader reader = new StringReader(exception.Message))
+        //    {
+        //        string line = reader.ReadLine();
 
-                if (rootCauseCount == 1)
-                {
-                    Assert.True(line.Contains(SR.CompositionException_SingleErrorWithSinglePath));
-                }
-                else
-                {
-                    Assert.True(
-                        line.Contains(string.Format(CultureInfo.CurrentCulture, SR.CompositionException_SingleErrorWithMultiplePaths, rootCauseCount)) ||
-                        line.Contains(string.Format(CultureInfo.CurrentCulture, SR.CompositionException_MultipleErrorsWithMultiplePaths, rootCauseCount))
-                        );
-                }
-            }
-        }
+        //        if (rootCauseCount == 1)
+        //        {
+        //            Assert.True(line.Contains(SR.CompositionException_SingleErrorWithSinglePath));
+        //        }
+        //        else
+        //        {
+        //            Assert.True(
+        //                line.Contains(string.Format(CultureInfo.CurrentCulture, SR.CompositionException_SingleErrorWithMultiplePaths, rootCauseCount)) ||
+        //                line.Contains(string.Format(CultureInfo.CurrentCulture, SR.CompositionException_MultipleErrorsWithMultiplePaths, rootCauseCount))
+        //                );
+        //        }
+        //    }
+        //}
 
-        private void AssertMessage(CompositionException exception, string[] expected)
-        {
-            if (PlatformDetection.IsNetNative)
-            {
-                return;
-            }
-            using (StringReader reader = new StringReader(exception.Message))
-            {
-                // Skip header
-                reader.ReadLine();
+        //private void AssertMessage(CompositionException exception, string[] expected)
+        //{
+        //    if (PlatformDetection.IsNetNative)
+        //    {
+        //        return;
+        //    }
+        //    using (StringReader reader = new StringReader(exception.Message))
+        //    {
+        //        // Skip header
+        //        reader.ReadLine();
 
-                foreach (string expect in expected)
-                {
-                    // Skip blank line
-                    reader.ReadLine();
-                    Assert.Equal(FixMessage(expect), reader.ReadLine());
-                }
-            }
-        }
+        //        foreach (string expect in expected)
+        //        {
+        //            // Skip blank line
+        //            reader.ReadLine();
+        //            Assert.Equal(FixMessage(expect), reader.ReadLine());
+        //        }
+        //    }
+        //}
 
-        private string FixMessage(string expect)
-        {
-            string fixedPrefix = expect.Replace("<Prefix>", SR.CompositionException_ErrorPrefix + " ");
-            string fixedSeparator = fixedPrefix.Replace("<Separator>", SR.CompositionException_PathsCountSeparator);
-            return fixedSeparator.Replace("<OriginSeparator>", SR.CompositionException_OriginSeparator);
-        }
+        //private string FixMessage(string expect)
+        //{
+        //    string fixedPrefix = expect.Replace("<Prefix>", SR.CompositionException_ErrorPrefix + " ");
+        //    string fixedSeparator = fixedPrefix.Replace("<Separator>", SR.CompositionException_PathsCountSeparator);
+        //    return fixedSeparator.Replace("<OriginSeparator>", SR.CompositionException_OriginSeparator);
+        //}
 
         private static CompositionError CreateCompositionError()
         {
@@ -482,29 +482,29 @@ namespace System.ComponentModel.Composition
             return errors;
         }
 
-        private static CompositionException CreateCompositionException()
-        {
-            return CreateCompositionException((string)null, (Exception)null, (IEnumerable<CompositionError>)null);
-        }
+        //private static CompositionException CreateCompositionException()
+        //{
+        //    return CreateCompositionException((string)null, (Exception)null, (IEnumerable<CompositionError>)null);
+        //}
 
-        private static CompositionException CreateCompositionException(string message)
-        {
-            return CreateCompositionException(message, (Exception)null, (IEnumerable<CompositionError>)null);
-        }
+        //private static CompositionException CreateCompositionException(string message)
+        //{
+        //    return CreateCompositionException(message, (Exception)null, (IEnumerable<CompositionError>)null);
+        //}
 
-        private static CompositionException CreateCompositionException(IEnumerable<CompositionError> errors)
-        {
-            return CreateCompositionException((string)null, (Exception)null, errors);
-        }
+        //private static CompositionException CreateCompositionException(IEnumerable<CompositionError> errors)
+        //{
+        //    return CreateCompositionException((string)null, (Exception)null, errors);
+        //}
 
-        private static CompositionException CreateCompositionException(Exception innerException)
-        {
-            return CreateCompositionException((string)null, innerException, (IEnumerable<CompositionError>)null);
-        }
+        //private static CompositionException CreateCompositionException(Exception innerException)
+        //{
+        //    return CreateCompositionException((string)null, innerException, (IEnumerable<CompositionError>)null);
+        //}
 
-        private static CompositionException CreateCompositionException(string message, Exception innerException, IEnumerable<CompositionError> errors)
-        {
-            return new CompositionException(message, innerException, errors);
-        }
+        //private static CompositionException CreateCompositionException(string message, Exception innerException, IEnumerable<CompositionError> errors)
+        //{
+        //    return new CompositionException(message, innerException, errors);
+        //}
     }
 }

@@ -8,7 +8,7 @@ using System.ComponentModel.Composition.Factories;
 using System.ComponentModel.Composition.Primitives;
 using Xunit;
 
-namespace Tests.Integration
+namespace System.ComponentModel.Composition.Tests
 {
     public class DelegateCompositionTests
     {

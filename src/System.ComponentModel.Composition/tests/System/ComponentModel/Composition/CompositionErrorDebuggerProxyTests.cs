@@ -18,50 +18,49 @@ namespace System.ComponentModel.Composition
             });
         }
 
-        [Fact]
-        public void Constructor_ValueAsErrorArgument_ShouldSetExceptionProperty()
-        {
-            var expectations = Expectations.GetInnerExceptionsWithNull();
+        //[Fact]
+        //public void Constructor_ValueAsErrorArgument_ShouldSetExceptionProperty()
+        //{
+        //    var expectations = Expectations.GetInnerExceptionsWithNull();
 
-            foreach (var e in expectations)
-            {
-                var error = ErrorFactory.Create(e);
+        //    foreach (var e in expectations)
+        //    {
+        //        var error = ErrorFactory.Create(e);
 
-                var proxy = new CompositionErrorDebuggerProxy(error);
+        //        var proxy = new CompositionErrorDebuggerProxy(error);
 
-                Assert.Same(error.Exception, proxy.Exception);
-            }            
-        }
+        //        Assert.Same(error.Exception, proxy.Exception);
+        //    }            
+        //}
 
-        [Fact]
-        public void Constructor_ValueAsErrorArgument_ShouldSetMessageProperty()
-        {
-            var expectations = Expectations.GetExceptionMessages();
+        //[Fact]
+        //public void Constructor_ValueAsErrorArgument_ShouldSetMessageProperty()
+        //{
+        //    var expectations = Expectations.GetExceptionMessages();
 
-            foreach (var e in expectations)
-            {
-                var error = ErrorFactory.Create(e);
+        //    foreach (var e in expectations)
+        //    {
+        //        var error = ErrorFactory.Create(e);
 
-                var proxy = new CompositionErrorDebuggerProxy(error);
+        //        var proxy = new CompositionErrorDebuggerProxy(error);
 
-                Assert.Same(error.Description, proxy.Description);
-            }
-        }
+        //        Assert.Same(error.Description, proxy.Description);
+        //    }
+        //}
 
-        [Fact]
-        public void Constructor_ValueAsErrorArgument_ShouldSetElementProperty()
-        {
-            var expectations = Expectations.GetCompositionElementsWithNull();
+        //[Fact]
+        //public void Constructor_ValueAsErrorArgument_ShouldSetElementProperty()
+        //{
+        //    var expectations = Expectations.GetCompositionElementsWithNull();
 
-            foreach (var e in expectations)
-            {
-                var error = ErrorFactory.Create(e);
+        //    foreach (var e in expectations)
+        //    {
+        //        var error = ErrorFactory.Create(e);
 
-                var proxy = new CompositionErrorDebuggerProxy(error);
+        //        var proxy = new CompositionErrorDebuggerProxy(error);
 
-                Assert.Same(error.Element, proxy.Element);
-            }
-        }
-
+        //        Assert.Same(error.Element, proxy.Element);
+        //    }
+        //}
    }
 }
