@@ -21,11 +21,12 @@ namespace System.Buffers
         public System.Memory<T> GetMemory(int sizeHint = 0) { throw null; }
         public System.Span<T> GetSpan(int sizeHint = 0) { throw null; }
     }
-    public abstract class ArrayPool<T>
+    public abstract partial class ArrayPool<T>
     {
-        public static ArrayPool<T> Shared { get { throw null; } }
-        public static ArrayPool<T> Create() { throw null; }
-        public static ArrayPool<T> Create(int maxArrayLength, int maxArraysPerBucket) { throw null; }
+        protected ArrayPool() { }
+        public static System.Buffers.ArrayPool<T> Shared { get { throw null; } }
+        public static System.Buffers.ArrayPool<T> Create() { throw null; }
+        public static System.Buffers.ArrayPool<T> Create(int maxArrayLength, int maxArraysPerBucket) { throw null; }
         public abstract T[] Rent(int minimumLength);
         public abstract void Return(T[] array, bool clearArray = false);
     }
