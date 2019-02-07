@@ -364,7 +364,7 @@ namespace System.Reflection
                 foreach (MethodInfo mi in iface.GetRuntimeMethods())
                 {
                     // Skip regular/non-virtual instance methods, static methods, and methods that cannot be overriden
-                    // (methods that cannot be overriden includes default implementation of other interface methods).
+                    // ("methods that cannot be overriden" includes default implementation of other interface methods).
                     if (!mi.IsVirtual || mi.IsFinal)
                         continue;
 
