@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.Internal;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -112,8 +112,8 @@ namespace System.ComponentModel.Composition.Hosting
                     atomicComposition.AddRevertAction(() => compositionLockHolder.Dispose());
                 }
 
-                var partManager = GetPartManager(part, true);
-                var result = TryPreviewImportsStateMachine(partManager, part, atomicComposition);
+                PartManager partManager = GetPartManager(part, true);
+                CompositionResult result = TryPreviewImportsStateMachine(partManager, part, atomicComposition);
                 result.ThrowOnErrors(atomicComposition);
 
                 StartSatisfyingImports(partManager, atomicComposition);
@@ -169,7 +169,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             using (_lock.LockComposition())
             {
-                var result = TrySatisfyImports(partManager, part, true);
+                CompositionResult result = TrySatisfyImports(partManager, part, true);
                 result.ThrowOnErrors(); // throw CompositionException not ChangeRejectedException
             }
         }
@@ -206,7 +206,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             using (_lock.LockComposition())
             {
-                var result = TrySatisfyImports(partManager, part, false);
+                CompositionResult result = TrySatisfyImports(partManager, part, false);
                 result.ThrowOnErrors(); // throw CompositionException not ChangeRejectedException
             }
         }
@@ -291,7 +291,7 @@ namespace System.ComponentModel.Composition.Hosting
         private CompositionResult TryPreviewImportsStateMachine(PartManager partManager,
             ComposablePart part, AtomicComposition atomicComposition)
         {
-            var result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.SucceededResult;
 
             if (partManager.State == ImportState.ImportsPreviewing)
             {
@@ -305,7 +305,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 partManager.State = ImportState.ImportsPreviewing;
 
-                var requiredImports = part.ImportDefinitions.Where(IsRequiredImportForPreview);
+                IEnumerable<ImportDefinition> requiredImports = part.ImportDefinitions.Where(IsRequiredImportForPreview);
 
                 // If this atomicComposition gets rolledback for any reason we need to reset our state
                 atomicComposition.AddRevertActionAllowNull(() => partManager.State = ImportState.NoImportsSatisfied);
@@ -327,11 +327,11 @@ namespace System.ComponentModel.Composition.Hosting
 
         private CompositionResult TrySatisfyImportsStateMachine(PartManager partManager, ComposablePart part)
         {
-            var result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.SucceededResult;
 
             while (partManager.State < ImportState.Composed)
             {
-                var previousState = partManager.State;
+                ImportState previousState = partManager.State;
 
                 switch (partManager.State)
                 {
@@ -342,7 +342,7 @@ namespace System.ComponentModel.Composition.Hosting
                         {
                             partManager.State = ImportState.PreExportImportsSatisfying;
 
-                            var prereqImports = part.ImportDefinitions.Where(import => import.IsPrerequisite);
+                            IEnumerable<ImportDefinition> prereqImports = part.ImportDefinitions.Where(import => import.IsPrerequisite);
                             result = result.MergeResult(
                                 TrySatisfyImportSubset(partManager, prereqImports, null));
 
@@ -353,7 +353,7 @@ namespace System.ComponentModel.Composition.Hosting
                         {
                             partManager.State = ImportState.PostExportImportsSatisfying;
 
-                            var requiredImports = part.ImportDefinitions.Where(import => !import.IsPrerequisite);
+                            IEnumerable<ImportDefinition> requiredImports = part.ImportDefinitions.Where(import => !import.IsPrerequisite);
 
                             result = result.MergeResult(
                                 TrySatisfyImportSubset(partManager, requiredImports, null));
@@ -414,7 +414,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 throw new ArgumentNullException(nameof(part));
             }
-            var result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.SucceededResult;
 
             // get out if the part is already composed
             if (partManager.State == ImportState.Composed)
@@ -455,10 +455,10 @@ namespace System.ComponentModel.Composition.Hosting
         {
             CompositionResult result = CompositionResult.SucceededResult;
 
-            var part = partManager.Part;
+            ComposablePart part = partManager.Part;
             foreach (ImportDefinition import in imports)
             {
-                var exports = partManager.GetSavedImport(import);
+                Export[] exports = partManager.GetSavedImport(import);
 
                 if (exports == null)
                 {
@@ -499,8 +499,7 @@ namespace System.ComponentModel.Composition.Hosting
             // index
             if (atomicComposition != null)
             {
-                EngineContext engineContext;
-                if (atomicComposition.TryGetValue(this, out engineContext))
+                if (atomicComposition.TryGetValue(this, out EngineContext engineContext))
                 {
                     // always added the new part managers to see if they will also be 
                     // affected by these changes
@@ -509,9 +508,9 @@ namespace System.ComponentModel.Composition.Hosting
                 }
             }
 
-            var changedExports = e.AddedExports.ConcatAllowingNull(e.RemovedExports);
+            IEnumerable<ExportDefinition> changedExports = e.AddedExports.ConcatAllowingNull(e.RemovedExports);
 
-            foreach (var partManager in affectedParts)
+            foreach (PartManager partManager in affectedParts)
             {
                 result = result.MergeResult(TryRecomposeImports(partManager, changedExports, atomicComposition));
             }
@@ -522,7 +521,7 @@ namespace System.ComponentModel.Composition.Hosting
         private CompositionResult TryRecomposeImports(PartManager partManager,
             IEnumerable<ExportDefinition> changedExports, AtomicComposition atomicComposition)
         {
-            var result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.SucceededResult;
 
             switch (partManager.State)
             {
@@ -538,11 +537,11 @@ namespace System.ComponentModel.Composition.Hosting
                     }
             }
 
-            var affectedImports = RecompositionManager.GetAffectedImports(partManager.Part, changedExports);
+            IEnumerable<ImportDefinition> affectedImports = RecompositionManager.GetAffectedImports(partManager.Part, changedExports);
             bool partComposed = (partManager.State == ImportState.Composed);
 
             bool recomposedImport = false;
-            foreach (var import in affectedImports)
+            foreach (ImportDefinition import in affectedImports)
             {
                 result = result.MergeResult(
                     TryRecomposeImport(partManager, partComposed, import, atomicComposition));
@@ -578,12 +577,12 @@ namespace System.ComponentModel.Composition.Hosting
 
             // During recomposition you must always requery with the new atomicComposition you cannot use any
             // cached value in the part manager
-            var exportsResult = TryGetExports(_sourceProvider, partManager.Part, import, atomicComposition);
+            CompositionResult<IEnumerable<Export>> exportsResult = TryGetExports(_sourceProvider, partManager.Part, import, atomicComposition);
             if (!exportsResult.Succeeded)
             {
                 return exportsResult.ToResult();
             }
-            var exports = exportsResult.Value.AsArray();
+            Export[] exports = exportsResult.Value.AsArray();
 
             if (partComposed)
             {

@@ -11,7 +11,6 @@ namespace System.ComponentModel.Composition.ReflectionModel
 {
     public struct LazyMemberInfo
     {
-        private readonly MemberTypes _memberType;
         private MemberInfo[] _accessors;
         private readonly Func<MemberInfo[]> _accessorsCreator;
 
@@ -21,9 +20,9 @@ namespace System.ComponentModel.Composition.ReflectionModel
             EnsureSupportedMemberType(member.MemberType, nameof(member));
 
             _accessorsCreator = null;
-            _memberType = member.MemberType;
+            MemberType = member.MemberType;
             
-            switch(_memberType)
+            switch(MemberType)
             {
                 case MemberTypes.Property:
                     PropertyInfo property = (PropertyInfo)member;
@@ -47,14 +46,13 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             EnsureSupportedMemberType(memberType, nameof(memberType));
             Requires.NotNull(accessors, nameof(accessors));
-            
-            string errorMessage;
-            if (!LazyMemberInfo.AreAccessorsValid(memberType, accessors, out errorMessage))
+
+            if (!AreAccessorsValid(memberType, accessors, out string errorMessage))
             {
                 throw new ArgumentException(errorMessage, nameof(accessors));
             }
 
-            _memberType = memberType;
+            MemberType = memberType;
             _accessors = accessors;
             _accessorsCreator = null;
         }
@@ -64,15 +62,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
             EnsureSupportedMemberType(memberType, nameof(memberType));
             Requires.NotNull(accessorsCreator, nameof(accessorsCreator));
 
-            _memberType = memberType;
+            MemberType = memberType;
             _accessors = null;
             _accessorsCreator = accessorsCreator;
         }
 
-        public MemberTypes MemberType
-        {
-            get { return _memberType; }
-        }
+        public MemberTypes MemberType { get; }
 
         public MemberInfo[] GetAccessors()
         {
@@ -80,8 +75,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             {
                 MemberInfo[] accessors = _accessorsCreator.Invoke();
 
-                string errorMessage;
-                if (!LazyMemberInfo.AreAccessorsValid(MemberType, accessors, out errorMessage))
+                if (!AreAccessorsValid(MemberType, accessors, out string errorMessage))
                 {
                     throw new InvalidOperationException(errorMessage);
                 }
@@ -113,7 +107,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             LazyMemberInfo that = (LazyMemberInfo)obj;
 
             // Difefrent member types mean different members
-            if (_memberType != that._memberType)
+            if (MemberType != that.MemberType)
             {
                 return false;
             }
@@ -144,7 +138,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private static void EnsureSupportedMemberType(MemberTypes memberType, string argument)
         {
             MemberTypes supportedTypes = MemberTypes.TypeInfo | MemberTypes.NestedType | MemberTypes.Constructor | MemberTypes.Field | MemberTypes.Method | MemberTypes.Property | MemberTypes.Event;
-            Requires.IsInMembertypeSet(memberType, argument, supportedTypes);
+            if ((memberType & supportedTypes) != memberType || (memberType & (memberType - 1)) != 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_InvalidEnumInSet, argument, memberType, supportedTypes.ToString()), argument);
+            }
         }
 
         private static bool AreAccessorsValid(MemberTypes memberType, MemberInfo[] accessors, out string errorMessage)

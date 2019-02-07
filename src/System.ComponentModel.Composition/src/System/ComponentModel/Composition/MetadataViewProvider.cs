@@ -88,7 +88,7 @@ namespace System.ComponentModel.Composition
                         {
                             throw new Exception(SR.Diagnostic_InternalExceptionMessage);
                         }
-                        return (TMetadataView)proxyType.SafeCreateInstance(metadata);
+                        return (TMetadataView)Activator.CreateInstance(proxyType, metadata);
                     }
                 }
                 catch (MissingMethodException ex)

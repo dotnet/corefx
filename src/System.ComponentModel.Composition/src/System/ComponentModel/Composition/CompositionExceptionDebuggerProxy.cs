@@ -2,11 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-
 using Microsoft.Internal;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition
 {
@@ -28,25 +27,19 @@ namespace System.ComponentModel.Composition
                 var errors = new List<Exception>();
 
                 // In here return a collection of all of the exceptions in the Errors collection
-                foreach (var error in _exception.Errors)
+                foreach (CompositionError error in _exception.Errors)
                 {
                     if (error.Exception != null)
                     {
                         errors.Add(error.Exception);
                     }
                 }
-                return errors.ToReadOnlyCollection<Exception>();
+                return errors.ToReadOnlyCollection();
             }
         }
 
-        public string Message
-        {
-            get { return _exception.Message; }
-        }
+        public string Message => _exception.Message;
 
-        public ReadOnlyCollection<Exception> RootCauses
-        {
-            get { return _exception.RootCauses; }
-        }
+        public ReadOnlyCollection<Exception> RootCauses => _exception.RootCauses;
     }
 }

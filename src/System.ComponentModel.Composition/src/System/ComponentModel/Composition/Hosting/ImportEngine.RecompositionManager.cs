@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Linq;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -57,7 +57,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 // This could be more efficient still if the export definitions were indexed by contract name,
                 // only worth revisiting if we need to squeeze more performance out of recomposition
-                foreach (var export in changedExports)
+                foreach (ExportDefinition export in changedExports)
                 {
                     if (import.IsConstraintSatisfiedBy(export))
                     {
@@ -70,13 +70,12 @@ namespace System.ComponentModel.Composition.Hosting
 
             public IEnumerable<PartManager> GetPartsImporting(string contractName)
             {
-                WeakReferenceCollection<PartManager> partManagerList;
-                if (!_partManagerIndex.TryGetValue(contractName, out partManagerList))
+                if (_partManagerIndex.TryGetValue(contractName, out WeakReferenceCollection<PartManager> partManagerList))
                 {
-                    return Enumerable.Empty<PartManager>();
+                    return partManagerList.AliveItemsToList();
                 }
 
-                return partManagerList.AliveItemsToList();
+                return Enumerable.Empty<PartManager>();
             }
 
             private void AddIndexEntries(PartManager partManager)
@@ -101,11 +100,10 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 foreach (string contractName in partManager.GetImportedContractNames())
                 {
-                    WeakReferenceCollection<PartManager> indexEntries;
-                    if (_partManagerIndex.TryGetValue(contractName, out indexEntries))
+                    if (_partManagerIndex.TryGetValue(contractName, out WeakReferenceCollection<PartManager> indexEntries))
                     {
                         indexEntries.Remove(partManager);
-                        var aliveItems = indexEntries.AliveItemsToList();
+                        List<PartManager> aliveItems = indexEntries.AliveItemsToList();
 
                         if (aliveItems.Count == 0)
                         {
@@ -117,10 +115,10 @@ namespace System.ComponentModel.Composition.Hosting
 
             private void UpdateImportIndex()
             {
-                var partsToIndex = _partsToIndex.AliveItemsToList();
+                List<PartManager> partsToIndex = _partsToIndex.AliveItemsToList();
                 _partsToIndex.Clear();
 
-                var partsToUnindex = _partsToUnindex.AliveItemsToList();
+                List<PartManager> partsToUnindex = _partsToUnindex.AliveItemsToList();
                 _partsToUnindex.Clear();
 
                 if (partsToIndex.Count == 0 && partsToUnindex.Count == 0)
@@ -128,7 +126,7 @@ namespace System.ComponentModel.Composition.Hosting
                     return;
                 }
 
-                foreach (var partManager in partsToIndex)
+                foreach (PartManager partManager in partsToIndex)
                 {
                     var index = partsToUnindex.IndexOf(partManager);
 
@@ -143,7 +141,7 @@ namespace System.ComponentModel.Composition.Hosting
                     }
                 }
 
-                foreach (var partManager in partsToUnindex)
+                foreach (PartManager partManager in partsToUnindex)
                 {
                     if (partManager != null)
                     {

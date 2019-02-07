@@ -64,7 +64,10 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public AggregateCatalog(IEnumerable<ComposablePartCatalog> catalogs)
         {
-            Requires.NullOrNotNullElements(catalogs, nameof(catalogs));
+            if (catalogs != null && !Contract.ForAll(catalogs, (catalog) => catalog != null))
+            {
+                throw ExceptionBuilder.CreateContainsNullElement(nameof(catalogs));
+            }
 
             _catalogs = new ComposablePartCatalogCollection(catalogs, OnChanged, OnChanging);
         }
@@ -132,7 +135,7 @@ namespace System.ComponentModel.Composition.Hosting
             foreach (var catalog in _catalogs)
             {
                 var catalogExports = catalog.GetExports(definition);
-                if (catalogExports != ComposablePartCatalog._EmptyExportsList)
+                if (catalogExports != ComposablePartCatalog.s_emptyExportsList)
                 {
                     // ideally this is is the case we will always hit
                     if (result == null)
@@ -151,7 +154,7 @@ namespace System.ComponentModel.Composition.Hosting
                     }
                 }
             }
-            return result ?? ComposablePartCatalog._EmptyExportsList;
+            return result ?? ComposablePartCatalog.s_emptyExportsList;
         }
 
         /// <summary>

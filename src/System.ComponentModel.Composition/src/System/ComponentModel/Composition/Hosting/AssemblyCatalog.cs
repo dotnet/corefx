@@ -75,7 +75,15 @@ namespace System.ComponentModel.Composition.Hosting
         /// </remarks>
         public AssemblyCatalog(string codeBase)
         {
-            Requires.NotNullOrEmpty(codeBase, nameof(codeBase));
+            if (codeBase == null)
+            {
+                throw new ArgumentNullException(nameof(codeBase));
+            }
+
+            if (codeBase.Length == 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, nameof(codeBase)), nameof(codeBase));
+            }
 
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
             _definitionOrigin = this;
@@ -131,7 +139,16 @@ namespace System.ComponentModel.Composition.Hosting
         /// </remarks>
         public AssemblyCatalog(string codeBase, ReflectionContext reflectionContext)
         {
-            Requires.NotNullOrEmpty(codeBase, nameof(codeBase));
+            if (codeBase == null)
+            {
+                throw new ArgumentNullException(nameof(codeBase));
+            }
+
+            if (codeBase.Length == 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, nameof(codeBase)), nameof(codeBase));
+            }
+
             Requires.NotNull(reflectionContext, nameof(reflectionContext));
 
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
@@ -188,7 +205,16 @@ namespace System.ComponentModel.Composition.Hosting
         /// </remarks>
         public AssemblyCatalog(string codeBase, ICompositionElement definitionOrigin)
         {
-            Requires.NotNullOrEmpty(codeBase, nameof(codeBase));
+            if (codeBase == null)
+            {
+                throw new ArgumentNullException(nameof(codeBase));
+            }
+
+            if (codeBase.Length == 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, nameof(codeBase)), nameof(codeBase));
+            }
+
             Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
@@ -252,7 +278,16 @@ namespace System.ComponentModel.Composition.Hosting
         /// </remarks>
         public AssemblyCatalog(string codeBase, ReflectionContext reflectionContext, ICompositionElement definitionOrigin)
         {
-            Requires.NotNullOrEmpty(codeBase, nameof(codeBase));
+            if (codeBase == null)
+            {
+                throw new ArgumentNullException(nameof(codeBase));
+            }
+
+            if (codeBase.Length == 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, nameof(codeBase)), nameof(codeBase));
+            }
+
             Requires.NotNull(reflectionContext, nameof(reflectionContext));
             Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
@@ -556,7 +591,15 @@ namespace System.ComponentModel.Composition.Hosting
 
         private static Assembly LoadAssembly(string codeBase)
         {
-            Requires.NotNullOrEmpty(codeBase, nameof(codeBase));
+            if (codeBase == null)
+            {
+                throw new ArgumentNullException(nameof(codeBase));
+            }
+
+            if (codeBase.Length == 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, nameof(codeBase)), nameof(codeBase));
+            }
 
             AssemblyName assemblyName;
 

@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Linq;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -21,23 +21,16 @@ namespace System.ComponentModel.Composition.Hosting
             private Dictionary<ImportDefinition, List<IDisposable>> _importedDisposableExports;
             private Dictionary<ImportDefinition, Export[]> _importCache;
             private string[] _importedContractNames;
-            private ComposablePart _part;
             private ImportState _state = ImportState.NoImportsSatisfied;
             private readonly ImportEngine _importEngine;
 
             public PartManager(ImportEngine importEngine, ComposablePart part)
             {
                 _importEngine = importEngine;
-                _part = part;
+                Part = part;
             }
 
-            public ComposablePart Part
-            {
-                get
-                {
-                    return _part;
-                }
-            }
+            public ComposablePart Part { get; }
 
             public ImportState State
             {
@@ -99,7 +92,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (atomicComposition != null)
                 {
-                    var savedExports = GetSavedImport(import);
+                    Export[] savedExports = GetSavedImport(import);
 
                     // Add a revert action to revert the stored exports
                     // in the case that this atomicComposition gets rolled back.
@@ -151,10 +144,9 @@ namespace System.ComponentModel.Composition.Hosting
                 // Determine if there are any new disposable exports, optimizing for the most
                 // likely case, which is that there aren't any
                 List<IDisposable> disposableExports = null;
-                foreach (var export in exports)
+                foreach (Export export in exports)
                 {
-                    IDisposable disposableExport = export as IDisposable;
-                    if (disposableExport != null)
+                    if (export is IDisposable disposableExport)
                     {
                         if (disposableExports == null)
                         {
@@ -165,9 +157,8 @@ namespace System.ComponentModel.Composition.Hosting
                 }
 
                 // Dispose any existing references previously set on this import
-                List<IDisposable> oldDisposableExports = null;
                 if (_importedDisposableExports != null &&
-                    _importedDisposableExports.TryGetValue(import, out oldDisposableExports))
+                    _importedDisposableExports.TryGetValue(import, out List<IDisposable> oldDisposableExports))
                 {
                     oldDisposableExports.ForEach(disposable => disposable.Dispose());
 

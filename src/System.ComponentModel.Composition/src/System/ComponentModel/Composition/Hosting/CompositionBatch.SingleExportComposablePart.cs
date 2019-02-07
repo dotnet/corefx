@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.Internal;
 
@@ -56,7 +57,11 @@ namespace System.ComponentModel.Composition.Hosting
             public override void SetImport(ImportDefinition definition, IEnumerable<Export> exports)
             {
                 Requires.NotNull(definition, nameof(definition));
-                Requires.NotNullOrNullElements(exports, nameof(exports));
+
+                if (exports == null || !Contract.ForAll(exports, (export) => export != null))
+                {
+                    throw ExceptionBuilder.CreateContainsNullElement(nameof(exports));
+                }
 
                 throw ExceptionBuilder.CreateImportDefinitionNotOnThisComposablePart(nameof(definition));
             }

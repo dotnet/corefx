@@ -788,7 +788,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             if (metadataViewType == null)
             {
-                metadataViewType = ExportServices.DefaultMetadataViewType;
+                metadataViewType = ExportServices.s_defaultMetadataViewType;
             }
 
             if (!MetadataViewProvider.IsViewTypeValid(metadataViewType))

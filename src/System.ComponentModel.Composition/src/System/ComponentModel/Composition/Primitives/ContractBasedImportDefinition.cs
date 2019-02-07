@@ -166,7 +166,15 @@ namespace System.ComponentModel.Composition.Primitives
             ImportCardinality cardinality, bool isRecomposable, bool isPrerequisite, CreationPolicy requiredCreationPolicy, IDictionary<string, object> metadata)
             : base(contractName, cardinality, isRecomposable, isPrerequisite, metadata)
         {
-            Requires.NotNullOrEmpty(contractName, nameof(contractName));
+            if (contractName == null)
+            {
+                throw new ArgumentNullException(contractName);
+            }
+
+            if (contractName.Length == 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, contractName), contractName);
+            }
 
             _requiredTypeIdentity = requiredTypeIdentity;
 

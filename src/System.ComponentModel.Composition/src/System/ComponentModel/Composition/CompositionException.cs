@@ -2,19 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using Microsoft.Internal;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition
 {
-
     /// <summary>
     ///     The exception that is thrown when one or more errors occur during composition.
     /// </summary>
@@ -22,14 +22,10 @@ namespace System.ComponentModel.Composition
     [DebuggerDisplay("{Message}")]
     public class CompositionException : Exception
     {
-        private const string ErrorsKey = "Errors";
-        private ReadOnlyCollection<CompositionError> _errors;
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="CompositionException"/> class.
         /// </summary>
-        public CompositionException()
-                : this((string)null, (Exception)null, (IEnumerable<CompositionError>)null)
+        public CompositionException() : this(null, null, null)
         {
         }
 
@@ -38,12 +34,11 @@ namespace System.ComponentModel.Composition
         ///     with the specified error message.
         /// </summary>
         /// <param name="message">
-        ///     A <see cref="String"/> containing a message that describes the 
+        ///     A <see cref="string"/> containing a message that describes the 
         ///     <see cref="CompositionException"/>; or <see langword="null"/> to set
         ///     the <see cref="Exception.Message"/> property to its default value.
         /// </param>
-        public CompositionException(string message)
-            : this(message, (Exception)null, (IEnumerable<CompositionError>)null)
+        public CompositionException(string message) : this(message, null, null)
         {
         }
 
@@ -53,7 +48,7 @@ namespace System.ComponentModel.Composition
         ///     exception.
         /// </summary>
         /// <param name="message">
-        ///     A <see cref="String"/> containing a message that describes the 
+        ///     A <see cref="string"/> containing a message that describes the 
         ///     <see cref="CompositionException"/>; or <see langword="null"/> to set
         ///     the <see cref="Exception.Message"/> property to its default value.
         /// </param>
@@ -62,13 +57,11 @@ namespace System.ComponentModel.Composition
         ///     <see cref="ComposablePartException"/>; or <see langword="null"/> to set
         ///     the <see cref="Exception.InnerException"/> property to <see langword="null"/>.
         /// </param>
-        public CompositionException(string message, Exception innerException)
-            : this(message, innerException, (IEnumerable<CompositionError>)null)
+        public CompositionException(string message, Exception innerException) : this(message, innerException, null)
         {
         }
 
-        internal CompositionException(CompositionError error)
-            : this(new CompositionError[] { error })
+        internal CompositionException(CompositionError error) : this(new CompositionError[] { error })
         {
         }
 
@@ -85,16 +78,19 @@ namespace System.ComponentModel.Composition
         /// <exception cref="ArgumentException">
         ///     <paramref name="errors"/> contains an element that is <see langword="null"/>.
         /// </exception>
-        public CompositionException(IEnumerable<CompositionError> errors)
-            : this((string)null, (Exception)null, errors)
+        public CompositionException(IEnumerable<CompositionError> errors) : this(null, null, errors)
         {
         }
 
         internal CompositionException(string message, Exception innerException, IEnumerable<CompositionError> errors)
                     : base(message, innerException)
         {
-            Requires.NullOrNotNullElements(errors, nameof(errors));
-            _errors = new ReadOnlyCollection<CompositionError>(errors == null ? Array.Empty<CompositionError>() : errors.ToArray<CompositionError>());
+            if (errors != null && !Contract.ForAll(errors, (error) => error != null))
+            {
+                throw ExceptionBuilder.CreateContainsNullElement(nameof(errors));
+            }
+
+            Errors = new ReadOnlyCollection<CompositionError>(errors == null ? Array.Empty<CompositionError>() : errors.ToArray());
         }
 
         /// <summary>
@@ -105,16 +101,13 @@ namespace System.ComponentModel.Composition
         ///     representing the errors that are the cause of the 
         ///     <see cref="CompositionException"/>.
         /// </value>
-        public ReadOnlyCollection<CompositionError> Errors
-        {
-            get { return _errors; }
-        }
+        public ReadOnlyCollection<CompositionError> Errors { get; }
 
         /// <summary>
         ///     Gets a message that describes the exception.
         /// </summary>
         /// <value>
-        ///     A <see cref="String"/> containing a message that describes the 
+        ///     A <see cref="string"/> containing a message that describes the 
         ///     <see cref="CompositionException"/>.
         /// </value>
         public override string Message
@@ -140,12 +133,11 @@ namespace System.ComponentModel.Composition
                 var errors = new List<Exception>();
 
                 // In here return a collection of all of the exceptions in the Errors collection
-                foreach (var error in Errors)
+                foreach (CompositionError error in Errors)
                 {
                     if (error.Exception != null)
                     {
-                        var ce = error.Exception as CompositionException;
-                        if (ce != null)
+                        if (error.Exception is CompositionException ce)
                         {
                             if (ce.RootCauses.Count > 0)
                             {
@@ -156,7 +148,7 @@ namespace System.ComponentModel.Composition
                         errors.Add(error.Exception);
                     }
                 }
-                return errors.ToReadOnlyCollection<Exception>();
+                return errors.ToReadOnlyCollection();
             }
         }
 
@@ -265,7 +257,7 @@ namespace System.ComponentModel.Composition
         {
             List<IEnumerable<CompositionError>> paths = new List<IEnumerable<CompositionError>>();
 
-            VisitContext context = new VisitContext();
+            var context = new VisitContext();
             context.Path = new Stack<CompositionError>();
             context.LeafVisitor = path =>
             {
@@ -311,8 +303,7 @@ namespace System.ComponentModel.Composition
 
         private static void VisitException(Exception exception, VisitContext context)
         {
-            CompositionException composition = exception as CompositionException;
-            if (composition != null)
+            if (exception is CompositionException composition)
             {
                 VisitCompositionException(composition, context);
             }

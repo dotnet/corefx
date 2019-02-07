@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.ObjectModel;
 using Microsoft.Internal;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.Primitives
 {
@@ -21,13 +21,10 @@ namespace System.ComponentModel.Composition.Primitives
             _catalog = catalog;
         }
 
-        public ReadOnlyCollection<ComposablePartDefinition> Parts
-        {
-            // NOTE: This shouldn't be cached, so that on every query of
-            // the current value of the underlying catalog is respected.
-            // We use ReadOnlyCollection as arrays do not have the 
-            // appropriate debugger display attributes applied to them.
-            get { return _catalog.Parts.ToReadOnlyCollection(); }
-        }
+        // NOTE: This shouldn't be cached, so that on every query of
+        // the current value of the underlying catalog is respected.
+        // We use ReadOnlyCollection as arrays do not have the 
+        // appropriate debugger display attributes applied to them.
+        public ReadOnlyCollection<ComposablePartDefinition> Parts => _catalog.Parts.ToReadOnlyCollection();
     }
 }

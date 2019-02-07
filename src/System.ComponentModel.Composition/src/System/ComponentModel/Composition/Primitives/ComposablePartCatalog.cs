@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -9,7 +10,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using Microsoft.Internal;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.Primitives
 {
@@ -26,7 +26,7 @@ namespace System.ComponentModel.Composition.Primitives
         private bool _isDisposed;
         private volatile IQueryable<ComposablePartDefinition> _queryableParts = null;
 
-        internal static readonly List<Tuple<ComposablePartDefinition, ExportDefinition>> _EmptyExportsList = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
+        internal static readonly List<Tuple<ComposablePartDefinition, ExportDefinition>> s_emptyExportsList = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ComposablePartCatalog"/> class.
@@ -50,7 +50,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///         Overriders of this property should never return <see langword="null"/>.
         ///     </note>
         /// </remarks>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Never)]
+        [EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         public virtual IQueryable<ComposablePartDefinition> Parts 
         {
             get
@@ -59,7 +59,7 @@ namespace System.ComponentModel.Composition.Primitives
                 if(_queryableParts == null)
                 {
                     // Guarantee one time only set _queryableParts
-                    var p = this.AsQueryable();
+                    IQueryable<ComposablePartDefinition> p = this.AsQueryable();
                     Interlocked.CompareExchange(ref _queryableParts, p, null);
                     if (_queryableParts == null)
                     {
@@ -105,22 +105,19 @@ namespace System.ComponentModel.Composition.Primitives
             Contract.Ensures(Contract.Result<IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>>>() != null);
 
             List<Tuple<ComposablePartDefinition, ExportDefinition>> exports = null;
-            var candidateParts = GetCandidateParts(definition);
+            IEnumerable<ComposablePartDefinition> candidateParts = GetCandidateParts(definition);
             if (candidateParts != null)
             {
-                foreach (var part in candidateParts)
+                foreach (ComposablePartDefinition part in candidateParts)
                 {
-                    Tuple<ComposablePartDefinition, ExportDefinition> singleMatch;
-                    IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> multipleMatches;
-
-                    if (part.TryGetExports(definition, out singleMatch, out multipleMatches))
+                    if (part.TryGetExports(definition, out Tuple<ComposablePartDefinition, ExportDefinition> singleMatch, out IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> multipleMatches))
                     {
                         exports = exports.FastAppendToListAllowNulls(singleMatch, multipleMatches);
                     }
                 }
             }
 
-            return exports ?? _EmptyExportsList;
+            return exports ?? s_emptyExportsList;
         }
 
         internal virtual IEnumerable<ComposablePartDefinition> GetCandidateParts(ImportDefinition definition)
@@ -163,15 +160,15 @@ namespace System.ComponentModel.Composition.Primitives
         //
         public virtual IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
-            var parts = Parts;
-            if(object.ReferenceEquals(parts, _queryableParts))
+            IQueryable<ComposablePartDefinition> parts = Parts;
+            if(ReferenceEquals(parts, _queryableParts))
             {
                 return Enumerable.Empty<ComposablePartDefinition>().GetEnumerator();
             }
             return parts.GetEnumerator();
         }
 
-        Collections.IEnumerator Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }

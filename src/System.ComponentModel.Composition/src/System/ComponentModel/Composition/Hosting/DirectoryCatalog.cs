@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Composition.Diagnostics;
@@ -14,9 +15,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.Internal;
-using Microsoft.Internal.Collections;
-using IOPath = System.IO.Path;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -30,7 +30,6 @@ namespace System.ComponentModel.Composition.Hosting
         private volatile bool _isDisposed = false;
         private string _path;
         private string _fullPath;
-        private string _searchPattern;
         private ReadOnlyCollection<string> _loadedFiles;
         
         private readonly ReflectionContext _reflectionContext = null;
@@ -224,8 +223,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public DirectoryCatalog(string path, string searchPattern)
         {
-            Requires.NotNullOrEmpty(path, nameof(path));
-            Requires.NotNullOrEmpty(searchPattern, nameof(searchPattern));
+            ValidateCtor(path, searchPattern);
 
             _definitionOrigin = this;
             Initialize(path, searchPattern);
@@ -267,8 +265,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public DirectoryCatalog(string path, string searchPattern, ICompositionElement definitionOrigin)
         {
-            Requires.NotNullOrEmpty(path, nameof(path));
-            Requires.NotNullOrEmpty(searchPattern, nameof(searchPattern));
+            ValidateCtor(path, searchPattern);
             Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             _definitionOrigin = definitionOrigin;
@@ -316,8 +313,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public DirectoryCatalog(string path, string searchPattern, ReflectionContext reflectionContext)
         {
-            Requires.NotNullOrEmpty(path, nameof(path));
-            Requires.NotNullOrEmpty(searchPattern, nameof(searchPattern));
+            ValidateCtor(path, searchPattern);
             Requires.NotNull(reflectionContext, nameof(reflectionContext));
 
             _reflectionContext = reflectionContext;
@@ -370,14 +366,36 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public DirectoryCatalog(string path, string searchPattern, ReflectionContext reflectionContext, ICompositionElement definitionOrigin)
         {
-            Requires.NotNullOrEmpty(path, nameof(path));
-            Requires.NotNullOrEmpty(searchPattern, nameof(searchPattern));
+            ValidateCtor(path, searchPattern);
             Requires.NotNull(reflectionContext, nameof(reflectionContext));
             Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
 
             _reflectionContext = reflectionContext;
             _definitionOrigin = definitionOrigin;
             Initialize(path, searchPattern);
+        }
+
+        private static void ValidateCtor(string path, string searchPattern)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            if (path.Length == 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, nameof(path)), nameof(path));
+            }
+
+            if (searchPattern == null)
+            {
+                throw new ArgumentNullException(searchPattern);
+            }
+
+            if (searchPattern.Length == 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, searchPattern), searchPattern);
+            }
         }
 
         /// <summary>
@@ -425,13 +443,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <summary>
         ///   SearchPattern passed into the constructor of <see cref="DirectoryCatalog"/>, or the default *.dll.
         /// </summary>
-        public string SearchPattern
-        {
-            get
-            {
-                return _searchPattern;
-            }
-        }
+        public string SearchPattern { get; private set; }
 
         /// <summary>
         /// Notify when the contents of the Catalog has changed.
@@ -534,11 +546,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </param>
         protected virtual void OnChanged(ComposablePartCatalogChangeEventArgs e)
         {
-            EventHandler<ComposablePartCatalogChangeEventArgs> changedEvent = Changed;
-            if (changedEvent != null)
-            {
-                changedEvent(this, e);
-            }
+            Changed?.Invoke(this, e);
         }
 
         /// <summary>
@@ -549,11 +557,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </param>
         protected virtual void OnChanging(ComposablePartCatalogChangeEventArgs e)
         {
-            EventHandler<ComposablePartCatalogChangeEventArgs> changingEvent = Changing;
-            if (changingEvent != null)
-            {
-                changingEvent(this, e);
-            }
+            Changing?.Invoke(this, e);
         }
 
         /// <summary>
@@ -577,8 +581,6 @@ namespace System.ComponentModel.Composition.Hosting
                 throw new Exception(SR.Diagnostic_InternalExceptionMessage);
             }
 
-            List<Tuple<string, AssemblyCatalog>> catalogsToAdd;
-            List<Tuple<string, AssemblyCatalog>> catalogsToRemove;
             ComposablePartDefinition[] addedDefinitions;
             ComposablePartDefinition[] removedDefinitions;
             object changeReferenceObject;
@@ -595,7 +597,8 @@ namespace System.ComponentModel.Composition.Hosting
                     beforeFiles = _loadedFiles.ToArray();
                 }
 
-                DiffChanges(beforeFiles, afterFiles, out catalogsToAdd, out catalogsToRemove);
+                DiffChanges(beforeFiles, afterFiles, out List<Tuple<string, AssemblyCatalog>> catalogsToAdd,
+                    out List<Tuple<string, AssemblyCatalog>> catalogsToRemove);
 
                 // Don't go any further if there's no work to do
                 if (catalogsToAdd.Count == 0 && catalogsToRemove.Count == 0)
@@ -606,11 +609,11 @@ namespace System.ComponentModel.Composition.Hosting
                 // Notify listeners to give them a preview before completeting the changes
                 addedDefinitions = catalogsToAdd
                     .SelectMany(cat => cat.Item2 as IEnumerable<ComposablePartDefinition>)
-                    .ToArray<ComposablePartDefinition>();
+                    .ToArray();
 
                 removedDefinitions = catalogsToRemove
                     .SelectMany(cat => cat.Item2 as IEnumerable<ComposablePartDefinition>)
-                    .ToArray<ComposablePartDefinition>();
+                    .ToArray();
 
                 using (var atomicComposition = new AtomicComposition())
                 {
@@ -626,13 +629,13 @@ namespace System.ComponentModel.Composition.Hosting
                             continue;
                         }
 
-                        foreach (var catalogToAdd in catalogsToAdd)
+                        foreach (Tuple<string, AssemblyCatalog> catalogToAdd in catalogsToAdd)
                         {
                             _assemblyCatalogs.Add(catalogToAdd.Item1, catalogToAdd.Item2);
                             _catalogCollection.Add(catalogToAdd.Item2);
                         }
 
-                        foreach (var catalogToRemove in catalogsToRemove)
+                        foreach (Tuple<string, AssemblyCatalog> catalogToRemove in catalogsToRemove)
                         {
                             _assemblyCatalogs.Remove(catalogToRemove.Item1);
                             _catalogCollection.Remove(catalogToRemove.Item2);
@@ -657,7 +660,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Returns a string representation of the directory catalog.
         /// </summary>
         /// <returns>
-        ///     A <see cref="String"/> containing the string representation of the <see cref="DirectoryCatalog"/>.
+        ///     A <see cref="string"/> containing the string representation of the <see cref="DirectoryCatalog"/>.
         /// </returns>
         public override string ToString()
         {
@@ -719,8 +722,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 foreach (string file in filesToRemove)
                 {
-                    AssemblyCatalog catalog;
-                    if (_assemblyCatalogs.TryGetValue(file, out catalog))
+                    if (_assemblyCatalogs.TryGetValue(file, out AssemblyCatalog catalog))
                     {
                         catalogsToRemove.Add(new Tuple<string, AssemblyCatalog>(file, catalog));
                     }
@@ -738,13 +740,13 @@ namespace System.ComponentModel.Composition.Hosting
 
         private string[] GetFiles()
         {
-            string[] files = Directory.GetFiles(_fullPath, _searchPattern);
+            string[] files = Directory.GetFiles(_fullPath, SearchPattern);
             return Array.ConvertAll<string, string>(files, (file) => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? file.ToUpperInvariant() : file);
         }
 
         private static string GetFullPath(string path)
         {
-            var fullPath = IOPath.GetFullPath(path);
+            var fullPath = System.IO.Path.GetFullPath(path);
             return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? fullPath.ToUpperInvariant() : fullPath;
         }
 
@@ -752,7 +754,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             _path = path;
             _fullPath = GetFullPath(path);
-            _searchPattern = searchPattern;
+            SearchPattern = searchPattern;
             _assemblyCatalogs = new Dictionary<string, AssemblyCatalog>();
             _catalogCollection = new ComposablePartCatalogCollection(null, null, null);
 
@@ -779,12 +781,12 @@ namespace System.ComponentModel.Composition.Hosting
                 throw ExceptionBuilder.CreateObjectDisposed(this);
             }
         }
-       
+
         /// <summary>
         ///     Gets the display name of the directory catalog.
         /// </summary>
         /// <value>
-        ///     A <see cref="String"/> containing a human-readable display name of the <see cref="DirectoryCatalog"/>.
+        ///     A <see cref="string"/> containing a human-readable display name of the <see cref="DirectoryCatalog"/>.
         /// </value>
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         string ICompositionElement.DisplayName

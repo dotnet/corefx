@@ -8,7 +8,6 @@ using System.ComponentModel.Composition.Primitives;
 using System.Linq;
 using System.Threading;
 using Microsoft.Internal;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -309,11 +308,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public void OnChanged(object sender, ComposablePartCatalogChangeEventArgs e)
         {
-            var changedEvent = Changed;
-            if (changedEvent != null)
-            {
-                changedEvent(sender, e);
-            }
+            Changed?.Invoke(sender, e);
         }
 
         private void RaiseChangingEvent(
@@ -333,11 +328,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public void OnChanging(object sender, ComposablePartCatalogChangeEventArgs e)
         {
-            var changingEvent = Changing;
-            if (changingEvent != null)
-            {
-                changingEvent(sender, e);
-            }
+            Changing?.Invoke(sender, e);
         }
 
         private void OnContainedCatalogChanged(object sender, ComposablePartCatalogChangeEventArgs e)
@@ -362,8 +353,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void SubscribeToCatalogNotifications(ComposablePartCatalog catalog)
         {
-            INotifyComposablePartCatalogChanged notifyCatalog = catalog as INotifyComposablePartCatalogChanged;
-            if (notifyCatalog != null)
+            if (catalog is INotifyComposablePartCatalogChanged notifyCatalog)
             {
                 notifyCatalog.Changed += OnContainedCatalogChanged;
                 notifyCatalog.Changing += OnContainedCatalogChanging;
@@ -372,7 +362,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void SubscribeToCatalogNotifications(IEnumerable<ComposablePartCatalog> catalogs)
         {
-            foreach (var catalog in catalogs)
+            foreach (ComposablePartCatalog catalog in catalogs)
             {
                 SubscribeToCatalogNotifications(catalog);
             }
@@ -380,8 +370,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void UnsubscribeFromCatalogNotifications(ComposablePartCatalog catalog)
         {
-            INotifyComposablePartCatalogChanged notifyCatalog = catalog as INotifyComposablePartCatalogChanged;
-            if (notifyCatalog != null)
+            if (catalog is INotifyComposablePartCatalogChanged notifyCatalog)
             {
                 notifyCatalog.Changed -= OnContainedCatalogChanged;
                 notifyCatalog.Changing -= OnContainedCatalogChanging;
@@ -390,7 +379,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void UnsubscribeFromCatalogNotifications(IEnumerable<ComposablePartCatalog> catalogs)
         {
-            foreach (var catalog in catalogs)
+            foreach (ComposablePartCatalog catalog in catalogs)
             {
                 UnsubscribeFromCatalogNotifications(catalog);
             }

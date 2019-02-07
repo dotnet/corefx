@@ -2,13 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Reflection;
 
-namespace Microsoft.Internal
+namespace System.Reflection
 {
     internal static class ReflectionServices
     {
@@ -89,7 +87,7 @@ namespace Microsoft.Internal
 
         internal static IEnumerable<MethodInfo> GetAllMethods(this Type type)
         {
-            IEnumerable<MethodInfo> declaredMethods = type.GetDeclaredMethods();
+            IEnumerable<MethodInfo> declaredMethods = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
 
             Type baseType = type.BaseType;
             if (baseType.UnderlyingSystemType != typeof(object))
@@ -102,17 +100,9 @@ namespace Microsoft.Internal
             }
         }
 
-        private static IEnumerable<MethodInfo> GetDeclaredMethods(this Type type)
-        {
-            foreach (MethodInfo method in type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
-            {
-                yield return method;
-            }
-        }
-
         public static IEnumerable<FieldInfo> GetAllFields(this Type type)
         {
-            IEnumerable<FieldInfo> declaredFields = type.GetDeclaredFields();
+            IEnumerable<FieldInfo> declaredFields = type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
 
             Type baseType = type.BaseType;
             if (baseType.UnderlyingSystemType != typeof(object))
@@ -122,14 +112,6 @@ namespace Microsoft.Internal
             else
             {
                 return declaredFields;
-            }
-        }
-
-        private static IEnumerable<FieldInfo> GetDeclaredFields(this Type type)
-        {
-            foreach (FieldInfo m in type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
-            {
-                yield return m;
             }
         }
 

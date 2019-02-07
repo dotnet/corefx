@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.AttributedModel;
 using System.ComponentModel.Composition.Primitives;
@@ -14,7 +15,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using Microsoft.Internal;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -175,7 +175,7 @@ namespace System.ComponentModel.Composition.Hosting
         private void InitializeTypeCatalog(IEnumerable<Type> types, ReflectionContext reflectionContext)
         {
             var typesList = new List<Type>();
-            foreach (var type in types)
+            foreach (Type type in types)
             {
                 if (type == null)
                 {
@@ -185,8 +185,8 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ElementReflectionOnlyType, nameof(types)), nameof(types));
                 }
-                var typeInfo = type.GetTypeInfo();
-                var lclType = (reflectionContext != null) ? reflectionContext.MapType(typeInfo) : typeInfo;
+                TypeInfo typeInfo = type.GetTypeInfo();
+                TypeInfo lclType = (reflectionContext != null) ? reflectionContext.MapType(typeInfo) : typeInfo;
 
                 // It is valid for the reflectionContext to delete types by mapping them to null
                 if (lclType != null)
@@ -204,7 +204,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void InitializeTypeCatalog(IEnumerable<Type> types)
         {
-            foreach (var type in types)
+            foreach (Type type in types)
             {
                 if (type == null)
                 {
@@ -228,7 +228,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Gets the display name of the type catalog.
         /// </summary>
         /// <value>
-        ///     A <see cref="String"/> containing a human-readable display name of the <see cref="TypeCatalog"/>.
+        ///     A <see cref="string"/> containing a human-readable display name of the <see cref="TypeCatalog"/>.
         /// </value>
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         string ICompositionElement.DisplayName
@@ -266,7 +266,7 @@ namespace System.ComponentModel.Composition.Hosting
                             var collection = new List<ComposablePartDefinition>();
                             foreach (Type type in _types)
                             {
-                                var definition = AttributedModelDiscovery.CreatePartDefinitionIfDiscoverable(type, _definitionOrigin);
+                                ComposablePartDefinition definition = AttributedModelDiscovery.CreatePartDefinitionIfDiscoverable(type, _definitionOrigin);
                                 if (definition != null)
                                 {
                                     collection.Add(definition);
@@ -312,16 +312,15 @@ namespace System.ComponentModel.Composition.Hosting
                 return null;
             }
 
-            List<ComposablePartDefinition> contractCandidateParts = null;
-            _contractPartIndex.Value.TryGetValue(contractName, out contractCandidateParts);
+            _contractPartIndex.Value.TryGetValue(contractName, out List<ComposablePartDefinition> contractCandidateParts);
             return contractCandidateParts;
         }
 
         private IDictionary<string, List<ComposablePartDefinition>> CreateIndex()
         {
-            Dictionary<string, List<ComposablePartDefinition>> index = new Dictionary<string, List<ComposablePartDefinition>>(StringComparers.ContractName);
+            var index = new Dictionary<string, List<ComposablePartDefinition>>(StringComparers.ContractName);
 
-            foreach (var part in PartsInternal)
+            foreach (ComposablePartDefinition part in PartsInternal)
             {
                 foreach (string contractName in part.ExportDefinitions.Select(export => export.ContractName).Distinct())
                 {
@@ -341,7 +340,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Returns a string representation of the type catalog.
         /// </summary>
         /// <returns>
-        ///     A <see cref="String"/> containing the string representation of the <see cref="TypeCatalog"/>.
+        ///     A <see cref="string"/> containing the string representation of the <see cref="TypeCatalog"/>.
         /// </returns>
         public override string ToString()
         {

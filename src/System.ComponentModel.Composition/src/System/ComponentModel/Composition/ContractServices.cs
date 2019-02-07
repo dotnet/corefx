@@ -5,7 +5,7 @@
 using System;
 using System.ComponentModel.Composition.Primitives;
 
-namespace Microsoft.Internal
+namespace System.ComponentModel.Composition
 {
     internal static class ContractServices
     {
@@ -25,8 +25,7 @@ namespace Microsoft.Internal
             // We couldn't cast see if a delegate works for us.
             if (typeof(Delegate).IsAssignableFrom(contractType))
             {
-                ExportedDelegate exportedDelegate = value as ExportedDelegate;
-                if (exportedDelegate != null)
+                if (value is ExportedDelegate exportedDelegate)
                 {
                     result = exportedDelegate.CreateDelegate(contractType.UnderlyingSystemType);
                     return (result != null);

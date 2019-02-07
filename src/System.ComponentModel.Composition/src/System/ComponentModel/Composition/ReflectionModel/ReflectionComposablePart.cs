@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics.CodeAnalysis;
@@ -9,7 +10,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Internal;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
@@ -390,7 +390,16 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private static void EnsureCardinality(ImportDefinition definition, Export[] exports)
         {
-            Requires.NullOrNotNullElements(exports, nameof(exports));
+            if (exports != null)
+            {
+                foreach (Export export in exports)
+                {
+                    if (export == null)
+                    {
+                        throw ExceptionBuilder.CreateContainsNullElement(nameof(exports));
+                    }
+                }
+            }
 
             ExportCardinalityCheckResult result = ExportServices.CheckCardinality(definition, exports);
 
@@ -418,7 +427,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
             try
             {
-                instance = constructor.SafeInvoke(arguments);
+                instance = constructor.Invoke(arguments);
             }
             catch (TypeInitializationException ex) 
             { 
@@ -470,9 +479,9 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private void UseImportedValues<TImportDefinition>(IEnumerable<TImportDefinition> definitions, Action<ImportingItem, TImportDefinition, object> useImportValue, bool errorIfMissing)
             where TImportDefinition : ImportDefinition
         {
-            var result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.SucceededResult;
 
-            foreach (var definition in definitions)
+            foreach (TImportDefinition definition in definitions)
             {
                 ImportingItem import = GetImportingItemFromDefinition(definition);
 
@@ -526,8 +535,6 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             if (_invokeImportsSatisfied)
             {
-                IPartImportsSatisfiedNotification notify = GetInstanceActivatingIfNeeded() as IPartImportsSatisfiedNotification;
-
                 lock (_lock)
                 {
                     if (!_invokeImportsSatisfied)
@@ -538,7 +545,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     _invokeImportsSatisfied = false;
                 }
 
-                if (notify != null)
+                if (GetInstanceActivatingIfNeeded() is IPartImportsSatisfiedNotification notify)
                 {
                     try
                     {
@@ -601,8 +608,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private static ImportingItem GetImportingItem(ImportDefinition definition)
         {
-            ReflectionImportDefinition reflectionDefinition = definition as ReflectionImportDefinition;
-            if (reflectionDefinition != null)
+            if (definition is ReflectionImportDefinition reflectionDefinition)
             {
                 return reflectionDefinition.ToImportingItem();
             }
@@ -612,8 +618,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private static ExportingMember GetExportingMember(ExportDefinition definition)
         {
-            ReflectionMemberExportDefinition exportDefinition = definition as ReflectionMemberExportDefinition;
-            if (exportDefinition != null)
+            if (definition is ReflectionMemberExportDefinition exportDefinition)
             {
                 return exportDefinition.ToExportingMember();
             }

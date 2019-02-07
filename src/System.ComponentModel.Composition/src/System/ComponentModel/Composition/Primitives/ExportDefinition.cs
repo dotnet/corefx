@@ -54,7 +54,15 @@ namespace System.ComponentModel.Composition.Primitives
         /// </exception>
         public ExportDefinition(string contractName, IDictionary<string, object> metadata)
         {
-            Requires.NotNullOrEmpty(contractName, nameof(contractName));
+            if (contractName == null)
+            {
+                throw new ArgumentNullException(contractName);
+            }
+
+            if (contractName.Length == 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, contractName), contractName);
+            }
 
             _contractName = contractName;
 

@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using Microsoft.Internal;
@@ -32,7 +33,11 @@ namespace System.ComponentModel.Composition.Hosting
         public CompositionScopeDefinition(ComposablePartCatalog catalog, IEnumerable<CompositionScopeDefinition> children)
         {
             Requires.NotNull(catalog, nameof(catalog));
-            Requires.NullOrNotNullElements(children, nameof(children));
+
+            if (children != null && !Contract.ForAll(children, (child) => child != null))
+            {
+                throw ExceptionBuilder.CreateContainsNullElement(nameof(children));
+            }
 
             InitializeCompositionScopeDefinition(catalog, children, null);
         }
@@ -46,8 +51,16 @@ namespace System.ComponentModel.Composition.Hosting
         public CompositionScopeDefinition(ComposablePartCatalog catalog, IEnumerable<CompositionScopeDefinition> children, IEnumerable<ExportDefinition> publicSurface)
         {
             Requires.NotNull(catalog, nameof(catalog));
-            Requires.NullOrNotNullElements(children, nameof(children));
-            Requires.NullOrNotNullElements(publicSurface, nameof(publicSurface));
+
+            if (children != null && !Contract.ForAll(children, (child) => child != null))
+            {
+                throw ExceptionBuilder.CreateContainsNullElement(nameof(children));
+            }
+
+            if (publicSurface != null && !Contract.ForAll(publicSurface, (value) => value != null))
+            {
+                throw ExceptionBuilder.CreateContainsNullElement(nameof(publicSurface));
+            }
 
             InitializeCompositionScopeDefinition(catalog, children, publicSurface);
         }

@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
@@ -24,11 +24,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public ReflectionComposablePartDefinition(IReflectionPartCreationInfo creationInfo)
         {
-            if (creationInfo == null)
-            {
-                throw new ArgumentNullException(nameof(creationInfo));
-            }
-            _creationInfo = creationInfo;
+            _creationInfo = creationInfo ?? throw new ArgumentNullException(nameof(creationInfo));
         }
 
         public Type GetPartType()
@@ -146,8 +142,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         internal override ComposablePartDefinition GetGenericPartDefinition()
         {
-            GenericSpecializationPartCreationInfo genericCreationInfo = _creationInfo as GenericSpecializationPartCreationInfo;
-            if (genericCreationInfo != null)
+            if (_creationInfo is GenericSpecializationPartCreationInfo genericCreationInfo)
             {
                 return genericCreationInfo.OriginalPart;
             }
@@ -164,13 +159,14 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
                 List<Tuple<ComposablePartDefinition, ExportDefinition>> exports = null;
 
-                var genericParameters = (definition.Metadata.Count > 0) ? definition.Metadata.GetValue<IEnumerable<object>>(CompositionConstants.GenericParametersMetadataName) : null;
+                IEnumerable<object> genericParameters = (definition.Metadata.Count > 0) ?
+                    definition.Metadata.GetValue<IEnumerable<object>>(CompositionConstants.GenericParametersMetadataName)
+                    : null;
                 // if and only if generic parameters have been supplied can we attempt to "close" the generic
                 if (genericParameters != null)
                 {
-                    Type[] genericTypeParameters = null;
                     // we only understand types
-                    if (TryGetGenericTypeParameters(genericParameters, out genericTypeParameters))
+                    if (TryGetGenericTypeParameters(genericParameters, out Type[] genericTypeParameters))
                     {
                         HashSet<ComposablePartDefinition> candidates = null;
                         ComposablePartDefinition candidatePart = null;
@@ -192,9 +188,11 @@ namespace System.ComponentModel.Composition.ReflectionModel
                                         }
                                         else
                                         {
-                                            candidates = new HashSet<ComposablePartDefinition>();
-                                            candidates.Add(previousPart);
-                                            candidates.Add(candidatePart);
+                                            candidates = new HashSet<ComposablePartDefinition>
+                                            {
+                                                previousPart,
+                                                candidatePart
+                                            };
                                         }
                                     }
                                     else
@@ -215,9 +213,9 @@ namespace System.ComponentModel.Composition.ReflectionModel
                                 }
                                 if (!alreadyProcessed)
                                 {
-                                    Tuple<ComposablePartDefinition, ExportDefinition> candidateSingleMatch;
-                                    IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> candidateMultipleMatches;
-                                    if (candidatePart.TryGetExports(definition, out candidateSingleMatch, out candidateMultipleMatches))
+                                    if (candidatePart.TryGetExports(definition,
+                                        out Tuple<ComposablePartDefinition, ExportDefinition> candidateSingleMatch,
+                                        out IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> candidateMultipleMatches))
                                     {
                                         exports = exports.FastAppendToListAllowNulls(candidateSingleMatch, candidateMultipleMatches);
                                     }
@@ -252,7 +250,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Tuple<ComposablePartDefinition, ExportDefinition> singleExport = null;
             bool matchesFound = false;
 
-            foreach (var export in ExportDefinitionsInternal)
+            foreach (ExportDefinition export in ExportDefinitionsInternal)
             {
                 if (definition.IsConstraintSatisfiedBy(export))
                 {
@@ -265,8 +263,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
                     {
                         if (multipleExports == null)
                         {
-                            multipleExports = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
-                            multipleExports.Add(singleExport);
+                            multipleExports = new List<Tuple<ComposablePartDefinition, ExportDefinition>>
+                            {
+                                singleExport
+                            };
                         }
                         multipleExports.Add(new Tuple<ComposablePartDefinition, ExportDefinition>(this, export));
                     }
@@ -354,18 +354,14 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             if (_creationInfo.IsIdentityComparison)
             {
-                return object.ReferenceEquals(this, obj);
+                return ReferenceEquals(this, obj);
             }
-            else
+            else if (obj is ReflectionComposablePartDefinition that)
             {
-                ReflectionComposablePartDefinition that = obj as ReflectionComposablePartDefinition;
-                if (that == null)
-                {
-                    return false;
-                }
-
                 return _creationInfo.Equals(that._creationInfo);
             }
+
+            return false;
         }
 
         public override int GetHashCode()

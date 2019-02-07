@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Microsoft.Internal;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -39,8 +39,7 @@ namespace System.ComponentModel.Composition.Hosting
             _filter = (p) => filter.Invoke(p.GetGenericPartDefinition() ?? p);
             _complement = complement;
 
-            INotifyComposablePartCatalogChanged notifyCatalog = _innerCatalog as INotifyComposablePartCatalogChanged;
-            if (notifyCatalog != null)
+            if (_innerCatalog is INotifyComposablePartCatalogChanged notifyCatalog)
             {
                 notifyCatalog.Changed += OnChangedInternal;
                 notifyCatalog.Changing += OnChangingInternal;
@@ -157,7 +156,7 @@ namespace System.ComponentModel.Composition.Hosting
             Requires.NotNull(definition, nameof(definition));
 
             var exports = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
-            foreach(var export in _innerCatalog.GetExports(definition))
+            foreach(Tuple<ComposablePartDefinition, ExportDefinition> export in _innerCatalog.GetExports(definition))
             {
                 if (_filter(export.Item1))
                 {
@@ -173,12 +172,12 @@ namespace System.ComponentModel.Composition.Hosting
         /// </summary>
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changed;
 
-/// <summary>
+        /// <summary>
         /// Notify when the contents of the Catalog is changing.
         /// </summary>
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changing;
 
-/// <summary>
+        /// <summary>
         /// Raises the <see cref="E:Changed"/> event.
         /// </summary>
         /// <param name="e">The <see cref="System.ComponentModel.Composition.Hosting.ComposablePartCatalogChangeEventArgs"/> instance containing the event data.</param>
@@ -206,7 +205,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void OnChangedInternal(object sender, ComposablePartCatalogChangeEventArgs e)
         {
-            var processedArgs = ProcessEventArgs(e);
+            ComposablePartCatalogChangeEventArgs processedArgs = ProcessEventArgs(e);
             if (processedArgs != null)
             {
                 OnChanged(ProcessEventArgs(processedArgs));
@@ -215,7 +214,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void OnChangingInternal(object sender, ComposablePartCatalogChangeEventArgs e)
         {
-            var processedArgs = ProcessEventArgs(e);
+            ComposablePartCatalogChangeEventArgs processedArgs = ProcessEventArgs(e);
             if (processedArgs != null)
             {
                 OnChanging(ProcessEventArgs(processedArgs));

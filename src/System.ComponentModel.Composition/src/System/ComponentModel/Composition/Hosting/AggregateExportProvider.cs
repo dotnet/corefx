@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Primitives;
@@ -9,7 +10,6 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -47,12 +47,7 @@ namespace System.ComponentModel.Composition.Hosting
                 for (int i = 0; i < providers.Length; i++)
                 {
                     ExportProvider provider = providers[i];
-                    if (provider == null)
-                    {
-                        throw ExceptionBuilder.CreateContainsNullElement(nameof(providers));
-                    }
-
-                    copiedProviders[i] = provider;
+                    copiedProviders[i] = provider ?? throw ExceptionBuilder.CreateContainsNullElement(nameof(providers));
 
                     provider.ExportsChanged += OnExportChangedInternal;
                     provider.ExportsChanging += OnExportChangingInternal;
@@ -81,8 +76,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///         That is, it will not try to dispose of any of them when it gets disposed.
         ///     </para>
         /// </remarks>
-        public AggregateExportProvider(IEnumerable<ExportProvider> providers)
-            : this((providers!= null) ? providers.AsArray() : null)
+        public AggregateExportProvider(IEnumerable<ExportProvider> providers) : this(providers?.AsArray())
         {
         }
 
@@ -161,9 +155,9 @@ namespace System.ComponentModel.Composition.Hosting
             if (definition.Cardinality == ImportCardinality.ZeroOrMore)
             {
                 var exports = new List<Export>();
-                foreach (var provider in _providers)
+                foreach (ExportProvider provider in _providers)
                 {
-                    foreach (var export in provider.GetExports(definition, atomicComposition))
+                    foreach (Export export in provider.GetExports(definition, atomicComposition))
                     {
                         exports.Add(export);
                     }
@@ -178,8 +172,7 @@ namespace System.ComponentModel.Composition.Hosting
                 // which best complies with the request, wins.
                 foreach (ExportProvider provider in _providers)
                 {
-                    IEnumerable<Export> exports;
-                    bool cardinalityCheckResult = provider.TryGetExports(definition, atomicComposition, out exports);
+                    bool cardinalityCheckResult = provider.TryGetExports(definition, atomicComposition, out IEnumerable<Export> exports);
                     bool anyExports = exports.FastAny();
                     if (cardinalityCheckResult && anyExports)
                     {

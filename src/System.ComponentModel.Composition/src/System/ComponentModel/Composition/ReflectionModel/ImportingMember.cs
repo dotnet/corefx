@@ -8,8 +8,6 @@ using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
-using Microsoft.Internal;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
@@ -20,12 +18,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public ImportingMember(ContractBasedImportDefinition definition, ReflectionWritableMember member, ImportType importType)
             : base(definition, importType)
         {
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-
-            _member = member;
+            _member = member ?? throw new ArgumentNullException(nameof(member));
         }
 
         public void SetExportedValue(object instance, object value)
@@ -159,7 +152,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 {
                     try
                     {
-                        collectionObject = constructor.SafeInvoke();
+                        collectionObject = constructor.Invoke(null);
                     }
                     catch (TargetInvocationException exception)
                     {

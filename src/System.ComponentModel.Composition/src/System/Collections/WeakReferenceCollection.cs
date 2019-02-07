@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Internal.Collections
+namespace System.Collections
 {
     internal class WeakReferenceCollection<T> where T : class
     {
@@ -66,11 +65,9 @@ namespace Microsoft.Internal.Collections
         {
             List<T> aliveItems = new List<T>();
 
-            foreach (var weakItem in _items)
+            foreach (WeakReference weakItem in _items)
             {
-                T item = weakItem.Target as T;
-
-                if (item != null)
+                if (weakItem.Target is T item)
                 {
                     aliveItems.Add(item);
                 }

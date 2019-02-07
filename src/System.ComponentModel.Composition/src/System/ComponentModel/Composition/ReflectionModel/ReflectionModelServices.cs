@@ -20,56 +20,52 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Requires.NotNull(partDefinition, nameof(partDefinition));
             Contract.Ensures(Contract.Result<Lazy<Type>>() != null);
 
-            ReflectionComposablePartDefinition reflectionPartDefinition = partDefinition as ReflectionComposablePartDefinition;
-            if (reflectionPartDefinition == null)
+            if (partDefinition is ReflectionComposablePartDefinition reflectionPartDefinition)
             {
-                throw ExceptionBuilder.CreateReflectionModelInvalidPartDefinition(nameof(partDefinition), partDefinition.GetType());
+                return reflectionPartDefinition.GetLazyPartType();
             }
 
-            return reflectionPartDefinition.GetLazyPartType();
+            throw ExceptionBuilder.CreateReflectionModelInvalidPartDefinition(nameof(partDefinition), partDefinition.GetType());
         }
 
         public static bool IsDisposalRequired(ComposablePartDefinition partDefinition)
         {
             Requires.NotNull(partDefinition, nameof(partDefinition));
 
-            ReflectionComposablePartDefinition reflectionPartDefinition = partDefinition as ReflectionComposablePartDefinition;
-            if (reflectionPartDefinition == null)
+            if (partDefinition is ReflectionComposablePartDefinition reflectionPartDefinition)
             {
-                throw ExceptionBuilder.CreateReflectionModelInvalidPartDefinition(nameof(partDefinition), partDefinition.GetType());
+                return reflectionPartDefinition.IsDisposalRequired;
             }
 
-            return reflectionPartDefinition.IsDisposalRequired;
+            throw ExceptionBuilder.CreateReflectionModelInvalidPartDefinition(nameof(partDefinition), partDefinition.GetType());
         }
 
         public static LazyMemberInfo GetExportingMember(ExportDefinition exportDefinition)
         {
             Requires.NotNull(exportDefinition, nameof(exportDefinition));
 
-            ReflectionMemberExportDefinition reflectionExportDefinition = exportDefinition as ReflectionMemberExportDefinition;
-            if (reflectionExportDefinition == null)
+            if (exportDefinition is ReflectionMemberExportDefinition reflectionExportDefinition)
             {
-                throw new ArgumentException(
-                    string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidExportDefinition, exportDefinition.GetType()),
-                    nameof(exportDefinition));
+                return reflectionExportDefinition.ExportingLazyMember;
             }
 
-            return reflectionExportDefinition.ExportingLazyMember;
+            throw new ArgumentException(
+                string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidExportDefinition, exportDefinition.GetType()),
+                nameof(exportDefinition));
         }
 
         public static LazyMemberInfo GetImportingMember(ImportDefinition importDefinition)
         {
             Requires.NotNull(importDefinition, nameof(importDefinition));
 
-            ReflectionMemberImportDefinition reflectionMemberImportDefinition = importDefinition as ReflectionMemberImportDefinition;
-            if (reflectionMemberImportDefinition == null)
+            if (importDefinition is ReflectionMemberImportDefinition reflectionMemberImportDefinition)
             {
-                throw new ArgumentException(
-                    string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidMemberImportDefinition, importDefinition.GetType()),
-                    nameof(importDefinition));
+                return reflectionMemberImportDefinition.ImportingLazyMember;
             }
 
-            return reflectionMemberImportDefinition.ImportingLazyMember;
+            throw new ArgumentException(
+                string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidMemberImportDefinition, importDefinition.GetType()),
+                nameof(importDefinition));
         }
 
         public static Lazy<ParameterInfo> GetImportingParameter(ImportDefinition importDefinition)
@@ -77,37 +73,35 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Requires.NotNull(importDefinition, nameof(importDefinition));
             Contract.Ensures(Contract.Result<Lazy<ParameterInfo>>() != null);
 
-            ReflectionParameterImportDefinition reflectionParameterImportDefinition = importDefinition as ReflectionParameterImportDefinition;
-            if (reflectionParameterImportDefinition == null)
+            if (importDefinition is ReflectionParameterImportDefinition reflectionParameterImportDefinition)
             {
-                throw new ArgumentException(
-                    string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidParameterImportDefinition, importDefinition.GetType()),
-                    nameof(importDefinition));
+                return reflectionParameterImportDefinition.ImportingLazyParameter;
             }
 
-            return reflectionParameterImportDefinition.ImportingLazyParameter;
+            throw new ArgumentException(
+                string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidParameterImportDefinition, importDefinition.GetType()),
+                nameof(importDefinition));
         }
 
         public static bool IsImportingParameter(ImportDefinition importDefinition)
         {
             Requires.NotNull(importDefinition, nameof(importDefinition));
 
-            ReflectionImportDefinition reflectionImportDefinition = importDefinition as ReflectionImportDefinition;
-            if (reflectionImportDefinition == null)
+            if (importDefinition is ReflectionImportDefinition reflectionImportDefinition)
             {
-                throw new ArgumentException(
-                    string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidImportDefinition, importDefinition.GetType()),
-                    nameof(importDefinition));
+                return importDefinition is ReflectionParameterImportDefinition;
             }
 
-            return (importDefinition is ReflectionParameterImportDefinition);
+            throw new ArgumentException(
+                string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidImportDefinition, importDefinition.GetType()),
+                nameof(importDefinition));
         }
 
         public static bool IsExportFactoryImportDefinition(ImportDefinition importDefinition)
         {
             Requires.NotNull(importDefinition, nameof(importDefinition));
 
-            return (importDefinition is IPartCreatorImportDefinition);
+            return importDefinition is IPartCreatorImportDefinition;
         }
 
         public static ContractBasedImportDefinition GetExportFactoryProductImportDefinition(ImportDefinition importDefinition)
@@ -115,18 +109,17 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Requires.NotNull(importDefinition, nameof(importDefinition));
             Contract.Ensures(Contract.Result<ContractBasedImportDefinition>() != null);
 
-            IPartCreatorImportDefinition partCreatorImportDefinition = importDefinition as IPartCreatorImportDefinition;
-            if (partCreatorImportDefinition == null)
+            if (importDefinition is IPartCreatorImportDefinition partCreatorImportDefinition)
             {
-                throw new ArgumentException(
-                    string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidImportDefinition, importDefinition.GetType()),
-                    nameof(importDefinition));
+                return partCreatorImportDefinition.ProductImportDefinition;
             }
 
-            return partCreatorImportDefinition.ProductImportDefinition;
+            throw new ArgumentException(
+                string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidImportDefinition, importDefinition.GetType()),
+                nameof(importDefinition));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public static ComposablePartDefinition CreatePartDefinition(
             Lazy<Type> partType,
             bool isDisposalRequired,
@@ -155,8 +148,23 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Lazy<IDictionary<string, object>> metadata,
             ICompositionElement origin)
         {
-            Requires.NotNullOrEmpty(contractName, nameof(contractName));
-            Requires.IsInMembertypeSet(exportingMember.MemberType, nameof(exportingMember), MemberTypes.Field | MemberTypes.Property | MemberTypes.NestedType | MemberTypes.TypeInfo | MemberTypes.Method);
+            if (contractName == null)
+            {
+                throw new ArgumentNullException(contractName);
+            }
+
+            if (contractName.Length == 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, contractName), contractName);
+            }
+
+            MemberTypes validMemberTypes = MemberTypes.Field | MemberTypes.Property | MemberTypes.NestedType | MemberTypes.TypeInfo | MemberTypes.Method;
+            if ((exportingMember.MemberType & validMemberTypes) != exportingMember.MemberType ||
+                (exportingMember.MemberType & (exportingMember.MemberType - 1)) != 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_InvalidEnumInSet, nameof(exportingMember), exportingMember.MemberType, validMemberTypes.ToString()), nameof(exportingMember));
+            }
+
             Contract.Ensures(Contract.Result<ExportDefinition>() != null);
 
             return new ReflectionMemberExportDefinition(
@@ -179,7 +187,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return CreateImportDefinition(importingMember, contractName, requiredTypeIdentity, requiredMetadata, cardinality, isRecomposable, requiredCreationPolicy, MetadataServices.EmptyMetadata, false, origin);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public static ContractBasedImportDefinition CreateImportDefinition(
             LazyMemberInfo importingMember,
             string contractName,
@@ -220,8 +228,23 @@ namespace System.ComponentModel.Composition.ReflectionModel
             bool isExportFactory,
             ICompositionElement origin)
         {
-            Requires.NotNullOrEmpty(contractName, nameof(contractName));
-            Requires.IsInMembertypeSet(importingMember.MemberType, nameof(importingMember), MemberTypes.Property | MemberTypes.Field);
+            if (contractName == null)
+            {
+                throw new ArgumentNullException(contractName);
+            }
+
+            if (contractName.Length == 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, contractName), contractName);
+            }
+
+            MemberTypes validMemberTypes = MemberTypes.Field | MemberTypes.Property;
+            if ((importingMember.MemberType & validMemberTypes) != importingMember.MemberType ||
+                (importingMember.MemberType & (importingMember.MemberType - 1)) != 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_InvalidEnumInSet, nameof(importingMember), importingMember.MemberType, validMemberTypes.ToString()), nameof(importingMember));
+            }
+
             Contract.Ensures(Contract.Result<ContractBasedImportDefinition>() != null);
 
             if (isExportFactory)
@@ -255,7 +278,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public static ContractBasedImportDefinition CreateImportDefinition(
             Lazy<ParameterInfo> parameter,
             string contractName,
@@ -281,7 +304,17 @@ namespace System.ComponentModel.Composition.ReflectionModel
             ICompositionElement origin)
         {
             Requires.NotNull(parameter, nameof(parameter));
-            Requires.NotNullOrEmpty(contractName, nameof(contractName));
+
+            if (contractName == null)
+            {
+                throw new ArgumentNullException(contractName);
+            }
+
+            if (contractName.Length == 0)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, contractName), contractName);
+            }
+
             Contract.Ensures(Contract.Result<ContractBasedImportDefinition>() != null);
 
             if (isExportFactory)
@@ -318,25 +351,22 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Requires.NotNull(partDefinition, nameof(partDefinition));
 
             specialization = null;
-            ReflectionComposablePartDefinition reflectionPartDefinition = partDefinition as ReflectionComposablePartDefinition;
-            if (reflectionPartDefinition == null)
+            if (partDefinition is ReflectionComposablePartDefinition reflectionPartDefinition)
             {
-                throw ExceptionBuilder.CreateReflectionModelInvalidPartDefinition(nameof(partDefinition), partDefinition.GetType());
+                return reflectionPartDefinition.TryMakeGenericPartDefinition(genericParameters.ToArray(), out specialization);
             }
 
-            return reflectionPartDefinition.TryMakeGenericPartDefinition(genericParameters.ToArray(), out specialization);
+            throw ExceptionBuilder.CreateReflectionModelInvalidPartDefinition(nameof(partDefinition), partDefinition.GetType());
         }
     }
 
-internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
+    internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
     {
         private readonly Lazy<Type> _partType;
         private readonly Lazy<IEnumerable<ImportDefinition>> _imports;
         private readonly Lazy<IEnumerable<ExportDefinition>> _exports;
         private readonly Lazy<IDictionary<string, object>> _metadata;
-        private readonly ICompositionElement _origin;
         private ConstructorInfo _constructor;
-        private bool _isDisposalRequired;
 
         public ReflectionPartCreationInfo(
             Lazy<Type> partType,
@@ -346,28 +376,19 @@ internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
             Lazy<IDictionary<string, object>> metadata,
             ICompositionElement origin)
         {
-            if (partType == null)
-            {
-                throw new ArgumentNullException(nameof(partType));
-            }
-
-            _partType = partType;
-            _isDisposalRequired = isDisposalRequired;
+            _partType = partType ?? throw new ArgumentNullException(nameof(partType));
+            IsDisposalRequired = isDisposalRequired;
             _imports = imports;
             _exports = exports;
             _metadata = metadata;
-            _origin = origin;
+            Origin = origin;
         }
 
-        public Type GetPartType()
-        {
-            return _partType.GetNotNullValue("type");
-        }
+        public string DisplayName => GetPartType().GetDisplayName();
 
-        public Lazy<Type> GetLazyPartType()
-        {
-            return _partType;
-        }
+        public Type GetPartType() => _partType.GetNotNullValue("type");
+
+        public Lazy<Type> GetLazyPartType() => _partType;
 
         public ConstructorInfo GetConstructor()
         {
@@ -393,26 +414,11 @@ internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
             return _constructor;
         }
 
-        public bool IsDisposalRequired
-        {
-            get
-            {
-                return _isDisposalRequired;
-            }
-        }
+        public bool IsDisposalRequired { get; }
 
-        public bool IsIdentityComparison
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public bool IsIdentityComparison => true;
 
-        public IDictionary<string, object> GetMetadata()
-        {
-            return (_metadata != null) ? _metadata.Value : null;
-        }
+        public IDictionary<string, object> GetMetadata() => _metadata?.Value;
 
         public IEnumerable<ExportDefinition> GetExports()
         {
@@ -430,13 +436,13 @@ internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
 
             foreach (ExportDefinition export in exports)
             {
-                ReflectionMemberExportDefinition reflectionExport = export as ReflectionMemberExportDefinition;
-                if (reflectionExport == null)
+                if (export is ReflectionMemberExportDefinition reflectionExport)
                 {
-                    throw new InvalidOperationException(
-                        string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidExportDefinition, export.GetType()));
+                    yield return reflectionExport;
                 }
-                yield return reflectionExport;
+
+                throw new InvalidOperationException(
+                        string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidExportDefinition, export.GetType()));
             }
         }
 
@@ -456,25 +462,17 @@ internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
 
             foreach (ImportDefinition import in imports)
             {
-                ReflectionImportDefinition reflectionImport = import as ReflectionImportDefinition;
-                if (reflectionImport == null)
+                if (import is ReflectionImportDefinition reflectionImport)
                 {
-                    throw new InvalidOperationException(
-                        string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidMemberImportDefinition, import.GetType()));
+                    yield return reflectionImport;
                 }
-                yield return reflectionImport;
+
+                throw new InvalidOperationException(
+                        string.Format(CultureInfo.CurrentCulture, SR.ReflectionModel_InvalidMemberImportDefinition, import.GetType()));
             }
         }
 
-        public string DisplayName
-        {
-            get { return GetPartType().GetDisplayName(); }
-        }
-
-        public ICompositionElement Origin
-        {
-            get { return _origin; }
-        }
+        public ICompositionElement Origin { get; }
     }
 
     internal class LazyExportDefinition : ExportDefinition
@@ -482,17 +480,11 @@ internal class ReflectionPartCreationInfo : IReflectionPartCreationInfo
         private readonly Lazy<IDictionary<string, object>> _metadata;
 
         public LazyExportDefinition(string contractName, Lazy<IDictionary<string, object>> metadata)
-            : base(contractName, (IDictionary<string, object>)null)
+            : base(contractName, null)
         {
             _metadata = metadata;
         }
 
-        public override IDictionary<string, object> Metadata
-        {
-            get
-            {
-                return _metadata.Value ?? MetadataServices.EmptyMetadata;
-            }
-        }
+        public override IDictionary<string, object> Metadata => _metadata.Value ?? MetadataServices.EmptyMetadata
     }
 }

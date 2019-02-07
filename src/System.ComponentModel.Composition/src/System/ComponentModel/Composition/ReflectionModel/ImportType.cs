@@ -2,50 +2,41 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
     // Describes the import type of a Reflection-based import definition
     internal class ImportType
     {
-        private static readonly Type LazyOfTType = typeof(Lazy<>);
-        private static readonly Type LazyOfTMType = typeof(Lazy<,>);
-        private static readonly Type ExportFactoryOfTType = typeof(ExportFactory<>);
-        private static readonly Type ExportFactoryOfTMType = typeof(ExportFactory<,>);
-
-        private readonly Type _type;
-        private readonly bool _isAssignableCollectionType;
-        private Type _contractType;
+        private static readonly Type s_lazyOfTType = typeof(Lazy<>);
+        private static readonly Type s_lazyOfTMType = typeof(Lazy<,>);
+        private static readonly Type s_exportFactoryOfTType = typeof(ExportFactory<>);
+        private static readonly Type s_exportFactoryOfTMType = typeof(ExportFactory<,>);
         private Func<Export, object> _castSingleValue;
-        private bool _isOpenGeneric = false;
+        private readonly bool _isOpenGeneric = false;
 
         [ThreadStatic]
-        internal static Dictionary<Type, Func<Export, object>> _castSingleValueCache;
+        internal static Dictionary<Type, Func<Export, object>> s_castSingleValueCache;
 
         private static Dictionary<Type, Func<Export, object>> CastSingleValueCache
         {
             get
             {
-                return _castSingleValueCache = _castSingleValueCache ?? new Dictionary<Type, Func<Export, object>>();
+                return s_castSingleValueCache = s_castSingleValueCache ?? new Dictionary<Type, Func<Export, object>>();
             }
         }
 
         public ImportType(Type type, ImportCardinality cardinality)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            _type = type;
+            ActualType = type ?? throw new ArgumentNullException(nameof(type));
             Type contractType = type;
 
             if (cardinality == ImportCardinality.ZeroOrMore)
             {
-                _isAssignableCollectionType = IsTypeAssignableCollectionType(type);
+                IsAssignableCollectionType = IsTypeAssignableCollectionType(type);
                 contractType = CheckForCollection(type);
             }
 
@@ -54,21 +45,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
             Initialize(contractType);
         }
 
-        public bool IsAssignableCollectionType
-        {
-            get { return _isAssignableCollectionType; }
-        }
+        public bool IsAssignableCollectionType { get; }
 
         public Type ElementType { get; private set; }
 
-        public Type ActualType
-        {
-            get { return _type; }
-        }
+        public Type ActualType { get; }
 
         public bool IsPartCreator { get; private set; }
 
-        public Type ContractType { get { return _contractType; } }
+        public Type ContractType { get; private set; }
 
         public Func<Export, object> CastExport
         {
@@ -134,7 +119,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             if (!type.IsGenericType)
             {
                 // no cast function, the original type is the contract type
-                _contractType = type;
+                ContractType = type;
                 return;
             }
 
@@ -148,7 +133,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 {
                     // in this case, even though the type is generic, it's nothing we have recognized,
                     // thereforeit's the same as the non-generic case
-                    _contractType = type;
+                    ContractType = type;
                     return;
                 }
 
@@ -158,7 +143,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             // we have found the cast function, which means, that we have found either Lazy of EF
             // in this case the contract is always argument[0] and the metadata view is always argument[1]
             IsPartCreator = !IsLazyGenericType(genericType) && (genericType != null);
-            _contractType = arguments[0];
+            ContractType = arguments[0];
             if (arguments.Length == 2)
             {
                 MetadataViewType = arguments[1];
@@ -167,14 +152,14 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         private static bool IsLazyGenericType(Type genericType)
         {
-            return (genericType == LazyOfTType) || (genericType == LazyOfTMType);
+            return (genericType == s_lazyOfTType) || (genericType == s_lazyOfTMType);
         }
 
         private static bool TryGetCastFunction(Type genericType, bool isOpenGeneric, Type[] arguments, out Func<Export, object> castFunction)
         {
             castFunction = null;
 
-            if (genericType == LazyOfTType)
+            if (genericType == s_lazyOfTType)
             {
                 if (!isOpenGeneric)
                 {
@@ -183,7 +168,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 return true;
             }
 
-            if (genericType == LazyOfTMType)
+            if (genericType == s_lazyOfTMType)
             {
                 if (!isOpenGeneric)
                 {
@@ -192,7 +177,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                 return true;
             }
 
-            if (genericType != null && IsDescendentOf(genericType, ExportFactoryOfTType))
+            if (genericType != null && IsDescendentOf(genericType, s_exportFactoryOfTType))
             {
                 if (arguments.Length == 1)
                 {

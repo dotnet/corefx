@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
@@ -9,20 +10,18 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-using Microsoft.Internal;
-using Microsoft.Internal.Collections;
 
 namespace System.ComponentModel.Composition
 {
     // Provides helpers for creating and dealing with Exports
     internal static partial class ExportServices
     {
-        private static readonly MethodInfo _createStronglyTypedLazyOfTM = typeof(ExportServices).GetMethod("CreateStronglyTypedLazyOfTM", BindingFlags.NonPublic | BindingFlags.Static);
-        private static readonly MethodInfo _createStronglyTypedLazyOfT = typeof(ExportServices).GetMethod("CreateStronglyTypedLazyOfT", BindingFlags.NonPublic | BindingFlags.Static);
-        private static readonly MethodInfo _createSemiStronglyTypedLazy = typeof(ExportServices).GetMethod("CreateSemiStronglyTypedLazy", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo s_createStronglyTypedLazyOfTM = typeof(ExportServices).GetMethod("CreateStronglyTypedLazyOfTM", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo s_createStronglyTypedLazyOfT = typeof(ExportServices).GetMethod("CreateStronglyTypedLazyOfT", BindingFlags.NonPublic | BindingFlags.Static);
+        private static readonly MethodInfo s_createSemiStronglyTypedLazy = typeof(ExportServices).GetMethod("CreateSemiStronglyTypedLazy", BindingFlags.NonPublic | BindingFlags.Static);
 
-        internal static readonly Type DefaultMetadataViewType = typeof(IDictionary<string, object>);
-        internal static readonly Type DefaultExportedValueType = typeof(object);
+        internal static readonly Type s_defaultMetadataViewType = typeof(IDictionary<string, object>);
+        internal static readonly Type s_defaultExportedValueType = typeof(object);
 
         internal static bool IsDefaultMetadataViewType(Type metadataViewType)
         {
@@ -34,7 +33,7 @@ namespace System.ComponentModel.Composition
             // Consider all types that IDictionary<string, object> derives from, such
             // as ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>> 
             // and IEnumerable, as default metadata view
-            return metadataViewType.IsAssignableFrom(DefaultMetadataViewType);
+            return metadataViewType.IsAssignableFrom(s_defaultMetadataViewType);
         }
 
         internal static bool IsDictionaryConstructorViewType(Type metadataViewType)
@@ -56,11 +55,11 @@ namespace System.ComponentModel.Composition
             MethodInfo genericMethod = null;
             if (metadataViewType != null)
             {
-                genericMethod = _createStronglyTypedLazyOfTM.MakeGenericMethod(exportType ?? ExportServices.DefaultExportedValueType, metadataViewType);
+                genericMethod = s_createStronglyTypedLazyOfTM.MakeGenericMethod(exportType ?? ExportServices.s_defaultExportedValueType, metadataViewType);
             }
             else
             {
-                genericMethod = _createStronglyTypedLazyOfT.MakeGenericMethod(exportType ?? ExportServices.DefaultExportedValueType);
+                genericMethod = s_createStronglyTypedLazyOfT.MakeGenericMethod(exportType ?? ExportServices.s_defaultExportedValueType);
             }
 
             if(genericMethod == null)
@@ -73,9 +72,9 @@ namespace System.ComponentModel.Composition
 
         internal static Func<Export, Lazy<object, object>> CreateSemiStronglyTypedLazyFactory(Type exportType, Type metadataViewType)
         {
-            MethodInfo genericMethod = _createSemiStronglyTypedLazy.MakeGenericMethod(
-                exportType ?? ExportServices.DefaultExportedValueType,
-                metadataViewType ?? ExportServices.DefaultMetadataViewType);
+            MethodInfo genericMethod = s_createSemiStronglyTypedLazy.MakeGenericMethod(
+                exportType ?? s_defaultExportedValueType,
+                metadataViewType ?? s_defaultMetadataViewType);
             if(genericMethod == null)
             {
                 throw new ArgumentNullException(nameof(genericMethod));
@@ -86,11 +85,10 @@ namespace System.ComponentModel.Composition
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         internal static Lazy<T, M> CreateStronglyTypedLazyOfTM<T, M>(Export export)
         {
-            IDisposable disposable = export as IDisposable;
-            if (disposable != null)
+            if (export is IDisposable disposable)
             {
                 return new DisposableLazy<T, M>(
-                    () => ExportServices.GetCastedExportedValue<T>(export),
+                    () => GetCastedExportedValue<T>(export),
                     AttributedModelServices.GetMetadataView<M>(export.Metadata),
                     disposable,
                     LazyThreadSafetyMode.PublicationOnly);
@@ -98,7 +96,7 @@ namespace System.ComponentModel.Composition
             else
             {
                 return new Lazy<T, M>(
-                    () => ExportServices.GetCastedExportedValue<T>(export),
+                    () => GetCastedExportedValue<T>(export),
                     AttributedModelServices.GetMetadataView<M>(export.Metadata),
                     LazyThreadSafetyMode.PublicationOnly);
             }
@@ -107,29 +105,26 @@ namespace System.ComponentModel.Composition
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         internal static Lazy<T> CreateStronglyTypedLazyOfT<T>(Export export)
         {
-            IDisposable disposable = export as IDisposable;
-            if (disposable != null)
+            if (export is IDisposable disposable)
             {
                 return new DisposableLazy<T>(
-                    () => ExportServices.GetCastedExportedValue<T>(export),
+                    () => GetCastedExportedValue<T>(export),
                     disposable,
                     LazyThreadSafetyMode.PublicationOnly);
             }
             else
             {
-                return new Lazy<T>(() => ExportServices.GetCastedExportedValue<T>(export), LazyThreadSafetyMode.PublicationOnly);
-
+                return new Lazy<T>(() => GetCastedExportedValue<T>(export), LazyThreadSafetyMode.PublicationOnly);
             }
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         internal static Lazy<object, object> CreateSemiStronglyTypedLazy<T, M>(Export export)
         {
-            IDisposable disposable = export as IDisposable;
-            if (disposable != null)
+            if (export is IDisposable disposable)
             {
                 return new DisposableLazy<object, object>(
-                    () => ExportServices.GetCastedExportedValue<T>(export),
+                    () => GetCastedExportedValue<T>(export),
                     AttributedModelServices.GetMetadataView<M>(export.Metadata),
                     disposable,
                     LazyThreadSafetyMode.PublicationOnly);
@@ -137,7 +132,7 @@ namespace System.ComponentModel.Composition
             else
             {
                 return new Lazy<object, object>(
-                    () => ExportServices.GetCastedExportedValue<T>(export),
+                    () => GetCastedExportedValue<T>(export),
                     AttributedModelServices.GetMetadataView<M>(export.Metadata),
                     LazyThreadSafetyMode.PublicationOnly);
             }
@@ -150,9 +145,7 @@ namespace System.ComponentModel.Composition
 
         internal static T CastExportedValue<T>(ICompositionElement element, object exportedValue)
         {
-            object typedExportedValue = null;
-
-            bool succeeded = ContractServices.TryCast(typeof(T), exportedValue, out typedExportedValue);
+            bool succeeded = ContractServices.TryCast(typeof(T), exportedValue, out object typedExportedValue);
             if (!succeeded)
             {
                 throw new CompositionContractMismatchException(string.Format(CultureInfo.CurrentCulture,

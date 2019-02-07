@@ -2,20 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 
-namespace Microsoft.Internal.Collections
+namespace System.Collections
 {
     internal static partial class CollectionServices
     {
-        private static readonly Type StringType = typeof(string);
-        private static readonly Type IEnumerableType = typeof(IEnumerable);
-        private static readonly Type IEnumerableOfTType = typeof(IEnumerable<>);
-        private static readonly Type ICollectionOfTType = typeof(ICollection<>);
+        private static readonly Type s_stringType = typeof(string);
+        private static readonly Type s_iEnumerableType = typeof(IEnumerable);
+        private static readonly Type s_iEnumerableOfTType = typeof(IEnumerable<>);
+        private static readonly Type s_iCollectionOfTType = typeof(ICollection<>);
 
         public static bool IsEnumerableOfT(Type type)
         {
@@ -23,7 +22,7 @@ namespace Microsoft.Internal.Collections
             {
                 Type genericType = type.GetGenericTypeDefinition().UnderlyingSystemType;
 
-                if (genericType == IEnumerableOfTType)
+                if (genericType == s_iEnumerableOfTType)
                 {
                     return true;
                 }
@@ -33,13 +32,13 @@ namespace Microsoft.Internal.Collections
 
         public static Type GetEnumerableElementType(Type type)
         {
-            if (type.UnderlyingSystemType == StringType || !IEnumerableType.IsAssignableFrom(type))
+            if (type.UnderlyingSystemType == s_stringType || !s_iEnumerableType.IsAssignableFrom(type))
             {
                 return null;
             }
 
             Type closedType;
-            if (ReflectionServices.TryGetGenericInterfaceType(type, IEnumerableOfTType, out closedType))
+            if (ReflectionServices.TryGetGenericInterfaceType(type, s_iEnumerableOfTType, out closedType))
             {
                 return closedType.GetGenericArguments()[0];
             }
@@ -50,7 +49,7 @@ namespace Microsoft.Internal.Collections
         public static Type GetCollectionElementType(Type type)
         {
             Type closedType;
-            if (ReflectionServices.TryGetGenericInterfaceType(type, ICollectionOfTType, out closedType))
+            if (ReflectionServices.TryGetGenericInterfaceType(type, s_iCollectionOfTType, out closedType))
             {
                 return closedType.GetGenericArguments()[0];
             }
@@ -115,8 +114,7 @@ namespace Microsoft.Internal.Collections
             }
 
             // if the second is List<T>, and contains very few elements there's no need for AddRange
-            List<T> secondAsList = second as List<T>;
-            if (secondAsList != null)
+            if (second is List<T> secondAsList)
             {
                 if (secondAsList.Count == 0)
                 {
@@ -132,7 +130,6 @@ namespace Microsoft.Internal.Collections
             // last resort - nothing is null, need to append
             source.AddRange(second);
             return source;
-
         }
 
         private static List<T> FastAppendToListAllowNulls<T>(this List<T> source, T value)
@@ -146,9 +143,7 @@ namespace Microsoft.Internal.Collections
             return source;
         }
 
-        public static List<T> FastAppendToListAllowNulls<T>(
-                        this List<T> source, T value,
-                        IEnumerable<T> second)
+        public static List<T> FastAppendToListAllowNulls<T>(this List<T> source, T value, IEnumerable<T> second)
         {
             if (second == null)
             {
@@ -177,8 +172,7 @@ namespace Microsoft.Internal.Collections
             }
 
             // Cast to ICollection instead of ICollection<T> for performance reasons.
-            ICollection collection = source as ICollection;
-            if (collection != null)
+            if (source is ICollection collection)
             {
                 switch (collection.Count)
                 {
@@ -191,7 +185,7 @@ namespace Microsoft.Internal.Collections
                 }
             }
 
-            using (var enumerator = source.GetEnumerator())
+            using (IEnumerator<T> enumerator = source.GetEnumerator())
             {
                 if (!enumerator.MoveNext())
                 {
@@ -216,8 +210,7 @@ namespace Microsoft.Internal.Collections
             // sources.
 
             // Cast to ICollection instead of ICollection<T> for performance reasons.
-            ICollection collection = source as ICollection;
-            if (collection != null)
+            if (source is ICollection collection)
             {
                 return collection.Count > 0;
             }
@@ -241,14 +234,7 @@ namespace Microsoft.Internal.Collections
 
         public static T[] AsArray<T>(this IEnumerable<T> enumerable)
         {
-            T[] array = enumerable as T[];
-
-            if (array != null)
-            {
-                return array;
-            }
-
-            return enumerable.ToArray();
+            return enumerable as T[] ?? enumerable.ToArray();
         }
 
         public static bool IsArrayEqual<T>(this T[] thisArray, T[] thatArray)

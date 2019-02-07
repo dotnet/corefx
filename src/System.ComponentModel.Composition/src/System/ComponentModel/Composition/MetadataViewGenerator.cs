@@ -8,7 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using Microsoft.Internal;
+using System.Threading;
 
 namespace System.ComponentModel.Composition
 {
@@ -68,26 +68,26 @@ namespace System.ComponentModel.Composition
         public const string MetadataViewFactoryName= "Create";
 
         private static Lock _lock = new Lock();
-        private static Dictionary<Type, MetadataViewFactory> _metadataViewFactories = new Dictionary<Type, MetadataViewFactory>();
-        private static AssemblyName ProxyAssemblyName = new AssemblyName(string.Format(CultureInfo.InvariantCulture, "MetadataViewProxies_{0}", Guid.NewGuid()));
-        private static ModuleBuilder    transparentProxyModuleBuilder;
+        private static Dictionary<Type, MetadataViewFactory> s_metadataViewFactories = new Dictionary<Type, MetadataViewFactory>();
+        private static readonly AssemblyName s_proxyAssemblyName = new AssemblyName(string.Format(CultureInfo.InvariantCulture, "MetadataViewProxies_{0}", Guid.NewGuid()));
+        private static ModuleBuilder s_transparentProxyModuleBuilder;
 
-        private static Type[] CtorArgumentTypes = new Type[] { typeof(IDictionary<string, object>) };
-        private static MethodInfo _mdvDictionaryTryGet = CtorArgumentTypes[0].GetMethod("TryGetValue");
-        private static readonly MethodInfo ObjectGetType = typeof(object).GetMethod("GetType", Type.EmptyTypes);
-        private static readonly ConstructorInfo ObjectCtor = typeof(object).GetConstructor(Type.EmptyTypes);
+        private static readonly Type[] s_ctorArgumentTypes = new Type[] { typeof(IDictionary<string, object>) };
+        private static readonly MethodInfo s_mdvDictionaryTryGet = s_ctorArgumentTypes[0].GetMethod("TryGetValue");
+        private static readonly MethodInfo s_objectGetType = typeof(object).GetMethod("GetType", Type.EmptyTypes);
+        private static readonly ConstructorInfo s_objectCtor = typeof(object).GetConstructor(Type.EmptyTypes);
 
         // Must be called with _lock held
         private static ModuleBuilder GetProxyModuleBuilder(bool requiresCritical)
         {
-            if (transparentProxyModuleBuilder == null)
+            if (s_transparentProxyModuleBuilder == null)
             {
                 // make a new assemblybuilder and modulebuilder
-                var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(ProxyAssemblyName, AssemblyBuilderAccess.Run);
-                transparentProxyModuleBuilder = assemblyBuilder.DefineDynamicModule("MetadataViewProxiesModule");
+                var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(s_proxyAssemblyName, AssemblyBuilderAccess.Run);
+                s_transparentProxyModuleBuilder = assemblyBuilder.DefineDynamicModule("MetadataViewProxiesModule");
             }
 
-            return transparentProxyModuleBuilder;
+            return s_transparentProxyModuleBuilder;
         }
 
         public static MetadataViewFactory GetMetadataViewFactory(Type viewType)
@@ -107,7 +107,7 @@ namespace System.ComponentModel.Composition
 
             using (new ReadLock(_lock))
             {
-                foundMetadataViewFactory = _metadataViewFactories.TryGetValue(viewType, out metadataViewFactory);
+                foundMetadataViewFactory = s_metadataViewFactories.TryGetValue(viewType, out metadataViewFactory);
             }
 
             // No factory exists
@@ -129,10 +129,10 @@ namespace System.ComponentModel.Composition
 
                 using (new WriteLock(_lock))
                 {
-                    if (!_metadataViewFactories.TryGetValue(viewType, out metadataViewFactory))
+                    if (!s_metadataViewFactories.TryGetValue(viewType, out metadataViewFactory))
                     {
                         metadataViewFactory = generatedMetadataViewFactory;
-                        _metadataViewFactories.Add(viewType, metadataViewFactory);
+                        s_metadataViewFactories.Add(viewType, metadataViewFactory);
                     }
                 }
             }
@@ -193,17 +193,17 @@ namespace System.ComponentModel.Composition
             Type[] interfaces = { viewType };
             bool requiresCritical = false;
 
-            var proxyModuleBuilder = GetProxyModuleBuilder(requiresCritical);
+            ModuleBuilder proxyModuleBuilder = GetProxyModuleBuilder(requiresCritical);
             proxyTypeBuilder = proxyModuleBuilder.DefineType(
                 string.Format(CultureInfo.InvariantCulture, "_proxy_{0}_{1}", viewType.FullName, Guid.NewGuid()),
                 TypeAttributes.Public,
                 typeof(object), 
                 interfaces);
             // Implement Constructor
-            ConstructorBuilder proxyCtor = proxyTypeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, CtorArgumentTypes);
+            ConstructorBuilder proxyCtor = proxyTypeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, s_ctorArgumentTypes);
             ILGenerator proxyCtorIL = proxyCtor.GetILGenerator();
             proxyCtorIL.Emit(OpCodes.Ldarg_0);
-            proxyCtorIL.Emit(OpCodes.Call, ObjectCtor);
+            proxyCtorIL.Emit(OpCodes.Call, s_objectCtor);
 
             LocalBuilder exception = proxyCtorIL.DeclareLocal(typeof(Exception));
             LocalBuilder exceptionData = proxyCtorIL.DeclareLocal(typeof(IDictionary));
@@ -261,7 +261,7 @@ namespace System.ComponentModel.Composition
                 proxyCtorIL.Emit(OpCodes.Ldarg_1);
                 proxyCtorIL.Emit(OpCodes.Ldstr, propertyInfo.Name);
                 proxyCtorIL.Emit(OpCodes.Ldloca, value);
-                proxyCtorIL.Emit(OpCodes.Callvirt, _mdvDictionaryTryGet);
+                proxyCtorIL.Emit(OpCodes.Callvirt, s_mdvDictionaryTryGet);
                 proxyCtorIL.Emit(OpCodes.Brtrue, doneGettingDefaultValue);
 
                 proxyCtorIL.GenerateLocalAssignmentFromFlag(usesExportedMD, false);
@@ -357,7 +357,7 @@ namespace System.ComponentModel.Composition
 
                 proxyCtorIL.GetExceptionDataAndStoreInLocal(exception, exceptionData);
                 proxyCtorIL.Emit(OpCodes.Ldloc, value);
-                proxyCtorIL.Emit(OpCodes.Call, ObjectGetType);
+                proxyCtorIL.Emit(OpCodes.Call, s_objectGetType);
                 proxyCtorIL.Emit(OpCodes.Stloc, sourceType);
                 proxyCtorIL.AddItemToLocalDictionary(exceptionData, MetadataViewType, viewType);
                 proxyCtorIL.AddLocalToLocalDictionary(exceptionData, MetadataItemSourceType, sourceType);
@@ -374,7 +374,7 @@ namespace System.ComponentModel.Composition
             // {
             //    return new <ProxyClass>(dictionary);
             // }
-            MethodBuilder factoryMethodBuilder = proxyTypeBuilder.DefineMethod(MetadataViewGenerator.MetadataViewFactoryName, MethodAttributes.Public | MethodAttributes.Static, typeof(object), CtorArgumentTypes);
+            MethodBuilder factoryMethodBuilder = proxyTypeBuilder.DefineMethod(MetadataViewGenerator.MetadataViewFactoryName, MethodAttributes.Public | MethodAttributes.Static, typeof(object), s_ctorArgumentTypes);
             ILGenerator factoryIL = factoryMethodBuilder.GetILGenerator();
             factoryIL.Emit(OpCodes.Ldarg_0);
             factoryIL.Emit(OpCodes.Newobj, proxyCtor);

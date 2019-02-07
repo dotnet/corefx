@@ -160,7 +160,11 @@ namespace System.ComponentModel.Composition
         public static void ComposeParts(this CompositionContainer container, params object[] attributedParts)
         {
             Requires.NotNull(container, nameof(container));
-            Requires.NotNullOrNullElements(attributedParts, nameof(attributedParts));
+
+            if (attributedParts == null || !Contract.ForAll(attributedParts, (attributedPart) => attributedPart != null))
+            {
+                throw ExceptionBuilder.CreateContainsNullElement(nameof(attributedParts));
+            }
 
             CompositionBatch batch = new CompositionBatch(
                 attributedParts.Select(attributedPart => AttributedModelServices.CreatePart(attributedPart)).ToArray(),

@@ -2,42 +2,40 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Microsoft.Internal
+namespace System.Reflection
 {
     internal static class GenerationServices
     {
         // Type.GetTypeFromHandle
-        private static readonly MethodInfo _typeGetTypeFromHandleMethod = typeof(Type).GetMethod("GetTypeFromHandle");
+        private static readonly MethodInfo s_typeGetTypeFromHandleMethod = typeof(Type).GetMethod("GetTypeFromHandle");
 
         // typeofs are pretty expensive, so we cache them statically
-        private static readonly Type TypeType = typeof(System.Type);
-        private static readonly Type StringType = typeof(string);
-        private static readonly Type CharType = typeof(char);
-        private static readonly Type BooleanType = typeof(bool);
-        private static readonly Type ByteType = typeof(byte);
-        private static readonly Type SByteType = typeof(sbyte);
-        private static readonly Type Int16Type = typeof(short);
-        private static readonly Type UInt16Type = typeof(ushort);
-        private static readonly Type Int32Type = typeof(int);
-        private static readonly Type UInt32Type = typeof(uint);
-        private static readonly Type Int64Type = typeof(long);
-        private static readonly Type UInt64Type = typeof(ulong);
-        private static readonly Type DoubleType = typeof(double);
-        private static readonly Type SingleType = typeof(float);
-        private static readonly Type IEnumerableTypeofT = typeof(System.Collections.Generic.IEnumerable<>);
-        private static readonly Type IEnumerableType = typeof(System.Collections.IEnumerable);
+        private static readonly Type s_typeType = typeof(System.Type);
+        private static readonly Type s_stringType = typeof(string);
+        private static readonly Type s_charType = typeof(char);
+        private static readonly Type s_booleanType = typeof(bool);
+        private static readonly Type s_byteType = typeof(byte);
+        private static readonly Type s_sByteType = typeof(sbyte);
+        private static readonly Type s_int16Type = typeof(short);
+        private static readonly Type s_uInt16Type = typeof(ushort);
+        private static readonly Type s_int32Type = typeof(int);
+        private static readonly Type s_uInt32Type = typeof(uint);
+        private static readonly Type s_int64Type = typeof(long);
+        private static readonly Type s_uInt64Type = typeof(ulong);
+        private static readonly Type s_doubleType = typeof(double);
+        private static readonly Type s_singleType = typeof(float);
+        private static readonly Type s_iEnumerableTypeofT = typeof(System.Collections.Generic.IEnumerable<>);
+        private static readonly Type s_iEnumerableType = typeof(System.Collections.IEnumerable);
 
-        private static readonly MethodInfo ExceptionGetData = typeof(Exception).GetProperty("Data").GetGetMethod();
-        private static readonly MethodInfo DictionaryAdd = typeof(IDictionary).GetMethod("Add");
-        private static readonly ConstructorInfo ObjectCtor = typeof(object).GetConstructor(Type.EmptyTypes);
+        private static readonly MethodInfo s_exceptionGetData = typeof(Exception).GetProperty("Data").GetGetMethod();
+        private static readonly MethodInfo s_dictionaryAdd = typeof(IDictionary).GetMethod("Add");
+        private static readonly ConstructorInfo s_objectCtor = typeof(object).GetConstructor(Type.EmptyTypes);
 
         /// Generates the code that loads the supplied value on the stack
         /// This is not as simple as it seems, as different instructions need to be generated depending
@@ -82,29 +80,27 @@ namespace Microsoft.Internal
             //
             // Generate IL depending on the valueType - this is messier than it should ever be, but sadly necessary
             //
-            if (valueType == GenerationServices.StringType)
+            if (valueType == s_stringType)
             {
                 // we need to check for strings before enumerables, because strings are IEnumerable<char>
                 ilGenerator.LoadString((string)rawValue);
             }
-            else if (GenerationServices.TypeType.IsAssignableFrom(valueType))
+            else if (s_typeType.IsAssignableFrom(valueType))
             {
                 ilGenerator.LoadTypeOf((Type)rawValue);
             }
-            else if (GenerationServices.IEnumerableType.IsAssignableFrom(valueType))
+            else if (s_iEnumerableType.IsAssignableFrom(valueType))
             {
                 // NOTE : strings and dictionaries are also enumerables, but we have already handled those
                 ilGenerator.LoadEnumerable((IEnumerable)rawValue);
             }
-            else if (
-                (valueType == GenerationServices.CharType) ||
-                (valueType == GenerationServices.BooleanType) ||
-                (valueType == GenerationServices.ByteType) ||
-                (valueType == GenerationServices.SByteType) ||
-                (valueType == GenerationServices.Int16Type) ||
-                (valueType == GenerationServices.UInt16Type) ||
-                (valueType == GenerationServices.Int32Type)
-                )
+            else if ((valueType == s_charType) ||
+                (valueType == s_booleanType) ||
+                (valueType == s_byteType) ||
+                (valueType == s_sByteType) ||
+                (valueType == s_int16Type) ||
+                (valueType == s_uInt16Type) ||
+                (valueType == s_int32Type))
             {
                 // NOTE : Everything that is 32 bit or less uses ldc.i4. We need to pass int32, even if the actual types is shorter - this is IL memory model
                 // direct casting to (int) won't work, because the value is boxed, thus we need to use Convert.
@@ -112,36 +108,35 @@ namespace Microsoft.Internal
                 // We have a special case for that next
                 ilGenerator.LoadInt((int)Convert.ChangeType(rawValue, typeof(int), CultureInfo.InvariantCulture));
             }
-            else if (valueType == GenerationServices.UInt32Type)
+            else if (valueType == s_uInt32Type)
             {
                 // NOTE : This one is a bit tricky. Ldc.I4 takes an Int32 as an argument, although it really treats it as a 32bit number
                 // That said, some UInt32 values are larger that Int32.MaxValue, so the Convert call above will fail, which is why 
                 // we need to treat this case individually and cast to uint, and then - unchecked - to int.
                 ilGenerator.LoadInt(unchecked((int)((uint)rawValue)));
             }
-            else if (valueType == GenerationServices.Int64Type)
+            else if (valueType == s_int64Type)
             {
                 ilGenerator.LoadLong((long)rawValue);
             }
-            else if (valueType == GenerationServices.UInt64Type)
+            else if (valueType == s_uInt64Type)
             {
                 // NOTE : This one is a bit tricky. Ldc.I8 takes an Int64 as an argument, although it really treats it as a 64bit number
                 // That said, some UInt64 values are larger that Int64.MaxValue, so the direct case we use above (or Convert, for that matter)will fail, which is why
                 // we need to treat this case individually and cast to ulong, and then - unchecked - to long.
                 ilGenerator.LoadLong(unchecked((long)((ulong)rawValue)));
             }
-            else if (valueType == GenerationServices.SingleType)
+            else if (valueType == s_singleType)
             {
                 ilGenerator.LoadFloat((float)rawValue);
             }
-            else if (valueType == GenerationServices.DoubleType)
+            else if (valueType == s_doubleType)
             {
                 ilGenerator.LoadDouble((double)rawValue);
             }
             else
             {
-                throw new InvalidOperationException(
-                    string.Format(CultureInfo.CurrentCulture, SR.InvalidMetadataValue, value.GetType().FullName));
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, SR.InvalidMetadataValue, value.GetType().FullName));
             }
         }
 
@@ -173,7 +168,7 @@ namespace Microsoft.Internal
             ilGenerator.Emit(OpCodes.Ldloc, dictionary);
             ilGenerator.LoadValue(key);
             ilGenerator.LoadValue(value);
-            ilGenerator.Emit(OpCodes.Callvirt, DictionaryAdd);
+            ilGenerator.Emit(OpCodes.Callvirt, s_dictionaryAdd);
         }
 
         /// Generates the code that adds an object from a local variable to a dictionary also stored in a local
@@ -204,7 +199,7 @@ namespace Microsoft.Internal
             ilGenerator.Emit(OpCodes.Ldloc, dictionary);
             ilGenerator.LoadValue(key);
             ilGenerator.Emit(OpCodes.Ldloc, value);
-            ilGenerator.Emit(OpCodes.Callvirt, DictionaryAdd);
+            ilGenerator.Emit(OpCodes.Callvirt, s_dictionaryAdd);
         }
 
         /// Generates the code to get the type of an object and store it in a local
@@ -227,7 +222,7 @@ namespace Microsoft.Internal
             }
 
             ilGenerator.Emit(OpCodes.Ldloc, exception);
-            ilGenerator.Emit(OpCodes.Callvirt, ExceptionGetData);
+            ilGenerator.Emit(OpCodes.Callvirt, s_exceptionGetData);
             ilGenerator.Emit(OpCodes.Stloc, dataStore);
         }
 
@@ -242,8 +237,7 @@ namespace Microsoft.Internal
 
             // We load enumerable as an array - this is the most compact and efficient way of representing it
             Type elementType = null;
-            Type closedType = null;
-            if (ReflectionServices.TryGetGenericInterfaceType(enumerable.GetType(), GenerationServices.IEnumerableTypeofT, out closedType))
+            if (ReflectionServices.TryGetGenericInterfaceType(enumerable.GetType(), s_iEnumerableTypeofT, out Type closedType))
             {
                 elementType = closedType.GetGenericArguments()[0];
             }
@@ -271,7 +265,7 @@ namespace Microsoft.Internal
                 ilGenerator.Emit(OpCodes.Ldloc, generatedArrayLocal);
                 ilGenerator.LoadInt(index);
                 ilGenerator.LoadValue(value);
-                if (GenerationServices.IsBoxingRequiredForValue(value) && !elementType.IsValueType)
+                if (IsBoxingRequiredForValue(value) && !elementType.IsValueType)
                 {
                     ilGenerator.Emit(OpCodes.Box, value.GetType());
                 }
@@ -347,7 +341,7 @@ namespace Microsoft.Internal
 
             //typeofs() translate into ldtoken and Type::GetTypeFromHandle call
             ilGenerator.Emit(OpCodes.Ldtoken, type);
-            ilGenerator.EmitCall(OpCodes.Call, GenerationServices._typeGetTypeFromHandleMethod, null);
+            ilGenerator.EmitCall(OpCodes.Call, s_typeGetTypeFromHandleMethod, null);
         }
     }
 }
