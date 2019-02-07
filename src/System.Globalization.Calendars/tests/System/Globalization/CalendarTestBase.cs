@@ -11,6 +11,60 @@ namespace System.Globalization.Tests
     {
         public abstract Calendar Calendar { get; }
 
+        public virtual DateTime MinSupportedDateTime => DateTime.MinValue;
+
+        public virtual DateTime MaxSupportedDateTime => DateTime.MaxValue;
+
+        public virtual int[] Eras => new int[] { 1 };
+
+        public virtual bool SkipErasTest => false;
+
+        public virtual CalendarAlgorithmType AlgorithmType => CalendarAlgorithmType.SolarCalendar;
+
+        public virtual bool IsReadOnly => false;
+
+        [Fact]
+        public void MinSupportedDateTime_Get_ReturnsExpected()
+        {
+            Assert.Equal(MinSupportedDateTime, Calendar.MinSupportedDateTime);
+        }
+
+        [Fact]
+        public void MaxSupportedDateTime_Get_ReturnsExpected()
+        {
+            Assert.Equal(MaxSupportedDateTime, Calendar.MaxSupportedDateTime);
+        }
+
+        [Fact]
+        public void Eras_Get_ReturnsExpected()
+        {
+            if (SkipErasTest)
+            {
+                return;
+            }
+
+            Assert.Equal(Eras, Calendar.Eras);
+        }
+
+        [Fact]
+        public void Eras_Get_ReturnsDifferentInstance()
+        {
+            Calendar calendar = Calendar;
+            Assert.NotSame(calendar.Eras, calendar.Eras);
+        }
+
+        [Fact]
+        public void AlgorithmType_Get_ReturnsExpected()
+        {
+            Assert.Equal(AlgorithmType, Calendar.AlgorithmType);
+        }
+
+        [Fact]
+        public void IsReadOnly_Get_ReturnsExpected()
+        {
+            Assert.Equal(IsReadOnly, Calendar.IsReadOnly);
+        }
+
         public enum DataType
         {
             Year = 1,

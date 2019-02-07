@@ -6,11 +6,52 @@ using Xunit;
 
 namespace System.Globalization.Tests
 {
+    public class GregorianCalendarTests
+    {
+        [Theory]
+        [InlineData(GregorianCalendarTypes.Localized - 1)]
+        [InlineData(GregorianCalendarTypes.TransliteratedFrench + 1)]
+        public void Ctor_InvalidType_ThrowsArgumentOutOfRangeException(GregorianCalendarTypes type)
+        {
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("type", () => new GregorianCalendar(type));
+        }
+    }
+
     public abstract class GregorianCalendarTestBase : CalendarTestBase
     {
         public abstract GregorianCalendarTypes CalendarType { get; }
 
         public override Calendar Calendar => new GregorianCalendar(CalendarType);
+
+        [Fact]
+        public void CalendarType_Get_ReturnsExpected()
+        {
+            GregorianCalendar calendar = ((GregorianCalendar)Calendar);
+            Assert.Equal(CalendarType, calendar.CalendarType);
+        }
+
+        [Theory]
+        [InlineData(GregorianCalendarTypes.Arabic)]
+        [InlineData(GregorianCalendarTypes.Localized)]
+        [InlineData(GregorianCalendarTypes.MiddleEastFrench)]
+        [InlineData(GregorianCalendarTypes.TransliteratedEnglish)]
+        [InlineData(GregorianCalendarTypes.TransliteratedFrench)]
+        [InlineData(GregorianCalendarTypes.USEnglish)]
+        public void CalendarType_Set(GregorianCalendarTypes type)
+        {
+            GregorianCalendar calendar = ((GregorianCalendar)Calendar);
+            calendar.CalendarType = type;
+            Assert.Equal(type, calendar.CalendarType);
+        }
+
+        [Theory]
+        [InlineData(GregorianCalendarTypes.Localized - 1)]
+        [InlineData(GregorianCalendarTypes.TransliteratedFrench + 1)]
+        public void CalendarType_SetInvalidValue_ThrowsArgumentOutOfRangeException(GregorianCalendarTypes type)
+        {
+            GregorianCalendar calendar = ((GregorianCalendar)Calendar);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("m_type", () => calendar.CalendarType = type);
+        }
     }
 
     public class GregorianCalendarDefaultTests : GregorianCalendarTestBase

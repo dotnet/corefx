@@ -9,5 +9,7 @@ namespace System.Globalization.Tests
     public class TaiwanCalendarTests : CalendarTestBase
     {
         public override Calendar Calendar => new TaiwanCalendar();
+
+        public override DateTime MinSupportedDateTime => new DateTime(1912, 01, 01);
     }
 }

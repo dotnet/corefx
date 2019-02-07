@@ -6,8 +6,12 @@ using Xunit;
 
 namespace System.Globalization.Tests
 {
-    public class TaiwanLunisolarTests : CalendarTestBase
+    public class TaiwanLunisolarTests : EastAsianLunisolarCalendarTestBase
     {
         public override Calendar Calendar => new TaiwanLunisolarCalendar();
+
+        public override DateTime MinSupportedDateTime => new DateTime(1912, 02, 18);
+
+        public override DateTime MaxSupportedDateTime => new DateTime(2051, 02, 10, 23, 59, 59).AddTicks(9999999);
     }
 }
