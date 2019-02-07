@@ -28,7 +28,7 @@ namespace System.Buffers
             _index = 0;
         }
 
-        public ReadOnlyMemory<T> OutputAsMemory
+        public ReadOnlyMemory<T> WrittenMemory
         {
             get
             {
@@ -38,17 +38,7 @@ namespace System.Buffers
             }
         }
 
-        public ReadOnlySpan<T> OutputAsSpan
-        {
-            get
-            {
-                CheckIfDisposed();
-
-                return _rentedBuffer.AsSpan(0, _index);
-            }
-        }
-
-        public int CurrentIndex
+        public int WrittenCount
         {
             get
             {
@@ -68,7 +58,7 @@ namespace System.Buffers
             }
         }
 
-        public int AvailableSpace
+        public int FreeCapacity
         {
             get
             {
@@ -87,6 +77,8 @@ namespace System.Buffers
 
         private void ClearHelper()
         {
+            Debug.Assert(_rentedBuffer != null);
+
             _rentedBuffer.AsSpan(0, _index).Clear();
             _index = 0;
         }
@@ -99,9 +91,9 @@ namespace System.Buffers
                 return;
             }
 
-            ArrayPool<T>.Shared.Return(_rentedBuffer, clearArray: true);
+            ClearHelper();
+            ArrayPool<T>.Shared.Return(_rentedBuffer);
             _rentedBuffer = null;
-            _index = 0;
         }
 
         private void CheckIfDisposed()
@@ -141,6 +133,8 @@ namespace System.Buffers
 
         private void CheckAndResizeBuffer(int sizeHint)
         {
+            Debug.Assert(_rentedBuffer != null);
+
             if (sizeHint < 0)
                 throw new ArgumentException(nameof(sizeHint));
 

@@ -18,20 +18,18 @@ namespace System.Buffers.Tests
         {
             using (var output = new ArrayBufferWriter<byte>())
             {
-                Assert.True(output.AvailableSpace > 0);
+                Assert.True(output.FreeCapacity > 0);
                 Assert.True(output.Capacity > 0);
-                Assert.Equal(0, output.CurrentIndex);
-                Assert.True(ReadOnlyMemory<byte>.Empty.Span.SequenceEqual(output.OutputAsMemory.Span));
-                Assert.True(ReadOnlySpan<byte>.Empty.SequenceEqual(output.OutputAsSpan));
+                Assert.Equal(0, output.WrittenCount);
+                Assert.True(ReadOnlyMemory<byte>.Empty.Span.SequenceEqual(output.WrittenMemory.Span));
             }
 
             using (var output = new ArrayBufferWriter<byte>(200))
             {
-                Assert.True(output.AvailableSpace >= 200);
+                Assert.True(output.FreeCapacity >= 200);
                 Assert.True(output.Capacity >= 200);
-                Assert.Equal(0, output.CurrentIndex);
-                Assert.True(ReadOnlyMemory<byte>.Empty.Span.SequenceEqual(output.OutputAsMemory.Span));
-                Assert.True(ReadOnlySpan<byte>.Empty.SequenceEqual(output.OutputAsSpan));
+                Assert.Equal(0, output.WrittenCount);
+                Assert.True(ReadOnlyMemory<byte>.Empty.Span.SequenceEqual(output.WrittenMemory.Span));
             }
 
             using (ArrayBufferWriter<byte> output = default)
@@ -63,10 +61,10 @@ namespace System.Buffers.Tests
             using (var output = new ArrayBufferWriter<byte>())
             {
                 output.Dispose();
-                Assert.Throws<ObjectDisposedException>(() => output.AvailableSpace);
+                Assert.Throws<ObjectDisposedException>(() => output.FreeCapacity);
                 Assert.Throws<ObjectDisposedException>(() => output.Capacity);
-                Assert.Throws<ObjectDisposedException>(() => output.CurrentIndex);
-                Assert.Throws<ObjectDisposedException>(() => output.OutputAsMemory);
+                Assert.Throws<ObjectDisposedException>(() => output.WrittenCount);
+                Assert.Throws<ObjectDisposedException>(() => output.WrittenMemory);
                 Assert.Throws<ObjectDisposedException>(() => output.Clear());
                 Assert.Throws<ObjectDisposedException>(() => output.Advance(1));
                 Assert.Throws<ObjectDisposedException>(() => output.GetMemory());
@@ -78,14 +76,14 @@ namespace System.Buffers.Tests
         {
             using (var output = new ArrayBufferWriter<byte>())
             {
-                int previousAvailable = output.AvailableSpace;
+                int previousAvailable = output.FreeCapacity;
                 WriteData(output, 2);
-                Assert.True(output.AvailableSpace < previousAvailable);
-                Assert.True(output.CurrentIndex > 0);
-                Assert.False(ReadOnlySpan<byte>.Empty.SequenceEqual(output.OutputAsSpan));
+                Assert.True(output.FreeCapacity < previousAvailable);
+                Assert.True(output.WrittenCount > 0);
+                Assert.False(ReadOnlyMemory<byte>.Empty.Span.SequenceEqual(output.WrittenMemory.Span));
                 output.Clear();
-                Assert.Equal(0, output.CurrentIndex);
-                Assert.True(ReadOnlySpan<byte>.Empty.SequenceEqual(output.OutputAsSpan));
+                Assert.Equal(0, output.WrittenCount);
+                Assert.True(ReadOnlyMemory<byte>.Empty.Span.SequenceEqual(output.WrittenMemory.Span));
             }
         }
 
@@ -95,17 +93,17 @@ namespace System.Buffers.Tests
             using (var output = new ArrayBufferWriter<byte>())
             {
                 int capacity = output.Capacity;
-                Assert.Equal(capacity, output.AvailableSpace);
-                output.Advance(output.AvailableSpace);
-                Assert.Equal(capacity, output.CurrentIndex);
-                Assert.Equal(0, output.AvailableSpace);
+                Assert.Equal(capacity, output.FreeCapacity);
+                output.Advance(output.FreeCapacity);
+                Assert.Equal(capacity, output.WrittenCount);
+                Assert.Equal(0, output.FreeCapacity);
             }
 
             using (var output = new ArrayBufferWriter<byte>())
             {
                 output.Advance(output.Capacity);
-                Assert.Equal(output.Capacity, output.CurrentIndex);
-                Assert.Equal(0, output.AvailableSpace);
+                Assert.Equal(output.Capacity, output.WrittenCount);
+                Assert.Equal(0, output.FreeCapacity);
                 int previousCapacity = output.Capacity;
                 Span<byte> _ = output.GetSpan();
                 Assert.True(output.Capacity > previousCapacity);
@@ -114,9 +112,9 @@ namespace System.Buffers.Tests
             using (var output = new ArrayBufferWriter<byte>())
             {
                 WriteData(output, 2);
-                ReadOnlySpan<byte> previous = output.OutputAsSpan;
+                ReadOnlySpan<byte> previous = output.WrittenMemory.Span;
                 output.Advance(10);
-                Assert.False(previous.SequenceEqual(output.OutputAsSpan));
+                Assert.False(previous.SequenceEqual(output.WrittenMemory.Span));
             }
         }
 
@@ -126,11 +124,11 @@ namespace System.Buffers.Tests
             using (var output = new ArrayBufferWriter<byte>())
             {
                 WriteData(output, 2);
-                Assert.Equal(2, output.CurrentIndex);
-                ReadOnlySpan<byte> previous = output.OutputAsSpan;
+                Assert.Equal(2, output.WrittenCount);
+                ReadOnlySpan<byte> previous = output.WrittenMemory.Span;
                 output.Advance(0);
-                Assert.Equal(2, output.CurrentIndex);
-                Assert.True(previous.SequenceEqual(output.OutputAsSpan));
+                Assert.Equal(2, output.WrittenCount);
+                Assert.True(previous.SequenceEqual(output.WrittenMemory.Span));
             }
         }
 
@@ -146,7 +144,7 @@ namespace System.Buffers.Tests
             using (var output = new ArrayBufferWriter<byte>())
             {
                 WriteData(output, 100);
-                Assert.Throws<InvalidOperationException>(() => output.Advance(output.AvailableSpace + 1));
+                Assert.Throws<InvalidOperationException>(() => output.Advance(output.FreeCapacity + 1));
             }
         }
 
@@ -184,14 +182,14 @@ namespace System.Buffers.Tests
             using (var output = new ArrayBufferWriter<byte>())
             {
                 WriteData(output, 2);
-                ReadOnlySpan<byte> writtenSoFar = output.OutputAsSpan;
-                int previousAvailable = output.AvailableSpace;
+                ReadOnlySpan<byte> writtenSoFar = output.WrittenMemory.Span;
+                int previousAvailable = output.FreeCapacity;
                 Span<byte> span = output.GetSpan(500);
                 Assert.True(span.Length >= 500);
-                Assert.True(output.AvailableSpace >= 500);
-                Assert.True(output.AvailableSpace > previousAvailable);
+                Assert.True(output.FreeCapacity >= 500);
+                Assert.True(output.FreeCapacity > previousAvailable);
 
-                Assert.True(writtenSoFar.SequenceEqual(span.Slice(0, output.CurrentIndex)));
+                Assert.True(writtenSoFar.SequenceEqual(span.Slice(0, output.WrittenCount)));
 
                 Memory<byte> memory = output.GetMemory();
                 Span<byte> memorySpan = memory.Span;
@@ -221,13 +219,13 @@ namespace System.Buffers.Tests
             using (var output = new ArrayBufferWriter<byte>())
             {
                 WriteData(output, 100);
-                int previousAvailable = output.AvailableSpace;
+                int previousAvailable = output.FreeCapacity;
 
                 Span<byte> span = output.GetSpan(previousAvailable);
-                Assert.Equal(previousAvailable, output.AvailableSpace);
+                Assert.Equal(previousAvailable, output.FreeCapacity);
 
                 span = output.GetSpan(previousAvailable + 1);
-                Assert.True(output.AvailableSpace >= previousAvailable * 2);
+                Assert.True(output.FreeCapacity >= previousAvailable * 2);
             }
         }
 
@@ -236,27 +234,27 @@ namespace System.Buffers.Tests
         {
             using (var output = new ArrayBufferWriter<byte>())
             {
-                int previousAvailable = output.AvailableSpace;
+                int previousAvailable = output.FreeCapacity;
 
                 for (int i = 0; i < 10; i++)
                 {
                     Span<byte> span = output.GetSpan();
-                    Assert.Equal(previousAvailable, output.AvailableSpace);
+                    Assert.Equal(previousAvailable, output.FreeCapacity);
                 }
             }
 
             using (var output = new ArrayBufferWriter<byte>(100))
             {
-                int previousAvailable = output.AvailableSpace;
+                int previousAvailable = output.FreeCapacity;
 
                 Span<byte> span = output.GetSpan();
-                Assert.True(output.AvailableSpace > previousAvailable);
+                Assert.True(output.FreeCapacity > previousAvailable);
 
-                previousAvailable = output.AvailableSpace;
+                previousAvailable = output.FreeCapacity;
                 for (int i = 0; i < 10; i++)
                 {
                     span = output.GetSpan();
-                    Assert.Equal(previousAvailable, output.AvailableSpace);
+                    Assert.Equal(previousAvailable, output.FreeCapacity);
                 }
             }
         }
@@ -277,7 +275,7 @@ namespace System.Buffers.Tests
         {
             using (var output = new ArrayBufferWriter<byte>(300))
             {
-                int previousAvailable = output.AvailableSpace;
+                int previousAvailable = output.FreeCapacity;
                 Assert.True(previousAvailable >= 300);
                 Assert.True(output.Capacity >= 300);
                 Assert.Equal(previousAvailable, output.Capacity);
@@ -306,11 +304,11 @@ namespace System.Buffers.Tests
                 WriteData(output, 100);
                 using (var memStream = new MemoryStream(100))
                 {
-                    Assert.Equal(100, output.CurrentIndex);
+                    Assert.Equal(100, output.WrittenCount);
 
-                    ReadOnlySpan<byte> outputSpan = output.OutputAsSpan.ToArray();
+                    ReadOnlySpan<byte> outputSpan = output.WrittenMemory.ToArray();
 
-                    ReadOnlySpan<byte> transientSpan = output.OutputAsSpan;
+                    ReadOnlySpan<byte> transientSpan = output.WrittenMemory.Span;
 
                     Assert.True(transientSpan[0] != 0);
 
@@ -319,11 +317,11 @@ namespace System.Buffers.Tests
 
                     Assert.True(transientSpan[0] == 0);
 
-                    Assert.Equal(0, output.CurrentIndex);
+                    Assert.Equal(0, output.WrittenCount);
                     byte[] streamOutput = memStream.ToArray();
 
-                    Assert.True(ReadOnlyMemory<byte>.Empty.Span.SequenceEqual(output.OutputAsMemory.Span));
-                    Assert.True(ReadOnlySpan<byte>.Empty.SequenceEqual(output.OutputAsSpan));
+                    Assert.True(ReadOnlyMemory<byte>.Empty.Span.SequenceEqual(output.WrittenMemory.Span));
+                    Assert.True(ReadOnlySpan<byte>.Empty.SequenceEqual(output.WrittenMemory.Span));
 
                     Assert.Equal(outputSpan.Length, streamOutput.Length);
                     Assert.True(outputSpan.SequenceEqual(streamOutput));
@@ -340,11 +338,11 @@ namespace System.Buffers.Tests
                 WriteData(output, 100);
                 using (var memStream = new MemoryStream(100))
                 {
-                    Assert.Equal(100, output.CurrentIndex);
+                    Assert.Equal(100, output.WrittenCount);
 
-                    ReadOnlyMemory<byte> outputMemory = output.OutputAsMemory.ToArray();
+                    ReadOnlyMemory<byte> outputMemory = output.WrittenMemory.ToArray();
 
-                    ReadOnlyMemory<byte> transient = output.OutputAsMemory;
+                    ReadOnlyMemory<byte> transient = output.WrittenMemory;
 
                     Assert.True(transient.Span[0] != 0);
 
@@ -353,11 +351,11 @@ namespace System.Buffers.Tests
 
                     Assert.True(transient.Span[0] == 0);
 
-                    Assert.Equal(0, output.CurrentIndex);
+                    Assert.Equal(0, output.WrittenCount);
                     byte[] streamOutput = memStream.ToArray();
 
-                    Assert.True(ReadOnlyMemory<byte>.Empty.Span.SequenceEqual(output.OutputAsMemory.Span));
-                    Assert.True(ReadOnlySpan<byte>.Empty.SequenceEqual(output.OutputAsSpan));
+                    Assert.True(ReadOnlyMemory<byte>.Empty.Span.SequenceEqual(output.WrittenMemory.Span));
+                    Assert.True(ReadOnlySpan<byte>.Empty.SequenceEqual(output.WrittenMemory.Span));
 
                     Assert.Equal(outputMemory.Length, streamOutput.Length);
                     Assert.True(outputMemory.Span.SequenceEqual(streamOutput));
