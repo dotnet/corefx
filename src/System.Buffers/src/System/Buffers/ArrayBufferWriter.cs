@@ -110,7 +110,7 @@ namespace System.Buffers
                 throw new ArgumentException(nameof(count));
 
             if (_index > _rentedBuffer.Length - count)
-                ThrowHelper.ThrowInvalidOperationException(_rentedBuffer.Length);
+                ThrowInvalidOperationException(_rentedBuffer.Length);
 
             _index += count;
         }
@@ -166,6 +166,11 @@ namespace System.Buffers
 
             Debug.Assert(_rentedBuffer.Length - _index > 0);
             Debug.Assert(_rentedBuffer.Length - _index >= sizeHint);
+        }
+
+        private static void ThrowInvalidOperationException(int capacity)
+        {
+            throw new InvalidOperationException(SR.Format(SR.AdvancingTooFar, capacity));
         }
     }
 }

@@ -144,7 +144,4 @@
   <data name="UnexpectedSegmentType" xml:space="preserve">
     <value>Unexpected segment type.</value>
   </data>
-  <data name="AdvancingTooFar" xml:space="preserve">
-    <value>Cannot advance past the end of the buffer, which has a capacity of {0} byte(s).</value>
-  </data>
 </root>

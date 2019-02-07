@@ -7,6 +7,20 @@
 
 namespace System.Buffers
 {
+    public sealed partial class ArrayBufferWriter<T> : System.Buffers.IBufferWriter<T>, System.IDisposable
+    {
+        public ArrayBufferWriter() { }
+        public ArrayBufferWriter(int initialCapacity) { }
+        public int Capacity { get { throw null; } }
+        public int FreeCapacity { get { throw null; } }
+        public int WrittenCount { get { throw null; } }
+        public System.ReadOnlyMemory<T> WrittenMemory { get { throw null; } }
+        public void Advance(int count) { }
+        public void Clear() { }
+        public void Dispose() { }
+        public System.Memory<T> GetMemory(int sizeHint = 0) { throw null; }
+        public System.Span<T> GetSpan(int sizeHint = 0) { throw null; }
+    }
     public abstract class ArrayPool<T>
     {
         public static ArrayPool<T> Shared { get { throw null; } }
