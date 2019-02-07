@@ -7,6 +7,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ArrayBufferWriter\ArrayBufferWriterTests.Byte.cs" />
+    <Compile Include="ArrayBufferWriter\ArrayBufferWriterTests.Char.cs" />
+    <Compile Include="ArrayBufferWriter\ArrayBufferWriterTests.String.cs" />
     <Compile Include="ArrayPool\ArrayPoolTest.cs" />
     <Compile Include="ArrayPool\CollectionTests.cs" />
     <Compile Include="ArrayPool\UnitTests.cs" />
