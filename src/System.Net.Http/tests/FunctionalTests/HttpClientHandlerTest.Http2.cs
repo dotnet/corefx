@@ -1049,9 +1049,7 @@ namespace System.Net.Http.Functional.Tests
                 // The client is waiting for more credit in order to send the last byte of the
                 // request body. Test cancellation at this point.
                 cts.Cancel();
-
                 await Assert.ThrowsAsync<OperationCanceledException>(async () => await clientTask);
-
                 frame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
                 Assert.Equal(FrameType.RstStream, frame.Type);
             }
