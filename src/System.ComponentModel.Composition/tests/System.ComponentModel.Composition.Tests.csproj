@@ -5,15 +5,6 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(CommonTestPath)\System\IO\TempDirectory.cs">
-      <Link>Common\System\IO\TempDirectory.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
-      <Link>Common\System\IO\TempFile.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
-      <Link>Common\System\ThreadCultureChange.cs</Link>
-    </Compile>
     <Compile Include="IMetadataView.cs" />
     <Compile Include="MetadataTests_IMetadataView.cs" />
     <Compile Include="System\ComponentModel\Composition\AdvancedValueComposition.cs" />
@@ -154,6 +145,9 @@
     <Compile Include="..\src\System\ComponentModel\Composition\Hosting\AssemblyCatalogDebuggerProxy.cs" Link="System\ComponentModel\Composition\Hosting\AssemblyCatalogDebuggerProxy.cs" />
     <Compile Include="..\src\System\ComponentModel\Composition\Primitives\ComposablePartCatalogDebuggerProxy.cs" Link="System\ComponentModel\Composition\Primitives\ComposablePartCatalogDebuggerProxy.cs" />
     <Compile Include="..\src\System\ComponentModel\Composition\Primitives\IPartCreatorImportDefinition.cs" Link="System\ComponentModel\Composition\Primitives\IPartCreatorImportDefinition.cs" />
+    <Compile Include="$(CommonTestPath)\System\IO\TempDirectory.cs" Link="Common\System\IO\TempDirectory.cs" />
+    <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs" Link="Common\System\IO\TempFile.cs" />
+    <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs" Link="Common\System\ThreadCultureChange.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="System.ComponentModel.Composition.Noop.Assembly/System.ComponentModel.Composition.Noop.Assembly.csproj">
