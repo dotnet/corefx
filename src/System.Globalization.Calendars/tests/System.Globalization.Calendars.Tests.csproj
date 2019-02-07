@@ -5,7 +5,21 @@
     <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CalendarHelpers.cs" />
+    <Compile Include="System\Globalization\CalendarTestBase.cs" />
+    <Compile Include="System\Globalization\ChineseLunisolarCalendarTests.cs" />
+    <Compile Include="System\Globalization\GregorianCalendarTests.cs" />
+    <Compile Include="System\Globalization\HebrewCalendarTests.cs" />
+    <Compile Include="System\Globalization\HijriCalendarTests.cs" />
+    <Compile Include="System\Globalization\JapaneseCalendarTests.cs" />
+    <Compile Include="System\Globalization\JapaneseLunisolarCalendarTests.cs" />
+    <Compile Include="System\Globalization\JulianCalendarTests.cs" />
+    <Compile Include="System\Globalization\KoreanCalendarTests.cs" />
+    <Compile Include="System\Globalization\KoreanLunisolarCalendarTests.cs" />
+    <Compile Include="System\Globalization\PersianCalendarTests.cs" />
+    <Compile Include="System\Globalization\TaiwanCalendarTests.cs" />
+    <Compile Include="System\Globalization\TaiwanLunisolarCalendarTests.cs" />
+    <Compile Include="System\Globalization\ThaiBuddhistCalendarTests.cs" />
+    <Compile Include="System\Globalization\UmAlQuraCalendarTests.cs" />
     <Compile Include="GregorianCalendar\GregorianCalendarCtor.cs" />
     <Compile Include="GregorianCalendar\GregorianCalendarAddMonths.cs" />
     <Compile Include="GregorianCalendar\GregorianCalendarAddYears.cs" />
@@ -59,7 +73,6 @@
     <Compile Include="KoreanCalendar\KoreanCalendarTwoDigitYearMax.cs" />
     <Compile Include="Misc\MiscCalendars.cs" />
     <Compile Include="Misc\Calendars.cs" />
-    <Compile Include="PersianCalendar\PersianCalendarTest.cs" />
     <Compile Include="TaiwanCalendar\TaiwanCalendarUtilities.cs" />
     <Compile Include="TaiwanCalendar\TaiwanCalendarAddMonths.cs" />
     <Compile Include="TaiwanCalendar\TaiwanCalendarAddYears.cs" />

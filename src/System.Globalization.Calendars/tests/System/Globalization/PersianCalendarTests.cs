@@ -7,8 +7,10 @@ using Xunit;
 
 namespace System.Globalization.Tests
 {
-    public class PersianCalendarTests
+    public class PersianCalendarTests : CalendarTestBase
     {
+        public override Calendar Calendar => new PersianCalendar();
+
         [Fact]
         public void CalendarConversion()
         {
