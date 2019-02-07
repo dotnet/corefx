@@ -318,7 +318,7 @@ namespace System.Buffers.Tests
 
                     Assert.True(transientSpan[0] != 0);
 
-                    memStream.Write(transientSpan);
+                    memStream.Write(transientSpan.ToArray(), 0, transientSpan.Length);
                     output.Clear();
 
                     Assert.True(transientSpan[0] == 0);
@@ -351,7 +351,7 @@ namespace System.Buffers.Tests
 
                     Assert.True(transient.Span[0] != 0);
 
-                    await memStream.WriteAsync(transient);
+                    await memStream.WriteAsync(transient.ToArray(), 0, transient.Length);
                     output.Clear();
 
                     Assert.True(transient.Span[0] == 0);
