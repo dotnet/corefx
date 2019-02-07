@@ -7,7 +7,6 @@
 
 namespace System.Buffers
 {
-#if INBOX_APIS
     public sealed partial class ArrayBufferWriter<T> : System.Buffers.IBufferWriter<T>, System.IDisposable
     {
         public ArrayBufferWriter() { }
@@ -22,7 +21,6 @@ namespace System.Buffers
         public System.Memory<T> GetMemory(int sizeHint = 0) { throw null; }
         public System.Span<T> GetSpan(int sizeHint = 0) { throw null; }
     }
-#endif
     public abstract partial class ArrayPool<T>
     {
         protected ArrayPool() { }

@@ -5,7 +5,6 @@
     <AssemblyVersion>4.0.2.0</AssemblyVersion>
     <ProjectGuid>{11AE73F7-3532-47B9-8FF6-B4F22D76456C}</ProjectGuid>
     <Configurations>netstandard-Debug;netstandard-Release;netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
-    <DefineConstants Condition="'$(TargetGroup)' == 'uap' OR '$(TargetGroup)' == 'netcoreapp'">$(DefineConstants);INBOX_APIS</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Buffers.cs" />
@@ -13,5 +12,8 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'uap' OR '$(TargetGroup)' == 'netcoreapp'">
     <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
     <ProjectReference Include="..\..\System.Memory\ref\System.Memory.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netcoreapp'">
+    <Reference Include="System.Memory" />
   </ItemGroup>
 </Project>
