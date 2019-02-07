@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Linq;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -42,7 +41,10 @@ namespace System.ComponentModel.Composition.Hosting
 
         public void Add(ComposablePartCatalog item)
         {
-            Requires.NotNull(item, nameof(item));
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
 
             ThrowIfDisposed();
 
@@ -51,7 +53,7 @@ namespace System.ComponentModel.Composition.Hosting
             using (var atomicComposition = new AtomicComposition())
             {
                 RaiseChangingEvent(addedParts, null, atomicComposition);
- 
+
                 using (new WriteLock(_lock))
                 {
                     if (_isCopyNeeded)
@@ -62,7 +64,7 @@ namespace System.ComponentModel.Composition.Hosting
                     _hasChanged = true;
                     _catalogs.Add(item);
                 }
-                
+
                 SubscribeToCatalogNotifications(item);
 
                 // Complete after the catalog changes are written
@@ -125,7 +127,10 @@ namespace System.ComponentModel.Composition.Hosting
 
         public bool Contains(ComposablePartCatalog item)
         {
-            Requires.NotNull(item, nameof(item));
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
 
             ThrowIfDisposed();
 
@@ -147,7 +152,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public int Count
         {
-            get 
+            get
             {
                 ThrowIfDisposed();
 
@@ -170,7 +175,10 @@ namespace System.ComponentModel.Composition.Hosting
 
         public bool Remove(ComposablePartCatalog item)
         {
-            Requires.NotNull(item, nameof(item));
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
 
             ThrowIfDisposed();
 
@@ -300,8 +308,12 @@ namespace System.ComponentModel.Composition.Hosting
                 return;
             }
 
-            var added = (addedDefinitions == null ? Enumerable.Empty<ComposablePartDefinition>() : addedDefinitions.Value);
-            var removed = (removedDefinitions == null ? Enumerable.Empty<ComposablePartDefinition>() : removedDefinitions.Value);
+            IEnumerable<ComposablePartDefinition> added = addedDefinitions == null ?
+                Enumerable.Empty<ComposablePartDefinition>() :
+                addedDefinitions.Value;
+            IEnumerable<ComposablePartDefinition> removed = removedDefinitions == null ?
+                Enumerable.Empty<ComposablePartDefinition>() :
+                removedDefinitions.Value;
 
             _onChanged.Invoke(new ComposablePartCatalogChangeEventArgs(added, removed, null));
         }
@@ -320,8 +332,12 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 return;
             }
-            var added = (addedDefinitions == null ? Enumerable.Empty<ComposablePartDefinition>() : addedDefinitions.Value);
-            var removed = (removedDefinitions == null ? Enumerable.Empty<ComposablePartDefinition>() : removedDefinitions.Value);
+            IEnumerable<ComposablePartDefinition> added = addedDefinitions == null ?
+                Enumerable.Empty<ComposablePartDefinition>() :
+                addedDefinitions.Value;
+            IEnumerable<ComposablePartDefinition> removed = removedDefinitions == null ?
+                Enumerable.Empty<ComposablePartDefinition>() :
+                removedDefinitions.Value;
 
             _onChanging.Invoke(new ComposablePartCatalogChangeEventArgs(added, removed, atomicComposition));
         }

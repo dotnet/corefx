@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Primitives
 {
@@ -18,9 +17,9 @@ namespace System.ComponentModel.Composition.Primitives
     {
         private readonly ExportDefinition _definition;
         private readonly Func<object> _exportedValueGetter;
-        private static readonly object _EmptyValue = new object();
-        private volatile object _exportedValue = Export._EmptyValue;
-        
+        private static readonly object s_emptyValue = new object();
+        private volatile object _exportedValue = s_emptyValue;
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="Export"/> class.
         /// </summary>
@@ -39,7 +38,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     with the specified contract name and exported value getter.
         /// </summary>
         /// <param name="contractName">
-        ///     A <see cref="String"/> containing the contract name of the 
+        ///     A <see cref="string"/> containing the contract name of the 
         ///     <see cref="Export"/>.
         /// </param>
         /// <param name="exportedValueGetter">
@@ -57,7 +56,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     <paramref name="contractName"/> is an empty string ("").
         /// </exception>
         public Export(string contractName, Func<object> exportedValueGetter)
-            : this(new ExportDefinition(contractName, (IDictionary<string, object>)null), exportedValueGetter)
+            : this(new ExportDefinition(contractName, null), exportedValueGetter)
         {
         }
 
@@ -66,7 +65,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     with the specified contract name, metadata and exported value getter.
         /// </summary>
         /// <param name="contractName">
-        ///     A <see cref="String"/> containing the contract name of the 
+        ///     A <see cref="string"/> containing the contract name of the 
         ///     <see cref="Export"/>.
         /// </param>
         /// <param name="metadata">
@@ -89,7 +88,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// <exception cref="ArgumentException">
         ///     <paramref name="contractName"/> is an empty string ("").
         /// </exception>
-        public Export(string contractName, IDictionary<string, object> metadata, Func<object> exportedValueGetter) 
+        public Export(string contractName, IDictionary<string, object> metadata, Func<object> exportedValueGetter)
             : this(new ExportDefinition(contractName, metadata), exportedValueGetter)
         {
         }
@@ -115,11 +114,8 @@ namespace System.ComponentModel.Composition.Primitives
         /// </exception>
         public Export(ExportDefinition definition, Func<object> exportedValueGetter)
         {
-            Requires.NotNull(definition, nameof(definition));
-            Requires.NotNull(exportedValueGetter, nameof(exportedValueGetter));
-
-            _definition = definition;
-            _exportedValueGetter = exportedValueGetter;
+            _definition = definition ?? throw new ArgumentNullException(nameof(definition));
+            _exportedValueGetter = exportedValueGetter ?? throw new ArgumentNullException(nameof(exportedValueGetter));
         }
 
         /// <summary>
@@ -140,10 +136,10 @@ namespace System.ComponentModel.Composition.Primitives
         /// </remarks>
         public virtual ExportDefinition Definition
         {
-            get 
+            get
             {
                 Contract.Ensures(Contract.Result<ExportDefinition>() != null);
-                
+
                 if (_definition != null)
                 {
                     return _definition;
@@ -171,19 +167,19 @@ namespace System.ComponentModel.Composition.Primitives
         /// </remarks>
         public IDictionary<string, object> Metadata
         {
-            get 
+            get
             {
                 Contract.Ensures(Contract.Result<IDictionary<string, object>>() != null);
 
-                return Definition.Metadata; 
-            }        
+                return Definition.Metadata;
+            }
         }
 
         /// <summary>
         ///     Returns the exported value of the export.
         /// </summary>
         /// <returns>
-        ///     The exported <see cref="Object"/> of the <see cref="Export"/>.
+        ///     The exported <see cref="object"/> of the <see cref="Export"/>.
         /// </returns>
         /// <exception cref="CompositionException">
         ///     An error occurred during composition. <see cref="CompositionException.Errors"/> will 
@@ -202,10 +198,10 @@ namespace System.ComponentModel.Composition.Primitives
             {
                 // NOTE : the logic below guarantees that the value will be set exactly once. It DOES NOT, however, guarantee that GetExportedValueCore() will be executed
                 // more than once, as locking would be required for that. The said locking is problematic, as we can't reliable call 3rd party code under a lock.
-                if (_exportedValue == Export._EmptyValue)
+                if (_exportedValue == s_emptyValue)
                 {
                     object exportedValue = GetExportedValueCore();
-                    Interlocked.CompareExchange(ref _exportedValue, exportedValue, Export._EmptyValue);
+                    Interlocked.CompareExchange(ref _exportedValue, exportedValue, Export.s_emptyValue);
                 }
 
                 return _exportedValue;
@@ -216,7 +212,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     Returns the exported value of the export.
         /// </summary>
         /// <returns>
-        ///     The exported <see cref="Object"/> of the <see cref="Export"/>.
+        ///     The exported <see cref="object"/> of the <see cref="Export"/>.
         /// </returns>
         /// <exception cref="CompositionException">
         ///     An error occurred during composition. <see cref="CompositionException.Errors"/> will 
@@ -245,5 +241,5 @@ namespace System.ComponentModel.Composition.Primitives
 
             throw ExceptionBuilder.CreateNotOverriddenByDerived("GetExportedValueCore");
         }
-    }   
+    }
 }

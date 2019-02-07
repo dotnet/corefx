@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Primitives;
 using System.Reflection;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -16,9 +15,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public AssemblyCatalogDebuggerProxy(AssemblyCatalog catalog)
         {
-            Requires.NotNull(catalog, nameof(catalog));
-
-            _catalog = catalog;
+            _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
         }
 
         public Assembly Assembly

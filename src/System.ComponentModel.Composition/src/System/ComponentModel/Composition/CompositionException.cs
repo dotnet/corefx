@@ -11,7 +11,6 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition
 {

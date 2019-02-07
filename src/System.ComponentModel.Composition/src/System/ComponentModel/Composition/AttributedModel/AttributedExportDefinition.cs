@@ -20,26 +20,11 @@ namespace System.ComponentModel.Composition.AttributedModel
         private IDictionary<string, object> _metadata;
 
         public AttributedExportDefinition(AttributedPartCreationInfo partCreationInfo, MemberInfo member, ExportAttribute exportAttribute, Type typeIdentityType, string contractName)
-            : base(contractName, (IDictionary<string, object>)null)
+            : base(contractName, null)
         {
-            if(partCreationInfo == null)
-            {
-                throw new ArgumentNullException(nameof(partCreationInfo));
-            }
-
-            if (member == null)
-            {
-                throw new ArgumentNullException(nameof(member));
-            }
-
-            if (exportAttribute == null)
-            {
-                throw new ArgumentNullException(nameof(exportAttribute));
-            }
-
-            _partCreationInfo = partCreationInfo;
-            _member = member;
-            _exportAttribute = exportAttribute;
+            _partCreationInfo = partCreationInfo ?? throw new ArgumentNullException(nameof(partCreationInfo));
+            _member = member ?? throw new ArgumentNullException(nameof(member));
+            _exportAttribute = exportAttribute ?? throw new ArgumentNullException(nameof(exportAttribute));
             _typeIdentityType = typeIdentityType;
         }
 
@@ -49,16 +34,15 @@ namespace System.ComponentModel.Composition.AttributedModel
             {
                 if (_metadata == null)
                 {
-                    IDictionary<string, object> metadata;
-                    _member.TryExportMetadataForMember(out metadata);
+                    _member.TryExportMetadataForMember(out IDictionary<string, object> metadata);
 
-                    string typeIdentity = _exportAttribute.IsContractNameSameAsTypeIdentity() ? 
-                        ContractName : 
+                    string typeIdentity = _exportAttribute.IsContractNameSameAsTypeIdentity() ?
+                        ContractName :
                         _member.GetTypeIdentityFromExport(_typeIdentityType);
 
                     metadata.Add(CompositionConstants.ExportTypeIdentityMetadataName, typeIdentity);
 
-                    var partMetadata = _partCreationInfo.GetMetadata();
+                    IDictionary<string, object> partMetadata = _partCreationInfo.GetMetadata();
                     if (partMetadata != null && partMetadata.ContainsKey(CompositionConstants.PartCreationPolicyMetadataName))
                     {
                         metadata.Add(CompositionConstants.PartCreationPolicyMetadataName, partMetadata[CompositionConstants.PartCreationPolicyMetadataName]);
@@ -75,5 +59,5 @@ namespace System.ComponentModel.Composition.AttributedModel
             }
         }
     }
-    
+
 }

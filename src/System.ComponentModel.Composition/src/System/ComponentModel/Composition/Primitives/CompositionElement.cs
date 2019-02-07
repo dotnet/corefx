@@ -11,41 +11,26 @@ namespace System.ComponentModel.Composition.Primitives
     [DebuggerTypeProxy(typeof(CompositionElementDebuggerProxy))]
     internal class CompositionElement : ICompositionElement
     {
-        private readonly string _displayName;
-        private readonly ICompositionElement _origin;
-        private readonly object _underlyingObject;
-        private static readonly ICompositionElement UnknownOrigin = new CompositionElement(SR.CompositionElement_UnknownOrigin, (ICompositionElement)null);
+        private static readonly ICompositionElement s_unknownOrigin = new CompositionElement(SR.CompositionElement_UnknownOrigin, null);
 
         public CompositionElement(object underlyingObject)
-            : this(underlyingObject.ToString(), UnknownOrigin)
+            : this(underlyingObject.ToString(), s_unknownOrigin)
         {
-            _underlyingObject = underlyingObject;
+            UnderlyingObject = underlyingObject;
         }
 
         public CompositionElement(string displayName, ICompositionElement origin)
         {
-            _displayName = displayName ?? string.Empty;
-            _origin = origin;
+            DisplayName = displayName ?? string.Empty;
+            Origin = origin;
         }
 
-        public string DisplayName
-        {
-            get { return _displayName; }
-        }
+        public string DisplayName { get; }
 
-        public ICompositionElement Origin
-        {
-            get { return _origin; }
-        }
+        public ICompositionElement Origin { get; }
 
-        public override string ToString()
-        {
-            return DisplayName;
-        }
+        public override string ToString() => DisplayName;
 
-        public object UnderlyingObject
-        {
-            get { return _underlyingObject; }
-        }
+        public object UnderlyingObject { get; }
     }
 }

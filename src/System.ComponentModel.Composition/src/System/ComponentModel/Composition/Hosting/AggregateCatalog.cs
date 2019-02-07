@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -125,7 +124,10 @@ namespace System.ComponentModel.Composition.Hosting
         {
             ThrowIfDisposed();
 
-            Requires.NotNull(definition, nameof(definition));
+            if (definition == null)
+            {
+                throw new ArgumentNullException(nameof(definition));
+            }
 
             // We optimize for the case where the result is comparible with the requested cardinality, though we do remain correct in all cases.
             // We do so to avoid any unnecessary allocations

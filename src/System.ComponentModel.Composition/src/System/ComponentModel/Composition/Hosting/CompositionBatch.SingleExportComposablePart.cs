@@ -6,11 +6,10 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    partial class CompositionBatch
+    public partial class CompositionBatch
     {
         // Represents a part that exports a single export
         private class SingleExportComposablePart : ComposablePart
@@ -19,12 +18,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             public SingleExportComposablePart(Export export)
             {
-                if (export == null)
-                {
-                    throw new ArgumentNullException(nameof(export));
-                }
-
-                _export = export;
+                _export = export ?? throw new ArgumentNullException(nameof(export));
             }
 
             public override IDictionary<string, object> Metadata
@@ -44,7 +38,10 @@ namespace System.ComponentModel.Composition.Hosting
 
             public override object GetExportedValue(ExportDefinition definition)
             {
-                Requires.NotNull(definition, nameof(definition));
+                if (definition == null)
+                {
+                    throw new ArgumentNullException(nameof(definition));
+                }
 
                 if (definition != _export.Definition)
                 {
@@ -56,9 +53,17 @@ namespace System.ComponentModel.Composition.Hosting
 
             public override void SetImport(ImportDefinition definition, IEnumerable<Export> exports)
             {
-                Requires.NotNull(definition, nameof(definition));
+                if (definition == null)
+                {
+                    throw new ArgumentNullException(nameof(definition));
+                }
 
-                if (exports == null || !Contract.ForAll(exports, (export) => export != null))
+                if (exports == null)
+                {
+                    throw new ArgumentNullException(nameof(exports));
+                }
+
+                if (!Contract.ForAll(exports, (export) => export != null))
                 {
                     throw ExceptionBuilder.CreateContainsNullElement(nameof(exports));
                 }

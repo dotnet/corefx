@@ -9,7 +9,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -25,11 +24,11 @@ namespace System.ComponentModel.Composition.Hosting
         private IDisposable _disposableLocalExportProvider;
         private ExportProvider _ancestorExportProvider;
         private IDisposable _disposableAncestorExportProvider;
-        
+
         private readonly ReadOnlyCollection<ExportProvider> _providers;
         private volatile bool _isDisposed = false;
         private object _lock = new object();
-        private static ReadOnlyCollection<ExportProvider> EmptyProviders = new ReadOnlyCollection<ExportProvider>(Array.Empty<ExportProvider>());
+        private static ReadOnlyCollection<ExportProvider> s_emptyProviders = new ReadOnlyCollection<ExportProvider>(Array.Empty<ExportProvider>());
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="CompositionContainer"/> class.
@@ -52,8 +51,8 @@ namespace System.ComponentModel.Composition.Hosting
         /// <exception cref="ArgumentException">
         ///     <paramref name="providers"/> contains an element that is <see langword="null"/>.
         /// </exception>
-        public CompositionContainer(params ExportProvider[] providers) : 
-            this((ComposablePartCatalog)null, providers)
+        public CompositionContainer(params ExportProvider[] providers) :
+            this(null, providers)
         {
         }
 
@@ -73,8 +72,8 @@ namespace System.ComponentModel.Composition.Hosting
         /// <exception cref="ArgumentException">
         ///     <paramref name="providers"/> contains an element that is <see langword="null"/>.
         /// </exception>
-        public CompositionContainer(CompositionOptions compositionOptions, params ExportProvider[] providers) : 
-            this((ComposablePartCatalog)null, compositionOptions, providers)
+        public CompositionContainer(CompositionOptions compositionOptions, params ExportProvider[] providers) :
+            this(null, compositionOptions, providers)
         {
         }
 
@@ -91,7 +90,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <exception cref="ArgumentException">
         ///     <paramref name="providers"/> contains an element that is <see langword="null"/>.
         /// </exception>
-        public CompositionContainer(ComposablePartCatalog catalog, params ExportProvider[] providers): 
+        public CompositionContainer(ComposablePartCatalog catalog, params ExportProvider[] providers) :
             this(catalog, false, providers)
         {
         }
@@ -142,14 +141,18 @@ namespace System.ComponentModel.Composition.Hosting
             _compositionOptions = compositionOptions;
 
             // We always create the mutable provider
-            _partExportProvider = new ComposablePartExportProvider(compositionOptions);
-            _partExportProvider.SourceProvider = this;
+            _partExportProvider = new ComposablePartExportProvider(compositionOptions)
+            {
+                SourceProvider = this
+            };
 
             // Create the catalog export provider, only if necessary 
             if (catalog != null)
             {
-                _catalogExportProvider = new CatalogExportProvider(catalog, compositionOptions);
-                _catalogExportProvider.SourceProvider = this;
+                _catalogExportProvider = new CatalogExportProvider(catalog, compositionOptions)
+                {
+                    SourceProvider = this
+                };
             }
 
             // Set the local export provider
@@ -213,26 +216,26 @@ namespace System.ComponentModel.Composition.Hosting
                 _disposableRootProvider = _rootProvider as IDisposable;
             }
 
-//Insert Composition Service
-            if(compositionOptions.HasFlag(CompositionOptions.ExportCompositionService))
+            //Insert Composition Service
+            if (compositionOptions.HasFlag(CompositionOptions.ExportCompositionService))
             {
                 this.ComposeExportedValue<ICompositionService>(new CompositionServiceShim(this));
-            }           
+            }
 
             _rootProvider.ExportsChanged += OnExportsChangedInternal;
             _rootProvider.ExportsChanging += OnExportsChangingInternal;
 
-            _providers = (providers != null) ? new ReadOnlyCollection<ExportProvider>((ExportProvider[])providers.Clone()) : EmptyProviders;
+            _providers = (providers != null) ? new ReadOnlyCollection<ExportProvider>((ExportProvider[])providers.Clone()) : s_emptyProviders;
         }
 
         internal CompositionOptions CompositionOptions
         {
-            get 
+            get
             {
                 ThrowIfDisposed();
-                return _compositionOptions; 
+                return _compositionOptions;
             }
-        }                                                   
+        }
 
         /// <summary>
         ///     Gets the catalog which provides the container access to exports produced
@@ -248,17 +251,17 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public ComposablePartCatalog Catalog
         {
-            get 
+            get
             {
                 ThrowIfDisposed();
 
-                return (_catalogExportProvider != null) ? _catalogExportProvider.Catalog : null;
+                return _catalogExportProvider?.Catalog;
             }
         }
 
         internal CatalogExportProvider CatalogExportProvider
         {
-            get 
+            get
             {
                 ThrowIfDisposed();
 
@@ -316,7 +319,7 @@ namespace System.ComponentModel.Composition.Hosting
                     CatalogExportProvider catalogExportProvider = null;
                     ImportEngine importEngine = null;
 
-                    lock(_lock)
+                    lock (_lock)
                     {
                         if (!_isDisposed)
                         {
@@ -326,7 +329,7 @@ namespace System.ComponentModel.Composition.Hosting
                             disposableRootProvider = _disposableRootProvider;
                             _disposableRootProvider = null;
 
-                            disposableLocalExportProvider = _disposableLocalExportProvider ;
+                            disposableLocalExportProvider = _disposableLocalExportProvider;
                             _disposableLocalExportProvider = null;
                             _localExportProvider = null;
 
@@ -386,10 +389,13 @@ namespace System.ComponentModel.Composition.Hosting
 
             }
         }
-  
+
         public void Compose(CompositionBatch batch)
         {
-            Requires.NotNull(batch, nameof(batch));
+            if (batch == null)
+            {
+                throw new ArgumentNullException(nameof(batch));
+            }
             ThrowIfDisposed();
 
             _partExportProvider.Compose(batch);
@@ -417,11 +423,12 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Performance", "CA1822")]
         public void ReleaseExport(Export export)
         {
-            Requires.NotNull(export, nameof(export));
+            if (export == null)
+            {
+                throw new ArgumentNullException(nameof(export));
+            }
 
-            IDisposable dependency = export as IDisposable;
-
-            if (dependency != null)
+            if (export is IDisposable dependency)
             {
                 dependency.Dispose();
             }
@@ -449,11 +456,12 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Performance", "CA1822")]
         public void ReleaseExport<T>(Lazy<T> export)
         {
-            Requires.NotNull(export, nameof(export));
+            if (export == null)
+            {
+                throw new ArgumentNullException(nameof(export));
+            }
 
-            IDisposable dependency = export as IDisposable;
-
-            if (dependency != null)
+            if (export is IDisposable dependency)
             {
                 dependency.Dispose();
             }
@@ -472,7 +480,12 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public void ReleaseExports(IEnumerable<Export> exports)
         {
-            if (exports == null || !Contract.ForAll(exports, (export) => export != null))
+            if (exports == null)
+            {
+                throw new ArgumentNullException(nameof(exports));
+            }
+
+            if (!Contract.ForAll(exports, (export) => export != null))
             {
                 throw ExceptionBuilder.CreateContainsNullElement(nameof(exports));
             }
@@ -497,7 +510,12 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public void ReleaseExports<T>(IEnumerable<Lazy<T>> exports)
         {
-            if (exports == null || !Contract.ForAll(exports, (export) => export != null))
+            if (exports == null)
+            {
+                throw new ArgumentNullException(nameof(exports));
+            }
+
+            if (!Contract.ForAll(exports, (export) => export != null))
             {
                 throw ExceptionBuilder.CreateContainsNullElement(nameof(exports));
             }
@@ -522,7 +540,12 @@ namespace System.ComponentModel.Composition.Hosting
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public void ReleaseExports<T, TMetadataView>(IEnumerable<Lazy<T, TMetadataView>> exports)
         {
-            if (exports == null || !Contract.ForAll(exports, (export) => export != null))
+            if (exports == null)
+            {
+                throw new ArgumentNullException(nameof(exports));
+            }
+
+            if (!Contract.ForAll(exports, (export) => export != null))
             {
                 throw ExceptionBuilder.CreateContainsNullElement(nameof(exports));
             }
@@ -553,12 +576,12 @@ namespace System.ComponentModel.Composition.Hosting
         public void SatisfyImportsOnce(ComposablePart part)
         {
             ThrowIfDisposed();
-            
+
             if (_importEngine == null)
             {
                 ImportEngine importEngine = new ImportEngine(this, _compositionOptions);
-                
-                lock(_lock)
+
+                lock (_lock)
                 {
                     if (_importEngine == null)
                     {
@@ -567,7 +590,7 @@ namespace System.ComponentModel.Composition.Hosting
                         importEngine = null;
                     }
                 }
-                if(importEngine != null)
+                if (importEngine != null)
                 {
                     importEngine.Dispose();
                 }
@@ -610,13 +633,12 @@ namespace System.ComponentModel.Composition.Hosting
 
             IEnumerable<Export> exports = null;
 
-            object source;
-            if(!definition.Metadata.TryGetValue(CompositionConstants.ImportSourceMetadataName, out source))
+            if (!definition.Metadata.TryGetValue(CompositionConstants.ImportSourceMetadataName, out object source))
             {
                 source = ImportSource.Any;
             }
 
-            switch((ImportSource)source)
+            switch ((ImportSource)source)
             {
                 case ImportSource.Any:
                     if (_rootProvider == null)
@@ -633,7 +655,7 @@ namespace System.ComponentModel.Composition.Hosting
                     _localExportProvider.TryGetExports(definition.RemoveImportSource(), atomicComposition, out exports);
                     break;
                 case ImportSource.NonLocal:
-                    if(_ancestorExportProvider != null)
+                    if (_ancestorExportProvider != null)
                     {
                         _ancestorExportProvider.TryGetExports(definition.RemoveImportSource(), atomicComposition, out exports);
                     }

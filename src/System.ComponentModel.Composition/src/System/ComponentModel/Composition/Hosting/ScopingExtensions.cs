@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel.Composition.Primitives;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -19,8 +18,14 @@ namespace System.ComponentModel.Composition.Hosting
         /// </returns>
         public static bool Exports(this ComposablePartDefinition part, string contractName)
         {
-            Requires.NotNull(part, nameof(part));
-            Requires.NotNull(contractName, nameof(contractName));
+            if (part == null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
+            if (contractName == null)
+            {
+                throw new ArgumentNullException(nameof(contractName));
+            }
 
             foreach (ExportDefinition export in part.ExportDefinitions)
             {
@@ -42,8 +47,14 @@ namespace System.ComponentModel.Composition.Hosting
         /// </returns>
         public static bool Imports(this ComposablePartDefinition part, string contractName)
         {
-            Requires.NotNull(part, nameof(part));
-            Requires.NotNull(contractName, nameof(contractName));
+            if (part == null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
+            if (contractName == null)
+            {
+                throw new ArgumentNullException(nameof(contractName));
+            }
 
             foreach (ImportDefinition import in part.ImportDefinitions)
             {
@@ -67,8 +78,14 @@ namespace System.ComponentModel.Composition.Hosting
         /// </returns>
         public static bool Imports(this ComposablePartDefinition part, string contractName, ImportCardinality importCardinality)
         {
-            Requires.NotNull(part, nameof(part));
-            Requires.NotNull(contractName, nameof(contractName));
+            if (part == null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
+            if (contractName == null)
+            {
+                throw new ArgumentNullException(nameof(contractName));
+            }
 
             foreach (ImportDefinition import in part.ImportDefinitions)
             {
@@ -81,7 +98,7 @@ namespace System.ComponentModel.Composition.Hosting
             return false;
         }
 
-/// <summary>
+        /// <summary>
         /// Determines whether the part contains a metadata entry with the specified key.
         /// </summary>
         /// <param name="part">The part.</param>
@@ -91,8 +108,14 @@ namespace System.ComponentModel.Composition.Hosting
         /// </returns>
         public static bool ContainsPartMetadataWithKey(this ComposablePartDefinition part, string key)
         {
-            Requires.NotNull(part, nameof(part));
-            Requires.NotNull(key, nameof(key));
+            if (part == null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
 
             return part.Metadata.ContainsKey(key);
         }
@@ -109,11 +132,16 @@ namespace System.ComponentModel.Composition.Hosting
         /// </returns>
         public static bool ContainsPartMetadata<T>(this ComposablePartDefinition part, string key, T value)
         {
-            Requires.NotNull(part, nameof(part));
-            Requires.NotNull(key, nameof(key));
+            if (part == null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
 
-            object untypedValue = null;
-            if (part.Metadata.TryGetValue(key, out untypedValue))
+            if (part.Metadata.TryGetValue(key, out object untypedValue))
             {
                 if (value == null)
                 {
@@ -136,8 +164,14 @@ namespace System.ComponentModel.Composition.Hosting
         /// <returns></returns>
         public static FilteredCatalog Filter(this ComposablePartCatalog catalog, Func<ComposablePartDefinition, bool> filter)
         {
-            Requires.NotNull(catalog, nameof(catalog));
-            Requires.NotNull(filter, nameof(filter));
+            if (catalog == null)
+            {
+                throw new ArgumentNullException(nameof(catalog));
+            }
+            if (filter == null)
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
 
             return new FilteredCatalog(catalog, filter);
         }

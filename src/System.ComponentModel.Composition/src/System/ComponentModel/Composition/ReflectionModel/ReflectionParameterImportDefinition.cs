@@ -6,14 +6,11 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Globalization;
 using System.Reflection;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
     internal class ReflectionParameterImportDefinition : ReflectionImportDefinition
     {
-        private Lazy<ParameterInfo> _importingLazyParameter;
-
         public ReflectionParameterImportDefinition(
             Lazy<ParameterInfo> importingLazyParameter,
             string contractName, 
@@ -25,12 +22,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             ICompositionElement origin)
             : base(contractName, requiredTypeIdentity, requiredMetadata, cardinality, false, true, requiredCreationPolicy, metadata, origin)
         {
-            if (importingLazyParameter == null)
-            {
-                throw new ArgumentNullException(nameof(importingLazyParameter));
-            }
-
-            _importingLazyParameter = importingLazyParameter;
+            ImportingLazyParameter = importingLazyParameter ?? throw new ArgumentNullException(nameof(importingLazyParameter));
         }
 
         public override ImportingItem ToImportingItem()
@@ -38,16 +30,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
             return new ImportingParameter(this, new ImportType(ImportingLazyParameter.GetNotNullValue("parameter").ParameterType, Cardinality));
         }
 
-        public Lazy<ParameterInfo> ImportingLazyParameter
-        {
-            get { return _importingLazyParameter; }
-        }
+        public Lazy<ParameterInfo> ImportingLazyParameter { get; }
 
         protected override string GetDisplayName()
         {
             ParameterInfo parameter = ImportingLazyParameter.GetNotNullValue("parameter");
-            return string.Format(
-                CultureInfo.CurrentCulture,
+            return string.Format(CultureInfo.CurrentCulture,
                 "{0} (Parameter=\"{1}\", ContractName=\"{2}\")",  // NOLOC
                 parameter.Member.GetDisplayName(),
                 parameter.Name,                

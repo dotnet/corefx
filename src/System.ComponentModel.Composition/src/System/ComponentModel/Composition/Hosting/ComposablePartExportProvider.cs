@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -21,18 +20,18 @@ namespace System.ComponentModel.Composition.Hosting
         private ExportProvider _sourceProvider;
         private ImportEngine _importEngine;
         private volatile bool _currentlyComposing;
-        private CompositionOptions _compositionOptions;
+        private readonly CompositionOptions _compositionOptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ComposablePartExportProvider"/> class.
         /// </summary>
-        public ComposablePartExportProvider() : 
+        public ComposablePartExportProvider() :
             this(false)
         {
         }
 
         public ComposablePartExportProvider(bool isThreadSafe)
-            :this(isThreadSafe ? CompositionOptions.IsThreadSafe : CompositionOptions.Default)
+            : this(isThreadSafe ? CompositionOptions.IsThreadSafe : CompositionOptions.Default)
         {
         }
 
@@ -139,7 +138,11 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 ThrowIfDisposed();
 
-                Requires.NotNull(value, nameof(value));
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
                 using (_lock.LockStateForWrite())
                 {
                     EnsureCanSet(_sourceProvider);
@@ -180,7 +183,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-/// <summary>
+        /// <summary>
         /// Returns all exports that match the conditions of the specified import.
         /// </summary>
         /// <param name="definition">The <see cref="ImportDefinition"/> that defines the conditions of the
@@ -219,10 +222,10 @@ namespace System.ComponentModel.Composition.Hosting
                 return null;
             }
 
-            List<Export> exports = new List<Export>();
-            foreach (var part in parts)
+            var exports = new List<Export>();
+            foreach (ComposablePart part in parts)
             {
-                foreach (var exportDefinition in part.ExportDefinitions)
+                foreach (ExportDefinition exportDefinition in part.ExportDefinitions)
                 {
                     if (definition.IsConstraintSatisfiedBy(exportDefinition))
                     {
@@ -231,14 +234,17 @@ namespace System.ComponentModel.Composition.Hosting
                 }
             }
             return exports;
-        }    
+        }
 
         public void Compose(CompositionBatch batch)
         {
             ThrowIfDisposed();
             EnsureRunning();
 
-            Requires.NotNull(batch, nameof(batch));
+            if (batch == null)
+            {
+                throw new ArgumentNullException(nameof(batch));
+            }
 
             // Quick exit test can be done prior to cloning since it's just an optimization, not a
             // change in behavior
@@ -247,10 +253,10 @@ namespace System.ComponentModel.Composition.Hosting
                 return;
             }
 
-            CompositionResult result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.s_succeededResult;
 
             // Get updated parts list and a cloned batch
-            var newParts = GetUpdatedPartsList(ref batch);
+            List<ComposablePart> newParts = GetUpdatedPartsList(ref batch);
 
             // Allow only recursive calls from the import engine to see the changes until
             // they've been verified ...

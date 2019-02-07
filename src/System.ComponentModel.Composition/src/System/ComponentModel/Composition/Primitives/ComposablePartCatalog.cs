@@ -9,7 +9,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Primitives
 {
@@ -50,13 +49,13 @@ namespace System.ComponentModel.Composition.Primitives
         ///         Overriders of this property should never return <see langword="null"/>.
         ///     </note>
         /// </remarks>
-        [EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public virtual IQueryable<ComposablePartDefinition> Parts 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public virtual IQueryable<ComposablePartDefinition> Parts
         {
             get
             {
                 ThrowIfDisposed();
-                if(_queryableParts == null)
+                if (_queryableParts == null)
                 {
                     // Guarantee one time only set _queryableParts
                     IQueryable<ComposablePartDefinition> p = this.AsQueryable();
@@ -101,7 +100,10 @@ namespace System.ComponentModel.Composition.Primitives
         {
             ThrowIfDisposed();
 
-            Requires.NotNull(definition, nameof(definition));
+            if (definition == null)
+            {
+                throw new ArgumentNullException(nameof(definition));
+            }
             Contract.Ensures(Contract.Result<IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>>>() != null);
 
             List<Tuple<ComposablePartDefinition, ExportDefinition>> exports = null;
@@ -134,7 +136,7 @@ namespace System.ComponentModel.Composition.Primitives
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing) 
+        protected virtual void Dispose(bool disposing)
         {
             _isDisposed = true;
         }
@@ -161,7 +163,7 @@ namespace System.ComponentModel.Composition.Primitives
         public virtual IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
             IQueryable<ComposablePartDefinition> parts = Parts;
-            if(ReferenceEquals(parts, _queryableParts))
+            if (ReferenceEquals(parts, _queryableParts))
             {
                 return Enumerable.Empty<ComposablePartDefinition>().GetEnumerator();
             }

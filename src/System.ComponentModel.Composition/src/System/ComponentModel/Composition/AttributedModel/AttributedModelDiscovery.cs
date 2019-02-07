@@ -2,14 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Composition.Diagnostics;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.ComponentModel.Composition.ReflectionModel;
+using System.Composition.Diagnostics;
 using System.Globalization;
-using System.Reflection;
-using Microsoft.Internal;
 using System.Linq;
+using System.Reflection;
 
 namespace System.ComponentModel.Composition.AttributedModel
 {
@@ -28,7 +27,7 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         public static ReflectionComposablePartDefinition CreatePartDefinition(Type type, PartCreationPolicyAttribute partCreationPolicy, bool ignoreConstructorImports, ICompositionElement origin)
         {
-            if(type == null)
+            if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
@@ -46,11 +45,11 @@ namespace System.ComponentModel.Composition.AttributedModel
             }
 
             // If given an instance then we want to pass the default composition options because we treat it as a shared part
-            ReflectionComposablePartDefinition definition = AttributedModelDiscovery.CreatePartDefinition(attributedPart.GetType(), PartCreationPolicyAttribute.Shared, true, (ICompositionElement)null);
+            ReflectionComposablePartDefinition definition = AttributedModelDiscovery.CreatePartDefinition(attributedPart.GetType(), PartCreationPolicyAttribute.Shared, true, null);
 
             return new ReflectionComposablePart(definition, attributedPart);
         }
-        
+
         public static ReflectionComposablePart CreatePart(object attributedPart, ReflectionContext reflectionContext)
         {
             if (attributedPart == null)
@@ -64,13 +63,13 @@ namespace System.ComponentModel.Composition.AttributedModel
             }
 
             // If given an instance then we want to pass the default composition options because we treat it as a shared part
-            var mappedType = reflectionContext.MapType(IntrospectionExtensions.GetTypeInfo(attributedPart.GetType()));
+            TypeInfo mappedType = reflectionContext.MapType(IntrospectionExtensions.GetTypeInfo(attributedPart.GetType()));
             if (mappedType.Assembly.ReflectionOnly)
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_ReflectionContextReturnsReflectionOnlyType, nameof(reflectionContext)), nameof(reflectionContext));
             }
 
-            ReflectionComposablePartDefinition definition = AttributedModelDiscovery.CreatePartDefinition(mappedType, PartCreationPolicyAttribute.Shared, true, (ICompositionElement)null);
+            ReflectionComposablePartDefinition definition = CreatePartDefinition(mappedType, PartCreationPolicyAttribute.Shared, true, null);
 
             return CreatePart(definition, attributedPart);
         }
@@ -93,7 +92,10 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         public static ReflectionParameterImportDefinition CreateParameterImportDefinition(ParameterInfo parameter, ICompositionElement origin)
         {
-            Requires.NotNull(parameter, nameof(parameter));
+            if (parameter == null)
+            {
+                throw new ArgumentNullException(nameof(parameter));
+            }
 
             ReflectionParameter reflectionParameter = parameter.ToReflectionParameter();
             IAttributedImport attributedImport = AttributedModelDiscovery.GetAttributedImport(reflectionParameter, parameter);
@@ -130,7 +132,10 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         public static ReflectionMemberImportDefinition CreateMemberImportDefinition(MemberInfo member, ICompositionElement origin)
         {
-            Requires.NotNull(member, nameof(member));
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
 
             ReflectionWritableMember reflectionMember = member.ToReflectionWritableMember();
             IAttributedImport attributedImport = AttributedModelDiscovery.GetAttributedImport(reflectionMember, member);

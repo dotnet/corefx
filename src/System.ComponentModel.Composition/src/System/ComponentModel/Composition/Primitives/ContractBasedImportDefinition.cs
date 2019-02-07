@@ -10,7 +10,6 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Primitives
 {
@@ -51,7 +50,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     is a prerequisite.
         /// </summary>
         /// <param name="contractName">
-        ///     A <see cref="String"/> containing the contract name of the 
+        ///     A <see cref="string"/> containing the contract name of the 
         ///     <see cref="Export"/> required by the <see cref="ContractBasedImportDefinition"/>.
         /// </param>
         /// <param name="requiredTypeIdentity">
@@ -59,7 +58,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     to generate a type identity for a given type. If no specific type is required pass <see langword="null"/>.
         /// </param>
         /// <param name="requiredMetadata">
-        ///     An <see cref="IEnumerable{T}"/> of <see cref="String"/> objects containing
+        ///     An <see cref="IEnumerable{T}"/> of <see cref="string"/> objects containing
         ///     the metadata names of the <see cref="Export"/> required by the 
         ///     <see cref="ContractBasedImportDefinition"/>; or <see langword="null"/> to
         ///     set the <see cref="RequiredMetadata"/> property to an empty <see cref="IEnumerable{T}"/>.
@@ -100,7 +99,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     values.
         /// </exception>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public ContractBasedImportDefinition(string contractName, string requiredTypeIdentity, IEnumerable<KeyValuePair<string, Type>> requiredMetadata, 
+        public ContractBasedImportDefinition(string contractName, string requiredTypeIdentity, IEnumerable<KeyValuePair<string, Type>> requiredMetadata,
             ImportCardinality cardinality, bool isRecomposable, bool isPrerequisite, CreationPolicy requiredCreationPolicy)
             : this(contractName, requiredTypeIdentity, requiredMetadata, cardinality, isRecomposable, isPrerequisite, requiredCreationPolicy, MetadataServices.EmptyMetadata)
         {
@@ -113,7 +112,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     is a prerequisite.
         /// </summary>
         /// <param name="contractName">
-        ///     A <see cref="String"/> containing the contract name of the 
+        ///     A <see cref="string"/> containing the contract name of the 
         ///     <see cref="Export"/> required by the <see cref="ContractBasedImportDefinition"/>.
         /// </param>
         /// <param name="requiredTypeIdentity">
@@ -121,7 +120,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     to generate a type identity for a given type. If no specific type is required pass <see langword="null"/>.
         /// </param>
         /// <param name="requiredMetadata">
-        ///     An <see cref="IEnumerable{T}"/> of <see cref="String"/> objects containing
+        ///     An <see cref="IEnumerable{T}"/> of <see cref="string"/> objects containing
         ///     the metadata names of the <see cref="Export"/> required by the 
         ///     <see cref="ContractBasedImportDefinition"/>; or <see langword="null"/> to
         ///     set the <see cref="RequiredMetadata"/> property to an empty <see cref="IEnumerable{T}"/>.
@@ -168,12 +167,12 @@ namespace System.ComponentModel.Composition.Primitives
         {
             if (contractName == null)
             {
-                throw new ArgumentNullException(contractName);
+                throw new ArgumentNullException(nameof(contractName));
             }
 
             if (contractName.Length == 0)
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, contractName), contractName);
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, nameof(contractName)), nameof(contractName));
             }
 
             _requiredTypeIdentity = requiredTypeIdentity;
@@ -221,7 +220,7 @@ namespace System.ComponentModel.Composition.Primitives
             get
             {
                 Contract.Ensures(Contract.Result<IEnumerable<KeyValuePair<string, Type>>>() != null);
-                
+
                 // NOTE : unlike other arguments, we validate this one as late as possible, because its validation may lead to type loading
                 ValidateRequiredMetadata();
 
@@ -282,7 +281,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     </para>
         /// </remarks>
         public override Expression<Func<ExportDefinition, bool>> Constraint
-        {   
+        {
             get
             {
                 if (_constraint == null)
@@ -316,7 +315,10 @@ namespace System.ComponentModel.Composition.Primitives
         /// </exception>
         public override bool IsConstraintSatisfiedBy(ExportDefinition exportDefinition)
         {
-            Requires.NotNull(exportDefinition, nameof(exportDefinition));
+            if (exportDefinition == null)
+            {
+                throw new ArgumentNullException(nameof(exportDefinition));
+            }
 
             if (!StringComparers.ContractName.Equals(ContractName, exportDefinition.ContractName))
             {
@@ -343,8 +345,7 @@ namespace System.ComponentModel.Composition.Primitives
                 string metadataKey = metadataItem.Key;
                 Type metadataValueType = metadataItem.Value;
 
-                object metadataValue = null;
-                if (!definition.Metadata.TryGetValue(metadataKey, out metadataValue))
+                if (!definition.Metadata.TryGetValue(metadataKey, out object metadataValue))
                 {
                     return false;
                 }
@@ -386,12 +387,12 @@ namespace System.ComponentModel.Composition.Primitives
 
             sb.Append(string.Format("\n\tContractName\t{0}", ContractName));
             sb.Append(string.Format("\n\tRequiredTypeIdentity\t{0}", RequiredTypeIdentity));
-            if(_requiredCreationPolicy != CreationPolicy.Any)
+            if (_requiredCreationPolicy != CreationPolicy.Any)
             {
                 sb.Append(string.Format("\n\tRequiredCreationPolicy\t{0}", RequiredCreationPolicy));
             }
 
-            if(_requiredMetadata.Count() > 0)
+            if (_requiredMetadata.Count() > 0)
             {
                 sb.Append(string.Format("\n\tRequiredMetadata"));
                 foreach (KeyValuePair<string, Type> metadataItem in _requiredMetadata)

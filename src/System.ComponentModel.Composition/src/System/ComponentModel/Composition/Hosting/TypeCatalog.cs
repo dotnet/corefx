@@ -14,7 +14,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -74,7 +73,10 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public TypeCatalog(IEnumerable<Type> types)
         {
-            Requires.NotNull(types, nameof(types));
+            if (types == null)
+            {
+                throw new ArgumentNullException(nameof(types));
+            }
 
             InitializeTypeCatalog(types);
 
@@ -101,12 +103,14 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public TypeCatalog(IEnumerable<Type> types, ICompositionElement definitionOrigin)
         {
-            Requires.NotNull(types, nameof(types));
-            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
+            if (types == null)
+            {
+                throw new ArgumentNullException(nameof(types));
+            }
 
+            _definitionOrigin = definitionOrigin ?? throw new ArgumentNullException(nameof(definitionOrigin));
             InitializeTypeCatalog(types);
 
-            _definitionOrigin = definitionOrigin;
             _contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(CreateIndex, true);
         }
 
@@ -130,8 +134,14 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public TypeCatalog(IEnumerable<Type> types, ReflectionContext reflectionContext)
         {
-            Requires.NotNull(types, nameof(types));
-            Requires.NotNull(reflectionContext, nameof(reflectionContext));
+            if (types == null)
+            {
+                throw new ArgumentNullException(nameof(types));
+            }
+            if (reflectionContext == null)
+            {
+                throw new ArgumentNullException(nameof(reflectionContext));
+            }
 
             InitializeTypeCatalog(types, reflectionContext);
 
@@ -162,13 +172,17 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public TypeCatalog(IEnumerable<Type> types, ReflectionContext reflectionContext, ICompositionElement definitionOrigin)
         {
-            Requires.NotNull(types, nameof(types));
-            Requires.NotNull(reflectionContext, nameof(reflectionContext));
-            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
+            if (types == null)
+            {
+                throw new ArgumentNullException(nameof(types));
+            }
+            if (reflectionContext == null)
+            {
+                throw new ArgumentNullException(nameof(reflectionContext));
+            }
 
+            _definitionOrigin = definitionOrigin ?? throw new ArgumentNullException(nameof(definitionOrigin));
             InitializeTypeCatalog(types, reflectionContext);
-
-            _definitionOrigin = definitionOrigin;
             _contractPartIndex = new Lazy<IDictionary<string, List<ComposablePartDefinition>>>(CreateIndex, true);
         }
 
@@ -324,8 +338,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 foreach (string contractName in part.ExportDefinitions.Select(export => export.ContractName).Distinct())
                 {
-                    List<ComposablePartDefinition> contractParts = null;
-                    if (!index.TryGetValue(contractName, out contractParts))
+                    if (!index.TryGetValue(contractName, out List<ComposablePartDefinition> contractParts))
                     {
                         contractParts = new List<ComposablePartDefinition>();
                         index.Add(contractName, contractParts);

@@ -5,39 +5,39 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Primitives
 {
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix")]
     public class ExportedDelegate
     {
-        private object _instance;
+        private readonly object _instance;
         private MethodInfo _method;
 
         protected ExportedDelegate() { }
 
         public ExportedDelegate(object instance, MethodInfo method)
         {
-            Requires.NotNull(method, nameof(method));
-
             _instance = instance;
-            _method = method;
+            _method = method ?? throw new ArgumentNullException(nameof(method));
         }
 
-        public virtual Delegate CreateDelegate(Type delegateType) 
+        public virtual Delegate CreateDelegate(Type delegateType)
         {
-            Requires.NotNull(delegateType, nameof(delegateType));
+            if (delegateType == null)
+            {
+                throw new ArgumentNullException(nameof(delegateType));
+            }
 
             if (delegateType == typeof(Delegate) || delegateType == typeof(MulticastDelegate))
             {
                 delegateType = CreateStandardDelegateType();
             }
             try
-            { 
+            {
                 return _method.CreateDelegate(delegateType, _instance);
             }
-            catch(ArgumentException)
+            catch (ArgumentException)
             {
                 //Bind failure occurs return null;
                 return null;
@@ -51,7 +51,7 @@ namespace System.ComponentModel.Composition.Primitives
             // This array should contains a lit of all argument types, and the last one is the return type (could be void)
             Type[] parameterTypes = new Type[parameters.Length + 1];
             parameterTypes[parameters.Length] = _method.ReturnType;
-            for (int i = 0; i < parameters.Length; i++ )
+            for (int i = 0; i < parameters.Length; i++)
             {
                 parameterTypes[i] = parameters[i].ParameterType;
             }

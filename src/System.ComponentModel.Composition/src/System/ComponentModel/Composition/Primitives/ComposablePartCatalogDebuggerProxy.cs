@@ -4,7 +4,6 @@
 
 using System.Collections;
 using System.Collections.ObjectModel;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Primitives
 {
@@ -14,11 +13,9 @@ namespace System.ComponentModel.Composition.Primitives
     {
         private readonly ComposablePartCatalog _catalog;
 
-        public ComposablePartCatalogDebuggerProxy(ComposablePartCatalog catalog) 
+        public ComposablePartCatalogDebuggerProxy(ComposablePartCatalog catalog)
         {
-            Requires.NotNull(catalog, nameof(catalog));
-
-            _catalog = catalog;
+            _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
         }
 
         // NOTE: This shouldn't be cached, so that on every query of

@@ -5,7 +5,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition
 {
@@ -15,9 +14,7 @@ namespace System.ComponentModel.Composition
 
         public CompositionExceptionDebuggerProxy(CompositionException exception)
         {
-            Requires.NotNull(exception, nameof(exception));
-
-            _exception = exception;
+            _exception = exception ?? throw new ArgumentNullException(nameof(exception));
         }
 
         public ReadOnlyCollection<Exception> Exceptions

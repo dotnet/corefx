@@ -119,7 +119,7 @@ namespace System.ComponentModel.Composition
         {
             if(requiredTypeIdentity == null)
             {
-                throw new ArgumentNullException(requiredTypeIdentity);
+                throw new ArgumentNullException(nameof(requiredTypeIdentity));
             }
 
             if(parameter == null)
@@ -209,18 +209,18 @@ namespace System.ComponentModel.Composition
             ParameterExpression exportDefinitionParameter = baseConstraint.Parameters[0];
 
             // exportDefinition.Metadata
-            Expression metadataExpression = Expression.Property(exportDefinitionParameter, ConstraintServices._exportDefinitionMetadataProperty);
+            Expression metadataExpression = Expression.Property(exportDefinitionParameter, _exportDefinitionMetadataProperty);
 
             // exportDefinition.Metadata.ContainsKey("ProductDefinition")
             Expression containsProductExpression = Expression.Call(
                 metadataExpression,
-                ConstraintServices._metadataContainsKeyMethod,
+                _metadataContainsKeyMethod,
                 Expression.Constant(CompositionConstants.ProductDefinitionMetadataName));
 
             // exportDefinition.Metadata["ProductDefinition"]
             Expression productExportDefinitionExpression = Expression.Call(
                     metadataExpression,
-                    ConstraintServices._metadataItemMethod,
+                    _metadataItemMethod,
                     Expression.Constant(CompositionConstants.ProductDefinitionMetadataName));
 
             // ProductImportDefinition.Contraint((ExportDefinition)exportDefinition.Metadata["ProductDefinition"])

@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Linq;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -14,7 +13,7 @@ namespace System.ComponentModel.Composition.Hosting
         private class CatalogChangeProxy : ComposablePartCatalog
         {
             private ComposablePartCatalog _originalCatalog;
-            private List<ComposablePartDefinition> _addedParts;
+            private readonly List<ComposablePartDefinition> _addedParts;
             private HashSet<ComposablePartDefinition> _removedParts;
 
             public CatalogChangeProxy(ComposablePartCatalog originalCatalog,
@@ -34,16 +33,19 @@ namespace System.ComponentModel.Composition.Hosting
             public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(
                 ImportDefinition definition)
             {
-                Requires.NotNull(definition, nameof(definition));
+                if (definition == null)
+                {
+                    throw new ArgumentNullException(nameof(definition));
+                }
 
-                var originalExports = _originalCatalog.GetExports(definition);
-                var trimmedExports = originalExports.Where(partAndExport =>
+                IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> originalExports = _originalCatalog.GetExports(definition);
+                IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> trimmedExports = originalExports.Where(partAndExport =>
                     !_removedParts.Contains(partAndExport.Item1));
 
                 var addedExports = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
-                foreach (var part in _addedParts)
+                foreach (ComposablePartDefinition part in _addedParts)
                 {
-                    foreach (var export in part.ExportDefinitions)
+                    foreach (ExportDefinition export in part.ExportDefinitions)
                     {
                         if (definition.IsConstraintSatisfiedBy(export))
                         {

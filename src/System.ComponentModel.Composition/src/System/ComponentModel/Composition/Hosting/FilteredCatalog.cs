@@ -8,7 +8,6 @@ using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -25,17 +24,20 @@ namespace System.ComponentModel.Composition.Hosting
         /// </summary>
         /// <param name="catalog">The catalog.</param>
         /// <param name="filter">The filter.</param>
-        public FilteredCatalog(ComposablePartCatalog catalog, Func<ComposablePartDefinition, bool> filter) : 
+        public FilteredCatalog(ComposablePartCatalog catalog, Func<ComposablePartDefinition, bool> filter) :
             this(catalog, filter, null)
         {
         }
 
         internal FilteredCatalog(ComposablePartCatalog catalog, Func<ComposablePartDefinition, bool> filter, FilteredCatalog complement)
         {
-            Requires.NotNull(catalog, nameof(catalog));
-            Requires.NotNull(filter, nameof(filter));
+            _innerCatalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
 
-            _innerCatalog = catalog;
+            if (filter == null)
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
+
             _filter = (p) => filter.Invoke(p.GetGenericPartDefinition() ?? p);
             _complement = complement;
 
@@ -46,7 +48,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-/// <summary>
+        /// <summary>
         /// Releases unmanaged and - optionally - managed resources
         /// </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
@@ -56,7 +58,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (disposing)
                 {
-                    if(!_isDisposed)
+                    if (!_isDisposed)
                     {
                         INotifyComposablePartCatalogChanged notifyCatalog = null;
                         try
@@ -153,10 +155,13 @@ namespace System.ComponentModel.Composition.Hosting
         public override IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> GetExports(ImportDefinition definition)
         {
             ThrowIfDisposed();
-            Requires.NotNull(definition, nameof(definition));
+            if (definition == null)
+            {
+                throw new ArgumentNullException(nameof(definition));
+            }
 
             var exports = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
-            foreach(Tuple<ComposablePartDefinition, ExportDefinition> export in _innerCatalog.GetExports(definition))
+            foreach (Tuple<ComposablePartDefinition, ExportDefinition> export in _innerCatalog.GetExports(definition))
             {
                 if (_filter(export.Item1))
                 {

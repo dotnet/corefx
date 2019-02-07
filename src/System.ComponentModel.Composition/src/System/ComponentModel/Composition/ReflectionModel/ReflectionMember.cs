@@ -3,36 +3,20 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
     internal abstract class ReflectionMember : ReflectionItem
     {
-        public abstract bool CanRead
-        {
-            get;
-        }
-        
-        public Type DeclaringType
-        {
-            get { return UnderlyingMember.DeclaringType; }
-        }
+        public abstract bool CanRead { get; }
 
-        public override string Name
-        {
-            get { return UnderlyingMember.Name; }
-        }
+        public Type DeclaringType => UnderlyingMember.DeclaringType;
 
-        public override string GetDisplayName()
-        {
-            return UnderlyingMember.GetDisplayName();
-        }
+        public override string Name => UnderlyingMember.Name;
 
-        public abstract bool RequiresInstance
-        {
-            get;
-        }
+        public override string GetDisplayName() => UnderlyingMember.GetDisplayName();
+
+        public abstract bool RequiresInstance { get; }
 
         public abstract MemberInfo UnderlyingMember { get; }
 

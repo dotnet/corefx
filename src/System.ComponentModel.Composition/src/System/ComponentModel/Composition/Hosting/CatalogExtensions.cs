@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel.Composition.Primitives;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -16,7 +15,10 @@ namespace System.ComponentModel.Composition.Hosting
         /// <returns>The newly created <see cref="CompositionService"/>.</returns>
         public static CompositionService CreateCompositionService(this ComposablePartCatalog composablePartCatalog)
         {
-            Requires.NotNull(composablePartCatalog, nameof(composablePartCatalog));
+            if (composablePartCatalog == null)
+            {
+                throw new ArgumentNullException(nameof(composablePartCatalog));
+            }
 
             return new CompositionService(composablePartCatalog);
         }

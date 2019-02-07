@@ -5,8 +5,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Composition.Diagnostics;
 using System.ComponentModel.Composition.Primitives;
+using System.Composition.Diagnostics;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -16,7 +16,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -31,7 +30,7 @@ namespace System.ComponentModel.Composition.Hosting
         private string _path;
         private string _fullPath;
         private ReadOnlyCollection<string> _loadedFiles;
-        
+
         private readonly ReflectionContext _reflectionContext = null;
 
         /// <summary>
@@ -67,7 +66,7 @@ namespace System.ComponentModel.Composition.Hosting
             : this(path, "*.dll")
         {
         }
-        
+
         /// <summary>
         ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the *.dll files 
         ///     in the given directory path.
@@ -140,11 +139,11 @@ namespace System.ComponentModel.Composition.Hosting
         /// <exception cref="UnauthorizedAccessException">
         ///     The caller does not have the required permission. 
         /// </exception>
-        public DirectoryCatalog(string path, ICompositionElement definitionOrigin) 
+        public DirectoryCatalog(string path, ICompositionElement definitionOrigin)
             : this(path, "*.dll", definitionOrigin)
         {
         }
-        
+
         /// <summary>
         ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the given searchPattern 
         ///     over the files in the given directory path.
@@ -266,12 +265,10 @@ namespace System.ComponentModel.Composition.Hosting
         public DirectoryCatalog(string path, string searchPattern, ICompositionElement definitionOrigin)
         {
             ValidateCtor(path, searchPattern);
-            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
-
-            _definitionOrigin = definitionOrigin;
+            _definitionOrigin = definitionOrigin ?? throw new ArgumentNullException(nameof(definitionOrigin));
             Initialize(path, searchPattern);
         }
-        
+
         /// <summary>
         ///     Creates a catalog of <see cref="ComposablePartDefinition"/>s based on all the given searchPattern 
         ///     over the files in the given directory path.
@@ -314,9 +311,7 @@ namespace System.ComponentModel.Composition.Hosting
         public DirectoryCatalog(string path, string searchPattern, ReflectionContext reflectionContext)
         {
             ValidateCtor(path, searchPattern);
-            Requires.NotNull(reflectionContext, nameof(reflectionContext));
-
-            _reflectionContext = reflectionContext;
+            _reflectionContext = reflectionContext ?? throw new ArgumentNullException(nameof(reflectionContext));
             _definitionOrigin = this;
             Initialize(path, searchPattern);
         }
@@ -367,11 +362,8 @@ namespace System.ComponentModel.Composition.Hosting
         public DirectoryCatalog(string path, string searchPattern, ReflectionContext reflectionContext, ICompositionElement definitionOrigin)
         {
             ValidateCtor(path, searchPattern);
-            Requires.NotNull(reflectionContext, nameof(reflectionContext));
-            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
-
-            _reflectionContext = reflectionContext;
-            _definitionOrigin = definitionOrigin;
+            _reflectionContext = reflectionContext ?? throw new ArgumentNullException(nameof(reflectionContext));
+            _definitionOrigin = definitionOrigin ?? throw new ArgumentNullException(nameof(definitionOrigin));
             Initialize(path, searchPattern);
         }
 
@@ -389,12 +381,12 @@ namespace System.ComponentModel.Composition.Hosting
 
             if (searchPattern == null)
             {
-                throw new ArgumentNullException(searchPattern);
+                throw new ArgumentNullException(nameof(searchPattern));
             }
 
             if (searchPattern.Length == 0)
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, searchPattern), searchPattern);
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, nameof(searchPattern)), nameof(searchPattern));
             }
         }
 
@@ -406,7 +398,7 @@ namespace System.ComponentModel.Composition.Hosting
             get
             {
                 Contract.Ensures(Contract.Result<string>() != null);
-                
+
                 return _fullPath;
             }
         }
@@ -435,7 +427,7 @@ namespace System.ComponentModel.Composition.Hosting
             get
             {
                 Contract.Ensures(Contract.Result<string>() != null);
-                
+
                 return _path;
             }
         }
@@ -533,7 +525,10 @@ namespace System.ComponentModel.Composition.Hosting
         {
             ThrowIfDisposed();
 
-            Requires.NotNull(definition, nameof(definition));
+            if (definition == null)
+            {
+                throw new ArgumentNullException(nameof(definition));
+            }
 
             return _catalogCollection.SelectMany(catalog => catalog.GetExports(definition));
         }

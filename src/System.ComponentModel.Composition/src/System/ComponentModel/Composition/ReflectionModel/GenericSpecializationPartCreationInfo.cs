@@ -9,14 +9,12 @@ using System.ComponentModel.Composition.Primitives;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
     internal class GenericSpecializationPartCreationInfo : IReflectionPartCreationInfo
     {
         private readonly IReflectionPartCreationInfo _originalPartCreationInfo;
-        private readonly ReflectionComposablePartDefinition _originalPart;
         private readonly Type[] _specialization;
         private readonly string[] _specializationIdentities;
         private IEnumerable<ExportDefinition> _exports;
@@ -27,12 +25,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private Dictionary<LazyMemberInfo, MemberInfo[]> _membersTable;
         private Dictionary<Lazy<ParameterInfo>, ParameterInfo> _parametersTable;
         private ConstructorInfo _constructor;
-        private object _lock = new object();
+        private readonly object _lock = new object();
 
         public GenericSpecializationPartCreationInfo(IReflectionPartCreationInfo originalPartCreationInfo, ReflectionComposablePartDefinition originalPart, Type[] specialization)
         {
             _originalPartCreationInfo = originalPartCreationInfo ?? throw new ArgumentNullException(nameof(originalPartCreationInfo));
-            _originalPart = originalPart ?? throw new ArgumentNullException(nameof(originalPart));
+            OriginalPart = originalPart ?? throw new ArgumentNullException(nameof(originalPart));
             _specialization = specialization ?? throw new ArgumentNullException(nameof(specialization));
             _specializationIdentities = new string[_specialization.Length];
             for (int i = 0; i < _specialization.Length; i++)
@@ -42,16 +40,9 @@ namespace System.ComponentModel.Composition.ReflectionModel
             _lazyPartType = new Lazy<Type>(
                 () => _originalPartCreationInfo.GetPartType().MakeGenericType(specialization),
                 LazyThreadSafetyMode.PublicationOnly);
-
         }
 
-        public ReflectionComposablePartDefinition OriginalPart
-        {
-            get
-            {
-                return _originalPart;
-            }
-        }
+        public ReflectionComposablePartDefinition OriginalPart { get; }
 
         public Type GetPartType()
         {
@@ -108,7 +99,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private MemberInfo[] GetAccessors(LazyMemberInfo originalLazyMember)
         {
             BuildTables();
-            if(_membersTable == null)
+            if (_membersTable == null)
             {
                 throw new ArgumentNullException(nameof(_membersTable));
             }

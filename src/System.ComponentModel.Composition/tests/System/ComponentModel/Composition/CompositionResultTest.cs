@@ -450,7 +450,7 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void SucceededResult_ShouldSetSuccessPropertyToTrue()
         {
-            var succeeded = CompositionResult.SucceededResult.Succeeded;
+            var succeeded = CompositionResult.s_succeededResult.Succeeded;
 
             Assert.True(succeeded);
         }
@@ -458,7 +458,7 @@ namespace System.ComponentModel.Composition
         [Fact]
         public void SucceededResult_ShouldSetErrorsPropertyToEmptyEnumerable()
         {
-            var errors = CompositionResult.SucceededResult.Errors;
+            var errors = CompositionResult.s_succeededResult.Errors;
 
             Assert.Empty(errors);
         }

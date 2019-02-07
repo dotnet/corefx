@@ -232,7 +232,7 @@ namespace System.ComponentModel.Composition
 
         private object GetInstance()
         {
-            var result = CompositionResult.SucceededResult;
+            var result = CompositionResult.s_succeededResult;
 
             // We only need this guard if we are pulling on the lazy exports during this call
             // but if we do the pulling in SetImport it isn't needed.

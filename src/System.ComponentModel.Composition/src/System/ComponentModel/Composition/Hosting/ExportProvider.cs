@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics.Contracts;
 using System.Globalization;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -96,12 +95,14 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public IEnumerable<Export> GetExports(ImportDefinition definition, AtomicComposition atomicComposition)
         {
-            Requires.NotNull(definition, nameof(definition));
+            if (definition == null)
+            {
+                throw new ArgumentNullException(nameof(definition));
+            }
             Contract.Ensures(Contract.Result<IEnumerable<Export>>() != null);
 
-            IEnumerable<Export> exports;
-            ExportCardinalityCheckResult result = TryGetExportsCore(definition, atomicComposition, out exports);
-            switch(result)
+            ExportCardinalityCheckResult result = TryGetExportsCore(definition, atomicComposition, out IEnumerable<Export> exports);
+            switch (result)
             {
                 case ExportCardinalityCheckResult.Match:
                     return exports;
@@ -143,13 +144,16 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public bool TryGetExports(ImportDefinition definition, AtomicComposition atomicComposition, out IEnumerable<Export> exports)
         {
-            Requires.NotNull(definition, nameof(definition));
+            if (definition == null)
+            {
+                throw new ArgumentNullException(nameof(definition));
+            }
 
             exports = null;
             ExportCardinalityCheckResult result = TryGetExportsCore(definition, atomicComposition, out exports);
             return (result == ExportCardinalityCheckResult.Match);
         }
-    
+
         /// <summary>
         ///     Returns all exports that match the constraint defined by the specified definition.
         /// </summary>
@@ -214,7 +218,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             exports = GetExportsCore(definition, atomicComposition);
 
-            var checkResult = ExportServices.CheckCardinality(definition, exports);
+            ExportCardinalityCheckResult checkResult = ExportServices.CheckCardinality(definition, exports);
 
             // Export providers treat >1 match as zero for cardinality 0-1 imports
             // If this policy is moved we need to revisit the assumption that the

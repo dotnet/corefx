@@ -7,11 +7,10 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Primitives;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    partial class DirectoryCatalog
+    public partial class DirectoryCatalog
     {
         internal class DirectoryCatalogDebuggerProxy
         {
@@ -19,19 +18,11 @@ namespace System.ComponentModel.Composition.Hosting
 
             public DirectoryCatalogDebuggerProxy(DirectoryCatalog catalog)
             {
-                Requires.NotNull(catalog, nameof(catalog));
-
-                _catalog = catalog;
+                _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
             }
 
-            public ReadOnlyCollection<Assembly> Assemblies
-            {
-                get
-                {
-                    return _catalog._assemblyCatalogs.Values.Select(catalog => catalog.Assembly)
-                                                                 .ToReadOnlyCollection();
-                }
-            }
+            public ReadOnlyCollection<Assembly> Assemblies => 
+                _catalog._assemblyCatalogs.Values.Select(catalog => catalog.Assembly).ToReadOnlyCollection();
 
             public ReflectionContext ReflectionContext => _catalog._reflectionContext;
 

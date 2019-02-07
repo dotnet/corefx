@@ -10,7 +10,6 @@ using System.ComponentModel.Composition.ReflectionModel;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.AttributedModel
 {
@@ -27,12 +26,7 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         public AttributedPartCreationInfo(Type type, PartCreationPolicyAttribute partCreationPolicy, bool ignoreConstructorImports, ICompositionElement origin)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            _type = type;
+            _type = type ?? throw new ArgumentNullException(nameof(type));
             _ignoreConstructorImports = ignoreConstructorImports;
             _partCreationPolicy = partCreationPolicy;
             _origin = origin;
@@ -277,7 +271,7 @@ namespace System.ComponentModel.Composition.AttributedModel
                 {
                     AttributedExportDefinition attributedExportDefinition = CreateExportDefinition(member, exportAttribute);
 
-                    if (exportAttribute.GetType() == CompositionServices.InheritedExportAttributeType)
+                    if (exportAttribute.GetType() == CompositionServices.s_inheritedExportAttributeType)
                     {
                         // Any InheritedExports on the type itself are contributed during this pass 
                         // and we need to do the book keeping for those.
@@ -325,9 +319,7 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         private AttributedExportDefinition CreateExportDefinition(MemberInfo member, ExportAttribute exportAttribute)
         {
-            string contractName = null;
-            Type typeIdentityType = null;
-            member.GetContractInfoFromExport(exportAttribute, out typeIdentityType, out contractName);
+            member.GetContractInfoFromExport(exportAttribute, out Type typeIdentityType, out string contractName);
 
             return new AttributedExportDefinition(this, member, exportAttribute, typeIdentityType, contractName);
         }
@@ -399,7 +391,7 @@ namespace System.ComponentModel.Composition.AttributedModel
             // Stopping at object instead of null to help with performance. It is a noticable performance
             // gain (~5%) if we don't have to try and pull the attributes we know don't exist on object.
             // We also need the null check in case we're passed a type that doesn't live in the runtime context.
-            while (currentType != null && currentType.UnderlyingSystemType != CompositionServices.ObjectType)
+            while (currentType != null && currentType.UnderlyingSystemType != CompositionServices.s_objectType)
             {
                 if (IsInheritedExport(currentType))
                 {
@@ -471,7 +463,7 @@ namespace System.ComponentModel.Composition.AttributedModel
                 // Stopping at object instead of null to help with performance. It is a noticable performance
                 // gain (~5%) if we don't have to try and pull the attributes we know don't exist on object.
                 // We also need the null check in case we're passed a type that doesn't live in the runtime context.
-                while (baseType != null && baseType.UnderlyingSystemType != CompositionServices.ObjectType)
+                while (baseType != null && baseType.UnderlyingSystemType != CompositionServices.s_objectType)
                 {
                     foreach (MemberInfo member in GetDeclaredOnlyImportMembers(baseType))
                     {

@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Linq;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -28,7 +27,10 @@ namespace System.ComponentModel.Composition.Hosting
         /// <returns></returns>
         public FilteredCatalog IncludeDependencies(Func<ImportDefinition, bool> importFilter)
         {
-            Requires.NotNull(importFilter, nameof(importFilter));
+            if (importFilter == null)
+            {
+                throw new ArgumentNullException(nameof(importFilter));
+            }
             ThrowIfDisposed();
 
             return Traverse(new DependenciesTraversal(this, importFilter));
@@ -51,7 +53,10 @@ namespace System.ComponentModel.Composition.Hosting
         /// <returns></returns>
         public FilteredCatalog IncludeDependents(Func<ImportDefinition, bool> importFilter)
         {
-            Requires.NotNull(importFilter, nameof(importFilter));
+            if (importFilter == null)
+            {
+                throw new ArgumentNullException(nameof(importFilter));
+            }
             ThrowIfDisposed();
 
             return Traverse(new DependentsTraversal(this, importFilter));
@@ -72,7 +77,7 @@ namespace System.ComponentModel.Composition.Hosting
             try
             {
                 traversal.Initialize();
-                var traversalClosure = GetTraversalClosure(_innerCatalog.Where(_filter), traversal);
+                HashSet<ComposablePartDefinition> traversalClosure = GetTraversalClosure(_innerCatalog.Where(_filter), traversal);
                 return new FilteredCatalog(_innerCatalog, p => traversalClosure.Contains(p));
             }
             finally
@@ -94,12 +99,11 @@ namespace System.ComponentModel.Composition.Hosting
 
         private static void GetTraversalClosure(IEnumerable<ComposablePartDefinition> parts, HashSet<ComposablePartDefinition> traversedParts, IComposablePartCatalogTraversal traversal)
         {
-            foreach (var part in parts)
+            foreach (ComposablePartDefinition part in parts)
             {
                 if (traversedParts.Add(part))
                 {
-                    IEnumerable<ComposablePartDefinition> partsToTraverse = null;
-                    if (traversal.TryTraverse(part, out partsToTraverse))
+                    if (traversal.TryTraverse(part, out IEnumerable<ComposablePartDefinition> partsToTraverse))
                     {
                         GetTraversalClosure(partsToTraverse, traversedParts, traversal);
                     }
@@ -109,8 +113,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void FreezeInnerCatalog()
         {
-            INotifyComposablePartCatalogChanged innerNotifyCatalog = _innerCatalog as INotifyComposablePartCatalogChanged;
-            if (innerNotifyCatalog != null)
+            if (_innerCatalog is INotifyComposablePartCatalogChanged innerNotifyCatalog)
             {
                 innerNotifyCatalog.Changing += ThrowOnRecomposition;
             }
@@ -118,8 +121,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void UnfreezeInnerCatalog()
         {
-            INotifyComposablePartCatalogChanged innerNotifyCatalog = _innerCatalog as INotifyComposablePartCatalogChanged;
-            if (innerNotifyCatalog != null)
+            if (_innerCatalog is INotifyComposablePartCatalogChanged innerNotifyCatalog)
             {
                 innerNotifyCatalog.Changing -= ThrowOnRecomposition;
             }

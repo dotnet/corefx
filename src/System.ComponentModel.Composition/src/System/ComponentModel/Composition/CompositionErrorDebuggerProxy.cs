@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel.Composition.Primitives;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition
 {
@@ -13,9 +12,7 @@ namespace System.ComponentModel.Composition
 
         public CompositionErrorDebuggerProxy(CompositionError error)
         {
-            Requires.NotNull(error, nameof(error));
-
-            _error = error;
+            _error = error ?? throw new ArgumentNullException(nameof(error));
         }
 
         public string Description

@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq.Expressions;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Primitives
 {
@@ -83,18 +82,14 @@ namespace System.ComponentModel.Composition.Primitives
         public ImportDefinition(Expression<Func<ExportDefinition, bool>> constraint, string contractName, ImportCardinality cardinality, bool isRecomposable, bool isPrerequisite)
             : this(contractName, cardinality, isRecomposable, isPrerequisite, MetadataServices.EmptyMetadata)
         {
-            Requires.NotNull(constraint, nameof(constraint));
-
-            _constraint = constraint;
+            _constraint = constraint ?? throw new ArgumentNullException(nameof(constraint));
         }
 
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public ImportDefinition(Expression<Func<ExportDefinition, bool>> constraint, string contractName, ImportCardinality cardinality, bool isRecomposable, bool isPrerequisite, IDictionary<string, object> metadata)
             : this(contractName, cardinality, isRecomposable, isPrerequisite, metadata)
         {
-            Requires.NotNull(constraint, nameof(constraint));
-
-            _constraint = constraint;
+            _constraint = constraint ?? throw new ArgumentNullException(nameof(constraint));
         }
 
         internal ImportDefinition(string contractName, ImportCardinality cardinality, bool isRecomposable, bool isPrerequisite, IDictionary<string, object> metadata)
@@ -112,7 +107,7 @@ namespace System.ComponentModel.Composition.Primitives
             _cardinality = cardinality;
             _isRecomposable = isRecomposable;
             _isPrerequisite = isPrerequisite;
-            
+
             //Metadata on imports was added in 4.5, prior to that it was ignored.
             if (metadata != null)
             {
@@ -124,18 +119,18 @@ namespace System.ComponentModel.Composition.Primitives
         ///     Gets the contract name of the export required by the import definition.
         /// </summary>
         /// <value>
-        ///     A <see cref="String"/> containing the contract name of the <see cref="Export"/> 
+        ///     A <see cref="string"/> containing the contract name of the <see cref="Export"/> 
         ///     required by the <see cref="ContractBasedImportDefinition"/>. This property should
-        ///     return <see cref="String.Empty"/> for imports that do not require a specific 
+        ///     return <see cref="string.Empty"/> for imports that do not require a specific 
         ///     contract name.
         /// </value>
         public virtual string ContractName
         {
-            get 
+            get
             {
                 Contract.Ensures(Contract.Result<string>() != null);
 
-                return _contractName; 
+                return _contractName;
             }
         }
 
@@ -206,7 +201,7 @@ namespace System.ComponentModel.Composition.Primitives
             get
             {
                 Contract.Ensures(Contract.Result<Expression<Func<ExportDefinition, bool>>>() != null);
-                
+
                 if (_constraint != null)
                 {
                     return _constraint;
@@ -267,7 +262,10 @@ namespace System.ComponentModel.Composition.Primitives
         /// </exception>
         public virtual bool IsConstraintSatisfiedBy(ExportDefinition exportDefinition)
         {
-            Requires.NotNull(exportDefinition, nameof(exportDefinition));
+            if (exportDefinition == null)
+            {
+                throw new ArgumentNullException(nameof(exportDefinition));
+            }
 
             if (_compiledConstraint == null)
             {
@@ -281,7 +279,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     Returns a string representation of the import definition.
         /// </summary>
         /// <returns>
-        ///     A <see cref="String"/> containing the value of the <see cref="Constraint"/> property.
+        ///     A <see cref="string"/> containing the value of the <see cref="Constraint"/> property.
         /// </returns>
         public override string ToString()
         {

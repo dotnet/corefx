@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics.Contracts;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -23,7 +22,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <summary>
         /// Initializes a new instance of the <see cref="CompositionBatch"/> class.
         /// </summary>
-        public CompositionBatch() : 
+        public CompositionBatch() :
             this(null, null)
         {
         }
@@ -38,7 +37,7 @@ namespace System.ComponentModel.Composition.Hosting
             _partsToAdd = new List<ComposablePart>();
             if (partsToAdd != null)
             {
-                foreach (var part in partsToAdd)
+                foreach (ComposablePart part in partsToAdd)
                 {
                     if (part == null)
                     {
@@ -52,7 +51,7 @@ namespace System.ComponentModel.Composition.Hosting
             _partsToRemove = new List<ComposablePart>();
             if (partsToRemove != null)
             {
-                foreach (var part in partsToRemove)
+                foreach (ComposablePart part in partsToRemove)
                 {
                     if (part == null)
                     {
@@ -90,7 +89,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                Contract.Ensures(Contract.Result <ReadOnlyCollection<ComposablePart>>() != null);
+                Contract.Ensures(Contract.Result<ReadOnlyCollection<ComposablePart>>() != null);
 
                 lock (_lock)
                 {
@@ -111,7 +110,11 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public void AddPart(ComposablePart part)
         {
-            Requires.NotNull(part, nameof(part));
+            if (part == null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
+
             lock (_lock)
             {
                 if (_copyNeededForAdd)
@@ -135,7 +138,11 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public void RemovePart(ComposablePart part)
         {
-            Requires.NotNull(part, nameof(part));
+            if (part == null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
+
             lock (_lock)
             {
                 if (_copyNeededForRemove)
@@ -165,7 +172,11 @@ namespace System.ComponentModel.Composition.Hosting
         /// </remarks>
         public ComposablePart AddExport(Export export)
         {
-            Requires.NotNull(export, nameof(export));
+            if (export == null)
+            {
+                throw new ArgumentNullException(nameof(export));
+            }
+
             Contract.Ensures(Contract.Result<ComposablePart>() != null);
 
             ComposablePart part = new SingleExportComposablePart(export);

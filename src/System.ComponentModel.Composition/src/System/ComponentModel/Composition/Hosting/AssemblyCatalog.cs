@@ -12,7 +12,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -31,14 +30,14 @@ namespace System.ComponentModel.Composition.Hosting
         private volatile ComposablePartCatalog _innerCatalog = null;
         private int _isDisposed = 0;
 
-        private ReflectionContext _reflectionContext = default(ReflectionContext);
+        private readonly ReflectionContext _reflectionContext = default;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssemblyCatalog"/> class 
         ///     with the specified code base.
         /// </summary>
         /// <param name="codeBase">
-        ///     A <see cref="String"/> containing the code base of the assembly containing the
+        ///     A <see cref="string"/> containing the code base of the assembly containing the
         ///     attributed <see cref="Type"/> objects to add to the <see cref="AssemblyCatalog"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
@@ -94,7 +93,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     with the specified code base.
         /// </summary>
         /// <param name="codeBase">
-        ///     A <see cref="String"/> containing the code base of the assembly containing the
+        ///     A <see cref="string"/> containing the code base of the assembly containing the
         ///     attributed <see cref="Type"/> objects to add to the <see cref="AssemblyCatalog"/>.
         /// </param>
         /// <param name="reflectionContext">
@@ -149,10 +148,8 @@ namespace System.ComponentModel.Composition.Hosting
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, nameof(codeBase)), nameof(codeBase));
             }
 
-            Requires.NotNull(reflectionContext, nameof(reflectionContext));
-
+            _reflectionContext = reflectionContext ?? throw new ArgumentNullException(nameof(reflectionContext));
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
-            _reflectionContext = reflectionContext;
             _definitionOrigin = this;
         }
 
@@ -161,7 +158,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     with the specified code base.
         /// </summary>
         /// <param name="codeBase">
-        ///     A <see cref="String"/> containing the code base of the assembly containing the
+        ///     A <see cref="string"/> containing the code base of the assembly containing the
         ///     attributed <see cref="Type"/> objects to add to the <see cref="AssemblyCatalog"/>.
         /// </param>
         /// <param name="definitionOrigin">
@@ -215,10 +212,8 @@ namespace System.ComponentModel.Composition.Hosting
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, nameof(codeBase)), nameof(codeBase));
             }
 
-            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
-
+            _definitionOrigin = definitionOrigin ?? throw new ArgumentNullException(nameof(definitionOrigin));
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
-            _definitionOrigin = definitionOrigin;
         }
 
         /// <summary>
@@ -226,7 +221,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     with the specified code base.
         /// </summary>
         /// <param name="codeBase">
-        ///     A <see cref="String"/> containing the code base of the assembly containing the
+        ///     A <see cref="string"/> containing the code base of the assembly containing the
         ///     attributed <see cref="Type"/> objects to add to the <see cref="AssemblyCatalog"/>.
         /// </param>
         /// <param name="reflectionContext">
@@ -288,12 +283,9 @@ namespace System.ComponentModel.Composition.Hosting
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, nameof(codeBase)), nameof(codeBase));
             }
 
-            Requires.NotNull(reflectionContext, nameof(reflectionContext));
-            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
-
+            _reflectionContext = reflectionContext ?? throw new ArgumentNullException(nameof(reflectionContext));
+            _definitionOrigin = definitionOrigin ?? throw new ArgumentNullException(nameof(definitionOrigin));
             InitializeAssemblyCatalog(LoadAssembly(codeBase));
-            _reflectionContext = reflectionContext;
-            _definitionOrigin = definitionOrigin;
         }
 
         /// <summary>
@@ -321,12 +313,14 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public AssemblyCatalog(Assembly assembly, ReflectionContext reflectionContext)
         {
-            Requires.NotNull(assembly, nameof(assembly));
-            Requires.NotNull(reflectionContext, nameof(reflectionContext));
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
 
-            InitializeAssemblyCatalog(assembly);
-            _reflectionContext = reflectionContext;
+            _reflectionContext = reflectionContext ?? throw new ArgumentNullException(nameof(reflectionContext));
             _definitionOrigin = this;
+            InitializeAssemblyCatalog(assembly);
         }
 
         /// <summary>
@@ -361,13 +355,14 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public AssemblyCatalog(Assembly assembly, ReflectionContext reflectionContext, ICompositionElement definitionOrigin)
         {
-            Requires.NotNull(assembly, nameof(assembly));
-            Requires.NotNull(reflectionContext, nameof(reflectionContext));
-            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
 
+            _reflectionContext = reflectionContext ?? throw new ArgumentNullException(nameof(reflectionContext));
+            _definitionOrigin = definitionOrigin ?? throw new ArgumentNullException(nameof(definitionOrigin));
             InitializeAssemblyCatalog(assembly);
-            _reflectionContext = reflectionContext;
-            _definitionOrigin = definitionOrigin;
         }
 
         /// <summary>
@@ -387,7 +382,10 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public AssemblyCatalog(Assembly assembly)
         {
-            Requires.NotNull(assembly, nameof(assembly));
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
 
             InitializeAssemblyCatalog(assembly);
             _definitionOrigin = this;
@@ -417,11 +415,13 @@ namespace System.ComponentModel.Composition.Hosting
         /// </exception>
         public AssemblyCatalog(Assembly assembly, ICompositionElement definitionOrigin)
         {
-            Requires.NotNull(assembly, nameof(assembly));
-            Requires.NotNull(definitionOrigin, nameof(definitionOrigin));
+            if (assembly == null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
 
+            _definitionOrigin = definitionOrigin ?? throw new ArgumentNullException(nameof(definitionOrigin));
             InitializeAssemblyCatalog(assembly);
-            _definitionOrigin = definitionOrigin;
         }
 
         private void InitializeAssemblyCatalog(Assembly assembly)
@@ -475,14 +475,14 @@ namespace System.ComponentModel.Composition.Hosting
                     var catalogReflectionContextAttribute = (CatalogReflectionContextAttribute)_assembly
                         .GetCustomAttributes(typeof(CatalogReflectionContextAttribute), false)
                         .FirstOrDefault();
-                    var assembly = (catalogReflectionContextAttribute != null)
+                    Assembly assembly = (catalogReflectionContextAttribute != null)
                         ? catalogReflectionContextAttribute.CreateReflectionContext().MapAssembly(_assembly)
                         : _assembly;
                     lock (_thisLock)
                     {
                         if (_innerCatalog == null)
                         {
-                            var catalog = (_reflectionContext != null)
+                            TypeCatalog catalog = (_reflectionContext != null)
                                 ? new TypeCatalog(assembly.GetTypes(), _reflectionContext, _definitionOrigin)
                                 : new TypeCatalog(assembly.GetTypes(), _definitionOrigin);
                             Thread.MemoryBarrier();
@@ -516,7 +516,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Gets the display name of the assembly catalog.
         /// </summary>
         /// <value>
-        ///     A <see cref="String"/> containing a human-readable display name of the <see cref="AssemblyCatalog"/>.
+        ///     A <see cref="string"/> containing a human-readable display name of the <see cref="AssemblyCatalog"/>.
         /// </value>
         [SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes")]
         string ICompositionElement.DisplayName
@@ -540,7 +540,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Returns a string representation of the assembly catalog.
         /// </summary>
         /// <returns>
-        ///     A <see cref="String"/> containing the string representation of the <see cref="AssemblyCatalog"/>.
+        ///     A <see cref="string"/> containing the string representation of the <see cref="AssemblyCatalog"/>.
         /// </returns>
         public override string ToString()
         {
@@ -609,8 +609,10 @@ namespace System.ComponentModel.Composition.Hosting
             }
             catch (ArgumentException)
             {
-                assemblyName = new AssemblyName();
-                assemblyName.CodeBase = codeBase;
+                assemblyName = new AssemblyName
+                {
+                    CodeBase = codeBase
+                };
             }
 
             try

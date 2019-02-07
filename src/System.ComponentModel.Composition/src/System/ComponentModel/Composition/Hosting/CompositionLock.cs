@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#define SINGLETHREADEDLOCKENFORCEMENT
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -25,16 +23,14 @@ namespace System.ComponentModel.Composition.Hosting
         // narrow lock
         private readonly Lock _stateLock = null;
         // wide lock
-        private static object _compositionLock = new object();
+        private static readonly object s_compositionLock = new object();
 
         private int _isDisposed = 0;
-        private bool _isThreadSafe = false;
-
-        private static readonly EmptyLockHolder _EmptyLockHolder = new EmptyLockHolder();
+        private static readonly EmptyLockHolder s_emptyLockHolder = new EmptyLockHolder();
 
         public CompositionLock(bool isThreadSafe)
         {
-            _isThreadSafe = isThreadSafe;
+            IsThreadSafe = isThreadSafe;
             if (isThreadSafe)
             {
                 _stateLock = new Lock();
@@ -43,7 +39,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         public void Dispose()
         {
-            if (_isThreadSafe)
+            if (IsThreadSafe)
             {
                 if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
                 {
@@ -52,66 +48,60 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        public bool IsThreadSafe
-        {
-            get
-            {
-                return _isThreadSafe;
-            }
-        }
+        public bool IsThreadSafe { get; } = false;
 
         private void EnterCompositionLock()
         {
 #pragma warning disable 618
-            if (_isThreadSafe)
+            if (IsThreadSafe)
             {
-                Monitor.Enter(_compositionLock);
+                Monitor.Enter(s_compositionLock);
             }
 #pragma warning restore 618
         }
 
         private void ExitCompositionLock()
         {
-            if (_isThreadSafe)
+            if (IsThreadSafe)
             {
-                Monitor.Exit(_compositionLock);
+                Monitor.Exit(s_compositionLock);
             }
         }
 
         public IDisposable LockComposition()
         {
-            if (_isThreadSafe)
+            if (IsThreadSafe)
             {
                 return new CompositionLockHolder(this);
             }
             else
             {
-                return _EmptyLockHolder;
+                return s_emptyLockHolder;
             }
         }
 
         public IDisposable LockStateForRead()
         {
-            if (_isThreadSafe)
+            if (IsThreadSafe)
             {
                 return new ReadLock(_stateLock);
             }
             else
             {
-                return _EmptyLockHolder;
-            }            
+                return s_emptyLockHolder;
+            }
         }
 
         public IDisposable LockStateForWrite()
         {
-            if (_isThreadSafe)
+            if (IsThreadSafe)
             {
                 return new WriteLock(_stateLock);
             }
             else
             {
-                return _EmptyLockHolder;
-            }   
+                return s_emptyLockHolder;
+            }
         }
 
         // NOTE : this should NOT be changed to a struct as ImportEngine relies on it

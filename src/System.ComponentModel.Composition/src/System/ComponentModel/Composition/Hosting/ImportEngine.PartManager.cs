@@ -72,7 +72,7 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     Part.SetImport(import, exports);
                     UpdateDisposableDependencies(import, exports);
-                    return CompositionResult.SucceededResult;
+                    return CompositionResult.s_succeededResult;
                 }
                 catch (CompositionException ex)
                 {   // Pulling on one of the exports failed
@@ -130,7 +130,7 @@ namespace System.ComponentModel.Composition.Hosting
                 try
                 {
                     Part.Activate();
-                    return CompositionResult.SucceededResult;
+                    return CompositionResult.s_succeededResult;
                 }
                 catch (ComposablePartException ex)
                 {   // Type failed to be constructed, imports could not be set, etc

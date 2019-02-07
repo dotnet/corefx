@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Primitives
 {
@@ -14,11 +13,9 @@ namespace System.ComponentModel.Composition.Primitives
     {
         private readonly CompositionElement _element;
 
-        public CompositionElementDebuggerProxy(CompositionElement element) 
+        public CompositionElementDebuggerProxy(CompositionElement element)
         {
-            Requires.NotNull(element, nameof(element));
-
-            _element = element;
+            _element = element ?? throw new ArgumentNullException(nameof(element));
         }
 
         public string DisplayName

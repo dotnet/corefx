@@ -8,18 +8,17 @@ using System.ComponentModel.Composition.Primitives;
 using System.ComponentModel.Composition.ReflectionModel;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
     internal static class CompositionServices
     {
-        internal static readonly Type InheritedExportAttributeType = typeof(InheritedExportAttribute);
-        internal static readonly Type ExportAttributeType = typeof(ExportAttribute);
-        internal static readonly Type AttributeType = typeof(Attribute);
-        internal static readonly Type ObjectType = typeof(object);
+        internal static readonly Type s_inheritedExportAttributeType = typeof(InheritedExportAttribute);
+        internal static readonly Type s_exportAttributeType = typeof(ExportAttribute);
+        internal static readonly Type s_attributeType = typeof(Attribute);
+        internal static readonly Type s_objectType = typeof(object);
 
-        private static readonly string[] reservedMetadataNames = new string[]
+        private static readonly string[] s_reservedMetadataNames = new string[]
         {
             CompositionConstants.PartCreationPolicyMetadataName
         };  
@@ -75,8 +74,8 @@ namespace System.ComponentModel.Composition.Hosting
                 // we will close the specfied contract type
                 if (specifiedContractType.ContainsGenericParameters && !memberType.ContainsGenericParameters)
                 {
-                    var typeGenericArguments = memberType.GetGenericArguments();
-                    var metadataTypeGenericArguments = specifiedContractType.GetGenericArguments();
+                    Type[] typeGenericArguments = memberType.GetGenericArguments();
+                    Type[] metadataTypeGenericArguments = specifiedContractType.GetGenericArguments();
 
                     if (typeGenericArguments.Length == metadataTypeGenericArguments.Length)
                     {
@@ -86,7 +85,7 @@ namespace System.ComponentModel.Composition.Hosting
                 // if both member type and the contract type are open generic types, make sure that their parameters are ordered the same way 
                 else if(specifiedContractType.ContainsGenericParameters && memberType.ContainsGenericParameters)
                 {
-                    var memberGenericParameters = memberType.GetPureGenericParameters();
+                    IList<Type> memberGenericParameters = memberType.GetPureGenericParameters();
                     if (specifiedContractType.GetPureGenericArity() == memberGenericParameters.Count)
                     {
                         return specifiedContractType.GetGenericTypeDefinition().MakeGenericType(memberGenericParameters.ToArray());
@@ -181,7 +180,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
             Type contractType = import.GetContractTypeFromImport(importType);
 
             // For our importers we treat object as not having a type identity
-            if (contractType == CompositionServices.ObjectType)
+            if (contractType == CompositionServices.s_objectType)
             {
                 return null;
             }
@@ -200,7 +199,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
 
             foreach (PartMetadataAttribute partMetadata in type.GetCustomAttributes<PartMetadataAttribute>(false))
             {
-                if (reservedMetadataNames.Contains(partMetadata.Name, StringComparers.MetadataKeyNames) 
+                if (s_reservedMetadataNames.Contains(partMetadata.Name, StringComparers.MetadataKeyNames) 
                     || dictionary.ContainsKey(partMetadata.Name))
                 {
                     // Perhaps we should log an error here so that people know this value is being ignored.
@@ -271,7 +270,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
 
                 if (provider != null)
                 {
-                    if (reservedMetadataNames.Contains(provider.Name, StringComparers.MetadataKeyNames))
+                    if (s_reservedMetadataNames.Contains(provider.Name, StringComparers.MetadataKeyNames))
                     {
                         throw ExceptionBuilder.CreateDiscoveryException(SR.Discovery_ReservedMetadataNameUsed, member.GetDisplayName(), provider.Name);
                     }
@@ -287,7 +286,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
                 {
                     Type attrType = attr.GetType();
                     // Perf optimization, relies on short circuit evaluation, often a property attribute is an ExportAttribute
-                    if ((attrType != CompositionServices.ExportAttributeType) && attrType.IsDefined(typeof(MetadataAttributeAttribute), true))
+                    if ((attrType != CompositionServices.s_exportAttributeType) && attrType.IsDefined(typeof(MetadataAttributeAttribute), true))
                     {
                         bool allowsMultiple = false;
 
@@ -300,13 +299,13 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
 
                         foreach (PropertyInfo pi in attrType.GetProperties())
                         {
-                            if (pi.DeclaringType == CompositionServices.ExportAttributeType || pi.DeclaringType == CompositionServices.AttributeType)
+                            if (pi.DeclaringType == CompositionServices.s_exportAttributeType || pi.DeclaringType == CompositionServices.s_attributeType)
                             {
                                 // Don't contribute metadata properies from the base attribute types.
                                 continue;
                             }
 
-                            if (reservedMetadataNames.Contains(pi.Name, StringComparers.MetadataKeyNames))
+                            if (s_reservedMetadataNames.Contains(pi.Name, StringComparers.MetadataKeyNames))
                             {
                                 throw ExceptionBuilder.CreateDiscoveryException(SR.Discovery_ReservedMetadataNameUsed, member.GetDisplayName(), provider.Name);
                             }
@@ -330,8 +329,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
             // Need Keys.ToArray because we alter the dictionary in the loop
             foreach (var key in dictionary.Keys.ToArray())
             {
-                var list = dictionary[key] as MetadataList;
-                if (list != null)
+                if (dictionary[key] is MetadataList list)
                 {
                     dictionary[key] = list.ToArray();
                 }
@@ -342,8 +340,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
 
         private static bool TryContributeMetadataValue(this IDictionary<string, object> dictionary, string name, object value, Type valueType, bool allowsMultiple)
         {
-            object metadataValue;
-            if (!dictionary.TryGetValue(name, out metadataValue))
+            if (!dictionary.TryGetValue(name, out object metadataValue))
             {
                 if (allowsMultiple)
                 {
@@ -374,8 +371,8 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
         {
             private Type _arrayType = null;
             private bool _containsNulls = false;
-            private static readonly Type ObjectType = typeof(object);
-            private static readonly Type TypeType = typeof(Type);
+            private static readonly Type s_objectType = typeof(object);
+            private static readonly Type s_typeType = typeof(Type);
             private Collection<object> _innerList = new Collection<object>();
 
             public void Add(object item, Type itemType)
@@ -383,7 +380,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
                 _containsNulls |= (item == null);
 
                 // if we've been passed typeof(object), we basically have no type inmformation
-                if (itemType == ObjectType)
+                if (itemType == s_objectType)
                 {
                     itemType = null;
                 }
@@ -397,7 +394,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
                 // Types are special, because the are abstract classes, so if the item casts to Type, we assume System.Type
                 if (item is Type)
                 {
-                    itemType = TypeType;
+                    itemType = s_typeType;
                 }
 
                 // only try to call this if we got a meaningful type
@@ -428,7 +425,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
                     // in metadata right now, it's a moot point
                     if (_arrayType != itemType)
                     {
-                        _arrayType = ObjectType;
+                        _arrayType = s_objectType;
                     }
                 }
             }
@@ -438,12 +435,12 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
                 if (_arrayType == null)
                 {
                     // if the array type has not been set, assume Object 
-                    _arrayType = ObjectType;
+                    _arrayType = s_objectType;
                 }
                 else if (_containsNulls && _arrayType.IsValueType)
                 {
                     // if the array type is a value type and we have seen nulls, then assume Object
-                    _arrayType = ObjectType;
+                    _arrayType = s_objectType;
                 }
 
                 Array array = Array.CreateInstance(_arrayType, _innerList.Count);
@@ -578,7 +575,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
             try
             {
                 action();
-                return CompositionResult.SucceededResult;
+                return CompositionResult.s_succeededResult;
             }
             catch (CompositionException ex)
             {
@@ -589,7 +586,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
         internal static CompositionResult TryFire<TEventArgs>(EventHandler<TEventArgs> _delegate, object sender, TEventArgs e)
             where TEventArgs : EventArgs
         {
-            CompositionResult result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.s_succeededResult;
             foreach (EventHandler<TEventArgs> _subscriber in _delegate.GetInvocationList())
             {
                 try
@@ -607,9 +604,7 @@ internal static Type GetContractTypeFromImport(this IAttributedImport import, Im
 
         internal static CreationPolicy GetRequiredCreationPolicy(this ImportDefinition definition)
         {
-            ContractBasedImportDefinition contractDefinition = definition as ContractBasedImportDefinition;
-
-            if (contractDefinition != null)
+            if (definition is ContractBasedImportDefinition contractDefinition)
             {
                 return contractDefinition.RequiredCreationPolicy;
             }

@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics.Contracts;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -42,8 +41,14 @@ namespace System.ComponentModel.Composition.Hosting
         public ComposablePartCatalogChangeEventArgs(IEnumerable<ComposablePartDefinition> addedDefinitions,
             IEnumerable<ComposablePartDefinition> removedDefinitions, AtomicComposition atomicComposition)
         {
-            Requires.NotNull(addedDefinitions, nameof(addedDefinitions));
-            Requires.NotNull(removedDefinitions, nameof(removedDefinitions));
+            if (addedDefinitions == null)
+            {
+                throw new ArgumentNullException(nameof(addedDefinitions));
+            }
+            if (removedDefinitions == null)
+            {
+                throw new ArgumentNullException(nameof(removedDefinitions));
+            }
 
             _addedDefinitions = addedDefinitions.AsArray();
             _removedDefinitions = removedDefinitions.AsArray();
@@ -57,7 +62,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     An <see cref="IEnumerable{T}"/> of <see cref="ComposablePartDefinition"/> objects that 
         ///     have been added to the <see cref="ComposablePartCatalog"/>.
         /// </value>
-        public IEnumerable<ComposablePartDefinition> AddedDefinitions 
+        public IEnumerable<ComposablePartDefinition> AddedDefinitions
         {
             get
             {
@@ -74,12 +79,12 @@ namespace System.ComponentModel.Composition.Hosting
         ///     An <see cref="IEnumerable{T}"/> of <see cref="ComposablePartDefinition"/> objects that 
         ///     have been removed from from the <see cref="ComposablePartCatalog"/>.
         /// </value>
-        public IEnumerable<ComposablePartDefinition> RemovedDefinitions 
+        public IEnumerable<ComposablePartDefinition> RemovedDefinitions
         {
             get
             {
                 Contract.Ensures(Contract.Result<IEnumerable<ComposablePartDefinition>>() != null);
-                
+
                 return _removedDefinitions;
             }
         }

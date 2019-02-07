@@ -3,67 +3,35 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
     internal class ReflectionField : ReflectionWritableMember
     {
-        private readonly FieldInfo _field;
-
         public ReflectionField(FieldInfo field)
         {
-            if (field == null)
-            {
-                throw new ArgumentNullException(nameof(field));
-            }
-
-            _field = field;
+            UnderlyingField = field ?? throw new ArgumentNullException(nameof(field));
         }
 
-        public FieldInfo UndelyingField
-        {
-            get { return _field; }
-        }
+        public FieldInfo UnderlyingField { get; }
 
-        public override MemberInfo UnderlyingMember
-        {
-            get { return UndelyingField; }
-        }
+        public override MemberInfo UnderlyingMember => UnderlyingField;
 
-        public override bool CanRead
-        {
-            get { return true; }
-        }
+        public override bool CanRead => true;
 
-        public override bool CanWrite
-        {
-            get { return !UndelyingField.IsInitOnly; }
-        }
+        public override bool CanWrite => !UnderlyingField.IsInitOnly;
 
-        public override bool RequiresInstance
-        {
-            get { return !UndelyingField.IsStatic; }
-        }
+        public override bool RequiresInstance => !UnderlyingField.IsStatic;
 
-        public override Type ReturnType
-        {
-            get { return UndelyingField.FieldType; }
-        }
+        public override Type ReturnType => UnderlyingField.FieldType;
 
-        public override ReflectionItemType ItemType
-        {
-            get { return ReflectionItemType.Field; }
-        }
+        public override ReflectionItemType ItemType => ReflectionItemType.Field;
 
-        public override object GetValue(object instance)
-        {
-            return UndelyingField.GetValue(instance);
-        }
+        public override object GetValue(object instance) => UnderlyingField.GetValue(instance);
 
         public override void SetValue(object instance, object value)
         {
-            UndelyingField.SetValue(instance, value);
+            UnderlyingField.SetValue(instance, value);
         }
     }
 }

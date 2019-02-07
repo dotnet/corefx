@@ -9,29 +9,15 @@ namespace System.ComponentModel.Composition.ReflectionModel
 {
     internal abstract class ImportingItem
     {
-        private readonly ContractBasedImportDefinition _definition;
-        private readonly ImportType _importType;
-
         protected ImportingItem(ContractBasedImportDefinition definition, ImportType importType)
         {
-            if (definition == null)
-            {
-                throw new ArgumentNullException(nameof(definition));
-            }
-
-            _definition = definition;
-            _importType = importType;
+            Definition = definition ?? throw new ArgumentNullException(nameof(definition));
+            ImportType = importType;
         }
 
-        public ContractBasedImportDefinition Definition
-        {
-            get { return _definition; }
-        }
+        public ContractBasedImportDefinition Definition { get; }
 
-        public ImportType ImportType
-        {
-            get { return _importType; }
-        }
+        public ImportType ImportType { get; }
 
         public object CastExportsToImportType(Export[] exports)
         {
@@ -102,8 +88,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
         {
             object value = export.Value;
 
-            object result;
-            if (!ContractServices.TryCast(type, value, out result))
+            if (!ContractServices.TryCast(type, value, out object result))
             {
                 throw new ComposablePartException(
                     string.Format(CultureInfo.CurrentCulture,

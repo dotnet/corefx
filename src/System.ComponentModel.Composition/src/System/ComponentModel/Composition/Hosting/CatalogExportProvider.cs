@@ -13,7 +13,6 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Microsoft.Internal;
 using System.Collections;
 
 namespace System.ComponentModel.Composition.Hosting
@@ -71,14 +70,14 @@ namespace System.ComponentModel.Composition.Hosting
 
         public CatalogExportProvider(ComposablePartCatalog catalog, CompositionOptions compositionOptions)
         {
-            Requires.NotNull(catalog, nameof(catalog));
+            _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+
             if (compositionOptions > (CompositionOptions.DisableSilentRejection | CompositionOptions.IsThreadSafe | CompositionOptions.ExportCompositionService))
             {
                 throw new ArgumentOutOfRangeException(nameof(compositionOptions));
             }
-
-            _catalog = catalog;
             _compositionOptions = compositionOptions;
+
             if (_catalog is INotifyComposablePartCatalogChanged notifyCatalogChanged)
             {
                 notifyCatalogChanged.Changing += OnCatalogChanging;
@@ -161,7 +160,10 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 ThrowIfDisposed();
 
-                Requires.NotNull(value, nameof(value));
+                if (value == null)
+{
+throw new ArgumentNullException(nameof(value));
+}
 
                 ImportEngine newImportEngine = null;
                 AggregateExportProvider aggregateExportProvider = null;

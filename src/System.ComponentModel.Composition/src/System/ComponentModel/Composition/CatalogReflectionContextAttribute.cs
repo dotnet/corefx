@@ -4,10 +4,8 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using Microsoft.Internal;
-
-using PermissionSet = System.Security.PermissionSet;
-using PermissionState = System.Security.Permissions.PermissionState;
+using System.Security;
+using System.Security.Permissions;
 
 namespace System.ComponentModel.Composition
 {
@@ -15,16 +13,14 @@ namespace System.ComponentModel.Composition
     ///     Enables the AssemblyCatalog to discover user provided ReflectionContexts.
     /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false,Inherited = true)]
+    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false, Inherited = true)]
     public class CatalogReflectionContextAttribute : Attribute
     {
-        Type _reflectionContextType;
+        private Type _reflectionContextType;
 
         public CatalogReflectionContextAttribute(Type reflectionContextType)
         {
-            Requires.NotNull(reflectionContextType, nameof(reflectionContextType));
-
-            _reflectionContextType = reflectionContextType;
+            _reflectionContextType = reflectionContextType ?? throw new ArgumentNullException(nameof(reflectionContextType));
         }
 
         public ReflectionContext CreateReflectionContext()

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel.Composition.Primitives;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -28,19 +27,19 @@ namespace System.ComponentModel.Composition.Hosting
             _notifyCatalog = composablePartCatalog as INotifyComposablePartCatalogChanged;
             try
             {
-                if(_notifyCatalog != null)
+                if (_notifyCatalog != null)
                 {
                     _notifyCatalog.Changing += OnCatalogChanging;
                 }
 
-                var compositionOptions = CompositionOptions.DisableSilentRejection | CompositionOptions.IsThreadSafe | CompositionOptions.ExportCompositionService;
+                CompositionOptions compositionOptions = CompositionOptions.DisableSilentRejection | CompositionOptions.IsThreadSafe | CompositionOptions.ExportCompositionService;
                 var compositionContainer = new CompositionContainer(composablePartCatalog, compositionOptions);
-    
+
                 _compositionContainer = compositionContainer;
             }
             catch
             {
-                if(_notifyCatalog != null)
+                if (_notifyCatalog != null)
                 {
                     _notifyCatalog.Changing -= OnCatalogChanging;
                 }
@@ -50,11 +49,15 @@ namespace System.ComponentModel.Composition.Hosting
 
         public void SatisfyImportsOnce(ComposablePart part)
         {
-            Requires.NotNull(part, nameof(part));
-            if(_compositionContainer == null)
+            if (part == null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
+            if (_compositionContainer == null)
             {
                 throw new Exception(SR.Diagnostic_InternalExceptionMessage);
             }
+
             _compositionContainer.SatisfyImportsOnce(part);
         }
 
@@ -64,7 +67,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 throw new Exception(SR.Diagnostic_InternalExceptionMessage);
             }
-            
+
             // Delegates are cool there is no concern if you try to remove an item from them and they don't exist
             if (_notifyCatalog != null)
             {

@@ -7,7 +7,6 @@ using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.ComponentModel.Composition.ReflectionModel;
 using System.Reflection;
-using Microsoft.Internal;
 
 namespace System.Composition.Diagnostics
 {
@@ -15,7 +14,7 @@ namespace System.Composition.Diagnostics
     {
         internal static void PartDefinitionResurrected(ComposablePartDefinition definition)
         {
-            if(definition == null)
+            if (definition == null)
             {
                 throw new ArgumentNullException(nameof(definition));
             }
@@ -30,12 +29,12 @@ namespace System.Composition.Diagnostics
 
         internal static void PartDefinitionRejected(ComposablePartDefinition definition, ChangeRejectedException exception)
         {
-            if(definition == null)
+            if (definition == null)
             {
                 throw new ArgumentNullException(nameof(definition));
             }
 
-            if(exception == null)
+            if (exception == null)
             {
                 throw new ArgumentNullException(nameof(exception));
             }
@@ -52,22 +51,22 @@ namespace System.Composition.Diagnostics
 
         internal static void AssemblyLoadFailed(DirectoryCatalog catalog, string fileName, Exception exception)
         {
-            if(catalog == null)
+            if (catalog == null)
             {
                 throw new ArgumentNullException(nameof(catalog));
             }
 
-            if(exception == null)
+            if (exception == null)
             {
                 throw new ArgumentNullException(nameof(exception));
             }
 
-            if(fileName == null)
+            if (fileName == null)
             {
                 throw new ArgumentNullException(nameof(fileName));
             }
 
-            if(fileName.Length == 0)
+            if (fileName.Length == 0)
             {
                 throw new ArgumentException(SR.Format(SR.ArgumentException_EmptyString, nameof(fileName)), nameof(fileName));
             }
@@ -84,7 +83,7 @@ namespace System.Composition.Diagnostics
 
         internal static void DefinitionMarkedWithPartNotDiscoverableAttribute(Type type)
         {
-            if(type == null)
+            if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
@@ -99,12 +98,12 @@ namespace System.Composition.Diagnostics
 
         internal static void DefinitionMismatchedExportArity(Type type, MemberInfo member)
         {
-            if(type == null)
+            if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
 
-            if(member == null)
+            if (member == null)
             {
                 throw new ArgumentNullException(nameof(member));
             }
@@ -119,7 +118,7 @@ namespace System.Composition.Diagnostics
 
         internal static void DefinitionContainsNoExports(Type type)
         {
-            if(type == null)
+            if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
@@ -134,7 +133,7 @@ namespace System.Composition.Diagnostics
 
         internal static void MemberMarkedWithMultipleImportAndImportMany(ReflectionItem item)
         {
-            if(item == null)
+            if (item == null)
             {
                 throw new ArgumentNullException(nameof(item));
             }

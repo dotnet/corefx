@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -32,7 +31,10 @@ namespace System.ComponentModel.Composition.Hosting
         /// <param name="children">The children.</param>
         public CompositionScopeDefinition(ComposablePartCatalog catalog, IEnumerable<CompositionScopeDefinition> children)
         {
-            Requires.NotNull(catalog, nameof(catalog));
+            if (catalog == null)
+            {
+                throw new ArgumentNullException(nameof(catalog));
+            }
 
             if (children != null && !Contract.ForAll(children, (child) => child != null))
             {
@@ -42,7 +44,7 @@ namespace System.ComponentModel.Composition.Hosting
             InitializeCompositionScopeDefinition(catalog, children, null);
         }
 
-/// <summary>
+        /// <summary>
         /// Initializes a new instance of the <see cref="CompositionScopeDefinition"/> class.
         /// </summary>
         /// <param name="catalog">The catalog.</param>
@@ -50,7 +52,10 @@ namespace System.ComponentModel.Composition.Hosting
         /// <param name="publicSurface">The exports that can be used to create new scopes.</param>
         public CompositionScopeDefinition(ComposablePartCatalog catalog, IEnumerable<CompositionScopeDefinition> children, IEnumerable<ExportDefinition> publicSurface)
         {
-            Requires.NotNull(catalog, nameof(catalog));
+            if (catalog == null)
+            {
+                throw new ArgumentNullException(nameof(catalog));
+            }
 
             if (children != null && !Contract.ForAll(children, (child) => child != null))
             {
@@ -65,7 +70,7 @@ namespace System.ComponentModel.Composition.Hosting
             InitializeCompositionScopeDefinition(catalog, children, publicSurface);
         }
 
-/// <summary>
+        /// <summary>
         /// Initializes a new instance of the <see cref="CompositionScopeDefinition"/> class.
         /// </summary>
         /// <param name="catalog">The catalog.</param>
@@ -77,13 +82,12 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 _children = children.ToArray();
             }
-            if(publicSurface != null)
+            if (publicSurface != null)
             {
                 _publicSurface = publicSurface;
             }
 
-            INotifyComposablePartCatalogChanged notifyCatalog = _catalog as INotifyComposablePartCatalogChanged;
-            if (notifyCatalog != null)
+            if (_catalog is INotifyComposablePartCatalogChanged notifyCatalog)
             {
                 notifyCatalog.Changed += OnChangedInternal;
                 notifyCatalog.Changing += OnChangingInternal;
@@ -102,8 +106,7 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
                     {
-                        INotifyComposablePartCatalogChanged notifyCatalog = _catalog as INotifyComposablePartCatalogChanged;
-                        if (notifyCatalog != null)
+                        if (_catalog is INotifyComposablePartCatalogChanged notifyCatalog)
                         {
                             notifyCatalog.Changed -= OnChangedInternal;
                             notifyCatalog.Changing -= OnChangingInternal;
@@ -148,14 +151,14 @@ namespace System.ComponentModel.Composition.Hosting
             get
             {
                 ThrowIfDisposed();
-                if(_publicSurface == null)
+                if (_publicSurface == null)
                 {
-                    return this.SelectMany( (p) => p.ExportDefinitions );
+                    return this.SelectMany((p) => p.ExportDefinitions);
                 }
 
                 return _publicSurface;
             }
-        } 
+        }
 
         /// <summary>
         /// Gets an Enumerator for the ComposablePartDefinitions
@@ -206,13 +209,13 @@ namespace System.ComponentModel.Composition.Hosting
 
             var exports = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
 
-            foreach(var exportDefinition in PublicSurface)
+            foreach (ExportDefinition exportDefinition in PublicSurface)
             {
                 if (definition.IsConstraintSatisfiedBy(exportDefinition))
                 {
-                    foreach (var export in GetExports(definition))
+                    foreach (Tuple<ComposablePartDefinition, ExportDefinition> export in GetExports(definition))
                     {
-                        if(export.Item2 == exportDefinition)
+                        if (export.Item2 == exportDefinition)
                         {
                             exports.Add(export);
                             break;

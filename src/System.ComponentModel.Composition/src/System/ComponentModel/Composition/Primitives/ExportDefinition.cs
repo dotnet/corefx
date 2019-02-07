@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using Microsoft.Internal;
+using System.Globalization;
 
 namespace System.ComponentModel.Composition.Primitives
 {
@@ -37,7 +37,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     the specified contract name and metadata.
         /// </summary>
         /// <param name="contractName">
-        ///     A <see cref="String"/> containing the contract name of the 
+        ///     A <see cref="string"/> containing the contract name of the 
         ///     <see cref="ExportDefinition"/>.
         /// </param>
         /// <param name="metadata">
@@ -56,12 +56,12 @@ namespace System.ComponentModel.Composition.Primitives
         {
             if (contractName == null)
             {
-                throw new ArgumentNullException(contractName);
+                throw new ArgumentNullException(nameof(contractName));
             }
 
             if (contractName.Length == 0)
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, contractName), contractName);
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.ArgumentException_EmptyString, nameof(contractName)), nameof(contractName));
             }
 
             _contractName = contractName;
@@ -76,7 +76,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     Gets the contract name of the export definition.
         /// </summary>
         /// <value>
-        ///     A <see cref="String"/> containing the contract name of the 
+        ///     A <see cref="string"/> containing the contract name of the 
         ///     <see cref="ExportDefinition"/>.
         /// </value>
         /// <exception cref="NotImplementedException">
@@ -137,7 +137,7 @@ namespace System.ComponentModel.Composition.Primitives
         ///     Returns a string representation of the export definition.
         /// </summary>
         /// <returns>
-        ///     A <see cref="String"/> containing the value of the <see cref="ContractName"/> property.
+        ///     A <see cref="string"/> containing the value of the <see cref="ContractName"/> property.
         /// </returns>
         public override string ToString()
         {

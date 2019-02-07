@@ -5,7 +5,6 @@
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.ReflectionModel
 {
@@ -16,13 +15,16 @@ namespace System.ComponentModel.Composition.ReflectionModel
 
         public LazyMemberInfo(MemberInfo member)
         {
-            Requires.NotNull(member, nameof(member));
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
             EnsureSupportedMemberType(member.MemberType, nameof(member));
 
             _accessorsCreator = null;
             MemberType = member.MemberType;
-            
-            switch(MemberType)
+
+            switch (MemberType)
             {
                 case MemberTypes.Property:
                     PropertyInfo property = (PropertyInfo)member;
@@ -45,7 +47,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public LazyMemberInfo(MemberTypes memberType, params MemberInfo[] accessors)
         {
             EnsureSupportedMemberType(memberType, nameof(memberType));
-            Requires.NotNull(accessors, nameof(accessors));
+            if (accessors == null)
+            {
+                throw new ArgumentNullException(nameof(accessors));
+            }
 
             if (!AreAccessorsValid(memberType, accessors, out string errorMessage))
             {
@@ -60,11 +65,10 @@ namespace System.ComponentModel.Composition.ReflectionModel
         public LazyMemberInfo(MemberTypes memberType, Func<MemberInfo[]> accessorsCreator)
         {
             EnsureSupportedMemberType(memberType, nameof(memberType));
-            Requires.NotNull(accessorsCreator, nameof(accessorsCreator));
 
             MemberType = memberType;
             _accessors = null;
-            _accessorsCreator = accessorsCreator;
+            _accessorsCreator = accessorsCreator ?? throw new ArgumentNullException(nameof(accessorsCreator));
         }
 
         public MemberTypes MemberType { get; }
@@ -92,14 +96,12 @@ namespace System.ComponentModel.Composition.ReflectionModel
             {
                 return MemberType.GetHashCode() ^ _accessorsCreator.GetHashCode();
             }
-            else
+            else if (_accessors == null || _accessors[0] == null)
             {
-                if(_accessors == null || _accessors[0] == null)
-                {
-                    throw new Exception(SR.Diagnostic_InternalExceptionMessage);
-                }
-                return MemberType.GetHashCode() ^ _accessors[0].GetHashCode();
+                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
             }
+
+            return MemberType.GetHashCode() ^ _accessors[0].GetHashCode();
         }
 
         public override bool Equals(object obj)
@@ -115,11 +117,11 @@ namespace System.ComponentModel.Composition.ReflectionModel
             // if any of the lazy memebers create accessors in a delay-loaded fashion, we simply compare the creators
             if ((_accessorsCreator != null) || (that._accessorsCreator != null))
             {
-                return object.Equals(_accessorsCreator, that._accessorsCreator);
+                return Equals(_accessorsCreator, that._accessorsCreator);
             }
 
             // we are dealing with explicitly passed accessors in both cases
-            if(_accessors == null || that._accessors == null)
+            if (_accessors == null || that._accessors == null)
             {
                 throw new Exception(SR.Diagnostic_InternalExceptionMessage);
             }
@@ -199,7 +201,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
                         errorMessage = string.Format(CultureInfo.CurrentCulture, SR.LazyMemberInfo_InvalidAccessorOnSimpleMember, memberType);
                         return false;
                     }
-                   
+
                     break;
             }
             return true;

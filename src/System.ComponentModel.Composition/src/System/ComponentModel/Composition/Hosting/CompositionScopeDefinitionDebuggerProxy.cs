@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Primitives;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -16,25 +15,23 @@ namespace System.ComponentModel.Composition.Hosting
     {
         private readonly CompositionScopeDefinition _compositionScopeDefinition;
 
-        public CompositionScopeDefinitionDebuggerProxy(CompositionScopeDefinition compositionScopeDefinition) 
+        public CompositionScopeDefinitionDebuggerProxy(CompositionScopeDefinition compositionScopeDefinition)
         {
-            Requires.NotNull(compositionScopeDefinition, nameof(compositionScopeDefinition));
-
-            _compositionScopeDefinition = compositionScopeDefinition;
+            _compositionScopeDefinition = compositionScopeDefinition ?? throw new ArgumentNullException(nameof(compositionScopeDefinition));
         }
 
         public ReadOnlyCollection<ComposablePartDefinition> Parts
         {
             get { return _compositionScopeDefinition.Parts.ToReadOnlyCollection(); }
         }
-        
+
         public IEnumerable<ExportDefinition> PublicSurface
         {
             get
             {
                 return _compositionScopeDefinition.PublicSurface.ToReadOnlyCollection();
             }
-        } 
+        }
 
         public virtual IEnumerable<CompositionScopeDefinition> Children
         {
@@ -43,6 +40,5 @@ namespace System.ComponentModel.Composition.Hosting
                 return _compositionScopeDefinition.Children.ToReadOnlyCollection();
             }
         }
-
-}
+    }
 }

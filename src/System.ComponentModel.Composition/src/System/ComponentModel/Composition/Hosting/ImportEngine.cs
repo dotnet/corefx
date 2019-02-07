@@ -8,7 +8,6 @@ using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -47,10 +46,8 @@ namespace System.ComponentModel.Composition.Hosting
 
         public ImportEngine(ExportProvider sourceProvider, CompositionOptions compositionOptions)
         {
-            Requires.NotNull(sourceProvider, nameof(sourceProvider));
-
             _compositionOptions = compositionOptions;
-            _sourceProvider = sourceProvider;
+            _sourceProvider = sourceProvider ?? throw new ArgumentNullException(nameof(sourceProvider));
             _sourceProvider.ExportsChanging += OnExportsChanging;
             _lock = new CompositionLock(compositionOptions.HasFlag(CompositionOptions.IsThreadSafe));
         }
@@ -85,7 +82,10 @@ namespace System.ComponentModel.Composition.Hosting
         {
             ThrowIfDisposed();
 
-            Requires.NotNull(part, nameof(part));
+            if (part == null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             // Do not do any previewing if SilentRejection is disabled.
             if (_compositionOptions.HasFlag(CompositionOptions.DisableSilentRejection))
@@ -158,7 +158,10 @@ namespace System.ComponentModel.Composition.Hosting
         {
             ThrowIfDisposed();
 
-            Requires.NotNull(part, nameof(part));
+            if (part == null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             // NOTE : the following two calls use the state lock
             PartManager partManager = GetPartManager(part, true);
@@ -195,7 +198,10 @@ namespace System.ComponentModel.Composition.Hosting
         {
             ThrowIfDisposed();
 
-            Requires.NotNull(part, nameof(part));
+            if (part == null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             // NOTE : the following two calls use the state lock
             PartManager partManager = GetPartManager(part, true);
@@ -229,7 +235,10 @@ namespace System.ComponentModel.Composition.Hosting
         {
             ThrowIfDisposed();
 
-            Requires.NotNull(part, nameof(part));
+            if (part == null)
+            {
+                throw new ArgumentNullException(nameof(part));
+            }
 
             using (_lock.LockComposition())
             {
@@ -291,7 +300,7 @@ namespace System.ComponentModel.Composition.Hosting
         private CompositionResult TryPreviewImportsStateMachine(PartManager partManager,
             ComposablePart part, AtomicComposition atomicComposition)
         {
-            CompositionResult result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.s_succeededResult;
 
             if (partManager.State == ImportState.ImportsPreviewing)
             {
@@ -327,7 +336,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private CompositionResult TrySatisfyImportsStateMachine(PartManager partManager, ComposablePart part)
         {
-            CompositionResult result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.s_succeededResult;
 
             while (partManager.State < ImportState.Composed)
             {
@@ -414,7 +423,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 throw new ArgumentNullException(nameof(part));
             }
-            CompositionResult result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.s_succeededResult;
 
             // get out if the part is already composed
             if (partManager.State == ImportState.Composed)
@@ -453,7 +462,7 @@ namespace System.ComponentModel.Composition.Hosting
         private CompositionResult TrySatisfyImportSubset(PartManager partManager,
             IEnumerable<ImportDefinition> imports, AtomicComposition atomicComposition)
         {
-            CompositionResult result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.s_succeededResult;
 
             ComposablePart part = partManager.Part;
             foreach (ImportDefinition import in imports)
@@ -488,7 +497,7 @@ namespace System.ComponentModel.Composition.Hosting
 
         private void OnExportsChanging(object sender, ExportsChangeEventArgs e)
         {
-            CompositionResult result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.s_succeededResult;
 
             // Prepare for the recomposition effort by minimizing the amount of work we'll have to do later
             AtomicComposition atomicComposition = e.AtomicComposition;
@@ -521,7 +530,7 @@ namespace System.ComponentModel.Composition.Hosting
         private CompositionResult TryRecomposeImports(PartManager partManager,
             IEnumerable<ExportDefinition> changedExports, AtomicComposition atomicComposition)
         {
-            CompositionResult result = CompositionResult.SucceededResult;
+            CompositionResult result = CompositionResult.s_succeededResult;
 
             switch (partManager.State)
             {
@@ -603,7 +612,7 @@ namespace System.ComponentModel.Composition.Hosting
                 partManager.SetSavedImport(import, exports, atomicComposition);
             }
 
-            return CompositionResult.SucceededResult;
+            return CompositionResult.s_succeededResult;
         }
 
         private void StartSatisfyingImports(PartManager partManager, AtomicComposition atomicComposition)
@@ -694,11 +703,9 @@ namespace System.ComponentModel.Composition.Hosting
                 throw new ArgumentNullException(nameof(atomicComposition));
             }
 
-            EngineContext engineContext;
-            if (!atomicComposition.TryGetValue(this, true, out engineContext))
+            if (!atomicComposition.TryGetValue(this, true, out EngineContext engineContext))
             {
-                EngineContext parentContext;
-                atomicComposition.TryGetValue(this, false, out parentContext);
+                atomicComposition.TryGetValue(this, false, out EngineContext parentContext);
                 engineContext = new EngineContext(this, parentContext);
                 atomicComposition.SetValue(this, engineContext);
                 atomicComposition.AddCompleteAction(engineContext.Complete);

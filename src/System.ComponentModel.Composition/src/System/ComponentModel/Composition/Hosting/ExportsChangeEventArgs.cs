@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -45,8 +44,14 @@ namespace System.ComponentModel.Composition.Hosting
         public ExportsChangeEventArgs(IEnumerable<ExportDefinition> addedExports,
                 IEnumerable<ExportDefinition> removedExports, AtomicComposition atomicComposition)
         {
-            Requires.NotNull(addedExports, nameof(addedExports));
-            Requires.NotNull(removedExports, nameof(removedExports));
+            if (addedExports == null)
+            {
+                throw new ArgumentNullException(nameof(addedExports));
+            }
+            if (removedExports == null)
+            {
+                throw new ArgumentNullException(nameof(removedExports));
+            }
 
             _addedExports = addedExports.AsArray();
             _removedExports = removedExports.AsArray();
@@ -60,7 +65,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     A <see cref="IEnumerable{T}"/> of ExportDefinitions representing 
         ///     the exports that have been added to the <see cref="CompositionContainer"/>.
         /// </value>
-        public IEnumerable<ExportDefinition> AddedExports 
+        public IEnumerable<ExportDefinition> AddedExports
         {
             get
             {
@@ -77,7 +82,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     A <see cref="IEnumerable{T}"/> of ExportDefinitions representing 
         ///     the exports that have been added to the <see cref="CompositionContainer"/>.
         /// </value>
-        public IEnumerable<ExportDefinition> RemovedExports 
+        public IEnumerable<ExportDefinition> RemovedExports
         {
             get
             {
@@ -94,7 +99,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     A <see cref="IEnumerable{T}"/> of strings representing the contract names of 
         ///     the exports that have changed in the <see cref="CompositionContainer"/>.
         /// </value>
-        public IEnumerable<string> ChangedContractNames 
+        public IEnumerable<string> ChangedContractNames
         {
             get
             {

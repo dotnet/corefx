@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
-using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
@@ -15,15 +14,13 @@ namespace System.ComponentModel.Composition.Hosting
     {
         public static ImportDefinition RemoveImportSource(this ImportDefinition definition)
         {
-            var contractBasedDefinition = definition as ContractBasedImportDefinition;
-            if(contractBasedDefinition == null)
-            {
-                return definition;
-            }
-            else
+            if (definition is ContractBasedImportDefinition contractBasedDefinition)
             {
                 return new NonImportSourceImportDefinition(contractBasedDefinition);
+
             }
+
+            return definition;
         }
 
         internal class NonImportSourceImportDefinition : ContractBasedImportDefinition
@@ -33,11 +30,7 @@ namespace System.ComponentModel.Composition.Hosting
 
             public NonImportSourceImportDefinition(ContractBasedImportDefinition sourceDefinition)
             {
-                if (sourceDefinition == null)
-                {
-                    throw new ArgumentNullException(nameof(sourceDefinition));
-                }
-                _sourceDefinition = sourceDefinition;
+                _sourceDefinition = sourceDefinition ?? throw new ArgumentNullException(nameof(sourceDefinition));
                 _metadata = null;
             }
 
@@ -52,10 +45,10 @@ namespace System.ComponentModel.Composition.Hosting
                 {
                     Contract.Ensures(Contract.Result<IDictionary<string, object>>() != null);
 
-                    var reply = _metadata;
-                    if(reply == null)
+                    IDictionary<string, object> reply = _metadata;
+                    if (reply == null)
                     {
-                        reply = new Dictionary<string, object> (_sourceDefinition.Metadata);
+                        reply = new Dictionary<string, object>(_sourceDefinition.Metadata);
                         reply.Remove(CompositionConstants.ImportSourceMetadataName);
                         _metadata = reply;
                     }
@@ -86,7 +79,10 @@ namespace System.ComponentModel.Composition.Hosting
 
             public override bool IsConstraintSatisfiedBy(ExportDefinition exportDefinition)
             {
-                Requires.NotNull(exportDefinition, nameof(exportDefinition));
+                if (exportDefinition == null)
+                {
+                    throw new ArgumentNullException(nameof(exportDefinition));
+                }
 
                 return _sourceDefinition.IsConstraintSatisfiedBy(exportDefinition);
             }
