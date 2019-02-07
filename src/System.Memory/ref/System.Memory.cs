@@ -116,8 +116,8 @@ namespace System.Buffers
     {
         public ArrayBufferWriter() { }
         public ArrayBufferWriter(int initialCapacity) { }
-        public int FreeCapacity { get { throw null; } }
         public int Capacity { get { throw null; } }
+        public int FreeCapacity { get { throw null; } }
         public int WrittenCount { get { throw null; } }
         public System.ReadOnlyMemory<T> WrittenMemory { get { throw null; } }
         public void Advance(int count) { }
