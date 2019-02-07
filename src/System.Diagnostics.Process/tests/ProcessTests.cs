@@ -1369,26 +1369,22 @@ namespace System.Diagnostics.Tests
             Assert.Throws<InvalidOperationException>(() => process.Start());
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
-        public void Start_RedirectStandardOutput_StartAgainWithoutRedirect()
+        public void Start_RedirectStandardOutput_StartAgain_DoesntThrow()
         {
-            var process = new Process
+            using (Process process = CreateProcess(() =>
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "cmd",
-                    Arguments = "/C dir",
-                    RedirectStandardOutput = true,
-                }
-            };
+                Console.WriteLine("hello world");
+                return SuccessExitCode;
+            }))
+            {
+                process.StartInfo.RedirectStandardOutput = true;
 
-            process.Start();
-            process.BeginOutputReadLine();
+                Assert.True(process.Start());
+                process.BeginOutputReadLine();
 
-            process.Start();
-
-            process.Dispose();
+                Assert.True(process.Start());
+            }
         }
 
         [Fact]

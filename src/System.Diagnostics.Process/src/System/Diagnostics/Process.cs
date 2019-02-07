@@ -859,18 +859,18 @@ namespace System.Diagnostics
                 {
                     if (_standardOutput != null && (_outputStreamReadMode == StreamReadMode.AsyncMode || _outputStreamReadMode == StreamReadMode.Undefined))
                     {
-                        if (_output != null && _outputStreamReadMode == StreamReadMode.AsyncMode)
+                        if (_outputStreamReadMode == StreamReadMode.AsyncMode)
                         {
-                            _output.CancelOperation();
+                            _output?.CancelOperation();
                         }
                         _standardOutput.Close();
                     }
 
                     if (_standardError != null && (_errorStreamReadMode == StreamReadMode.AsyncMode || _errorStreamReadMode == StreamReadMode.Undefined))
                     {
-                        if (_error != null && _errorStreamReadMode == StreamReadMode.AsyncMode)
+                        if (_errorStreamReadMode == StreamReadMode.AsyncMode)
                         {
-                            _error.CancelOperation();
+                            _error?.CancelOperation();
                         }
                         _standardError.Close();
                     }
@@ -888,9 +888,6 @@ namespace System.Diagnostics
 
                     _output = null;
                     _error = null;
-
-                    _pendingOutputRead = false;
-                    _pendingErrorRead = false;
 
                     CloseCore();
                     Refresh();
