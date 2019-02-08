@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.IO.Pipelines.Tests
 {
-    public class PipePoolTests
+    public partial class PipePoolTests
     {
         private class DisposeTrackingBufferPool : TestMemoryPool
         {
@@ -265,114 +265,6 @@ namespace System.IO.Pipelines.Tests
 
             pipe.Writer.Complete();
             pipe.Reader.Complete();
-        }
-
-        [Fact]
-        public async Task WritesToArrayPoolByDefault()
-        {
-            var pipe = new Pipe();
-            pipe.Writer.WriteEmpty(10);
-            await pipe.Writer.FlushAsync();
-            pipe.Writer.Complete();
-
-            ReadResult result = await pipe.Reader.ReadAsync();
-            Assert.Equal(10, result.Buffer.Length);
-
-            SequenceMarshal.TryGetReadOnlySequenceSegment(
-               result.Buffer,
-               out ReadOnlySequenceSegment<byte> start,
-               out int startIndex,
-               out ReadOnlySequenceSegment<byte> end,
-               out int endIndex);
-
-            var startSegment = (BufferSegment)start;
-            var endSegment = (BufferSegment)end;
-
-            Assert.Same(startSegment, endSegment);
-            Assert.NotNull(startSegment.Memory);
-            Assert.IsType<byte[]>(startSegment.MemoryOwner);
-
-            pipe.Reader.AdvanceTo(result.Buffer.End);
-            pipe.Reader.Complete();
-        }
-
-        [Fact]
-        public async Task GetMemoryOverMaxPoolSizeAllocatesArray()
-        {
-            using (var pool = new DisposeTrackingBufferPool())
-            {
-                var pipe = new Pipe(new PipeOptions(pool: pool));
-
-                // Allocate 5 KB
-                pipe.Writer.WriteEmpty(5 * 1024);
-                await pipe.Writer.FlushAsync();
-                pipe.Writer.Complete();
-
-                Assert.Equal(0, pool.CurrentlyRentedBlocks);
-
-                ReadResult result = await pipe.Reader.ReadAsync();
-                Assert.Equal(5 * 1024, result.Buffer.Length);
-
-                SequenceMarshal.TryGetReadOnlySequenceSegment(
-                   result.Buffer,
-                   out ReadOnlySequenceSegment<byte> start,
-                   out int startIndex,
-                   out ReadOnlySequenceSegment<byte> end,
-                   out int endIndex);
-
-                var startSegment = (BufferSegment)start;
-                var endSegment = (BufferSegment)end;
-
-                Assert.Same(startSegment, endSegment);
-
-                // Null owner implies that the buffer is allocated and wasn't rented from the pool
-                Assert.Null(startSegment.MemoryOwner);
-
-                pipe.Reader.AdvanceTo(result.Buffer.End);
-                pipe.Reader.Complete();
-
-                Assert.Equal(0, pool.CurrentlyRentedBlocks);
-                Assert.Equal(0, pool.DisposedBlocks);
-            }
-        }
-
-        [Fact]
-        public async Task GetMemoryAtMaxPoolSizeAllocatesFromPool()
-        {
-            using (var pool = new DisposeTrackingBufferPool())
-            {
-                var pipe = new Pipe(new PipeOptions(pool: pool));
-
-                pipe.Writer.WriteEmpty(pool.MaxBufferSize);
-                await pipe.Writer.FlushAsync();
-                pipe.Writer.Complete();
-
-                Assert.Equal(1, pool.CurrentlyRentedBlocks);
-
-                ReadResult result = await pipe.Reader.ReadAsync();
-                Assert.Equal(pool.MaxBufferSize, result.Buffer.Length);
-
-                SequenceMarshal.TryGetReadOnlySequenceSegment(
-                   result.Buffer,
-                   out ReadOnlySequenceSegment<byte> start,
-                   out int startIndex,
-                   out ReadOnlySequenceSegment<byte> end,
-                   out int endIndex);
-
-                var startSegment = (BufferSegment)start;
-                var endSegment = (BufferSegment)end;
-
-                Assert.Same(startSegment, endSegment);
-
-                // Null owner implies that the buffer is allocated and wasn't rented from the pool
-                Assert.NotNull(startSegment.MemoryOwner);
-
-                pipe.Reader.AdvanceTo(result.Buffer.End);
-                pipe.Reader.Complete();
-
-                Assert.Equal(0, pool.CurrentlyRentedBlocks);
-                Assert.Equal(1, pool.DisposedBlocks);
-            }
         }
 
         private static PipeOptions CreatePipeWithInlineSchedulers(DisposeTrackingBufferPool pool)
