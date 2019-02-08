@@ -179,8 +179,7 @@ namespace System.IO.Pipelines
             if (_writingHead == null)
             {
                 // We need to allocate memory to write since nobody has written before
-                BufferSegment newSegment = CreateSegmentUnsynchronized();
-                newSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
+                BufferSegment newSegment = AllocateSegment(sizeHint);
 
                 // Set all the pointers
                 _writingHead = _readHead = _readTail = newSegment;
@@ -191,8 +190,7 @@ namespace System.IO.Pipelines
 
                 if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < sizeHint)
                 {
-                    BufferSegment newSegment = CreateSegmentUnsynchronized();
-                    newSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint)));
+                    BufferSegment newSegment = AllocateSegment(sizeHint);
 
                     _writingHead.SetNext(newSegment);
                     _writingHead = newSegment;
@@ -200,13 +198,27 @@ namespace System.IO.Pipelines
             }
         }
 
-        private int GetSegmentSize(int sizeHint)
+        private BufferSegment AllocateSegment(int sizeHint)
+        {
+            BufferSegment newSegment = CreateSegmentUnsynchronized();
+
+            if (_pool != null)
+            {
+                newSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint, _pool.MaxBufferSize)));
+            }
+            else
+            {
+                newSegment.SetMemory(ArrayPool<byte>.Shared.Rent(GetSegmentSize(sizeHint)));
+            }
+
+            return newSegment;
+        }
+
+        private int GetSegmentSize(int sizeHint, int maxBufferSize = int.MaxValue)
         {
             // First we need to handle case where hint is smaller than minimum segment size
-            sizeHint = Math.Max(_minimumSegmentSize, sizeHint);
             // After that adjust it to fit into pools max buffer size
-            var adjustedToMaximumSize = Math.Min(_pool.MaxBufferSize, sizeHint);
-            return adjustedToMaximumSize;
+            return Math.Clamp(sizeHint, _minimumSegmentSize, maxBufferSize);
         }
 
         private BufferSegment CreateSegmentUnsynchronized()
