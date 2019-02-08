@@ -430,6 +430,7 @@ namespace System.ComponentModel.Composition.Registration.Tests
         }
 
         [Fact]
+        [ActiveIssue(35144, TargetFrameworkMonikers.UapAot)]
         public void InsideTheLambdaCallGetCustomAttributesShouldSucceed()
         {
             //Same test as above only using default export builder
