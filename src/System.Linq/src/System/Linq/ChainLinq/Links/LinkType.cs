@@ -6,6 +6,7 @@
 
         Compose,
         Distinct,
+        Except,
         Identity,
         Select,
         SelectIndexed,

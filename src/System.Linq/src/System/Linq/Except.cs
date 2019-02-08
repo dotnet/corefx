@@ -20,7 +20,7 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(second));
             }
 
-            return ExceptIterator(first, second, null);
+            return ExceptConsumer(first, second, null);
         }
 
         public static IEnumerable<TSource> Except<TSource>(this IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
@@ -35,24 +35,17 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(second));
             }
 
-            return ExceptIterator(first, second, comparer);
+            return ExceptConsumer(first, second, comparer);
         }
 
-        private static IEnumerable<TSource> ExceptIterator<TSource>(IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
+        private static IEnumerable<TSource> ExceptConsumer<TSource>(IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
         {
-            Set<TSource> set = new Set<TSource>(comparer);
-            foreach (TSource element in second)
-            {
-                set.Add(element);
-            }
+            ChainLinq.Link<TSource, TSource> exceptLink =
+                comparer == null
+                    ? (ChainLinq.Link<TSource, TSource>) new ChainLinq.Links.ExceptDefaultComparer<TSource>(second)
+                    : (ChainLinq.Link<TSource, TSource>) new ChainLinq.Links.Except<TSource>(comparer, second);
 
-            foreach (TSource element in first)
-            {
-                if (set.Add(element))
-                {
-                    yield return element;
-                }
-            }
+            return ChainLinq.Utils.PushTTTransform(first, exceptLink);
         }
     }
 }

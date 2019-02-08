@@ -24,6 +24,7 @@
     <Compile Include="System\Linq\ChainLinq\Consume\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\IList.cs" />
     <Compile Include="System\Linq\ChainLinq\GetEnumerator\Lookup.cs" />
+    <Compile Include="System\Linq\ChainLinq\Links\Except.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\LinkType.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\TakeWhile.cs" />
     <Compile Include="System\Linq\ChainLinq\Links\TakeWhileIndexed.cs" />
