@@ -4,12 +4,17 @@
   <PropertyGroup>
     <SkipPackageFileCheck>true</SkipPackageFileCheck>
     <SkipValidatePackage>true</SkipValidatePackage>
-    <SystemIOPortsNativePath>$(ArtifactsBinDir)\native\$(TargetGroup)-$(DefaultOSGroup)-$(Configuration)-$(ArchGroup)</SystemIOPortsNativePath>
   </PropertyGroup>
-  <ItemGroup Condition="'$(OS)' != 'Windows_NT' and '$(PackageTargetRuntime)' != ''">
-    <NativeFile Include="$(SystemIOPortsNativePath)\System.IO.Ports.Native$(LibraryFileExtension)" >
+  <ItemGroup Condition="'$(PackageTargetRuntime)' == 'linux-arm' or '$(PackageTargetRuntime)' == 'linux-arm64' or '$(PackageTargetRuntime)' == 'linux-x64' or '$(PackageTargetRuntime)' == 'osx-x64'">
+    <NativeFile Include="$(NativeBinDir)\System.IO.Ports.Native$(LibraryFileExtension)" >
       <TargetPath>runtimes/$(PackageRID)/native</TargetPath>
     </NativeFile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(PackageTargetRuntime)' == ''">
+    <_buildRIDWithMetadata Include="@(BuildRID)">
+      <Version>$(PackageVersion)</Version>
+    </_buildRIDWithMetadata>
+    <Dependency Include="@(_buildRIDWithMetadata->'runtime.%(Identity).$(Id)')" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>
