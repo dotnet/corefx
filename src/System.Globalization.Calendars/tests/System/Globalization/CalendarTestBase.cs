@@ -346,6 +346,10 @@ namespace System.Globalization.Tests
         public void ToDateTime_Invalid_ThrowsArgumentOutOfRangeException()
         {
             Calendar calendar = Calendar;
+            if (PlatformDetection.IsFullFramework && calendar is JapaneseLunisolarCalendar)
+            {
+                return;
+            }
 
             int month = 1;
             int day = 1;
