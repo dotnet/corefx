@@ -24,4 +24,25 @@ namespace System.Linq.ChainLinq.Links
         }
     }
 
+    sealed class DistinctDefaultComparer<T> : Link<T, T>
+    {
+        public static readonly Link<T, T> Instance = new DistinctDefaultComparer<T>();
+
+        private DistinctDefaultComparer() : base(LinkType.Distinct) { }
+
+        public override Chain<T> Compose(Chain<T> activity) =>
+            new Activity(activity);
+
+        sealed class Activity : Activity<T, T>
+        {
+            private SetDefaultComparer<T> _seen;
+
+            public Activity(Chain<T> next) : base(next) =>
+                _seen = new SetDefaultComparer<T>();
+
+            public override ChainStatus ProcessNext(T input) =>
+                _seen.Add(input) ? Next(input) : ChainStatus.Filter;
+        }
+    }
+
 }

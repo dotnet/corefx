@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace System.Linq
 {
@@ -11,50 +12,41 @@ namespace System.Linq
     /// A lightweight hash set.
     /// </summary>
     /// <typeparam name="TElement">The type of the set's items.</typeparam>
-    internal sealed class Set<TElement>
+    internal class SetBase<TElement>
     {
-        /// <summary>
-        /// The comparer used to hash and compare items in the set.
-        /// </summary>
-        private readonly IEqualityComparer<TElement> _comparer;
-
         /// <summary>
         /// The hash buckets, which are used to index into the slots.
         /// </summary>
-        private int[] _buckets;
+        protected int[] _buckets;
 
         /// <summary>
         /// The slots, each of which store an item and its hash code.
         /// </summary>
-        private Slot[] _slots;
+        protected Slot[] _slots;
 
         /// <summary>
         /// The number of items in this set.
         /// </summary>
-        private int _count;
+        protected int _count;
 
 #if DEBUG
         /// <summary>
-        /// Whether <see cref="Remove"/> has been called on this set.
+        /// Whether Remove has been called on this set.
         /// </summary>
         /// <remarks>
-        /// When <see cref="Remove"/> runs in debug builds, this flag is set to <c>true</c>.
+        /// When Remove runs in debug builds, this flag is set to <c>true</c>.
         /// Other methods assert that this flag is <c>false</c> in debug builds, because
-        /// they make optimizations that may not be correct if <see cref="Remove"/> is called
+        /// they make optimizations that may not be correct if Remove is called
         /// beforehand.
         /// </remarks>
-        private bool _haveRemoved;
+        protected bool _haveRemoved;
 #endif
 
         /// <summary>
         /// Constructs a set that compares items with the specified comparer.
         /// </summary>
-        /// <param name="comparer">
-        /// The comparer. If this is <c>null</c>, it defaults to <see cref="EqualityComparer{TElement}.Default"/>.
-        /// </param>
-        public Set(IEqualityComparer<TElement> comparer)
+        public SetBase()
         {
-            _comparer = comparer ?? EqualityComparer<TElement>.Default;
             _buckets = new int[7];
             _slots = new Slot[7];
         }
@@ -66,20 +58,11 @@ namespace System.Linq
         /// <returns>
         /// <c>true</c> if the item was not in the set; otherwise, <c>false</c>.
         /// </returns>
-        public bool Add(TElement value)
+        protected bool DoAdd(TElement value, int hashCode)
         {
 #if DEBUG
             Debug.Assert(!_haveRemoved, "This class is optimised for never calling Add after Remove. If your changes need to do so, undo that optimization.");
 #endif
-            int hashCode = InternalGetHashCode(value);
-            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i]._next)
-            {
-                if (_slots[i]._hashCode == hashCode && _comparer.Equals(_slots[i]._value, value))
-                {
-                    return false;
-                }
-            }
-
             if (_count == _slots.Length)
             {
                 Resize();
@@ -93,44 +76,6 @@ namespace System.Linq
             _slots[index]._next = _buckets[bucket] - 1;
             _buckets[bucket] = index + 1;
             return true;
-        }
-
-        /// <summary>
-        /// Attempts to remove an item from this set.
-        /// </summary>
-        /// <param name="value">The item to remove.</param>
-        /// <returns>
-        /// <c>true</c> if the item was in the set; otherwise, <c>false</c>.
-        /// </returns>
-        public bool Remove(TElement value)
-        {
-#if DEBUG
-            _haveRemoved = true;
-#endif
-            int hashCode = InternalGetHashCode(value);
-            int bucket = hashCode % _buckets.Length;
-            int last = -1;
-            for (int i = _buckets[bucket] - 1; i >= 0; last = i, i = _slots[i]._next)
-            {
-                if (_slots[i]._hashCode == hashCode && _comparer.Equals(_slots[i]._value, value))
-                {
-                    if (last < 0)
-                    {
-                        _buckets[bucket] = _slots[i]._next + 1;
-                    }
-                    else
-                    {
-                        _slots[last]._next = _slots[i]._next;
-                    }
-
-                    _slots[i]._hashCode = -1;
-                    _slots[i]._value = default(TElement);
-                    _slots[i]._next = -1;
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         /// <summary>
@@ -196,6 +141,112 @@ namespace System.Linq
         public int Count => _count;
 
         /// <summary>
+        /// An entry in the hash set.
+        /// </summary>
+        protected struct Slot
+        {
+            /// <summary>
+            /// The hash code of the item.
+            /// </summary>
+            internal int _hashCode;
+
+            /// <summary>
+            /// In the case of a hash collision, the index of the next slot to probe.
+            /// </summary>
+            internal int _next;
+
+            /// <summary>
+            /// The item held by this slot.
+            /// </summary>
+            internal TElement _value;
+        }
+    }
+
+    /// <summary>
+    /// A lightweight hash set.
+    /// </summary>
+    /// <typeparam name="TElement">The type of the set's items.</typeparam>
+    internal sealed class Set<TElement> : SetBase<TElement>
+    {
+        /// <summary>
+        /// The comparer used to hash and compare items in the set.
+        /// </summary>
+        private readonly IEqualityComparer<TElement> _comparer;
+
+        /// <summary>
+        /// Constructs a set that compares items with the specified comparer.
+        /// </summary>
+        /// <param name="comparer">
+        /// The comparer. If this is <c>null</c>, it defaults to <see cref="EqualityComparer{TElement}.Default"/>.
+        /// </param>
+        public Set(IEqualityComparer<TElement> comparer)
+        {
+            _comparer = comparer ?? EqualityComparer<TElement>.Default;
+        }
+
+        /// <summary>
+        /// Attempts to add an item to this set.
+        /// </summary>
+        /// <param name="value">The item to add.</param>
+        /// <returns>
+        /// <c>true</c> if the item was not in the set; otherwise, <c>false</c>.
+        /// </returns>
+        public bool Add(TElement value)
+        {
+#if DEBUG
+            Debug.Assert(!_haveRemoved, "This class is optimised for never calling Add after Remove. If your changes need to do so, undo that optimization.");
+#endif
+            int hashCode = InternalGetHashCode(value);
+            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i]._next)
+            {
+                if (_slots[i]._hashCode == hashCode && _comparer.Equals(_slots[i]._value, value))
+                {
+                    return false;
+                }
+            }
+
+            return DoAdd(value, hashCode);
+        }
+
+        /// <summary>
+        /// Attempts to remove an item from this set.
+        /// </summary>
+        /// <param name="value">The item to remove.</param>
+        /// <returns>
+        /// <c>true</c> if the item was in the set; otherwise, <c>false</c>.
+        /// </returns>
+        public bool Remove(TElement value)
+        {
+#if DEBUG
+            _haveRemoved = true;
+#endif
+            int hashCode = InternalGetHashCode(value);
+            int bucket = hashCode % _buckets.Length;
+            int last = -1;
+            for (int i = _buckets[bucket] - 1; i >= 0; last = i, i = _slots[i]._next)
+            {
+                if (_slots[i]._hashCode == hashCode && _comparer.Equals(_slots[i]._value, value))
+                {
+                    if (last < 0)
+                    {
+                        _buckets[bucket] = _slots[i]._next + 1;
+                    }
+                    else
+                    {
+                        _slots[last]._next = _slots[i]._next;
+                    }
+
+                    _slots[i]._hashCode = -1;
+                    _slots[i]._value = default;
+                    _slots[i]._next = -1;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Unions this set with an enumerable.
         /// </summary>
         /// <param name="other">The enumerable.</param>
@@ -214,27 +265,98 @@ namespace System.Linq
         /// </summary>
         /// <param name="value">The value to hash.</param>
         /// <returns>The lower 31 bits of the value's hash code.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int InternalGetHashCode(TElement value) => value == null ? 0 : _comparer.GetHashCode(value) & 0x7FFFFFFF;
+    }
+
+    /// <summary>
+    /// A lightweight hash set with default comparer.
+    /// </summary>
+    /// <typeparam name="TElement">The type of the set's items.</typeparam>
+    internal sealed class SetDefaultComparer<TElement> : SetBase<TElement>
+    {
+        /// <summary>
+        /// Attempts to add an item to this set.
+        /// </summary>
+        /// <param name="value">The item to add.</param>
+        /// <returns>
+        /// <c>true</c> if the item was not in the set; otherwise, <c>false</c>.
+        /// </returns>
+        public bool Add(TElement value)
+        {
+#if DEBUG
+            Debug.Assert(!_haveRemoved, "This class is optimised for never calling Add after Remove. If your changes need to do so, undo that optimization.");
+#endif
+            int hashCode = InternalGetHashCode(value);
+            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i]._next)
+            {
+                if (_slots[i]._hashCode == hashCode && EqualityComparer<TElement>.Default.Equals(_slots[i]._value, value))
+                {
+                    return false;
+                }
+            }
+
+            return DoAdd(value, hashCode);
+        }
 
         /// <summary>
-        /// An entry in the hash set.
+        /// Attempts to remove an item from this set.
         /// </summary>
-        private struct Slot
+        /// <param name="value">The item to remove.</param>
+        /// <returns>
+        /// <c>true</c> if the item was in the set; otherwise, <c>false</c>.
+        /// </returns>
+        public bool Remove(TElement value)
         {
-            /// <summary>
-            /// The hash code of the item.
-            /// </summary>
-            internal int _hashCode;
+#if DEBUG
+            _haveRemoved = true;
+#endif
+            int hashCode = InternalGetHashCode(value);
+            int bucket = hashCode % _buckets.Length;
+            int last = -1;
+            for (int i = _buckets[bucket] - 1; i >= 0; last = i, i = _slots[i]._next)
+            {
+                if (_slots[i]._hashCode == hashCode && EqualityComparer<TElement>.Default.Equals(_slots[i]._value, value))
+                {
+                    if (last < 0)
+                    {
+                        _buckets[bucket] = _slots[i]._next + 1;
+                    }
+                    else
+                    {
+                        _slots[last]._next = _slots[i]._next;
+                    }
 
-            /// <summary>
-            /// In the case of a hash collision, the index of the next slot to probe.
-            /// </summary>
-            internal int _next;
+                    _slots[i]._hashCode = -1;
+                    _slots[i]._value = default;
+                    _slots[i]._next = -1;
+                    return true;
+                }
+            }
 
-            /// <summary>
-            /// The item held by this slot.
-            /// </summary>
-            internal TElement _value;
+            return false;
         }
+
+        /// <summary>
+        /// Unions this set with an enumerable.
+        /// </summary>
+        /// <param name="other">The enumerable.</param>
+        public void UnionWith(IEnumerable<TElement> other)
+        {
+            Debug.Assert(other != null);
+
+            foreach (TElement item in other)
+            {
+                Add(item);
+            }
+        }
+
+        /// <summary>
+        /// Gets the hash code of the provided value with its sign bit zeroed out, so that modulo has a positive result.
+        /// </summary>
+        /// <param name="value">The value to hash.</param>
+        /// <returns>The lower 31 bits of the value's hash code.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int InternalGetHashCode(TElement value) => value == null ? 0 : EqualityComparer<TElement>.Default.GetHashCode(value) & 0x7FFFFFFF;
     }
 }

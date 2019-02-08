@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace System.Linq
 {
@@ -18,7 +17,12 @@ namespace System.Linq
                 throw Error.ArgumentNull(nameof(source));
             }
 
-            return ChainLinq.Utils.PushTTTransform(source, new ChainLinq.Links.Distinct<TSource>(comparer));
+            var distinctLink =
+                comparer == null
+                    ? ChainLinq.Links.DistinctDefaultComparer<TSource>.Instance
+                    : new ChainLinq.Links.Distinct<TSource>(comparer);
+
+            return ChainLinq.Utils.PushTTTransform(source, distinctLink);
         }
     }
 }
