@@ -275,7 +275,7 @@ namespace System.IO.Pipelines.Tests
             await pipe.Writer.FlushAsync();
             pipe.Writer.Complete();
 
-            var result = await pipe.Reader.ReadAsync();
+            ReadResult result = await pipe.Reader.ReadAsync();
             Assert.Equal(10, result.Buffer.Length);
 
             SequenceMarshal.TryGetReadOnlySequenceSegment(
@@ -310,7 +310,7 @@ namespace System.IO.Pipelines.Tests
 
                 Assert.Equal(0, pool.CurrentlyRentedBlocks);
 
-                var result = await pipe.Reader.ReadAsync();
+                ReadResult result = await pipe.Reader.ReadAsync();
                 Assert.Equal(5 * 1024, result.Buffer.Length);
 
                 SequenceMarshal.TryGetReadOnlySequenceSegment(
@@ -349,7 +349,7 @@ namespace System.IO.Pipelines.Tests
 
                 Assert.Equal(1, pool.CurrentlyRentedBlocks);
 
-                var result = await pipe.Reader.ReadAsync();
+                ReadResult result = await pipe.Reader.ReadAsync();
                 Assert.Equal(pool.MaxBufferSize, result.Buffer.Length);
 
                 SequenceMarshal.TryGetReadOnlySequenceSegment(

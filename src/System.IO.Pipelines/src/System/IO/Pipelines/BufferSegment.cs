@@ -60,7 +60,7 @@ namespace System.IO.Pipelines
 
             SetUnownedMemory(arrayPoolBuffer);
         }
- 
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetUnownedMemory(Memory<byte> memory)
         {
@@ -76,9 +76,9 @@ namespace System.IO.Pipelines
             {
                 owner.Dispose();
             }
-            else if (_memoryOwner != null)
+            else if (_memoryOwner is byte[] array)
             {
-                ArrayPool<byte>.Shared.Return((byte[])_memoryOwner);
+                ArrayPool<byte>.Shared.Return(array);
             }
 
             _memoryOwner = null;
