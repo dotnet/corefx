@@ -6,6 +6,7 @@
 
 #include <stdbool.h>
 #include <assert.h>
+#include <dirent.h>
 
 c_static_assert(PAL_X509_V_OK == X509_V_OK);
 c_static_assert(PAL_X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT);
@@ -234,6 +235,23 @@ X509Stack* CryptoNative_X509StoreCtxGetChain(X509_STORE_CTX* ctx)
     return X509_STORE_CTX_get1_chain(ctx);
 }
 
+X509* CryptoNative_X509StoreCtxGetCurrentCert(X509_STORE_CTX* ctx)
+{
+    if (ctx == NULL)
+    {
+        return NULL;
+    }
+
+    X509* cert = X509_STORE_CTX_get_current_cert(ctx);
+
+    if (cert != NULL)
+    {
+        X509_up_ref(cert);
+    }
+
+    return cert;
+}
+
 X509Stack* CryptoNative_X509StoreCtxGetSharedUntrusted(X509_STORE_CTX* ctx)
 {
     if (ctx)
@@ -257,6 +275,16 @@ X509* CryptoNative_X509StoreCtxGetTargetCert(X509_STORE_CTX* ctx)
 X509VerifyStatusCode CryptoNative_X509StoreCtxGetError(X509_STORE_CTX* ctx)
 {
     return (unsigned int)X509_STORE_CTX_get_error(ctx);
+}
+
+int32_t CryptoNative_X509StoreCtxReset(X509_STORE_CTX* ctx)
+{
+    X509* leaf = X509_STORE_CTX_get0_cert(ctx);
+    X509Stack* untrusted = X509_STORE_CTX_get0_untrusted(ctx);
+    X509_STORE* store = ctx->ctx;
+
+    X509_STORE_CTX_cleanup(ctx);
+    return CryptoNative_X509StoreCtxInit(ctx, store, leaf, untrusted);
 }
 
 void CryptoNative_X509StoreCtxSetVerifyCallback(X509_STORE_CTX* ctx, X509StoreVerifyCallback callback)
@@ -322,4 +350,285 @@ X509* CryptoNative_X509UpRef(X509* x509)
     }
 
     return x509;
+}
+
+static DIR* OpenUserStore(const char* storePath, char** pathTmp, char** nextFileWrite)
+{
+    DIR* trustDir = opendir(storePath);
+
+    if (trustDir == NULL)
+    {
+        *pathTmp = NULL;
+        *nextFileWrite = NULL;
+        return NULL;
+    }
+
+    struct dirent* ent = NULL;
+    size_t storePathLen = strlen(storePath);
+
+    // d_name is a fixed length char[], not a char*.
+    // Leave one byte for '\0' and one for '/'
+    char* tmp = (char*)calloc(storePathLen + sizeof(ent->d_name) + 2, sizeof(char));
+    strcat(tmp, storePath);
+    tmp[storePathLen] = '/';
+    *pathTmp = tmp;
+    *nextFileWrite = (tmp + storePathLen + 1);
+    return trustDir;
+}
+
+static X509* ReadNextPublicCert(DIR* dir, X509Stack* tmpStack, char* pathTmp, char* nextFileWrite)
+{
+    struct dirent* next;
+
+    while ((next = readdir(dir)) != NULL)
+    {
+        size_t len = strnlen(next->d_name, sizeof(next->d_name));
+
+        if (len > 4 && 0 == strncasecmp(".pfx", next->d_name + len - 4, 4))
+        {
+            memcpy(nextFileWrite, next->d_name, len);
+            // if d_name was full-length it might not have a trailing null.
+            nextFileWrite[len] = 0;
+
+            FILE* fp = fopen(pathTmp, "r");
+
+            if (fp != NULL)
+            {
+                PKCS12* p12 = d2i_PKCS12_fp(fp, NULL);
+
+                if (p12 != NULL)
+                {
+                    EVP_PKEY* key;
+                    X509* cert;
+
+                    if (PKCS12_parse(p12, NULL, &key, &cert, &tmpStack))
+                    {
+                        if (key != NULL)
+                        {
+                            EVP_PKEY_free(key);
+                        }
+
+                        if (cert == NULL && sk_X509_num(tmpStack) > 0)
+                        {
+                            cert = sk_X509_value(tmpStack, 0);
+                            X509_up_ref(cert);
+                        }
+                    }
+
+                    X509* popTmp;
+                    while ((popTmp = sk_X509_pop(tmpStack)) != NULL)
+                    {
+                        X509_free(popTmp);
+                    }
+
+                    PKCS12_free(p12);
+
+                    if (cert != NULL)
+                    {
+                        return cert;
+                    }
+                }
+
+                fclose(fp);
+            }
+        }
+    }
+
+    return NULL;
+}
+
+X509_STORE* CryptoNative_X509ChainNew(X509Stack* systemTrust, const char* userTrustPath)
+{
+    X509_STORE* store = X509_STORE_new();
+
+    if (store == NULL)
+    {
+        return NULL;
+    }
+
+    if (systemTrust != NULL)
+    {
+        int count = sk_X509_num(systemTrust);
+
+        for (int i = 0; i < count; i++)
+        {
+            if (!X509_STORE_add_cert(store, sk_X509_value(systemTrust, i)))
+            {
+                X509_STORE_free(store);
+                return NULL;
+            }
+        }
+    }
+
+    if (userTrustPath != NULL)
+    {
+        char* pathTmp;
+        char* nextFileWrite;
+        DIR* trustDir = OpenUserStore(userTrustPath, &pathTmp, &nextFileWrite);
+
+        if (trustDir != NULL)
+        {
+            X509* cert;
+            X509Stack* tmpStack = sk_X509_new(NULL);
+
+            while ((cert = ReadNextPublicCert(trustDir, tmpStack, pathTmp, nextFileWrite)) != NULL)
+            {
+                // cert refcount is 1
+                if (!X509_STORE_add_cert(store, cert))
+                {
+                    // cert refcount is still 1
+                    if (ERR_get_error() != ERR_PACK(ERR_LIB_X509, X509_F_X509_STORE_ADD_CERT, X509_R_CERT_ALREADY_IN_HASH_TABLE))
+                    {
+                        // cert refcount goes to 0
+                        X509_free(cert);
+                        X509_STORE_free(store);
+                        store = NULL;
+                        break;
+                    }
+                }
+
+                // if add_cert succeeded, reduce refcount to 1
+                // if add_cert failed (duplicate add), reduce refcount to 0
+                X509_free(cert);
+            }
+
+            sk_X509_free(tmpStack);
+            free(pathTmp);
+            closedir(trustDir);
+
+            if (store == NULL)
+            {
+                return NULL;
+            }
+
+            // PKCS12_parse can cause spurious errors.
+            // d2i_PKCS12_fp may have failed for invalid files.
+            // Just clear it all.
+            ERR_clear_error();
+        }
+    }
+
+    return store;
+}
+
+int32_t CryptoNative_X509StackAddDirectoryStore(X509Stack* stack, char* storePath)
+{
+    if (stack == NULL || storePath == NULL)
+    {
+        return -1;
+    }
+
+    int clearError = 1;
+    char* pathTmp;
+    char* nextFileWrite;
+    DIR* storeDir = OpenUserStore(storePath, &pathTmp, &nextFileWrite);
+
+    if (storeDir != NULL)
+    {
+        X509* cert;
+        X509Stack* tmpStack = sk_X509_new(NULL);
+
+        while ((cert = ReadNextPublicCert(storeDir, tmpStack, pathTmp, nextFileWrite)) != NULL)
+        {
+            if (!sk_X509_push(stack, cert))
+            {
+                clearError = 0;
+                X509_free(cert);
+                break;
+            }
+
+            // Don't free the cert here, it'll get freed by sk_X509_pop_free later (push doesn't call up_ref)
+        }
+
+        sk_X509_free(tmpStack);
+        free(pathTmp);
+        closedir(storeDir);
+
+        if (clearError)
+        {
+            // PKCS12_parse can cause spurious errors.
+            // d2i_PKCS12_fp may have failed for invalid files.
+            // Just clear it all.
+            ERR_clear_error();
+        }
+
+    }
+
+    return clearError;
+}
+
+int32_t CryptoNative_X509StackAddMultiple(X509Stack* dest, X509Stack* src)
+{
+    if (dest == NULL)
+    {
+        return -1;
+    }
+
+    int success = 1;
+
+    if (src != NULL)
+    {
+        int count = sk_X509_num(src);
+
+        for (int i = 0; i < count; i++)
+        {
+            X509* cert = sk_X509_value(src, i);
+            X509_up_ref(cert);
+
+            if (!sk_X509_push(dest, cert))
+            {
+                success = 0;
+                break;
+            }
+        }
+    }
+
+    return success;
+}
+
+int32_t CryptoNative_X509StoreCtxCommitToChain(X509_STORE_CTX* storeCtx)
+{
+    if (storeCtx == NULL)
+    {
+        return -1;
+    }
+
+    X509Stack* chain = X509_STORE_CTX_get1_chain(storeCtx);
+
+    if (chain == NULL)
+    {
+        return 0;
+    }
+
+    X509* cur = NULL;
+    X509Stack* untrusted = X509_STORE_CTX_get0_untrusted(storeCtx);
+    X509* leaf = X509_STORE_CTX_get0_cert(storeCtx);
+
+    while ((cur = sk_X509_pop(untrusted)) != NULL)
+    {
+        X509_free(cur);
+    }
+
+    while ((cur = sk_X509_pop(chain)) != NULL)
+    {
+        if (cur == leaf)
+        {
+            // Undo the up-ref from get1_chain
+            X509_free(cur);
+        }
+        else
+        {
+            // For intermediates which were already in untrusted this puts them back.
+            //
+            // For a fully trusted chain this will add the trust root redundantly to the
+            // untrusted lookup set, but the resulting extra work is small compared to the
+            // risk of being wrong about promoting trust or losing the chain at this point.
+            sk_X509_push(untrusted, cur);
+        }
+    }
+
+    // Since we've already drained out this collection there's no difference between free
+    // and pop_free, other than free saves a bit of work.
+    sk_X509_free(chain);
+    return 1;
 }

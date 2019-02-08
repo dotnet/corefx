@@ -240,6 +240,8 @@ Shims the X509_STORE_CTX_get1_chain method.
 */
 DLLEXPORT X509Stack* CryptoNative_X509StoreCtxGetChain(X509_STORE_CTX* ctx);
 
+DLLEXPORT X509* CryptoNative_X509StoreCtxGetCurrentCert(X509_STORE_CTX* ctx);
+
 /*
 Returns the interior pointer to the "untrusted" certificates collection for this X509_STORE_CTX
 */
@@ -254,6 +256,8 @@ DLLEXPORT X509* CryptoNative_X509StoreCtxGetTargetCert(X509_STORE_CTX* ctx);
 Shims the X509_STORE_CTX_get_error method.
 */
 DLLEXPORT X509VerifyStatusCode CryptoNative_X509StoreCtxGetError(X509_STORE_CTX* ctx);
+
+DLLEXPORT int32_t CryptoNative_X509StoreCtxReset(X509_STORE_CTX* ctx);
 
 /*
 Shims the X509_STORE_CTX_get_error_depth method.
@@ -311,3 +315,15 @@ Unlike X509Duplicate, this modifies an existing object, so no new memory is allo
 Returns the input value.
 */
 DLLEXPORT X509* CryptoNative_X509UpRef(X509* x509);
+
+/*
+Create a new X509_STORE, considering the certificates from systemTrust and any readable PFX
+in userTrustPath to be trusted
+*/
+DLLEXPORT X509_STORE* CryptoNative_X509ChainNew(X509Stack* systemTrust, const char* userTrustPath);
+
+DLLEXPORT int32_t CryptoNative_X509StackAddDirectoryStore(X509Stack* stack, char* storePath);
+
+DLLEXPORT int32_t CryptoNative_X509StackAddMultiple(X509Stack* dest, X509Stack* src);
+
+DLLEXPORT int32_t CryptoNative_X509StoreCtxCommitToChain(X509_STORE_CTX* storeCtx);
