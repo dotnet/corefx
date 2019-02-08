@@ -540,7 +540,16 @@ namespace System.Diagnostics.Tests
 
                     Assert.Equal(uid, getuid().ToString());
                     Assert.Equal(gid, getgid().ToString());
-                    Assert.Equal(groups, GetGroups());
+                    // On systems with a low value of NGROUPS_MAX (e.g 16 on OSX), the groups may be truncated.
+                    // On Linux NGROUPS_MAX is 65536, so we expect to see every group.
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        Assert.Equal(groups, GetGroups());
+                    }
+                    else
+                    {
+                        Assert.Subset(new HashSet<uint>(groups), new HashSet<uint>(GetGroups()));
+                    }
 
                     return SuccessExitCode;
                 };
