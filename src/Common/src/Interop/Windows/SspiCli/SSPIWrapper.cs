@@ -373,11 +373,21 @@ namespace System.Net
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null, contextAttribute);
 
+            Span<T> span =
+#if netstandard
+                stackalloc T[1] { attribute };
+#else
+                MemoryMarshal.CreateSpan(ref attribute, 1);
+#endif
             int errorCode = secModule.QueryContextAttributes(
                 securityContext, contextAttribute,
-                MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref attribute, 1)),
+                MemoryMarshal.AsBytes(span),
                 null,
                 out SafeHandle sspiHandle);
+#if netstandard
+            attribute = span[0];
+#endif
+
             using (sspiHandle)
             {
                 if (errorCode != 0)
@@ -395,11 +405,20 @@ namespace System.Net
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null, contextAttribute);
 
+            Span<T> span =
+#if netstandard
+                stackalloc T[1] { attribute };
+#else
+                MemoryMarshal.CreateSpan(ref attribute, 1);
+#endif
             int errorCode = secModule.QueryContextAttributes(
                 securityContext, contextAttribute,
-                MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref attribute, 1)),
+                MemoryMarshal.AsBytes(span),
                 safeHandleType,
                 out sspiHandle);
+#if netstandard
+            attribute = span[0];
+#endif
 
             if (errorCode != 0)
             {
@@ -419,11 +438,11 @@ namespace System.Net
 
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null, contextAttribute);
 
-            IntPtr buffer = default;
+            Span<IntPtr> buffer = stackalloc IntPtr[1];
             int errorCode = secModule.QueryContextAttributes(
                 securityContext,
                 contextAttribute,
-                MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref buffer, 1)),
+                MemoryMarshal.AsBytes(buffer),
                 typeof(SafeFreeContextBuffer),
                 out SafeHandle sspiHandle);
             using (sspiHandle)
@@ -444,11 +463,11 @@ namespace System.Net
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null);
 
-            IntPtr buffer = default;
+            Span<IntPtr> buffer = stackalloc IntPtr[1];
             int errorCode = secModule.QueryContextAttributes(
                 securityContext,
                 Interop.SspiCli.ContextAttribute.SECPKG_ATTR_REMOTE_CERT_CONTEXT,
-                MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref buffer, 1)),
+                MemoryMarshal.AsBytes(buffer),
                 typeof(SafeFreeCertContext),
                 out SafeHandle sspiHandle);
 
@@ -468,13 +487,21 @@ namespace System.Net
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(null);
 
-            Span<byte> buffer = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref ctx, 1));
+            Span<Interop.SspiCli.SecPkgContext_IssuerListInfoEx> buffer =
+#if netstandard
+                stackalloc Interop.SspiCli.SecPkgContext_IssuerListInfoEx[1] { ctx };
+#else
+                MemoryMarshal.CreateSpan(ref ctx, 1);
+#endif
             int errorCode = secModule.QueryContextAttributes(
                 securityContext,
                 Interop.SspiCli.ContextAttribute.SECPKG_ATTR_ISSUER_LIST_EX,
-                buffer,
+                MemoryMarshal.AsBytes(buffer),
                 typeof(SafeFreeContextBuffer),
                 out sspiHandle);
+#if netstandard
+            ctx = buffer[0];
+#endif
 
             if (errorCode != 0)
             {

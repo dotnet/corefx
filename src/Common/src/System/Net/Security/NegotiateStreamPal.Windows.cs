@@ -80,24 +80,31 @@ namespace System.Net.Security
             ref byte[] resultBlob,
             ref ContextFlagsPal contextFlags)
         {
+#if netstandard
+            Span<SecurityBuffer> inSecurityBufferSpan = new SecurityBuffer[2];
+#else
             TwoSecurityBuffers twoSecurityBuffers = default;
-            Span<SecurityBuffer> inSecurityBufferSpan = default;
+            Span<SecurityBuffer> inSecurityBufferSpan = MemoryMarshal.CreateSpan(ref twoSecurityBuffers._item0, 2);
+#endif
+
+            int inSecurityBufferSpanLength = 0;
             if (incomingBlob != null && channelBinding != null)
             {
-                inSecurityBufferSpan = MemoryMarshal.CreateSpan(ref twoSecurityBuffers._item0, 2);
                 inSecurityBufferSpan[0] = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
                 inSecurityBufferSpan[1] = new SecurityBuffer(channelBinding);
+                inSecurityBufferSpanLength = 2;
             }
             else if (incomingBlob != null)
             {
-                inSecurityBufferSpan = MemoryMarshal.CreateSpan(ref twoSecurityBuffers._item0, 1);
                 inSecurityBufferSpan[0] = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
+                inSecurityBufferSpanLength = 1;
             }
             else if (channelBinding != null)
             {
-                inSecurityBufferSpan = MemoryMarshal.CreateSpan(ref twoSecurityBuffers._item0, 1);
                 inSecurityBufferSpan[0] = new SecurityBuffer(channelBinding);
+                inSecurityBufferSpanLength = 1;
             }
+            inSecurityBufferSpan = inSecurityBufferSpan.Slice(0, inSecurityBufferSpanLength);
 
             var outSecurityBuffer = new SecurityBuffer(resultBlob, SecurityBufferType.SECBUFFER_TOKEN);
 
@@ -139,24 +146,31 @@ namespace System.Net.Security
             ref byte[] resultBlob,
             ref ContextFlagsPal contextFlags)
         {
-            TwoSecurityBuffers stackBuffers = default;
-            Span<SecurityBuffer> inSecurityBufferSpan = default;
+#if netstandard
+            Span<SecurityBuffer> inSecurityBufferSpan = new SecurityBuffer[2];
+#else
+            TwoSecurityBuffers twoSecurityBuffers = default;
+            Span<SecurityBuffer> inSecurityBufferSpan = MemoryMarshal.CreateSpan(ref twoSecurityBuffers._item0, 2);
+#endif
+
+            int inSecurityBufferSpanLength = 0;
             if (incomingBlob != null && channelBinding != null)
             {
-                inSecurityBufferSpan = MemoryMarshal.CreateSpan(ref stackBuffers._item0, 2);
                 inSecurityBufferSpan[0] = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
                 inSecurityBufferSpan[1] = new SecurityBuffer(channelBinding);
+                inSecurityBufferSpanLength = 2;
             }
             else if (incomingBlob != null)
             {
-                inSecurityBufferSpan = MemoryMarshal.CreateSpan(ref stackBuffers._item0, 1);
                 inSecurityBufferSpan[0] = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
+                inSecurityBufferSpanLength = 1;
             }
             else if (channelBinding != null)
             {
-                inSecurityBufferSpan = MemoryMarshal.CreateSpan(ref stackBuffers._item0, 1);
                 inSecurityBufferSpan[0] = new SecurityBuffer(channelBinding);
+                inSecurityBufferSpanLength = 1;
             }
+            inSecurityBufferSpan = inSecurityBufferSpan.Slice(0, inSecurityBufferSpanLength);
 
             var outSecurityBuffer = new SecurityBuffer(resultBlob, SecurityBufferType.SECBUFFER_TOKEN);
 
@@ -202,8 +216,12 @@ namespace System.Net.Security
             // setup security buffers for ssp call
             // one points at signed data
             // two will receive payload if signature is valid
+#if netstandard
+            Span<SecurityBuffer> securityBuffer = new SecurityBuffer[2];
+#else
             TwoSecurityBuffers stackBuffer = default;
             Span<SecurityBuffer> securityBuffer = MemoryMarshal.CreateSpan(ref stackBuffer._item0, 2);
+#endif
             securityBuffer[0] = new SecurityBuffer(buffer, offset, count, SecurityBufferType.SECBUFFER_STREAM);
             securityBuffer[1] = new SecurityBuffer(0, SecurityBufferType.SECBUFFER_DATA);
 
@@ -245,8 +263,12 @@ namespace System.Net.Security
             Buffer.BlockCopy(buffer, offset, output, sizes.cbMaxSignature, count);
 
             // setup security buffers for ssp call
+#if netstandard
+            Span<SecurityBuffer> securityBuffer = new SecurityBuffer[2];
+#else
             TwoSecurityBuffers stackBuffer = default;
             Span<SecurityBuffer> securityBuffer = MemoryMarshal.CreateSpan(ref stackBuffer._item0, 2);
+#endif
             securityBuffer[0] = new SecurityBuffer(output, 0, sizes.cbMaxSignature, SecurityBufferType.SECBUFFER_TOKEN);
             securityBuffer[1] = new SecurityBuffer(output, sizes.cbMaxSignature, count, SecurityBufferType.SECBUFFER_DATA);
 
