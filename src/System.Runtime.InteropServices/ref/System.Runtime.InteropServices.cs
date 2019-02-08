@@ -952,7 +952,6 @@ namespace System.Runtime.InteropServices
         I4 = 7,
         I8 = 9,
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-        [System.ObsoleteAttribute("Marshalling as IDispatch may be unavailable in future releases.")]
         IDispatch = 26,
         IInspectable = 46,
         Interface = 28,
@@ -966,10 +965,8 @@ namespace System.Runtime.InteropServices
         R4 = 11,
         R8 = 12,
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-        [System.ObsoleteAttribute("Marshalling as SafeArray may be unavailable in future releases.")]
         SafeArray = 29,
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-        [System.ObsoleteAttribute("Applying UnmanagedType.Struct is unnecessary when marshalling a struct. Support for UnmanagedType.Struct when marshalling a reference type may be unavailable in future releases.")]
         Struct = 27,
         SysInt = 31,
         SysUInt = 32,
@@ -981,14 +978,12 @@ namespace System.Runtime.InteropServices
         U4 = 8,
         U8 = 10,
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-        [System.ObsoleteAttribute("Marshalling as VariantBool may be unavailable in future releases.")]
         VariantBool = 37,
         [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         [System.ObsoleteAttribute("Marshalling as VBByRefString may be unavailable in future releases.")]
         VBByRefStr = 34,
     }
     [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
-    [System.ObsoleteAttribute("Marshalling VARIANTs may be unavailable in future releases.")]
     public enum VarEnum
     {
         VT_ARRAY = 8192,
