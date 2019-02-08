@@ -100,7 +100,9 @@ namespace System.IO.Pipelines
             _readerCompletion = default;
             _writerCompletion = default;
 
-            _pool = options.Pool;
+            // If we're using the default pool then mark it as null since we're just going to use the 
+            // array pool under the covers
+            _pool = options.Pool == MemoryPool<byte>.Shared ? null : options.Pool;
             _minimumSegmentSize = options.MinimumSegmentSize;
             _pauseWriterThreshold = options.PauseWriterThreshold;
             _resumeWriterThreshold = options.ResumeWriterThreshold;
@@ -202,13 +204,13 @@ namespace System.IO.Pipelines
         {
             BufferSegment newSegment = CreateSegmentUnsynchronized();
 
-            if (_pool != null)
+            if (_pool is null)
             {
-                newSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint, _pool.MaxBufferSize)));
+                newSegment.SetMemory(ArrayPool<byte>.Shared.Rent(GetSegmentSize(sizeHint)));
             }
             else
             {
-                newSegment.SetMemory(ArrayPool<byte>.Shared.Rent(GetSegmentSize(sizeHint)));
+                newSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint, _pool.MaxBufferSize)));
             }
 
             return newSegment;

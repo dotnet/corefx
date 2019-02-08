@@ -45,7 +45,7 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.resumeWriterThreshold);
             }
 
-            Pool = pool;
+            Pool = pool ?? MemoryPool<byte>.Shared;
             ReaderScheduler = readerScheduler ?? PipeScheduler.ThreadPool;
             WriterScheduler = writerScheduler ?? PipeScheduler.ThreadPool;
             PauseWriterThreshold = pauseWriterThreshold;
