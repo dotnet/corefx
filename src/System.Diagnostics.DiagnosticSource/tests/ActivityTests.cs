@@ -25,7 +25,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(activityName, activity.OperationName);
             Assert.Null(activity.Id);
             Assert.Null(activity.RootId);
-            Assert.Equal(TimeSpan.Zero, activity.Duration);            
+            Assert.Equal(TimeSpan.Zero, activity.Duration);
             Assert.Null(activity.Parent);
             Assert.Null(activity.ParentId);
             Assert.Equal(0, activity.Baggage.ToList().Count);
@@ -264,7 +264,7 @@ namespace System.Diagnostics.Tests
         public void RootId()
         {
 
-            var parentIds = new []{
+            var parentIds = new[]{
                 "123",   //Parent does not start with '|' and does not contain '.'
                 "123.1", //Parent does not start with '|' but contains '.'
                 "|123",  //Parent starts with '|' and does not contain '.'
@@ -310,19 +310,20 @@ namespace System.Diagnostics.Tests
             // NewTraceId
             TraceId newId1 = TraceId.NewTraceId();
             Assert.True(IsHex(newId1.AsHexString));
+            Assert.Equal(16, newId1.AsBytes.Length);
 
             TraceId newId2 = TraceId.NewTraceId();
+            Assert.Equal(16, newId1.AsBytes.Length);
             Assert.NotEqual(newId1.AsHexString, newId2.AsHexString);
 
-                // AsBytes and Byte constructor.  
-                TraceId newId2Clone = new TraceId(newId2.AsBytes);
+            // AsBytes and Byte constructor.  
+            TraceId newId2Clone = new TraceId(newId2.AsBytes);
             Assert.Equal(newId2.AsHexString, newId2Clone.AsHexString);
             Assert.Equal(newId2.AsBytes.ToArray(), newId2.AsBytes.ToArray());
 
             // String constructor and AsHexString.  
             string idStr = "0123456789ABCDEF0123456789ABCDEF";
-            ReadOnlySpan<char> idSpan = idStr.ToCharArray();
-            TraceId id = new TraceId(idSpan);
+            TraceId id = new TraceId(idStr.AsSpan());
             Assert.Equal(idStr, id.AsHexString);
 
             // Utf8 Constructor. 
@@ -348,8 +349,10 @@ namespace System.Diagnostics.Tests
             // NewSpanId
             SpanId newId1 = SpanId.NewSpanId();
             Assert.True(IsHex(newId1.AsHexString));
+            Assert.Equal(8, newId1.AsBytes.Length);
 
             SpanId newId2 = SpanId.NewSpanId();
+            Assert.Equal(8, newId1.AsBytes.Length);
             Assert.NotEqual(newId1.AsHexString, newId2.AsHexString);
 
             // AsBytes and Byte constructor.  
@@ -359,8 +362,7 @@ namespace System.Diagnostics.Tests
 
             // String constructor and AsHexString.  
             string idStr = "0123456789ABCDEF";
-            ReadOnlySpan<char> idSpan = idStr.ToCharArray();
-            SpanId id = new SpanId(idSpan);
+            SpanId id = new SpanId(idStr.AsSpan());
             Assert.Equal(idStr, id.AsHexString);
 
             // Utf8 Constructor. 
@@ -376,42 +378,106 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void IdFormatTests()
         {
-            Activity activity;
+            try
+            {
+                Activity activity;
 
-            // Default format is the default (Hierarchical)
-            activity = new Activity("activity1");
-            activity.Start();
-            Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
-            activity.Stop();
+                // Default format is the default (Hierarchical)
+                activity = new Activity("activity1");
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+                activity.Stop();
 
-            // Set the parent to something that is WC3 by string
-            activity = new Activity("activity2");
-            activity.SetParentId("00-0123456789ABCDEF0123456789ABCDEF-0123456789ABCDEF-01");
-            activity.Start();
-            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
-            Assert.Equal("0123456789ABCDEF0123456789ABCDEF", activity.TraceId.AsHexString);
-            Assert.True(IdIsW3CFormat(activity.Id));
-            activity.Stop();
+                // Set the parent to something that is WC3 by string
+                activity = new Activity("activity2");
+                activity.SetParentId("00-0123456789ABCDEF0123456789ABCDEF-0123456789ABCDEF-01");
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+                Assert.Equal("0123456789ABCDEF0123456789ABCDEF", activity.TraceId.AsHexString);
+                Assert.True(IdIsW3CFormat(activity.Id));
+                activity.Stop();
 
-            // Set the parent to something that is WC3 byt using traceId,spanId version of SetParentId.  
-            activity = new Activity("activity3");
-            TraceId traceId = TraceId.NewTraceId();
-            activity.SetParentId(traceId, SpanId.NewSpanId());
-            activity.Start();
-            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
-            Assert.Equal(traceId.AsHexString, activity.TraceId.AsHexString);
-            Assert.True(IdIsW3CFormat(activity.Id));
-            activity.Stop();
+                // Set the parent to something that is WC3 byt using traceId,spanId version of SetParentId.  
+                activity = new Activity("activity3");
+                TraceId traceId = TraceId.NewTraceId();
+                activity.SetParentId(traceId, SpanId.NewSpanId());
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+                Assert.Equal(traceId.AsHexString, activity.TraceId.AsHexString);
+                Assert.True(IdIsW3CFormat(activity.Id));
+                activity.Stop();
 
-            // Change DefaultIdFormat to W3C, confirm I get the new format.  
-            Activity.DefaultIdFormat = ActivityIdFormat.W3C;
-            activity = new Activity("activity1");
-            activity.Start();
-            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
-            Assert.True(IdIsW3CFormat(activity.Id));
-            activity.Stop();
-            // Set it back to the default, just to put the state back. 
-            Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
+                // Change DefaultIdFormat to W3C, confirm I get the new format.  
+                Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+                activity = new Activity("activity4");
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+                Assert.True(IdIsW3CFormat(activity.Id));
+                activity.Stop();
+
+                // But I don't get the default format if parent is hierarchical 
+                activity = new Activity("activity5");
+                string parentId = "|a000b421-5d183ab6.1";
+                activity.SetParentId(parentId);
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
+                Assert.True(activity.Id.StartsWith(parentId));
+
+                // Heirarchical Ids return null TraceId and SpanIds
+                Assert.Equal(new byte[16], activity.TraceId.AsBytes.ToArray());
+                Assert.Equal(new byte[8], activity.SpanId.AsBytes.ToArray());
+                activity.Stop();
+
+                // But if I set ForceDefaultFormat I get what I asked for (W3C format)
+                Activity.ForceDefaultIdFormat = true;
+                activity = new Activity("activity6");
+                activity.SetParentId(parentId);
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+                Assert.True(IdIsW3CFormat(activity.Id));
+                Assert.NotEqual(new byte[16], activity.TraceId.AsBytes.ToArray());
+                Assert.NotEqual(new byte[8], activity.SpanId.AsBytes.ToArray());
+
+                /* TraceStateString testing */
+                // Test TraceStateString (that it inherits from parent)
+                Activity parent = new Activity("parent");
+                string testString = "MyTestString";
+                parent.TraceStateString = testString;
+                parent.Start();
+                Assert.Equal(testString, parent.TraceStateString);
+
+                activity = new Activity("activity7");
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+                Assert.True(IdIsW3CFormat(activity.Id));
+                Assert.Equal(testString, activity.TraceStateString);
+
+                // Update child 
+                string childTestString = "ChildTestString";
+                activity.TraceStateString = childTestString;
+
+                // Confirm that child sees update, but parent does not
+                Assert.Equal(childTestString, activity.TraceStateString);
+                Assert.Equal(testString, parent.TraceStateString);
+
+                // Update parent
+                string parentTestString = "newTestString";
+                parent.TraceStateString = parentTestString;
+
+                // Confirm that parent sees update but child does not.  
+                Assert.Equal(childTestString, activity.TraceStateString);
+                Assert.Equal(parentTestString, parent.TraceStateString);
+
+                activity.Stop();
+                parent.Stop();
+            }
+            finally
+            {
+                // Set global settings back to the default, just to put the state back. 
+                Activity.ForceDefaultIdFormat = false;
+                Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
+                Activity.Current = null;
+            }
         }
 
         /// <summary>
@@ -609,7 +675,7 @@ namespace System.Diagnostics.Tests
 
                     // let's only check that Duration is set in StopActivity, we do not intend to check precision here
                     Assert.InRange(observer.Activity.Duration, TimeSpan.FromTicks(1), stopWatch.Elapsed.Add(TimeSpan.FromMilliseconds(2 * MaxClockErrorMSec)));
-                } 
+                }
             }
         }
 
