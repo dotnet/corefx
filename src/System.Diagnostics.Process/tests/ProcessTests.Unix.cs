@@ -588,7 +588,7 @@ namespace System.Diagnostics.Tests
                     Assert.NotEqual(0, p.ExitCode);
                 }
 
-                return 0;
+                return SuccessExitCode;
             }
         }
 
@@ -824,7 +824,7 @@ namespace System.Diagnostics.Tests
                     Assert.NotEqual(0, p.ExitCode);
                 }
 
-                return 0;
+                return SuccessExitCode;
             }
         }
 
@@ -837,21 +837,10 @@ namespace System.Diagnostics.Tests
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions()
             {
-                Start = false,
                 RunAsSudo = true
             };
-            Process p = null;
             using (RemoteInvokeHandle handle = RemoteInvoke(testMethod, arg, options))
-            {
-                p = handle.Process;
-                handle.Process = null;
-            }
-            AddProcessForDispose(p);
-
-            p.Start();
-            p.WaitForExit();
-
-            Assert.Equal(0, p.ExitCode);
+            { }
         }
 
         [DllImport("libc")]
