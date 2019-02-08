@@ -78,6 +78,14 @@ namespace Microsoft.Win32.SafeHandles
         /// </summary>
         public static SafeGssCredHandle Create(string username, string password, bool isNtlmOnly)
         {
+            if (isNtlmOnly && !Interop.NetSecurityNative.IsNtlmInstalled())
+            {
+                throw new Interop.NetSecurityNative.GssApiException(
+                    Interop.NetSecurityNative.Status.GSS_S_BAD_MECH,
+                    0,
+                    SR.net_gssapi_ntlm_missing_plugin);
+            }
+
             if (string.IsNullOrEmpty(username))
             {
                 return new SafeGssCredHandle();
@@ -100,12 +108,7 @@ namespace Microsoft.Win32.SafeHandles
                 if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
                 {
                     retHandle.Dispose();
-                    throw new Interop.NetSecurityNative.GssApiException(
-                        status,
-                        minorStatus,
-                        (status == Interop.NetSecurityNative.Status.GSS_S_BAD_MECH && isNtlmOnly) ?
-                            SR.net_gssapi_ntlm_missing_plugin :
-                            null);
+                    throw new Interop.NetSecurityNative.GssApiException(status, minorStatus, null);
                 }
             }
 
