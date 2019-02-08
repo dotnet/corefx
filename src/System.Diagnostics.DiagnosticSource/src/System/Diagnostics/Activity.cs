@@ -869,6 +869,11 @@ namespace System.Diagnostics
         #endregion 
 
         #region private
+
+        /// <summary>
+        /// Sets the bytes in 'outBytes' to be random values.   outBytes.Length must be <= 16.  
+        /// </summary>
+        /// <param name="outBytes"></param>
         internal static void SetToRandomBytes(Span<byte> outBytes)
         {
             Debug.Assert(outBytes.Length <= sizeof(Guid));     // Guid is 16 bytes, and so is TraceId 
@@ -877,15 +882,26 @@ namespace System.Diagnostics
             guidBytes.Slice(0, outBytes.Length).CopyTo(outBytes);
         }
 
+        #region CONVERSION binary spans to hex spans, and hex spans to binary spans  
+        /* It would be nice to use generic Hex number conversion routines, but there 
+         * is nothing that is exposed publically and efficient */
+        /// <summary>
+        /// Converts each byte in 'bytes' to hex (thus two characters) and concatinates them
+        /// and returns the resulting string.  
+        /// </summary>
         internal static string SpanToHexString(ReadOnlySpan<byte> bytes)
         {
             // TODO replace with ValueStringBuilder when available.  
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(bytes.Length * 2);
             foreach (byte b in bytes)
                 sb.Append(BinaryToHexDigit(b >> 4)).Append(BinaryToHexDigit(b));
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Converts 'idData' which is assumed to be HEX UTF8 characters to binary
+        /// puts it in 'outBytes'
+        /// </summary>
         internal static void SetSpanFromHexUtf8Chars(Span<byte> outBytes, ReadOnlySpan<byte> idData)
         {
             Debug.Assert(outBytes.Length * 2 == idData.Length);
@@ -893,38 +909,38 @@ namespace System.Diagnostics
                 outBytes[i] = HexByteFromChars((char)idData[i * 2], (char)idData[i * 2 + 1]);
         }
 
+        /// <summary>
+        /// Converts 'idData' which is assumed to be HEX Unicode characters to binary
+        /// puts it in 'outBytes'
+        /// </summary>
         internal static void SetSpanFromHexChars(Span<byte> outBytes, ReadOnlySpan<char> charData)
         {
             Debug.Assert(outBytes.Length * 2 == charData.Length);
             for (int i = 0; i < outBytes.Length; i++)
                 outBytes[i] = HexByteFromChars(charData[i * 2], charData[i * 2 + 1]);
         }
-        internal static byte HexByteFromChars(char char1, char char2)
+        private static byte HexByteFromChars(char char1, char char2)
         {
             return (byte)(HexDigitToBinary(char1) * 16 + HexDigitToBinary(char2));
         }
-
-        internal static byte HexDigitToBinary(char c)
+        private static byte HexDigitToBinary(char c)
         {
-            if (Char.IsDigit(c))
+            if ('0' <= c && c <= '9')
                 return (byte)(c - '0');
-
             if ('A' <= c && c <= 'F')
                 return (byte)(c - ('A' - 10));
-
             if ('a' <= c && c <= 'f')
                 return (byte)(c - ('a' - 10));
-
             throw new ArgumentOutOfRangeException("idData");
         }
-
-        internal static char BinaryToHexDigit(int val)
+        private static char BinaryToHexDigit(int val)
         {
             val &= 0xF;
             if (val <= 9)
                 return (char)('0' + val);
             return (char)(('A' - 10) + val);
         }
+        #endregion
 
         ulong _id1;
         ulong _id2;
@@ -1061,42 +1077,4 @@ namespace System.Diagnostics
     }
 }
 
-#if false
 
-        /// <summary>
-        /// Copies the 16 byte binary trace Id int 'outputBuffer'. 
-        /// </summary>
-        public void CopyTo(Span<byte> outputBuffer)
-        {
-            if (_asHexString != null && _id1 == 0 && _id2 == 0)
-            {
-                UInt64.TryParse(_asHexString, out _id1);
-                UInt64.TryParse(_asHexString.Substring(8), out _id2);
-            }
-            fixed (ulong* idBytes = &_id1)
-                new ReadOnlySpan<byte>(idBytes, sizeof(ulong) * 2).CopyTo(outputBuffer);
-        }
-
-        /// <summary>
-        /// Creates a SpanId from a long id.  
-        /// </summary>
-        /// <param name="id"></param>
-        public SpanId(long id)
-        {
-            _id1 = id;
-            _asHexString = null;
-        }
-
-        /// <summary>
-        /// Returns the SpanId as a 8 byte long.  
-        /// </summary>
-        public long AsLong
-        {
-            get
-            {
-                if (_asHexString != null && _id1 == 0)
-                    Int64.TryParse(_asHexString, out _id1);
-                return _id1;
-            }
-        }
-#endif
