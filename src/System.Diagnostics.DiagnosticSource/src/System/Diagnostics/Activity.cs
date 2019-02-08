@@ -255,7 +255,7 @@ namespace System.Diagnostics
         /// Set the parent ID using the W3C convention using a TraceId and a SpanId.   This
         /// constructor has the advantage that no string manipulation is needed to set the ID.  
         /// </summary>
-        public Activity SetParentId(in TraceId traceId, in SpanId spanId)
+        public Activity SetParentId(in ActivityTraceId traceId, in ActivitySpanId spanId)
         {
             if (Parent != null)
             {
@@ -446,7 +446,7 @@ namespace System.Diagnostics
         /// If the Activity has the W3C format, this returns the ID for the SPAN part of the Id.  
         /// Otherwise it returns a zero SpanId. 
         /// </summary>
-        public ref readonly SpanId SpanId
+        public ref readonly ActivitySpanId SpanId
         {
             get
             {
@@ -454,7 +454,7 @@ namespace System.Diagnostics
                 {
                     if (_id != null && IdFormat == ActivityIdFormat.W3C)
                     {
-                        _spanId = new SpanId(((ReadOnlySpan<char>)_id).Slice(36, 16));
+                        _spanId = new ActivitySpanId(((ReadOnlySpan<char>)_id).Slice(36, 16));
                         _spanIdSet = true;
                     }
                 }
@@ -466,7 +466,7 @@ namespace System.Diagnostics
         /// If the Activity has the W3C format, this returns the ID for the TraceId part of the Id.  
         /// Otherwise it returns a zero TraceId. 
         /// </summary>
-        public ref readonly TraceId TraceId
+        public ref readonly ActivityTraceId TraceId
         {
             get
             {
@@ -474,7 +474,7 @@ namespace System.Diagnostics
                 {
                     if (_id != null && IdFormat == ActivityIdFormat.W3C)
                     {
-                        _traceId = new TraceId(((ReadOnlySpan<char>)_id).Slice(3, 32));
+                        _traceId = new ActivityTraceId(((ReadOnlySpan<char>)_id).Slice(3, 32));
                         _traceIdSet = true;
                     }
                 }
@@ -486,13 +486,13 @@ namespace System.Diagnostics
         /// If the parent Activity ID has the W3C format, this returns the ID for the SpanId part of the ParentId.  
         /// Otherwise it returns a zero SpanId. 
         /// </summary>
-        public ref readonly SpanId ParentSpanId
+        public ref readonly ActivitySpanId ParentSpanId
         {
             get
             {
                 if (!_parentSpanIdSet && _parentId != null && IsW3CId(_parentId))
                 {
-                    _parentSpanId = new SpanId(((ReadOnlySpan<char>)_parentId).Slice(36, 16));
+                    _parentSpanId = new ActivitySpanId(((ReadOnlySpan<char>)_parentId).Slice(36, 16));
                     _parentSpanIdSet = true;
                 }
                 return ref _parentSpanId;
@@ -566,13 +566,13 @@ namespace System.Diagnostics
                 if (Parent != null && Parent.IdFormat == ActivityIdFormat.W3C)
                     _traceId = Parent.TraceId;
                 else if (_parentId != null && IsW3CId(_parentId))
-                    _traceId = new TraceId(((ReadOnlySpan<char>)_parentId).Slice(3, 32));
+                    _traceId = new ActivityTraceId(((ReadOnlySpan<char>)_parentId).Slice(3, 32));
                 else
-                    _traceId = TraceId.NewTraceId();
+                    _traceId = ActivityTraceId.NewTraceId();
                 _traceIdSet = true;
             }
             // Create a new SpanID. 
-            _spanId = SpanId.NewSpanId();
+            _spanId = ActivitySpanId.NewSpanId();
             _spanIdSet = true;
         }
 
@@ -728,14 +728,14 @@ namespace System.Diagnostics
 
         // State associated with ID.  It can be represented by a string or by TraceId, SpanId.  
         private string _id;
-        private TraceId _traceId;
+        private ActivityTraceId _traceId;
         private bool _traceIdSet;
-        private SpanId _spanId;
+        private ActivitySpanId _spanId;
         private bool _spanIdSet;
 
         // State associated with ParentId.  It can be represented by a string or by TraceId, SpanId.  
         private string _parentId;
-        private SpanId _parentSpanId;
+        private ActivitySpanId _parentSpanId;
         private bool _parentSpanIdSet;
 
         private bool isFinished;
@@ -761,12 +761,12 @@ namespace System.Diagnostics
     /// it has to, and caches the string representation after it was created.   
     /// It is mostly useful as an exchange type.  
     /// </summary>
-    public unsafe struct TraceId : IEquatable<TraceId>
+    public unsafe struct ActivityTraceId : IEquatable<ActivityTraceId>
     {
         /// <summary>
         /// Creates a TraceId from a 16 byte span 'idBytes'.   The bytes are copied.  
         /// </summary>
-        public TraceId(ReadOnlySpan<byte> idData, bool isUtf8Chars = false)
+        public ActivityTraceId(ReadOnlySpan<byte> idData, bool isUtf8Chars = false)
         {
             _id1 = 0;
             _id2 = 0;
@@ -778,7 +778,7 @@ namespace System.Diagnostics
                 {
                     if (idData.Length != 32)
                         throw new ArgumentOutOfRangeException(nameof(idData));
-                    TraceId.SetSpanFromHexUtf8Chars(outBuff, idData);
+                    ActivityTraceId.SetSpanFromHexUtf8Chars(outBuff, idData);
                 }
                 else
                 {
@@ -789,7 +789,7 @@ namespace System.Diagnostics
             }
         }
 
-        public TraceId(ReadOnlySpan<char> idData)
+        public ActivityTraceId(ReadOnlySpan<char> idData)
         {
             _id1 = 0;
             _id2 = 0;
@@ -798,16 +798,16 @@ namespace System.Diagnostics
             {
                 if (idData.Length != 32)
                     throw new ArgumentOutOfRangeException(nameof(idData));
-                TraceId.SetSpanFromHexChars(new Span<byte>(idPtr, sizeof(ulong) * 2), idData);
+                ActivityTraceId.SetSpanFromHexChars(new Span<byte>(idPtr, sizeof(ulong) * 2), idData);
             }
         }
 
         /// <summary>
         /// Create a new TraceId with at random number in it (very likely to be unique)
         /// </summary>
-        public static TraceId NewTraceId()
+        public static ActivityTraceId NewTraceId()
         {
-            TraceId ret = new TraceId();
+            ActivityTraceId ret = new ActivityTraceId();
             SetToRandomBytes(new Span<byte>(&ret._id1, sizeof(ulong) * 2));
             return ret;
         }
@@ -843,23 +843,23 @@ namespace System.Diagnostics
         public override string ToString() => AsHexString;
 
         #region equality operators
-        public static bool operator ==(in TraceId traceId1, in TraceId traceId2)
+        public static bool operator ==(in ActivityTraceId traceId1, in ActivityTraceId traceId2)
         {
             return traceId1._id1 == traceId2._id1 && traceId1._id2 == traceId2._id2;
         }
-        public static bool operator !=(in TraceId traceId1, in TraceId traceId2)
+        public static bool operator !=(in ActivityTraceId traceId1, in ActivityTraceId traceId2)
         {
             return traceId1._id1 != traceId2._id1 || traceId1._id2 != traceId2._id2;
         }
-        public bool Equals(TraceId traceId)
+        public bool Equals(ActivityTraceId traceId)
         {
             return _id1 == traceId._id1 && _id2 == traceId._id2;
         }
         public override bool Equals(object obj)
         {
-            if (!(obj is TraceId))
+            if (!(obj is ActivityTraceId))
                 return false;
-            TraceId traceId = (TraceId)obj;
+            ActivityTraceId traceId = (ActivityTraceId)obj;
             return _id1 == traceId._id1 && _id2 == traceId._id2;
         }
         public override int GetHashCode()
@@ -941,14 +941,14 @@ namespace System.Diagnostics
     /// it has to, and caches the string representation after it was created.   
     /// It is mostly useful as an exchange type.  
     /// </summary>
-    public unsafe struct SpanId : IEquatable<SpanId>
+    public unsafe struct ActivitySpanId : IEquatable<ActivitySpanId>
     {
         /// <summary>
         /// Creates a new SpanId from a given set of bytes 'idData'   idData 
         /// can either be an 8 byte Span of bytes, or a 16 byte Span of Utf8 characters
         /// and 'isUtf8Chars' indicates which of these it is.   
         /// </summary>
-        public SpanId(ReadOnlySpan<byte> idData, bool isUtf8Chars = false)
+        public ActivitySpanId(ReadOnlySpan<byte> idData, bool isUtf8Chars = false)
         {
             _id1 = 0;
             _asHexString = null;
@@ -959,7 +959,7 @@ namespace System.Diagnostics
                 {
                     if (idData.Length != 16)
                         throw new ArgumentOutOfRangeException(nameof(idData));
-                    TraceId.SetSpanFromHexUtf8Chars(outBuff, idData);
+                    ActivityTraceId.SetSpanFromHexUtf8Chars(outBuff, idData);
                 }
                 else
                 {
@@ -975,7 +975,7 @@ namespace System.Diagnostics
         /// must be exactly 16 bytes long and contain only Hex digits.   
         /// </summary>
         /// <param name="idData"></param>
-        public SpanId(ReadOnlySpan<char> idData)
+        public ActivitySpanId(ReadOnlySpan<char> idData)
         {
             _id1 = 0;
             _asHexString = null;
@@ -983,17 +983,17 @@ namespace System.Diagnostics
             {
                 if (idData.Length != 16)
                     throw new ArgumentOutOfRangeException(nameof(idData));
-                TraceId.SetSpanFromHexChars(new Span<byte>(idPtr, sizeof(ulong)), idData);
+                ActivityTraceId.SetSpanFromHexChars(new Span<byte>(idPtr, sizeof(ulong)), idData);
             }
         }
 
         /// <summary>
         /// Create a new SpanId with at random number in it (very likely to be unique)
         /// </summary>
-        public static SpanId NewSpanId()
+        public static ActivitySpanId NewSpanId()
         {
-            SpanId ret = new SpanId();
-            TraceId.SetToRandomBytes(new Span<byte>(&ret._id1, sizeof(ulong)));
+            ActivitySpanId ret = new ActivitySpanId();
+            ActivityTraceId.SetToRandomBytes(new Span<byte>(&ret._id1, sizeof(ulong)));
             return ret;
         }
 
@@ -1018,7 +1018,7 @@ namespace System.Diagnostics
             get
             {
                 if (_asHexString == null)
-                    _asHexString = TraceId.SpanToHexString(AsBytes);
+                    _asHexString = ActivityTraceId.SpanToHexString(AsBytes);
                 return _asHexString;
             }
         }
@@ -1029,23 +1029,23 @@ namespace System.Diagnostics
         public override string ToString() => AsHexString;
 
         #region equality operators
-        public static bool operator ==(in SpanId spanId1, in SpanId spandId2)
+        public static bool operator ==(in ActivitySpanId spanId1, in ActivitySpanId spandId2)
         {
             return spanId1._id1 == spandId2._id1;
         }
-        public static bool operator !=(in SpanId spanId1, in SpanId spandId2)
+        public static bool operator !=(in ActivitySpanId spanId1, in ActivitySpanId spandId2)
         {
             return spanId1._id1 != spandId2._id1;
         }
-        public bool Equals(SpanId spanId)
+        public bool Equals(ActivitySpanId spanId)
         {
             return _id1 == spanId._id1;
         }
         public override bool Equals(object obj)
         {
-            if (!(obj is SpanId))
+            if (!(obj is ActivitySpanId))
                 return false;
-            SpanId spanId = (SpanId)obj;
+            ActivitySpanId spanId = (ActivitySpanId)obj;
             return _id1 == spanId._id1;
         }
         public override int GetHashCode()

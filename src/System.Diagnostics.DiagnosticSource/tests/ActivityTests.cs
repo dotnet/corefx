@@ -296,29 +296,29 @@ namespace System.Diagnostics.Tests
             return Regex.IsMatch(s, "^[0-9A-Fa-f]*$");
         }
 
-        /****** TraceId tests *****/
+        /****** ActivityTraceId tests *****/
         [Fact]
-        public void TraceIdTests()
+        public void ActivityTraceIdTests()
         {
             // Empty Constructor 
             string zeros = "00000000000000000000000000000000";
-            TraceId emptySpan = new TraceId();
+            ActivityTraceId emptySpan = new ActivityTraceId();
             Assert.Equal(zeros, emptySpan.AsHexString);
             Assert.Equal(16, emptySpan.AsBytes.Length);
             Assert.Equal(new byte[16], emptySpan.AsBytes.ToArray());
 
-            Assert.True(emptySpan == new TraceId());
-            Assert.True(!(emptySpan != new TraceId()));
-            Assert.True(emptySpan.Equals(new TraceId()));
-            Assert.True(emptySpan.Equals((object)new TraceId()));
-            Assert.Equal(new TraceId().GetHashCode(), emptySpan.GetHashCode());
+            Assert.True(emptySpan == new ActivityTraceId());
+            Assert.True(!(emptySpan != new ActivityTraceId()));
+            Assert.True(emptySpan.Equals(new ActivityTraceId()));
+            Assert.True(emptySpan.Equals((object)new ActivityTraceId()));
+            Assert.Equal(new ActivityTraceId().GetHashCode(), emptySpan.GetHashCode());
 
-            // NewTraceId
-            TraceId newId1 = TraceId.NewTraceId();
+            // NewActivityTraceId
+            ActivityTraceId newId1 = ActivityTraceId.NewTraceId();
             Assert.True(IsHex(newId1.AsHexString));
             Assert.Equal(16, newId1.AsBytes.Length);
 
-            TraceId newId2 = TraceId.NewTraceId();
+            ActivityTraceId newId2 = ActivityTraceId.NewTraceId();
             Assert.Equal(16, newId1.AsBytes.Length);
             Assert.NotEqual(newId1.AsHexString, newId2.AsHexString);
 
@@ -329,7 +329,7 @@ namespace System.Diagnostics.Tests
             Assert.True(!(newId1.Equals((object)newId2)));
             Assert.NotEqual(newId1.GetHashCode(), newId2.GetHashCode());
 
-            TraceId newId3 = new TraceId("00000000000000000000000000000001".AsSpan());
+            ActivityTraceId newId3 = new ActivityTraceId("00000000000000000000000000000001".AsSpan());
             Assert.True(newId3 != emptySpan);
             Assert.True(!(newId3 == emptySpan));
             Assert.True(!(newId3.Equals(emptySpan)));
@@ -337,24 +337,24 @@ namespace System.Diagnostics.Tests
             Assert.NotEqual(newId3.GetHashCode(), emptySpan.GetHashCode());
 
             // Use in Dictionary (this does assume we have no collisions in IDs over 100 tries (very good).  
-            var dict = new Dictionary<TraceId, string>();
+            var dict = new Dictionary<ActivityTraceId, string>();
             for(int i = 0; i < 100; i++)
             {
-                var newId7 = TraceId.NewTraceId();
+                var newId7 = ActivityTraceId.NewTraceId();
                 dict[newId7] = newId7.AsHexString;
             }
             int ctr = 0;
             foreach(string value in dict.Values)
             {
                 string valueInDict;
-                Assert.True(dict.TryGetValue(new TraceId(value.AsSpan()), out valueInDict));
+                Assert.True(dict.TryGetValue(new ActivityTraceId(value.AsSpan()), out valueInDict));
                 Assert.Equal(value, valueInDict);
                 ctr++;
             }
             Assert.Equal(100, ctr);     // We got out what we put in.  
 
             // AsBytes and Byte constructor.  
-            TraceId newId2Clone = new TraceId(newId2.AsBytes);
+            ActivityTraceId newId2Clone = new ActivityTraceId(newId2.AsBytes);
             Assert.Equal(newId2.AsHexString, newId2Clone.AsHexString);
             Assert.Equal(newId2.AsBytes.ToArray(), newId2.AsBytes.ToArray());
 
@@ -365,41 +365,41 @@ namespace System.Diagnostics.Tests
 
             // String constructor and AsHexString.  
             string idStr = "0123456789ABCDEF0123456789ABCDEF";
-            TraceId id = new TraceId(idStr.AsSpan());
+            ActivityTraceId id = new ActivityTraceId(idStr.AsSpan());
             Assert.Equal(idStr, id.AsHexString);
 
             // Utf8 Constructor. 
             byte[] idUtf8 = Encoding.UTF8.GetBytes(idStr);
-            TraceId id1 = new TraceId(idUtf8, true);
+            ActivityTraceId id1 = new ActivityTraceId(idUtf8, true);
             Assert.Equal(idStr, id1.AsHexString);
 
             // ToString
             Assert.Equal(idStr, id.ToString());
         }
 
-        /****** SpanId tests *****/
+        /****** ActivitySpanId tests *****/
         [Fact]
-        public void SpanIdTests()
+        public void ActivitySpanIdTests()
         {
             // Empty Constructor 
             string zeros = "0000000000000000";
-            SpanId emptySpan = new SpanId();
+            ActivitySpanId emptySpan = new ActivitySpanId();
             Assert.Equal(zeros, emptySpan.AsHexString);
             Assert.Equal(8, emptySpan.AsBytes.Length);
             Assert.Equal(new byte[8], emptySpan.AsBytes.ToArray());
 
-            Assert.True(emptySpan == new SpanId());
-            Assert.True(!(emptySpan != new SpanId()));
-            Assert.True(emptySpan.Equals(new SpanId()));
-            Assert.True(emptySpan.Equals((object)new SpanId()));
-            Assert.Equal(new SpanId().GetHashCode(), emptySpan.GetHashCode());
+            Assert.True(emptySpan == new ActivitySpanId());
+            Assert.True(!(emptySpan != new ActivitySpanId()));
+            Assert.True(emptySpan.Equals(new ActivitySpanId()));
+            Assert.True(emptySpan.Equals((object)new ActivitySpanId()));
+            Assert.Equal(new ActivitySpanId().GetHashCode(), emptySpan.GetHashCode());
      
-            // NewSpanId
-            SpanId newId1 = SpanId.NewSpanId();
+            // NewActivitySpanId
+            ActivitySpanId newId1 = ActivitySpanId.NewSpanId();
             Assert.True(IsHex(newId1.AsHexString));
             Assert.Equal(8, newId1.AsBytes.Length);
 
-            SpanId newId2 = SpanId.NewSpanId();
+            ActivitySpanId newId2 = ActivitySpanId.NewSpanId();
             Assert.Equal(8, newId1.AsBytes.Length);
             Assert.NotEqual(newId1.AsHexString, newId2.AsHexString);
 
@@ -410,7 +410,7 @@ namespace System.Diagnostics.Tests
             Assert.True(!(newId1.Equals((object)newId2)));
             Assert.NotEqual(newId1.GetHashCode(), newId2.GetHashCode());
 
-            SpanId newId3 = new SpanId("0000000000000001".AsSpan());
+            ActivitySpanId newId3 = new ActivitySpanId("0000000000000001".AsSpan());
             Assert.True(newId3 != emptySpan);
             Assert.True(!(newId3 == emptySpan));
             Assert.True(!(newId3.Equals(emptySpan)));
@@ -418,35 +418,35 @@ namespace System.Diagnostics.Tests
             Assert.NotEqual(newId3.GetHashCode(), emptySpan.GetHashCode());
 
             // Use in Dictionary (this does assume we have no collisions in IDs over 100 tries (very good).  
-            var dict = new Dictionary<SpanId, string>();
+            var dict = new Dictionary<ActivitySpanId, string>();
             for (int i = 0; i < 100; i++)
             {
-                var newId8 = SpanId.NewSpanId();
+                var newId8 = ActivitySpanId.NewSpanId();
                 dict[newId8] = newId8.AsHexString;
             }
             int ctr = 0;
             foreach (string value in dict.Values)
             {
                 string valueInDict;
-                Assert.True(dict.TryGetValue(new SpanId(value.AsSpan()), out valueInDict));
+                Assert.True(dict.TryGetValue(new ActivitySpanId(value.AsSpan()), out valueInDict));
                 Assert.Equal(value, valueInDict);
                 ctr++;
             }
             Assert.Equal(100, ctr);     // We got out what we put in.  
 
             // AsBytes and Byte constructor.  
-            SpanId newId2Clone = new SpanId(newId2.AsBytes);
+            ActivitySpanId newId2Clone = new ActivitySpanId(newId2.AsBytes);
             Assert.Equal(newId2.AsHexString, newId2Clone.AsHexString);
             Assert.Equal(newId2.AsBytes.ToArray(), newId2.AsBytes.ToArray());
 
             // String constructor and AsHexString.  
             string idStr = "0123456789ABCDEF";
-            SpanId id = new SpanId(idStr.AsSpan());
+            ActivitySpanId id = new ActivitySpanId(idStr.AsSpan());
             Assert.Equal(idStr, id.AsHexString);
 
             // Utf8 Constructor. 
             byte[] idUtf8 = Encoding.UTF8.GetBytes(idStr);
-            SpanId id1 = new SpanId(idUtf8, true);
+            ActivitySpanId id1 = new ActivitySpanId(idUtf8, true);
             Assert.Equal(idStr, id1.AsHexString);
 
             // ToString
@@ -476,13 +476,13 @@ namespace System.Diagnostics.Tests
                 Assert.True(IdIsW3CFormat(activity.Id));
                 activity.Stop();
 
-                // Set the parent to something that is WC3 byt using traceId,spanId version of SetParentId.  
+                // Set the parent to something that is WC3 byt using ActivityTraceId,ActivitySpanId version of SetParentId.  
                 activity = new Activity("activity3");
-                TraceId traceId = TraceId.NewTraceId();
-                activity.SetParentId(traceId, SpanId.NewSpanId());
+                ActivityTraceId activityTraceId = ActivityTraceId.NewTraceId();
+                activity.SetParentId(activityTraceId, ActivitySpanId.NewSpanId());
                 activity.Start();
                 Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
-                Assert.Equal(traceId.AsHexString, activity.TraceId.AsHexString);
+                Assert.Equal(activityTraceId.AsHexString, activity.TraceId.AsHexString);
                 Assert.True(IdIsW3CFormat(activity.Id));
                 activity.Stop();
 
@@ -502,7 +502,7 @@ namespace System.Diagnostics.Tests
                 Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
                 Assert.True(activity.Id.StartsWith(parentId));
 
-                // Heirarchical Ids return null TraceId and SpanIds
+                // Heirarchical Ids return null ActivityTraceId and ActivitySpanIds
                 Assert.Equal(new byte[16], activity.TraceId.AsBytes.ToArray());
                 Assert.Equal(new byte[8], activity.SpanId.AsBytes.ToArray());
                 activity.Stop();
