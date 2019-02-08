@@ -217,8 +217,10 @@ namespace System.IO.Pipelines
         private int GetSegmentSize(int sizeHint, int maxBufferSize = int.MaxValue)
         {
             // First we need to handle case where hint is smaller than minimum segment size
+            sizeHint = Math.Max(_minimumSegmentSize, sizeHint);
             // After that adjust it to fit into pools max buffer size
-            return Math.Clamp(sizeHint, _minimumSegmentSize, maxBufferSize);
+            var adjustedToMaximumSize = Math.Min(maxBufferSize, sizeHint);
+            return adjustedToMaximumSize;
         }
 
         private BufferSegment CreateSegmentUnsynchronized()
