@@ -307,6 +307,12 @@ namespace System.Diagnostics.Tests
             Assert.Equal(16, emptySpan.AsBytes.Length);
             Assert.Equal(new byte[16], emptySpan.AsBytes.ToArray());
 
+            Assert.True(emptySpan == new TraceId());
+            Assert.True(!(emptySpan != new TraceId()));
+            Assert.True(emptySpan.Equals(new TraceId()));
+            Assert.True(emptySpan.Equals((object)new TraceId()));
+            Assert.Equal(new TraceId().GetHashCode(), emptySpan.GetHashCode());
+
             // NewTraceId
             TraceId newId1 = TraceId.NewTraceId();
             Assert.True(IsHex(newId1.AsHexString));
@@ -316,10 +322,46 @@ namespace System.Diagnostics.Tests
             Assert.Equal(16, newId1.AsBytes.Length);
             Assert.NotEqual(newId1.AsHexString, newId2.AsHexString);
 
+            // Test equality
+            Assert.True(newId1 != newId2);
+            Assert.True(!(newId1 == newId2));
+            Assert.True(!(newId1.Equals(newId2)));
+            Assert.True(!(newId1.Equals((object)newId2)));
+            Assert.NotEqual(newId1.GetHashCode(), newId2.GetHashCode());
+
+            TraceId newId3 = new TraceId("00000000000000000000000000000001".AsSpan());
+            Assert.True(newId3 != emptySpan);
+            Assert.True(!(newId3 == emptySpan));
+            Assert.True(!(newId3.Equals(emptySpan)));
+            Assert.True(!(newId3.Equals((object)emptySpan)));
+            Assert.NotEqual(newId3.GetHashCode(), emptySpan.GetHashCode());
+
+            // Use in Dictionary (this does assume we have no collisions in IDs over 100 tries (very good).  
+            var dict = new Dictionary<TraceId, string>();
+            for(int i = 0; i < 100; i++)
+            {
+                var newId7 = TraceId.NewTraceId();
+                dict[newId7] = newId7.AsHexString;
+            }
+            int ctr = 0;
+            foreach(string value in dict.Values)
+            {
+                string valueInDict;
+                Assert.True(dict.TryGetValue(new TraceId(value.AsSpan()), out valueInDict));
+                Assert.Equal(value, valueInDict);
+                ctr++;
+            }
+            Assert.Equal(100, ctr);     // We got out what we put in.  
+
             // AsBytes and Byte constructor.  
             TraceId newId2Clone = new TraceId(newId2.AsBytes);
             Assert.Equal(newId2.AsHexString, newId2Clone.AsHexString);
             Assert.Equal(newId2.AsBytes.ToArray(), newId2.AsBytes.ToArray());
+
+            Assert.True(newId2 == newId2Clone);
+            Assert.True(newId2.Equals(newId2Clone));
+            Assert.True(newId2.Equals((object)newId2Clone));
+            Assert.Equal(newId2.GetHashCode(), newId2Clone.GetHashCode());
 
             // String constructor and AsHexString.  
             string idStr = "0123456789ABCDEF0123456789ABCDEF";
@@ -346,6 +388,12 @@ namespace System.Diagnostics.Tests
             Assert.Equal(8, emptySpan.AsBytes.Length);
             Assert.Equal(new byte[8], emptySpan.AsBytes.ToArray());
 
+            Assert.True(emptySpan == new SpanId());
+            Assert.True(!(emptySpan != new SpanId()));
+            Assert.True(emptySpan.Equals(new SpanId()));
+            Assert.True(emptySpan.Equals((object)new SpanId()));
+            Assert.Equal(new SpanId().GetHashCode(), emptySpan.GetHashCode());
+     
             // NewSpanId
             SpanId newId1 = SpanId.NewSpanId();
             Assert.True(IsHex(newId1.AsHexString));
@@ -354,6 +402,37 @@ namespace System.Diagnostics.Tests
             SpanId newId2 = SpanId.NewSpanId();
             Assert.Equal(8, newId1.AsBytes.Length);
             Assert.NotEqual(newId1.AsHexString, newId2.AsHexString);
+
+            // Test equality
+            Assert.True(newId1 != newId2);
+            Assert.True(!(newId1 == newId2));
+            Assert.True(!(newId1.Equals(newId2)));
+            Assert.True(!(newId1.Equals((object)newId2)));
+            Assert.NotEqual(newId1.GetHashCode(), newId2.GetHashCode());
+
+            SpanId newId3 = new SpanId("0000000000000001".AsSpan());
+            Assert.True(newId3 != emptySpan);
+            Assert.True(!(newId3 == emptySpan));
+            Assert.True(!(newId3.Equals(emptySpan)));
+            Assert.True(!(newId3.Equals((object)emptySpan)));
+            Assert.NotEqual(newId3.GetHashCode(), emptySpan.GetHashCode());
+
+            // Use in Dictionary (this does assume we have no collisions in IDs over 100 tries (very good).  
+            var dict = new Dictionary<SpanId, string>();
+            for (int i = 0; i < 100; i++)
+            {
+                var newId8 = SpanId.NewSpanId();
+                dict[newId8] = newId8.AsHexString;
+            }
+            int ctr = 0;
+            foreach (string value in dict.Values)
+            {
+                string valueInDict;
+                Assert.True(dict.TryGetValue(new SpanId(value.AsSpan()), out valueInDict));
+                Assert.Equal(value, valueInDict);
+                ctr++;
+            }
+            Assert.Equal(100, ctr);     // We got out what we put in.  
 
             // AsBytes and Byte constructor.  
             SpanId newId2Clone = new SpanId(newId2.AsBytes);

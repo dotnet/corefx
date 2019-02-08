@@ -54,7 +54,7 @@ namespace System.Diagnostics
         W3C = (byte)2,
     }
 
-    public partial struct SpanId
+    public partial struct SpanId : IEquatable<SpanId>
     {
         private object _dummy;
         private int _dummyPrimitive;
@@ -62,10 +62,15 @@ namespace System.Diagnostics
         public SpanId(System.ReadOnlySpan<char> idData) { throw null; }
         public System.ReadOnlySpan<byte> AsBytes { get { throw null; } }
         public string AsHexString { get { throw null; } }
+        public bool Equals(System.Diagnostics.SpanId spanId) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
         public static System.Diagnostics.SpanId NewSpanId() { throw null; }
+        public static bool operator ==(in System.Diagnostics.SpanId spanId1, in System.Diagnostics.SpanId spandId2) { throw null; }
+        public static bool operator !=(in System.Diagnostics.SpanId spanId1, in System.Diagnostics.SpanId spandId2) { throw null; }
         public override string ToString() { throw null; }
     }
-    public partial struct TraceId
+    public partial struct TraceId : IEquatable<TraceId>
     {
         private object _dummy;
         private int _dummyPrimitive;
@@ -73,7 +78,12 @@ namespace System.Diagnostics
         public TraceId(System.ReadOnlySpan<char> idData) { throw null; }
         public System.ReadOnlySpan<byte> AsBytes { get { throw null; } }
         public string AsHexString { get { throw null; } }
+        public bool Equals(System.Diagnostics.TraceId traceId) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
         public static System.Diagnostics.TraceId NewTraceId() { throw null; }
+        public static bool operator ==(in System.Diagnostics.TraceId traceId1, in System.Diagnostics.TraceId traceId2) { throw null; }
+        public static bool operator !=(in System.Diagnostics.TraceId traceId1, in System.Diagnostics.TraceId traceId2) { throw null; }
         public override string ToString() { throw null; }
     }
 

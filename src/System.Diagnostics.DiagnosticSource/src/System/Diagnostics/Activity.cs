@@ -761,7 +761,7 @@ namespace System.Diagnostics
     /// it has to, and caches the string representation after it was created.   
     /// It is mostly useful as an exchange type.  
     /// </summary>
-    public unsafe struct TraceId
+    public unsafe struct TraceId : IEquatable<TraceId>
     {
         /// <summary>
         /// Creates a TraceId from a 16 byte span 'idBytes'.   The bytes are copied.  
@@ -842,6 +842,32 @@ namespace System.Diagnostics
         /// </summary>
         public override string ToString() => AsHexString;
 
+        #region equality operators
+        public static bool operator ==(in TraceId traceId1, in TraceId traceId2)
+        {
+            return traceId1._id1 == traceId2._id1 && traceId1._id2 == traceId2._id2;
+        }
+        public static bool operator !=(in TraceId traceId1, in TraceId traceId2)
+        {
+            return traceId1._id1 != traceId2._id1 || traceId1._id2 != traceId2._id2;
+        }
+        public bool Equals(TraceId traceId)
+        {
+            return _id1 == traceId._id1 && _id2 == traceId._id2;
+        }
+        public override bool Equals(object obj)
+        {
+            if (!(obj is TraceId))
+                return false;
+            TraceId traceId = (TraceId)obj;
+            return _id1 == traceId._id1 && _id2 == traceId._id2;
+        }
+        public override int GetHashCode()
+        {
+            return _id1.GetHashCode() + _id2.GetHashCode();
+        }
+        #endregion 
+
         #region private
         internal static void SetToRandomBytes(Span<byte> outBytes)
         {
@@ -915,7 +941,7 @@ namespace System.Diagnostics
     /// it has to, and caches the string representation after it was created.   
     /// It is mostly useful as an exchange type.  
     /// </summary>
-    public unsafe struct SpanId
+    public unsafe struct SpanId : IEquatable<SpanId>
     {
         /// <summary>
         /// Creates a new SpanId from a given set of bytes 'idData'   idData 
@@ -1001,6 +1027,32 @@ namespace System.Diagnostics
         /// Returns SpanId as a hex string. 
         /// </summary>
         public override string ToString() => AsHexString;
+
+        #region equality operators
+        public static bool operator ==(in SpanId spanId1, in SpanId spandId2)
+        {
+            return spanId1._id1 == spandId2._id1;
+        }
+        public static bool operator !=(in SpanId spanId1, in SpanId spandId2)
+        {
+            return spanId1._id1 != spandId2._id1;
+        }
+        public bool Equals(SpanId spanId)
+        {
+            return _id1 == spanId._id1;
+        }
+        public override bool Equals(object obj)
+        {
+            if (!(obj is SpanId))
+                return false;
+            SpanId spanId = (SpanId)obj;
+            return _id1 == spanId._id1;
+        }
+        public override int GetHashCode()
+        {
+            return _id1.GetHashCode();
+        }
+        #endregion
 
         #region private
         ulong _id1;
