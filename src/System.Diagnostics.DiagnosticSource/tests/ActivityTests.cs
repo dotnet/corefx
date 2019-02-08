@@ -278,7 +278,6 @@ namespace System.Diagnostics.Tests
             }
         }
 
-
         public static bool IdIsW3CFormat(string id)
         {
             if (id.Length != 55)
@@ -296,7 +295,6 @@ namespace System.Diagnostics.Tests
         {
             return Regex.IsMatch(s, "^[0-9A-Fa-f]*$");
         }
-
 
         /****** TraceId tests *****/
         [Fact]
@@ -316,9 +314,10 @@ namespace System.Diagnostics.Tests
             TraceId newId2 = TraceId.NewTraceId();
             Assert.NotEqual(newId1.AsHexString, newId2.AsHexString);
 
-            // AsBytes and Byte constructor.  
-            TraceId newId2Clone = new TraceId(newId2.AsBytes);
+                // AsBytes and Byte constructor.  
+                TraceId newId2Clone = new TraceId(newId2.AsBytes);
             Assert.Equal(newId2.AsHexString, newId2Clone.AsHexString);
+            Assert.Equal(newId2.AsBytes.ToArray(), newId2.AsBytes.ToArray());
 
             // String constructor and AsHexString.  
             string idStr = "0123456789ABCDEF0123456789ABCDEF";
@@ -343,7 +342,7 @@ namespace System.Diagnostics.Tests
             string zeros = "0000000000000000";
             SpanId emptySpan = new SpanId();
             Assert.Equal(zeros, emptySpan.AsHexString);
-            Assert.Equal(16, emptySpan.AsBytes.Length);
+            Assert.Equal(8, emptySpan.AsBytes.Length);
             Assert.Equal(new byte[8], emptySpan.AsBytes.ToArray());
 
             // NewSpanId
@@ -356,6 +355,7 @@ namespace System.Diagnostics.Tests
             // AsBytes and Byte constructor.  
             SpanId newId2Clone = new SpanId(newId2.AsBytes);
             Assert.Equal(newId2.AsHexString, newId2Clone.AsHexString);
+            Assert.Equal(newId2.AsBytes.ToArray(), newId2.AsBytes.ToArray());
 
             // String constructor and AsHexString.  
             string idStr = "0123456789ABCDEF";
@@ -377,27 +377,41 @@ namespace System.Diagnostics.Tests
         public void IdFormatTests()
         {
             Activity activity;
-            
+
+            // Default format is the default (Hierarchical)
             activity = new Activity("activity1");
             activity.Start();
             Assert.Equal(ActivityIdFormat.Hierarchical, activity.IdFormat);
-            Assert.True(IdIsW3CFormat(activity.Id));
             activity.Stop();
 
-
+            // Set the parent to something that is WC3 by string
             activity = new Activity("activity2");
             activity.SetParentId("00-0123456789ABCDEF0123456789ABCDEF-0123456789ABCDEF-01");
             activity.Start();
             Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.Equal("0123456789ABCDEF0123456789ABCDEF", activity.TraceId.AsHexString);
+            Assert.True(IdIsW3CFormat(activity.Id));
             activity.Stop();
 
+            // Set the parent to something that is WC3 byt using traceId,spanId version of SetParentId.  
             activity = new Activity("activity3");
-            activity.SetParentId(TraceId.NewTraceId(), SpanId.NewSpanId());
+            TraceId traceId = TraceId.NewTraceId();
+            activity.SetParentId(traceId, SpanId.NewSpanId());
             activity.Start();
             Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.Equal(traceId.AsHexString, activity.TraceId.AsHexString);
+            Assert.True(IdIsW3CFormat(activity.Id));
             activity.Stop();
 
-            Assert.Equal(default(DateTime), activity.StartTimeUtc);
+            // Change DefaultIdFormat to W3C, confirm I get the new format.  
+            Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+            activity = new Activity("activity1");
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.True(IdIsW3CFormat(activity.Id));
+            activity.Stop();
+            // Set it back to the default, just to put the state back. 
+            Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
         }
 
         /// <summary>

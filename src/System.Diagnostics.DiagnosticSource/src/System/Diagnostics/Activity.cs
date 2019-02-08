@@ -97,7 +97,7 @@ namespace System.Diagnostics
                     if (_parentSpanIdSet)
                         _parentId = "00-" + _traceId.AsHexString + "-" + _parentSpanId.AsHexString + "-00";
                     else if (Parent != null)
-                        _parentId = Parent.ParentId;
+                        _parentId = Parent.Id;
                 }
                 return _parentId;
             }
@@ -512,7 +512,12 @@ namespace System.Diagnostics
         /// </summary>
         public static ActivityIdFormat DefaultIdFormat
         {
-            get { return s_DefaultIdFormat; }
+            get
+            {
+                if (s_DefaultIdFormat == ActivityIdFormat.Unknown)
+                    s_DefaultIdFormat = ActivityIdFormat.Hierarchical;
+                return s_DefaultIdFormat;
+            }
             set
             {
                 if (!(ActivityIdFormat.Hierarchical <= value && value <= ActivityIdFormat.W3C))
@@ -879,10 +884,10 @@ namespace System.Diagnostics
                 return (byte)(c - '0');
 
             if ('A' <= c && c <= 'F')
-                return (byte)(c - ('A' + 10));
+                return (byte)(c - ('A' - 10));
 
             if ('a' <= c && c <= 'f')
-                return (byte)(c - ('a' + 10));
+                return (byte)(c - ('a' - 10));
 
             throw new ArgumentOutOfRangeException("idData");
         }
@@ -974,7 +979,7 @@ namespace System.Diagnostics
             get
             {
                 fixed (ulong* idPtr = &_id1)
-                    return new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2);
+                    return new ReadOnlySpan<byte>(idPtr, sizeof(ulong));
             }
         }
 
