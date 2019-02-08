@@ -6,9 +6,9 @@
     <SkipValidatePackage>true</SkipValidatePackage>
   </PropertyGroup>
   <ItemGroup Condition="'$(PackageTargetRuntime)' == 'linux-arm' or '$(PackageTargetRuntime)' == 'linux-arm64' or '$(PackageTargetRuntime)' == 'linux-x64' or '$(PackageTargetRuntime)' == 'osx-x64'">
-    <NativeFile Include="$(NativeBinDir)\System.IO.Ports.Native$(LibraryFileExtension)" >
+    <File Include="$(NativeBinDir)\System.IO.Ports.Native$(LibraryFileExtension)" >
       <TargetPath>runtimes/$(PackageRID)/native</TargetPath>
-    </NativeFile>
+    </File>
   </ItemGroup>
   <ItemGroup Condition="'$(PackageTargetRuntime)' == ''">
     <_buildRIDWithMetadata Include="@(BuildRID)">
