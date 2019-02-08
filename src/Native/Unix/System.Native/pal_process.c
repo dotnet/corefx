@@ -157,8 +157,8 @@ static int SetGroups(uint32_t* userGroups, int32_t userGroupsLength, uint32_t* p
     int rv = setgroups(platformGroupsLength, userGroups);
 
     // We fall back to using the current process' groups, if they are a subset of the user groups.
-    // We do this when the current user doesn't have permission to call setgroups.
-    // And when the number is more than NGROUPS_MAX, which is low on some platforms (e.g. 16 on OSX).
+    // We do this to support a user setting UserName to himself but not having setgroups permissions.
+    // And for dealing with platforms with low NGROUP_MAX (e.g. 16 on OSX).
     if (rv == -1 && ((errno == EPERM) ||
                      (errno == EINVAL && userGroupsLength > NGROUPS_MAX)))
     {
@@ -172,7 +172,6 @@ static int SetGroups(uint32_t* userGroups, int32_t userGroupsLength, uint32_t* p
             }
             else
             {
-                errno = 0;
                 rv = 0;
                 for (int i = 0; i < processGroupsLength; i++)
                 {
@@ -183,13 +182,19 @@ static int SetGroups(uint32_t* userGroups, int32_t userGroupsLength, uint32_t* p
                     }
                     if (!isUserGroup)
                     {
-                        errno = EPERM;
                         rv = -1;
                         break;
                     }
                 }
             }
         }
+    }
+
+    // Truncate on platforms with a low NGROUPS_MAX.
+    if (rv == -1 && (errno == EINVAL && userGroupsLength > NGROUPS_MAX))
+    {
+        platformGroupsLength = NGROUPS_MAX;
+        rv = setgroups(platformGroupsLength, userGroups);
     }
 
     return rv;
