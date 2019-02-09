@@ -8,16 +8,16 @@ using Xunit;
 
 namespace System.IO.Pipelines.Tests
 {
-    public class PipeWriterCopyFromAsyncTests
+    public class PipeWriterCopyToAsyncTests
     {
         [Fact]
-        public async Task CopyFromAsyncWorks()
+        public async Task CopyToAsyncWorks()
         {
             var helloBytes = Encoding.UTF8.GetBytes("Hello World");
 
             var pipe = new Pipe();
             var stream = new MemoryStream(helloBytes);
-            await pipe.Writer.CopyFromAsync(stream);
+            await stream.CopyToAsync(pipe.Writer);
 
             ReadResult result = await pipe.Reader.ReadAsync();
 
@@ -29,16 +29,16 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task CopyFromAsyncCalledMultipleTimesWorks()
+        public async Task CopyToAsyncCalledMultipleTimesWorks()
         {
             var hello = "Hello World";
             var helloBytes = Encoding.UTF8.GetBytes(hello);
             var expected = Encoding.UTF8.GetBytes(hello + hello + hello);
 
             var pipe = new Pipe();
-            await pipe.Writer.CopyFromAsync(new MemoryStream(helloBytes));
-            await pipe.Writer.CopyFromAsync(new MemoryStream(helloBytes));
-            await pipe.Writer.CopyFromAsync(new MemoryStream(helloBytes));
+            await new MemoryStream(helloBytes).CopyToAsync(pipe.Writer);
+            await new MemoryStream(helloBytes).CopyToAsync(pipe.Writer);
+            await new MemoryStream(helloBytes).CopyToAsync(pipe.Writer);
             pipe.Writer.Complete();
 
             ReadResult result = await pipe.Reader.ReadAsync();
@@ -73,7 +73,7 @@ namespace System.IO.Pipelines.Tests
 
             var pipe = new Pipe(new PipeOptions(pauseWriterThreshold: helloBytes.Length - 1, resumeWriterThreshold: 0));
             var stream = new MemoryStream(helloBytes);
-            Task task = pipe.Writer.CopyFromAsync(stream);
+            Task task = stream.CopyToAsync(pipe.Writer);
 
             Assert.False(task.IsCompleted);
 
@@ -93,7 +93,7 @@ namespace System.IO.Pipelines.Tests
             var pipe = new Pipe(new PipeOptions(pauseWriterThreshold: helloBytes.Length - 1, resumeWriterThreshold: 0));
             var stream = new MemoryStream(helloBytes);
             var cts = new CancellationTokenSource();
-            Task task = pipe.Writer.CopyFromAsync(stream, cts.Token);
+            Task task = stream.CopyToAsync(pipe.Writer, cts.Token);
 
             Assert.False(task.IsCompleted);
 
@@ -111,7 +111,7 @@ namespace System.IO.Pipelines.Tests
             var pipe = new Pipe();
             var stream = new CancelledReadsStream();
             var cts = new CancellationTokenSource();
-            Task task = pipe.Writer.CopyFromAsync(stream, cts.Token);
+            Task task = stream.CopyToAsync(pipe.Writer, cts.Token);
 
             Assert.False(task.IsCompleted);
 
@@ -120,7 +120,6 @@ namespace System.IO.Pipelines.Tests
             stream.WaitForReadTask.TrySetResult(null);
 
             await Assert.ThrowsAsync<OperationCanceledException>(() => task);
-
 
             pipe.Writer.Complete();
             pipe.Reader.Complete();

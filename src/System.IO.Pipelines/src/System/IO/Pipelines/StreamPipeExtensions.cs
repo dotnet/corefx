@@ -14,7 +14,7 @@ namespace System.IO.Pipelines
         /// <returns>A task that represents the asynchronous copy operation.</returns>
         public static Task CopyToAsync(this Stream source, PipeWriter destination, CancellationToken cancellationToken = default)
         {
-            return destination.CopyFromAsync(source);
+            return destination.CopyFromAsync(source, cancellationToken);
         }
     }
 }

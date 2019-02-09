@@ -22,7 +22,7 @@
     <Compile Include="PipePoolTests.cs" />
     <Compile Include="PipeResetTests.cs" />
     <Compile Include="PipeTest.cs" />
-    <Compile Include="PipeWriterCopyFromAsyncTests.cs" />
+    <Compile Include="PipeWriterCopyToAsyncTests.cs" />
     <Compile Include="PipeWriterTests.cs" />
     <Compile Include="ReadAsyncCancellationTests.cs" />
     <Compile Include="ReadAsyncCompletionTests.cs" />
