@@ -41,7 +41,7 @@ namespace System.Linq
         private static IEnumerable<TSource> ExceptConsumer<TSource>(IEnumerable<TSource> first, IEnumerable<TSource> second, IEqualityComparer<TSource> comparer)
         {
             ChainLinq.Link<TSource, TSource> exceptLink =
-                comparer == null
+                (comparer == null || ReferenceEquals(comparer, EqualityComparer<TSource>.Default))
                     ? (ChainLinq.Link<TSource, TSource>) new ChainLinq.Links.ExceptDefaultComparer<TSource>(second)
                     : (ChainLinq.Link<TSource, TSource>) new ChainLinq.Links.Except<TSource>(comparer, second);
 

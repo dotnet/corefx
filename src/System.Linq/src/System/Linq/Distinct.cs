@@ -18,7 +18,7 @@ namespace System.Linq
             }
 
             var distinctLink =
-                comparer == null
+                (comparer == null || ReferenceEquals(comparer, EqualityComparer<TSource>.Default))
                     ? ChainLinq.Links.DistinctDefaultComparer<TSource>.Instance
                     : new ChainLinq.Links.Distinct<TSource>(comparer);
 

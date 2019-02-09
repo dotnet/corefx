@@ -15,33 +15,11 @@ namespace System.Linq.ChainLinq.Links
 
         sealed class Activity : Activity<T, T>
         {
-            class PopulateSet : Consumer<T>
-            {
-                private Set<T> _set;
-
-                public PopulateSet(Set<T> set) => _set = set;
-
-                public override ChainStatus ProcessNext(T input)
-                {
-                    _set.Add(input);
-                    return ChainStatus.Flow;
-                }
-            }
-
             private Set<T> _seen;
 
             public Activity(IEqualityComparer<T> comparer, IEnumerable<T> second, Chain<T> next) : base(next)
             {
-                _seen = new Set<T>(comparer);
-                if (second is Consumable<T> c)
-                {
-                    c.Consume(new PopulateSet(_seen));
-                }
-                else
-                {
-                    foreach (var element in second)
-                        _seen.Add(element);
-                }
+                _seen = Utils.Consume(second, new Consumer.CreateSet<T>(comparer));
             }
 
             public override ChainStatus ProcessNext(T input) =>
@@ -61,33 +39,11 @@ namespace System.Linq.ChainLinq.Links
 
         sealed class Activity : Activity<T, T>
         {
-            class PopulateSet : Consumer<T>
-            {
-                private SetDefaultComparer<T> _set;
-
-                public PopulateSet(SetDefaultComparer<T> set) => _set = set;
-
-                public override ChainStatus ProcessNext(T input)
-                {
-                    _set.Add(input);
-                    return ChainStatus.Flow;
-                }
-            }
-
             private SetDefaultComparer<T> _seen;
 
             public Activity(IEnumerable<T> second, Chain<T> next) : base(next)
             {
-                _seen = new SetDefaultComparer<T>();
-                if (second is Consumable<T> c)
-                {
-                    c.Consume(new PopulateSet(_seen));
-                }
-                else
-                {
-                    foreach (var element in second)
-                        _seen.Add(element);
-                }
+                _seen = Utils.Consume(second, new Consumer.CreateSetDefaultComparer());
             }
 
             public override ChainStatus ProcessNext(T input) =>
