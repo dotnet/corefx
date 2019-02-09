@@ -9,6 +9,7 @@ using System.IO;
 using System.Net.Http.Headers;
 using System.Net.Http.HPack;
 using System.Net.Security;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -699,6 +700,32 @@ namespace System.Net.Http
             _headerBuffer.Commit(bytesWritten);
         }
 
+        private void WriteHeader(string name, string[] value, string separator)
+        {
+            // TODO: ISSUE 31307: Use static table for known headers
+
+            int bytesWritten;
+            while (!HPackEncoder.EncodeHeader(name, value, separator, _headerBuffer.AvailableSpan, out bytesWritten))
+            {
+                _headerBuffer.EnsureAvailableSpace(_headerBuffer.AvailableSpan.Length + 1);
+            }
+
+            _headerBuffer.Commit(bytesWritten);
+        }
+
+        private void WriteHeader(HeaderDescriptor header, string[] value, string separator)
+        {
+            // TODO: ISSUE 31307: Use static table for known headers
+
+            int bytesWritten;
+            while (!HPackEncoder.EncodeHeader(header.Name, value, separator, _headerBuffer.AvailableSpan, out bytesWritten))
+            {
+                _headerBuffer.EnsureAvailableSpace(_headerBuffer.AvailableSpan.Length + 1);
+            }
+
+            _headerBuffer.Commit(bytesWritten);
+        }
+
         private void WriteHeaderCollection(HttpHeaders headers)
         {
             foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValues())
@@ -717,10 +744,21 @@ namespace System.Net.Http
                 }
 
                 Debug.Assert(header.Value.Length > 0, "No values for header??");
-                for (int i = 0; i < header.Value.Length; i++)
+
+                string separator = null;
+                if (header.Value.Length > 1)
                 {
-                    WriteHeader(header.Key.Name, header.Value[i]);
+                    HttpHeaderParser parser = header.Key.Parser;
+                    if (parser != null && parser.SupportsMultipleValues)
+                    {
+                        separator = parser.Separator;
+                    }
+                    else
+                    {
+                        separator = HttpHeaderParser.DefaultSeparator;
+                    }
                 }
+                WriteHeader(header.Key, header.Value, separator);
             }
         }
 
