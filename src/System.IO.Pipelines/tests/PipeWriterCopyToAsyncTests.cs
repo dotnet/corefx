@@ -67,7 +67,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task CancellingViaCancelPendingFlushThrows()
+        public async Task CancelingViaCancelPendingFlushThrows()
         {
             var helloBytes = Encoding.UTF8.GetBytes("Hello World");
 
@@ -86,7 +86,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task CancellingViaCancellationTokenThrows()
+        public async Task CancelingViaCancellationTokenThrows()
         {
             var helloBytes = Encoding.UTF8.GetBytes("Hello World");
 
@@ -106,7 +106,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task CancellingStreamViaCancellationTokenThrows()
+        public async Task CancelingStreamViaCancellationTokenThrows()
         {
             var pipe = new Pipe();
             var stream = new CancelledReadsStream();

@@ -48,7 +48,18 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task CancellingThePendingReadThrowsOperationCancelledException()
+        public async Task EmptyBufferWrittenToStream()
+        {
+            var pipe = new Pipe(s_testOptions);
+            pipe.Writer.Complete();
+
+            var stream = new ThrowingStream();
+            await pipe.Reader.CopyToAsync(stream);
+            pipe.Reader.Complete();
+        }
+
+        [Fact]
+        public async Task CancelingThePendingReadThrowsOperationCancelledException()
         {
             var pipe = new Pipe(s_testOptions);
             var stream = new MemoryStream();
@@ -60,7 +71,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task CancellingViaCancellationTokenThrowsOperationCancelledException()
+        public async Task CancelingViaCancellationTokenThrowsOperationCancelledException()
         {
             var pipe = new Pipe(s_testOptions);
             var stream = new MemoryStream();
@@ -73,7 +84,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task CancellingStreamViaCancellationTokenThrowsOperationCancelledException()
+        public async Task CancelingStreamViaCancellationTokenThrowsOperationCancelledException()
         {
             var pipe = new Pipe(s_testOptions);
             var stream = new CancelledWritesStream();
@@ -109,7 +120,7 @@ namespace System.IO.Pipelines.Tests
             await pipe.Writer.FlushAsync();
             pipe.Writer.Complete();
 
-            var result = await pipe.Reader.ReadAsync();
+            ReadResult result = await pipe.Reader.ReadAsync();
             Assert.True(result.IsCompleted);
             Assert.Equal(20, result.Buffer.Length);
             pipe.Reader.Complete();

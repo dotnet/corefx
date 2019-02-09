@@ -60,7 +60,7 @@ namespace System.IO.Pipelines
         /// <returns>A task that represents the asynchronous copy operation.</returns>
         protected internal virtual async Task CopyFromAsync(Stream source, CancellationToken cancellationToken = default)
         {
-            while (!cancellationToken.IsCancellationRequested)
+            while (true)
             {
                 Memory<byte> buffer = GetMemory();
                 int read = await source.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
@@ -82,11 +82,6 @@ namespace System.IO.Pipelines
                 if (result.IsCompleted)
                 {
                     break;
-                }
-
-                if (cancellationToken.CanBeCanceled)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
                 }
             }
         }
