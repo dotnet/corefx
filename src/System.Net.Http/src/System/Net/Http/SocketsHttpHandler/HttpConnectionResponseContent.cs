@@ -12,25 +12,26 @@ namespace System.Net.Http
     internal sealed class HttpConnectionResponseContent : HttpContent
     {
         private Stream _stream;
+        private bool _consumedStream; // separate from _stream so that Dispose can drain _stream
 
         public void SetStream(Stream stream)
         {
             Debug.Assert(stream != null);
             Debug.Assert(stream.CanRead);
+            Debug.Assert(!_consumedStream);
 
             _stream = stream;
         }
 
         private Stream ConsumeStream()
         {
-            Stream stream = _stream;
-            if (stream == null)
+            if (_consumedStream || _stream == null)
             {
                 throw new InvalidOperationException(SR.net_http_content_stream_already_read);
             }
+            _consumedStream = true;
 
-            _stream = null;
-            return stream;
+            return _stream;
         }
 
         protected sealed override Task SerializeToStreamAsync(Stream stream, TransportContext context) =>

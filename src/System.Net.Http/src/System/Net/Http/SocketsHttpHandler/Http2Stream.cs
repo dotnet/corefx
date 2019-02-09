@@ -349,15 +349,15 @@ namespace System.Net.Http
 
                 protected override void Dispose(bool disposing)
                 {
-                    Http2Stream stream = Interlocked.Exchange(ref _http2Stream, null);
-                    if (stream == null)
+                    Http2Stream http2Stream = Interlocked.Exchange(ref _http2Stream, null);
+                    if (http2Stream == null)
                     {
                         return;
                     }
 
                     if (disposing)
                     {
-                        stream.Dispose();
+                        http2Stream.Dispose();
                     }
 
                     base.Dispose(disposing);
@@ -368,7 +368,13 @@ namespace System.Net.Http
 
                 public override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
                 {
-                    return _http2Stream?.ReadDataAsync(destination, cancellationToken) ?? new ValueTask<int>(0);
+                    Http2Stream http2Stream = _http2Stream;
+                    if (http2Stream == null)
+                    {
+                        return new ValueTask<int>(Task.FromException<int>(new ObjectDisposedException(nameof(Http2ReadStream))));
+                    }
+
+                    return http2Stream.ReadDataAsync(destination, cancellationToken);
                 }
 
                 public override ValueTask WriteAsync(ReadOnlyMemory<byte> destination, CancellationToken cancellationToken) => throw new NotSupportedException();
@@ -389,14 +395,14 @@ namespace System.Net.Http
 
                 protected override void Dispose(bool disposing)
                 {
-                    Http2Stream stream = Interlocked.Exchange(ref _http2Stream, null);
-                    if (stream == null)
+                    Http2Stream http2Stream = Interlocked.Exchange(ref _http2Stream, null);
+                    if (http2Stream == null)
                     {
                         return;
                     }
 
                     // Don't wait for completion, which could happen asynchronously.
-                    ValueTask ignored = stream._connection.SendEndStreamAsync(stream.StreamId);
+                    ValueTask ignored = http2Stream._connection.SendEndStreamAsync(http2Stream.StreamId);
 
                     base.Dispose(disposing);
                 }
@@ -408,7 +414,13 @@ namespace System.Net.Http
 
                 public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
                 {
-                    return _http2Stream?.SendDataAsync(buffer) ?? default(ValueTask);
+                    Http2Stream http2Stream = _http2Stream;
+                    if (http2Stream == null)
+                    {
+                        return new ValueTask(Task.FromException(new ObjectDisposedException(nameof(Http2WriteStream))));
+                    }
+
+                    return http2Stream.SendDataAsync(buffer);
                 }
 
                 public override Task FlushAsync(CancellationToken cancellationToken) => Task.CompletedTask;
