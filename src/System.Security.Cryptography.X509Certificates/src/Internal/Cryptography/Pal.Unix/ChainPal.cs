@@ -5,9 +5,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Win32.SafeHandles;
 
 namespace Internal.Cryptography.Pal
 {
@@ -54,83 +54,72 @@ namespace Internal.Cryptography.Pal
             {
             }
 
+            SafeX509Handle certHandle = ((OpenSslX509CertificateReader)cert).SafeHandle;
+            bool addedRef = false;
+
+            try
+            {
+                certHandle.DangerousAddRef(ref addedRef);
+            }
+            finally
+            {
+                if (addedRef)
+                {
+                    certHandle.DangerousRelease();
+                }
+            }
+
             TimeSpan remainingDownloadTime = timeout;
 
-            using (var leaf = new X509Certificate2(cert.Handle))
+            OpenSslX509ChainProcessor chainPal = OpenSslX509ChainProcessor.InitiateChain(
+                ((OpenSslX509CertificateReader)cert).SafeHandle,
+                verificationTime);
+
+            Interop.Crypto.X509VerifyStatusCode status = chainPal.FindFirstChain(extraStore);
+
+            if (!OpenSslX509ChainProcessor.IsCompleteChain(status))
             {
-                GC.KeepAlive(cert); // ensure cert's safe handle isn't finalized while raw handle is in use
+                List<X509Certificate2> tmp = null;
+                status = chainPal.FindChainViaAia(ref remainingDownloadTime, ref tmp);
 
-                var downloaded = new HashSet<X509Certificate2>();
-                var systemTrusted = new HashSet<X509Certificate2>();
-
-                HashSet<X509Certificate2> candidates = OpenSslX509ChainProcessor.FindCandidates(
-                    leaf,
-                    extraStore,
-                    downloaded,
-                    systemTrusted,
-                    ref remainingDownloadTime);
-
-                IChainPal chain = OpenSslX509ChainProcessor.BuildChain(
-                    leaf,
-                    candidates,
-                    systemTrusted,
-                    applicationPolicy,
-                    certificatePolicy,
-                    revocationMode,
-                    revocationFlag,
-                    verificationTime,
-                    ref remainingDownloadTime);
-
-#if DEBUG
-                if (chain.ChainElements.Length > 0)
+                if (tmp != null)
                 {
-                    X509Certificate2 reportedLeaf = chain.ChainElements[0].Certificate;
-                    Debug.Assert(reportedLeaf != null, "reportedLeaf != null");
-                    Debug.Assert(reportedLeaf.Equals(leaf), "reportedLeaf.Equals(leaf)");
-                    Debug.Assert(!ReferenceEquals(reportedLeaf, leaf), "!ReferenceEquals(reportedLeaf, leaf)");
-                }
-#endif
+                    X509Store userIntermediate =
+                        status == Interop.Crypto.X509VerifyStatusCode.X509_V_OK
+                            ? new X509Store(StoreName.CertificateAuthority, StoreLocation.CurrentUser,
+                                OpenFlags.ReadWrite)
+                            : null;
 
-                if (chain.ChainStatus.Length == 0 && downloaded.Count > 0)
-                {
-                    SaveIntermediateCertificates(chain.ChainElements, downloaded);
-                }
-
-                // Everything we put into the chain has been cloned, dispose all the originals.
-                systemTrusted.DisposeAll();
-                downloaded.DisposeAll();
-
-                if (extraStore == null || extraStore.Count == 0)
-                {
-                    // There were no extraStore certs, so everything can be disposed.
-                    foreach (X509Certificate2 candidate in candidates)
+                    using (userIntermediate)
                     {
-                        candidate.Dispose();
-                    }
-                }
-                else
-                {
-                    // Candidate certs which came from extraStore should NOT be disposed, since they came
-                    // from outside.
-                    var extraStoreByReference = new HashSet<X509Certificate2>(
-                        ReferenceEqualityComparer<X509Certificate2>.Instance);
-
-                    foreach (X509Certificate2 extraCert in extraStore)
-                    {
-                        extraStoreByReference.Add(extraCert);
-                    }
-
-                    foreach (X509Certificate2 candidate in candidates)
-                    {
-                        if (!extraStoreByReference.Contains(candidate))
+                        foreach (X509Certificate2 downloaded in tmp)
                         {
-                            candidate.Dispose();
+                            userIntermediate?.Add(downloaded);
+                            downloaded.Dispose();
                         }
                     }
                 }
-
-                return chain;
             }
+
+            if (revocationMode == X509RevocationMode.Online &&
+                status != Interop.Crypto.X509VerifyStatusCode.X509_V_OK)
+            {
+                revocationMode = X509RevocationMode.Offline;
+            }
+
+            chainPal.CommitToChain();
+            chainPal.ProcessRevocation(revocationMode, revocationFlag, ref remainingDownloadTime);
+            chainPal.Finish(applicationPolicy, certificatePolicy);
+
+#if DEBUG
+            if (chainPal.ChainElements.Length > 0)
+            {
+                X509Certificate2 reportedLeaf = chainPal.ChainElements[0].Certificate;
+                Debug.Assert(reportedLeaf != null, "reportedLeaf != null");
+                Debug.Assert(!ReferenceEquals(cert, reportedLeaf.Pal), "!ReferenceEquals(cert, reportedLeaf.Pal)");
+            }
+#endif
+            return chainPal;
         }
 
         private static void SaveIntermediateCertificates(

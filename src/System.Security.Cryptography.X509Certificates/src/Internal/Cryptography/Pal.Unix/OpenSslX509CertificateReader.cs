@@ -442,6 +442,32 @@ namespace Internal.Cryptography.Pal
             }
         }
 
+        internal static ArraySegment<byte> FindFirstExtension(SafeX509Handle cert, string oidValue)
+        {
+            int extensionCount = Interop.Crypto.X509GetExtCount(cert);
+
+            for (int i = 0; i < extensionCount; i++)
+            {
+                IntPtr ext = Interop.Crypto.X509GetExt(cert, i);
+                Interop.Crypto.CheckValidOpenSslHandle(ext);
+
+                IntPtr oidPtr = Interop.Crypto.X509ExtensionGetOid(ext);
+                Interop.Crypto.CheckValidOpenSslHandle(oidPtr);
+
+                string extOidValue = Interop.Crypto.GetOidValue(oidPtr);
+
+                if (oidValue == extOidValue)
+                {
+                    IntPtr dataPtr = Interop.Crypto.X509ExtensionGetData(ext);
+                    Interop.Crypto.CheckValidOpenSslHandle(dataPtr);
+
+                    return Interop.Crypto.RentAsn1StringBytes(dataPtr);
+                }
+            }
+
+            return default;
+        }
+
         internal void SetPrivateKey(SafeEvpPKeyHandle privateKey)
         {
             _privateKey = privateKey;
