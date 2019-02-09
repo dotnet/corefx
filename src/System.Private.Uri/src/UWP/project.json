@@ -8,13 +8,11 @@
         "dotnet5.1"
       ]
     },
-    "netstandard1.3": {
-      "imports": [
-        "netcore50"
-      ],
+    "netcore50": {
       "dependencies": {
         "Microsoft.TargetingPack.Private.NETNative": "1.0.0-rc3-24211-00"
       }
     }
   }
 }
+

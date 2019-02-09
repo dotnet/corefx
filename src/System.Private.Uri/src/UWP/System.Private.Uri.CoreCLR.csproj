@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
+  </PropertyGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+  <PropertyGroup>
+    <ProjectGuid>{4AC5343E-6E31-4BA5-A795-0493AE7E9008}</ProjectGuid>
+    <AssemblyName>System.Private.Uri</AssemblyName>
+    <AssemblyVersion>4.0.1.1</AssemblyVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);INTERNAL_GLOBALIZATION_EXTENSIONS</DefineConstants>
+    <!-- Suppress warnings for type conflicts between SafeFileHandle in partial facade and mscorlib -->
+    <NoWarn>0436</NoWarn>
+    <PackageTargetFramework Condition="'$(PackageTargetFramework)'==''">netstandard1.0</PackageTargetFramework>
+    <SkipCommonResourcesIncludes Condition="'$(TargetGroup)'=='netcore50aot' Or '$(TargetGroup)'=='netstandard13aot'">true</SkipCommonResourcesIncludes>
+    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.0</NuGetTargetMoniker>
+    <UWPCommonPath>$(MSBuildThisFileDirectory)Common</UWPCommonPath>
+  </PropertyGroup>
+
+  <!-- Default configurations to help VS understand the configurations -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'FreeBSD_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Linux_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'OSX_Release|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU' " />
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU' " />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netcore50aot_Debug|AnyCPU'"/>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netcore50aot_Release|AnyCPU'"/>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netstandard13aot_Debug|AnyCPU'"/>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_netstandard13aot_Release|AnyCPU'"/>
+
+  <ItemGroup>
+    <Compile Include="$(UWPCommonPath)\System\Diagnostics\Debug.cs" Condition="'$(TargetGroup)'!='netcore50aot' And '$(TargetGroup)'!='netstandard13aot'">
+      <Link>Common\System\Diagnostics\Debug.cs</Link>
+    </Compile>
+    <Compile Include="$(UWPCommonPath)\System\Collections\Generic\LowLevelDictionary.cs">
+      <Link>Common\System\Collections\Generic\LowLevelDictionary.cs</Link>
+    </Compile>
+    <Compile Include="$(UWPCommonPath)\System\Collections\Generic\LowLevelList.cs">
+      <Link>Common\System\Collections\Generic\LowLevelList.cs</Link>
+    </Compile>
+    <Compile Include="$(UWPCommonPath)\System\StringNormalizationExtensions.cs">
+      <Link>Common\System\StringNormalizationExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(UWPCommonPath)\System\Globalization\IdnMapping.cs">
+      <Link>Common\System\Globalization\IdnMapping.cs</Link>
+    </Compile>
+    <Compile Include="$(UWPCommonPath)\System\Text\NormalizationForm.cs">
+      <Link>Common\System\Text\NormalizationForm.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\DomainNameHelper.cs" />
+    <Compile Include="System\IPv4AddressHelper.cs" />
+    <Compile Include="System\IPv6AddressHelper.cs" />
+    <Compile Include="System\IriHelper.cs" />
+    <Compile Include="System\UncNameHelper.cs" />
+    <Compile Include="System\Uri.cs" />
+    <Compile Include="System\UriBuilder.cs" />
+    <Compile Include="System\UriEnumTypes.cs" />
+    <Compile Include="System\UriExt.cs" />
+    <Compile Include="System\UriFormatException.cs" />
+    <Compile Include="System\UriHelper.cs" />
+    <Compile Include="System\UriHostNameType.cs" />
+    <Compile Include="System\UriPartial.cs" />
+    <Compile Include="System\UriScheme.cs" />
+    <Compile Include="System\UriSyntax.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="$(UWPCommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(UWPCommonPath)\Interop\Windows\mincore\Interop.OutputDebugString.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.OutputDebugString.cs</Link>
+    </Compile>
+    <Compile Include="$(UWPCommonPath)\System\StringNormalizationExtensions.Windows.cs">
+      <Link>Common\System\StringNormalizationExtensions.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(UWPCommonPath)\System\Globalization\IdnMapping.Windows.cs">
+      <Link>Common\System\Globalization\IdnMapping.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(UWPCommonPath)\System\Diagnostics\Debug.Windows.cs" Condition="'$(TargetGroup)'!='netcore50aot' And '$(TargetGroup)'!='netstandard13aot'">
+      <Link>Common\System\Diagnostics\Debug.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(UWPCommonPath)\Interop\Windows\mincore\Interop.GetLastError.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.GetLastError.cs</Link>
+    </Compile>
+    <Compile Include="$(UWPCommonPath)\Interop\Windows\mincore\Interop.SetLastError.cs">
+      <Link>Common\Interop\Windows\mincore\Interop.SetLastError.cs</Link>
+    </Compile>
+    <Compile Include="$(UWPCommonPath)\Interop\Interop.Globalization.Extensions.manual.cs">
+      <Link>Common\Interop\Interop.Globalization.Extensions.manual.cs</Link>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetGroup)'=='netcore50aot' Or '$(TargetGroup)'=='netstandard13aot'">
+    <TargetingPackReference Include="System.Private.CoreLib" />
+    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+    <Compile Include="$(CommonPath)\System\SR.Core.cs" Condition="'$(TargetGroup)'=='netcore50aot'">
+      <Link>Common\System\SR.Core.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\SR.CoreRT.cs" Condition="'$(TargetGroup)'=='netstandard13aot'">
+      <Link>Common\System\SR.CoreRT.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Resources\NeutralResourcesLanguageAttribute.cs">
+      <Link>Common\System\Resources\NeutralResourcesLanguageAttribute.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Runtime\InteropServices\Marshal.Win32.cs"  Condition="'$(TargetsWindows)'=='true'">
+      <Link>Common\System\Runtime\InteropServices\Marshal.Win32.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Runtime\InteropServices\Marshal.Unix.cs"  Condition="'$(TargetsUnix)'=='true'">
+      <Link>Common\System\Runtime\InteropServices\Marshal.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\OperationCanceledException.cs"  Condition="'$(TargetsUnix)'=='true'">
+      <Link>Common\System\System\OperationCanceledException.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+</Project>

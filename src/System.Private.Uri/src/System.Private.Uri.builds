@@ -8,16 +8,12 @@
     <Project Include="System.Private.Uri.csproj">
       <OSGroup>Windows_NT</OSGroup>
     </Project>
-    <Project Include="System.Private.Uri.csproj">
+    <Project Include="UWP\System.Private.Uri.CoreCLR.csproj">
       <OSGroup>Windows_NT</OSGroup>
       <TargetGroup>netcore50aot</TargetGroup>
     </Project>
-    <Project Include="System.Private.Uri.csproj">
+    <Project Include="UWP\System.Private.Uri.CoreCLR.csproj">
       <OSGroup>Windows_NT</OSGroup>
-      <TargetGroup>netstandard13aot</TargetGroup>
-    </Project>
-    <Project Include="System.Private.Uri.csproj">
-      <OSGroup>Unix</OSGroup>
       <TargetGroup>netstandard13aot</TargetGroup>
     </Project>
   </ItemGroup>
