@@ -81,8 +81,13 @@
     <_RuntimeInputs Include="$(TestHostRootPath)**/*.dll" />
   </ItemGroup>
 
+  <!-- Define which workloads require global tools. -->
+  <PropertyGroup>
+    <UseGlobalTools Condition="'$(UseGlobalTools)' == '' AND '$(Coverage)' == 'true'">true</UseGlobalTools>
+  </PropertyGroup>
+
   <!-- Add global tools to runtime -->
-  <ItemGroup Condition="'$(UseGlobalTools)' == 'true' AND '$(TargetsNetCoreApp)' == 'true'">  
+  <ItemGroup Condition="'$(UseGlobalTools)' == 'true'">
     <TestArchiveRuntimeDependency Include="$(DotNetRoot)shared\Microsoft.NETCore.App\**\*.*" DestinationDir="shared\Microsoft.NETCore.App" />
     <TestArchiveRuntimeDependency Include="$(DotNetRoot)host\**\*.*" DestinationDir="host" />
     <TestArchiveRuntimeDependency Include="$(GlobalToolsDir)**\*.*" DestinationDir="tools" />
