@@ -43,7 +43,7 @@ namespace System.Linq.ChainLinq.Links
 
             public Activity(IEnumerable<T> second, Chain<T> next) : base(next)
             {
-                _seen = Utils.Consume(second, new Consumer.CreateSetDefaultComparer());
+                _seen = Utils.Consume(second, new Consumer.CreateSetDefaultComparer<T>());
             }
 
             public override ChainStatus ProcessNext(T input) =>
