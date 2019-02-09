@@ -48,7 +48,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task EmptyBufferWrittenToStream()
+        public async Task EmptyBufferNotWrittenToStream()
         {
             var pipe = new Pipe(s_testOptions);
             pipe.Writer.Complete();
