@@ -871,7 +871,7 @@ namespace System.Diagnostics
         #region private
 
         /// <summary>
-        /// Sets the bytes in 'outBytes' to be random values.   outBytes.Length must be <= 16.  
+        /// Sets the bytes in 'outBytes' to be random values.   outBytes.Length must be less than or equal to 16
         /// </summary>
         /// <param name="outBytes"></param>
         internal static void SetToRandomBytes(Span<byte> outBytes)
