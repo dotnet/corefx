@@ -95,17 +95,18 @@ namespace System.IO.Pipelines
                 {
                     ReadResult result = await ReadAsync(cancellationToken).ConfigureAwait(false);
                     ReadOnlySequence<byte> buffer = result.Buffer;
-
-                    consumed = buffer.Start;
+                    SequencePosition position = buffer.Start;
 
                     if (result.IsCanceled)
                     {
                         throw new OperationCanceledException();
                     }
 
-                    while (buffer.TryGet(ref consumed, out ReadOnlyMemory<byte> memory))
+                    while (buffer.TryGet(ref position, out ReadOnlyMemory<byte> memory))
                     {
                         await destination.WriteAsync(memory, cancellationToken).ConfigureAwait(false);
+
+                        consumed = position;
                     }
 
                     if (result.IsCompleted)

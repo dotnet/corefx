@@ -48,6 +48,27 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
+        public async Task MultiSegmentWritesUntilFailure()
+        {
+            using (var pool = new TestMemoryPool())
+            {
+                var pipe = new Pipe(new PipeOptions(pool: pool, readerScheduler: PipeScheduler.Inline));
+                pipe.Writer.WriteEmpty(4096);
+                pipe.Writer.WriteEmpty(4096);
+                pipe.Writer.WriteEmpty(4096);
+                await pipe.Writer.FlushAsync();
+                pipe.Writer.Complete();
+
+                var stream = new ThrowAfterNWritesStream(2);
+                await Assert.ThrowsAsync<InvalidOperationException>(() => pipe.Reader.CopyToAsync(stream));
+
+                ReadResult result = await pipe.Reader.ReadAsync();
+                Assert.Equal(4096, result.Buffer.Length);
+                pipe.Reader.Complete();
+            }
+        }
+
+        [Fact]
         public async Task EmptyBufferNotWrittenToStream()
         {
             var pipe = new Pipe(s_testOptions);
@@ -151,9 +172,23 @@ namespace System.IO.Pipelines.Tests
             }
 #endif
         }
-
-        private class ThrowingStream : WriteOnlyStream
+        private class ThrowingStream : ThrowAfterNWritesStream
         {
+            public ThrowingStream() : base(0)
+            {
+            }
+        }
+
+        private class ThrowAfterNWritesStream : WriteOnlyStream
+        {
+            private readonly int _maxWrites;
+            private int _writes;
+
+            public ThrowAfterNWritesStream(int maxWrites)
+            {
+                _maxWrites = maxWrites;
+            }
+
             public override void Write(byte[] buffer, int offset, int count)
             {
                 throw new InvalidOperationException();
@@ -161,13 +196,23 @@ namespace System.IO.Pipelines.Tests
 
             public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
-                throw new InvalidOperationException();
+                if (_writes >= _maxWrites)
+                {
+                    throw new InvalidOperationException();
+                }
+                _writes++;
+                return Task.CompletedTask;
             }
 
 #if !netstandard
             public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
             {
-                throw new InvalidOperationException();
+                if (_writes >= _maxWrites)
+                {
+                    throw new InvalidOperationException();
+                }
+                _writes++;
+                return default;
             }
 #endif
         }
