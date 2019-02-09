@@ -11,6 +11,30 @@ namespace System.IO.Pipelines.Tests
     public class PipeWriterCopyToAsyncTests
     {
         [Fact]
+        public async Task CopyToAsyncThrowsArgumentNullExceptionForNullSource()
+        {
+            var pipe = new Pipe();
+            MemoryStream stream = null;
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() => stream.CopyToAsync(pipe.Writer));
+            Assert.Equal("source", ex.ParamName);
+        }
+
+        [Fact]
+        public async Task CopyToAsyncThrowsArgumentNullExceptionForNullDestination()
+        {
+            var stream = new MemoryStream();
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() => stream.CopyToAsync(null));
+            Assert.Equal("destination", ex.ParamName);
+        }
+
+        [Fact]
+        public async Task CopyToAsyncThrowsTaskCanceledExceptionForAlreadyCancelledToken()
+        {
+            var pipe = new Pipe();
+            await Assert.ThrowsAsync<TaskCanceledException>(() => new MemoryStream().CopyToAsync(pipe.Writer, new CancellationToken(true)));
+        }
+
+        [Fact]
         public async Task CopyToAsyncWorks()
         {
             var helloBytes = Encoding.UTF8.GetBytes("Hello World");

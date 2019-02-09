@@ -12,6 +12,21 @@ namespace System.IO.Pipelines.Tests
         private static readonly PipeOptions s_testOptions = new PipeOptions(readerScheduler: PipeScheduler.Inline);
 
         [Fact]
+        public async Task CopyToAsyncThrowsArgumentNullExceptionForNullDestination()
+        {
+            var pipe = new Pipe(s_testOptions);
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() => pipe.Reader.CopyToAsync(null));
+            Assert.Equal("destination", ex.ParamName);
+        }
+
+        [Fact]
+        public async Task CopyToAsyncThrowsTaskCanceledExceptionForAlreadyCancelledToken()
+        {
+            var pipe = new Pipe(s_testOptions);
+            await Assert.ThrowsAsync<TaskCanceledException>(() => pipe.Reader.CopyToAsync(new MemoryStream(), new CancellationToken(true)));
+        }
+
+        [Fact]
         public async Task CopyToAsyncWorks()
         {
             var helloBytes = Encoding.UTF8.GetBytes("Hello World");
