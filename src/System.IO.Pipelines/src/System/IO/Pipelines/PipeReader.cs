@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,7 +11,7 @@ namespace System.IO.Pipelines
     /// <summary>
     /// Defines a class that provides access to a read side of pipe.
     /// </summary>
-    public abstract class PipeReader
+    public abstract partial class PipeReader
     {
         /// <summary>
         /// Attempt to synchronously read data the <see cref="PipeReader"/>.
@@ -62,5 +63,68 @@ namespace System.IO.Pipelines
         /// Cancel the pending <see cref="ReadAsync"/> operation. If there is none, cancels next <see cref="ReadAsync"/> operation, without completing the <see cref="PipeWriter"/>.
         /// </summary>
         public abstract void OnWriterCompleted(Action<Exception, object> callback, object state);
+
+        /// <summary>
+        /// Asynchronously reads the bytes from the <see cref="PipeReader"/> and writes them to the specified stream, using a specified buffer size and cancellation token.
+        /// </summary>
+        /// <param name="destination">The stream to which the contents of the current stream will be copied.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
+        /// <returns>A task that represents the asynchronous copy operation.</returns>
+        public virtual async Task CopyToAsync(Stream destination, CancellationToken cancellationToken = default)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                SequencePosition consumed = default;
+
+                try
+                {
+                    ReadResult result = await ReadAsync(cancellationToken).ConfigureAwait(false);
+                    ReadOnlySequence<byte> buffer = result.Buffer;
+
+                    consumed = buffer.Start;
+
+                    if (result.IsCanceled)
+                    {
+                        throw new OperationCanceledException();
+                    }
+
+                    if (!buffer.IsEmpty)
+                    {
+                        if (buffer.IsSingleSegment)
+                        {
+                            await destination.WriteAsync(buffer.First, cancellationToken).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            SequencePosition position = buffer.Start;
+                            while (buffer.TryGet(ref position, out ReadOnlyMemory<byte> memory))
+                            {
+                                await destination.WriteAsync(memory, cancellationToken).ConfigureAwait(false);
+                            }
+                        }
+
+                        consumed = buffer.End;
+                    }
+
+                    if (result.IsCompleted)
+                    {
+                        break;
+                    }
+
+                    // Throw here so we don't exit the loop if the we're not complete and
+                    // the token is cancelled
+                    if (cancellationToken.CanBeCanceled)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+                }
+                finally
+                {
+                    // Advance even if WriteAsync throws so the PipeReader is not left in the
+                    // currently reading state
+                    AdvanceTo(consumed);
+                }
+            }
+        }
     }
 }
