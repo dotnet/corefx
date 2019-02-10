@@ -72,13 +72,15 @@ namespace Microsoft.Win32.SafeHandles
     /// </summary>
     internal class SafeGssCredHandle : SafeHandle
     {
+        private static readonly Lazy<bool> s_IsNtlmInstalled = new Lazy<bool>(InitIsNtlmInstalled);
+
         /// <summary>
         ///  returns the handle for the given credentials.
         ///  The method returns an invalid handle if the username is null or empty.
         /// </summary>
         public static SafeGssCredHandle Create(string username, string password, bool isNtlmOnly)
         {
-            if (isNtlmOnly && !Interop.NetSecurityNative.IsNtlmInstalled())
+            if (isNtlmOnly && !s_IsNtlmInstalled.Value)
             {
                 throw new Interop.NetSecurityNative.GssApiException(
                     Interop.NetSecurityNative.Status.GSS_S_BAD_MECH,
@@ -131,6 +133,11 @@ namespace Microsoft.Win32.SafeHandles
             Interop.NetSecurityNative.Status status = Interop.NetSecurityNative.ReleaseCred(out minorStatus, ref handle);
             SetHandle(IntPtr.Zero);
             return status == Interop.NetSecurityNative.Status.GSS_S_COMPLETE;
+        }
+
+        private static bool InitIsNtlmInstalled()
+        {
+            return Interop.NetSecurityNative.IsNtlmInstalled();
         }
     }
 

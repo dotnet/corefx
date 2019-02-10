@@ -451,6 +451,7 @@ uint32_t NetSecurityNative_IsNtlmInstalled()
             if ((oid.length == ntlmOid->length) && (memcmp(oid.elements, ntlmOid->elements, oid.length) == 0))
             {
                 foundNtlm = 1;
+                break;
             }
         }
 
