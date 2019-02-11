@@ -100,32 +100,21 @@ namespace Internal.Cryptography.Pal
                 systemTrusted.DisposeAll();
                 downloaded.DisposeAll();
 
-                if (extraStore == null || extraStore.Count == 0)
+                // Candidate certs which came from extraStore should NOT be disposed, since they came
+                // from outside.
+                var extraStoreByReference = new HashSet<X509Certificate2>(
+                    ReferenceEqualityComparer<X509Certificate2>.Instance);
+
+                foreach (X509Certificate2 extraCert in extraStore)
                 {
-                    // There were no extraStore certs, so everything can be disposed.
-                    foreach (X509Certificate2 candidate in candidates)
+                    extraStoreByReference.Add(extraCert);
+                }
+
+                foreach (X509Certificate2 candidate in candidates)
+                {
+                    if (!extraStoreByReference.Contains(candidate))
                     {
                         candidate.Dispose();
-                    }
-                }
-                else
-                {
-                    // Candidate certs which came from extraStore should NOT be disposed, since they came
-                    // from outside.
-                    var extraStoreByReference = new HashSet<X509Certificate2>(
-                        ReferenceEqualityComparer<X509Certificate2>.Instance);
-
-                    foreach (X509Certificate2 extraCert in extraStore)
-                    {
-                        extraStoreByReference.Add(extraCert);
-                    }
-
-                    foreach (X509Certificate2 candidate in candidates)
-                    {
-                        if (!extraStoreByReference.Contains(candidate))
-                        {
-                            candidate.Dispose();
-                        }
                     }
                 }
 
