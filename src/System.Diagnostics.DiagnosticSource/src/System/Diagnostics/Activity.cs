@@ -59,6 +59,7 @@ namespace System.Diagnostics
             get
             {
                 // if we represented it as a traceId-spanId, convert it to a string.  
+                // We can do this concatination with a stackalloced Span<char> if we actualy Id is used alot.  
                 if (_id == null && _spanIdSet)
                     _id = "00-" + _traceId.AsHexString + "-" + _spanId.AsHexString + "-00";
                 return _id;
@@ -158,7 +159,7 @@ namespace System.Diagnostics
         {
             get
             {
-                for (var activity = this; activity != null; activity = activity.Parent)
+                for (Activity activity = this; activity != null; activity = activity.Parent)
                     for (var baggage = activity._baggage; baggage != null; baggage = baggage.Next)
                         yield return baggage.keyValue;
             }
@@ -445,6 +446,13 @@ namespace System.Diagnostics
         /// <summary>
         /// If the Activity has the W3C format, this returns the ID for the SPAN part of the Id.  
         /// Otherwise it returns a zero SpanId. 
+        /// 
+        /// Note that this returns a readonly ref.   This is because SpanId has a cache of the
+        /// Hex string.   However for that cache to be available for subsequent conversions to
+        /// Hex, you have to be operating on the same instance.   Thus if you need the Hex string
+        /// you should store the SpanId in a ref local variable and call the AsHexString property
+        /// which will have the effect of updating Activity's instance so all subsequent uses
+        /// share the same converted string.  
         /// </summary>
         public ref readonly ActivitySpanId SpanId
         {
@@ -465,6 +473,13 @@ namespace System.Diagnostics
         /// <summary>
         /// If the Activity has the W3C format, this returns the ID for the TraceId part of the Id.  
         /// Otherwise it returns a zero TraceId. 
+        /// 
+        /// Note that this returns a readonly ref.   This is because TraceId has a cache of the
+        /// Hex string.   However for that cache to be available for subsequent conversions to
+        /// Hex, you have to be operating on the same instance.   Thus if you need the Hex string
+        /// you should store the TraceId in a ref local variable and call the AsHexString property
+        /// which will have the effect of updating Activity's instance so all subsequent uses
+        /// share the same converted string.  
         /// </summary>
         public ref readonly ActivityTraceId TraceId
         {
@@ -523,7 +538,6 @@ namespace System.Diagnostics
                 if (!(ActivityIdFormat.Hierarchical <= value && value <= ActivityIdFormat.W3C))
                     throw new ArgumentException($"value must be a valid ActivityIDFormat value");
                 s_DefaultIdFormat = value;
-
             }
         }
 
@@ -791,15 +805,14 @@ namespace System.Diagnostics
 
         public ActivityTraceId(ReadOnlySpan<char> idData)
         {
+            if (idData.Length != 32)
+                throw new ArgumentOutOfRangeException(nameof(idData));
+
             _id1 = 0;
             _id2 = 0;
             _asHexString = null;
             fixed (ulong* idPtr = &_id1)
-            {
-                if (idData.Length != 32)
-                    throw new ArgumentOutOfRangeException(nameof(idData));
                 ActivityTraceId.SetSpanFromHexChars(new Span<byte>(idPtr, sizeof(ulong) * 2), idData);
-            }
         }
 
         /// <summary>
@@ -891,11 +904,14 @@ namespace System.Diagnostics
         /// </summary>
         internal static string SpanToHexString(ReadOnlySpan<byte> bytes)
         {
-            // TODO replace with ValueStringBuilder when available.  
-            StringBuilder sb = new StringBuilder(bytes.Length * 2);
+            Span<char> result = stackalloc char[bytes.Length * 2];
+            int pos = 0;
             foreach (byte b in bytes)
-                sb.Append(BinaryToHexDigit(b >> 4)).Append(BinaryToHexDigit(b));
-            return sb.ToString();
+            {
+                result[pos++] = BinaryToHexDigit(b >> 4);
+                result[pos++] = BinaryToHexDigit(b);
+            }
+            return result.ToString();
         }
 
         /// <summary>
@@ -993,14 +1009,13 @@ namespace System.Diagnostics
         /// <param name="idData"></param>
         public ActivitySpanId(ReadOnlySpan<char> idData)
         {
+            if (idData.Length != 16)
+                throw new ArgumentOutOfRangeException(nameof(idData));
+
             _id1 = 0;
             _asHexString = null;
             fixed (ulong* idPtr = &_id1)
-            {
-                if (idData.Length != 16)
-                    throw new ArgumentOutOfRangeException(nameof(idData));
                 ActivityTraceId.SetSpanFromHexChars(new Span<byte>(idPtr, sizeof(ulong)), idData);
-            }
         }
 
         /// <summary>
