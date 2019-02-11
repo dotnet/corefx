@@ -114,25 +114,24 @@ namespace System.Linq.ChainLinq.Consumables
         internal LookupWithComparer(IEqualityComparer<TKey> comparer) =>
             _comparer = comparer;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int InternalGetHashCode(TKey key)
-        {
-            // Handle comparer implementations that throw when passed null
-            return (key == null) ? 0 : _comparer.GetHashCode(key) & 0x7FFFFFFF;
-        }
-
         internal sealed override GroupingInternal<TKey, TElement> GetGrouping(TKey key, bool create)
         {
-            int hashCode = InternalGetHashCode(key);
-            for (GroupingInternal<TKey, TElement> g = _groupings[hashCode % _groupings.Length]; g != null; g = g._hashNext)
+            int hashCode = (key == null) ? 0 : _comparer.GetHashCode(key) & 0x7FFFFFFF;
+            GroupingInternal<TKey, TElement> g = _groupings[hashCode % _groupings.Length];
+            while(true)
             {
+                if (g == null)
+                {
+                    return create ? Create(key, hashCode) : null;
+                }
+
                 if (g._hashCode == hashCode && _comparer.Equals(g._key, key))
                 {
                     return g;
                 }
-            }
 
-            return create ? Create(key, hashCode) : null;
+                g = g._hashNext;
+            }
         }
     }
 
@@ -140,25 +139,24 @@ namespace System.Linq.ChainLinq.Consumables
     [DebuggerTypeProxy(typeof(SystemLinq_ConsumablesLookupDebugView<,>))]
     internal sealed partial class LookupDefaultComparer<TKey, TElement> : Lookup<TKey, TElement>
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int InternalGetHashCode(TKey key)
-        {
-            // Handle comparer implementations that throw when passed null
-            return (key == null) ? 0 : EqualityComparer<TKey>.Default.GetHashCode(key) & 0x7FFFFFFF;
-        }
-
         internal sealed override GroupingInternal<TKey, TElement> GetGrouping(TKey key, bool create)
         {
-            int hashCode = InternalGetHashCode(key);
-            for (GroupingInternal<TKey, TElement> g = _groupings[hashCode % _groupings.Length]; g != null; g = g._hashNext)
+            int hashCode = (key == null) ? 0 : EqualityComparer<TKey>.Default.GetHashCode(key) & 0x7FFFFFFF;
+            GroupingInternal<TKey, TElement> g = _groupings[hashCode % _groupings.Length];
+            while (true)
             {
+                if (g == null)
+                {
+                    return create ? Create(key, hashCode) : null;
+                }
+
                 if (g._hashCode == hashCode && EqualityComparer<TKey>.Default.Equals(g._key, key))
                 {
                     return g;
                 }
-            }
 
-            return create ? Create(key, hashCode) : null;
+                g = g._hashNext;
+            }
         }
     }
 

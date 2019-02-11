@@ -197,15 +197,21 @@ namespace System.Linq
             Debug.Assert(!_haveRemoved, "This class is optimised for never calling Add after Remove. If your changes need to do so, undo that optimization.");
 #endif
             int hashCode = InternalGetHashCode(value);
-            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i]._next)
+            int i = _buckets[hashCode % _buckets.Length] - 1;
+            while (true)
             {
+                if (i < 0)
+                {
+                    return DoAdd(value, hashCode);
+                }
+
                 if (_slots[i]._hashCode == hashCode && _comparer.Equals(_slots[i]._value, value))
                 {
                     return false;
                 }
-            }
 
-            return DoAdd(value, hashCode);
+                i = _slots[i]._next;
+            }
         }
 
         /// <summary>
@@ -288,15 +294,21 @@ namespace System.Linq
             Debug.Assert(!_haveRemoved, "This class is optimised for never calling Add after Remove. If your changes need to do so, undo that optimization.");
 #endif
             int hashCode = InternalGetHashCode(value);
-            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i]._next)
+            int i = _buckets[hashCode % _buckets.Length] - 1;
+            while (true)
             {
+                if (i < 0)
+                {
+                    return DoAdd(value, hashCode);
+                }
+
                 if (_slots[i]._hashCode == hashCode && EqualityComparer<TElement>.Default.Equals(_slots[i]._value, value))
                 {
                     return false;
                 }
-            }
 
-            return DoAdd(value, hashCode);
+                i = _slots[i]._next;
+            }
         }
 
         /// <summary>
