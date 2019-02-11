@@ -503,8 +503,6 @@ namespace System.Diagnostics.Tests
 
         private static int CheckUserAndGroupIds(string userId, string groupId, string groupIdsJoined, string checkGroupsExact)
         {
-            uint[] groups = groupIdsJoined.Split(',').Select(s => uint.Parse(s)).ToArray();
-
             Assert.Equal(userId, getuid().ToString());
             Assert.Equal(userId, geteuid().ToString());
             Assert.Equal(groupId, getgid().ToString());
@@ -512,10 +510,11 @@ namespace System.Diagnostics.Tests
 
             if (bool.Parse(checkGroupsExact))
             {
-                Assert.Equal(groups, GetGroups());
+                Assert.Equal(groupIdsJoined, string.Join(",", GetGroups()));
             }
             else
             {
+                uint[] groups = groupIdsJoined.Split(',').Select(s => uint.Parse(s)).ToArray();
                 Assert.Subset(new HashSet<uint>(groups), new HashSet<uint>(GetGroups()));
             }
 
@@ -598,7 +597,8 @@ namespace System.Diagnostics.Tests
 
         private static string GetUserGroupIds(string username)
         {
-            string[] groupIds = StartAndReadToEnd("id", new[] { "-G", username }).Trim('\n').Split(' ');
+            string[] groupIds = StartAndReadToEnd("id", new[] { "-G", username })
+                                    .Split(new[] { ' ', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return string.Join(",", groupIds.Select(s => uint.Parse(s)).OrderBy(id => id));
         }
 
