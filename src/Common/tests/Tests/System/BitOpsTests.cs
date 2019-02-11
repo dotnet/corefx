@@ -7,6 +7,11 @@ using Test.Cryptography;
 
 using Xunit;
 
+namespace Internal.Runtime.CompilerServices
+{
+    // Dummy namespace needed for compilation of BitOps
+}
+
 namespace Tests.System
 {
     public static class BitOpsTests
