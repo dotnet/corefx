@@ -5,11 +5,11 @@
 using System;
 using System.Runtime.InteropServices;
 
-internal partial class Interop
+internal static partial class Interop
 {
-    internal partial class Kernel32
+    internal static partial class NetSecurityNative
     {
-        [DllImport(Libraries.Kernel32)]
-        internal static extern IntPtr GetCurrentProcess();
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_IsNtlmInstalled")]
+        internal static extern bool IsNtlmInstalled();
     }
 }

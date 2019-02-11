@@ -22,6 +22,9 @@
     <Compile Include="$(CommonPath)\System\CharArrayHelpers.cs">
       <Link>Common\System\CharArrayHelpers.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\BitOp.cs">
+      <Link>Common\System\BitOps.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Marvin.cs">
       <Link>Common\System\Marvin.cs</Link>
     </Compile>
