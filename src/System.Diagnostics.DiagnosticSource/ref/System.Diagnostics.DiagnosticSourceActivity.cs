@@ -60,8 +60,8 @@ namespace System.Diagnostics
         private int _dummyPrimitive;
         public ActivitySpanId(System.ReadOnlySpan<byte> idData, bool isUtf8Chars = false) { throw null; }
         public ActivitySpanId(System.ReadOnlySpan<char> idData) { throw null; }
-        public System.ReadOnlySpan<byte> AsBytes { get { throw null; } }
         public string AsHexString { get { throw null; } }
+        public void CopyTo(System.Span<byte> destination) { }
         public bool Equals(System.Diagnostics.ActivitySpanId spanId) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -76,8 +76,8 @@ namespace System.Diagnostics
         private int _dummyPrimitive;
         public ActivityTraceId(System.ReadOnlySpan<byte> idData, bool isUtf8Chars = false) { throw null; }
         public ActivityTraceId(System.ReadOnlySpan<char> idData) { throw null; }
-        public System.ReadOnlySpan<byte> AsBytes { get { throw null; } }
         public string AsHexString { get { throw null; } }
+        public void CopyTo(System.Span<byte> destination) { }
         public bool Equals(System.Diagnostics.ActivityTraceId traceId) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }

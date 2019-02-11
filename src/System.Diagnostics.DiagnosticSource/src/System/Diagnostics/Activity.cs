@@ -565,7 +565,8 @@ namespace System.Diagnostics
             //  * 2 chars flags 
             //  = 55 chars (see https://w3c.github.io/trace-context)
             // We require that all non-WC3IDs NOT start with a digit.  
-            return id.Length == 55 && char.IsDigit(id[0]);
+            // The digit is used to indicate that this is a WC3 ID.   
+            return id.Length == 55 && '0' <= id[0] && id[0] <= '9';
         }
 
         /// <summary>
@@ -826,15 +827,12 @@ namespace System.Diagnostics
         }
 
         /// <summary>
-        /// Return the bytes of the ID.  Its length is always 16
+        /// Copy the bytes of the TraceId (16 total) into the 'destination' span.
         /// </summary>
-        public ReadOnlySpan<byte> AsBytes
+        public void CopyTo(Span<byte> destination)
         {
-            get
-            {
-                fixed (ulong* idPtr = &_id1)
-                    return new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2);
-            }
+            fixed (ulong* idPtr = &_id1)
+                new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2).CopyTo(destination);
         }
 
         /// <summary>
@@ -845,7 +843,10 @@ namespace System.Diagnostics
             get
             {
                 if (_asHexString == null)
-                    _asHexString = SpanToHexString(AsBytes);
+                {
+                    fixed (ulong* idPtr = &_id1)
+                        _asHexString = SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2));
+                }
                 return _asHexString;
             }
         }
@@ -960,7 +961,7 @@ namespace System.Diagnostics
 
         ulong _id1;
         ulong _id2;
-        string _asHexString;  // ultimately change to object, and allow several representations based on type.  
+        string _asHexString;  // Caches the Hex string    
         #endregion
     }
 
@@ -1029,15 +1030,12 @@ namespace System.Diagnostics
         }
 
         /// <summary>
-        /// Return the bytes of the ID.  Its length is always 8
+        /// Copy the bytes of the TraceId (8 bytes total) into the 'destination' span.
         /// </summary>
-        public ReadOnlySpan<byte> AsBytes
+        public void CopyTo(Span<byte> destination)
         {
-            get
-            {
-                fixed (ulong* idPtr = &_id1)
-                    return new ReadOnlySpan<byte>(idPtr, sizeof(ulong));
-            }
+            fixed (ulong* idPtr = &_id1)
+                new ReadOnlySpan<byte>(idPtr, sizeof(ulong)).CopyTo(destination);
         }
 
         /// <summary>
@@ -1049,7 +1047,10 @@ namespace System.Diagnostics
             get
             {
                 if (_asHexString == null)
-                    _asHexString = ActivityTraceId.SpanToHexString(AsBytes);
+                {
+                    fixed (ulong* idPtr = &_id1)
+                        _asHexString = ActivityTraceId.SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong)));
+                }
                 return _asHexString;
             }
         }
@@ -1087,7 +1088,7 @@ namespace System.Diagnostics
 
         #region private
         ulong _id1;
-        string _asHexString;   // ultimately change to object, and allow several representations based on type.   
+        string _asHexString;   // Caches the Hex string  
         #endregion
     }
 }
