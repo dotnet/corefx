@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -263,7 +264,7 @@ namespace System.Net.Security
             if (asyncRequest != null)
             {
                 asyncRequest.SetNextRequest(_ReadHeader, 0, _ReadHeader.Length, s_readCallback);
-                _ = FixedSizeReader.ReadPacketAsync(InnerStream, asyncRequest);
+                FixedSizeReader.ReadPacketAsync(InnerStream, asyncRequest);
                 if (!asyncRequest.MustCompleteSynchronously)
                 {
                     return 0;
@@ -317,7 +318,7 @@ namespace System.Net.Security
             {
                 asyncRequest.SetNextRequest(InternalBuffer, 0, readBytes, s_readCallback);
 
-                _ = FixedSizeReader.ReadPacketAsync(InnerStream, asyncRequest);
+                FixedSizeReader.ReadPacketAsync(InnerStream, asyncRequest);
 
                 if (!asyncRequest.MustCompleteSynchronously)
                 {

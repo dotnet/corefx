@@ -91,20 +91,15 @@ namespace System.Net
                     }
                 }
             }
-            catch
-            {
-                result?.Dispose();
-                throw;
-            }
             finally
             {
+                if (gotReference)
+                {
+                    remoteContext.DangerousRelease();
+                }
+
                 if (remoteContext != null)
                 {
-                    if (gotReference)
-                    {
-                        remoteContext.DangerousRelease();
-                    }
-
                     remoteContext.Dispose();
                 }
             }

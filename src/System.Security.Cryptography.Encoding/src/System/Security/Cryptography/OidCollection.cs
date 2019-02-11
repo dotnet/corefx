@@ -3,42 +3,26 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography
 {
     public sealed class OidCollection : ICollection
     {
-        private Oid[] _oids = Array.Empty<Oid>();
-        private int _count;
-
-        public OidCollection() { }
+        public OidCollection()
+        {
+            _list = new List<Oid>();
+        }
 
         public int Add(Oid oid)
         {
-            int count = _count;
-            if (count == _oids.Length)
-            {
-                Array.Resize(ref _oids, count == 0 ? 4 : count * 2);
-            }
-            _oids[count] = oid;
-            _count = count + 1;
+            int count = _list.Count;
+            _list.Add(oid);
             return count;
         }
 
-        public Oid this[int index]
-        {
-            get
-            {
-                if ((uint)index >= (uint)_count)
-                {
-                    // For compat, throw an ArgumentOutOfRangeException instead of
-                    // the IndexOutOfRangeException that comes from the array's indexer.
-                    throw new ArgumentOutOfRangeException(nameof(index));
-                }
-                return _oids[index];
-            }
-        }
+        public Oid this[int index] => _list[index];
 
         // Indexer using an OID friendly name or value.
         public Oid this[string oid]
@@ -51,9 +35,8 @@ namespace System.Security.Cryptography
                 {
                     oidValue = oid;
                 }
-                for (int i = 0; i < _count; i++)
+                foreach (Oid entry in _list)
                 {
-                    Oid entry = _oids[i];
                     if (entry.Value == oidValue)
                         return entry;
                 }
@@ -61,7 +44,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        public int Count => _count;
+        public int Count => _list.Count;
 
         public OidEnumerator GetEnumerator() => new OidEnumerator(this);
 
@@ -95,11 +78,13 @@ namespace System.Security.Cryptography
             if (index < 0 || index >= array.Length)
                 throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
 
-            Array.Copy(_oids, 0, array, index, _count);
+            _list.CopyTo(array, index);
         }
 
         public bool IsSynchronized => false;
 
         public object SyncRoot => this;
+
+        private readonly List<Oid> _list;
     }
 }

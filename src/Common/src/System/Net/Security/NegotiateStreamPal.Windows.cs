@@ -2,11 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Security.Authentication.ExtendedProtection;
+using System.ComponentModel;
 
 namespace System.Net.Security
 {
@@ -51,89 +48,57 @@ namespace System.Net.Security
             }
             finally
             {
-                authData?.Dispose();
+                if (authData != null)
+                {
+                    authData.Dispose();
+                }
             }
         }
 
         internal static string QueryContextClientSpecifiedSpn(SafeDeleteContext securityContext)
         {
-            return SSPIWrapper.QueryStringContextAttributes(GlobalSSPI.SSPIAuth, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_CLIENT_SPECIFIED_TARGET);
+            return SSPIWrapper.QueryContextAttributes(GlobalSSPI.SSPIAuth, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_CLIENT_SPECIFIED_TARGET) as string;
         }
 
         internal static string QueryContextAuthenticationPackage(SafeDeleteContext securityContext)
         {
-            SecPkgContext_NegotiationInfoW ctx = default;
-            bool success = SSPIWrapper.QueryBlittableContextAttributes(GlobalSSPI.SSPIAuth, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_NEGOTIATION_INFO, typeof(SafeFreeContextBuffer), out SafeHandle sspiHandle, ref ctx);
-            using (sspiHandle)
-            {
-                return success ? NegotiationInfoClass.GetAuthenticationPackageName(sspiHandle, (int)ctx.NegotiationState) : null;
-            }
+            var negotiationInfoClass = SSPIWrapper.QueryContextAttributes(GlobalSSPI.SSPIAuth, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_NEGOTIATION_INFO) as NegotiationInfoClass;
+            return negotiationInfoClass?.AuthenticationPackage;
         }
 
         internal static SecurityStatusPal InitializeSecurityContext(
-            ref SafeFreeCredentials credentialsHandle,
+            SafeFreeCredentials credentialsHandle,
             ref SafeDeleteContext securityContext,
             string spn,
             ContextFlagsPal requestedContextFlags,
-            byte[] incomingBlob,
-            ChannelBinding channelBinding,
-            ref byte[] resultBlob,
+            SecurityBuffer[] inSecurityBufferArray,
+            SecurityBuffer outSecurityBuffer,
             ref ContextFlagsPal contextFlags)
         {
-#if netstandard
-            Span<SecurityBuffer> inSecurityBufferSpan = new SecurityBuffer[2];
-#else
-            TwoSecurityBuffers twoSecurityBuffers = default;
-            Span<SecurityBuffer> inSecurityBufferSpan = MemoryMarshal.CreateSpan(ref twoSecurityBuffers._item0, 2);
-#endif
-
-            int inSecurityBufferSpanLength = 0;
-            if (incomingBlob != null && channelBinding != null)
-            {
-                inSecurityBufferSpan[0] = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
-                inSecurityBufferSpan[1] = new SecurityBuffer(channelBinding);
-                inSecurityBufferSpanLength = 2;
-            }
-            else if (incomingBlob != null)
-            {
-                inSecurityBufferSpan[0] = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
-                inSecurityBufferSpanLength = 1;
-            }
-            else if (channelBinding != null)
-            {
-                inSecurityBufferSpan[0] = new SecurityBuffer(channelBinding);
-                inSecurityBufferSpanLength = 1;
-            }
-            inSecurityBufferSpan = inSecurityBufferSpan.Slice(0, inSecurityBufferSpanLength);
-
-            var outSecurityBuffer = new SecurityBuffer(resultBlob, SecurityBufferType.SECBUFFER_TOKEN);
-
             Interop.SspiCli.ContextFlags outContextFlags = Interop.SspiCli.ContextFlags.Zero;
             Interop.SECURITY_STATUS winStatus = (Interop.SECURITY_STATUS)SSPIWrapper.InitializeSecurityContext(
                 GlobalSSPI.SSPIAuth,
-                ref credentialsHandle,
+                credentialsHandle,
                 ref securityContext,
                 spn,
                 ContextFlagsAdapterPal.GetInteropFromContextFlagsPal(requestedContextFlags),
                 Interop.SspiCli.Endianness.SECURITY_NETWORK_DREP,
-                inSecurityBufferSpan,
-                ref outSecurityBuffer,
+                inSecurityBufferArray,
+                outSecurityBuffer,
                 ref outContextFlags);
 
-            resultBlob = outSecurityBuffer.token;
             contextFlags = ContextFlagsAdapterPal.GetContextFlagsPalFromInterop(outContextFlags);
             return SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(winStatus);
         }
 
         internal static SecurityStatusPal CompleteAuthToken(
             ref SafeDeleteContext securityContext,
-            byte[] incomingBlob)
+            SecurityBuffer[] inSecurityBufferArray)
         {
-            var inSecurityBuffer = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
             Interop.SECURITY_STATUS winStatus = (Interop.SECURITY_STATUS)SSPIWrapper.CompleteAuthToken(
                 GlobalSSPI.SSPIAuth,
                 ref securityContext,
-                in inSecurityBuffer);
+                inSecurityBufferArray);
             return SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(winStatus);
         }
 
@@ -141,39 +106,10 @@ namespace System.Net.Security
             SafeFreeCredentials credentialsHandle,
             ref SafeDeleteContext securityContext,
             ContextFlagsPal requestedContextFlags,
-            byte[] incomingBlob,
-            ChannelBinding channelBinding,
-            ref byte[] resultBlob,
+            SecurityBuffer[] inSecurityBufferArray,
+            SecurityBuffer outSecurityBuffer,
             ref ContextFlagsPal contextFlags)
         {
-#if netstandard
-            Span<SecurityBuffer> inSecurityBufferSpan = new SecurityBuffer[2];
-#else
-            TwoSecurityBuffers twoSecurityBuffers = default;
-            Span<SecurityBuffer> inSecurityBufferSpan = MemoryMarshal.CreateSpan(ref twoSecurityBuffers._item0, 2);
-#endif
-
-            int inSecurityBufferSpanLength = 0;
-            if (incomingBlob != null && channelBinding != null)
-            {
-                inSecurityBufferSpan[0] = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
-                inSecurityBufferSpan[1] = new SecurityBuffer(channelBinding);
-                inSecurityBufferSpanLength = 2;
-            }
-            else if (incomingBlob != null)
-            {
-                inSecurityBufferSpan[0] = new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN);
-                inSecurityBufferSpanLength = 1;
-            }
-            else if (channelBinding != null)
-            {
-                inSecurityBufferSpan[0] = new SecurityBuffer(channelBinding);
-                inSecurityBufferSpanLength = 1;
-            }
-            inSecurityBufferSpan = inSecurityBufferSpan.Slice(0, inSecurityBufferSpanLength);
-
-            var outSecurityBuffer = new SecurityBuffer(resultBlob, SecurityBufferType.SECBUFFER_TOKEN);
-
             Interop.SspiCli.ContextFlags outContextFlags = Interop.SspiCli.ContextFlags.Zero;
             Interop.SECURITY_STATUS winStatus = (Interop.SECURITY_STATUS)SSPIWrapper.AcceptSecurityContext(
                 GlobalSSPI.SSPIAuth,
@@ -181,11 +117,9 @@ namespace System.Net.Security
                 ref securityContext,
                 ContextFlagsAdapterPal.GetInteropFromContextFlagsPal(requestedContextFlags),
                 Interop.SspiCli.Endianness.SECURITY_NETWORK_DREP,
-                inSecurityBufferSpan,
-                ref outSecurityBuffer,
+                inSecurityBufferArray,
+                outSecurityBuffer,
                 ref outContextFlags);
-
-            resultBlob = outSecurityBuffer.token;
 
             contextFlags = ContextFlagsAdapterPal.GetContextFlagsPalFromInterop(outContextFlags);
             return SecurityStatusAdapterPal.GetSecurityStatusPalFromInterop(winStatus);
@@ -216,12 +150,7 @@ namespace System.Net.Security
             // setup security buffers for ssp call
             // one points at signed data
             // two will receive payload if signature is valid
-#if netstandard
-            Span<SecurityBuffer> securityBuffer = new SecurityBuffer[2];
-#else
-            TwoSecurityBuffers stackBuffer = default;
-            Span<SecurityBuffer> securityBuffer = MemoryMarshal.CreateSpan(ref stackBuffer._item0, 2);
-#endif
+            SecurityBuffer[] securityBuffer = new SecurityBuffer[2];
             securityBuffer[0] = new SecurityBuffer(buffer, offset, count, SecurityBufferType.SECBUFFER_STREAM);
             securityBuffer[1] = new SecurityBuffer(0, SecurityBufferType.SECBUFFER_DATA);
 
@@ -248,9 +177,11 @@ namespace System.Net.Security
 
         internal static int MakeSignature(SafeDeleteContext securityContext, byte[] buffer, int offset, int count, ref byte[] output)
         {
-            SecPkgContext_Sizes sizes = default;
-            bool success = SSPIWrapper.QueryBlittableContextAttributes(GlobalSSPI.SSPIAuth, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_SIZES, ref sizes);
-            Debug.Assert(success);
+            SecPkgContext_Sizes sizes = SSPIWrapper.QueryContextAttributes(
+                GlobalSSPI.SSPIAuth,
+                securityContext,
+                Interop.SspiCli.ContextAttribute.SECPKG_ATTR_SIZES
+                ) as SecPkgContext_Sizes;
 
             // alloc new output buffer if not supplied or too small
             int resultSize = count + sizes.cbMaxSignature;
@@ -263,12 +194,7 @@ namespace System.Net.Security
             Buffer.BlockCopy(buffer, offset, output, sizes.cbMaxSignature, count);
 
             // setup security buffers for ssp call
-#if netstandard
-            Span<SecurityBuffer> securityBuffer = new SecurityBuffer[2];
-#else
-            TwoSecurityBuffers stackBuffer = default;
-            Span<SecurityBuffer> securityBuffer = MemoryMarshal.CreateSpan(ref stackBuffer._item0, 2);
-#endif
+            SecurityBuffer[] securityBuffer = new SecurityBuffer[2];
             securityBuffer[0] = new SecurityBuffer(output, 0, sizes.cbMaxSignature, SecurityBufferType.SECBUFFER_TOKEN);
             securityBuffer[1] = new SecurityBuffer(output, sizes.cbMaxSignature, count, SecurityBufferType.SECBUFFER_DATA);
 

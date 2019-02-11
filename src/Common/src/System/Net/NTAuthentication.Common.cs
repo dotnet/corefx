@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Net.Security;
-using System.Runtime.InteropServices;
 using System.Security.Authentication.ExtendedProtection;
+using System.Threading;
 
 namespace System.Net
 {
@@ -212,7 +214,25 @@ namespace System.Net
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, incomingBlob);
 
-            var result = new byte[_tokenSize];
+            SecurityBuffer[] inSecurityBufferArray = null;
+            if (incomingBlob != null && _channelBinding != null)
+            {
+                inSecurityBufferArray = new SecurityBuffer[2]
+                {
+                    new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN),
+                    new SecurityBuffer(_channelBinding)
+                };
+            }
+            else if (incomingBlob != null)
+            {
+                inSecurityBufferArray = new SecurityBuffer[1] { new SecurityBuffer(incomingBlob, SecurityBufferType.SECBUFFER_TOKEN) };
+            }
+            else if (_channelBinding != null)
+            {
+                inSecurityBufferArray = new SecurityBuffer[1] { new SecurityBuffer(_channelBinding) };
+            }
+
+            var outSecurityBuffer = new SecurityBuffer(_tokenSize, SecurityBufferType.SECBUFFER_TOKEN);
 
             bool firstTime = _securityContext == null;
             try
@@ -221,24 +241,26 @@ namespace System.Net
                 {
                     // client session
                     statusCode = NegotiateStreamPal.InitializeSecurityContext(
-                        ref _credentialsHandle,
+                        _credentialsHandle,
                         ref _securityContext,
                         _spn,
                         _requestedContextFlags,
-                        incomingBlob,
-                        _channelBinding,
-                        ref result,
+                        inSecurityBufferArray,
+                        outSecurityBuffer,
                         ref _contextFlags);
 
                     if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"SSPIWrapper.InitializeSecurityContext() returns statusCode:0x{((int)statusCode.ErrorCode):x8} ({statusCode})");
 
                     if (statusCode.ErrorCode == SecurityStatusPalErrorCode.CompleteNeeded)
                     {
-                        statusCode = NegotiateStreamPal.CompleteAuthToken(ref _securityContext, result);
+                        var inSecurityBuffers = new SecurityBuffer[1];
+                        inSecurityBuffers[0] = outSecurityBuffer;
+
+                        statusCode = NegotiateStreamPal.CompleteAuthToken(ref _securityContext, inSecurityBuffers);
 
                         if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"SSPIWrapper.CompleteAuthToken() returns statusCode:0x{((int)statusCode.ErrorCode):x8} ({statusCode})");
 
-                        result = null;
+                        outSecurityBuffer.token = null;
                     }
                 }
                 else
@@ -248,9 +270,8 @@ namespace System.Net
                         _credentialsHandle,
                         ref _securityContext,
                         _requestedContextFlags,
-                        incomingBlob,
-                        _channelBinding,
-                        ref result,
+                        inSecurityBufferArray,
+                        outSecurityBuffer,
                         ref _contextFlags);
 
                     if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"SSPIWrapper.AcceptSecurityContext() returns statusCode:0x{((int)statusCode.ErrorCode):x8} ({statusCode})");
@@ -264,9 +285,9 @@ namespace System.Net
                 // The real dispose will happen when the security context is closed.
                 // Note if the first call was not successful the handle is physically destroyed here.
                 //
-                if (firstTime)
+                if (firstTime && _credentialsHandle != null)
                 {
-                    _credentialsHandle?.Dispose();
+                    _credentialsHandle.Dispose();
                 }
             }
 
@@ -308,7 +329,7 @@ namespace System.Net
                 if (NetEventSource.IsEnabled) NetEventSource.Exit(this, $"IsCompleted: {IsCompleted}");
             }
 
-            return result;
+            return outSecurityBuffer.token;
         }
 
         private string GetClientSpecifiedSpn()

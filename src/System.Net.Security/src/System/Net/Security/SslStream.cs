@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
@@ -39,8 +41,7 @@ namespace System.Net.Security
     public class SslStream : AuthenticatedStream
     {
         private SslState _sslState;
-        private X509Certificate2 _remoteCertificate;
-        private bool _remoteCertificateExposed;
+        private object _remoteCertificateOrBytes;
 
         internal RemoteCertificateValidationCallback _userCertificateValidationCallback;
         internal LocalCertificateSelectionCallback _userCertificateSelectionCallback;
@@ -123,7 +124,7 @@ namespace System.Net.Security
 
         private bool UserCertValidationCallbackWrapper(string hostName, X509Certificate2 certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
-            _remoteCertificate = certificate == null ? null : new X509Certificate2(certificate);
+            _remoteCertificateOrBytes = certificate == null ? null : certificate.RawData;
             if (_userCertificateValidationCallback == null)
             {
                 if (!_sslState.RemoteCertRequired)
@@ -507,8 +508,16 @@ namespace System.Net.Security
             get
             {
                 _sslState.CheckThrow(true);
-                _remoteCertificateExposed = true;
-                return _remoteCertificate;
+
+                object chkCertificateOrBytes = _remoteCertificateOrBytes;
+                if (chkCertificateOrBytes != null && chkCertificateOrBytes.GetType() == typeof(byte[]))
+                {
+                    return (X509Certificate)(_remoteCertificateOrBytes = new X509Certificate2((byte[])chkCertificateOrBytes));
+                }
+                else
+                {
+                    return chkCertificateOrBytes as X509Certificate;
+                }
             }
         }
 
@@ -663,12 +672,6 @@ namespace System.Net.Security
         {
             try
             {
-                if (!_remoteCertificateExposed)
-                {
-                    _remoteCertificate?.Dispose();
-                    _remoteCertificate = null;
-                    _remoteCertificateExposed = false;
-                }
                 _sslState.Close();
             }
             finally

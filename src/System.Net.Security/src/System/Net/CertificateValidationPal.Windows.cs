@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
-using System.Diagnostics;
 using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -96,7 +95,7 @@ namespace System.Net
             SafeFreeCertContext remoteContext = null;
             try
             {
-                remoteContext = SSPIWrapper.QueryContextAttributes_SECPKG_ATTR_REMOTE_CERT_CONTEXT(GlobalSSPI.SSPISecureChannel, securityContext);
+                remoteContext = SSPIWrapper.QueryContextAttributes(GlobalSSPI.SSPISecureChannel, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_REMOTE_CERT_CONTEXT) as SafeFreeCertContext;
                 if (remoteContext != null && !remoteContext.IsInvalid)
                 {
                     result = new X509Certificate2(remoteContext.DangerousGetHandle());
@@ -125,28 +124,41 @@ namespace System.Net
         //
         internal static string[] GetRequestCertificateAuthorities(SafeDeleteContext securityContext)
         {
-            Interop.SspiCli.SecPkgContext_IssuerListInfoEx issuerList = default;
-            bool success = SSPIWrapper.QueryContextAttributes_SECPKG_ATTR_ISSUER_LIST_EX(GlobalSSPI.SSPISecureChannel, securityContext, ref issuerList, out SafeHandle sspiHandle);
+            Interop.SspiCli.SecPkgContext_IssuerListInfoEx issuerList =
+                (Interop.SspiCli.SecPkgContext_IssuerListInfoEx)SSPIWrapper.QueryContextAttributes(
+                    GlobalSSPI.SSPISecureChannel,
+                    securityContext,
+                    Interop.SspiCli.ContextAttribute.SECPKG_ATTR_ISSUER_LIST_EX);
 
             string[] issuers = Array.Empty<string>();
+
             try
             {
-                if (success && issuerList.cIssuers > 0)
+                if (issuerList.cIssuers > 0)
                 {
                     unsafe
                     {
+                        uint count = issuerList.cIssuers;
                         issuers = new string[issuerList.cIssuers];
-                        var elements = new Span<Interop.SspiCli.CERT_CHAIN_ELEMENT>((void*)sspiHandle.DangerousGetHandle(), issuers.Length);
-                        for (int i = 0; i < elements.Length; ++i)
+                        Interop.SspiCli.CERT_CHAIN_ELEMENT* pIL = (Interop.SspiCli.CERT_CHAIN_ELEMENT*)issuerList.aIssuers.DangerousGetHandle();
+                        for (int i = 0; i < count; ++i)
                         {
-                            if (elements[i].cbSize <= 0)
+                            Interop.SspiCli.CERT_CHAIN_ELEMENT* pIL2 = pIL + i;
+                            if (pIL2->cbSize <= 0)
                             {
-                                NetEventSource.Fail(securityContext, $"Interop.SspiCli._CERT_CHAIN_ELEMENT size is not positive: {elements[i].cbSize}");
+                                NetEventSource.Fail(securityContext, $"Interop.SspiCli._CERT_CHAIN_ELEMENT size is not positive: {pIL2->cbSize}");
                             }
-                            if (elements[i].cbSize > 0)
+                            if (pIL2->cbSize > 0)
                             {
-                                byte[] x = new Span<byte>((byte*)elements[i].pCertContext, checked((int)elements[i].cbSize)).ToArray();
-                                var x500DistinguishedName = new X500DistinguishedName(x);
+                                uint size = pIL2->cbSize;
+                                byte* ptr = (byte*)(pIL2->pCertContext);
+                                byte[] x = new byte[size];
+                                for (int j = 0; j < size; j++)
+                                {
+                                    x[j] = *(ptr + j);
+                                }
+
+                                X500DistinguishedName x500DistinguishedName = new X500DistinguishedName(x);
                                 issuers[i] = x500DistinguishedName.Name;
                                 if (NetEventSource.IsEnabled) NetEventSource.Info(securityContext, "IssuerListEx[{issuers[i]}]");
                             }
@@ -156,7 +168,10 @@ namespace System.Net
             }
             finally
             {
-                sspiHandle?.Dispose();
+                if (issuerList.aIssuers != null)
+                {
+                    issuerList.aIssuers.Dispose();
+                }
             }
 
             return issuers;

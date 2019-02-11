@@ -174,7 +174,10 @@ namespace System.Net
             {
                 // This should be very rare, but doing this will reduce the chance of deadlock.
                 _event = null;
-                waitHandle?.Dispose();
+                if (waitHandle != null)
+                {
+                    waitHandle.Dispose();
+                }
 
                 throw;
             }

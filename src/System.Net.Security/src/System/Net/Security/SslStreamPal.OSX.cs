@@ -35,22 +35,61 @@ namespace System.Net.Security
         public static SecurityStatusPal AcceptSecurityContext(
             ref SafeFreeCredentials credential,
             ref SafeDeleteContext context,
-            ArraySegment<byte> inputBuffer,
-            ref byte[] outputBuffer,
+            SecurityBuffer[] inputBuffers,
+            SecurityBuffer outputBuffer,
             SslAuthenticationOptions sslAuthenticationOptions)
         {
-            return HandshakeInternal(credential, ref context, inputBuffer, ref outputBuffer, sslAuthenticationOptions);
+            if (inputBuffers != null)
+            {
+                Debug.Assert(inputBuffers.Length == 2);
+                Debug.Assert(inputBuffers[1].token == null);
+
+                return HandshakeInternal(credential, ref context, inputBuffers[0], outputBuffer, sslAuthenticationOptions);
+            }
+            else
+            {
+                return HandshakeInternal(credential, ref context, inputBuffer: null, outputBuffer, sslAuthenticationOptions);
+            }
         }
 
         public static SecurityStatusPal InitializeSecurityContext(
             ref SafeFreeCredentials credential,
             ref SafeDeleteContext context,
             string targetName,
-            ArraySegment<byte> inputBuffer,
-            ref byte[] outputBuffer,
+            SecurityBuffer inputBuffer,
+            SecurityBuffer outputBuffer,
             SslAuthenticationOptions sslAuthenticationOptions)
         {
-            return HandshakeInternal(credential, ref context, inputBuffer, ref outputBuffer, sslAuthenticationOptions);
+            return HandshakeInternal(credential, ref context, inputBuffer, outputBuffer, sslAuthenticationOptions);
+        }
+
+        public static SecurityStatusPal InitializeSecurityContext(
+            SafeFreeCredentials credential,
+            ref SafeDeleteContext context,
+            string targetName,
+            SecurityBuffer[] inputBuffers,
+            SecurityBuffer outputBuffer,
+            SslAuthenticationOptions sslAuthenticationOptions)
+        {
+            Debug.Assert(inputBuffers.Length == 2);
+            Debug.Assert(inputBuffers[1].token == null);
+            return HandshakeInternal(credential, ref context, inputBuffers[0], outputBuffer, sslAuthenticationOptions);
+        }
+
+        public static SecurityBuffer[] GetIncomingSecurityBuffers(SslAuthenticationOptions options, ref SecurityBuffer incomingSecurity)
+        {
+            SecurityBuffer[] incomingSecurityBuffers = null;
+
+            if (incomingSecurity != null)
+            {
+                incomingSecurityBuffers = new SecurityBuffer[]
+                {
+                    incomingSecurity,
+                    new SecurityBuffer(null, 0, 0, SecurityBufferType.SECBUFFER_EMPTY)
+                };
+            }
+
+            return incomingSecurityBuffers;
         }
 
         public static SafeFreeCredentials AcquireCredentialsHandle(
@@ -233,8 +272,8 @@ namespace System.Net.Security
         private static SecurityStatusPal HandshakeInternal(
             SafeFreeCredentials credential,
             ref SafeDeleteContext context,
-            ArraySegment<byte> inputBuffer,
-            ref byte[] outputBuffer,
+            SecurityBuffer inputBuffer,
+            SecurityBuffer outputBuffer,
             SslAuthenticationOptions sslAuthenticationOptions)
         {
             Debug.Assert(!credential.IsInvalid);
@@ -260,9 +299,9 @@ namespace System.Net.Security
                     }
                 }
 
-                if (inputBuffer.Array != null && inputBuffer.Count > 0)
+                if (inputBuffer != null && inputBuffer.size > 0)
                 {
-                    sslContext.Write(inputBuffer.Array, inputBuffer.Offset, inputBuffer.Count);
+                    sslContext.Write(inputBuffer.token, inputBuffer.offset, inputBuffer.size);
                 }
 
                 SafeSslHandle sslHandle = sslContext.SslContext;
@@ -273,7 +312,11 @@ namespace System.Net.Security
                     status = PerformHandshake(sslHandle);
                 }
 
-                outputBuffer = sslContext.ReadPendingWrites();
+                byte[] output = sslContext.ReadPendingWrites();
+                outputBuffer.offset = 0;
+                outputBuffer.size = output?.Length ?? 0;
+                outputBuffer.token = output;
+
                 return status;
             }
             catch (Exception exc)

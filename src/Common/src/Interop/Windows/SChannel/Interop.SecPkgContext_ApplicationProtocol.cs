@@ -22,22 +22,20 @@ internal static partial class Interop
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal unsafe struct SecPkgContext_ApplicationProtocol
+    internal class SecPkgContext_ApplicationProtocol
     {
         private const int MaxProtocolIdSize = 0xFF;
 
         public ApplicationProtocolNegotiationStatus ProtoNegoStatus;
         public ApplicationProtocolNegotiationExt ProtoNegoExt;
         public byte ProtocolIdSize;
-        public fixed byte ProtocolId[MaxProtocolIdSize];
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxProtocolIdSize)]
+        public byte[] ProtocolId;
         public byte[] Protocol
         {
             get
             {
-                fixed (byte* pid = ProtocolId)
-                {
-                    return new Span<byte>(pid, ProtocolIdSize).ToArray();
-                }
+                return new Span<byte>(ProtocolId, 0, ProtocolIdSize).ToArray();
             }
         }
     }

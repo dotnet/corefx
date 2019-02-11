@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -38,8 +39,8 @@ namespace System.Net.Security
         private SslAuthenticationOptions _sslAuthenticationOptions;
         private SslApplicationProtocol _negotiatedApplicationProtocol;
 
-        private static readonly Oid s_serverAuthOid = new Oid("1.3.6.1.5.5.7.3.1", "1.3.6.1.5.5.7.3.1");
-        private static readonly Oid s_clientAuthOid = new Oid("1.3.6.1.5.5.7.3.2", "1.3.6.1.5.5.7.3.2");
+        private readonly Oid _serverAuthOid = new Oid("1.3.6.1.5.5.7.3.1", "1.3.6.1.5.5.7.3.1");
+        private readonly Oid _clientAuthOid = new Oid("1.3.6.1.5.5.7.3.2", "1.3.6.1.5.5.7.3.2");
 
         internal SecureChannel(SslAuthenticationOptions sslAuthenticationOptions)
         {
@@ -176,8 +177,16 @@ namespace System.Net.Security
 
         internal void Close()
         {
-            _securityContext?.Dispose();
-            _credentialsHandle?.Dispose();
+            if (_securityContext != null)
+            {
+                _securityContext.Dispose();
+            }
+
+            if (_credentialsHandle != null)
+            {
+                _credentialsHandle.Dispose();
+            }
+
             GC.SuppressFinalize(this);
         }
 
@@ -197,9 +206,13 @@ namespace System.Net.Security
 
             try
             {
+                string certHash = null;
+
                 // Protecting from X509Certificate2 derived classes.
                 X509Certificate2 certEx = MakeEx(certificate);
-                
+
+                certHash = certEx.Thumbprint;
+
                 if (certEx != null)
                 {
                     if (certEx.HasPrivateKey)
@@ -217,7 +230,6 @@ namespace System.Net.Security
                 }
 
                 X509Certificate2Collection collectionEx;
-                string certHash = certEx.Thumbprint;
 
                 // ELSE Try the MY user and machine stores for private key check.
                 // For server side mode MY machine store takes priority.
@@ -336,7 +348,7 @@ namespace System.Net.Security
 
             // Acquire possible Client Certificate information and set it on the handle.
             X509Certificate clientCertificate = null;        // This is a candidate that can come from the user callback or be guessed when targeting a session restart.
-            List<X509Certificate> filteredCerts = null;      // This is an intermediate client certs collection that try to use if no selectedCert is available yet.
+            var filteredCerts = new List<X509Certificate>(); // This is an intermediate client certs collection that try to use if no selectedCert is available yet.
             string[] issuers = null;                         // This is a list of issuers sent by the server, only valid is we do know what the server cert is.
 
             bool sessionRestartAttempt = false; // If true and no cached creds we will use anonymous creds.
@@ -361,7 +373,10 @@ namespace System.Net.Security
                 }
                 finally
                 {
-                    remoteCert?.Dispose();
+                    if (remoteCert != null)
+                    {
+                        remoteCert.Dispose();
+                    }
                 }
 
 
@@ -372,7 +387,7 @@ namespace System.Net.Security
                         sessionRestartAttempt = true;
                     }
 
-                    EnsureInitialized(ref filteredCerts).Add(clientCertificate);
+                    filteredCerts.Add(clientCertificate);
                     if (NetEventSource.IsEnabled)
                         NetEventSource.Log.CertificateFromDelegate(this);
                 }
@@ -400,7 +415,7 @@ namespace System.Net.Security
                 sessionRestartAttempt = true;
                 if (clientCertificate != null)
                 {
-                    EnsureInitialized(ref filteredCerts).Add(clientCertificate);
+                    filteredCerts.Add(clientCertificate);
                 }
 
                 if (NetEventSource.IsEnabled)
@@ -458,8 +473,7 @@ namespace System.Net.Security
                             //
                             if (chain.ChainElements.Count > 0)
                             {
-                                int elementsCount = chain.ChainElements.Count;
-                                for (int ii = 0; ii < elementsCount; ++ii)
+                                for (int ii = 0; ii < chain.ChainElements.Count; ++ii)
                                 {
                                     string issuer = chain.ChainElements[ii].Certificate.Issuer;
                                     found = Array.IndexOf(issuers, issuer) != -1;
@@ -484,12 +498,6 @@ namespace System.Net.Security
                             if (chain != null)
                             {
                                 chain.Dispose();
-
-                                int elementsCount = chain.ChainElements.Count;
-                                for (int element = 0; element < elementsCount; element++)
-                                {
-                                    chain.ChainElements[element].Certificate.Dispose();
-                                }
                             }
 
                             if (certificateEx != null && (object)certificateEx != (object)_sslAuthenticationOptions.ClientCertificates[i])
@@ -502,7 +510,7 @@ namespace System.Net.Security
                     if (NetEventSource.IsEnabled)
                         NetEventSource.Log.SelectedCert(_sslAuthenticationOptions.ClientCertificates[i], this);
 
-                    EnsureInitialized(ref filteredCerts).Add(_sslAuthenticationOptions.ClientCertificates[i]);
+                    filteredCerts.Add(_sslAuthenticationOptions.ClientCertificates[i]);
                 }
             }
 
@@ -513,14 +521,13 @@ namespace System.Net.Security
 
             if (NetEventSource.IsEnabled)
             {
-                if (filteredCerts != null && filteredCerts.Count != 0)
+                NetEventSource.Log.CertsAfterFiltering(filteredCerts.Count, this);
+                if (filteredCerts.Count != 0)
                 {
-                    NetEventSource.Log.CertsAfterFiltering(filteredCerts.Count, this);
                     NetEventSource.Log.FindingMatchingCerts(this);
                 }
                 else
                 {
-                    NetEventSource.Log.CertsAfterFiltering(0, this);
                     NetEventSource.Info(this, "No client certificate to choose from");
                 }
             }
@@ -532,19 +539,16 @@ namespace System.Net.Security
             // SECURITY: Accessing X509 cert Credential is disabled for semitrust.
             // We no longer need to demand for unmanaged code permissions.
             // EnsurePrivateKey should do the right demand for us.
-            if (filteredCerts != null)
+            for (int i = 0; i < filteredCerts.Count; ++i)
             {
-                for (int i = 0; i < filteredCerts.Count; ++i)
+                clientCertificate = filteredCerts[i];
+                if ((selectedCert = EnsurePrivateKey(clientCertificate)) != null)
                 {
-                    clientCertificate = filteredCerts[i];
-                    if ((selectedCert = EnsurePrivateKey(clientCertificate)) != null)
-                    {
-                        break;
-                    }
-
-                    clientCertificate = null;
-                    selectedCert = null;
+                    break;
                 }
+
+                clientCertificate = null;
+                selectedCert = null;
             }
 
             if ((object)clientCertificate != (object)selectedCert && !clientCertificate.Equals(selectedCert))
@@ -620,7 +624,6 @@ namespace System.Net.Security
             return cachedCred;
         }
 
-        private static List<T> EnsureInitialized<T>(ref List<T> list) => list ?? (list = new List<T>());
 
         //
         // Acquire Server Side Certificate information and set it on the class.
@@ -779,8 +782,20 @@ namespace System.Net.Security
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            byte[] result = Array.Empty<byte>();
-            SecurityStatusPal status = default;
+            SecurityBuffer incomingSecurity = null;
+            SecurityBuffer[] incomingSecurityBuffers = null;
+
+            if (input != null)
+            {
+                incomingSecurity = new SecurityBuffer(input, offset, count, SecurityBufferType.SECBUFFER_TOKEN);
+            }
+
+            incomingSecurityBuffers = SslStreamPal.GetIncomingSecurityBuffers(_sslAuthenticationOptions, ref incomingSecurity);
+
+            SecurityBuffer outgoingSecurity = new SecurityBuffer(null, SecurityBufferType.SECBUFFER_TOKEN);
+
+            SecurityStatusPal status = default(SecurityStatusPal);
+
             bool cachedCreds = false;
             byte[] thumbPrint = null;
 
@@ -805,19 +820,32 @@ namespace System.Net.Security
                         status = SslStreamPal.AcceptSecurityContext(
                                       ref _credentialsHandle,
                                       ref _securityContext,
-                                      input != null ? new ArraySegment<byte>(input, offset, count) : default,
-                                      ref result,
+                                      incomingSecurityBuffers,
+                                      outgoingSecurity,
                                       _sslAuthenticationOptions);
                     }
                     else
                     {
-                        status = SslStreamPal.InitializeSecurityContext(
-                                       ref _credentialsHandle,
-                                       ref _securityContext,
-                                       _sslAuthenticationOptions.TargetHost,
-                                      input != null ? new ArraySegment<byte>(input, offset, count) : default,
-                                       ref result,
-                                       _sslAuthenticationOptions);
+                        if (incomingSecurityBuffers == null)
+                        {
+                            status = SslStreamPal.InitializeSecurityContext(
+                                           ref _credentialsHandle,
+                                           ref _securityContext,
+                                           _sslAuthenticationOptions.TargetHost,
+                                           incomingSecurity,
+                                           outgoingSecurity,
+                                           _sslAuthenticationOptions);
+                        }
+                        else
+                        {
+                            status = SslStreamPal.InitializeSecurityContext(
+                                           _credentialsHandle,
+                                           ref _securityContext,
+                                           _sslAuthenticationOptions.TargetHost,
+                                           incomingSecurityBuffers,
+                                           outgoingSecurity,
+                                           _sslAuthenticationOptions);
+                        }
                     }
                 } while (cachedCreds && _credentialsHandle == null);
             }
@@ -831,7 +859,10 @@ namespace System.Net.Security
                     // Assuming the ISC or ASC has referenced the credential,
                     // we want to call dispose so to decrement the effective ref count.
                     //
-                    _credentialsHandle?.Dispose();
+                    if (_credentialsHandle != null)
+                    {
+                        _credentialsHandle.Dispose();
+                    }
 
                     //
                     // This call may bump up the credential reference count further.
@@ -844,7 +875,7 @@ namespace System.Net.Security
                 }
             }
 
-            output = result;
+            output = outgoingSecurity.token;
             if (_negotiatedApplicationProtocol == default)
             {
                 // try to get ALPN info unless we already have it. (this function can be called multiple times)
@@ -969,6 +1000,9 @@ namespace System.Net.Security
         --*/
 
         //This method validates a remote certificate.
+        //SECURITY: The scenario is allowed in semitrust StorePermission is asserted for Chain.Build
+        //          A user callback has unique signature so it is safe to call it under permission assert.
+        //
         internal bool VerifyRemoteCertificate(RemoteCertValidationCallback remoteCertValidationCallback, ref ProtocolToken alertToken)
         {
             if (NetEventSource.IsEnabled)
@@ -980,10 +1014,10 @@ namespace System.Net.Security
             bool success = false;
             X509Chain chain = null;
             X509Certificate2 remoteCertificateEx = null;
-            X509Certificate2Collection remoteCertificateStore = null;
 
             try
             {
+                X509Certificate2Collection remoteCertificateStore;
                 remoteCertificateEx = CertificateValidationPal.GetRemoteCertificate(_securityContext, out remoteCertificateStore);
                 _isRemoteCertificateAvailable = remoteCertificateEx != null;
 
@@ -1000,7 +1034,7 @@ namespace System.Net.Security
                     chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
 
                     // Authenticate the remote party: (e.g. when operating in server mode, authenticate the client).
-                    chain.ChainPolicy.ApplicationPolicy.Add(_sslAuthenticationOptions.IsServer ? s_clientAuthOid : s_serverAuthOid);
+                    chain.ChainPolicy.ApplicationPolicy.Add(_sslAuthenticationOptions.IsServer ? _clientAuthOid : _serverAuthOid);
 
                     if (remoteCertificateStore != null)
                     {
@@ -1048,28 +1082,15 @@ namespace System.Net.Security
             {
                 // At least on Win2k server the chain is found to have dependencies on the original cert context.
                 // So it should be closed first.
-
                 if (chain != null)
                 {
-                    int elementsCount = chain.ChainElements.Count;
-                    for (int i = 0; i < elementsCount; i++)
-                    {
-                        chain.ChainElements[i].Certificate.Dispose();
-                    }
-
                     chain.Dispose();
                 }
 
-                if (remoteCertificateStore != null)
+                if (remoteCertificateEx != null)
                 {
-                    int certCount = remoteCertificateStore.Count;
-                    for (int i = 0; i < certCount; i++)
-                    {
-                        remoteCertificateStore[i].Dispose();
-                    }
+                    remoteCertificateEx.Dispose();
                 }
-
-                remoteCertificateEx?.Dispose();
             }
 
             if (NetEventSource.IsEnabled)

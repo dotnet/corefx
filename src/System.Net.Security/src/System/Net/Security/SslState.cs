@@ -24,8 +24,9 @@ namespace System.Net.Security
 
         internal SslAuthenticationOptions _sslAuthenticationOptions;
 
-        private readonly Stream _innerStream;
-        private readonly SslStreamInternal _secureStream;
+        private Stream _innerStream;
+
+        private SslStreamInternal _secureStream;
 
         private int _nestedAuth;
         private SecureChannel _context;
@@ -74,7 +75,6 @@ namespace System.Net.Security
         internal SslState(Stream innerStream)
         {
             _innerStream = innerStream;
-            _secureStream = new SslStreamInternal(this);
         }
 
         /// <summary>Set as the _exception when the instance is disposed.</summary>
@@ -398,6 +398,11 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
+                if (_secureStream == null)
+                {
+                    Interlocked.CompareExchange<SslStreamInternal>(ref _secureStream, new SslStreamInternal(this), null);
+                }
+
                 return _secureStream;
             }
         }
@@ -850,7 +855,7 @@ namespace System.Net.Security
             else
             {
                 asyncRequest.SetNextRequest(buffer, 0, SecureChannel.ReadHeaderSize, s_partialFrameCallback);
-                _ = FixedSizeReader.ReadPacketAsync(_innerStream, asyncRequest);
+                FixedSizeReader.ReadPacketAsync(_innerStream, asyncRequest);
                 if (!asyncRequest.MustCompleteSynchronously)
                 {
                     return;
@@ -898,7 +903,7 @@ namespace System.Net.Security
             else
             {
                 asyncRequest.SetNextRequest(buffer, readBytes, restBytes, s_readFrameCallback);
-                _ = FixedSizeReader.ReadPacketAsync(_innerStream, asyncRequest);
+                FixedSizeReader.ReadPacketAsync(_innerStream, asyncRequest);
                 if (!asyncRequest.MustCompleteSynchronously)
                 {
                     return;
@@ -1606,7 +1611,7 @@ namespace System.Net.Security
 #if TRACE_VERBOSE
                 if (bytes[1] != 3 && NetEventSource.IsEnabled)
                 {
-                    if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"WARNING: SslState::DetectFraming() SSL protocol is > 3, trying SSL3 framing in retail = {bytes[1]:x}");
+                    if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"WARNING: SslState::DetectFraming() SSL protocol is > 3, trying SSL3 framing in retail = {bytes[i]:x}");
                 }
 #endif
 

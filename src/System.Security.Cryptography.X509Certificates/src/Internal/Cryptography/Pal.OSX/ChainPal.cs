@@ -413,6 +413,9 @@ namespace Internal.Cryptography.Pal
 
         private X509ChainElement BuildElement(X509Certificate2 cert, int dwStatus)
         {
+            const int errSecCertificateExpired = -67818;
+            const int errSecCertificateNotValidYet = -67819;
+
             if (dwStatus == 0)
             {
                 return new X509ChainElement(cert, Array.Empty<X509ChainStatus>(), "");
@@ -426,30 +429,29 @@ namespace Internal.Cryptography.Pal
                 if ((mapping.ChainStatusFlag & flags) == mapping.ChainStatusFlag)
                 {
                     int osStatus;
-                    string errorString;
 
                     // Disambiguate the NotTimeValid code to get the right string.
                     if (mapping.ChainStatusFlag == X509ChainStatusFlags.NotTimeValid)
                     {
-                        const int errSecCertificateExpired = -67818;
-                        const int errSecCertificateNotValidYet = -67819;
-
-                        osStatus = cert != null && cert.NotBefore > _verificationTime ?
-                            errSecCertificateNotValidYet :
-                            errSecCertificateExpired;
-                        errorString = Interop.AppleCrypto.GetSecErrorString(osStatus);
+                        if (cert != null && cert.NotBefore > _verificationTime)
+                        {
+                            osStatus = errSecCertificateNotValidYet;
+                        }
+                        else
+                        {
+                            osStatus = errSecCertificateExpired;
+                        }
                     }
                     else
                     {
                         osStatus = mapping.OSStatus;
-                        errorString = mapping.ErrorString;
                     }
 
                     statuses.Add(
                         new X509ChainStatus
                         {
                             Status = mapping.ChainStatusFlag,
-                            StatusInformation = errorString
+                            StatusInformation = Interop.AppleCrypto.GetSecErrorString(osStatus),
                         });
                 }
             }
@@ -490,13 +492,11 @@ namespace Internal.Cryptography.Pal
 
             internal readonly X509ChainStatusFlags ChainStatusFlag;
             internal readonly int OSStatus;
-            internal readonly string ErrorString;
 
             private X509ChainErrorMapping(X509ChainStatusFlags flag)
             {
                 ChainStatusFlag = flag;
                 OSStatus = Interop.AppleCrypto.GetOSStatusForChainStatus(flag);
-                ErrorString = Interop.AppleCrypto.GetSecErrorString(OSStatus);
             }
         }
     }

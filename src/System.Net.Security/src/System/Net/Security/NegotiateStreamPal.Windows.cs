@@ -2,11 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
+using System.Globalization;
+using System.IO;
 using System.Security;
 using System.Security.Principal;
+using System.Threading;
+using System.ComponentModel;
+using System.Security.Authentication;
+using System.Security.Authentication.ExtendedProtection;
 
 namespace System.Net.Security
 {
@@ -60,7 +64,10 @@ namespace System.Net.Security
                 }
                 finally
                 {
-                    token?.Dispose();
+                    if (token != null)
+                    {
+                        token.Dispose();
+                    }
                 }
             }
 
@@ -71,7 +78,7 @@ namespace System.Net.Security
 
         internal static string QueryContextAssociatedName(SafeDeleteContext securityContext)
         {
-            return SSPIWrapper.QueryStringContextAttributes(GlobalSSPI.SSPIAuth, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_NAMES);
+            return SSPIWrapper.QueryContextAttributes(GlobalSSPI.SSPIAuth, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_NAMES) as string;
         }
         
         internal static void ValidateImpersonationLevel(TokenImpersonationLevel impersonationLevel)
@@ -94,9 +101,11 @@ namespace System.Net.Security
             ref byte[] output,
             uint sequenceNumber)
         {
-            SecPkgContext_Sizes sizes = default;
-            bool success = SSPIWrapper.QueryBlittableContextAttributes(GlobalSSPI.SSPIAuth, securityContext, Interop.SspiCli.ContextAttribute.SECPKG_ATTR_SIZES, ref sizes);
-            Debug.Assert(success);
+            SecPkgContext_Sizes sizes = SSPIWrapper.QueryContextAttributes(
+                GlobalSSPI.SSPIAuth,
+                securityContext,
+                Interop.SspiCli.ContextAttribute.SECPKG_ATTR_SIZES
+                ) as SecPkgContext_Sizes;
 
             try
             {
@@ -123,8 +132,7 @@ namespace System.Net.Security
             Buffer.BlockCopy(buffer, offset, output, 4 + sizes.cbSecurityTrailer, count);
 
             // Prepare buffers TOKEN(signature), DATA and Padding.
-            ThreeSecurityBuffers buffers = default;
-            var securityBuffer = MemoryMarshal.CreateSpan(ref buffers._item0, 3);
+            var securityBuffer = new SecurityBuffer[3];
             securityBuffer[0] = new SecurityBuffer(output, 4, sizes.cbSecurityTrailer, SecurityBufferType.SECBUFFER_TOKEN);
             securityBuffer[1] = new SecurityBuffer(output, 4 + sizes.cbSecurityTrailer, count, SecurityBufferType.SECBUFFER_DATA);
             securityBuffer[2] = new SecurityBuffer(output, 4 + sizes.cbSecurityTrailer + count, sizes.cbBlockSize, SecurityBufferType.SECBUFFER_PADDING);
@@ -208,8 +216,7 @@ namespace System.Net.Security
             //
             // Kerberos and up
             //
-            TwoSecurityBuffers buffers = default;
-            var securityBuffer = MemoryMarshal.CreateSpan(ref buffers._item0, 2);
+            var securityBuffer = new SecurityBuffer[2];
             securityBuffer[0] = new SecurityBuffer(buffer, offset, count, SecurityBufferType.SECBUFFER_STREAM);
             securityBuffer[1] = new SecurityBuffer(0, SecurityBufferType.SECBUFFER_DATA);
 
@@ -256,8 +263,7 @@ namespace System.Net.Security
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            TwoSecurityBuffers buffers = default;
-            var securityBuffer = MemoryMarshal.CreateSpan(ref buffers._item0, 2);
+            var securityBuffer = new SecurityBuffer[2];
             securityBuffer[0] = new SecurityBuffer(buffer, offset, ntlmSignatureLength, SecurityBufferType.SECBUFFER_TOKEN);
             securityBuffer[1] = new SecurityBuffer(buffer, offset + ntlmSignatureLength, count - ntlmSignatureLength, SecurityBufferType.SECBUFFER_DATA);
 

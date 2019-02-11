@@ -37,11 +37,9 @@ namespace System.Security.Cryptography.X509Certificates
             _lazyNotAfter = DateTime.MinValue;
 
             ICertificatePalCore pal = Pal;
+            Pal = null;
             if (pal != null)
-            {
-                Pal = null;
                 pal.Dispose();
-            }
         }
 
         public X509Certificate()
