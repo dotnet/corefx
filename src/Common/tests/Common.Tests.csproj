@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{C72FD34C-539A-4447-9796-62A229571199}</ProjectGuid>
     <TestCategories>InnerLoop;OuterLoop</TestCategories>
@@ -21,6 +21,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\CharArrayHelpers.cs">
       <Link>Common\System\CharArrayHelpers.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\BitOp.cs">
+      <Link>Common\System\BitOps.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Marvin.cs">
       <Link>Common\System\Marvin.cs</Link>
@@ -74,6 +77,7 @@
     <Compile Include="Tests\System\CharArrayHelpersTests.cs" />
     <Compile Include="Tests\System\IO\PathInternal.Tests.cs" />
     <Compile Include="Tests\System\IO\StringParserTests.cs" />
+    <Compile Include="Tests\System\BitOpsTests.cs" />
     <Compile Include="Tests\System\MarvinTests.cs" />
     <Compile Include="Tests\System\Net\HttpDateParserTests.cs" />
     <Compile Include="Tests\System\PasteArgumentsTests.cs" />
