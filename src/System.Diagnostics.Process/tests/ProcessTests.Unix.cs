@@ -529,7 +529,9 @@ namespace System.Diagnostics.Tests
             string userGroupId = GetUserGroupId(userName);
             string userGroupIds = GetUserGroupIds(userName);
             // If this test runs as the user, we expect to be able to match the user groups exactly.
-            bool checkGroupsExact = userId == geteuid().ToString();
+            // Except on OSX, where getgrouplist may return a list of groups truncated to NGROUPS_MAX.
+            bool checkGroupsExact = userId == geteuid().ToString() &&
+                                    !RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
 
             // Start as username
             var invokeOptions = new RemoteInvokeOptions();
