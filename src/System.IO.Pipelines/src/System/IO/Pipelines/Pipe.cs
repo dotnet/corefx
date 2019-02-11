@@ -141,9 +141,12 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.minimumSize);
             }
 
-            lock (_sync)
+            // If writing is currently active and enough space, don't need to take the lock to just set WritingActive.
+            // IsWritingActive is needed to prevent the reader releasing the writers memory when it fully consumes currently written.
+            if (!_operationState.IsWritingActive ||
+                _writingMemory.Length == 0 || _writingMemory.Length < sizeHint)
             {
-                AllocateWriteHeadUnsynchronized(sizeHint);
+                AllocateWriteHeadSynchronized(sizeHint);
             }
 
             return _writingMemory;
@@ -161,43 +164,49 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.minimumSize);
             }
 
-            lock (_sync)
+            // If writing is currently active and enough space, don't need to take the lock to just set WritingActive.
+            // IsWritingActive is needed to prevent the reader releasing the writers memory when it fully consumes currently written.
+            if (!_operationState.IsWritingActive ||
+                _writingMemory.Length == 0 || _writingMemory.Length < sizeHint)
             {
-                AllocateWriteHeadUnsynchronized(sizeHint);
+                AllocateWriteHeadSynchronized(sizeHint);
             }
 
             return _writingMemory.Span;
         }
 
-        private void AllocateWriteHeadUnsynchronized(int sizeHint)
+        private void AllocateWriteHeadSynchronized(int sizeHint)
         {
-            _operationState.BeginWrite();
-
-            if (_writingHead == null)
+            lock (_sync)
             {
-                // We need to allocate memory to write since nobody has written before
-                BufferSegment newSegment = AllocateSegment(sizeHint);
+                _operationState.BeginWrite();
 
-                // Set all the pointers
-                _writingHead = _readHead = _readTail = newSegment;
-            }
-            else
-            {
-                int bytesLeftInBuffer = _writingMemory.Length;
-
-                if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < sizeHint)
+                if (_writingHead == null)
                 {
-                    if (_buffered > 0)
-                    {
-                        // Flush buffered data to the segment
-                        _writingHead.End += _buffered;
-                        _buffered = 0;
-                    }
-
+                    // We need to allocate memory to write since nobody has written before
                     BufferSegment newSegment = AllocateSegment(sizeHint);
 
-                    _writingHead.SetNext(newSegment);
-                    _writingHead = newSegment;
+                    // Set all the pointers
+                    _writingHead = _readHead = _readTail = newSegment;
+                }
+                else
+                {
+                    int bytesLeftInBuffer = _writingMemory.Length;
+
+                    if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < sizeHint)
+                    {
+                        if (_buffered > 0)
+                        {
+                            // Flush buffered data to the segment
+                            _writingHead.End += _buffered;
+                            _buffered = 0;
+                        }
+
+                        BufferSegment newSegment = AllocateSegment(sizeHint);
+
+                        _writingHead.SetNext(newSegment);
+                        _writingHead = newSegment;
+                    }
                 }
             }
         }
@@ -471,6 +480,7 @@ namespace System.IO.Pipelines
                             Debug.Assert(_readHead == null);
                             Debug.Assert(_readTail == null);
                             _writingHead = null;
+                            _writingMemory = default;
                         }
 
                         returnEnd = nextBlock;
