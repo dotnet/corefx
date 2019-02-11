@@ -11,8 +11,6 @@ namespace Tests.System
 {
     public static class BitOpsTests
     {
-        #region TrailingZeroCount
-
         [Theory]
         [InlineData(0u, 32)]
         [InlineData(0b1u, 0)]
@@ -56,7 +54,5 @@ namespace Tests.System
             int actual = BitOps.TrailingZeroCount(n);
             Assert.Equal(expected, actual);
         }
-
-        #endregion
     }
 }

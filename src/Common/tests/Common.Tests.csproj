@@ -70,6 +70,9 @@
     <Compile Include="$(CommonPath)\CoreLib\System\PasteArguments.cs">
       <Link>Common\CoreLib\System\PasteArguments.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\BitOps.cs">
+      <Link>Common\CoreLib\System\BitOps.cs</Link>
+    </Compile>
     <Compile Include="Tests\Interop\procfsTests.cs" />
     <Compile Include="Tests\System\CharArrayHelpersTests.cs" />
     <Compile Include="Tests\System\IO\PathInternal.Tests.cs" />
