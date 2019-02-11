@@ -40,7 +40,7 @@ namespace System.IO.Pipelines.Tests
             SequencePosition consumed = result.Buffer.GetPosition(31);
 
             var exception = Assert.Throws<InvalidOperationException>(() => _pipe.Reader.AdvanceTo(consumed, result.Buffer.End));
-            Assert.Equal("The maximum buffer limit of 32 bytes was exceeded by the writer.", exception.Message);
+            Assert.Contains("32", exception.Message);
 
             _pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
         }
@@ -57,8 +57,9 @@ namespace System.IO.Pipelines.Tests
 
             // Examine to the end without releasing backpressure
             var result = await _pipe.Reader.ReadAsync();
+
             var exception = Assert.Throws<InvalidOperationException>(() => _pipe.Reader.AdvanceTo(result.Buffer.Start, result.Buffer.End));
-            Assert.Equal("The maximum buffer limit of 32 bytes was exceeded by the writer.", exception.Message);
+            Assert.Contains("32", exception.Message);
         }
 
         [Fact]
