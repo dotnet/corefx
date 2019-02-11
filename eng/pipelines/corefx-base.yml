@@ -130,6 +130,9 @@ jobs:
         workspace:
           clean: all
 
+        # enabling publish build artifacts, will publish all build logs under /artifacts/log/
+        enablePublishBuildArtifacts: true
+
         ${{ if ne(job.enableMicrobuild, '') }}:
           enableMicrobuild: ${{ job.enableMicrobuild }}
 
