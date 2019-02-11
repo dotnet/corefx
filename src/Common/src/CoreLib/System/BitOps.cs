@@ -55,9 +55,9 @@ namespace System
 
             // uint.MaxValue >> 27 is always in range [0 - 31] so we use Unsafe.AddByteOffset to avoid bounds check
             return Unsafe.AddByteOffset(
-                ref MemoryMarshal.GetReference(s_TrailingZeroCountDeBruijn), 
+                ref MemoryMarshal.GetReference(s_TrailingZeroCountDeBruijn),
                 // Using deBruijn sequence, k=2, n=5 (2^5=32) : 0b_0000_0111_0111_1100_1011_0101_0011_0001u
-                ((uint)((value & -value) * 0x077CB531u)) >> 27);
+                (IntPtr)(int)(((uint)((value & -value) * 0x077CB531u)) >> 27)); // shift over long also expensive on 32-bit
         }
     }
 }
