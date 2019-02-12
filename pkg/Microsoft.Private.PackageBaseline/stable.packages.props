@@ -1540,5 +1540,16 @@
       <Version>4.1.1</Version>
     </StablePackage>
 
+    <!-- Post 1.0.14 update for UWP -->
+    <StablePackage Include="System.Private.Uri">
+      <Version>4.0.4</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.unix.System.Private.Uri">
+      <Version>4.0.4</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.win7.System.Private.Uri">
+      <Version>4.0.4</Version>
+    </StablePackage>
+
   </ItemGroup>
 </Project>
