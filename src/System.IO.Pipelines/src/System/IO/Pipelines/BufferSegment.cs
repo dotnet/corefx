@@ -27,7 +27,7 @@ namespace System.IO.Pipelines
                 Debug.Assert(value <= AvailableMemory.Length);
 
                 _end = value;
-                Memory = AvailableMemory.Slice(0, _end);
+                Memory = AvailableMemory.Slice(0, value);
             }
         }
 
@@ -66,7 +66,7 @@ namespace System.IO.Pipelines
         {
             AvailableMemory = memory;
             RunningIndex = 0;
-            End = 0;
+            _end = 0;
             NextSegment = null;
         }
 
@@ -83,6 +83,7 @@ namespace System.IO.Pipelines
 
             _memoryOwner = null;
             AvailableMemory = default;
+            Memory = default;
         }
 
         // Exposed for testing
