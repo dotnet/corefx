@@ -136,13 +136,16 @@ jobs:
           - ${{ if eq(job.customBuildSteps[0], '') }}:
             
             - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+              - task: NuGetToolInstaller@0
+                inputs:
+                  versionSpec: '4.9.2'
               - task: NuGetCommand@2
                 displayName: Restore internal tools
                 inputs:
                   command: restore
                   feedsToUse: config
                   restoreSolution: 'eng\common\internal\Tools.csproj'
-                  nugetConfigPath: 'NuGet.config'
+                  nugetConfigPath: 'eng\common\internal\NuGet.config'
                   restoreDirectory: '$(Build.SourcesDirectory)\.packages'
                 condition: eq(variables['_restoreInternalTools'], 'true')
 
