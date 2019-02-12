@@ -8,29 +8,21 @@ for %%x in (%*) do Set /A argC+=1
 if NOT %argC%==3 GOTO :USAGE
 if %1=="/?" GOTO :USAGE
 
-setlocal EnableDelayedExpansion
+setlocal
 set __sourceDir=%~dp0
 set __ExtraCmakeParams=
 
-:: VS 2017 is the minimum supported toolset
 if "%__VSVersion%" == "vs2019" (
-  set __VSString=16 2019
-
-  :: VS 2019 generator is not per arch, and the arch needs to be passed with -A option
-  :: x86 is the default arch selected by cmake.
   :: CMAKE 3.14 or later is required to use VS2019
-  if /i "%3" == "x64"     (set __ExtraCmakeParams=%__ExtraCmakeParams% -A x64)
-  if /i "%3" == "arm"     (set __ExtraCmakeParams=%__ExtraCmakeParams% -A ARM)
+  set __VSString=16 2019
 ) else (
+  :: VS 2017 is the minimum supported toolset
   set __VSString=15 2017
-
-  :: VS2017 generator needs to be specified with the arch as part of its name.
-  :: x86 is the default arch selected by cmake.
-  if /i "%3" == "x64"     (set __VSString=!__VSString! Win64)
-  if /i "%3" == "arm"     (set __VSString=!__VSString! ARM)
 )
 
-:: arm64 doesn't have a specific generator so we need to pass it through -A option.
+:: x86 is the default arch selected by cmake.
+if /i "%3" == "x64"     (set __ExtraCmakeParams=%__ExtraCmakeParams% -A x64)
+if /i "%3" == "arm"     (set __ExtraCmakeParams=%__ExtraCmakeParams% -A ARM)
 if /i "%3" == "arm64"   (set __ExtraCmakeParams=%__ExtraCmakeParams% -A ARM64)
 if /i "%3" == "wasm"    (set __sourceDir=%~dp0..\Unix && goto DoGen)
 
