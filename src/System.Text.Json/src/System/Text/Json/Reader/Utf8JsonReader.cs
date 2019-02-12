@@ -113,10 +113,22 @@ namespace System.Text.Json
         {
             get
             {
-                // TODO: Cannot use Slice even though it would be faster: https://github.com/dotnet/corefx/issues/33291
-                return _isInputSequence
-                    ? _sequence.GetPosition(BytesConsumed)
-                    : default;
+                if (_isInputSequence)
+                {
+                    if (_isSingleSegment)
+                    {
+                        return _sequence.GetPosition(_consumed);
+                    }
+                    else
+                    {
+                        Debug.Assert(_currentPosition.GetObject() != null);
+                        return _sequence.GetPosition(_consumed, _currentPosition);
+                    }
+                }
+                else
+                {
+                    return default;
+                }
             }
         }
 
