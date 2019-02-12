@@ -55,7 +55,7 @@ namespace System.Diagnostics
     }
 
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
+        [System.Security.SecuritySafeCriticalAttribute]
 #endif
     public partial struct ActivitySpanId : IEquatable<ActivitySpanId>
     {
@@ -75,7 +75,7 @@ namespace System.Diagnostics
     }
 
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
+        [System.Security.SecuritySafeCriticalAttribute]
 #endif
     public partial struct ActivityTraceId : IEquatable<ActivityTraceId>
     {
