@@ -213,19 +213,20 @@ namespace System.Net
                 long result = 0;
                 if (!string.IsNullOrEmpty(scopeId))
                 {
-                    if (scopeId.Length < 2)
+                    uint interfaceIndex = Interop.Sys.GetNativeIPInterfaceIndex(scopeId);
+                    if (interfaceIndex >= 0)
                     {
-                        scope = 0;
-                        return false;
+                        scope = interfaceIndex;
+                        return true;
                     }
 
-                    for (int i = 1; i < scopeId.Length; i++)
+                    for (int i = 0; i < scopeId.Length; i++)
                     {
                         char c = scopeId[i];
                         if (c < '0' || c > '9')
                         {
                             scope = 0;
-                            return false;
+                            return true;
                         }
                         result = (result * 10) + (c - '0');
                         if (result > uint.MaxValue)

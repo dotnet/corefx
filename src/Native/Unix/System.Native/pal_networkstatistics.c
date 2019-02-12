@@ -437,6 +437,12 @@ int32_t SystemNative_GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoC
     return 0;
 }
 
+uint32_t SystemNative_GetNativeIPInterfaceIndex(char* interfaceName)
+{
+    assert(interfaceName != NULL);
+    return if_nametoindex(interfaceName);
+}
+
 int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPInterfaceStatistics* retStats)
 {
     assert(interfaceName != NULL && retStats != NULL);

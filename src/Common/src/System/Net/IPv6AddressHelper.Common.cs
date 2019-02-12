@@ -143,11 +143,6 @@ namespace System
                                 {
                                     goto case '/';
                                 }
-                                else if (name[i] < '0' || name[i] > '9')
-                                {
-                                    // scope ID must only contain digits
-                                    return false;
-                                }
                             }
                             break;
                         case ']':
@@ -307,7 +302,10 @@ namespace System
                         for (++i; i < address.Length && address[i] != ']' && address[i] != '/'; ++i)
                         {
                         }
-                        scopeId = new string(address.Slice(start, i - start));
+                        if (i - start > 0)
+                            scopeId = new string(address.Slice(start + 1, i - start)); // + 1 to ignore '%'
+                        else
+                            scopeId = string.Empty;
                         // ignore prefix if any
                         for (; i < address.Length && address[i] != ']'; ++i)
                         {
