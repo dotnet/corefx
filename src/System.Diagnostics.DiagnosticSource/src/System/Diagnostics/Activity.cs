@@ -429,7 +429,7 @@ namespace System.Diagnostics
         {
             get
             {
-                for (var activity = this; activity != null; activity = activity.Parent)
+                for (Activity activity = this; activity != null; activity = activity.Parent)
                 {
                     var val = activity._traceState;
                     if (val != null)
@@ -462,7 +462,7 @@ namespace System.Diagnostics
                 {
                     if (_id != null && IdFormat == ActivityIdFormat.W3C)
                     {
-                        _spanId = new ActivitySpanId(((ReadOnlySpan<char>)_id).Slice(36, 16));
+                        _spanId = new ActivitySpanId(_id.AsSpan(36, 16));
                         _spanIdSet = true;
                     }
                 }
@@ -489,7 +489,7 @@ namespace System.Diagnostics
                 {
                     if (_id != null && IdFormat == ActivityIdFormat.W3C)
                     {
-                        _traceId = new ActivityTraceId(((ReadOnlySpan<char>)_id).Slice(3, 32));
+                        _traceId = new ActivityTraceId(_id.AsSpan(3, 32));
                         _traceIdSet = true;
                     }
                 }
@@ -507,7 +507,7 @@ namespace System.Diagnostics
             {
                 if (!_parentSpanIdSet && _parentId != null && IsW3CId(_parentId))
                 {
-                    _parentSpanId = new ActivitySpanId(((ReadOnlySpan<char>)_parentId).Slice(36, 16));
+                    _parentSpanId = new ActivitySpanId(_parentId.AsSpan(36, 16));
                     _parentSpanIdSet = true;
                 }
                 return ref _parentSpanId;
@@ -581,7 +581,7 @@ namespace System.Diagnostics
                 if (Parent != null && Parent.IdFormat == ActivityIdFormat.W3C)
                     _traceId = Parent.TraceId;
                 else if (_parentId != null && IsW3CId(_parentId))
-                    _traceId = new ActivityTraceId(((ReadOnlySpan<char>)_parentId).Slice(3, 32));
+                    _traceId = new ActivityTraceId(_parentId.AsSpan(3, 32));
                 else
                     _traceId = ActivityTraceId.NewTraceId();
                 _traceIdSet = true;
