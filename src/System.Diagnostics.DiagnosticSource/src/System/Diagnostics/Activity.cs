@@ -776,6 +776,9 @@ namespace System.Diagnostics
     /// it has to, and caches the string representation after it was created.   
     /// It is mostly useful as an exchange type.  
     /// </summary>
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+        [SecuritySafeCritical]
+#endif
     public unsafe struct ActivityTraceId : IEquatable<ActivityTraceId>
     {
         /// <summary>
@@ -974,6 +977,9 @@ namespace System.Diagnostics
     /// it has to, and caches the string representation after it was created.   
     /// It is mostly useful as an exchange type.  
     /// </summary>
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+        [SecuritySafeCritical]
+#endif
     public unsafe struct ActivitySpanId : IEquatable<ActivitySpanId>
     {
         /// <summary>

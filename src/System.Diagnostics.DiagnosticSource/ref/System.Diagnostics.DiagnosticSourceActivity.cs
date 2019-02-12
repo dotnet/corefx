@@ -54,6 +54,9 @@ namespace System.Diagnostics
         W3C = (byte)2,
     }
 
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+        [SecuritySafeCritical]
+#endif
     public partial struct ActivitySpanId : IEquatable<ActivitySpanId>
     {
         private object _dummy;
@@ -70,6 +73,10 @@ namespace System.Diagnostics
         public static bool operator !=(in System.Diagnostics.ActivitySpanId spanId1, in System.Diagnostics.ActivitySpanId spandId2) { throw null; }
         public override string ToString() { throw null; }
     }
+
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+        [SecuritySafeCritical]
+#endif
     public partial struct ActivityTraceId : IEquatable<ActivityTraceId>
     {
         private object _dummy;
