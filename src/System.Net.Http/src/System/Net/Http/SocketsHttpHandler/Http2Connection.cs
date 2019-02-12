@@ -701,19 +701,6 @@ namespace System.Net.Http
             _headerBuffer.Commit(bytesWritten);
         }
 
-        private void WriteHeader(string name, string[] value, string separator)
-        {
-            // TODO: ISSUE 31307: Use static table for known headers
-
-            int bytesWritten;
-            while (!HPackEncoder.EncodeHeader(name, value, separator, _headerBuffer.AvailableSpan, out bytesWritten))
-            {
-                _headerBuffer.EnsureAvailableSpace(_headerBuffer.AvailableSpan.Length + 1);
-            }
-
-            _headerBuffer.Commit(bytesWritten);
-        }
-
         private void WriteHeader(HeaderDescriptor header, string[] value, string separator)
         {
             // TODO: ISSUE 31307: Use static table for known headers

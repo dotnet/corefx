@@ -30,20 +30,26 @@ namespace System.Net.Http.HPack
 
         public static bool EncodeHeader(Headers.HeaderDescriptor header, string value, Span<byte> buffer, out int length)
         {
+            Debug.Assert(value != null);
             return EncodeHeader(header.Name, value, null, null, buffer, out length);
         }
 
         public static bool EncodeHeader(Headers.HeaderDescriptor header, string[] values, string separator, Span<byte> buffer, out int length)
         {
+            Debug.Assert(values != null);
+            Debug.Assert(values.Length > 0);
             return EncodeHeader(header.Name, values, separator, buffer, out length);
         }
 
         public static bool EncodeHeader(string name, string[] values, string separator, Span<byte> buffer, out int length)
         {
+            Debug.Assert(values != null);
+            Debug.Assert(values.Length > 0);
             if (values.Length == 1)
             {
                 return EncodeHeader(name, values[0], null, null, buffer, out length);
             }
+
             // When we have more values, separator must be provided.
             Debug.Assert(separator != null);
             return EncodeHeader(name, null, values, separator, buffer, out length);
@@ -54,31 +60,21 @@ namespace System.Net.Http.HPack
             int i = 0;
             length = 0;
 
-            if (buffer.Length == 0)
+            // We need at least \0 and twice length plus one octet string
+            if (buffer.Length < 5)
             {
                 return false;
             }
 
             buffer[i++] = 0;
 
-            if (i == buffer.Length)
+            if (!EncodeHeaderName(name, buffer.Slice(i), out int nameLength))
             {
                 return false;
             }
-
-            if (!EncodeString(name, null, null, buffer.Slice(i), out int nameLength, lowercase: true))
-            {
-                return false;
-            }
-
             i += nameLength;
 
-            if (i >= buffer.Length)
-            {
-                return false;
-            }
-
-            if (!EncodeString(value, values, separator, buffer.Slice(i), out int valueLength, lowercase: false))
+            if (!EncodeHeaderValue(value, values, separator, buffer.Slice(i), out int valueLength))
             {
                 return false;
             }
@@ -88,35 +84,62 @@ namespace System.Net.Http.HPack
             return true;
         }
 
-        private static bool EncodeStringPart(string s, Span<byte> buffer, ref int i, bool lowercase)
+        // Encode header name. It needs to be lower cased and validity was checked when created.
+        private static bool EncodeHeaderName(string s, Span<byte> buffer, out int nameLength)
         {
-            const int toLowerMask = 0x20;
-            // TODO: use huffman encoding
-            for (int j = 0; j < s.Length; j++)
-            {
-                if (i >= buffer.Length)
-                {
-                    return false;
-                }
+            const int ToLowerMask = 0x20;
+            nameLength = 0;
 
-                //buffer[i++] = (byte)(s[j] | (lowercase && s[j] >= 'A' && s[j] <= 'Z' ? toLowerMask : 0));
-                buffer[i++] = (byte)(s[j] | (lowercase ? toLowerMask : 0));
-            }
-
-            return true;
-        }
-
-        private static bool EncodeString(string s, string[] parts, string separator, Span<byte> buffer, out int length, bool lowercase)
-        {
-            int i = 0;
-            length = 0;
-
-            if (buffer.Length == 0)
+            if (!IntegerEncoder.Encode(s.Length, 7, buffer, out int currentIndex))
             {
                 return false;
             }
 
-            buffer[0] = 0;
+            if (currentIndex + s.Length >= buffer.Length)
+            {
+                return false;
+            }
+
+            // TODO: use huffman encoding
+            for (int j = 0; j < s.Length; j++)
+            {
+                // TODO Use ASCII ToUpper when #34144 is ready.
+                buffer[currentIndex++] = (byte)(s[j] | (s[j] >= 'A' && s[j] <= 'Z' ? ToLowerMask : 0));
+            }
+            nameLength = currentIndex;
+
+            return true;
+        }
+
+        // Encode fragment or header value without writing out length.
+        private static bool EncodeStringPart(string s, Span<byte> buffer, ref int currentIndex)
+        {
+            if (s.Length >= buffer.Length)
+            {
+                return false;
+            }
+
+            int i = 0;
+            for (int j = 0; j < s.Length; j++)
+            {
+                // TODO add validation for valid characters #35165.
+                buffer[i++] = (byte)(s[j]);
+            }
+            currentIndex += i;
+
+            return true;
+        }
+
+        private static bool EncodeHeaderValue(string s, string[] parts, string separator, Span<byte> buffer, out int length)
+        {
+            int i = 0;
+            length = 0;
+
+            // \0, length and at least one byte of value
+            if (buffer.Length < 3)
+            {
+                return false;
+            }
 
             if (s != null)
             {
@@ -124,22 +147,24 @@ namespace System.Net.Http.HPack
             }
             else
             {
-                // Calculate length of all pars and separators.
+                // Calculate length of all parts and separators.
                 foreach (string part in parts)
                 {
                     i += part.Length;
                 }
+
                 i += (parts.Length - 1) * separator.Length;
                 s = parts[0];
             }
 
-            if (!IntegerEncoder.Encode(i, 7, buffer, out int nameLength))
+            if (!IntegerEncoder.Encode(i, 7, buffer, out int valueLength))
             {
                 return false;
             }
-            i = nameLength;
 
-            if (!EncodeStringPart(s, buffer, ref i, lowercase))
+            i = valueLength;
+
+            if (!EncodeStringPart(s, buffer.Slice(i), ref i))
             {
                 return false;
             }
@@ -150,11 +175,11 @@ namespace System.Net.Http.HPack
                 // If header has multiple parts, write the rest.
                 for (int j = 1 ; j < parts.Length; j++)
                 {
-                    if (!EncodeStringPart(separator, buffer, ref i, lowercase))
+                    if (!EncodeStringPart(separator, buffer.Slice(i), ref i))
                     {
                         return false;
                     }
-                    if (!EncodeStringPart(parts[j], buffer, ref i, lowercase))
+                    if (!EncodeStringPart(parts[j], buffer.Slice(i), ref i))
                     {
                         return false;
                     }
