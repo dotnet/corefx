@@ -17,6 +17,10 @@ namespace Internal.Cryptography.Pal
 {
     internal sealed class OpenSslX509ChainProcessor : IChainPal
     {
+        // The average chain is 3 (End-Entity, Intermediate, Root)
+        // 10 is plenty big.
+        private const int DefaultChainCapacity = 10;
+
         private static readonly string s_userRootPath =
             DirectoryBasedStoreProvider.GetStorePath(X509Store.RootStoreName);
 
@@ -217,10 +221,7 @@ namespace Internal.Cryptography.Pal
                 using (SafeX509StackHandle chainStack = Interop.Crypto.X509StoreCtxGetChain(_storeCtx))
                 {
                     int chainSize = Interop.Crypto.GetX509StackFieldCount(chainStack);
-
-                    // The average chain is 3 (End-Entity, Intermediate, Root)
-                    // 10 is plenty big.
-                    Span<IntPtr> tempChain = stackalloc IntPtr[10];
+                    Span<IntPtr> tempChain = stackalloc IntPtr[DefaultChainCapacity];
                     IntPtr[] tempChainRent = null;
 
                     if (chainSize < tempChain.Length)
@@ -336,6 +337,8 @@ namespace Internal.Cryptography.Pal
                 workingChain,
                 out List<X509ChainStatus> overallStatus);
 
+            workingChain?.Dispose();
+
             if (applicationPolicy?.Count > 0 || certificatePolicy?.Count > 0)
             {
                 ProcessPolicy(elements, overallStatus, applicationPolicy, certificatePolicy);
@@ -363,16 +366,14 @@ namespace Internal.Cryptography.Pal
                 for (int i = 0; i < chainSize; i++)
                 {
                     X509ChainStatus[] status = Array.Empty<X509ChainStatus>();
+                    ErrorCollection? elementErrors = workingChain?[i];
 
-                    List<Interop.Crypto.X509VerifyStatusCode> elementErrors =
-                        i < workingChain.Errors.Count ? workingChain.Errors[i] : null;
-
-                    if (elementErrors != null)
+                    if (elementErrors.HasValue && elementErrors.Value.HasErrors)
                     {
                         List<X509ChainStatus> statusBuilder = new List<X509ChainStatus>();
                         overallStatus = new List<X509ChainStatus>();
 
-                        AddElementStatus(elementErrors, statusBuilder, overallStatus);
+                        AddElementStatus(elementErrors.Value, statusBuilder, overallStatus);
                         status = statusBuilder.ToArray();
                     }
 
@@ -449,7 +450,7 @@ namespace Internal.Cryptography.Pal
         }
 
         private static void AddElementStatus(
-            List<Interop.Crypto.X509VerifyStatusCode> errorCodes,
+            ErrorCollection errorCodes,
             List<X509ChainStatus> elementStatus,
             List<X509ChainStatus> overallStatus)
         {
@@ -657,10 +658,23 @@ namespace Internal.Cryptography.Pal
             }
         }
 
-        private class WorkingChain
+        private sealed class WorkingChain : IDisposable
         {
-            internal readonly List<List<Interop.Crypto.X509VerifyStatusCode>> Errors =
-                new List<List<Interop.Crypto.X509VerifyStatusCode>>();
+            private ErrorCollection[] _errors;
+
+            internal ErrorCollection? this[int idx] =>
+                idx < _errors?.Length ? (ErrorCollection?)_errors[idx] : null;
+
+            public void Dispose()
+            {
+                ErrorCollection[] toReturn = _errors;
+                _errors = null;
+
+                if (toReturn != null)
+                {
+                    ArrayPool<ErrorCollection>.Shared.Return(toReturn);
+                }
+            }
 
             internal int VerifyCallback(int ok, IntPtr ctx)
             {
@@ -681,17 +695,26 @@ namespace Internal.Cryptography.Pal
                         if (errorCode != Interop.Crypto.X509VerifyStatusCode.X509_V_OK &&
                             errorCode != Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CRL_NOT_YET_VALID)
                         {
-                            while (Errors.Count <= errorDepth)
+                            if (_errors == null)
                             {
-                                Errors.Add(null);
+                                int size = Math.Max(DefaultChainCapacity, errorDepth + 1);
+                                _errors = ArrayPool<ErrorCollection>.Shared.Rent(size);
+
+                                // We only do spares writes.
+                                _errors.AsSpan().Clear();
+                            }
+                            else if (errorDepth >= _errors.Length)
+                            {
+                                ErrorCollection[] toReturn = _errors;
+                                _errors = ArrayPool<ErrorCollection>.Shared.Rent(errorDepth + 1);
+                                toReturn.AsSpan().CopyTo(_errors);
+                                
+                                // We only do spares writes, clear the remainder.
+                                _errors.AsSpan(toReturn.Length).Clear();
+                                ArrayPool<ErrorCollection>.Shared.Return(toReturn);
                             }
 
-                            if (Errors[errorDepth] == null)
-                            {
-                                Errors[errorDepth] = new List<Interop.Crypto.X509VerifyStatusCode>();
-                            }
-
-                            Errors[errorDepth].Add(errorCode);
+                            _errors[errorDepth].Add(errorCode);
                         }
                     }
 
@@ -701,6 +724,101 @@ namespace Internal.Cryptography.Pal
                 {
                     return -1;
                 }
+            }
+        }
+
+        private unsafe struct ErrorCollection
+        {
+            // As of OpenSSL 1.1.1 there are 74 defined X509_V_ERR values.
+            private const int BucketCount = 3;
+            private fixed int _codes[BucketCount];
+
+            internal bool HasErrors =>
+                _codes[0] != 0 || _codes[1] != 0 || _codes[2] != 0;
+
+            internal void Add(Interop.Crypto.X509VerifyStatusCode statusCode)
+            {
+                int bucket = FindBucket(statusCode, out int bitValue);
+                _codes[bucket] |= bitValue;
+            }
+
+            internal bool HasError(Interop.Crypto.X509VerifyStatusCode statusCode)
+            {
+                int bucket = FindBucket(statusCode, out int bitValue);
+                return (_codes[bucket] & bitValue) != 0;
+            }
+
+            public Enumerator GetEnumerator()
+            {
+                return new Enumerator(this);
+            }
+
+            private static int FindBucket(Interop.Crypto.X509VerifyStatusCode statusCode, out int bitValue)
+            {
+                int val = (int)statusCode;
+                Debug.Assert(val < 32 * BucketCount);
+                int bucket = Math.DivRem(val, 32, out int localBitNumber);
+                bitValue = (1 << localBitNumber);
+                return bucket;
+            }
+
+            internal struct Enumerator
+            {
+                private ErrorCollection _collection;
+                private int _lastBucket;
+                private int _lastBit;
+
+                internal Enumerator(ErrorCollection coll)
+                {
+                    _collection = coll;
+                    _lastBucket = -1;
+                    _lastBit = -1;
+                }
+
+                public bool MoveNext()
+                {
+                    if (_lastBucket >= BucketCount)
+                    {
+                        return false;
+                    }
+
+FindNextBit:
+                    if (_lastBit == -1)
+                    {
+                        _lastBucket++;
+
+                        while (_lastBucket < BucketCount && _collection._codes[_lastBucket] == 0)
+                        {
+                            _lastBucket++;
+                        }
+
+                        if (_lastBucket >= BucketCount)
+                        {
+                            return false;
+                        }
+                    }
+
+                    _lastBit++;
+                    int val = _collection._codes[_lastBucket];
+
+                    while (_lastBit < 32)
+                    {
+                        if ((val & (1 << _lastBit)) != 0)
+                        {
+                            return true;
+                        }
+
+                        _lastBit++;
+                    }
+
+                    _lastBit = -1;
+                    goto FindNextBit;
+                }
+
+                public Interop.Crypto.X509VerifyStatusCode Current =>
+                    _lastBit == -1 ?
+                        Interop.Crypto.X509VerifyStatusCode.X509_V_OK :
+                        (Interop.Crypto.X509VerifyStatusCode)(_lastBit + 32 * _lastBucket);
             }
         }
     }
