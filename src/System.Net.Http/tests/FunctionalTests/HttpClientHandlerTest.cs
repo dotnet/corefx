@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.DotNet.XUnitExtensions;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,6 +16,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.DotNet.XUnitExtensions;
 
 using Xunit;
 using Xunit.Abstractions;
