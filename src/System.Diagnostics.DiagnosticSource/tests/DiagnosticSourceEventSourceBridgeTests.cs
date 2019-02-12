@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Xunit;
 using System.Diagnostics.Tracing;
 using System.Text;
+using System.Threading;
 
 namespace System.Diagnostics.Tests
 {
@@ -641,6 +642,39 @@ namespace System.Diagnostics.Tests
                 }
             }).Dispose();
         }
+
+        [OuterLoop("Runs for several seconds")]
+        [Fact]
+        public void Stress_WriteConcurrently_DoesntCrash()
+        {
+            const int StressTimeSeconds = 4;
+            RemoteInvoke(() =>
+            {
+                using (new TurnOnAllEventListener())
+                using (var source = new DiagnosticListener("testlistener"))
+                {
+                    var ce = new CountdownEvent(Environment.ProcessorCount * 2);
+                    for (int i = 0; i < ce.InitialCount; i++)
+                    {
+                        new Thread(() =>
+                        {
+                            DateTime end = DateTime.UtcNow.Add(TimeSpan.FromSeconds(StressTimeSeconds));
+                            while (DateTime.UtcNow < end)
+                            {
+                                source.Write("event1", Tuple.Create(1));
+                                source.Write("event2", Tuple.Create(1, 2));
+                                source.Write("event3", Tuple.Create(1, 2, 3));
+                                source.Write("event4", Tuple.Create(1, 2, 3, 4));
+                                source.Write("event5", Tuple.Create(1, 2, 3, 4, 5));
+                            }
+                            ce.Signal();
+                        })
+                        {  IsBackground = true }.Start();
+                    }
+                    ce.Wait();
+                }
+            }).Dispose();
+        }
     }
 
     /****************************************************************************/
@@ -850,5 +884,11 @@ namespace System.Diagnostics.Tests
 
         EventSource _diagnosticSourceEventSource;
         #endregion
+    }
+
+    internal sealed class TurnOnAllEventListener : EventListener
+    {
+        protected override void OnEventSourceCreated(EventSource eventSource) => EnableEvents(eventSource, EventLevel.LogAlways);
+        protected override void OnEventWritten(EventWrittenEventArgs eventData) { }
     }
 }
