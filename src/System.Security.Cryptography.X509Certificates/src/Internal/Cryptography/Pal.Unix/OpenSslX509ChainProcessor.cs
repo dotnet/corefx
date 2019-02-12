@@ -30,16 +30,20 @@ namespace Internal.Cryptography.Pal
         private readonly SafeX509StackHandle _untrustedLookup;
         private readonly SafeX509StoreCtxHandle _storeCtx;
         private readonly DateTime _verificationTime;
+        private TimeSpan _remainingDownloadTime;
 
-        private OpenSslX509ChainProcessor(SafeX509StoreHandle store,
+        private OpenSslX509ChainProcessor(
+            SafeX509StoreHandle store,
             SafeX509StackHandle untrusted,
             SafeX509StoreCtxHandle storeCtx,
-            DateTime verificationTime)
+            DateTime verificationTime,
+            TimeSpan remainingDownloadTime)
         {
             _store = store;
             _untrustedLookup = untrusted;
             _storeCtx = storeCtx;
             _verificationTime = verificationTime;
+            _remainingDownloadTime = remainingDownloadTime;
         }
 
         public void Dispose()
@@ -65,7 +69,8 @@ namespace Internal.Cryptography.Pal
 
         internal static OpenSslX509ChainProcessor InitiateChain(
             SafeX509Handle leafHandle,
-            DateTime verificationTime)
+            DateTime verificationTime,
+            TimeSpan remainingDownloadTime)
         {
             SafeX509StackHandle systemTrust = StorePal.GetMachineRoot().GetNativeCollection();
             SafeX509StackHandle systemIntermediate = StorePal.GetMachineIntermediate().GetNativeCollection();
@@ -91,7 +96,7 @@ namespace Internal.Cryptography.Pal
                 }
 
                 Interop.Crypto.SetX509ChainVerifyTime(storeCtx, verificationTime);
-                return new OpenSslX509ChainProcessor(store, untrusted, storeCtx, verificationTime);
+                return new OpenSslX509ChainProcessor(store, untrusted, storeCtx, verificationTime, remainingDownloadTime);
             }
             catch
             {
@@ -147,7 +152,6 @@ namespace Internal.Cryptography.Pal
         }
 
         internal Interop.Crypto.X509VerifyStatusCode FindChainViaAia(
-            ref TimeSpan remainingDownloadTime,
             ref List<X509Certificate2> downloadedCerts)
         {
             IntPtr lastCert = IntPtr.Zero;
@@ -182,7 +186,7 @@ namespace Internal.Cryptography.Pal
 
                     X509Certificate2 downloaded = DownloadCertificate(
                         authorityInformationAccess,
-                        ref remainingDownloadTime);
+                        ref _remainingDownloadTime);
 
                     // The AIA record is contained in a public structure, so no need to clear it.
                     ArrayPool<byte>.Shared.Return(authorityInformationAccess.Array);
@@ -269,8 +273,7 @@ namespace Internal.Cryptography.Pal
 
         internal void ProcessRevocation(
             X509RevocationMode revocationMode,
-            X509RevocationFlag revocationFlag,
-            ref TimeSpan remainingDownloadTime)
+            X509RevocationFlag revocationFlag)
         {
             if (revocationMode == X509RevocationMode.NoCheck)
             {
@@ -294,7 +297,7 @@ namespace Internal.Cryptography.Pal
                             _store,
                             revocationMode,
                             _verificationTime,
-                            ref remainingDownloadTime);
+                            ref _remainingDownloadTime);
                     }
                 }
             }

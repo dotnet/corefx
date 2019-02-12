@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Win32.SafeHandles;
 
 namespace Internal.Cryptography.Pal
 {
@@ -54,49 +53,30 @@ namespace Internal.Cryptography.Pal
             {
             }
 
-            SafeX509Handle certHandle = ((OpenSslX509CertificateReader)cert).SafeHandle;
-            bool addedRef = false;
-
-            try
-            {
-                certHandle.DangerousAddRef(ref addedRef);
-            }
-            finally
-            {
-                if (addedRef)
-                {
-                    certHandle.DangerousRelease();
-                }
-            }
-
             TimeSpan remainingDownloadTime = timeout;
 
             OpenSslX509ChainProcessor chainPal = OpenSslX509ChainProcessor.InitiateChain(
                 ((OpenSslX509CertificateReader)cert).SafeHandle,
-                verificationTime);
+                verificationTime,
+                remainingDownloadTime);
 
             Interop.Crypto.X509VerifyStatusCode status = chainPal.FindFirstChain(extraStore);
 
             if (!OpenSslX509ChainProcessor.IsCompleteChain(status))
             {
                 List<X509Certificate2> tmp = null;
-                status = chainPal.FindChainViaAia(ref remainingDownloadTime, ref tmp);
+                status = chainPal.FindChainViaAia(ref tmp);
 
                 if (tmp != null)
                 {
-                    X509Store userIntermediate =
-                        status == Interop.Crypto.X509VerifyStatusCode.X509_V_OK
-                            ? new X509Store(StoreName.CertificateAuthority, StoreLocation.CurrentUser,
-                                OpenFlags.ReadWrite)
-                            : null;
-
-                    using (userIntermediate)
+                    if (status == Interop.Crypto.X509VerifyStatusCode.X509_V_OK)
                     {
-                        foreach (X509Certificate2 downloaded in tmp)
-                        {
-                            userIntermediate?.Add(downloaded);
-                            downloaded.Dispose();
-                        }
+                        SaveIntermediateCertificates(tmp);
+                    }
+
+                    foreach (X509Certificate2 downloaded in tmp)
+                    {
+                        downloaded.Dispose();
                     }
                 }
             }
@@ -108,7 +88,7 @@ namespace Internal.Cryptography.Pal
             }
 
             chainPal.CommitToChain();
-            chainPal.ProcessRevocation(revocationMode, revocationFlag, ref remainingDownloadTime);
+            chainPal.ProcessRevocation(revocationMode, revocationFlag);
             chainPal.Finish(applicationPolicy, certificatePolicy);
 
 #if DEBUG
@@ -122,29 +102,8 @@ namespace Internal.Cryptography.Pal
             return chainPal;
         }
 
-        private static void SaveIntermediateCertificates(
-            X509ChainElement[] chainElements,
-            HashSet<X509Certificate2> downloaded)
+        private static void SaveIntermediateCertificates(List<X509Certificate2> downloadedCerts)
         {
-            List<X509Certificate2> chainDownloaded = new List<X509Certificate2>(chainElements.Length);
-
-            // It should be very unlikely that we would have downloaded something, the chain succeed,
-            // and the thing we downloaded not being a part of the chain, but safer is better.
-            for (int i = 0; i < chainElements.Length; i++)
-            {
-                X509Certificate2 elementCert = chainElements[i].Certificate;
-
-                if (downloaded.Contains(elementCert))
-                {
-                    chainDownloaded.Add(elementCert);
-                }
-            }
-
-            if (chainDownloaded.Count == 0)
-            {
-                return;
-            }
-
             using (var userIntermediate = new X509Store(StoreName.CertificateAuthority, StoreLocation.CurrentUser))
             {
                 try
@@ -157,7 +116,7 @@ namespace Internal.Cryptography.Pal
                     return;
                 }
 
-                foreach (X509Certificate2 cert in chainDownloaded)
+                foreach (X509Certificate2 cert in downloadedCerts)
                 {
                     try
                     {
