@@ -582,5 +582,11 @@ namespace System.Net.Http.Functional.Tests
                     _output.WriteLine(authHeaderValue);
                });
         }
+
+        [Fact]
+        public void VerifyNtlmIsInstalled()
+        {
+            Assert.True(Capability.IsNtlmInstalled()); 
+        }
     }
 }
