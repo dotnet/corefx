@@ -454,9 +454,6 @@ namespace System.Diagnostics
         /// which will have the effect of updating Activity's instance so all subsequent uses
         /// share the same converted string.  
         /// </summary>
-#if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
-#endif
         public ref readonly ActivitySpanId SpanId
         {
             get
@@ -484,9 +481,6 @@ namespace System.Diagnostics
         /// which will have the effect of updating Activity's instance so all subsequent uses
         /// share the same converted string.  
         /// </summary>
-#if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
-#endif
         public ref readonly ActivityTraceId TraceId
         {
             get
@@ -507,9 +501,6 @@ namespace System.Diagnostics
         /// If the parent Activity ID has the W3C format, this returns the ID for the SpanId part of the ParentId.  
         /// Otherwise it returns a zero SpanId. 
         /// </summary>
-#if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
-#endif
         public ref readonly ActivitySpanId ParentSpanId
         {
             get
