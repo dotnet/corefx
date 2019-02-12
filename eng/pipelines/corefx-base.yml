@@ -86,20 +86,11 @@ jobs:
           - _msbuildCommand: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
 
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            - _optionalToolsArguments: /p:OptionalToolSourceUser=dn-bot
-                                       /p:OptionalToolSource=$(OptionalToolSourceUri)
-                                       /p:OptionalToolSourcePassword=$(dn-bot-devdiv-nuget-feed-read)
             - _windowsOfficialBuildArguments: -sign
                                               /p:DotNetSignType=$(_SignType)
-                                              /p:EnableProfileGuidedOptimization=true
-                                              $(_optionalToolsArguments)
 
           - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
             - _windowsOfficialBuildArguments: ''
-
-          # Optional tooling variables
-          - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            - group: DotNet-Internal-Tools-Feed
 
         # Non-Windows variables
         - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
@@ -143,6 +134,18 @@ jobs:
             - ${{ job.preBuildSteps }}
 
           - ${{ if eq(job.customBuildSteps[0], '') }}:
+            
+            - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+              - task: NuGetCommand@2
+                displayName: Restore internal tools
+                inputs:
+                  command: restore
+                  feedsToUse: config
+                  restoreSolution: 'eng\common\internal\Tools.csproj'
+                  nugetConfigPath: 'NuGet.config'
+                  restoreDirectory: '$(Build.SourcesDirectory)\.packages'
+                condition: eq(variables['_restoreInternalTools'], 'true')
+
             - script: $(_buildScript)
                     $(_commonArguments)
                     -framework $(_framework)
