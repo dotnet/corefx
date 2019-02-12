@@ -496,9 +496,10 @@ namespace System.IO.Pipelines
 
                 while (returnStart != null && returnStart != returnEnd)
                 {
+                    BufferSegment next = returnStart.NextSegment;
                     returnStart.ResetMemory();
                     ReturnSegmentUnsynchronized(returnStart);
-                    returnStart = returnStart.NextSegment;
+                    returnStart = next;
                 }
 
                 _operationState.EndRead();
