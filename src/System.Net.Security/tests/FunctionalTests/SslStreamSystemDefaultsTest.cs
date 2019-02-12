@@ -86,6 +86,14 @@ namespace System.Net.Security.Tests
         public async Task ClientAndServer_OneUsesDefault_OtherUsesLowerProtocol_Fails(
             SslProtocols? clientProtocols, SslProtocols? serverProtocols)
         {
+            if (!PlatformDetection.SupportsSsl2AndSsl3)
+            {
+#pragma warning disable 0618
+                if (clientProtocols == SslProtocols.Ssl2 || serverProtocols == SslProtocols.Ssl2)
+                    return;
+#pragma warning restore 0618
+            }
+
             using (X509Certificate2 serverCertificate = Configuration.Certificates.GetServerCertificate())
             using (X509Certificate2 clientCertificate = Configuration.Certificates.GetClientCertificate())
             {
