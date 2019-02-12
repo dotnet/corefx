@@ -310,19 +310,27 @@ namespace Internal.Cryptography.Pal
 
         internal void Finish(OidCollection applicationPolicy, OidCollection certificatePolicy)
         {
-            Interop.Crypto.X509StoreCtxReset(_storeCtx);
-            Interop.Crypto.SetX509ChainVerifyTime(_storeCtx, _verificationTime);
+            WorkingChain workingChain = null;
 
-            WorkingChain workingChain = new WorkingChain();
-            Interop.Crypto.X509StoreVerifyCallback workingCallback = workingChain.VerifyCallback;
-            Interop.Crypto.X509StoreCtxSetVerifyCallback(_storeCtx, workingCallback);
+            // If the chain had any errors during the previous build we need to walk it again with
+            // the error collector running.
+            if (Interop.Crypto.X509StoreCtxGetError(_storeCtx) !=
+                Interop.Crypto.X509VerifyStatusCode.X509_V_OK)
+            {
+                Interop.Crypto.X509StoreCtxReset(_storeCtx);
+                Interop.Crypto.SetX509ChainVerifyTime(_storeCtx, _verificationTime);
 
-            bool verify = Interop.Crypto.X509VerifyCert(_storeCtx);
-            GC.KeepAlive(workingCallback);
+                workingChain = new WorkingChain();
+                Interop.Crypto.X509StoreVerifyCallback workingCallback = workingChain.VerifyCallback;
+                Interop.Crypto.X509StoreCtxSetVerifyCallback(_storeCtx, workingCallback);
 
-            // Because our callback tells OpenSSL that every problem is ignorable, it should tell us that the
-            // chain is just fine (unless it returned a negative code for an exception)
-            Debug.Assert(verify, "verify should have returned true");
+                bool verify = Interop.Crypto.X509VerifyCert(_storeCtx);
+                GC.KeepAlive(workingCallback);
+
+                // Because our callback tells OpenSSL that every problem is ignorable, it should tell us that the
+                // chain is just fine (unless it returned a negative code for an exception)
+                Debug.Assert(verify, "verify should have returned true");
+            }
 
             X509ChainElement[] elements = BuildChainElements(
                 workingChain,
@@ -333,7 +341,7 @@ namespace Internal.Cryptography.Pal
                 ProcessPolicy(elements, overallStatus, applicationPolicy, certificatePolicy);
             }
 
-            ChainStatus = overallStatus.ToArray();
+            ChainStatus = overallStatus?.ToArray() ?? Array.Empty<X509ChainStatus>();
             ChainElements = elements;
 
             // The native resources are not needed any longer.
@@ -345,7 +353,7 @@ namespace Internal.Cryptography.Pal
             out List<X509ChainStatus> overallStatus)
         {
             X509ChainElement[] elements;
-            overallStatus = new List<X509ChainStatus>();
+            overallStatus = null;
 
             using (SafeX509StackHandle chainStack = Interop.Crypto.X509StoreCtxGetChain(_storeCtx))
             {
@@ -354,14 +362,18 @@ namespace Internal.Cryptography.Pal
 
                 for (int i = 0; i < chainSize; i++)
                 {
-                    List<X509ChainStatus> status = new List<X509ChainStatus>();
+                    X509ChainStatus[] status = Array.Empty<X509ChainStatus>();
 
                     List<Interop.Crypto.X509VerifyStatusCode> elementErrors =
                         i < workingChain.Errors.Count ? workingChain.Errors[i] : null;
 
                     if (elementErrors != null)
                     {
-                        AddElementStatus(elementErrors, status, overallStatus);
+                        List<X509ChainStatus> statusBuilder = new List<X509ChainStatus>();
+                        overallStatus = new List<X509ChainStatus>();
+
+                        AddElementStatus(elementErrors, statusBuilder, overallStatus);
+                        status = statusBuilder.ToArray();
                     }
 
                     IntPtr elementCertPtr = Interop.Crypto.GetX509StackField(chainStack, i);
@@ -373,7 +385,7 @@ namespace Internal.Cryptography.Pal
 
                     // Duplicate the certificate handle
                     X509Certificate2 elementCert = new X509Certificate2(elementCertPtr);
-                    elements[i] = new X509ChainElement(elementCert, status.ToArray(), "");
+                    elements[i] = new X509ChainElement(elementCert, status, "");
                 }
             }
 

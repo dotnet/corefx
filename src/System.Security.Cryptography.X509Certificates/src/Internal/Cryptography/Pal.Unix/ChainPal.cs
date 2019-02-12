@@ -87,8 +87,15 @@ namespace Internal.Cryptography.Pal
                 revocationMode = X509RevocationMode.Offline;
             }
 
-            chainPal.CommitToChain();
-            chainPal.ProcessRevocation(revocationMode, revocationFlag);
+            // In NoCheck+OK then we don't need to build the chain any more, we already
+            // know it's error-free.  So skip straight to finish.
+            if (status != Interop.Crypto.X509VerifyStatusCode.X509_V_OK ||
+                revocationMode != X509RevocationMode.NoCheck)
+            {
+                chainPal.CommitToChain();
+                chainPal.ProcessRevocation(revocationMode, revocationFlag);
+            }
+
             chainPal.Finish(applicationPolicy, certificatePolicy);
 
 #if DEBUG
