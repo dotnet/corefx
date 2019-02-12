@@ -163,13 +163,13 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     bool haveProcessCreateLock = false;
 #endif
     bool success = true;
-    int stdinFds[2] = {-1, -1}, stdoutFds[2] = {-1, -1}, stderrFds[2] = {-1, -1}, waitForChildToExecPipe[2] = {-1, 1};
+    int stdinFds[2] = {-1, -1}, stdoutFds[2] = {-1, -1}, stderrFds[2] = {-1, -1}, waitForChildToExecPipe[2] = {-1, -1};
     pid_t processId = -1;
     int thread_cancel_state;
     sigset_t signal_set;
     sigset_t old_signal_set;
 
-    // None of this code can be cancelled without leaking handles, so just don't allow it
+    // None of this code can be canceled without leaking handles, so just don't allow it
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &thread_cancel_state);
 
     // Validate arguments
@@ -297,7 +297,7 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
                 if (oldhandler != SIG_IGN && oldhandler != SIG_DFL)
                 {
                     // It has a custom handler, put the default handler back.
-                    // We check first th preserve flags on default handlers.
+                    // We check first to preserve flags on default handlers.
                     sigaction(sig, &sa_default, NULL);
                 }
             }
