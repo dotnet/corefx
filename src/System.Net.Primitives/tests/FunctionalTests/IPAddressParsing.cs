@@ -345,6 +345,25 @@ namespace System.Net.Primitives.Functional.Tests
             }
         }
 
+        public static readonly object[][] ScopeIds =
+        {
+            new object[] { "Fe08::1%123", 123},
+            new object[] { "Fe08::1%12345678", 12345678},
+            new object[] { "fe80::e8b0:63ff:fee8:6b3b%9", 9},
+            new object[] { "fe80::e8b0:63ff:fee8:6b3b", 0},
+            new object[] { "fe80::e8b0:63ff:fee8:6b3b%abcd0", 0},
+            new object[] { "::%unknownInterface", 0},
+            new object[] { "::%0", 0},
+        };
+
+        [Theory]
+        [MemberData(nameof(ScopeIds))]
+        public void ParseIPv6_ExtractsScopeId(string address, int expectedScopeId)
+        {
+            IPAddress ip = Parse(address);
+            Assert.Equal(expectedScopeId, ip.ScopeId);
+        }
+
         public static IEnumerable<object[]> InvalidIpv6Addresses()
         {
             yield return new object[] { ":::4df" };
