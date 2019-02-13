@@ -288,6 +288,7 @@ namespace System.Net.Primitives.Functional.Tests
             new object[] { "::%123", "::%123" },
             new object[] { "Fe08::1%13542", "fe08::1%awdl0" },
             new object[] { "Fe08::1%13542", "fe08::1%gpd0" },
+            new object[] { "Fe08::1%13542", "fe08::1%unknowninterface" },
             // v4 as v6
             new object[] { "FE08::192.168.0.1", "fe08::c0a8:1" }, // Output is not IPv4 mapped
             new object[] { "::192.168.0.1", "::192.168.0.1" },

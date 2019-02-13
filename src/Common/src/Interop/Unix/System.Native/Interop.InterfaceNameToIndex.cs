@@ -9,7 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetNativeIPInterfaceIndex")]
-        public static extern unsafe uint GetNativeIPInterfaceIndex(string name);
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_InterfaceNameToIndex", SetLastError = true)]
+        public static extern unsafe uint InterfaceNameToIndex(string name);
     }
 }

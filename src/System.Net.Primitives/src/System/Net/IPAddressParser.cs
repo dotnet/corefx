@@ -7,6 +7,8 @@ using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Globalization;
+using System.Net.NetworkInformation;
 
 namespace System.Net
 {
@@ -210,34 +212,22 @@ namespace System.Net
                 string scopeId = null;
                 IPv6AddressHelper.Parse(ipSpan, numbers, 0, ref scopeId);
 
-                long result = 0;
                 if (!string.IsNullOrEmpty(scopeId))
                 {
-                    uint interfaceIndex = Interop.Sys.GetNativeIPInterfaceIndex(scopeId);
-                    if (interfaceIndex >= 0)
+                    if (uint.TryParse(scopeId, NumberStyles.None, CultureInfo.InvariantCulture, out scope))
+                    {
+                        return true; // scopeId is a numeric value
+                    }
+                    uint interfaceIndex = InterfaceInfoPal.InterfaceNameToIndex(scopeId);
+                    if (interfaceIndex > 0)
                     {
                         scope = interfaceIndex;
-                        return true;
+                        return true; // scopeId is a known interface name
                     }
-
-                    for (int i = 0; i < scopeId.Length; i++)
-                    {
-                        char c = scopeId[i];
-                        if (c < '0' || c > '9')
-                        {
-                            scope = 0;
-                            return true;
-                        }
-                        result = (result * 10) + (c - '0');
-                        if (result > uint.MaxValue)
-                        {
-                            scope = 0;
-                            return false;
-                        }
-                    }
+                    // scopeId is an unknown interface name
                 }
-
-                scope = (uint)result;
+                // scopeId is not presented
+                scope = 0;
                 return true;
             }
 

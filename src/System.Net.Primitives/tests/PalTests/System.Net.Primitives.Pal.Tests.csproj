@@ -115,8 +115,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\NtDll\Interop.NtStatus.cs">
       <Link>ProductionCode\Common\Interop\Windows\NtDll\Interop.NtStatus.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Interop.GetNativeIPInterfaceIndex.cs">
-      <Link>ProductionCode\Common\Interop\Windows\Interop.GetNativeIPInterfaceIndex.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\InterfaceInfoPal.Windows.cs">
+      <Link>ProductionCode\System\Net\NetworkInformation\InterfaceInfoPal.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\IpHlpApi\Interop.if_nametoindex.cs">
+      <Link>ProductionCode\Common\Interop\Windows\IpHlpApi\Interop.if_nametoindex.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
@@ -159,8 +162,11 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.SocketAddress.cs">
       <Link>ProductionCode\Common\Interop\Unix\System.Native\Interop.SocketAddress.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetNativeIPInterfaceIndex.cs">
-      <Link>ProductionCode\Common\Interop\Unix\System.Native\Interop.GetNativeIPInterfaceIndex.cs</Link>
+    <Compile Include="$(CommonPath)\System\Net\NetworkInformation\InterfaceInfoPal.Unix.cs">
+      <Link>ProductionCode\Common\System\Net\NetworkInformation\InterfaceInfoPal.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.InterfaceNameToIndex.cs">
+      <Link>ProductionCode\Common\Interop\Unix\System.Native\Interop.InterfaceNameToIndex.cs</Link>
     </Compile>
   </ItemGroup>
 </Project>

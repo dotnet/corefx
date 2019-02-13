@@ -7,8 +7,9 @@ using System.Runtime.InteropServices;
 
 internal static partial class Interop
 {
-    internal static partial class Sys
+    internal static partial class IpHlpApi
     {
-        public static uint GetNativeIPInterfaceIndex(string name) => 0; //TODO: um.. where should I put `if_nametoindex` for Windows (available since Vista)
+        [DllImport(Interop.Libraries.IpHlpApi)]
+        internal extern static uint if_nametoindex(string name);
     }
 }

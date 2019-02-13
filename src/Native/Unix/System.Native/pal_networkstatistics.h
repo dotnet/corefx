@@ -167,7 +167,7 @@ DLLEXPORT int32_t SystemNative_GetEstimatedUdpListenerCount(void);
 
 DLLEXPORT int32_t SystemNative_GetActiveUdpListeners(IPEndPointInfo* infos, int32_t* infoCount);
 
-DLLEXPORT uint32_t SystemNative_GetNativeIPInterfaceIndex(char* interfaceName);
+DLLEXPORT uint32_t SystemNative_InterfaceNameToIndex(char* interfaceName);
 
 DLLEXPORT int32_t SystemNative_GetNativeIPInterfaceStatistics(char* interfaceName, NativeIPInterfaceStatistics* retStats);
 
