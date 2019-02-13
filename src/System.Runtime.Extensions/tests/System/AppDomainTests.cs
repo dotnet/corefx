@@ -41,8 +41,16 @@ namespace System.Tests
         [Fact]
         public void TargetFrameworkTest()
         {
-            // On Uap we use the Microsoft.DotNet.XUnitRunnerUap instead of the RemoteExecutorConsoleApp
-            string targetFrameworkName = PlatformDetection.IsUap ? ".NETCore,Version=v5.0" : "DUMMY-TFA";
+            string targetFrameworkName = "DUMMY-TFA";
+            if (PlatformDetection.IsInAppContainer)
+            {
+                targetFrameworkName = ".NETCore,Version=v5.0";
+            }
+            if (PlatformDetection.IsNetNative)
+            {
+                targetFrameworkName = ".NETCoreApp,Version=v2.0";
+            }
+            
             RemoteInvoke((_targetFrameworkName) => {
                 Assert.Contains(_targetFrameworkName, AppContext.TargetFrameworkName);
             }, targetFrameworkName).Dispose();
@@ -591,12 +599,12 @@ namespace System.Tests
             RemoteInvoke(() => {
                 ResolveEventHandler handler = (sender, e) =>
                 {
-                    return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests.exe"));
+                    return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTestApp.dll"));
                 };
 
                 AppDomain.CurrentDomain.AssemblyResolve += handler;
 
-                Type t = Type.GetType("AssemblyResolveTests.Class1, AssemblyResolveTests", true);
+                Type t = Type.GetType("AssemblyResolveTestApp.Class1, AssemblyResolveTestApp", true);
                 Assert.NotNull(t);
                 return SuccessExitCode;
             }).Dispose();
@@ -614,7 +622,7 @@ namespace System.Tests
                 ResolveEventHandler handler = (sender, e) =>
                 {
                     Assert.Equal(e.RequestingAssembly, a);
-                    return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests.exe"));
+                    return Assembly.LoadFile(Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTestApp.dll"));
                 };
 
                 AppDomain.CurrentDomain.AssemblyResolve += handler;
@@ -732,11 +740,11 @@ namespace System.Tests
 
         private void CopyTestAssemblies()
         {
-            string destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTests", "AssemblyResolveTests.dll");
-            if (!File.Exists(destTestAssemblyPath) && File.Exists("AssemblyResolveTests.dll"))
+            string destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "AssemblyResolveTestApp", "AssemblyResolveTestApp.dll");
+            if (!File.Exists(destTestAssemblyPath) && File.Exists("AssemblyResolveTestApp.dll"))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(destTestAssemblyPath));
-                File.Copy("AssemblyResolveTests.dll", destTestAssemblyPath, false);
+                File.Copy("AssemblyResolveTestApp.dll", destTestAssemblyPath, false);
             }
 
             destTestAssemblyPath = Path.Combine(Environment.CurrentDirectory, "TestAppOutsideOfTPA", "TestAppOutsideOfTPA.exe");

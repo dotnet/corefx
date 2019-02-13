@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -326,7 +327,7 @@ namespace System
         {
             int flags = d.flags;
             if ((flags & ScaleMask) != 0)
-                DecCalc.InternalRound(ref AsMutable(ref d), (byte)(flags >> ScaleShift), DecCalc.RoundingMode.Ceiling);
+                DecCalc.InternalRound(ref AsMutable(ref d), (byte)(flags >> ScaleShift), MidpointRounding.ToPositiveInfinity);
             return d;
         }
 
@@ -406,7 +407,7 @@ namespace System
         {
             int flags = d.flags;
             if ((flags & ScaleMask) != 0)
-                DecCalc.InternalRound(ref AsMutable(ref d), (byte)(flags >> ScaleShift), DecCalc.RoundingMode.Floor);
+                DecCalc.InternalRound(ref AsMutable(ref d), (byte)(flags >> ScaleShift), MidpointRounding.ToNegativeInfinity);
             return d;
         }
 
@@ -487,12 +488,12 @@ namespace System
                 return false;
             }
 
-            return Number.TryParseDecimal(s, NumberStyles.Number, NumberFormatInfo.CurrentInfo, out result, out _);
+            return Number.TryParseDecimal(s, NumberStyles.Number, NumberFormatInfo.CurrentInfo, out result) == Number.ParsingStatus.OK;
         }
 
         public static bool TryParse(ReadOnlySpan<char> s, out decimal result)
         {
-            return Number.TryParseDecimal(s, NumberStyles.Number, NumberFormatInfo.CurrentInfo, out result, out _);
+            return Number.TryParseDecimal(s, NumberStyles.Number, NumberFormatInfo.CurrentInfo, out result) == Number.ParsingStatus.OK;
         }
 
         public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out decimal result)
@@ -505,13 +506,13 @@ namespace System
                 return false;
             }
 
-            return Number.TryParseDecimal(s, style, NumberFormatInfo.GetInstance(provider), out result, out _);
+            return Number.TryParseDecimal(s, style, NumberFormatInfo.GetInstance(provider), out result) == Number.ParsingStatus.OK;
         }
 
         public static bool TryParse(ReadOnlySpan<char> s, NumberStyles style, IFormatProvider provider, out decimal result)
         {
             NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
-            return Number.TryParseDecimal(s, style, NumberFormatInfo.GetInstance(provider), out result, out _);
+            return Number.TryParseDecimal(s, style, NumberFormatInfo.GetInstance(provider), out result) == Number.ParsingStatus.OK;
         }
 
         // Returns a binary representation of a Decimal. The return value is an
@@ -553,13 +554,13 @@ namespace System
             buffer[15] = (byte)(d.flags >> 24);
         }
 
-        internal static decimal ToDecimal(byte[] buffer)
+        internal static decimal ToDecimal(ReadOnlySpan<byte> span)
         {
-            Debug.Assert((buffer != null && buffer.Length >= 16), "[ToDecimal]buffer != null && buffer.Length >= 16");
-            int lo = ((int)buffer[0]) | ((int)buffer[1] << 8) | ((int)buffer[2] << 16) | ((int)buffer[3] << 24);
-            int mid = ((int)buffer[4]) | ((int)buffer[5] << 8) | ((int)buffer[6] << 16) | ((int)buffer[7] << 24);
-            int hi = ((int)buffer[8]) | ((int)buffer[9] << 8) | ((int)buffer[10] << 16) | ((int)buffer[11] << 24);
-            int flags = ((int)buffer[12]) | ((int)buffer[13] << 8) | ((int)buffer[14] << 16) | ((int)buffer[15] << 24);
+            Debug.Assert((span.Length >= 16), "span.Length >= 16");
+            int lo = BinaryPrimitives.ReadInt32LittleEndian(span);
+            int mid = BinaryPrimitives.ReadInt32LittleEndian(span.Slice(4));
+            int hi = BinaryPrimitives.ReadInt32LittleEndian(span.Slice(8));
+            int flags = BinaryPrimitives.ReadInt32LittleEndian(span.Slice(12));
             return new decimal(lo, mid, hi, flags);
         }
 
@@ -616,12 +617,12 @@ namespace System
         {
             if ((uint)decimals > 28)
                 throw new ArgumentOutOfRangeException(nameof(decimals), SR.ArgumentOutOfRange_DecimalRound);
-            if ((uint)mode > (uint)MidpointRounding.AwayFromZero)
+            if ((uint)mode > (uint)MidpointRounding.ToPositiveInfinity)
                 throw new ArgumentException(SR.Format(SR.Argument_InvalidEnumValue, mode, nameof(MidpointRounding)), nameof(mode));
 
             int scale = d.Scale - decimals;
             if (scale > 0)
-                DecCalc.InternalRound(ref AsMutable(ref d), (uint)scale, (DecCalc.RoundingMode)mode);
+                DecCalc.InternalRound(ref AsMutable(ref d), (uint)scale, mode);
             return d;
         }
 
@@ -646,11 +647,12 @@ namespace System
             {
                 temp = ToUInt32(value);
             }
-            catch (OverflowException e)
+            catch (OverflowException)
             {
-                throw new OverflowException(SR.Overflow_Byte, e);
+                Number.ThrowOverflowException(TypeCode.Byte);
+                throw;
             }
-            if (temp != (byte)temp) throw new OverflowException(SR.Overflow_Byte);
+            if (temp != (byte)temp) Number.ThrowOverflowException(TypeCode.Byte);
             return (byte)temp;
         }
 
@@ -666,11 +668,12 @@ namespace System
             {
                 temp = ToInt32(value);
             }
-            catch (OverflowException e)
+            catch (OverflowException)
             {
-                throw new OverflowException(SR.Overflow_SByte, e);
+                Number.ThrowOverflowException(TypeCode.SByte);
+                throw;
             }
-            if (temp != (sbyte)temp) throw new OverflowException(SR.Overflow_SByte);
+            if (temp != (sbyte)temp) Number.ThrowOverflowException(TypeCode.SByte);
             return (sbyte)temp;
         }
 
@@ -685,11 +688,12 @@ namespace System
             {
                 temp = ToInt32(value);
             }
-            catch (OverflowException e)
+            catch (OverflowException)
             {
-                throw new OverflowException(SR.Overflow_Int16, e);
+                Number.ThrowOverflowException(TypeCode.Int16);
+                throw;
             }
-            if (temp != (short)temp) throw new OverflowException(SR.Overflow_Int16);
+            if (temp != (short)temp) Number.ThrowOverflowException(TypeCode.Int16);
             return (short)temp;
         }
 
@@ -759,11 +763,12 @@ namespace System
             {
                 temp = ToUInt32(value);
             }
-            catch (OverflowException e)
+            catch (OverflowException)
             {
-                throw new OverflowException(SR.Overflow_UInt16, e);
+                Number.ThrowOverflowException(TypeCode.UInt16);
+                throw;
             }
-            if (temp != (ushort)temp) throw new OverflowException(SR.Overflow_UInt16);
+            if (temp != (ushort)temp) Number.ThrowOverflowException(TypeCode.UInt16);
             return (ushort)temp;
         }
 
@@ -824,7 +829,7 @@ namespace System
         {
             int flags = d.flags;
             if ((flags & ScaleMask) != 0)
-                DecCalc.InternalRound(ref AsMutable(ref d), (byte)(flags >> ScaleShift), DecCalc.RoundingMode.Truncate);
+                DecCalc.InternalRound(ref AsMutable(ref d), (byte)(flags >> ScaleShift), MidpointRounding.ToZero);
         }
 
         public static implicit operator decimal(byte value)

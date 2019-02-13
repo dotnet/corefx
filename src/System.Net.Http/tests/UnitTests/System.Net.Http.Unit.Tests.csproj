@@ -8,8 +8,8 @@
   </PropertyGroup>
   <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
   <ItemGroup>
-    <TargetingPackExclusions Include="System.Net.Http" />
-    <TargetingPackExclusions Include="System.Net.Mail" />
+    <DefaultReferenceExclusions Include="System.Net.Http" />
+    <DefaultReferenceExclusions Include="System.Net.Mail" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
@@ -388,14 +388,14 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.HRESULT_FROM_WIN32.cs">
       <Link>Common\Interop\Windows\Interop.HRESULT_FROM_WIN32.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\winhttp\Interop.SafeWinHttpHandle.cs">
-      <Link>Common\Interop\Windows\winhttp\Interop.SafeWinHttpHandle.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\WinHttp\Interop.SafeWinHttpHandle.cs">
+      <Link>Common\Interop\Windows\WinHttp\Interop.SafeWinHttpHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Runtime\ExceptionServices\ExceptionStackTrace.cs">
       <Link>Common\System\Runtime\ExceptionServices\ExceptionStackTrace.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\winhttp\Interop.winhttp_types.cs">
-      <Link>Common\Interop\Windows\winhttp\Interop.winhttp_types.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\WinHttp\Interop.winhttp_types.cs">
+      <Link>Common\Interop\Windows\WinHttp\Interop.winhttp_types.cs</Link>
     </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\tests\UnitTests\FakeInterop.cs">
       <Link>ProductionCode\System\Net\Http\WinInetProxyHelper.cs</Link>
@@ -426,8 +426,5 @@
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
 </Project>

@@ -128,7 +128,6 @@ namespace System
         [System.CLSCompliantAttribute(false)]
         public System.TypedReference GetNextArg(System.RuntimeTypeHandle rth) { throw null; }
         public System.RuntimeTypeHandle GetNextArgType() { throw null; }
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.InternalCall)]
         public int GetRemainingCount() { throw null; }
     }
     public partial class ArgumentException : System.SystemException
@@ -1459,9 +1458,14 @@ namespace System
     public readonly partial struct Index : System.IEquatable<System.Index>
     {
         private readonly int _dummyPrimitive;
-        public Index(int value, bool fromEnd) { throw null; }
-        public bool FromEnd { get { throw null; } }
+        public Index(int value, bool fromEnd = false) { throw null; }
+        public bool IsFromEnd { get { throw null; } }
         public int Value { get { throw null; } }
+        public static Index Start { get { throw null; } }
+        public static Index End { get { throw null; } }
+        public static Index FromStart(int value) { throw null; }
+        public static Index FromEnd(int value) { throw null; }
+        public int GetOffset(int length) { throw null; }
         public bool Equals(System.Index other) { throw null; }
         public override bool Equals(object value) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -1748,6 +1752,9 @@ namespace System
         public System.Buffers.MemoryHandle Pin() { throw null; }
         public System.Memory<T> Slice(int start) { throw null; }
         public System.Memory<T> Slice(int start, int length) { throw null; }
+        public System.Memory<T> Slice(System.Index startIndex) { throw null; }
+        public System.Memory<T> Slice(System.Range range) { throw null; }
+        public System.Memory<T> this[System.Range range] { get { throw null; } }
         public T[] ToArray() { throw null; }
         public override string ToString() { throw null; }
         public bool TryCopyTo(System.Memory<T> destination) { throw null; }
@@ -1761,8 +1768,11 @@ namespace System
     }
     public enum MidpointRounding
     {
-        AwayFromZero = 1,
         ToEven = 0,
+        AwayFromZero = 1,
+        ToZero = 2,
+        ToNegativeInfinity = 3,
+        ToPositiveInfinity = 4
     }
     public partial class MissingFieldException : System.MissingMemberException, System.Runtime.Serialization.ISerializable
     {
@@ -1974,14 +1984,24 @@ namespace System
         private readonly int _dummyPrimitive;
         public System.Index End { get { throw null; } }
         public System.Index Start { get { throw null; } }
-        public static System.Range All() { throw null; }
-        public static System.Range Create(System.Index start, System.Index end) { throw null; }
+        public Range(System.Index start, System.Index end) { throw null; }
+        public OffsetAndLength GetOffsetAndLength(int length) { throw null; }
         public override bool Equals(object value) { throw null; }
         public bool Equals(System.Range other) { throw null; }
-        public static System.Range FromStart(System.Index start) { throw null; }
         public override int GetHashCode() { throw null; }
-        public static System.Range ToEnd(System.Index end) { throw null; }
         public override string ToString() { throw null; }
+        public static System.Range StartAt(System.Index start) { throw null; }
+        public static System.Range EndAt(System.Index end) { throw null; }
+        public static System.Range All { get { throw null; } }
+
+        public readonly struct OffsetAndLength
+        {
+            private readonly int _dummyPrimitive;
+            public int Offset { get { throw null; } }
+            public int Length { get { throw null; } }
+            public OffsetAndLength(int offset, int length) { throw null; }
+            public void Deconstruct(out int offset, out int length) { throw null; }
+        }
     }
     public partial class RankException : System.SystemException
     {
@@ -2011,6 +2031,9 @@ namespace System
         public System.Buffers.MemoryHandle Pin() { throw null; }
         public System.ReadOnlyMemory<T> Slice(int start) { throw null; }
         public System.ReadOnlyMemory<T> Slice(int start, int length) { throw null; }
+        public System.ReadOnlyMemory<T> Slice(System.Index startIndex) { throw null; }
+        public System.ReadOnlyMemory<T> Slice(System.Range range)  { throw null; }
+        public System.ReadOnlyMemory<T> this[System.Range range] { get { throw null; } }
         public T[] ToArray() { throw null; }
         public override string ToString() { throw null; }
         public bool TryCopyTo(System.Memory<T> destination) { throw null; }
@@ -2045,6 +2068,8 @@ namespace System
         public static bool operator !=(System.ReadOnlySpan<T> left, System.ReadOnlySpan<T> right) { throw null; }
         public System.ReadOnlySpan<T> Slice(int start) { throw null; }
         public System.ReadOnlySpan<T> Slice(int start, int length) { throw null; }
+        public System.ReadOnlySpan<T> Slice(System.Index startIndex) { throw null; }
+        public System.ReadOnlySpan<T> Slice(System.Range range) { throw null; }
         public T[] ToArray() { throw null; }
         public override string ToString() { throw null; }
         public bool TryCopyTo(System.Span<T> destination) { throw null; }
@@ -2252,6 +2277,8 @@ namespace System
         public static bool operator !=(System.Span<T> left, System.Span<T> right) { throw null; }
         public System.Span<T> Slice(int start) { throw null; }
         public System.Span<T> Slice(int start, int length) { throw null; }
+        public System.Span<T> Slice(System.Index startIndex) { throw null; }
+        public System.Span<T> Slice(System.Range range) { throw null; }
         public T[] ToArray() { throw null; }
         public override string ToString() { throw null; }
         public bool TryCopyTo(System.Span<T> destination) { throw null; }
@@ -2293,6 +2320,10 @@ namespace System
         public unsafe String(sbyte* value, int startIndex, int length, System.Text.Encoding enc) { }
         [System.Runtime.CompilerServices.IndexerName("Chars")]
         public char this[int index] { get { throw null; } }
+        [System.Runtime.CompilerServices.IndexerName("Chars")]
+        public char this[System.Index index] { get { throw null; } }
+        [System.Runtime.CompilerServices.IndexerName("Chars")]
+        public System.String this[System.Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public object Clone() { throw null; }
         public static int Compare(System.String strA, int indexA, System.String strB, int indexB, int length) { throw null; }
@@ -2317,6 +2348,9 @@ namespace System
         public static System.String Concat(System.String str0, System.String str1) { throw null; }
         public static System.String Concat(System.String str0, System.String str1, System.String str2) { throw null; }
         public static System.String Concat(System.String str0, System.String str1, System.String str2, System.String str3) { throw null; }
+        public static System.String Concat(System.ReadOnlySpan<char> str0, System.ReadOnlySpan<char> str1) { throw null; }
+        public static System.String Concat(System.ReadOnlySpan<char> str0, System.ReadOnlySpan<char> str1, System.ReadOnlySpan<char> str2) { throw null; }
+        public static System.String Concat(System.ReadOnlySpan<char> str0, System.ReadOnlySpan<char> str1, System.ReadOnlySpan<char> str2, System.ReadOnlySpan<char> str3) { throw null; }
         public static System.String Concat(params string[] values) { throw null; }
         public static System.String Concat<T>(System.Collections.Generic.IEnumerable<T> values) { throw null; }
         public bool Contains(char value) { throw null; }
@@ -2422,6 +2456,8 @@ namespace System
         public bool StartsWith(System.String value, System.StringComparison comparisonType) { throw null; }
         public System.String Substring(int startIndex) { throw null; }
         public System.String Substring(int startIndex, int length) { throw null; }
+        public System.String Substring(System.Index startIndex) { throw null; }
+        public System.String Substring(System.Range range) { throw null; }
         System.Collections.Generic.IEnumerator<char> System.Collections.Generic.IEnumerable<System.Char>.GetEnumerator() { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         bool System.IConvertible.ToBoolean(System.IFormatProvider provider) { throw null; }
@@ -3897,7 +3933,7 @@ namespace System.Collections.Generic
 {
     public partial interface IAsyncEnumerable<out T>
     {
-        System.Collections.Generic.IAsyncEnumerator<T> GetAsyncEnumerator();
+        System.Collections.Generic.IAsyncEnumerator<T> GetAsyncEnumerator(System.Threading.CancellationToken cancellationToken = default);
     }
     public partial interface IAsyncEnumerator<out T> : System.IAsyncDisposable
     {
@@ -5196,7 +5232,7 @@ namespace System.IO
         Current = 1,
         End = 2,
     }
-    public abstract partial class Stream : System.MarshalByRefObject, System.IDisposable
+    public abstract partial class Stream : System.MarshalByRefObject, System.IDisposable, System.IAsyncDisposable
     {
         public static readonly System.IO.Stream Null;
         protected Stream() { }
@@ -5274,6 +5310,7 @@ namespace System.Reflection
         public virtual System.Collections.Generic.IEnumerable<System.Reflection.Module> Modules { get { throw null; } }
         public virtual bool ReflectionOnly { get { throw null; } }
         public virtual System.Security.SecurityRuleSet SecurityRuleSet { get { throw null; } }
+        public virtual bool IsCollectible { get { throw null; } }
         public virtual event System.Reflection.ModuleResolveEventHandler ModuleResolve { add { } remove { } }
         public object CreateInstance(string typeName) { throw null; }
         public object CreateInstance(string typeName, bool ignoreCase) { throw null; }
@@ -5857,6 +5894,7 @@ namespace System.Reflection
         public virtual System.Reflection.Module Module { get { throw null; } }
         public abstract string Name { get; }
         public abstract System.Type ReflectedType { get; }
+        public virtual bool IsCollectible { get { throw null; } }
         public override bool Equals(object obj) { throw null; }
         public abstract object[] GetCustomAttributes(bool inherit);
         public abstract object[] GetCustomAttributes(System.Type attributeType, bool inherit);
@@ -6438,6 +6476,11 @@ namespace System.Runtime.CompilerServices
         public AsyncMethodBuilderAttribute(System.Type builderType) { }
         public System.Type BuilderType { get { throw null; } }
     }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    public sealed partial class AsyncIteratorStateMachineAttribute : System.Runtime.CompilerServices.StateMachineAttribute
+    {
+        public AsyncIteratorStateMachineAttribute(System.Type stateMachineType) : base(default(System.Type)) { }
+    }
     [System.AttributeUsageAttribute(System.AttributeTargets.Method, Inherited=false, AllowMultiple=false)]
     public sealed partial class AsyncStateMachineAttribute : System.Runtime.CompilerServices.StateMachineAttribute
     {
@@ -6756,6 +6799,8 @@ namespace System.Runtime.CompilerServices
         public const string DefaultImplementationsOfInterfaces = "DefaultImplementationsOfInterfaces";
 #endif
         public const string PortablePdb = "PortablePdb";
+        public static bool IsDynamicCodeCompiled { get { throw null; } }
+        public static bool IsDynamicCodeSupported { get { throw null; } }
         public static bool IsSupported(string feature) { throw null; }
     }
     public static partial class RuntimeHelpers
@@ -6767,6 +6812,7 @@ namespace System.Runtime.CompilerServices
         public static int GetHashCode(object o) { throw null; }
         public static object GetObjectValue(object obj) { throw null; }
         public static object GetUninitializedObject(System.Type type) { throw null; }
+        public static T[] GetSubArray<T>(T[] array, System.Range range) { throw null; }
         public static void InitializeArray(System.Array array, System.RuntimeFieldHandle fldHandle) { }
         public static bool IsReferenceOrContainsReferences<T>() { throw null; }
         public static void PrepareConstrainedRegions() { }
@@ -7821,7 +7867,7 @@ namespace System.Threading
         public void ThrowIfCancellationRequested() { }
         public System.Threading.CancellationTokenRegistration UnsafeRegister(System.Action<object> callback, object state) { throw null; }
     }
-    public readonly partial struct CancellationTokenRegistration : System.IDisposable, System.IEquatable<System.Threading.CancellationTokenRegistration>
+    public readonly partial struct CancellationTokenRegistration : System.IDisposable, System.IAsyncDisposable, System.IEquatable<System.Threading.CancellationTokenRegistration>
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;

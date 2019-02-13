@@ -173,6 +173,7 @@
     <Compile Include="Memory\Equality.cs" />
     <Compile Include="Memory\GetHashCode.cs" />
     <Compile Include="Memory\ImplicitConversion.cs" />
+    <Compile Include="Memory\IndexAndRange.cs" />
     <Compile Include="Memory\MemoryManager.cs" />
     <Compile Include="Memory\Pin.cs" />
     <Compile Include="Memory\Slice.cs" />
@@ -265,9 +266,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">

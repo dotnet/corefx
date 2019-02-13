@@ -71,7 +71,7 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
         // Set the machine affinity to windows machines
         Utilities.setMachineAffinity(newJob, 'Windows_NT', 'latest-or-auto')
         // Publish reports
-        Utilities.addHtmlPublisher(newJob, 'artifacts/bin/tests/coverage', 'Code Coverage Report', 'index.htm')
+        Utilities.addHtmlPublisher(newJob, 'artifacts/coverage', 'Code Coverage Report', 'index.htm')
         // Archive results.
         Utilities.addArchival(newJob, '**/coverage/*,msbuild.log')
         // Timeout. Code coverage runs take longer, so we set the timeout to be longer.
@@ -277,14 +277,10 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
 [true, false].each { isPR ->
     ['netcoreapp'].each { targetGroup ->
         ['Debug', 'Release'].each { configurationGroup ->
-            ['Linux', 'Tizen'].each { osName ->
+            ['Linux'].each { osName ->
                 if (osName == "Linux") {
                     linuxCodeName="xenial"
                     abi = "arm"
-                }
-                else if (osName == "Tizen") {
-                    linuxCodeName="tizen"
-                    abi = "armel"
                 }
 
                 def osGroup = "Linux"
@@ -322,8 +318,8 @@ def targetGroupOsMapInnerloop = ['netcoreapp': ['Windows_NT', 'Ubuntu14.04', 'Ub
 
                 // Set up triggers
                 if (isPR) {
-                    // We run Tizen Debug and Linux Release as default PR builds
-                    if ((osName == "Tizen" && configurationGroup == "Debug") || (osName == "Linux" && configurationGroup == "Release")) {
+                    // We run Linux Release as default PR builds
+                    if (osName == "Linux" && configurationGroup == "Release") {
                         Utilities.addGithubPRTriggerForBranch(newJob, branch, "${osName} ${abi} ${configurationGroup} Build")
                     }
                     else {

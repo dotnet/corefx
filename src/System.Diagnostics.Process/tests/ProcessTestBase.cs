@@ -62,7 +62,7 @@ namespace System.Diagnostics.Tests
             return p;
         }
 
-        protected Process CreateProcess(Func<string, int> method, string arg)
+        protected Process CreateProcess(Func<string, int> method, string arg, bool autoDispose = true)
         {
             Process p = null;
             using (RemoteInvokeHandle handle = RemoteInvoke(method, arg, new RemoteInvokeOptions { Start = false }))
@@ -70,7 +70,9 @@ namespace System.Diagnostics.Tests
                 p = handle.Process;
                 handle.Process = null;
             }
-            AddProcessForDispose(p);
+            if (autoDispose)
+                AddProcessForDispose(p);
+
             return p;
         }
 

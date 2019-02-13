@@ -74,22 +74,26 @@ namespace System.IO.Pipelines
         {
             Action<object> currentCompletion = _completion;
             object currentState = _completionState;
+            ExecutionContext executionContext = _executionContext;
+            SynchronizationContext synchronizationContext = _synchronizationContext;
 
-            _completion = null;
-            _completionState = null;
-
-            completionData = currentCompletion != null ?
-                new CompletionData(currentCompletion, currentState, _executionContext, _synchronizationContext) :
-                default;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Reset()
-        {
             _completion = null;
             _completionState = null;
             _synchronizationContext = null;
             _executionContext = null;
+
+            completionData = currentCompletion != null ?
+                new CompletionData(currentCompletion, currentState, executionContext, synchronizationContext) :
+                default;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetUncompleted()
+        {
+            Debug.Assert(_completion == null);
+            Debug.Assert(_completionState == null);
+            Debug.Assert(_synchronizationContext == null);
+            Debug.Assert(_executionContext == null);
 
             _awaitableState &= ~AwaitableState.Completed;
         }
@@ -97,7 +101,7 @@ namespace System.IO.Pipelines
         public void OnCompleted(Action<object> continuation, object state, ValueTaskSourceOnCompletedFlags flags, out CompletionData completionData, out bool doubleCompletion)
         {
             completionData = default;
-            doubleCompletion = _completion != null;
+            doubleCompletion = !ReferenceEquals(_completion, null);
 
             if (IsCompleted || doubleCompletion)
             {

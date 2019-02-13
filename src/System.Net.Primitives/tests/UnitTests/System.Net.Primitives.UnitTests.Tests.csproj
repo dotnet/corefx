@@ -13,7 +13,7 @@
   </PropertyGroup>
   <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
   <ItemGroup>
-    <TargetingPackExclusions Include="System.Net.Primitives" />
+    <DefaultReferenceExclusions Include="System.Net.Primitives" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CookieInternalTest.cs" />
@@ -101,8 +101,8 @@
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>ProductionCode\Common\System\NotImplemented.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Winsock\Interop.ErrorCodes.cs">
-      <Link>ProductionCode\Common\Interop\Windows\Winsock\Interop.ErrorCodes.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\WinSock\Interop.ErrorCodes.cs">
+      <Link>ProductionCode\Common\Interop\Windows\WinSock\Interop.ErrorCodes.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">

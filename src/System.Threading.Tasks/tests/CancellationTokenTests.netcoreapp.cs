@@ -23,6 +23,21 @@ namespace System.Threading.Tasks.Tests
         }
 
         [Fact]
+        public static void CancellationTokenRegistration_Token_AccessibleAfterCtsDispose()
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            CancellationToken ct = cts.Token;
+            CancellationTokenRegistration ctr = ct.Register(() => { });
+
+            cts.Dispose();
+            Assert.Throws<ObjectDisposedException>(() => cts.Token);
+
+            Assert.Equal(ct, ctr.Token);
+            ctr.Dispose();
+            Assert.Equal(ct, ctr.Token);
+        }
+
+        [Fact]
         public static void CancellationTokenRegistration_UnregisterOnDefaultIsNop()
         {
             Assert.False(default(CancellationTokenRegistration).Unregister());
@@ -275,6 +290,30 @@ namespace System.Threading.Tasks.Tests
             }
 
             Assert.True(reg.DisposeAsync().IsCompletedSuccessfully);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void CancellationTokenSource_Ctor_ZeroTimeout(bool timeSpan)
+        {
+            var cts = timeSpan ?
+                new CancellationTokenSource(TimeSpan.Zero) :
+                new CancellationTokenSource(0);
+
+            Assert.True(cts.IsCancellationRequested);
+            Assert.True(cts.Token.IsCancellationRequested);
+
+            Assert.NotEqual(CancellationToken.None, cts.Token);
+            Assert.NotEqual(new CancellationTokenSource(0).Token, cts.Token);
+
+            for (int i = 0; i < 2; i++)
+            {
+                int invokedCount = 0;
+                CancellationTokenRegistration r = cts.Token.Register(() => invokedCount++);
+                Assert.Equal(1, invokedCount);
+                Assert.False(r.Unregister());
+            }
         }
     }
 }
