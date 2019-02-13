@@ -276,9 +276,10 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task SendAsync_GetWithInvalidHostHeader_ThrowsException()
         {
-            if (PlatformDetection.IsNetCore && !UseSocketsHttpHandler)
+            if (PlatformDetection.IsNetCore && (!UseSocketsHttpHandler || LoopbackServerFactory.IsHttp2))
             {
-                // Only .NET Framework and SocketsHttpHandler use the Host header to influence the SSL auth.
+                // Only .NET Framework and SocketsHttpHandler with HTTP/1.x use the Host header to influence the SSL auth.
+                // Host header is not used for HTTP2
                 return;
             }
 
@@ -2703,7 +2704,7 @@ namespace System.Net.Http.Functional.Tests
         {
             string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.18 Safari/537.36";
 
-            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
             {
                 using (var client = CreateHttpClient())
                 {
@@ -2711,11 +2712,14 @@ namespace System.Net.Http.Functional.Tests
                     message.Headers.TryAddWithoutValidation("User-Agent", userAgent);
                     (await client.SendAsync(message).ConfigureAwait(false)).Dispose();
                 }
-            }, server => server.AcceptConnectionAsync(async connection =>
+            },
+            async server =>
             {
-                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
-                Assert.Contains($"User-Agent: {userAgent}", headers);
-            }));
+                HttpRequestData requestData = await server.HandleRequestAsync(HttpStatusCode.OK);
+
+                string agent = requestData.GetSingleHeaderValue("User-Agent");
+                Assert.Equal(userAgent, agent);
+            });
         }
 
         [Fact]
