@@ -42,7 +42,7 @@ extern "C" int32_t CryptoNative_ObjSn2Nid(const char* sn)
     return OBJ_sn2nid(sn);
 }
 
-extern "C" ASN1_OBJECT* CryptoNative_ObjNid2Obj(int32_t nid)
+extern "C" const ASN1_OBJECT* CryptoNative_ObjNid2Obj(int32_t nid)
 {
     return OBJ_nid2obj(nid);
 }

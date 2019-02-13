@@ -19,6 +19,11 @@ Direct shim to sk_X509_NAME_value
 extern "C" X509_NAME* CryptoNative_GetX509NameStackField(X509NameStack* sk, int32_t loc);
 
 /*
+ * The following methods are kept around for compatiblity during servicing.
+ * They are not used.
+ */
+
+/*
 Shims the d2i_X509_NAME method and makes it easier to invoke from managed code.
 */
 extern "C" X509_NAME* CryptoNative_DecodeX509Name(const uint8_t* buf, int32_t len);

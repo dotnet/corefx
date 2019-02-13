@@ -4,6 +4,11 @@
 
 #include "pal_asn1_print.h"
 
+/*
+ * This file is completely unused. It's kept around for compatiblity between
+ * servicing updates.
+ */
+
 static_assert(PAL_B_ASN1_NUMERICSTRING == B_ASN1_NUMERICSTRING, "");
 static_assert(PAL_B_ASN1_PRINTABLESTRING == B_ASN1_PRINTABLESTRING, "");
 static_assert(PAL_B_ASN1_T61STRING == B_ASN1_T61STRING, "");
@@ -26,12 +31,19 @@ static_assert(PAL_ASN1_STRFLGS_UTF8_CONVERT == ASN1_STRFLGS_UTF8_CONVERT, "");
 
 extern "C" ASN1_STRING* CryptoNative_DecodeAsn1TypeBytes(const uint8_t* buf, int32_t len, Asn1StringTypeFlags type)
 {
-    if (!buf || !len)
+#if NEED_OPENSSL_1_0
+    if (!API_EXISTS(d2i_ASN1_type_bytes) || !buf || !len)
     {
         return nullptr;
     }
 
     return d2i_ASN1_type_bytes(nullptr, &buf, len, type);
+#else
+    (void)buf;
+    (void)len;
+    (void)type;
+    return nullptr;
+#endif
 }
 
 extern "C" int32_t CryptoNative_Asn1StringPrintEx(BIO* out, ASN1_STRING* str, Asn1StringPrintFlags flags)
