@@ -91,7 +91,7 @@ jobs:
 
           - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
             - _windowsOfficialBuildArguments: ''
-        
+
           # Optional tooling variables
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
             - group: DotNet-Internal-Tools-Feed
