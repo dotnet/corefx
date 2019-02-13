@@ -12,6 +12,7 @@ parameters:
   officialBuildId: ''
   enableAzurePipelinesReporter: '' # true | false
   outerloop: '' # true | false
+  coverage: '' # true | false
 
 steps:
   - script: ${{ parameters.msbuildScript }}
@@ -19,6 +20,7 @@ steps:
             /t:test
             /p:ArchGroup=${{ parameters.archGroup }}
             /p:ConfigurationGroup=${{ parameters.configuration }}
+            /p:Coverage=${{ parameters.coverage }}
             /p:OSGroup=${{ parameters.targetOS }}
             /p:OuterLoop=${{ parameters.outerloop }}
             /p:TargetGroup=${{ parameters.framework }}
@@ -34,3 +36,5 @@ steps:
     displayName: Send to Helix
     env:
       SYSTEM_ACCESSTOKEN: $(System.AccessToken) # We need to set this env var to publish helix results to Azure Dev Ops
+      ${{ if eq(parameters.coverage, 'true') }}:
+        CODECOV_TOKEN: $(CODECOVTOKEN)

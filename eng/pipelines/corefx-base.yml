@@ -14,6 +14,14 @@ parameters:
   #   Default: false
   isOfficialBuild: false
 
+  # Required: value to specify if the build is comming from a code coverage pipeline.
+  #   Default: false
+  isCodeCoverageBuild: false
+
+  # Required: value to specify if outerloop tests should be run.
+  #   Default: false
+  runOuterloop: false
+
   # EACH JOB SHOULD INCLUDE THE FOLLOWING PROPERTIES (ASIDE FROM THE REQUIRED ONES IN THE JOB SCHEMA)
 
   # Required: as part of the strategy matrix, the following variables should be defined
@@ -21,9 +29,6 @@ parameters:
   #     _architecture: x64 | x86 | arm | arm64
   #     _framework: (netcoreapp, netfx, uap, etc).
   #     _helixQueues: Windows.Amd64 (Only needed if submitToHelix -> true.) -- Queues should be separated by + if multiple.
-
-  # Required: as part of the variables object, the following values need to be passed:
-  #     _outerloop: true | false
 
   # Optional: _publishTests -> Boolean -> Publish test assets to blob storage if true.
   # Default: false
@@ -74,10 +79,19 @@ jobs:
 
         - _msbuildCommonParameters: ''
         - _archiveTestsParameter: ''
+        - _outerloopParameter: ''
+        - _coverageParameter: ''
         - _finalFrameworkArg: -framework $(_framework)
 
         - ${{ if ne(job._jobFramework, '')}}:
           - _finalFrameworkArg: ${{ job._jobFramework }}
+
+        - ${{ if eq(parameters.runOuterloop, 'true') }}:
+          - _outerloopParameter: -outerloop
+
+        - ${{ if eq(parameters.isCodeCoverageBuild, 'true') }}:
+          - group: DotNet-CoreFx-CodeCov
+          - _coverageParameter: -coverage
 
         - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
           - _msbuildCommonParameters: /p:OfficialBuildId=$(Build.BuildNumber)
@@ -89,7 +103,7 @@ jobs:
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
             - group: DotNet-HelixApi-Access
 
-        - _args: -configuration $(_BuildConfig) -ci -arch $(_architecture) $(_finalFrameworkArg) $(_archiveTestsParameter) ${{ job.buildExtraArguments }}
+        - _args: -configuration $(_BuildConfig) -ci -arch $(_architecture) $(_finalFrameworkArg) $(_outerloopParameter) $(_coverageParameter) $(_archiveTestsParameter) ${{ job.buildExtraArguments }}
         - _commonArguments: $(_args)
 
         # Windows variables
@@ -150,7 +164,6 @@ jobs:
                     -build
                     -buildtests
                     $(_commonArguments)
-                    /p:OuterLoop=$(_outerloop)
                     $(_msbuildCommonParameters)
               displayName: Build Sources and Tests
 
@@ -195,20 +208,27 @@ jobs:
                 helixQueues: $(_helixQueues)
                 msbuildScript: $(_msbuildCommand)
                 framework: $(_framework)
-                outerloop: $(_outerloop)
+                outerloop: ${{ parameters.runOuterloop }}
+                coverage: ${{ parameters.isCodeCoverageBuild }}
                 enableAzurePipelinesReporter: false
 
-                ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+                # Code coverage runs from internal domain for now so we need to use the access token.
+                ${{ if or(eq(parameters.isOfficialBuild, 'true'), eq(parameters.isCodeCoverageBuild, 'true')) }}:
                   isExternal: false
+                  helixToken: $(HelixApiAccessToken)
+
+                ${{ if eq(parameters.isOfficialBuild, 'true') }}:
                   waitForCompletion: false
                   officialBuildId: $(Build.BuildNumber)
                   helixToken: $(HelixApiAccessToken)
 
                 ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+                  waitForCompletion: true
+
+                ${{ if and(eq(parameters.isOfficialBuild, 'false'), eq(parameters.isCodeCoverageBuild, 'false')) }}:
                   # TODO: SET Creator to the PR owner whenever Azure DevOps supports a good way to retrieve it.
                   creator: dotnet-bot
                   isExternal: true
-                  waitForCompletion: true
                   helixToken: ''
 
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:

@@ -6,12 +6,19 @@ parameters:
   # Required: value to specify if the build is comming from an outerloop pipeline.
   #   Default: false
   isOuterloopBuild: false
+  # Required: value to specify if the build is comming from a code coverage pipeline.
+  #   Default: false
+  isCodeCoverageBuild: false
 
 jobs:
 
 - template: corefx-base.yml
   parameters:
     isOfficialBuild: ${{ parameters.isOfficialBuild }}
+    isCodeCoverageBuild: ${{ parameters.isCodeCoverageBuild }}
+    ${{ if or(eq(parameters.isOuterloopBuild, 'true'), eq(parameters.isCodeCoverageBuild, 'true'), eq(parameters.isOfficialBuild, 'true')) }}:
+      runOuterloop: true
+
     targetOS: OSX
     jobs:
 
@@ -49,13 +56,11 @@ jobs:
       submitToHelix: true
 
       variables:
-        - _skipTests: true
-        - _outerloop: ${{ parameters.isOfficialBuild }}
-        - ${{ if eq(parameters.isOuterloopBuild, 'true') }}:
-          - _outerloop: true
-
         - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
           - macOSQueues: OSX.1012.Amd64.Open+OSX.1013.Amd64.Open
 
         - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
           - macOSQueues: OSX.1012.Amd64+OSX.1013.Amd64+OSX.1014.Amd64
+        
+        - ${{ if eq(parameters.isCodeCoverageBuild, 'true') }}:
+          - macOSQueues: OSX.1014.Amd64

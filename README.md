@@ -1,6 +1,7 @@
 # .NET Core Libraries (CoreFX)
 
 [![Build Status](https://dev.azure.com/dnceng/internal/_apis/build/status/dotnet/corefx/corefx-official?branchName=master)](https://dev.azure.com/dnceng/internal/_build/latest?definitionId=283&branchName=master)
+[![codecov](https://codecov.io/gh/dotnet/corefx/branch/master/graph/badge.svg)](https://codecov.io/gh/dotnet/corefx)
 
 This repo contains the library implementation (called "CoreFX") for .NET Core. It includes System.Collections, System.IO, System.Xml, and many other components.
 The corresponding [.NET Core Runtime repo](https://github.com/dotnet/coreclr) (called "CoreCLR") contains the runtime implementation for .NET Core. It includes RyuJIT, the .NET GC, and many other components.

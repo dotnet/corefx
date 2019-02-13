@@ -6,12 +6,19 @@ parameters:
   # Required: value to specify if the build is comming from an outerloop pipeline.
   #   Default: false
   isOuterloopBuild: false
+  # Required: value to specify if the build is comming from a code coverage pipeline.
+  #   Default: false
+  isCodeCoverageBuild: false
 
 jobs:
 
 - template: corefx-base.yml
   parameters:
     isOfficialBuild: ${{ parameters.isOfficialBuild }}
+    isCodeCoverageBuild: ${{ parameters.isCodeCoverageBuild }}
+    ${{ if or(eq(parameters.isOuterloopBuild, 'true'), eq(parameters.isCodeCoverageBuild, 'true'), eq(parameters.isOfficialBuild, 'true')) }}:
+      runOuterloop: true
+
     targetOS: Windows_NT
     jobs:
 
@@ -21,7 +28,7 @@ jobs:
       strategy:
         matrix:
           # PR CI Matrix
-          ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+          ${{ if and(eq(parameters.isOfficialBuild, 'false'), eq(parameters.isCodeCoverageBuild, 'false')) }}:
             x64_Debug:
               _BuildConfig: Debug
               _architecture: x64
@@ -108,22 +115,24 @@ jobs:
               _framework: uapaot
               _helixQueues: $(uapNetfxQueues)
 
+          ${{ if eq(parameters.isCodeCoverageBuild, 'true') }}:
+            x64_Debug:
+              _BuildConfig: Debug
+              _architecture: x64
+              _framework: netcoreapp
+              _helixQueues: $(netcoreappWindowsQueues)
+
       pool:
-        ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+        ${{ if or(eq(parameters.isOfficialBuild, 'true'), eq(parameters.isCodeCoverageBuild, 'true')) }}:
           name: NetCoreInternal-Int-Pool
           queue: buildpool.windows.10.amd64.vs2017
-        ${{ if eq(parameters.isOfficialBuild, 'false') }}:
+        ${{ if and(eq(parameters.isOfficialBuild, 'false'), eq(parameters.isCodeCoverageBuild, 'false')) }}:
           name: Hosted VS2017
 
       submitToHelix: true
       buildExtraArguments: /p:RuntimeOS=win10
 
       variables:
-        - _skipTests: true
-        - _outerloop: ${{ parameters.isOfficialBuild }}
-        - ${{ if eq(parameters.isOuterloopBuild, 'true') }}:
-          - _outerloop: true
-
         - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
           - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.ES.Open
           - nanoQueues: Windows.10.Nano.Amd64.Open
@@ -134,9 +143,12 @@ jobs:
           - nanoQueues: Windows.10.Nano.Amd64
           - uapNetfxQueues: Windows.10.Amd64.ClientRS5
           - windowsArmQueue: Windows.10.Arm64
+        
+        - ${{ if eq(parameters.isCodeCoverageBuild, 'true') }}:
+          - netcoreappWindowsQueues: Windows.10.Amd64.ClientRS4
 
-    # There is no point of running legs without outerloop tests, when in an outerloop build.
-    - ${{ if eq(parameters.isOuterloopBuild, 'false') }}:
+    # These builds doesn't run any product code tests.
+    - ${{ if and(eq(parameters.isOuterloopBuild, 'false'), eq(parameters.isCodeCoverageBuild, 'false')) }}:
       # Packaging all configurations
       - job: AllConfigurations
         displayName: Packaging All Configurations
@@ -171,7 +183,6 @@ jobs:
         enableAzurePipelinesReporter: false
 
         variables:
-          - _outerloop: false
           - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
             - allConfigurationsQueues: Windows.10.Amd64.ClientRS5.Open
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
@@ -233,7 +244,3 @@ jobs:
 
         submitToHelix: false
         buildExtraArguments: /p:RuntimeOS=win10
-
-        variables:
-          - _skipTests: true
-          - _outerloop: ${{ parameters.isOfficialBuild }}

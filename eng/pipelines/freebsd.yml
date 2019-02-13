@@ -4,6 +4,7 @@ jobs:
 - template: corefx-base.yml
   parameters:
     isOfficialBuild: true
+    runOuterloop: true
     targetOS: FreeBSD
     jobs:
 
@@ -21,7 +22,3 @@ jobs:
 
       buildScriptPrefix: $(_buildScriptPrefix)
       submitToHelix: false
-
-      variables:
-        - _skipTests: true
-        - _outerloop: true # Only runs in official builds

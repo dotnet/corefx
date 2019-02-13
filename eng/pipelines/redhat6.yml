@@ -4,6 +4,7 @@ jobs:
 - template: corefx-base.yml
   parameters:
     isOfficialBuild: true
+    runOuterloop: true
     targetOS: Linux
     jobs:
 
@@ -26,6 +27,4 @@ jobs:
       submitToHelix: true
 
       variables:
-        - _skipTests: true
-        - _outerloop: true # Only runs in official builds
         - redhatHelixQueue: RedHat.6.Amd64

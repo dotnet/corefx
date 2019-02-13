@@ -50,7 +50,8 @@
   <PropertyGroup Condition="'$(HelixType)' == ''">
     <!-- For PRs we want helixtype to be the same for all frameworks except package testing-->
     <HelixType>test/functional/cli/</HelixType>
-    <HelixType Condition="'$(Outerloop)' == 'true' AND '$(OfficialBuildId)' == ''">$(HelixType)/outerloop/</HelixType>
+    <HelixType Condition="'$(Outerloop)' == 'true' AND '$(OfficialBuildId)' == '' AND '$(Coverage)' != 'true'">$(HelixType)outerloop/</HelixType>
+    <HelixType Condition="'$(Coverage)' == 'true'">$(HelixType)codecoverage/</HelixType>
     <HelixType Condition="'$(TargetGroup)' == 'AllConfigurations'">test/functional/packaging/</HelixType>
     <HelixType Condition="'$(TargetGroup)' == 'netfx' AND '$(OfficialBuildId)' != ''">test/functional/desktop/cli/</HelixType>
     <HelixType Condition="'$(TargetGroup)' == 'uap' AND '$(OfficialBuildId)' != ''">test/functional/uwp/</HelixType>
@@ -64,11 +65,6 @@
     <HelixCommand>$(HelixCommand) /p:PackageTestProjectsDir=%HELIX_WORKITEM_PAYLOAD%</HelixCommand>
     <HelixCommand>$(HelixCommand) /p:RestorePackagesPath=%HELIX_WORKITEM_PAYLOAD%\packages</HelixCommand>
     <HelixCommand>$(HelixCommand) /p:LocalPackagesPath="%HELIX_CORRELATION_PAYLOAD%\packages\</HelixCommand>
-  </PropertyGroup>
-
-  <!-- Define which workloads require global tools. -->
-  <PropertyGroup Condition="'$(UseGlobalTools)' == ''">
-    <UseGlobalTools Condition="'$(Coverage)' == 'true'">true</UseGlobalTools>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(HelixCommand)' == '' and '$(TargetsWindows)' == 'true'">
@@ -91,6 +87,19 @@
   <ItemGroup>
     <_RuntimeInputs Include="$(TestHostRootPath)**/*.dll" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <!-- Define files to download from helix results container, multiple can be specified with ; as separator. -->
+    <ResultFilesToDownload Condition="'$(Coverage)' == 'true'">coverage.xml</ResultFilesToDownload>
+
+    <!-- If Coverage is ran, coverage.xml files are not uploaded by the Helix SDK yet, as a workaround we need to upload them. -->
+    <_uploadScriptCommand>upload_result.py -result coverage.xml -result_name coverage.xml</_uploadScriptCommand>
+    <HelixPostCommands Condition="'$(TargetsWindows)' == 'true'">%HELIX_PYTHONPATH% %HELIX_SCRIPT_ROOT%\$(_uploadScriptCommand)</HelixPostCommands>
+    <HelixPostCommands Condition="'$(TargetsWindows)' != 'true'">$HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/$(_uploadScriptCommand)</HelixPostCommands>
+
+    <!-- Define where results files should be downloaded to -->
+    <HelixResultsDestinationDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'helixresults'))</HelixResultsDestinationDir>
+  </PropertyGroup>
 
   <!-- Add global tools to runtime -->
   <ItemGroup Condition="'$(UseGlobalTools)' == 'true'">
@@ -129,7 +138,8 @@
   </Target>
 
   <Target Name="BuildHelixWorkItems"
-          DependsOnTargets="CompressRuntimeDirectory">
+          DependsOnTargets="CompressRuntimeDirectory"
+          BeforeTargets="BeforeTest">
     <ItemGroup>
 
       <HelixCorrelationPayload Include="$(HelixCorrelationPayload)" />
@@ -140,6 +150,7 @@
         <PayloadArchive>%(Identity)</PayloadArchive>
         <Command>$(HelixCommand)</Command>
         <Timeout>$(_timeoutSpan)</Timeout>
+        <DownloadFilesFromResults Condition="'$(ResultFilesToDownload)' != ''">$(ResultFilesToDownload)</DownloadFilesFromResults>
       </HelixWorkItem>
     </ItemGroup>
   </Target>
