@@ -27,6 +27,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <net/if.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -50,7 +51,6 @@
 #include <sys/uio.h>
 #endif
 #if !HAVE_IN_PKTINFO
-#include <net/if.h>
 #if HAVE_GETIFADDRS
 #include <ifaddrs.h>
 #endif
