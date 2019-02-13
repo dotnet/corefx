@@ -2568,3 +2568,9 @@ int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, i
     return SystemNative_ConvertErrorPlatformToPal(errno);
 #endif
 }
+
+uint32_t SystemNative_InterfaceNameToIndex(char* interfaceName)
+{
+    assert(interfaceName != NULL);
+    return if_nametoindex(interfaceName);
+}
