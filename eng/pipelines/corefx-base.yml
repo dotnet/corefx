@@ -91,6 +91,10 @@ jobs:
 
           - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
             - _windowsOfficialBuildArguments: ''
+        
+          # Optional tooling variables
+          - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+            - group: DotNet-Internal-Tools-Feed
 
         # Non-Windows variables
         - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
@@ -148,6 +152,8 @@ jobs:
                   nugetConfigPath: 'eng\common\internal\NuGet.config'
                   restoreDirectory: '$(Build.SourcesDirectory)\.packages'
                 condition: eq(variables['_restoreInternalTools'], 'true')
+                env:
+                  VSS_NUGET_EXTERNAL_FEED_ENDPOINTS: '{"endpointCredentials": [{"endpoint":"$(OptionalToolSourceUri)", "username":"dn-bot","password":"$(dn-bot-devdiv-nuget-feed-read)"}]}'
 
             - script: $(_buildScript)
                     $(_commonArguments)
