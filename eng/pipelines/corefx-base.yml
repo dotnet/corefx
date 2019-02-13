@@ -150,7 +150,7 @@ jobs:
                   command: restore
                   feedsToUse: config
                   restoreSolution: 'eng\common\internal\Tools.csproj'
-                  nugetConfigPath: 'eng\common\internal\NuGet.config'
+                  nugetConfigPath: 'NuGet.config'
                   restoreDirectory: '$(Build.SourcesDirectory)\.packages'
                 condition: eq(variables['_restoreInternalTools'], 'true')
                 env:
