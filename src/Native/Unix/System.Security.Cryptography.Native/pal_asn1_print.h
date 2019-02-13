@@ -6,6 +6,11 @@
 #include "opensslshim.h"
 
 /*
+ * This file is completely unused. It's kept around for compatiblity between
+ * servicing updates.
+ */
+
+/*
 Flags for the 'type' parameter of CryptoNative_DecodeAsn1TypeBytes.
 */
 enum Asn1StringTypeFlags : int32_t

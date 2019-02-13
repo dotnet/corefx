@@ -6,7 +6,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # These are happening inside of OpenSSL-defined macros out of our control
 add_compile_options(-Wno-cast-align)
 
-add_definitions(-DPIC=1)
+add_definitions(-DPIC=1 -DOPENSSL_API_COMPAT=0x10100000L)
 
 if(CMAKE_STATIC_LIB_LINK)
    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
@@ -16,6 +16,7 @@ find_package(OpenSSL REQUIRED)
 include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
 
 set(NATIVECRYPTO_SOURCES
+    apibridge.cpp
     openssl.cpp
     pal_asn1.cpp
     pal_asn1_print.cpp

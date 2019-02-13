@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 internal static partial class Interop
@@ -47,8 +48,49 @@ internal static partial class Interop
         [DllImport(Libraries.HttpNative, EntryPoint = "HttpNative_GetSslVersionDescription")]
         internal static extern string GetSslVersionDescription();
 
-        internal const string OpenSsl10Description = "openssl/1.0";
+        internal const string OpenSslDescriptionPrefix = "OpenSSL/";
         internal const string SecureTransportDescription = "SecureTransport";
         internal const string LibreSslDescription = "LibreSSL";
+
+#if !SYSNETHTTP_NO_OPENSSL
+        private static readonly Lazy<string> s_requiredOpenSslDescription =
+            new Lazy<string>(() => DetermineRequiredOpenSslDescription());
+
+        private static readonly Lazy<bool> s_hasMatchingOpenSsl =
+            new Lazy<bool>(() => RequiredOpenSslDescription == GetSslVersionDescription());
+
+        internal static string RequiredOpenSslDescription => s_requiredOpenSslDescription.Value;
+        internal static bool HasMatchingOpenSslVersion => s_hasMatchingOpenSsl.Value;
+
+        private static string DetermineRequiredOpenSslDescription()
+        {
+            string versionDescription = Interop.OpenSsl.OpenSslVersionDescription();
+            var version = versionDescription.AsSpan();
+
+            // OpenSSL version description looks like this:
+            //
+            // OpenSSL 1.1.1 FIPS  11 Sep 2018
+            //
+            // libcurl's OpenSSL vtls backend ignores status in the version string.
+            // Major, minor, and fix are encoded (by libcurl) as unpadded hex
+            // (0 => "0", 15 => "f", 16 => "10").
+            //
+            // Patch is encoded as in the way OpenSSL would do it.
+
+            string prefix = "OpenSSL ";
+            if (version.StartsWith(prefix))
+            {
+                version = version.Slice(prefix.Length).Trim();
+            }
+            int end = version.IndexOf(" ");
+            if (end != -1)
+            {
+                version = version.Slice(0, end);
+            }
+            version = version.Trim();
+
+            return $"{OpenSslDescriptionPrefix}{version.ToString()}";
+        }
+#endif
     }
 }

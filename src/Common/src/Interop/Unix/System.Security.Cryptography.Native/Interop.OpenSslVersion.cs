@@ -12,7 +12,7 @@ internal static partial class Interop
         private static Version s_opensslVersion;
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SSLEayVersion")]
-        private static extern string OpenSslVersionDescription();
+        internal static extern string OpenSslVersionDescription();
 
         internal static Version OpenSslVersion
         {
