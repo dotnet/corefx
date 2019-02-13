@@ -298,12 +298,12 @@ namespace System
                             numberIsValid = false;
                         }
 
-                        start = i;
+                        start = i + 1;
                         for (++i; i < address.Length && address[i] != ']' && address[i] != '/'; ++i)
                         {
                         }
-                        if (address.Length > start + 1 && i - start > 0)
-                            scopeId = new string(address.Slice(start + 1, i - start)); // + 1 to ignore '%'
+                        if (address.Length > start && i - start > 0)
+                            scopeId = new string(address.Slice(start, i - start));
                         else
                             scopeId = string.Empty;
                         // ignore prefix if any
