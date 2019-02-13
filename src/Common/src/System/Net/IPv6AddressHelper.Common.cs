@@ -302,7 +302,7 @@ namespace System
                         for (++i; i < address.Length && address[i] != ']' && address[i] != '/'; ++i)
                         {
                         }
-                        if (i - start > 0)
+                        if (address.Length > start + 1 && i - start > 0)
                             scopeId = new string(address.Slice(start + 1, i - start)); // + 1 to ignore '%'
                         else
                             scopeId = string.Empty;
