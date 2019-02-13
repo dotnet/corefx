@@ -225,18 +225,6 @@ namespace System.Drawing.Primitives.Tests
             Assert.False(Color.FromArgb(Color.AliceBlue.A, Color.AliceBlue.R, Color.AliceBlue.G, Color.AliceBlue.B).IsNamedColor);
         }
 
-        [Fact]
-        public void IsSystemColor()
-        {
-            Color sysColor = Color.FromKnownColor(KnownColor.ActiveBorder);
-            Assert.True(sysColor.IsSystemColor);
-            Assert.True(Color.FromName("ActiveBorder").IsSystemColor);
-            Assert.True(Color.FromName("WindowText").IsSystemColor);
-            Assert.False(Color.FromArgb(sysColor.A, sysColor.R, sysColor.G, sysColor.B).IsSystemColor);
-            Assert.False(Color.FromKnownColor(KnownColor.AliceBlue).IsSystemColor);
-            Assert.False(Color.FromName("AliceBlue").IsSystemColor);
-        }
-
         [Theory]
         [MemberData(nameof(ColorNames))]
         public void KnownNames(string name)
