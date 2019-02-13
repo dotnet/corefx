@@ -112,6 +112,9 @@
     <Compile Include="$(CommonPath)\System\Net\SocketAddressPal.Windows.cs">
       <Link>Common\System\Net\SocketAddressPal.Windows.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.GetNativeIPInterfaceIndex.cs">
+      <Link>ProductionCode\Common\Interop\Windows\Interop.GetNativeIPInterfaceIndex.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="..\..\src\System\Net\SocketException.Unix.cs">
@@ -131,6 +134,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.SocketAddress.cs">
       <Link>ProductionCode\Common\Interop\Unix\System.Native\Interop.SocketAddress.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetNativeIPInterfaceIndex.cs">
+      <Link>ProductionCode\Common\Interop\Unix\System.Native\Interop.GetNativeIPInterfaceIndex.cs</Link>
     </Compile>
   </ItemGroup>
 </Project>
