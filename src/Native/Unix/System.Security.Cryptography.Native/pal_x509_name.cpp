@@ -14,6 +14,11 @@ extern "C" X509_NAME* CryptoNative_GetX509NameStackField(X509NameStack* sk, int3
     return sk_X509_NAME_value(sk, loc);
 }
 
+/*
+ * The following methods are kept around for compatiblity during servicing.
+ * They are not used.
+ */
+
 extern "C" X509_NAME* CryptoNative_DecodeX509Name(const uint8_t* buf, int32_t len)
 {
     if (!buf || !len)
