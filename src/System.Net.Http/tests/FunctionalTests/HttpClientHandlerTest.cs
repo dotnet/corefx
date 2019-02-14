@@ -1074,12 +1074,11 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public async Task GetAsync_TrailingHeaders_Ignored(bool includeTrailerHeader)
+        public async Task GetAsyncDeafultCompletionOption_TrailingHeaders_Available(bool includeTrailerHeader)
         {
-            if (IsCurlHandler)
+            if (!UseSocketsHttpHandler)
             {
-                // ActiveIssue #17174: CurlHandler has a problem here
-                // https://github.com/curl/curl/issues/1354
+                // PlatformHandlers don't support trailers.
                 return;
             }
 
@@ -1095,27 +1094,229 @@ namespace System.Net.Http.Functional.Tests
                             "HTTP/1.1 200 OK\r\n" +
                             "Connection: close\r\n" +
                             "Transfer-Encoding: chunked\r\n" +
-                            (includeTrailerHeader ? "Trailer: MyCoolTrailerHeader\r\n" : "") +
+                            (includeTrailerHeader ? "Trailer: MyCoolTrailerHeader, Hello\r\n" : "") +
                             "\r\n" +
                             "4\r\n" +
                             "data\r\n" +
                             "0\r\n" +
                             "MyCoolTrailerHeader: amazingtrailer\r\n" +
+                            "Hello: World\r\n" +
                             "\r\n"));
 
                     using (HttpResponseMessage response = await getResponseTask)
                     {
                         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Contains("chunked", response.Headers.GetValues("Transfer-Encoding"));
+
+                        // Check the Trailer header.
                         if (includeTrailerHeader)
                         {
                             Assert.Contains("MyCoolTrailerHeader", response.Headers.GetValues("Trailer"));
+                            Assert.Contains("Hello", response.Headers.GetValues("Trailer"));
                         }
-                        Assert.False(response.Headers.Contains("MyCoolTrailerHeader"), "Trailer should have been ignored");
+
+                        Assert.Contains("amazingtrailer", response.TrailingHeaders.GetValues("MyCoolTrailerHeader"));
+                        Assert.Contains("World", response.TrailingHeaders.GetValues("Hello"));
 
                         string data = await response.Content.ReadAsStringAsync();
                         Assert.Contains("data", data);
+                        // Trailers should not be part of the content data.
                         Assert.DoesNotContain("MyCoolTrailerHeader", data);
                         Assert.DoesNotContain("amazingtrailer", data);
+                        Assert.DoesNotContain("Hello", data);
+                        Assert.DoesNotContain("World", data);
+                    }
+                }
+            });
+        }
+
+        [Fact]
+        public async Task GetAsyncResponseHeadersReadOption_TrailingHeaders_Available()
+        {
+            if (!UseSocketsHttpHandler)
+            {
+                // PlatformHandlers don't support trailers.
+                return;
+            }
+
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                    await TestHelper.WhenAllCompletedOrAnyFailed(
+                        getResponseTask,
+                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                            "HTTP/1.1 200 OK\r\n" +
+                            "Connection: close\r\n" +
+                            "Transfer-Encoding: chunked\r\n" +
+                            "Trailer: MyCoolTrailerHeader\r\n" +
+                            "\r\n" +
+                            "4\r\n" +
+                            "data\r\n" +
+                            "0\r\n" +
+                            "MyCoolTrailerHeader: amazingtrailer\r\n" +
+                            "Hello: World\r\n" +
+                            "\r\n"));
+
+                    using (HttpResponseMessage response = await getResponseTask)
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Contains("chunked", response.Headers.GetValues("Transfer-Encoding"));
+                        Assert.Contains("MyCoolTrailerHeader", response.Headers.GetValues("Trailer"));
+
+                        // Pending read on the response content.
+                        Assert.Null(response.TrailingHeaders);
+
+                        Stream stream = await response.Content.ReadAsStreamAsync();
+                        Byte[] data = new Byte[100];
+                        int start = 0;
+                        await stream.ReadAsync(data, start, 4);
+                        start = 4;
+
+                        // Intermedia test - haven't reached stream EOF yet.
+                        Assert.Null(response.TrailingHeaders);
+                        Assert.Contains("data", System.Text.Encoding.Default.GetString(data));
+
+                        bool streamEOFReached = false;
+                        while (!streamEOFReached)
+                        {
+                            if (stream.Read(data, start, 10) == 0)
+                            {
+                                streamEOFReached = true;
+                            }
+                            start += 10;
+                        }
+
+                        Assert.Contains("amazingtrailer", response.TrailingHeaders.GetValues("MyCoolTrailerHeader"));
+                        Assert.Contains("World", response.TrailingHeaders.GetValues("Hello"));
+                    }
+                }
+            });
+        }
+
+        [Fact]
+        public async Task GetAsync_ForbiddenTrailingHeaders_Ignored()
+        {
+            if (!UseSocketsHttpHandler)
+            {
+                // PlatformHandlers don't support trailers.
+                return;
+            }
+
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
+                    await TestHelper.WhenAllCompletedOrAnyFailed(
+                        getResponseTask,
+                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                            "HTTP/1.1 200 OK\r\n" +
+                            "Connection: close\r\n" +
+                            "Transfer-Encoding: chunked\r\n" +
+                            "Trailer: Set-Cookie, MyCoolTrailerHeader, Hello, Content-Type\r\n" +
+                            "\r\n" +
+                            "4\r\n" +
+                            "data\r\n" +
+                            "0\r\n" +
+                            "Set-Cookie: yummy\r\n" +
+                            "MyCoolTrailerHeader: amazingtrailer\r\n" +
+                            "Hello: World\r\n" +
+                            "Content-Type: text\r\n" +
+                            "\r\n"));
+
+                    using (HttpResponseMessage response = await getResponseTask)
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Contains("chunked", response.Headers.GetValues("Transfer-Encoding"));
+
+                        Assert.Equal(2, response.TrailingHeaders.Count());
+                        Assert.Contains("amazingtrailer", response.TrailingHeaders.GetValues("MyCoolTrailerHeader"));
+                        Assert.Contains("World", response.TrailingHeaders.GetValues("Hello"));
+                    }
+                }
+            });
+        }
+
+        [Fact]
+        public async Task GetAsync_MissingTrailer_TrailingHeadersAccepted()
+        {
+            if (!UseSocketsHttpHandler)
+            {
+                // PlatformHandlers don't support trailers.
+                return;
+            }
+
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
+                    await TestHelper.WhenAllCompletedOrAnyFailed(
+                        getResponseTask,
+                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                            "HTTP/1.1 200 OK\r\n" +
+                            "Connection: close\r\n" +
+                            "Transfer-Encoding: chunked\r\n" +
+                            "\r\n" +
+                            "4\r\n" +
+                            "data\r\n" +
+                            "0\r\n" +
+                            "MyCoolTrailerHeader: amazingtrailer\r\n" +
+                            "Hello: World\r\n" +
+                            "\r\n"));
+
+                    using (HttpResponseMessage response = await getResponseTask)
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Contains("chunked", response.Headers.GetValues("Transfer-Encoding"));
+
+                        Assert.Contains("amazingtrailer", response.TrailingHeaders.GetValues("MyCoolTrailerHeader"));
+                        Assert.Contains("World", response.TrailingHeaders.GetValues("Hello"));
+                    }
+                }
+            });
+        }
+
+        [Fact]
+        public async Task GetAsync_NoTrailingHeaders_EmptyCollection()
+        {
+            if (!UseSocketsHttpHandler)
+            {
+                // PlatformHandlers don't support trailers.
+                return;
+            }
+
+            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
+                    await TestHelper.WhenAllCompletedOrAnyFailed(
+                        getResponseTask,
+                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                            "HTTP/1.1 200 OK\r\n" +
+                            "Connection: close\r\n" +
+                            "Transfer-Encoding: chunked\r\n" +
+                            "Trailer: MyCoolTrailerHeader\r\n" +
+                            "\r\n" +
+                            "4\r\n" +
+                            "data\r\n" +
+                            "0\r\n" +
+                            "\r\n"));
+
+                    using (HttpResponseMessage response = await getResponseTask)
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        Assert.Contains("chunked", response.Headers.GetValues("Transfer-Encoding"));
+
+                        Assert.NotNull(response.TrailingHeaders);
+                        Assert.Equal(0, response.TrailingHeaders.Count());
                     }
                 }
             });

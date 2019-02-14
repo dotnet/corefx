@@ -3,8 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers.Text;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -27,8 +30,15 @@ namespace System.Net.Http
             private ulong _chunkBytesRemaining;
             /// <summary>The current state of the parsing state machine for the chunked response.</summary>
             private ParsingState _state = ParsingState.ExpectChunkHeader;
+            /// <summary>The metadata at the end of chunked messages.</summary>
+            private HttpResponseHeaders _trailers;
+            private HttpResponseMessage _response;
 
-            public ChunkedEncodingReadStream(HttpConnection connection) : base(connection) { }
+            public ChunkedEncodingReadStream(HttpConnection connection, HttpResponseMessage response) : base(connection)
+            {
+                Debug.Assert(response != null, "The HttpResponseMessage cannot be null.");
+                _response = response;
+            }
 
             public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
             {
@@ -279,6 +289,7 @@ namespace System.Net.Http
 
                             while (true)
                             {
+                                // Folded header was deprecated in RFC 7230 3.2.4. Thus we don't support it.
                                 _connection._allowedReadLineBytes = MaxTrailingHeaderLength;
                                 if (!_connection.TryReadNextLine(out currentLine))
                                 {
@@ -300,7 +311,18 @@ namespace System.Net.Http
                                     _state = ParsingState.Done;
                                     _connection.CompleteResponse();
                                     _connection = null;
+
+                                    // Reached EOF.
+                                    _response.TrailingHeaders = _trailers ??
+                                        HttpResponseHeaders.EmptyResponseHeader;
+
                                     break;
+                                }
+                                // Parse the trailers.
+                                else
+                                {
+                                    if (_trailers == null) _trailers = new HttpResponseHeaders();
+                                    ParseHeaderNameValue(currentLine, _trailers);
                                 }
                             }
 
@@ -407,6 +429,95 @@ namespace System.Net.Http
                     cts?.Dispose();
                 }
             }
+
+            private void ParseHeaderNameValue(ReadOnlySpan<byte> line, HttpResponseHeaders trailers)
+            {
+                Debug.Assert(line.Length > 0);
+
+                int pos = 0;
+                while (line[pos] != (byte)':' && line[pos] != (byte)' ')
+                {
+                    pos++;
+                    if (pos == line.Length)
+                    {
+                        // Invalid header line that doesn't contain ':'.
+                        return;
+                    }
+                }
+
+                if (pos == 0)
+                {
+                    // Invalid empty header name.
+                    return;
+                }
+
+                if (!HeaderDescriptor.TryGet(line.Slice(0, pos), out HeaderDescriptor descriptor))
+                {
+                    // Invalid header name
+                    ThrowInvalidHttpResponse();
+                }
+
+                if (descriptor.KnownHeader != null && disallowedHeaders.Contains(descriptor.KnownHeader))
+                {
+                    // Disallowed trailer fields.
+                    // A recipient MUST ignore fields that are forbidden to be sent in a trailer.
+                    return;
+                }
+
+                // Eat any trailing whitespace
+                while (line[pos] == (byte)' ')
+                {
+                    pos++;
+                    if (pos == line.Length)
+                    {
+                        // Invalid header line that doesn't contain ':'.
+                        return;
+                    }
+                }
+
+                if (line[pos++] != ':')
+                {
+                    // Invalid header line that doesn't contain ':'.
+                    return;
+                }
+
+                // Skip whitespace after colon
+                while (pos < line.Length && (line[pos] == (byte)' ' || line[pos] == (byte)'\t'))
+                {
+                    pos++;
+                }
+
+                string headerValue = descriptor.GetHeaderValue(line.Slice(pos));
+
+                // Ignore the return value from TryAddWithoutValidation,
+                // if the header can't be added, we silently drop it.
+                trailers.TryAddWithoutValidation(descriptor, headerValue);
+            }
+
+            private static readonly List<KnownHeader> disallowedHeaders = new List<KnownHeader>
+            {
+                // Message framing headers.
+                KnownHeaders.TransferEncoding, KnownHeaders.ContentLength,
+
+                // Routing headers.
+                KnownHeaders.Host,
+
+                // Request modifiers: controls and conditionals.
+                // rfc7231#section-5.1: Controls.
+                KnownHeaders.CacheControl, KnownHeaders.Expect, KnownHeaders.MaxForwards, KnownHeaders.Pragma, KnownHeaders.Range, KnownHeaders.TE,
+                // rfc7231#section-5.2: Conditionals.
+                KnownHeaders.IfMatch, KnownHeaders.IfNoneMatch, KnownHeaders.IfModifiedSince, KnownHeaders.IfUnmodifiedSince, KnownHeaders.IfRange,
+
+                // Authentication headers.
+                KnownHeaders.Authorization, KnownHeaders.SetCookie,
+
+                // Response control data.
+                // rfc7231#section-7.1: Control Data.
+                KnownHeaders.Age, KnownHeaders.Expires, KnownHeaders.Date, KnownHeaders.Location, KnownHeaders.RetryAfter, KnownHeaders.Vary, KnownHeaders.Warning,
+
+                // Content-Encoding, Content-Type, Content-Range, and Trailer itself.
+                KnownHeaders.ContentEncoding, KnownHeaders.ContentType, KnownHeaders.ContentRange, KnownHeaders.Trailer
+            };
         }
     }
 }

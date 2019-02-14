@@ -645,7 +645,7 @@ namespace System.Net.Http
                 }
                 else if (response.Headers.TransferEncodingChunked == true)
                 {
-                    responseStream = new ChunkedEncodingReadStream(this);
+                    responseStream = new ChunkedEncodingReadStream(this, response);
                 }
                 else
                 {

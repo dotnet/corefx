@@ -13,6 +13,7 @@ namespace System.Net.Http
 
         private HttpStatusCode _statusCode;
         private HttpResponseHeaders _headers;
+        private HttpResponseHeaders _trailingHeaders;
         private string _reasonPhrase;
         private HttpRequestMessage _requestMessage;
         private Version _version;
@@ -112,6 +113,20 @@ namespace System.Net.Http
                     _headers = new HttpResponseHeaders();
                 }
                 return _headers;
+            }
+        }
+
+        public HttpResponseHeaders TrailingHeaders
+        {
+            get
+            {
+                // If trailing headers are not ready yet, return null.
+                return _trailingHeaders;
+            }
+            set
+            {
+                CheckDisposed();
+                _trailingHeaders = value;
             }
         }
 
