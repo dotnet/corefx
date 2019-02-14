@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #include "pal_ssl.h"
+#include "openssl.h"
 
 #include <assert.h>
 #include <string.h>
@@ -16,16 +17,34 @@ static_assert(PAL_SSL_ERROR_ZERO_RETURN == SSL_ERROR_ZERO_RETURN, "");
 
 extern "C" int32_t CryptoNative_EnsureOpenSslInitialized();
 
+#ifdef NEED_OPENSSL_1_0
+static void EnsureLibSsl10Initialized()
+{
+    SSL_library_init();
+    SSL_load_error_strings();
+}
+#endif
+
 extern "C" void CryptoNative_EnsureLibSslInitialized()
 {
     CryptoNative_EnsureOpenSslInitialized();
-    SSL_library_init();
-    SSL_load_error_strings();
+
+    // If portable, call the 1.0 initializer when needed.
+    // If 1.0, call it statically.
+    // In 1.1 no action is required, since EnsureOpenSslInitialized does both libraries.
+#ifdef FEATURE_DISTRO_AGNOSTIC_SSL
+    if (API_EXISTS(SSL_state))
+    {
+        EnsureLibSsl10Initialized();
+    }
+#elif OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0_RTM
+    EnsureLibSsl10Initialized();
+#endif
 }
 
 extern "C" const SSL_METHOD* CryptoNative_SslV2_3Method()
 {
-    const SSL_METHOD* method = SSLv23_method();
+    const SSL_METHOD* method = TLS_method();
     assert(method != nullptr);
     return method;
 }
@@ -51,19 +70,39 @@ Returns 1 on success, 0 on failure.
 */
 static long TrySetECDHNamedCurve(SSL_CTX* ctx)
 {
-	long result = 0;
-#ifdef SSL_CTX_set_ecdh_auto
-	result = SSL_CTX_set_ecdh_auto(ctx, 1);
-#else
-	EC_KEY *ecdh = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
-	if (ecdh != nullptr)
-	{
-		result = SSL_CTX_set_tmp_ecdh(ctx, ecdh);
-		EC_KEY_free(ecdh);
-	}
+#ifdef NEED_OPENSSL_1_0
+    long result = 0;
+    unsigned long version = OpenSSL_version_num();
+
+    if (version >= OPENSSL_VERSION_1_1_0_RTM)
+    {
+        // OpenSSL 1.1+ automatically set up ECDH
+        result = 1;
+    }
+    else if (version >= OPENSSL_VERSION_1_0_2_RTM)
+    {
+#ifndef SSL_CTRL_SET_ECDH_AUTO
+#define SSL_CTRL_SET_ECDH_AUTO 94
 #endif
+        // Expanded form of SSL_CTX_set_ecdh_auto(ctx, 1)
+        result = SSL_CTX_ctrl(ctx, SSL_CTRL_SET_ECDH_AUTO, 1, nullptr);
+    }
+    else
+    {
+        EC_KEY *ecdh = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
+
+        if (ecdh != nullptr)
+        {
+            result = SSL_CTX_set_tmp_ecdh(ctx, ecdh);
+            EC_KEY_free(ecdh);
+        }
+    }
 
 	return result;
+#else
+    (void)ctx;
+    return 1;
+#endif
 }
 
 extern "C" void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols protocols)
@@ -80,7 +119,7 @@ extern "C" void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols proto
         return;
     }
 
-    long protocolOptions = 0;
+    unsigned long protocolOptions = 0;
 
     if ((protocols & PAL_SSL_SSL2) != PAL_SSL_SSL2)
     {
@@ -94,20 +133,26 @@ extern "C" void CryptoNative_SetProtocolOptions(SSL_CTX* ctx, SslProtocols proto
     {
         protocolOptions |= SSL_OP_NO_TLSv1;
     }
-#if HAVE_TLS_V1_1
     if ((protocols & PAL_SSL_TLS11) != PAL_SSL_TLS11)
     {
         protocolOptions |= SSL_OP_NO_TLSv1_1;
     }
-#endif
-#if HAVE_TLS_V1_2
     if ((protocols & PAL_SSL_TLS12) != PAL_SSL_TLS12)
     {
         protocolOptions |= SSL_OP_NO_TLSv1_2;
     }
-#endif
 
+    // protocol options were specified, and there's no handler yet for TLS 1.3.
+#ifndef SSL_OP_NO_TLSv1_3
+#define SSL_OP_NO_TLSv1_3 0x20000000U
+#endif
+    protocolOptions |= SSL_OP_NO_TLSv1_3;
+
+    // OpenSSL 1.0 calls this long, OpenSSL 1.1 calls it unsigned long.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-conversion"
     SSL_CTX_set_options(ctx, protocolOptions);
+#pragma clang diagnostic pop
 }
 
 extern "C" SSL* CryptoNative_SslCreate(SSL_CTX* ctx)
@@ -254,54 +299,54 @@ static ExchangeAlgorithmType MapExchangeAlgorithmType(const char* keyExchange, s
 
 static void GetHashAlgorithmTypeAndSize(const char* mac,
                                         size_t macLength,
-                                        HashAlgorithmType& dataHashAlg,
-                                        DataHashSize& hashKeySize)
+                                        HashAlgorithmType* dataHashAlg,
+                                        DataHashSize* hashKeySize)
 {
     if (StringSpanEquals(mac, "MD5", macLength))
     {
-        dataHashAlg = HashAlgorithmType::Md5;
-        hashKeySize = DataHashSize::MD5_HashKeySize;
+        *dataHashAlg = HashAlgorithmType::Md5;
+        *hashKeySize = DataHashSize::MD5_HashKeySize;
         return;
     }
     if (StringSpanEquals(mac, "SHA1", macLength))
     {
-        dataHashAlg = HashAlgorithmType::Sha1;
-        hashKeySize = DataHashSize::SHA1_HashKeySize;
+        *dataHashAlg = HashAlgorithmType::Sha1;
+        *hashKeySize = DataHashSize::SHA1_HashKeySize;
         return;
     }
     if (StringSpanEquals(mac, "GOST94", macLength))
     {
-        dataHashAlg = HashAlgorithmType::SSL_GOST94;
-        hashKeySize = DataHashSize::GOST_HashKeySize;
+        *dataHashAlg = HashAlgorithmType::SSL_GOST94;
+        *hashKeySize = DataHashSize::GOST_HashKeySize;
         return;
     }
     if (StringSpanEquals(mac, "GOST89", macLength))
     {
-        dataHashAlg = HashAlgorithmType::SSL_GOST89;
-        hashKeySize = DataHashSize::GOST_HashKeySize;
+        *dataHashAlg = HashAlgorithmType::SSL_GOST89;
+        *hashKeySize = DataHashSize::GOST_HashKeySize;
         return;
     }
     if (StringSpanEquals(mac, "SHA256", macLength))
     {
-        dataHashAlg = HashAlgorithmType::SSL_SHA256;
-        hashKeySize = DataHashSize::SHA256_HashKeySize;
+        *dataHashAlg = HashAlgorithmType::SSL_SHA256;
+        *hashKeySize = DataHashSize::SHA256_HashKeySize;
         return;
     }
     if (StringSpanEquals(mac, "SHA384", macLength))
     {
-        dataHashAlg = HashAlgorithmType::SSL_SHA384;
-        hashKeySize = DataHashSize::SHA384_HashKeySize;
+        *dataHashAlg = HashAlgorithmType::SSL_SHA384;
+        *hashKeySize = DataHashSize::SHA384_HashKeySize;
         return;
     }
     if (StringSpanEquals(mac, "AEAD", macLength))
     {
-        dataHashAlg = HashAlgorithmType::SSL_AEAD;
-        hashKeySize = DataHashSize::Default;
+        *dataHashAlg = HashAlgorithmType::SSL_AEAD;
+        *hashKeySize = DataHashSize::Default;
         return;
     }
 
-    dataHashAlg = HashAlgorithmType::None;
-    hashKeySize = DataHashSize::Default;
+    *dataHashAlg = HashAlgorithmType::None;
+    *hashKeySize = DataHashSize::Default;
 }
 
 /*
@@ -340,10 +385,10 @@ Parses the Kx, Enc, and Mac values out of the SSL_CIPHER_description and
 maps the values to the corresponding .NET enum value.
 */
 static bool GetSslConnectionInfoFromDescription(const SSL_CIPHER* cipher,
-                                                CipherAlgorithmType& dataCipherAlg,
-                                                ExchangeAlgorithmType& keyExchangeAlg,
-                                                HashAlgorithmType& dataHashAlg,
-                                                DataHashSize& hashKeySize)
+                                                CipherAlgorithmType* dataCipherAlg,
+                                                ExchangeAlgorithmType* keyExchangeAlg,
+                                                HashAlgorithmType* dataHashAlg,
+                                                DataHashSize* hashKeySize)
 {
     const int descriptionLength = 256;
     char description[descriptionLength] = {};
@@ -370,8 +415,8 @@ static bool GetSslConnectionInfoFromDescription(const SSL_CIPHER* cipher,
         return false;
     }
 
-    keyExchangeAlg = MapExchangeAlgorithmType(keyExchange, keyExchangeLength);
-    dataCipherAlg = MapCipherAlgorithmType(encryption, encryptionLength);
+    *keyExchangeAlg = MapExchangeAlgorithmType(keyExchange, keyExchangeLength);
+    *dataCipherAlg = MapCipherAlgorithmType(encryption, encryptionLength);
     GetHashAlgorithmTypeAndSize(mac, macLength, dataHashAlg, hashKeySize);
     return true;
 }
@@ -396,8 +441,9 @@ extern "C" int32_t CryptoNative_GetSslConnectionInfo(SSL* ssl,
         goto err;
     }
 
-    *dataKeySize = cipher->alg_bits;
-    if (GetSslConnectionInfoFromDescription(cipher, *dataCipherAlg, *keyExchangeAlg, *dataHashAlg, *hashKeySize))
+    SSL_CIPHER_get_bits(cipher, dataKeySize);
+
+    if (GetSslConnectionInfoFromDescription(cipher, dataCipherAlg, keyExchangeAlg, dataHashAlg, hashKeySize))
     {
         return 1;
     }
@@ -453,7 +499,7 @@ extern "C" int32_t CryptoNative_SslDoHandshake(SSL* ssl)
 
 extern "C" int32_t CryptoNative_IsSslStateOK(SSL* ssl)
 {
-    return SSL_state(ssl) == SSL_ST_OK;
+    return SSL_is_init_finished(ssl);
 }
 
 extern "C" X509* CryptoNative_SslGetPeerCertificate(SSL* ssl)
@@ -517,6 +563,8 @@ CryptoNative_SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCallba
 extern "C" int32_t CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
 {
     const char* cipherString = nullptr;
+    bool clearSecLevel = false;
+
     switch (policy)
     {
         case EncryptionPolicy::RequireEncryption:
@@ -525,14 +573,22 @@ extern "C" int32_t CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPoli
 
         case EncryptionPolicy::AllowNoEncryption:
             cipherString = SSL_TXT_AllIncludingNull;
+            clearSecLevel = true;
             break;
 
         case EncryptionPolicy::NoEncryption:
             cipherString = SSL_TXT_eNULL;
+            clearSecLevel = true;
             break;
     }
 
     assert(cipherString != nullptr);
+
+    if (clearSecLevel)
+    {
+        // No minimum security policy, same as OpenSSL 1.0
+        SSL_CTX_set_security_level(ctx, 0);
+    }
 
     return SSL_CTX_set_cipher_list(ctx, cipherString);
 }
