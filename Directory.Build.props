@@ -251,6 +251,10 @@
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+  
+  <PropertyGroup>
+    <Copyright>© .NET Foundation and Contributors</Copyright>
+  </PropertyGroup>
 
   <!-- Set the kind of PDB to Portable and turn on SourceLink (fetching source from GitHub) -->
   <PropertyGroup>
