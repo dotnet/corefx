@@ -44,6 +44,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 new object[] { "EmptyPfx", TestData.EmptyPfx, X509ContentType.Pkcs12 },
                 new object[] { "MultiPrivatePfx", TestData.MultiPrivateKeyPfx, X509ContentType.Pkcs12 },
                 new object[] { "ChainPfx", TestData.ChainPfxBytes, X509ContentType.Pkcs12 },
+                new object[] { "ConcatenatedPem", TestData.ConcatenatedPemFile, X509ContentType.Cert }
             };
         }
     }
