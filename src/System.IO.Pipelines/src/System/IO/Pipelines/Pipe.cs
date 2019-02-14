@@ -141,13 +141,7 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.minimumSize);
             }
 
-            // If writing is currently active and enough space, don't need to take the lock to just set WritingActive.
-            // IsWritingActive is needed to prevent the reader releasing the writers memory when it fully consumes currently written.
-            if (!_operationState.IsWritingActive ||
-                _writingMemory.Length == 0 || _writingMemory.Length < sizeHint)
-            {
-                AllocateWriteHeadSynchronized(sizeHint);
-            }
+            AllocateWriteHeadIfNeeded(sizeHint);
 
             return _writingMemory;
         }
@@ -164,6 +158,14 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.minimumSize);
             }
 
+            AllocateWriteHeadIfNeeded(sizeHint);
+
+            return _writingMemory.Span;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void AllocateWriteHeadIfNeeded(int sizeHint)
+        {
             // If writing is currently active and enough space, don't need to take the lock to just set WritingActive.
             // IsWritingActive is needed to prevent the reader releasing the writers memory when it fully consumes currently written.
             if (!_operationState.IsWritingActive ||
@@ -171,8 +173,6 @@ namespace System.IO.Pipelines
             {
                 AllocateWriteHeadSynchronized(sizeHint);
             }
-
-            return _writingMemory.Span;
         }
 
         private void AllocateWriteHeadSynchronized(int sizeHint)
