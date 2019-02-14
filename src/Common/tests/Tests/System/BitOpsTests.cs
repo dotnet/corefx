@@ -189,9 +189,6 @@ namespace Tests.System
             Assert.Equal(expected, actual);
         }
 
-        // Ignore: Work In Progress
-        /*
-
         [Fact]
         public static void BitOps_RotateLeft_UInt()
         {
@@ -303,7 +300,5 @@ namespace Tests.System
             int actual = BitOps.PopCount(n);
             Assert.Equal(expected, actual);
         }
-
-        */
     }
 }
