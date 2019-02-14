@@ -1,13 +1,13 @@
 ﻿namespace System.Linq.ChainLinq.Consume
 {
-    static class Array
+    static class ReadOnlyMemory
     {
-        public static void Invoke<T, V>(T[] array, Link<T, V> composition, Chain<V> consumer)
+        public static void Invoke<T, V>(ReadOnlyMemory<T> array, Link<T, V> composition, Chain<V> consumer)
         {
             var chain = composition.Compose(consumer);
             try
             {
-                if (chain is Optimizations.IPipeline<T[]> optimized)
+                if (chain is Optimizations.IPipeline<ReadOnlyMemory<T>> optimized)
                 {
                     optimized.Pipeline(array);
                 }
@@ -23,9 +23,9 @@
             }
         }
 
-        private static void Pipeline<T>(T[] array, Chain<T> chain)
+        private static void Pipeline<T>(ReadOnlyMemory<T> memory, Chain<T> chain)
         {
-            foreach (var item in array)
+            foreach (var item in memory.Span)
             {
                 var state = chain.ProcessNext(item);
                 if (state.IsStopped())

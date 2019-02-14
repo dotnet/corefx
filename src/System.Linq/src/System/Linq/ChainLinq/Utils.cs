@@ -11,7 +11,7 @@ namespace System.Linq.ChainLinq
                 return
                     array.Length == 0
                       ? Consumables.Empty<U>.Instance
-                      : new Consumables.Array<T, U>(array, transform);
+                      : new Consumables.Array<T, U>(array, 0, array.Length, transform);
             }
             else if (e is List<T> list)
             {
@@ -132,7 +132,7 @@ namespace System.Linq.ChainLinq
             }
             else if (e is T[] array)
             {
-                ChainLinq.Consume.Array.Invoke(array, Links.Identity<T>.Instance, consumer);
+                ChainLinq.Consume.ReadOnlyMemory.Invoke(array, Links.Identity<T>.Instance, consumer);
             }
             else if (e is List<T> list)
             {

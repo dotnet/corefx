@@ -12,13 +12,13 @@ namespace System.Linq.ChainLinq.Links
         public Link<T, U> Skip(int toSkip) => this;
 
         sealed partial class Activity
-            : Optimizations.IPipeline<T[]>
+            : Optimizations.IPipeline<ReadOnlyMemory<T>>
             , Optimizations.IPipeline<List<T>>
             , Optimizations.IPipeline<IEnumerable<T>>
         {
-            public void Pipeline(T[] array)
+            public void Pipeline(ReadOnlyMemory<T> memory)
             {
-                foreach (var item in array)
+                foreach (var item in memory.Span)
                 {
                     var state = Next(_selector(item));
                     if (state.IsStopped())

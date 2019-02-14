@@ -20,7 +20,7 @@ namespace System.Linq.ChainLinq.Links
 
         sealed class Activity
             : Activity<T, U>
-            , Optimizations.IPipeline<T[]>
+            , Optimizations.IPipeline<ReadOnlyMemory<T>>
             , Optimizations.IPipeline<List<T>>
             , Optimizations.IPipeline<IEnumerable<T>>
         {
@@ -36,9 +36,9 @@ namespace System.Linq.ChainLinq.Links
                 return _predicate(item) ? Next(item) : ChainStatus.Filter;
             }
 
-            public void Pipeline(T[] array)
+            public void Pipeline(ReadOnlyMemory<T> memory)
             {
-                foreach (var t in array)
+                foreach (var t in memory.Span)
                 {
                     var u = _selector(t);
                     if (_predicate(u))

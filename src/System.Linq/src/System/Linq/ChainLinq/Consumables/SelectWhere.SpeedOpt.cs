@@ -14,7 +14,7 @@ namespace System.Linq.ChainLinq.Consumables
             (Underlying, Selector, Predicate) = (array, selector, predicate);
 
         public override void Consume(Consumer<U> consumer) =>
-            ChainLinq.Consume.Array.Invoke(Underlying, new Links.SelectWhere<T, U>(Selector, Predicate), consumer);
+            ChainLinq.Consume.ReadOnlyMemory.Invoke(Underlying, new Links.SelectWhere<T, U>(Selector, Predicate), consumer);
 
         internal override ConsumableEnumerator<U> Clone() =>
             new SelectWhereArray<T, U>(Underlying, Selector, Predicate);
@@ -44,10 +44,10 @@ namespace System.Linq.ChainLinq.Consumables
             throw new NotImplementedException();
 
         public override Consumable<U> AddTail(Link<U, U> transform) =>
-            new Array<T, U>(Underlying, Links.Composition.Create(new Links.SelectWhere<T, U>(Selector, Predicate), transform));
+            new Array<T, U>(Underlying, 0, Underlying.Length, Links.Composition.Create(new Links.SelectWhere<T, U>(Selector, Predicate), transform));
 
         public override Consumable<V> AddTail<V>(Link<U, V> transform) =>
-            new Array<T, V>(Underlying, Links.Composition.Create(new Links.SelectWhere<T, U>(Selector, Predicate), transform));
+            new Array<T, V>(Underlying, 0, Underlying.Length, Links.Composition.Create(new Links.SelectWhere<T, U>(Selector, Predicate), transform));
     }
 
     sealed partial class SelectWhereList<T, U> : ConsumableEnumerator<U>

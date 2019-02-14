@@ -3,13 +3,17 @@
     internal sealed class Array<T, TResult> : ConsumerEnumerator<TResult>
     {
         private T[] _array;
+        private readonly int _endIdx;
         private int _idx;
         private Chain<T> _chain = null;
 
         internal override Chain StartOfChain => _chain;
 
-        public Array(T[] array, Link<T, TResult> factory)
+        public Array(T[] array, int start, int length, Link<T, TResult> factory)
         {
+            _idx = start;
+            checked { _endIdx = start + length; }
+
             _array = array;
             _chain = factory.Compose(this);
         }
@@ -23,7 +27,7 @@
         public override bool MoveNext()
         {
         tryAgain:
-            if (_idx >= _array.Length || status.IsStopped())
+            if (_idx >= _endIdx || status.IsStopped())
             {
                 Result = default;
                 _chain.ChainComplete();

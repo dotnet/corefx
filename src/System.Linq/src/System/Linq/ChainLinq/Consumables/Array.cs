@@ -6,16 +6,19 @@ namespace System.Linq.ChainLinq.Consumables
     {
         internal T[] Underlying { get; }
 
-        public Array(T[] array, Link<T, V> first) : base(first) =>
-            Underlying = array;
+        private readonly int _start;
+        private readonly int _length;
 
-        public override Consumable<V> Create   (Link<T, V> first) => new Array<T, V>(Underlying, first);
-        public override Consumable<W> Create<W>(Link<T, W> first) => new Array<T, W>(Underlying, first);
+        public Array(T[] array, int start, int length, Link<T, V> first) : base(first) =>
+            (Underlying, _start, _length) = (array, start, length);
+
+        public override Consumable<V> Create   (Link<T, V> first) => new Array<T, V>(Underlying, _start, _length, first);
+        public override Consumable<W> Create<W>(Link<T, W> first) => new Array<T, W>(Underlying, _start, _length, first);
 
         public override IEnumerator<V> GetEnumerator() =>
-            ChainLinq.GetEnumerator.Array.Get(this);
+            ChainLinq.GetEnumerator.Array.Get(Underlying, _start, _length, Link);
 
         public override void Consume(Consumer<V> consumer) =>
-            ChainLinq.Consume.Array.Invoke(Underlying, Link, consumer);
+            ChainLinq.Consume.ReadOnlyMemory.Invoke(new ReadOnlyMemory<T>(Underlying, _start, _length), Link, consumer);
     }
 }

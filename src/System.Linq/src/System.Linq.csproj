@@ -62,7 +62,7 @@
     <Compile Include="System\Linq\ChainLinq\Consumer\Set.cs" />
     <Compile Include="System\Linq\ChainLinq\Consumer\Sum.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\List.cs" />
-    <Compile Include="System\Linq\ChainLinq\Consume\Array.cs" />
+    <Compile Include="System\Linq\ChainLinq\Consume\ReadOnlyMemory.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Concat.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\Repeat.cs" />
     <Compile Include="System\Linq\ChainLinq\Consume\UnknownEnumerable.cs" />

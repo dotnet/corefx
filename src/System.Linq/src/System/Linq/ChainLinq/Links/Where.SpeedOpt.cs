@@ -13,13 +13,13 @@ namespace System.Linq.ChainLinq.Links
             consumable.ReplaceTailLink(new Where2<T>(Predicate, second));
 
         sealed partial class Activity
-            : Optimizations.IPipeline<T[]>
+            : Optimizations.IPipeline<ReadOnlyMemory<T>>
             , Optimizations.IPipeline<List<T>>
             , Optimizations.IPipeline<IEnumerable<T>>
         {
-            public void Pipeline(T[] array)
+            public void Pipeline(ReadOnlyMemory<T> memory)
             {
-                foreach (var item in array)
+                foreach (var item in memory.Span)
                 {
                     if (_predicate(item))
                     {

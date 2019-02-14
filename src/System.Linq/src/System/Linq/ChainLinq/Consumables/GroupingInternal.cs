@@ -14,10 +14,7 @@ namespace System.Linq.ChainLinq.Consumables
         : Grouping<TKey, TElement>
         , IConsumableProvider<TElement>
     {
-        public Consumable<U> GetConsumable<U>(Link<TElement, U> transform)
-        {
-            Trim();
-            return new Array<TElement, U>(_elements, transform);
-        }
+        public Consumable<U> GetConsumable<U>(Link<TElement, U> transform) =>
+            new Array<TElement, U>(_elements, 0, _count, transform);
     }
 }
