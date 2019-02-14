@@ -205,9 +205,6 @@ namespace System.Text.Json.Tests
                 {
                     Assert.Equal(expectedlineNumber, ex.LineNumber);
                     Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
-                    byte[] consumed = dataUtf8.AsSpan(0, (int)json.BytesConsumed).ToArray();
-                    Assert.Equal(consumed, sequence.Slice(0, json.Position).ToArray());
-                    Assert.Equal(consumed, sequence.Slice(0, json.CurrentState.Position).ToArray());
                 }
             }
         }
