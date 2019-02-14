@@ -92,8 +92,7 @@ PAL_X509ContentType AppleCryptoNative_X509GetContentType(uint8_t* pbData, int32_
     // * X509 DER
     // * PKCS7 PEM/DER
     // * PKCS12 DER (or PEM if Apple has non-standard support for that)
-    // * X509 PEM (or DER, but that already matched)
-    // * X509 PEM concatenated certificate list.
+    // * X509 PEM or PEM aggregate (or DER, but that already matched)
     //
     // If the X509 PEM check is done first SecItemImport will erroneously match
     // some PKCS#7 blobs and say they were certificates.
@@ -169,23 +168,8 @@ PAL_X509ContentType AppleCryptoNative_X509GetContentType(uint8_t* pbData, int32_
 
     if (osStatus == noErr)
     {
-        if (actualType == itemType && actualFormat == dataFormat)
-        {
-            CFRelease(cfData);
-            return PAL_Certificate;
-        }
-    }
-
-    dataFormat = kSecFormatPEMSequence;
-    actualFormat = dataFormat;
-    itemType = kSecItemTypeAggregate;
-    actualType = itemType;
-
-    osStatus = SecItemImport(cfData, NULL, &actualFormat, &actualType, 0, NULL, NULL, NULL);
-
-    if (osStatus == noErr)
-    {
-        if (actualType == itemType && actualFormat == dataFormat)
+        if ((actualType == itemType && actualFormat == dataFormat) ||
+            (actualType == kSecItemTypeAggregate && actualFormat == kSecFormatPEMSequence))
         {
             CFRelease(cfData);
             return PAL_Certificate;
