@@ -28,6 +28,13 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal(contentType, blobType);
         }
 
+        [Fact]
+        public static void TestThrowsWhenGivenInvalidContent()
+        {
+            byte[] blob = new byte[] { 0x00, 0xFF, 0x00, 0xFF };
+            Assert.ThrowsAny<CryptographicException>(() => X509Certificate2.GetCertContentType(blob));
+        }
+
         public static IEnumerable<object[]> GetContentBlobsWithType()
         {
             return new[]
