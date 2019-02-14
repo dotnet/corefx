@@ -262,6 +262,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+        [Fact]
+        public static void TestLoadConcatenatedPrivateKeyWithCert()
+        {
+            using (X509Certificate2 c = new X509Certificate2(TestData.ConcatenatedPrivateKeyAndCert))
+            {
+                string certificateThumbprint = "1E17881C0B128F38BCB8E87E47517F2D7C5B214C";
+                Assert.Equal(certificateThumbprint, c.GetCertHashString());
+            }
+        }
+
         private static X509Certificate2 LoadCertificateFromFile()
         {
             string path = Path.Combine("TestData", "MS.cer");
