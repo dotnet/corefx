@@ -437,6 +437,15 @@ namespace System.Net.Test.Common
                 await SendResponseAsync(statusCode, additionalHeaders, content);
                 return lines;
             }
+
+            public async Task Drain(int max = 4000)
+            {
+                char[] buffer  = new char[max];
+                try {
+                    await _reader.ReadAsync(buffer, 0 , max);
+                }
+                catch { };
+            }
         }
 
         //
@@ -454,32 +463,80 @@ namespace System.Net.Test.Common
                 }
             }
 
-            List<string> headerLines = await AcceptConnectionSendResponseAndCloseAsync(statusCode, headerString, content);
-
+            List<string> headerLines = null;
             HttpRequestData requestData = new HttpRequestData();
 
-            // Parse method and path
-            string[] splits = headerLines[0].Split(' ');
-            requestData.Method = splits[0];
-            requestData.Path = splits[1];
-
-            // TODO: Add handling for request body.
-            // In the meantime, just fail any request that's not a GET so that we don't confuse
-            // the client by not consuming the request body.
-            if (requestData.Method != "GET")
+            await AcceptConnectionAsync(async connection =>
             {
-                throw new NotImplementedException("Request body not supported");
-            }
+                headerLines = await connection.ReadRequestHeaderAndSendResponseAsync(statusCode, headerString + "Connection: close\r\n", content);
 
-            // Convert header lines to key/value pairs
-            // Skip first line since it's the status line
-            foreach (var line in headerLines.Skip(1))
-            {
-                int offset = line.IndexOf(':');
-                string name = line.Substring(0, offset);
-                string value = line.Substring(offset + 1).TrimStart();
-                requestData.Headers.Add(new HttpHeaderData(name, value));
-            }
+                // Parse method and path
+                string[] splits = headerLines[0].Split(' ');
+                requestData.Method = splits[0];
+                requestData.Path = splits[1];
+
+                // Convert header lines to key/value pairs
+                // Skip first line since it's the status line
+                foreach (var line in headerLines.Skip(1))
+                {
+                    int offset = line.IndexOf(':');
+                    string name = line.Substring(0, offset);
+                    string value = line.Substring(offset + 1).TrimStart();
+                    requestData.Headers.Add(new HttpHeaderData(name, value));
+                }
+
+                if (requestData.Method != "GET")
+                {
+                    if (requestData.GetHeaderValueCount("Content-Length") != 0)
+                    {
+                        int contentLength = Int32.Parse(requestData.GetSingleHeaderValue("Content-Length"));
+                        byte[] buffer = new byte[contentLength];
+                        int offset = 0;
+
+                        while (contentLength != 0)
+                        {
+                            int length = await connection.Reader.BaseStream.ReadAsync(buffer, offset, contentLength);
+                            contentLength -= length;
+                            offset += length;
+                        }
+
+                        requestData.AddBodyData(buffer);
+                    }
+                    else if (requestData.GetHeaderValueCount("Transfer-Encoding") != 0 && requestData.GetSingleHeaderValue("Transfer-Encoding") == "chunked")
+                    {
+                        while (true)
+                        {
+                            string chunkHeader = await connection.Reader.ReadLineAsync();
+                            if (chunkHeader == null)
+                            {
+                                // Some tests do not send complete body.
+                                break;
+                            }
+                            int contentLength = int.Parse(chunkHeader, System.Globalization.NumberStyles.HexNumber);
+                            if (contentLength == 0)
+                            {
+                                // Last chunk
+                                break;
+                            }
+                            char[] buffer = new char[contentLength];
+                            int offset = 0;
+                            while (contentLength != 0)
+                            {
+                                int length = await connection.Reader.ReadAsync(buffer, offset, contentLength);
+                                contentLength -= length;
+                                offset += length;
+                            }
+
+                            requestData.AddBodyData(Encoding.GetEncoding("ASCII").GetBytes(buffer).AsSpan());
+                            await connection.Reader.ReadLineAsync();
+                        }
+                    }
+                    else
+                    {
+                        await connection.Drain();
+                    }
+                }
+            });
 
             return requestData;
         }

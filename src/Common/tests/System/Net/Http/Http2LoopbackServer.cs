@@ -24,6 +24,7 @@ namespace System.Net.Test.Common
         private Uri _uri;
         private bool _ignoreSettingsAck;
         private bool _ignoreWindowUpdates;
+        public TimeSpan Timeout = TimeSpan.FromSeconds(30);
 
         public Uri Address
         {
@@ -496,8 +497,12 @@ namespace System.Net.Test.Common
             HttpRequestData requestData = new HttpRequestData();
 
             // Receive HEADERS frame for request.
-            HeadersFrame headersFrame = (HeadersFrame) await ReadFrameAsync(TimeSpan.FromSeconds(30));
-            Assert.Equal(FrameFlags.EndHeaders | FrameFlags.EndStream, headersFrame.Flags);
+            Frame frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
+            Assert.Equal(FrameType.Headers, frame.Type);
+            HeadersFrame headersFrame = (HeadersFrame) frame;
+
+            // TODO CONTINUATION support
+            Assert.Equal(FrameFlags.EndHeaders, FrameFlags.EndHeaders & headersFrame.Flags);
 
             int streamId = headersFrame.StreamId;
 
@@ -514,6 +519,15 @@ namespace System.Net.Test.Common
             // Extract method and path
             requestData.Method = requestData.GetSingleHeaderValue(":method");
             requestData.Path = requestData.GetSingleHeaderValue(":path");
+
+            while ((frame.Flags & FrameFlags.EndStream) == 0)
+            {
+                frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
+                if (frame.Type == FrameType.Data && frame.Length > 1)
+                {
+                    requestData.AddBodyData(((DataFrame)frame).Data.Span);
+                }
+            }
 
             return (streamId, requestData);
         }

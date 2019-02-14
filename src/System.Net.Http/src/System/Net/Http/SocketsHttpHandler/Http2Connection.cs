@@ -701,12 +701,12 @@ namespace System.Net.Http
             _headerBuffer.Commit(bytesWritten);
         }
 
-        private void WriteHeader(HeaderDescriptor header, string[] value, string separator)
+        private void WriteHeader(string name, string[] values, string separator)
         {
             // TODO: ISSUE 31307: Use static table for known headers
 
             int bytesWritten;
-            while (!HPackEncoder.EncodeHeader(header.Name, value, separator, _headerBuffer.AvailableSpan, out bytesWritten))
+            while (!HPackEncoder.EncodeHeader(name, values, separator, _headerBuffer.AvailableSpan, out bytesWritten))
             {
                 _headerBuffer.EnsureAvailableSpace(_headerBuffer.AvailableSpan.Length + 1);
             }
@@ -725,9 +725,23 @@ namespace System.Net.Http
                     continue;
                 }
 
-                // The Connection header is not supported in HTTP2. Don't send it.
-                if (header.Key.KnownHeader == KnownHeaders.Connection)
+                // Filter headers forbidden by HTTP2.
+                if (header.Key.KnownHeader == KnownHeaders.Connection || header.Key.KnownHeader == KnownHeaders.Upgrade ||  header.Key.KnownHeader == KnownHeaders.ProxyConnection)
                 {
+                    continue;
+                }
+
+                if (header.Key.KnownHeader == KnownHeaders.TE)
+                {
+                    // HTTP/2 allows only 'trailers' TE header. rfc7540 8.1.2.2
+                    foreach (string value  in header.Value)
+                    {
+                        if (value == "trailers")
+                        {
+                            WriteHeader(header.Key.Name, value);
+                            break;
+                        }
+                    }
                     continue;
                 }
 
@@ -746,7 +760,7 @@ namespace System.Net.Http
                         separator = HttpHeaderParser.DefaultSeparator;
                     }
                 }
-                WriteHeader(header.Key, header.Value, separator);
+                WriteHeader(header.Key.Name, header.Value, separator);
             }
         }
 
