@@ -4,6 +4,7 @@
 
 using System;
 using System.Buffers;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -30,19 +31,23 @@ namespace Internal.Cryptography.Pal
         private static readonly string s_userPersonalPath =
             DirectoryBasedStoreProvider.GetStorePath(X509Store.MyStoreName);
 
+        private SafeX509Handle _leafHandle;
         private readonly SafeX509StoreHandle _store;
         private readonly SafeX509StackHandle _untrustedLookup;
         private readonly SafeX509StoreCtxHandle _storeCtx;
         private readonly DateTime _verificationTime;
         private TimeSpan _remainingDownloadTime;
+        private X509RevocationMode _revocationMode;
 
         private OpenSslX509ChainProcessor(
+            SafeX509Handle leafHandle,
             SafeX509StoreHandle store,
             SafeX509StackHandle untrusted,
             SafeX509StoreCtxHandle storeCtx,
             DateTime verificationTime,
             TimeSpan remainingDownloadTime)
         {
+            _leafHandle = leafHandle;
             _store = store;
             _untrustedLookup = untrusted;
             _storeCtx = storeCtx;
@@ -55,6 +60,9 @@ namespace Internal.Cryptography.Pal
             _storeCtx?.Dispose();
             _untrustedLookup?.Dispose();
             _store?.Dispose();
+            
+            // We don't own this one.
+            _leafHandle = null;
         }
 
         public bool? Verify(X509VerificationFlags flags, out Exception exception)
@@ -100,7 +108,14 @@ namespace Internal.Cryptography.Pal
                 }
 
                 Interop.Crypto.SetX509ChainVerifyTime(storeCtx, verificationTime);
-                return new OpenSslX509ChainProcessor(store, untrusted, storeCtx, verificationTime, remainingDownloadTime);
+
+                return new OpenSslX509ChainProcessor(
+                    leafHandle,
+                    store,
+                    untrusted,
+                    storeCtx,
+                    verificationTime,
+                    remainingDownloadTime);
             }
             catch
             {
@@ -276,6 +291,8 @@ namespace Internal.Cryptography.Pal
             X509RevocationMode revocationMode,
             X509RevocationFlag revocationFlag)
         {
+            _revocationMode = revocationMode;
+
             if (revocationMode == X509RevocationMode.NoCheck)
             {
                 return;
@@ -331,6 +348,31 @@ namespace Internal.Cryptography.Pal
                 // Because our callback tells OpenSSL that every problem is ignorable, it should tell us that the
                 // chain is just fine (unless it returned a negative code for an exception)
                 Debug.Assert(verify, "verify should have returned true");
+
+                const Interop.Crypto.X509VerifyStatusCode NoCrl =
+                    Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_CRL;
+
+                ErrorCollection? errors =
+                    workingChain.LastError > 0 ? (ErrorCollection?)workingChain[0] : null;
+
+                if (_revocationMode == X509RevocationMode.Online &&
+                    _remainingDownloadTime > TimeSpan.Zero &&
+                    errors?.HasError(NoCrl) == true)
+                {
+                    Interop.Crypto.X509VerifyStatusCode ocspStatus = CheckOcsp();
+
+                    ref ErrorCollection refErrors = ref workingChain[0];
+
+                    if (ocspStatus == Interop.Crypto.X509VerifyStatusCode.X509_V_OK)
+                    {
+                        refErrors.ClearError(NoCrl);
+                    }
+                    else if (ocspStatus != NoCrl)
+                    {
+                        refErrors.ClearError(NoCrl);
+                        refErrors.Add(ocspStatus);
+                    }
+                }
             }
 
             X509ChainElement[] elements = BuildChainElements(
@@ -351,6 +393,160 @@ namespace Internal.Cryptography.Pal
             Dispose();
         }
 
+        private Interop.Crypto.X509VerifyStatusCode CheckOcsp()
+        {
+            string ocspCache = CrlCache.GetCachedOcspResponseDirectory();
+            Interop.Crypto.X509VerifyStatusCode status =
+                Interop.Crypto.X509ChainGetCachedOcspStatus(_storeCtx, ocspCache);
+
+            if (status != Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_CRL)
+            {
+                return status;
+            }
+
+            string baseUri = GetOcspEndpoint(_leafHandle);
+
+            if (baseUri == null)
+            {
+                return status;
+            }
+            
+            using (SafeOcspRequestHandle req = Interop.Crypto.X509ChainBuildOcspRequest(_storeCtx))
+            {
+                ArraySegment<byte> encoded = Interop.Crypto.OpenSslRentEncode(
+                    handle => Interop.Crypto.GetOcspRequestDerSize(handle),
+                    (handle, buf) => Interop.Crypto.EncodeOcspRequest(handle, buf),
+                    req);
+
+                ArraySegment<char> urlEncoded = Base64UrlEncode(encoded);
+                string requestUrl = UrlPathAppend(baseUri, urlEncoded);
+
+                // Nothing sensitive is in the encoded request (it was sent via HTTP-non-S)
+                ArrayPool<byte>.Shared.Return(encoded.Array);
+                ArrayPool<char>.Shared.Return(urlEncoded.Array);
+
+                // https://tools.ietf.org/html/rfc6960#appendix-A describes both a GET and a POST
+                // version of an OCSP responder.
+                //
+                // Doing POST via the reflection indirection to HttpClient is difficult, and
+                // CA/Browser Forum Baseline Requirements (version 1.6.3) section 4.9.10
+                // (On-line REvocation Checking Requirements) says that the GET method must be supported.
+                //
+                // So, for now, only try GET.
+
+                SafeOcspResponseHandle resp =
+                    CertificateAssetDownloader.DownloadOcspGet(requestUrl, ref _remainingDownloadTime);
+
+                using (resp)
+                {
+                    if (resp == null || resp.IsInvalid)
+                    {
+                        return Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_UNABLE_TO_GET_CRL;
+                    }
+
+                    try
+                    {
+                        System.IO.Directory.CreateDirectory(ocspCache);
+                    }
+                    catch
+                    {
+                        // Opportunistic create, suppress all errors.
+                    }
+
+                    return Interop.Crypto.X509ChainVerifyOcsp(_storeCtx, req, resp, ocspCache);
+                }
+            }
+        }
+
+        private static string UrlPathAppend(string baseUri, ReadOnlyMemory<char> resource)
+        {
+            Debug.Assert(baseUri.Length > 0);
+            Debug.Assert(resource.Length > 0);
+
+            int count = baseUri.Length + resource.Length;
+            ValueTuple<string, ReadOnlyMemory<char>> state = ValueTuple.Create(baseUri, resource);
+
+            if (baseUri[baseUri.Length - 1] == '/')
+            {
+                return string.Create(
+                    count,
+                    state,
+                    (buf, st) =>
+                    {
+                        st.Item1.AsSpan().CopyTo(buf);
+                        st.Item2.Span.CopyTo(buf.Slice(st.Item1.Length));
+                    });
+            }
+
+            return string.Create(
+                count + 1,
+                state,
+                (buf, st) =>
+                {
+                    st.Item1.AsSpan().CopyTo(buf);
+                    buf[st.Item1.Length] = '/';
+                    st.Item2.Span.CopyTo(buf.Slice(st.Item1.Length + 1));
+                });
+        }
+
+        private static ArraySegment<char> Base64UrlEncode(ReadOnlySpan<byte> input)
+        {
+            // Every 3 bytes turns into 4 chars for the Base64 operation
+            int base64Len = ((input.Length + 2) / 3) * 4;
+            char[] base64 = ArrayPool<char>.Shared.Rent(base64Len);
+
+            if (!Convert.TryToBase64Chars(input, base64, out int charsWritten))
+            {
+                Debug.Fail($"Convert.TryToBase64 failed with {input.Length} bytes to a {base64.Length} buffer");
+                throw new CryptographicException();
+            }
+
+            Debug.Assert(charsWritten == base64Len);
+
+            // In the degenerate case every char will turn into 3 chars.
+            int urlEncodedLen = charsWritten * 3;
+            char[] urlEncoded = ArrayPool<char>.Shared.Rent(urlEncodedLen);
+            int writeIdx = 0;
+
+            for (int readIdx = 0; readIdx < charsWritten; readIdx++)
+            {
+                char cur = base64[readIdx];
+
+                if ((cur >= 'A' && cur <= 'Z') ||
+                    (cur >= 'a' && cur <= 'z') ||
+                    (cur >= '0' && cur <= '9'))
+                {
+                    urlEncoded[writeIdx++] = cur;
+                }
+                else if (cur == '+')
+                {
+                    urlEncoded[writeIdx++] = '%';
+                    urlEncoded[writeIdx++] = '2';
+                    urlEncoded[writeIdx++] = 'B';
+                }
+                else if (cur == '/')
+                {
+                    urlEncoded[writeIdx++] = '%';
+                    urlEncoded[writeIdx++] = '2';
+                    urlEncoded[writeIdx++] = 'F';
+                }
+                else if (cur == '=')
+                {
+                    urlEncoded[writeIdx++] = '%';
+                    urlEncoded[writeIdx++] = '3';
+                    urlEncoded[writeIdx++] = 'D';
+                }
+                else
+                {
+                    Debug.Fail($"'{cur}' is not a valid Base64 character");
+                    throw new CryptographicException();
+                }
+            }
+
+            ArrayPool<char>.Shared.Return(base64);
+            return new ArraySegment<char>(urlEncoded, 0, writeIdx);
+        }
+
         private X509ChainElement[] BuildChainElements(
             WorkingChain workingChain,
             out List<X509ChainStatus> overallStatus)
@@ -366,7 +562,8 @@ namespace Internal.Cryptography.Pal
                 for (int i = 0; i < chainSize; i++)
                 {
                     X509ChainStatus[] status = Array.Empty<X509ChainStatus>();
-                    ErrorCollection? elementErrors = workingChain?[i];
+                    ErrorCollection? elementErrors =
+                        workingChain?.LastError > i ? (ErrorCollection?)workingChain[i] : null;
 
                     if (elementErrors.HasValue && elementErrors.Value.HasErrors)
                     {
@@ -606,6 +803,23 @@ namespace Internal.Cryptography.Pal
             return CertificateAssetDownloader.DownloadCertificate(uri, ref remainingDownloadTime);
         }
 
+        private static string GetOcspEndpoint(SafeX509Handle cert)
+        {
+            ArraySegment<byte> authorityInformationAccess =
+                OpenSslX509CertificateReader.FindFirstExtension(
+                    cert,
+                    Oids.AuthorityInformationAccess);
+
+            if (authorityInformationAccess.Count == 0)
+            {
+                return null;
+            }
+
+            string baseUrl = FindHttpAiaRecord(authorityInformationAccess, Oids.OcspEndpoint);
+            ArrayPool<byte>.Shared.Return(authorityInformationAccess.Array);
+            return baseUrl;
+        }
+
         private static string FindHttpAiaRecord(ReadOnlyMemory<byte> authorityInformationAccess, string recordTypeOid)
         {
             AsnReader reader = new AsnReader(authorityInformationAccess, AsnEncodingRules.DER);
@@ -662,8 +876,9 @@ namespace Internal.Cryptography.Pal
         {
             private ErrorCollection[] _errors;
 
-            internal ErrorCollection? this[int idx] =>
-                idx < _errors?.Length ? (ErrorCollection?)_errors[idx] : null;
+            internal int LastError => _errors.Length;
+
+            internal ref ErrorCollection this[int idx] => ref _errors[idx];
 
             public void Dispose()
             {
@@ -740,6 +955,12 @@ namespace Internal.Cryptography.Pal
             {
                 int bucket = FindBucket(statusCode, out int bitValue);
                 _codes[bucket] |= bitValue;
+            }
+
+            public void ClearError(Interop.Crypto.X509VerifyStatusCode statusCode)
+            {
+                int bucket = FindBucket(statusCode, out int bitValue);
+                _codes[bucket] &= ~bitValue;
             }
 
             internal bool HasError(Interop.Crypto.X509VerifyStatusCode statusCode)

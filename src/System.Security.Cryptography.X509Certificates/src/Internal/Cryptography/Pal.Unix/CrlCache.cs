@@ -16,6 +16,16 @@ namespace Internal.Cryptography.Pal
 {
     internal static class CrlCache
     {
+        private static readonly string s_crlDir =
+            PersistedFiles.GetUserFeatureDirectory(
+                X509Persistence.CryptographyFeatureName,
+                X509Persistence.CrlsSubFeatureName);
+
+        private static readonly string s_ocspDir =
+            PersistedFiles.GetUserFeatureDirectory(
+                X509Persistence.CryptographyFeatureName,
+                X509Persistence.OcspSubFeatureName);
+
         private const ulong X509_R_CERT_ALREADY_IN_HASH_TABLE = 0x0B07D065;
 
         public static void AddCrlForCertificate(
@@ -161,13 +171,14 @@ namespace Internal.Cryptography.Pal
                 }
             }
         }
-        
+
+        internal static string GetCachedOcspResponseDirectory()
+        {
+            return s_ocspDir;
+        }
+
         private static string GetCachedCrlPath(SafeX509Handle cert, bool mkDir=false)
         {
-            string crlDir = PersistedFiles.GetUserFeatureDirectory(
-                X509Persistence.CryptographyFeatureName,
-                X509Persistence.CrlsSubFeatureName);
-
             // X509_issuer_name_hash returns "unsigned long", which is marshalled as ulong.
             // But it only sets 32 bits worth of data, so force it down to uint just... in case.
             ulong persistentHashLong = Interop.Crypto.X509IssuerNameHash(cert);
@@ -184,10 +195,10 @@ namespace Internal.Cryptography.Pal
 
             if (mkDir)
             {
-                Directory.CreateDirectory(crlDir);
+                Directory.CreateDirectory(s_crlDir);
             }
 
-            return Path.Combine(crlDir, localFileName);
+            return Path.Combine(s_crlDir, localFileName);
         }
 
         private static string GetCdpUrl(SafeX509Handle cert)
