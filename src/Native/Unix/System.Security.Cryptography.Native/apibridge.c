@@ -479,6 +479,11 @@ int32_t local_SSL_is_init_finished(const SSL* ssl)
     return SSL_state(ssl) == SSL_ST_OK;
 }
 
+X509Stack* local_X509_STORE_CTX_get0_chain(X509_STORE_CTX* ctx)
+{
+    return ctx ? ctx->chain : NULL;
+}
+
 X509Stack* local_X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx)
 {
     return ctx ? ctx->untrusted : NULL;

@@ -327,3 +327,9 @@ DLLEXPORT int32_t CryptoNative_X509StackAddDirectoryStore(X509Stack* stack, char
 DLLEXPORT int32_t CryptoNative_X509StackAddMultiple(X509Stack* dest, X509Stack* src);
 
 DLLEXPORT int32_t CryptoNative_X509StoreCtxCommitToChain(X509_STORE_CTX* storeCtx);
+
+DLLEXPORT X509VerifyStatusCode CryptoNative_X509ChainGetCachedOcspStatus(X509_STORE_CTX* storeCtx, char* cachePath);
+
+DLLEXPORT OCSP_REQUEST* CryptoNative_X509ChainBuildOcspRequest(X509_STORE_CTX* storeCtx);
+
+DLLEXPORT X509VerifyStatusCode CryptoNative_X509ChainVerifyOcsp(X509_STORE_CTX* storeCtx, OCSP_REQUEST* req, OCSP_RESPONSE* resp, char* cachePath);

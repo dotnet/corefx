@@ -23,6 +23,7 @@
 #include <openssl/hmac.h>
 #include <openssl/md5.h>
 #include <openssl/objects.h>
+#include <openssl/ocsp.h>
 #include <openssl/pem.h>
 #include <openssl/pkcs12.h>
 #include <openssl/pkcs7.h>
@@ -480,6 +481,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(X509_STORE_add_crl) \
     REQUIRED_FUNCTION(X509_STORE_CTX_free) \
     REQUIRED_FUNCTION(X509_STORE_CTX_get0_param) \
+    FALLBACK_FUNCTION(X509_STORE_CTX_get0_chain) \
     REQUIRED_FUNCTION(X509_STORE_CTX_get1_chain) \
     REQUIRED_FUNCTION(X509_STORE_CTX_get_error) \
     REQUIRED_FUNCTION(X509_STORE_CTX_get_error_depth) \
@@ -835,6 +837,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_STORE_CTX_get0_cert X509_STORE_CTX_get0_cert_ptr
 #define X509_STORE_CTX_get0_param X509_STORE_CTX_get0_param_ptr
 #define X509_STORE_CTX_get0_untrusted X509_STORE_CTX_get0_untrusted_ptr
+#define X509_STORE_CTX_get0_chain X509_STORE_CTX_get0_chain_ptr
 #define X509_STORE_CTX_get1_chain X509_STORE_CTX_get1_chain_ptr
 #define X509_STORE_CTX_get_error X509_STORE_CTX_get_error_ptr
 #define X509_STORE_CTX_get_error_depth X509_STORE_CTX_get_error_depth_ptr
@@ -921,6 +924,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_NAME_get0_der local_X509_NAME_get0_der
 #define X509_PUBKEY_get0_param local_X509_PUBKEY_get0_param
 #define X509_STORE_CTX_get0_cert local_X509_STORE_CTX_get0_cert
+#define X509_STORE_CTX_get0_chain local_X509_STORE_CTX_get0_chain
 #define X509_STORE_CTX_get0_untrusted local_X509_STORE_CTX_get0_untrusted
 #define X509_get0_notAfter local_X509_get0_notAfter
 #define X509_get0_notBefore local_X509_get0_notBefore

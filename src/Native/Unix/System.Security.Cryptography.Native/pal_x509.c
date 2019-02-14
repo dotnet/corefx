@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <dirent.h>
+#include <unistd.h>
 
 c_static_assert(PAL_X509_V_OK == X509_V_OK);
 c_static_assert(PAL_X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT);
@@ -281,7 +282,7 @@ int32_t CryptoNative_X509StoreCtxReset(X509_STORE_CTX* ctx)
 {
     X509* leaf = X509_STORE_CTX_get0_cert(ctx);
     X509Stack* untrusted = X509_STORE_CTX_get0_untrusted(ctx);
-    X509_STORE* store = ctx->ctx;
+    X509_STORE* store = X509_STORE_CTX_get0_store(ctx);
 
     X509_STORE_CTX_cleanup(ctx);
     return CryptoNative_X509StoreCtxInit(ctx, store, leaf, untrusted);
@@ -631,4 +632,344 @@ int32_t CryptoNative_X509StoreCtxCommitToChain(X509_STORE_CTX* storeCtx)
     // and pop_free, other than free saves a bit of work.
     sk_X509_free(chain);
     return 1;
+}
+
+static char* BuildOcspCacheFilename(char* cachePath, X509* subject)
+{
+    assert(cachePath != NULL);
+    assert(subject != NULL);
+
+    size_t len = strlen(cachePath);
+    // path plus '/', '.', '.ocsp', '\0' and two 8 character hex strings
+    size_t allocSize = len + 24;
+    char* fullPath = (char*)calloc(allocSize, sizeof(char));
+
+    if (fullPath != NULL)
+    {
+        unsigned long issuerHash = X509_issuer_name_hash(subject);
+        unsigned long subjectHash = X509_subject_name_hash(subject);
+
+        size_t written = (size_t)snprintf(fullPath, allocSize, "%s/%08lx.%08lx.ocsp", cachePath, issuerHash, subjectHash);
+        assert(written < allocSize);
+
+        if (issuerHash == 0 || subjectHash == 0)
+        {
+            ERR_clear_error();
+        }
+    }
+
+    return fullPath;
+}
+
+static OCSP_CERTID* MakeCertId(X509* subject, X509* issuer)
+{
+    assert(subject != NULL);
+    assert(issuer != NULL);
+
+    // SHA-1 is being used because that's really the only thing supported by current OCSP responders
+    return OCSP_cert_to_id(EVP_sha1(), subject, issuer);
+}
+
+static X509VerifyStatusCode CheckOcsp(
+    OCSP_RESPONSE* resp,
+    X509* subject,
+    X509* issuer,
+    X509_STORE_CTX* storeCtx,
+    ASN1_GENERALIZEDTIME** thisUpdate,
+    ASN1_GENERALIZEDTIME** nextUpdate)
+{
+    if (thisUpdate != NULL)
+    {
+        *thisUpdate = NULL;
+    }
+
+    if (nextUpdate != NULL)
+    {
+        *nextUpdate = NULL;
+    }
+
+    assert(resp != NULL);
+    assert(subject != NULL);
+    assert(issuer != NULL);
+
+    OCSP_CERTID* certId = MakeCertId(subject, issuer);
+
+    if (certId == NULL)
+    {
+        return (X509VerifyStatusCode)-1;
+    }
+
+    OCSP_BASICRESP* basicResp = OCSP_response_get1_basic(resp);
+    int status = V_OCSP_CERTSTATUS_UNKNOWN;
+    X509VerifyStatusCode ret = PAL_X509_V_ERR_UNABLE_TO_GET_CRL;
+
+    if (basicResp != NULL)
+    {
+        X509_STORE* store = X509_STORE_CTX_get0_store(storeCtx);
+        X509Stack* untrusted = X509_STORE_CTX_get0_untrusted(storeCtx);
+
+        if (OCSP_basic_verify(basicResp, untrusted, store, 0))
+        {
+            ASN1_GENERALIZEDTIME* thisupd = NULL;
+            ASN1_GENERALIZEDTIME* nextupd = NULL;
+
+            if (OCSP_resp_find_status(basicResp, certId, &status, NULL, NULL, &thisupd, &nextupd))
+            {
+                if (thisUpdate != NULL && thisupd != NULL)
+                {
+                    *thisUpdate = (ASN1_GENERALIZEDTIME*)ASN1_STRING_dup((ASN1_STRING*)thisupd);
+                }
+
+                if (nextUpdate != NULL && nextupd != NULL)
+                {
+                    *nextUpdate = (ASN1_GENERALIZEDTIME*)ASN1_STRING_dup((ASN1_STRING*)nextupd);
+                }
+
+                if (status == V_OCSP_CERTSTATUS_GOOD)
+                {
+                    ret = PAL_X509_V_OK;
+                }
+                else if (status == V_OCSP_CERTSTATUS_REVOKED)
+                {
+                    ret = PAL_X509_V_ERR_CERT_REVOKED;
+                }
+            }
+        }
+
+        OCSP_BASICRESP_free(basicResp);
+        basicResp = NULL;
+    }
+
+    OCSP_CERTID_free(certId);
+    return ret;
+}
+
+static int Get0CertAndIssuer(X509_STORE_CTX* storeCtx, X509** subject, X509** issuer)
+{
+    assert(storeCtx != NULL);
+    assert(subject != NULL);
+    assert(issuer != NULL);
+
+    // get0 => don't free.
+    X509Stack* chain = X509_STORE_CTX_get0_chain(storeCtx);
+    int chainSize = chain == NULL ? 0 : sk_X509_num(chain);
+
+    if (chainSize < 1)
+    {
+        return 0;
+    }
+
+    *subject = sk_X509_value(chain, 0);
+    *issuer = sk_X509_value(chain, chainSize == 1 ? 0 : 1);
+    return 1;
+}
+
+static time_t GetIssuanceWindowStart()
+{
+    // time_t granularity is seconds, so subtract 4 days worth of seconds.
+    // The 4 day policy is based on the CA/Browser Forum Baseline Requirements
+    // (version 1.6.3) section 4.9.10 (On-Line Revocation Checking Requirements)
+    time_t t = time(NULL);
+    t -= 4 * 24 * 60 * 60;
+    return t;
+}
+
+X509VerifyStatusCode CryptoNative_X509ChainGetCachedOcspStatus(X509_STORE_CTX* storeCtx, char* cachePath)
+{
+    if (storeCtx == NULL || cachePath == NULL)
+    {
+        return (X509VerifyStatusCode)-1;
+    }
+
+    X509* subject;
+    X509* issuer;
+
+    if (!Get0CertAndIssuer(storeCtx, &subject, &issuer))
+    {
+        return (X509VerifyStatusCode)-2;
+    }
+
+    X509VerifyStatusCode ret = PAL_X509_V_ERR_UNABLE_TO_GET_CRL;
+    char* fullPath = BuildOcspCacheFilename(cachePath, subject);
+    FILE* fp = fullPath != NULL ? fopen(fullPath, "rb") : NULL;
+    OCSP_RESPONSE* resp = NULL;
+
+    if (fp != NULL)
+    {
+        resp = (OCSP_RESPONSE*)ASN1_item_d2i_fp(ASN1_ITEM_rptr(OCSP_RESPONSE), fp, NULL);
+        fclose(fp);
+    }
+
+    if (resp != NULL)
+    {
+        ASN1_GENERALIZEDTIME* thisUpdate = NULL;
+        ASN1_GENERALIZEDTIME* nextUpdate = NULL;
+        ret = CheckOcsp(resp, subject, issuer, storeCtx, &thisUpdate, &nextUpdate);
+
+        if (ret != PAL_X509_V_ERR_UNABLE_TO_GET_CRL)
+        {
+            time_t oldest = GetIssuanceWindowStart();
+
+            // If either the thisUpdate or nextUpdate is missing we can't determine policy, so reject it.
+            // oldest = now - window;
+            //
+            // if thisUpdate < oldest || nextUpdate < now, reject.
+            if (nextUpdate == NULL ||
+                thisUpdate == NULL ||
+                X509_cmp_current_time(nextUpdate) < 0 ||
+                X509_cmp_time(thisUpdate, &oldest) < 0)
+            {
+                ret = PAL_X509_V_ERR_UNABLE_TO_GET_CRL;
+            }
+        }
+
+        if (nextUpdate != NULL)
+        {
+            ASN1_GENERALIZEDTIME_free(nextUpdate);
+        }
+
+        if (thisUpdate != NULL)
+        {
+            ASN1_GENERALIZEDTIME_free(thisUpdate);
+        }
+    }
+
+    if (ret == PAL_X509_V_ERR_UNABLE_TO_GET_CRL)
+    {
+        unlink(fullPath);
+        ERR_clear_error();
+    }
+
+    free(fullPath);
+
+    if (resp != NULL)
+    {
+        OCSP_RESPONSE_free(resp);
+    }
+
+    return ret;
+}
+
+OCSP_REQUEST* CryptoNative_X509ChainBuildOcspRequest(X509_STORE_CTX* storeCtx)
+{
+    if (storeCtx == NULL)
+    {
+        return NULL;
+    }
+
+    X509* subject;
+    X509* issuer;
+
+    if (!Get0CertAndIssuer(storeCtx, &subject, &issuer))
+    {
+        return NULL;
+    }
+
+    OCSP_CERTID* certId = MakeCertId(subject, issuer);
+
+    if (certId == NULL)
+    {
+        return NULL;
+    }
+
+    OCSP_REQUEST* req = OCSP_REQUEST_new();
+
+    if (req == NULL)
+    {
+        OCSP_CERTID_free(certId);
+        return NULL;
+    }
+
+    if (!OCSP_request_add0_id(req, certId))
+    {
+        OCSP_CERTID_free(certId);
+        OCSP_REQUEST_free(req);
+        return NULL;
+    }
+
+    // Add a random nonce.
+    OCSP_request_add1_nonce(req, NULL, -1);
+    return req;
+}
+
+X509VerifyStatusCode CryptoNative_X509ChainVerifyOcsp(
+    X509_STORE_CTX* storeCtx,
+    OCSP_REQUEST* req,
+    OCSP_RESPONSE* resp,
+    char* cachePath)
+{
+    if (storeCtx == NULL || req == NULL || resp == NULL)
+    {
+        return (X509VerifyStatusCode)-1;
+    }
+
+    X509* subject;
+    X509* issuer;
+
+    if (!Get0CertAndIssuer(storeCtx, &subject, &issuer))
+    {
+        return (X509VerifyStatusCode)-2;
+    }
+
+    X509VerifyStatusCode ret = PAL_X509_V_ERR_UNABLE_TO_GET_CRL;
+    OCSP_CERTID* certId = MakeCertId(subject, issuer);
+
+    if (certId == NULL)
+    {
+        return (X509VerifyStatusCode)-3;
+    }
+
+    ASN1_GENERALIZEDTIME* thisUpdate = NULL;
+    ASN1_GENERALIZEDTIME* nextUpdate = NULL;
+    ret = CheckOcsp(resp, subject, issuer, storeCtx, &thisUpdate, &nextUpdate);
+
+    if (ret == PAL_X509_V_OK || ret == PAL_X509_V_ERR_CERT_REVOKED)
+    {
+        // If the nextUpdate time is in the past, report either REVOKED or CRL_EXPIRED
+        if (nextUpdate != NULL && X509_cmp_current_time(nextUpdate) < 0)
+        {
+            if (ret == PAL_X509_V_OK)
+            {
+                ret = PAL_X509_V_ERR_CRL_HAS_EXPIRED;
+            }
+        }
+        else
+        {
+            time_t oldest = GetIssuanceWindowStart();
+
+            // If the response is within our caching policy (which requires a nextUpdate value)
+            // then try to cache it.
+            if (nextUpdate != NULL &&
+                thisUpdate != NULL &&
+                X509_cmp_time(thisUpdate, &oldest) > 0)
+            {
+                char* fullPath = BuildOcspCacheFilename(cachePath, subject);
+                FILE* fp = fullPath != NULL ? fopen(fullPath, "wb") : NULL;
+
+                if (fp)
+                {
+                    int encoded = ASN1_item_i2d_fp(ASN1_ITEM_rptr(OCSP_RESPONSE), fp, resp);
+                    fclose(fp);
+
+                    if (!encoded)
+                    {
+                        ERR_clear_error();
+                        unlink(fullPath);
+                    }
+                }
+            }
+        }
+    }
+
+    if (nextUpdate != NULL)
+    {
+        ASN1_GENERALIZEDTIME_free(nextUpdate);
+    }
+
+    if (thisUpdate != NULL)
+    {
+        ASN1_GENERALIZEDTIME_free(thisUpdate);
+    }
+
+    return ret;
 }
