@@ -54,7 +54,7 @@ namespace System.Text.Json
             if (jsonData.IsSingleSegment)
             {
                 _nextPosition = default;
-                _currentPosition = default;
+                _currentPosition = jsonData.Start;
                 _isLastSegment = isFinalBlock;
                 _isSingleSegment = true;
             }

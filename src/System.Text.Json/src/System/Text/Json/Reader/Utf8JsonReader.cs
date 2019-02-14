@@ -115,15 +115,8 @@ namespace System.Text.Json
             {
                 if (_isInputSequence)
                 {
-                    if (_isSingleSegment)
-                    {
-                        return _sequence.GetPosition(_consumed);
-                    }
-                    else
-                    {
-                        Debug.Assert(_currentPosition.GetObject() != null);
-                        return _sequence.GetPosition(_consumed, _currentPosition);
-                    }
+                    Debug.Assert(_currentPosition.GetObject() != null);
+                    return _sequence.GetPosition(_consumed, _currentPosition);
                 }
                 else
                 {
