@@ -19,6 +19,7 @@ namespace Microsoft.VisualBasic
         public Collection() { }
         public int Count { get { throw null; } }
         public object this[int Index] { get { throw null; } }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
         public object this[object Index] { get { throw null; } }
         public object this[string Key] { get { throw null; } }
         int System.Collections.ICollection.Count { get { throw null; } }
@@ -70,6 +71,7 @@ namespace Microsoft.VisualBasic
         public const string vbCrLf = "\r\n";
         public const string vbFormFeed = "\f";
         public const string vbLf = "\n";
+        [System.ObsoleteAttribute("For a carriage return and line feed, use vbCrLf.  For the current platform's newline, use System.Environment.NewLine.")]
         public const string vbNewLine = "\r\n";
         public const string vbNullChar = "\0";
         public const string vbNullString = null;
@@ -99,6 +101,7 @@ namespace Microsoft.VisualBasic
         public static System.DateTime Today { get { throw null; } }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, AllowMultiple=false, Inherited=false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class HideModuleNameAttribute : System.Attribute
     {
         public HideModuleNameAttribute() { }
@@ -123,6 +126,7 @@ namespace Microsoft.VisualBasic
         public static string VbTypeName(string UrtName) { throw null; }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, AllowMultiple=false, Inherited=false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
     public sealed partial class MyGroupCollectionAttribute : System.Attribute
     {
         public MyGroupCollectionAttribute(string typeToCollect, string createInstanceMethodName, string disposeInstanceMethodName, string defaultInstanceAlias) { }
@@ -228,12 +232,14 @@ namespace Microsoft.VisualBasic.ApplicationServices
         public StartupEventArgs(System.Collections.ObjectModel.ReadOnlyCollection<string> args) { }
         public System.Collections.ObjectModel.ReadOnlyCollection<string> CommandLine { get { throw null; } }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
     public partial class StartupNextInstanceEventArgs : System.EventArgs
     {
         public StartupNextInstanceEventArgs(System.Collections.ObjectModel.ReadOnlyCollection<string> args, bool bringToForegroundFlag) { }
         public bool BringToForeground { get { throw null; } set { } }
         public System.Collections.ObjectModel.ReadOnlyCollection<string> CommandLine { get { throw null; } }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
     public partial class UnhandledExceptionEventArgs : System.Threading.ThreadExceptionEventArgs
     {
         public UnhandledExceptionEventArgs(bool exitApplication, System.Exception exception) : base (default(System.Exception)) { }
@@ -242,6 +248,7 @@ namespace Microsoft.VisualBasic.ApplicationServices
 }
 namespace Microsoft.VisualBasic.CompilerServices
 {
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class BooleanType
     {
         internal BooleanType() { }
@@ -252,6 +259,7 @@ namespace Microsoft.VisualBasic.CompilerServices
     {
         internal Conversions() { }
         public static object ChangeType(object Expression, System.Type TargetType) { throw null; }
+        [System.ObsoleteAttribute("do not use this method", true)]
         public static object FallbackUserDefinedConversion(object Expression, System.Type TargetType) { throw null; }
         public static string FromCharAndCount(char Value, int Count) { throw null; }
         public static string FromCharArray(char[] Value) { throw null; }
@@ -315,6 +323,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         [System.CLSCompliantAttribute(false)]
         public static ushort ToUShort(string Value) { throw null; }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class DecimalType
     {
         internal DecimalType() { }
@@ -326,10 +335,12 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static decimal Parse(string Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, AllowMultiple=false, Inherited=false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class DesignerGeneratedAttribute : System.Attribute
     {
         public DesignerGeneratedAttribute() { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class DoubleType
     {
         internal DoubleType() { }
@@ -340,24 +351,44 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static double Parse(string Value) { throw null; }
         public static double Parse(string Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class IncompleteInitialization : System.Exception
     {
         public IncompleteInitialization() { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class NewLateBinding
     {
         internal NewLateBinding() { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
         public static object FallbackCall(object Instance, string MemberName, object[] Arguments, string[] ArgumentNames, bool IgnoreReturn) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
         public static object FallbackGet(object Instance, string MemberName, object[] Arguments, string[] ArgumentNames) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
         public static void FallbackIndexSet(object Instance, object[] Arguments, string[] ArgumentNames) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
         public static void FallbackIndexSetComplex(object Instance, object[] Arguments, string[] ArgumentNames, bool OptimisticSet, bool RValueBase) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
         public static object FallbackInvokeDefault1(object Instance, object[] Arguments, string[] ArgumentNames, bool ReportErrors) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
         public static object FallbackInvokeDefault2(object Instance, object[] Arguments, string[] ArgumentNames, bool ReportErrors) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
         public static void FallbackSet(object Instance, string MemberName, object[] Arguments) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("do not use this method", true)]
         public static void FallbackSetComplex(object Instance, string MemberName, object[] Arguments, bool OptimisticSet, bool RValueBase) { }
         public static object LateCall(object Instance, System.Type Type, string MemberName, object[] Arguments, string[] ArgumentNames, System.Type[] TypeArguments, bool[] CopyBack, bool IgnoreReturn) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static object LateCallInvokeDefault(object Instance, object[] Arguments, string[] ArgumentNames, bool ReportErrors) { throw null; }
         public static object LateGet(object Instance, System.Type Type, string MemberName, object[] Arguments, string[] ArgumentNames, System.Type[] TypeArguments, bool[] CopyBack) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static object LateGetInvokeDefault(object Instance, object[] Arguments, string[] ArgumentNames, bool ReportErrors) { throw null; }
         public static object LateIndexGet(object Instance, object[] Arguments, string[] ArgumentNames) { throw null; }
         public static void LateIndexSet(object Instance, object[] Arguments, string[] ArgumentNames) { }
@@ -366,10 +397,12 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static void LateSet(object Instance, System.Type Type, string MemberName, object[] Arguments, string[] ArgumentNames, System.Type[] TypeArguments, bool OptimisticSet, bool RValueBase, Microsoft.VisualBasic.CallType CallType) { }
         public static void LateSetComplex(object Instance, System.Type Type, string MemberName, object[] Arguments, string[] ArgumentNames, System.Type[] TypeArguments, bool OptimisticSet, bool RValueBase) { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class ObjectFlowControl
     {
         internal ObjectFlowControl() { }
         public static void CheckForSyncLockOnValueType(object Expression) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public sealed partial class ForLoopControl
         {
             internal ForLoopControl() { }
@@ -380,6 +413,7 @@ namespace Microsoft.VisualBasic.CompilerServices
             public static bool ForNextCheckR8(double count, double limit, double StepValue) { throw null; }
         }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class Operators
     {
         internal Operators() { }
@@ -401,6 +435,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static bool ConditionalCompareObjectNotEqual(object Left, object Right, bool TextCompare) { throw null; }
         public static object DivideObject(object Left, object Right) { throw null; }
         public static object ExponentObject(object Left, object Right) { throw null; }
+        [System.ObsoleteAttribute("do not use this method", true)]
         public static object FallbackInvokeUserDefinedOperator(object vbOp, object[] arguments) { throw null; }
         public static object IntDivideObject(object Left, object Right) { throw null; }
         public static object LeftShiftObject(object Operand, object Amount) { throw null; }
@@ -415,11 +450,13 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static object XorObject(object Left, object Right) { throw null; }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Parameter, Inherited=false, AllowMultiple=false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class OptionCompareAttribute : System.Attribute
     {
         public OptionCompareAttribute() { }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, Inherited=false, AllowMultiple=false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class OptionTextAttribute : System.Attribute
     {
         public OptionTextAttribute() { }
@@ -432,20 +469,24 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static void SetProjectError(System.Exception ex, int lErl) { }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, Inherited=false, AllowMultiple=false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class StandardModuleAttribute : System.Attribute
     {
         public StandardModuleAttribute() { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class StaticLocalInitFlag
     {
         public short State;
         public StaticLocalInitFlag() { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class Utils
     {
         internal Utils() { }
         public static System.Array CopyArray(System.Array arySrc, System.Array aryDest) { throw null; }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class Versioned
     {
         internal Versioned() { }
@@ -536,12 +577,15 @@ namespace Microsoft.VisualBasic.FileIO
     public partial class MalformedLineException : System.Exception
     {
         public MalformedLineException() { }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         protected MalformedLineException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public MalformedLineException(string message) { }
         public MalformedLineException(string message, System.Exception innerException) { }
         public MalformedLineException(string message, long lineNumber) { }
         public MalformedLineException(string message, long lineNumber, System.Exception innerException) { }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Always)]
         public long LineNumber { get { throw null; } set { } }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
     }
@@ -578,13 +622,16 @@ namespace Microsoft.VisualBasic.FileIO
         public TextFieldParser(string path) { }
         public TextFieldParser(string path, System.Text.Encoding defaultEncoding) { }
         public TextFieldParser(string path, System.Text.Encoding defaultEncoding, bool detectEncoding) { }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public string[] CommentTokens { get { throw null; } set { } }
         public string[] Delimiters { get { throw null; } set { } }
         public bool EndOfData { get { throw null; } }
         public string ErrorLine { get { throw null; } }
         public long ErrorLineNumber { get { throw null; } }
         public int[] FieldWidths { get { throw null; } set { } }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public bool HasFieldsEnclosedInQuotes { get { throw null; } set { } }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public long LineNumber { get { throw null; } }
         public Microsoft.VisualBasic.FileIO.FieldType TextFieldType { get { throw null; } set { } }
         public bool TrimWhiteSpace { get { throw null; } set { } }
@@ -593,7 +640,9 @@ namespace Microsoft.VisualBasic.FileIO
         ~TextFieldParser() { }
         public string PeekChars(int numberOfChars) { throw null; }
         public string[] ReadFields() { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public string ReadLine() { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]	
         public string ReadToEnd() { throw null; }
         public void SetDelimiters(params string[] delimiters) { }
         public void SetFieldWidths(params int[] fieldWidths) { }

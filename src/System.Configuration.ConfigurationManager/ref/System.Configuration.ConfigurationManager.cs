@@ -64,8 +64,10 @@ namespace System.Configuration
     public sealed partial class AppSettingsSection : System.Configuration.ConfigurationSection
     {
         public AppSettingsSection() { }
+        [System.Configuration.ConfigurationPropertyAttribute("file", DefaultValue = "")]
         public string File { get { throw null; } set { } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
+        [System.Configuration.ConfigurationPropertyAttribute("", IsDefaultCollection = true)]
         public System.Configuration.KeyValueConfigurationCollection Settings { get { throw null; } }
         protected override void DeserializeElement(System.Xml.XmlReader reader, bool serializeCollectionKey) { }
         protected override object GetRuntimeObject() { throw null; }
@@ -91,6 +93,7 @@ namespace System.Configuration
     {
         public ClientSettingsSection() { }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
+        [System.Configuration.ConfigurationPropertyAttribute("", IsDefaultCollection = true)]
         public System.Configuration.SettingElementCollection Settings { get { throw null; } }
     }
     public sealed partial class CommaDelimitedStringCollection : System.Collections.Specialized.StringCollection
@@ -290,20 +293,29 @@ namespace System.Configuration
     }
     public partial class ConfigurationException : System.SystemException
     {
+        [System.ObsoleteAttribute("This class is obsolete, to create a new exception create a System.Configuration!System.Configuration.ConfigurationErrorsException")]
         public ConfigurationException() { }
         protected ConfigurationException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        [System.ObsoleteAttribute("This class is obsolete, to create a new exception create a System.Configuration!System.Configuration.ConfigurationErrorsException")]
         public ConfigurationException(string message) { }
+        [System.ObsoleteAttribute("This class is obsolete, to create a new exception create a System.Configuration!System.Configuration.ConfigurationErrorsException")]
         public ConfigurationException(string message, System.Exception inner) { }
+        [System.ObsoleteAttribute("This class is obsolete, to create a new exception create a System.Configuration!System.Configuration.ConfigurationErrorsException")]
         public ConfigurationException(string message, System.Exception inner, string filename, int line) { }
+        [System.ObsoleteAttribute("This class is obsolete, to create a new exception create a System.Configuration!System.Configuration.ConfigurationErrorsException")]
         public ConfigurationException(string message, System.Exception inner, System.Xml.XmlNode node) { }
+        [System.ObsoleteAttribute("This class is obsolete, to create a new exception create a System.Configuration!System.Configuration.ConfigurationErrorsException")]
         public ConfigurationException(string message, string filename, int line) { }
+        [System.ObsoleteAttribute("This class is obsolete, to create a new exception create a System.Configuration!System.Configuration.ConfigurationErrorsException")]
         public ConfigurationException(string message, System.Xml.XmlNode node) { }
         public virtual string BareMessage { get { throw null; } }
         public virtual string Filename { get { throw null; } }
         public virtual int Line { get { throw null; } }
         public override string Message { get { throw null; } }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        [System.ObsoleteAttribute("This class is obsolete, use System.Configuration!System.Configuration.ConfigurationErrorsException.GetFilename instead")]
         public static string GetXmlNodeFilename(System.Xml.XmlNode node) { throw null; }
+        [System.ObsoleteAttribute("This class is obsolete, use System.Configuration!System.Configuration.ConfigurationErrorsException.GetLinenumber instead")]
         public static int GetXmlNodeLineNumber(System.Xml.XmlNode node) { throw null; }
     }
     public partial class ConfigurationFileMap : System.ICloneable
@@ -485,7 +497,9 @@ namespace System.Configuration
     public sealed partial class ConfigurationSettings
     {
         internal ConfigurationSettings() { }
+        [System.ObsoleteAttribute("This method is obsolete, it has been replaced by System.Configuration!System.Configuration.ConfigurationManager.AppSettings")]
         public static System.Collections.Specialized.NameValueCollection AppSettings { get { throw null; } }
+        [System.ObsoleteAttribute("This method is obsolete, it has been replaced by System.Configuration!System.Configuration.ConfigurationManager.GetSection")]
         public static object GetConfig(string sectionName) { throw null; }
     }
     public enum ConfigurationUserLevel
@@ -530,9 +544,12 @@ namespace System.Configuration
         public ConnectionStringSettings() { }
         public ConnectionStringSettings(string name, string connectionString) { }
         public ConnectionStringSettings(string name, string connectionString, string providerName) { }
+        [System.Configuration.ConfigurationPropertyAttribute("connectionString", Options = (System.Configuration.ConfigurationPropertyOptions)(2), DefaultValue = "")]
         public string ConnectionString { get { throw null; } set { } }
+        [System.Configuration.ConfigurationPropertyAttribute("name", Options = (System.Configuration.ConfigurationPropertyOptions)(6), DefaultValue = "")]
         public string Name { get { throw null; } set { } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
+        [System.Configuration.ConfigurationPropertyAttribute("providerName", DefaultValue = "System.Data.SqlClient")]
         public string ProviderName { get { throw null; } set { } }
         public override string ToString() { throw null; }
     }
@@ -556,6 +573,7 @@ namespace System.Configuration
     public sealed partial class ConnectionStringsSection : System.Configuration.ConfigurationSection
     {
         public ConnectionStringsSection() { }
+        [System.Configuration.ConfigurationPropertyAttribute("", Options = (System.Configuration.ConfigurationPropertyOptions)(1))]
         public System.Configuration.ConnectionStringSettingsCollection ConnectionStrings { get { throw null; } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
         protected override object GetRuntimeObject() { throw null; }
@@ -656,6 +674,7 @@ namespace System.Configuration
     public sealed partial class IdnElement : System.Configuration.ConfigurationElement
     {
         public IdnElement() { }
+        [System.Configuration.ConfigurationPropertyAttribute("enabled", DefaultValue = (System.UriIdnScope)(0))]
         public System.UriIdnScope Enabled { get { throw null; } set { } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
     }
@@ -714,6 +733,7 @@ namespace System.Configuration
     public sealed partial class IriParsingElement : System.Configuration.ConfigurationElement
     {
         public IriParsingElement() { }
+        [System.Configuration.ConfigurationPropertyAttribute("enabled", DefaultValue = false)]
         public bool Enabled { get { throw null; } set { } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
     }
@@ -739,8 +759,10 @@ namespace System.Configuration
     public partial class KeyValueConfigurationElement : System.Configuration.ConfigurationElement
     {
         public KeyValueConfigurationElement(string key, string value) { }
+        [System.Configuration.ConfigurationPropertyAttribute("key", Options = (System.Configuration.ConfigurationPropertyOptions)(4), DefaultValue = "")]
         public string Key { get { throw null; } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
+        [System.Configuration.ConfigurationPropertyAttribute("value", DefaultValue = "")]
         public string Value { get { throw null; } set { } }
         protected override void Init() { }
     }
@@ -789,8 +811,10 @@ namespace System.Configuration
     public sealed partial class NameValueConfigurationElement : System.Configuration.ConfigurationElement
     {
         public NameValueConfigurationElement(string name, string value) { }
+        [System.Configuration.ConfigurationPropertyAttribute("name", IsKey = true, DefaultValue = "")]
         public string Name { get { throw null; } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
+        [System.Configuration.ConfigurationPropertyAttribute("value", DefaultValue = "")]
         public string Value { get { throw null; } set { } }
     }
     public partial class NameValueFileSectionHandler : System.Configuration.IConfigurationSectionHandler
@@ -883,23 +907,28 @@ namespace System.Configuration
     public sealed partial class ProtectedConfigurationSection : System.Configuration.ConfigurationSection
     {
         public ProtectedConfigurationSection() { }
+        [System.Configuration.ConfigurationPropertyAttribute("defaultProvider", DefaultValue = "RsaProtectedConfigurationProvider")]
         public string DefaultProvider { get { throw null; } set { } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
+        [System.Configuration.ConfigurationPropertyAttribute("providers")]
         public System.Configuration.ProviderSettingsCollection Providers { get { throw null; } }
     }
     public partial class ProtectedProviderSettings : System.Configuration.ConfigurationElement
     {
         public ProtectedProviderSettings() { }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
+        [System.Configuration.ConfigurationPropertyAttribute("", IsDefaultCollection = true, Options = (System.Configuration.ConfigurationPropertyOptions)(1))]
         public System.Configuration.ProviderSettingsCollection Providers { get { throw null; } }
     }
     public sealed partial class ProviderSettings : System.Configuration.ConfigurationElement
     {
         public ProviderSettings() { }
         public ProviderSettings(string name, string type) { }
+        [System.Configuration.ConfigurationPropertyAttribute("name", IsRequired = true, IsKey = true)]
         public string Name { get { throw null; } set { } }
         public System.Collections.Specialized.NameValueCollection Parameters { get { throw null; } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
+        [System.Configuration.ConfigurationPropertyAttribute("type", IsRequired = true)]
         public string Type { get { throw null; } set { } }
         protected override bool IsModified() { throw null; }
         protected override bool OnDeserializeUnrecognizedAttribute(string name, string value) { throw null; }
@@ -952,7 +981,9 @@ namespace System.Configuration
     public sealed partial class SchemeSettingElement : System.Configuration.ConfigurationElement
     {
         public SchemeSettingElement() { }
+        [System.Configuration.ConfigurationPropertyAttribute("genericUriParserOptions", DefaultValue = (System.Configuration.ConfigurationPropertyOptions)(0), IsRequired = true)]
         public System.GenericUriParserOptions GenericUriParserOptions { get { throw null; } }
+        [System.Configuration.ConfigurationPropertyAttribute("name", DefaultValue = null, IsRequired = true, IsKey = true)]
         public string Name { get { throw null; } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
     }
@@ -1017,9 +1048,12 @@ namespace System.Configuration
     {
         public SettingElement() { }
         public SettingElement(string name, System.Configuration.SettingsSerializeAs serializeAs) { }
+        [System.Configuration.ConfigurationPropertyAttribute("name", IsRequired = true, IsKey = true, DefaultValue = "")]
         public string Name { get { throw null; } set { } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
+        [System.Configuration.ConfigurationPropertyAttribute("serializeAs", IsRequired = true, DefaultValue = (System.Configuration.SettingsSerializeAs)(0))]
         public System.Configuration.SettingsSerializeAs SerializeAs { get { throw null; } set { } }
+        [System.Configuration.ConfigurationPropertyAttribute("value", IsRequired = true, DefaultValue = null)]
         public System.Configuration.SettingValueElement Value { get { throw null; } set { } }
         public override bool Equals(object settings) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -1324,9 +1358,12 @@ namespace System.Configuration
     public sealed partial class UriSection : System.Configuration.ConfigurationSection
     {
         public UriSection() { }
+        [System.Configuration.ConfigurationPropertyAttribute("idn")]
         public System.Configuration.IdnElement Idn { get { throw null; } }
+        [System.Configuration.ConfigurationPropertyAttribute("iriParsing")]
         public System.Configuration.IriParsingElement IriParsing { get { throw null; } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
+        [System.Configuration.ConfigurationPropertyAttribute("schemeSettings")]
         public System.Configuration.SchemeSettingElementCollection SchemeSettings { get { throw null; } }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Property)]
@@ -1564,6 +1601,7 @@ namespace System.Drawing.Configuration
     public sealed partial class SystemDrawingSection : System.Configuration.ConfigurationSection
     {
         public SystemDrawingSection() { }
+        [System.Configuration.ConfigurationPropertyAttribute("bitmapSuffix")]
         public string BitmapSuffix { get { throw null; } set { } }
         protected override System.Configuration.ConfigurationPropertyCollection Properties { get { throw null; } }
     }
