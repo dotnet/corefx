@@ -99,6 +99,7 @@ namespace Internal.Cryptography.Pal
                 Interop.Crypto.X509StackAddDirectoryStore(untrusted, s_userIntermediatePath);
                 Interop.Crypto.X509StackAddDirectoryStore(untrusted, s_userPersonalPath);
                 Interop.Crypto.X509StackAddMultiple(untrusted, systemIntermediate);
+                Interop.Crypto.X509StoreSetVerifyTime(store, verificationTime);
 
                 storeCtx = Interop.Crypto.X509StoreCtxCreate();
 
@@ -106,8 +107,6 @@ namespace Internal.Cryptography.Pal
                 {
                     throw Interop.Crypto.CreateOpenSslCryptographicException();
                 }
-
-                Interop.Crypto.SetX509ChainVerifyTime(storeCtx, verificationTime);
 
                 return new OpenSslX509ChainProcessor(
                     leafHandle,
@@ -149,8 +148,6 @@ namespace Internal.Cryptography.Pal
                 }
 
                 Interop.Crypto.X509StoreCtxReset(storeCtx);
-                Interop.Crypto.SetX509ChainVerifyTime(storeCtx, _verificationTime);
-
                 Interop.Crypto.X509VerifyCert(storeCtx);
                 statusCode = Interop.Crypto.X509StoreCtxGetError(storeCtx);
             }
@@ -224,7 +221,6 @@ namespace Internal.Cryptography.Pal
                     downloadedCerts.Add(downloaded);
                     
                     Interop.Crypto.X509StoreCtxReset(storeCtx);
-                    Interop.Crypto.SetX509ChainVerifyTime(storeCtx, _verificationTime);
                     Interop.Crypto.X509VerifyCert(storeCtx);
 
                     statusCode = Interop.Crypto.X509StoreCtxGetError(storeCtx);
@@ -322,7 +318,6 @@ namespace Internal.Cryptography.Pal
 
             Interop.Crypto.X509StoreSetRevocationFlag(_store, revocationFlag);
             Interop.Crypto.X509StoreCtxReset(_storeCtx);
-            Interop.Crypto.SetX509ChainVerifyTime(_storeCtx, _verificationTime);
             Interop.Crypto.X509VerifyCert(_storeCtx);
         }
 
@@ -336,7 +331,6 @@ namespace Internal.Cryptography.Pal
                 Interop.Crypto.X509VerifyStatusCode.X509_V_OK)
             {
                 Interop.Crypto.X509StoreCtxReset(_storeCtx);
-                Interop.Crypto.SetX509ChainVerifyTime(_storeCtx, _verificationTime);
 
                 workingChain = new WorkingChain();
                 Interop.Crypto.X509StoreVerifyCallback workingCallback = workingChain.VerifyCallback;
