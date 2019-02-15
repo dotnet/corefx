@@ -101,10 +101,10 @@ namespace System
         public static bool IsUbuntu1804 { get { throw null; } }
         public static bool IsUbuntu1810OrHigher { get { throw null; } }
         public static bool IsWindows { get { throw null; } }
-        public static bool IsWindows10Version1607OrGreater { get { throw null; } }
-        public static bool IsWindows10Version1703OrGreater { get { throw null; } }
-        public static bool IsWindows10Version1709OrGreater { get { throw null; } }
-        public static bool IsWindows10Version1803OrGreater { get { throw null; } }
+        public static bool IsWindows10Version1607OrGreater { get { throw null; } } // >= Windows 10 Anniversary Update
+        public static bool IsWindows10Version1703OrGreater { get { throw null; } } // >= Windows 10 Creators Update
+        public static bool IsWindows10Version1709OrGreater { get { throw null; } } // >= Windows 10 Fall Creators Update
+        public static bool IsWindows10Version1803OrGreater { get { throw null; } } // >= Windows 10 April 2018 Update
         public static bool IsWindows7 { get { throw null; } }
         public static bool IsWindows8x { get { throw null; } }
         public static bool IsWindows8xOrLater { get { throw null; } }
@@ -165,23 +165,23 @@ namespace System.Diagnostics
         public sealed partial class RemoteInvokeHandle : System.IDisposable
         {
             public RemoteInvokeHandle(System.Diagnostics.Process process, System.Diagnostics.RemoteInvokeOptions options, string assemblyName, string className, string methodName) { }
-            public int ExitCode { get { throw null; } }
-            public System.Diagnostics.RemoteInvokeOptions Options { get { throw null; } }
-            public System.Diagnostics.Process Process { get { throw null; } set { } }
+            public int ExitCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+            public System.Diagnostics.RemoteInvokeOptions Options { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+            public System.Diagnostics.Process Process { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
             public void Dispose() { }
         }
     }
     public sealed partial class RemoteInvokeOptions
     {
         public RemoteInvokeOptions() { }
-        public bool CheckExitCode { get { throw null; } set { } }
-        public bool EnableProfiling { get { throw null; } set { } }
-        public string ExceptionFile { get { throw null; } }
-        public int ExpectedExitCode { get { throw null; } set { } }
-        public bool RunAsSudo { get { throw null; } set { } }
-        public bool Start { get { throw null; } set { } }
-        public System.Diagnostics.ProcessStartInfo StartInfo { get { throw null; } set { } }
-        public int TimeOut { get { throw null; } set { } }
+        public bool CheckExitCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool EnableProfiling { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public string ExceptionFile { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        public int ExpectedExitCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool RunAsSudo { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public bool Start { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.Diagnostics.ProcessStartInfo StartInfo {[System.Runtime.CompilerServices.CompilerGeneratedAttribute] get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public int TimeOut { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
 }
 namespace System.IO
@@ -189,7 +189,7 @@ namespace System.IO
     public abstract partial class FileCleanupTestBase : System.IDisposable
     {
         protected FileCleanupTestBase() { }
-        protected string TestDirectory { get { throw null; } }
+        protected string TestDirectory { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         ~FileCleanupTestBase() { }
