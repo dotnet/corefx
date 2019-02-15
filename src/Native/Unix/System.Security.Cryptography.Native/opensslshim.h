@@ -481,6 +481,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(X509_get_default_cert_file) \
     REQUIRED_FUNCTION(X509_get_default_cert_file_env) \
     REQUIRED_FUNCTION(X509_get_ext) \
+    REQUIRED_FUNCTION(X509_get_ext_by_NID) \
     REQUIRED_FUNCTION(X509_get_ext_count) \
     REQUIRED_FUNCTION(X509_get_ext_d2i) \
     REQUIRED_FUNCTION(X509_get_issuer_name) \
@@ -867,6 +868,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_get_default_cert_file X509_get_default_cert_file_ptr
 #define X509_get_default_cert_file_env X509_get_default_cert_file_env_ptr
 #define X509_get_ext X509_get_ext_ptr
+#define X509_get_ext_by_NID X509_get_ext_by_NID_ptr
 #define X509_get_ext_count X509_get_ext_count_ptr
 #define X509_get_ext_d2i X509_get_ext_d2i_ptr
 #define X509_get_issuer_name X509_get_issuer_name_ptr

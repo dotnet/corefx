@@ -167,6 +167,30 @@ int32_t CryptoNative_X509ExtensionGetCritical(X509_EXTENSION* x)
     return X509_EXTENSION_get_critical(x);
 }
 
+ASN1_OCTET_STRING* CryptoNative_X509FindExtensionData(X509* x, int32_t nid)
+{
+    if (x == NULL || nid == NID_undef)
+    {
+        return NULL;
+    }
+
+    int idx = X509_get_ext_by_NID(x, nid, -1);
+
+    if (idx < 0)
+    {
+        return NULL;
+    }
+
+    X509_EXTENSION* ext = X509_get_ext(x, idx);
+
+    if (ext == NULL)
+    {
+        return NULL;
+    }
+
+    return X509_EXTENSION_get_data(ext);
+}
+
 X509_STORE* CryptoNative_X509StoreCreate()
 {
     return X509_STORE_new();

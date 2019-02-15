@@ -189,6 +189,11 @@ Shims the X509_EXTENSION_get_critical method.
 DLLEXPORT int32_t CryptoNative_X509ExtensionGetCritical(X509_EXTENSION* x);
 
 /*
+Returns the data portion of the first matched extension.
+*/
+DLLEXPORT ASN1_OCTET_STRING* CryptoNative_X509FindExtensionData(X509* x, int32_t nid);
+
+/*
 Shims the X509_STORE_new method.
 */
 DLLEXPORT X509_STORE* CryptoNative_X509StoreCreate(void);
