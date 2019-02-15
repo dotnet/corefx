@@ -175,11 +175,11 @@ namespace System.Net.Http.HPack
             int i = 0;
             for (int j = 0; j < s.Length; j++)
             {
-                if ((c & 0xFF80) != 0)
+                if ((s[j] & 0xFF80) != 0)
                 {
                     throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                 }
-                buffer[i++] = (byte)c[j];
+                buffer[i++] = (byte)s[j];
             }
 
             encodedLength = i;
