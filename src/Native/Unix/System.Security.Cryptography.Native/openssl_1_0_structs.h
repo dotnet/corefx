@@ -132,7 +132,7 @@ struct x509_st
 
 struct x509_store_ctx_st
 {
-    X509_STORE* ctx;
+    void* _ignored0;
     int _ignored1;
     X509* cert;
     STACK_OF(X509*) untrusted;
