@@ -520,13 +520,31 @@ namespace System.Net.Test.Common
             requestData.Method = requestData.GetSingleHeaderValue(":method");
             requestData.Path = requestData.GetSingleHeaderValue(":path");
 
+            byte[]  body = null;
             while ((frame.Flags & FrameFlags.EndStream) == 0)
             {
                 frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
+                // TODO. support more types.
+                Assert.Equal(FrameType.Data, frame.Type);
                 if (frame.Type == FrameType.Data && frame.Length > 1)
                 {
-                    requestData.AddBodyData(((DataFrame)frame).Data.Span);
+                    if (body == null)
+                    {
+                        body = ((DataFrame)frame).Data.ToArray();
+                    }
+                    else
+                    {
+                        byte[] newBuffer = new byte[body.Length + ((DataFrame)frame).Data.Length];
+
+                        body.CopyTo(newBuffer, 0);
+                        ((DataFrame)frame).Data.Span.CopyTo(newBuffer.AsSpan().Slice(body.Length));
+                        body= newBuffer;
+                    }
                 }
+            }
+            if (body != null)
+            {
+                requestData.Body = body;
             }
 
             return (streamId, requestData);

@@ -829,7 +829,7 @@ namespace System.Net.Http.Functional.Tests
                     request.Headers.TE.Add(new TransferCodingWithQualityHeaderValue("trailers"));
                     request.Headers.TE.Add(new TransferCodingWithQualityHeaderValue("deflate"));
                     request.Headers.Trailer.Add("MyTrailer");
-                    request.Headers.TransferEncoding.Add(new TransferCodingHeaderValue("chunked"));
+                    if (!IsCurlHandler) request.Headers.TransferEncoding.Add(new TransferCodingHeaderValue("chunked"));
                     request.Headers.UserAgent.Add(new ProductInfoHeaderValue(new ProductHeaderValue("Mozilla", "5.0")));
                     request.Headers.Upgrade.Add(new ProductHeaderValue("HTTPS", "1.3"));
                     request.Headers.Upgrade.Add(new ProductHeaderValue("IRC", "6.9"));
@@ -868,10 +868,7 @@ namespace System.Net.Http.Functional.Tests
 
                     var headersSet = requestData.Headers;
 
-                    if (!IsCurlHandler)
-                    {
-                        Assert.Equal(content, Encoding.ASCII.GetString(requestData.Body));
-                    }
+                    Assert.Equal(content, Encoding.ASCII.GetString(requestData.Body));
 
                     Assert.Equal("utf-8", requestData.GetSingleHeaderValue("Accept-Charset"));
                     Assert.Equal("gzip, deflate", requestData.GetSingleHeaderValue("Accept-Encoding"));

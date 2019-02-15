@@ -26,10 +26,10 @@ namespace System.Net.Http.HPack
         {
             int i = 0;
             length = 0;
-            int valueLength = (value == null ? 0 : value.Length);
+            int valueLength = value.Length;
 
             // We need at least \0 and twice length plus one octet string
-            if (buffer.Length < 3 + name.Length + (value == null ? 0 : value.Length))
+            if (buffer.Length < 3 + name.Length + valueLength)
             {
                 return false;
             }
@@ -96,17 +96,19 @@ namespace System.Net.Http.HPack
             {
                 return false;
             }
+
             i += encodedLength;
 
             if (!IntegerEncoder.Encode(valueLength, 7, buffer.Slice(i), out encodedLength))
             {
                 return false;
             }
+
             i += encodedLength;
 
             if (valueLength == 0)
             {
-                // We are done of there is no value.
+                // We are done if there is no value.
                 length = i;
                 return true;
             }
@@ -154,6 +156,7 @@ namespace System.Net.Http.HPack
                 // TODO Use ASCII ToUpper when #34144 is ready.
                 buffer[currentIndex++] = (byte)(s[j] | (s[j] >= 'A' && s[j] <= 'Z' ? ToLowerMask : 0));
             }
+
             nameLength = currentIndex;
 
             return true;
@@ -170,14 +173,15 @@ namespace System.Net.Http.HPack
             }
 
             int i = 0;
-            foreach (char c in s)
+            for (int j = 0; j < s.Length; j++)
             {
                 if ((c & 0xFF80) != 0)
                 {
                     throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                 }
-                buffer[i++] = (byte)c;
+                buffer[i++] = (byte)c[j];
             }
+
             encodedLength = i;
 
             return true;

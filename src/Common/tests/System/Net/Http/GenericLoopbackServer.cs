@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -53,10 +52,9 @@ namespace System.Net.Test.Common
         }
     }
 
-    public class HttpRequestData : IDisposable
+    public class HttpRequestData
     {
-        private byte[] _body;
-        private int _bodyLength;
+        public byte[] Body;
         public string Method;
         public string Path;
         public List<HttpHeaderData> Headers { get; }
@@ -64,7 +62,6 @@ namespace System.Net.Test.Common
         public HttpRequestData()
         {
             Headers = new List<HttpHeaderData>();
-            _body = null;
         }
 
         public string[] GetHeaderValues(string headerName)
@@ -88,36 +85,6 @@ namespace System.Net.Test.Common
         public int GetHeaderValueCount(string headerName)
         {
             return Headers.Where(h => h.Name.Equals(headerName, StringComparison.OrdinalIgnoreCase)).Count();
-        }
-
-        public Span<byte> Body => _body.AsSpan().Slice(0, _bodyLength);
-
-        internal void AddBodyData(ReadOnlySpan<Byte> data)
-        {
-            byte[] buffer = _body;
-            if (buffer == null)
-            {
-                // In most cases we should get body in single frame for tests.
-                _body = ArrayPool<byte>.Shared.Rent(data.Length);
-                data.CopyTo(_body.AsSpan());
-                _bodyLength = data.Length;
-            }
-            else
-            {
-                _body = ArrayPool<byte>.Shared.Rent(data.Length + _bodyLength);
-                buffer.AsSpan().Slice(0, _bodyLength).CopyTo(_body.AsSpan());
-                data.CopyTo(_body.AsSpan().Slice(_bodyLength));
-                _bodyLength += data.Length;
-                ArrayPool<byte>.Shared.Return(buffer);
-            }
-        }
-
-        public void Dispose()
-        {
-            if (_body != null)
-            {
-                ArrayPool<byte>.Shared.Return(_body);
-            }
         }
     }
 }

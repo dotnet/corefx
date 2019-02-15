@@ -468,7 +468,7 @@ namespace System.Net.Test.Common
 
             await AcceptConnectionAsync(async connection =>
             {
-                headerLines = await connection.ReadRequestHeaderAndSendResponseAsync(statusCode, headerString + "Connection: close\r\n", content);
+                headerLines = await connection.ReadRequestHeaderAsync().ConfigureAwait(false);
 
                 // Parse method and path
                 string[] splits = headerLines[0].Split(' ');
@@ -490,52 +490,47 @@ namespace System.Net.Test.Common
                     if (requestData.GetHeaderValueCount("Content-Length") != 0)
                     {
                         int contentLength = Int32.Parse(requestData.GetSingleHeaderValue("Content-Length"));
-                        byte[] buffer = new byte[contentLength];
-                        int offset = 0;
 
-                        while (contentLength != 0)
+                        if (contentLength > 0)
                         {
-                            int length = await connection.Reader.BaseStream.ReadAsync(buffer, offset, contentLength);
-                            contentLength -= length;
-                            offset += length;
+                            char[] buffer = new char[contentLength];
+                            await connection.Reader.ReadBlockAsync(buffer, 0, contentLength);
+                            requestData.Body = Encoding.GetEncoding("ASCII").GetBytes(buffer);
                         }
-
-                        requestData.AddBodyData(buffer);
                     }
                     else if (requestData.GetHeaderValueCount("Transfer-Encoding") != 0 && requestData.GetSingleHeaderValue("Transfer-Encoding") == "chunked")
                     {
                         while (true)
                         {
                             string chunkHeader = await connection.Reader.ReadLineAsync();
-                            if (chunkHeader == null)
+                            int chunkLength = int.Parse(chunkHeader, System.Globalization.NumberStyles.HexNumber);
+                            if (chunkLength == 0)
                             {
-                                // Some tests do not send complete body.
+                                // Last chunk. Read CRLF and exit.
+                                await connection.Reader.ReadLineAsync();
                                 break;
-                            }
-                            int contentLength = int.Parse(chunkHeader, System.Globalization.NumberStyles.HexNumber);
-                            if (contentLength == 0)
-                            {
-                                // Last chunk
-                                break;
-                            }
-                            char[] buffer = new char[contentLength];
-                            int offset = 0;
-                            while (contentLength != 0)
-                            {
-                                int length = await connection.Reader.ReadAsync(buffer, offset, contentLength);
-                                contentLength -= length;
-                                offset += length;
                             }
 
-                            requestData.AddBodyData(Encoding.GetEncoding("ASCII").GetBytes(buffer).AsSpan());
+                            char[] buffer = new char[chunkLength];
+                            await connection.Reader.ReadBlockAsync(buffer, 0, chunkLength);
                             await connection.Reader.ReadLineAsync();
+                            if (requestData.Body == null)
+                            {
+                                requestData.Body = Encoding.GetEncoding("ASCII").GetBytes(buffer);
+                            }
+                            else
+                            {
+                                byte[] newBuffer = new byte[requestData.Body.Length + chunkLength];
+
+                                requestData.Body.CopyTo(newBuffer, 0);
+                                Encoding.GetEncoding("ASCII").GetBytes(buffer).CopyTo(newBuffer, requestData.Body.Length);
+                                requestData.Body = newBuffer;
+                            }
                         }
                     }
-                    else
-                    {
-                        await connection.Drain();
-                    }
                 }
+
+                await connection.SendResponseAsync(statusCode, headerString + "Connection: close\r\n" , content).ConfigureAwait(false);
             });
 
             return requestData;
