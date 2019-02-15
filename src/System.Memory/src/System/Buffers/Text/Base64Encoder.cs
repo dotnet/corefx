@@ -126,7 +126,6 @@ namespace System.Buffers.Text
         /// It does not return NeedMoreData since this method tramples the data in the buffer and hence can only be called once with all the data in the buffer.
         /// It does not return InvalidData since that is not possible for base 64 encoding.
         /// </returns>
-
         public static OperationStatus EncodeToUtf8InPlace(Span<byte> buffer, int dataLength, out int bytesWritten)
         {
             int encodedLength = GetMaxEncodedToUtf8Length(dataLength);
