@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <dirent.h>
+#include <string.h>
 #include <unistd.h>
 
 c_static_assert(PAL_X509_V_OK == X509_V_OK);
