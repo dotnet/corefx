@@ -46,7 +46,7 @@ namespace System.Threading.Tasks
     }
     public partial struct ParallelLoopResult
     {
-        private int _dummy;
+        private int _dummyPrimitive;
         public bool IsCompleted { get { throw null; } }
         public System.Nullable<long> LowestBreakIteration { get { throw null; } }
     }

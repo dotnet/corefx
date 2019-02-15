@@ -9,7 +9,7 @@ namespace System.Collections.Specialized
 {
     public partial struct BitVector32
     {
-        private int _dummy;
+        private int _dummyPrimitive;
         public BitVector32(System.Collections.Specialized.BitVector32 value) { throw null; }
         public BitVector32(int data) { throw null; }
         public int Data { get { throw null; } }
@@ -25,7 +25,7 @@ namespace System.Collections.Specialized
         public static string ToString(System.Collections.Specialized.BitVector32 value) { throw null; }
         public readonly partial struct Section
         {
-            private readonly int _dummy;
+            private readonly int _dummyPrimitive;
             public short Mask { get { throw null; } }
             public short Offset { get { throw null; } }
             public bool Equals(System.Collections.Specialized.BitVector32.Section obj) { throw null; }
@@ -90,11 +90,9 @@ namespace System.Collections.Specialized
     {
         protected NameObjectCollectionBase() { }
         protected NameObjectCollectionBase(System.Collections.IEqualityComparer equalityComparer) { }
-        [System.ObsoleteAttribute("Please use NameObjectCollectionBase(IEqualityComparer) instead.")]
         protected NameObjectCollectionBase(System.Collections.IHashCodeProvider hashProvider, System.Collections.IComparer comparer) { }
         protected NameObjectCollectionBase(int capacity) { }
         protected NameObjectCollectionBase(int capacity, System.Collections.IEqualityComparer equalityComparer) { }
-        [System.ObsoleteAttribute("Please use NameObjectCollectionBase(Int32, IEqualityComparer) instead.")]
         protected NameObjectCollectionBase(int capacity, System.Collections.IHashCodeProvider hashProvider, System.Collections.IComparer comparer) { }
         protected NameObjectCollectionBase(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public virtual int Count { get { throw null; } }
@@ -135,12 +133,10 @@ namespace System.Collections.Specialized
     {
         public NameValueCollection() { }
         public NameValueCollection(System.Collections.IEqualityComparer equalityComparer) { }
-        [System.ObsoleteAttribute("Please use NameValueCollection(IEqualityComparer) instead.")]
         public NameValueCollection(System.Collections.IHashCodeProvider hashProvider, System.Collections.IComparer comparer) { }
         public NameValueCollection(System.Collections.Specialized.NameValueCollection col) { }
         public NameValueCollection(int capacity) { }
         public NameValueCollection(int capacity, System.Collections.IEqualityComparer equalityComparer) { }
-        [System.ObsoleteAttribute("Please use NameValueCollection(Int32, IEqualityComparer) instead.")]
         public NameValueCollection(int capacity, System.Collections.IHashCodeProvider hashProvider, System.Collections.IComparer comparer) { }
         public NameValueCollection(int capacity, System.Collections.Specialized.NameValueCollection col) { }
         protected NameValueCollection(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }

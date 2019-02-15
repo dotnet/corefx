@@ -33,7 +33,7 @@ namespace System.Diagnostics
         [System.ComponentModel.DefaultValueAttribute(false)]
         public bool EnableRaisingEvents { get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public System.Diagnostics.EventLogEntryCollection Entries { get { throw null; } }
         [System.ComponentModel.DefaultValueAttribute("")]
         [System.ComponentModel.ReadOnlyAttribute(true)]
@@ -46,7 +46,7 @@ namespace System.Diagnostics
         [System.ComponentModel.SettingsBindableAttribute(true)]
         public string MachineName { get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
-        [System.ComponentModel.DesignerSerializationVisibilityAttribute((System.ComponentModel.DesignerSerializationVisibility)(0))]
+        [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public long MaximumKilobytes { get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
         public int MinimumRetentionDays { get { throw null; } }
@@ -65,7 +65,6 @@ namespace System.Diagnostics
         public void Close() { }
         public static void CreateEventSource(System.Diagnostics.EventSourceCreationData sourceData) { }
         public static void CreateEventSource(string source, string logName) { }
-        [System.ObsoleteAttribute("This method has been deprecated.  Please use System.Diagnostics.EventLog.CreateEventSource(EventSourceCreationData sourceData) instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public static void CreateEventSource(string source, string logName, string machineName) { }
         public static void Delete(string logName) { }
         public static void Delete(string logName, string machineName) { }
@@ -98,7 +97,6 @@ namespace System.Diagnostics
         public static void WriteEvent(string source, System.Diagnostics.EventInstance instance, params object[] values) { }
     }
     [System.ComponentModel.DesignTimeVisibleAttribute(false)]
-    [System.ComponentModel.ToolboxItemAttribute(false)]
     public sealed partial class EventLogEntry : System.ComponentModel.Component, System.Runtime.Serialization.ISerializable
     {
         internal EventLogEntry() { }
@@ -106,7 +104,6 @@ namespace System.Diagnostics
         public short CategoryNumber { get { throw null; } }
         public byte[] Data { get { throw null; } }
         public System.Diagnostics.EventLogEntryType EntryType { get { throw null; } }
-        [System.ObsoleteAttribute("This property has been deprecated.  Please use System.Diagnostics.EventLogEntry.InstanceId instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public int EventID { get { throw null; } }
         public int Index { get { throw null; } }
         public long InstanceId { get { throw null; } }
@@ -139,17 +136,6 @@ namespace System.Diagnostics
         SuccessAudit = 8,
         Warning = 2,
     }
-    public partial class EventSourceCreationData
-    {
-        public EventSourceCreationData(string source, string logName) { }
-        public int CategoryCount { get { throw null; } set { } }
-        public string CategoryResourceFile { get { throw null; } set { } }
-        public string LogName { get { throw null; } set { } }
-        public string MachineName { get { throw null; } set { } }
-        public string MessageResourceFile { get { throw null; } set { } }
-        public string ParameterResourceFile { get { throw null; } set { } }
-        public string Source { get { throw null; } set { } }
-    }
     public sealed partial class EventLogTraceListener : System.Diagnostics.TraceListener
     {
         public EventLogTraceListener() { }
@@ -161,16 +147,23 @@ namespace System.Diagnostics
         public override string Name { get { throw null; } set { } }
         public override void Close() { }
         protected override void Dispose(bool disposing) { }
-        [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override void TraceData(System.Diagnostics.TraceEventCache eventCache, string source, System.Diagnostics.TraceEventType severity, int id, object data) { }
-        [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override void TraceData(System.Diagnostics.TraceEventCache eventCache, string source, System.Diagnostics.TraceEventType severity, int id, params object[] data) { }
-        [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override void TraceEvent(System.Diagnostics.TraceEventCache eventCache, string source, System.Diagnostics.TraceEventType severity, int id, string message) { }
-        [System.Runtime.InteropServices.ComVisibleAttribute(false)]
         public override void TraceEvent(System.Diagnostics.TraceEventCache eventCache, string source, System.Diagnostics.TraceEventType severity, int id, string format, params object[] args) { }
         public override void Write(string message) { }
         public override void WriteLine(string message) { }
+    }
+    public partial class EventSourceCreationData
+    {
+        public EventSourceCreationData(string source, string logName) { }
+        public int CategoryCount { get { throw null; } set { } }
+        public string CategoryResourceFile { get { throw null; } set { } }
+        public string LogName { get { throw null; } set { } }
+        public string MachineName { get { throw null; } set { } }
+        public string MessageResourceFile { get { throw null; } set { } }
+        public string ParameterResourceFile { get { throw null; } set { } }
+        public string Source { get { throw null; } set { } }
     }
     public enum OverflowAction
     {
@@ -506,7 +499,6 @@ namespace System.Diagnostics.Eventing.Reader
     {
         AuditFailure = (long)4503599627370496,
         AuditSuccess = (long)9007199254740992,
-        [System.ObsoleteAttribute("Incorrect value: use CorrelationHint2 instead", false)]
         CorrelationHint = (long)4503599627370496,
         CorrelationHint2 = (long)18014398509481984,
         EventLogClassic = (long)36028797018963968,

@@ -5,12 +5,12 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
 namespace System.IO
 {
     public partial class FileFormatException : System.FormatException
     {
         public FileFormatException() { }
+        protected FileFormatException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public FileFormatException(string message) { }
         public FileFormatException(string message, System.Exception innerException) { }
         public FileFormatException(System.Uri sourceUri) { }
@@ -18,6 +18,7 @@ namespace System.IO
         public FileFormatException(System.Uri sourceUri, string message) { }
         public FileFormatException(System.Uri sourceUri, string message, System.Exception innerException) { }
         public System.Uri SourceUri { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
 }
 namespace System.IO.Packaging
