@@ -189,15 +189,19 @@ namespace Tests.System
             Assert.Equal(expected, actual);
         }
 
-        [Fact]
-        public static void BitOps_RotateLeft_uint()
+        [Theory]
+        [InlineData(0b00000000_00000000_00000000_00000001u, int.MaxValue, 0b10000000_00000000_00000000_00000000u)] // % 32 = 31
+        [InlineData(0b01000000_00000001_00000000_00000001u, 3, 0b00000000_00001000_00000000_00001010u)]
+        [InlineData(0b01000000_00000001_00000000_00000001u, 2, 0b00000000_00000100_00000000_00000101u)]
+        [InlineData(0b01010101_01010101_01010101_01010101u, 1, 0b10101010_10101010_10101010_10101010u)]
+        [InlineData(0b01010101_11111111_01010101_01010101u, 0, 0b01010101_11111111_01010101_01010101u)]
+        [InlineData(0b00000000_00000000_00000000_00000001u, -1, 0b10000000_00000000_00000000_00000000u)]
+        [InlineData(0b00000000_00000000_00000000_00000001u, -2, 0b01000000_00000000_00000000_00000000u)]
+        [InlineData(0b00000000_00000000_00000000_00000001u, -3, 0b00100000_00000000_00000000_00000000u)]
+        [InlineData(0b01010101_11111111_01010101_01010101u, int.MinValue, 0b01010101_11111111_01010101_01010101u)] // % 32 = 0
+        public static void BitOps_RotateLeft_uint(uint n, int offset, uint expected)
         {
-            uint value = 0b01010101_01010101_01010101_01010101u;
-            Assert.Equal(0b10101010_10101010_10101010_10101010u, BitOps.RotateLeft(value, 1));
-            Assert.Equal(0b01010101_01010101_01010101_01010101u, BitOps.RotateLeft(value, 2));
-            Assert.Equal(0b10101010_10101010_10101010_10101010u, BitOps.RotateLeft(value, 3));
-            Assert.Equal(value, BitOps.RotateLeft(value, int.MinValue)); // % 32 = 0
-            Assert.Equal(BitOps.RotateLeft(value, 31), BitOps.RotateLeft(value, int.MaxValue)); // % 32 = 31
+            Assert.Equal(expected, BitOps.RotateLeft(n, offset));
         }
 
         [Fact]
@@ -211,15 +215,19 @@ namespace Tests.System
             Assert.Equal(BitOps.RotateLeft(value, 63), BitOps.RotateLeft(value, int.MaxValue)); // % 64 = 63
         }
 
-        [Fact]
-        public static void BitOps_RotateRight_uint()
+        [Theory]
+        [InlineData(0b10000000_00000000_00000000_00000000u, int.MaxValue, 0b00000000_00000000_00000000_00000001u)] // % 32 = 31
+        [InlineData(0b00000000_00001000_00000000_00001010u, 3, 0b01000000_00000001_00000000_00000001u)]
+        [InlineData(0b00000000_00000100_00000000_00000101u, 2, 0b01000000_00000001_00000000_00000001u)]
+        [InlineData(0b01010101_01010101_01010101_01010101u, 1, 0b10101010_10101010_10101010_10101010u)]
+        [InlineData(0b01010101_11111111_01010101_01010101u, 0, 0b01010101_11111111_01010101_01010101u)]
+        [InlineData(0b10000000_00000000_00000000_00000000u, -1, 0b00000000_00000000_00000000_00000001u)]
+        [InlineData(0b00000000_00000000_00000000_00000001u, -2, 0b00000000_00000000_00000000_00000100u)]
+        [InlineData(0b01000000_00000000_00000000_00000000u, -3, 0b00000000_00000000_00000000_00000010u)]
+        [InlineData(0b01010101_11111111_01010101_01010101u, int.MinValue, 0b01010101_11111111_01010101_01010101u)] // % 32 = 0
+        public static void BitOps_RotateRight_uint(uint n, int offset, uint expected)
         {
-            uint value = 0b01010101_01010101_01010101_01010101u;
-            Assert.Equal(0b10101010_10101010_10101010_10101010u, BitOps.RotateRight(value, 1));
-            Assert.Equal(0b01010101_01010101_01010101_01010101u, BitOps.RotateRight(value, 2));
-            Assert.Equal(0b10101010_10101010_10101010_10101010u, BitOps.RotateRight(value, 3));
-            Assert.Equal(value, BitOps.RotateRight(value, int.MinValue)); // % 32 = 0
-            Assert.Equal(BitOps.RotateLeft(value, 15), BitOps.RotateRight(value, int.MaxValue)); // % 32 = 15
+            Assert.Equal(expected, BitOps.RotateRight(n, offset));
         }
 
         [Fact]
