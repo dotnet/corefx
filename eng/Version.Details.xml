@@ -15,17 +15,17 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview4-27413-11">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview4-27414-11">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>0f10c29471af71b020b0c1513f28356660df1eab</Sha>
+      <Sha>ccb7a03355bd0732dd39279759608e1290240fbd</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHost" Version="3.0.0-preview4-27413-11">
+    <Dependency Name="Microsoft.NETCore.DotNetHost" Version="3.0.0-preview4-27414-11">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>0f10c29471af71b020b0c1513f28356660df1eab</Sha>
+      <Sha>ccb7a03355bd0732dd39279759608e1290240fbd</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostPolicy" Version="3.0.0-preview4-27413-11">
+    <Dependency Name="Microsoft.NETCore.DotNetHostPolicy" Version="3.0.0-preview4-27414-11">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>0f10c29471af71b020b0c1513f28356660df1eab</Sha>
+      <Sha>ccb7a03355bd0732dd39279759608e1290240fbd</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview4.19113.23">
       <Uri>https://github.com/dotnet/corefx</Uri>
