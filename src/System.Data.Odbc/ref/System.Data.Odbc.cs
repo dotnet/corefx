@@ -24,6 +24,7 @@ namespace System.Data.Odbc
         [System.ComponentModel.BrowsableAttribute(false)]
         [System.ComponentModel.DefaultValueAttribute(true)]
         [System.ComponentModel.DesignOnlyAttribute(true)]
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override bool DesignTimeVisible { get { throw null; } set { } }
         [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Content)]
         public new System.Data.Odbc.OdbcParameterCollection Parameters { get { throw null; } }
@@ -246,7 +247,9 @@ namespace System.Data.Odbc
         public OdbcParameter() { }
         public OdbcParameter(string name, System.Data.Odbc.OdbcType type) { }
         public OdbcParameter(string name, System.Data.Odbc.OdbcType type, int size) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
         public OdbcParameter(string parameterName, System.Data.Odbc.OdbcType odbcType, int size, System.Data.ParameterDirection parameterDirection, bool isNullable, byte precision, byte scale, string srcColumn, System.Data.DataRowVersion srcVersion, object value) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
         public OdbcParameter(string parameterName, System.Data.Odbc.OdbcType odbcType, int size, System.Data.ParameterDirection parameterDirection, byte precision, byte scale, string sourceColumn, System.Data.DataRowVersion sourceVersion, bool sourceColumnNullMapping, object value) { }
         public OdbcParameter(string name, System.Data.Odbc.OdbcType type, int size, string sourcecolumn) { }
         public OdbcParameter(string name, object value) { }
@@ -288,6 +291,8 @@ namespace System.Data.Odbc
         public System.Data.Odbc.OdbcParameter Add(string parameterName, System.Data.Odbc.OdbcType odbcType) { throw null; }
         public System.Data.Odbc.OdbcParameter Add(string parameterName, System.Data.Odbc.OdbcType odbcType, int size) { throw null; }
         public System.Data.Odbc.OdbcParameter Add(string parameterName, System.Data.Odbc.OdbcType odbcType, int size, string sourceColumn) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("Add(String parameterName, Object value) has been deprecated.  Use AddWithValue(String parameterName, Object value).  https://go.microsoft.com/fwlink/?linkid=14202", false)]
         public System.Data.Odbc.OdbcParameter Add(string parameterName, object value) { throw null; }
         public override void AddRange(System.Array values) { }
         public void AddRange(System.Data.Odbc.OdbcParameter[] values) { }
