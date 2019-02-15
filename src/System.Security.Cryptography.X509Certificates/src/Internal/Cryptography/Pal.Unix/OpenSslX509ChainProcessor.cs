@@ -870,7 +870,7 @@ namespace Internal.Cryptography.Pal
         {
             private ErrorCollection[] _errors;
 
-            internal int LastError => _errors.Length;
+            internal int LastError => _errors?.Length ?? 0;
 
             internal ref ErrorCollection this[int idx] => ref _errors[idx];
 
