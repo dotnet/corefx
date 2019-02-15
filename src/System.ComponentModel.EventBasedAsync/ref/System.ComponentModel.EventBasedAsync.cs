@@ -28,6 +28,7 @@ namespace System.ComponentModel
     }
     public static partial class AsyncOperationManager
     {
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
         public static System.Threading.SynchronizationContext SynchronizationContext { get { throw null; } set { } }
         public static System.ComponentModel.AsyncOperation CreateOperation(object userSuppliedState) { throw null; }
     }
@@ -64,6 +65,7 @@ namespace System.ComponentModel
     {
         public ProgressChangedEventArgs(int progressPercentage, object userState) { }
         public int ProgressPercentage { get { throw null; } }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public object UserState { get { throw null; } }
     }
     public delegate void ProgressChangedEventHandler(object sender, System.ComponentModel.ProgressChangedEventArgs e);
