@@ -696,6 +696,7 @@ static OCSP_CERTID* MakeCertId(X509* subject, X509* issuer)
 }
 
 static X509VerifyStatusCode CheckOcsp(
+    OCSP_REQUEST* req,
     OCSP_RESPONSE* resp,
     X509* subject,
     X509* issuer,
@@ -733,7 +734,22 @@ static X509VerifyStatusCode CheckOcsp(
         X509_STORE* store = X509_STORE_CTX_get0_store(storeCtx);
         X509Stack* untrusted = X509_STORE_CTX_get0_untrusted(storeCtx);
 
-        if (OCSP_basic_verify(basicResp, untrusted, store, 0))
+        // From the documentation:
+        // -1: Request has nonce, response does not.
+        // 0: Request and response both have nonce, nonces do not match.
+        // 1: Request and response both have nonce, nonces match.
+        // 2: Neither request nor response have nonce.
+        // 3: Response has a nonce, request does not.
+        //
+        int nonceCheck = req == NULL ? 1 : OCSP_check_nonce(req, basicResp);
+
+        // Treat "response has no nonce" as success, since not all responders set the nonce.
+        if (nonceCheck == -1)
+        {
+            nonceCheck = 1;
+        }
+
+        if (nonceCheck == 1 && OCSP_basic_verify(basicResp, untrusted, store, 0))
         {
             ASN1_GENERALIZEDTIME* thisupd = NULL;
             ASN1_GENERALIZEDTIME* nextupd = NULL;
@@ -835,7 +851,7 @@ X509VerifyStatusCode CryptoNative_X509ChainGetCachedOcspStatus(X509_STORE_CTX* s
     {
         ASN1_GENERALIZEDTIME* thisUpdate = NULL;
         ASN1_GENERALIZEDTIME* nextUpdate = NULL;
-        ret = CheckOcsp(resp, subject, issuer, storeCtx, &thisUpdate, &nextUpdate);
+        ret = CheckOcsp(NULL, resp, subject, issuer, storeCtx, &thisUpdate, &nextUpdate);
 
         if (ret != PAL_X509_V_ERR_UNABLE_TO_GET_CRL)
         {
@@ -954,7 +970,7 @@ X509VerifyStatusCode CryptoNative_X509ChainVerifyOcsp(
 
     ASN1_GENERALIZEDTIME* thisUpdate = NULL;
     ASN1_GENERALIZEDTIME* nextUpdate = NULL;
-    ret = CheckOcsp(resp, subject, issuer, storeCtx, &thisUpdate, &nextUpdate);
+    ret = CheckOcsp(req, resp, subject, issuer, storeCtx, &thisUpdate, &nextUpdate);
 
     if (ret == PAL_X509_V_OK || ret == PAL_X509_V_ERR_CERT_REVOKED)
     {

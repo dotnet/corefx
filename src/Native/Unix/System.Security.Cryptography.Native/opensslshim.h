@@ -366,6 +366,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(OCSP_basic_verify) \
     REQUIRED_FUNCTION(OCSP_CERTID_free) \
     REQUIRED_FUNCTION(OCSP_cert_to_id) \
+    REQUIRED_FUNCTION(OCSP_check_nonce) \
     REQUIRED_FUNCTION(OCSP_request_add0_id) \
     REQUIRED_FUNCTION(OCSP_request_add1_nonce) \
     REQUIRED_FUNCTION(OCSP_REQUEST_free) \
@@ -741,6 +742,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define OCSP_basic_verify OCSP_basic_verify_ptr
 #define OCSP_BASICRESP_free OCSP_BASICRESP_free_ptr
 #define OCSP_cert_to_id OCSP_cert_to_id_ptr
+#define OCSP_check_nonce OCSP_check_nonce_ptr
 #define OCSP_CERTID_free OCSP_CERTID_free_ptr
 #define OCSP_request_add0_id OCSP_request_add0_id_ptr
 #define OCSP_request_add1_nonce OCSP_request_add1_nonce_ptr
