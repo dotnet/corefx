@@ -471,7 +471,7 @@ X509_STORE* CryptoNative_X509ChainNew(X509Stack* systemTrust, const char* userTr
         if (trustDir != NULL)
         {
             X509* cert;
-            X509Stack* tmpStack = sk_X509_new(NULL);
+            X509Stack* tmpStack = sk_X509_new_null();
 
             while ((cert = ReadNextPublicCert(trustDir, tmpStack, pathTmp, nextFileWrite)) != NULL)
             {
@@ -528,7 +528,7 @@ int32_t CryptoNative_X509StackAddDirectoryStore(X509Stack* stack, char* storePat
     if (storeDir != NULL)
     {
         X509* cert;
-        X509Stack* tmpStack = sk_X509_new(NULL);
+        X509Stack* tmpStack = sk_X509_new_null();
 
         while ((cert = ReadNextPublicCert(storeDir, tmpStack, pathTmp, nextFileWrite)) != NULL)
         {
