@@ -142,7 +142,8 @@ int32_t X509_NAME_get0_der(X509_NAME* x509Name, const uint8_t** pder, size_t* pd
 int32_t X509_PUBKEY_get0_param(
     ASN1_OBJECT** palgOid, const uint8_t** pkeyBytes, int* pkeyBytesLen, X509_ALGOR** palg, X509_PUBKEY* pubkey);
 X509* X509_STORE_CTX_get0_cert(X509_STORE_CTX* ctx);
-STACK_OF(X509) * X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx);
+STACK_OF(X509)* X509_STORE_CTX_get0_chain(X509_STORE_CTX* ctx);
+STACK_OF(X509)* X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx);
 const ASN1_TIME* X509_get0_notAfter(const X509* x509);
 const ASN1_TIME* X509_get0_notBefore(const X509* x509);
 ASN1_BIT_STRING* X509_get0_pubkey_bitstr(const X509* x509);
