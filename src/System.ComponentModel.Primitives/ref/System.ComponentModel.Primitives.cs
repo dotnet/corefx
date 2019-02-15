@@ -60,6 +60,7 @@ namespace System.ComponentModel
         [System.ComponentModel.DesignerSerializationVisibilityAttribute(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
         public virtual System.ComponentModel.ISite Site { get { throw null; } set { } }
         [System.ComponentModel.BrowsableAttribute(false)]
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
         public event System.EventHandler Disposed { add { } remove { } }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
