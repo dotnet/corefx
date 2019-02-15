@@ -717,12 +717,12 @@ static X509VerifyStatusCode CheckOcsp(
             {
                 if (thisUpdate != NULL && thisupd != NULL)
                 {
-                    *thisUpdate = (ASN1_GENERALIZEDTIME*)ASN1_STRING_dup((ASN1_STRING*)thisupd);
+                    *thisUpdate = ASN1_STRING_dup(thisupd);
                 }
 
                 if (nextUpdate != NULL && nextupd != NULL)
                 {
-                    *nextUpdate = (ASN1_GENERALIZEDTIME*)ASN1_STRING_dup((ASN1_STRING*)nextupd);
+                    *nextUpdate = ASN1_STRING_dup(nextupd);
                 }
 
                 if (status == V_OCSP_CERTSTATUS_GOOD)
