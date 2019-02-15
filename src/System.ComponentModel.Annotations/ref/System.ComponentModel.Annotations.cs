@@ -14,6 +14,7 @@ namespace System.ComponentModel.DataAnnotations
         public override System.ComponentModel.ICustomTypeDescriptor GetTypeDescriptor(System.Type objectType, object instance) { throw null; }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Field | System.AttributeTargets.Property, AllowMultiple=false, Inherited=true)]
+    [System.ObsoleteAttribute("This attribute is no longer in use and will be ignored if applied.")]
     public sealed partial class AssociationAttribute : System.Attribute
     {
         public AssociationAttribute(string name, string thisKey, string otherKey) { }
@@ -158,6 +159,7 @@ namespace System.ComponentModel.DataAnnotations
         public override bool IsValid(object value) { throw null; }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Field | System.AttributeTargets.Property, AllowMultiple=false)]
+    [System.ObsoleteAttribute("This attribute is no longer in use and will be ignored if applied.")]
     public sealed partial class FilterUIHintAttribute : System.Attribute
     {
         public FilterUIHintAttribute(string filterUIHint) { }
