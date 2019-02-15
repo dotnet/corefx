@@ -5,6 +5,8 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(destination: typeof(System.Lazy<,>))]
+
 namespace System.ComponentModel.Composition
 {
     public static partial class AdaptationConstants
@@ -515,6 +517,7 @@ namespace System.ComponentModel.Composition.Primitives
     public abstract partial class ComposablePartCatalog : System.Collections.Generic.IEnumerable<System.ComponentModel.Composition.Primitives.ComposablePartDefinition>, System.Collections.IEnumerable, System.IDisposable
     {
         protected ComposablePartCatalog() { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public virtual System.Linq.IQueryable<System.ComponentModel.Composition.Primitives.ComposablePartDefinition> Parts { get { throw null; } }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
