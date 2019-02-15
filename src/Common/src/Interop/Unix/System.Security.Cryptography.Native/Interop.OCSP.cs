@@ -52,7 +52,6 @@ internal static partial class Interop
             return response;
         }
 
-
         [DllImport(Libraries.CryptoNative)]
         private static extern X509VerifyStatusCode CryptoNative_X509ChainVerifyOcsp(
             SafeX509StoreCtxHandle ctx,
@@ -92,7 +91,6 @@ internal static partial class Interop
 
             return req;
         }
-
     }
 }
 
