@@ -92,6 +92,21 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509IssuerNameHash")]
         internal static extern ulong X509IssuerNameHash(SafeX509Handle x);
 
+        [DllImport(Libraries.CryptoNative)]
+        private static extern SafeSharedAsn1OctetStringHandle CryptoNative_X509FindExtensionData(
+            SafeX509Handle x,
+            int extensionNid);
+
+        internal static SafeSharedAsn1OctetStringHandle X509FindExtensionData(SafeX509Handle x, int extensionNid)
+        {
+            CheckValidOpenSslHandle(x);
+
+            return SafeInteriorHandle.OpenInteriorHandle(
+                (handle, arg) => CryptoNative_X509FindExtensionData(handle, arg),
+                x,
+                extensionNid);
+        }
+
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_X509GetExtCount")]
         internal static extern int X509GetExtCount(SafeX509Handle x);
 
