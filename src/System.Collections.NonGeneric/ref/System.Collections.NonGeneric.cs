@@ -5,6 +5,11 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.ArrayList))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.IHashCodeProvider))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Hashtable))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Collections.Comparer))]
+
 namespace System.Collections
 {
     public partial class CaseInsensitiveComparer : System.Collections.IComparer
@@ -15,6 +20,7 @@ namespace System.Collections
         public static System.Collections.CaseInsensitiveComparer DefaultInvariant { get { throw null; } }
         public int Compare(object a, object b) { throw null; }
     }
+    [System.ObsoleteAttribute("Please use StringComparer instead.")] 
     public partial class CaseInsensitiveHashCodeProvider : System.Collections.IHashCodeProvider
     {
         public CaseInsensitiveHashCodeProvider() { }
