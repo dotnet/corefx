@@ -1540,7 +1540,7 @@
       <Version>4.1.1</Version>
     </StablePackage>
 
-    <!-- Post 1.0.14 update for UWP -->
+    <!-- Servicing 1.0.15 wave -->
     <StablePackage Include="System.Private.Uri">
       <Version>4.0.4</Version>
     </StablePackage>
@@ -1549,6 +1549,27 @@
     </StablePackage>
     <StablePackage Include="runtime.win7.System.Private.Uri">
       <Version>4.0.4</Version>
+    </StablePackage>
+    <StablePackage Include="Microsoft.NETCore.Targets">
+      <Version>1.0.7</Version>
+    </StablePackage>
+    <StablePackage Include="System.Runtime">
+      <Version>4.1.2</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.any.System.Runtime">
+      <Version>4.1.2</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.aot.System.Runtime">
+      <Version>4.0.22</Version>
+    </StablePackage>
+    <StablePackage Include="System.Runtime.Extensions">
+      <Version>4.1.2</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.unix.System.Runtime.Extensions">
+      <Version>4.1.2</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.win.System.Runtime.Extensions">
+      <Version>4.1.2</Version>
     </StablePackage>
 
   </ItemGroup>
