@@ -190,7 +190,7 @@ namespace Tests.System
         }
 
         [Fact]
-        public static void BitOps_RotateLeft_UInt()
+        public static void BitOps_RotateLeft_uint()
         {
             uint value = 0b01010101_01010101_01010101_01010101u;
             Assert.Equal(0b10101010_10101010_10101010_10101010u, BitOps.RotateLeft(value, 1));
@@ -201,7 +201,7 @@ namespace Tests.System
         }
 
         [Fact]
-        public static void BitOps_RotateLeft_ULong()
+        public static void BitOps_RotateLeft_ulong()
         {
             ulong value = 0b01010101_01010101_01010101_01010101_01010101_01010101_01010101_01010101ul;
             Assert.Equal(0b10101010_10101010_10101010_10101010_10101010_10101010_10101010_10101010ul, BitOps.RotateLeft(value, 1));
@@ -212,7 +212,7 @@ namespace Tests.System
         }
 
         [Fact]
-        public static void BitOps_RotateRight_UInt()
+        public static void BitOps_RotateRight_uint()
         {
             uint value = 0b01010101_01010101_01010101_01010101u;
             Assert.Equal(0b10101010_10101010_10101010_10101010u, BitOps.RotateRight(value, 1));
@@ -223,7 +223,7 @@ namespace Tests.System
         }
 
         [Fact]
-        public static void BitOps_RotateRight_ULong()
+        public static void BitOps_RotateRight_ulong()
         {
             ulong value = 0b01010101_01010101_01010101_01010101_01010101_01010101_01010101_01010101ul;
             Assert.Equal(0b10101010_10101010_10101010_10101010_10101010_10101010_10101010_10101010ul, BitOps.RotateRight(value, 1));
