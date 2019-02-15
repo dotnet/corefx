@@ -792,13 +792,19 @@ X509VerifyStatusCode CryptoNative_X509ChainGetCachedOcspStatus(X509_STORE_CTX* s
 
     X509VerifyStatusCode ret = PAL_X509_V_ERR_UNABLE_TO_GET_CRL;
     char* fullPath = BuildOcspCacheFilename(cachePath, subject);
-    FILE* fp = fullPath != NULL ? fopen(fullPath, "rb") : NULL;
+
+    if (fullPath == NULL)
+    {
+        return ret;
+    }
+
+    BIO* bio = BIO_new_file(fullPath, "rb");
     OCSP_RESPONSE* resp = NULL;
 
-    if (fp != NULL)
+    if (bio != NULL)
     {
-        resp = (OCSP_RESPONSE*)ASN1_item_d2i_fp(ASN1_ITEM_rptr(OCSP_RESPONSE), fp, NULL);
-        fclose(fp);
+        resp = d2i_OCSP_RESPONSE_bio(bio, NULL);
+        BIO_free(bio);
     }
 
     if (resp != NULL)
@@ -815,10 +821,12 @@ X509VerifyStatusCode CryptoNative_X509ChainGetCachedOcspStatus(X509_STORE_CTX* s
             // oldest = now - window;
             //
             // if thisUpdate < oldest || nextUpdate < now, reject.
+            //
+            // Since X509_cmp(_current)_time returns 0 on error, do a <= 0 check.
             if (nextUpdate == NULL ||
                 thisUpdate == NULL ||
-                X509_cmp_current_time(nextUpdate) < 0 ||
-                X509_cmp_time(thisUpdate, &oldest) < 0)
+                X509_cmp_current_time(nextUpdate) <= 0 ||
+                X509_cmp_time(thisUpdate, &oldest) <= 0)
             {
                 ret = PAL_X509_V_ERR_UNABLE_TO_GET_CRL;
             }
@@ -926,8 +934,8 @@ X509VerifyStatusCode CryptoNative_X509ChainVerifyOcsp(
 
     if (ret == PAL_X509_V_OK || ret == PAL_X509_V_ERR_CERT_REVOKED)
     {
-        // If the nextUpdate time is in the past, report either REVOKED or CRL_EXPIRED
-        if (nextUpdate != NULL && X509_cmp_current_time(nextUpdate) < 0)
+        // If the nextUpdate time is in the past (or corrupt), report either REVOKED or CRL_EXPIRED
+        if (nextUpdate != NULL && X509_cmp_current_time(nextUpdate) <= 0)
         {
             if (ret == PAL_X509_V_OK)
             {
@@ -945,18 +953,29 @@ X509VerifyStatusCode CryptoNative_X509ChainVerifyOcsp(
                 X509_cmp_time(thisUpdate, &oldest) > 0)
             {
                 char* fullPath = BuildOcspCacheFilename(cachePath, subject);
-                FILE* fp = fullPath != NULL ? fopen(fullPath, "wb") : NULL;
 
-                if (fp)
+                if (fullPath != NULL)
                 {
-                    int encoded = ASN1_item_i2d_fp(ASN1_ITEM_rptr(OCSP_RESPONSE), fp, resp);
-                    fclose(fp);
+                    int clearErr = 1;
+                    BIO* bio = BIO_new_file(fullPath, "wb");
 
-                    if (!encoded)
+                    if (bio != NULL)
+                    {
+                        if (i2d_OCSP_RESPONSE_bio(bio, resp))
+                        {
+                            clearErr = 0;
+                        }
+
+                        BIO_free(bio);
+                    }
+
+                    if (clearErr)
                     {
                         ERR_clear_error();
                         unlink(fullPath);
                     }
+
+                    free(fullPath);
                 }
             }
         }
