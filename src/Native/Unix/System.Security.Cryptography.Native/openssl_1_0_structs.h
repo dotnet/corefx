@@ -158,3 +158,11 @@ struct x509_store_ctx_st
     int _ignored18;
     STACK_OF(X509*) chain;
 };
+
+struct x509_store_st
+{
+    int _ignored0;
+    const void* _ignored1;
+    const void* _ignored2;
+    X509_VERIFY_PARAM* param;
+};
