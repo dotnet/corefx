@@ -49,6 +49,7 @@ namespace System.Diagnostics
     [System.FlagsAttribute]
     public enum SourceLevels
     {
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
         ActivityTracing = 65280,
         All = -1,
         Critical = 1,

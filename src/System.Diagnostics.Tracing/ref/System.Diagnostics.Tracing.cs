@@ -213,6 +213,7 @@ namespace System.Diagnostics.Tracing
         public void Write<T>(string eventName, ref System.Diagnostics.Tracing.EventSourceOptions options, ref System.Guid activityId, ref System.Guid relatedActivityId, ref T data) { }
         public void Write<T>(string eventName, ref System.Diagnostics.Tracing.EventSourceOptions options, ref T data) { }
         public void Write<T>(string eventName, T data) { }
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
         protected internal partial struct EventData
         {
             private int _dummyPrimitive;
@@ -240,6 +241,7 @@ namespace System.Diagnostics.Tracing
         public EventSourceException(string message) { }
         public EventSourceException(string message, System.Exception innerException) { }
     }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct EventSourceOptions
     {
         private int _dummyPrimitive;
