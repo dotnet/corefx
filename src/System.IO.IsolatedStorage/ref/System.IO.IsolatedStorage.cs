@@ -18,9 +18,11 @@ namespace System.IO.IsolatedStorage
         public object AssemblyIdentity { get { throw null; } }
         public virtual long AvailableFreeSpace { get { throw null; } }
         [System.CLSCompliantAttribute(false)]
+        [System.ObsoleteAttribute("IsolatedStorage.CurrentSize has been deprecated because it is not CLS Compliant.  To get the current size use IsolatedStorage.UsedSize")]
         public virtual ulong CurrentSize { get { throw null; } }
         public object DomainIdentity { get { throw null; } }
         [System.CLSCompliantAttribute(false)]
+        [System.ObsoleteAttribute("IsolatedStorage.MaximumSize has been deprecated because it is not CLS Compliant.  To get the maximum size use IsolatedStorage.Quota")]
         public virtual ulong MaximumSize { get { throw null; } }
         public virtual long Quota { get { throw null; } }
         public System.IO.IsolatedStorage.IsolatedStorageScope Scope { get { throw null; } }
@@ -44,9 +46,11 @@ namespace System.IO.IsolatedStorage
         internal IsolatedStorageFile() { }
         public override long AvailableFreeSpace { get { throw null; } }
         [System.CLSCompliantAttribute(false)]
+        [System.ObsoleteAttribute("IsolatedStorageFile.CurrentSize has been deprecated because it is not CLS Compliant.  To get the current size use IsolatedStorageFile.UsedSize")]
         public override ulong CurrentSize { get { throw null; } }
         public static bool IsEnabled { get { throw null; } }
         [System.CLSCompliantAttribute(false)]
+        [System.ObsoleteAttribute("IsolatedStorageFile.MaximumSize has been deprecated because it is not CLS Compliant.  To get the maximum size use IsolatedStorageFile.Quota")]
         public override ulong MaximumSize { get { throw null; } }
         public override long Quota { get { throw null; } }
         public override long UsedSize { get { throw null; } }
@@ -102,6 +106,7 @@ namespace System.IO.IsolatedStorage
         public override bool CanRead { get { throw null; } }
         public override bool CanSeek { get { throw null; } }
         public override bool CanWrite { get { throw null; } }
+         [System.ObsoleteAttribute("This property has been deprecated.  Please use IsolatedStorageFileStream's SafeFileHandle property instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public override System.IntPtr Handle { get { throw null; } }
         public override bool IsAsync { get { throw null; } }
         public override long Length { get { throw null; } }

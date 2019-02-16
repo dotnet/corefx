@@ -373,6 +373,7 @@ namespace System.Linq.Expressions
     public abstract partial class Expression
     {
         protected Expression() { }
+        [System.ObsoleteAttribute("use a different constructor that does not take ExpressionType. Then override NodeType and Type properties to provide the values that would be specified to this constructor.")]
         protected Expression(System.Linq.Expressions.ExpressionType nodeType, System.Type type) { }
         public virtual bool CanReduce { get { throw null; } }
         public virtual System.Linq.Expressions.ExpressionType NodeType { get { throw null; } }
@@ -949,6 +950,7 @@ namespace System.Linq.Expressions
     }
     public abstract partial class MemberBinding
     {
+        [System.ObsoleteAttribute("Do not use this constructor. It will be removed in future releases.")]
         protected MemberBinding(System.Linq.Expressions.MemberBindingType type, System.Reflection.MemberInfo member) { }
         public System.Linq.Expressions.MemberBindingType BindingType { get { throw null; } }
         public System.Reflection.MemberInfo Member { get { throw null; } }

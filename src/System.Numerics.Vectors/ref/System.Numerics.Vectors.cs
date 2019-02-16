@@ -470,7 +470,9 @@ namespace System.Numerics
     public partial struct Vector<T> : System.IEquatable<System.Numerics.Vector<T>>, System.IFormattable where T : struct
     {
         private int _dummyPrimitive;
+#if HAS_SPAN
         public Vector(System.Span<T> values) { throw null; }
+#endif
         public Vector(T value) { throw null; }
         public Vector(T[] values) { throw null; }
         public Vector(T[] values, int index) { throw null; }

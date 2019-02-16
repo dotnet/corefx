@@ -57,7 +57,7 @@ namespace System.Reflection.Emit
         public void SetImplementationFlags(System.Reflection.MethodImplAttributes attributes) { }
         public override string ToString() { throw null; }
     }
-    public sealed partial class EnumBuilder : System.Type
+    public sealed partial class EnumBuilder : System.Type //TYPEINFO: System.Reflection.TypeInfo doesn't have a public ctor
     {
         internal EnumBuilder() { }
         public override System.Reflection.Assembly Assembly { get { throw null; } }
@@ -66,11 +66,7 @@ namespace System.Reflection.Emit
         public override System.Type DeclaringType { get { throw null; } }
         public override string FullName { get { throw null; } }
         public override System.Guid GUID { get { throw null; } }
-        public override bool IsByRefLike { get { throw null; } }
         public override bool IsConstructedGenericType { get { throw null; } }
-        public override bool IsSZArray { get { throw null; } }
-        public override bool IsTypeDefinition { get { throw null; } }
-        public override bool IsVariableBoundArray { get { throw null; } }
         public override System.Reflection.Module Module { get { throw null; } }
         public override string Name { get { throw null; } }
         public override string Namespace { get { throw null; } }
@@ -106,6 +102,7 @@ namespace System.Reflection.Emit
         protected override bool HasElementTypeImpl() { throw null; }
         public override object InvokeMember(string name, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object target, object[] args, System.Reflection.ParameterModifier[] modifiers, System.Globalization.CultureInfo culture, string[] namedParameters) { throw null; }
         protected override bool IsArrayImpl() { throw null; }
+//TYPEINFO        public override bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { throw null; }
         protected override bool IsByRefImpl() { throw null; }
         protected override bool IsCOMObjectImpl() { throw null; }
         public override bool IsDefined(System.Type attributeType, bool inherit) { throw null; }
@@ -148,7 +145,7 @@ namespace System.Reflection.Emit
         public void SetOffset(int iOffset) { }
         public override void SetValue(object obj, object val, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Globalization.CultureInfo culture) { }
     }
-    public sealed partial class GenericTypeParameterBuilder : System.Type
+    public sealed partial class GenericTypeParameterBuilder : System.Type //TYPEINFO: System.Reflection.TypeInfo
     {
         internal GenericTypeParameterBuilder() { }
         public override System.Reflection.Assembly Assembly { get { throw null; } }
@@ -161,14 +158,10 @@ namespace System.Reflection.Emit
         public override System.Reflection.GenericParameterAttributes GenericParameterAttributes { get { throw null; } }
         public override int GenericParameterPosition { get { throw null; } }
         public override System.Guid GUID { get { throw null; } }
-        public override bool IsByRefLike { get { throw null; } }
         public override bool IsConstructedGenericType { get { throw null; } }
         public override bool IsGenericParameter { get { throw null; } }
         public override bool IsGenericType { get { throw null; } }
         public override bool IsGenericTypeDefinition { get { throw null; } }
-        public override bool IsSZArray { get { throw null; } }
-        public override bool IsTypeDefinition { get { throw null; } }
-        public override bool IsVariableBoundArray { get { throw null; } }
         public override System.Reflection.Module Module { get { throw null; } }
         public override string Name { get { throw null; } }
         public override string Namespace { get { throw null; } }
@@ -204,6 +197,7 @@ namespace System.Reflection.Emit
         protected override bool HasElementTypeImpl() { throw null; }
         public override object InvokeMember(string name, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object target, object[] args, System.Reflection.ParameterModifier[] modifiers, System.Globalization.CultureInfo culture, string[] namedParameters) { throw null; }
         protected override bool IsArrayImpl() { throw null; }
+//TYPEINFO:        public override bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { throw null; }
         public override bool IsAssignableFrom(System.Type c) { throw null; }
         protected override bool IsByRefImpl() { throw null; }
         protected override bool IsCOMObjectImpl() { throw null; }
@@ -232,7 +226,6 @@ namespace System.Reflection.Emit
         public override bool ContainsGenericParameters { get { throw null; } }
         public override System.Type DeclaringType { get { throw null; } }
         public bool InitLocals { get { throw null; } set { } }
-        public override bool IsConstructedGenericMethod { get { throw null; } }
         public override bool IsGenericMethod { get { throw null; } }
         public override bool IsGenericMethodDefinition { get { throw null; } }
         public override System.RuntimeMethodHandle MethodHandle { get { throw null; } }
@@ -278,8 +271,6 @@ namespace System.Reflection.Emit
         public System.Reflection.Emit.MethodBuilder DefineGlobalMethod(string name, System.Reflection.MethodAttributes attributes, System.Reflection.CallingConventions callingConvention, System.Type returnType, System.Type[] requiredReturnTypeCustomModifiers, System.Type[] optionalReturnTypeCustomModifiers, System.Type[] parameterTypes, System.Type[][] requiredParameterTypeCustomModifiers, System.Type[][] optionalParameterTypeCustomModifiers) { throw null; }
         public System.Reflection.Emit.MethodBuilder DefineGlobalMethod(string name, System.Reflection.MethodAttributes attributes, System.Type returnType, System.Type[] parameterTypes) { throw null; }
         public System.Reflection.Emit.FieldBuilder DefineInitializedData(string name, byte[] data, System.Reflection.FieldAttributes attributes) { throw null; }
-        public System.Reflection.Emit.MethodBuilder DefinePInvokeMethod(string name, string dllName, System.Reflection.MethodAttributes attributes, System.Reflection.CallingConventions callingConvention, System.Type returnType, System.Type[] parameterTypes, System.Runtime.InteropServices.CallingConvention nativeCallConv, System.Runtime.InteropServices.CharSet nativeCharSet) { throw null; }
-        public System.Reflection.Emit.MethodBuilder DefinePInvokeMethod(string name, string dllName, string entryName, System.Reflection.MethodAttributes attributes, System.Reflection.CallingConventions callingConvention, System.Type returnType, System.Type[] parameterTypes, System.Runtime.InteropServices.CallingConvention nativeCallConv, System.Runtime.InteropServices.CharSet nativeCharSet) { throw null; }
         public System.Reflection.Emit.TypeBuilder DefineType(string name) { throw null; }
         public System.Reflection.Emit.TypeBuilder DefineType(string name, System.Reflection.TypeAttributes attr) { throw null; }
         public System.Reflection.Emit.TypeBuilder DefineType(string name, System.Reflection.TypeAttributes attr, System.Type parent) { throw null; }
@@ -323,7 +314,7 @@ namespace System.Reflection.Emit
         public override void SetValue(object obj, object value, object[] index) { }
         public override void SetValue(object obj, object value, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object[] index, System.Globalization.CultureInfo culture) { }
     }
-    public sealed partial class TypeBuilder : System.Type
+    public sealed partial class TypeBuilder : System.Type //TYPEINFO: System.Reflection.TypeInfo
     {
         internal TypeBuilder() { }
         public const int UnspecifiedTypeSize = 0;
@@ -336,7 +327,6 @@ namespace System.Reflection.Emit
         public override System.Reflection.GenericParameterAttributes GenericParameterAttributes { get { throw null; } }
         public override int GenericParameterPosition { get { throw null; } }
         public override System.Guid GUID { get { throw null; } }
-        public override bool IsByRefLike { get { throw null; } }
         public override bool IsConstructedGenericType { get { throw null; } }
         public override bool IsGenericParameter { get { throw null; } }
         public override bool IsGenericType { get { throw null; } }
@@ -344,9 +334,6 @@ namespace System.Reflection.Emit
         public override bool IsSecurityCritical { get { throw null; } }
         public override bool IsSecuritySafeCritical { get { throw null; } }
         public override bool IsSecurityTransparent { get { throw null; } }
-        public override bool IsSZArray { get { throw null; } }
-        public override bool IsTypeDefinition { get { throw null; } }
-        public override bool IsVariableBoundArray { get { throw null; } }
         public override System.Reflection.Module Module { get { throw null; } }
         public override string Name { get { throw null; } }
         public override string Namespace { get { throw null; } }
@@ -356,7 +343,6 @@ namespace System.Reflection.Emit
         public override System.RuntimeTypeHandle TypeHandle { get { throw null; } }
         public override System.Type UnderlyingSystemType { get { throw null; } }
         public void AddInterfaceImplementation(System.Type interfaceType) { }
-        public System.Type CreateType() { throw null; }
         public System.Reflection.TypeInfo CreateTypeInfo() { throw null; }
         public System.Reflection.Emit.ConstructorBuilder DefineConstructor(System.Reflection.MethodAttributes attributes, System.Reflection.CallingConventions callingConvention, System.Type[] parameterTypes) { throw null; }
         public System.Reflection.Emit.ConstructorBuilder DefineConstructor(System.Reflection.MethodAttributes attributes, System.Reflection.CallingConventions callingConvention, System.Type[] parameterTypes, System.Type[][] requiredCustomModifiers, System.Type[][] optionalCustomModifiers) { throw null; }
@@ -379,9 +365,6 @@ namespace System.Reflection.Emit
         public System.Reflection.Emit.TypeBuilder DefineNestedType(string name, System.Reflection.TypeAttributes attr, System.Type parent, System.Reflection.Emit.PackingSize packSize) { throw null; }
         public System.Reflection.Emit.TypeBuilder DefineNestedType(string name, System.Reflection.TypeAttributes attr, System.Type parent, System.Reflection.Emit.PackingSize packSize, int typeSize) { throw null; }
         public System.Reflection.Emit.TypeBuilder DefineNestedType(string name, System.Reflection.TypeAttributes attr, System.Type parent, System.Type[] interfaces) { throw null; }
-        public System.Reflection.Emit.MethodBuilder DefinePInvokeMethod(string name, string dllName, System.Reflection.MethodAttributes attributes, System.Reflection.CallingConventions callingConvention, System.Type returnType, System.Type[] parameterTypes, System.Runtime.InteropServices.CallingConvention nativeCallConv, System.Runtime.InteropServices.CharSet nativeCharSet) { throw null; }
-        public System.Reflection.Emit.MethodBuilder DefinePInvokeMethod(string name, string dllName, string entryName, System.Reflection.MethodAttributes attributes, System.Reflection.CallingConventions callingConvention, System.Type returnType, System.Type[] parameterTypes, System.Runtime.InteropServices.CallingConvention nativeCallConv, System.Runtime.InteropServices.CharSet nativeCharSet) { throw null; }
-        public System.Reflection.Emit.MethodBuilder DefinePInvokeMethod(string name, string dllName, string entryName, System.Reflection.MethodAttributes attributes, System.Reflection.CallingConventions callingConvention, System.Type returnType, System.Type[] returnTypeRequiredCustomModifiers, System.Type[] returnTypeOptionalCustomModifiers, System.Type[] parameterTypes, System.Type[][] parameterTypeRequiredCustomModifiers, System.Type[][] parameterTypeOptionalCustomModifiers, System.Runtime.InteropServices.CallingConvention nativeCallConv, System.Runtime.InteropServices.CharSet nativeCharSet) { throw null; }
         public System.Reflection.Emit.PropertyBuilder DefineProperty(string name, System.Reflection.PropertyAttributes attributes, System.Reflection.CallingConventions callingConvention, System.Type returnType, System.Type[] parameterTypes) { throw null; }
         public System.Reflection.Emit.PropertyBuilder DefineProperty(string name, System.Reflection.PropertyAttributes attributes, System.Reflection.CallingConventions callingConvention, System.Type returnType, System.Type[] returnTypeRequiredCustomModifiers, System.Type[] returnTypeOptionalCustomModifiers, System.Type[] parameterTypes, System.Type[][] parameterTypeRequiredCustomModifiers, System.Type[][] parameterTypeOptionalCustomModifiers) { throw null; }
         public System.Reflection.Emit.PropertyBuilder DefineProperty(string name, System.Reflection.PropertyAttributes attributes, System.Type returnType, System.Type[] parameterTypes) { throw null; }
@@ -418,6 +401,7 @@ namespace System.Reflection.Emit
         protected override bool HasElementTypeImpl() { throw null; }
         public override object InvokeMember(string name, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, object target, object[] args, System.Reflection.ParameterModifier[] modifiers, System.Globalization.CultureInfo culture, string[] namedParameters) { throw null; }
         protected override bool IsArrayImpl() { throw null; }
+//TYPEINFO:        public override bool IsAssignableFrom(System.Reflection.TypeInfo typeInfo) { throw null; }
         public override bool IsAssignableFrom(System.Type c) { throw null; }
         protected override bool IsByRefImpl() { throw null; }
         protected override bool IsCOMObjectImpl() { throw null; }

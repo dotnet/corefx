@@ -226,6 +226,7 @@ namespace System.Net
         public IPAddress(long newAddress) { }
         public IPAddress(System.ReadOnlySpan<byte> address) { }
         public IPAddress(System.ReadOnlySpan<byte> address, long scopeid) { }
+        [Obsolete("This property has been deprecated. It is address family dependent. Please use IPAddress.Equals method to perform comparisons. https://go.microsoft.com/fwlink/?linkid=14202")]
         public long Address { get { throw null; } set { } }
         public System.Net.Sockets.AddressFamily AddressFamily { get { throw null; } }
         public bool IsIPv4MappedToIPv6 { get { throw null; } }
@@ -497,9 +498,12 @@ namespace System.Security.Authentication
     [System.FlagsAttribute]
     public enum SslProtocols
     {
+        [Obsolete("This value has been deprecated.  It is no longer supported. https://go.microsoft.com/fwlink/?linkid=14202")]
         Default = 240,
         None = 0,
+        [Obsolete("This value has been deprecated.  It is no longer supported. https://go.microsoft.com/fwlink/?linkid=14202")]
         Ssl2 = 12,
+        [Obsolete("This value has been deprecated.  It is no longer supported. https://go.microsoft.com/fwlink/?linkid=14202")]
         Ssl3 = 48,
         Tls = 192,
         Tls11 = 768,

@@ -32,6 +32,7 @@ namespace System.Net
         public bool BypassProxyOnLocal { get { throw null; } set { } }
         public System.Net.ICredentials Credentials { get { throw null; } set { } }
         public bool UseDefaultCredentials { get { throw null; } set { } }
+        [Obsolete("This method has been deprecated. Please use the proxy selected for you by default. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static System.Net.WebProxy GetDefaultProxy() { throw null; }
         protected virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public System.Uri GetProxy(System.Uri destination) { throw null; }

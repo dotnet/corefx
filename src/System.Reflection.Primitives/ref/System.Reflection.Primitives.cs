@@ -5,6 +5,17 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+// These types were moved down to System.Runtime
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.CallingConventions))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.EventAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.FieldAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.GenericParameterAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.MethodAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.MethodImplAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.ParameterAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.PropertyAttributes))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.TypeAttributes))]
+
 namespace System.Reflection.Emit
 {
     public enum FlowControl
@@ -15,6 +26,7 @@ namespace System.Reflection.Emit
         Cond_Branch = 3,
         Meta = 4,
         Next = 5,
+        [Obsolete("This API has been deprecated. https://go.microsoft.com/fwlink/?linkid=14202")]
         Phi = 6,
         Return = 7,
         Throw = 8,
@@ -270,6 +282,7 @@ namespace System.Reflection.Emit
     }
     public enum OpCodeType
     {
+        [Obsolete("This API has been deprecated. https://go.microsoft.com/fwlink/?linkid=14202")]
         Annotation = 0,
         Macro = 1,
         Nternal = 2,
@@ -285,6 +298,7 @@ namespace System.Reflection.Emit
         InlineI8 = 3,
         InlineMethod = 4,
         InlineNone = 5,
+        [Obsolete("This API has been deprecated. https://go.microsoft.com/fwlink/?linkid=14202")]
         InlinePhi = 6,
         InlineR = 7,
         InlineSig = 9,

@@ -10,6 +10,10 @@ namespace System.Net.Sockets
         public EndPoint RemoteEndPoint;
     }
 
+    // Review note: RemoteEndPoint definition includes the Address and Port.
+    // PacketInformation includes Address and Interface (physical interface number).
+    // The redundancy could be removed by replacing RemoteEndPoint with Port.
+
     // Alternative:
     //    public struct SocketReceiveFromResult
     //    {
