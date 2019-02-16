@@ -9,6 +9,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <unistd.h>
+#include "../Common/pal_safecrt.h"
 
 c_static_assert(PAL_X509_V_OK == X509_V_OK);
 c_static_assert(PAL_X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT);
@@ -388,7 +389,7 @@ X509* CryptoNative_X509UpRef(X509* x509)
     return x509;
 }
 
-static DIR* OpenUserStore(const char* storePath, char** pathTmp, char** nextFileWrite)
+static DIR* OpenUserStore(const char* storePath, char** pathTmp, size_t* pathTmpSize, char** nextFileWrite)
 {
     DIR* trustDir = opendir(storePath);
 
@@ -404,17 +405,23 @@ static DIR* OpenUserStore(const char* storePath, char** pathTmp, char** nextFile
 
     // d_name is a fixed length char[], not a char*.
     // Leave one byte for '\0' and one for '/'
-    char* tmp = (char*)calloc(storePathLen + sizeof(ent->d_name) + 2, sizeof(char));
-    strcat(tmp, storePath);
+    size_t allocSize = storePathLen + sizeof(ent->d_name) + 2;
+    char* tmp = (char*)calloc(allocSize, sizeof(char));
+    memcpy_s(tmp, allocSize, storePath, storePathLen);
     tmp[storePathLen] = '/';
     *pathTmp = tmp;
+    *pathTmpSize = allocSize;
     *nextFileWrite = (tmp + storePathLen + 1);
     return trustDir;
 }
 
-static X509* ReadNextPublicCert(DIR* dir, X509Stack* tmpStack, char* pathTmp, char* nextFileWrite)
+static X509* ReadNextPublicCert(DIR* dir, X509Stack* tmpStack, char* pathTmp, size_t pathTmpSize, char* nextFileWrite)
 {
     struct dirent* next;
+    ptrdiff_t offset = nextFileWrite - pathTmp;
+    assert(offset > 0);
+    assert((size_t)offset < pathTmpSize);
+    size_t remaining = pathTmpSize - (size_t)offset;
 
     while ((next = readdir(dir)) != NULL)
     {
@@ -422,7 +429,7 @@ static X509* ReadNextPublicCert(DIR* dir, X509Stack* tmpStack, char* pathTmp, ch
 
         if (len > 4 && 0 == strncasecmp(".pfx", next->d_name + len - 4, 4))
         {
-            memcpy(nextFileWrite, next->d_name, len);
+            memcpy_s(nextFileWrite, remaining, next->d_name, len);
             // if d_name was full-length it might not have a trailing null.
             nextFileWrite[len] = 0;
 
@@ -435,7 +442,7 @@ static X509* ReadNextPublicCert(DIR* dir, X509Stack* tmpStack, char* pathTmp, ch
                 if (p12 != NULL)
                 {
                     EVP_PKEY* key;
-                    X509* cert;
+                    X509* cert = NULL;
 
                     if (PKCS12_parse(p12, NULL, &key, &cert, &tmpStack))
                     {
@@ -451,6 +458,8 @@ static X509* ReadNextPublicCert(DIR* dir, X509Stack* tmpStack, char* pathTmp, ch
                         }
                     }
 
+                    fclose(fp);
+
                     X509* popTmp;
                     while ((popTmp = sk_X509_pop(tmpStack)) != NULL)
                     {
@@ -464,8 +473,6 @@ static X509* ReadNextPublicCert(DIR* dir, X509Stack* tmpStack, char* pathTmp, ch
                         return cert;
                     }
                 }
-
-                fclose(fp);
             }
         }
     }
@@ -499,15 +506,16 @@ X509_STORE* CryptoNative_X509ChainNew(X509Stack* systemTrust, const char* userTr
     if (userTrustPath != NULL)
     {
         char* pathTmp;
+        size_t pathTmpSize;
         char* nextFileWrite;
-        DIR* trustDir = OpenUserStore(userTrustPath, &pathTmp, &nextFileWrite);
+        DIR* trustDir = OpenUserStore(userTrustPath, &pathTmp, &pathTmpSize, &nextFileWrite);
 
         if (trustDir != NULL)
         {
             X509* cert;
             X509Stack* tmpStack = sk_X509_new_null();
 
-            while ((cert = ReadNextPublicCert(trustDir, tmpStack, pathTmp, nextFileWrite)) != NULL)
+            while ((cert = ReadNextPublicCert(trustDir, tmpStack, pathTmp, pathTmpSize, nextFileWrite)) != NULL)
             {
                 // cert refcount is 1
                 if (!X509_STORE_add_cert(store, cert))
@@ -532,6 +540,9 @@ X509_STORE* CryptoNative_X509ChainNew(X509Stack* systemTrust, const char* userTr
             free(pathTmp);
             closedir(trustDir);
 
+            // store is only NULL if X509_STORE_add_cert failed, in which case we
+            // want to leave the error state intact, so the exception will report
+            // what went wrong (probably out of memory).
             if (store == NULL)
             {
                 return NULL;
@@ -539,6 +550,7 @@ X509_STORE* CryptoNative_X509ChainNew(X509Stack* systemTrust, const char* userTr
 
             // PKCS12_parse can cause spurious errors.
             // d2i_PKCS12_fp may have failed for invalid files.
+            // X509_STORE_add_cert may have reported duplicate addition.
             // Just clear it all.
             ERR_clear_error();
         }
@@ -556,15 +568,16 @@ int32_t CryptoNative_X509StackAddDirectoryStore(X509Stack* stack, char* storePat
 
     int clearError = 1;
     char* pathTmp;
+    size_t pathTmpSize;
     char* nextFileWrite;
-    DIR* storeDir = OpenUserStore(storePath, &pathTmp, &nextFileWrite);
+    DIR* storeDir = OpenUserStore(storePath, &pathTmp, &pathTmpSize, &nextFileWrite);
 
     if (storeDir != NULL)
     {
         X509* cert;
         X509Stack* tmpStack = sk_X509_new_null();
 
-        while ((cert = ReadNextPublicCert(storeDir, tmpStack, pathTmp, nextFileWrite)) != NULL)
+        while ((cert = ReadNextPublicCert(storeDir, tmpStack, pathTmp, pathTmpSize, nextFileWrite)) != NULL)
         {
             if (!sk_X509_push(stack, cert))
             {
@@ -675,7 +688,7 @@ static char* BuildOcspCacheFilename(char* cachePath, X509* subject)
     assert(subject != NULL);
 
     size_t len = strlen(cachePath);
-    // path plus '/', '.', '.ocsp', '\0' and two 8 character hex strings
+    // path plus '/', '.', ".ocsp", '\0' and two 8 character hex strings
     size_t allocSize = len + 24;
     char* fullPath = (char*)calloc(allocSize, sizeof(char));
 
@@ -685,7 +698,8 @@ static char* BuildOcspCacheFilename(char* cachePath, X509* subject)
         unsigned long subjectHash = X509_subject_name_hash(subject);
 
         size_t written = (size_t)snprintf(fullPath, allocSize, "%s/%08lx.%08lx.ocsp", cachePath, issuerHash, subjectHash);
-        assert(written < allocSize);
+        assert(written == allocSize - 1);
+        (void)written;
 
         if (issuerHash == 0 || subjectHash == 0)
         {
@@ -893,6 +907,9 @@ X509VerifyStatusCode CryptoNative_X509ChainGetCachedOcspStatus(X509_STORE_CTX* s
         }
     }
 
+    // If the file failed to parse, or failed to match the certificate, or was outside of the policy window,
+    // (or any other "this file has no further value" condition), delete the file and clear the errors that
+    // may have been reported while determining we want to delete it and ask again fresh.
     if (ret == PAL_X509_V_ERR_UNABLE_TO_GET_CRL)
     {
         unlink(fullPath);
@@ -945,6 +962,9 @@ OCSP_REQUEST* CryptoNative_X509ChainBuildOcspRequest(X509_STORE_CTX* storeCtx)
         OCSP_REQUEST_free(req);
         return NULL;
     }
+
+    // Ownership was successfully transferred to req
+    certId = NULL;
 
     // Add a random nonce.
     OCSP_request_add1_nonce(req, NULL, -1);
