@@ -1703,6 +1703,7 @@ namespace System.Runtime.InteropServices.ComTypes
         public int memid;
         public System.Runtime.InteropServices.ComTypes.VARKIND varkind;
         public short wVarFlags;
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Explicit)]
         public partial struct DESCUNION
         {
             [System.Runtime.InteropServices.FieldOffsetAttribute(0)]

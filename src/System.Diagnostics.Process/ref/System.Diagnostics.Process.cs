@@ -175,7 +175,6 @@ namespace System.Diagnostics
         public bool LoadUserProfile { get { throw null; } set { } }
         [System.CLSCompliantAttribute(false)]
         public System.Security.SecureString Password { get { throw null; } set { } }
-        public string PasswordInClearText { get { throw null; } set { } }
         public bool RedirectStandardError { get { throw null; } set { } }
         public bool RedirectStandardInput { get { throw null; } set { } }
         public bool RedirectStandardOutput { get { throw null; } set { } }
