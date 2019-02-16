@@ -45,7 +45,6 @@ namespace System.Threading.Channels
     {
         protected ChannelReader() { }
         public virtual System.Threading.Tasks.Task Completion { get { throw null; } }
-        public virtual System.Collections.Generic.IAsyncEnumerable<T> ReadAllAsync() { throw null; }
         public virtual System.Threading.Tasks.ValueTask<T> ReadAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public abstract bool TryRead(out T item);
         public abstract System.Threading.Tasks.ValueTask<bool> WaitToReadAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));

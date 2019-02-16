@@ -156,6 +156,8 @@ namespace System.Security.Principal
         LocalSid = 2,
         LocalSystemSid = 22,
         LogonIdsSid = 21,
+        [System.ObsoleteAttribute("This member has been depcreated and is only maintained for backwards compatability. WellKnownSidType values greater than MaxDefined may be defined in future releases.")]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         MaxDefined = 60,
         NetworkServiceSid = 24,
         NetworkSid = 9,
@@ -208,6 +210,7 @@ namespace System.Security.Principal
         WinWriteRestrictedCodeSid = 70,
         WorldSid = 1,
     }
+    [System.Runtime.InteropServices.ComVisible(true)]
     public enum WindowsAccountType
     {
         Anonymous = 3,

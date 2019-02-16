@@ -37,7 +37,9 @@ namespace System.Web
         public static byte[] UrlEncodeToBytes(byte[] bytes, int offset, int count) { throw null; }
         public static byte[] UrlEncodeToBytes(string str) { throw null; }
         public static byte[] UrlEncodeToBytes(string str, System.Text.Encoding e) { throw null; }
+        [Obsolete("This method produces non-standards-compliant output and has interoperability issues. The preferred alternative is UrlEncode(String).")]
         public static string UrlEncodeUnicode(string str) { throw null; }
+        [Obsolete("This method produces non-standards-compliant output and has interoperability issues. The preferred alternative is UrlEncodeToBytes(String).")]
         public static byte[] UrlEncodeUnicodeToBytes(string str) { throw null; }
         public static string UrlPathEncode(string str) { throw null; }
     }

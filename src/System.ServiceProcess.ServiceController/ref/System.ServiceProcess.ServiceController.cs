@@ -36,6 +36,7 @@ namespace System.ServiceProcess
         public bool CanStop { get { throw null; } set { } }
         public virtual System.Diagnostics.EventLog EventLog { get { throw null; } }
         public int ExitCode { get { throw null; } set { } }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(2))]
         protected System.IntPtr ServiceHandle { get { throw null; } }
         public string ServiceName { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
@@ -50,6 +51,7 @@ namespace System.ServiceProcess
         public void RequestAdditionalTime(int milliseconds) { }
         public static void Run(System.ServiceProcess.ServiceBase service) { }
         public static void Run(System.ServiceProcess.ServiceBase[] services) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public void ServiceMainCallback(int argCount, System.IntPtr argPointer) { }
         public void Stop() { }
     }

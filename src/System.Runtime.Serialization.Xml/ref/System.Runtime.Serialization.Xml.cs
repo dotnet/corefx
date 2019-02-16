@@ -5,6 +5,8 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.Serialization.InvalidDataContractException))]
+
 namespace System.Runtime.Serialization
 {
     public abstract partial class DataContractResolver
@@ -52,6 +54,7 @@ namespace System.Runtime.Serialization
     {
         public DataContractSerializerSettings() { }
         public System.Runtime.Serialization.DataContractResolver DataContractResolver { get { throw null; } set { } }
+//CODEDOM        public System.Runtime.Serialization.IDataContractSurrogate DataContractSurrogate { get { throw null; } set { } }
         public bool IgnoreExtensionDataObject { get { throw null; } set { } }
         public System.Collections.Generic.IEnumerable<System.Type> KnownTypes { get { throw null; } set { } }
         public int MaxItemsInObjectGraph { get { throw null; } set { } }
@@ -63,6 +66,7 @@ namespace System.Runtime.Serialization
     public partial class ExportOptions
     {
         public ExportOptions() { }
+//CODEDOM        public System.Runtime.Serialization.IDataContractSurrogate DataContractSurrogate { get { throw null; } set { } }
         public System.Collections.ObjectModel.Collection<System.Type> KnownTypes { get { throw null; } }
     }
     public sealed partial class ExtensionDataObject
