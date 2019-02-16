@@ -313,6 +313,16 @@ int32_t CryptoNative_X509StoreCtxReset(X509_STORE_CTX* ctx)
     return CryptoNative_X509StoreCtxInit(ctx, store, leaf, untrusted);
 }
 
+int32_t CryptoNative_X509StoreCtxRebuildChain(X509_STORE_CTX* ctx)
+{
+    if (!CryptoNative_X509StoreCtxReset(ctx))
+    {
+        return -1;
+    }
+
+    return X509_verify_cert(ctx);
+}
+
 void CryptoNative_X509StoreCtxSetVerifyCallback(X509_STORE_CTX* ctx, X509StoreVerifyCallback callback)
 {
     X509_STORE_CTX_set_verify_cb(ctx, callback);

@@ -272,6 +272,13 @@ and verify parameters.
 DLLEXPORT int32_t CryptoNative_X509StoreCtxReset(X509_STORE_CTX* ctx);
 
 /*
+Reset ctx and rebuild the chain.
+Returns -1 if CryptoNative_X509StoreCtxReset failed, otherwise returns the result of
+X509_verify_cert.
+*/
+DLLEXPORT int32_t CryptoNative_X509StoreCtxRebuildChain(X509_STORE_CTX* ctx);
+
+/*
 Shims the X509_STORE_CTX_get_error_depth method.
 */
 DLLEXPORT int32_t CryptoNative_X509StoreCtxGetErrorDepth(X509_STORE_CTX* ctx);
