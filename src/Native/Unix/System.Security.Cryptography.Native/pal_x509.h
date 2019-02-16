@@ -245,6 +245,9 @@ Shims the X509_STORE_CTX_get1_chain method.
 */
 DLLEXPORT X509Stack* CryptoNative_X509StoreCtxGetChain(X509_STORE_CTX* ctx);
 
+/*
+Shims the X509_STORE_CTX_get_current_cert function.
+*/
 DLLEXPORT X509* CryptoNative_X509StoreCtxGetCurrentCert(X509_STORE_CTX* ctx);
 
 /*
@@ -262,6 +265,10 @@ Shims the X509_STORE_CTX_get_error method.
 */
 DLLEXPORT X509VerifyStatusCode CryptoNative_X509StoreCtxGetError(X509_STORE_CTX* ctx);
 
+/*
+Resets ctx to before the chain was built, preserving the target cert, trust store, extra cert context,
+and verify parameters.
+*/
 DLLEXPORT int32_t CryptoNative_X509StoreCtxReset(X509_STORE_CTX* ctx);
 
 /*
@@ -327,14 +334,36 @@ in userTrustPath to be trusted
 */
 DLLEXPORT X509_STORE* CryptoNative_X509ChainNew(X509Stack* systemTrust, const char* userTrustPath);
 
+/*
+Adds all of the simple certificates from null-or-empty-password PFX files in storePath to stack.
+*/
 DLLEXPORT int32_t CryptoNative_X509StackAddDirectoryStore(X509Stack* stack, char* storePath);
 
+/*
+Adds all of the certificates in src to dest and increases their reference count.
+*/
 DLLEXPORT int32_t CryptoNative_X509StackAddMultiple(X509Stack* dest, X509Stack* src);
 
+/*
+Removes any untrusted/extra certificates from the unstrusted collection that are not part of
+the current chain to make chain builds after Reset faster.
+*/
 DLLEXPORT int32_t CryptoNative_X509StoreCtxCommitToChain(X509_STORE_CTX* storeCtx);
 
+/*
+Look for a cached OCSP response appropriate to the end-entity certificate using the issuer as
+determined by the chain in storeCtx.
+*/
 DLLEXPORT X509VerifyStatusCode CryptoNative_X509ChainGetCachedOcspStatus(X509_STORE_CTX* storeCtx, char* cachePath);
 
+/*
+Build an OCSP request appropriate for the end-entity certificate using the issuer (and trust) as
+determined by the chain in storeCtx.
+*/
 DLLEXPORT OCSP_REQUEST* CryptoNative_X509ChainBuildOcspRequest(X509_STORE_CTX* storeCtx);
 
+/*
+Determine if the OCSP response is acceptable, and if acceptable report the status and
+cache the result (if appropriate)
+*/
 DLLEXPORT X509VerifyStatusCode CryptoNative_X509ChainVerifyOcsp(X509_STORE_CTX* storeCtx, OCSP_REQUEST* req, OCSP_RESPONSE* resp, char* cachePath);
