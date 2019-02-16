@@ -147,8 +147,7 @@ namespace Internal.Cryptography.Pal
                     AddToStackAndUpRef(((OpenSslX509CertificateReader)cert.Pal).SafeHandle, untrusted);
                 }
 
-                Interop.Crypto.X509StoreCtxReset(storeCtx);
-                Interop.Crypto.X509VerifyCert(storeCtx);
+                Interop.Crypto.X509StoreCtxRebuildChain(storeCtx);
                 statusCode = Interop.Crypto.X509StoreCtxGetError(storeCtx);
             }
 
@@ -220,9 +219,7 @@ namespace Internal.Cryptography.Pal
                     AddToStackAndUpRef(downloaded.Handle, _untrustedLookup);
                     downloadedCerts.Add(downloaded);
                     
-                    Interop.Crypto.X509StoreCtxReset(storeCtx);
-                    Interop.Crypto.X509VerifyCert(storeCtx);
-
+                    Interop.Crypto.X509StoreCtxRebuildChain(storeCtx);
                     statusCode = Interop.Crypto.X509StoreCtxGetError(storeCtx);
                 }
             }
@@ -317,8 +314,7 @@ namespace Internal.Cryptography.Pal
             }
 
             Interop.Crypto.X509StoreSetRevocationFlag(_store, revocationFlag);
-            Interop.Crypto.X509StoreCtxReset(_storeCtx);
-            Interop.Crypto.X509VerifyCert(_storeCtx);
+            Interop.Crypto.X509StoreCtxRebuildChain(_storeCtx);
         }
 
         internal void Finish(OidCollection applicationPolicy, OidCollection certificatePolicy)
