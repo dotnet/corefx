@@ -145,6 +145,7 @@ int32_t X509_PUBKEY_get0_param(
 X509* X509_STORE_CTX_get0_cert(X509_STORE_CTX* ctx);
 STACK_OF(X509)* X509_STORE_CTX_get0_chain(X509_STORE_CTX* ctx);
 STACK_OF(X509)* X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx);
+X509_VERIFY_PARAM* X509_STORE_get0_param(X509_STORE* ctx);
 const ASN1_TIME* X509_get0_notAfter(const X509* x509);
 const ASN1_TIME* X509_get0_notBefore(const X509* x509);
 ASN1_BIT_STRING* X509_get0_pubkey_bitstr(const X509* x509);
@@ -523,6 +524,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(X509_STORE_CTX_set_flags) \
     REQUIRED_FUNCTION(X509_STORE_CTX_set_verify_cb) \
     REQUIRED_FUNCTION(X509_STORE_free) \
+    FALLBACK_FUNCTION(X509_STORE_get0_param) \
     REQUIRED_FUNCTION(X509_STORE_new) \
     REQUIRED_FUNCTION(X509_STORE_set_flags) \
     REQUIRED_FUNCTION(X509V3_EXT_print) \
@@ -907,6 +909,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_STORE_CTX_set_flags X509_STORE_CTX_set_flags_ptr
 #define X509_STORE_CTX_set_verify_cb X509_STORE_CTX_set_verify_cb_ptr
 #define X509_STORE_free X509_STORE_free_ptr
+#define X509_STORE_get0_param X509_STORE_get0_param_ptr
 #define X509_STORE_new X509_STORE_new_ptr
 #define X509_STORE_set_flags X509_STORE_set_flags_ptr
 #define X509V3_EXT_print X509V3_EXT_print_ptr
@@ -991,6 +994,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_STORE_CTX_get0_cert local_X509_STORE_CTX_get0_cert
 #define X509_STORE_CTX_get0_chain local_X509_STORE_CTX_get0_chain
 #define X509_STORE_CTX_get0_untrusted local_X509_STORE_CTX_get0_untrusted
+#define X509_STORE_get0_param local_X509_STORE_get0_param
 #define X509_get0_notAfter local_X509_get0_notAfter
 #define X509_get0_notBefore local_X509_get0_notBefore
 #define X509_get0_pubkey_bitstr local_X509_get0_pubkey_bitstr

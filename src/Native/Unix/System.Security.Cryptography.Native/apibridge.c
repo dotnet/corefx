@@ -494,6 +494,11 @@ X509* local_X509_STORE_CTX_get0_cert(X509_STORE_CTX* ctx)
     return ctx ? ctx->cert : NULL;
 }
 
+X509_VERIFY_PARAM* local_X509_STORE_get0_param(X509_STORE* ctx)
+{
+    return ctx ? ctx->param: NULL;
+}
+
 int32_t local_X509_up_ref(X509* x509)
 {
     if (x509 != NULL)
