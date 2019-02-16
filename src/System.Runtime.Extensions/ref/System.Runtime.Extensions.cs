@@ -35,9 +35,12 @@ namespace System
         public event System.ResolveEventHandler ResourceResolve { add { } remove { } }
         public event System.ResolveEventHandler TypeResolve { add { } remove { } }
         public event System.UnhandledExceptionEventHandler UnhandledException { add { } remove { } }
+        [Obsolete("AppDomain.AppendPrivatePath has been deprecated. Please investigate the use of AppDomainSetup.PrivateBinPath instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public void AppendPrivatePath(string path) { }
         public string ApplyPolicy(string assemblyName) { throw null; }
+        [Obsolete("AppDomain.ClearPrivatePath has been deprecated. Please investigate the use of AppDomainSetup.PrivateBinPath instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public void ClearPrivatePath() { }
+        [Obsolete("AppDomain.ClearShadowCopyPath has been deprecated. Please investigate the use of AppDomainSetup.ShadowCopyDirectories instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public void ClearShadowCopyPath() { }
         public static System.AppDomain CreateDomain(string friendlyName) { throw null; }
         public System.Runtime.Remoting.ObjectHandle CreateInstance(string assemblyName, string typeName) { throw null; }
@@ -59,6 +62,7 @@ namespace System
         public int ExecuteAssemblyByName(string assemblyName) { throw null; }
         public int ExecuteAssemblyByName(string assemblyName, params string[] args) { throw null; }
         public System.Reflection.Assembly[] GetAssemblies() { throw null; }
+        [Obsolete("AppDomain.GetCurrentThreadId has been deprecated because it does not provide a stable Id when managed threads are running on fibers (aka lightweight threads). To get a stable identifier for a managed thread, use the ManagedThreadId property on Thread.  https://go.microsoft.com/fwlink/?linkid=14202", false)]
         public static int GetCurrentThreadId() { throw null; }
         public object GetData(string name) { throw null; }
         public System.Nullable<bool> IsCompatibilitySwitchSet(string value) { throw null; }
@@ -69,10 +73,13 @@ namespace System
         public System.Reflection.Assembly Load(System.Reflection.AssemblyName assemblyRef) { throw null; }
         public System.Reflection.Assembly Load(string assemblyString) { throw null; }
         public System.Reflection.Assembly[] ReflectionOnlyGetAssemblies() { throw null; }
+         [Obsolete("AppDomain.SetCachePath has been deprecated. Please investigate the use of AppDomainSetup.CachePath instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public void SetCachePath(string path) { }
         public void SetData(string name, object data) { }
+        [ObsoleteAttribute("AppDomain.SetDynamicBase has been deprecated. Please investigate the use of AppDomainSetup.DynamicBase instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public void SetDynamicBase(string path) { }
         public void SetPrincipalPolicy(System.Security.Principal.PrincipalPolicy policy) { }
+         [Obsolete("AppDomain.SetShadowCopyFiles has been deprecated. Please investigate the use of AppDomainSetup.ShadowCopyFiles instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public void SetShadowCopyFiles() { }
         public void SetShadowCopyPath(string path) { }
         public void SetThreadPrincipal(System.Security.Principal.IPrincipal principal) { }
@@ -746,7 +753,9 @@ namespace System
     }
     public enum LoaderOptimization
     {
+        [System.ObsoleteAttribute("This method has been deprecated. Please use Assembly.Load() instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         DisallowBindings = 4,
+        [System.ObsoleteAttribute("This method has been deprecated. Please use Assembly.Load() instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         DomainMask = 3,
         MultiDomain = 2,
         MultiDomainHost = 3,
@@ -762,8 +771,6 @@ namespace System
     }
     public static partial class Math
     {
-        public const double E = 2.7182818284590451;
-        public const double PI = 3.1415926535897931;
         public static decimal Abs(decimal value) { throw null; }
         public static double Abs(double value) { throw null; }
         public static short Abs(short value) { throw null; }
@@ -875,8 +882,6 @@ namespace System
     }
     public static partial class MathF
     {
-        public const float E = 2.71828175f;
-        public const float PI = 3.14159274f;
         public static float Abs(float x) { throw null; }
         public static float Acos(float x) { throw null; }
         public static float Acosh(float x) { throw null; }
@@ -932,13 +937,13 @@ namespace System
     }
     public enum PlatformID
     {
-        MacOSX = 6,
+        [ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)] MacOSX = 6,
         Unix = 4,
         Win32NT = 2,
-        Win32S = 0,
-        Win32Windows = 1,
-        WinCE = 3,
-        Xbox = 5,
+        [ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)] Win32S = 0,
+        [ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)] Win32Windows = 1,
+        [ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)] WinCE = 3,
+        [ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)] Xbox = 5,
     }
     public partial class Progress<T> : System.IProgress<T>
     {
@@ -1128,22 +1133,29 @@ namespace System.Collections
         public Hashtable() { }
         public Hashtable(System.Collections.IDictionary d) { }
         public Hashtable(System.Collections.IDictionary d, System.Collections.IEqualityComparer equalityComparer) { }
+        [System.ObsoleteAttribute("Please use Hashtable(IDictionary, IEqualityComparer) instead.")]
         public Hashtable(System.Collections.IDictionary d, System.Collections.IHashCodeProvider hcp, System.Collections.IComparer comparer) { }
         public Hashtable(System.Collections.IDictionary d, float loadFactor) { }
         public Hashtable(System.Collections.IDictionary d, float loadFactor, System.Collections.IEqualityComparer equalityComparer) { }
+         [System.ObsoleteAttribute("Please use Hashtable(IDictionary, float, IEqualityComparer) instead.")]
         public Hashtable(System.Collections.IDictionary d, float loadFactor, System.Collections.IHashCodeProvider hcp, System.Collections.IComparer comparer) { }
         public Hashtable(System.Collections.IEqualityComparer equalityComparer) { }
+        [System.ObsoleteAttribute("Please use Hashtable(IEqualityComparer) instead.")]
         public Hashtable(System.Collections.IHashCodeProvider hcp, System.Collections.IComparer comparer) { }
         public Hashtable(int capacity) { }
         public Hashtable(int capacity, System.Collections.IEqualityComparer equalityComparer) { }
+        [System.ObsoleteAttribute("Please use Hashtable(int, IEqualityComparer) instead.")]
         public Hashtable(int capacity, System.Collections.IHashCodeProvider hcp, System.Collections.IComparer comparer) { }
         public Hashtable(int capacity, float loadFactor) { }
         public Hashtable(int capacity, float loadFactor, System.Collections.IEqualityComparer equalityComparer) { }
+        [System.ObsoleteAttribute("Please use Hashtable(int, float, IEqualityComparer) instead.")]
         public Hashtable(int capacity, float loadFactor, System.Collections.IHashCodeProvider hcp, System.Collections.IComparer comparer) { }
         protected Hashtable(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        [System.ObsoleteAttribute("Please use KeyComparer properties.")]
         protected System.Collections.IComparer comparer { get { throw null; } set { } }
         public virtual int Count { get { throw null; } }
         protected System.Collections.IEqualityComparer EqualityComparer { get { throw null; } }
+        [System.ObsoleteAttribute("Please use EqualityComparer property.")]
         protected System.Collections.IHashCodeProvider hcp { get { throw null; } set { } }
         public virtual bool IsFixedSize { get { throw null; } }
         public virtual bool IsReadOnly { get { throw null; } }
@@ -1366,6 +1378,7 @@ namespace System.IO
     {
         public static readonly char AltDirectorySeparatorChar;
         public static readonly char DirectorySeparatorChar;
+        [ObsoleteAttribute("Please use GetInvalidPathChars or GetInvalidFileNameChars instead.")]
         public static readonly char[] InvalidPathChars;
         public static readonly char PathSeparator;
         public static readonly char VolumeSeparatorChar;
@@ -1760,10 +1773,12 @@ namespace System.Security
         protected virtual System.Security.IPermission AddPermissionImpl(System.Security.IPermission perm) { throw null; }
         public void Assert() { }
         public bool ContainsNonCodeAccessPermissions() { throw null; }
+        [System.ObsoleteAttribute]
         public static byte[] ConvertPermissionSet(string inFormat, byte[] inData, string outFormat) { throw null; }
         public virtual System.Security.PermissionSet Copy() { throw null; }
         public virtual void CopyTo(System.Array array, int index) { }
         public void Demand() { }
+        [System.ObsoleteAttribute]
         public void Deny() { }
         public override bool Equals(object o) { throw null; }
         public virtual void FromXml(System.Security.SecurityElement et) { }
@@ -1827,12 +1842,16 @@ namespace System.Security.Permissions
     {
         Assert = 3,
         Demand = 2,
+        [System.ObsoleteAttribute("Deny is obsolete and will be removed in a future release of the .NET Framework. See https://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
         Deny = 4,
         InheritanceDemand = 7,
         LinkDemand = 6,
         PermitOnly = 5,
+        [System.ObsoleteAttribute("Assembly level declarative security is obsolete and is no longer enforced by the CLR by default. See https://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
         RequestMinimum = 8,
+        [System.ObsoleteAttribute("Assembly level declarative security is obsolete and is no longer enforced by the CLR by default. See https://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
         RequestOptional = 9,
+        [System.ObsoleteAttribute("Assembly level declarative security is obsolete and is no longer enforced by the CLR by default. See https://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
         RequestRefuse = 10,
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Constructor | System.AttributeTargets.Method | System.AttributeTargets.Struct, AllowMultiple=true, Inherited=false)]
