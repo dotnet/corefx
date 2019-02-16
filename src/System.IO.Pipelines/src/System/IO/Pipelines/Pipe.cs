@@ -209,12 +209,12 @@ namespace System.IO.Pipelines
             if (_pool is null)
             {
                 // Use the array pool
-                newSegment.SetMemory(ArrayPool<byte>.Shared.Rent(GetSegmentSize(sizeHint)));
+                newSegment.SetOwnedMemory(ArrayPool<byte>.Shared.Rent(GetSegmentSize(sizeHint)));
             }
             else if (sizeHint <= _pool.MaxBufferSize)
             {
                 // Use the specified pool if it fits
-                newSegment.SetMemory(_pool.Rent(GetSegmentSize(sizeHint, _pool.MaxBufferSize)));
+                newSegment.SetOwnedMemory(_pool.Rent(GetSegmentSize(sizeHint, _pool.MaxBufferSize)));
             }
             else
             {
@@ -489,16 +489,17 @@ namespace System.IO.Pipelines
                     // Prevent deadlock where reader awaits new data and writer await backpressure
                     if (!_writerAwaitable.IsCompleted)
                     {
-                        ThrowHelper.ThrowInvalidOperationException_BackpressureDeadlock();
+                        ThrowHelper.ThrowInvalidOperationException_BackpressureDeadlock(_resumeWriterThreshold);
                     }
                     _readerAwaitable.SetUncompleted();
                 }
 
                 while (returnStart != null && returnStart != returnEnd)
                 {
+                    BufferSegment next = returnStart.NextSegment;
                     returnStart.ResetMemory();
                     ReturnSegmentUnsynchronized(returnStart);
-                    returnStart = returnStart.NextSegment;
+                    returnStart = next;
                 }
 
                 _operationState.EndRead();
