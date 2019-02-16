@@ -1044,12 +1044,12 @@ namespace System
     public readonly partial struct Double : System.IComparable, System.IComparable<double>, System.IConvertible, System.IEquatable<double>, System.IFormattable
     {
         private readonly double _dummyPrimitive;
-        public const double Epsilon = 4.94065645841247E-324;
-        public const double MaxValue = 1.7976931348623157E+308;
-        public const double MinValue = -1.7976931348623157E+308;
-        public const double NaN = 0.0 / 0.0;
-        public const double NegativeInfinity = -1.0 / 0.0;
-        public const double PositiveInfinity = 1.0 / 0.0;
+        //public const double Epsilon = 4.94065645841247E-324;     -- defined in System.Runtime.Manual.cs
+        //public const double MaxValue = 1.7976931348623157E+308;  -- defined in System.Runtime.Manual.cs
+        //public const double MinValue = -1.7976931348623157E+308; -- defined in System.Runtime.Manual.cs
+        //public const double NaN = 0.0 / 0.0;                     -- defined in System.Runtime.Manual.cs
+        //public const double NegativeInfinity = -1.0 / 0.0;       -- defined in System.Runtime.Manual.cs
+        //public const double PositiveInfinity = 1.0 / 0.0;        -- defined in System.Runtime.Manual.cs
         public int CompareTo(System.Double value) { throw null; }
         public int CompareTo(object value) { throw null; }
         public bool Equals(System.Double obj) { throw null; }
@@ -1162,8 +1162,10 @@ namespace System
         [System.CLSCompliantAttribute(false)]
         public static object ToObject(System.Type enumType, ulong value) { throw null; }
         public override string ToString() { throw null; }
+        [System.ObsoleteAttribute("The provider argument is not used. Please use ToString().")]
         public string ToString(System.IFormatProvider provider) { throw null; }
         public string ToString(string format) { throw null; }
+        [System.ObsoleteAttribute("The provider argument is not used. Please use ToString(String).")]
         public string ToString(string format, System.IFormatProvider provider) { throw null; }
         public static bool TryParse(System.Type enumType, string value, bool ignoreCase, out object result) { throw null; }
         public static bool TryParse(System.Type enumType, string value, out object result) { throw null; }
@@ -1197,6 +1199,7 @@ namespace System
         public new System.Type GetType() { throw null; }
         public override string ToString() { throw null; }
     }
+    [System.ObsoleteAttribute("This type previously indicated an unspecified fatal error in the runtime. The runtime no longer raises this exception so this type is obsolete.")]
     public sealed partial class ExecutionEngineException : System.SystemException
     {
         public ExecutionEngineException() { }
@@ -1376,7 +1379,11 @@ namespace System
         public static int Combine<T1, T2, T3, T4, T5, T6>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6) { throw null; }
         public static int Combine<T1, T2, T3, T4, T5, T6, T7>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7) { throw null; }
         public static int Combine<T1, T2, T3, T4, T5, T6, T7, T8>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("HashCode is a mutable struct and should not be compared with other HashCodes.", true)]
         public override bool Equals(object obj) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("HashCode is a mutable struct and should not be compared with other HashCodes. Use ToHashCode to retrieve the computed hash code.", true)]
         public override int GetHashCode() { throw null; }
         public int ToHashCode() { throw null; }
     }
@@ -1736,7 +1743,9 @@ namespace System
         public System.Span<T> Span { get { throw null; } }
         public void CopyTo(System.Memory<T> destination) { }
         public bool Equals(System.Memory<T> other) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override bool Equals(object obj) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override int GetHashCode() { throw null; }
         public static implicit operator System.Memory<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlyMemory<T> (System.Memory<T> memory) { throw null; }
@@ -2012,8 +2021,10 @@ namespace System
         public int Length { get { throw null; } }
         public System.ReadOnlySpan<T> Span { get { throw null; } }
         public void CopyTo(System.Memory<T> destination) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.ReadOnlyMemory<T> other) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public override int GetHashCode() { throw null; }
         public static implicit operator System.ReadOnlyMemory<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlyMemory<T> (T[] array) { throw null; }
@@ -2021,7 +2032,7 @@ namespace System
         public System.ReadOnlyMemory<T> Slice(System.Index startIndex) { throw null; }
         public System.ReadOnlyMemory<T> Slice(int start) { throw null; }
         public System.ReadOnlyMemory<T> Slice(int start, int length) { throw null; }
-        public System.ReadOnlyMemory<T> Slice(System.Range range) { throw null; }
+        public System.ReadOnlyMemory<T> Slice(System.Range range)  { throw null; }
         public T[] ToArray() { throw null; }
         public override string ToString() { throw null; }
         public bool TryCopyTo(System.Memory<T> destination) { throw null; }
@@ -2041,9 +2052,14 @@ namespace System
         public System.ReadOnlySpan<T> this[System.Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public void CopyTo(System.Span<T> destination) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("Equals() on ReadOnlySpan will always throw an exception. Use == instead.")]
         public override bool Equals(object obj) { throw null; }
         public System.ReadOnlySpan<T>.Enumerator GetEnumerator() { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("GetHashCode() on ReadOnlySpan will always throw an exception.")]
         public override int GetHashCode() { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public ref readonly T GetPinnableReference() { throw null; }
         public static bool operator ==(System.ReadOnlySpan<T> left, System.ReadOnlySpan<T> right) { throw null; }
         public static implicit operator System.ReadOnlySpan<T> (System.ArraySegment<T> segment) { throw null; }
@@ -2171,12 +2187,12 @@ namespace System
     public readonly partial struct Single : System.IComparable, System.IComparable<float>, System.IConvertible, System.IEquatable<float>, System.IFormattable
     {
         private readonly float _dummyPrimitive;
-        public const float Epsilon = 1.401298E-45f;
-        public const float MaxValue = 3.40282347E+38f;
-        public const float MinValue = -3.40282347E+38f;
-        public const float NaN = 0.0f / 0.0f;
-        public const float NegativeInfinity = -1.0f / 0.0f;
-        public const float PositiveInfinity = 1.0f / 0.0f;
+        //public const float Epsilon = 1.401298E-45f;         -- defined in System.Runtime.Manual.cs
+        //public const float MaxValue = 3.40282347E+38f;      -- defined in System.Runtime.Manual.cs
+        //public const float MinValue = -3.40282347E+38f;     -- defined in System.Runtime.Manual.cs
+        //public const float NaN = 0.0f / 0.0f;               -- defined in System.Runtime.Manual.cs
+        //public const float NegativeInfinity = -1.0f / 0.0f; -- defined in System.Runtime.Manual.cs
+        //public const float PositiveInfinity = 1.0f / 0.0f;  -- defined in System.Runtime.Manual.cs
         public int CompareTo(object value) { throw null; }
         public int CompareTo(System.Single value) { throw null; }
         public override bool Equals(object obj) { throw null; }
@@ -2243,10 +2259,15 @@ namespace System
         public int Length { get { throw null; } }
         public void Clear() { }
         public void CopyTo(System.Span<T> destination) { }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("Equals() on Span will always throw an exception. Use == instead.")]
         public override bool Equals(object obj) { throw null; }
         public void Fill(T value) { }
         public System.Span<T>.Enumerator GetEnumerator() { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ObsoleteAttribute("GetHashCode() on Span will always throw an exception.")]
         public override int GetHashCode() { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public ref T GetPinnableReference() { throw null; }
         public static bool operator ==(System.Span<T> left, System.Span<T> right) { throw null; }
         public static implicit operator System.Span<T> (System.ArraySegment<T> segment) { throw null; }
@@ -2593,6 +2614,7 @@ namespace System
         public static bool TryParseExact(string input, string[] formats, System.IFormatProvider formatProvider, System.Globalization.TimeSpanStyles styles, out System.TimeSpan result) { throw null; }
         public static bool TryParseExact(string input, string[] formats, System.IFormatProvider formatProvider, out System.TimeSpan result) { throw null; }
     }
+    [System.ObsoleteAttribute("System.TimeZone has been deprecated.  Please investigate the use of System.TimeZoneInfo instead.")]
     public abstract partial class TimeZone
     {
         protected TimeZone() { }
@@ -2705,26 +2727,47 @@ namespace System
     }
     public static partial class TupleExtensions
     {
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1>(this System.Tuple<T1> value, out T1 item1) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15, out T16 item16) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15, out T16 item16, out T17 item17) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15, out T16 item16, out T17 item17, out T18 item18) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15, out T16 item16, out T17 item17, out T18 item18, out T19 item19) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2>(this System.Tuple<T1, T2> value, out T1 item1, out T2 item2) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19, T20>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15, out T16 item16, out T17 item17, out T18 item18, out T19 item19, out T20 item20) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19, T20, T21>>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9, out T10 item10, out T11 item11, out T12 item12, out T13 item13, out T14 item14, out T15 item15, out T16 item16, out T17 item17, out T18 item18, out T19 item19, out T20 item20, out T21 item21) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3>(this System.Tuple<T1, T2, T3> value, out T1 item1, out T2 item2, out T3 item3) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4>(this System.Tuple<T1, T2, T3, T4> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5>(this System.Tuple<T1, T2, T3, T4, T5> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6>(this System.Tuple<T1, T2, T3, T4, T5, T6> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9) { throw null; }
         public static System.Tuple<T1> ToTuple<T1>(this System.ValueTuple<T1> value) { throw null; }
         public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10>> value) { throw null; }
@@ -3379,9 +3422,11 @@ namespace System
         public static readonly string UriSchemeNntp;
         protected Uri(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public Uri(string uriString) { }
+        [System.ObsoleteAttribute("The constructor has been deprecated. Please use new Uri(string). The dontEscape parameter is deprecated and is always false. https://go.microsoft.com/fwlink/?linkid=14202")]
         public Uri(string uriString, bool dontEscape) { }
         public Uri(string uriString, System.UriKind uriKind) { }
         public Uri(System.Uri baseUri, string relativeUri) { }
+        [System.ObsoleteAttribute("The constructor has been deprecated. Please new Uri(Uri, string). The dontEscape parameter is deprecated and is always false. https://go.microsoft.com/fwlink/?linkid=14202")]
         public Uri(System.Uri baseUri, string relativeUri, bool dontEscape) { }
         public Uri(System.Uri baseUri, System.Uri relativeUri) { }
         public string AbsolutePath { get { throw null; } }
@@ -3406,14 +3451,18 @@ namespace System
         public string[] Segments { get { throw null; } }
         public bool UserEscaped { get { throw null; } }
         public string UserInfo { get { throw null; } }
+        [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void Canonicalize() { }
         public static System.UriHostNameType CheckHostName(string name) { throw null; }
         public static bool CheckSchemeName(string schemeName) { throw null; }
+        [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void CheckSecurity() { }
         public static int Compare(System.Uri uri1, System.Uri uri2, System.UriComponents partsToCompare, System.UriFormat compareFormat, System.StringComparison comparisonType) { throw null; }
         public override bool Equals(object comparand) { throw null; }
+        [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void Escape() { }
         public static string EscapeDataString(string stringToEscape) { throw null; }
+        [System.ObsoleteAttribute("The method has been deprecated. Please use GetComponents() or static EscapeUriString() to escape a Uri component or a string. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected static string EscapeString(string str) { throw null; }
         public static string EscapeUriString(string stringToEscape) { throw null; }
         public static int FromHex(char digit) { throw null; }
@@ -3423,24 +3472,30 @@ namespace System
         protected void GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public static string HexEscape(char character) { throw null; }
         public static char HexUnescape(string pattern, ref int index) { throw null; }
+        [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual bool IsBadFileSystemCharacter(char character) { throw null; }
         public bool IsBaseOf(System.Uri uri) { throw null; }
+        [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected static bool IsExcludedCharacter(char character) { throw null; }
         public static bool IsHexDigit(char character) { throw null; }
         public static bool IsHexEncoding(string pattern, int index) { throw null; }
+        [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual bool IsReservedCharacter(char character) { throw null; }
         public bool IsWellFormedOriginalString() { throw null; }
         public static bool IsWellFormedUriString(string uriString, System.UriKind uriKind) { throw null; }
+        [System.ObsoleteAttribute("The method has been deprecated. Please use MakeRelativeUri(Uri uri). https://go.microsoft.com/fwlink/?linkid=14202")]
         public string MakeRelative(System.Uri toUri) { throw null; }
         public System.Uri MakeRelativeUri(System.Uri uri) { throw null; }
         public static bool operator ==(System.Uri uri1, System.Uri uri2) { throw null; }
         public static bool operator !=(System.Uri uri1, System.Uri uri2) { throw null; }
+        [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void Parse() { }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public override string ToString() { throw null; }
         public static bool TryCreate(string uriString, System.UriKind uriKind, out System.Uri result) { throw null; }
         public static bool TryCreate(System.Uri baseUri, string relativeUri, out System.Uri result) { throw null; }
         public static bool TryCreate(System.Uri baseUri, System.Uri relativeUri, out System.Uri result) { throw null; }
+        [System.ObsoleteAttribute("The method has been deprecated. Please use GetComponents() or static UnescapeDataString() to unescape a Uri component or a string. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual string Unescape(string path) { throw null; }
         public static string UnescapeDataString(string stringToUnescape) { throw null; }
     }
@@ -3802,6 +3857,7 @@ namespace System.Collections
         public DictionaryEntry(object key, object value) { throw null; }
         public object Key { get { throw null; } set { } }
         public object Value { get { throw null; } set { } }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public void Deconstruct(out object key, out object value) { throw null; }
     }
     public partial interface ICollection : System.Collections.IEnumerable
@@ -3976,6 +4032,7 @@ namespace System.Collections.Generic
         public KeyValuePair(TKey key, TValue value) { throw null; }
         public TKey Key { get { throw null; } }
         public TValue Value { get { throw null; } }
+        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
         public void Deconstruct(out TKey key, out TValue value) { throw null; }
         public override string ToString() { throw null; }
     }
@@ -4362,12 +4419,14 @@ namespace System.Globalization
     public enum CultureTypes
     {
         AllCultures = 7,
+        [System.ObsoleteAttribute("This value has been deprecated.  Please use other values in CultureTypes.")]
         FrameworkCultures = 64,
         InstalledWin32Cultures = 4,
         NeutralCultures = 1,
         ReplacementCultures = 16,
         SpecificCultures = 2,
         UserCustomCulture = 8,
+        [System.ObsoleteAttribute("This value has been deprecated.  Please use other values in CultureTypes.")]
         WindowsOnlyCultures = 32,
     }
     public sealed partial class DateTimeFormatInfo : System.ICloneable, System.IFormatProvider
@@ -5097,9 +5156,13 @@ namespace System.IO
         public FileStream(Microsoft.Win32.SafeHandles.SafeFileHandle handle, System.IO.FileAccess access) { }
         public FileStream(Microsoft.Win32.SafeHandles.SafeFileHandle handle, System.IO.FileAccess access, int bufferSize) { }
         public FileStream(Microsoft.Win32.SafeHandles.SafeFileHandle handle, System.IO.FileAccess access, int bufferSize, bool isAsync) { }
+        [System.ObsoleteAttribute("This constructor has been deprecated.  Please use new FileStream(SafeFileHandle handle, FileAccess access) instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public FileStream(System.IntPtr handle, System.IO.FileAccess access) { }
+        [System.ObsoleteAttribute("This constructor has been deprecated.  Please use new FileStream(SafeFileHandle handle, FileAccess access) instead, and optionally make a new SafeFileHandle with ownsHandle=false if needed.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public FileStream(System.IntPtr handle, System.IO.FileAccess access, bool ownsHandle) { }
+        [System.ObsoleteAttribute("This constructor has been deprecated.  Please use new FileStream(SafeFileHandle handle, FileAccess access, int bufferSize) instead, and optionally make a new SafeFileHandle with ownsHandle=false if needed.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public FileStream(System.IntPtr handle, System.IO.FileAccess access, bool ownsHandle, int bufferSize) { }
+        [System.ObsoleteAttribute("This constructor has been deprecated.  Please use new FileStream(SafeFileHandle handle, FileAccess access, int bufferSize, bool isAsync) instead, and optionally make a new SafeFileHandle with ownsHandle=false if needed.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public FileStream(System.IntPtr handle, System.IO.FileAccess access, bool ownsHandle, int bufferSize, bool isAsync) { }
         public FileStream(string path, System.IO.FileMode mode) { }
         public FileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access) { }
@@ -5110,6 +5173,7 @@ namespace System.IO
         public override bool CanRead { get { throw null; } }
         public override bool CanSeek { get { throw null; } }
         public override bool CanWrite { get { throw null; } }
+        [System.ObsoleteAttribute("This property has been deprecated.  Please use FileStream's SafeFileHandle property instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public virtual System.IntPtr Handle { get { throw null; } }
         public virtual bool IsAsync { get { throw null; } }
         public override long Length { get { throw null; } }
@@ -5188,6 +5252,7 @@ namespace System.IO
         public System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize) { throw null; }
         public virtual System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize, System.Threading.CancellationToken cancellationToken) { throw null; }
         public System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, System.Threading.CancellationToken cancellationToken) { throw null; }
+        [System.ObsoleteAttribute("CreateWaitHandle will be removed eventually.  Please use \"new ManualResetEvent(false)\" instead.")]
         protected virtual System.Threading.WaitHandle CreateWaitHandle() { throw null; }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
@@ -5197,6 +5262,7 @@ namespace System.IO
         public abstract void Flush();
         public System.Threading.Tasks.Task FlushAsync() { throw null; }
         public virtual System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
+        [System.ObsoleteAttribute("Do not call or override this method.")]
         protected virtual void ObjectInvariant() { }
         public abstract int Read(byte[] buffer, int offset, int count);
         public virtual int Read(System.Span<byte> buffer) { throw null; }
@@ -5292,6 +5358,7 @@ namespace System.Reflection
         public static System.Reflection.Assembly LoadFrom(string assemblyFile, byte[] hashValue, System.Configuration.Assemblies.AssemblyHashAlgorithm hashAlgorithm) { throw null; }
         public System.Reflection.Module LoadModule(string moduleName, byte[] rawModule) { throw null; }
         public virtual System.Reflection.Module LoadModule(string moduleName, byte[] rawModule, byte[] rawSymbolStore) { throw null; }
+        [System.ObsoleteAttribute("This method has been deprecated. Please use Assembly.Load() instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static System.Reflection.Assembly LoadWithPartialName(string partialName) { throw null; }
         public static bool operator ==(System.Reflection.Assembly left, System.Reflection.Assembly right) { throw null; }
         public static bool operator !=(System.Reflection.Assembly left, System.Reflection.Assembly right) { throw null; }
@@ -5366,12 +5433,15 @@ namespace System.Reflection
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly, Inherited=false)]
     public sealed partial class AssemblyFlagsAttribute : System.Attribute
     {
+        [System.ObsoleteAttribute("This constructor has been deprecated. Please use AssemblyFlagsAttribute(AssemblyNameFlags) instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public AssemblyFlagsAttribute(int assemblyFlags) { }
         public AssemblyFlagsAttribute(System.Reflection.AssemblyNameFlags assemblyFlags) { }
         [System.CLSCompliantAttribute(false)]
+        [System.ObsoleteAttribute("This constructor has been deprecated. Please use AssemblyFlagsAttribute(AssemblyNameFlags) instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public AssemblyFlagsAttribute(uint flags) { }
         public int AssemblyFlags { get { throw null; } }
         [System.CLSCompliantAttribute(false)]
+        [System.ObsoleteAttribute("This property has been deprecated. Please use AssemblyFlags instead. https://go.microsoft.com/fwlink/?linkid=14202")]
         public uint Flags { get { throw null; } }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly, Inherited=false)]
@@ -6642,6 +6712,7 @@ namespace System.Runtime.CompilerServices
         public bool AllInternalsVisible { get { throw null; } set { } }
         public string AssemblyName { get { throw null; } }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     [System.AttributeUsageAttribute(System.AttributeTargets.Struct)]
     public sealed partial class IsByRefLikeAttribute : System.Attribute
     {
@@ -6651,6 +6722,7 @@ namespace System.Runtime.CompilerServices
     {
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.All, Inherited=false)]
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public sealed partial class IsReadOnlyAttribute : System.Attribute
     {
         public IsReadOnlyAttribute() { }
@@ -6722,7 +6794,9 @@ namespace System.Runtime.CompilerServices
     }
     public static partial class RuntimeFeature
     {
+#if FEATURE_DEFAULT_INTERFACES
         public const string DefaultImplementationsOfInterfaces = "DefaultImplementationsOfInterfaces";
+#endif
         public const string PortablePdb = "PortablePdb";
         public static bool IsDynamicCodeCompiled { get { throw null; } }
         public static bool IsDynamicCodeSupported { get { throw null; } }
@@ -6843,6 +6917,7 @@ namespace System.Runtime.CompilerServices
         public void OnCompleted(System.Action continuation) { }
         public void UnsafeOnCompleted(System.Action continuation) { }
     }
+    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
     public readonly partial struct YieldAwaitable
     {
         public System.Runtime.CompilerServices.YieldAwaitable.YieldAwaiter GetAwaiter() { throw null; }
@@ -7235,8 +7310,10 @@ namespace System.Security
     {
         public SecurityCriticalAttribute() { }
         public SecurityCriticalAttribute(System.Security.SecurityCriticalScope scope) { }
+        [System.ObsoleteAttribute("SecurityCriticalScope is only used for .NET 2.0 transparency compatibility.")]
         public System.Security.SecurityCriticalScope Scope { get { throw null; } }
     }
+    [System.ObsoleteAttribute("SecurityCriticalScope is only used for .NET 2.0 transparency compatibility.")]
     public enum SecurityCriticalScope
     {
         Everything = 1,
@@ -7819,6 +7896,7 @@ namespace System.Threading
         protected static readonly System.IntPtr InvalidHandle;
         public const int WaitTimeout = 258;
         protected WaitHandle() { }
+        [System.ObsoleteAttribute("Use the SafeWaitHandle property instead.")]
         public virtual System.IntPtr Handle { get { throw null; } set { } }
         public Microsoft.Win32.SafeHandles.SafeWaitHandle SafeWaitHandle { get { throw null; } set { } }
         public virtual void Close() { }
@@ -8172,6 +8250,7 @@ namespace System.Threading.Tasks
         public bool Observed { get { throw null; } }
         public void SetObserved() { }
     }
+    [System.Runtime.CompilerServices.AsyncMethodBuilderAttribute(typeof(System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder))]
     public readonly partial struct ValueTask : System.IEquatable<System.Threading.Tasks.ValueTask>
     {
         private readonly object _dummy;
@@ -8192,6 +8271,7 @@ namespace System.Threading.Tasks
         public static bool operator !=(System.Threading.Tasks.ValueTask left, System.Threading.Tasks.ValueTask right) { throw null; }
         public System.Threading.Tasks.ValueTask Preserve() { throw null; }
     }
+    [System.Runtime.CompilerServices.AsyncMethodBuilderAttribute(typeof(System.Runtime.CompilerServices.AsyncValueTaskMethodBuilder<>))]
     public readonly partial struct ValueTask<TResult> : System.IEquatable<System.Threading.Tasks.ValueTask<TResult>>
     {
         internal readonly TResult _result;
