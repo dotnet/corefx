@@ -58,8 +58,8 @@ namespace System.CodeDom
         public CodeArrayCreateExpression(System.Type createType, int size) { }
         public System.CodeDom.CodeTypeReference CreateType { get { throw null; } set { } }
         public System.CodeDom.CodeExpressionCollection Initializers { get { throw null; } }
-        public int Size { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
-        public System.CodeDom.CodeExpression SizeExpression { get { throw null; } set { } }
+        public int Size { get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
+        public System.CodeDom.CodeExpression SizeExpression { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
     }
     public partial class CodeArrayIndexerExpression : System.CodeDom.CodeExpression
     {
@@ -410,7 +410,7 @@ namespace System.CodeDom
         public CodeMemberMethod() { }
         public System.CodeDom.CodeTypeReferenceCollection ImplementationTypes { get { throw null; } }
         public System.CodeDom.CodeParameterDeclarationExpressionCollection Parameters { get { throw null; } }
-        public System.CodeDom.CodeTypeReference PrivateImplementationType { get { throw null; } set { } }
+        public System.CodeDom.CodeTypeReference PrivateImplementationType { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
         public System.CodeDom.CodeTypeReference ReturnType { get { throw null; } set { } }
         public System.CodeDom.CodeAttributeDeclarationCollection ReturnTypeCustomAttributes { get { throw null; } }
         public System.CodeDom.CodeStatementCollection Statements { get { throw null; } }
@@ -422,7 +422,7 @@ namespace System.CodeDom
     public partial class CodeMemberProperty : System.CodeDom.CodeTypeMember
     {
         public CodeMemberProperty() { }
-        public System.CodeDom.CodeStatementCollection GetStatements { get { throw null; } }
+        public System.CodeDom.CodeStatementCollection GetStatements { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
         public bool HasGet { get { throw null; } set { } }
         public bool HasSet { get { throw null; } set { } }
         public System.CodeDom.CodeTypeReferenceCollection ImplementationTypes { get { throw null; } }
@@ -437,7 +437,7 @@ namespace System.CodeDom
         public CodeMethodInvokeExpression(System.CodeDom.CodeExpression targetObject, string methodName, params System.CodeDom.CodeExpression[] parameters) { }
         public CodeMethodInvokeExpression(System.CodeDom.CodeMethodReferenceExpression method, params System.CodeDom.CodeExpression[] parameters) { }
         public System.CodeDom.CodeMethodReferenceExpression Method { get { throw null; } set { } }
-        public System.CodeDom.CodeExpressionCollection Parameters { get { throw null; } }
+        public System.CodeDom.CodeExpressionCollection Parameters { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
     }
     public partial class CodeMethodReferenceExpression : System.CodeDom.CodeExpression
     {
