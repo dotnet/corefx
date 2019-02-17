@@ -155,6 +155,10 @@ int32_t X509_get_version(const X509* x509);
 int32_t X509_up_ref(X509* x509);
 #endif
 
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_0_2_RTM
+X509_STORE* X509_STORE_CTX_get0_store(X509_STORE_CTX* ctx);
+#endif
+
 #if !HAVE_OPENSSL_ALPN
 #undef HAVE_OPENSSL_ALPN
 #define HAVE_OPENSSL_ALPN 1
@@ -516,7 +520,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     FALLBACK_FUNCTION(X509_STORE_CTX_get0_cert) \
     FALLBACK_FUNCTION(X509_STORE_CTX_get0_chain) \
     REQUIRED_FUNCTION(X509_STORE_CTX_get0_param) \
-    REQUIRED_FUNCTION(X509_STORE_CTX_get0_store) \
+    FALLBACK_FUNCTION(X509_STORE_CTX_get0_store) \
     FALLBACK_FUNCTION(X509_STORE_CTX_get0_untrusted) \
     REQUIRED_FUNCTION(X509_STORE_CTX_get1_chain) \
     REQUIRED_FUNCTION(X509_STORE_CTX_init) \

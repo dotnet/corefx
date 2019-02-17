@@ -484,6 +484,11 @@ X509Stack* local_X509_STORE_CTX_get0_chain(X509_STORE_CTX* ctx)
     return ctx ? ctx->chain : NULL;
 }
 
+X509_STORE* local_X509_STORE_CTX_get0_store(X509_STORE_CTX* ctx)
+{
+    return ctx ? ctx->ctx: NULL;
+}
+
 X509Stack* local_X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx)
 {
     return ctx ? ctx->untrusted : NULL;
