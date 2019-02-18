@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http.HPack;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -26,7 +27,8 @@ namespace System.Net.Http
         private readonly string _host;
         private readonly int _port;
         private readonly Uri _proxyUri;
-
+        internal readonly byte[] _encodedAuthorityHostHeader;
+        
         /// <summary>List of idle connections stored in the pool.</summary>
         private readonly List<CachedConnection> _idleConnections = new List<CachedConnection>();
         /// <summary>The maximum number of connections allowed to be associated with the pool.</summary>
@@ -125,6 +127,21 @@ namespace System.Net.Http
                     break;
             }
 
+            string hostHeader = null;
+            if (_host != null)
+            {
+                // Precalculate ASCII bytes for Host header
+                // Note that if _host is null, this is a (non-tunneled) proxy connection, and we can't cache the hostname.
+                hostHeader =
+                    (_port != (sslHostName == null ? DefaultHttpPort : DefaultHttpsPort)) ?
+                    $"{_host}:{_port}" :
+                    _host;
+
+                // Note the IDN hostname should always be ASCII, since it's already been IDNA encoded.
+                _hostHeaderValueBytes = Encoding.ASCII.GetBytes(hostHeader);
+                Debug.Assert(Encoding.ASCII.GetString(_hostHeaderValueBytes) == hostHeader);
+            }
+
             if (sslHostName != null)
             {
                 _sslOptionsHttp11 = ConstructSslOptions(poolManager, sslHostName);
@@ -135,21 +152,10 @@ namespace System.Net.Http
                     _sslOptionsHttp2 = ConstructSslOptions(poolManager, sslHostName);
                     _sslOptionsHttp2.ApplicationProtocols = Http2ApplicationProtocols;
                     _sslOptionsHttp2.AllowRenegotiation = false;
+
+                    Debug.Assert(hostHeader != null);
+                    _encodedAuthorityHostHeader = HPackEncoder.EncodeLiteralHeaderFieldWithoutIndexingToAllocatedArray(StaticTable.Authority, hostHeader);
                 }
-            }
-
-            if (_host != null)
-            {
-                // Precalculate ASCII bytes for Host header
-                // Note that if _host is null, this is a (non-tunneled) proxy connection, and we can't cache the hostname.
-                string hostHeader =
-                    (_port != (sslHostName == null ? DefaultHttpPort : DefaultHttpsPort)) ?
-                    $"{_host}:{_port}" :
-                    _host;
-
-                // Note the IDN hostname should always be ASCII, since it's already been IDNA encoded.
-                _hostHeaderValueBytes = Encoding.ASCII.GetBytes(hostHeader);
-                Debug.Assert(Encoding.ASCII.GetString(_hostHeaderValueBytes) == hostHeader);
             }
             
             // Set up for PreAuthenticate.  Access to this cache is guarded by a lock on the cache itself.
@@ -270,7 +276,7 @@ namespace System.Net.Http
                 }
 
                 HttpConnection conn = cachedConnection._connection;
-                if (cachedConnection.IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout) &&
+                if (!conn.LifetimeExpired(now, pooledConnectionLifetime) &&
                     !conn.EnsureReadAheadAndPollRead())
                 {
                     // We found a valid connection.  Return it.
@@ -326,13 +332,26 @@ namespace System.Net.Http
 
             // See if we have an HTTP2 connection
             Http2Connection http2Connection = _http2Connection;
+
             if (http2Connection != null)
             {
-                if (NetEventSource.IsEnabled) Trace("Using existing HTTP2 connection.");
-                return (http2Connection, false, null);
+                TimeSpan pooledConnectionLifetime = _poolManager.Settings._pooledConnectionLifetime;
+                if (http2Connection.LifetimeExpired(DateTimeOffset.UtcNow, pooledConnectionLifetime))
+                {
+                    // Connection expired.
+                    http2Connection.Dispose();
+                    InvalidateHttp2Connection(http2Connection);
+                }
+                else
+                {
+                    // Connection exist and it is still good to use.
+                    if (NetEventSource.IsEnabled) Trace("Using existing HTTP2 connection.");
+                    _usedSinceLastCleanup = true;
+                    return (http2Connection, false, null);
+                }
             }
 
-            // Ensure that the connection creation semaphore is created 
+            // Ensure that the connection creation semaphore is created
             if (_http2ConnectionCreateLock == null)
             {
                 lock (SyncObj)
@@ -747,15 +766,12 @@ namespace System.Net.Http
                 _associatedConnectionCount--;
             }
         }
-        
+
         /// <summary>Returns the connection to the pool for subsequent reuse.</summary>
         /// <param name="connection">The connection to return.</param>
         public void ReturnConnection(HttpConnection connection)
         {
-            TimeSpan lifetime = _poolManager.Settings._pooledConnectionLifetime;
-            bool lifetimeExpired = 
-                lifetime != Timeout.InfiniteTimeSpan &&
-                (lifetime == TimeSpan.Zero || connection.CreationTime + lifetime <= DateTime.UtcNow);
+            bool lifetimeExpired = connection.LifetimeExpired(DateTime.UtcNow, _poolManager.Settings._pooledConnectionLifetime);
 
             if (!lifetimeExpired)
             {
@@ -815,8 +831,13 @@ namespace System.Net.Http
 
         public void InvalidateHttp2Connection(Http2Connection connection)
         {
-            Debug.Assert(_http2Connection == connection);
-            _http2Connection = null;
+            lock (SyncObj)
+            {
+                if (_http2Connection == connection)
+                {
+                    _http2Connection = null;
+                }
+            }
         }
 
         /// <summary>
@@ -860,6 +881,7 @@ namespace System.Net.Http
             List<CachedConnection> list = _idleConnections;
             List<HttpConnection> toDispose = null;
             bool tookLock = false;
+
             try
             {
                 if (NetEventSource.IsEnabled) Trace("Cleaning pool.");
@@ -868,6 +890,17 @@ namespace System.Net.Http
                 // Get the current time.  This is compared against each connection's last returned
                 // time to determine whether a connection is too old and should be closed.
                 DateTimeOffset now = DateTimeOffset.UtcNow;
+                Http2Connection http2Connection = _http2Connection;
+
+                if (http2Connection != null)
+                {
+                    if (http2Connection.IsExpired(now, pooledConnectionLifetime, pooledConnectionIdleTimeout))
+                    {
+                        http2Connection.Dispose();
+                        // We can set _http2Connection directly while holding lock instead of calling InvalidateHttp2Connection().
+                        _http2Connection = null;
+                    }
+                }
 
                 // Find the first item which needs to be removed.
                 int freeIndex = 0;
@@ -914,7 +947,7 @@ namespace System.Net.Http
                     // if a pool was used since the last time we cleaned up, give it another chance. New pools
                     // start out saying they've recently been used, to give them a bit of breathing room and time
                     // for the initial collection to be added to it.
-                    if (_associatedConnectionCount == 0 && !_usedSinceLastCleanup)
+                    if (_associatedConnectionCount == 0 && !_usedSinceLastCleanup && _http2Connection == null)
                     {
                         Debug.Assert(list.Count == 0, $"Expected {nameof(list)}.{nameof(list.Count)} == 0");
                         _disposed = true;
@@ -1016,9 +1049,8 @@ namespace System.Net.Http
                 }
 
                 // Validate that the connection hasn't been alive for longer than is allowed.
-                if ((pooledConnectionLifetime != Timeout.InfiniteTimeSpan) && (now - _connection.CreationTime > pooledConnectionLifetime))
+                if (_connection.LifetimeExpired(now, pooledConnectionLifetime))
                 {
-                    if (NetEventSource.IsEnabled) _connection.Trace($"Connection no longer usable. Alive {now - _connection.CreationTime} > {pooledConnectionLifetime}.");
                     return false;
                 }
 
