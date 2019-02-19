@@ -730,7 +730,7 @@ namespace System.Net.Http
             pingContent.CopyTo(_outgoingBuffer.AvailableMemory);
             _outgoingBuffer.Commit(FrameHeader.PingLength);
 
-            await FinishWriteAsync(true).ConfigureAwait(false);
+            await FinishWriteAsync(false).ConfigureAwait(false);
         }
 
         private async Task SendRstStreamAsync(int streamId, Http2ProtocolErrorCode errorCode)
@@ -1010,7 +1010,7 @@ namespace System.Net.Http
                 current.CopyTo(_outgoingBuffer.AvailableMemory);
                 _outgoingBuffer.Commit(current.Length);
 
-                await FinishWriteAsync(true, cancellationToken).ConfigureAwait(false);
+                await FinishWriteAsync(false, cancellationToken).ConfigureAwait(false);
             }
         }
 
