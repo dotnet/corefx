@@ -142,7 +142,7 @@
     <value>Can't GetResult unless awaiter is completed.</value>
   </data>
   <data name="InvalidZeroByteRead" xml:space="preserve">
-    <value>The PipeReader returned 0 bytes when the ReadResult was not completed or cancelled.</value>
+    <value>The PipeReader returned 0 bytes when the ReadResult was not completed or canceled.</value>
   </data>
   <data name="NoReadingOperationToComplete" xml:space="preserve">
     <value>No reading operation to complete.</value>

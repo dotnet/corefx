@@ -110,10 +110,8 @@ namespace System.IO.Pipelines.Tests
             Assert.Throws<NotSupportedException>(() => { long position = stream.Position; });
             Assert.Throws<NotSupportedException>(() => stream.Seek(0, SeekOrigin.Begin));
             Assert.Throws<NotSupportedException>(() => stream.Write(new byte[10], 0, 10));
-            Assert.Throws<NotSupportedException>(() => stream.Flush());
             await Assert.ThrowsAsync<NotSupportedException>(() => stream.WriteAsync(new byte[10], 0, 10));
             await Assert.ThrowsAsync<NotSupportedException>(() => stream.WriteAsync(new byte[10]).AsTask());
-            await Assert.ThrowsAsync<NotSupportedException>(() => stream.FlushAsync());
 
             pipe.Reader.Complete();
             pipe.Writer.Complete();

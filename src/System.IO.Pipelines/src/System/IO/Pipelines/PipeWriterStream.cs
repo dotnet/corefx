@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace System.IO.Pipelines
 {
-    internal class PipeWriterStream : Stream
+    internal sealed class PipeWriterStream : Stream
     {
         private readonly PipeWriter _pipeWriter;
 
@@ -34,6 +34,12 @@ namespace System.IO.Pipelines
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
         public override void SetLength(long value) => throw new NotSupportedException();
+
+        public sealed override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state) =>
+            TaskToApm.Begin(WriteAsync(buffer, offset, count, default), callback, state);
+
+        public sealed override void EndWrite(IAsyncResult asyncResult) =>
+            TaskToApm.End(asyncResult);
 
         public override void Write(byte[] buffer, int offset, int count)
         {
@@ -67,7 +73,7 @@ namespace System.IO.Pipelines
         {
             if (valueTask.IsCompletedSuccessfully)
             {
-                FlushResult result = valueTask.GetAwaiter().GetResult();
+                FlushResult result = valueTask.Result;
                 if (result.IsCanceled)
                 {
                     ThrowHelper.ThrowOperationCanceledException_FlushCanceled();
@@ -78,7 +84,7 @@ namespace System.IO.Pipelines
 
             static async Task AwaitTask(ValueTask<FlushResult> valueTask)
             {
-                FlushResult result = await valueTask;
+                FlushResult result = await valueTask.ConfigureAwait(false);
 
                 if (result.IsCanceled)
                 {

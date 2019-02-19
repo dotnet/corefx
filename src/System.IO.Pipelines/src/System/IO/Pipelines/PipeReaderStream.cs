@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace System.IO.Pipelines
 {
-    internal class PipeReaderStream : Stream
+    internal sealed class PipeReaderStream : Stream
     {
         private readonly PipeReader _pipeReader;
 
@@ -26,7 +26,9 @@ namespace System.IO.Pipelines
 
         public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
 
-        public override void Flush() => throw new NotSupportedException();
+        public override void Flush()
+        {
+        }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
@@ -38,6 +40,12 @@ namespace System.IO.Pipelines
         public override void SetLength(long value) => throw new NotSupportedException();
 
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+        public sealed override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) =>
+            TaskToApm.Begin(ReadAsync(buffer, offset, count, default), callback, state);
+
+        public sealed override int EndRead(IAsyncResult asyncResult) =>
+            TaskToApm.End<int>(asyncResult);
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
@@ -62,7 +70,7 @@ namespace System.IO.Pipelines
 
             ReadOnlySequence<byte> sequence = result.Buffer;
             long bufferLength = sequence.Length;
-            SequencePosition consumed = sequence.End;
+            SequencePosition consumed = sequence.Start;
 
             try
             {
@@ -88,12 +96,11 @@ namespace System.IO.Pipelines
             }
 
             // This is a buggy PipeReader implementation that returns 0 byte reads even though the PipeReader
-            // isn't completed or cancelled
+            // isn't completed or canceled
             ThrowHelper.ThrowInvalidOperationException_InvalidZeroByteRead();
             return 0;
         }
 
-        /// <inheritdoc />
         public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             // Delegate to CopyToAsync on the PipeReader
