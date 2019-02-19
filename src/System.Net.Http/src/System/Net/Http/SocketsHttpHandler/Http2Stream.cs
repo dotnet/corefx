@@ -344,9 +344,8 @@ namespace System.Net.Http
 
             public void Cancel()
             {
-                lock (_syncObject)
+                lock (SyncObject)
                 {
-                    _cancelled = true;
                     Task ignored = _connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel);
                 }
             }
