@@ -8,6 +8,7 @@ using System.IO;
 using System.Net.Http.HPack;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
@@ -21,6 +22,12 @@ namespace System.Net.Http
     internal sealed class HttpConnectionPool : IDisposable
     {
         private static readonly bool s_isWindows7Or2008R2 = GetIsWindows7Or2008R2();
+
+        // TODO: Use public property when available. https://github.com/dotnet/corefx/issues/35410
+        private static readonly Func<NetworkStream, Socket> s_getSocketFromNetworkStream = (Func<NetworkStream, Socket>)
+            typeof(NetworkStream).GetProperty("Socket", BindingFlags.Instance | BindingFlags.NonPublic) // Socket is protected
+            .GetGetMethod(nonPublic: true)
+            .CreateDelegate(typeof(Func<NetworkStream, Socket>));
 
         private readonly HttpConnectionPoolManager _poolManager;
         private readonly HttpConnectionKind _kind;
@@ -582,18 +589,17 @@ namespace System.Net.Http
 
             try
             {
-                Socket socket = null;
                 Stream stream = null;
                 switch (_kind)
                 {
                     case HttpConnectionKind.Http:
                     case HttpConnectionKind.Https:
                     case HttpConnectionKind.ProxyConnect:
-                        (socket, stream) = await ConnectHelper.ConnectAsync(_host, _port, cancellationToken).ConfigureAwait(false);
+                        stream = await ConnectHelper.ConnectAsync(_host, _port, cancellationToken).ConfigureAwait(false);
                         break;
 
                     case HttpConnectionKind.Proxy:
-                        (socket, stream) = await ConnectHelper.ConnectAsync(_proxyUri.IdnHost, _proxyUri.Port, cancellationToken).ConfigureAwait(false);
+                        stream = await ConnectHelper.ConnectAsync(_proxyUri.IdnHost, _proxyUri.Port, cancellationToken).ConfigureAwait(false);
                         break;
 
                     case HttpConnectionKind.ProxyTunnel:
@@ -607,6 +613,13 @@ namespace System.Net.Http
                             return (null, null, null, response);
                         }
                         break;
+                }
+
+                Socket socket = null;
+                if (stream is NetworkStream ns)
+                {
+                    socket = s_getSocketFromNetworkStream(ns);
+                    Debug.Assert(socket != null);
                 }
 
                 TransportContext transportContext = null;
