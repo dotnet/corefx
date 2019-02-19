@@ -682,7 +682,6 @@ namespace System.Net.Http
                         throw new OperationCanceledException(cancellationToken);
                     }
 
-                    // MAX NOTE: try to better understand this line.
                     await _inProgressWrite.ConfigureAwait(false);
                 }
             }
@@ -997,7 +996,6 @@ namespace System.Net.Http
 
                 // It's possible that a cancellation will occur while we wait for the write lock. In that case, we need to
                 // return the credit that we have acquired and don't plan to use.
-                // MAX NOTE: Is this necessary now?
                 try
                 {
                     await StartWriteAsync(FrameHeader.Size + current.Length, cancellationToken).ConfigureAwait(false);
