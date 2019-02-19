@@ -12,4 +12,9 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="TimerDisposeTests.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(CommonTestPath)\System\Threading\ThreadTestHelpers.cs">
+      <Link>CommonTest\System\Threading\ThreadTestHelpers.cs</Link>
+    </Compile>
+  </ItemGroup>
 </Project>
