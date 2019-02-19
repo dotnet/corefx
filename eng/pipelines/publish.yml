@@ -46,7 +46,7 @@ jobs:
                 /t:PublishPackagesToBlobFeed
                 /p:ManifestBuildId=$(Build.BuildNumber)
                 /p:ManifestBuildData=Location=$(_dotnetFeedUrl)
-                /p:ManifestBranch=$(Build.SourceBranchName)
+                /p:ManifestBranch=$(Build.SourceBranch)
                 /p:ManifestCommit=$(Build.SourceVersion)
                 /p:ManifestRepoUri=$(Build.Repository.Uri)
                 /p:AccountKey=$(dotnetfeed-storage-access-key-1)
