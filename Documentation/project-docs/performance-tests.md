@@ -17,7 +17,7 @@ Performance test files (if present) are stored within a library's ```tests/Perfo
 
 The results files will be dropped in corefx/artifacts/bin/tests/TESTLIBRARY/FLAVOR/.  The console output will also specify the location of these files.
 
-To build and run all tests from root, execute the following command: `build -performanceTest /p:BuildTests=true -c Release`.
+To build and run all tests from root, execute the following command: `build -performanceTest -buildtests -c Release`.
 
 **Getting memory usage**
 

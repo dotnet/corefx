@@ -27,7 +27,7 @@ parameters:
   #     _outerloop: true | false
 
   # Required: submitToHelix -> Boolean -> Value to know if it should submit tests payloads to helix.
-  
+
   # Optional: buildScriptPrefix -> String -> string to append to Unix build script.
   #   buildScriptPrefix: 'HOME=/home/ ' -> 'HOME=/home/ ./build.sh ...'
 
@@ -41,7 +41,7 @@ parameters:
 
   # Optional: enableMicrobuild -> Boolean - if microbuild plugin for signing should be enabled
   # Default: false
-  
+
   # Optional: preBuildSteps -> Array -> list of steps to be executed before common build steps.
   # In example, to install build dependencies, or setup an environment.
   #   preBuildSteps:
@@ -78,11 +78,14 @@ jobs:
 
         - ${{ if eq(job.submitToHelix, 'true') }}:
           - group: DotNet-HelixApi-Access
+          - _archiveTestsParameter: /p:ArchiveTests=Tests
+        - ${{ if eq(job.submitToHelix, 'false') }}:
+          - _archiveTestsParameter: ''
 
         # Windows variables
         - ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
           - _buildScript: build.cmd
-          - _commonArguments: -restore -build -configuration $(_BuildConfig) -buildtests
+          - _commonArguments: -restore -build -configuration $(_BuildConfig) -ci -buildtests
           - _msbuildCommand: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
 
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
@@ -99,7 +102,7 @@ jobs:
         # Non-Windows variables
         - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
           - _buildScript: ${{ job.buildScriptPrefix }}./build.sh
-          - _args: --restore --build --configuration $(_BuildConfig) -buildtests
+          - _args: --restore --build --configuration $(_BuildConfig) --ci -buildtests
           - _commonArguments: $(_args)
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
             - _commonArguments: $(_args) -stripSymbols
@@ -138,7 +141,7 @@ jobs:
             - ${{ job.preBuildSteps }}
 
           - ${{ if eq(job.customBuildSteps[0], '') }}:
-            
+
             - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
               - task: NuGetToolInstaller@0
                 inputs:
@@ -161,7 +164,7 @@ jobs:
                     -framework $(_framework)
                     /p:OuterLoop=$(_outerloop)
                     -arch $(_architecture)
-                    /p:ArchiveTests=${{ job.submitToHelix }}
+                    $(_archiveTestsParameter)
                     ${{ job.buildExtraArguments }}
                     $(_msbuildCommonParameters)
                     $(_windowsOfficialBuildArguments)
@@ -199,7 +202,7 @@ jobs:
                   helixToken: ''
                   # TODO: Enable azure pipelines reporter for PRs once retry feature is available.
                   enableAzurePipelinesReporter: false
-          
+
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
             - task: PublishBuildArtifacts@1
               displayName: Publish packages to artifacts container
