@@ -972,10 +972,10 @@ namespace System.Net.Http
                 current.CopyTo(_outgoingBuffer.AvailableMemory);
                 _outgoingBuffer.Commit(current.Length);
 
+                await FinishWriteAsync(remaining.Length == 0, cancellationToken, false).ConfigureAwait(false);
+
                 while (remaining.Length > 0)
                 {
-                    await FinishWriteAsync(true, cancellationToken, false).ConfigureAwait(false);
-
                     (current, remaining) = SplitBuffer(remaining, FrameHeader.MaxLength);
 
                     flags = (remaining.Length == 0 ? FrameFlags.EndHeaders : FrameFlags.None);
@@ -985,19 +985,19 @@ namespace System.Net.Http
                     WriteFrameHeader(new FrameHeader(current.Length, FrameType.Continuation, flags, streamId));
                     current.CopyTo(_outgoingBuffer.AvailableMemory);
                     _outgoingBuffer.Commit(current.Length);
-                }
 
-                await FinishWriteAsync(true, cancellationToken, true).ConfigureAwait(false); // MAX NOTE: Should we proccess cancellation here?
+                    await FinishWriteAsync(remaining.Length == 0, cancellationToken, false).ConfigureAwait(false);
+                }
             }
             catch
             {
-                _writerLock.Release();
                 http2Stream.Dispose();
                 throw;
             }
             finally
             {
                 _headerBuffer.Discard(_headerBuffer.ActiveMemory.Length);
+                _writerLock.Release();
             }
 
             return http2Stream;
