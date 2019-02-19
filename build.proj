@@ -8,13 +8,12 @@
     <BuildRestore Condition="'$(BuildRestore)' == ''">true</BuildRestore>
     <BuildNative Condition="'$(BuildNative)' == ''">true</BuildNative>
     <BuildManaged Condition="'$(BuildManaged)' == ''">true</BuildManaged>
-    <BuildTests Condition="'$(BuildTests)' == ''">false</BuildTests>
     <BuildPackages Condition="'$(BuildPackages)' == ''">true</BuildPackages>
 
     <BuildDependsOn Condition="'$(BuildRestore)' == 'true'">$(BuildDependsOn);Restore</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildNative)' == 'true'">$(BuildDependsOn);BuildNative</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildManaged)' == 'true'">$(BuildDependsOn);BuildManaged</BuildDependsOn>
-    <BuildDependsOn Condition="'$(BuildTests)' == 'true'">$(BuildDependsOn);Test</BuildDependsOn>
+    <BuildDependsOn Condition="'$(BuildTests)' == 'true'">$(BuildDependsOn);BuildTests</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildPackages)' == 'true'">$(BuildDependsOn);Pack</BuildDependsOn>
 
     <!-- Explicitly set Configuration based on BuildConfiguration for the root projects -->
