@@ -581,6 +581,7 @@ namespace System.PrivateUri.Tests
 
         [Theory]
         [MemberData(nameof(AllForbiddenDecompositions))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Iri_AllForbiddenDecompositions_IdnHostThrows(string scheme, string host)
         {
             Uri uri = new Uri(scheme + "://" + host);
@@ -589,6 +590,7 @@ namespace System.PrivateUri.Tests
 
         [Theory]
         [MemberData(nameof(AllForbiddenDecompositions))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Iri_AllForbiddenDecompositions_NonIdnPropertiesOk(string scheme, string host)
         {
             Uri uri = new Uri(scheme + "://" + host);
