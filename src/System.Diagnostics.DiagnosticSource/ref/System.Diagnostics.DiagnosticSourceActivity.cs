@@ -30,12 +30,12 @@ namespace System.Diagnostics
         public string OperationName { get { throw null; } }
         public System.Diagnostics.Activity Parent { get { throw null; } }
         public string ParentId { get { throw null; } }
-        public ref readonly System.Diagnostics.ActivitySpanId ParentSpanId { get { throw null; } }
+        public ref System.Diagnostics.ActivitySpanId ParentSpanId { get { throw null; } }
         public string RootId { get { throw null; } }
-        public ref readonly System.Diagnostics.ActivitySpanId SpanId { get { throw null; } }
+        public ref System.Diagnostics.ActivitySpanId SpanId { get { throw null; } }
         public System.DateTime StartTimeUtc { get { throw null; } }
         public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> Tags { get { throw null; } }
-        public ref readonly System.Diagnostics.ActivityTraceId TraceId { get { throw null; } }
+        public ref System.Diagnostics.ActivityTraceId TraceId { get { throw null; } }
         public string TraceStateString { get { throw null; } set { } }
         public System.Diagnostics.Activity AddBaggage(string key, string value) { throw null; }
         public System.Diagnostics.Activity AddTag(string key, string value) { throw null; }

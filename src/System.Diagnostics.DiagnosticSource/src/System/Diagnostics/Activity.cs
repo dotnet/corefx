@@ -454,7 +454,7 @@ namespace System.Diagnostics
         /// which will have the effect of updating Activity's instance so all subsequent uses
         /// share the same converted string.  
         /// </summary>
-        public ref readonly ActivitySpanId SpanId
+        public ref ActivitySpanId SpanId
         {
             get
             {
@@ -481,7 +481,7 @@ namespace System.Diagnostics
         /// which will have the effect of updating Activity's instance so all subsequent uses
         /// share the same converted string.  
         /// </summary>
-        public ref readonly ActivityTraceId TraceId
+        public ref ActivityTraceId TraceId
         {
             get
             {
@@ -501,7 +501,7 @@ namespace System.Diagnostics
         /// If the parent Activity ID has the W3C format, this returns the ID for the SpanId part of the ParentId.  
         /// Otherwise it returns a zero SpanId. 
         /// </summary>
-        public ref readonly ActivitySpanId ParentSpanId
+        public ref ActivitySpanId ParentSpanId
         {
             get
             {
@@ -965,8 +965,8 @@ namespace System.Diagnostics
         }
         #endregion
 
-        ulong _id1;
-        ulong _id2;
+        readonly ulong _id1;
+        readonly ulong _id2;
         string _asHexString;  // Caches the Hex string    
         #endregion
     }
@@ -1096,7 +1096,7 @@ namespace System.Diagnostics
         #endregion
 
         #region private
-        ulong _id1;
+        readonly ulong _id1;
         string _asHexString;   // Caches the Hex string  
         #endregion
     }
