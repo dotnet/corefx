@@ -145,10 +145,10 @@ NetSecurityNative_ImportUserName(uint32_t* minorStatus, char* inputName, uint32_
 }
 
 uint32_t NetSecurityNative_ImportTargetName(uint32_t* minorStatus,
-                                               char* inputName,
-                                               uint32_t inputNameLen,
-                                               uint32_t isNtlmTarget,
-                                               GssName** outputName)
+                                            char* inputName,
+                                            uint32_t inputNameLen,
+                                            uint32_t isNtlmTarget,
+                                            GssName** outputName)
 {
     assert(minorStatus != NULL);
     assert(inputName != NULL);

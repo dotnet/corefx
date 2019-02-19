@@ -511,7 +511,7 @@ namespace System.Net.Http.Functional.Tests
             yield return new object[] { $"http://{server}/test/auth/ntlm/{authEndPoint}", false };
             yield return new object[] { $"https://{server}/test/auth/ntlm/{authEndPoint}", false };
 
-            // Curlhandler (due to libcurl bug) cannot do Negotiate (SPNEGO) Kerberos to NTM fallback.
+            // Curlhandler (due to libcurl bug) cannot do Negotiate (SPNEGO) Kerberos to NTLM fallback.
             yield return new object[] { $"http://{server}/test/auth/negotiate/{authEndPoint}", true };
             yield return new object[] { $"https://{server}/test/auth/negotiate/{authEndPoint}", true };
 

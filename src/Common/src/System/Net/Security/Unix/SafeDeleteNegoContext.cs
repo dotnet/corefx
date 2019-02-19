@@ -53,8 +53,8 @@ namespace System.Net.Security
             Debug.Assert((null != credential), "Null credential in SafeDeleteNegoContext");
             try
             {
-                _targetNameKerberos = SafeGssNameHandle.CreateTarget(targetName, false);
-                _targetNameNtlm = SafeGssNameHandle.CreateTarget(targetName, true);
+                _targetNameKerberos = SafeGssNameHandle.CreateTarget(targetName, isNtlmTarget: false);
+                _targetNameNtlm = SafeGssNameHandle.CreateTarget(targetName, isNtlmTarget: true);
             }
             catch
             {
