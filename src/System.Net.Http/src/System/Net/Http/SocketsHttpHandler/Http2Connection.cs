@@ -722,14 +722,9 @@ namespace System.Net.Http
         private async ValueTask SendSettingsAckAsync()
         {
             await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
-            try
-            {
-                WriteFrameHeader(new FrameHeader(0, FrameType.Settings, FrameFlags.Ack, 0));
-            }
-            finally
-            {
-                await FinishWriteAsync(true).ConfigureAwait(false);
-            }
+            WriteFrameHeader(new FrameHeader(0, FrameType.Settings, FrameFlags.Ack, 0));
+
+            await FinishWriteAsync(true).ConfigureAwait(false);
         }
 
         private async ValueTask SendPingAckAsync(ReadOnlyMemory<byte> pingContent)
@@ -737,33 +732,21 @@ namespace System.Net.Http
             Debug.Assert(pingContent.Length == FrameHeader.PingLength);
 
             await StartWriteAsync(FrameHeader.Size + FrameHeader.PingLength).ConfigureAwait(false);
-            try
-            {
-                WriteFrameHeader(new FrameHeader(FrameHeader.PingLength, FrameType.Ping, FrameFlags.Ack, 0));
-                pingContent.CopyTo(_outgoingBuffer.AvailableMemory);
-                _outgoingBuffer.Commit(FrameHeader.PingLength);
-            }
-            finally
-            {
-                await FinishWriteAsync(true).ConfigureAwait(false);
-            }
+            WriteFrameHeader(new FrameHeader(FrameHeader.PingLength, FrameType.Ping, FrameFlags.Ack, 0));
+            pingContent.CopyTo(_outgoingBuffer.AvailableMemory);
+            _outgoingBuffer.Commit(FrameHeader.PingLength);
+
+            await FinishWriteAsync(true).ConfigureAwait(false);
         }
 
         private async Task SendRstStreamAsync(int streamId, Http2ProtocolErrorCode errorCode)
         {
             await StartWriteAsync(FrameHeader.Size + FrameHeader.RstStreamLength).ConfigureAwait(false);
-            try
-            {
-                WriteFrameHeader(new FrameHeader(FrameHeader.RstStreamLength, FrameType.RstStream, FrameFlags.None, streamId));
+            WriteFrameHeader(new FrameHeader(FrameHeader.RstStreamLength, FrameType.RstStream, FrameFlags.None, streamId));
+            BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, (int)errorCode);
+            _outgoingBuffer.Commit(FrameHeader.RstStreamLength);
 
-                BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, (int)errorCode);
-
-                _outgoingBuffer.Commit(FrameHeader.RstStreamLength);
-            }
-            finally
-            {
-                await FinishWriteAsync(true).ConfigureAwait(false);
-            }
+            await FinishWriteAsync(true).ConfigureAwait(false);
         }
 
         private static (ReadOnlyMemory<byte> first, ReadOnlyMemory<byte> rest) SplitBuffer(ReadOnlyMemory<byte> buffer, int maxSize) =>
@@ -1030,56 +1013,39 @@ namespace System.Net.Http
                     throw;
                 }
 
-                try
-                {
-                    WriteFrameHeader(new FrameHeader(current.Length, FrameType.Data, FrameFlags.None, streamId));
-                    current.CopyTo(_outgoingBuffer.AvailableMemory);
-                    _outgoingBuffer.Commit(current.Length);
-                }
-                finally
-                {
-                    await FinishWriteAsync(true, cancellationToken).ConfigureAwait(false);
-                }
+                WriteFrameHeader(new FrameHeader(current.Length, FrameType.Data, FrameFlags.None, streamId));
+                current.CopyTo(_outgoingBuffer.AvailableMemory);
+                _outgoingBuffer.Commit(current.Length);
+
+                await FinishWriteAsync(true, cancellationToken).ConfigureAwait(false);
             }
         }
 
         private async ValueTask SendEndStreamAsync(int streamId)
         {
             await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
-            try
-            {
-                WriteFrameHeader(new FrameHeader(0, FrameType.Data, FrameFlags.EndStream, streamId));
-            }
-            finally
-            {
-                await FinishWriteAsync(true).ConfigureAwait(false);
-            }
+
+            WriteFrameHeader(new FrameHeader(0, FrameType.Data, FrameFlags.EndStream, streamId));
+
+            await FinishWriteAsync(true).ConfigureAwait(false);
         }
 
         private async ValueTask SendWindowUpdateAsync(int streamId, int amount)
         {
             Debug.Assert(amount > 0);
 
-            await _writerLock.WaitAsync().ConfigureAwait(false);
-            try
-            {
-                // We update both the connection-level and stream-level windows at the same time
-                _outgoingBuffer.EnsureAvailableSpace((FrameHeader.Size + FrameHeader.WindowUpdateLength) * 2);
+            // We update both the connection-level and stream-level windows at the same time
+            await StartWriteAsync((FrameHeader.Size + FrameHeader.WindowUpdateLength) * 2);
 
-                WriteFrameHeader(new FrameHeader(FrameHeader.WindowUpdateLength, FrameType.WindowUpdate, FrameFlags.None, 0));
-                BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, amount);
-                _outgoingBuffer.Commit(FrameHeader.WindowUpdateLength);
+            WriteFrameHeader(new FrameHeader(FrameHeader.WindowUpdateLength, FrameType.WindowUpdate, FrameFlags.None, 0));
+            BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, amount);
+            _outgoingBuffer.Commit(FrameHeader.WindowUpdateLength);
 
-                WriteFrameHeader(new FrameHeader(FrameHeader.WindowUpdateLength, FrameType.WindowUpdate, FrameFlags.None, streamId));
-                BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, amount);
-                _outgoingBuffer.Commit(FrameHeader.WindowUpdateLength);
+            WriteFrameHeader(new FrameHeader(FrameHeader.WindowUpdateLength, FrameType.WindowUpdate, FrameFlags.None, streamId));
+            BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, amount);
+            _outgoingBuffer.Commit(FrameHeader.WindowUpdateLength);
 
-                await FinishWriteAsync(true).ConfigureAwait(false);
-            }
-            finally
-            {
-                _writerLock.Release();
-            }
+            await FinishWriteAsync(true).ConfigureAwait(false);
         }
 
         private void WriteFrameHeader(FrameHeader frameHeader)
