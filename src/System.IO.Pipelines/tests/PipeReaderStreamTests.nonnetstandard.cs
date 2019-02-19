@@ -134,6 +134,26 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
+        public async Task CanReadAfterCancellingPendingRead()
+        {
+            var pipe = new Pipe();
+
+            Stream stream = pipe.Reader.AsStream();
+            ValueTask<int> task = stream.ReadAsync(new byte[1024]);
+            Assert.False(task.IsCompleted);
+
+            pipe.Reader.CancelPendingRead();
+
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await task);
+            pipe.Writer.Complete();
+
+            ReadResult result = await pipe.Reader.ReadAsync();
+            Assert.True(result.IsCompleted);
+
+            pipe.Reader.Complete();
+        }
+
+        [Fact]
         public async Task CancellationTokenFlowsToUnderlyingPipeReader()
         {
             var pipe = new Pipe();
