@@ -125,11 +125,22 @@ namespace System.Threading.Tests
 
         public static void WaitForConditionWithCustomDelay(Func<bool> condition, Action delay)
         {
-            var startTime = DateTime.Now;
-            while (!condition())
+            if (condition())
             {
-                Assert.True((DateTime.Now - startTime).TotalMilliseconds < UnexpectedTimeoutMilliseconds);
+                return;
+            }
+
+            var startTime = Environment.TickCount;
+            while (true)
+            {
                 delay();
+
+                if (condition())
+                {
+                    return;
+                }
+
+                Assert.True(Environment.TickCount - startTime < UnexpectedTimeoutMilliseconds);
             }
         }
 
