@@ -95,8 +95,6 @@ namespace System.Net.Http
                 {
                     while (_current > 0 && _waiters.TryDequeue(out Waiter waiter))
                     {
-                        waiter.TokenRegistration.Dispose();
-
                         int granted = Math.Min(waiter.Amount, _current);
 
                         // Ensure that we grant credit only if the task has not been canceled.

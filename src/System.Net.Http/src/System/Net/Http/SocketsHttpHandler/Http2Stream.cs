@@ -34,7 +34,6 @@ namespace System.Net.Http
             private bool _responseComplete;
             private bool _responseAborted;
             private bool _disposed;
-            private bool _cancelled;
 
             public Http2Stream(HttpRequestMessage request, Http2Connection connection, int streamId, int initialWindowSize)
             {
@@ -67,7 +66,6 @@ namespace System.Net.Http
             public int StreamId => _streamId;
             public HttpRequestMessage Request => _request;
             public HttpResponseMessage Response => _response;
-            public bool Cancelled => _cancelled;
 
             public async Task SendRequestBodyAsync(CancellationToken cancellationToken)
             {
