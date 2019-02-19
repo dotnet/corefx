@@ -652,7 +652,7 @@ namespace System.Net.Http
             {
                 if (acquireWriteLock)
                 {
-                    ReleaseWriteLock();
+                    _writerLock.Release();
                 }
                 throw;
             }
@@ -690,7 +690,7 @@ namespace System.Net.Http
             {
                 if (releaseWriteLock)
                 {
-                    ReleaseWriteLock();
+                    _writerLock.Release();
                 }
             }
         }
@@ -712,11 +712,6 @@ namespace System.Net.Http
             {
                 throw new IOException(SR.net_http_invalid_response);
             }
-        }
-
-        private void ReleaseWriteLock()
-        {
-            _writerLock.Release();
         }
 
         private async ValueTask SendSettingsAckAsync()
