@@ -62,11 +62,17 @@ namespace System.IO.Pipelines.Tests
             int read = await stream.ReadAsync(buffer);
 
             Assert.Equal(5, read);
-            Assert.Equal(helloBytes.AsSpan(0, 5).ToArray(), buffer.AsSpan(0, read).ToArray());
+            Assert.Equal(helloBytes.AsSpan(0, 5).ToArray(), buffer);
+
+            buffer = new byte[3];
+            read = await stream.ReadAsync(buffer);
+
+            Assert.Equal(3, read);
+            Assert.Equal(helloBytes.AsSpan(5, 3).ToArray(), buffer);
 
             // Verify that the buffer is partially consumed and we can read the rest from the PipeReader directly
             ReadResult result = await pipe.Reader.ReadAsync();
-            Assert.Equal(helloBytes.AsSpan(5).ToArray(), result.Buffer.ToArray());
+            Assert.Equal(helloBytes.AsSpan(8).ToArray(), result.Buffer.ToArray());
             pipe.Reader.AdvanceTo(result.Buffer.End);
 
             pipe.Reader.Complete();
@@ -286,6 +292,13 @@ namespace System.IO.Pipelines.Tests
                     return await stream.ReadAsync(data);
                 };
 
+                ReadAsyncDelegate readMemoryAsyncWithThreadHop = async (stream, data) =>
+                {
+                    await Task.Yield();
+
+                    return await stream.ReadAsync(data);
+                };
+
                 ReadAsyncDelegate readArraySync = (stream, data) =>
                 {
                     return Task.FromResult(stream.Read(data, 0, data.Length));
@@ -298,6 +311,7 @@ namespace System.IO.Pipelines.Tests
 
                 yield return new object[] { readArrayAsync };
                 yield return new object[] { readMemoryAsync };
+                yield return new object[] { readMemoryAsyncWithThreadHop };
                 yield return new object[] { readArraySync };
                 yield return new object[] { readSpanSync };
             }
