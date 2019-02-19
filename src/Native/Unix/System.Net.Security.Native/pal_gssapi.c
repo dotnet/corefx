@@ -190,7 +190,7 @@ uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
     assert(minorStatus != NULL);
     assert(contextHandle != NULL);
     assert(isNtlm == 0 || isNtlm == 1);
-    assert(isNtlm == 0 || targetNameKerberos != NULL);
+    assert(isNtlm == 1 || targetNameKerberos != NULL);
     assert(isNtlmFallback == 0 || isNtlmFallback == 1);
     assert(targetNameNtlm != NULL);
     assert(inputBytes != NULL || inputLength == 0);
