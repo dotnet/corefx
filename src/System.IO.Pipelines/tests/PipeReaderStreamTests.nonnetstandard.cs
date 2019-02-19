@@ -82,6 +82,8 @@ namespace System.IO.Pipelines.Tests
         public async Task EndOfPipeReaderReturnsZeroBytesFromReadAsync()
         {
             var pipe = new Pipe();
+            Memory<byte> memory = pipe.Writer.GetMemory();
+            pipe.Writer.Advance(5);
             pipe.Writer.Complete();
 
             Stream stream = pipe.Reader.AsStream();
@@ -89,7 +91,13 @@ namespace System.IO.Pipelines.Tests
             var buffer = new byte[5];
             var read = await stream.ReadAsync(buffer);
 
+            Assert.Equal(5, read);
+
+            read = await stream.ReadAsync(buffer);
+
+            // Read again to make sure it always returns 0
             Assert.Equal(0, read);
+
             pipe.Reader.Complete();
         }
 
