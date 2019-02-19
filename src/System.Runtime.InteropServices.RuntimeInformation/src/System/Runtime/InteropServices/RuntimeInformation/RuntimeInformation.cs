@@ -23,9 +23,15 @@ namespace System.Runtime.InteropServices
             {
                 if (s_frameworkDescription == null)
                 {
-                    AssemblyFileVersionAttribute attr = (AssemblyFileVersionAttribute)(typeof(object).GetTypeInfo().Assembly.GetCustomAttribute(typeof(AssemblyFileVersionAttribute)));
-                    Debug.Assert(attr != null);
-                    s_frameworkDescription = $"{FrameworkName} {attr.Version}";
+                    string versionString = (string)AppContext.GetData("FX_PRODUCT_VERSION");
+
+                    if (versionString == null)
+                    {
+                        // Use AssemblyInformationalVersionAttribute as fallback if the exact product version is not specified by the host
+                        versionString = typeof(object).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                    }
+
+                    s_frameworkDescription = $"{FrameworkName} {versionString}";
                 }
 
                 return s_frameworkDescription;
