@@ -43,6 +43,10 @@
 
     <!-- SDK sets product to assembly but we want it to be our product name -->
     <Product>Microsoft%AE .NET Core</Product>
+
+    <!-- Use the .NET Core product version for informational version description -->
+    <InformationalVersion>$(PlatformPackageVersion)</InformationalVersion>
+    <InformationalVersion Condition="'$(VersionSuffix)' != ''">$(InformationalVersion)-$(VersionSuffix)</InformationalVersion>
   </PropertyGroup>
 
   <Target Name="_ComputeBuildToolsAssemblyInfoAttributes"
