@@ -1,6 +1,6 @@
 [CmdletBinding(PositionalBinding=$false)]
 Param(
-  [switch] $build,
+  [switch][Alias('b')]$build,
   [switch] $buildtests,
   [string][Alias('c')]$configuration = "Debug",
   [string] $framework,
