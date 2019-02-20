@@ -185,7 +185,7 @@ jobs:
                     -allconfigurations
                     -arch $(_architecture)
                     /p:RuntimeOS=win10
-                    /p:ArchiveTests=true
+                    /p:ArchiveTests=Packages
                     $(_windowsOfficialBuildArguments)
                     $(_msbuildCommonParameters)
             displayName: Build Packages and Tests
