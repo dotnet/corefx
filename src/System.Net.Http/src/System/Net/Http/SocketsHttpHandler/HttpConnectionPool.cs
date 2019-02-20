@@ -8,7 +8,6 @@ using System.IO;
 using System.Net.Http.HPack;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
@@ -22,12 +21,6 @@ namespace System.Net.Http
     internal sealed class HttpConnectionPool : IDisposable
     {
         private static readonly bool s_isWindows7Or2008R2 = GetIsWindows7Or2008R2();
-
-        // TODO: Use public property when available. https://github.com/dotnet/corefx/issues/35410
-        private static readonly Func<NetworkStream, Socket> s_getSocketFromNetworkStream = (Func<NetworkStream, Socket>)
-            typeof(NetworkStream).GetProperty("Socket", BindingFlags.Instance | BindingFlags.NonPublic) // Socket is protected
-            .GetGetMethod(nonPublic: true)
-            .CreateDelegate(typeof(Func<NetworkStream, Socket>));
 
         private readonly HttpConnectionPoolManager _poolManager;
         private readonly HttpConnectionKind _kind;
@@ -615,12 +608,7 @@ namespace System.Net.Http
                         break;
                 }
 
-                Socket socket = null;
-                if (stream is NetworkStream ns)
-                {
-                    socket = s_getSocketFromNetworkStream(ns);
-                    Debug.Assert(socket != null);
-                }
+                Socket socket = (stream as ExposedSocketNetworkStream)?.Socket; // TODO: Use NetworkStream when https://github.com/dotnet/corefx/issues/35410 is available.
 
                 TransportContext transportContext = null;
                 if (_kind == HttpConnectionKind.Https || _kind == HttpConnectionKind.SslProxyTunnel)

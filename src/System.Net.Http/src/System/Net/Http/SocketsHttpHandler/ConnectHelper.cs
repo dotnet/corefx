@@ -77,7 +77,7 @@ namespace System.Net.Http
                 // Configure the socket and return a stream for it.
                 Socket socket = saea.ConnectSocket;
                 socket.NoDelay = true;
-                return new NetworkStream(socket, ownsSocket: true);
+                return new ExposedSocketNetworkStream(socket, ownsSocket: true);
             }
             catch (Exception error)
             {
