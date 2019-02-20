@@ -343,6 +343,50 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
+        public async Task SendAsync_Cancel_CancellationTokenPropagates()
+        {
+            TaskCompletionSource<bool> clientCanceled = new TaskCompletionSource<bool>();
+            await LoopbackServerFactory.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    var cts = new CancellationTokenSource();
+                    cts.Cancel();
+
+                    CancellationToken? ct = null;
+
+                    using (HttpClient client = CreateHttpClient())
+                    {
+                        bool throwsExpectedException = false;
+                        try
+                        {
+                            await client.GetAsync(uri, cts.Token);
+                        }
+                        catch (OperationCanceledException ex)
+                        {
+                            // Ideally, this would only throw OperationCancelledException, but it can also throw
+                            // TaskCancelledException.
+                            ct = ex.CancellationToken;
+                            throwsExpectedException = true;
+                        }
+
+                        Assert.True(throwsExpectedException, "SendAsync did not throw an exception when cancellation was requested.");
+                        Assert.True(cts.Token.IsCancellationRequested, "cts token IsCancellationRequested");
+
+                        if (!PlatformDetection.IsFullFramework)
+                        {
+                            // .NET Framework has bug where it doesn't propagate token information.
+                            Assert.True(ct.Value.IsCancellationRequested, "exception token IsCancellationRequested");
+                        }
+                        clientCanceled.SetResult(true);
+                    }
+                },
+                async server =>
+                {
+                    Assert.Equal(clientCanceled.Task, await Task.WhenAny(server.HandleRequestAsync(), clientCanceled.Task));
+                });
+        }
+
         private async Task ValidateClientCancellationAsync(Func<Task> clientBodyAsync)
         {
             var stopwatch = Stopwatch.StartNew();
