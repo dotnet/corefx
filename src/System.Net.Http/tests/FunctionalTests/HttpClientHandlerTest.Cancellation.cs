@@ -353,30 +353,16 @@ namespace System.Net.Http.Functional.Tests
                     var cts = new CancellationTokenSource();
                     cts.Cancel();
 
-                    CancellationToken? ct = null;
-
                     using (HttpClient client = CreateHttpClient())
                     {
-                        bool throwsExpectedException = false;
-                        try
-                        {
-                            await client.GetAsync(uri, cts.Token);
-                        }
-                        catch (OperationCanceledException ex)
-                        {
-                            // Ideally, this would only throw OperationCancelledException, but it can also throw
-                            // TaskCancelledException.
-                            ct = ex.CancellationToken;
-                            throwsExpectedException = true;
-                        }
+                        TaskCanceledException ex = await Assert.ThrowsAsync<TaskCanceledException>(() => client.GetAsync(uri, cts.Token));
 
-                        Assert.True(throwsExpectedException, "SendAsync did not throw an exception when cancellation was requested.");
                         Assert.True(cts.Token.IsCancellationRequested, "cts token IsCancellationRequested");
 
                         if (!PlatformDetection.IsFullFramework)
                         {
                             // .NET Framework has bug where it doesn't propagate token information.
-                            Assert.True(ct.Value.IsCancellationRequested, "exception token IsCancellationRequested");
+                            Assert.True(ex.CancellationToken.IsCancellationRequested, "exception token IsCancellationRequested");
                         }
                         clientCanceled.SetResult(true);
                     }
