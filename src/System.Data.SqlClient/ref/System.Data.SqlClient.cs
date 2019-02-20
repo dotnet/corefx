@@ -502,7 +502,6 @@ namespace System.Data.SqlClient
         public override void Close() { }
         public new System.Data.SqlClient.SqlCommand CreateCommand() { throw null; }
         protected override System.Data.Common.DbCommand CreateDbCommand() { throw null; }
-        public override void EnlistTransaction(System.Transactions.Transaction transaction) { }
         public override System.Data.DataTable GetSchema() { throw null; }
         public override System.Data.DataTable GetSchema(string collectionName) { throw null; }
         public override System.Data.DataTable GetSchema(string collectionName, string[] restrictionValues) { throw null; }
@@ -591,7 +590,7 @@ namespace System.Data.SqlClient
         object System.ICloneable.Clone() { throw null; }
         protected override void TerminateBatching() { }
     }
-    public partial class SqlDataReader : System.Data.Common.DbDataReader, System.Data.Common.IDbColumnSchemaGenerator, System.Data.IDataReader, System.Data.IDataRecord, System.IDisposable
+    public partial class SqlDataReader : System.Data.Common.DbDataReader, System.Data.IDataReader, System.Data.IDataRecord, System.IDisposable
     {
         internal SqlDataReader() { }
         protected System.Data.SqlClient.SqlConnection Connection { get { throw null; } }
@@ -803,7 +802,6 @@ namespace System.Data.SqlClient
         public object SqlValue { get { throw null; } set { } }
         public string TypeName { get { throw null; } set { } }
         public string UdtTypeName { get { throw null; } set { } }
-        [System.ComponentModel.TypeConverterAttribute(typeof(System.ComponentModel.StringConverter))]
         public override object Value { get { throw null; } set { } }
         public string XmlSchemaCollectionDatabase { get { throw null; } set { } }
         public string XmlSchemaCollectionName { get { throw null; } set { } }

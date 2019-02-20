@@ -946,7 +946,7 @@ namespace System.Linq.Expressions
     }
     public sealed partial class MemberAssignment : System.Linq.Expressions.MemberBinding
     {
-        internal MemberAssignment() : base (default(System.Linq.Expressions.MemberBindingType), default(System.Reflection.MemberInfo)) { }
+        internal MemberAssignment() { }
         public System.Linq.Expressions.Expression Expression { get { throw null; } }
         public System.Linq.Expressions.MemberAssignment Update(System.Linq.Expressions.Expression expression) { throw null; }
     }
@@ -954,6 +954,7 @@ namespace System.Linq.Expressions
     {
         [System.ObsoleteAttribute("Do not use this constructor. It will be removed in future releases.")]
         protected MemberBinding(System.Linq.Expressions.MemberBindingType type, System.Reflection.MemberInfo member) { }
+        internal MemberBinding() { }
         public System.Linq.Expressions.MemberBindingType BindingType { get { throw null; } }
         public System.Reflection.MemberInfo Member { get { throw null; } }
         public override string ToString() { throw null; }
@@ -987,13 +988,13 @@ namespace System.Linq.Expressions
     }
     public sealed partial class MemberListBinding : System.Linq.Expressions.MemberBinding
     {
-        internal MemberListBinding() : base (default(System.Linq.Expressions.MemberBindingType), default(System.Reflection.MemberInfo)) { }
+        internal MemberListBinding() { }
         public System.Collections.ObjectModel.ReadOnlyCollection<System.Linq.Expressions.ElementInit> Initializers { get { throw null; } }
         public System.Linq.Expressions.MemberListBinding Update(System.Collections.Generic.IEnumerable<System.Linq.Expressions.ElementInit> initializers) { throw null; }
     }
     public sealed partial class MemberMemberBinding : System.Linq.Expressions.MemberBinding
     {
-        internal MemberMemberBinding() : base (default(System.Linq.Expressions.MemberBindingType), default(System.Reflection.MemberInfo)) { }
+        internal MemberMemberBinding() { }
         public System.Collections.ObjectModel.ReadOnlyCollection<System.Linq.Expressions.MemberBinding> Bindings { get { throw null; } }
         public System.Linq.Expressions.MemberMemberBinding Update(System.Collections.Generic.IEnumerable<System.Linq.Expressions.MemberBinding> bindings) { throw null; }
     }
@@ -1164,12 +1165,6 @@ namespace System.Runtime.CompilerServices
         public T Update { get { throw null; } }
         public static System.Runtime.CompilerServices.CallSite<T> Create(System.Runtime.CompilerServices.CallSiteBinder binder) { throw null; }
     }
-    public sealed partial class Closure
-    {
-        public readonly object[] Constants;
-        public readonly object[] Locals;
-        public Closure(object[] constants, object[] locals) { }
-    }
     public abstract partial class DebugInfoGenerator
     {
         protected DebugInfoGenerator() { }
@@ -1226,17 +1221,5 @@ namespace System.Runtime.CompilerServices
     public partial class RuleCache<T> where T : class
     {
         internal RuleCache() { }
-    }
-    public static partial class RuntimeOps
-    {
-        public static System.Runtime.CompilerServices.IRuntimeVariables CreateRuntimeVariables() { throw null; }
-        public static System.Runtime.CompilerServices.IRuntimeVariables CreateRuntimeVariables(object[] data, long[] indexes) { throw null; }
-        public static bool ExpandoCheckVersion(System.Dynamic.ExpandoObject expando, object version) { throw null; }
-        public static void ExpandoPromoteClass(System.Dynamic.ExpandoObject expando, object oldClass, object newClass) { }
-        public static bool ExpandoTryDeleteValue(System.Dynamic.ExpandoObject expando, object indexClass, int index, string name, bool ignoreCase) { throw null; }
-        public static bool ExpandoTryGetValue(System.Dynamic.ExpandoObject expando, object indexClass, int index, string name, bool ignoreCase, out object value) { throw null; }
-        public static object ExpandoTrySetValue(System.Dynamic.ExpandoObject expando, object indexClass, int index, object value, string name, bool ignoreCase) { throw null; }
-        public static System.Runtime.CompilerServices.IRuntimeVariables MergeRuntimeVariables(System.Runtime.CompilerServices.IRuntimeVariables first, System.Runtime.CompilerServices.IRuntimeVariables second, int[] indexes) { throw null; }
-        public static System.Linq.Expressions.Expression Quote(System.Linq.Expressions.Expression expression, object hoistedLocals, object[] locals) { throw null; }
     }
 }
