@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -996,9 +997,14 @@ namespace System.Net.Http.Functional.Tests
                 // but it should still behave in the same way if so.
                 await Task.Delay(500);
 
+                Stopwatch stopwatch = Stopwatch.StartNew();
                 cts.Cancel();
 
                 await Assert.ThrowsAsync<OperationCanceledException>(async () => await sendTask);
+
+                // Ensure that the cancellation occurs promptly
+                stopwatch.Stop();
+                Assert.True(stopwatch.ElapsedMilliseconds < 30000);
 
                 // As the client has not allocated a stream ID when the corresponding request is cancelled,
                 // we do not send a RST stream frame.
@@ -1048,8 +1054,16 @@ namespace System.Net.Http.Functional.Tests
 
                 // The client is waiting for more credit in order to send the last byte of the
                 // request body. Test cancellation at this point.
+                Stopwatch stopwatch = Stopwatch.StartNew();
+
                 cts.Cancel();
                 await Assert.ThrowsAsync<OperationCanceledException>(async () => await clientTask);
+
+                // Ensure that the cancellation occurs promptly
+                stopwatch.Stop();
+                Assert.True(stopwatch.ElapsedMilliseconds < 30000);
+
+                // The server should receive a RstStream frame.
                 frame = await server.ReadFrameAsync(TimeSpan.FromSeconds(30));
                 Assert.Equal(FrameType.RstStream, frame.Type);
             }
