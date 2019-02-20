@@ -429,6 +429,23 @@ namespace System
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
     }
+    public static partial class BitOps
+    {
+        public static int LeadingZeroCount(uint value) { throw null; }
+        public static int LeadingZeroCount(ulong value) { throw null; }
+        public static int Log2(uint value) { throw null; }
+        public static int Log2(ulong value) { throw null; }
+        public static int PopCount(uint value) { throw null; }
+        public static int PopCount(ulong value) { throw null; }
+        public static uint RotateLeft(uint value, int bitOffset) { throw null; }
+        public static ulong RotateLeft(ulong value, int bitOffset) { throw null; }
+        public static uint RotateRight(uint value, int bitOffset) { throw null; }
+        public static ulong RotateRight(ulong value, int bitOffset) { throw null; }
+        public static int TrailingZeroCount(int value) { throw null; }
+        public static int TrailingZeroCount(long value) { throw null; }
+        public static int TrailingZeroCount(uint value) { throw null; }
+        public static int TrailingZeroCount(ulong value) { throw null; }
+    }
     public readonly partial struct Boolean : System.IComparable, System.IComparable<bool>, System.IConvertible, System.IEquatable<bool>
     {
         private readonly bool _dummyPrimitive;
