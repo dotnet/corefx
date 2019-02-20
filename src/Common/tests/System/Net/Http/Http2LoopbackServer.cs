@@ -402,7 +402,7 @@ namespace System.Net.Test.Common
             new HttpHeaderData("if-modified-since", ""),
             new HttpHeaderData("if-none-match", ""),
             new HttpHeaderData("if-range", ""),
-            new HttpHeaderData("if-unmodifiedsince", ""),
+            new HttpHeaderData("if-unmodified-since", ""),
             new HttpHeaderData("last-modified", ""),
             new HttpHeaderData("link", ""),
             new HttpHeaderData("location", ""),

@@ -20,7 +20,6 @@ namespace System.Net.Http
     {
         private readonly HttpConnectionPool _pool;
         private readonly SslStream _stream;
-        private readonly object _syncObject;
 
         // NOTE: These are mutable structs; do not make these readonly.
         private ArrayBuffer _incomingBuffer;
@@ -40,7 +39,7 @@ namespace System.Net.Http
         private bool _expectingSettingsAck;
         private int _initialWindowSize;
         private int _maxConcurrentStreams;
-        private DateTimeOffset _idleSinceTime;
+        private int _idleSinceTickCount;
 
         private bool _disposed;
 
@@ -61,7 +60,6 @@ namespace System.Net.Http
         {
             _pool = pool;
             _stream = stream;
-            _syncObject = new object();
             _incomingBuffer = new ArrayBuffer(InitialConnectionBufferSize);
             _outgoingBuffer = new ArrayBuffer(InitialConnectionBufferSize);
             _headerBuffer = new ArrayBuffer(InitialConnectionBufferSize);
@@ -78,6 +76,8 @@ namespace System.Net.Http
             _initialWindowSize = DefaultInitialWindowSize;
             _maxConcurrentStreams = int.MaxValue;
         }
+
+        private object SyncObject => _httpStreams;
 
         public async Task SetupAsync()
         {
@@ -247,7 +247,7 @@ namespace System.Net.Http
                 throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
             }
 
-            lock (_syncObject)
+            lock (SyncObject)
             {
                 if (!_httpStreams.TryGetValue(streamId, out Http2Stream http2Stream))
                 {
@@ -257,6 +257,9 @@ namespace System.Net.Http
                 return http2Stream;
             }
         }
+
+        private static readonly HPackDecoder.HeaderCallback s_http2StreamOnResponseHeader =
+            (state, name, value) => ((Http2Stream)state).OnResponseHeader(name, value);
 
         private async Task ProcessHeadersFrame(FrameHeader frameHeader)
         {
@@ -273,11 +276,10 @@ namespace System.Net.Http
                 throw new Http2ProtocolException(Http2ProtocolErrorCode.StreamClosed);
             }
 
-            // TODO: Figure out how to cache this delegate.
-            // Probably want to pass a state object to Decode.
-            HPackDecoder.HeaderCallback headerCallback = http2Stream.OnResponseHeader;
-
-            _hpackDecoder.Decode(GetFrameData(_incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length), frameHeader.PaddedFlag, frameHeader.PriorityFlag), headerCallback);
+            _hpackDecoder.Decode(
+                GetFrameData(_incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length), frameHeader.PaddedFlag, frameHeader.PriorityFlag),
+                s_http2StreamOnResponseHeader,
+                http2Stream);
             _incomingBuffer.Discard(frameHeader.Length);
 
             while (!frameHeader.EndHeadersFlag)
@@ -289,7 +291,10 @@ namespace System.Net.Http
                     throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                 }
 
-                _hpackDecoder.Decode(_incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length), headerCallback);
+                _hpackDecoder.Decode(
+                    _incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length),
+                    s_http2StreamOnResponseHeader,
+                    http2Stream);
                 _incomingBuffer.Discard(frameHeader.Length);
             }
 
@@ -461,7 +466,7 @@ namespace System.Net.Http
         {
             Debug.Assert(newSize >= 0);
 
-            lock (_syncObject)
+            lock (SyncObject)
             {
                 int delta = newSize - _initialWindowSize;
                 _initialWindowSize = newSize;
@@ -688,79 +693,125 @@ namespace System.Net.Http
                 (buffer.Slice(0, maxSize), buffer.Slice(maxSize)) :
                 (buffer, Memory<byte>.Empty);
 
-        private void WriteHeader(string name, string value)
+        private void WriteIndexedHeader(int index)
         {
-            // TODO: ISSUE 31307: Use static table for known headers
-
             int bytesWritten;
-            while (!HPackEncoder.EncodeHeader(name, value, _headerBuffer.AvailableSpan, out bytesWritten))
+            while (!HPackEncoder.EncodeIndexedHeaderField(index, _headerBuffer.AvailableSpan, out bytesWritten))
             {
-                _headerBuffer.EnsureAvailableSpace(_headerBuffer.AvailableSpan.Length + 1);
+                _headerBuffer.EnsureAvailableSpace(_headerBuffer.AvailableLength + 1);
             }
 
             _headerBuffer.Commit(bytesWritten);
         }
 
-        private void WriteHeader(string name, string[] values, string separator)
+        private void WriteIndexedHeader(int index, string value)
         {
-            // TODO: ISSUE 31307: Use static table for known headers
-
             int bytesWritten;
-            while (!HPackEncoder.EncodeHeader(name, values, separator, _headerBuffer.AvailableSpan, out bytesWritten))
+            while (!HPackEncoder.EncodeLiteralHeaderFieldWithoutIndexing(index, value, _headerBuffer.AvailableSpan, out bytesWritten))
             {
-                _headerBuffer.EnsureAvailableSpace(_headerBuffer.AvailableSpan.Length + 1);
+                _headerBuffer.EnsureAvailableSpace(_headerBuffer.AvailableLength + 1);
             }
 
             _headerBuffer.Commit(bytesWritten);
+        }
+
+        private void WriteLiteralHeader(string name, string[] values)
+        {
+            int bytesWritten;
+            while (!HPackEncoder.EncodeLiteralHeaderFieldWithoutIndexingNewName(name, values, HttpHeaderParser.DefaultSeparator, _headerBuffer.AvailableSpan, out bytesWritten))
+            {
+                _headerBuffer.EnsureAvailableSpace(_headerBuffer.AvailableLength + 1);
+            }
+
+            _headerBuffer.Commit(bytesWritten);
+        }
+
+        private void WriteLiteralHeaderValues(string[] values, string separator)
+        {
+            int bytesWritten;
+            while (!HPackEncoder.EncodeStringLiterals(values, separator, _headerBuffer.AvailableSpan, out bytesWritten))
+            {
+                _headerBuffer.EnsureAvailableSpace(_headerBuffer.AvailableLength + 1);
+            }
+
+            _headerBuffer.Commit(bytesWritten);
+        }
+
+        private void WriteLiteralHeaderValue(string value)
+        {
+            int bytesWritten;
+            while (!HPackEncoder.EncodeStringLiteral(value, _headerBuffer.AvailableSpan, out bytesWritten))
+            {
+                _headerBuffer.EnsureAvailableSpace(_headerBuffer.AvailableLength + 1);
+            }
+
+            _headerBuffer.Commit(bytesWritten);
+        }
+
+        private void WriteBytes(ReadOnlySpan<byte> bytes)
+        {
+            if (bytes.Length > _headerBuffer.AvailableLength)
+            {
+                _headerBuffer.EnsureAvailableSpace(bytes.Length);
+            }
+
+            bytes.CopyTo(_headerBuffer.AvailableSpan);
+            _headerBuffer.Commit(bytes.Length);
         }
 
         private void WriteHeaderCollection(HttpHeaders headers)
         {
             foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValues())
             {
-                // The Host header is not sent for HTTP2 because we send the ":authority" pseudo-header instead
-                // (see pseudo-header handling below in WriteHeaders)
-                if (header.Key.KnownHeader == KnownHeaders.Host)
-                {
-                    continue;
-                }
-
-                // Filter headers forbidden by HTTP2.
-                if (header.Key.KnownHeader == KnownHeaders.Connection || header.Key.KnownHeader == KnownHeaders.Upgrade ||  header.Key.KnownHeader == KnownHeaders.ProxyConnection)
-                {
-                    continue;
-                }
-
-                if (header.Key.KnownHeader == KnownHeaders.TE)
-                {
-                    // HTTP/2 allows only 'trailers' TE header. rfc7540 8.1.2.2
-                    foreach (string value  in header.Value)
-                    {
-                        if (value == "trailers")
-                        {
-                            WriteHeader(header.Key.Name, value);
-                            break;
-                        }
-                    }
-                    continue;
-                }
-
                 Debug.Assert(header.Value.Length > 0, "No values for header??");
 
-                string separator = null;
-                if (header.Value.Length > 1)
+                KnownHeader knownHeader = header.Key.KnownHeader;
+                if (knownHeader != null)
                 {
-                    HttpHeaderParser parser = header.Key.Parser;
-                    if (parser != null && parser.SupportsMultipleValues)
+                    // The Host header is not sent for HTTP2 because we send the ":authority" pseudo-header instead
+                    // (see pseudo-header handling below in WriteHeaders).
+                    // The Connection, Upgrade and ProxyConnection headers are also not supported in HTTP2.
+                    if (knownHeader != KnownHeaders.Host && knownHeader != KnownHeaders.Connection && knownHeader != KnownHeaders.Upgrade && knownHeader != KnownHeaders.ProxyConnection)
                     {
-                        separator = parser.Separator;
-                    }
-                    else
-                    {
-                        separator = HttpHeaderParser.DefaultSeparator;
+                        if (header.Key.KnownHeader == KnownHeaders.TE)
+                        {
+                            // HTTP/2 allows only 'trailers' TE header. rfc7540 8.1.2.2
+                            foreach (string value  in header.Value)
+                            {
+                                if (value == "trailers")
+                                {
+                                    WriteBytes(knownHeader.Http2EncodedName);
+                                    WriteLiteralHeaderValue(value);
+                                    break;
+                                }
+                            }
+                            continue;
+                        }
+
+                        // For all other known headers, send them via their pre-encoded name and the associated value.
+                        WriteBytes(knownHeader.Http2EncodedName);
+                        string separator = null;
+                        if (header.Value.Length > 1)
+                        {
+                            HttpHeaderParser parser = header.Key.Parser;
+                            if (parser != null && parser.SupportsMultipleValues)
+                            {
+                                separator = parser.Separator;
+                            }
+                            else
+                            {
+                                separator = HttpHeaderParser.DefaultSeparator;
+                            }
+                        }
+
+                        WriteLiteralHeaderValues(header.Value, separator);
                     }
                 }
-                WriteHeader(header.Key.Name, header.Value, separator);
+                else
+                {
+                    // The header is not known: fall back to just encoding the header name and value(s).
+                    WriteLiteralHeader(header.Key.Name, header.Value);
+                }
             }
         }
 
@@ -773,27 +824,40 @@ namespace System.Net.Http
 
             HttpMethod normalizedMethod = HttpMethod.Normalize(request.Method);
 
-            // TODO: ISSUE 31307: Use static table for pseudo-headers
-            WriteHeader(":method", normalizedMethod.Method);
-            WriteHeader(":scheme", "https");
-
-            string authority;
-            if (request.HasHeaders && request.Headers.Host != null)
+            // Method is normalized so we can do reference equality here.
+            if (ReferenceEquals(normalizedMethod, HttpMethod.Get))
             {
-                authority = request.Headers.Host;
+                WriteIndexedHeader(StaticTable.MethodGet);
+            }
+            else if (ReferenceEquals(normalizedMethod, HttpMethod.Post))
+            {
+                WriteIndexedHeader(StaticTable.MethodPost);
             }
             else
             {
-                authority = request.RequestUri.IdnHost;
-                if (!request.RequestUri.IsDefaultPort)
-                {
-                    // TODO: Avoid allocation here by caching this on the connection or pool
-                    authority += ":" + request.RequestUri.Port;
-                }
+                WriteIndexedHeader(StaticTable.MethodGet, normalizedMethod.Method);
             }
 
-            WriteHeader(":authority", authority);
-            WriteHeader(":path", request.RequestUri.PathAndQuery);
+            WriteIndexedHeader(StaticTable.SchemeHttps);
+
+            if (request.HasHeaders && request.Headers.Host != null)
+            {
+                WriteIndexedHeader(StaticTable.Authority, request.Headers.Host);
+            }
+            else
+            {
+                WriteBytes(_pool._encodedAuthorityHostHeader);
+            }
+
+            string pathAndQuery = request.RequestUri.PathAndQuery;
+            if (pathAndQuery == "/")
+            {
+                WriteIndexedHeader(StaticTable.PathSlash);
+            }
+            else
+            {
+                WriteIndexedHeader(StaticTable.PathSlash, pathAndQuery);
+            }
 
             if (request.HasHeaders)
             {
@@ -806,7 +870,8 @@ namespace System.Net.Http
                 string cookiesFromContainer = _pool.Settings._cookieContainer.GetCookieHeader(request.RequestUri);
                 if (cookiesFromContainer != string.Empty)
                 {
-                    WriteHeader(HttpKnownHeaderNames.Cookie, cookiesFromContainer);
+                    WriteBytes(KnownHeaders.Cookie.Http2EncodedName);
+                    WriteLiteralHeaderValue(cookiesFromContainer);
                 }
             }
 
@@ -816,8 +881,8 @@ namespace System.Net.Http
                 // unless this is a method that never has a body.
                 if (normalizedMethod.MustHaveRequestBody)
                 {
-                    // TODO: ISSUE 31307: Use static table for Content-Length
-                    WriteHeader("Content-Length", "0");
+                    WriteBytes(KnownHeaders.ContentLength.Http2EncodedName);
+                    WriteLiteralHeaderValue("0");
                 }
             }
             else
@@ -984,7 +1049,7 @@ namespace System.Net.Http
         }
 
         /// <summary>Gets whether the connection exceeded any of the connection limits.</summary>
-        /// <param name="now">The current time.  Passed in to amortize the cost of calling DateTime.UtcNow.</param>
+        /// <param name="nowTicks">The current tick count.  Passed in to amortize the cost of calling Environment.TickCount.</param>
         /// <param name="connectionLifetime">How long a connection can be open to be considered reusable.</param>
         /// <param name="connectionIdleTimeout">How long a connection can have been idle in the pool to be considered reusable.</param>
         /// <returns>
@@ -995,7 +1060,7 @@ namespace System.Net.Http
         /// the nature of connection pooling.
         /// </returns>
 
-        public bool IsExpired(DateTimeOffset now,
+        public bool IsExpired(int nowTicks,
                               TimeSpan connectionLifetime,
                               TimeSpan connectionIdleTimeout)
 
@@ -1006,20 +1071,21 @@ namespace System.Net.Http
             }
 
             // Check idle timeout when there are not pending requests for a while.
-            if ((connectionIdleTimeout != Timeout.InfiniteTimeSpan) && (_httpStreams.Count == 0) &&
-                    (now - _idleSinceTime > connectionIdleTimeout))
+            if ((connectionIdleTimeout != Timeout.InfiniteTimeSpan) &&
+                (_httpStreams.Count == 0) &&
+                ((uint)(nowTicks - _idleSinceTickCount) > connectionIdleTimeout.TotalMilliseconds))
             {
-                if (NetEventSource.IsEnabled) Trace($"Connection no longer usable. Idle {now - _idleSinceTime} > {connectionIdleTimeout}.");
+                if (NetEventSource.IsEnabled) Trace($"Connection no longer usable. Idle {TimeSpan.FromMilliseconds((uint)(nowTicks - _idleSinceTickCount))} > {connectionIdleTimeout}.");
 
                 return true;
             }
 
-            return LifetimeExpired(now, connectionLifetime);
+            return LifetimeExpired(nowTicks, connectionLifetime);
         }
 
         private void AbortStreams(int lastValidStream)
         {
-            lock (_syncObject)
+            lock (SyncObject)
             {
                 if (!_disposed)
                 {
@@ -1048,7 +1114,7 @@ namespace System.Net.Http
         private void CheckForShutdown()
         {
             Debug.Assert(_disposed);
-            Debug.Assert(Monitor.IsEntered(_syncObject));
+            Debug.Assert(Monitor.IsEntered(SyncObject));
 
             // Check if dictionary has become empty
             if (_httpStreams.Count != 0)
@@ -1066,7 +1132,7 @@ namespace System.Net.Http
 
         public void Dispose()
         {
-            lock (_syncObject)
+            lock (SyncObject)
             {
                 if (!_disposed)
                 {
@@ -1206,18 +1272,18 @@ namespace System.Net.Http
             {
                 http2Stream?.Dispose();
 
-                if (e is IOException ioe)
+                if (e is IOException)
                 {
-                    throw new HttpRequestException(SR.net_http_client_execution_error, ioe);
+                    throw new HttpRequestException(SR.net_http_client_execution_error, e);
                 }
                 else if (e is ObjectDisposedException)
                 {
-                    throw new HttpRequestException(SR.net_http_client_execution_error);
+                    throw new HttpRequestException(SR.net_http_client_execution_error, e);
                 }
                 else if (e is Http2ProtocolException)
                 {
                     // ISSUE 31315: Determine if/how to expose HTTP2 error codes
-                    throw new HttpRequestException(SR.net_http_client_execution_error);
+                    throw new HttpRequestException(SR.net_http_client_execution_error, e);
                 }
                 else
                 {
@@ -1230,7 +1296,7 @@ namespace System.Net.Http
 
         private Http2Stream AddStream(HttpRequestMessage request)
         {
-            lock (_syncObject)
+            lock (SyncObject)
             {
                 if (_disposed || _nextStream == MaxStreamId)
                 {
@@ -1254,7 +1320,7 @@ namespace System.Net.Http
 
         private void RemoveStream(Http2Stream http2Stream)
         {
-            lock (_syncObject)
+            lock (SyncObject)
             {
                 if (!_httpStreams.Remove(http2Stream.StreamId, out Http2Stream removed))
                 {
@@ -1268,7 +1334,7 @@ namespace System.Net.Http
                 if (_httpStreams.Count == 0)
                 {
                     // If this was last pending request, get timestamp so we can monitor idle time.
-                    _idleSinceTime = DateTimeOffset.UtcNow;
+                    _idleSinceTickCount = Environment.TickCount;
                 }
 
                 if (_disposed)
