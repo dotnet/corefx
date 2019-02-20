@@ -55,11 +55,12 @@ jobs:
     - template: ../common/templates/job/job.yml
       parameters:
         variables:
-        - group: DotNet-Blob-Feed
         - name: _dotnetFeedUrl
           value: https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
         - name: _targetOS
           value: ${{ parameters.targetOS }}
+        - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
+          - group: DotNet-Blob-Feed
 
         # pass along job variables
         - ${{ each variable in job.variables }}:
