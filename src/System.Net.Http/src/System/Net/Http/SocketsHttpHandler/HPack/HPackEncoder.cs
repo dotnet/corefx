@@ -213,7 +213,7 @@ namespace System.Net.Http.HPack
             return false;
         }
 
-        private static bool EncodeStringLiteralStringPart(string value, Span<byte> destination, out int bytesWritten)
+        private static bool EncodeStringLiteralValue(string value, Span<byte> destination, out int bytesWritten)
         {
             if (value.Length <= destination.Length)
             {
@@ -254,7 +254,7 @@ namespace System.Net.Http.HPack
                 {
                     Debug.Assert(integerLength >= 1);
 
-                    if (EncodeStringLiteralStringPart(value, destination.Slice(integerLength), out int valueLength))
+                    if (EncodeStringLiteralValue(value, destination.Slice(integerLength), out int valueLength))
                     {
                         bytesWritten = integerLength + valueLength;
                         return true;
@@ -275,7 +275,7 @@ namespace System.Net.Http.HPack
 
                 if (values.Length == 0)
                 {
-                    return EncodeStringLiteral(null, destination, out bytesWritten);
+                    return EncodeStringLiteral("", destination, out bytesWritten);
                 }
                 else if (values.Length == 1)
                 {
@@ -297,14 +297,14 @@ namespace System.Net.Http.HPack
                     int encodedLength = 0;
                     for (int j = 0; j < values.Length; j++)
                     {
-                        if (j != 0 && !EncodeStringLiteralStringPart(separator, destination.Slice(integerLength), out encodedLength))
+                        if (j != 0 && !EncodeStringLiteralValue(separator, destination.Slice(integerLength), out encodedLength))
                         {
                             return false;
                         }
 
                         integerLength += encodedLength;
 
-                        if (!EncodeStringLiteralStringPart(values[j], destination.Slice(integerLength), out encodedLength))
+                        if (!EncodeStringLiteralValue(values[j], destination.Slice(integerLength), out encodedLength))
                         {
                             return false;
                         }
