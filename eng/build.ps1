@@ -3,7 +3,7 @@ Param(
   [switch][Alias('b')]$build,
   [switch] $buildtests,
   [string][Alias('c')]$configuration = "Debug",
-  [string] $framework,
+  [string][Alias('f')]$framework,
   [string] $os,
   [switch] $allconfigurations,
   [switch] $coverage,
@@ -12,18 +12,17 @@ Param(
   [switch] $help,
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
-
 function Print-Usage() {
-    Write-Host "Default if no arguments are passed in: -restore -build"
+    Write-Host "Default if no actions are passed in: -restore -build"
     Write-Host ""
     Write-Host "CoreFX specific settings:"
-    Write-Host "  -buildtests             Build test projects. Can be used as a target or as an option."
-    Write-Host "  -framework              The target group assemblies are built for."
-    Write-Host "  -os                     The operating system assemblies are built for."
-    Write-Host "  -allconfigurations      Build packages for all build configurations."
-    Write-Host "  -coverage               Collect code coverage when testing."
-    Write-Host "  -outerloop              Include tests which are marked as OuterLoop."
-    Write-Host "  -arch                   The architecture group."
+    Write-Host "  -buildtests             Build test projects. Can be used as a target or as an option"
+    Write-Host "  -framework              The target group assemblies are built for (short: -f)"
+    Write-Host "  -os                     The operating system assemblies are built for"
+    Write-Host "  -allconfigurations      Build packages for all build configurations"
+    Write-Host "  -coverage               Collect code coverage when testing"
+    Write-Host "  -outerloop              Include tests which are marked as OuterLoop"
+    Write-Host "  -arch                   The architecture group"
     Write-Host ""
 }
 
@@ -33,7 +32,14 @@ if ($help -or (($null -ne $properties) -and ($properties.Contains("/help") -or $
   exit 0
 }
 
-if ($PSBoundParameters.Count -eq 0) {
+# Check if an action is passed in
+$actions = "r","restore","b","build","rebuild","deploy","deployDeps","test","integrationTest","performanceTest","sign","publish","buildtests"
+$actionPassedIn = @(Compare-Object -ReferenceObject @($PSBoundParameters.Keys) -DifferenceObject $actions -ExcludeDifferent -IncludeEqual).Length -ne 0
+if ($null -ne $properties -and $actionPassedIn -ne $true) {
+  $actionPassedIn = @(Compare-Object -ReferenceObject $properties -DifferenceObject $actions.ForEach({ "-" + $_ }) -ExcludeDifferent -IncludeEqual).Length -ne 0
+}
+
+if (!$actionPassedIn) {
   $arguments = "-restore -build"
 }
 
