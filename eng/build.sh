@@ -23,7 +23,7 @@ usage()
   echo "  --allconfigurations      Build packages for all build configurations"
   echo "  --coverage               Collect code coverage when testing"
   echo "  --outerloop              Include tests which are marked as OuterLoop"
-  echo "  --arch                   The architecture group (short: -a)"
+  echo "  --arch                   The architecture group"
   echo ""
 }
 
@@ -45,7 +45,7 @@ while (($# > 0)); do
       usage
       exit 0
       ;;
-     --arch|-a)
+     --arch)
       arguments="$arguments /p:ArchGroup=$2"
       shift 2
       ;;

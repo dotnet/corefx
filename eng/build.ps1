@@ -8,7 +8,7 @@ Param(
   [switch] $allconfigurations,
   [switch] $coverage,
   [switch] $outerloop,
-  [string][Alias('a')]$arch,
+  [string] $arch,
   [switch] $help,
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
@@ -22,7 +22,7 @@ function Print-Usage() {
     Write-Host "  -allconfigurations      Build packages for all build configurations"
     Write-Host "  -coverage               Collect code coverage when testing"
     Write-Host "  -outerloop              Include tests which are marked as OuterLoop"
-    Write-Host "  -arch                   The architecture group (short: -a)"
+    Write-Host "  -arch                   The architecture group"
     Write-Host ""
 }
 
