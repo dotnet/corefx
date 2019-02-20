@@ -153,6 +153,12 @@ namespace System.Runtime.InteropServices
         public static bool operator ==(System.Runtime.InteropServices.ArrayWithOffset a, System.Runtime.InteropServices.ArrayWithOffset b) { throw null; }
         public static bool operator !=(System.Runtime.InteropServices.ArrayWithOffset a, System.Runtime.InteropServices.ArrayWithOffset b) { throw null; }
     }
+    [System.FlagsAttribute]
+    public enum AssemblyRegistrationFlags
+    {
+        None = 0,
+        SetCodeBase = 1,
+    }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Interface, Inherited=false)]
     public sealed partial class AutomationProxyAttribute : System.Attribute
     {
@@ -218,12 +224,16 @@ namespace System.Runtime.InteropServices
         public ComAwareEventInfo(System.Type type, string eventName) { }
         public override System.Reflection.EventAttributes Attributes { get { throw null; } }
         public override System.Type DeclaringType { get { throw null; } }
+        public override int MetadataToken { get { throw null; } }
+        public override System.Reflection.Module Module { get { throw null; } }
         public override string Name { get { throw null; } }
         public override System.Type ReflectedType { get { throw null; } }
         public override void AddEventHandler(object target, System.Delegate handler) { }
         public override System.Reflection.MethodInfo GetAddMethod(bool nonPublic) { throw null; }
         public override object[] GetCustomAttributes(bool inherit) { throw null; }
         public override object[] GetCustomAttributes(System.Type attributeType, bool inherit) { throw null; }
+        public override System.Collections.Generic.IList<System.Reflection.CustomAttributeData> GetCustomAttributesData() { throw null; }
+        public override System.Reflection.MethodInfo[] GetOtherMethods(bool nonPublic) { throw null; }
         public override System.Reflection.MethodInfo GetRaiseMethod(bool nonPublic) { throw null; }
         public override System.Reflection.MethodInfo GetRemoveMethod(bool nonPublic) { throw null; }
         public override bool IsDefined(System.Type attributeType, bool inherit) { throw null; }
@@ -405,6 +415,12 @@ namespace System.Runtime.InteropServices
         public ErrorWrapper(object errorCode) { }
         public int ErrorCode { get { throw null; } }
     }
+    public enum ExporterEventKind
+    {
+        ERROR_REFTOINVALIDASSEMBLY = 2,
+        NOTIF_CONVERTWARNING = 1,
+        NOTIF_TYPECONVERTED = 0,
+    }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Delegate | System.AttributeTargets.Enum | System.AttributeTargets.Interface | System.AttributeTargets.Struct, Inherited=false)]
     public sealed partial class GuidAttribute : System.Attribute
     {
@@ -454,6 +470,19 @@ namespace System.Runtime.InteropServices
     public partial interface ICustomQueryInterface
     {
         System.Runtime.InteropServices.CustomQueryInterfaceResult GetInterface(ref System.Guid iid, out System.IntPtr ppv);
+    }
+    [System.AttributeUsageAttribute(AttributeTargets.Class | AttributeTargets.Assembly, Inherited=false)]
+    public sealed partial class IDispatchImplAttribute : System.Attribute
+    {
+        public IDispatchImplAttribute(short implType) { }
+        public IDispatchImplAttribute(System.Runtime.InteropServices.IDispatchImplType implType) { }
+        public System.Runtime.InteropServices.IDispatchImplType Value { get { throw null; } }
+    }
+    public enum IDispatchImplType
+    {
+        CompatibleImpl = 2,
+        InternalImpl = 1,
+        SystemDefinedImpl = 0,
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly, Inherited=false)]
     public sealed partial class ImportedFromTypeLibAttribute : System.Attribute
@@ -758,6 +787,37 @@ namespace System.Runtime.InteropServices
         public ProgIdAttribute(string progId) { }
         public string Value { get { throw null; } }
     }
+    [System.FlagsAttribute]
+    public enum RegistrationClassContext
+    {
+        DisableActivateAsActivator = 32768,
+        EnableActivateAsActivator = 65536,
+        EnableCodeDownload = 8192,
+        FromDefaultContext = 131072,
+        InProcessHandler = 2,
+        InProcessHandler16 = 32,
+        InProcessServer = 1,
+        InProcessServer16 = 8,
+        LocalServer = 4,
+        NoCodeDownload = 1024,
+        NoCustomMarshal = 4096,
+        NoFailureLog = 16384,
+        RemoteServer = 16,
+        Reserved1 = 64,
+        Reserved2 = 128,
+        Reserved3 = 256,
+        Reserved4 = 512,
+        Reserved5 = 2048,
+    }
+    [System.FlagsAttribute]
+    public enum RegistrationConnectionType
+    {
+        MultipleUse = 1,
+        MultiSeparate = 2,
+        SingleUse = 0,
+        Surrogate = 8,
+        Suspended = 4,
+    }
     public static partial class RuntimeEnvironment
     {
         public static string SystemConfigurationFile { get { throw null; } }
@@ -811,6 +871,11 @@ namespace System.Runtime.InteropServices
         public SEHException(string message) { }
         public SEHException(string message, System.Exception inner) { }
         public virtual bool CanResume() { throw null; }
+    }
+    [System.AttributeUsageAttribute(AttributeTargets.Assembly, Inherited=false)]
+    public sealed partial class SetWin32ContextInIDispatchAttribute : System.Attribute
+    {
+        public SetWin32ContextInIDispatchAttribute() { }
     }
     public partial class StandardOleMarshalObject : System.MarshalByRefObject
     {
@@ -1259,6 +1324,7 @@ namespace System.Runtime.InteropServices.ComTypes
         void EnumConnectionPoints(out System.Runtime.InteropServices.ComTypes.IEnumConnectionPoints ppEnum);
         void FindConnectionPoint(ref System.Guid riid, out System.Runtime.InteropServices.ComTypes.IConnectionPoint ppCP);
     }
+    [System.CLSCompliantAttribute(false)]
     public partial interface IDataObject
     {
         int DAdvise(ref System.Runtime.InteropServices.ComTypes.FORMATETC pFormatetc, System.Runtime.InteropServices.ComTypes.ADVF advf, System.Runtime.InteropServices.ComTypes.IAdviseSink adviseSink, out int connection);

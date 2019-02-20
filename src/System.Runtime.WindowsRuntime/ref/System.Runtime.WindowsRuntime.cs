@@ -125,6 +125,16 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public static byte[] ToArray(this global::Windows.Storage.Streams.IBuffer source, uint sourceIndex, int count) { throw null; }
     }
 }
+namespace System.Threading
+{
+    public delegate void DispatcherQueueHandler();
+    public enum DispatcherQueuePriority
+    {
+        High = 10,
+        Low = -10,
+        Normal = 0,
+    }
+}
 namespace Windows.Foundation
 {
     public partial struct Point : global::System.IFormattable

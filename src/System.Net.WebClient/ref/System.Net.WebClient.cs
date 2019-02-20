@@ -75,7 +75,7 @@ namespace System.Net
     {
         public WebClient() { }
         [System.Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
-         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public bool AllowReadStreamBuffering { get { throw null; } set { } }
         [System.Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]

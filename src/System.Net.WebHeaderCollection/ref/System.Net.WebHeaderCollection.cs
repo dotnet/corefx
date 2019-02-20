@@ -84,7 +84,7 @@ namespace System.Net
         Warning = 9,
         WwwAuthenticate = 29,
     }
-    public partial class WebHeaderCollection : System.Collections.Specialized.NameValueCollection, System.Collections.IEnumerable, System.Runtime.Serialization.ISerializable
+    public partial class WebHeaderCollection : System.Collections.Specialized.NameValueCollection, System.Runtime.Serialization.ISerializable
     {
         public WebHeaderCollection() { }
         protected WebHeaderCollection(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
@@ -92,7 +92,6 @@ namespace System.Net
         public override int Count { get { throw null; } }
         public string this[System.Net.HttpRequestHeader header] { get { throw null; } set { } }
         public string this[System.Net.HttpResponseHeader header] { get { throw null; } set { } }
-        public new string this[string name] { get { throw null; } set { } }
         public override System.Collections.Specialized.NameObjectCollectionBase.KeysCollection Keys { get { throw null; } }
         public void Add(System.Net.HttpRequestHeader header, string value) { }
         public void Add(System.Net.HttpResponseHeader header, string value) { }

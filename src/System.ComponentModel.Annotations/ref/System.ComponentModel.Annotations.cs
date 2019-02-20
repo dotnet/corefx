@@ -51,6 +51,7 @@ namespace System.ComponentModel.DataAnnotations
     {
         public CustomValidationAttribute(System.Type validatorType, string method) { }
         public string Method { get { throw null; } }
+        public override bool RequiresValidationContext { get { throw null; } }
         public System.Type ValidatorType { get { throw null; } }
         public override string FormatErrorMessage(string name) { throw null; }
         protected override System.ComponentModel.DataAnnotations.ValidationResult IsValid(object value, System.ComponentModel.DataAnnotations.ValidationContext validationContext) { throw null; }

@@ -3140,6 +3140,7 @@ namespace System.Data.SqlTypes
     [System.Xml.Serialization.XmlSchemaProviderAttribute("GetXsdType")]
     public partial struct SqlSingle : System.Data.SqlTypes.INullable, System.IComparable, System.Xml.Serialization.IXmlSerializable
     {
+        private object _dummy;
         private int _dummyPrimitive;
         public static readonly System.Data.SqlTypes.SqlSingle MaxValue;
         public static readonly System.Data.SqlTypes.SqlSingle MinValue;

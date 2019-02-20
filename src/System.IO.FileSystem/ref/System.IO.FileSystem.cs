@@ -251,6 +251,8 @@ namespace System.IO.Enumeration
 {
     public ref partial struct FileSystemEntry
     {
+        private object _dummy;
+        private int _dummyPrimitive;
         public System.IO.FileAttributes Attributes { get { throw null; } }
         public System.DateTimeOffset CreationTimeUtc { get { throw null; } }
         public System.ReadOnlySpan<char> Directory { get { throw null; } }
@@ -284,6 +286,7 @@ namespace System.IO.Enumeration
         protected virtual bool ContinueOnError(int error) { throw null; }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
+        ~FileSystemEnumerator() { }
         public bool MoveNext() { throw null; }
         protected virtual void OnDirectoryFinished(System.ReadOnlySpan<char> directory) { }
         public void Reset() { }

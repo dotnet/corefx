@@ -26,6 +26,7 @@ namespace System
         public static void ThrowsAny<TFirstExceptionType, TSecondExceptionType, TThirdExceptionType>(System.Action action) where TFirstExceptionType : System.Exception where TSecondExceptionType : System.Exception where TThirdExceptionType : System.Exception { }
         public static System.Threading.Tasks.Task<T> ThrowsAsync<T>(string paramName, System.Func<System.Threading.Tasks.Task> testCode) where T : System.ArgumentException { throw null; }
         public static void ThrowsIf<T>(bool condition, System.Action action) where T : System.Exception { }
+        public static T Throws<T>(System.Action action) where T : System.Exception { throw null; }
         public static void Throws<T>(System.Action action, string message) where T : System.Exception { }
         public static T Throws<T>(string paramName, System.Action action) where T : System.ArgumentException { throw null; }
         public static T Throws<T>(string paramName, System.Func<object> testCode) where T : System.ArgumentException { throw null; }
@@ -150,7 +151,7 @@ namespace System.Diagnostics
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string, string, string, string> method, string arg1, string arg2, string arg3, string arg4, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string, string, string> method, string arg1, string arg2, string arg3, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string, string> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string> method, string arg1, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
+        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string> method, string arg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<int> method, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, int> method, string arg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, int> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
@@ -164,11 +165,15 @@ namespace System.Diagnostics
         public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvokeRaw(System.Delegate method, string unparsedArg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
         public sealed partial class RemoteInvokeHandle : System.IDisposable
         {
-            public RemoteInvokeHandle(System.Diagnostics.Process process, System.Diagnostics.RemoteInvokeOptions options, string assemblyName, string className, string methodName) { }
+            public RemoteInvokeHandle(System.Diagnostics.Process process, System.Diagnostics.RemoteInvokeOptions options, string assemblyName = null, string className = null, string methodName = null) { }
+            public string AssemblyName { get { throw null; } }
+            public string ClassName { get { throw null; } }
             public int ExitCode { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+            public string MethodName { get { throw null; } }
             public System.Diagnostics.RemoteInvokeOptions Options { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
             public System.Diagnostics.Process Process { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } [System.Runtime.CompilerServices.CompilerGeneratedAttribute]set { } }
             public void Dispose() { }
+            ~RemoteInvokeHandle() { }
         }
     }
     public sealed partial class RemoteInvokeOptions
@@ -190,6 +195,7 @@ namespace System.IO
     {
         protected FileCleanupTestBase() { }
         protected string TestDirectory { [System.Runtime.CompilerServices.CompilerGeneratedAttribute]get { throw null; } }
+        protected static bool IsProcessElevated { get { throw null; } }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         ~FileCleanupTestBase() { }

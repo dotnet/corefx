@@ -197,7 +197,7 @@ namespace System.Text.RegularExpressions
         public override string ToString() { throw null; }
         public static string Unescape(string str) { throw null; }
         protected bool UseOptionC() { throw null; }
-        protected bool UseOptionR() { throw null; }
+        protected internal bool UseOptionR() { throw null; }
         protected internal static void ValidateMatchTimeout(System.TimeSpan matchTimeout) { }
     }
     public partial class RegexCompilationInfo
@@ -221,7 +221,7 @@ namespace System.Text.RegularExpressions
         public string Input { get { throw null; } }
         public System.TimeSpan MatchTimeout { get { throw null; } }
         public string Pattern { get { throw null; } }
-        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo si, System.Runtime.Serialization.StreamingContext context) { }
+        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     [System.FlagsAttribute]
     public enum RegexOptions

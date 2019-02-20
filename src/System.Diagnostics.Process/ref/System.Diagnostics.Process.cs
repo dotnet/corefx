@@ -28,7 +28,7 @@ namespace System.Diagnostics
         public MonitoringDescriptionAttribute(string description) { }
         public override string Description { get { throw null; } }
     }
-    public partial class Process : System.ComponentModel.Component
+    public partial class Process : System.ComponentModel.Component, System.IDisposable
     {
         public Process() { }
         public int BasePriority { get { throw null; } }
@@ -183,10 +183,10 @@ namespace System.Diagnostics
         public System.Text.Encoding StandardOutputEncoding { get { throw null; } set { } }
         public string UserName { get { throw null; } set { } }
         public bool UseShellExecute { get { throw null; } set { } }
-        [System.ComponentModel.DefaultValueAttribute(null)]
+        [System.ComponentModel.DefaultValueAttribute("")]
         public string Verb { get { throw null; } set { } }
         public string[] Verbs { get { throw null; } }
-        [System.ComponentModel.DefaultValueAttribute(null)]
+        [System.ComponentModel.DefaultValueAttribute(System.Diagnostics.ProcessWindowStyle.Normal)]
         public System.Diagnostics.ProcessWindowStyle WindowStyle { get { throw null; } set { } }
         public string WorkingDirectory { get { throw null; } set { } }
     }

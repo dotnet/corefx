@@ -55,21 +55,21 @@ namespace System.Data.Common
     public abstract partial class DBDataPermission : System.Security.CodeAccessPermission, System.Security.Permissions.IUnrestrictedPermission
     {
         protected DBDataPermission() { }
-        protected DBDataPermission(System.Data.Common.DBDataPermission permission) { }
-        protected DBDataPermission(System.Data.Common.DBDataPermissionAttribute permissionAttribute) { }
+        protected DBDataPermission(System.Data.Common.DBDataPermission dataPermission) { }
+        protected DBDataPermission(System.Data.Common.DBDataPermissionAttribute attribute) { }
         protected DBDataPermission(System.Security.Permissions.PermissionState state) { }
-        protected DBDataPermission(System.Security.Permissions.PermissionState state, bool allowBlankPassword) { }
+        protected DBDataPermission(System.Security.Permissions.PermissionState state, bool blankPassword) { }
         public bool AllowBlankPassword { get { throw null; } set { } }
         public virtual void Add(string connectionString, string restrictions, System.Data.KeyRestrictionBehavior behavior) { }
         protected void Clear() { }
         public override System.Security.IPermission Copy() { throw null; }
         protected virtual System.Data.Common.DBDataPermission CreateInstance() { throw null; }
-        public override void FromXml(System.Security.SecurityElement securityElement) { }
+        public override void FromXml(System.Security.SecurityElement elem) { }
         public override System.Security.IPermission Intersect(System.Security.IPermission target) { throw null; }
         public override bool IsSubsetOf(System.Security.IPermission target) { throw null; }
         public bool IsUnrestricted() { throw null; }
         public override System.Security.SecurityElement ToXml() { throw null; }
-        public override System.Security.IPermission Union(System.Security.IPermission target) { throw null; }
+        public override System.Security.IPermission Union(System.Security.IPermission other) { throw null; }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Constructor | System.AttributeTargets.Method | System.AttributeTargets.Struct, AllowMultiple=true, Inherited=false)]
     public abstract partial class DBDataPermissionAttribute : System.Security.Permissions.CodeAccessSecurityAttribute
@@ -544,6 +544,7 @@ namespace System.Security
         public HostProtectionException(string message, System.Security.Permissions.HostProtectionResource protectedResources, System.Security.Permissions.HostProtectionResource demandedResources) { }
         public System.Security.Permissions.HostProtectionResource DemandedResources { get { throw null; } }
         public System.Security.Permissions.HostProtectionResource ProtectedResources { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
     }
     public partial class HostSecurityManager
@@ -1080,7 +1081,7 @@ namespace System.Security.Permissions
         public PrincipalPermission(string name, string role, bool isAuthenticated) { }
         public System.Security.IPermission Copy() { throw null; }
         public void Demand() { }
-        public override bool Equals(object o) { throw null; }
+        public override bool Equals(object obj) { throw null; }
         public void FromXml(System.Security.SecurityElement elem) { }
         public override int GetHashCode() { throw null; }
         public System.Security.IPermission Intersect(System.Security.IPermission target) { throw null; }
@@ -1890,7 +1891,7 @@ namespace System.Security.Policy
         public string Url { get { throw null; } set { } }
         public bool Check(System.Security.Policy.Evidence evidence) { throw null; }
         public System.Security.Policy.IMembershipCondition Copy() { throw null; }
-        public override bool Equals(object o) { throw null; }
+        public override bool Equals(object obj) { throw null; }
         public void FromXml(System.Security.SecurityElement e) { }
         public void FromXml(System.Security.SecurityElement e, System.Security.Policy.PolicyLevel level) { }
         public override int GetHashCode() { throw null; }
@@ -1958,7 +1959,7 @@ namespace System.ServiceProcess
         public System.ServiceProcess.ServiceControllerPermissionAccess PermissionAccess { get { throw null; } }
         public string ServiceName { get { throw null; } }
     }
-    public sealed partial class ServiceControllerPermissionEntryCollection : System.Collections.CollectionBase
+    public partial class ServiceControllerPermissionEntryCollection : System.Collections.CollectionBase
     {
         internal ServiceControllerPermissionEntryCollection() { }
         public System.ServiceProcess.ServiceControllerPermissionEntry this[int index] { get { throw null; } set { } }

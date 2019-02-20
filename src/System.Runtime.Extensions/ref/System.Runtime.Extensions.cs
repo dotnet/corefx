@@ -65,6 +65,7 @@ namespace System
         [Obsolete("AppDomain.GetCurrentThreadId has been deprecated because it does not provide a stable Id when managed threads are running on fibers (aka lightweight threads). To get a stable identifier for a managed thread, use the ManagedThreadId property on Thread.  https://go.microsoft.com/fwlink/?linkid=14202", false)]
         public static int GetCurrentThreadId() { throw null; }
         public object GetData(string name) { throw null; }
+        public System.Security.Principal.IPrincipal GetThreadPrincipal() { throw null; }
         public System.Nullable<bool> IsCompatibilitySwitchSet(string value) { throw null; }
         public bool IsDefaultAppDomain() { throw null; }
         public bool IsFinalizingForUnload() { throw null; }
@@ -989,10 +990,10 @@ namespace System
     }
     public static partial class StringNormalizationExtensions
     {
-        public static bool IsNormalized(this string value) { throw null; }
-        public static bool IsNormalized(this string value, System.Text.NormalizationForm normalizationForm) { throw null; }
-        public static string Normalize(this string value) { throw null; }
-        public static string Normalize(this string value, System.Text.NormalizationForm normalizationForm) { throw null; }
+        public static bool IsNormalized(this string strInput) { throw null; }
+        public static bool IsNormalized(this string strInput, System.Text.NormalizationForm normalizationForm) { throw null; }
+        public static string Normalize(this string strInput) { throw null; }
+        public static string Normalize(this string strInput, System.Text.NormalizationForm normalizationForm) { throw null; }
     }
     public partial class UriBuilder
     {
@@ -1305,6 +1306,8 @@ namespace System.IO
         public System.IO.Stream UnderlyingStream { get { throw null; } }
         public override System.IAsyncResult BeginRead(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { throw null; }
         public override System.IAsyncResult BeginWrite(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { throw null; }
+        public override void CopyTo(System.IO.Stream destination, int bufferSize) { }
+        public override System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize, System.Threading.CancellationToken cancellationToken) { throw null; }
         protected override void Dispose(bool disposing) { }
         public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override int EndRead(System.IAsyncResult asyncResult) { throw null; }
@@ -1312,12 +1315,16 @@ namespace System.IO
         public override void Flush() { }
         public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         public override int Read(byte[] array, int offset, int count) { throw null; }
+        public override int Read(System.Span<byte> destination) { throw null; }
         public override System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public override System.Threading.Tasks.ValueTask<int> ReadAsync(System.Memory<byte> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override int ReadByte() { throw null; }
         public override long Seek(long offset, System.IO.SeekOrigin origin) { throw null; }
         public override void SetLength(long value) { }
         public override void Write(byte[] array, int offset, int count) { }
+        public override void Write(System.ReadOnlySpan<byte> buffer) { }
         public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override void WriteByte(byte value) { }
     }
     public partial class EndOfStreamException : System.IO.IOException
@@ -1524,15 +1531,19 @@ namespace System.IO
         public override void Write(char[] buffer, int index, int count) { }
         public override void Write(System.ReadOnlySpan<char> buffer) { }
         public override void Write(string value) { }
+        public override void Write(System.Text.StringBuilder value) { }
         public override System.Threading.Tasks.Task WriteAsync(char value) { throw null; }
         public override System.Threading.Tasks.Task WriteAsync(char[] buffer, int index, int count) { throw null; }
         public override System.Threading.Tasks.Task WriteAsync(System.ReadOnlyMemory<char> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override System.Threading.Tasks.Task WriteAsync(string value) { throw null; }
+        public override System.Threading.Tasks.Task WriteAsync(System.Text.StringBuilder value, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override void WriteLine(System.ReadOnlySpan<char> buffer) { }
+        public override void WriteLine(System.Text.StringBuilder value) { }
         public override System.Threading.Tasks.Task WriteLineAsync(char value) { throw null; }
         public override System.Threading.Tasks.Task WriteLineAsync(char[] buffer, int index, int count) { throw null; }
         public override System.Threading.Tasks.Task WriteLineAsync(System.ReadOnlyMemory<char> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override System.Threading.Tasks.Task WriteLineAsync(string value) { throw null; }
+        public override System.Threading.Tasks.Task WriteLineAsync(System.Text.StringBuilder value, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
     }
     public abstract partial class TextReader : System.MarshalByRefObject, System.IDisposable
     {
@@ -1670,6 +1681,7 @@ namespace System.Runtime.CompilerServices
         public SwitchExpressionException(object unmatchedValue) { }
         public SwitchExpressionException(string message) { }
         public SwitchExpressionException(string message, System.Exception innerException) { }
+        public override string Message { get { throw null; } }
         public object UnmatchedValue { get { throw null; } }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }

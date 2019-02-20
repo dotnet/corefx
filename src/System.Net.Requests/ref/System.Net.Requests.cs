@@ -114,6 +114,7 @@ namespace System.Net
     public sealed partial class FtpWebRequest : System.Net.WebRequest
     {
         internal FtpWebRequest() { }
+        public override System.Net.Cache.RequestCachePolicy CachePolicy { get { throw null; } set { } }
         public System.Security.Cryptography.X509Certificates.X509CertificateCollection ClientCertificates { get { throw null; } set { } }
         public override string ConnectionGroupName { get { throw null; } set { } }
         public override long ContentLength { get { throw null; } set { } }
@@ -148,7 +149,6 @@ namespace System.Net
         internal FtpWebResponse() { }
         public string BannerMessage { get { throw null; } }
         public override long ContentLength { get { throw null; } }
-        public override string ContentType { get { throw null; } }
         public string ExitMessage { get { throw null; } }
         public override System.Net.WebHeaderCollection Headers { get { throw null; } }
         public System.DateTime LastModified { get { throw null; } }
@@ -170,6 +170,7 @@ namespace System.Net
     public delegate void HttpContinueDelegate(int StatusCode, System.Net.WebHeaderCollection httpHeaders);
     public partial class HttpWebRequest : System.Net.WebRequest, System.Runtime.Serialization.ISerializable
     {
+        public HttpWebRequest() { }
         [System.ObsoleteAttribute("Serialization is obsoleted for this type.  https://go.microsoft.com/fwlink/?linkid=14202")]
         protected HttpWebRequest(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public string Accept { get { throw null; } set { } }
