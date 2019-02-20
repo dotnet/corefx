@@ -232,9 +232,9 @@ namespace Internal.Cryptography.Pal
                     Span<IntPtr> tempChain = stackalloc IntPtr[DefaultChainCapacity];
                     IntPtr[] tempChainRent = null;
 
-                    if (chainSize < tempChain.Length)
+                    if (chainSize <= tempChain.Length)
                     {
-                        tempChain = tempChain.Slice(chainSize);
+                        tempChain = tempChain.Slice(0, chainSize);
                     }
                     else
                     {
@@ -247,6 +247,18 @@ namespace Internal.Cryptography.Pal
                         tempChain[i] = Interop.Crypto.GetX509StackField(chainStack, i);
                     }
 
+                    // In the average case we never made it here.
+                    //
+                    // Given that we made it here, in the average remaining case
+                    // we are doing a one item for which will match in the second position
+                    // of an (on-average) 3 item collection.
+                    //
+                    // The only case where this loop really matters is if downloading the
+                    // certificate made an alternate chain better, which may have resulted in
+                    // an extra download and made the first one not be involved any longer. In
+                    // that case, it's a 2 item for loop matching against a three item set.
+                    //
+                    // So N*M is well contained.
                     for (int i = downloadedCerts.Count - 1; i >= 0; i--)
                     {
                         X509Certificate2 downloadedCert = downloadedCerts[i];
@@ -267,7 +279,8 @@ namespace Internal.Cryptography.Pal
                     {
                         // While the IntPtrs aren't secret, clearing them helps prevent
                         // accidental use-after-free because of pooling.
-                        ArrayPool<IntPtr>.Shared.Return(tempChainRent, clearArray: true);
+                        tempChain.Clear();
+                        ArrayPool<IntPtr>.Shared.Return(tempChainRent);
                     }
                 }
             }
@@ -454,28 +467,27 @@ namespace Internal.Cryptography.Pal
             Debug.Assert(resource.Length > 0);
 
             int count = baseUri.Length + resource.Length;
-            ValueTuple<string, ReadOnlyMemory<char>> state = ValueTuple.Create(baseUri, resource);
 
             if (baseUri[baseUri.Length - 1] == '/')
             {
                 return string.Create(
                     count,
-                    state,
+                    (baseUri, resource),
                     (buf, st) =>
                     {
-                        st.Item1.AsSpan().CopyTo(buf);
-                        st.Item2.Span.CopyTo(buf.Slice(st.Item1.Length));
+                        st.baseUri.AsSpan().CopyTo(buf);
+                        st.resource.Span.CopyTo(buf.Slice(st.Item1.Length));
                     });
             }
 
             return string.Create(
                 count + 1,
-                state,
+                (baseUri, resource),
                 (buf, st) =>
                 {
-                    st.Item1.AsSpan().CopyTo(buf);
+                    st.baseUri.AsSpan().CopyTo(buf);
                     buf[st.Item1.Length] = '/';
-                    st.Item2.Span.CopyTo(buf.Slice(st.Item1.Length + 1));
+                    st.resource.Span.CopyTo(buf.Slice(st.Item1.Length + 1));
                 });
         }
 
