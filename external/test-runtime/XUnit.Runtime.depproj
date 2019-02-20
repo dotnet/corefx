@@ -124,7 +124,7 @@
   </Target>
 
   <!-- System.Data.SqlClient tests require sni.dll in the test folder -->
-  <ItemGroup Condition="'$(TargetsAot)'=='true'">
+  <ItemGroup Condition="'$(TargetsAot)' == 'true'">
     <PackageReference Include="runtime.native.System.Data.SqlClient.sni" Version="$(RuntimeWinX64RuntimeNativeSystemDataSqlClientSniPackageVersion)" />
 
     <PackageToInclude Include="runtime.win-arm64.runtime.native.System.Data.SqlClient.sni"/>
@@ -138,7 +138,6 @@
           AfterTargets="AfterResolveReferences">
 
     <PropertyGroup>
-
       <UAPToolsFolder Condition="'$(UAPToolsFolder)'==''">$(PackagesDir)$(MicrosoftDotNetUapTestToolsPackageName)\$(MicrosoftDotNetUapTestToolsPackageVersion)\Tools\$(ArchGroup)</UAPToolsFolder>
       <UAPToolsFolder>$(UAPToolsFolder.Replace('/', '\'))</UAPToolsFolder>
     </PropertyGroup>
@@ -181,8 +180,6 @@
       <TestILCToolsPackageName Condition="'$(ArchGroup)' == 'arm'">$(TestILCToolsPackageName).armret</TestILCToolsPackageName>
       <TestILCFolder Condition="'$(TestILCFolder)' == ''">$(PackagesDir)$(TestILCToolsPackageName)\$(ProjectNTfsTestILCPackageVersion)\TestILC</TestILCFolder>
     </PropertyGroup>
-
-    <Warning Condition="('$(TestILCFolder)' == '' OR !Exists('$(TestILCFolder)')) AND '$(BuildAllConfigurations)' != 'true'" Text="Could not find the TestILC Tools at '$(TestILCFolder)'. Please run sync." />
 
     <ItemGroup Condition="Exists('$(TestILCFolder)')">
       <TestILCFolderContents Include="$(TestILCFolder)\**\*" />
