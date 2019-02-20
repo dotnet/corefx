@@ -12,14 +12,14 @@ namespace System.Diagnostics
 {
     internal class StackTraceSymbols : IDisposable
     {
-        private readonly ConcurrentDictionary<IntPtr, MetadataReaderProvider> _metadataCache;
+        private readonly ConditionalWeakTable<Assembly, MetadataReaderProvider> _metadataCache;
 
         /// <summary>
         /// Create an instance of this class.
         /// </summary>
         public StackTraceSymbols()
         {
-            _metadataCache = new ConcurrentDictionary<IntPtr, MetadataReaderProvider>();
+            _metadataCache = new ConditionalWeakTable<Assembly, MetadataReaderProvider>();
         }
 
         /// <summary>
@@ -38,6 +38,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Returns the source file and line number information for the method.
         /// </summary>
+        /// <param name="assembly">managed assmebly</param>
         /// <param name="assemblyPath">file path of the assembly or null</param>
         /// <param name="loadedPeAddress">loaded PE image address or zero</param>
         /// <param name="loadedPeSize">loaded PE image size</param>
@@ -48,15 +49,15 @@ namespace System.Diagnostics
         /// <param name="sourceFile">source file return</param>
         /// <param name="sourceLine">line number return</param>
         /// <param name="sourceColumn">column return</param>
-        internal void GetSourceLineInfo(string assemblyPath, IntPtr loadedPeAddress, int loadedPeSize, 
-            IntPtr inMemoryPdbAddress, int inMemoryPdbSize, int methodToken, int ilOffset, 
+        internal void GetSourceLineInfo(Assembly assembly, string assemblyPath, IntPtr loadedPeAddress, 
+            int loadedPeSize, IntPtr inMemoryPdbAddress, int inMemoryPdbSize, int methodToken, int ilOffset, 
             out string sourceFile, out int sourceLine, out int sourceColumn)
         {
             sourceFile = null;
             sourceLine = 0;
             sourceColumn = 0;
 
-            MetadataReader reader = TryGetReader(assemblyPath, loadedPeAddress, loadedPeSize, inMemoryPdbAddress, inMemoryPdbSize);
+            MetadataReader reader = TryGetReader(assembly, assemblyPath, loadedPeAddress, loadedPeSize, inMemoryPdbAddress, inMemoryPdbSize);
             if (reader != null)
             {
                 Handle handle = MetadataTokens.Handle(methodToken);
@@ -109,7 +110,7 @@ namespace System.Diagnostics
         /// <remarks>
         /// Assumes that neither PE image nor PDB loaded into memory can be unloaded or moved around.
         /// </remarks>
-        private unsafe MetadataReader TryGetReader(string assemblyPath, IntPtr loadedPeAddress, int loadedPeSize, IntPtr inMemoryPdbAddress, int inMemoryPdbSize)
+        private unsafe MetadataReader TryGetReader(Assembly assembly, string assemblyPath, IntPtr loadedPeAddress, int loadedPeSize, IntPtr inMemoryPdbAddress, int inMemoryPdbSize)
         {
             if ((loadedPeAddress == IntPtr.Zero || assemblyPath == null) && inMemoryPdbAddress == IntPtr.Zero)
             {
@@ -117,10 +118,8 @@ namespace System.Diagnostics
                 return null;
             }
 
-            IntPtr cacheKey = (inMemoryPdbAddress != IntPtr.Zero) ? inMemoryPdbAddress : loadedPeAddress;
-
             MetadataReaderProvider provider;
-            while (!_metadataCache.TryGetValue(cacheKey, out provider))
+            while (!_metadataCache.TryGetValue(assmebly, out provider))
             {
                 provider = (inMemoryPdbAddress != IntPtr.Zero) ?
                             TryOpenReaderForInMemoryPdb(inMemoryPdbAddress, inMemoryPdbSize) :
@@ -128,7 +127,7 @@ namespace System.Diagnostics
 
                  // If the add loses the race with another thread, then the dispose the provider just 
                  // created and return the provider already in the cache.
-                 if (_metadataCache.TryAdd(cacheKey, provider))
+                 if (_metadataCache.TryAdd(assembly, provider))
                      break;
 
                  provider?.Dispose();
