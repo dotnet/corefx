@@ -3,7 +3,8 @@
   <Import Project="..\Directory.Build.props" />
   <PropertyGroup>
     <AssemblyVersion>4.1.0.0</AssemblyVersion>
-    <NetstandardAssemblyVersion>4.0.4.0</NetstandardAssemblyVersion>
+    <!-- Currently the netstandard build is locked to the netfx API -->
+    <AssemblyVersion Condition="'$(TargetsNetStandard)' == 'true'">4.0.4.0</AssemblyVersion>
     <StrongNameKeyId>Microsoft</StrongNameKeyId>
   </PropertyGroup>
 </Project>
