@@ -141,7 +141,7 @@
     </PropertyGroup>
 
     <!-- Give a warning that the UAPToolsFolder is not set and that tests won't run -->
-    <Warning Condition="('$(UAPToolsFolder)'=='' or !Exists('$(UAPToolsFolder)')) AND '$(BuildAllConfigurations)' != 'true'" Text="Could not find the UAP Tools at '$(UAPToolsFolder)'. Please run sync." />
+    <Warning Condition="('$(UAPToolsFolder)'=='' or !Exists('$(UAPToolsFolder)')) AND '$(BuildAllConfigurations)' != 'true'" Text="Could not find the UAP Tools at '$(UAPToolsFolder)'. Please run restore." />
 
     <ItemGroup Condition="'$(UAPToolsFolder)'!=''">
       <RunnerFolderContents Include="$(UAPToolsFolder)\Runner\**\*" />
