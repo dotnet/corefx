@@ -102,7 +102,7 @@ jobs:
         # Non-Windows variables
         - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
           - _buildScript: ${{ job.buildScriptPrefix }}./build.sh
-          - _args: --restore --build --configuration $(_BuildConfig) --ci -buildtests
+          - _args: --restore --build --configuration $(_BuildConfig) --ci --buildtests
           - _commonArguments: $(_args)
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
             - _commonArguments: $(_args) -stripSymbols
@@ -161,9 +161,9 @@ jobs:
 
             - script: $(_buildScript)
                     $(_commonArguments)
-                    -framework $(_framework)
+                    -f $(_framework)                    
+                    -a $(_architecture)
                     /p:OuterLoop=$(_outerloop)
-                    -arch $(_architecture)
                     $(_archiveTestsParameter)
                     ${{ job.buildExtraArguments }}
                     $(_msbuildCommonParameters)
