@@ -934,9 +934,13 @@ namespace Internal.Cryptography.Pal
 
         private unsafe struct ErrorCollection
         {
-            // As of OpenSSL 1.1.1 there are 74 defined X509_V_ERR values.
+            // As of OpenSSL 1.1.1 there are 74 defined X509_V_ERR values,
+            // therefore it fits in a bitvector backed by 3 ints (96 bits available).
             private const int BucketCount = 3;
+            private const int OverflowValue = BucketCount * sizeof(int) * 8 - 1;
             private fixed int _codes[BucketCount];
+
+            internal bool HasOverflow => _codes[2] < 0;
 
             internal bool HasErrors =>
                 _codes[0] != 0 || _codes[1] != 0 || _codes[2] != 0;
@@ -961,15 +965,32 @@ namespace Internal.Cryptography.Pal
 
             public Enumerator GetEnumerator()
             {
+                if (HasOverflow)
+                {
+                    throw new CryptographicException();
+                }
+
                 return new Enumerator(this);
             }
 
             private static int FindBucket(Interop.Crypto.X509VerifyStatusCode statusCode, out int bitValue)
             {
                 int val = (int)statusCode;
-                Debug.Assert(val < 32 * BucketCount);
-                int bucket = Math.DivRem(val, 32, out int localBitNumber);
-                bitValue = (1 << localBitNumber);
+
+                int bucket;
+
+                if (val >= OverflowValue)
+                {
+                    Debug.Fail($"Out of range X509VerifyStatusCode returned {val} >= {OverflowValue}");
+                    bucket = BucketCount - 1;
+                    bitValue = 1 << 31;
+                }
+                else
+                {
+                    bucket = Math.DivRem(val, 32, out int localBitNumber);
+                    bitValue = (1 << localBitNumber);
+                }
+
                 return bucket;
             }
 
