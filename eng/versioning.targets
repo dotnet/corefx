@@ -44,8 +44,8 @@
     <!-- SDK sets product to assembly but we want it to be our product name -->
     <Product>Microsoft%AE .NET Core</Product>
 
-    <!-- Use the .NET Core product version for informational version description -->
-    <InformationalVersion>$(PlatformPackageVersion)</InformationalVersion>
+    <!-- Use the .NET Core product branding version for informational version description -->
+    <InformationalVersion>$(ProductVersion)</InformationalVersion>
     <InformationalVersion Condition="'$(VersionSuffix)' != ''">$(InformationalVersion)-$(VersionSuffix)</InformationalVersion>
   </PropertyGroup>
 
