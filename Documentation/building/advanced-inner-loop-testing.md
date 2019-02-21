@@ -10,7 +10,7 @@ For the sake of completeness, we have placed our repositories under `d:\git\`.
 If you've made changes to coreclr make sure to also build it and pass its binaries to corefx.
 ```
 coreclr\build -release
-corefx\build -c Release -- /p:CoreCLROverridePath=d:\git\coreclr\bin\Product\Windows_NT.x64.Release\
+corefx\build -c Release /p:CoreCLROverridePath=d:\git\coreclr\bin\Product\Windows_NT.x64.Release\
 ```
 
 ## Compile corefx with pre-compiled coreclr binaries
