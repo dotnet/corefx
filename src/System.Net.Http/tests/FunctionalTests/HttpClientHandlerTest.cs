@@ -2082,7 +2082,7 @@ namespace System.Net.Http.Functional.Tests
                         "Cookie: ignore_cookie=choco2\r\n" + "Content-type: text/plain\r\n" + $"Set-Cookie: {SetCookieIgnored2}\r\n");
 
                     var result = new char[TestString.Length];
-                    await connection.Reader.ReadAsync(result, 0, TestString.Length);
+                    await connection.ReadBlockAsync(result, 0, TestString.Length);
                     Assert.Equal(TestString, new string(result));
 
                     // Send final status code.
@@ -2127,7 +2127,7 @@ namespace System.Net.Http.Functional.Tests
                     await connection.SendResponseAsync(responseStatusCode);
 
                     var result = new char[TestString.Length];
-                    await connection.Reader.ReadAsync(result, 0, TestString.Length);
+                    await connection.ReadBlockAsync(result, 0, TestString.Length);
                     Assert.Equal(TestString, new string(result));
 
                     // Send final status code.
@@ -2166,7 +2166,7 @@ namespace System.Net.Http.Functional.Tests
                         string.Concat(Enumerable.Repeat(Valid100ContinueResponse, 3)));
 
                     var result = new char[TestString.Length];
-                    await connection.Reader.ReadAsync(result, 0, TestString.Length);
+                    await connection.ReadBlockAsync(result, 0, TestString.Length);
                     Assert.Equal(TestString, new string(result));
 
                     // Send final status code.
@@ -2209,7 +2209,7 @@ namespace System.Net.Http.Functional.Tests
                     await connection.ReadRequestHeaderAndSendResponseAsync();
 
                     var result = new char[TestString.Length];
-                    await connection.Reader.ReadAsync(result, 0, TestString.Length);
+                    await connection.ReadBlockAsync(result, 0, TestString.Length);
                     Assert.Equal(TestString, new string(result));
 
                     await clientFinished.Task;

@@ -365,24 +365,166 @@ namespace System.Net.Test.Common
 
         public sealed class Connection : IDisposable
         {
+            private const int _blockSize=4000;
             private Socket _socket;
             private Stream _stream;
-            private StreamReader _reader;
             private StreamWriter _writer;
+            private byte[] _buffer;
+            private int _end;
+            private int _start;
 
             public Connection(Socket socket, Stream stream)
             {
                 _socket = socket;
                 _stream = stream;
 
-                _reader = new StreamReader(stream, Encoding.ASCII);
                 _writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true };
+
+                _buffer = new byte[_blockSize];
+                _end= 0;
+                _start = 0;
             }
 
             public Socket Socket => _socket;
             public Stream Stream => _stream;
-            public StreamReader Reader => _reader;
             public StreamWriter Writer => _writer;
+
+            public async Task<int> ReadAsync(byte[] buffer, int offset, int size)
+            {
+                if (_end - _start > 0)
+                {
+                    // Use buffered data first.
+                    int copyLength = _end - _start > size ? size : _end - _start;
+                    Array.Copy(_buffer, _start, buffer, offset, copyLength);
+                    _start += copyLength;
+                    return copyLength;
+                }
+
+                return await _stream.ReadAsync(buffer,offset, size).ConfigureAwait(false);
+            }
+
+            // Read until we either get requested data or we hit end of stream.
+            public async Task<int> ReadBlockAsync(byte[] buffer, int offset, int size)
+            {
+                int totalLength = 0;
+
+                while (size != 0)
+                {
+                    int readLength = await ReadAsync(buffer, offset, size).ConfigureAwait(false);
+
+                    if (readLength == 0)
+                    {
+                        break;
+                    }
+
+                    totalLength += readLength;
+                    offset += readLength;
+                    size -= readLength;
+                }
+
+                return totalLength;
+            }
+
+            public async Task<int> ReadBlockAsync(char[]  result, int offset, int size)
+            {
+                byte[] buffer = new byte[size];
+                int readLength = await ReadBlockAsync(buffer, 0, size);
+
+                string asString = System.Text.Encoding.ASCII.GetString(buffer, 0, readLength);
+
+                for (int i = 0; i < readLength; i++)
+                {
+                    result[offset + i ] = asString[i];
+                }
+
+                return readLength;
+            }
+
+            public async Task<string> ReadToEndAsync()
+            {
+                byte[] buffer = new byte[_blockSize];
+                int offset = 0;
+                int totalLength = 0;
+                int bytesRead;
+
+                do
+                {
+                    bytesRead = await ReadAsync(buffer, offset, buffer.Length - offset);
+                    totalLength += bytesRead;
+                    offset+=bytesRead;
+
+                    if (bytesRead == buffer.Length)
+                    {
+                        byte[] newBuffer = new byte[buffer.Length + _blockSize];
+                        buffer.CopyTo(newBuffer, 0);
+                        offset = buffer.Length;
+                        buffer = newBuffer;
+                    }
+                } while (bytesRead > 0);
+
+                return System.Text.Encoding.ASCII.GetString(buffer, 0, totalLength);
+            }
+
+            public string ReadLine()
+            {
+                return ReadLineAsync().GetAwaiter().GetResult();
+            }
+
+            public async Task<string> ReadLineAsync()
+            {
+                int index = 0;
+                int startSearch = _start;
+
+                while (true)
+                {
+                    if (_start == _end || index == -1)
+                    {
+                        // We either have no data or we did not find LF in stream.
+                        // In either case, read more.
+                        if (_end + 2 > _buffer.Length)
+                        {
+                            // We no longer have space to read CRLF. Allocate new buffer and start over.
+                            byte[] newBuffer = new byte[_buffer.Length + _blockSize];
+                            int dataLength = _end - _start;
+                            if (dataLength > 0)
+                            {
+                                Array.Copy(_buffer, _start, newBuffer, 0, dataLength);
+                                _start = 0;
+                                _end = dataLength;
+                                _buffer = newBuffer;
+                            }
+                        }
+
+                        int bytesRead = await _stream.ReadAsync(_buffer, _end, _buffer.Length - _end).ConfigureAwait(false);
+                        if (bytesRead == 0)
+                        {
+                            break;
+                        }
+
+                        _end += bytesRead;
+                   }
+
+                    index = Array.IndexOf(_buffer, (byte)'\n', startSearch, _end - startSearch);
+                    if (index == -1)
+                    {
+                        // We did not find it, look for more data.
+                        startSearch = _end;
+                        continue;
+                    }
+
+                    int stringLength = index - _start;
+                    while (stringLength > 0 && _buffer[_start+stringLength] == '\n' || _buffer[_start+stringLength] == '\r')
+                    {
+                        stringLength--;
+                    }
+
+                    string line = System.Text.Encoding.ASCII.GetString(_buffer, _start, stringLength + 1);
+                    _start = index + 1;
+                    return line;
+                }
+
+                return null;
+            }
 
             public void Dispose()
             {
@@ -396,7 +538,6 @@ namespace System.Net.Test.Common
                 }
                 catch (Exception) { }
 
-                _reader.Dispose();
                 _writer.Dispose();
                 _stream.Dispose();
                 _socket.Dispose();
@@ -406,7 +547,7 @@ namespace System.Net.Test.Common
             {
                 var lines = new List<string>();
                 string line;
-                while (!string.IsNullOrEmpty(line = await _reader.ReadLineAsync().ConfigureAwait(false)))
+                while (!string.IsNullOrEmpty(line = await ReadLineAsync().ConfigureAwait(false)))
                 {
                     lines.Add(line);
                 }
@@ -440,9 +581,9 @@ namespace System.Net.Test.Common
 
             public async Task Drain(int max = 4000)
             {
-                char[] buffer  = new char[max];
+                byte[] buffer  = new byte[max];
                 try {
-                    await _reader.ReadAsync(buffer, 0 , max);
+                    await _stream.ReadAsync(buffer, 0 , max);
                 }
                 catch { };
             }
@@ -493,37 +634,38 @@ namespace System.Net.Test.Common
 
                         if (contentLength > 0)
                         {
-                            char[] buffer = new char[contentLength];
-                            await connection.Reader.ReadBlockAsync(buffer, 0, contentLength);
-                            requestData.Body = Encoding.GetEncoding("ASCII").GetBytes(buffer);
+                            byte[] buffer = new byte[contentLength];
+                            int bytesRead = await connection.ReadBlockAsync(buffer, 0, contentLength);
+                            Assert.Equal(contentLength, bytesRead);
+                            requestData.Body = buffer;
                         }
                     }
                     else if (requestData.GetHeaderValueCount("Transfer-Encoding") != 0 && requestData.GetSingleHeaderValue("Transfer-Encoding") == "chunked")
                     {
                         while (true)
                         {
-                            string chunkHeader = await connection.Reader.ReadLineAsync();
+                            string chunkHeader = await connection.ReadLineAsync();
                             int chunkLength = int.Parse(chunkHeader, System.Globalization.NumberStyles.HexNumber);
                             if (chunkLength == 0)
                             {
                                 // Last chunk. Read CRLF and exit.
-                                await connection.Reader.ReadLineAsync();
+                                await connection.ReadLineAsync();
                                 break;
                             }
 
-                            char[] buffer = new char[chunkLength];
-                            await connection.Reader.ReadBlockAsync(buffer, 0, chunkLength);
-                            await connection.Reader.ReadLineAsync();
+                            byte[] buffer = new byte[chunkLength];
+                            await connection.ReadBlockAsync(buffer, 0, chunkLength);
+                            await connection.ReadLineAsync();
                             if (requestData.Body == null)
                             {
-                                requestData.Body = Encoding.GetEncoding("ASCII").GetBytes(buffer);
+                                requestData.Body = buffer;
                             }
                             else
                             {
                                 byte[] newBuffer = new byte[requestData.Body.Length + chunkLength];
 
                                 requestData.Body.CopyTo(newBuffer, 0);
-                                Encoding.GetEncoding("ASCII").GetBytes(buffer).CopyTo(newBuffer, requestData.Body.Length);
+                                buffer.CopyTo(newBuffer, requestData.Body.Length);
                                 requestData.Body = newBuffer;
                             }
                         }
