@@ -1127,7 +1127,7 @@ namespace System.Net.Http
             // It's not clear that we actually need to dispose this object, since it shouldn't
             // actually hold any unmanaged resources. However, we should ensure we have a clear understanding
             // of shutdown semantics and object lifetimes in general, even if we don't actually dispose this.
-//            _writerLock.Dispose();
+            // _writerLock.Dispose();
         }
 
         public void Dispose()
