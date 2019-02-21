@@ -10,7 +10,8 @@
     <GitHubRepositoryName Condition="'$(GitHubRepositoryName)' == ''">corefx</GitHubRepositoryName>
     <AssetManifestFileName Condition="'$(AssetManifestFileName)' == '' AND '$(ManifestBuildId)' != ''">$(GitHubRepositoryName)-$(ManifestBuildId)</AssetManifestFileName>
     <AssetManifestFileName Condition="'$(AssetManifestFileName)' == ''">$(GitHubRepositoryName)</AssetManifestFileName>
-    <AssetManifestFilePath>$(ArtifactsDir)AssetManifests\$(AssetManifestFileName).xml</AssetManifestFilePath>
+    <AssetManifestDir>$(ArtifactsDir)AssetManifests\</AssetManifestDir>
+    <AssetManifestFilePath>$(AssetManifestDir)$(AssetManifestFileName).xml</AssetManifestFilePath>
 
     <PackageOutputRoot Condition="'$(PackagesOutputRoot)' == ''">$(ArtifactsDir)/packages/</PackageOutputRoot>
     <FinalPublishPattern>$(PackageOutputRoot)*.nupkg</FinalPublishPattern>
@@ -139,7 +140,7 @@
     <ItemGroup>
       <_ManifestToPush Remove="@(_ManifestToPush)" />
       <_ManifestToPush Include="$(AssetManifestFilePath)">
-        <RelativeBlobPath>$(_FileRelativePathBase)corefx-test-assets.xml</RelativeBlobPath>
+        <RelativeBlobPath>$(_FileRelativePathBase)$([System.String]::Copy('%(RecursiveDir)%(Filename)%(Extension)').Replace('\' ,'/'))</RelativeBlobPath>
       </_ManifestToPush>
     </ItemGroup>
 
@@ -154,6 +155,6 @@
                     ManifestCommit="$(ManifestCommit)"
                     ManifestBuildData="$(ManifestBuildData)"
                     ManifestRepoUri="$(ManifestRepoUri)"
-                    AssetManifestPath="$(ArtifactsDir)AssetManifests\ManifestUpload.xml" />
+                    AssetManifestPath="$(AssetManifestDir)ManifestUpload.xml" />
   </Target>
 </Project>
