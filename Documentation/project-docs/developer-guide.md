@@ -16,13 +16,9 @@ Building the repository
 
 The CoreFX repo can be built from a regular, non-admin command prompt. The build produces multiple binaries that make up the CoreFX libraries and the accompanying tests.
 
-Developer Workflow
-------------------
-The dev workflow describes the [development process](https://github.com/dotnet/buildtools/blob/master/Documentation/Dev-workflow.md) to follow. It is divided into specific tasks that are fast, transparent and easy to understand.
-
-For more information about the different options that each task has, use the argument `-?` when calling the script.  For example:
+For information about the different options that are available use the argument `-help` when calling the script.  For example:
 ```
-build -?
+build -help
 ```
 
 ### Build
@@ -35,8 +31,8 @@ The build configurations are generally defaulted based on where you are building
 
 - `-framework` identifies the target framework for the build. It defaults to `netcoreapp` but possible values include `netcoreapp`, `netfx` or `uap`. (msbuild property `TargetGroup`)
 - `-os` identifies the OS for the build. It defaults to the OS you are running on but possible values include `Windows_NT`, `Unix`, `Linux`, or `OSX`. (msbuild property `OSGroup`)
-- `-debug|-release` controls the optimization level the compilers use for the build. It defaults to `Debug`. (msbuild property `ConfigurationGroup`)
-- `/p:ArchGroup` identifies the architecture for the build. It defaults to `x64` but possible values include `x64`, `x86`, `arm`, or `arm64`. (msbuild property `ArchGroup`)
+- `-configuration|-c Debug|Release` controls the optimization level the compilers use for the build. It defaults to `Debug`. (msbuild property `ConfigurationGroup`)
+- `-arch` identifies the architecture for the build. It defaults to `x64` but possible values include `x64`, `x86`, `arm`, or `arm64`. (msbuild property `ArchGroup`)
 
 For more details on the build configurations see [project-guidelines](../coding-guidelines/project-guidelines.md#build-pivots).
 
@@ -44,7 +40,9 @@ For more details on the build configurations see [project-guidelines](../coding-
 
 The most common workflow for developers is to call `build` from the root once (preceded by a `clean -all` if you have built previously) and then go and work on the individual library that you are trying to make changes for. On windows folks will usually open up the solution file in the root of that library directory and work in VS.
 
-By default build only builds the product libraries and none of the tests if you want to build and run all the tests you can call `build -test` to build and run only the tests or `build -includetests` to build the project as well as the tests
+By default build only builds the product libraries and none of the tests. If you want to build the tests you can call `build -buildtests`. If you want to run the tests you can call `build -test`, `build -integrationTest` or `build -performanceTest`. To build and run the tests combine both arguments: `build -test -buildtests`. To build both the product libraries and the test libraries pass `build -build -buildtests` to the command line. If you want to further configure which test libraries to build you can pass `/p:TestProjectFilter=Tests|IntegrationTests|PerformanceTests` to the command.
+
+If you invoke the build script without any argument the default arguments will be executed `-restore -build`. Note that -restore and -build are only implicit if no actions are passed in.
 
 **Examples**
 - Clean and build the product libraries
@@ -53,17 +51,17 @@ clean -all
 build
 ```
 
-- Building in debug mode for platform x64
+- Building in release mode for platform x64 (restore and build are implicit here as no actions are passed in)
 ```
-build -debug /p:ArchGroup=x64
-```
-
-- Building the src and then building and running the tests
-```
-build -includetests
+build -c Release -arch x64
 ```
 
-- Building for different target frameworks
+- Building the src and build and run tests
+```
+build & build -test -buildtests
+```
+
+- Building for different target frameworks (-restore and -build are implicit again as no action is passed in)
 ```
 build -framework netcoreapp
 build -framework netfx
@@ -102,12 +100,12 @@ To build the tests and run them you can call the build script passing -tests opt
 **Examples**
 - The following shows how to build only the tests but not run them
 ```
-build -test -skiptests
+build -buildtests
 ```
 
 - The following builds and runs all tests for netcoreapp in release configuration.
 ```
-build -test -release -framework=netcoreapp
+build -test -buildtests -c Release -f netcoreapp
 ```
 
 - The following example shows how to pass extra msbuild properties to ignore tests ignored in CI.
@@ -145,7 +143,7 @@ build src\System.Collections\tests
 
 - All the options listed above like framework and configuration are also supported (note they must be after the directory)
 ```
-build System.Collections -framework:netfx -release
+build System.Collections -framework netfx -c Release
 ```
 
 ### Building individual projects
@@ -200,19 +198,19 @@ Note that you cannot generally build native components for another OS but you ca
 ### Building in Release or Debug
 
 By default, building from the root or within a project will build the libraries in Debug mode.
-One can build in Debug or Release mode from the root by doing `build -release` or `build -debug` or when building a project by specifying `/p:ConfigurationGroup=[Debug|Release]` after the `dotnet msbuild` command.
+One can build in Debug or Release mode from the root by doing `build -c Release` or `build -c Debug` or when building a project by specifying `/p:ConfigurationGroup=[Debug|Release]` after the `dotnet msbuild` command.
 
 ### Building other Architectures
 
-One can build 32- or 64-bit binaries or for any architecture by specifying in the root `build /p:ArchGroup=[value]` or in a project `/p:ArchGroup=[value]` after the `dotnet msbuild` command.
+One can build 32- or 64-bit binaries or for any architecture by specifying in the root `build -arch [value]` or in a project `/p:ArchGroup=[value]` after the `dotnet msbuild` command.
 
 ### Tests
 
-We use the OSS testing framework [xunit](http://xunit.github.io/) with the [BuildTools test targets](https://github.com/dotnet/buildtools/blob/master/Documentation/test-targets-usage.md).
+We use the OSS testing framework [xunit](http://xunit.github.io/).
 
 #### Running tests on the command line
 
-Do build tests you need to pass `-test` flag (`build -test`) to build.cmd/sh or if you want to build both you pass `-includetests` flag (`build -includetests`).
+To build tests you need to pass the `-buildtests` flag to build.cmd/sh or if you want to build both you pass `-buildtests` flag (`build -restore -build -buildtests`). Note that you need to specify -restore and -build additionally as those are only implicit if no action is passed in (in this case buildtests is an action).
 
 For more information about cross-platform testing, please take a look [here](https://github.com/dotnet/corefx/blob/master/Documentation/building/cross-platform-testing.md).
 
@@ -260,13 +258,12 @@ The tests can also be filtered based on xunit trait attributes defined in [`Micr
 ```cs
 [OuterLoop()]
 ```
-Tests marked as `OuterLoop` are for scenarios that don't need to run every build. They may take longer than normal tests, cover seldom hit code paths, or require special setup or resources to execute. These tests are excluded by default when testing through `dotnet msbuild` but can be enabled manually by adding the `outerloop` switch e.g.
+Tests marked as `OuterLoop` are for scenarios that don't need to run every build. They may take longer than normal tests, cover seldom hit code paths, or require special setup or resources to execute. These tests are excluded by default when testing through `dotnet msbuild` but can be enabled manually by adding the `-outerloop` switch or `/p:OuterLoop=true` e.g.
 
 ```cmd
 build -test -outerloop
+cd src/System.Text.RegularExpressions/tests && dotnet msbuild /t:RebuildAndTest /p:OuterLoop=true
 ```
-
-To run <b>only</b> OuterLoop tests, use the following msbuild property: `/p:WithCategories=OuterLoop`.
 
 #### PlatformSpecificAttribute
 
@@ -409,18 +406,13 @@ dotnet msbuild <csproj_file> /t:BuildAndTest /p:OSGroup=Windows_NT
 dotnet msbuild <csproj_file> /t:BuildAndTest /p:OSGroup=OSX /p:WithCategories="OuterLoop;failing""
 ```
 
-Alternatively, you can directly invoke the XUnit executable by changing your working directory to the test execution directory at `bin\tests\{OSPlatformConfig)\{Project}.Tests\{TargetGroup}.{TestTFM}\` which is created when the test project is built.  For example, the following command runs all Linux-supported inner-loop tests:
-```sh
-./corerun xunit.console.dll <test_dll_file> -notrait category=nonlinuxtests -notrait category=OuterLoop
-```
-
 ### Code Coverage
 
 Code coverage is built into the corefx build system.  It utilizes OpenCover for generating coverage data and ReportGenerator for generating reports about that data.  To run:
 
 ```cmd
-:: Run full coverage
-build -test -Coverage
+:: Run full coverage (assuming sources are already built)
+build -test -buildtests -coverage
 
 If coverage succeeds, the full report can be found at `artifacts\coverage\index.htm`.
 

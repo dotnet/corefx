@@ -7,7 +7,7 @@ Building and Running Tests
 -----------
 Performance test files (if present) are stored within a library's ```tests/Performance``` directory and contain test methods that are all marked with a perf-specific *Benchmark* attribute.
 
-**Step # 1:** Prior to running performance tests, a full build from the repo root must be completed: ```build -release```
+**Step # 1:** Prior to running performance tests, a full build from the repo root must be completed: `build -c Release`
 
 **Step # 2:** Change directory to the performance tests directory: ```cd path/to/library/tests/Performance```
 
