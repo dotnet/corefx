@@ -108,7 +108,7 @@ jobs:
           - _args: --restore --build --configuration $(_BuildConfig) --ci --buildtests --arch $(_architecture)
           - _commonArguments: $(_args)
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            - _commonArguments: $(_args) -stripSymbols
+            - _commonArguments: $(_args) --stripSymbols
           - ${{ if or(eq(parameters._architecture, 'arm'), eq(parameters._architecture, 'arm64')) }}:
             _logArguments: --warnAsError 0
 
