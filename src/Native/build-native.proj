@@ -6,6 +6,7 @@
   <Target Name="Build" DependsOnTargets="GenerateNativeVersionFile;BuildNativeUnix;BuildNativeWindows" />
 
   <PropertyGroup>
+    <NativeVersionFile>$(ArtifactsObjDir)_version.h</NativeVersionFile>
     <_BuildNativeArgs>$(ArchGroup) $(ConfigurationGroup) $(OSGroup) outconfig $(Configuration)</_BuildNativeArgs>
   </PropertyGroup>
 
