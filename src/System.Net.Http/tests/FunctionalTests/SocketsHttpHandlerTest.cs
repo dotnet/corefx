@@ -18,6 +18,9 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
+using Microsoft.DotNet.XUnitExtensions;
+
+
 namespace System.Net.Http.Functional.Tests
 {
     public sealed class SocketsHttpHandler_HttpClientHandler_Asynchrony_Test : HttpClientHandler_Asynchrony_Test
@@ -1636,6 +1639,35 @@ namespace System.Net.Http.Functional.Tests
 
                 return SuccessExitCode;
             }).Dispose();
+        }
+    }
+    public sealed class SocketsHttpHandler_Output_Test: HttpClientHandler_ClientCertificates_Test
+    {
+        private ITestOutputHelper _output;
+
+        public SocketsHttpHandler_Output_Test(ITestOutputHelper output) : base(output) {
+            _output = output;
+        }
+
+        [Fact]
+        public void OutputTest_OK()
+        {
+            _output.WriteLine("Going to pass {0}", DateTime.Now);
+        }
+
+        [Fact]
+        public void OutputTest_Fail()
+        {
+            _output.WriteLine("Going to fail {0}", DateTime.Now);
+
+            Assert.True(false);
+        }
+
+        [ConditionalFact]
+        public void OutputTest_Skip()
+        {
+            _output.WriteLine("Going to skip {0}", DateTime.Now);
+            throw new SkipTestException("CurlHandler (libCurl) doesn't not work");
         }
     }
 
