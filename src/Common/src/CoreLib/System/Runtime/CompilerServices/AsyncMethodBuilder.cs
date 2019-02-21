@@ -42,7 +42,15 @@ namespace System.Runtime.CompilerServices
         {
             SynchronizationContext sc = SynchronizationContext.Current;
             sc?.OperationStarted();
+#if PROJECTN
+            // ProjectN's AsyncTaskMethodBuilder.Create() currently does additional debugger-related
+            // work, so we need to delegate to it.
+            return new AsyncVoidMethodBuilder() { _synchronizationContext = sc, _builder = AsyncTaskMethodBuilder.Create() };
+#else
+            // _builder should be initialized to AsyncTaskMethodBuilder.Create(), but on coreclr
+            // that Create() is a nop, so we can just return the default here.
             return new AsyncVoidMethodBuilder() { _synchronizationContext = sc };
+#endif
         }
 
         /// <summary>Initiates the builder's execution with the associated state machine.</summary>
@@ -198,7 +206,16 @@ namespace System.Runtime.CompilerServices
 
         /// <summary>Initializes a new <see cref="AsyncTaskMethodBuilder"/>.</summary>
         /// <returns>The initialized <see cref="AsyncTaskMethodBuilder"/>.</returns>
-        public static AsyncTaskMethodBuilder Create() => default;
+        public static AsyncTaskMethodBuilder Create() =>
+#if PROJECTN
+            // ProjectN's AsyncTaskMethodBuilder<VoidTaskResult>.Create() currently does additional debugger-related
+            // work, so we need to delegate to it.
+            new AsyncTaskMethodBuilder { m_builder = AsyncTaskMethodBuilder<VoidTaskResult>.Create() };
+#else
+            // m_builder should be initialized to AsyncTaskMethodBuilder<VoidTaskResult>.Create(), but on coreclr
+            // that Create() is a nop, so we can just return the default here.
+            default;
+#endif
 
         /// <summary>Initiates the builder's execution with the associated state machine.</summary>
         /// <typeparam name="TStateMachine">Specifies the type of the state machine.</typeparam>
@@ -311,10 +328,20 @@ namespace System.Runtime.CompilerServices
         /// <returns>The initialized <see cref="AsyncTaskMethodBuilder"/>.</returns>
         public static AsyncTaskMethodBuilder<TResult> Create()
         {
-            return default;
+#if PROJECTN
+            var result = new AsyncTaskMethodBuilder<TResult>();
+            if (System.Threading.Tasks.Task.s_asyncDebuggingEnabled)
+            {
+                // This allows the debugger to access m_task directly without evaluating ObjectIdForDebugger for ProjectN
+                result.InitializeTaskAsStateMachineBox();
+            }            
+            return result;
+#else
             // NOTE: If this method is ever updated to perform more initialization,
             //       other Create methods like AsyncTaskMethodBuilder.Create and
             //       AsyncValueTaskMethodBuilder.Create must be updated to call this.
+            return default;
+#endif
         }
 
         /// <summary>Initiates the builder's execution with the associated state machine.</summary>
@@ -544,12 +571,16 @@ namespace System.Runtime.CompilerServices
             where TStateMachine : IAsyncStateMachine
         {
             /// <summary>Delegate used to invoke on an ExecutionContext when passed an instance of this box type.</summary>
-            private static readonly ContextCallback s_callback = s =>
+            private static readonly ContextCallback s_callback = ExecutionContextCallback;
+
+            // Used to initialize s_callback above. We don't use a lambda for this on purpose: a lambda would
+            // introduce a new generic type behind the scenes that comes with a hefty size penalty in AOT builds.
+            private static void ExecutionContextCallback(object s)
             {
                 Debug.Assert(s is AsyncStateMachineBox<TStateMachine>);
                 // Only used privately to pass directly to EC.Run
                 Unsafe.As<AsyncStateMachineBox<TStateMachine>>(s).StateMachine.MoveNext();
-            };
+            }
 
             /// <summary>A delegate to the <see cref="MoveNext()"/> method.</summary>
             private Action _moveNextAction;
