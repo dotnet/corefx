@@ -742,7 +742,7 @@ namespace System.Collections
 
         private static void ThrowArgumentOutOfRangeException(int index)
         {
-            throw new ArgumentOutOfRangeException("index", index, SR.ArgumentOutOfRange_Index);
+            throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_Index);
         }
 
         private class BitArrayEnumeratorSimple : IEnumerator, ICloneable
