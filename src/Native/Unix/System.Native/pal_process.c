@@ -145,6 +145,13 @@ static void ExitChild(int pipeToParent, int error)
     _exit(error != 0 ? error : EXIT_FAILURE);
 }
 
+static int compare_groups(const void * a, const void * b)
+{
+    // Cast to signed because we need a signed return value.
+    // It's okay to changed signedness (groups are uint), we just need an order.
+    return *(const int32_t*)a - *(const int32_t*)b;
+}
+
 static int SetGroups(uint32_t* userGroups, int32_t userGroupsLength, uint32_t* processGroups)
 {
 #ifdef __linux__
@@ -171,13 +178,11 @@ static int SetGroups(uint32_t* userGroups, int32_t userGroupsLength, uint32_t* p
             else
             {
                 rv = 0;
+                // sort the groups so we can efficiently search them.
+                qsort(userGroups, (size_t)userGroupsLength, sizeof(uint32_t), compare_groups);
                 for (int i = 0; i < processGroupsLength; i++)
                 {
-                    bool isUserGroup = false;
-                    for (int j = 0; j < userGroupsLength && !isUserGroup; j++)
-                    {
-                        isUserGroup = processGroups[i] == userGroups[j];
-                    }
+                    bool isUserGroup = NULL != bsearch(&processGroups[i], userGroups, (size_t)userGroupsLength, sizeof(uint32_t), compare_groups);
                     if (!isUserGroup)
                     {
                         rv = -1;
