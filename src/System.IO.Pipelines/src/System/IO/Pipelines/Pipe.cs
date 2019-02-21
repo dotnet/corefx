@@ -963,7 +963,7 @@ namespace System.IO.Pipelines
                 _writingHead.End += writable;
                 _buffered = 0;
 
-                // This is optimized to use pooled memory that's why we pass 0 instead of
+                // This is optimized to use pooled memory. That's why we pass 0 instead of
                 // source.Length
                 BufferSegment newSegment = AllocateSegment(0);
 
