@@ -205,11 +205,11 @@ namespace System.Runtime.Intrinsics
 
             return SoftwareFallback(in this, other);
 
-            bool SoftwareFallback(in Vector256<T> x, Vector256<T> y)
+            static bool SoftwareFallback(in Vector256<T> vector, Vector256<T> other)
             {
                 for (int i = 0; i < Count; i++)
                 {
-                    if (!((IEquatable<T>)(x.GetElement(i))).Equals(y.GetElement(i)))
+                    if (!((IEquatable<T>)(vector.GetElement(i))).Equals(other.GetElement(i)))
                     {
                         return false;
                     }
@@ -233,6 +233,7 @@ namespace System.Runtime.Intrinsics
         /// <returns>The value of the element at <paramref name="index" />.</returns>
         /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="index" /> was less than zero or greater than the number of elements.</exception>
+        [Intrinsic]
         public T GetElement(int index)
         {
             ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
@@ -252,6 +253,7 @@ namespace System.Runtime.Intrinsics
         /// <returns>A <see cref="Vector256{T}" /> with the value of the element at <paramref name="index" /> set to <paramref name="value" /> and the remaining elements set to the same value as that in the current instance.</returns>
         /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="index" /> was less than zero or greater than the number of elements.</exception>
+        [Intrinsic]
         public Vector256<T> WithElement(int index, T value)
         {
             ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
@@ -318,10 +320,10 @@ namespace System.Runtime.Intrinsics
 
             return SoftwareFallback(in this, value);
 
-            Vector256<T> SoftwareFallback(in Vector256<T> t, Vector128<T> x)
+            static Vector256<T> SoftwareFallback(in Vector256<T> vector, Vector128<T> value)
             {
-                Vector256<T> result = t;
-                Unsafe.As<Vector256<T>, Vector128<T>>(ref result) = x;
+                Vector256<T> result = vector;
+                Unsafe.As<Vector256<T>, Vector128<T>>(ref result) = value;
                 return result;
             }
         }
@@ -349,9 +351,9 @@ namespace System.Runtime.Intrinsics
 
             return SoftwareFallback(in this);
 
-            Vector128<T> SoftwareFallback(in Vector256<T> t)
+            static Vector128<T> SoftwareFallback(in Vector256<T> vector)
             {
-                ref Vector128<T> lower = ref Unsafe.As<Vector256<T>, Vector128<T>>(ref Unsafe.AsRef(in t));
+                ref Vector128<T> lower = ref Unsafe.As<Vector256<T>, Vector128<T>>(ref Unsafe.AsRef(in vector));
                 return Unsafe.Add(ref lower, 1);
             }
         }
@@ -380,11 +382,11 @@ namespace System.Runtime.Intrinsics
 
             return SoftwareFallback(in this, value);
 
-            Vector256<T> SoftwareFallback(in Vector256<T> t, Vector128<T> x)
+            static Vector256<T> SoftwareFallback(in Vector256<T> vector, Vector128<T> value)
             {
-                Vector256<T> result = t;
+                Vector256<T> result = vector;
                 ref Vector128<T> lower = ref Unsafe.As<Vector256<T>, Vector128<T>>(ref result);
-                Unsafe.Add(ref lower, 1) = x;
+                Unsafe.Add(ref lower, 1) = value;
                 return result;
             }
         }
