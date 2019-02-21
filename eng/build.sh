@@ -43,6 +43,7 @@ while (($# > 0)); do
   case $lowerI in
      --help|-h)
       usage
+      "$scriptroot/common/build.sh" --help
       exit 0
       ;;
      --arch)
