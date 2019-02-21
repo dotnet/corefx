@@ -5,6 +5,7 @@
 using System.Buffers.Binary;
 using System.Buffers.Text;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
     using System.Security;
@@ -456,7 +457,11 @@ namespace System.Diagnostics
         /// which will have the effect of updating Activity's instance so all subsequent uses
         /// share the same converted string.  
         /// </summary>
-        public ref ActivitySpanId SpanId
+        public ref
+#if !NETSTANDARD1_3 // Could not get this to build with ref readonly returns. 
+        readonly
+#endif
+            ActivitySpanId SpanId
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
             [System.Security.SecuritySafeCriticalAttribute]
@@ -486,7 +491,11 @@ namespace System.Diagnostics
         /// which will have the effect of updating Activity's instance so all subsequent uses
         /// share the same converted string.  
         /// </summary>
-        public ref ActivityTraceId TraceId
+        public ref
+#if !NETSTANDARD1_3 // Could not get this to build with ref readonly returns. 
+        readonly
+#endif
+             ActivityTraceId TraceId
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
             [System.Security.SecuritySafeCriticalAttribute]
@@ -509,7 +518,11 @@ namespace System.Diagnostics
         /// If the parent Activity ID has the W3C format, this returns the ID for the SpanId part of the ParentId.  
         /// Otherwise it returns a zero SpanId. 
         /// </summary>
-        public ref ActivitySpanId ParentSpanId
+        public ref
+#if !NETSTANDARD1_3 // Could not get this to build with ref readonly returns. 
+        readonly
+#endif
+             ActivitySpanId ParentSpanId
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
             [System.Security.SecuritySafeCriticalAttribute]
@@ -819,7 +832,7 @@ namespace System.Diagnostics
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
         [SecuritySafeCritical]
 #endif
-    public unsafe struct ActivityTraceId : IEquatable<ActivityTraceId>
+    public unsafe readonly struct ActivityTraceId : IEquatable<ActivityTraceId>
     {
         /// <summary>
         /// Create a new TraceId with at random number in it (very likely to be unique)
@@ -865,12 +878,20 @@ namespace System.Diagnostics
         /// </summary>
         public string ToHexString()
         {
-            if (_asHexString == null)
+            get
             {
-                fixed (ulong* idPtr = &_id1)
-                    _asHexString = SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2));
+                if (_asHexString == null)
+                {
+                    fixed (ulong* idPtr = &_id1)
+                    {
+                        // Cast away the read-only-ness of _asHexString, and assign the converted value to it.  
+                        // We are OK with this because conceptually the class is still read-only.  
+                        ref string strRef = ref Unsafe.AsRef(in _asHexString);
+                        strRef = SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2));
+                    }
+                }
+                return _asHexString;
             }
-            return _asHexString;
         }
 
         /// <summary>
@@ -989,7 +1010,7 @@ namespace System.Diagnostics
 
         readonly ulong _id1;
         readonly ulong _id2;
-        string _asHexString;  // Caches the Hex string    
+        readonly string _asHexString;  // Caches the Hex string    
         #endregion
     }
 
@@ -1005,7 +1026,7 @@ namespace System.Diagnostics
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
         [SecuritySafeCritical]
 #endif
-    public unsafe struct ActivitySpanId : IEquatable<ActivitySpanId>
+    public unsafe readonly struct ActivitySpanId : IEquatable<ActivitySpanId>
     {
         /// <summary>
         /// Create a new SpanId with at random number in it (very likely to be unique)
@@ -1049,14 +1070,22 @@ namespace System.Diagnostics
         /// Returns the TraceId as a 16 character hexadecimal string.  
         /// </summary>
         /// <returns></returns>
-        public string ToHexString()
+        public string AsHexString
         {
-            if (_asHexString == null)
+            get
             {
-                fixed (ulong* idPtr = &_id1)
-                    _asHexString = ActivityTraceId.SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong)));
+                if (_asHexString == null)
+                {
+                    fixed (ulong* idPtr = &_id1)
+                    {
+                        // Cast away the read-only-ness of _asHexString, and assign the converted value to it.  
+                        // We are OK with this because conceptually the class is still read-only.  
+                        ref string strRef = ref Unsafe.AsRef(in _asHexString);
+                        strRef = ActivityTraceId.SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong)));
+                    }
+                }
+                return _asHexString;
             }
-            return _asHexString;
         }
 
         /// <summary>
@@ -1104,7 +1133,7 @@ namespace System.Diagnostics
         }
 
         readonly ulong _id1;
-        string _asHexString;   // Caches the Hex string  
+        readonly string _asHexString;   // Caches the Hex string  
         #endregion
     }
 }
