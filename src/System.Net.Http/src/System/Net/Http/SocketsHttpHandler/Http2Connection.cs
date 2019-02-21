@@ -967,7 +967,7 @@ namespace System.Net.Http
 
                     flags = (remaining.Length == 0 ? FrameFlags.EndHeaders : FrameFlags.None);
 
-                    await StartWriteAsync(FrameHeader.Size + current.Length, default, false);
+                    await StartWriteAsync(FrameHeader.Size + current.Length, default, false).ConfigureAwait(false);
 
                     WriteFrameHeader(new FrameHeader(current.Length, FrameType.Continuation, flags, streamId));
                     current.CopyTo(_outgoingBuffer.AvailableMemory);
@@ -1038,7 +1038,7 @@ namespace System.Net.Http
             Debug.Assert(amount > 0);
 
             // We update both the connection-level and stream-level windows at the same time
-            await StartWriteAsync(FrameHeader.Size + FrameHeader.WindowUpdateLength);
+            await StartWriteAsync(FrameHeader.Size + FrameHeader.WindowUpdateLength).ConfigureAwait(false);
 
             WriteFrameHeader(new FrameHeader(FrameHeader.WindowUpdateLength, FrameType.WindowUpdate, FrameFlags.None, streamId));
             BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, amount);
