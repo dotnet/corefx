@@ -17,7 +17,7 @@ usage()
   echo "Default if no actions are passed in: --restore --build"
   echo ""
   echo "CoreFX specific settings:"
-  echo "  --buildtests             Build test projects. Can be used as a target or as an option"
+  echo "  --buildtests             Build test projects"
   echo "  --framework              The target group assemblies are built for (short: -f)"
   echo "  --os                     The operating system assemblies are built for"
   echo "  --allconfigurations      Build packages for all build configurations"

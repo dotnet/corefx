@@ -9,14 +9,14 @@ Param(
   [switch] $coverage,
   [switch] $outerloop,
   [string] $arch,
-  [switch] $help,
+  [switch][Alias('h')]$help,
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 function Print-Usage() {
     Write-Host "Default if no actions are passed in: -restore -build"
     Write-Host ""
     Write-Host "CoreFX specific settings:"
-    Write-Host "  -buildtests             Build test projects. Can be used as a target or as an option"
+    Write-Host "  -buildtests             Build test projects"
     Write-Host "  -framework              The target group assemblies are built for (short: -f)"
     Write-Host "  -os                     The operating system assemblies are built for"
     Write-Host "  -allconfigurations      Build packages for all build configurations"

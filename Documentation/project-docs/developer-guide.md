@@ -16,9 +16,9 @@ Building the repository
 
 The CoreFX repo can be built from a regular, non-admin command prompt. The build produces multiple binaries that make up the CoreFX libraries and the accompanying tests.
 
-For information about the different options that are available use the argument `-help` when calling the script.  For example:
+For information about the different options that are available use the argument `-help|-h` when calling the build script:
 ```
-build -help
+build -h
 ```
 
 ### Build
@@ -29,18 +29,20 @@ Calling the script `build` attempts to build both the native and managed code.
 
 The build configurations are generally defaulted based on where you are building (i.e. which OS or which architecture) but we have a few shortcuts for the individual properties that can be passed to the build scripts:
 
-- `-framework` identifies the target framework for the build. It defaults to `netcoreapp` but possible values include `netcoreapp`, `netfx` or `uap`. (msbuild property `TargetGroup`)
+- `-framework|-f` identifies the target framework for the build. It defaults to `netcoreapp` but possible values include `netcoreapp`, `netfx` or `uap`. (msbuild property `TargetGroup`)
 - `-os` identifies the OS for the build. It defaults to the OS you are running on but possible values include `Windows_NT`, `Unix`, `Linux`, or `OSX`. (msbuild property `OSGroup`)
 - `-configuration|-c Debug|Release` controls the optimization level the compilers use for the build. It defaults to `Debug`. (msbuild property `ConfigurationGroup`)
 - `-arch` identifies the architecture for the build. It defaults to `x64` but possible values include `x64`, `x86`, `arm`, or `arm64`. (msbuild property `ArchGroup`)
 
 For more details on the build configurations see [project-guidelines](../coding-guidelines/project-guidelines.md#build-pivots).
 
-**Note**: Before working on individual projects or test projects you **must** run `build` from the root once before beginning that work. It is also a good idea to run `build` whenever you pull a large set of unknown changes into your branch.
+**Note**: Before working on individual projects or test projects you **must** run `build` from the root once before beginning that work. It is also a good idea to run `build` whenever you pull a large set of unknown changes into your branch. If you invoke the build script without any actions, the default action chain `-restore -build` is executed. This means that restore and build are not implicit when invoking other actions!
+
+**Note:** You can chain multiple actions together but the order of execution is fixed and does not relate to the position of the argument in the command.
 
 The most common workflow for developers is to call `build` from the root once (preceded by a `clean -all` if you have built previously) and then go and work on the individual library that you are trying to make changes for. On windows folks will usually open up the solution file in the root of that library directory and work in VS.
 
-By default build only builds the product libraries and none of the tests. If you want to build the tests you can call `build -buildtests`. If you want to run the tests you can call `build -test`, `build -integrationTest` or `build -performanceTest`. To build and run the tests combine both arguments: `build -test -buildtests`. To build both the product libraries and the test libraries pass `build -build -buildtests` to the command line. If you want to further configure which test libraries to build you can pass `/p:TestProjectFilter=Tests|IntegrationTests|PerformanceTests` to the command.
+By default build only builds the product libraries and none of the tests. If you want to build the tests you can call `build -buildtests`. If you want to run the tests you can call `build -test`, `build -integrationTest` or `build -performanceTest`. To build and run the tests combine both arguments: `build -buildtests -test`. To build both the product libraries and the test libraries pass `build -build -buildtests` to the command line. If you want to further configure which test libraries to build you can pass `/p:TestProjectFilter=Tests|IntegrationTests|PerformanceTests` to the command. 
 
 If you invoke the build script without any argument the default arguments will be executed `-restore -build`. Note that -restore and -build are only implicit if no actions are passed in.
 
@@ -56,12 +58,12 @@ build
 build -c Release -arch x64
 ```
 
-- Building the src and build and run tests
+- Building the src assemblies and build and run tests (running all tests takes a considerable amount of time!)
 ```
-build & build -test -buildtests
+build -restore -build -buildtests -test
 ```
 
-- Building for different target frameworks (-restore and -build are implicit again as no action is passed in)
+- Building for different target frameworks (restore and build are implicit again as no action is passed in)
 ```
 build -framework netcoreapp
 build -framework netfx
@@ -105,7 +107,7 @@ build -buildtests
 
 - The following builds and runs all tests for netcoreapp in release configuration.
 ```
-build -test -buildtests -c Release -f netcoreapp
+build -buildtests -test -c Release -f netcoreapp
 ```
 
 - The following example shows how to pass extra msbuild properties to ignore tests ignored in CI.
@@ -143,7 +145,7 @@ build src\System.Collections\tests
 
 - All the options listed above like framework and configuration are also supported (note they must be after the directory)
 ```
-build System.Collections -framework netfx -c Release
+build System.Collections -f netfx -c Release
 ```
 
 ### Building individual projects
@@ -191,7 +193,7 @@ dotnet msbuild System.Net.NetworkInformation.csproj /t:RebuildAll
 ### Building all for other OSes
 
 By default, building from the root will only build the libraries for the OS you are running on. One can
-build for another OS by specifying `build /p:OSGroup=[value]`.
+build for another OS by specifying `build -os [value]`.
 
 Note that you cannot generally build native components for another OS but you can for managed components so if you need to do that you can do it at the individual project level or build all via passing `/p:BuildNative=false`.
 
@@ -210,7 +212,7 @@ We use the OSS testing framework [xunit](http://xunit.github.io/).
 
 #### Running tests on the command line
 
-To build tests you need to pass the `-buildtests` flag to build.cmd/sh or if you want to build both you pass `-buildtests` flag (`build -restore -build -buildtests`). Note that you need to specify -restore and -build additionally as those are only implicit if no action is passed in (in this case buildtests is an action).
+To build tests you need to pass the `-buildtests` flag to build.cmd/sh or if you want to build both src and tests you pass `-buildtests` flag (`build -restore -build -buildtests`). Note that you need to specify -restore and -build additionally as those are only implicit if no action is passed in.
 
 For more information about cross-platform testing, please take a look [here](https://github.com/dotnet/corefx/blob/master/Documentation/building/cross-platform-testing.md).
 
@@ -411,8 +413,8 @@ dotnet msbuild <csproj_file> /t:BuildAndTest /p:OSGroup=OSX /p:WithCategories="O
 Code coverage is built into the corefx build system.  It utilizes OpenCover for generating coverage data and ReportGenerator for generating reports about that data.  To run:
 
 ```cmd
-:: Run full coverage (assuming sources are already built)
-build -test -buildtests -coverage
+:: Run full coverage (assuming sources and tests are already built)
+build -test -coverage
 
 If coverage succeeds, the full report can be found at `artifacts\coverage\index.htm`.
 
