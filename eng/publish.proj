@@ -8,10 +8,10 @@
 
   <PropertyGroup>
     <GitHubRepositoryName Condition="'$(GitHubRepositoryName)' == ''">corefx</GitHubRepositoryName>
-    <AssetManifestFileName Condition="'$(AssetManifestFileName)' == '' AND '$(ManifestBuildId)' != ''">$(GitHubRepositoryName)-$(ManifestBuildId)</AssetManifestFileName>
-    <AssetManifestFileName Condition="'$(AssetManifestFileName)' == ''">$(GitHubRepositoryName)</AssetManifestFileName>
+    <AssetManifestFileName Condition="'$(AssetManifestFileName)' == '' AND '$(ManifestBuildId)' != ''">$(GitHubRepositoryName)-$(ManifestBuildId).xml</AssetManifestFileName>
+    <AssetManifestFileName Condition="'$(AssetManifestFileName)' == ''">$(GitHubRepositoryName).xml</AssetManifestFileName>
     <AssetManifestDir>$(ArtifactsDir)AssetManifests\</AssetManifestDir>
-    <AssetManifestFilePath>$(AssetManifestDir)$(AssetManifestFileName).xml</AssetManifestFilePath>
+    <AssetManifestFilePath>$(AssetManifestDir)$(AssetManifestFileName)</AssetManifestFilePath>
 
     <PackageOutputRoot Condition="'$(PackagesOutputRoot)' == ''">$(ArtifactsDir)/packages/</PackageOutputRoot>
     <FinalPublishPattern>$(PackageOutputRoot)*.nupkg</FinalPublishPattern>
