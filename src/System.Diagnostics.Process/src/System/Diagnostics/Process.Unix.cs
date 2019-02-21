@@ -780,7 +780,6 @@ namespace System.Diagnostics
         {
             Debug.Assert(!string.IsNullOrEmpty(startInfo.UserName));
 
-            uint[] groups = null;
             (uint? userId, uint? groupId) = GetUserAndGroupIds(startInfo.UserName);
 
             Debug.Assert(userId.HasValue == groupId.HasValue, "userId and groupId both need to have values, or both need to be null.");
@@ -789,7 +788,7 @@ namespace System.Diagnostics
                 throw new Win32Exception(SR.Format(SR.UserDoesNotExist, startInfo.UserName));
             }
 
-            groups = Interop.Sys.GetGroupList(startInfo.UserName, groupId.Value);
+            uint[] groups = Interop.Sys.GetGroupList(startInfo.UserName, groupId.Value);
             if (groups == null)
             {
                 throw new Win32Exception(SR.Format(SR.UserGroupsCannotBeDetermined, startInfo.UserName));
