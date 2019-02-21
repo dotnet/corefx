@@ -612,6 +612,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void MetadataAttributes()
         {
             RemoteInvoke(() =>
@@ -1448,6 +1449,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void RegionsSnippetsAndLinePragmas()
         {
             RemoteInvoke(() =>
@@ -2569,6 +2571,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void ProviderSupports()
         {
             RemoteInvoke(() =>
