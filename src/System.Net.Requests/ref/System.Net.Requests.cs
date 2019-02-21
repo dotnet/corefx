@@ -160,7 +160,7 @@ namespace System.Net
         public override void Close() { }
         public override System.IO.Stream GetResponseStream() { throw null; }
     }
-    [ObsoleteAttribute("This class has been deprecated. Please use WebRequest.DefaultWebProxy instead to access and set the global default proxy. Use 'null' instead of GetEmptyWebProxy. http://go.microsoft.com/fwlink/?linkid=14202")]
+    [ObsoleteAttribute("This class has been deprecated. Please use WebRequest.DefaultWebProxy instead to access and set the global default proxy. Use 'null' instead of GetEmptyWebProxy. https://go.microsoft.com/fwlink/?linkid=14202")]
     public partial class GlobalProxySelection
     {
         public GlobalProxySelection() { }

@@ -65,7 +65,7 @@ namespace System.Diagnostics
         public void Close() { }
         public static void CreateEventSource(System.Diagnostics.EventSourceCreationData sourceData) { }
         public static void CreateEventSource(string source, string logName) { }
-        [System.ObsoleteAttribute("This method has been deprecated.  Please use System.Diagnostics.EventLog.CreateEventSource(EventSourceCreationData sourceData) instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("This method has been deprecated.  Please use System.Diagnostics.EventLog.CreateEventSource(EventSourceCreationData sourceData) instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public static void CreateEventSource(string source, string logName, string machineName) { }
         public static void Delete(string logName) { }
         public static void Delete(string logName, string machineName) { }
