@@ -28,6 +28,7 @@ jobs:
             _dockerContainer: rhel7_container
             _buildScriptPrefix: ''
             _buildExtraArguments: ''
+            _publishTests: true
 
           arm64_Release:
             _BuildConfig: Release
@@ -36,7 +37,7 @@ jobs:
             _helixQueues: $(linuxArm64Queues)
             _dockerContainer: ubuntu_1604_arm64_cross_container
             _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
-            _buildExtraArguments: ''
+            _buildExtraArguments: --warnAsError false
 
           ${{ if eq(parameters.isOuterloopBuild, 'true') }}:
             x64_Debug:
@@ -55,7 +56,7 @@ jobs:
               _helixQueues: $(linuxArm64Queues)
               _dockerContainer: ubuntu_1604_arm64_cross_container
               _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
-              _buildExtraArguments: ''
+              _buildExtraArguments: --warnAsError false
           
           ${{ if eq(parameters.isOfficialBuild, 'true') }}:
             musl_x64_Release:
@@ -82,7 +83,7 @@ jobs:
           - _outerloop: true
 
         - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-          - linuxDefaultQueues: Centos.7.Amd64.Open+RedHat.7.Amd64.Open+Debian.8.Amd64.Open+Ubuntu.1604.Amd64.Open+Ubuntu.1804.Amd64.Open+OpenSuse.42.Amd64.Open #+Fedora.27.Amd64.Open
+          - linuxDefaultQueues: Centos.7.Amd64.Open+RedHat.7.Amd64.Open+Debian.8.Amd64.Open+Ubuntu.1604.Amd64.Open+Ubuntu.1804.Amd64.Open+OpenSuse.42.Amd64.Open+Fedora.27.Amd64.Open
           - linuxArm64Queues: Ubuntu.1604.Arm64.Open
       
         - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
@@ -110,7 +111,7 @@ jobs:
               _BuildConfig: Release
               _architecture: arm
               _framework: netcoreapp
-              _buildExtraArguments: /p:RuntimeOS=ubuntu.16.04
+              _buildExtraArguments: /p:RuntimeOS=ubuntu.16.04 --warnAsError false
               _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm '
               _dockerContainer: ubuntu_1604_arm_cross_container
 

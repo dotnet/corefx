@@ -185,6 +185,7 @@ using Internal.Runtime.Augments;
 
 #if ES_BUILD_STANDALONE
 using EventDescriptor = Microsoft.Diagnostics.Tracing.EventDescriptor;
+using BitOps = Microsoft.Diagnostics.Tracing.Internal.BitOps;
 #else
 using System.Threading.Tasks;
 #endif
@@ -455,7 +456,7 @@ namespace System.Diagnostics.Tracing
         {
             get
             {
-                int threadID = Win32Native.GetCurrentThreadId();
+                int threadID = Interop.Kernel32.GetCurrentThreadId();
 
                 // Managed thread IDs are more aggressively re-used than native thread IDs,
                 // so we'll use the latter...
@@ -1579,7 +1580,7 @@ namespace System.Diagnostics.Tracing
             {
                 for (int i = 16; i != 80; i++)
                 {
-                    this.w[i] = Rol1((this.w[i - 3] ^ this.w[i - 8] ^ this.w[i - 14] ^ this.w[i - 16]));
+                    this.w[i] = BitOps.RotateLeft((this.w[i - 3] ^ this.w[i - 8] ^ this.w[i - 14] ^ this.w[i - 16]), 1);
                 }
 
                 unchecked
@@ -1594,28 +1595,28 @@ namespace System.Diagnostics.Tracing
                     {
                         const uint k = 0x5A827999;
                         uint f = (b & c) | ((~b) & d);
-                        uint temp = Rol5(a) + f + e + k + this.w[i]; e = d; d = c; c = Rol30(b); b = a; a = temp;
+                        uint temp = BitOps.RotateLeft(a, 5) + f + e + k + this.w[i]; e = d; d = c; c = BitOps.RotateLeft(b, 30); b = a; a = temp;
                     }
 
                     for (int i = 20; i != 40; i++)
                     {
                         uint f = b ^ c ^ d;
                         const uint k = 0x6ED9EBA1;
-                        uint temp = Rol5(a) + f + e + k + this.w[i]; e = d; d = c; c = Rol30(b); b = a; a = temp;
+                        uint temp = BitOps.RotateLeft(a, 5) + f + e + k + this.w[i]; e = d; d = c; c = BitOps.RotateLeft(b, 30); b = a; a = temp;
                     }
 
                     for (int i = 40; i != 60; i++)
                     {
                         uint f = (b & c) | (b & d) | (c & d);
                         const uint k = 0x8F1BBCDC;
-                        uint temp = Rol5(a) + f + e + k + this.w[i]; e = d; d = c; c = Rol30(b); b = a; a = temp;
+                        uint temp = BitOps.RotateLeft(a, 5) + f + e + k + this.w[i]; e = d; d = c; c = BitOps.RotateLeft(b, 30); b = a; a = temp;
                     }
 
                     for (int i = 60; i != 80; i++)
                     {
                         uint f = b ^ c ^ d;
                         const uint k = 0xCA62C1D6;
-                        uint temp = Rol5(a) + f + e + k + this.w[i]; e = d; d = c; c = Rol30(b); b = a; a = temp;
+                        uint temp = BitOps.RotateLeft(a, 5) + f + e + k + this.w[i]; e = d; d = c; c = BitOps.RotateLeft(b, 30); b = a; a = temp;
                     }
 
                     this.w[80] += a;
@@ -1627,21 +1628,6 @@ namespace System.Diagnostics.Tracing
 
                 this.length += 512; // 64 bytes == 512 bits
                 this.pos = 0;
-            }
-
-            private static uint Rol1(uint input)
-            {
-                return (input << 1) | (input >> 31);
-            }
-
-            private static uint Rol5(uint input)
-            {
-                return (input << 5) | (input >> 27);
-            }
-
-            private static uint Rol30(uint input)
-            {
-                return (input << 30) | (input >> 2);
             }
         }
 
@@ -2742,7 +2728,7 @@ namespace System.Diagnostics.Tracing
                 // for non-BCL EventSource we must assert SecurityPermission
                 new SecurityPermission(PermissionState.Unrestricted).Assert();
 #endif
-                s_currentPid = Win32Native.GetCurrentProcessId();
+                s_currentPid = Interop.Kernel32.GetCurrentProcessId();
             }
         }
 
@@ -3874,10 +3860,10 @@ namespace System.Diagnostics.Tracing
         static EventListener()
         {
 #if FEATURE_PERFTRACING
-            // Ensure that RuntimeEventSource is initialized so that EventListeners get an opportunity to subscribe to its events.
-            // This is required because RuntimeEventSource never emit events on its own, and thus will never be initialized
+            // Ensure that NativeRuntimeEventSource is initialized so that EventListeners get an opportunity to subscribe to its events.
+            // This is required because NativeRuntimeEventSource never emit events on its own, and thus will never be initialized
             // in the normal way that EventSources are initialized.
-            GC.KeepAlive(RuntimeEventSource.Log);
+            GC.KeepAlive(NativeRuntimeEventSource.Log);
 #endif // FEATURE_PERFTRACING
         }
 
@@ -3989,7 +3975,7 @@ namespace System.Diagnostics.Tracing
             eventSource.SendCommand(this, EventProviderType.None, 0, 0, EventCommand.Update, true, level, matchAnyKeyword, arguments);
 
 #if FEATURE_PERFTRACING
-            if (eventSource.GetType() == typeof(RuntimeEventSource))
+            if (eventSource.GetType() == typeof(NativeRuntimeEventSource))
             {
                 EventPipeEventDispatcher.Instance.SendCommand(this, EventCommand.Update, true, level, matchAnyKeyword);
             }
@@ -4010,7 +3996,7 @@ namespace System.Diagnostics.Tracing
             eventSource.SendCommand(this, EventProviderType.None, 0, 0, EventCommand.Update, false, EventLevel.LogAlways, EventKeywords.None, null);
 
 #if FEATURE_PERFTRACING
-            if (eventSource.GetType() == typeof(RuntimeEventSource))
+            if (eventSource.GetType() == typeof(NativeRuntimeEventSource))
             {
                 EventPipeEventDispatcher.Instance.SendCommand(this, EventCommand.Update, false, EventLevel.LogAlways, EventKeywords.None);
             }
