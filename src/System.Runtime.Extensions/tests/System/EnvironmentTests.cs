@@ -174,7 +174,7 @@ namespace System.Tests
         [Fact]
         public void Version_Valid()
         {
-            Assert.True(Environment.Version >= new Version(3,0));
+            Assert.True(Environment.Version >= new Version(3, 0));
         }
 
         [Fact]
