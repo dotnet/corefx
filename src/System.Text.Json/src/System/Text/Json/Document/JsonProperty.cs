@@ -10,7 +10,7 @@ namespace System.Text.Json
     public readonly struct JsonProperty
     {
         /// <summary>
-        /// The value of this property
+        ///   The value of this property.
         /// </summary>
         public JsonElement Value { get; }
 
@@ -23,7 +23,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// The name of this property.
+        ///   The name of this property.
         /// </summary>
         public string Name => Value.GetPropertyName();
 

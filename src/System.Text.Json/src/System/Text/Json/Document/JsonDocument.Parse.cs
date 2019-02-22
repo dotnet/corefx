@@ -46,7 +46,7 @@ namespace System.Text.Json
         ///   Parse a sequence as UTF-8-encoded text representing a single JSON value into a JsonDocument.
         /// </summary>
         /// <remarks>
-        ///   The backing <see cref="ReadOnlyMemory{T}"/> values may be used for the entire lifetime of the
+        ///   The <see cref="ReadOnlySequence{T}"/> may be used for the entire lifetime of the
         ///   JsonDocument object, and the caller must ensure that the data therein does not change during
         ///   the object lifetime.
         ///
@@ -134,7 +134,7 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="utf8Json">JSON data to parse.</param>
         /// <param name="readerOptions">Options to control the reader behavior during parsing.</param>
-        /// <param name="cancellationToken">   The token to monitor for cancellation requests.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>
         ///   A Task to produce a JsonDocument representation of the JSON value.
         /// </returns>

@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace System.Text.Json
 {
     /// <summary>
-    ///   Represents a specific value within a <see cref="JsonDocument"/>.
+    ///   Represents a specific JSON value within a <see cref="JsonDocument"/>.
     /// </summary>
     public readonly partial struct JsonElement
     {
@@ -47,7 +47,7 @@ namespace System.Text.Json
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Array"/>.
         /// </exception>
         /// <exception cref="IndexOutOfRangeException">
-        ///   <paramref name="index"/> is not in the range [0, <see cref="GetArrayLength"/>()),
+        ///   <paramref name="index"/> is not in the range [0, <see cref="GetArrayLength"/>()).
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -101,7 +101,7 @@ namespace System.Text.Json
         ///   No property was found with the requested name.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///   <paramref name="propertyName"/> is <c>null</c>.
+        ///   <paramref name="propertyName"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -203,13 +203,13 @@ namespace System.Text.Json
         /// <param name="propertyName">Name of the property to find.</param>
         /// <param name="value">Receives the value of the located property.</param>
         /// <returns>
-        ///   <c>true</c> if the property was found, <c>false</c> otherwise.
+        ///   <see langword="true"/> if the property was found, <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Object"/>.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///   <paramref name="propertyName"/> is <c>null</c>.
+        ///   <paramref name="propertyName"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -237,7 +237,7 @@ namespace System.Text.Json
         /// <param name="propertyName">Name of the property to find.</param>
         /// <param name="value">Receives the value of the located property.</param>
         /// <returns>
-        ///   <c>true</c> if the property was found, <c>false</c> otherwise.
+        ///   <see langword="true"/> if the property was found, <see langword="false"/> otherwise.
         /// </returns>
         /// <seealso cref="EnumerateObject"/>
         /// <exception cref="InvalidOperationException">
@@ -269,7 +269,7 @@ namespace System.Text.Json
         /// </param>
         /// <param name="value">Receives the value of the located property.</param>
         /// <returns>
-        ///   <c>true</c> if the property was found, <c>false</c> otherwise.
+        ///   <see langword="true"/> if the property was found, <see langword="false"/> otherwise.
         /// </returns>
         /// <seealso cref="EnumerateObject"/>
         /// <exception cref="InvalidOperationException">
@@ -341,8 +341,8 @@ namespace System.Text.Json
         ///   This method does not parse the contents of a JSON string value.
         /// </remarks>
         /// <returns>
-        ///   <c>true</c> if the number can be represented as an <see cref="int"/>, <c>false</c>
-        ///   otherwise.
+        ///   <see langword="true"/> if the number can be represented as an <see cref="int"/>,
+        ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
@@ -388,8 +388,8 @@ namespace System.Text.Json
         ///   This method does not parse the contents of a JSON string value.
         /// </remarks>
         /// <returns>
-        ///   <c>true</c> if the number can be represented as a <see cref="uint"/>, <c>false</c>
-        ///   otherwise.
+        ///   <see langword="true"/> if the number can be represented as a <see cref="uint"/>,
+        ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
@@ -440,8 +440,8 @@ namespace System.Text.Json
         ///   This method does not parse the contents of a JSON string value.
         /// </remarks>
         /// <returns>
-        ///   <c>true</c> if the number can be represented as a <see cref="long"/>, <c>false</c>
-        ///   otherwise.
+        ///   <see langword="true"/> if the number can be represented as a <see cref="long"/>,
+        ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
@@ -490,8 +490,8 @@ namespace System.Text.Json
         ///   This method does not parse the contents of a JSON string value.
         /// </remarks>
         /// <returns>
-        ///   <c>true</c> if the number can be represented as a <see cref="ulong"/>, <c>false</c>
-        ///   otherwise.
+        ///   <see langword="true"/> if the number can be represented as a <see cref="ulong"/>,
+        ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
@@ -541,14 +541,14 @@ namespace System.Text.Json
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
         ///
-        ///   On .NET Core this method does not return <c>false</c> for values larger than
+        ///   On .NET Core this method does not return <see langword="false"/> for values larger than
         ///   <see cref="double.MaxValue"/> (or smaller than <see cref="double.MinValue"/>),
-        ///   instead <c>true</c> is returned and <see cref="double.PositiveInfinity"/> (or
+        ///   instead <see langword="true"/> is returned and <see cref="double.PositiveInfinity"/> (or
         ///   <see cref="double.NegativeInfinity"/>) is emitted.
         /// </remarks>
         /// <returns>
-        ///   <c>true</c> if the number can be represented as a <see cref="double"/>, <c>false</c>
-        ///   otherwise.
+        ///   <see langword="true"/> if the number can be represented as a <see cref="double"/>,
+        ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
@@ -600,14 +600,14 @@ namespace System.Text.Json
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
         ///
-        ///   On .NET Core this method does not return <c>false</c> for values larger than
+        ///   On .NET Core this method does not return <see langword="false"/> for values larger than
         ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>),
-        ///   instead <c>true</c> is returned and <see cref="float.PositiveInfinity"/> (or
+        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or
         ///   <see cref="float.NegativeInfinity"/>) is emitted.
         /// </remarks>
         /// <returns>
-        ///   <c>true</c> if the number can be represented as a <see cref="float"/>, <c>false</c>
-        ///   otherwise.
+        ///   <see langword="true"/> if the number can be represented as a <see cref="float"/>,
+        ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
@@ -660,8 +660,8 @@ namespace System.Text.Json
         ///   This method does not parse the contents of a JSON string value.
         /// </remarks>
         /// <returns>
-        ///   <c>true</c> if the number can be represented as a <see cref="decimal"/>, <c>false</c>
-        ///   otherwise.
+        ///   <see langword="true"/> if the number can be represented as a <see cref="decimal"/>,
+        ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
@@ -804,7 +804,7 @@ namespace System.Text.Json
         /// 
         ///   For <see cref="JsonValueType.String"/>, the value of <see cref="GetString"/>() is returned.
         ///
-        ///   For other types, the value of <see cref="GetRawText"/> is returned.
+        ///   For other types, the value of <see cref="GetRawText"/>() is returned.
         /// </remarks>
         /// <returns>
         ///   A string representation for the current value appropriate to the value type.

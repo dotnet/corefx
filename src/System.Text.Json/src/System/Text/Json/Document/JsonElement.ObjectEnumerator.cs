@@ -42,13 +42,13 @@ namespace System.Text.Json
             /// </summary>
             /// <returns>
             ///   An <see cref="ObjectEnumerator"/> value that can be used to iterate
-            ///   through the array.
+            ///   through the object.
             /// </returns>
             /// <remarks>
             ///   The enumerator will enumerate the properties in the order they are
             ///   declared, and when an object has multiple definitions of a single
-            ///   property they will all individually be returned (in their correctly
-            ///   defined order).
+            ///   property they will all individually be returned (each in the order
+            ///   they appear in the content).
             /// </remarks>
             public ObjectEnumerator GetEnumerator()
             {
