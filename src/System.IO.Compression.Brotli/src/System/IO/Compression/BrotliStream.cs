@@ -43,20 +43,6 @@ namespace System.IO.Compression
             _buffer = ArrayPool<byte>.Shared.Rent(DefaultInternalBufferSize);
         }
 
-        private void ReturnBufferToPool()
-        {
-            Debug.Assert(_stream == null, "Stream must be disposed to return the buffer.");
-            byte[] buffer = _buffer;
-            if (buffer != null)
-            {
-                _buffer = null;
-                if (!AsyncOperationIsActive)
-                {
-                    ArrayPool<byte>.Shared.Return(buffer);
-                }
-            }
-        }
-
         private void EnsureNotDisposed()
         {
             if (_stream == null)
@@ -82,10 +68,7 @@ namespace System.IO.Compression
             }
             finally
             {
-                _stream = null;
-                _encoder.Dispose();
-                _decoder.Dispose();
-                ReturnBufferToPool();
+                ReleaseStateForDispose();
                 base.Dispose(disposing);
             }
         }
@@ -109,10 +92,24 @@ namespace System.IO.Compression
             }
             finally
             {
-                _stream = null;
-                _encoder.Dispose();
-                _decoder.Dispose();
-                ReturnBufferToPool();
+                ReleaseStateForDispose();
+            }
+        }
+
+        private void ReleaseStateForDispose()
+        {
+            _stream = null;
+            _encoder.Dispose();
+            _decoder.Dispose();
+
+            byte[] buffer = _buffer;
+            if (buffer != null)
+            {
+                _buffer = null;
+                if (!AsyncOperationIsActive)
+                {
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
             }
         }
 
