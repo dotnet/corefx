@@ -95,6 +95,9 @@ namespace System.Diagnostics.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Pipe doesn't work well on UAP")]
         async public Task TestAsyncOutputStream_CancelOutputRead()
         {
+            // This test might have some false positives due to possible race condition in System.Diagnostics.AsyncStreamReader.ReadBufferAsync
+            // There is not way to know if parent process has processed async output from child process
+            
             using (AnonymousPipeServerStream pipeWrite = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable))
             using (AnonymousPipeServerStream pipeRead = new AnonymousPipeServerStream(PipeDirection.In, HandleInheritability.Inheritable))
             {
