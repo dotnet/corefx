@@ -63,6 +63,8 @@ namespace System
         public static bool IsDrawingSupported { get; } = GetGdiplusIsAvailable();
         public static bool IsSoundPlaySupported { get; } = false;
 
+        public static bool IsDocker => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && File.Exists("/.dockerenv");
+
         [DllImport("libdl")]
         private static extern IntPtr dlopen(string libName, int flags);
         public const int RTLD_NOW = 0x002;

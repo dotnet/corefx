@@ -45,6 +45,7 @@ namespace System
         public static bool IsRedHatFamily6 => false;
         public static bool IsRedHatFamily7 => false;
         public static bool IsNotRedHatFamily6 => true;
+        public static bool IsDocker => false;
 
         public static bool IsWindows10Version1607OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
