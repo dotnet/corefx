@@ -46,7 +46,7 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
         [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp)]
         public void VerifyRuntimeNameOnNetCoreApp()
         {
-            Assert.True(RuntimeInformation.FrameworkDescription.StartsWith(".NET Core"));
+            Assert.True(RuntimeInformation.FrameworkDescription.StartsWith(".NET Core"), RuntimeInformation.FrameworkDescription);
             Assert.Same(RuntimeInformation.FrameworkDescription, RuntimeInformation.FrameworkDescription);
         }
 
@@ -54,7 +54,7 @@ namespace System.Runtime.InteropServices.RuntimeInformationTests
         [SkipOnTargetFramework(~TargetFrameworkMonikers.UapAot)]
         public void VerifyRuntimeNameOnNetNative()
         {
-            Assert.True(RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"));
+            Assert.True(RuntimeInformation.FrameworkDescription.StartsWith(".NET Native"), RuntimeInformation.FrameworkDescription);
             Assert.Same(RuntimeInformation.FrameworkDescription, RuntimeInformation.FrameworkDescription);
         }
 
