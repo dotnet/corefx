@@ -18,6 +18,11 @@
       <Value>.NETCoreApp;UAP</Value>
     </ValidatePackageSuppression>
   </ItemGroup>
+
+  <!-- This target is a work-around and should be removed by 6/2019 (by then a fixed version of System.Memory
+       should be available so that System.Memory does not reference NetStandard1.X)
+       See Eric St John for details. -->
+
   <Target Name="RemoveSystemMemoryNetStandard1x" AfterTargets="GetNuGetPackageDependencies">
     <!-- System.Memory is causing a cycle when used for netstandard1.x.
          This is due to S.M referencing the NETStandard.Library metapackage for netstandard1.x
@@ -29,5 +34,6 @@
       <Dependency Remove="@(Dependency)" Condition="'%(Identity)' == 'System.Memory' AND $([System.String]::new('%(TargetFramework)').StartsWith('netstandard1.'))" />
     </ItemGroup>
   </Target>
+
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>
