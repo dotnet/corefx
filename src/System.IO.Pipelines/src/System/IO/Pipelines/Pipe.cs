@@ -303,7 +303,7 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Advance(int bytesWritten)
         {
-            if (bytesWritten < 0 || bytesWritten > _writingMemory.Length)
+            if ((uint)bytesWritten > (uint)_writingMemory.Length)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.bytesWritten);
             }
