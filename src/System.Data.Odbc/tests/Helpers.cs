@@ -16,7 +16,7 @@ namespace System.Data.Odbc.Tests
 #if TargetsWindows
                 !PlatformDetection.IsWindowsNanoServer && (!PlatformDetection.IsWindowsServerCore || Environment.Is64BitProcess);
 #else
-                Interop.Libdl.dlopen(Interop.Libraries.Odbc32, Interop.Libdl.RTLD_NOW) != IntPtr.Zero;
+                NativeLibrary.TryLoad(Interop.Libraries.Odbc32, out _);
 #endif
     }
 }
