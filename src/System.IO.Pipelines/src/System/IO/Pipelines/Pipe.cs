@@ -170,52 +170,99 @@ namespace System.IO.Pipelines
         {
             // If writing is currently active and enough space, don't need to take the lock to just set WritingActive.
             // IsWritingActive is needed to prevent the reader releasing the writers memory when it fully consumes currently written.
-            if (!_operationState.IsWritingActive ||
-                _writingMemory.Length == 0 || _writingMemory.Length < sizeHint)
+            if (!_operationState.IsWritingActive)
             {
                 AllocateWriteHeadSynchronized(sizeHint);
             }
+            else if (_writingMemory.Length == 0 || _writingMemory.Length < sizeHint)
+            {
+                AllocateWriteHead(sizeHint);
+            }
+        }
+
+        private void AllocateWriteHead(int sizeHint)
+        {
+            Debug.Assert(_operationState.IsWritingActive);
+            Debug.Assert(_writingHead != null);
+
+            if (_buffered > 0)
+            {
+                // Flush buffered data to the segment
+                _writingHead.End += _buffered;
+                _buffered = 0;
+            }
+
+            AllocateAndLinkSegment(sizeHint);
         }
 
         private void AllocateWriteHeadSynchronized(int sizeHint)
         {
-            if (_writingHead == null)
-            {
-                // We need to allocate memory to write since nobody has written before
-                BufferSegment newSegment = AllocateSegment(sizeHint);
+            Debug.Assert(!_operationState.IsWritingActive);
 
-                lock (_sync)
-                {
-                    _operationState.BeginWrite();
-                    // Set all the pointers
-                    _writingHead = _readHead = _readTail = newSegment;
-                }
-
-                return;
-            }
-            else if (!_operationState.IsWritingActive)
+            BufferSegment newSegment = null;
+            if (_writingHead is null)
             {
-                lock (_sync)
-                {
-                    _operationState.BeginWrite();
-                }
+                // We definately always need to allocate memory to write since nobody has written before, 
+                // we can now opportunistically do that out of lock as it doesn't change any state and it is expensive.
+                newSegment = AllocateSegment(sizeHint);
             }
 
-            // Have to recheck as if writing wasn't active AdvanceReader may have disposed any available Memory
-            if (_writingMemory.Length == 0 || _writingMemory.Length < sizeHint)
+            lock (_sync)
             {
-                if (_buffered > 0)
+                _operationState.BeginWrite();
+
+                // We need to recheck state as AdvanceReader may have deallocated it prior to setting writing active.
+                if (_writingMemory.Length == 0 || _writingMemory.Length < sizeHint)
                 {
-                    // Flush buffered data to the segment
-                    _writingHead.End += _buffered;
-                    _buffered = 0;
+                    // Need to allocate BufferSegment
+                    // Note: If _writingHead == null then _writingMemory.Length == 0, so only need to check one.
+
+                    if (_buffered > 0)
+                    {
+                        // If we have buffered data, we must already have a writing head.
+                        Debug.Assert(_writingHead != null);
+
+                        // Flush buffered data to the segment
+                        _writingHead.End += _buffered;
+                        _buffered = 0;
+                    }
+
+                    if (newSegment is null)
+                    {
+                        // We haven't opportunistically allocated as _writingHead != null when we entered, outside the lock.
+                        newSegment = AllocateSegment(sizeHint);
+                    }
+
+                    if (_writingHead is null)
+                    {
+                        // If _writingHead is null, then we set all the pointers to the newSegment.
+                        _writingHead = _readHead = _readTail = newSegment;
+                    }
+                    else
+                    {
+                        // Otherwise update the _writingHead to the newSegment.
+                        LinkWriteSegmentAndAdvance(newSegment);
+                    }
+
+                    // Set the _writingMemory to the newly allocated memory.
+                    _writingMemory = newSegment.AvailableMemory;
                 }
-
-                BufferSegment newSegment = AllocateSegment(sizeHint);
-
-                _writingHead.SetNext(newSegment);
-                _writingHead = newSegment;
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void AllocateAndLinkSegment(int sizeHint = 0)
+        {
+            BufferSegment newSegment = AllocateSegment(sizeHint);
+            LinkWriteSegmentAndAdvance(newSegment);
+            _writingMemory = newSegment.AvailableMemory;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void LinkWriteSegmentAndAdvance(BufferSegment newSegment)
+        {
+            _writingHead.SetNext(newSegment);
+            _writingHead = newSegment;
         }
 
         private BufferSegment AllocateSegment(int sizeHint)
@@ -237,8 +284,6 @@ namespace System.IO.Pipelines
                 // We can't use the pool so allocate an array
                 newSegment.SetUnownedMemory(new byte[sizeHint]);
             }
-
-            _writingMemory = newSegment.AvailableMemory;
 
             return newSegment;
         }
@@ -1003,12 +1048,7 @@ namespace System.IO.Pipelines
                 _writingHead.End += writable;
                 _buffered = 0;
 
-                // This is optimized to use pooled memory. That's why we pass 0 instead of
-                // source.Length
-                BufferSegment newSegment = AllocateSegment(0);
-
-                _writingHead.SetNext(newSegment);
-                _writingHead = newSegment;
+                AllocateAndLinkSegment();
 
                 destination = _writingMemory.Span;
             }
