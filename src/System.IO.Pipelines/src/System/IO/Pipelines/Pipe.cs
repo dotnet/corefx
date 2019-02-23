@@ -43,7 +43,9 @@ namespace System.IO.Pipelines
         private readonly PipeScheduler _writerScheduler;
 
         private int _pooledSegmentCount;
-        private readonly SegmentAsValue[] _bufferSegmentPool;
+        private readonly BufferSegment[] _bufferSegmentPool;
+        // Temporary list to hold Segments return while being reset
+        private readonly BufferSegment[] _bufferSegmentsToReturn;
 
         private readonly DefaultPipeReader _reader;
         private readonly DefaultPipeWriter _writer;
@@ -95,7 +97,8 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.options);
             }
 
-            _bufferSegmentPool = new SegmentAsValue[SegmentPoolSize];
+            _bufferSegmentPool = new BufferSegment[SegmentPoolSize];
+            _bufferSegmentsToReturn = new BufferSegment[SegmentPoolSize];
 
             _operationState = default;
             _readerCompletion = default;
@@ -292,6 +295,66 @@ namespace System.IO.Pipelines
             // After that adjust it to fit into pools max buffer size
             var adjustedToMaximumSize = Math.Min(maxBufferSize, sizeHint);
             return adjustedToMaximumSize;
+        }
+
+        private BufferSegment CreateSegmentSynchronized()
+        {
+            BufferSegment[] segmentPool = _bufferSegmentPool;
+            lock (segmentPool)
+            {
+                int index = _pooledSegmentCount - 1;
+                if ((uint)index < (uint)segmentPool.Length)
+                {
+                    _pooledSegmentCount = index;
+                    return segmentPool[index];
+                }
+            }
+
+            return new BufferSegment();
+        }
+
+        private void ReturnSegments(BufferSegment from, BufferSegment toExclusive)
+        {
+            Debug.Assert(from != null);
+            Debug.Assert(from != toExclusive);
+
+            // Reset the Segments and return their data out of lock
+            BufferSegment[] segmentToReturn = _bufferSegmentsToReturn;
+            int count = 0;
+            do
+            {
+                BufferSegment next = from.NextSegment;
+                Debug.Assert(next != null || toExclusive == null);
+
+                from.ResetMemory();
+
+                if ((uint)count < (uint)segmentToReturn.Length)
+                {
+                    // Store in temporary list while preforming expensive resets
+                    segmentToReturn[count] = from;
+                    count++;
+                }
+
+                from = next;
+            } while (from != toExclusive);
+
+            // Add the Segments back to pool from the temporary list under lock
+            BufferSegment[] segmentPool = _bufferSegmentPool;
+            lock (segmentPool)
+            {
+                int index = _pooledSegmentCount;
+                for (int i = 0; i < count; i++)
+                {
+                    if ((uint)index < (uint)segmentPool.Length)
+                    {
+                        segmentPool[index] = segmentToReturn[i];
+                        index++;
+                    }
+                    segmentToReturn[i] = null;
+                }
+
+                _pooledSegmentCount = index;
+            }
         }
 
         internal bool CommitUnsynchronized()
@@ -1052,97 +1115,5 @@ namespace System.IO.Pipelines
                 ResetState();
             }
         }
-
-        private BufferSegment CreateSegmentSynchronized()
-        {
-            SegmentAsValue[] segmentPool = _bufferSegmentPool;
-            lock (segmentPool)
-            {
-                int index = _pooledSegmentCount - 1;
-                if ((uint)index < (uint)segmentPool.Length)
-                {
-                    _pooledSegmentCount = index;
-                    return segmentPool[index];
-                }
-            }
-
-            return new BufferSegment();
-        }
-
-        private void ReturnSegments(BufferSegment from, BufferSegment toExclusive)
-        {
-            Debug.Assert(from != null);
-            Debug.Assert(from != toExclusive);
-
-            // Reset the Segments and return their data out of lock
-            ValueSegmentList segmentsToReturn = default;
-            ref var startSegment = ref segmentsToReturn.Segment00;
-            int count = 0;
-            do
-            {
-                BufferSegment next = from.NextSegment;
-                Debug.Assert(next != null || toExclusive == null);
-
-                from.ResetMemory();
-
-                if ((uint)count < (uint)SegmentPoolSize)
-                {
-                    // Store in temporary list while preforming expensive resets
-                    Unsafe.Add(ref startSegment, count) = from;
-                    count++;
-                }
-
-                from = next;
-            } while (from != toExclusive);
-
-            // Add the Segments back to pool from the temporary list under lock
-            SegmentAsValue[] segmentPool = _bufferSegmentPool;
-            lock (segmentPool)
-            {
-                int index = _pooledSegmentCount;
-                for (int i = 0; i < count; i++)
-                {
-                    if ((uint)index < (uint)segmentPool.Length)
-                    {
-                        segmentPool[index] = Unsafe.Add(ref startSegment, i);
-                        index++;
-                    }
-                }
-
-                _pooledSegmentCount = index;
-            }
-        }
-
-        // Used to avoid covariant checks on the array
-        private readonly struct SegmentAsValue
-        {
-            private readonly BufferSegment _bufferSegment;
-            public SegmentAsValue(BufferSegment bufferSegment) => _bufferSegment = bufferSegment;
-            public static implicit operator SegmentAsValue(BufferSegment b) => new SegmentAsValue(b);
-            public static implicit operator BufferSegment(SegmentAsValue s) => s._bufferSegment;
-        }
-
-        // Temporary list to hold Segments return while being reset
-#pragma warning disable CS0649
-        private ref struct ValueSegmentList
-        {
-            public BufferSegment Segment00;
-            public BufferSegment Segment01;
-            public BufferSegment Segment02;
-            public BufferSegment Segment03;
-            public BufferSegment Segment04;
-            public BufferSegment Segment05;
-            public BufferSegment Segment06;
-            public BufferSegment Segment07;
-            public BufferSegment Segment08;
-            public BufferSegment Segment09;
-            public BufferSegment Segment10;
-            public BufferSegment Segment11;
-            public BufferSegment Segment12;
-            public BufferSegment Segment13;
-            public BufferSegment Segment14;
-            public BufferSegment Segment15;
-        }
-#pragma warning enable CS0649
     }
 }
