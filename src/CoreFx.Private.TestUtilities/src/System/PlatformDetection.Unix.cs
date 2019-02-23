@@ -71,7 +71,7 @@ namespace System
 
         [DllImport("libdl")]
         private static extern IntPtr dlopen(string libName, int flags);
-        public const int RTLD_LAZY = 0x001;
+        private const int RTLD_LAZY = 0x001;
 #endif
 
         public static bool IsSoundPlaySupported { get; } = false;
