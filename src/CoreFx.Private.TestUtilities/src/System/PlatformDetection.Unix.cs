@@ -65,7 +65,7 @@ namespace System
 
         [DllImport("libdl")]
         private static extern IntPtr dlopen(string libName, int flags);
-        public const int RTLD_NOW = 0x002;
+        public const int RTLD_LAZY = 0x001;
 
         private static bool GetGdiplusIsAvailable()
         {
@@ -73,14 +73,14 @@ namespace System
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                nativeLib = dlopen("libgdiplus.dylib", RTLD_NOW);
+                nativeLib = dlopen("libgdiplus.dylib", RTLD_LAZY);
             }
             else
             {
-                nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
+                nativeLib = dlopen("libgdiplus.so", RTLD_LAZY);
                 if (nativeLib == IntPtr.Zero)
                 {
-                    nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
+                    nativeLib = dlopen("libgdiplus.so.0", RTLD_LAZY);
                 }
             }
 
