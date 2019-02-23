@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -1769,6 +1770,76 @@ namespace System.Text.Json.Tests
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
         }
 
+        [Theory]
+        [MemberData(nameof(SingleLineCommentData))]
+        public static void ConsumeSingleLineCommentSingleSpanTest(string[] inputData)
+        {
+            string expected = inputData[inputData.Length - 1];
+            inputData = inputData.Take(inputData.Length - 1).ToArray();
+
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            int bytesConsumed = 0;
+            var dataUtf8 = new byte[] { };
+
+            for (int count = 0; count < inputData.Length; ++count)
+            {
+                bool isFinal = (count == inputData.Length - 1);
+                dataUtf8 = dataUtf8.Concat(Encoding.ASCII.GetBytes(inputData[count])).ToArray();
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: isFinal, state);
+                while (json.Read())
+                {
+                    switch (json.TokenType)
+                    {
+                        case JsonTokenType.StartObject:
+                        case JsonTokenType.EndObject:
+                            break;
+                        case JsonTokenType.Comment:
+                            Assert.Equal(Encoding.ASCII.GetBytes(expected), json.ValueSpan.ToArray());
+                            break;
+                        default:
+                            Assert.True(false);
+                            break;
+                    }
+                }
+                dataUtf8 = dataUtf8.Skip(bytesConsumed).ToArray();
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(SingleLineCommentData))]
+        public static void SkipSingleLineCommentSingleSpanTest(string[] inputData)
+        {
+            string expected = inputData[inputData.Length - 1];
+            inputData = inputData.Take(inputData.Length - 1).ToArray();
+
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            int bytesConsumed = 0;
+            var dataUtf8 = new byte[] { };
+
+            for (int count = 0; count < inputData.Length; ++count)
+            {
+                bool isFinal = (count == inputData.Length - 1);
+                dataUtf8 = dataUtf8.Concat(Encoding.ASCII.GetBytes(inputData[count])).ToArray();
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: isFinal, state);
+                while (json.Read())
+                {
+                    switch (json.TokenType)
+                    {
+                        case JsonTokenType.StartObject:
+                        case JsonTokenType.EndObject:
+                            break;
+                        case JsonTokenType.Comment:
+                            Assert.Equal(Encoding.ASCII.GetBytes(expected), json.ValueSpan.ToArray());
+                            break;
+                        default:
+                            Assert.True(false);
+                            break;
+                    }
+                }
+                dataUtf8 = dataUtf8.Skip(bytesConsumed).ToArray();
+            }
+        }
+
         public static IEnumerable<object[]> TestCases
         {
             get
@@ -1995,6 +2066,28 @@ namespace System.Text.Json.Tests
                     new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0xbc, 98, 34 } },
                     new object[] { new byte[] { 34, 97, 0xf0, 0x90, 0x28, 0xbc, 98, 34 } },
                     new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0x28, 98, 34 } },
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> SingleLineCommentData
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] { new object[] { "{//Comment\r}", "//Comment\r" } },
+                    new object[] { new object[] { "{//Comment\r", "}", "//Comment\r" } },
+                    new object[] { new object[] { "{//Comment", "\r}", "//Comment\r" } },
+
+                    new object[] { new object[] { "{//Comment\r\n}", "//Comment\r\n" } },
+                    new object[] { new object[] { "{//Comment\r\n", "}", "//Comment\r\n" } },
+                    new object[] { new object[] { "{//Comment\r", "\n}", "//Comment\r\n" } },
+                    new object[] { new object[] { "{//Comment", "\r\n}", "//Comment\r\n" } },
+
+                    new object[] { new object[] { "{//Comment\n}", "//Comment\n" } },
+                    new object[] { new object[] { "{//Comment\n", "}", "//Comment\n" } },
+                    new object[] { new object[] { "{//Comment", "\n}", "//Comment\n" } },
                 };
             }
         }

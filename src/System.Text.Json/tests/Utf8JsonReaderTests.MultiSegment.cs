@@ -6,6 +6,8 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace System.Text.Json.Tests
@@ -563,6 +565,76 @@ namespace System.Text.Json.Tests
                 Assert.False(json.HasValueSequence);
                 Assert.True(json.ValueSpan == default);
                 Assert.True(json.ValueSequence.IsEmpty);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(SingleLineCommentData))]
+        public static void ConsumeSingleLineCommentMultiSpanTest(string[] inputData)
+        {
+            string expected = inputData[inputData.Length - 1];
+            inputData = inputData.Take(inputData.Length - 1).ToArray();
+
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            int bytesConsumed = 0;
+            var dataUtf8 = new byte[] { };
+
+            for (int count = 0; count < inputData.Length; ++count)
+            {
+                bool isFinal = (count == inputData.Length - 1);
+                dataUtf8 = dataUtf8.Concat(Encoding.ASCII.GetBytes(inputData[count])).ToArray();
+                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
+                var json = new Utf8JsonReader(sequence, isFinalBlock: isFinal, state);
+                while (json.Read())
+                {
+                    switch (json.TokenType)
+                    {
+                        case JsonTokenType.StartObject:
+                        case JsonTokenType.EndObject:
+                            break;
+                        case JsonTokenType.Comment:
+                            var actual = json.HasValueSequence ? json.ValueSequence.ToArray() : json.ValueSpan.ToArray();
+                            Assert.Equal(Encoding.ASCII.GetBytes(expected), actual);
+                            break;
+                        default:
+                            Assert.True(false);
+                            break;
+                    }
+                }
+                dataUtf8 = dataUtf8.Skip(bytesConsumed).ToArray();
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(SingleLineCommentData))]
+        public static void SkipSingleLineCommentMultiSpanTest(string[] inputData)
+        {
+            string expected = inputData[inputData.Length - 1];
+            inputData = inputData.Take(inputData.Length - 1).ToArray();
+
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
+            int bytesConsumed = 0;
+            var dataUtf8 = new byte[] { };
+
+            for (int count = 0; count < inputData.Length; ++count)
+            {
+                bool isFinal = (count == inputData.Length - 1);
+                dataUtf8 = dataUtf8.Concat(Encoding.ASCII.GetBytes(inputData[count])).ToArray();
+                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
+                var json = new Utf8JsonReader(sequence, isFinalBlock: isFinal, state);
+                while (json.Read())
+                {
+                    switch (json.TokenType)
+                    {
+                        case JsonTokenType.StartObject:
+                        case JsonTokenType.EndObject:
+                            break;
+                        default:
+                            Assert.True(false);
+                            break;
+                    }
+                }
+                dataUtf8 = dataUtf8.Skip(bytesConsumed).ToArray();
             }
         }
     }
