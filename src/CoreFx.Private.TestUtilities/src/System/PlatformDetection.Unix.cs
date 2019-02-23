@@ -60,20 +60,12 @@ namespace System
         public static bool IsNetfx471OrNewer => false;
         public static bool IsNetfx472OrNewer => false;
 
-        public static bool IsDrawingSupported { get; } = GetGdiplusIsAvailable();
-        public static bool IsSoundPlaySupported { get; } = false;
+        public static bool IsDrawingSupported { get; } =
+            RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ?
+                NativeLibrary.TryLoad("libgdiplus.dylib", out _) :
+                NativeLibrary.TryLoad("libgdiplus.so", out _) || NativeLibrary.TryLoad("libgdiplus.so.0", out _);
 
-        private static bool GetGdiplusIsAvailable()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                return NativeLibrary.TryLoad("libgdiplus.dylib", out _);
-            }
-            else
-            {
-                return NativeLibrary.TryLoad("libgdiplus.so", out _) || NativeLibrary.TryLoad("libgdiplus.so.0", out _);
-            }
-        }
+        public static bool IsSoundPlaySupported { get; } = false;
 
         public static Version OSXVersion { get; } = ToVersion(PlatformApis.GetOSVersion());
 
