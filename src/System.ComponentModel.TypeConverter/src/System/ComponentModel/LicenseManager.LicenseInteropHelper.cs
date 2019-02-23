@@ -30,7 +30,6 @@ namespace System.ComponentModel
             private const int S_OK = 0;
             private const int E_NOTIMPL = unchecked((int)0x80004001);
             private const int CLASS_E_NOTLICENSED = unchecked((int)0x80040112);
-            private const int E_FAIL = unchecked((int)0x80000008);
             private DesigntimeLicenseContext _helperContext;
             private LicenseContext _savedLicenseContext;
             private Type _savedType;
@@ -47,10 +46,19 @@ namespace System.ComponentModel
             private static object AllocateAndValidateLicense(RuntimeTypeHandle rth, IntPtr bstrKey, int fDesignTime)
             {
                 Type type = Type.GetTypeFromHandle(rth);
-                CLRLicenseContext licensecontext = new CLRLicenseContext(fDesignTime != 0 ? LicenseUsageMode.Designtime : LicenseUsageMode.Runtime, type);
-                if (fDesignTime == 0 && bstrKey != (IntPtr)0)
+                string key = null;
+                if (bstrKey != IntPtr.Zero)
                 {
-                    licensecontext.SetSavedLicenseKey(type, Marshal.PtrToStringBSTR(bstrKey));
+                    key = Marshal.PtrToStringBSTR(bstrKey);
+                }
+                return AllocateAndValidateLicense2(type, key, (fDesignTime == 1 ? true : false));
+            }
+            private static object AllocateAndValidateLicense2(Type type, string key, bool isDesignTime)
+            {
+                CLRLicenseContext licensecontext = new CLRLicenseContext(isDesignTime ? LicenseUsageMode.Designtime : LicenseUsageMode.Runtime, type);
+                if (!isDesignTime && key != null)
+                {
+                    licensecontext.SetSavedLicenseKey(type, key);
                 }
                 try
                 {
@@ -69,6 +77,20 @@ namespace System.ComponentModel
             private static int RequestLicKey(RuntimeTypeHandle rth, ref IntPtr pbstrKey)
             {
                 Type type = Type.GetTypeFromHandle(rth);
+                try
+                {
+                    string licenseKey = RequestLicKey2(type);
+                    pbstrKey = Marshal.StringToBSTR(licenseKey);
+                }
+                catch (Exception e)
+                {
+                    return e.HResult;
+                }
+
+                return S_OK;
+            }
+            private static string RequestLicKey2(Type type)
+            {
                 License license;
                 string licenseKey;
                 // license will be null, since we passed no instance,
@@ -85,19 +107,17 @@ namespace System.ComponentModel
                                                               out license,
                                                               out licenseKey))
                 {
-                    return E_FAIL;
+                    throw new COMException();
                 }
                 if (licenseKey == null)
                 {
-                    return E_FAIL;
+                    throw new COMException();
                 }
-                pbstrKey = Marshal.StringToBSTR(licenseKey);
                 if (license != null)
                 {
                     license.Dispose();
-                    license = null;
                 }
-                return S_OK;
+                return licenseKey;
             }
             // The CLR invokes this whenever a COM client invokes
             // IClassFactory2::GetLicInfo on a managed class.
@@ -106,11 +126,19 @@ namespace System.ComponentModel
             // should only throw in the case of a catastrophic error (stack, memory, etc.)
             private void GetLicInfo(RuntimeTypeHandle rth, ref int pRuntimeKeyAvail, ref int pLicVerified)
             {
-                pRuntimeKeyAvail = 0;
-                pLicVerified = 0;
                 Type type = Type.GetTypeFromHandle(rth);
-                License license;
-                string licenseKey;
+
+                bool runtimeKeyAvail;
+                bool licVerified;
+                GetLicInfo2(type, out runtimeKeyAvail, out licVerified);
+                pRuntimeKeyAvail = runtimeKeyAvail ? 1 : 0;
+                pLicVerified = licVerified ? 1 : 0;
+            }
+            private void GetLicInfo2(Type type, out bool runtimeKeyAvail, out bool licVerified)
+            {
+                runtimeKeyAvail = false;
+                licVerified = false;
+
                 if (_helperContext == null)
                 {
                     _helperContext = new DesigntimeLicenseContext();
@@ -119,17 +147,17 @@ namespace System.ComponentModel
                 {
                     _helperContext._savedLicenseKeys.Clear();
                 }
+
+                License license;
+                string licenseKey;
                 if (LicenseManager.ValidateInternalRecursive(_helperContext, type, null, false, out license, out licenseKey))
                 {
-                    if (_helperContext._savedLicenseKeys.Contains(type.AssemblyQualifiedName))
-                    {
-                        pRuntimeKeyAvail = 1;
-                    }
+                    runtimeKeyAvail = _helperContext._savedLicenseKeys.Contains(type.AssemblyQualifiedName);
                     if (license != null)
                     {
                         license.Dispose();
                         license = null;
-                        pLicVerified = 1;
+                        licVerified = true;
                     }
                 }
             }
