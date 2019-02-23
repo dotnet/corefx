@@ -61,9 +61,18 @@ namespace System
         public static bool IsNetfx472OrNewer => false;
 
         public static bool IsDrawingSupported { get; } =
-            RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ?
-                NativeLibrary.TryLoad("libgdiplus.dylib", out _) :
-                NativeLibrary.TryLoad("libgdiplus.so", out _) || NativeLibrary.TryLoad("libgdiplus.so.0", out _);
+            RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+#if netcoreapp30
+                ? NativeLibrary.TryLoad("libgdiplus.dylib", out _)
+                : NativeLibrary.TryLoad("libgdiplus.so", out _) || NativeLibrary.TryLoad("libgdiplus.so.0", out _);
+#else
+                ? dlopen("libgdiplus.dylib", RTLD_LAZY) != IntPtr.Zero
+                : dlopen("libgdiplus.so", RTLD_LAZY) != IntPtr.Zero || dlopen("libgdiplus.so.0", RTLD_LAZY) != IntPtr.Zero;
+
+        [DllImport("libdl")]
+        private static extern IntPtr dlopen(string libName, int flags);
+        public const int RTLD_LAZY = 0x001;
+#endif
 
         public static bool IsSoundPlaySupported { get; } = false;
 
