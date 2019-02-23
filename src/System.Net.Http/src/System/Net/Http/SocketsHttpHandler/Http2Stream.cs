@@ -45,12 +45,12 @@ namespace System.Net.Http
             private bool _disposed;
 
             /// <summary>The core logic for the IValueTaskSource implementation.</summary>
-            private ManualResetValueTaskSourceCore<bool> _waitSourceCore = new ManualResetValueTaskSourceCore<bool> { RunContinuationsAsynchronously = true }; // mutable struct, do not make this readonly
+            private ManualResetValueTaskSourceCore<bool> _waitSource = new ManualResetValueTaskSourceCore<bool> { RunContinuationsAsynchronously = true }; // mutable struct, do not make this readonly
             /// <summary>
             /// Whether code has requested or is about to request a wait be performed and thus requires a call to SetResult to complete it.
             /// This is read and written while holding the lock so that most operations on _waitSourceCore don't need to be.
             /// </summary>
-            private bool _waitSourceCoreWaitingForSetResult;
+            private bool _hasWaiter;
 
             private const int StreamWindowSize = DefaultInitialWindowSize;
 
@@ -166,7 +166,7 @@ namespace System.Net.Http
 
             public void OnResponseHeadersComplete(bool endStream)
             {
-                bool callSetResult;
+                bool signalWaiter;
                 lock (SyncObject)
                 {
                     if (_state != StreamState.ExpectingHeaders)
@@ -176,19 +176,19 @@ namespace System.Net.Http
 
                     _state = endStream ? StreamState.Complete : StreamState.ExpectingData;
 
-                    callSetResult = _waitSourceCoreWaitingForSetResult;
-                    _waitSourceCoreWaitingForSetResult = false;
+                    signalWaiter = _hasWaiter;
+                    _hasWaiter = false;
                 }
 
-                if (callSetResult)
+                if (signalWaiter)
                 {
-                    _waitSourceCore.SetResult(true);
+                    _waitSource.SetResult(true);
                 }
             }
 
             public void OnResponseData(ReadOnlySpan<byte> buffer, bool endStream)
             {
-                bool callSetResult;
+                bool signalWaiter;
                 lock (SyncObject)
                 {
                     if (_disposed)
@@ -216,19 +216,19 @@ namespace System.Net.Http
                         _state = StreamState.Complete;
                     }
 
-                    callSetResult = _waitSourceCoreWaitingForSetResult;
-                    _waitSourceCoreWaitingForSetResult = false;
+                    signalWaiter = _hasWaiter;
+                    _hasWaiter = false;
                 }
 
-                if (callSetResult)
+                if (signalWaiter)
                 {
-                    _waitSourceCore.SetResult(true);
+                    _waitSource.SetResult(true);
                 }
             }
 
             public void OnResponseAbort()
             {
-                bool callSetResult;
+                bool signalWaiter;
                 lock (SyncObject)
                 {
                     if (_disposed)
@@ -243,13 +243,13 @@ namespace System.Net.Http
 
                     _state = StreamState.Aborted;
 
-                    callSetResult = _waitSourceCoreWaitingForSetResult;
-                    _waitSourceCoreWaitingForSetResult = false;
+                    signalWaiter = _hasWaiter;
+                    _hasWaiter = false;
                 }
 
-                if (callSetResult)
+                if (signalWaiter)
                 {
-                    _waitSourceCore.SetResult(true);
+                    _waitSource.SetResult(true);
                 }
             }
 
@@ -268,9 +268,9 @@ namespace System.Net.Http
                     }
                     else if (_state == StreamState.ExpectingHeaders)
                     {
-                        Debug.Assert(!_waitSourceCoreWaitingForSetResult);
-                        _waitSourceCoreWaitingForSetResult = true;
-                        _waitSourceCore.Reset();
+                        Debug.Assert(!_hasWaiter);
+                        _hasWaiter = true;
+                        _waitSource.Reset();
                         return (true, false);
                     }
                     else if (_state == StreamState.ExpectingData)
@@ -291,7 +291,7 @@ namespace System.Net.Http
                 (bool wait, bool emptyResponse) = TryEnsureHeaders();
                 if (wait)
                 {
-                    await AsConfiguredAwaitable();
+                    await GetWaiterTask().ConfigureAwait(false);
                     (wait, emptyResponse) = TryEnsureHeaders();
                     Debug.Assert(!wait);
                 }
@@ -362,9 +362,9 @@ namespace System.Net.Http
 
                     Debug.Assert(_state == StreamState.ExpectingData);
 
-                    Debug.Assert(!_waitSourceCoreWaitingForSetResult);
-                    _waitSourceCoreWaitingForSetResult = true;
-                    _waitSourceCore.Reset();
+                    Debug.Assert(!_hasWaiter);
+                    _hasWaiter = true;
+                    _waitSource.Reset();
                     return (true, 0);
                 }
             }
@@ -380,7 +380,7 @@ namespace System.Net.Http
                 if (wait)
                 {
                     Debug.Assert(bytesRead == 0);
-                    await AsConfiguredAwaitable();
+                    await GetWaiterTask().ConfigureAwait(false);
                     (wait, bytesRead) = TryReadFromBuffer(buffer.Span);
                     Debug.Assert(!wait);
                 }
@@ -428,10 +428,10 @@ namespace System.Net.Http
             // This object is itself usable as a backing source for ValueTask.  Since there's only ever one awaiter
             // for this object's state transitions at a time, we allow the object to be awaited directly. All functionality
             // associated with the implementation is just delegated to the ManualResetValueTaskSourceCore.
-            private ConfiguredValueTaskAwaitable AsConfiguredAwaitable() => new ValueTask(this, _waitSourceCore.Version).ConfigureAwait(false);
-            ValueTaskSourceStatus IValueTaskSource.GetStatus(short token) => _waitSourceCore.GetStatus(token);
-            void IValueTaskSource.OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags) => _waitSourceCore.OnCompleted(continuation, state, token, flags);
-            void IValueTaskSource.GetResult(short token) => _waitSourceCore.GetResult(token);
+            private ValueTask GetWaiterTask() => new ValueTask(this, _waitSource.Version);
+            ValueTaskSourceStatus IValueTaskSource.GetStatus(short token) => _waitSource.GetStatus(token);
+            void IValueTaskSource.OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags) => _waitSource.OnCompleted(continuation, state, token, flags);
+            void IValueTaskSource.GetResult(short token) => _waitSource.GetResult(token);
 
             private sealed class Http2ReadStream : BaseAsyncStream
             {
