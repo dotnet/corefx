@@ -63,28 +63,16 @@ namespace System
         public static bool IsDrawingSupported { get; } = GetGdiplusIsAvailable();
         public static bool IsSoundPlaySupported { get; } = false;
 
-        [DllImport("libdl")]
-        private static extern IntPtr dlopen(string libName, int flags);
-        public const int RTLD_LAZY = 0x001;
-
         private static bool GetGdiplusIsAvailable()
         {
-            IntPtr nativeLib;
-
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                nativeLib = dlopen("libgdiplus.dylib", RTLD_LAZY);
+                return NativeLibrary.TryLoad("libgdiplus.dylib", out _);
             }
             else
             {
-                nativeLib = dlopen("libgdiplus.so", RTLD_LAZY);
-                if (nativeLib == IntPtr.Zero)
-                {
-                    nativeLib = dlopen("libgdiplus.so.0", RTLD_LAZY);
-                }
+                return NativeLibrary.TryLoad("libgdiplus.so", out _) || NativeLibrary.TryLoad("libgdiplus.so.0", out _);
             }
-
-            return nativeLib != IntPtr.Zero;
         }
 
         public static Version OSXVersion { get; } = ToVersion(PlatformApis.GetOSVersion());
