@@ -297,66 +297,6 @@ namespace System.IO.Pipelines
             return adjustedToMaximumSize;
         }
 
-        private BufferSegment CreateSegmentSynchronized()
-        {
-            BufferSegment[] segmentPool = _bufferSegmentPool;
-            lock (segmentPool)
-            {
-                int index = _pooledSegmentCount - 1;
-                if ((uint)index < (uint)segmentPool.Length)
-                {
-                    _pooledSegmentCount = index;
-                    return segmentPool[index];
-                }
-            }
-
-            return new BufferSegment();
-        }
-
-        private void ReturnSegments(BufferSegment from, BufferSegment toExclusive)
-        {
-            Debug.Assert(from != null);
-            Debug.Assert(from != toExclusive);
-
-            // Reset the Segments and return their data out of lock
-            BufferSegment[] segmentToReturn = _bufferSegmentsToReturn;
-            int count = 0;
-            do
-            {
-                BufferSegment next = from.NextSegment;
-                Debug.Assert(next != null || toExclusive == null);
-
-                from.ResetMemory();
-
-                if ((uint)count < (uint)segmentToReturn.Length)
-                {
-                    // Store in temporary list while preforming expensive resets
-                    segmentToReturn[count] = from;
-                    count++;
-                }
-
-                from = next;
-            } while (from != toExclusive);
-
-            // Add the Segments back to pool from the temporary list under lock
-            BufferSegment[] segmentPool = _bufferSegmentPool;
-            lock (segmentPool)
-            {
-                int index = _pooledSegmentCount;
-                for (int i = 0; i < count; i++)
-                {
-                    if ((uint)index < (uint)segmentPool.Length)
-                    {
-                        segmentPool[index] = segmentToReturn[i];
-                        index++;
-                    }
-                    segmentToReturn[i] = null;
-                }
-
-                _pooledSegmentCount = index;
-            }
-        }
-
         internal bool CommitUnsynchronized()
         {
             _operationState.EndWrite();
@@ -1113,6 +1053,66 @@ namespace System.IO.Pipelines
 
                 _disposed = false;
                 ResetState();
+            }
+        }
+
+        private BufferSegment CreateSegmentSynchronized()
+        {
+            BufferSegment[] segmentPool = _bufferSegmentPool;
+            lock (segmentPool)
+            {
+                int index = _pooledSegmentCount - 1;
+                if ((uint)index < (uint)segmentPool.Length)
+                {
+                    _pooledSegmentCount = index;
+                    return segmentPool[index];
+                }
+            }
+
+            return new BufferSegment();
+        }
+
+        private void ReturnSegments(BufferSegment from, BufferSegment toExclusive)
+        {
+            Debug.Assert(from != null);
+            Debug.Assert(from != toExclusive);
+
+            // Reset the Segments and return their data out of lock
+            BufferSegment[] segmentToReturn = _bufferSegmentsToReturn;
+            int count = 0;
+            do
+            {
+                BufferSegment next = from.NextSegment;
+                Debug.Assert(next != null || toExclusive == null);
+
+                from.ResetMemory();
+
+                if ((uint)count < (uint)segmentToReturn.Length)
+                {
+                    // Store in temporary list while preforming expensive resets
+                    segmentToReturn[count] = from;
+                    count++;
+                }
+
+                from = next;
+            } while (from != toExclusive);
+
+            // Add the Segments back to pool from the temporary list under lock
+            BufferSegment[] segmentPool = _bufferSegmentPool;
+            lock (segmentPool)
+            {
+                int index = _pooledSegmentCount;
+                for (int i = 0; i < count; i++)
+                {
+                    if ((uint)index < (uint)segmentPool.Length)
+                    {
+                        segmentPool[index] = segmentToReturn[i];
+                        index++;
+                    }
+                    segmentToReturn[i] = null;
+                }
+
+                _pooledSegmentCount = index;
             }
         }
     }
