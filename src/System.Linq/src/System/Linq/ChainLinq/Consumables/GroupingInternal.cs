@@ -14,6 +14,10 @@ namespace System.Linq.ChainLinq.Consumables
         : Grouping<TKey, TElement>
         , IConsumableProvider<TElement>
     {
+        internal GroupingInternal(GroupingArrayPool<TElement> pool) : base(pool)
+        {
+        }
+
         public Consumable<U> GetConsumable<U>(Link<TElement, U> transform) =>
             new Array<TElement, U>(_elements, 0, _count, transform);
     }

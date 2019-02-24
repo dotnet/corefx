@@ -13,12 +13,15 @@ namespace System.Linq.ChainLinq.Consumables
         , ILookup<TKey, TElement>
         , IConsumableInternal
     {
+        GroupingArrayPool<TElement> _pool;
+
         protected GroupingInternal<TKey, TElement>[] _groupings;
         protected GroupingInternal<TKey, TElement> _lastGrouping;
 
         internal Lookup()
         {
             _groupings = new GroupingInternal<TKey, TElement>[7];
+            _pool = new GroupingArrayPool<TElement>();
         }
 
         public int Count { get; protected set; }
@@ -83,10 +86,10 @@ namespace System.Linq.ChainLinq.Consumables
             }
 
             int index = hashCode % _groupings.Length;
-            GroupingInternal<TKey, TElement> g = new GroupingInternal<TKey, TElement>();
+            GroupingInternal<TKey, TElement> g = new GroupingInternal<TKey, TElement>(_pool);
             g._key = key;
             g._hashCode = hashCode;
-            g._elements = new TElement[1];
+            g._elements = _pool.Upgrade(null);
             g._hashNext = _groupings[index];
             _groupings[index] = g;
             if (_lastGrouping == null)

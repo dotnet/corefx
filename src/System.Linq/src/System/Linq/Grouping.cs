@@ -40,6 +40,92 @@ namespace System.Linq
         TKey Key { get; }
     }
 
+    internal sealed class GroupingArrayPool<TElement>
+    {
+        const int MinLength = 4; // relates to MinShift
+        const int MinShift = 2; // relates to MinLength
+
+        const int Buckets = 4;
+
+        private (TElement[], TElement[]) _bucket_1;
+        private (TElement[], TElement[]) _bucket_2;
+        private (TElement[], TElement[]) _bucket_3;
+        private (TElement[], TElement[]) _bucket_4;
+
+        private GroupingArrayPool<TElement> _nextPool;
+        private GroupingArrayPool<TElement> NextPool => _nextPool ?? (_nextPool = new GroupingArrayPool<TElement>());
+
+        private static void TryPush(ref (TElement[], TElement[]) store, TElement[] toStore)
+        {
+            if (store.Item2 != null)
+                return;
+
+            Array.Clear(toStore, 0, toStore.Length);
+
+            store.Item2 = store.Item1;
+            store.Item1 = toStore;
+        }
+
+        private static TElement[] TryPop(ref (TElement[], TElement[]) store)
+        {
+            var head = store.Item1;
+
+            if (head != null)
+            {
+                store.Item1 = store.Item2;
+                store.Item2 = null;
+            }
+
+            return head;
+        }
+
+        private static TElement[] Upgrade(ref (TElement[], TElement[]) pushStore, ref (TElement[], TElement[]) popStore, TElement[] currentElements)
+        {
+            var newElements = TryPop(ref popStore);
+            if (newElements == null)
+            {
+                newElements = new TElement[checked(currentElements.Length * 2)];
+            }
+            currentElements.CopyTo(newElements, 0);
+            TryPush(ref pushStore, currentElements);
+            return newElements;
+        }
+
+        private TElement[] FindBucketAndUpgrade(TElement[] currentElements, int shiftedLength)
+        {
+            if (shiftedLength <= 0x8)
+            {
+                switch (shiftedLength)
+                {
+                    case 0b_0001: return Upgrade(ref _bucket_1, ref _bucket_2, currentElements);
+                    case 0b_0010: return Upgrade(ref _bucket_2, ref _bucket_3, currentElements);
+                    case 0b_0100: return Upgrade(ref _bucket_3, ref _bucket_4, currentElements);
+                    case 0b_1000: return Upgrade(ref _bucket_4, ref NextPool._bucket_1, currentElements);
+                }
+            }
+            return NextPool.FindBucketAndUpgrade(currentElements, shiftedLength >> Buckets);
+        }
+
+        private static bool IsPowerOf2(int n) => n > 0 && (n & (n - 1)) == 0;
+
+        public TElement[] Upgrade(TElement[] currentElements)
+        {
+            if (currentElements == null)
+            {
+                return TryPop(ref _bucket_1) ?? new TElement[MinLength];
+            }
+
+            var length = currentElements.Length;
+
+            Debug.Assert(IsPowerOf2(length), "Only powers of 2 lengths should be accepted");
+            Debug.Assert(length >= MinLength, "Minimum size should be 4");
+
+            var shiftedLength = length >> MinShift;
+
+            return FindBucketAndUpgrade(currentElements, shiftedLength);
+        }
+    }
+
     // It is (unfortunately) common to databind directly to Grouping.Key.
     // Because of this, we have to declare this internal type public so that we
     // can mark the Key property for public reflection.
@@ -52,20 +138,22 @@ namespace System.Linq
     {
         internal TKey _key;
         internal int _hashCode;
+
+        GroupingArrayPool<TElement> _pool;
         internal TElement[] _elements;
         internal int _count;
+
         internal ChainLinq.Consumables.GroupingInternal<TKey, TElement> _hashNext;
         internal ChainLinq.Consumables.GroupingInternal<TKey, TElement> _next;
 
-        internal Grouping()
-        {
-        }
+        internal Grouping(GroupingArrayPool<TElement> pool) =>
+            _pool = pool;
 
         internal void Add(TElement element)
         {
             if (_elements.Length == _count)
             {
-                Array.Resize(ref _elements, checked(_count * 2));
+                _elements = _pool.Upgrade(_elements);
             }
 
             _elements[_count] = element;
