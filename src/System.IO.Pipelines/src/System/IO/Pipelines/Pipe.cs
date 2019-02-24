@@ -297,25 +297,45 @@ namespace System.IO.Pipelines
             return adjustedToMaximumSize;
         }
 
-        internal bool CommitUnsynchronized()
+        internal long CommitStart()
         {
-            _operationState.EndWrite();
+            // Either need to be writing or have the lock
+            Debug.Assert(_operationState.IsWritingActive || Monitor.IsEntered(_sync));
 
-            if (_currentWriteLength == 0)
+            long currentWriteLength = _currentWriteLength;
+
+            if (_buffered > 0)
             {
-                // Nothing written to commit
-                return true;
+                // Update the writing head
+                _writingHead.End += _buffered;
+                _buffered = 0;
             }
 
-            // Update the writing head
-            _writingHead.End += _buffered;
+            _currentWriteLength = 0;
+
+            return currentWriteLength;
+        }
+
+        internal void CommitEndUnsynchronized(long comittedLength)
+        {
+            Debug.Assert(Monitor.IsEntered(_sync));
+            Debug.Assert(_currentWriteLength == 0);
+            Debug.Assert(_buffered == 0);
+
+            _operationState.EndWrite();
+
+            if (comittedLength == 0)
+            {
+                // Nothing written to commit
+                return;
+            }
 
             // Always move the read tail to the write head
             _readTail = _writingHead;
             _readTailIndex = _writingHead.End;
 
             long oldLength = _length;
-            _length += _currentWriteLength;
+            _length += comittedLength;
 
             // Do not reset if reader is complete
             if (_pauseWriterThreshold > 0 &&
@@ -325,11 +345,6 @@ namespace System.IO.Pipelines
             {
                 _writerAwaitable.SetUncompleted();
             }
-
-            _currentWriteLength = 0;
-            _buffered = 0;
-
-            return false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -355,9 +370,25 @@ namespace System.IO.Pipelines
         {
             CompletionData completionData;
             ValueTask<FlushResult> result;
+            long committedLength = 0;
+
+            bool isWritingActive = _operationState.IsWritingActive;
+
+            if (isWritingActive)
+            {
+                // If writing, can start the commit outside the lock.
+                committedLength = CommitStart();
+            }
+
             lock (_sync)
             {
-                var wasEmpty = CommitUnsynchronized();
+                if (!isWritingActive)
+                {
+                    // If not writing, need the lock to start the commit.
+                    committedLength = CommitStart();
+                }
+
+                CommitEndUnsynchronized(committedLength);
 
                 // AttachToken before completing reader awaiter in case cancellationToken is already completed
                 _writerAwaitable.BeginOperation(cancellationToken, s_signalWriterAwaitable, this);
@@ -378,7 +409,7 @@ namespace System.IO.Pipelines
                 // Complete reader only if new data was pushed into the pipe
                 // Avoid throwing in between completing the reader and scheduling the callback
                 // if the intent is to allow pipe to continue reading the data
-                if (!wasEmpty)
+                if (committedLength > 0)
                 {
                     _readerAwaitable.Complete(out completionData);
                 }
@@ -405,8 +436,10 @@ namespace System.IO.Pipelines
 
             lock (_sync)
             {
+                // Have to start the commit under the lock as my not be writing.
+                long committedLength = CommitStart();
                 // Commit any pending buffers
-                CommitUnsynchronized();
+                CommitEndUnsynchronized(committedLength);
 
                 completionCallbacks = _writerCompletion.TryComplete(exception);
                 _readerAwaitable.Complete(out completionData);
