@@ -185,13 +185,7 @@ namespace System.IO.Pipelines
             Debug.Assert(_operationState.IsWritingActive);
             Debug.Assert(_writingHead != null);
 
-            if (_buffered > 0)
-            {
-                // Flush buffered data to the segment
-                _writingHead.End += _buffered;
-                _buffered = 0;
-            }
-
+            FlushBufferedToSegment();
             AllocateAndLinkSegment(sizeHint);
         }
 
@@ -217,15 +211,7 @@ namespace System.IO.Pipelines
                     // Need to allocate BufferSegment
                     // Note: If _writingHead == null then _writingMemory.Length == 0, so only need to check one.
 
-                    if (_buffered > 0)
-                    {
-                        // If we have buffered data, we must already have a writing head.
-                        Debug.Assert(_writingHead != null);
-
-                        // Flush buffered data to the segment
-                        _writingHead.End += _buffered;
-                        _buffered = 0;
-                    }
+                    FlushBufferedToSegment();
 
                     if (newSegment is null)
                     {
@@ -247,6 +233,20 @@ namespace System.IO.Pipelines
                     // Set the _writingMemory to the newly allocated memory.
                     _writingMemory = newSegment.AvailableMemory;
                 }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void FlushBufferedToSegment()
+        {
+            if (_buffered > 0)
+            {
+                // If we have buffered data, we must already have a writing head.
+                Debug.Assert(_writingHead != null);
+
+                // Flush buffered data to the segment
+                _writingHead.End += _buffered;
+                _buffered = 0;
             }
         }
 
@@ -302,17 +302,10 @@ namespace System.IO.Pipelines
             // Either need to be writing or have the lock
             Debug.Assert(_operationState.IsWritingActive || Monitor.IsEntered(_sync));
 
+            FlushBufferedToSegment();
+
             long currentWriteLength = _currentWriteLength;
-
-            if (_buffered > 0)
-            {
-                // Update the writing head
-                _writingHead.End += _buffered;
-                _buffered = 0;
-            }
-
             _currentWriteLength = 0;
-
             return currentWriteLength;
         }
 
