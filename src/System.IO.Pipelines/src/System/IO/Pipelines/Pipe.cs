@@ -253,6 +253,9 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void AllocateAndLinkSegment(int sizeHint = 0)
         {
+            Debug.Assert(_operationState.IsWritingActive);
+            Debug.Assert(_writingHead != null);
+
             BufferSegment newSegment = AllocateSegment(sizeHint);
             LinkWriteSegmentAndAdvance(newSegment);
             _writingMemory = newSegment.AvailableMemory;
@@ -261,6 +264,9 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void LinkWriteSegmentAndAdvance(BufferSegment newSegment)
         {
+            Debug.Assert(_operationState.IsWritingActive);
+            Debug.Assert(_writingHead != null);
+
             _writingHead.SetNext(newSegment);
             _writingHead = newSegment;
         }
@@ -354,6 +360,9 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void AdvanceCore(int bytesWritten)
         {
+            Debug.Assert(_operationState.IsWritingActive);
+            Debug.Assert(_writingHead != null);
+
             _currentWriteLength += bytesWritten;
             _buffered += bytesWritten;
             _writingMemory = _writingMemory.Slice(bytesWritten);
