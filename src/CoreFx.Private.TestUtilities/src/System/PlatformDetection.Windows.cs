@@ -45,7 +45,7 @@ namespace System
         public static bool IsRedHatFamily6 => false;
         public static bool IsRedHatFamily7 => false;
         public static bool IsNotRedHatFamily6 => true;
-        public static bool IsDocker => false;
+        public static bool IsInContainer => !String.IsNullOrEmpty(GetContainerType());
 
         public static bool IsWindows10Version1607OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
@@ -207,6 +207,22 @@ namespace System
         {
             Assert.True(GetProductInfo(Environment.OSVersion.Version.Major, Environment.OSVersion.Version.Minor, 0, 0, out int productType));
             return productType;
+        }
+
+        private static string GetContainerType()
+        {
+            string key = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control";
+            string value = "";
+
+            try
+            {
+                value = (string)Registry.GetValue(key, "ContainerType", defaultValue: "");
+            }
+            catch ( )
+            {
+            }
+
+            return value;
         }
 
         private const int PRODUCT_IOTUAP = 0x0000007B;

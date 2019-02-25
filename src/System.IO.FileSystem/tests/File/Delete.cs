@@ -10,7 +10,7 @@ namespace System.IO.Tests
 {
     public class File_Delete : FileSystemTest
     {
-        static bool IsBindMountSupported => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && !PlatformDetection.IsDocker && !PlatformDetection.IsRedHatFamily6;
+        static bool IsBindMountSupported => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && !PlatformDetection.IsInContainer && !PlatformDetection.IsRedHatFamily6;
 
         public virtual void Delete(string path)
         {
