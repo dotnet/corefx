@@ -284,10 +284,35 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Throws<FormatException>(() => { IPAddress.Parse("[1]"); });
         }
 
-        [Fact]
-        public void ParseIPv6_LeadingSingleColon_Failure()
+        [InlineData(":1")]        
+        [InlineData(":1:2")]
+        [InlineData(":1:2:3")]
+        [InlineData(":1:2:3:4")]
+        [InlineData(":1:2:3:4:5")]
+        [InlineData(":1:2:3:4:5:6")]
+        [InlineData(":1:2:3:4:5:6:7")]
+        [InlineData(":1:2:3:4:5:6:7:8")]
+        [InlineData(":1:2:3:4:5:6:7:8:9")]
+        [Theory]
+        public void ParseIPv6_LeadingSingleColon_Failure(string address)
         {
-            Assert.Throws<FormatException>(() => { IPAddress.Parse(":1"); });
+            Assert.Throws<FormatException>(() => { IPAddress.Parse(address); });
+        }
+
+        [InlineData("::1:2:3:4:5:6:7:8")]
+        [InlineData("1::2:3:4:5:6:7:8")]
+        [InlineData("1:2::3:4:5:6:7:8")]
+        [InlineData("1:2:3::4:5:6:7:8")]
+        [InlineData("1:2:3:4::5:6:7:8")]
+        [InlineData("1:2:3:4:5::6:7:8")]
+        [InlineData("1:2:3:4:5:6::7:8")]
+        [InlineData("1:2:3:4:5:6:7::8")]
+        [InlineData("1:2:3:4:5:6:7:8::")]
+        [InlineData("::1:2:3:4:5:6:7:8:9")]
+        [Theory]
+        public void ParseIPv6_CompressorWithTooManyNumberGroups_Failure(string address)
+        {
+            Assert.Throws<FormatException>(() => { IPAddress.Parse(address); });
         }
 
         [Fact]
