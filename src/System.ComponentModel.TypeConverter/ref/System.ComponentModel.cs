@@ -2,6 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// These types were moved down to System.Primitives
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.InvalidAsynchronousStateException))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.InvalidEnumArgumentException))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.Component))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.ISupportInitialize))]
+// moved to System.ObjectModel
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.TypeConverterAttribute))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.TypeDescriptionProviderAttribute))]
+
 namespace System.ComponentModel
 {
     [System.AttributeUsageAttribute((System.AttributeTargets)(128))]

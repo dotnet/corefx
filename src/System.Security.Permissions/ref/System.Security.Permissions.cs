@@ -5,6 +5,20 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.IPermission))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.ISecurityEncodable))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.SecurityElement))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.Permissions.CodeAccessSecurityAttribute))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.Permissions.SecurityAction))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.Permissions.SecurityAttribute))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.Permissions.SecurityPermissionAttribute))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.Permissions.SecurityPermissionFlag))]
+#if netcoreapp || uap
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.IStackWalk))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.PermissionSet))]
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.Permissions.PermissionState))]
+#endif
+
 namespace System
 {
     public sealed partial class ApplicationIdentity : System.Runtime.Serialization.ISerializable

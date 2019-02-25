@@ -5,6 +5,8 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
+[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.Cryptography.CryptographicException))]
+
 namespace System.Security.Cryptography
 {
     public abstract partial class AsymmetricAlgorithm : System.IDisposable
