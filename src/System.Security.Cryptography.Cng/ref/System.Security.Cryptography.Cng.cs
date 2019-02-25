@@ -316,7 +316,8 @@ namespace System.Security.Cryptography
     }
     public sealed partial class ECDiffieHellmanCngPublicKey : System.Security.Cryptography.ECDiffieHellmanPublicKey
     {
-        internal ECDiffieHellmanCngPublicKey() { }
+        // ECDiffieHellmanPublicKey parameter-less ctor only exist on netfx 4.7+
+        private ECDiffieHellmanCngPublicKey() : base(null) { }
         public System.Security.Cryptography.CngKeyBlobFormat BlobFormat { get { throw null; } }
         protected override void Dispose(bool disposing) { }
 #if FEATURE_ECPARAMETERS
