@@ -279,7 +279,9 @@ namespace System.Drawing
         SourcePaint = 15597702,
         Whiteness = 16711778,
     }
+#if netcoreapp
     [System.ComponentModel.TypeConverterAttribute("System.Drawing.FontConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public sealed partial class Font : System.MarshalByRefObject, System.ICloneable, System.IDisposable, System.Runtime.Serialization.ISerializable
     {
         public Font(System.Drawing.Font prototype, System.Drawing.FontStyle newStyle) { }
@@ -638,7 +640,9 @@ namespace System.Drawing
         Point = 3,
         World = 0,
     }
+#if netcoreapp
     [System.ComponentModel.TypeConverterAttribute("System.Drawing.IconConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public sealed partial class Icon : System.MarshalByRefObject, System.ICloneable, System.IDisposable, System.Runtime.Serialization.ISerializable
     {
         public Icon(System.Drawing.Icon original, System.Drawing.Size size) { }
@@ -673,7 +677,9 @@ namespace System.Drawing
         void ReleaseHdc();
     }
     [System.ComponentModel.ImmutableObjectAttribute(true)]
+#if netcoreapp
     [System.ComponentModel.TypeConverterAttribute("System.Drawing.ImageConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public abstract partial class Image : System.MarshalByRefObject, System.ICloneable, System.IDisposable, System.Runtime.Serialization.ISerializable
     {
         internal Image() { }
@@ -2329,7 +2335,9 @@ namespace System.Drawing.Imaging
         ReadOnly = 65536,
         Scalable = 1,
     }
+#if netcoreapp
     [System.ComponentModel.TypeConverterAttribute("System.Drawing.ImageFormatConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public sealed partial class ImageFormat
     {
         public ImageFormat(System.Guid guid) { }
@@ -2526,7 +2534,9 @@ namespace System.Drawing.Printing
         protected InvalidPrinterException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
+#if netcoreapp
     [System.ComponentModel.TypeConverterAttribute("System.Drawing.Printing.MarginsConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public partial class Margins : System.ICloneable
     {
         public Margins() { }
