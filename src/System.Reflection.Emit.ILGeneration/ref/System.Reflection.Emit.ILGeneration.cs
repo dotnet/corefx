@@ -5,7 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
 namespace System.Reflection.Emit
 {
     public partial class CustomAttributeBuilder
@@ -48,6 +47,7 @@ namespace System.Reflection.Emit
         public virtual void Emit(System.Reflection.Emit.OpCode opcode, System.Type cls) { }
         public virtual void EmitCall(System.Reflection.Emit.OpCode opcode, System.Reflection.MethodInfo methodInfo, System.Type[] optionalParameterTypes) { }
         public virtual void EmitCalli(System.Reflection.Emit.OpCode opcode, System.Reflection.CallingConventions callingConvention, System.Type returnType, System.Type[] parameterTypes, System.Type[] optionalParameterTypes) { }
+        public virtual void EmitCalli(System.Reflection.Emit.OpCode opcode, System.Runtime.InteropServices.CallingConvention unmanagedCallConv, System.Type returnType, System.Type[] parameterTypes) { }
         public virtual void EmitWriteLine(System.Reflection.Emit.LocalBuilder localBuilder) { }
         public virtual void EmitWriteLine(System.Reflection.FieldInfo fld) { }
         public virtual void EmitWriteLine(string value) { }
@@ -59,7 +59,7 @@ namespace System.Reflection.Emit
     }
     public partial struct Label
     {
-        private int _dummy;
+        private int _dummyPrimitive;
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Reflection.Emit.Label obj) { throw null; }
         public override int GetHashCode() { throw null; }

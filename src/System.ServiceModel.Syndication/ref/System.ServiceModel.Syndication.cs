@@ -20,7 +20,7 @@ namespace System.ServiceModel.Syndication
         protected override System.ServiceModel.Syndication.SyndicationFeed CreateFeedInstance() { throw null; }
         public override void ReadFrom(System.Xml.XmlReader reader) { }
         protected virtual System.ServiceModel.Syndication.SyndicationItem ReadItem(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationFeed feed) { throw null; }
-        protected virtual System.Collections.Generic.IEnumerable<System.ServiceModel.Syndication.SyndicationItem> ReadItems(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationFeed feed, out bool areAllItemsRead) { areAllItemsRead = default(bool); throw null; }
+        protected virtual System.Collections.Generic.IEnumerable<System.ServiceModel.Syndication.SyndicationItem> ReadItems(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationFeed feed, out bool areAllItemsRead) { throw null; }
         System.Xml.Schema.XmlSchema System.Xml.Serialization.IXmlSerializable.GetSchema() { throw null; }
         void System.Xml.Serialization.IXmlSerializable.ReadXml(System.Xml.XmlReader reader) { }
         void System.Xml.Serialization.IXmlSerializable.WriteXml(System.Xml.XmlWriter writer) { }
@@ -176,7 +176,7 @@ namespace System.ServiceModel.Syndication
         protected override System.ServiceModel.Syndication.SyndicationFeed CreateFeedInstance() { throw null; }
         public override void ReadFrom(System.Xml.XmlReader reader) { }
         protected virtual System.ServiceModel.Syndication.SyndicationItem ReadItem(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationFeed feed) { throw null; }
-        protected virtual System.Collections.Generic.IEnumerable<System.ServiceModel.Syndication.SyndicationItem> ReadItems(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationFeed feed, out bool areAllItemsRead) { areAllItemsRead = default(bool); throw null; }
+        protected virtual System.Collections.Generic.IEnumerable<System.ServiceModel.Syndication.SyndicationItem> ReadItems(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationFeed feed, out bool areAllItemsRead) { throw null; }
         protected internal override void SetFeed(System.ServiceModel.Syndication.SyndicationFeed feed) { }
         System.Xml.Schema.XmlSchema System.Xml.Serialization.IXmlSerializable.GetSchema() { throw null; }
         void System.Xml.Serialization.IXmlSerializable.ReadXml(System.Xml.XmlReader reader) { }
@@ -360,6 +360,7 @@ namespace System.ServiceModel.Syndication
         public System.Collections.ObjectModel.Collection<System.ServiceModel.Syndication.SyndicationPerson> Contributors { get { throw null; } }
         public System.ServiceModel.Syndication.TextSyndicationContent Copyright { get { throw null; } set { } }
         public System.ServiceModel.Syndication.TextSyndicationContent Description { get { throw null; } set { } }
+        public System.ServiceModel.Syndication.SyndicationLink Documentation { get { throw null; } set { } }
         public System.ServiceModel.Syndication.SyndicationElementExtensionCollection ElementExtensions { get { throw null; } }
         public string Generator { get { throw null; } set { } }
         public string Id { get { throw null; } set { } }
@@ -368,6 +369,10 @@ namespace System.ServiceModel.Syndication
         public string Language { get { throw null; } set { } }
         public System.DateTimeOffset LastUpdatedTime { get { throw null; } set { } }
         public System.Collections.ObjectModel.Collection<System.ServiceModel.Syndication.SyndicationLink> Links { get { throw null; } }
+        public System.Collections.ObjectModel.Collection<string> SkipDays { get { throw null; } }
+        public System.Collections.ObjectModel.Collection<int> SkipHours { get { throw null; } }
+        public System.ServiceModel.Syndication.SyndicationTextInput TextInput { get { throw null; } set { } }
+        public System.TimeSpan? TimeToLive { get { throw null; } set { } }
         public System.ServiceModel.Syndication.TextSyndicationContent Title { get { throw null; } set { } }
         public virtual System.ServiceModel.Syndication.SyndicationFeed Clone(bool cloneItems) { throw null; }
         protected internal virtual System.ServiceModel.Syndication.SyndicationCategory CreateCategory() { throw null; }
@@ -391,7 +396,9 @@ namespace System.ServiceModel.Syndication
     {
         protected SyndicationFeedFormatter() { }
         protected SyndicationFeedFormatter(System.ServiceModel.Syndication.SyndicationFeed feedToWrite) { }
+        public System.ServiceModel.Syndication.TryParseDateTimeCallback DateTimeParser { get { throw null; } set { } }
         public System.ServiceModel.Syndication.SyndicationFeed Feed { get { throw null; } }
+        public System.ServiceModel.Syndication.TryParseUriCallback UriParser { get { throw null; } set { } }
         public abstract string Version { get; }
         public abstract bool CanRead(System.Xml.XmlReader reader);
         protected internal static System.ServiceModel.Syndication.SyndicationCategory CreateCategory(System.ServiceModel.Syndication.SyndicationFeed feed) { throw null; }
@@ -415,7 +422,7 @@ namespace System.ServiceModel.Syndication
         protected internal static bool TryParseAttribute(string name, string ns, string value, System.ServiceModel.Syndication.SyndicationItem item, string version) { throw null; }
         protected internal static bool TryParseAttribute(string name, string ns, string value, System.ServiceModel.Syndication.SyndicationLink link, string version) { throw null; }
         protected internal static bool TryParseAttribute(string name, string ns, string value, System.ServiceModel.Syndication.SyndicationPerson person, string version) { throw null; }
-        protected internal static bool TryParseContent(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationItem item, string contentType, string version, out System.ServiceModel.Syndication.SyndicationContent content) { content = default(System.ServiceModel.Syndication.SyndicationContent); throw null; }
+        protected internal static bool TryParseContent(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationItem item, string contentType, string version, out System.ServiceModel.Syndication.SyndicationContent content) { throw null; }
         protected internal static bool TryParseElement(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationCategory category, string version) { throw null; }
         protected internal static bool TryParseElement(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationFeed feed, string version) { throw null; }
         protected internal static bool TryParseElement(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationItem item, string version) { throw null; }
@@ -468,7 +475,7 @@ namespace System.ServiceModel.Syndication
         public void SaveAsAtom10(System.Xml.XmlWriter writer) { }
         public void SaveAsRss20(System.Xml.XmlWriter writer) { }
         protected internal virtual bool TryParseAttribute(string name, string ns, string value, string version) { throw null; }
-        protected internal virtual bool TryParseContent(System.Xml.XmlReader reader, string contentType, string version, out System.ServiceModel.Syndication.SyndicationContent content) { content = default(System.ServiceModel.Syndication.SyndicationContent); throw null; }
+        protected internal virtual bool TryParseContent(System.Xml.XmlReader reader, string contentType, string version, out System.ServiceModel.Syndication.SyndicationContent content) { throw null; }
         protected internal virtual bool TryParseElement(System.Xml.XmlReader reader, string version) { throw null; }
         protected internal virtual void WriteAttributeExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual void WriteElementExtensions(System.Xml.XmlWriter writer, string version) { }
@@ -496,7 +503,7 @@ namespace System.ServiceModel.Syndication
         protected static bool TryParseAttribute(string name, string ns, string value, System.ServiceModel.Syndication.SyndicationItem item, string version) { throw null; }
         protected static bool TryParseAttribute(string name, string ns, string value, System.ServiceModel.Syndication.SyndicationLink link, string version) { throw null; }
         protected static bool TryParseAttribute(string name, string ns, string value, System.ServiceModel.Syndication.SyndicationPerson person, string version) { throw null; }
-        protected static bool TryParseContent(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationItem item, string contentType, string version, out System.ServiceModel.Syndication.SyndicationContent content) { content = default(System.ServiceModel.Syndication.SyndicationContent); throw null; }
+        protected static bool TryParseContent(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationItem item, string contentType, string version, out System.ServiceModel.Syndication.SyndicationContent content) { throw null; }
         protected static bool TryParseElement(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationCategory category, string version) { throw null; }
         protected static bool TryParseElement(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationItem item, string version) { throw null; }
         protected static bool TryParseElement(System.Xml.XmlReader reader, System.ServiceModel.Syndication.SyndicationLink link, string version) { throw null; }
@@ -554,6 +561,14 @@ namespace System.ServiceModel.Syndication
         protected internal virtual void WriteAttributeExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual void WriteElementExtensions(System.Xml.XmlWriter writer, string version) { }
     }
+    public partial class SyndicationTextInput
+    {
+        public SyndicationTextInput() { }
+        public string Description { get { throw null; } set { } }
+        public System.ServiceModel.Syndication.SyndicationLink Link { get { throw null; } set { } }
+        public string Name { get { throw null; } set { } }
+        public string Title { get { throw null; } set { } }
+    }
     public static partial class SyndicationVersions
     {
         public const string Atom10 = "Atom10";
@@ -575,6 +590,8 @@ namespace System.ServiceModel.Syndication
         Plaintext = 0,
         XHtml = 2,
     }
+    public delegate bool TryParseDateTimeCallback(System.ServiceModel.Syndication.XmlDateTimeData data, out System.DateTimeOffset dateTimeOffset);
+    public delegate bool TryParseUriCallback(System.ServiceModel.Syndication.XmlUriData data, out System.Uri uri);
     public partial class UrlSyndicationContent : System.ServiceModel.Syndication.SyndicationContent
     {
         protected UrlSyndicationContent(System.ServiceModel.Syndication.UrlSyndicationContent source) { }
@@ -600,6 +617,13 @@ namespace System.ServiceModel.Syndication
         protected internal virtual void WriteAttributeExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual void WriteElementExtensions(System.Xml.XmlWriter writer, string version) { }
     }
+    public partial struct XmlDateTimeData
+    {
+        private object _dummy;
+        public XmlDateTimeData(string dateTimeString, System.Xml.XmlQualifiedName elementQualifiedName) { throw null; }
+        public string DateTimeString { get { throw null; } }
+        public System.Xml.XmlQualifiedName ElementQualifiedName { get { throw null; } }
+    }
     public partial class XmlSyndicationContent : System.ServiceModel.Syndication.SyndicationContent
     {
         protected XmlSyndicationContent(System.ServiceModel.Syndication.XmlSyndicationContent source) { }
@@ -615,5 +639,14 @@ namespace System.ServiceModel.Syndication
         public TContent ReadContent<TContent>(System.Runtime.Serialization.XmlObjectSerializer dataContractSerializer) { throw null; }
         public TContent ReadContent<TContent>(System.Xml.Serialization.XmlSerializer serializer) { throw null; }
         protected override void WriteContentsTo(System.Xml.XmlWriter writer) { }
+    }
+    public partial struct XmlUriData
+    {
+        private object _dummy;
+        private int _dummyPrimitive;
+        public XmlUriData(string uriString, System.UriKind uriKind, System.Xml.XmlQualifiedName elementQualifiedName) { throw null; }
+        public System.Xml.XmlQualifiedName ElementQualifiedName { get { throw null; } }
+        public System.UriKind UriKind { get { throw null; } }
+        public string UriString { get { throw null; } }
     }
 }

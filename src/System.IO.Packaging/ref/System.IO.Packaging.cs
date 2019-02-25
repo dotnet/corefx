@@ -5,12 +5,12 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
 namespace System.IO
 {
     public partial class FileFormatException : System.FormatException
     {
         public FileFormatException() { }
+        protected FileFormatException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public FileFormatException(string message) { }
         public FileFormatException(string message, System.Exception innerException) { }
         public FileFormatException(System.Uri sourceUri) { }
@@ -18,6 +18,7 @@ namespace System.IO
         public FileFormatException(System.Uri sourceUri, string message) { }
         public FileFormatException(System.Uri sourceUri, string message, System.Exception innerException) { }
         public System.Uri SourceUri { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
 }
 namespace System.IO.Packaging
@@ -105,15 +106,15 @@ namespace System.IO.Packaging
         public abstract string Category { get; set; }
         public abstract string ContentStatus { get; set; }
         public abstract string ContentType { get; set; }
-        public abstract System.Nullable<System.DateTime> Created { get; set; }
+        public abstract System.DateTime? Created { get; set; }
         public abstract string Creator { get; set; }
         public abstract string Description { get; set; }
         public abstract string Identifier { get; set; }
         public abstract string Keywords { get; set; }
         public abstract string Language { get; set; }
         public abstract string LastModifiedBy { get; set; }
-        public abstract System.Nullable<System.DateTime> LastPrinted { get; set; }
-        public abstract System.Nullable<System.DateTime> Modified { get; set; }
+        public abstract System.DateTime? LastPrinted { get; set; }
+        public abstract System.DateTime? Modified { get; set; }
         public abstract string Revision { get; set; }
         public abstract string Subject { get; set; }
         public abstract string Title { get; set; }

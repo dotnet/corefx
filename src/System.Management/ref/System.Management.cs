@@ -133,7 +133,6 @@ namespace System.Management
         public InvokeMethodOptions(System.Management.ManagementNamedValueCollection context, System.TimeSpan timeout) { }
         public override object Clone() { throw null; }
     }
-    [System.ComponentModel.ToolboxItemAttribute(false)]
     public partial class ManagementBaseObject : System.ComponentModel.Component, System.ICloneable, System.Runtime.Serialization.ISerializable
     {
         protected ManagementBaseObject(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
@@ -211,7 +210,6 @@ namespace System.Management
         internal ManagementEventArgs() { }
         public object Context { get { throw null; } }
     }
-    [System.ComponentModel.ToolboxItemAttribute(false)]
     public partial class ManagementEventWatcher : System.ComponentModel.Component
     {
         public ManagementEventWatcher() { }
@@ -328,7 +326,6 @@ namespace System.Management
             public void Reset() { }
         }
     }
-    [System.ComponentModel.ToolboxItemAttribute(false)]
     public partial class ManagementObjectSearcher : System.ComponentModel.Component
     {
         public ManagementObjectSearcher() { }
@@ -353,7 +350,7 @@ namespace System.Management
         public event System.Management.ProgressEventHandler Progress { add { } remove { } }
         public void Cancel() { }
     }
-    [System.ComponentModel.TypeConverter(typeof(System.ComponentModel.ExpandableObjectConverter))]
+    [System.ComponentModel.TypeConverterAttribute(typeof(System.ComponentModel.ExpandableObjectConverter))]
     public abstract partial class ManagementOptions : System.ICloneable
     {
         internal ManagementOptions() { }
@@ -366,19 +363,19 @@ namespace System.Management
     {
         public ManagementPath() { }
         public ManagementPath(string path) { }
-        [System.ComponentModel.RefreshPropertiesAttribute((System.ComponentModel.RefreshProperties)(1))]
+        [System.ComponentModel.RefreshPropertiesAttribute(System.ComponentModel.RefreshProperties.All)]
         public string ClassName { get { throw null; } set { } }
         public static System.Management.ManagementPath DefaultPath { get { throw null; } set { } }
         public bool IsClass { get { throw null; } }
         public bool IsInstance { get { throw null; } }
         public bool IsSingleton { get { throw null; } }
-        [System.ComponentModel.RefreshPropertiesAttribute((System.ComponentModel.RefreshProperties)(1))]
+        [System.ComponentModel.RefreshPropertiesAttribute(System.ComponentModel.RefreshProperties.All)]
         public string NamespacePath { get { throw null; } set { } }
-        [System.ComponentModel.RefreshPropertiesAttribute((System.ComponentModel.RefreshProperties)(1))]
+        [System.ComponentModel.RefreshPropertiesAttribute(System.ComponentModel.RefreshProperties.All)]
         public string Path { get { throw null; } set { } }
-        [System.ComponentModel.RefreshPropertiesAttribute((System.ComponentModel.RefreshProperties)(1))]
+        [System.ComponentModel.RefreshPropertiesAttribute(System.ComponentModel.RefreshProperties.All)]
         public string RelativePath { get { throw null; } set { } }
-        [System.ComponentModel.RefreshPropertiesAttribute((System.ComponentModel.RefreshProperties)(1))]
+        [System.ComponentModel.RefreshPropertiesAttribute(System.ComponentModel.RefreshProperties.All)]
         public string Server { get { throw null; } set { } }
         public System.Management.ManagementPath Clone() { throw null; }
         public void SetAsClass() { }
