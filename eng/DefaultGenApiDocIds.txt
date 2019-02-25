@@ -54,5 +54,5 @@ T:System.Runtime.CompilerServices.AsyncMethodBuilderAttribute
 T:System.Reflection.DefaultMemberAttribute
 
 // These do not need to be persisted in the implementation
-//T:System.ComponentModel.EditorBrowsableAttribute
-//T:System.ObsoleteAttribute
+T:System.ComponentModel.EditorBrowsableAttribute
+T:System.ObsoleteAttribute

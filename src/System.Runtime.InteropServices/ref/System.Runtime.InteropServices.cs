@@ -1047,6 +1047,7 @@ namespace System.Runtime.InteropServices.ComTypes
         ADVF_PRIMEFIRST = 2,
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Explicit)]
     public partial struct BINDPTR
     {
         [System.Runtime.InteropServices.FieldOffsetAttribute(0)]
@@ -1122,6 +1123,7 @@ namespace System.Runtime.InteropServices.ComTypes
     {
         public System.Runtime.InteropServices.ComTypes.ELEMDESC.DESCUNION desc;
         public System.Runtime.InteropServices.ComTypes.TYPEDESC tdesc;
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Explicit)]
         public partial struct DESCUNION
         {
             [System.Runtime.InteropServices.FieldOffsetAttribute(0)]
@@ -1659,6 +1661,7 @@ namespace System.Runtime.InteropServices.ComTypes
         public int memid;
         public System.Runtime.InteropServices.ComTypes.VARKIND varkind;
         public short wVarFlags;
+        [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Explicit)]
         public partial struct DESCUNION
         {
             [System.Runtime.InteropServices.FieldOffsetAttribute(0)]
