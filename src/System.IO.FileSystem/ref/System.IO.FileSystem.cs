@@ -5,10 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(Microsoft.Win32.SafeHandles.SafeFileHandle))]
-[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.IO.FileOptions))]
-[assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.IO.FileStream))]
-
 namespace System.IO
 {
     public static partial class Directory
