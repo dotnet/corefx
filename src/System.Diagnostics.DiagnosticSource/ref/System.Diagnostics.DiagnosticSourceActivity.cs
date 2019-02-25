@@ -93,12 +93,9 @@ namespace System.Diagnostics
         public static bool operator !=(in System.Diagnostics.ActivityTraceId traceId1, in System.Diagnostics.ActivityTraceId traceId2) { throw null; }
         public override string ToString() { throw null; }
     }
-
     public abstract partial class DiagnosticSource
     {
         public Activity StartActivity(Activity activity, object args) { throw null; }
         public void StopActivity(Activity activity, object args) { }
     }
-
-
 }

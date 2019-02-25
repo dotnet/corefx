@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers.Binary;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Text;
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
@@ -59,7 +61,7 @@ namespace System.Diagnostics
             get
             {
                 // if we represented it as a traceId-spanId, convert it to a string.  
-                // We can do this concatination with a stackalloced Span<char> if we actualy Id is used alot.  
+                // We can do this concatenation with a stackalloced Span<char> if we actually used Id a lot.  
                 if (_id == null && _spanIdSet)
                     _id = "00-" + _traceId.AsHexString + "-" + _spanId.AsHexString + "-00";
                 return _id;
@@ -792,21 +794,24 @@ namespace System.Diagnostics
             _id1 = 0;
             _id2 = 0;
             _asHexString = null;
-            fixed (ulong* idPtr = &_id1)
+            if (isUtf8Chars)
             {
-                var outBuff = new Span<byte>(idPtr, sizeof(ulong) * 2);
-                if (isUtf8Chars)
+                if (idData.Length != 32)
+                    throw new ArgumentOutOfRangeException(nameof(idData));
+                Utf8Parser.TryParse(idData.Slice(0, 16), out _id1, out _, 'x');
+                Utf8Parser.TryParse(idData.Slice(16, 16), out _id2, out _, 'x');
+                if (BitConverter.IsLittleEndian)
                 {
-                    if (idData.Length != 32)
-                        throw new ArgumentOutOfRangeException(nameof(idData));
-                    ActivityTraceId.SetSpanFromHexUtf8Chars(outBuff, idData);
+                    _id1 = BinaryPrimitives.ReverseEndianness(_id1);
+                    _id2 = BinaryPrimitives.ReverseEndianness(_id2);
                 }
-                else
-                {
-                    if (idData.Length != 16)
-                        throw new ArgumentOutOfRangeException(nameof(idData));
-                    idData.CopyTo(outBuff);
-                }
+            }
+            else
+            {
+                if (idData.Length != 16)
+                    throw new ArgumentOutOfRangeException(nameof(idData));
+                fixed (ulong* idPtr = &_id1)
+                    idData.CopyTo(new Span<byte>(idPtr, sizeof(ulong) * 2));
             }
         }
 
@@ -877,10 +882,9 @@ namespace System.Diagnostics
         }
         public override bool Equals(object obj)
         {
-            if (!(obj is ActivityTraceId))
-                return false;
-            ActivityTraceId traceId = (ActivityTraceId)obj;
-            return _id1 == traceId._id1 && _id2 == traceId._id2;
+            if (obj is ActivityTraceId traceId)
+                return _id1 == traceId._id1 && _id2 == traceId._id2;
+            return false;
         }
         public override int GetHashCode()
         {
@@ -904,13 +908,14 @@ namespace System.Diagnostics
 
         #region CONVERSION binary spans to hex spans, and hex spans to binary spans  
         /* It would be nice to use generic Hex number conversion routines, but there 
-         * is nothing that is exposed publically and efficient */
+         * is nothing that is exposed publicly and efficient */
         /// <summary>
-        /// Converts each byte in 'bytes' to hex (thus two characters) and concatinates them
+        /// Converts each byte in 'bytes' to hex (thus two characters) and concatenates them
         /// and returns the resulting string.  
         /// </summary>
         internal static string SpanToHexString(ReadOnlySpan<byte> bytes)
         {
+            Debug.Assert(bytes.Length <= 16);   // We want it to not be very bing
             Span<char> result = stackalloc char[bytes.Length * 2];
             int pos = 0;
             foreach (byte b in bytes)
@@ -919,17 +924,6 @@ namespace System.Diagnostics
                 result[pos++] = BinaryToHexDigit(b);
             }
             return result.ToString();
-        }
-
-        /// <summary>
-        /// Converts 'idData' which is assumed to be HEX UTF8 characters to binary
-        /// puts it in 'outBytes'
-        /// </summary>
-        internal static void SetSpanFromHexUtf8Chars(Span<byte> outBytes, ReadOnlySpan<byte> idData)
-        {
-            Debug.Assert(outBytes.Length * 2 == idData.Length);
-            for (int i = 0; i < outBytes.Length; i++)
-                outBytes[i] = HexByteFromChars((char)idData[i * 2], (char)idData[i * 2 + 1]);
         }
 
         /// <summary>
@@ -994,21 +988,20 @@ namespace System.Diagnostics
         {
             _id1 = 0;
             _asHexString = null;
-            fixed (ulong* idPtr = &_id1)
+            if (isUtf8Chars)
             {
-                var outBuff = new Span<byte>(idPtr, sizeof(ulong));
-                if (isUtf8Chars)
-                {
-                    if (idData.Length != 16)
-                        throw new ArgumentOutOfRangeException(nameof(idData));
-                    ActivityTraceId.SetSpanFromHexUtf8Chars(outBuff, idData);
-                }
-                else
-                {
-                    if (idData.Length != 8)
-                        throw new ArgumentOutOfRangeException(nameof(idData));
-                    idData.CopyTo(outBuff);
-                }
+                if (idData.Length != 16)
+                    throw new ArgumentOutOfRangeException(nameof(idData));
+                Utf8Parser.TryParse(idData, out _id1, out _, 'x');
+                if (BitConverter.IsLittleEndian)
+                    _id1 = BinaryPrimitives.ReverseEndianness(_id1);
+            }
+            else
+            {
+                if (idData.Length != 8)
+                    throw new ArgumentOutOfRangeException(nameof(idData));
+                fixed (ulong* idPtr = &_id1)
+                    idData.CopyTo(new Span<byte>(idPtr, sizeof(ulong)));
             }
         }
 
@@ -1101,5 +1094,3 @@ namespace System.Diagnostics
         #endregion
     }
 }
-
-
