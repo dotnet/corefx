@@ -18,7 +18,16 @@ namespace System.Linq.ChainLinq.Consumables
         {
         }
 
-        public Consumable<U> GetConsumable<U>(Link<TElement, U> transform) =>
-            new Array<TElement, U>(_elements, 0, _count, transform);
+        public Consumable<U> GetConsumable<U>(Link<TElement, U> transform)
+        {
+            if (_count == 1)
+            {
+                return new IList<TElement, U>(this, 0, 1, transform);
+            }
+            else
+            {
+                return new Array<TElement, U>(_elementArray, 0, _count, transform);
+            }
+        }
     }
 }

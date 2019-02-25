@@ -56,8 +56,7 @@ namespace System.Linq.ChainLinq.Consume
                 do
                 {
                     g = g._next;
-                    g.Trim();
-                    var state = chain.ProcessNext(resultSelector(g.Key, g._elements));
+                    var state = chain.ProcessNext(resultSelector(g.Key, g.GetEfficientList(true)));
                     if (state.IsStopped())
                         break;
                 }

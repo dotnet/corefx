@@ -137,8 +137,7 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
                     }
 
                     _g = _g._next;
-                    _g.Trim();
-                    status = _chain.ProcessNext(_resultSelector(_g.Key, _g._elements));
+                    status = _chain.ProcessNext(_resultSelector(_g.Key, _g.GetEfficientList(true)));
                     var flowing = status.IsFlowing();
                     if (_g == _lastGrouping)
                         status = ChainStatus.Stop;

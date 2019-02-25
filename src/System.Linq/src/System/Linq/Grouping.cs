@@ -110,11 +110,6 @@ namespace System.Linq
 
         public TElement[] Upgrade(TElement[] currentElements)
         {
-            if (currentElements == null)
-            {
-                return TryPop(ref _bucket_1) ?? new TElement[MinLength];
-            }
-
             var length = currentElements.Length;
 
             Debug.Assert(IsPowerOf2(length), "Only powers of 2 lengths should be accepted");
@@ -124,6 +119,8 @@ namespace System.Linq
 
             return FindBucketAndUpgrade(currentElements, shiftedLength);
         }
+
+        public TElement[] Alloc() => TryPop(ref _bucket_1) ?? new TElement[MinLength];
     }
 
     // It is (unfortunately) common to databind directly to Grouping.Key.
@@ -140,40 +137,86 @@ namespace System.Linq
         internal int _hashCode;
 
         GroupingArrayPool<TElement> _pool;
-        internal TElement[] _elements;
         internal int _count;
+        /// <summary>
+        /// for single elements buckets we don't allocate a seperate array, rather we use
+        /// this slot to store the value. 
+        /// NB. _element is only valid when _count = 1
+        /// </summary>
+        internal TElement _element;
+        /// <summary>
+        /// NB. _elementArray is not valid when _count = 1
+        /// </summary>
+        internal TElement[] _elementArray;
 
         internal ChainLinq.Consumables.GroupingInternal<TKey, TElement> _hashNext;
         internal ChainLinq.Consumables.GroupingInternal<TKey, TElement> _next;
 
-        internal Grouping(GroupingArrayPool<TElement> pool) =>
+        internal Grouping(GroupingArrayPool<TElement> pool)
+        {
             _pool = pool;
+            _elementArray = Array.Empty<TElement>();
+        }
 
         internal void Add(TElement element)
         {
-            if (_elements.Length == _count)
+            if (_count == 0)
             {
-                _elements = _pool.Upgrade(_elements);
+                _element = element;
+                _count = 1;
             }
+            else
+            {
+                if (_count == 1)
+                {
+                    _elementArray = _pool.Alloc();
+                    _elementArray[0] = _element;
+                    _element = default;
+                }
 
-            _elements[_count] = element;
-            _count++;
+                if (_elementArray.Length == _count)
+                {
+                    _elementArray = _pool.Upgrade(_elementArray);
+                }
+
+                _elementArray[_count] = element;
+                _count++;
+            }
         }
 
-        internal void Trim()
+        private void Trim()
         {
-            if (_elements.Length != _count)
+            if (_elementArray.Length != _count)
             {
-                Array.Resize(ref _elements, _count);
+                Array.Resize(ref _elementArray, _count);
             }
         }
 
         public IEnumerator<TElement> GetEnumerator()
         {
-            for (int i = 0; i < _count; i++)
+            if (_count == 1)
             {
-                yield return _elements[i];
+                yield return _element;
             }
+            else
+            {
+                for (int i = 0; i < _count; i++)
+                {
+                    yield return _elementArray[i];
+                }
+            }
+        }
+
+        internal IList<TElement> GetEfficientList(bool canTrim)
+        {
+            if (_count == 1 || (!canTrim && _count != _elementArray.Length))
+            {
+                return this;
+            }
+
+            Trim();
+
+            return _elementArray;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -190,14 +233,43 @@ namespace System.Linq
 
         void ICollection<TElement>.Clear() => throw Error.NotSupported();
 
-        bool ICollection<TElement>.Contains(TElement item) => Array.IndexOf(_elements, item, 0, _count) >= 0;
+        bool ICollection<TElement>.Contains(TElement item)
+        {
+            if (_count == 1)
+            {
+                return EqualityComparer<TElement>.Default.Equals(item, _element);
+            }
+            else
+            {
+                return Array.IndexOf(_elementArray, item, 0, _count) >= 0;
+            }
+        }
 
-        void ICollection<TElement>.CopyTo(TElement[] array, int arrayIndex) =>
-            Array.Copy(_elements, 0, array, arrayIndex, _count);
+        void ICollection<TElement>.CopyTo(TElement[] array, int arrayIndex)
+        {
+            if (_count == 1)
+            {
+                array[arrayIndex] = _element;
+            }
+            else
+            {
+                Array.Copy(_elementArray, 0, array, arrayIndex, _count);
+            }
+        }
 
         bool ICollection<TElement>.Remove(TElement item) => throw Error.NotSupported();
 
-        int IList<TElement>.IndexOf(TElement item) => Array.IndexOf(_elements, item, 0, _count);
+        int IList<TElement>.IndexOf(TElement item)
+        {
+            if (_count == 1)
+            {
+                return EqualityComparer<TElement>.Default.Equals(item, _element) ? 0 : -1;
+            }
+            else
+            {
+                return Array.IndexOf(_elementArray, item, 0, _count);
+            }
+        }
 
         void IList<TElement>.Insert(int index, TElement item) => throw Error.NotSupported();
 
@@ -212,7 +284,10 @@ namespace System.Linq
                     throw Error.ArgumentOutOfRange(nameof(index));
                 }
 
-                return _elements[index];
+                if (_count == 1)
+                    return _element;
+
+                return _elementArray[index];
             }
 
             set

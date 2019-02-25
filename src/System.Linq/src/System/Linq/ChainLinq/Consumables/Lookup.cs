@@ -89,7 +89,6 @@ namespace System.Linq.ChainLinq.Consumables
             GroupingInternal<TKey, TElement> g = new GroupingInternal<TKey, TElement>(_pool);
             g._key = key;
             g._hashCode = hashCode;
-            g._elements = _pool.Upgrade(null);
             g._hashNext = _groupings[index];
             _groupings[index] = g;
             if (_lastGrouping == null)

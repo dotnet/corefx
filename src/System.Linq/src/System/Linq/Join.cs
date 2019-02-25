@@ -84,10 +84,17 @@ namespace System.Linq
                             if (g != null)
                             {
                                 int count = g._count;
-                                TInner[] elements = g._elements;
-                                for (int i = 0; i != count; ++i)
+                                if (count == 1)
                                 {
-                                    yield return resultSelector(item, elements[i]);
+                                    yield return resultSelector(item, g._element);
+                                }
+                                else
+                                {
+                                    TInner[] elements = g._elementArray;
+                                    for (int i = 0; i != count; ++i)
+                                    {
+                                        yield return resultSelector(item, elements[i]);
+                                    }
                                 }
                             }
                         }
