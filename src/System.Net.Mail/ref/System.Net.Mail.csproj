@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Net.Mime.cs" />
-    <Compile Include="System.Net.Mail.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\System.ComponentModel.EventBasedAsync\ref\System.ComponentModel.EventBasedAsync.csproj" />

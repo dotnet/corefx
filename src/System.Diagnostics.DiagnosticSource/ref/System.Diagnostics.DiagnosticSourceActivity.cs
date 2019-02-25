@@ -7,20 +7,20 @@
 
 namespace System.Diagnostics 
 {
-   public partial class Activity
-   {
+    public partial class Activity
+    {
         public Activity(string operationName) { }
         public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> Baggage { get { throw null; } }
-        public static Activity Current
+        public static System.Diagnostics.Activity Current
         {
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+          [System.Security.SecuritySafeCriticalAttribute]
+#endif
+          get { throw null; }
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
         [System.Security.SecuritySafeCriticalAttribute]
 #endif
-            get { throw null; }
-#if ALLOW_PARTIALLY_TRUSTED_CALLERS
-       [System.Security.SecuritySafeCriticalAttribute]
-#endif
-            set { }
+          set { }
         }
         public System.TimeSpan Duration { get { throw null; } }
         public string Id { get { throw null; } }
@@ -38,10 +38,10 @@ namespace System.Diagnostics
         public System.Diagnostics.Activity SetStartTime(System.DateTime startTimeUtc) { throw null; }
         public System.Diagnostics.Activity Start() { throw null; }
         public void Stop() { }
-  }
-  public abstract partial class DiagnosticSource 
-  {
-    public Activity StartActivity(Activity activity, object args) {throw null;}
-    public void StopActivity(Activity activity, object args) {}
-  }
+    }
+    public abstract partial class DiagnosticSource
+    {
+        public System.Diagnostics.Activity StartActivity(System.Diagnostics.Activity activity, object args) { throw null; }
+        public void StopActivity(System.Diagnostics.Activity activity, object args) { }
+    }
 }

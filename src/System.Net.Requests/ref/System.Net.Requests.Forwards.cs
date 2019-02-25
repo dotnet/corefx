@@ -5,8 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
-// Types moved down into System.Net.WebHeaderCollection
+// These types were moved to System.Net.WebHeaderCollection
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Net.WebHeaderCollection))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Net.HttpRequestHeader))]
-
