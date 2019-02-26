@@ -29,7 +29,7 @@ namespace System
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, int start) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, int start, int length) { throw null; }
         public static Span<T> AsSpan<T>(this System.ArraySegment<T> segment, Index startIndex) { throw null; }
-        public static Span<T> AsSpan<T>(this System.ArraySegment<T> segment, Range range)  { throw null; }
+        public static Span<T> AsSpan<T>(this System.ArraySegment<T> segment, Range range) { throw null; }
         public static System.Span<T> AsSpan<T>(this T[] array) { throw null; }
         public static System.Span<T> AsSpan<T>(this T[] array, int start) { throw null; }
         public static System.Span<T> AsSpan<T>(this T[] array, int start, int length) { throw null; }
@@ -88,6 +88,39 @@ namespace System
         public static bool StartsWith(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public static bool StartsWith<T>(this System.ReadOnlySpan<T> span, System.ReadOnlySpan<T> value) where T : System.IEquatable<T> { throw null; }
         public static bool StartsWith<T>(this System.Span<T> span, System.ReadOnlySpan<T> value) where T : System.IEquatable<T> { throw null; }
+
+        public static Memory<T> Trim<T>(this System.Memory<T> memory, T trimElement) where T : IEquatable<T> { throw null; }
+        public static Memory<T> TrimStart<T>(this System.Memory<T> memory, T trimElement) where T : IEquatable<T> { throw null; }
+        public static Memory<T> TrimEnd<T>(this System.Memory<T> memory, T trimElement) where T : IEquatable<T> { throw null; }
+
+        public static Memory<T> Trim<T>(this System.Memory<T> memory, System.ReadOnlySpan<T> trimElements) where T : IEquatable<T> { throw null; }
+        public static Memory<T> TrimStart<T>(this System.Memory<T> memory, System.ReadOnlySpan<T> trimElements) where T : IEquatable<T> { throw null; }
+        public static Memory<T> TrimEnd<T>(this System.Memory<T> memory, System.ReadOnlySpan<T> trimElements) where T : IEquatable<T> { throw null; }
+
+        public static ReadOnlyMemory<T> Trim<T>(this System.ReadOnlyMemory<T> memory, T trimElement) where T : IEquatable<T> { throw null; }
+        public static ReadOnlyMemory<T> TrimStart<T>(this System.ReadOnlyMemory<T> memory, T trimElement) where T : IEquatable<T> { throw null; }
+        public static ReadOnlyMemory<T> TrimEnd<T>(this System.ReadOnlyMemory<T> memory, T trimElement) where T : IEquatable<T> { throw null; }
+
+        public static ReadOnlyMemory<T> Trim<T>(this System.ReadOnlyMemory<T> memory, System.ReadOnlySpan<T> trimElements) where T : IEquatable<T> { throw null; }
+        public static ReadOnlyMemory<T> TrimStart<T>(this System.ReadOnlyMemory<T> memory, System.ReadOnlySpan<T> trimElements) where T : IEquatable<T> { throw null; }
+        public static ReadOnlyMemory<T> TrimEnd<T>(this System.ReadOnlyMemory<T> memory, System.ReadOnlySpan<T> trimElements) where T : IEquatable<T> { throw null; }
+
+        public static Span<T> Trim<T>(this System.Span<T> memory, T trimElement) where T : IEquatable<T> { throw null; }
+        public static Span<T> TrimStart<T>(this System.Span<T> memory, T trimElement) where T : IEquatable<T> { throw null; }
+        public static Span<T> TrimEnd<T>(this System.Span<T> memory, T trimElement) where T : IEquatable<T> { throw null; }
+
+        public static Span<T> Trim<T>(this System.Span<T> memory, System.ReadOnlySpan<T> trimElements) where T : IEquatable<T> { throw null; }
+        public static Span<T> TrimStart<T>(this System.Span<T> memory, System.ReadOnlySpan<T> trimElements) where T : IEquatable<T> { throw null; }
+        public static Span<T> TrimEnd<T>(this System.Span<T> memory, System.ReadOnlySpan<T> trimElements) where T : IEquatable<T> { throw null; }
+
+        public static ReadOnlySpan<T> Trim<T>(this System.ReadOnlySpan<T> memory, T trimElement) where T : IEquatable<T> { throw null; }
+        public static ReadOnlySpan<T> TrimStart<T>(this System.ReadOnlySpan<T> memory, T trimElement) where T : IEquatable<T> { throw null; }
+        public static ReadOnlySpan<T> TrimEnd<T>(this System.ReadOnlySpan<T> memory, T trimElement) where T : IEquatable<T> { throw null; }
+
+        public static ReadOnlySpan<T> Trim<T>(this System.ReadOnlySpan<T> memory, System.ReadOnlySpan<T> trimElements) where T : IEquatable<T> { throw null; }
+        public static ReadOnlySpan<T> TrimStart<T>(this System.ReadOnlySpan<T> memory, System.ReadOnlySpan<T> trimElements) where T : IEquatable<T> { throw null; }
+        public static ReadOnlySpan<T> TrimEnd<T>(this System.ReadOnlySpan<T> memory, System.ReadOnlySpan<T> trimElements) where T : IEquatable<T> { throw null; }
+
         public static int ToLower(this System.ReadOnlySpan<char> source, System.Span<char> destination, System.Globalization.CultureInfo culture) { throw null; }
         public static int ToLowerInvariant(this System.ReadOnlySpan<char> source, System.Span<char> destination) { throw null; }
         public static int ToUpper(this System.ReadOnlySpan<char> source, System.Span<char> destination, System.Globalization.CultureInfo culture) { throw null; }
@@ -251,7 +284,7 @@ namespace System.Buffers
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         public static bool operator ==(System.Buffers.StandardFormat left, System.Buffers.StandardFormat right) { throw null; }
-        public static implicit operator System.Buffers.StandardFormat (char symbol) { throw null; }
+        public static implicit operator System.Buffers.StandardFormat(char symbol) { throw null; }
         public static bool operator !=(System.Buffers.StandardFormat left, System.Buffers.StandardFormat right) { throw null; }
         public static System.Buffers.StandardFormat Parse(System.ReadOnlySpan<char> format) { throw null; }
         public static System.Buffers.StandardFormat Parse(string format) { throw null; }
