@@ -217,7 +217,7 @@ namespace System
                     enabled = false;
                 }
             }
-            catch (Exception e) when (e is SecurityException || e is InvalidCastException)
+            catch (Exception e) when (e is SecurityException || e is InvalidCastException || e is NullReferenceException)
             {
             }
 
