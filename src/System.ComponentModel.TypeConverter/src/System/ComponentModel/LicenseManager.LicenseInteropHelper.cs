@@ -157,9 +157,7 @@ namespace System.ComponentModel
                     _helperContext._savedLicenseKeys.Clear();
                 }
 
-                License license;
-                string licenseKey;
-                if (LicenseManager.ValidateInternalRecursive(_helperContext, type, null, false, out License license, out string licenseKey))
+                if (LicenseManager.ValidateInternalRecursive(_helperContext, type, null, false, out License license, out string _))
                 {
                     runtimeKeyAvail = _helperContext._savedLicenseKeys.Contains(type.AssemblyQualifiedName);
                     if (license != null)
