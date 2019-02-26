@@ -150,7 +150,7 @@ namespace System.ComponentModel
 
                 License license;
                 string licenseKey;
-                if (LicenseManager.ValidateInternalRecursive(_helperContext, type, null, false, out license, out licenseKey))
+                if (LicenseManager.ValidateInternalRecursive(_helperContext, type, null, false, out License license, out string licenseKey))
                 {
                     runtimeKeyAvail = _helperContext._savedLicenseKeys.Contains(type.AssemblyQualifiedName);
                     if (license != null)
