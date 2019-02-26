@@ -97,10 +97,10 @@ namespace System.Linq
             {
                 switch (shiftedLength)
                 {
-                    case 0b_0001: return Upgrade(ref _bucket_1, ref _bucket_2, currentElements);
-                    case 0b_0010: return Upgrade(ref _bucket_2, ref _bucket_3, currentElements);
-                    case 0b_0100: return Upgrade(ref _bucket_3, ref _bucket_4, currentElements);
-                    case 0b_1000: return Upgrade(ref _bucket_4, ref NextPool._bucket_1, currentElements);
+                    case 1: return Upgrade(ref _bucket_1, ref _bucket_2, currentElements);
+                    case 2: return Upgrade(ref _bucket_2, ref _bucket_3, currentElements);
+                    case 4: return Upgrade(ref _bucket_3, ref _bucket_4, currentElements);
+                    case 8: return Upgrade(ref _bucket_4, ref NextPool._bucket_1, currentElements);
                 }
             }
             return NextPool.FindBucketAndUpgrade(currentElements, shiftedLength >> Buckets);
@@ -171,7 +171,7 @@ namespace System.Linq
                 {
                     _elementArray = _pool.Alloc();
                     _elementArray[0] = _element;
-                    _element = default;
+                    _element = default(TElement);
                 }
 
                 if (_elementArray.Length == _count)
@@ -229,9 +229,9 @@ namespace System.Linq
 
         bool ICollection<TElement>.IsReadOnly => true;
 
-        void ICollection<TElement>.Add(TElement item) => throw Error.NotSupported();
+        void ICollection<TElement>.Add(TElement item) => ThrowHelper.ThrowNotSupportedException();
 
-        void ICollection<TElement>.Clear() => throw Error.NotSupported();
+        void ICollection<TElement>.Clear() => ThrowHelper.ThrowNotSupportedException();
 
         bool ICollection<TElement>.Contains(TElement item)
         {
@@ -257,7 +257,11 @@ namespace System.Linq
             }
         }
 
-        bool ICollection<TElement>.Remove(TElement item) => throw Error.NotSupported();
+        bool ICollection<TElement>.Remove(TElement item)
+        {
+            ThrowHelper.ThrowNotSupportedException();
+            return false;
+        }
 
         int IList<TElement>.IndexOf(TElement item)
         {
@@ -271,9 +275,9 @@ namespace System.Linq
             }
         }
 
-        void IList<TElement>.Insert(int index, TElement item) => throw Error.NotSupported();
+        void IList<TElement>.Insert(int index, TElement item) => ThrowHelper.ThrowNotSupportedException();
 
-        void IList<TElement>.RemoveAt(int index) => throw Error.NotSupported();
+        void IList<TElement>.RemoveAt(int index) => ThrowHelper.ThrowNotSupportedException();
 
         TElement IList<TElement>.this[int index]
         {
@@ -281,7 +285,7 @@ namespace System.Linq
             {
                 if (index < 0 || index >= _count)
                 {
-                    throw Error.ArgumentOutOfRange(nameof(index));
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index);
                 }
 
                 if (_count == 1)
@@ -292,7 +296,7 @@ namespace System.Linq
 
             set
             {
-                throw Error.NotSupported();
+                ThrowHelper.ThrowNotSupportedException();
             }
         }
     }

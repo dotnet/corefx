@@ -71,7 +71,7 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
                     goto case ProcessGrouping;
 
                 case Finished:
-                    Result = default;
+                    Result = default(TResult);
                     _chain.ChainComplete();
                     _state = PostFinished;
                     return false;
@@ -151,7 +151,7 @@ namespace System.Linq.ChainLinq.ConsumerEnumerators
                     goto case ProcessGrouping;
 
                 case Finished:
-                    base.Result = default;
+                    base.Result = default(Result);
                     _chain.ChainComplete();
                     _state = PostFinished;
                     return false;

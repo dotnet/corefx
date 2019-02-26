@@ -29,7 +29,7 @@
         tryAgain:
             if (_idx >= _endIdx || status.IsStopped())
             {
-                Result = default;
+                Result = default(TResult);
                 _chain.ChainComplete();
                 return false;
             }

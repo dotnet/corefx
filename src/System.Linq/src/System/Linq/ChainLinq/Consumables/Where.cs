@@ -34,7 +34,7 @@ namespace System.Linq.ChainLinq.Consumables
                 _state = int.MaxValue;
             }
 
-            _current = default;
+            _current = default(T);
             return false;
         }
 
@@ -91,7 +91,7 @@ namespace System.Linq.ChainLinq.Consumables
                     goto default;
 
                 default:
-                    _current = default;
+                    _current = default(T);
                     return false;
             }
         }
@@ -159,7 +159,7 @@ namespace System.Linq.ChainLinq.Consumables
                     goto default;
 
                 default:
-                    _current = default;
+                    _current = default(T);
                     if (_enumerator != null)
                     {
                         _enumerator.Dispose();

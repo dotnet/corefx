@@ -17,12 +17,12 @@ namespace System.Linq.ChainLinq.Consumables
         V IEnumerator<V>.Current => _current;
         object IEnumerator.Current => _current;
 
-        void IEnumerator.Reset() => throw Error.NotSupported();
+        void IEnumerator.Reset() => ThrowHelper.ThrowNotSupportedException();
 
         public virtual void Dispose()
         {
             _state = int.MaxValue;
-            _current = default;
+            _current = default(V);
         }
 
         public override IEnumerator<V> GetEnumerator()
@@ -57,7 +57,7 @@ namespace System.Linq.ChainLinq.Consumables
         {
             if (_state != 1 || _idx >= Underlying.Length)
             {
-                _current = default;
+                _current = default(U);
                 return false;
             }
 
@@ -115,7 +115,7 @@ namespace System.Linq.ChainLinq.Consumables
                     return true;
 
                 default:
-                    _current = default;
+                    _current = default(U);
                     return false;
             }
         }
@@ -179,7 +179,7 @@ namespace System.Linq.ChainLinq.Consumables
                     return true;
 
                 default:
-                    _current = default;
+                    _current = default(U);
                     if (_enumerator != null)
                     {
                         _enumerator.Dispose();

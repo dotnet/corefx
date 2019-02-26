@@ -34,7 +34,7 @@ namespace System.Linq.ChainLinq.Consumables
                 }
             }
 
-            _current = default;
+            _current = default(U);
             return false;
         }
 
@@ -90,7 +90,7 @@ namespace System.Linq.ChainLinq.Consumables
                     goto default;
 
                 default:
-                    _current = default;
+                    _current = default(U);
                     return false;
             }
         }
@@ -157,7 +157,7 @@ namespace System.Linq.ChainLinq.Consumables
                     goto default;
 
                 default:
-                    _current = default;
+                    _current = default(U);
                     if (_enumerator != null)
                     {
                         _enumerator.Dispose();

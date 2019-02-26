@@ -12,8 +12,18 @@ namespace System.Linq.ChainLinq.Consumables
 
         public GroupedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IEqualityComparer<TKey> comparer)
         {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
+            if (source == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            }
+
+            if (keySelector == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
+            }
+
+            _source = source;
+            _keySelector = keySelector;
             _comparer = comparer;
         }
 
@@ -71,9 +81,24 @@ namespace System.Linq.ChainLinq.Consumables
 
         public GroupedEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, IEqualityComparer<TKey> comparer)
         {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
-            _elementSelector = elementSelector ?? throw Error.ArgumentNull(nameof(elementSelector));
+            if (source == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            }
+
+            if (keySelector == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
+            }
+
+            if (elementSelector == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.elementSelector);
+            }
+
+            _source = source;
+            _keySelector = keySelector;
+            _elementSelector = elementSelector;
             _comparer = comparer;
         }
 
@@ -132,9 +157,24 @@ namespace System.Linq.ChainLinq.Consumables
 
         public GroupedResultEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TKey, IEnumerable<TSource>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
-            _resultSelector = resultSelector ?? throw Error.ArgumentNull(nameof(resultSelector));
+            if (source == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            }
+
+            if (keySelector == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
+            }
+
+            if (resultSelector == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.resultSelector);
+            }
+
+            _source = source;
+            _keySelector = keySelector;
+            _resultSelector = resultSelector;
             _comparer = comparer;
         }
 
@@ -195,11 +235,31 @@ namespace System.Linq.ChainLinq.Consumables
 
         public GroupedResultEnumerable(IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, Func<TKey, IEnumerable<TElement>, TResult> resultSelector, IEqualityComparer<TKey> comparer)
         {
-            _source = source ?? throw Error.ArgumentNull(nameof(source));
-            _keySelector = keySelector ?? throw Error.ArgumentNull(nameof(keySelector));
-            _elementSelector = elementSelector ?? throw Error.ArgumentNull(nameof(elementSelector));
+            if (source == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            }
+
+            if (keySelector == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
+            }
+
+            if (elementSelector == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.elementSelector);
+            }
+
+            if (resultSelector == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.resultSelector);
+            }
+
+            _source = source;
+            _keySelector = keySelector;
+            _elementSelector = elementSelector;
             _comparer = comparer;
-            _resultSelector = resultSelector ?? throw Error.ArgumentNull(nameof(resultSelector));
+            _resultSelector = resultSelector;
         }
 
         public override Consumable<TResult> AddTail(Link<TResult, TResult> transform) =>
