@@ -42,6 +42,30 @@ namespace System.Net.Http
         private static readonly byte[] s_http1DotBytes = Encoding.ASCII.GetBytes("HTTP/1.");
         private static readonly ulong s_http10Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.0"));
         private static readonly ulong s_http11Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.1"));
+        private static readonly HashSet<KnownHeader> s_disallowedHeaders = new HashSet<KnownHeader>
+        {
+            // Message framing headers.
+            KnownHeaders.TransferEncoding, KnownHeaders.ContentLength,
+
+            // Routing headers.
+            KnownHeaders.Host,
+
+            // Request modifiers: controls and conditionals.
+            // rfc7231#section-5.1: Controls.
+            KnownHeaders.CacheControl, KnownHeaders.Expect, KnownHeaders.MaxForwards, KnownHeaders.Pragma, KnownHeaders.Range, KnownHeaders.TE,
+            // rfc7231#section-5.2: Conditionals.
+            KnownHeaders.IfMatch, KnownHeaders.IfNoneMatch, KnownHeaders.IfModifiedSince, KnownHeaders.IfUnmodifiedSince, KnownHeaders.IfRange,
+
+            // Authentication headers.
+            KnownHeaders.Authorization, KnownHeaders.SetCookie,
+
+            // Response control data.
+            // rfc7231#section-7.1: Control Data.
+            KnownHeaders.Age, KnownHeaders.Expires, KnownHeaders.Date, KnownHeaders.Location, KnownHeaders.RetryAfter, KnownHeaders.Vary, KnownHeaders.Warning,
+
+            // Content-Encoding, Content-Type, Content-Range, and Trailer itself.
+            KnownHeaders.ContentEncoding, KnownHeaders.ContentType, KnownHeaders.ContentRange, KnownHeaders.Trailer
+        };
 
         private readonly HttpConnectionPool _pool;
         private readonly Socket _socket; // used for polling; _stream should be used for all reading/writing. _stream owns disposal.
@@ -799,7 +823,7 @@ namespace System.Net.Http
             const int MinStatusLineLength = 12; // "HTTP/1.x 123" 
             if (line.Length < MinStatusLineLength || line[8] != ' ')
             {
-                ThrowInvalidHttpResponse();
+                TryThrowInvalidHttpResponse(isFromTrailer:false);
             }
 
             ulong first8Bytes = BitConverter.ToUInt64(line);
@@ -821,7 +845,7 @@ namespace System.Net.Http
                 }
                 else
                 {
-                    ThrowInvalidHttpResponse();
+                    TryThrowInvalidHttpResponse(isFromTrailer:false);
                 }
             }
 
@@ -829,7 +853,7 @@ namespace System.Net.Http
             byte status1 = line[9], status2 = line[10], status3 = line[11];
             if (!IsDigit(status1) || !IsDigit(status2) || !IsDigit(status3))
             {
-                ThrowInvalidHttpResponse();
+                TryThrowInvalidHttpResponse(isFromTrailer:false);
             }
             response.SetStatusCodeWithoutValidation((HttpStatusCode)(100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0')));
 
@@ -860,16 +884,16 @@ namespace System.Net.Http
             }
             else
             {
-                ThrowInvalidHttpResponse();
+                TryThrowInvalidHttpResponse(isFromTrailer:false);
             }
         }
 
         // TODO: Remove this overload once https://github.com/dotnet/csharplang/issues/1331 is addressed
         // and the compiler doesn't prevent using spans in async methods.
         private static void ParseHeaderNameValue(ArraySegment<byte> line, HttpResponseMessage response) =>
-            ParseHeaderNameValue((Span<byte>)line, response);
+            ParseHeaderNameValue((Span<byte>)line, response, isFromTrailer:false);
 
-        private static void ParseHeaderNameValue(Span<byte> line, HttpResponseMessage response)
+        private static void ParseHeaderNameValue(ReadOnlySpan<byte> line, HttpResponseMessage response, bool isFromTrailer)
         {
             Debug.Assert(line.Length > 0);
 
@@ -880,20 +904,29 @@ namespace System.Net.Http
                 if (pos == line.Length)
                 {
                     // Invalid header line that doesn't contain ':'.
-                    ThrowInvalidHttpResponse();
+                    TryThrowInvalidHttpResponse(isFromTrailer);
+                    return;
                 }
             }
 
             if (pos == 0)
             {
                 // Invalid empty header name.
-                ThrowInvalidHttpResponse();
+                TryThrowInvalidHttpResponse(isFromTrailer);
+                return;
             }
 
             if (!HeaderDescriptor.TryGet(line.Slice(0, pos), out HeaderDescriptor descriptor))
             {
-                // Invalid header name
-                ThrowInvalidHttpResponse();
+                // Invalid header name. Need to throw.
+                TryThrowInvalidHttpResponse(false);
+            }
+
+            if (isFromTrailer && descriptor.KnownHeader != null && s_disallowedHeaders.Contains(descriptor.KnownHeader))
+            {
+                // Disallowed trailer fields.
+                // A recipient MUST ignore fields that are forbidden to be sent in a trailer.
+                return;
             }
 
             // Eat any trailing whitespace
@@ -903,14 +936,16 @@ namespace System.Net.Http
                 if (pos == line.Length)
                 {
                     // Invalid header line that doesn't contain ':'.
-                    ThrowInvalidHttpResponse();
+                    TryThrowInvalidHttpResponse(isFromTrailer);
+                    return;
                 }
             }
 
             if (line[pos++] != ':')
             {
                 // Invalid header line that doesn't contain ':'.
-                ThrowInvalidHttpResponse();
+                TryThrowInvalidHttpResponse(isFromTrailer);
+                return;
             }
 
             // Skip whitespace after colon
@@ -923,7 +958,12 @@ namespace System.Net.Http
 
             // Note we ignore the return value from TryAddWithoutValidation; 
             // if the header can't be added, we silently drop it.
-            if (descriptor.HeaderType == HttpHeaderType.Content)
+            if (isFromTrailer)
+            {
+                if (response.TrailingHeaders == null) response.TrailingHeaders = new HttpResponseHeaders();
+                response.TrailingHeaders.TryAddWithoutValidation(descriptor, headerValue);
+            }
+            else if (descriptor.HeaderType == HttpHeaderType.Content)
             {
                 response.Content.Headers.TryAddWithoutValidation(descriptor, headerValue);
             }
@@ -1161,7 +1201,7 @@ namespace System.Net.Http
             {
                 if (_allowedReadLineBytes < buffer.Length)
                 {
-                    ThrowInvalidHttpResponse();
+                    TryThrowInvalidHttpResponse(isFromTrailer:false);
                 }
 
                 line = default;
@@ -1229,7 +1269,7 @@ namespace System.Net.Http
                             // so if we haven't seen a colon, this is invalid.
                             if (Array.IndexOf(_readBuffer, (byte)':', _readOffset, lfIndex - _readOffset) == -1)
                             {
-                                ThrowInvalidHttpResponse();
+                                TryThrowInvalidHttpResponse(isFromTrailer:false);
                             }
 
                             // When we return the line, we need the interim newlines filtered out. According
@@ -1272,7 +1312,7 @@ namespace System.Net.Http
         {
             if (_allowedReadLineBytes < 0)
             {
-                ThrowInvalidHttpResponse();
+                TryThrowInvalidHttpResponse(isFromTrailer:false);
             }
         }
 
@@ -1653,7 +1693,13 @@ namespace System.Net.Http
 
         public sealed override string ToString() => $"{nameof(HttpConnection)}({_pool})"; // Description for diagnostic purposes
 
-        private static void ThrowInvalidHttpResponse() => throw new HttpRequestException(SR.net_http_invalid_response);
+        private static void TryThrowInvalidHttpResponse(bool isFromTrailer)
+        {
+            if (!isFromTrailer)
+            {
+                throw new HttpRequestException(SR.net_http_invalid_response);
+            }
+        }
 
         private static void ThrowInvalidHttpResponse(Exception innerException) => throw new HttpRequestException(SR.net_http_invalid_response, innerException);
 

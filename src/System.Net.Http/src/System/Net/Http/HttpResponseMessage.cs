@@ -123,7 +123,7 @@ namespace System.Net.Http
                 // If trailing headers are not ready yet, return null.
                 return _trailingHeaders;
             }
-            set
+            internal set
             {
                 CheckDisposed();
                 _trailingHeaders = value;

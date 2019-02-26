@@ -20,7 +20,7 @@ namespace System.Net.Http.Headers
 
         private object[] _specialCollectionsSlots;
         private HttpGeneralHeaders _generalHeaders;
-        private static HttpResponseHeaders _emptyHeaders;
+        private static readonly HttpResponseHeaders _emptyHeaders = HeadersInitializer();
 
         #region Response Headers
 
@@ -163,6 +163,11 @@ namespace System.Net.Http.Headers
         private HttpGeneralHeaders GeneralHeaders => _generalHeaders ?? (_generalHeaders = new HttpGeneralHeaders(this));
 
         // Lazy initialization.
-        internal static HttpResponseHeaders EmptyResponseHeader => _emptyHeaders ?? (_emptyHeaders = new HttpResponseHeaders());
+        private static HttpResponseHeaders HeadersInitializer()
+        {
+            return new HttpResponseHeaders();
+        }
+
+        internal static HttpResponseHeaders EmptyResponseHeader => _emptyHeaders;
     }
 }
