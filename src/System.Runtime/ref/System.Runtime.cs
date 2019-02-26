@@ -429,7 +429,7 @@ namespace System
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public override string ToString() { throw null; }
     }
-    public static partial class BitOps
+    public static partial class BitOps // TODO: System.Numerics.BitOperations
     {
         [System.CLSCompliantAttribute(false)]
         public static int LeadingZeroCount(uint value) { throw null; }
