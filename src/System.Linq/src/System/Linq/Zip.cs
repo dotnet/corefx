@@ -32,12 +32,12 @@ namespace System.Linq
         {
             if (first is null)
             {
-                throw Error.ArgumentNull(nameof(first));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.first);
             }
 
             if (second is null)
             {
-                throw Error.ArgumentNull(nameof(second));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.second);
             }
 
             return ZipIterator(first, second);
