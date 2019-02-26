@@ -6633,19 +6633,19 @@ namespace System.Tests
                 Assert.True(span.SequenceEqual(span.TrimEnd()));
 
                 Span<char> span1 = new Span<char>(s1.ToCharArray());
-                Assert.True(span1.SequenceEqual(span1.Trim()));
-                Assert.True(span1.SequenceEqual(span1.TrimStart()));
+                Assert.True(span1.Slice(1).SequenceEqual(span1.Trim()));
+                Assert.True(span1.Slice(1).SequenceEqual(span1.TrimStart()));
                 Assert.True(span1.SequenceEqual(span1.TrimEnd()));
 
                 Memory<char> mem = new Memory<char>(s1.ToCharArray());
-                Assert.True(mem.SequenceEqual(mem.Trim()));
-                Assert.True(mem.SequenceEqual(mem.TrimStart()));
-                Assert.True(mem.SequenceEqual(mem.TrimEnd()));
+                Assert.True(mem.Slice(1).Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Slice(1).Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimEnd().Span));
 
                 ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(s1.ToCharArray());
-                Assert.True(rom.SequenceEqual(rom.Trim()));
-                Assert.True(rom.SequenceEqual(rom.TrimStart()));
-                Assert.True(rom.SequenceEqual(rom.TrimEnd()));
+                Assert.True(rom.Slice(1).Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Slice(1).Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimEnd().Span));
             }
         }
 
