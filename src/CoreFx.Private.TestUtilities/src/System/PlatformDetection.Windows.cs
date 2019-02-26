@@ -203,7 +203,7 @@ namespace System
             return value;
         }
 
-        private static string GetSsl3Support()
+        private static bool GetSsl3Support()
         {
             string clientKey = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Client";
             string serverKey = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Server";
@@ -212,12 +212,12 @@ namespace System
             // This may change in future but for now, missing key means protocol is enabled.
             try
             {
-                if ((int)Registry.GetValue(clientKey, "Enabled") == 0 || (int)Registry.GetValue(serverKey, "Enabled") == 0)
+                if ((int)Registry.GetValue(clientKey, "Enabled", 1) == 0 || (int)Registry.GetValue(serverKey, "Enabled", 1) == 0)
                 {
                     enabled = false;
                 }
             }
-            catch ( )
+            catch (Exception e) when (e is SecurityException || e is InvalidCastException)
             {
             }
 
