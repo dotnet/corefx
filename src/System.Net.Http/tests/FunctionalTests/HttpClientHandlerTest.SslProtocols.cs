@@ -121,7 +121,7 @@ namespace System.Net.Http.Functional.Tests
 #pragma warning disable 0618
             if (IsCurlHandler && PlatformDetection.IsRedHatFamily6 && acceptedProtocol == SslProtocols.Ssl3)
             {
-                // Issue: #28790: SSLv3 is supported on RHEL 6, but it fails fails with curl.
+                // Issue: #28790: SSLv3 is supported on RHEL 6, but it fails with curl.
                 throw new SkipTestException("CurlHandler (libCurl) has problems with SSL3 on RH6");
             }
 #pragma warning restore 0618
