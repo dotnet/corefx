@@ -173,5 +173,26 @@ namespace System.Memory.Tests.SequenceReader
             reader.Advance(4);
             Assert.False(reader.TryReadTo(out ReadOnlySequence<byte> span, 255, 0, advancePastDelimiter));
         }
+
+        [Fact]
+        public void TryReadTo_SingleDelimiter()
+        {
+            ReadOnlySequence<byte> bytes = SequenceFactory.Create(new byte[][] {
+                new byte[] { 1 },
+                new byte[] { 2, 3, 4, 5, 6 }
+            });
+
+            SequenceReader<byte> reader = new SequenceReader<byte>(bytes);
+
+            Span<byte> delimiter = new byte[] { 1 };
+
+            for (int i = 1; i < 6; i += 2)
+            {
+                delimiter[0] = (byte)i;
+                Assert.True(reader.TryReadTo(out ReadOnlySequence<byte> sequence, delimiter, advancePastDelimiter: true));
+                Assert.True(reader.TryPeek(out byte value));
+                Assert.Equal(i + 1, value);
+            }
+        }
     }
 }
