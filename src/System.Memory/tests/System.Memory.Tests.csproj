@@ -95,6 +95,7 @@
     <Compile Include="Span\StartsWith.T.cs" />
     <Compile Include="Span\ToArray.cs" />
     <Compile Include="Span\ToString.cs" />
+    <Compile Include="Span\Trim.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ReadOnlyBuffer\ReadOnlySequenceTests.Common.char.cs" />
@@ -156,6 +157,7 @@
     <Compile Include="ReadOnlySpan\StartsWith.T.cs" />
     <Compile Include="ReadOnlySpan\ToArray.cs" />
     <Compile Include="ReadOnlySpan\ToString.cs" />
+    <Compile Include="ReadOnlySpan\Trim.cs" />
     <Compile Include="$(CommonTestPath)\Tests\System\SpanTestHelpers.cs">
       <Link>ReadOnlySpan\SpanTestHelpers.cs</Link>
     </Compile>
@@ -181,6 +183,7 @@
     <Compile Include="Memory\Strings.cs" />
     <Compile Include="Memory\ToArray.cs" />
     <Compile Include="Memory\ToString.cs" />
+    <Compile Include="Memory\Trim.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MemoryMarshal\AsBytesReadOnlySpan.cs" />
@@ -212,6 +215,7 @@
     <Compile Include="ReadOnlyMemory\Strings.cs" />
     <Compile Include="ReadOnlyMemory\ToArray.cs" />
     <Compile Include="ReadOnlyMemory\ToString.cs" />
+    <Compile Include="ReadOnlyMemory\Trim.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Binary\BinaryReaderUnitTests.cs" />
