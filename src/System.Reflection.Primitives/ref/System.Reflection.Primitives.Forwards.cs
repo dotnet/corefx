@@ -5,7 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-// These types were moved to System.Runtime
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.CallingConventions))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.EventAttributes))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Reflection.FieldAttributes))]

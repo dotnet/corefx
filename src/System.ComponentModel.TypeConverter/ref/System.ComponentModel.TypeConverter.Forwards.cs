@@ -5,11 +5,9 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-// These types were moved to System.Primitives
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.InvalidAsynchronousStateException))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.InvalidEnumArgumentException))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.Component))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.ISupportInitialize))]
-// These types were moved to System.ObjectModel
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.TypeConverterAttribute))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.ComponentModel.TypeDescriptionProviderAttribute))]
