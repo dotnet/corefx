@@ -2132,6 +2132,7 @@ namespace System.ComponentModel.Design.Serialization
         public System.Reflection.MemberInfo MemberInfo { get { throw null; } }
         public object Invoke() { throw null; }
     }
+    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public readonly partial struct MemberRelationship
     {
         private readonly object _dummy;
