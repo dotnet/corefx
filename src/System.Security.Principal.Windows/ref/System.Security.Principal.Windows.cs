@@ -210,6 +210,7 @@ namespace System.Security.Principal
         WinWriteRestrictedCodeSid = 70,
         WorldSid = 1,
     }
+    [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public enum WindowsAccountType
     {
         Anonymous = 3,

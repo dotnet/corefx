@@ -133,6 +133,7 @@ namespace System.Management
         public InvokeMethodOptions(System.Management.ManagementNamedValueCollection context, System.TimeSpan timeout) { }
         public override object Clone() { throw null; }
     }
+    [System.ComponentModel.ToolboxItemAttribute(false)]
     public partial class ManagementBaseObject : System.ComponentModel.Component, System.ICloneable, System.Runtime.Serialization.ISerializable
     {
         protected ManagementBaseObject(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
@@ -210,6 +211,7 @@ namespace System.Management
         internal ManagementEventArgs() { }
         public object Context { get { throw null; } }
     }
+    [System.ComponentModel.ToolboxItemAttribute(false)]
     public partial class ManagementEventWatcher : System.ComponentModel.Component
     {
         public ManagementEventWatcher() { }
@@ -326,6 +328,7 @@ namespace System.Management
             public void Reset() { }
         }
     }
+    [System.ComponentModel.ToolboxItemAttribute(false)]
     public partial class ManagementObjectSearcher : System.ComponentModel.Component
     {
         public ManagementObjectSearcher() { }
