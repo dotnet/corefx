@@ -62,6 +62,7 @@ namespace System
 
         public static bool IsDrawingSupported { get; } = GetGdiplusIsAvailable();
         public static bool IsSoundPlaySupported { get; } = false;
+        public static bool SupportsSsl3 => (PlatformDetection.IsOSX || (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && PlatformDetection.OpenSslVersion < new Version(1, 0, 2) && !PlatformDetection.IsDebian));
 
         [DllImport("libdl")]
         private static extern IntPtr dlopen(string libName, int flags);
