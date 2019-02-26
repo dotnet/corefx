@@ -12,7 +12,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (source is ChainLinq.Consumable<TSource> consumable)
@@ -38,7 +38,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (source is ChainLinq.Consumable<TSource> consumable)
@@ -67,12 +67,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (keySelector == null)
             {
-                throw Error.ArgumentNull(nameof(keySelector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
             }
 
             var consumable = ChainLinq.Utils.AsConsumable(source);
@@ -100,17 +100,17 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (keySelector == null)
             {
-                throw Error.ArgumentNull(nameof(keySelector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
             }
 
             if (elementSelector == null)
             {
-                throw Error.ArgumentNull(nameof(elementSelector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.elementSelector);
             }
 
             var consumable = ChainLinq.Utils.AsConsumable(source);
@@ -137,7 +137,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             // Don't pre-allocate based on knowledge of size, as potentially many elements will be dropped.

@@ -28,7 +28,7 @@ namespace System.Runtime.Intrinsics
         {
             get
             {
-                ThrowIfUnsupportedType();
+                ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
                 return Vector64.Size / Unsafe.SizeOf<T>();
             }
         }
@@ -39,7 +39,7 @@ namespace System.Runtime.Intrinsics
         {
             get
             {
-                ThrowIfUnsupportedType();
+                ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
                 return default;
             }
         }
@@ -77,103 +77,17 @@ namespace System.Runtime.Intrinsics
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void ThrowIfUnsupportedType()
-        {
-            if (!IsSupported)
-            {
-                throw new NotSupportedException(SR.Arg_TypeNotSupported);
-            }
-        }
-
-        /// <summary>Reinterprets the current instance as a new <see cref="Vector64{U}" />.</summary>
-        /// <typeparam name="U">The type of the vector the current instance should be reinterpreted as.</typeparam>
-        /// <returns>The current instance reinterpreted as a new <see cref="Vector64{U}" />.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) or the type of the target (<typeparamref name="U" />) is not supported.</exception>
-        [Intrinsic]
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Vector64<U> As<U>() where U : struct
-        {
-            ThrowIfUnsupportedType();
-            Vector64<U>.ThrowIfUnsupportedType();
-            return Unsafe.As<Vector64<T>, Vector64<U>>(ref Unsafe.AsRef(in this));
-        }
-
-        /// <summary>Reinterprets the current instance as a new <see cref="Vector64{Byte}" />.</summary>
-        /// <returns>The current instance reinterpreted as a new <see cref="Vector64{Byte}" />.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        [Intrinsic]
-        public Vector64<byte> AsByte() => As<byte>();
-
-        /// <summary>Reinterprets the current instance as a new <see cref="Vector64{Double}" />.</summary>
-        /// <returns>The current instance reinterpreted as a new <see cref="Vector64{Double}" />.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        [Intrinsic]
-        public Vector64<double> AsDouble() => As<double>();
-
-        /// <summary>Reinterprets the current instance as a new <see cref="Vector64{Int16}" />.</summary>
-        /// <returns>The current instance reinterpreted as a new <see cref="Vector64{Int16}" />.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        [Intrinsic]
-        public Vector64<short> AsInt16() => As<short>();
-
-        /// <summary>Reinterprets the current instance as a new <see cref="Vector64{Int32}" />.</summary>
-        /// <returns>The current instance reinterpreted as a new <see cref="Vector64{Int32}" />.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        [Intrinsic]
-        public Vector64<int> AsInt32() => As<int>();
-
-        /// <summary>Reinterprets the current instance as a new <see cref="Vector64{Int64}" />.</summary>
-        /// <returns>The current instance reinterpreted as a new <see cref="Vector64{Int64}" />.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        [Intrinsic]
-        public Vector64<long> AsInt64() => As<long>();
-
-        /// <summary>Reinterprets the current instance as a new <see cref="Vector64{SByte}" />.</summary>
-        /// <returns>The current instance reinterpreted as a new <see cref="Vector64{SByte}" />.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        [Intrinsic]
-        [CLSCompliant(false)]
-        public Vector64<sbyte> AsSByte() => As<sbyte>();
-
-        /// <summary>Reinterprets the current instance as a new <see cref="Vector64{Single}" />.</summary>
-        /// <returns>The current instance reinterpreted as a new <see cref="Vector64{Single}" />.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        [Intrinsic]
-        public Vector64<float> AsSingle() => As<float>();
-
-        /// <summary>Reinterprets the current instance as a new <see cref="Vector64{Int16}" />.</summary>
-        /// <returns>The current instance reinterpreted as a new <see cref="Vector64{Int16}" />.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        [Intrinsic]
-        [CLSCompliant(false)]
-        public Vector64<ushort> AsUInt16() => As<ushort>();
-
-        /// <summary>Reinterprets the current instance as a new <see cref="Vector64{UInt32}" />.</summary>
-        /// <returns>The current instance reinterpreted as a new <see cref="Vector64{UInt32}" />.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        [Intrinsic]
-        [CLSCompliant(false)]
-        public Vector64<uint> AsUInt32() => As<uint>();
-
-        /// <summary>Reinterprets the current instance as a new <see cref="Vector64{UInt64}" />.</summary>
-        /// <returns>The current instance reinterpreted as a new <see cref="Vector64{UInt64}" />.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        [Intrinsic]
-        [CLSCompliant(false)]
-        public Vector64<ulong> AsUInt64() => As<ulong>();
-
         /// <summary>Determines whether the specified <see cref="Vector64{T}" /> is equal to the current instance.</summary>
         /// <param name="other">The <see cref="Vector64{T}" /> to compare with the current instance.</param>
         /// <returns><c>true</c> if <paramref name="other" /> is equal to the current instance; otherwise, <c>false</c>.</returns>
         /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
         public bool Equals(Vector64<T> other)
         {
-            ThrowIfUnsupportedType();
+            ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
 
             for (int i = 0; i < Count; i++)
             {
-                if (!((IEquatable<T>)(GetElement(i))).Equals(other.GetElement(i)))
+                if (!((IEquatable<T>)(this.GetElement(i))).Equals(other.GetElement(i)))
                 {
                     return false;
                 }
@@ -191,69 +105,21 @@ namespace System.Runtime.Intrinsics
             return (obj is Vector64<T>) && Equals((Vector64<T>)(obj));
         }
 
-        /// <summary>Gets the element at the specified index.</summary>
-        /// <param name="index">The index of the element to get.</param>
-        /// <returns>The value of the element at <paramref name="index" />.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index" /> was less than zero or greater than the number of elements.</exception>
-        public T GetElement(int index)
-        {
-            ThrowIfUnsupportedType();
-
-            if ((uint)(index) >= (uint)(Count))
-            {
-                throw new ArgumentOutOfRangeException(nameof(index));
-            }
-
-            ref T e0 = ref Unsafe.As<Vector64<T>, T>(ref Unsafe.AsRef(in this));
-            return Unsafe.Add(ref e0, index);
-        }
-
-        /// <summary>Creates a new <see cref="Vector64{T}" /> with the element at the specified index set to the specified value and the remaining elements set to the same value as that in the current instance.</summary>
-        /// <param name="index">The index of the element to set.</param>
-        /// <param name="value">The value to set the value to.</param>
-        /// <returns>A <see cref="Vector64{T}" /> with the value of the element at <paramref name="index" /> set to <paramref name="value" /> and the remaining elements set to the same value as that in the current instance.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="index" /> was less than zero or greater than the number of elements.</exception>
-        public Vector64<T> WithElement(int index, T value)
-        {
-            ThrowIfUnsupportedType();
-
-            if ((uint)(index) >= (uint)(Count))
-            {
-                throw new ArgumentOutOfRangeException(nameof(index));
-            }
-
-            Vector64<T> result = this;
-            ref T e0 = ref Unsafe.As<Vector64<T>, T>(ref result);
-            Unsafe.Add(ref e0, index) = value;
-            return result;
-        }
-
         /// <summary>Gets the hash code for the instance.</summary>
         /// <returns>The hash code for the instance.</returns>
         /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
         public override int GetHashCode()
         {
-            ThrowIfUnsupportedType();
+            ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
 
             int hashCode = 0;
 
             for (int i = 0; i < Count; i++)
             {
-                hashCode = HashCode.Combine(hashCode, GetElement(i).GetHashCode());
+                hashCode = HashCode.Combine(hashCode, this.GetElement(i).GetHashCode());
             }
 
             return hashCode;
-        }
-
-        /// <summary>Converts the current instance to a scalar containing the value of the first element.</summary>
-        /// <returns>A scalar <typeparamref name="T" /> containing the value of the first element.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        public T ToScalar()
-        {
-            ThrowIfUnsupportedType();
-            return Unsafe.As<Vector64<T>, T>(ref Unsafe.AsRef(in this));
         }
 
         /// <summary>Converts the current instance to an equivalent string representation.</summary>
@@ -280,7 +146,7 @@ namespace System.Runtime.Intrinsics
         /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
         public string ToString(string format, IFormatProvider formatProvider)
         {
-            ThrowIfUnsupportedType();
+            ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
 
             string separator = NumberFormatInfo.GetInstance(formatProvider).NumberGroupSeparator;
             int lastElement = Count - 1;
@@ -290,43 +156,14 @@ namespace System.Runtime.Intrinsics
 
             for (int i = 0; i < lastElement; i++)
             {
-                sb.Append(((IFormattable)(GetElement(i))).ToString(format, formatProvider));
+                sb.Append(((IFormattable)(this.GetElement(i))).ToString(format, formatProvider));
                 sb.Append(separator);
                 sb.Append(' ');
             }
-            sb.Append(((IFormattable)(GetElement(lastElement))).ToString(format, formatProvider));
+            sb.Append(((IFormattable)(this.GetElement(lastElement))).ToString(format, formatProvider));
 
             sb.Append('>');
             return StringBuilderCache.GetStringAndRelease(sb);
-        }
-
-        /// <summary>Converts the current instance to a new <see cref="Vector128{T}" /> with the lower 64-bits set to the value of the current instance and the upper 64-bits initialized to zero.</summary>
-        /// <returns>A new <see cref="Vector128{T}" /> with the lower 64-bits set to the value of the current instance and the upper 64-bits initialized to zero.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        public Vector128<T> ToVector128()
-        {
-            ThrowIfUnsupportedType();
-            Vector128<T>.ThrowIfUnsupportedType();
-
-            Vector128<T> result = Vector128<T>.Zero;
-            Unsafe.As<Vector128<T>, Vector64<T>>(ref result) = this;
-            return result;
-        }
-
-        /// <summary>Converts the current instance to a new <see cref="Vector128{T}" /> with the lower 64-bits set to the value of the current instance and the upper 64-bits left uninitialized.</summary>
-        /// <returns>A new <see cref="Vector128{T}" /> with the lower 64-bits set to the value of the current instance and the upper 64-bits initialized to zero.</returns>
-        /// <exception cref="NotSupportedException">The type of the current instance (<typeparamref name="T" />) is not supported.</exception>
-        public unsafe Vector128<T> ToVector128Unsafe()
-        {
-            ThrowIfUnsupportedType();
-            Vector128<T>.ThrowIfUnsupportedType();
-
-            // This relies on us stripping the "init" flag from the ".locals"
-            // declaration to let the upper bits be uninitialized.
-
-            var pResult = stackalloc byte[Vector128.Size];
-            Unsafe.AsRef<Vector64<T>>(pResult) = this;
-            return Unsafe.AsRef<Vector128<T>>(pResult);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (false)
@@ -42,14 +42,15 @@ namespace System.Linq
                 }
             }
 
-            throw Error.ArgumentOutOfRange(nameof(index));
+            ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index);
+            return default;
         }
 
         public static TSource ElementAtOrDefault<TSource>(this IEnumerable<TSource> source, int index)
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (index >= 0)

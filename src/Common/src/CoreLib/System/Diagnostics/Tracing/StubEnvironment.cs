@@ -6,6 +6,10 @@ using System;
 using System.Collections.Generic;
 
 #if ES_BUILD_STANDALONE
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Security;
+
 namespace Microsoft.Diagnostics.Tracing.Internal
 #else
 namespace System.Diagnostics.Tracing.Internal
@@ -48,6 +52,15 @@ namespace System.Diagnostics.Tracing.Internal
 
         private static System.Resources.ResourceManager rm = new System.Resources.ResourceManager("Microsoft.Diagnostics.Tracing.Messages", typeof(Environment).Assembly());
     }
+
+#if ES_BUILD_STANDALONE
+    internal static class BitOps
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint RotateLeft(uint value, int offset)
+            => (value << offset) | (value >> (32 - offset));
+    }
+#endif
 }
 
 #if ES_BUILD_AGAINST_DOTNET_V35
@@ -324,34 +337,11 @@ namespace Microsoft.Reflection
     }
 }
 
-// Defining some no-ops in PCL builds
-#if ES_BUILD_PCL
-namespace System.Security
-{
-    class SuppressUnmanagedCodeSecurityAttribute : Attribute { }
-
-    enum SecurityAction { Demand }
-}
-
-namespace System.Security.Permissions
-{
-    class HostProtectionAttribute : Attribute { public bool MayLeakOnAbort { get; set; } }
-    class PermissionSetAttribute : Attribute
-    { 
-        public PermissionSetAttribute(System.Security.SecurityAction action) { }
-        public bool Unrestricted { get; set; }
-    }
-}
-#endif
-
 #if ES_BUILD_STANDALONE
-namespace Microsoft.Win32
+internal static partial class Interop
 {
-    using System.Runtime.InteropServices;
-    using System.Security;
-
     [SuppressUnmanagedCodeSecurityAttribute()]
-    internal static class Win32Native
+    internal static partial class Kernel32
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         public static extern int GetCurrentThreadId();

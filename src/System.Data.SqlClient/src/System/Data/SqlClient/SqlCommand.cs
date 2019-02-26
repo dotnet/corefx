@@ -569,65 +569,69 @@ namespace System.Data.SqlClient
 
 
             SqlStatistics statistics = null;
-            statistics = SqlStatistics.StartTimer(Statistics);
-
-            // only prepare if batch with parameters
-            if (
-                this.IsPrepared && !this.IsDirty
-                || (this.CommandType == CommandType.StoredProcedure)
-                || (
-                        (System.Data.CommandType.Text == this.CommandType)
-                        && (0 == GetParameterCount(_parameters))
-                    )
-
-            )
+            try
             {
-                if (null != Statistics)
-                {
-                    Statistics.SafeIncrement(ref Statistics._prepares);
-                }
-                _hiddenPrepare = false;
-            }
-            else
-            {
-                // Validate the command outside of the try\catch to avoid putting the _stateObj on error
-                ValidateCommand(async: false);
+                statistics = SqlStatistics.StartTimer(Statistics);
 
-                bool processFinallyBlock = true;
-                try
+                // only prepare if batch with parameters
+                if (
+                    this.IsPrepared && !this.IsDirty
+                    || (this.CommandType == CommandType.StoredProcedure)
+                    || (
+                            (System.Data.CommandType.Text == this.CommandType)
+                            && (0 == GetParameterCount(_parameters))
+                        )
+                )
                 {
-                    // NOTE: The state object isn't actually needed for this, but it is still here for back-compat (since it does a bunch of checks)
-                    GetStateObject();
-
-                    // Loop through parameters ensuring that we do not have unspecified types, sizes, scales, or precisions
-                    if (null != _parameters)
+                    if (null != Statistics)
                     {
-                        int count = _parameters.Count;
-                        for (int i = 0; i < count; ++i)
+                        Statistics.SafeIncrement(ref Statistics._prepares);
+                    }
+                    _hiddenPrepare = false;
+                }
+                else
+                {
+                    // Validate the command outside of the try\catch to avoid putting the _stateObj on error
+                    ValidateCommand(async: false);
+
+                    bool processFinallyBlock = true;
+                    try
+                    {
+                        // NOTE: The state object isn't actually needed for this, but it is still here for back-compat (since it does a bunch of checks)
+                        GetStateObject();
+
+                        // Loop through parameters ensuring that we do not have unspecified types, sizes, scales, or precisions
+                        if (null != _parameters)
                         {
-                            _parameters[i].Prepare(this);
+                            int count = _parameters.Count;
+                            for (int i = 0; i < count; ++i)
+                            {
+                                _parameters[i].Prepare(this);
+                            }
+                        }
+
+                        InternalPrepare();
+                    }
+                    catch (Exception e)
+                    {
+                        processFinallyBlock = ADP.IsCatchableExceptionType(e);
+                        throw;
+                    }
+                    finally
+                    {
+                        if (processFinallyBlock)
+                        {
+                            _hiddenPrepare = false; // The command is now officially prepared
+
+                            ReliablePutStateObject();
                         }
                     }
-
-                    InternalPrepare();
-                }
-                catch (Exception e)
-                {
-                    processFinallyBlock = ADP.IsCatchableExceptionType(e);
-                    throw;
-                }
-                finally
-                {
-                    if (processFinallyBlock)
-                    {
-                        _hiddenPrepare = false; // The command is now officially prepared
-
-                        ReliablePutStateObject();
-                    }
                 }
             }
-
-            SqlStatistics.StopTimer(statistics);
+            finally
+            {
+                SqlStatistics.StopTimer(statistics);
+            }
         }
 
         private void InternalPrepare()
@@ -1293,7 +1297,10 @@ namespace System.Data.SqlClient
                 // Add callback after work is done to avoid overlapping Begin\End methods
                 if (callback != null)
                 {
-                    completion.Task.ContinueWith((t) => callback(t), TaskScheduler.Default);
+                    completion.Task.ContinueWith(
+                        (task,state) => ((AsyncCallback)state)(task),
+                        state: callback
+                    );
                 }
                 return completion.Task;
             }
@@ -1577,7 +1584,10 @@ namespace System.Data.SqlClient
                 // Add callback after work is done to avoid overlapping Begin\End methods
                 if (callback != null)
                 {
-                    completion.Task.ContinueWith((t) => callback(t), TaskScheduler.Default);
+                    completion.Task.ContinueWith(
+                        (task,state) => ((AsyncCallback)state)(task),
+                        state: callback
+                    );
                 }
                 return completion.Task;
             }
@@ -2441,9 +2451,13 @@ namespace System.Data.SqlClient
                     }
                     else
                     {
-                        AsyncHelper.ContinueTask(subTask, completion, () => completion.SetResult(null));
+                        AsyncHelper.ContinueTaskWithState(subTask, completion, 
+                            state: completion,
+                            onSuccess: (state) => ((TaskCompletionSource<object>)state).SetResult(null)
+                        );
                     }
-                }, connectionToAbort: _activeConnection);
+                }
+            );
         }
 
         internal SqlDataReader RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, bool returnStream, [CallerMemberName] string method = "")
@@ -2692,15 +2706,17 @@ namespace System.Data.SqlClient
         // This is in its own method to avoid always allocating the lambda in RunExecuteReaderTds 
         private Task RunExecuteReaderTdsSetupContinuation(RunBehavior runBehavior, SqlDataReader ds, string optionSettings, Task writeTask)
         {
-            Task task = AsyncHelper.CreateContinuationTask(writeTask, () =>
-            {
-                _activeConnection.GetOpenTdsConnection(); // it will throw if connection is closed 
-                cachedAsyncState.SetAsyncReaderState(ds, runBehavior, optionSettings);
-            },
-            onFailure: (exc) =>
-            {
-                _activeConnection.GetOpenTdsConnection().DecrementAsyncCount();
-            });
+            Task task = AsyncHelper.CreateContinuationTask(writeTask, 
+                onSuccess: () =>
+                {
+                    _activeConnection.GetOpenTdsConnection(); // it will throw if connection is closed 
+                    cachedAsyncState.SetAsyncReaderState(ds, runBehavior, optionSettings);
+                },
+                onFailure: (exc) =>
+                {
+                    _activeConnection.GetOpenTdsConnection().DecrementAsyncCount();
+                }
+            );
             return task;
         }
 
@@ -2726,9 +2742,12 @@ namespace System.Data.SqlClient
                     }
                     else
                     {
-                        AsyncHelper.ContinueTask(subTask, completion, () => completion.SetResult(null));
+                        AsyncHelper.ContinueTaskWithState(subTask, completion, 
+                            state: completion,
+                            onSuccess: (state) => ((TaskCompletionSource<object>)state).SetResult(null)
+                        );
                     }
-                }, connectionToAbort: _activeConnection
+                }
             );
         }
 

@@ -14,10 +14,7 @@ using Internal.Runtime.CompilerServices;
 namespace System.Runtime.CompilerServices
 {
     /// <summary>Provides an awaiter for a <see cref="ValueTask"/>.</summary>
-    public readonly struct ValueTaskAwaiter : ICriticalNotifyCompletion
-#if CORECLR
-            , IStateMachineBoxAwareAwaiter
-#endif
+    public readonly struct ValueTaskAwaiter : ICriticalNotifyCompletion, IStateMachineBoxAwareAwaiter
     {
         /// <summary>Shim used to invoke an <see cref="Action"/> passed as the state argument to a <see cref="Action{Object}"/>.</summary>
         internal static readonly Action<object> s_invokeActionDelegate = state =>
@@ -36,7 +33,7 @@ namespace System.Runtime.CompilerServices
         /// <summary>Initializes the awaiter.</summary>
         /// <param name="value">The value to be awaited.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ValueTaskAwaiter(ValueTask value) => _value = value;
+        internal ValueTaskAwaiter(in ValueTask value) => _value = value;
 
         /// <summary>Gets whether the <see cref="ValueTask"/> has completed.</summary>
         public bool IsCompleted
@@ -90,7 +87,6 @@ namespace System.Runtime.CompilerServices
             }
         }
 
-#if CORECLR
         void IStateMachineBoxAwareAwaiter.AwaitUnsafeOnCompleted(IAsyncStateMachineBox box)
         {
             object obj = _value._obj;
@@ -109,14 +105,10 @@ namespace System.Runtime.CompilerServices
                 TaskAwaiter.UnsafeOnCompletedInternal(Task.CompletedTask, box, continueOnCapturedContext: true);
             }
         }
-#endif
     }
 
     /// <summary>Provides an awaiter for a <see cref="ValueTask{TResult}"/>.</summary>
-    public readonly struct ValueTaskAwaiter<TResult> : ICriticalNotifyCompletion
-#if CORECLR
-            , IStateMachineBoxAwareAwaiter
-#endif
+    public readonly struct ValueTaskAwaiter<TResult> : ICriticalNotifyCompletion, IStateMachineBoxAwareAwaiter
     {
         /// <summary>The value being awaited.</summary>
         private readonly ValueTask<TResult> _value;
@@ -124,7 +116,7 @@ namespace System.Runtime.CompilerServices
         /// <summary>Initializes the awaiter.</summary>
         /// <param name="value">The value to be awaited.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ValueTaskAwaiter(ValueTask<TResult> value) => _value = value;
+        internal ValueTaskAwaiter(in ValueTask<TResult> value) => _value = value;
 
         /// <summary>Gets whether the <see cref="ValueTask{TResult}"/> has completed.</summary>
         public bool IsCompleted
@@ -178,7 +170,6 @@ namespace System.Runtime.CompilerServices
             }
         }
 
-#if CORECLR
         void IStateMachineBoxAwareAwaiter.AwaitUnsafeOnCompleted(IAsyncStateMachineBox box)
         {
             object obj = _value._obj;
@@ -197,10 +188,8 @@ namespace System.Runtime.CompilerServices
                 TaskAwaiter.UnsafeOnCompletedInternal(Task.CompletedTask, box, continueOnCapturedContext: true);
             }
         }
-#endif
     }
 
-#if CORECLR
     /// <summary>Internal interface used to enable optimizations from <see cref="AsyncTaskMethodBuilder"/>.</summary>>
     internal interface IStateMachineBoxAwareAwaiter
     {
@@ -208,5 +197,4 @@ namespace System.Runtime.CompilerServices
         /// <param name="box">The box object.</param>
         void AwaitUnsafeOnCompleted(IAsyncStateMachineBox box);
     }
-#endif
 }

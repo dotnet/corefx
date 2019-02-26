@@ -13,12 +13,12 @@ namespace System.Linq
         {
             if (first == null)
             {
-                throw Error.ArgumentNull(nameof(first));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.first);
             }
 
             if (second == null)
             {
-                throw Error.ArgumentNull(nameof(second));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.second);
             }
 
             if (first is ChainLinq.Consumables.Concat<TSource, TSource> forAppending)

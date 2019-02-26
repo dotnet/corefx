@@ -177,6 +177,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 chain.ChainPolicy.ExtraStore.Add(sampleCert);
                 bool valid = chain.Build(sampleCert);
                 Assert.False(valid);
+                chainHolder.DisposeChainElements();
 
                 chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
                 chain.ChainPolicy.VerificationTime = new DateTime(2015, 10, 15, 12, 01, 01, DateTimeKind.Local);
@@ -186,6 +187,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.True(valid, "Chain built validly");
 
                 Assert.Equal(1, chain.ChainElements.Count);
+                chainHolder.DisposeChainElements();
 
                 chain.Reset();
                 Assert.Equal(0, chain.ChainElements.Count);
@@ -557,6 +559,19 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     for (int j = 0; j < onlineChain.ChainElements.Count; j++)
                     {
+                        X509ChainStatusFlags chainFlags = onlineChain.ChainStatus.Aggregate(
+                            X509ChainStatusFlags.NoError,
+                            (cur, status) => cur | status.Status);
+
+                        const X509ChainStatusFlags WontCheck =
+                            X509ChainStatusFlags.RevocationStatusUnknown | X509ChainStatusFlags.UntrustedRoot;
+
+                        if (chainFlags == WontCheck)
+                        {
+                            Console.WriteLine($"{nameof(VerifyWithRevocation)}: online chain failed with {{{chainFlags}}}, skipping");
+                            return;
+                        }
+
                         X509ChainElement chainElement = onlineChain.ChainElements[j];
 
                         // Since `NoError` gets mapped as the empty array, just look for non-empty arrays

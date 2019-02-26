@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
@@ -53,13 +54,71 @@ namespace System.Diagnostics
             throw new PlatformNotSupportedException(SR.ProcessStartWithPasswordAndDomainNotSupported);
         }
 
-        /// <summary>Stops the associated process immediately.</summary>
+        /// <summary>Terminates the associated process immediately.</summary>
         public void Kill()
         {
             EnsureState(State.HaveNonExitedId);
             if (Interop.Sys.Kill(_processId, Interop.Sys.Signals.SIGKILL) != 0)
             {
                 throw new Win32Exception(); // same exception as on Windows
+            }
+        }
+
+        private IEnumerable<Exception> KillTree()
+        {
+            List<Exception> exceptions = null;
+            KillTree(ref exceptions);
+            return exceptions ?? Enumerable.Empty<Exception>();
+        }
+
+        private void KillTree(ref List<Exception> exceptions)
+        {
+            // If the process has exited, we can no longer determine its children.
+            if (HasExited)
+            {
+                return;
+            }
+
+            // Stop the process, so it won't start additional children.
+            // This is best effort: kill can return before the process is stopped.
+            int stopResult = Interop.Sys.Kill(_processId, Interop.Sys.Signals.SIGSTOP);
+            if (stopResult != 0)
+            {
+                Interop.Error error = Interop.Sys.GetLastError();
+                // Ignore 'process no longer exists' error.
+                if (error != Interop.Error.ESRCH)
+                {
+                    AddException(ref exceptions, new Win32Exception());
+                }
+                return;
+            }
+
+            IReadOnlyList<Process> children = GetChildProcesses();
+
+            int killResult = Interop.Sys.Kill(_processId, Interop.Sys.Signals.SIGKILL);
+            if (killResult != 0)
+            {
+                Interop.Error error = Interop.Sys.GetLastError();
+                // Ignore 'process no longer exists' error.
+                if (error != Interop.Error.ESRCH)
+                {
+                    AddException(ref exceptions, new Win32Exception());
+                }
+            }
+
+            foreach (Process childProcess in children)
+            {
+                childProcess.KillTree(ref exceptions);
+                childProcess.Dispose();
+            }
+
+            void AddException(ref List<Exception> list, Exception e)
+            {
+                if (list == null)
+                {
+                    list = new List<Exception>();
+                }
+                list.Add(e);
             }
         }
 
@@ -240,6 +299,13 @@ namespace System.Diagnostics
             return Interop.Sys.GetPid();
         }
 
+        /// <summary>Checks whether the argument is a direct child of this process.</summary>
+        private bool IsParentOf(Process possibleChildProcess) =>
+            Id == possibleChildProcess.ParentProcessId;
+
+        private bool Equals(Process process) =>
+            Id == process.Id;
+
         partial void ThrowIfExited(bool refresh)
         {
             // Don't allocate a ProcessWaitState.Holder unless we're refreshing.
@@ -365,7 +431,8 @@ namespace System.Diagnostics
             {
                 Debug.Assert(stdinFd >= 0);
                 _standardInput = new StreamWriter(OpenStream(stdinFd, FileAccess.Write),
-                    startInfo.StandardInputEncoding ?? s_utf8NoBom, StreamBufferSize) { AutoFlush = true };
+                    startInfo.StandardInputEncoding ?? s_utf8NoBom, StreamBufferSize)
+                { AutoFlush = true };
             }
             if (startInfo.RedirectStandardOutput)
             {

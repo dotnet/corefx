@@ -511,9 +511,7 @@ namespace System
                 return 1;
             }
 
-            string other = value as string;
-
-            if (other == null)
+            if (!(value is string other))
             {
                 throw new ArgumentException(SR.Arg_MustBeString);
             }
@@ -568,7 +566,8 @@ namespace System
                     return CompareInfo.Invariant.IsSuffix(this, value, GetCaseCompareOfComparisonCulture(comparisonType));
 
                 case StringComparison.Ordinal:
-                    return this.Length < value.Length ? false : (CompareOrdinalHelper(this, this.Length - value.Length, value.Length, value, 0, value.Length) == 0);
+                    int offset = this.Length - value.Length;
+                    return (uint)offset <= (uint)this.Length && this.AsSpan(offset).SequenceEqual(value);
 
                 case StringComparison.OrdinalIgnoreCase:
                     return this.Length < value.Length ? false : (CompareInfo.CompareOrdinalIgnoreCase(this, this.Length - value.Length, value.Length, value, 0, value.Length) == 0);
@@ -596,8 +595,8 @@ namespace System
 
         public bool EndsWith(char value)
         {
-            int thisLen = Length;
-            return thisLen != 0 && this[thisLen - 1] == value;
+            int lastPos = Length - 1;
+            return ((uint)lastPos < (uint)Length) && this[lastPos] == value;
         }
 
         // Determines whether two strings match.
@@ -606,8 +605,7 @@ namespace System
             if (object.ReferenceEquals(this, obj))
                 return true;
 
-            string str = obj as string;
-            if (str == null)
+            if (!(obj is string str))
                 return false;
 
             if (this.Length != str.Length)
@@ -822,15 +820,15 @@ namespace System
                 {
                     length -= 4;
                     // Where length is 4n-1 (e.g. 3,7,11,15,19) this additionally consumes the null terminator
-                    hash1 = (((hash1 << 5) | (hash1 >> 27)) + hash1) ^ ptr[0];
-                    hash2 = (((hash2 << 5) | (hash2 >> 27)) + hash2) ^ ptr[1];
+                    hash1 = (BitOps.RotateLeft(hash1, 5) + hash1) ^ ptr[0];
+                    hash2 = (BitOps.RotateLeft(hash2, 5) + hash2) ^ ptr[1];
                     ptr += 2;
                 }
 
                 if (length > 0)
                 {
                     // Where length is 4n-3 (e.g. 1,5,9,13,17) this additionally consumes the null terminator
-                    hash2 = (((hash2 << 5) | (hash2 >> 27)) + hash2) ^ ptr[0];
+                    hash2 = (BitOps.RotateLeft(hash2, 5) + hash2) ^ ptr[0];
                 }
 
                 return (int)(hash1 + (hash2 * 1566083941));

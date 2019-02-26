@@ -24,18 +24,15 @@ namespace System.Runtime.CompilerServices
         /// <summary>Initializes the awaitable.</summary>
         /// <param name="value">The wrapped <see cref="ValueTask"/>.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ConfiguredValueTaskAwaitable(ValueTask value) => _value = value;
+        internal ConfiguredValueTaskAwaitable(in ValueTask value) => _value = value;
 
         /// <summary>Returns an awaiter for this <see cref="ConfiguredValueTaskAwaitable"/> instance.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ConfiguredValueTaskAwaiter GetAwaiter() => new ConfiguredValueTaskAwaiter(_value);
+        public ConfiguredValueTaskAwaiter GetAwaiter() => new ConfiguredValueTaskAwaiter(in _value);
 
         /// <summary>Provides an awaiter for a <see cref="ConfiguredValueTaskAwaitable"/>.</summary>
         [StructLayout(LayoutKind.Auto)]
-        public readonly struct ConfiguredValueTaskAwaiter : ICriticalNotifyCompletion
-#if CORECLR
-            , IStateMachineBoxAwareAwaiter
-#endif
+        public readonly struct ConfiguredValueTaskAwaiter : ICriticalNotifyCompletion, IStateMachineBoxAwareAwaiter
         {
             /// <summary>The value being awaited.</summary>
             private readonly ValueTask _value;
@@ -43,7 +40,7 @@ namespace System.Runtime.CompilerServices
             /// <summary>Initializes the awaiter.</summary>
             /// <param name="value">The value to be awaited.</param>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal ConfiguredValueTaskAwaiter(ValueTask value) => _value = value;
+            internal ConfiguredValueTaskAwaiter(in ValueTask value) => _value = value;
 
             /// <summary>Gets whether the <see cref="ConfiguredValueTaskAwaitable"/> has completed.</summary>
             public bool IsCompleted
@@ -100,7 +97,6 @@ namespace System.Runtime.CompilerServices
                 }
             }
 
-#if CORECLR
             void IStateMachineBoxAwareAwaiter.AwaitUnsafeOnCompleted(IAsyncStateMachineBox box)
             {
                 object obj = _value._obj;
@@ -120,7 +116,6 @@ namespace System.Runtime.CompilerServices
                     TaskAwaiter.UnsafeOnCompletedInternal(Task.CompletedTask, box, _value._continueOnCapturedContext);
                 }
             }
-#endif
         }
     }
 
@@ -135,18 +130,15 @@ namespace System.Runtime.CompilerServices
         /// <summary>Initializes the awaitable.</summary>
         /// <param name="value">The wrapped <see cref="ValueTask{TResult}"/>.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ConfiguredValueTaskAwaitable(ValueTask<TResult> value) => _value = value;
+        internal ConfiguredValueTaskAwaitable(in ValueTask<TResult> value) => _value = value;
 
         /// <summary>Returns an awaiter for this <see cref="ConfiguredValueTaskAwaitable{TResult}"/> instance.</summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ConfiguredValueTaskAwaiter GetAwaiter() => new ConfiguredValueTaskAwaiter(_value);
+        public ConfiguredValueTaskAwaiter GetAwaiter() => new ConfiguredValueTaskAwaiter(in _value);
 
         /// <summary>Provides an awaiter for a <see cref="ConfiguredValueTaskAwaitable{TResult}"/>.</summary>
         [StructLayout(LayoutKind.Auto)]
-        public readonly struct ConfiguredValueTaskAwaiter : ICriticalNotifyCompletion
-#if CORECLR
-            , IStateMachineBoxAwareAwaiter
-#endif
+        public readonly struct ConfiguredValueTaskAwaiter : ICriticalNotifyCompletion, IStateMachineBoxAwareAwaiter
         {
             /// <summary>The value being awaited.</summary>
             private readonly ValueTask<TResult> _value;
@@ -154,7 +146,7 @@ namespace System.Runtime.CompilerServices
             /// <summary>Initializes the awaiter.</summary>
             /// <param name="value">The value to be awaited.</param>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal ConfiguredValueTaskAwaiter(ValueTask<TResult> value) => _value = value;
+            internal ConfiguredValueTaskAwaiter(in ValueTask<TResult> value) => _value = value;
 
             /// <summary>Gets whether the <see cref="ConfiguredValueTaskAwaitable{TResult}"/> has completed.</summary>
             public bool IsCompleted
@@ -211,7 +203,6 @@ namespace System.Runtime.CompilerServices
                 }
             }
 
-#if CORECLR
             void IStateMachineBoxAwareAwaiter.AwaitUnsafeOnCompleted(IAsyncStateMachineBox box)
             {
                 object obj = _value._obj;
@@ -231,7 +222,6 @@ namespace System.Runtime.CompilerServices
                     TaskAwaiter.UnsafeOnCompletedInternal(Task.CompletedTask, box, _value._continueOnCapturedContext);
                 }
             }
-#endif
         }
     }
 }

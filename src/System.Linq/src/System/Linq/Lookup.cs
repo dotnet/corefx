@@ -17,12 +17,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (keySelector == null)
             {
-                throw Error.ArgumentNull(nameof(keySelector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
             }
 
             return ChainLinq.Consumer.Lookup.Consume(source, keySelector, comparer);
@@ -35,17 +35,17 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (keySelector == null)
             {
-                throw Error.ArgumentNull(nameof(keySelector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.keySelector);
             }
 
             if (elementSelector == null)
             {
-                throw Error.ArgumentNull(nameof(elementSelector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.elementSelector);
             }
 
             return ChainLinq.Consumer.Lookup.Consume(source, keySelector, elementSelector, comparer);

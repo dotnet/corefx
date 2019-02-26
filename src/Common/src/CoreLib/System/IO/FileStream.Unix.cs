@@ -109,7 +109,17 @@ namespace System.IO
             {
                 // Truncate the file now if the file mode requires it. This ensures that the file only will be truncated
                 // if opened successfully.
-                CheckFileCall(Interop.Sys.FTruncate(_fileHandle, 0));
+                if (Interop.Sys.FTruncate(_fileHandle, 0) < 0)
+                {
+                    Interop.ErrorInfo errorInfo = Interop.Sys.GetLastErrorInfo();
+                    if (errorInfo.Error != Interop.Error.EBADF && errorInfo.Error != Interop.Error.EINVAL)
+                    {
+                        // We know the file descriptor is valid and we know the size argument to FTruncate is correct,
+                        // so if EBADF or EINVAL is returned, it means we're dealing with a special file that can't be
+                        // truncated.  Ignore the error in such cases; in all others, throw.
+                        throw Interop.GetExceptionForIoErrno(errorInfo, _path, isDirectory: false);
+                    }
+                }
             }
         }
 
@@ -209,7 +219,7 @@ namespace System.IO
                 _canSeek = Interop.Sys.LSeek(fileHandle, 0, Interop.Sys.SeekWhence.SEEK_CUR) >= 0;
             }
 
-            return _canSeek.Value;
+            return _canSeek.GetValueOrDefault();
         }
 
         private long GetLengthInternal()
@@ -597,13 +607,13 @@ namespace System.IO
                 int spaceRemaining = _bufferLength - _writePos;
                 if (spaceRemaining >= source.Length)
                 {
-                    source.CopyTo(new Span<byte>(GetBuffer()).Slice(_writePos));
+                    source.CopyTo(GetBuffer().AsSpan(_writePos));
                     _writePos += source.Length;
                     return;
                 }
                 else if (spaceRemaining > 0)
                 {
-                    source.Slice(0, spaceRemaining).CopyTo(new Span<byte>(GetBuffer()).Slice(_writePos));
+                    source.Slice(0, spaceRemaining).CopyTo(GetBuffer().AsSpan(_writePos));
                     _writePos += spaceRemaining;
                     source = source.Slice(spaceRemaining);
                 }
