@@ -241,7 +241,7 @@ namespace System
             {
                 value = (string)Registry.GetValue(key, "ContainerType", defaultValue: "");
             }
-            catch ( )
+            catch
             {
             }
 
