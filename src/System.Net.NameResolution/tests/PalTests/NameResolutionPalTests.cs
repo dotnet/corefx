@@ -93,6 +93,7 @@ namespace System.Net.NameResolution.PalTests
             {
                 LogUnixInfo();
             }
+
             Assert.Equal(SocketError.Success, error);
             Assert.NotNull(name);
         }
@@ -182,6 +183,7 @@ namespace System.Net.NameResolution.PalTests
             {
                 LogUnixInfo();
             }
+
             Assert.Equal(SocketError.Success, error);
             Assert.NotNull(name);
 
