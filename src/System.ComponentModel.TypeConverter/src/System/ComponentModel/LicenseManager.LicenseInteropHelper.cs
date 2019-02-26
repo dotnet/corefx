@@ -24,6 +24,9 @@ namespace System.ComponentModel
         // requests the class factory for a runtime license key and invokes
         // SaveKeyInCurrentContext() to stash a copy in the current licensing
         // context
+        //
+        // This entire inner class should be moved to the coreclr repo since
+        // its sole purpose is supporting IClassFactory2 for COM activation.
         private class LicenseInteropHelper
         {
             // Define some common HRESULTs.
@@ -33,6 +36,7 @@ namespace System.ComponentModel
             private DesigntimeLicenseContext _helperContext;
             private LicenseContext _savedLicenseContext;
             private Type _savedType;
+            
             // The CLR invokes this whenever a COM client invokes
             // IClassFactory::CreateInstance() or IClassFactory2::CreateInstanceLic()
             // on a managed that has a LicenseProvider custom attribute.
@@ -53,6 +57,7 @@ namespace System.ComponentModel
                 }
                 return AllocateAndValidateLicense2(type, key, (fDesignTime == 1 ? true : false));
             }
+            
             private static object AllocateAndValidateLicense2(Type type, string key, bool isDesignTime)
             {
                 CLRLicenseContext licensecontext = new CLRLicenseContext(isDesignTime ? LicenseUsageMode.Designtime : LicenseUsageMode.Runtime, type);
@@ -69,6 +74,7 @@ namespace System.ComponentModel
                     throw new COMException(lexp.Message, CLASS_E_NOTLICENSED);
                 }
             }
+            
             // The CLR invokes this whenever a COM client invokes
             // IClassFactory2::RequestLicKey on a managed class.
             //
@@ -89,6 +95,7 @@ namespace System.ComponentModel
 
                 return S_OK;
             }
+            
             private static string RequestLicKey2(Type type)
             {
                 License license;
@@ -119,6 +126,7 @@ namespace System.ComponentModel
                 }
                 return licenseKey;
             }
+            
             // The CLR invokes this whenever a COM client invokes
             // IClassFactory2::GetLicInfo on a managed class.
             //
@@ -134,6 +142,7 @@ namespace System.ComponentModel
                 pRuntimeKeyAvail = runtimeKeyAvail ? 1 : 0;
                 pLicVerified = licVerified ? 1 : 0;
             }
+            
             private void GetLicInfo2(Type type, out bool runtimeKeyAvail, out bool licVerified)
             {
                 runtimeKeyAvail = false;
@@ -161,6 +170,7 @@ namespace System.ComponentModel
                     }
                 }
             }
+            
             // The CLR invokes this when instantiating an unmanaged COM
             // object. The purpose is to decide which classfactory method to
             // use.
@@ -196,6 +206,7 @@ namespace System.ComponentModel
                     bstrKey = Marshal.StringToBSTR(key);
                 }
             }
+            
             // The CLR invokes this when instantiating a licensed COM
             // object inside a designtime license context.
             // It's purpose is to save away the license key that the CLR
@@ -207,6 +218,7 @@ namespace System.ComponentModel
                     _savedLicenseContext.SetSavedLicenseKey(_savedType, Marshal.PtrToStringBSTR(bstrKey));
                 }
             }
+            
             // A private implementation of a LicenseContext used for instantiating
             // managed objects exposed to COM. It has memory for the license key
             // of a single Type.
