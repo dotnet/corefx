@@ -5,7 +5,7 @@
         private bool _found;
         private bool _orDefault;
 
-        public Last(bool orDefault) : base(default) =>
+        public Last(bool orDefault) : base(default(T)) =>
             (_orDefault, _found) = (orDefault, false);
 
         public override ChainStatus ProcessNext(T input)
@@ -19,7 +19,7 @@
         {
             if (!_orDefault && !_found)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }
@@ -30,7 +30,7 @@
         private bool _found;
         private bool _orDefault;
 
-        public LastWithPredicate(bool orDefault, Func<T, bool> selector) : base(default) =>
+        public LastWithPredicate(bool orDefault, Func<T, bool> selector) : base(default(T)) =>
             (_orDefault, _selector) = (orDefault, selector);
 
         public override ChainStatus ProcessNext(T input)
@@ -47,7 +47,7 @@
         {
             if (!_orDefault && !_found)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }

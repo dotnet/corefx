@@ -55,6 +55,7 @@ namespace System.Linq
         /// Attempts to add an item to this set.
         /// </summary>
         /// <param name="value">The item to add.</param>
+        /// <param name="hashCode"></param>
         /// <returns>
         /// <c>true</c> if the item was not in the set; otherwise, <c>false</c>.
         /// </returns>

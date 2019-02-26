@@ -12,7 +12,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageInt());
@@ -22,7 +22,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableInt());
@@ -32,7 +32,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageLong());
@@ -42,7 +42,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableLong());
@@ -52,7 +52,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageFloat());
@@ -62,7 +62,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableFloat());
@@ -72,7 +72,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageDouble());
@@ -82,7 +82,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableDouble());
@@ -92,7 +92,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageDecimal());
@@ -102,7 +102,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableDecimal());
@@ -112,12 +112,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (selector == null)
             {
-                throw Error.ArgumentNull(nameof(selector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.selector);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageInt<TSource>(selector));
@@ -127,12 +127,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (selector == null)
             {
-                throw Error.ArgumentNull(nameof(selector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.selector);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableInt<TSource>(selector));
@@ -142,12 +142,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (selector == null)
             {
-                throw Error.ArgumentNull(nameof(selector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.selector);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageLong<TSource>(selector));
@@ -157,12 +157,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (selector == null)
             {
-                throw Error.ArgumentNull(nameof(selector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.selector);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableLong<TSource>(selector));
@@ -172,12 +172,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (selector == null)
             {
-                throw Error.ArgumentNull(nameof(selector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.selector);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageFloat<TSource>(selector));
@@ -187,12 +187,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (selector == null)
             {
-                throw Error.ArgumentNull(nameof(selector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.selector);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableFloat<TSource>(selector));
@@ -202,12 +202,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (selector == null)
             {
-                throw Error.ArgumentNull(nameof(selector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.selector);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageDouble<TSource>(selector));
@@ -217,12 +217,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (selector == null)
             {
-                throw Error.ArgumentNull(nameof(selector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.selector);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableDouble<TSource>(selector));
@@ -232,12 +232,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (selector == null)
             {
-                throw Error.ArgumentNull(nameof(selector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.selector);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageDecimal<TSource>(selector));
@@ -247,12 +247,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (selector == null)
             {
-                throw Error.ArgumentNull(nameof(selector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.selector);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.AverageNullableDecimal<TSource>(selector));

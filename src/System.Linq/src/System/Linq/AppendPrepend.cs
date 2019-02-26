@@ -13,7 +13,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (source is ChainLinq.Consumables.Concat<TSource, TSource> forAppending)
@@ -28,7 +28,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (source is ChainLinq.Consumables.Concat<TSource, TSource> forPrepending)

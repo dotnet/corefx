@@ -23,7 +23,7 @@ namespace System.Linq.ChainLinq.Consumer
         {
             if (_first)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }
@@ -64,7 +64,7 @@ namespace System.Linq.ChainLinq.Consumer
         {
             if (_first)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }
@@ -110,7 +110,7 @@ namespace System.Linq.ChainLinq.Consumer
         {
             if (_first)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }
@@ -175,7 +175,7 @@ namespace System.Linq.ChainLinq.Consumer
         {
             if (_first)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }
@@ -235,7 +235,7 @@ namespace System.Linq.ChainLinq.Consumer
         {
             if (_first)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }
@@ -289,7 +289,7 @@ namespace System.Linq.ChainLinq.Consumer
         {
             if (_first)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }
@@ -334,7 +334,7 @@ namespace System.Linq.ChainLinq.Consumer
         {
             if (_first)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }
@@ -384,7 +384,7 @@ namespace System.Linq.ChainLinq.Consumer
         {
             if (_first)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }
@@ -439,7 +439,7 @@ namespace System.Linq.ChainLinq.Consumer
         {
             if (_first)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }
@@ -513,7 +513,7 @@ namespace System.Linq.ChainLinq.Consumer
         {
             if (_first)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }
@@ -582,7 +582,7 @@ namespace System.Linq.ChainLinq.Consumer
         {
             if (_first)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }
@@ -645,7 +645,7 @@ namespace System.Linq.ChainLinq.Consumer
         {
             if (_first)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
         }
     }

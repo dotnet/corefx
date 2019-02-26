@@ -26,7 +26,7 @@
         public override void ChainComplete()
         {
             if (_first)
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
 
             base.ChainComplete();
         }

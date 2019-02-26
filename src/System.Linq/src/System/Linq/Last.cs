@@ -24,7 +24,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             var consumable = ChainLinq.Utils.AsConsumable(source);
@@ -43,12 +43,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (predicate == null)
             {
-                throw Error.ArgumentNull(nameof(predicate));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
             }
 
             if (source is IList<TSource> list)
@@ -64,10 +64,10 @@ namespace System.Linq
 
                 if (orDefault)
                 {
-                    return default;
+                    return default(TSource);
                 }
 
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.LastWithPredicate<TSource>(orDefault, predicate));

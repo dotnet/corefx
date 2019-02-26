@@ -12,12 +12,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (func == null)
             {
-                throw Error.ArgumentNull(nameof(func));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.func);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Reduce<TSource>(func));
@@ -27,12 +27,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (func == null)
             {
-                throw Error.ArgumentNull(nameof(func));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.func);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Aggregate<TSource, TAccumulate, TAccumulate>(seed, func, x=>x));
@@ -42,17 +42,17 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (func == null)
             {
-                throw Error.ArgumentNull(nameof(func));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.func);
             }
 
             if (resultSelector == null)
             {
-                throw Error.ArgumentNull(nameof(resultSelector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.resultSelector);
             }
 
             return ChainLinq.Utils.Consume(source, new ChainLinq.Consumer.Aggregate<TSource, TAccumulate, TResult>(seed, func, resultSelector));

@@ -30,7 +30,7 @@
         {
             if (_count == 0)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
             Result = (double)_sum / _count;
         }
@@ -104,7 +104,7 @@
         {
             if (_count == 0)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
             Result = (double)_sum / _count;
         }
@@ -175,7 +175,7 @@
         {
             if (_count == 0)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
             Result = (float)(_sum / _count);
         }
@@ -247,7 +247,7 @@
         {
             if (_count == 0)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
             Result = _sum / _count;
         }
@@ -315,7 +315,7 @@
         {
             if (_count == 0)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
             Result = _sum / _count;
         }
@@ -389,7 +389,7 @@
         {
             if (_count == 0)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
             Result = (double)_sum / _count;
         }
@@ -469,7 +469,7 @@
         {
             if (_count == 0)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
             Result = (double)_sum / _count;
         }
@@ -546,7 +546,7 @@
         {
             if (_count == 0)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
             Result = (float)(_sum / _count);
         }
@@ -624,7 +624,7 @@
         {
             if (_count == 0)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
             Result = _sum / _count;
         }
@@ -698,7 +698,7 @@
         {
             if (_count == 0)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
             Result = _sum / _count;
         }
