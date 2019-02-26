@@ -5,7 +5,7 @@
 namespace System.Buffers
 {
     /// <summary>
-    /// Represents a <typeparam name="T"/> output sink into which data can be written.
+    /// Represents an output sink into which <typeparam name="T"/> data can be written.
     /// </summary>
     public interface IBufferWriter<T>
     {
@@ -19,10 +19,10 @@ namespace System.Buffers
 
         /// <summary>
         /// Returns a <see cref="Memory{T}"/> to write to that is at least the requested length (specified by <paramref name="sizeHint"/>).
-        /// If no <paramref name="sizeHint"/> is provided (or it's equal to <code>0</code>), some, non-empty, buffer is returned.
+        /// If no <paramref name="sizeHint"/> is provided (or it's equal to <code>0</code>), some non-empty buffer is returned.
         /// </summary>
         /// <remarks>
-        /// This must never return an empty <see cref="Memory{T}"/> but it can throw <see cref="OutOfMemoryException"/>
+        /// This must never return an empty <see cref="Memory{T}"/> but it can throw
         /// if the requested buffer size is not available.
         /// </remarks>
         /// <remarks>
@@ -35,10 +35,10 @@ namespace System.Buffers
 
         /// <summary>
         /// Returns a <see cref="Span{T}"/> to write to that is at least the requested length (specified by <paramref name="sizeHint"/>).
-        /// If no <paramref name="sizeHint"/> is provided (or it's equal to <code>0</code>), some, non-empty, buffer is returned.
+        /// If no <paramref name="sizeHint"/> is provided (or it's equal to <code>0</code>), some non-empty buffer is returned.
         /// </summary>
         /// <remarks>
-        /// This must never return an empty <see cref="Span{T}"/> but it can throw <see cref="OutOfMemoryException"/>
+        /// This must never return an empty <see cref="Span{T}"/> but it can throw
         /// if the requested buffer size is not available.
         /// </remarks>
         /// <remarks>
