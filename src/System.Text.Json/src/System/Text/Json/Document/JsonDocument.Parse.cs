@@ -18,11 +18,15 @@ namespace System.Text.Json
         ///   Parse memory as UTF-8-encoded text representing a single JSON value into a JsonDocument.
         /// </summary>
         /// <remarks>
-        ///   The <see cref="ReadOnlyMemory{T}"/> value will be used for the entire lifetime of the
-        ///   JsonDocument object, and the caller must ensure that the data therein does not change during
-        ///   the object lifetime.
+        ///   <para>
+        ///     The <see cref="ReadOnlyMemory{T}"/> value will be used for the entire lifetime of the
+        ///     JsonDocument object, and the caller must ensure that the data therein does not change during
+        ///     the object lifetime.
+        ///   </para>
         ///
-        ///   Because the input is considered to be text, a UTF-8 Byte-Order-Mark (BOM) must not be present.
+        ///   <para>
+        ///     Because the input is considered to be text, a UTF-8 Byte-Order-Mark (BOM) must not be present.
+        ///   </para>
         /// </remarks>
         /// <param name="utf8Json">JSON text to parse.</param>
         /// <param name="readerOptions">Options to control the reader behavior during parsing.</param>
@@ -46,11 +50,15 @@ namespace System.Text.Json
         ///   Parse a sequence as UTF-8-encoded text representing a single JSON value into a JsonDocument.
         /// </summary>
         /// <remarks>
-        ///   The <see cref="ReadOnlySequence{T}"/> may be used for the entire lifetime of the
-        ///   JsonDocument object, and the caller must ensure that the data therein does not change during
-        ///   the object lifetime.
+        ///   <para>
+        ///     The <see cref="ReadOnlySequence{T}"/> may be used for the entire lifetime of the
+        ///     JsonDocument object, and the caller must ensure that the data therein does not change during
+        ///     the object lifetime.
+        ///   </para>
         ///
-        ///   Because the input is considered to be text, a UTF-8 Byte-Order-Mark (BOM) must not be present.
+        ///   <para>
+        ///     Because the input is considered to be text, a UTF-8 Byte-Order-Mark (BOM) must not be present.
+        ///   </para>
         /// </remarks>
         /// <param name="utf8Json">JSON text to parse.</param>
         /// <param name="readerOptions">Options to control the reader behavior during parsing.</param>

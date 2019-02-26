@@ -124,10 +124,14 @@ namespace System.Text.Json
         ///   by <paramref name="propertyName"/>.
         /// </summary>
         /// <remarks>
-        ///   Property name matching is performed as an ordinal, case-sensitive, comparison.
+        ///   <para>
+        ///     Property name matching is performed as an ordinal, case-sensitive, comparison.
+        ///   </para>
         ///
-        ///   If a property is defined multiple times for the same object, the last such definition is
-        ///   what is matched.
+        ///   <para>
+        ///     If a property is defined multiple times for the same object, the last such definition is
+        ///     what is matched.
+        ///   </para>
         /// </remarks>
         /// <param name="propertyName">Name of the property whose value to return.</param>
         /// <returns>
@@ -158,13 +162,17 @@ namespace System.Text.Json
         ///   by <paramref name="utf8PropertyName"/>.
         /// </summary>
         /// <remarks>
-        ///   Property name matching is performed as an ordinal, case-sensitive, comparison.
+        ///   <para>
+        ///     Property name matching is performed as an ordinal, case-sensitive, comparison.
+        ///   </para>
         ///
-        ///   If a property is defined multiple times for the same object, the last such definition is
-        ///   what is matched.
+        ///   <para>
+        ///     If a property is defined multiple times for the same object, the last such definition is
+        ///     what is matched.
+        ///   </para>
         /// </remarks>
         /// <param name="utf8PropertyName">
-        ///   Name of the property whose value to return encoded as UTF-8 with no Byte-Order-Mark (BOM).
+        ///   The UTF-8 (with no Byte-Order-Mark (BOM)) representation of the name of the property to return.
         /// </param>
         /// <returns>
         ///   A <see cref="JsonElement"/> representing the value of the requested property.
@@ -195,10 +203,14 @@ namespace System.Text.Json
         ///   is assigned to the value of that property.
         /// </summary>
         /// <remarks>
-        ///   Property name matching is performed as an ordinal, case-sensitive, comparison.
+        ///   <para>
+        ///     Property name matching is performed as an ordinal, case-sensitive, comparison.
+        ///   </para>
         ///
-        ///   If a property is defined multiple times for the same object, the last such definition is
-        ///   what is matched.
+        ///   <para>
+        ///     If a property is defined multiple times for the same object, the last such definition is
+        ///     what is matched.
+        ///   </para>
         /// </remarks>
         /// <param name="propertyName">Name of the property to find.</param>
         /// <param name="value">Receives the value of the located property.</param>
@@ -229,10 +241,14 @@ namespace System.Text.Json
         ///   is assigned to the value of that property.
         /// </summary>
         /// <remarks>
-        ///   Property name matching is performed as an ordinal, case-sensitive, comparison.
+        ///   <para>
+        ///     Property name matching is performed as an ordinal, case-sensitive, comparison.
+        ///   </para>
         ///
-        ///   If a property is defined multiple times for the same object, the last such definition is
-        ///   what is matched.
+        ///   <para>
+        ///     If a property is defined multiple times for the same object, the last such definition is
+        ///     what is matched.
+        ///   </para>
         /// </remarks>
         /// <param name="propertyName">Name of the property to find.</param>
         /// <param name="value">Receives the value of the located property.</param>
@@ -259,13 +275,17 @@ namespace System.Text.Json
         ///   is assigned to the value of that property.
         /// </summary>
         /// <remarks>
-        ///   Property name matching is performed as an ordinal, case-sensitive, comparison.
+        ///   <para>
+        ///     Property name matching is performed as an ordinal, case-sensitive, comparison.
+        ///   </para>
         ///
-        ///   If a property is defined multiple times for the same object, the last such definition is
-        ///   what is matched.
+        ///   <para>
+        ///     If a property is defined multiple times for the same object, the last such definition is
+        ///     what is matched.
+        ///   </para>
         /// </remarks>
         /// <param name="utf8PropertyName">
-        ///   Name of the property to find, encoded as UTF-8 without a Byte-Order-Mark (BOM).
+        ///   The UTF-8 (with no Byte-Order-Mark (BOM)) representation of the name of the property to return.
         /// </param>
         /// <param name="value">Receives the value of the located property.</param>
         /// <returns>
@@ -539,12 +559,16 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
-        ///   This method does not parse the contents of a JSON string value.
+        ///   <para>
+        ///     This method does not parse the contents of a JSON string value.
+        ///   </para>
         ///
-        ///   On .NET Core this method does not return <see langword="false"/> for values larger than
-        ///   <see cref="double.MaxValue"/> (or smaller than <see cref="double.MinValue"/>),
-        ///   instead <see langword="true"/> is returned and <see cref="double.PositiveInfinity"/> (or
-        ///   <see cref="double.NegativeInfinity"/>) is emitted.
+        ///   <para>
+        ///     On .NET Core this method does not return <see langword="false"/> for values larger than
+        ///     <see cref="double.MaxValue"/> (or smaller than <see cref="double.MinValue"/>),
+        ///     instead <see langword="true"/> is returned and <see cref="double.PositiveInfinity"/> (or
+        ///     <see cref="double.NegativeInfinity"/>) is emitted.
+        ///   </para>
         /// </remarks>
         /// <returns>
         ///   <see langword="true"/> if the number can be represented as a <see cref="double"/>,
@@ -568,11 +592,15 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>The current JSON number as a <see cref="double"/>.</returns>
         /// <remarks>
-        ///   This method does not parse the contents of a JSON string value.
+        ///   <para>
+        ///     This method does not parse the contents of a JSON string value.
+        ///   </para>
         ///
-        ///   On .NET Core this method returns <see cref="double.PositiveInfinity"/> (or
-        ///   <see cref="double.NegativeInfinity"/>) for values larger than
-        ///   <see cref="double.MaxValue"/> (or smaller than <see cref="double.MinValue"/>).
+        ///   <para>
+        ///     On .NET Core this method returns <see cref="double.PositiveInfinity"/> (or
+        ///     <see cref="double.NegativeInfinity"/>) for values larger than
+        ///     <see cref="double.MaxValue"/> (or smaller than <see cref="double.MinValue"/>).
+        ///   </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
@@ -598,12 +626,16 @@ namespace System.Text.Json
         /// </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
-        ///   This method does not parse the contents of a JSON string value.
+        ///   <para>
+        ///     This method does not parse the contents of a JSON string value.
+        ///   </para>
         ///
-        ///   On .NET Core this method does not return <see langword="false"/> for values larger than
-        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>),
-        ///   instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or
-        ///   <see cref="float.NegativeInfinity"/>) is emitted.
+        ///   <para>
+        ///     On .NET Core this method does not return <see langword="false"/> for values larger than
+        ///     <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>),
+        ///     instead <see langword="true"/> is returned and <see cref="float.PositiveInfinity"/> (or
+        ///     <see cref="float.NegativeInfinity"/>) is emitted.
+        ///   </para>
         /// </remarks>
         /// <returns>
         ///   <see langword="true"/> if the number can be represented as a <see cref="float"/>,
@@ -627,11 +659,15 @@ namespace System.Text.Json
         /// </summary>
         /// <returns>The current JSON number as a <see cref="float"/>.</returns>
         /// <remarks>
-        ///   This method does not parse the contents of a JSON string value.
+        ///   <para>
+        ///     This method does not parse the contents of a JSON string value.
+        ///   </para>
         ///
-        ///   On .NET Core this method returns <see cref="float.PositiveInfinity"/> (or
-        ///   <see cref="float.NegativeInfinity"/>) for values larger than
-        ///   <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>).
+        ///   <para>
+        ///     On .NET Core this method returns <see cref="float.PositiveInfinity"/> (or
+        ///     <see cref="float.NegativeInfinity"/>) for values larger than
+        ///     <see cref="float.MaxValue"/> (or smaller than <see cref="float.MinValue"/>).
+        ///   </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.Number"/>.
@@ -796,15 +832,25 @@ namespace System.Text.Json
         ///   Gets a string representation for the current value appropriate to the value type.
         /// </summary>
         /// <remarks>
-        ///   For <see cref="JsonValueType.Null"/>, <see cref="string.Empty"/> is returned.
+        ///   <para>
+        ///     For <see cref="JsonValueType.Null"/>, <see cref="string.Empty"/> is returned.
+        ///   </para>
         ///
-        ///   For <see cref="JsonValueType.True"/>, <see cref="bool.TrueString"/> is returned.
+        ///   <para>
+        ///     For <see cref="JsonValueType.True"/>, <see cref="bool.TrueString"/> is returned.
+        ///   </para>
         ///
-        ///   For <see cref="JsonValueType.False"/>, <see cref="bool.FalseString"/> is returned.
+        ///   <para>
+        ///     For <see cref="JsonValueType.False"/>, <see cref="bool.FalseString"/> is returned.
+        ///   </para>
         /// 
-        ///   For <see cref="JsonValueType.String"/>, the value of <see cref="GetString"/>() is returned.
+        ///   <para>
+        ///     For <see cref="JsonValueType.String"/>, the value of <see cref="GetString"/>() is returned.
+        ///   </para>
         ///
-        ///   For other types, the value of <see cref="GetRawText"/>() is returned.
+        ///   <para>
+        ///     For other types, the value of <see cref="GetRawText"/>() is returned.
+        ///   </para>
         /// </remarks>
         /// <returns>
         ///   A string representation for the current value appropriate to the value type.
