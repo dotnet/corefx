@@ -157,7 +157,7 @@ namespace System.MemoryTests
 
             var expected = new Foo[] { null, null, 1, 2 };
 
-            Memory<Foo> memory = .TrimEnd(new Memory<Foo>(values), trim);
+            Memory<Foo> memory = new Memory<Foo>(values).TrimEnd(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
         }
 
