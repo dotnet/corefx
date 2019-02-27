@@ -308,10 +308,6 @@ namespace System.Net.Http
                                     _connection.CompleteResponse();
                                     _connection = null;
 
-                                    // Reached EOF.
-                                    _response.TrailingHeaders = _response.TrailingHeaders ??
-                                        HttpResponseHeaders.EmptyResponseHeader;
-
                                     break;
                                 }
                                 // Parse the trailers.

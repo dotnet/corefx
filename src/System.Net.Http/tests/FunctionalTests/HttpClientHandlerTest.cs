@@ -1167,7 +1167,7 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Contains("MyCoolTrailerHeader", response.Headers.GetValues("Trailer"));
 
                         // Pending read on the response content.
-                        Assert.Null(response.TrailingHeaders);
+                        Assert.Empty(response.TrailingHeaders);
 
                         Stream stream = await response.Content.ReadAsStreamAsync();
                         Byte[] data = new Byte[100];
@@ -1176,7 +1176,7 @@ namespace System.Net.Http.Functional.Tests
                         start = 4;
 
                         // Intermedia test - haven't reached stream EOF yet.
-                        Assert.Null(response.TrailingHeaders);
+                        Assert.Empty(response.TrailingHeaders);
                         Assert.Contains("data", System.Text.Encoding.Default.GetString(data));
 
                         bool streamEOFReached = false;
