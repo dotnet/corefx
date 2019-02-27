@@ -324,10 +324,14 @@ namespace System.Net.NetworkInformation
             return SendPingAsync(hostNameOrAddress, timeout, buffer, null);
         }
 
-        public async Task<PingReply> SendPingAsync(IPAddress address, int timeout, byte[] buffer, PingOptions options)
+        public Task<PingReply> SendPingAsync(IPAddress address, int timeout, byte[] buffer, PingOptions options)
         {
             CheckArgs(address, timeout, buffer, options);
+            return SendPingAsyncInternal(address, timeout, buffer, options);
+        }
 
+        private async Task<PingReply> SendPingAsyncInternal(IPAddress address, int timeout, byte[] buffer, PingOptions options)
+        {
             // Need to snapshot the address here, so we're sure that it's not changed between now
             // and the operation, and to be sure that IPAddress.ToString() is called and not some override.
             IPAddress addressSnapshot = GetAddressSnapshot(address);
