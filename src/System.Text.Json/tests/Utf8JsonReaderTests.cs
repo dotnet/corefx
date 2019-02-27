@@ -3333,5 +3333,22 @@ namespace System.Text.Json.Tests
                 };
             }
         }
+
+        public static IEnumerable<object[]> GetCommentTestData
+        {
+            get
+            {
+                var dataList = new List<object[]>();
+                foreach (var delim in new[] { "\r", "\r\n", "\n" })
+                {
+                    var singleLineComment = "// Single Line Comment ";
+                    dataList.Add(new object[] { new object[] { $"{{ {singleLineComment}{delim} }}", singleLineComment } });
+
+                    var multilineComment = $"/* Multiline {delim} Comment */";
+                    dataList.Add(new object[] { new object[] { $"{{ {multilineComment}{delim}}}", multilineComment } });
+                }
+                return dataList;
+            }
+        }
     }
 }

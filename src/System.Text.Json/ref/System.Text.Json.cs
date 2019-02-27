@@ -203,6 +203,7 @@ namespace System.Text.Json
         public int GetInt32() { throw null; }
         public long GetInt64() { throw null; }
         public float GetSingle() { throw null; }
+        public string GetComment() { throw null; }
         public string GetString() { throw null; }
         [System.CLSCompliantAttribute(false)]
         public uint GetUInt32() { throw null; }

@@ -17,7 +17,7 @@ namespace System.Text.Json
         /// Thrown if trying to get the value of the JSON token that is not a string
         /// (i.e. other than <see cref="JsonTokenType.String"/> or <see cref="JsonTokenType.PropertyName"/>).
         /// <seealso cref="TokenType" />
-        /// I will also throw when the JSON string contains invalid UTF-8 bytes, or invalid UTF-16 surrogates.
+        /// It will also throw when the JSON string contains invalid UTF-8 bytes, or invalid UTF-16 surrogates.
         /// </exception>
         public string GetString()
         {
@@ -36,6 +36,29 @@ namespace System.Text.Json
             }
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
+            return JsonReaderHelper.TranscodeHelper(span);
+        }
+
+        /// <summary>
+        /// Reads value of the next JSON token for a comment from the source transcoded as a <see cref="string"/>,
+        /// preserving the comment delimiters.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of the JSON token that is not a comment.
+        /// <seealso cref="TokenType" />
+        /// It will also throw when the JSON string contains invalid UTF-8 bytes, or invalid UTF-16 surrogates.
+        /// </exception>
+        public string GetComment()
+        {
+            if (TokenType != JsonTokenType.Comment)
+            {
+                throw ThrowHelper.GetInvalidOperationException_ExpectedComment(TokenType);
+            }
+            ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
+            while (span.LastIndexOfAny(JsonConstants.CarriageReturn, JsonConstants.LineFeed) == span.Length - 1)
+            {
+                span = span.Slice(0, span.Length - 1);
+            }
             return JsonReaderHelper.TranscodeHelper(span);
         }
 
