@@ -93,6 +93,7 @@ namespace System.Data
     }
     [System.ComponentModel.DefaultPropertyAttribute("ColumnName")]
     [System.ComponentModel.DesignTimeVisibleAttribute(false)]
+    [System.ComponentModel.ToolboxItemAttribute(false)]
     public partial class DataColumn : System.ComponentModel.MarshalByValueComponent
     {
         public DataColumn() { }
@@ -538,6 +539,7 @@ namespace System.Data
     [System.ComponentModel.DefaultEventAttribute("RowChanging")]
     [System.ComponentModel.DefaultPropertyAttribute("TableName")]
     [System.ComponentModel.DesignTimeVisibleAttribute(false)]
+    [System.ComponentModel.ToolboxItemAttribute(false)]
     [System.Xml.Serialization.XmlSchemaProviderAttribute("GetDataTableSchema")]
     public partial class DataTable : System.ComponentModel.MarshalByValueComponent, System.ComponentModel.IListSource, System.ComponentModel.ISupportInitialize, System.ComponentModel.ISupportInitializeNotification, System.Runtime.Serialization.ISerializable, System.Xml.Serialization.IXmlSerializable
     {
