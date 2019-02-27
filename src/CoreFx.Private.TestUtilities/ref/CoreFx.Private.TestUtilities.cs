@@ -55,6 +55,7 @@ namespace System
         public static bool IsFreeBSD { get { throw null; } }
         public static bool IsFullFramework { get { throw null; } }
         public static bool IsInAppContainer { get { throw null; } }
+        public static bool IsInContainer { get { throw null; } }
         public static bool IsInvokingStaticConstructorsSupported { get { throw null; } }
         public static bool IsMacOsHighSierraOrHigher { get { throw null; } }
         public static bool IsNetBSD { get { throw null; } }
@@ -122,6 +123,7 @@ namespace System
         public static System.Version OSXVersion { get { throw null; } }
         public static bool SupportsAlpn { get { throw null; } }
         public static bool SupportsClientAlpn { get { throw null; } }
+        public static bool SupportsSsl3 { get { throw null; } }
         public static bool TargetsNetFx452OrLower { get { throw null; } }
         public static int WindowsVersion { get { throw null; } }
         public static string GetDistroVersionString() { throw null; }
