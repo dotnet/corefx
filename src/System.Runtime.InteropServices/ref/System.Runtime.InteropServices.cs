@@ -1212,6 +1212,7 @@ namespace System.Runtime.InteropServices.ComTypes
         FUNC_VIRTUAL = 0,
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IAdviseSink
     {
         void OnClose();
@@ -1221,6 +1222,7 @@ namespace System.Runtime.InteropServices.ComTypes
         void OnViewChange(int aspect, int index);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IBindCtx
     {
         void EnumObjectParam(out System.Runtime.InteropServices.ComTypes.IEnumString ppenum);
@@ -1235,6 +1237,7 @@ namespace System.Runtime.InteropServices.ComTypes
         void SetBindOptions(ref System.Runtime.InteropServices.ComTypes.BIND_OPTS pbindopts);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IConnectionPoint
     {
         void Advise(object pUnkSink, out int pdwCookie);
@@ -1244,6 +1247,7 @@ namespace System.Runtime.InteropServices.ComTypes
         void Unadvise(int dwCookie);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IConnectionPointContainer
     {
         void EnumConnectionPoints(out System.Runtime.InteropServices.ComTypes.IEnumConnectionPoints ppEnum);
@@ -1279,6 +1283,7 @@ namespace System.Runtime.InteropServices.ComTypes
         IDLFLAG_NONE = (short)0,
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IEnumConnectionPoints
     {
         void Clone(out System.Runtime.InteropServices.ComTypes.IEnumConnectionPoints ppenum);
@@ -1287,6 +1292,7 @@ namespace System.Runtime.InteropServices.ComTypes
         int Skip(int celt);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IEnumConnections
     {
         void Clone(out System.Runtime.InteropServices.ComTypes.IEnumConnections ppenum);
@@ -1295,6 +1301,7 @@ namespace System.Runtime.InteropServices.ComTypes
         int Skip(int celt);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IEnumFORMATETC
     {
         void Clone(out System.Runtime.InteropServices.ComTypes.IEnumFORMATETC newEnum);
@@ -1303,6 +1310,7 @@ namespace System.Runtime.InteropServices.ComTypes
         int Skip(int celt);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IEnumMoniker
     {
         void Clone(out System.Runtime.InteropServices.ComTypes.IEnumMoniker ppenum);
@@ -1318,6 +1326,7 @@ namespace System.Runtime.InteropServices.ComTypes
         int Skip(int celt);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IEnumString
     {
         void Clone(out System.Runtime.InteropServices.ComTypes.IEnumString ppenum);
@@ -1326,6 +1335,7 @@ namespace System.Runtime.InteropServices.ComTypes
         int Skip(int celt);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IEnumVARIANT
     {
         System.Runtime.InteropServices.ComTypes.IEnumVARIANT Clone();
@@ -1334,6 +1344,7 @@ namespace System.Runtime.InteropServices.ComTypes
         int Skip(int celt);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IMoniker
     {
         void BindToObject(System.Runtime.InteropServices.ComTypes.IBindCtx pbc, System.Runtime.InteropServices.ComTypes.IMoniker pmkToLeft, ref System.Guid riidResult, out object ppvResult);
@@ -1376,6 +1387,7 @@ namespace System.Runtime.InteropServices.ComTypes
         INVOKE_PROPERTYPUTREF = 8,
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IPersistFile
     {
         void GetClassID(out System.Guid pClassID);
@@ -1386,6 +1398,7 @@ namespace System.Runtime.InteropServices.ComTypes
         void SaveCompleted(string pszFileName);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IRunningObjectTable
     {
         void EnumRunning(out System.Runtime.InteropServices.ComTypes.IEnumMoniker ppenumMoniker);
@@ -1397,6 +1410,7 @@ namespace System.Runtime.InteropServices.ComTypes
         void Revoke(int dwRegister);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IStream
     {
         void Clone(out System.Runtime.InteropServices.ComTypes.IStream ppstm);
@@ -1412,12 +1426,14 @@ namespace System.Runtime.InteropServices.ComTypes
         void Write(byte[] pv, int cb, System.IntPtr pcbWritten);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface ITypeComp
     {
         void Bind(string szName, int lHashVal, short wFlags, out System.Runtime.InteropServices.ComTypes.ITypeInfo ppTInfo, out System.Runtime.InteropServices.ComTypes.DESCKIND pDescKind, out System.Runtime.InteropServices.ComTypes.BINDPTR pBindPtr);
         void BindType(string szName, int lHashVal, out System.Runtime.InteropServices.ComTypes.ITypeInfo ppTInfo, out System.Runtime.InteropServices.ComTypes.ITypeComp ppTComp);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface ITypeInfo
     {
         void AddressOfMember(int memid, System.Runtime.InteropServices.ComTypes.INVOKEKIND invKind, out System.IntPtr ppv);
@@ -1441,6 +1457,7 @@ namespace System.Runtime.InteropServices.ComTypes
         void ReleaseVarDesc(System.IntPtr pVarDesc);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface ITypeInfo2 : System.Runtime.InteropServices.ComTypes.ITypeInfo
     {
         new void AddressOfMember(int memid, System.Runtime.InteropServices.ComTypes.INVOKEKIND invKind, out System.IntPtr ppv);
@@ -1479,6 +1496,7 @@ namespace System.Runtime.InteropServices.ComTypes
         new void ReleaseVarDesc(System.IntPtr pVarDesc);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface ITypeLib
     {
         void FindName(string szNameBuf, int lHashVal, System.Runtime.InteropServices.ComTypes.ITypeInfo[] ppTInfo, int[] rgMemId, ref short pcFound);
@@ -1493,6 +1511,7 @@ namespace System.Runtime.InteropServices.ComTypes
         void ReleaseTLibAttr(System.IntPtr pTLibAttr);
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface ITypeLib2 : System.Runtime.InteropServices.ComTypes.ITypeLib
     {
         new void FindName(string szNameBuf, int lHashVal, System.Runtime.InteropServices.ComTypes.ITypeInfo[] ppTInfo, int[] rgMemId, ref short pcFound);
