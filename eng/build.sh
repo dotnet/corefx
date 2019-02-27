@@ -32,15 +32,14 @@ extraargs=''
 checkedPossibleDirectoryToBuild=false
 
 # Check if an action is passed in
-paramArr=( "$@" )
 declare -a actions=("r" "restore" "b" "build" "rebuild" "deploy" "deployDeps" "test" "integrationTest" "performanceTest" "sign" "publish" "buildtests")
-actInt=($(comm -12 <(printf '%s\n' "${actions[@]/#/-}" | sort) <(printf '%s\n' "${paramArr[@]/#--/-}" | sort)))
+actInt=($(comm -12 <(printf '%s\n' "${actions[@]/#/-}" | sort) <(printf '%s\n' "${@/#--/-}" | sort)))
 if [ ${#actInt[@]} -eq 0 ]; then
     arguments="-restore -build"
 fi
 
 while [[ $# > 0 ]]; do
-  opt="$(echo "$1" | awk '{gsub("--", "-", $0); print tolower($0)}')"
+  opt="$(echo "${1/#--/-}" | awk '{print tolower($0)}')"
   case "$opt" in
      -help|-h)
       usage
