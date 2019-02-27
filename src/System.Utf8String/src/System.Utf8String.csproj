@@ -4,9 +4,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;</Configurations>
+    <RootNamespace>System</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <!-- TODO: Source files go here. -->
+    <Compile Include="Utf8StringExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ReferenceFromRuntime Include="System.Private.CoreLib" />

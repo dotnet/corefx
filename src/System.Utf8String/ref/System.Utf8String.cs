@@ -22,12 +22,16 @@ namespace System
         public static bool operator ==(Utf8String a, Utf8String b) => throw null;
         public static bool operator !=(Utf8String a, Utf8String b) => throw null;
         public int Length => throw null;
-        [ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)] // for compiler use only
         public override bool Equals(object obj) => throw null;
         public bool Equals(Utf8String value) => throw null;
         public static bool Equals(Utf8String a, Utf8String b) => throw null;
         public override int GetHashCode() => throw null;
+        [ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)] // for compiler use only
         public ref readonly byte GetPinnableReference() => throw null;
         public override string ToString() => throw null;
+    }
+    public static partial class Utf8StringExtensions
+    {
+        public static ReadOnlySpan<byte> AsBytes(this Utf8String text) => throw null;
     }
 }
