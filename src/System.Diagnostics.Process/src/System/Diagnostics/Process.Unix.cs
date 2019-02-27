@@ -19,10 +19,11 @@ namespace System.Diagnostics
     {
         private static readonly UTF8Encoding s_utf8NoBom =
             new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-        private static volatile bool s_sigchildHandlerRegistered = false;
-        private static readonly object s_sigchildGate = new object();
+        private static volatile bool s_initialized = false;
+        private static readonly object s_initializedGate = new object();
         private static readonly Interop.Sys.SigChldCallback s_sigChildHandler = OnSigChild;
         private static readonly ReaderWriterLockSlim s_processStartLock = new ReaderWriterLockSlim();
+        private static int s_interactiveChildProcessCount;
 
         /// <summary>
         /// Puts a Process component in state to interact with operating system processes that run in a 
@@ -344,7 +345,7 @@ namespace System.Diagnostics
         /// <param name="startInfo">The start info with which to start the process.</param>
         private bool StartCore(ProcessStartInfo startInfo)
         {
-            EnsureSigChildHandler();
+            EnsureInitialized();
 
             string filename;
             string[] argv;
@@ -369,6 +370,13 @@ namespace System.Diagnostics
                 (userId, groupId) = GetUserAndGroupIds(startInfo);
             }
 
+            // .NET applications don't echo characters unless there is a Console.Read operation.
+            // Unix applications expect the terminal to be in an echoing state by default.
+            // To support processes that interact with the terminal (e.g. 'vi'), we need to configure the
+            // terminal to echo. We keep this configuration as long as there are interactive applications.
+            // Based on ProcessStartInfo we determine if the child may be an interactive application.
+            bool isInteractiveChild = !startInfo.RedirectStandardInput && !startInfo.RedirectStandardOutput;
+
             if (startInfo.UseShellExecute)
             {
                 string verb = startInfo.Verb;
@@ -392,7 +400,7 @@ namespace System.Diagnostics
                     isExecuting = ForkAndExecProcess(filename, argv, envp, cwd,
                         startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
                         setCredentials, userId, groupId,
-                        out stdinFd, out stdoutFd, out stderrFd,
+                        out stdinFd, out stdoutFd, out stderrFd, isInteractiveChild,
                         throwOnNoExec: false); // return false instead of throwing on ENOEXEC
                 }
 
@@ -405,7 +413,7 @@ namespace System.Diagnostics
                     ForkAndExecProcess(filename, argv, envp, cwd,
                         startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
                         setCredentials, userId, groupId,
-                        out stdinFd, out stdoutFd, out stderrFd);
+                        out stdinFd, out stdoutFd, out stderrFd, isInteractiveChild);
                 }
             }
             else
@@ -420,7 +428,7 @@ namespace System.Diagnostics
                 ForkAndExecProcess(filename, argv, envp, cwd,
                     startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
                     setCredentials, userId, groupId,
-                    out stdinFd, out stdoutFd, out stderrFd);
+                    out stdinFd, out stdoutFd, out stderrFd, isInteractiveChild);
             }
 
             // Configure the parent's ends of the redirection streams.
@@ -455,7 +463,7 @@ namespace System.Diagnostics
             bool redirectStdin, bool redirectStdout, bool redirectStderr,
             bool setCredentials, uint userId, uint groupId,
             out int stdinFd, out int stdoutFd, out int stderrFd,
-            bool throwOnNoExec = true)
+            bool isInteractiveChild, bool throwOnNoExec = true)
         {
             if (string.IsNullOrEmpty(filename))
             {
@@ -467,6 +475,11 @@ namespace System.Diagnostics
             s_processStartLock.EnterReadLock();
             try
             {
+                if (isInteractiveChild)
+                {
+                    ConfigureConsoleForInteractiveChildren(+1);
+                }
+
                 int childPid;
 
                 // Invoke the shim fork/execve routine.  It will create pipes for all requested
@@ -485,7 +498,7 @@ namespace System.Diagnostics
                 {
                     // Ensure we'll reap this process.
                     // note: SetProcessId will set this if we don't set it first.
-                    _waitStateHolder = new ProcessWaitState.Holder(childPid, isNewChild: true);
+                    _waitStateHolder = new ProcessWaitState.Holder(childPid, isNewChild: true, isInteractiveChild);
 
                     // Store the child's information into this Process object.
                     Debug.Assert(childPid >= 0);
@@ -508,6 +521,14 @@ namespace System.Diagnostics
             finally
             {
                 s_processStartLock.ExitReadLock();
+
+                // We failed to launch an interactive child.
+                if (_waitStateHolder == null && isInteractiveChild)
+                {
+                    s_processStartLock.EnterWriteLock();
+                    ConfigureConsoleForInteractiveChildren(-1);
+                    s_processStartLock.ExitWriteLock();
+                }
             }
         }
 
@@ -940,24 +961,27 @@ namespace System.Diagnostics
 
         private bool WaitForInputIdleCore(int milliseconds) => throw new InvalidOperationException(SR.InputIdleUnkownError);
 
-        private static void EnsureSigChildHandler()
+        private static void EnsureInitialized()
         {
-            if (s_sigchildHandlerRegistered)
+            if (s_initialized)
             {
                 return;
             }
 
-            lock (s_sigchildGate)
+            lock (s_initializedGate)
             {
-                if (!s_sigchildHandlerRegistered)
+                if (!s_initialized)
                 {
-                    // Ensure signal handling is setup and register our callback.
-                    if (!Interop.Sys.RegisterForSigChld(s_sigChildHandler))
+                    // Setup signal handling and configure the terminal.
+                    if (!Interop.Sys.InitializeConsoleAndSignalHandling())
                     {
                         throw new Win32Exception();
                     }
 
-                    s_sigchildHandlerRegistered = true;
+                    // Register our callback.
+                    Interop.Sys.RegisterForSigChld(s_sigChildHandler);
+
+                    s_initialized = true;
                 }
             }
         }
@@ -968,11 +992,37 @@ namespace System.Diagnostics
             s_processStartLock.EnterWriteLock();
             try
             {
-                ProcessWaitState.CheckChildren(reapAll);
+                ProcessWaitState.CheckChildren(reapAll, out int reapedInteractiveChildren);
+
+                if (reapedInteractiveChildren > 0)
+                {
+                    ConfigureConsoleForInteractiveChildren(-reapedInteractiveChildren);
+                }
             }
             finally
             {
                 s_processStartLock.ExitWriteLock();
+            }
+        }
+
+        private static void ConfigureConsoleForInteractiveChildren(int increment)
+        {
+            Debug.Assert(increment != 0);
+
+            int interactiveChildrenRemaining = Interlocked.Add(ref s_interactiveChildProcessCount, increment);
+            if (increment > 0)
+            {
+                Debug.Assert(s_processStartLock.IsReadLockHeld);
+                // This will noop if the console is already configured for an interactive child.
+                Interop.Sys.ConfigureConsoleForInteractiveChild(true);
+            }
+            else
+            {
+                Debug.Assert(s_processStartLock.IsWriteLockHeld);
+                if (interactiveChildrenRemaining == 0)
+                {
+                    Interop.Sys.ConfigureConsoleForInteractiveChild(false);
+                }
             }
         }
     }

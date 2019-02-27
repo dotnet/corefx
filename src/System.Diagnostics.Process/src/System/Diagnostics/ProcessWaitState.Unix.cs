@@ -55,9 +55,9 @@ namespace System.Diagnostics
         {
             internal ProcessWaitState _state;
 
-            internal Holder(int processId, bool isNewChild = false)
+            internal Holder(int processId, bool isNewChild = false, bool isInteractiveChild = false)
             {
-                _state = ProcessWaitState.AddRef(processId, isNewChild);
+                _state = ProcessWaitState.AddRef(processId, isNewChild, isInteractiveChild);
             }
 
             ~Holder()
@@ -99,7 +99,7 @@ namespace System.Diagnostics
         /// </summary>
         /// <param name="processId">The process ID for which we need wait state.</param>
         /// <returns>The wait state object.</returns>
-        internal static ProcessWaitState AddRef(int processId, bool isNewChild)
+        internal static ProcessWaitState AddRef(int processId, bool isNewChild, bool isInteractiveChild)
         {
             lock (s_childProcessWaitStates)
             {
@@ -109,7 +109,7 @@ namespace System.Diagnostics
                     // When the PID is recycled for a new child, we remove the old child.
                     s_childProcessWaitStates.Remove(processId);
 
-                    pws = new ProcessWaitState(processId, isChild: true);
+                    pws = new ProcessWaitState(processId, isChild: true, isInteractiveChild);
                     s_childProcessWaitStates.Add(processId, pws);
                     pws._outstandingRefCount++; // For Holder
                     pws._outstandingRefCount++; // Decremented in CheckChildren
@@ -143,7 +143,7 @@ namespace System.Diagnostics
                         }
                         if (pws == null)
                         {
-                            pws = new ProcessWaitState(processId, isChild: false, exitTime);
+                            pws = new ProcessWaitState(processId, isChild: false, isInteractiveChild: false, exitTime);
                             s_processWaitStates.Add(processId, pws);
                         }
                         pws._outstandingRefCount++;
@@ -196,6 +196,8 @@ namespace System.Diagnostics
         private readonly int _processId;
         /// <summary>Associated process is a child process.</summary>
         private readonly bool _isChild;
+        /// <summary>Associated process is an interactive child process.</summary>
+        private readonly bool _isInteractiveChild;
 
         /// <summary>If a wait operation is in progress, the Task that represents it; otherwise, null.</summary>
         private Task _waitInProgress;
@@ -216,11 +218,12 @@ namespace System.Diagnostics
 
         /// <summary>Initialize the wait state object.</summary>
         /// <param name="processId">The associated process' ID.</param>
-        private ProcessWaitState(int processId, bool isChild, DateTime exitTime = default)
+        private ProcessWaitState(int processId, bool isChild, bool isInteractiveChild, DateTime exitTime = default)
         {
             Debug.Assert(processId >= 0);
             _processId = processId;
             _isChild = isChild;
+            _isInteractiveChild = isInteractiveChild;
             _exitTime = exitTime;
         }
 
@@ -545,7 +548,7 @@ namespace System.Diagnostics
             });
         }
 
-        private bool TryReapChild()
+        private bool TryReapChild(ref int interactiveChildrenReaped)
         {
             lock (_gate)
             {
@@ -563,6 +566,12 @@ namespace System.Diagnostics
                     _exitCode = exitCode;
 
                     SetExited();
+
+                    if (_isInteractiveChild)
+                    {
+                        interactiveChildrenReaped++;
+                    }
+
                     return true;
                 }
                 else if (waitResult == 0)
@@ -579,8 +588,10 @@ namespace System.Diagnostics
             }
         }
 
-        internal static void CheckChildren(bool reapAll)
+        internal static void CheckChildren(bool reapAll, out int interactiveChildrenReaped)
         {
+            interactiveChildrenReaped = 0;
+
             // This is called on SIGCHLD from a native thread.
             // A lock in Process ensures no new processes are spawned while we are checking.
             lock (s_childProcessWaitStates)
@@ -598,7 +609,7 @@ namespace System.Diagnostics
                         if (s_childProcessWaitStates.TryGetValue(pid, out ProcessWaitState pws))
                         {
                             // Known Process.
-                            if (pws.TryReapChild())
+                            if (pws.TryReapChild(ref interactiveChildrenReaped))
                             {
                                 pws.ReleaseRef();
                             }
@@ -631,7 +642,7 @@ namespace System.Diagnostics
                     foreach (KeyValuePair<int, ProcessWaitState> kv in s_childProcessWaitStates)
                     {
                         ProcessWaitState pws = kv.Value;
-                        if (pws.TryReapChild())
+                        if (pws.TryReapChild(ref interactiveChildrenReaped))
                         {
                             if (firstToRemove == null)
                             {

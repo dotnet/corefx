@@ -40,28 +40,15 @@ static struct sigaction* OrigActionFor(int sig)
 
 static void SignalHandler(int sig, siginfo_t* siginfo, void* context)
 {
-    if (sig == SIGCONT || sig == SIGCHLD)
-    {
-        // SIGCONT will be sent when we're resumed after suspension, at which point
-        // we need to set the terminal back up.  Similarly, SIGCHLD will be sent after
-        // a child process completes, and that child could have left things in a bad state,
-        // so we similarly need to reinitialize.
-        ReinitializeConsole();
-    }
-
     // Signal handler for signals where we want our background thread to do the real processing.
     // It simply writes the signal code to a pipe that's read by the thread.
-    if (sig == SIGQUIT || sig == SIGINT || sig == SIGCHLD)
-    {
-        // Write the signal code to the pipe
-        uint8_t signalCodeByte = (uint8_t)sig;
-        ssize_t writtenBytes;
-        while ((writtenBytes = write(g_signalPipe[1], &signalCodeByte, 1)) < 0 && errno == EINTR);
+    uint8_t signalCodeByte = (uint8_t)sig;
+    ssize_t writtenBytes;
+    while ((writtenBytes = write(g_signalPipe[1], &signalCodeByte, 1)) < 0 && errno == EINTR);
 
-        if (writtenBytes != 1)
-        {
-            abort(); // fatal error
-        }
+    if (writtenBytes != 1)
+    {
+        abort(); // fatal error
     }
 
     // Delegate to any saved handler we may have
@@ -154,6 +141,10 @@ static void* SignalHandlerLoop(void* arg)
                 callback(reapAll ? 1 : 0);
             }
         }
+        else if (signalCode == SIGCONT)
+        {
+            ReinitializeConsole();
+        }
         else
         {
             assert_msg(false, "invalid signalCode", (int)signalCode);
@@ -192,13 +183,8 @@ void SystemNative_RestoreAndHandleCtrl(CtrlCode ctrlCode)
     kill(getpid(), signalCode);
 }
 
-uint32_t SystemNative_RegisterForSigChld(SigChldCallback callback)
+void SystemNative_RegisterForSigChld(SigChldCallback callback)
 {
-    if (!InitializeSignalHandling())
-    {
-        return 0;
-    }
-
     assert(callback != NULL);
     assert(g_sigChldCallback == NULL);
 
@@ -207,8 +193,6 @@ uint32_t SystemNative_RegisterForSigChld(SigChldCallback callback)
         g_sigChldCallback = callback;
     }
     pthread_mutex_unlock(&lock);
-
-    return 1;
 }
 
 static void InstallSignalHandler(int sig, bool skipWhenSigIgn)
@@ -236,7 +220,7 @@ static void InstallSignalHandler(int sig, bool skipWhenSigIgn)
     assert(rv == 0);
 }
 
-static bool InitializeSignalHandlingCore()
+int32_t InitializeSignalHandlingCore()
 {
     // Create a pipe we'll use to communicate with our worker
     // thread.  We can't do anything interesting in the signal handler,
@@ -244,7 +228,7 @@ static bool InitializeSignalHandlingCore()
     // the handling work.
     if (SystemNative_Pipe(g_signalPipe, PAL_O_CLOEXEC) != 0)
     {
-        return false;
+        return 0;
     }
     assert(g_signalPipe[0] >= 0);
     assert(g_signalPipe[1] >= 0);
@@ -255,7 +239,7 @@ static bool InitializeSignalHandlingCore()
     {
         CloseSignalHandlingPipe();
         errno = ENOMEM;
-        return false;
+        return 0;
     }
     *readFdPtr = g_signalPipe[0];
 
@@ -267,7 +251,7 @@ static bool InitializeSignalHandlingCore()
         free(readFdPtr);
         CloseSignalHandlingPipe();
         errno = err;
-        return false;
+        return 0;
     }
 
     // Finally, register our signal handlers
@@ -278,21 +262,5 @@ static bool InitializeSignalHandlingCore()
     InstallSignalHandler(SIGCONT, /* skipWhenSigIgn */ false);
     InstallSignalHandler(SIGCHLD, /* skipWhenSigIgn */ false);
 
-    return true;
-}
-
-uint32_t InitializeSignalHandling()
-{
-    static bool initialized = false;
-
-    pthread_mutex_lock(&lock);
-    {
-        if (!initialized)
-        {
-            initialized = InitializeSignalHandlingCore();
-        }
-    }
-    pthread_mutex_unlock(&lock);
-
-    return initialized ? 1 : 0;
+    return 1;
 }

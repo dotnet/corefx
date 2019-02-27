@@ -58,11 +58,11 @@ DLLEXPORT int32_t SystemNative_GetWindowSize(WinSize* windowsSize);
 DLLEXPORT int32_t SystemNative_IsATty(intptr_t fd);
 
 /**
- * Initializes the console for use by System.Console.
+ * Initializes signal handling and terminal for use by System.Console and System.Process.
  *
  * Returns 1 on success; otherwise returns 0 and sets errno.
  */
-DLLEXPORT int32_t SystemNative_InitializeConsole(void);
+DLLEXPORT int32_t SystemNative_InitializeConsoleAndSignalHandling(void);
 
 /**
  * Stores the string that can be written to stdout to transition
@@ -92,12 +92,12 @@ DLLEXPORT int32_t SystemNative_StdinReady(void);
 /**
  * Initializes the terminal in preparation for a read operation.
  */
-DLLEXPORT void SystemNative_InitializeConsoleBeforeRead(uint8_t minChars, uint8_t decisecondsTimeout);
+DLLEXPORT void SystemNative_ConfigureConsoleTimeout(uint8_t minChars, uint8_t decisecondsTimeout);
 
 /**
- * Restores the terminal's attributes to what they were before InitializeConsoleBeforeRead was called.
+ * Initializes the terminal for running interactive applications.
  */
-DLLEXPORT void SystemNative_UninitializeConsoleAfterRead(void);
+DLLEXPORT void SystemNative_ConfigureConsoleForInteractiveChild(int32_t enable);
 
 /**
  * Reads the number of bytes specified into the provided buffer from stdin.
