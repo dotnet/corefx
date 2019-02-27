@@ -548,7 +548,7 @@ namespace System.Diagnostics
             });
         }
 
-        private bool TryReapChild(ref int interactiveChildrenReaped)
+        private bool TryReapChild()
         {
             lock (_gate)
             {
@@ -565,12 +565,10 @@ namespace System.Diagnostics
                 {
                     _exitCode = exitCode;
 
-                    SetExited();
+                    // Update console settings before calling SetExited.
+                    Process.ConfigureConsoleForInteractiveChildren(-1);
 
-                    if (_isInteractiveChild)
-                    {
-                        interactiveChildrenReaped++;
-                    }
+                    SetExited();
 
                     return true;
                 }
@@ -588,10 +586,8 @@ namespace System.Diagnostics
             }
         }
 
-        internal static void CheckChildren(bool reapAll, out int interactiveChildrenReaped)
+        internal static void CheckChildren(bool reapAll)
         {
-            interactiveChildrenReaped = 0;
-
             // This is called on SIGCHLD from a native thread.
             // A lock in Process ensures no new processes are spawned while we are checking.
             lock (s_childProcessWaitStates)
@@ -609,7 +605,7 @@ namespace System.Diagnostics
                         if (s_childProcessWaitStates.TryGetValue(pid, out ProcessWaitState pws))
                         {
                             // Known Process.
-                            if (pws.TryReapChild(ref interactiveChildrenReaped))
+                            if (pws.TryReapChild())
                             {
                                 pws.ReleaseRef();
                             }
@@ -642,7 +638,7 @@ namespace System.Diagnostics
                     foreach (KeyValuePair<int, ProcessWaitState> kv in s_childProcessWaitStates)
                     {
                         ProcessWaitState pws = kv.Value;
-                        if (pws.TryReapChild(ref interactiveChildrenReaped))
+                        if (pws.TryReapChild())
                         {
                             if (firstToRemove == null)
                             {

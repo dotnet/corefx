@@ -992,12 +992,7 @@ namespace System.Diagnostics
             s_processStartLock.EnterWriteLock();
             try
             {
-                ProcessWaitState.CheckChildren(reapAll, out int reapedInteractiveChildren);
-
-                if (reapedInteractiveChildren > 0)
-                {
-                    ConfigureConsoleForInteractiveChildren(-reapedInteractiveChildren);
-                }
+                ProcessWaitState.CheckChildren(reapAll);
             }
             finally
             {
@@ -1005,7 +1000,7 @@ namespace System.Diagnostics
             }
         }
 
-        private static void ConfigureConsoleForInteractiveChildren(int increment)
+        internal static void ConfigureConsoleForInteractiveChildren(int increment)
         {
             Debug.Assert(increment != 0);
 
