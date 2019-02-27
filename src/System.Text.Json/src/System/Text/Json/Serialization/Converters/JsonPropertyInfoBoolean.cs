@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal class JsonPropertyInfoBoolean : JsonPropertyInfo<bool>, IJsonValueConverter<bool>
+    internal sealed class JsonPropertyInfoBoolean : JsonPropertyInfo<bool>, IJsonValueConverter<bool>
     {
         public JsonPropertyInfoBoolean(Type classType, Type propertyType, PropertyInfo propertyInfo, JsonSerializerOptions options) :
             base(classType, propertyType, propertyInfo, options)

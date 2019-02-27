@@ -2,12 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal class JsonPropertyInfoChar : JsonPropertyInfo<char>, IJsonValueConverter<char>
+    internal sealed class JsonPropertyInfoChar : JsonPropertyInfo<char>, IJsonValueConverter<char>
     {
         public JsonPropertyInfoChar(Type classType, Type propertyType, PropertyInfo propertyInfo, JsonSerializerOptions options) :
             base(classType, propertyType, propertyInfo, options)

@@ -172,7 +172,7 @@ namespace System.Text.Json.Serialization
 
         private static void ThrowInvalidOperationException(int capacity)
         {
-            throw new InvalidOperationException($"Cannot advance past the end of the buffer, which has a size of { capacity }");
+            throw new InvalidOperationException(SR.Format(SR.BufferWriterAdvancedTooFar, capacity));
         }
     }
 }

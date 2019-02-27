@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal class JsonPropertyInfoByte : JsonPropertyInfo<byte>, IJsonValueConverter<byte>
+    internal sealed class JsonPropertyInfoByte : JsonPropertyInfo<byte>, IJsonValueConverter<byte>
     {
         public JsonPropertyInfoByte(Type classType, Type propertyType, PropertyInfo propertyInfo, JsonSerializerOptions options) :
             base(classType, propertyType, propertyInfo, options)

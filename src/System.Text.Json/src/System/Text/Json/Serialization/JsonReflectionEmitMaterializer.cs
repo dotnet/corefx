@@ -10,11 +10,11 @@ using System.Reflection.Emit;
 
 namespace System.Text.Json.Serialization
 {
-    internal class JsonReflectionEmitMaterializer : JsonMemberBasedClassMaterializer
+    internal sealed class JsonReflectionEmitMaterializer : JsonMemberBasedClassMaterializer
     {
         public override JsonClassInfo.ConstructorDelegate CreateConstructor(Type type)
         {
-            ConstructorInfo realMethod = type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic| BindingFlags.Instance, binder: null, Type.EmptyTypes, modifiers: null);
+            ConstructorInfo realMethod = type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, binder: null, Type.EmptyTypes, modifiers: null);
             if (realMethod == null)
                 return null;
 
@@ -25,21 +25,11 @@ namespace System.Text.Json.Serialization
                 typeof(JsonReflectionEmitMaterializer).Module,
                 skipVisibility: true);
 
-            if (dynamicMethod != null)
-            {
-                ILGenerator generator = dynamicMethod?.GetILGenerator();
-                if (generator != null)
-                {
+            ILGenerator generator = dynamicMethod.GetILGenerator();
+            generator.Emit(OpCodes.Newobj, realMethod);
+            generator.Emit(OpCodes.Ret);
 
-                    generator.Emit(OpCodes.Newobj, realMethod);
-                    generator.Emit(OpCodes.Ret);
-
-                    var result = (JsonClassInfo.ConstructorDelegate)dynamicMethod.CreateDelegate(typeof(JsonClassInfo.ConstructorDelegate));
-                    return result;
-                }
-            }
-
-            throw new InvalidOperationException(SR.Format(SR.SerializationUnableToCreateDynamicMethod, $"{type.FullName}.{realMethod.Name}"));
+            return (JsonClassInfo.ConstructorDelegate)dynamicMethod.CreateDelegate(typeof(JsonClassInfo.ConstructorDelegate));
         }
 
         public override JsonPropertyInfo<TValue>.GetterDelegate CreateGetter<TValue>(PropertyInfo propertyInfo)
@@ -54,22 +44,12 @@ namespace System.Text.Json.Serialization
                 typeof(JsonReflectionEmitMaterializer).Module,
                 skipVisibility: true);
 
-            if (dynamicMethod != null)
-            {
+            ILGenerator generator = dynamicMethod.GetILGenerator();
+            generator.Emit(OpCodes.Ldarg_0);
+            generator.EmitCall(OpCodes.Callvirt, realMethod, null);
+            generator.Emit(OpCodes.Ret);
 
-                ILGenerator generator = dynamicMethod?.GetILGenerator();
-                if (generator != null)
-                {
-                    generator.Emit(OpCodes.Ldarg_0);
-                    generator.EmitCall(OpCodes.Callvirt, realMethod, null);
-                    generator.Emit(OpCodes.Ret);
-
-                    var result = (JsonPropertyInfo<TValue>.GetterDelegate)dynamicMethod.CreateDelegate(typeof(JsonPropertyInfo<TValue>.GetterDelegate));
-                    return result;
-                }
-            }
-
-            throw new InvalidOperationException(SR.Format(SR.SerializationUnableToCreateDynamicMethod, $"{propertyInfo.Name}.{realMethod.Name}"));
+            return (JsonPropertyInfo<TValue>.GetterDelegate)dynamicMethod.CreateDelegate(typeof(JsonPropertyInfo<TValue>.GetterDelegate));
         }
 
         public override JsonPropertyInfo<TValue>.SetterDelegate CreateSetter<TValue>(PropertyInfo propertyInfo)
@@ -84,23 +64,13 @@ namespace System.Text.Json.Serialization
                 typeof(JsonReflectionEmitMaterializer).Module,
                 skipVisibility: true);
 
-            if (dynamicMethod != null)
-            {
-                ILGenerator generator = dynamicMethod?.GetILGenerator();
-                if (generator != null)
-                {
+            ILGenerator generator = dynamicMethod.GetILGenerator();
+            generator.Emit(OpCodes.Ldarg_0);
+            generator.Emit(OpCodes.Ldarg_1);
+            generator.EmitCall(OpCodes.Callvirt, realMethod, null);
+            generator.Emit(OpCodes.Ret);
 
-                    generator.Emit(OpCodes.Ldarg_0);
-                    generator.Emit(OpCodes.Ldarg_1);
-                    generator.EmitCall(OpCodes.Callvirt, realMethod, null);
-                    generator.Emit(OpCodes.Ret);
-
-                    var result = (JsonPropertyInfo<TValue>.SetterDelegate)dynamicMethod.CreateDelegate(typeof(JsonPropertyInfo<TValue>.SetterDelegate));
-                    return result;
-                }
-            }
-
-            throw new InvalidOperationException(SR.Format(SR.SerializationUnableToCreateDynamicMethod, $"{propertyInfo.Name}.{realMethod.Name}"));
+            return (JsonPropertyInfo<TValue>.SetterDelegate)dynamicMethod.CreateDelegate(typeof(JsonPropertyInfo<TValue>.SetterDelegate));
         }
     }
 }

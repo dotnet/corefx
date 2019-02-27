@@ -4,11 +4,12 @@
 
 using System.Buffers;
 using System.Buffers.Text;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal class JsonPropertyInfoDateTimeNullable : JsonPropertyInfo<DateTime?>, IJsonValueConverter<DateTime?>
+    internal sealed class JsonPropertyInfoDateTimeNullable : JsonPropertyInfo<DateTime?>, IJsonValueConverter<DateTime?>
     {
         public JsonPropertyInfoDateTimeNullable(Type classType, Type propertyType, PropertyInfo propertyInfo, JsonSerializerOptions options) :
             base(classType, propertyType, propertyInfo, options)
@@ -32,14 +33,18 @@ namespace System.Text.Json.Serialization.Converters
 
         public void Write(DateTime? value, ref Utf8JsonWriter writer)
         {
-            byte[] stringValue = JsonReaderHelper.s_utf8Encoding.GetBytes(value.Value.ToString("O"));
-            writer.WriteStringValue(stringValue);
+            Debug.Assert(value.HasValue); // nulls are filtered before calling here
+
+            // todo: use the appropriate DateTime method once available.
+            writer.WriteStringValue(value.Value.ToString("O"));
         }
 
         public void Write(Span<byte> escapedPropertyName, DateTime? value, ref Utf8JsonWriter writer)
         {
-            byte[] stringValue = JsonReaderHelper.s_utf8Encoding.GetBytes(value.Value.ToString("O"));
-            writer.WriteString(escapedPropertyName, stringValue);
+            Debug.Assert(value.HasValue); // nulls are filtered before calling here
+
+            // todo: use the appropriate DateTime method once available.
+            writer.WriteString(escapedPropertyName, value.Value.ToString("O"));
         }
     }
 }

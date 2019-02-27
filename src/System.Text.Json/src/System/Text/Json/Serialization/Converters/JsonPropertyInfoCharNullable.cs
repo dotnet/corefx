@@ -2,12 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal class JsonPropertyInfoCharNullable : JsonPropertyInfo<char?>, IJsonValueConverter<char?>
+    internal sealed class JsonPropertyInfoCharNullable : JsonPropertyInfo<char?>, IJsonValueConverter<char?>
     {
         public JsonPropertyInfoCharNullable(Type classType, Type propertyType, PropertyInfo propertyInfo, JsonSerializerOptions options) :
             base(classType, propertyType, propertyInfo, options)
@@ -27,6 +28,7 @@ namespace System.Text.Json.Serialization.Converters
 
         public void Write(char? value, ref Utf8JsonWriter writer)
         {
+            Debug.Assert(value.HasValue); // nulls are filtered before calling here
 #if BUILDING_INBOX_LIBRARY
             char tempChar = value.Value;
             Span<char> tempSpan = MemoryMarshal.CreateSpan<char>(ref tempChar, 1);
@@ -38,6 +40,7 @@ namespace System.Text.Json.Serialization.Converters
 
         public void Write(Span<byte> escapedPropertyName, char? value, ref Utf8JsonWriter writer)
         {
+            Debug.Assert(value.HasValue); // nulls are filtered before calling here
 #if BUILDING_INBOX_LIBRARY
             char tempChar = value.Value;
             Span<char> tempSpan = MemoryMarshal.CreateSpan<char>(ref tempChar, 1);

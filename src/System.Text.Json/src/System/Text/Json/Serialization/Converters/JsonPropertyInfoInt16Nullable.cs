@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal class JsonPropertyInfoInt16Nullable : JsonPropertyInfo<short?>, IJsonValueConverter<short?>
+    internal sealed class JsonPropertyInfoInt16Nullable : JsonPropertyInfo<short?>, IJsonValueConverter<short?>
     {
         public JsonPropertyInfoInt16Nullable(Type classType, Type propertyType, PropertyInfo propertyInfo, JsonSerializerOptions options) :
             base(classType, propertyType, propertyInfo, options)

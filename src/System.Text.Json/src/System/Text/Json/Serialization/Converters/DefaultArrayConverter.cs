@@ -3,12 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
-using System.Linq;
 using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal class DefaultArrayConverter : JsonEnumerableConverter
+    internal sealed class DefaultArrayConverter : JsonEnumerableConverter
     {
         public override IEnumerable CreateFromList(Type elementType, IList sourceList)
         {
@@ -19,9 +18,12 @@ namespace System.Text.Json.Serialization.Converters
                 array = Array.CreateInstance(probe.GetType(), sourceList.Count);
 
                 int i = 0;
-                foreach (Array childArray in sourceList.OfType<Array>())
+                foreach (IList child in sourceList)
                 {
-                    array.SetValue(childArray, i++);
+                    if (child is Array childArray)
+                    {
+                        array.SetValue(childArray, i++);
+                    }
                 }
             }
             else

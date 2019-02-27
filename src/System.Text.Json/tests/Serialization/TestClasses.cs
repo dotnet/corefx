@@ -101,7 +101,7 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
-    public class SimpleTestClassWithNullables : ITestClass
+    public abstract class SimpleBaseClassWithNullables
     {
         public short? MyInt16 { get; set; }
         public int? MyInt32 { get; set; }
@@ -118,7 +118,56 @@ namespace System.Text.Json.Serialization.Tests
         public double? MyDouble { get; set; }
         public DateTime? MyDateTime { get; set; }
         public SampleEnum? MyEnum { get; set; }
+    }
 
+    public class SimpleTestClassWithNulls : SimpleBaseClassWithNullables, ITestClass
+    {
+        public void Initialize()
+        {
+        }
+
+        public void Verify()
+        {
+            Assert.Null(MyInt16);
+            Assert.Null(MyInt32);
+            Assert.Null(MyInt64);
+            Assert.Null(MyUInt16);
+            Assert.Null(MyUInt32);
+            Assert.Null(MyUInt64);
+            Assert.Null(MyByte);
+            Assert.Null(MyChar);
+            Assert.Null(MyDecimal);
+            Assert.Null(MyBooleanFalse);
+            Assert.Null(MyBooleanTrue);
+            Assert.Null(MySingle);
+            Assert.Null(MyDouble);
+            Assert.Null(MyDateTime);
+            Assert.Null(MyEnum);
+        }
+        public static readonly string s_json =
+                @"{" +
+                @"""MyInt16"" : null," +
+                @"""MyInt32"" : null," +
+                @"""MyInt64"" : null," +
+                @"""MyUInt16"" : null," +
+                @"""MyUInt32"" : null," +
+                @"""MyUInt64"" : null," +
+                @"""MyByte"" : null," +
+                @"""MyChar"" : null," +
+                @"""MyBooleanTrue"" : null," +
+                @"""MyBooleanFalse"" : null," +
+                @"""MySingle"" : null," +
+                @"""MyDouble"" : null," +
+                @"""MyDecimal"" : null," +
+                @"""MyDateTime"" : null," +
+                @"""MyEnum"" : null" +
+                @"}";
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
+    }
+
+    public class SimpleTestClassWithNullables : SimpleBaseClassWithNullables, ITestClass
+    {
         public static readonly string s_json =
                 @"{" +
                 @"""MyInt16"" : 1," +

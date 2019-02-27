@@ -40,20 +40,11 @@ namespace System.Text.Json.Serialization.Converters
 
             if (attr == null)
             {
-                // Then class type
-                attr = options.GetAttributes<TAttribute>(parentClassType, inherit: true).FirstOrDefault();
-
-                if (attr == null)
-                {
-                    // Then declaring assembly
-                    attr = options.GetAttributes<TAttribute>(parentClassType.Assembly).FirstOrDefault();
-
-                    if (attr == null)
-                    {
-                        // Then global
-                        attr = options.GetAttributes<TAttribute>(JsonSerializerOptions.GlobalAttributesProvider).FirstOrDefault();
-                    }
-                }
+                // Look at class first, then assembly and then global.
+                attr =
+                      options.GetAttributes<TAttribute>(parentClassType, inherit: true).FirstOrDefault() ??
+                      options.GetAttributes<TAttribute>(parentClassType.Assembly).FirstOrDefault() ??
+                      options.GetAttributes<TAttribute>(JsonSerializerOptions.GlobalAttributesProvider).FirstOrDefault();
             }
 
             return attr;
@@ -154,12 +145,7 @@ namespace System.Text.Json.Serialization.Converters
                 }
             }
 
-            if (attr != null)
-            {
-                return attr.CreateConverter();
-            }
-
-            return null;
+            return attr?.CreateConverter();
         }
 
         public static JsonValueConverterAttribute GetPropertyValueConverter(

@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal class JsonPropertyInfoDateTime : JsonPropertyInfo<DateTime>, IJsonValueConverter<DateTime>
+    internal sealed class JsonPropertyInfoDateTime : JsonPropertyInfo<DateTime>, IJsonValueConverter<DateTime>
     {
         public JsonPropertyInfoDateTime(Type classType, Type propertyType, PropertyInfo propertyInfo, JsonSerializerOptions options) :
             base(classType, propertyType, propertyInfo, options)
@@ -28,14 +28,14 @@ namespace System.Text.Json.Serialization.Converters
 
         public void Write(DateTime value, ref Utf8JsonWriter writer)
         {
-            byte[] stringValue = JsonReaderHelper.s_utf8Encoding.GetBytes(value.ToString("O"));
-            writer.WriteStringValue(stringValue);
+            // todo: use the appropriate DateTime method once available.
+            writer.WriteStringValue(value.ToString("O"));
         }
 
         public void Write(Span<byte> escapedPropertyName, DateTime value, ref Utf8JsonWriter writer)
         {
-            byte[] stringValue = JsonReaderHelper.s_utf8Encoding.GetBytes(value.ToString("O"));
-            writer.WriteString(escapedPropertyName, stringValue);
+            // todo: use the appropriate DateTime method once available.
+            writer.WriteString(escapedPropertyName, value.ToString("O"));
         }
     }
 }

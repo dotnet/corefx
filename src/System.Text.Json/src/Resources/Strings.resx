@@ -297,7 +297,10 @@
   <data name="SerializationInvalidBufferSize" xml:space="preserve">
     <value>The value must be greater than zero or equal to -1.</value>
   </data>
-  <data name="SerializationUnableToCreateDynamicMethod" xml:space="preserve">
-    <value>Unable to create DynamicMethod {0}.</value>
+  <data name="BufferWriterAdvancedTooFar" xml:space="preserve">
+    <value>Cannot advance past the end of the buffer, which has a size of {0}.</value>
+  </data>
+  <data name="EnumConverterNotImplemented" xml:space="preserve">
+    <value>EnumConverter is not yet supported on .NET Standard 2.0.</value>
   </data>
 </root>

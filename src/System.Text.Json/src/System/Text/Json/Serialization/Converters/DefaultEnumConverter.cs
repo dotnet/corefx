@@ -6,7 +6,7 @@ using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal class DefaultEnumConverter<TValue> : JsonValueConverter<TValue>
+    internal sealed class DefaultEnumConverter<TValue> : JsonValueConverter<TValue>
     {
         public bool TreatAsString { get; private set; }
 
@@ -28,7 +28,7 @@ namespace System.Text.Json.Serialization.Converters
 
 #if !BUILDING_INBOX_LIBRARY 
                 // todo: add code here to handle NS2.0
-                throw new NotImplementedException("EnumConverter is not yet supported on .NET Standard 2.0.");
+                throw new NotImplementedException(SR.EnumConverterNotImplemented);
 #else
                 string enumString = reader.GetString();
                 if (!Enum.TryParse(valueType, enumString, out object objValue))

@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace System.Text.Json.Serialization
 {
-    internal class JsonReflectionMaterializer : JsonMemberBasedClassMaterializer
+    internal sealed class JsonReflectionMaterializer : JsonMemberBasedClassMaterializer
     {
         public override JsonClassInfo.ConstructorDelegate CreateConstructor(Type type)
         {

@@ -7,7 +7,7 @@ using System.Text.Json.Serialization.Converters;
 namespace System.Text.Json.Serialization.Policies
 {
     [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = true)]
-    internal class JsonArrayConverterAttribute : JsonEnumerableConverterAttribute
+    internal sealed class JsonArrayConverterAttribute : JsonEnumerableConverterAttribute
     {
         private static readonly JsonEnumerableConverter _converter = new DefaultArrayConverter();
 

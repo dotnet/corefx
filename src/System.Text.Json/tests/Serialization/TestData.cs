@@ -14,6 +14,7 @@ namespace System.Text.Json.Serialization.Tests
             {
                 yield return new object[] { typeof(SimpleTestClass), SimpleTestClass.s_data };
                 yield return new object[] { typeof(SimpleTestClassWithNullables), SimpleTestClassWithNullables.s_data };
+                yield return new object[] { typeof(SimpleTestClassWithNulls), SimpleTestClassWithNulls.s_data };
                 yield return new object[] { typeof(TestClassWithNestedObjectInner), TestClassWithNestedObjectInner.s_data };
                 yield return new object[] { typeof(TestClassWithNestedObjectOuter), TestClassWithNestedObjectOuter.s_data };
                 yield return new object[] { typeof(TestClassWithObjectArray), TestClassWithObjectArray.s_data };
@@ -27,6 +28,7 @@ namespace System.Text.Json.Serialization.Tests
             {
                 yield return new object[] { new SimpleTestClass() };
                 yield return new object[] { new SimpleTestClassWithNullables() };
+                yield return new object[] { new SimpleTestClassWithNulls() };
                 yield return new object[] { new TestClassWithNestedObjectInner() };
                 yield return new object[] { new TestClassWithNestedObjectOuter() };
                 yield return new object[] { new TestClassWithObjectArray() };
