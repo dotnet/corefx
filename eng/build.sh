@@ -32,54 +32,55 @@ extraargs=''
 checkedPossibleDirectoryToBuild=false
 
 # Check if an action is passed in
-declare -a actions=("-r" "--restore" "-b" "--build" "--rebuild" "--deploy" "--deployDeps" "--test" "--integrationTest" "--performanceTest" "--sign" "--publish" "--buildtests")
-actInt=($(comm -12 <(printf '%s\n' "${actions[@]}" | sort) <(printf '%s\n' "$@" | sort)))
+paramArr=( "$@" )
+declare -a actions=("r" "restore" "b" "build" "rebuild" "deploy" "deployDeps" "test" "integrationTest" "performanceTest" "sign" "publish" "buildtests")
+actInt=($(comm -12 <(printf '%s\n' "${actions[@]/#/-}" | sort) <(printf '%s\n' "${paramArr[@]/#--/-}" | sort)))
 if [ ${#actInt[@]} -eq 0 ]; then
-    arguments="--restore --build"
+    arguments="-restore -build"
 fi
 
-while (($# > 0)); do
-  lowerI="$(echo $1 | awk '{print tolower($0)}')"
-  case $lowerI in
-     --help|-h)
+while [[ $# > 0 ]]; do
+  opt="$(echo "$1" | awk '{gsub("--", "-", $0); print tolower($0)}')"
+  case "$opt" in
+     -help|-h)
       usage
       "$scriptroot/common/build.sh" --help
       exit 0
       ;;
-     --arch)
+     -arch)
       arguments="$arguments /p:ArchGroup=$2"
       shift 2
       ;;
-     --configuration|-c)
-      arguments="$arguments /p:ConfigurationGroup=$2 --configuration $2"
+     -configuration|-c)
+      arguments="$arguments /p:ConfigurationGroup=$2 -configuration $2"
       shift 2
       ;;
-     --framework|-f)
+     -framework|-f)
       val="$(echo "$2" | awk '{print tolower($0)}')"
       arguments="$arguments /p:TargetGroup=$val"
       shift 2
       ;;
-     --os)
+     -os)
       arguments="$arguments /p:OSGroup=$2"
       shift 2
       ;;
-     --allconfigurations)
+     -allconfigurations)
       arguments="$arguments /p:BuildAllConfigurations=true"
       shift 1
       ;;
-     --buildtests)
+     -buildtests)
       arguments="$arguments /p:BuildTests=true"
       shift 1
       ;;
-     --outerloop)
+     -outerloop)
       arguments="$arguments /p:OuterLoop=true"
       shift 1
       ;;
-     --coverage)
+     -coverage)
       arguments="$arguments /p:Coverage=true"
       shift 1
       ;;
-     --stripsymbols)
+     -stripsymbols)
       arguments="$arguments /p:BuildNativeStripSymbols=true"
       shift 1
       ;;
