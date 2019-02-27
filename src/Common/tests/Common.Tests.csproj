@@ -75,7 +75,6 @@
     <Compile Include="Tests\System\IO\StringParserTests.cs" />
     <Compile Include="Tests\System\MarvinTests.cs" />
     <Compile Include="Tests\System\Net\HttpDateParserTests.cs" />
-    <Compile Include="Tests\System\Numerics\BitOperationsTests.cs" />
     <Compile Include="Tests\System\PasteArgumentsTests.cs" />
     <Compile Include="Tests\System\Security\IdentityHelperTests.cs" />
     <Compile Include="Tests\System\Text\ValueStringBuilderTests.cs" />

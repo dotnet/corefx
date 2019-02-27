@@ -899,7 +899,7 @@ namespace System
         public static float Log(float x) { throw null; }
         public static float Log(float x, float y) { throw null; }
         public static float Log2(float x) { throw null; }
-        public static float Log10(float x) { throw null; }        
+        public static float Log10(float x) { throw null; }
         public static float Max(float x, float y) { throw null; }
         public static float MaxMagnitude(float x, float y) { throw null; }
         public static float Min(float x, float y) { throw null; }
@@ -1615,7 +1615,7 @@ namespace System.IO
         public virtual System.Threading.Tasks.Task WriteAsync(char[] buffer, int index, int count) { throw null; }
         public virtual System.Threading.Tasks.Task WriteAsync(System.ReadOnlyMemory<char> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public virtual System.Threading.Tasks.Task WriteAsync(string value) { throw null; }
-        public virtual System.Threading.Tasks.Task WriteAsync(System.Text.StringBuilder value, System.Threading.CancellationToken cancellationToken = default) { throw null;  }
+        public virtual System.Threading.Tasks.Task WriteAsync(System.Text.StringBuilder value, System.Threading.CancellationToken cancellationToken = default) { throw null; }
         public virtual void WriteLine() { }
         public virtual void WriteLine(bool value) { }
         public virtual void WriteLine(char value) { }
@@ -1659,6 +1659,38 @@ namespace System.Net
         public static byte[] UrlDecodeToBytes(byte[] encodedValue, int offset, int count) { throw null; }
         public static string UrlEncode(string value) { throw null; }
         public static byte[] UrlEncodeToBytes(byte[] value, int offset, int count) { throw null; }
+    }
+}
+namespace System.Numerics
+{
+    public static partial class BitOperations
+    {
+        [System.CLSCompliantAttribute(false)]
+        public static int LeadingZeroCount(uint value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static int LeadingZeroCount(ulong value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static int Log2(uint value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static int Log2(ulong value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static int PopCount(uint value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static int PopCount(ulong value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static uint RotateLeft(uint value, int bitOffset) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static ulong RotateLeft(ulong value, int bitOffset) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static uint RotateRight(uint value, int bitOffset) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static ulong RotateRight(ulong value, int bitOffset) { throw null; }
+        public static int TrailingZeroCount(int value) { throw null; }
+        public static int TrailingZeroCount(long value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static int TrailingZeroCount(uint value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public static int TrailingZeroCount(ulong value) { throw null; }
     }
 }
 namespace System.Security

@@ -6,7 +6,7 @@ using System;
 using System.Numerics;
 using Xunit;
 
-namespace Tests.System.Numerics
+namespace System.Numerics.Tests
 {
     public static class BitOperationsTests
     {
