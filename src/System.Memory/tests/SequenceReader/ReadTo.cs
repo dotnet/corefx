@@ -186,7 +186,7 @@ namespace System.Memory.Tests.SequenceReader
 
             Span<byte> delimiter = new byte[] { 1 };
 
-            for (int i = 1; i < 6; i += 2)
+            for (int i = 1; i < 6; i += 1)
             {
                 delimiter[0] = (byte)i;
                 Assert.True(reader.TryReadTo(out ReadOnlySequence<byte> sequence, delimiter, advancePastDelimiter: true));
