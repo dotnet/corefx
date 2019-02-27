@@ -94,7 +94,7 @@ public partial class SafeHandle_4000_Tests
 
         public override bool IsInvalid => handle == IntPtr.Zero;
 
-        override protected bool ReleaseHandle()
+        protected override bool ReleaseHandle()
         {
             SetLastError(-1);
             return true;
