@@ -133,7 +133,6 @@ namespace System.Runtime.InteropServices
     {
         public AllowReversePInvokeCallsAttribute() { }
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ArrayWithOffset
     {
         private object _dummy;
@@ -415,7 +414,6 @@ namespace System.Runtime.InteropServices
         public void Add() { }
         public void Remove() { }
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public readonly partial struct HandleRef
     {
         private readonly object _dummy;
