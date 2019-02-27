@@ -39,7 +39,8 @@ namespace System.Net.Http
         private bool _expectingSettingsAck;
         private int _initialWindowSize;
         private int _maxConcurrentStreams;
-        private DateTimeOffset _idleSinceTime;
+        private int _pendingWindowUpdate;
+        private int _idleSinceTickCount;
 
         private bool _disposed;
 
@@ -55,6 +56,14 @@ namespace System.Net.Http
         // We limit it per stream, and the user controls how many streams are created.
         // So set the connection window size to a large value.
         private const int ConnectionWindowSize = 64 * 1024 * 1024;
+
+        // We hold off on sending WINDOW_UPDATE until we hit thi minimum threshold.
+        // This value is somewhat arbitrary; the intent is to ensure it is much smaller than
+        // the window size itself, or we risk stalling the server because it runs out of window space.
+        // If we want to further reduce the frequency of WINDOW_UPDATEs, it's probably better to
+        // increase the window size (and thus increase the threshold proportionally)
+        // rather than just increase the threshold.
+        private const int ConnectionWindowThreshold = ConnectionWindowSize / 8;
 
         public Http2Connection(HttpConnectionPool pool, SslStream stream)
         {
@@ -75,6 +84,7 @@ namespace System.Net.Http
             _nextStream = 1;
             _initialWindowSize = DefaultInitialWindowSize;
             _maxConcurrentStreams = int.MaxValue;
+            _pendingWindowUpdate = 0;
         }
 
         private object SyncObject => _httpStreams;
@@ -149,7 +159,7 @@ namespace System.Net.Http
             }
         }
 
-        private async Task<FrameHeader> ReadFrameAsync()
+        private async ValueTask<FrameHeader> ReadFrameAsync()
         {
             // Read frame header
             await EnsureIncomingBytesAsync(FrameHeader.Size).ConfigureAwait(false);
@@ -975,12 +985,7 @@ namespace System.Net.Http
             await _writerLock.WaitAsync().ConfigureAwait(false);
             try
             {
-                // We update both the connection-level and stream-level windows at the same time
-                _outgoingBuffer.EnsureAvailableSpace((FrameHeader.Size + FrameHeader.WindowUpdateLength) * 2);
-
-                WriteFrameHeader(new FrameHeader(FrameHeader.WindowUpdateLength, FrameType.WindowUpdate, FrameFlags.None, 0));
-                BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, amount);
-                _outgoingBuffer.Commit(FrameHeader.WindowUpdateLength);
+                _outgoingBuffer.EnsureAvailableSpace(FrameHeader.Size + FrameHeader.WindowUpdateLength);
 
                 WriteFrameHeader(new FrameHeader(FrameHeader.WindowUpdateLength, FrameType.WindowUpdate, FrameFlags.None, streamId));
                 BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, amount);
@@ -992,6 +997,28 @@ namespace System.Net.Http
             {
                 _writerLock.Release();
             }
+        }
+
+        private void ExtendWindow(int amount)
+        {
+            Debug.Assert(amount > 0);
+
+            int windowUpdateSize;
+            lock (SyncObject)
+            {
+                Debug.Assert(_pendingWindowUpdate < ConnectionWindowThreshold);
+
+                _pendingWindowUpdate += amount;
+                if (_pendingWindowUpdate < ConnectionWindowThreshold)
+                {
+                    return;
+                }
+
+                windowUpdateSize = _pendingWindowUpdate;
+                _pendingWindowUpdate = 0;
+            }
+
+            ValueTask ignored = SendWindowUpdateAsync(0, windowUpdateSize);
         }
 
         private void WriteFrameHeader(FrameHeader frameHeader)
@@ -1015,7 +1042,7 @@ namespace System.Net.Http
         }
 
         /// <summary>Gets whether the connection exceeded any of the connection limits.</summary>
-        /// <param name="now">The current time.  Passed in to amortize the cost of calling DateTime.UtcNow.</param>
+        /// <param name="nowTicks">The current tick count.  Passed in to amortize the cost of calling Environment.TickCount.</param>
         /// <param name="connectionLifetime">How long a connection can be open to be considered reusable.</param>
         /// <param name="connectionIdleTimeout">How long a connection can have been idle in the pool to be considered reusable.</param>
         /// <returns>
@@ -1026,7 +1053,7 @@ namespace System.Net.Http
         /// the nature of connection pooling.
         /// </returns>
 
-        public bool IsExpired(DateTimeOffset now,
+        public bool IsExpired(int nowTicks,
                               TimeSpan connectionLifetime,
                               TimeSpan connectionIdleTimeout)
 
@@ -1037,15 +1064,16 @@ namespace System.Net.Http
             }
 
             // Check idle timeout when there are not pending requests for a while.
-            if ((connectionIdleTimeout != Timeout.InfiniteTimeSpan) && (_httpStreams.Count == 0) &&
-                    (now - _idleSinceTime > connectionIdleTimeout))
+            if ((connectionIdleTimeout != Timeout.InfiniteTimeSpan) &&
+                (_httpStreams.Count == 0) &&
+                ((uint)(nowTicks - _idleSinceTickCount) > connectionIdleTimeout.TotalMilliseconds))
             {
-                if (NetEventSource.IsEnabled) Trace($"Connection no longer usable. Idle {now - _idleSinceTime} > {connectionIdleTimeout}.");
+                if (NetEventSource.IsEnabled) Trace($"Connection no longer usable. Idle {TimeSpan.FromMilliseconds((uint)(nowTicks - _idleSinceTickCount))} > {connectionIdleTimeout}.");
 
                 return true;
             }
 
-            return LifetimeExpired(now, connectionLifetime);
+            return LifetimeExpired(nowTicks, connectionLifetime);
         }
 
         private void AbortStreams(int lastValidStream)
@@ -1092,7 +1120,14 @@ namespace System.Net.Http
 
             _connectionWindow.Dispose();
             _concurrentStreams.Dispose();
-            _writerLock.Dispose();
+
+            // ISSUE #35466
+            // We can't dispose the writer lock here, because there's a timing issue where this can occur 
+            // before a writer that has completed writing has actually release the lock.
+            // It's not clear that we actually need to dispose this object, since it shouldn't
+            // actually hold any unmanaged resources. However, we should ensure we have a clear understanding
+            // of shutdown semantics and object lifetimes in general, even if we don't actually dispose this.
+            // _writerLock.Dispose();
         }
 
         public void Dispose()
@@ -1237,18 +1272,18 @@ namespace System.Net.Http
             {
                 http2Stream?.Dispose();
 
-                if (e is IOException ioe)
+                if (e is IOException)
                 {
-                    throw new HttpRequestException(SR.net_http_client_execution_error, ioe);
+                    throw new HttpRequestException(SR.net_http_client_execution_error, e);
                 }
                 else if (e is ObjectDisposedException)
                 {
-                    throw new HttpRequestException(SR.net_http_client_execution_error);
+                    throw new HttpRequestException(SR.net_http_client_execution_error, e);
                 }
                 else if (e is Http2ProtocolException)
                 {
                     // ISSUE 31315: Determine if/how to expose HTTP2 error codes
-                    throw new HttpRequestException(SR.net_http_client_execution_error);
+                    throw new HttpRequestException(SR.net_http_client_execution_error, e);
                 }
                 else
                 {
@@ -1299,7 +1334,7 @@ namespace System.Net.Http
                 if (_httpStreams.Count == 0)
                 {
                     // If this was last pending request, get timestamp so we can monitor idle time.
-                    _idleSinceTime = DateTimeOffset.UtcNow;
+                    _idleSinceTickCount = Environment.TickCount;
                 }
 
                 if (_disposed)
