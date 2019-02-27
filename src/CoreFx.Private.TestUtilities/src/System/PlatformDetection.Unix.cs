@@ -60,6 +60,8 @@ namespace System
         public static bool IsNetfx471OrNewer => false;
         public static bool IsNetfx472OrNewer => false;
 
+        public static bool SupportsSsl3 => (PlatformDetection.IsOSX || (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && PlatformDetection.OpenSslVersion < new Version(1, 0, 2) && !PlatformDetection.IsDebian));
+
         public static bool IsDrawingSupported { get; } =
             RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
 #if netcoreapp30
@@ -68,6 +70,8 @@ namespace System
 #else
                 ? dlopen("libgdiplus.dylib", RTLD_LAZY) != IntPtr.Zero
                 : dlopen("libgdiplus.so", RTLD_LAZY) != IntPtr.Zero || dlopen("libgdiplus.so.0", RTLD_LAZY) != IntPtr.Zero;
+
+        public static bool IsInContainer => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && File.Exists("/.dockerenv");
 
         [DllImport("libdl")]
         private static extern IntPtr dlopen(string libName, int flags);
