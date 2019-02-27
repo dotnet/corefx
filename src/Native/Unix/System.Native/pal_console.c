@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <poll.h>
 #include <pthread.h>
+#include <signal.h>
 
 int32_t SystemNative_GetWindowSize(WinSize* windowSize)
 {
@@ -78,6 +79,7 @@ static bool g_hasInteractiveChildren = false; // tracks whether the application 
 static struct termios g_initTermios;          // the initial attributes captured when Console was initialized
 static bool g_consoleUninitialized = false;   // tracks whether the application is terminating
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
+static volatile bool g_receivedSigTtou = false;
 
 static void ApplyTerminalSettings(struct termios* termios, bool signalForBreak, bool hasInteractiveChildren)
 {
@@ -109,17 +111,54 @@ static bool TcGetAttr(struct termios* termios, bool signalForBreak, bool hasInte
     return rv;
 }
 
-static bool TcSetAttr(struct termios* t)
+static void ttou_handler(int signo)
 {
-    // This method is called with lock g_lock held.
+    (void)signo;
+    g_receivedSigTtou = true;
+}
 
+static bool TcSetAttr(struct termios* t, bool blockIfBackground)
+{
     if (g_consoleUninitialized)
     {
         // The application is exiting, we mustn't change terminal settings.
         return true;
     }
 
-    return tcsetattr(STDIN_FILENO, TCSANOW, t) >= 0;
+    if (!blockIfBackground)
+    {
+        // When the process is running in background, changing terminal settings
+        // will stop it (default SIGTTOU action).
+        // We change SIGTTOU to to get EINTR instead of blocking.
+        struct sigaction action;
+        memset(&action, 0, sizeof(action));
+        action.sa_handler = ttou_handler;
+        int rvSigaction = sigaction(SIGTTOU, &action, NULL);
+        assert(rvSigaction == 0);
+
+        g_receivedSigTtou = false;
+    }
+
+    bool rv = tcsetattr(STDIN_FILENO, TCSANOW, t) >= 0;
+
+    if (!blockIfBackground)
+    {
+        if (!rv && errno == EINTR && g_receivedSigTtou)
+        {
+            // Operation failed because we are background
+            // pretend it went fine.
+            rv = true;
+        }
+
+        // Restore default SIGTTOU handler.
+        struct sigaction action;
+        memset(&action, 0, sizeof(action));
+        action.sa_handler = SIG_DFL;
+        int rvSigaction = sigaction(SIGTTOU, &action, NULL);
+        assert(rvSigaction == 0);
+    }
+
+    return rv;
 }
 
 void UninitializeConsole()
@@ -136,8 +175,7 @@ void UninitializeConsole()
 
         if (g_haveInitTermios)
         {
-            // TODO: https://github.com/dotnet/cli/issues/6216
-            TcSetAttr(&g_initTermios);
+            TcSetAttr(&g_initTermios, /* blockIfBackground */ false);
         }
 
         g_consoleUninitialized = true;
@@ -156,7 +194,7 @@ void SystemNative_ConfigureConsoleTimeout(uint8_t minChars, uint8_t decisecondsT
             termios.c_cc[VMIN] = minChars;
             termios.c_cc[VTIME] = decisecondsTimeout;
 
-            TcSetAttr(&termios);
+            TcSetAttr(&termios, /* blockIfBackground */ true);
         }
         pthread_mutex_unlock(&g_lock);
     }
@@ -176,11 +214,9 @@ void SystemNative_ConfigureConsoleForInteractiveChild(int32_t hasInteractiveChil
         struct termios termios;
         if (TcGetAttr(&termios, g_signalForBreak, hasInteractiveChildren))
         {
-            if (TcSetAttr(&termios))
-            {
-                g_hasInteractiveChildren = hasInteractiveChildren;
-            }
+            TcSetAttr(&termios, /* blockIfBackground */ false);
         }
+        g_hasInteractiveChildren = hasInteractiveChildren;
 
         // Redo "Application mode" when there are no more interactive children.
         if (!hasInteractiveChildren)
@@ -327,7 +363,7 @@ int32_t SystemNative_SetSignalForBreak(int32_t signalForBreak)
         struct termios termios;
         if (TcGetAttr(&termios, signalForBreak, g_hasInteractiveChildren))
         {
-            if (TcSetAttr(&termios))
+            if (TcSetAttr(&termios, /* blockIfBackground */ false))
             {
                 g_signalForBreak = signalForBreak;
                 rv = 1;
@@ -349,7 +385,7 @@ void ReinitializeConsole()
         struct termios termios;
         if (TcGetAttr(&termios, g_signalForBreak, g_hasInteractiveChildren))
         {
-            TcSetAttr(&termios);
+            TcSetAttr(&termios, /* blockIfBackground */ false);
         }
 
         // Redo "Application mode" unless there are interactive children.
@@ -382,7 +418,7 @@ int32_t SystemNative_InitializeConsoleAndSignalHandling()
                 {
                     struct termios termios = g_initTermios;
                     ApplyTerminalSettings(&termios, g_signalForBreak, g_hasInteractiveChildren);
-                    TcSetAttr(&termios);
+                    TcSetAttr(&termios, /* blockIfBackground */ false);
                 }
 
                 atexit(UninitializeConsole);
