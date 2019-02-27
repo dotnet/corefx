@@ -64,19 +64,19 @@ namespace System.Text.Json
                 _nextPosition = _currentPosition;
                 if (_buffer.Length == 0)
                 {
+                    // Once we find a non-empty segment, we need to set current position to it.
+                    // Therefore, track the next position in a copy before it gets advanced to the next segment.
                     SequencePosition previousNextPosition = _nextPosition;
                     while (jsonData.TryGet(ref _nextPosition, out ReadOnlyMemory<byte> memory, advance: true))
                     {
+                        // _currentPosition should point to the segment right befor the segment that _nextPosition points to.
                         _currentPosition = previousNextPosition;
                         if (memory.Length != 0)
                         {
                             _buffer = memory.Span;
                             break;
                         }
-                        else
-                        {
-                            previousNextPosition = _nextPosition;
-                        }
+                        previousNextPosition = _nextPosition;
                     }
                 }
 

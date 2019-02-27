@@ -118,10 +118,7 @@ namespace System.Text.Json
                     Debug.Assert(_currentPosition.GetObject() != null);
                     return _sequence.GetPosition(_consumed, _currentPosition);
                 }
-                else
-                {
-                    return default;
-                }
+                return default;
             }
         }
 
