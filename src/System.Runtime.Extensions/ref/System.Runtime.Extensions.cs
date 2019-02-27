@@ -1663,7 +1663,7 @@ namespace System.Net
 }
 namespace System.Numerics
 {
-    public static partial class BitOperations
+    public static class BitOperations
     {
         [System.CLSCompliantAttribute(false)]
         public static int LeadingZeroCount(uint value) { throw null; }
