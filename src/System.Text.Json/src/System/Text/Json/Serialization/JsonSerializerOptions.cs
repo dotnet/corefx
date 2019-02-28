@@ -15,7 +15,7 @@ namespace System.Text.Json.Serialization
         internal const int BufferSizeUnspecified = -1;
         internal const int BufferSizeDefault = 16 * 1024;
 
-        private JsonMemberBasedClassMaterializer _classMaterializerStrategy;
+        private ClassMaterializer _classMaterializerStrategy;
         private int _defaultBufferSize = BufferSizeUnspecified;
         private bool _hasRuntimeCustomAttributes;
 
@@ -203,17 +203,17 @@ namespace System.Text.Json.Serialization
             return attributes.Concat(globalAttributes.OfType<TAttribute>());
         }
 
-        internal JsonMemberBasedClassMaterializer ClassMaterializerStrategy
+        internal ClassMaterializer ClassMaterializerStrategy
         {
             get
             {
                 if (_classMaterializerStrategy == null)
                 {
 #if BUILDING_INBOX_LIBRARY
-                    _classMaterializerStrategy = new JsonReflectionEmitMaterializer();
+                    _classMaterializerStrategy = new ReflectionEmitMaterializer();
 #else
                     // todo: should we attempt to detect here, or at least have a #define like #SUPPORTS_IL_EMIT
-                    _classMaterializerStrategy = new JsonReflectionMaterializer();
+                    _classMaterializerStrategy = new ReflectionMaterializer();
 #endif
                 }
 

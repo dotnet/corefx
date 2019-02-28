@@ -24,6 +24,9 @@ namespace System.Text.Json.Serialization
         internal byte[] _name = default;
         internal byte[] _escapedName = default;
 
+        internal bool HasGetter { get; set; }
+        internal bool HasSetter { get; set; }
+
         public ReadOnlySpan<byte> EscapedName
         {
             get

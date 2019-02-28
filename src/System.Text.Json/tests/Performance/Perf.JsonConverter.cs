@@ -314,6 +314,50 @@ namespace System.Text.Json.Serialization.Performance
             }
         }
 
+        [Benchmark(InnerIterationCount = 100000)]
+        [MeasureGCCounts]
+        public static void MeasureDeserialize_Constructor_JsonNet()
+        {
+            JsonConvert.DeserializeObject<SimpleTestClass>("{}");
+
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                SimpleTestClass obj = null;
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        obj = JsonConvert.DeserializeObject<SimpleTestClass>("{}");
+                        Assert.NotNull(obj);
+                    }
+                }
+            }
+        }
+
+        [Benchmark(InnerIterationCount = 100000)]
+        [MeasureGCCounts]
+        public static void MeasureDeserialize_Constructor()
+        {
+            byte[] encodedBytes = Encoding.UTF8.GetBytes("{}");
+
+            ReadOnlySpan<byte> spanBytes = encodedBytes;
+
+            JsonSerializer.Parse<SimpleTestClass>(spanBytes);
+
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                SimpleTestClass obj = null;
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < Benchmark.InnerIterationCount; i++)
+                    {
+                        obj = JsonSerializer.Parse<SimpleTestClass>(spanBytes);
+                        Assert.NotNull(obj);
+                    }
+                }
+            }
+        }
+
         private static void VerifySimpleTestClass(SimpleTestClass obj)
         {
             Assert.Equal(obj.Int1, 1);

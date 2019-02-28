@@ -28,6 +28,7 @@ namespace System.Text.Json.Serialization.Tests
         public uint MyUInt32 { get; set; }
         public ulong MyUInt64 { get; set; }
         public byte MyByte { get; set; }
+        public sbyte MySByte { get; set; }
         public char MyChar { get; set; }
         public string MyString { get; set; }
         public decimal MyDecimal { get; set; }
@@ -47,6 +48,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyUInt32"" : 5," +
                 @"""MyUInt64"" : 6," +
                 @"""MyByte"" : 7," +
+                @"""MySByte"" : 8," +
                 @"""MyChar"" : ""a""," +
                 @"""MyString"" : ""Hello""," +
                 @"""MyBooleanTrue"" : true," +
@@ -69,6 +71,7 @@ namespace System.Text.Json.Serialization.Tests
             MyUInt32 = 5;
             MyUInt64 = 6;
             MyByte = 7;
+            MySByte = 8;
             MyChar = 'a';
             MyString = "Hello";
             MyBooleanTrue = true;
@@ -89,6 +92,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal((uint)5, MyUInt32);
             Assert.Equal((ulong)6, MyUInt64);
             Assert.Equal((byte)7, MyByte);
+            Assert.Equal((sbyte)8, MySByte);
             Assert.Equal('a', MyChar);
             Assert.Equal("Hello", MyString);
             Assert.Equal(3.3m, MyDecimal);
@@ -110,6 +114,7 @@ namespace System.Text.Json.Serialization.Tests
         public uint? MyUInt32 { get; set; }
         public ulong? MyUInt64 { get; set; }
         public byte? MyByte { get; set; }
+        public sbyte? MySByte { get; set; }
         public char? MyChar { get; set; }
         public decimal? MyDecimal { get; set; }
         public bool? MyBooleanTrue { get; set; }
@@ -135,6 +140,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Null(MyUInt32);
             Assert.Null(MyUInt64);
             Assert.Null(MyByte);
+            Assert.Null(MySByte);
             Assert.Null(MyChar);
             Assert.Null(MyDecimal);
             Assert.Null(MyBooleanFalse);
@@ -153,6 +159,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyUInt32"" : null," +
                 @"""MyUInt64"" : null," +
                 @"""MyByte"" : null," +
+                @"""MySByte"" : null," +
                 @"""MyChar"" : null," +
                 @"""MyBooleanTrue"" : null," +
                 @"""MyBooleanFalse"" : null," +
@@ -177,6 +184,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyUInt32"" : 5," +
                 @"""MyUInt64"" : 6," +
                 @"""MyByte"" : 7," +
+                @"""MySByte"" : 8," +
                 @"""MyChar"" : ""a""," +
                 @"""MyBooleanTrue"" : true," +
                 @"""MyBooleanFalse"" : false," +
@@ -198,6 +206,7 @@ namespace System.Text.Json.Serialization.Tests
             MyUInt32 = 5;
             MyUInt64 = 6;
             MyByte = 7;
+            MySByte = 8;
             MyChar = 'a';
             MyBooleanTrue = true;
             MyBooleanFalse = false;
@@ -217,6 +226,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(MyUInt32, (uint)5);
             Assert.Equal(MyUInt64, (ulong)6);
             Assert.Equal(MyByte, (byte)7);
+            Assert.Equal(MySByte, (sbyte)8);
             Assert.Equal(MyChar, 'a');
             Assert.Equal(MyDecimal, 3.3m);
             Assert.Equal(MyBooleanFalse, false);

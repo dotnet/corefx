@@ -13,6 +13,72 @@ namespace System.Text.Json.Serialization.Converters
         public static readonly JsonArrayConverterAttribute s_arrayConverterAttibute = new JsonArrayConverterAttribute();
         public static readonly JsonEnumConverterAttribute s_enumConverterAttibute = new JsonEnumConverterAttribute();
 
+        private const int Max_TypeCode = 18;
+
+        private static readonly object[] s_Converters = {
+            null,
+            null,
+            null,
+            new JsonValueConverterBoolean(),
+            new JsonValueConverterChar(),
+            new JsonValueConverterSByte(),
+            new JsonValueConverterByte(),
+            new JsonValueConverterInt16(),
+            new JsonValueConverterUInt16(),
+            new JsonValueConverterInt32(),
+            new JsonValueConverterUInt32(),
+            new JsonValueConverterInt64(),
+            new JsonValueConverterUInt64(),
+            new JsonValueConverterSingle(),
+            new JsonValueConverterDouble(),
+            new JsonValueConverterDecimal(),
+            new JsonValueConverterDateTime(),
+            null,
+            new JsonValueConverterString()
+        };
+
+        private static readonly object[] s_NullableConverters = {
+            null,
+            null,
+            null,
+            new JsonValueConverterBooleanNullable(),
+            new JsonValueConverterCharNullable(),
+            new JsonValueConverterSByteNullable(),
+            new JsonValueConverterByteNullable(),
+            new JsonValueConverterInt16Nullable(),
+            new JsonValueConverterUInt16Nullable(),
+            new JsonValueConverterInt32Nullable(),
+            new JsonValueConverterUInt32Nullable(),
+            new JsonValueConverterInt64Nullable(),
+            new JsonValueConverterUInt64Nullable(),
+            new JsonValueConverterSingleNullable(),
+            new JsonValueConverterDoubleNullable(),
+            new JsonValueConverterDecimalNullable(),
+            new JsonValueConverterDateTimeNullable(),
+            null,
+            new JsonValueConverterString()
+        };
+
+        private static object GetDefaultPropertyValueConverter(Type propertyType, bool isNullable)
+        {
+            object converter = null;
+
+            int typeCode = (int)Type.GetTypeCode(propertyType);
+            if (typeCode <= Max_TypeCode)
+            {
+                if (isNullable)
+                {
+                    converter = s_NullableConverters[typeCode];
+                }
+                else
+                {
+                    converter = s_Converters[typeCode];
+                }
+            }
+
+            return converter;
+        }
+
         public static Type GetTypeConverter(Type classType, JsonSerializerOptions options)
         {
             JsonClassAttribute attr = options.GetAttributes<JsonClassAttribute>(classType, inherit: true).FirstOrDefault();
@@ -50,13 +116,13 @@ namespace System.Text.Json.Serialization.Converters
             return attr;
         }
 
-        public static TValue GetPropertyValueOption<TValue>(
+        public static TProperty GetPropertyValueOption<TProperty>(
             Type parentClassType,
             PropertyInfo propertyInfo,
             JsonSerializerOptions options,
-            Func<JsonPropertyValueAttribute, TValue> selector)
+            Func<JsonPropertyValueAttribute, TProperty> selector)
         {
-            TValue value;
+            TProperty value;
 
             JsonPropertyValueAttribute attr = null;
             if (propertyInfo != null)
@@ -148,30 +214,52 @@ namespace System.Text.Json.Serialization.Converters
             return attr?.CreateConverter();
         }
 
-        public static JsonValueConverterAttribute GetPropertyValueConverter(
+        public static JsonValueConverter<TProperty> GetPropertyValueConverter<TProperty>(
             Type parentClassType,
             PropertyInfo propertyInfo,
             Type propertyType,
             JsonSerializerOptions options)
         {
-            if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                propertyType = Nullable.GetUnderlyingType(propertyType);
-            }
+            Type propertyTypeNullableStripped;
 
             JsonValueConverterAttribute attr = GetPropertyValueConverterInternal(parentClassType, propertyInfo, options, propertyType);
+            if (attr != null)
+            {
+                return attr.GetConverter<TProperty>();
+            }
+
+            bool isNullable = propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
+            if (isNullable)
+            {
+                propertyTypeNullableStripped = Nullable.GetUnderlyingType(propertyType);
+                attr = GetPropertyValueConverterInternal(parentClassType, propertyInfo, options, propertyTypeNullableStripped);
+                if (attr != null)
+                {
+                    return attr.GetConverter<TProperty>();
+                }
+            }
+            else
+            {
+                propertyTypeNullableStripped = propertyType;
+            }
 
             // For Enums, support both the type Enum plus strongly-typed Enums.
-            if (attr == null && (propertyType.IsEnum || propertyType == typeof(Enum)))
+            if (propertyTypeNullableStripped.IsEnum || propertyTypeNullableStripped == typeof(Enum))
             {
                 attr = GetPropertyValueConverterInternal(parentClassType, propertyInfo, options, typeof(Enum));
                 if (attr == null)
                 {
                     attr = s_enumConverterAttibute;
                 }
+
+                if (attr != null)
+                {
+                    return attr.GetConverter<TProperty>();
+                }
             }
 
-            return attr;
+            object defaultConverter = GetDefaultPropertyValueConverter(propertyTypeNullableStripped, isNullable);
+            return (JsonValueConverter<TProperty>)defaultConverter;
         }
 
         private static JsonValueConverterAttribute GetPropertyValueConverterInternal(

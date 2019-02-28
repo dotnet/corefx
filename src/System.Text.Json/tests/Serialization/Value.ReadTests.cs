@@ -72,6 +72,118 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void RangeFail()
+        {
+            // These have custom code because the reader doesn't natively support:
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<byte>((byte.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<byte>((byte.MaxValue + 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<byte?>((byte.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<byte?>((byte.MaxValue + 1).ToString()));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<sbyte>((sbyte.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<sbyte>((sbyte.MaxValue + 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<sbyte?>((sbyte.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<sbyte?>((sbyte.MaxValue + 1).ToString()));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short>((short.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short>((short.MaxValue + 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short?>((short.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short?>((short.MaxValue + 1).ToString()));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float>((float.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float>((float.MaxValue + 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float?>((float.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float?>((float.MaxValue + 1).ToString()));
+
+            // These are natively supported by the reader:
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int>(((long)int.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int>(((long)int.MaxValue + 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int?>(((long)int.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int?>(((long)int.MaxValue + 1).ToString()));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<uint>(((long)uint.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<uint>(((long)uint.MaxValue + 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<uint?>(((long)uint.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<uint?>(((long)uint.MaxValue + 1).ToString()));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<long>(long.MinValue.ToString() + "0"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<long>(long.MaxValue.ToString() + "0"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<long?>(long.MinValue.ToString() + "0"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<long?>(long.MaxValue.ToString() + "0"));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ulong>(ulong.MinValue.ToString() + "0"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ulong>(ulong.MaxValue.ToString() + "0"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ulong?>(ulong.MinValue.ToString() + "0"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ulong?>(ulong.MaxValue.ToString() + "0"));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<decimal>(decimal.MinValue.ToString() + "0"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<decimal>(decimal.MaxValue.ToString() + "0"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<decimal?>(decimal.MinValue.ToString() + "0"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<decimal?>(decimal.MaxValue.ToString() + "0"));
+
+            // todo: determine why these don't throw (issue with reader?)
+            //Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<double>(double.MinValue.ToString() + "0"));
+            //Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<double>(double.MaxValue.ToString() + "0"));
+            //Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<double?>(double.MinValue.ToString() + "0"));
+            //Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<double?>(double.MaxValue.ToString() + "0"));
+        }
+
+        [Fact]
+        public static void RangePass()
+        {
+            Assert.Equal(byte.MinValue, JsonSerializer.Parse<byte>(byte.MinValue.ToString()));
+            Assert.Equal(byte.MaxValue, JsonSerializer.Parse<byte>(byte.MaxValue.ToString()));
+            Assert.Equal(byte.MinValue, JsonSerializer.Parse<byte?>(byte.MinValue.ToString()));
+            Assert.Equal(byte.MaxValue, JsonSerializer.Parse<byte?>(byte.MaxValue.ToString()));
+
+            Assert.Equal(sbyte.MinValue, JsonSerializer.Parse<sbyte>(sbyte.MinValue.ToString()));
+            Assert.Equal(sbyte.MaxValue, JsonSerializer.Parse<sbyte>(sbyte.MaxValue.ToString()));
+            Assert.Equal(sbyte.MinValue, JsonSerializer.Parse<sbyte?>(sbyte.MinValue.ToString()));
+            Assert.Equal(sbyte.MaxValue, JsonSerializer.Parse<sbyte?>(sbyte.MaxValue.ToString()));
+
+            Assert.Equal(short.MinValue, JsonSerializer.Parse<short>(short.MinValue.ToString()));
+            Assert.Equal(short.MaxValue, JsonSerializer.Parse<short>(short.MaxValue.ToString()));
+            Assert.Equal(short.MinValue, JsonSerializer.Parse<short?>(short.MinValue.ToString()));
+            Assert.Equal(short.MaxValue, JsonSerializer.Parse<short?>(short.MaxValue.ToString()));
+
+            // todo: these fail due to double->float conversion - do we need support in reader?
+            //Assert.Equal(float.MinValue, JsonSerializer.Parse<float>(float.MinValue.ToString()));
+            //Assert.Equal(float.MaxValue, JsonSerializer.Parse<float>(float.MaxValue.ToString()));
+            //Assert.Equal(float.MinValue, JsonSerializer.Parse<float?>(float.MinValue.ToString()));
+            //Assert.Equal(float.MaxValue, JsonSerializer.Parse<float?>(float.MaxValue.ToString()));
+
+            Assert.Equal(int.MinValue, JsonSerializer.Parse<int>(int.MinValue.ToString()));
+            Assert.Equal(int.MaxValue, JsonSerializer.Parse<int>(int.MaxValue.ToString()));
+            Assert.Equal(int.MinValue, JsonSerializer.Parse<int?>(int.MinValue.ToString()));
+            Assert.Equal(int.MaxValue, JsonSerializer.Parse<int?>(int.MaxValue.ToString()));
+
+            Assert.Equal(uint.MinValue, JsonSerializer.Parse<uint>(uint.MinValue.ToString()));
+            Assert.Equal(uint.MaxValue, JsonSerializer.Parse<uint>(uint.MaxValue.ToString()));
+            Assert.Equal(uint.MinValue, JsonSerializer.Parse<uint?>(uint.MinValue.ToString()));
+            Assert.Equal(uint.MaxValue, JsonSerializer.Parse<uint?>(uint.MaxValue.ToString()));
+
+            Assert.Equal(long.MinValue, JsonSerializer.Parse<long>(long.MinValue.ToString()));
+            Assert.Equal(long.MaxValue, JsonSerializer.Parse<long>(long.MaxValue.ToString()));
+            Assert.Equal(long.MinValue, JsonSerializer.Parse<long?>(long.MinValue.ToString()));
+            Assert.Equal(long.MaxValue, JsonSerializer.Parse<long?>(long.MaxValue.ToString()));
+
+            Assert.Equal(ulong.MinValue, JsonSerializer.Parse<ulong>(ulong.MinValue.ToString()));
+            Assert.Equal(ulong.MaxValue, JsonSerializer.Parse<ulong>(ulong.MaxValue.ToString()));
+            Assert.Equal(ulong.MinValue, JsonSerializer.Parse<ulong?>(ulong.MinValue.ToString()));
+            Assert.Equal(ulong.MaxValue, JsonSerializer.Parse<ulong?>(ulong.MaxValue.ToString()));
+
+            Assert.Equal(decimal.MinValue, JsonSerializer.Parse<decimal>(decimal.MinValue.ToString()));
+            Assert.Equal(decimal.MaxValue, JsonSerializer.Parse<decimal>(decimal.MaxValue.ToString()));
+            Assert.Equal(decimal.MinValue, JsonSerializer.Parse<decimal?>(decimal.MinValue.ToString()));
+            Assert.Equal(decimal.MaxValue, JsonSerializer.Parse<decimal?>(decimal.MaxValue.ToString()));
+
+            Assert.Equal(double.MinValue, JsonSerializer.Parse<double>(double.MinValue.ToString()));
+            Assert.Equal(double.MaxValue, JsonSerializer.Parse<double>(double.MaxValue.ToString()));
+            Assert.Equal(double.MinValue, JsonSerializer.Parse<double?>(double.MinValue.ToString()));
+            Assert.Equal(double.MaxValue, JsonSerializer.Parse<double?>(double.MaxValue.ToString()));
+        }
+
+        [Fact]
         public static void ReadObjectArray()
         {
             string data =

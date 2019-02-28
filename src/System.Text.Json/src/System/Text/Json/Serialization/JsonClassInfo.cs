@@ -73,7 +73,7 @@ namespace System.Text.Json.Serialization
                 Debug.Assert(ClassType == ClassType.Value);
 
                 // Add a single property that maps to the class type so we can have policies applied.
-                AddProperty(type, null, type, options);
+                AddProperty(type, propertyInfo: null, type, options);
             }
 
             GetPolicies(options);
