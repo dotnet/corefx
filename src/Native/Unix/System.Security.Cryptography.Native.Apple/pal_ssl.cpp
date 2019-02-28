@@ -26,7 +26,7 @@ static SSLProtocol PalSslProtocolToSslProtocol(PAL_SslProtocol palProtocolId)
     switch (palProtocolId)
     {
         case PAL_SslProtocol_Tls13:
-            return kTLSProtocol13_ForwardDef;
+            return (SSLProtocol)kTLSProtocol13_ForwardDef;
         case PAL_SslProtocol_Tls12:
             return kTLSProtocol12;
         case PAL_SslProtocol_Tls11:
