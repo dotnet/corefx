@@ -14,6 +14,7 @@ namespace System.Net.Http
     {
         private static class SslProvider
         {
+            // SP_PROT_TLS1_3 / SslProtocols.Tls13 in netcoreapp3.0
             private const SslProtocols Tls13Protocol = (SslProtocols)12288;
 
             internal static void SetSslOptions(EasyRequest easy, ClientCertificateOption clientCertOption)

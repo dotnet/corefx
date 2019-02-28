@@ -12,6 +12,7 @@ namespace System.Net
 {
     public class ServicePointManager
     {
+        // SP_PROT_TLS1_3 / SslProtocols.Tls13 in netcoreapp3.0
         private const SecurityProtocolType Tls13 = (SecurityProtocolType)12288;
 
         public const int DefaultNonPersistentConnectionLimit = 4;

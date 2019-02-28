@@ -10,6 +10,7 @@ namespace System.Net
     {
         public const SslProtocols DefaultSecurityProtocols =
 #if !netstandard && !netfx
+            // SP_PROT_TLS1_3 / SslProtocols.Tls13 in netcoreapp3.0
             ((SslProtocols)12288) |
 #endif
             SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;

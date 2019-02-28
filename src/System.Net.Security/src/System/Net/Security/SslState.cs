@@ -17,6 +17,7 @@ namespace System.Net.Security
 {
     internal class SslState
     {
+        // SP_PROT_TLS1_3 / SslProtocols.Tls13 in netcoreapp3.0
         internal const SslProtocols Tls13Protocol = (SslProtocols)12288;
 
         private static int s_uniqueNameInteger = 123;
