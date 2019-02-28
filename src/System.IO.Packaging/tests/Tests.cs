@@ -3640,7 +3640,7 @@ namespace System.IO.Packaging.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]  // desktop doesn't support Package.Open with FileAccess.Write
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop doesn't support Package.Open with FileAccess.Write")]
         public void CreateWithFileAccessWrite()
         {
             string[] fileNames = new [] { "file1.txt", "file2.txt", "file3.txt" };
@@ -3649,7 +3649,7 @@ namespace System.IO.Packaging.Tests
             {
                 using (Package package = Package.Open(stream, FileMode.Create, FileAccess.Write))
                 {
-                    foreach(String fileName in fileNames)
+                    foreach (string fileName in fileNames)
                     {
                         PackagePart part = package.CreatePart(PackUriHelper.CreatePartUri(new Uri(fileName, UriKind.Relative)),
                                                               System.Net.Mime.MediaTypeNames.Text.Plain,
@@ -3666,7 +3666,7 @@ namespace System.IO.Packaging.Tests
                 stream.Seek(0, SeekOrigin.Begin);
                 using (Package readPackage = Package.Open(stream))
                 {
-                    foreach(string fileName in fileNames)
+                    foreach (string fileName in fileNames)
                     {
                         PackagePart part = readPackage.GetPart(PackUriHelper.CreatePartUri(new Uri(fileName, UriKind.Relative)));
 
@@ -3696,7 +3696,7 @@ namespace System.IO.Packaging.Tests
 
                 // should compress *very well*
                 byte[] buffer =  new byte[1024 * 1024];
-                for(int i = 0; i < buffer.Length; i++)
+                for (int i = 0; i < buffer.Length; i++)
                 {
                     buffer[i] = (byte)(i % 2);
                 }
@@ -3731,7 +3731,7 @@ namespace System.IO.Packaging.Tests
                     {
                         Assert.Equal(totalLength, partStream.Length);
                         byte[] readBuffer = new byte[buffer.Length];
-                        for(long i = 0; i < SizeInMb; i++)
+                        for (long i = 0; i < SizeInMb; i++)
                         {
                             int actualRead = partStream.Read(readBuffer, 0, readBuffer.Length);
 
