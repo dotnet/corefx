@@ -3640,20 +3640,21 @@ namespace System.IO.Packaging.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]  // desktop doesn't support Package.Open with FileAccess.Write
         public void CreateWithFileAccessWrite()
         {
             string[] fileNames = new [] { "file1.txt", "file2.txt", "file3.txt" };
 
-            using (var stream = new MemoryStream())
+            using (Stream stream = new MemoryStream())
             {
-                using (var package = Package.Open(stream, FileMode.Create, FileAccess.Write))
+                using (Package package = Package.Open(stream, FileMode.Create, FileAccess.Write))
                 {
-                    foreach( var fileName in fileNames)
+                    foreach(String fileName in fileNames)
                     {
                         PackagePart part = package.CreatePart(PackUriHelper.CreatePartUri(new Uri(fileName, UriKind.Relative)),
                                                               System.Net.Mime.MediaTypeNames.Text.Plain,
                                                               CompressionOption.Fast);
-                        using (var writer = new StreamWriter(part.GetStream(), Encoding.ASCII))
+                        using (StreamWriter writer = new StreamWriter(part.GetStream(), Encoding.ASCII))
                         {
                             // just write the filename as content
                             writer.Write(fileName);
@@ -3663,14 +3664,14 @@ namespace System.IO.Packaging.Tests
 
                 // reopen for read and validate the content
                 stream.Seek(0, SeekOrigin.Begin);
-                using (var readPackage = Package.Open(stream))
+                using (Package readPackage = Package.Open(stream))
                 {
-                    foreach(var fileName in fileNames)
+                    foreach(string fileName in fileNames)
                     {
-                        var part = readPackage.GetPart(PackUriHelper.CreatePartUri(new Uri(fileName, UriKind.Relative)));
+                        PackagePart part = readPackage.GetPart(PackUriHelper.CreatePartUri(new Uri(fileName, UriKind.Relative)));
 
-                        using (var partStream = part.GetStream())
-                        using (var reader = new StreamReader(partStream, Encoding.ASCII))
+                        using (Stream partStream = part.GetStream())
+                        using (StreamReader reader = new StreamReader(partStream, Encoding.ASCII))
                         {
                             Assert.Equal(fileName.Length, partStream.Length);
                             Assert.Equal(fileName, reader.ReadToEnd());
@@ -3689,7 +3690,7 @@ namespace System.IO.Packaging.Tests
             // When ZipArchive is opened in Create it will write entries directly to the zip stream
             // When ZipArchive is opened in Update it will write uncompressed data to memory until 
             // the archive is closed.
-            using (var stream = new MemoryStream())
+            using (Stream stream = new MemoryStream())
             {
                 Uri partUri = PackUriHelper.CreatePartUri(new Uri("test.bin", UriKind.Relative));
 
@@ -3700,10 +3701,11 @@ namespace System.IO.Packaging.Tests
                     buffer[i] = (byte)(i % 2);
                 }
                 
-                const long sizeInMb = 6 * 1024; // 6GB
-                long totalLength = sizeInMb * buffer.Length;
+                const long SizeInMb = 6 * 1024; // 6GB
+                long totalLength = SizeInMb * buffer.Length;
 
-                using (Package package = Package.Open(stream, FileMode.Create, FileAccess.Write))  
+                // issue on desktop we cannot use FileAccess.Write on a ZipArchive
+                using (Package package = Package.Open(stream, FileMode.Create, PlatformDetection.IsFullFramework ? FileAccess.ReadWrite : FileAccess.Write))
                 {
                     PackagePart part = package.CreatePart(partUri,
                                                           System.Net.Mime.MediaTypeNames.Application.Octet,
@@ -3712,7 +3714,7 @@ namespace System.IO.Packaging.Tests
 
                     using (Stream partStream = part.GetStream())
                     {
-                        for (long i = 0; i < sizeInMb; i++)
+                        for (long i = 0; i < SizeInMb; i++)
                         {
                             partStream.Write(buffer, 0, buffer.Length);
                         }
@@ -3723,19 +3725,18 @@ namespace System.IO.Packaging.Tests
                 stream.Seek(0, SeekOrigin.Begin);
                 using (Package readPackage = Package.Open(stream))
                 {
-                    var part = readPackage.GetPart(partUri);
+                    PackagePart part = readPackage.GetPart(partUri);
 
                     using (Stream partStream = part.GetStream())
                     {
                         Assert.Equal(totalLength, partStream.Length);
-
                         byte[] readBuffer = new byte[buffer.Length];
-                        for(long i = 0; i < sizeInMb; i++)
+                        for(long i = 0; i < SizeInMb; i++)
                         {
                             int actualRead = partStream.Read(readBuffer, 0, readBuffer.Length);
 
                             Assert.Equal(actualRead, readBuffer.Length);
-                            Assert.True(((ReadOnlySpan<byte>)buffer).SequenceEqual(readBuffer));
+                            Assert.True(buffer.AsSpan().SequenceEqual(readBuffer));
                         }
                     }
                 }
