@@ -592,7 +592,9 @@ namespace System.Diagnostics
             if (!_traceIdSet)
             {
                 if (Parent != null && Parent.IdFormat == ActivityIdFormat.W3C)
+                {
                     _traceId = Parent.TraceId;
+                }
                 else if (_parentId != null && IsW3CId(_parentId))
                 {
                     try
@@ -604,8 +606,10 @@ namespace System.Diagnostics
                         _traceId = ActivityTraceId.NewTraceId();
                     }
                 }
-                else 
+                else
+                {
                     _traceId = ActivityTraceId.NewTraceId();
+                }
 
                 _traceIdSet = true;
             }
