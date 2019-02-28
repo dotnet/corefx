@@ -107,11 +107,11 @@ namespace System.ConfigurationTests
             Assert.Equal(10, settings.IntProperty);
         }
 
-        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp)),
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer)),
             InlineData(true),
-            InlineData(false)
-            ]
+            InlineData(false)]
         [ActiveIssue("dotnet/corefx #18832", TargetFrameworkMonikers.NetFramework)]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/35668", TestPlatforms.AnyUnix)]
         public void Save_SimpleSettings_Ok(bool isSynchronized)
         {
             PersistedSimpleSettings settings = isSynchronized
