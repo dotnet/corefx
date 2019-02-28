@@ -574,12 +574,22 @@ namespace System.Diagnostics.Tests
                 Assert.True(IdIsW3CFormat(activity.Id));
                 activity.Stop();
 
-                // non hex chars are not supported
+                // non hex chars are not supported in traceId
                 activity = new Activity("activity9");
-                activity.SetParentId("00-xyz3456789abcdef0123456789abcdef-x123456789abcdef-01");
+                activity.SetParentId("00-xyz3456789abcdef0123456789abcdef-0123456789abcdef-01");
                 activity.Start();
                 Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
                 Assert.True(IdIsW3CFormat(activity.Id));
+                activity.Stop();
+
+                // non hex chars are not supported in parentSpanId
+                activity = new Activity("activity10");
+                activity.SetParentId("00-0123456789abcdef0123456789abcdef-x123456789abcdef-01");
+                activity.Start();
+                Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+                Assert.True(IdIsW3CFormat(activity.Id));
+                Assert.Equal("0000000000000000", activity.ParentSpanId.AsHexString);
+                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.AsHexString);
                 activity.Stop();
 
                 // ParentSpanId from parent Activity

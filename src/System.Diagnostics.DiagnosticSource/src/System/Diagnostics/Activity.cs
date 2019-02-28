@@ -511,7 +511,11 @@ namespace System.Diagnostics
                 {
                     if (_parentId != null && IsW3CId(_parentId))
                     {
-                        _parentSpanId = new ActivitySpanId(_parentId.AsSpan(36, 16));
+                        try
+                        {
+                            _parentSpanId = new ActivitySpanId(_parentId.AsSpan(36, 16));
+                        }
+                        catch  { }
                         _parentSpanIdSet = true;
                     }
                     else if (Parent != null && Parent.IdFormat == ActivityIdFormat.W3C)
