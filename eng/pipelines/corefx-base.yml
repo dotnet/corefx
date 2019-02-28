@@ -88,7 +88,8 @@ jobs:
           - group: DotNet-HelixApi-Access
           - _archiveTestsParameter: /p:ArchiveTests=Tests
 
-        - _commonArguments: -restore -build -configuration $(_BuildConfig) -ci -buildtests -arch $(_architecture) -framework $(_framework) $(_outerloopParameter) $(_archiveTestsParameter)
+        - _args: -restore -build -configuration $(_BuildConfig) -ci -buildtests -arch $(_architecture) -framework $(_framework) $(_archiveTestsParameter)
+        - _commonArguments: $(_args)
         - _windowsOfficialBuildArguments: ''
 
         # Windows variables
@@ -104,7 +105,7 @@ jobs:
           - _buildScript: ${{ job.buildScriptPrefix }}./build.sh
           - _msbuildCommand: ${{ job.buildScriptPrefix }}./eng/common/msbuild.sh --warnaserror false --ci
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            - _commonArguments: $(_commonArguments) -stripSymbols
+            - _commonArguments: $(_args) -stripSymbols
 
         - ${{ if and(eq(job.enableMicrobuild, 'true'), eq(parameters.isOfficialBuild, 'true')) }}:
           - _TeamName: DotNetCore
