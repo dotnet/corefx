@@ -16,14 +16,17 @@ usage()
 {
   echo "Default if no actions are passed in: --restore --build"
   echo ""
-  echo "CoreFX specific settings:"
-  echo "  --buildtests             Build test projects"
+  echo "CoreFx specific actions:"
+  echo "  --buildtests             Build test projects in the solution"
+  echo "  --clean                  Clean the solution"
+  echo ""
+  echo "CoreFx specific options:"
   echo "  --framework              The target group assemblies are built for (short: -f)"
   echo "  --os                     The operating system assemblies are built for"
   echo "  --allconfigurations      Build packages for all build configurations"
   echo "  --coverage               Collect code coverage when testing"
   echo "  --outerloop              Include tests which are marked as OuterLoop"
-  echo "  --arch                   The architecture group"
+  echo "  --arch                   The architecture group (x86, x64, arm, etc.)"
   echo ""
 }
 
@@ -45,6 +48,17 @@ while [[ $# > 0 ]]; do
       usage
       "$scriptroot/common/build.sh" --help
       exit 0
+      ;;
+     -clean)
+      artifactsPath="$scriptroot/../artifacts"
+      if [ -d "$artifactsPath" ]; then
+        rm -rf $artifactsPath
+        echo "Artifacts directory deleted."
+      fi
+      if [ ${#actInt[@]} -eq 0 ]; then
+        exit 0
+      fi
+      shift 1
       ;;
      -arch)
       arguments="$arguments /p:ArchGroup=$2"
