@@ -380,8 +380,8 @@ internal static partial class Interop
             [In, MarshalAs(UnmanagedType.LPWStr)]
             /*SQLCHAR* */string SchemaName,
             /*SQLSMALLINT*/short NameLen2,
-            [In, MarshalAs(UnmanagedType.LPWStr)]
-            /*SQLCHAR* */string TableName,
+            [In]
+            /*SQLCHAR* */IntPtr TableName, // IntPtr because is mutated
             /*SQLSMALLINT*/short NameLen3,
             /*SQLUSMALLINT*/short Unique,
             /*SQLUSMALLINT*/short Reserved);
