@@ -69,7 +69,6 @@ namespace System.ComponentModel
 
             public bool Contains(string assemblyName) => _savedLicenseKeys.Contains(assemblyName);
 
-            // It is unknown why this is set to Designtime
             public override LicenseUsageMode UsageMode => LicenseUsageMode.Designtime;
 
             public override string GetSavedLicenseKey(Type type, Assembly resourceAssembly) => null;
