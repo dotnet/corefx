@@ -1,6 +1,6 @@
 # Pull Request Builds
 
-As part of our Pull Requests we have some validation builds where we build the product and run tests on different Operative Systems and Build Configurations.
+As part of our Pull Requests we have some validation builds where we build the product and run tests on different Operating Systems and Build Configurations.
 
 ### Build Matrix
 
@@ -18,7 +18,7 @@ As part of our Pull Requests we have some validation builds where we build the p
 | MacOS x64_Debug | netcoreapp | X |   |
 | Packaging All Configurations x64_Debug | all | X | X |
 
-Our build definitions are defined by some .yml files with the following structure:
+Our build definitions are defined by some `.yml` files with the following structure:
 
 - Entrypoint `.azure-pipelines.yml`
 - Shared build steps `eng/pipelines/corefx-base.yml`
@@ -44,7 +44,7 @@ Our build definitions are defined by some .yml files with the following structur
 
 `/azp` is a shortcut for `/AzurePipelines` which can be used as well.
 
-In order to use comment triggers, at the moment you need to be a `Contributor` or `Member` of the repo.
+In order to use comment triggers, at the moment you need to be a `Collaborator` or `Member` of the repo.
 
 ## How to look at a build failure
 
@@ -69,24 +69,26 @@ Then on Mission Control, you can just navigate through the results and look at s
 
 In order to rerun a build, it can be done through comments, the checks tab through the `rerun` button, or in the build UI on the right top corner, under the `...` submenu you will find a `retry` button.
 
-Unfortunately, `rerun` button on checks tab and `retry` button in build's UI are only available for Microsoft people.
+Unfortunately, `rerun` button on checks tab and `retry` button in build's UI are only available for contributors that are part of the Microsoft organization.
 
 ## Access a build binlog
 
-We publish binlogs as part of our PR builds to make weird build errors easier to diagnose. In order to find these, you can go to the build UI and find them pretty easily. 
+We publish binlogs as part of our PR builds to make weird build errors easier to diagnose. In order to find these, you can find them via the build UI: 
 
   1. If the build is still running, you can click on the `...` submenu and there will be an `Artifacts` entry.
   2. If the build is done, on the top right corner, there will be a big blue button called `Artifacts`.
 
-Once you click under the `Artifacts` section, a popup will show, with multiple directories, one for each build leg. Under this directories, you will find every binlog we produce as part of our builds.
+Once you click under the `Artifacts` section, a popup will show, with multiple directories, one for each build leg. Under this directory, you will find every binlog produced as part of the build.
 
 # Known Issues
 
-  1. Multiline comments are not supported, so if you want to trigger multiple builds, you have to do it on separate comments.
+  1. Multiline comments are not supported, so if you want to trigger multiple builds, you have to do it on separate comments. Also, everything after `/azp run` is considered the build name, so a comment trigger can't have anything after it. [See a real example](https://github.com/dotnet/corefx/pull/35322#issuecomment-4638363830).
   2. Feature request: trigger multiple builds with one `/azp` call. I.e `/azp run corefx-ci, corefx-outerloop-osx`.
   3. Duplicated jobs are shown on PR badges when a build is `rerun`.
   4. Feature request: `/azp help` doesn't list available builds for the repo.
   5. Too much clicks to get to the build UI.
   6. Mobile experience is really bad.
+  7. Only an entire pipeline can be triggered through comments, triggering a single leg is not supported yet. `/azp run corefx-ci (macOS x64_Debug)` wouldn't work.
+  8. Rerunning a single leg while others are still running is not yet supported, you have to wait for all legs to finish before retrying an individual leg.
 
 All of this issues have been raised to Azure DevOps teams, expect @safern, to update the docs through PR to widely communicate new features coming.
