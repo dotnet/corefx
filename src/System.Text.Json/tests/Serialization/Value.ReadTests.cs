@@ -95,10 +95,11 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort?>((ushort.MinValue - 1).ToString()));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort?>((ushort.MaxValue + 1).ToString()));
 
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float>((float.MinValue - 1).ToString()));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float>((float.MaxValue + 1).ToString()));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float?>((float.MinValue - 1).ToString()));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float?>((float.MaxValue + 1).ToString()));
+            // To ensure range failure, just use double's MinValue and MaxValue (instead of float.MinValue\MaxValue +-1)
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float>(double.MinValue.ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float>(double.MaxValue.ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float?>(double.MinValue.ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float?>(double.MaxValue.ToString()));
 
             // These are natively supported by the reader:
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int>(((long)int.MinValue - 1).ToString()));

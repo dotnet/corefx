@@ -16,8 +16,7 @@ namespace System.Text.Json.Serialization.Converters
                 return false;
             }
 
-            value = reader.GetDouble();
-            return true;
+            return reader.TryGetDouble(out value);
         }
 
         public override void Write(double value, ref Utf8JsonWriter writer)
