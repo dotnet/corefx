@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RestoreSources>
-      https://dotnet.myget.org/F/dotnet-core-optimization-data/api/v3/index.json;
-      $(RestoreSources);
-    </RestoreSources>
     <!-- Copy to IBC directory -->
     <OutputPath>$(IbcOptimizationDataDir)</OutputPath>
     <EnableBinPlacing>false</EnableBinPlacing>
