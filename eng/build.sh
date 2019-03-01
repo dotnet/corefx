@@ -28,7 +28,6 @@ usage()
   echo "  --buildtests               Build test projects in the solution"
   echo "  --rebuild                  Rebuild solution"
   echo "  --test                     Run all unit tests in the solution (short: -t)"
-  echo "  --integrationTest          Run all integration tests in the solution"
   echo "  --performanceTest          Run all performance tests in the solution"
   echo "  --pack                     Package build outputs into NuGet packages and Willow components"
   echo "  --sign                     Sign build outputs"
