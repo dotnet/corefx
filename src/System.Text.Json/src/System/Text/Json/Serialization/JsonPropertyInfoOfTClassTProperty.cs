@@ -8,7 +8,7 @@ using System.Reflection;
 namespace System.Text.Json.Serialization
 {
     /// <summary>
-    /// Represents a strongly-typed property to prevent boxing.
+    /// Represents a strongly-typed property to prevent boxing and to create a direct delegate to the getter\setter.
     /// </summary>
     internal class JsonPropertyInfo<TClass, TProperty> : JsonPropertyInfo<TProperty>
     {
@@ -104,7 +104,7 @@ namespace System.Text.Json.Serialization
                     }
                 }
 
-                throw new JsonReaderException(SR.Format(SR.DeserializeUnableToConvertValue, state.PropertyPath, PropertyType), reader.CurrentState);
+                ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(PropertyType, reader, state);
             }
         }
 
@@ -125,7 +125,7 @@ namespace System.Text.Json.Serialization
                 }
             }
 
-            throw new JsonReaderException(SR.Format(SR.DeserializeUnableToConvertValue, state.PropertyPath, PropertyType), reader.CurrentState);
+            ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(PropertyType, reader, state);
         }
 
         // todo: have the caller check if current.Enumerator != null and call WriteEnumerable of the underlying property directly to avoid an extra virtual call.

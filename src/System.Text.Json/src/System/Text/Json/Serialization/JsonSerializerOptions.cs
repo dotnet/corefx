@@ -4,7 +4,6 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -21,12 +20,14 @@ namespace System.Text.Json.Serialization
 
         private static readonly GlobalAttributeInfo s_globalAttributeInfo = new GlobalAttributeInfo();
 
-        private static readonly ConcurrentDictionary<ICustomAttributeProvider, object[]> s_reflectionAttributes = new ConcurrentDictionary<ICustomAttributeProvider, object[]>();
+        private static readonly ConcurrentDictionary<ICustomAttributeProvider, object[]> s_reflectionAttributes = 
+            new ConcurrentDictionary<ICustomAttributeProvider, object[]>();
 
-        // todo: determine threading guarantees on the List<Attribute>.
-        // Most likely a single thread is adding a new poco type and its attributes, so collisions are not likely.
-        // We could change List<> to thread-safe version if necessary.
-        private readonly Lazy<ConcurrentDictionary<ICustomAttributeProvider, List<Attribute>>> _runtimeAttributes = new Lazy<ConcurrentDictionary<ICustomAttributeProvider, List<Attribute>>>();
+        // todo: the List<Attribute> isn't thread-safe.
+        // For perf and for threading behavior, change to using ConcurrentStack<Tuple<ICustomAttributeProvider, Attribute>> and once serialization
+        // occurs convert that to a fast read-only Dictionary<ICustomAttributeProvider, List<Attribute>> and prevent subsequent calls to AddAttribute().
+        private readonly Lazy<ConcurrentDictionary<ICustomAttributeProvider, List<Attribute>>> _runtimeAttributes = 
+            new Lazy<ConcurrentDictionary<ICustomAttributeProvider, List<Attribute>>>();
 
         private static readonly ConcurrentDictionary<Type, JsonClassInfo> s_classes = new ConcurrentDictionary<Type, JsonClassInfo>();
         private readonly ConcurrentDictionary<Type, JsonClassInfo> _local_classes = new ConcurrentDictionary<Type, JsonClassInfo>();

@@ -21,7 +21,7 @@ namespace System.Text.Json.Serialization
             {
                 if (!type.IsAssignableFrom(value.GetType()))
                 {
-                    throw new ArgumentException(SR.Format(SR.DeserializeWrongType, type.FullName, value.GetType().FullName));
+                    ThrowHelper.ThrowArgumentException_DeserializeWrongType(type, value);
                 }
             }
         }
@@ -54,7 +54,9 @@ namespace System.Text.Json.Serialization
                 else
                 {
                     if (type == null)
+                    {
                         type = value.GetType();
+                    }
 
                     WriteStack state = default;
                     JsonClassInfo classInfo = options.GetOrAddClass(type);

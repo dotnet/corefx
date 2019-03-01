@@ -10,19 +10,9 @@ namespace System.Text.Json.Serialization.Converters
     {
         public override bool TryRead(Type valueType, ref Utf8JsonReader reader, out float? value)
         {
-            if (reader.TokenType != JsonTokenType.Number)
-            {
-                value = default;
-                return false;
-            }
-
-            if (!reader.TryGetDouble(out double rawValue))
-            {
-                value = default;
-                return false;
-            }
-
-            if (rawValue < float.MinValue || rawValue > float.MaxValue)
+            if (reader.TokenType != JsonTokenType.Number ||
+                !reader.TryGetDouble(out double rawValue) ||
+                !JsonHelpers.IsInRangeInclusive(rawValue, float.MinValue, float.MaxValue))
             {
                 value = default;
                 return false;

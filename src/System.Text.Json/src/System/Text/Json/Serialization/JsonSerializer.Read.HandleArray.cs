@@ -11,7 +11,6 @@ namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void HandleStartArray(
             JsonSerializerOptions options,
             ref Utf8JsonReader reader,
@@ -28,7 +27,7 @@ namespace System.Text.Json.Serialization
             Type arrayType = state.Current.JsonPropertyInfo.PropertyType;
             if (!typeof(IEnumerable).IsAssignableFrom(arrayType) || (arrayType.IsArray && arrayType.GetArrayRank() > 1))
             {
-                throw new JsonReaderException(SR.Format(SR.DeserializeUnableToConvertValue, state.PropertyPath, arrayType), reader.CurrentState);
+                ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(arrayType, reader, state);
             }
 
             Debug.Assert(state.Current.IsPropertyEnumerable());
@@ -71,7 +70,6 @@ namespace System.Text.Json.Serialization
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool HandleEndArray(
             JsonSerializerOptions options,
             ref ReadStack state)

@@ -4,13 +4,11 @@
 
 using System.Collections;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool WriteEnumerable(
             JsonSerializerOptions options,
             ref Utf8JsonWriter writer,

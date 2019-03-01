@@ -43,7 +43,7 @@ namespace System.Text.Json.Serialization
             {
                 JsonTokenType tokenType = reader.TokenType;
 
-                if (tokenType >= JsonTokenType.String && tokenType <= JsonTokenType.False)
+                if (JsonHelpers.IsInRangeInclusive(tokenType, JsonTokenType.String, JsonTokenType.False))
                 {
                     Debug.Assert(tokenType == JsonTokenType.String || tokenType == JsonTokenType.Number || tokenType == JsonTokenType.True || tokenType == JsonTokenType.False);
 

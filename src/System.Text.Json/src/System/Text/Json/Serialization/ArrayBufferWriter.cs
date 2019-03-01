@@ -101,7 +101,7 @@ namespace System.Text.Json.Serialization
         private void CheckIfDisposed()
         {
             if (_rentedBuffer == null)
-                throw new ObjectDisposedException(nameof(ArrayBufferWriter<T>));
+                ThrowHelper.ThrowObjectDisposedException(nameof(ArrayBufferWriter<T>));
         }
 
         public void Advance(int count)

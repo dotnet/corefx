@@ -2,13 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.CompilerServices;
-
 namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void HandleStartObject(JsonSerializerOptions options, ref ReadStack state)
         {
             if (state.Current.Skip())
@@ -40,7 +37,6 @@ namespace System.Text.Json.Serialization
             classInfo.CallOnDeserializing(state.Current.TypeConverter, state.Current.ReturnValue, options);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool HandleEndObject(JsonSerializerOptions options, ref ReadStack state)
         {
             bool isLastFrame = state.IsLastFrame;

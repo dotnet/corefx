@@ -3,13 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool WriteObject(
             JsonSerializerOptions options,
             ref Utf8JsonWriter writer,

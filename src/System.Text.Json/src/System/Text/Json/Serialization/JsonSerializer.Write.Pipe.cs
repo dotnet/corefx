@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
 // Exclude until we determine the dependency should work on System.IO.Pipelines
 #if false
 
@@ -51,7 +50,9 @@ namespace System.Text.Json.Serialization
             }
 
             if (type == null)
+            {
                 type = value.GetType();
+            }
 
             JsonClassInfo classInfo = options.GetOrAddClass(type);
             WriteStack state = default;

@@ -20,9 +20,7 @@ namespace System.Text.Json.Serialization.Converters
             }
 
             ReadOnlySpan<byte> span = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
-            DateTime tempValue;
-            bool success = Utf8Parser.TryParse(span, out tempValue, out int bytesConsumed, 'O') && span.Length == bytesConsumed;
-
+            bool success = Utf8Parser.TryParse(span, out DateTime tempValue, out int bytesConsumed, 'O') && span.Length == bytesConsumed;
             value = tempValue;
             return success;
         }

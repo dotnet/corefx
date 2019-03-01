@@ -10,13 +10,8 @@ namespace System.Text.Json.Serialization.Converters
     {
         public override bool TryRead(Type valueType, ref Utf8JsonReader reader, out long? value)
         {
-            if (reader.TokenType != JsonTokenType.Number)
-            {
-                value = default;
-                return false;
-            }
-
-            if (!reader.TryGetInt64(out long rawValue))
+            if (reader.TokenType != JsonTokenType.Number ||
+                !reader.TryGetInt64(out long rawValue))
             {
                 value = default;
                 return false;

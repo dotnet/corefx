@@ -2,14 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
 namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool HandleNull(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options)
         {
             if (state.Current.Skip())
@@ -20,7 +16,7 @@ namespace System.Text.Json.Serialization
             JsonPropertyInfo propertyInfo = state.Current.JsonPropertyInfo;
             if (!propertyInfo.CanBeNull)
             {
-                throw new JsonReaderException(SR.Format(SR.DeserializeCannotBeNull, state.PropertyPath), reader.CurrentState);
+                ThrowHelper.ThrowJsonReaderException_DeserializeCannotBeNull(reader, state);
             }
 
             if (state.Current.IsEnumerable() || state.Current.IsPropertyEnumerable())

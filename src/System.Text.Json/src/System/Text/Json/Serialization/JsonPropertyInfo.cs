@@ -27,21 +27,8 @@ namespace System.Text.Json.Serialization
         internal bool HasGetter { get; set; }
         internal bool HasSetter { get; set; }
 
-        public ReadOnlySpan<byte> EscapedName
-        {
-            get
-            {
-                return _escapedName;
-            }
-        }
-
-        public ReadOnlySpan<byte> Name
-        {
-            get
-            {
-                return _name;
-            }
-        }
+        public ReadOnlySpan<byte> EscapedName => _escapedName;
+        public ReadOnlySpan<byte> Name => _name;
 
         // todo: to minimize hashtable lookups, cache JsonClassInfo:
         //public JsonClassInfo ClassInfo;

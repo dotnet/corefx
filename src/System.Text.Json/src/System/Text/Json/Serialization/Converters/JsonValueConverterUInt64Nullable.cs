@@ -10,13 +10,8 @@ namespace System.Text.Json.Serialization.Converters
     {
         public override bool TryRead(Type valueType, ref Utf8JsonReader reader, out ulong? value)
         {
-            if (reader.TokenType != JsonTokenType.Number)
-            {
-                value = default;
-                return false;
-            }
-
-            if (!reader.TryGetUInt64(out ulong rawValue))
+            if (reader.TokenType != JsonTokenType.Number ||
+                !reader.TryGetUInt64(out ulong rawValue))
             {
                 value = default;
                 return false;

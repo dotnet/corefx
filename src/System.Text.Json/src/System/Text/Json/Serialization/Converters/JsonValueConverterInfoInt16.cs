@@ -10,19 +10,9 @@ namespace System.Text.Json.Serialization.Converters
     {
         public override bool TryRead(Type valueType, ref Utf8JsonReader reader, out short value)
         {
-            if (reader.TokenType != JsonTokenType.Number)
-            {
-                value = default;
-                return false;
-            }
-
-            if (!reader.TryGetInt32(out int rawValue))
-            {
-                value = default;
-                return false;
-            }
-
-            if (rawValue < short.MinValue || rawValue > short.MaxValue)
+            if (reader.TokenType != JsonTokenType.Number ||
+                !reader.TryGetInt32(out int rawValue) ||
+                !JsonHelpers.IsInRangeInclusive(rawValue, short.MinValue, short.MaxValue))
             {
                 value = default;
                 return false;
