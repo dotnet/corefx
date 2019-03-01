@@ -42,13 +42,8 @@ namespace System.Text.Json.Serialization.Converters
 #endif
             }
 
-            if (reader.TokenType != JsonTokenType.Number)
-            {
-                value = default;
-                return false;
-            }
-
-            if (!reader.TryGetUInt64(out ulong ulongValue))
+            if (reader.TokenType != JsonTokenType.Number ||
+                !reader.TryGetUInt64(out ulong ulongValue))
             {
                 value = default;
                 return false;

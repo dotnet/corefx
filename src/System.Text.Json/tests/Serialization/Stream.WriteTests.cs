@@ -141,12 +141,21 @@ namespace System.Text.Json.Serialization.Tests
             return base.FlushAsync(cancellationToken);
         }
 
+#if BUILDING_INBOX_LIBRARY
         public override ValueTask WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
         {
             TestWriteCount++;
             TestWriteBytesCount += source.Length;
             return base.WriteAsync(source, cancellationToken);
         }
+#else
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            TestWriteCount++;
+            TestWriteBytesCount += (count - offset);
+            return base.WriteAsync(buffer, offset, count, cancellationToken);
+        }
+#endif
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
