@@ -458,6 +458,9 @@ namespace System.Diagnostics
         /// </summary>
         public ref ActivitySpanId SpanId
         {
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+            [System.Security.SecuritySafeCriticalAttribute]
+#endif
             get
             {
                 if (!_spanIdSet)
@@ -485,6 +488,9 @@ namespace System.Diagnostics
         /// </summary>
         public ref ActivityTraceId TraceId
         {
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+            [System.Security.SecuritySafeCriticalAttribute]
+#endif
             get
             {
                 if (!_traceIdSet)
@@ -505,6 +511,9 @@ namespace System.Diagnostics
         /// </summary>
         public ref ActivitySpanId ParentSpanId
         {
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+            [System.Security.SecuritySafeCriticalAttribute]
+#endif
             get
             {
                 if (!_parentSpanIdSet)
