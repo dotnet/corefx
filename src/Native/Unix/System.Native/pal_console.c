@@ -168,17 +168,15 @@ void UninitializeConsole()
 
     if (pthread_mutex_lock(&g_lock) == 0)
     {
-        if (g_consoleUninitialized)
+        if (!g_consoleUninitialized)
         {
-            return;
-        }
+            if (g_haveInitTermios)
+            {
+                TcSetAttr(&g_initTermios, /* blockIfBackground */ false);
+            }
 
-        if (g_haveInitTermios)
-        {
-            TcSetAttr(&g_initTermios, /* blockIfBackground */ false);
+            g_consoleUninitialized = true;
         }
-
-        g_consoleUninitialized = true;
 
         pthread_mutex_unlock(&g_lock);
     }
@@ -206,22 +204,20 @@ void SystemNative_ConfigureConsoleForInteractiveChild(int32_t hasInteractiveChil
 
     if (pthread_mutex_lock(&g_lock) == 0)
     {
-        if (g_hasInteractiveChildren == hasInteractiveChildren)
+        if (g_hasInteractiveChildren != hasInteractiveChildren)
         {
-            return;
-        }
+            struct termios termios;
+            if (TcGetAttr(&termios, g_signalForBreak, hasInteractiveChildren))
+            {
+                TcSetAttr(&termios, /* blockIfBackground */ false);
+            }
+            g_hasInteractiveChildren = hasInteractiveChildren;
 
-        struct termios termios;
-        if (TcGetAttr(&termios, g_signalForBreak, hasInteractiveChildren))
-        {
-            TcSetAttr(&termios, /* blockIfBackground */ false);
-        }
-        g_hasInteractiveChildren = hasInteractiveChildren;
-
-        // Redo "Application mode" when there are no more interactive children.
-        if (!hasInteractiveChildren)
-        {
-            WriteKeypadXmit();
+            // Redo "Application mode" when there are no more interactive children.
+            if (!hasInteractiveChildren)
+            {
+                WriteKeypadXmit();
+            }
         }
 
         pthread_mutex_unlock(&g_lock);
