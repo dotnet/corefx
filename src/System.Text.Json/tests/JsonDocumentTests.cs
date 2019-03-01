@@ -1251,6 +1251,17 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void PayloadWithTooLargeMaxDepthCapped()
+        {
+            // MaxDepthOverflow * 8 > int.MaxValue
+            const int MaxDepthOverflow = 1 << 28; //268_435_456;
+
+            string badJson = new string('[', MaxDepthOverflow) + "2" + new string(']', MaxDepthOverflow);
+
+            Assert.Throws<JsonReaderException>(() => JsonDocument.Parse(badJson, new JsonReaderOptions { MaxDepth = 7 }));
+        }
+
+        [Fact]
         public static void HonorReaderOptionsMaxDepth()
         {
             const int OkayCount = 65;
@@ -1283,13 +1294,24 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void MaxDepthTooLarge()
+        public static void LargeMaxDepthIsAllowed()
         {
+            // MaxDepthOverflow * 8 > int.MaxValue
             const int MaxDepthOverflow = 1 << 28; //268_435_456;
 
             string okayJson = "[]";
 
-            Assert.Throws<OverflowException>(() => JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = MaxDepthOverflow }));
+            using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = MaxDepthOverflow }))
+            {
+                JsonElement root = doc.RootElement;
+                Assert.Equal(JsonValueType.Array, root.Type);
+            }
+
+            using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = int.MaxValue }))
+            {
+                JsonElement root = doc.RootElement;
+                Assert.Equal(JsonValueType.Array, root.Type);
+            }
         }
 
         [Fact]

@@ -14,8 +14,6 @@ namespace System.Text.Json
     /// </summary>
     public struct JsonReaderState
     {
-        internal const int DefaultMaxDepth = 64;
-
         internal long _lineNumber;
         internal long _bytePositionInLine;
         internal long _bytesConsumed;

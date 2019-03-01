@@ -149,7 +149,7 @@ namespace System.Text.Json
         {
             if (readerOptions.MaxDepth == 0)
             {
-                readerOptions.MaxDepth = JsonReaderState.DefaultMaxDepth;
+                readerOptions.MaxDepth = JsonReaderOptions.DefaultMaxDepth;
             }
 
             ReadOnlySpan<byte> utf8JsonSpan = utf8Json.Span;
@@ -159,7 +159,7 @@ namespace System.Text.Json
                 new JsonReaderState(options: readerOptions));
 
             var database = new MetadataDb(utf8Json.Length);
-            var stack = new StackRowStack(checked (readerOptions.MaxDepth * StackRow.Size));
+            var stack = new StackRowStack(JsonReaderOptions.DefaultMaxDepth * StackRow.Size);
 
             try
             {

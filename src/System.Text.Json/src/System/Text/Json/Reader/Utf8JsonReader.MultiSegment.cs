@@ -41,7 +41,7 @@ namespace System.Text.Json
             _readerOptions = state._readerOptions;
             if (_readerOptions.MaxDepth == 0)
             {
-                _readerOptions.MaxDepth = JsonReaderState.DefaultMaxDepth;  // If max depth is not set, revert to the default depth.
+                _readerOptions.MaxDepth = JsonReaderOptions.DefaultMaxDepth;  // If max depth is not set, revert to the default depth.
             }
             _bitStack = state._bitStack;
 

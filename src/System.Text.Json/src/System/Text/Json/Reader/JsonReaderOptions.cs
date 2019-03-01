@@ -5,13 +5,12 @@
 namespace System.Text.Json
 {
     /// <summary>
-    /// Provides the ability for the user to define custom behavior when reading JSON
-    /// using the <see cref="Utf8JsonReader"/> that may deviate from strict adherence
-    /// to the JSON specification (as per the JSON RFC - https://tools.ietf.org/html/rfc8259),
-    /// which is the default behavior. It also lets the user define the maximum depth to read up to.
+    /// Provides the ability for the user to define custom behavior when reading JSON.
     /// </summary>
     public struct JsonReaderOptions
     {
+        internal const int DefaultMaxDepth = 64;
+
         private int _maxDepth;
 
         /// <summary>
@@ -26,10 +25,7 @@ namespace System.Text.Json
         /// </summary>
         public int MaxDepth
         {
-            get
-            {
-                return _maxDepth;
-            }
+            get => _maxDepth;
             set
             {
                 if (value < 0)
