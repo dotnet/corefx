@@ -80,6 +80,7 @@ static struct termios g_initTermios;          // the initial attributes captured
 static bool g_consoleUninitialized = false;   // tracks whether the application is terminating
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
 static volatile bool g_receivedSigTtou = false;
+static bool g_noTty = false;                  // cache we are not a tty
 
 static void ApplyTerminalSettings(struct termios* termios, bool signalForBreak, bool hasInteractiveChildren)
 {
@@ -103,7 +104,19 @@ static void ApplyTerminalSettings(struct termios* termios, bool signalForBreak, 
 
 static bool TcGetAttr(struct termios* termios, bool signalForBreak, bool hasInteractiveChildren)
 {
+    if (g_noTty)
+    {
+        errno = ENOTTY;
+        return false;
+    }
+
     bool rv = tcgetattr(STDIN_FILENO, termios) >= 0;
+
+    if (!rv && errno == ENOTTY)
+    {
+        g_noTty = true;
+    }
+
     if (rv)
     {
         ApplyTerminalSettings(termios, signalForBreak, hasInteractiveChildren);
@@ -117,8 +130,24 @@ static void ttou_handler(int signo)
     g_receivedSigTtou = true;
 }
 
+static void InstallTTOUHandler(void (*handler)(int))
+{
+    struct sigaction action;
+    memset(&action, 0, sizeof(action));
+    action.sa_handler = handler;
+    int rvSigaction = sigaction(SIGTTOU, &action, NULL);
+    assert(rvSigaction == 0);
+    (void)rvSigaction;
+}
+
 static bool TcSetAttr(struct termios* t, bool blockIfBackground)
 {
+    if (g_noTty)
+    {
+        errno = ENOTTY;
+        return false;
+    }
+
     if (g_consoleUninitialized)
     {
         // The application is exiting, we mustn't change terminal settings.
@@ -130,11 +159,7 @@ static bool TcSetAttr(struct termios* t, bool blockIfBackground)
         // When the process is running in background, changing terminal settings
         // will stop it (default SIGTTOU action).
         // We change SIGTTOU to to get EINTR instead of blocking.
-        struct sigaction action;
-        memset(&action, 0, sizeof(action));
-        action.sa_handler = ttou_handler;
-        int rvSigaction = sigaction(SIGTTOU, &action, NULL);
-        assert(rvSigaction == 0);
+        InstallTTOUHandler(ttou_handler);
 
         g_receivedSigTtou = false;
     }
@@ -151,11 +176,7 @@ static bool TcSetAttr(struct termios* t, bool blockIfBackground)
         }
 
         // Restore default SIGTTOU handler.
-        struct sigaction action;
-        memset(&action, 0, sizeof(action));
-        action.sa_handler = SIG_DFL;
-        int rvSigaction = sigaction(SIGTTOU, &action, NULL);
-        assert(rvSigaction == 0);
+        InstallTTOUHandler(SIG_DFL);
     }
 
     return rv;
