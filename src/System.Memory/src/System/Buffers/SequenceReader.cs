@@ -18,7 +18,7 @@ namespace System.Buffers
         /// Create a <see cref="SequenceReader{T}"/> over the given <see cref="ReadOnlySequence{T}"/>.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SequenceReader(ReadOnlySequence<T> sequence)
+        public SequenceReader(in ReadOnlySequence<T> sequence)
         {
             CurrentSpanIndex = 0;
             Consumed = 0;
