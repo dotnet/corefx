@@ -829,7 +829,7 @@ namespace System.Net.Http.Functional.Tests
                     request.Headers.TE.Add(new TransferCodingWithQualityHeaderValue("trailers"));
                     request.Headers.TE.Add(new TransferCodingWithQualityHeaderValue("deflate"));
                     request.Headers.Trailer.Add("MyTrailer");
-                    if (!IsCurlHandler) request.Headers.TransferEncoding.Add(new TransferCodingHeaderValue("chunked"));
+                    request.Headers.TransferEncoding.Add(new TransferCodingHeaderValue("chunked"));
                     request.Headers.UserAgent.Add(new ProductInfoHeaderValue(new ProductHeaderValue("Mozilla", "5.0")));
                     request.Headers.Upgrade.Add(new ProductHeaderValue("HTTPS", "1.3"));
                     request.Headers.Upgrade.Add(new ProductHeaderValue("IRC", "6.9"));

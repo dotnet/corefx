@@ -178,6 +178,33 @@ namespace System.Net.Http.Functional.Tests
                 });
         }
 
+        private string GetCookieValue(HttpRequestData request)
+        {
+            if (!LoopbackServerFactory.IsHttp2)
+            {
+                // HTTP/1.x must have only one value.
+                return request.GetSingleHeaderValue("Cookie");
+            }
+
+            string cookieHeaderValue = null;
+            string[] cookieHeaderValues = request.GetHeaderValues("Cookie");
+
+            foreach (string header in cookieHeaderValues)
+            {
+                if (cookieHeaderValue == null)
+                {
+                    cookieHeaderValue = header;
+                }
+                else
+                {
+                    // rfc7540 8.1.2.5 states multiple cookie headers should be represented as single value.
+                    cookieHeaderValue = String.Concat(cookieHeaderValue, "; ", header);
+                }
+            }
+
+            return cookieHeaderValue;
+        }
+
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Netfx handler does not support custom cookie header")]
         [ConditionalFact]
         public async Task GetAsync_SetCookieContainerAndCookieHeader_BothCookiesSent()
@@ -204,22 +231,7 @@ namespace System.Net.Http.Functional.Tests
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
                     HttpRequestData requestData = await serverTask;
-                    string[] cookieHeaderValues = requestData.GetHeaderValues("Cookie");
-                    string cookieHeaderValue = null;
-
-                    foreach (string header in cookieHeaderValues)
-                    {
-                        if (cookieHeaderValue == null)
-                        {
-                            cookieHeaderValue = header;
-                        }
-                        else
-                        {
-                            // rfc7540 8.1.2.5 states multiple cookie headers should be represented as single value.
-                            cookieHeaderValue = String.Concat(cookieHeaderValue, "; ", header);
-                        }
-                    }
-
+                    string cookieHeaderValue = GetCookieValue(requestData);
                     var cookies = cookieHeaderValue.Split(new string[] { "; " }, StringSplitOptions.None);
                     Assert.Contains(s_expectedCookieHeaderValue, cookies);
                     Assert.Contains(s_customCookieHeaderValue, cookies);
@@ -256,21 +268,7 @@ namespace System.Net.Http.Functional.Tests
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
                     HttpRequestData requestData = await serverTask;
-                    string[] cookieHeaderValues = requestData.GetHeaderValues("Cookie");
-                    string cookieHeaderValue = null;
-
-                    foreach (string header in cookieHeaderValues)
-                    {
-                        if (cookieHeaderValue == null)
-                        {
-                            cookieHeaderValue = header;
-                        }
-                        else
-                        {
-                            // rfc7540 8.1.2.5 states multiple cookie headers should be represented as single value.
-                            cookieHeaderValue = String.Concat(cookieHeaderValue, "; ", header);
-                        }
-                    }
+                    string cookieHeaderValue = GetCookieValue(requestData);
 
                     // Multiple Cookie header values are treated as any other header values and are
                     // concatenated using ", " as the separator.  The container cookie is concatenated to

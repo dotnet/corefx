@@ -365,13 +365,13 @@ namespace System.Net.Test.Common
 
         public sealed class Connection : IDisposable
         {
-            private const int _blockSize=4000;
+            private const int BufferSize = 4000;
             private Socket _socket;
             private Stream _stream;
             private StreamWriter _writer;
-            private byte[] _buffer;
-            private int _end;
-            private int _start;
+            private byte[] _readBuffer;
+            private int _readStart;
+            private int _readEnd;
 
             public Connection(Socket socket, Stream stream)
             {
@@ -380,41 +380,42 @@ namespace System.Net.Test.Common
 
                 _writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true };
 
-                _buffer = new byte[_blockSize];
-                _end= 0;
-                _start = 0;
+                _readBuffer = new byte[BufferSize];
+                _readStart = 0;
+                _readEnd = 0;
             }
 
             public Socket Socket => _socket;
             public Stream Stream => _stream;
             public StreamWriter Writer => _writer;
 
-            public async Task<int> ReadAsync(byte[] buffer, int offset, int size)
+            public async Task<int> ReadAsync(Memory<byte> buffer, int offset, int size)
             {
-                if (_end - _start > 0)
+                if (_readEnd - _readStart > 0)
                 {
                     // Use buffered data first.
-                    int copyLength = _end - _start > size ? size : _end - _start;
-                    Array.Copy(_buffer, _start, buffer, offset, copyLength);
-                    _start += copyLength;
+                    int copyLength = Math.Min(size, _readEnd - _readStart);
+                    Memory<byte> source = new Memory<byte>(_readBuffer).Slice(_readStart, copyLength);
+                    source.CopyTo(buffer.Slice(offset));
+
+                    _readStart += copyLength;
                     return copyLength;
                 }
 
-                return await _stream.ReadAsync(buffer,offset, size).ConfigureAwait(false);
+                return await _stream.ReadAsync(buffer.Slice(offset, size)).ConfigureAwait(false);
             }
 
             // Read until we either get requested data or we hit end of stream.
-            public async Task<int> ReadBlockAsync(byte[] buffer, int offset, int size)
+            public async Task<int> ReadBlockAsync(Memory<byte> buffer, int offset, int size)
             {
                 int totalLength = 0;
 
                 while (size != 0)
                 {
                     int readLength = await ReadAsync(buffer, offset, size).ConfigureAwait(false);
-
                     if (readLength == 0)
                     {
-                        break;
+                        throw new Exception("Unexpected EOF trying to read");
                     }
 
                     totalLength += readLength;
@@ -442,7 +443,7 @@ namespace System.Net.Test.Common
 
             public async Task<string> ReadToEndAsync()
             {
-                byte[] buffer = new byte[_blockSize];
+                byte[] buffer = new byte[BufferSize];
                 int offset = 0;
                 int totalLength = 0;
                 int bytesRead;
@@ -455,7 +456,7 @@ namespace System.Net.Test.Common
 
                     if (bytesRead == buffer.Length)
                     {
-                        byte[] newBuffer = new byte[buffer.Length + _blockSize];
+                        byte[] newBuffer = new byte[buffer.Length + BufferSize];
                         buffer.CopyTo(newBuffer, 0);
                         offset = buffer.Length;
                         buffer = newBuffer;
@@ -473,53 +474,52 @@ namespace System.Net.Test.Common
             public async Task<string> ReadLineAsync()
             {
                 int index = 0;
-                int startSearch = _start;
+                int startSearch = _readStart;
 
                 while (true)
                 {
-                    if (_start == _end || index == -1)
+                    if (_readStart == _readEnd || index == -1)
                     {
                         // We either have no data or we did not find LF in stream.
                         // In either case, read more.
-                        if (_end + 2 > _buffer.Length)
+                        if (_readEnd + 2 > _readBuffer.Length)
                         {
                             // We no longer have space to read CRLF. Allocate new buffer and start over.
-                            byte[] newBuffer = new byte[_buffer.Length + _blockSize];
-                            int dataLength = _end - _start;
+                            byte[] newBuffer = new byte[_readBuffer.Length + BufferSize];
+                            int dataLength = _readEnd - _readStart;
                             if (dataLength > 0)
                             {
-                                Array.Copy(_buffer, _start, newBuffer, 0, dataLength);
-                                _start = 0;
-                                _end = dataLength;
-                                _buffer = newBuffer;
+                                Array.Copy(_readBuffer, _readStart, newBuffer, 0, dataLength);
+                                _readStart = 0;
+                                _readEnd = dataLength;
+                                _readBuffer = newBuffer;
                             }
                         }
 
-                        int bytesRead = await _stream.ReadAsync(_buffer, _end, _buffer.Length - _end).ConfigureAwait(false);
+                        int bytesRead = await _stream.ReadAsync(_readBuffer, _readEnd, _readBuffer.Length - _readEnd).ConfigureAwait(false);
                         if (bytesRead == 0)
                         {
                             break;
                         }
 
-                        _end += bytesRead;
+                        _readEnd += bytesRead;
                    }
 
-                    index = Array.IndexOf(_buffer, (byte)'\n', startSearch, _end - startSearch);
+                    index = Array.IndexOf(_readBuffer, (byte)'\n', startSearch, _readEnd - startSearch);
                     if (index == -1)
                     {
                         // We did not find it, look for more data.
-                        startSearch = _end;
+                        startSearch = _readEnd;
                         continue;
                     }
 
-                    int stringLength = index - _start;
-                    while (stringLength > 0 && _buffer[_start+stringLength] == '\n' || _buffer[_start+stringLength] == '\r')
-                    {
-                        stringLength--;
-                    }
+                    int stringLength = index - _readStart;
+                    // Consume CRLF if present.
+                    if (_readBuffer[_readStart + stringLength] == '\n') { stringLength--; }
+                    if (_readBuffer[_readStart + stringLength] == '\r') { stringLength--; }
 
-                    string line = System.Text.Encoding.ASCII.GetString(_buffer, _start, stringLength + 1);
-                    _start = index + 1;
+                    string line = System.Text.Encoding.ASCII.GetString(_readBuffer, _readStart, stringLength + 1);
+                    _readStart = index + 1;
                     return line;
                 }
 
@@ -577,15 +577,6 @@ namespace System.Net.Test.Common
                 List<string> lines = await ReadRequestHeaderAsync().ConfigureAwait(false);
                 await SendResponseAsync(statusCode, additionalHeaders, content);
                 return lines;
-            }
-
-            public async Task Drain(int max = 4000)
-            {
-                byte[] buffer  = new byte[max];
-                try {
-                    await _stream.ReadAsync(buffer, 0 , max);
-                }
-                catch { };
             }
         }
 
