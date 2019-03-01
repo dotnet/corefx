@@ -1197,7 +1197,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public async Task GetAsync_ForbiddenTrailingHeaders_Ignored()
+        public async Task GetAsync_ForbiddenTrailingHeaders_Throws()
         {
             if (!UseSocketsHttpHandler)
             {
@@ -1205,40 +1205,27 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            await LoopbackServer.CreateClientAndServerAsync(async url =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
                 using (var client = new HttpClient(handler))
                 {
-                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
-                    await TestHelper.WhenAllCompletedOrAnyFailed(
-                        getResponseTask,
-                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
-                            "HTTP/1.1 200 OK\r\n" +
-                            "Connection: close\r\n" +
-                            "Transfer-Encoding: chunked\r\n" +
-                            "Trailer: Set-Cookie, MyCoolTrailerHeader, Hello, Content-Type\r\n" +
-                            "\r\n" +
-                            "4\r\n" +
-                            "data\r\n" +
-                            "0\r\n" +
-                            "Set-Cookie: yummy\r\n" +
-                            "MyCoolTrailerHeader: amazingtrailer\r\n" +
-                            "Hello: World\r\n" +
-                            "Content-Type: text\r\n" +
-                            "\r\n"));
-
-                    using (HttpResponseMessage response = await getResponseTask)
-                    {
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        Assert.Contains("chunked", response.Headers.GetValues("Transfer-Encoding"));
-
-                        Assert.Equal(2, response.TrailingHeaders.Count());
-                        Assert.Contains("amazingtrailer", response.TrailingHeaders.GetValues("MyCoolTrailerHeader"));
-                        Assert.Contains("World", response.TrailingHeaders.GetValues("Hello"));
-                    }
+                    await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
                 }
-            });
+            }, server => server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                "HTTP/1.1 200 OK\r\n" +
+                "Connection: close\r\n" +
+                "Transfer-Encoding: chunked\r\n" +
+                "Trailer: Set-Cookie, MyCoolTrailerHeader, Hello, Content-Type\r\n" +
+                "\r\n" +
+                "4\r\n" +
+                "data\r\n" +
+                "0\r\n" +
+                "Set-Cookie: yummy\r\n" +
+                "MyCoolTrailerHeader: amazingtrailer\r\n" +
+                "Hello: World\r\n" +
+                "Content-Type: text\r\n" +
+                "\r\n"));
         }
 
         [Fact]

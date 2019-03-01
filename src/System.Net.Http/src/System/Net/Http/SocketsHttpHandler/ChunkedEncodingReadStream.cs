@@ -274,7 +274,7 @@ namespace System.Net.Http
 
                             if (currentLine.Length != 0)
                             {
-                                TryThrowInvalidHttpResponse(isFromTrailer:false);
+                                ThrowInvalidHttpResponse();
                             }
 
                             _state = ParsingState.ExpectChunkHeader;
@@ -285,12 +285,8 @@ namespace System.Net.Http
 
                             while (true)
                             {
-                                // Folded header was deprecated in RFC 7230 3.2.4. Thus we don't support it.
                                 _connection._allowedReadLineBytes = MaxTrailingHeaderLength;
-                                if (!_connection.TryReadNextLine(out currentLine))
-                                {
-                                    break;
-                                }
+                                currentLine = _connection.ReadNextResponseHeaderLineAsync(foldedHeadersAllowed: true).Result;
 
                                 if (currentLine.IsEmpty)
                                 {
@@ -311,8 +307,10 @@ namespace System.Net.Http
                                     break;
                                 }
                                 // Parse the trailers.
-                                else
+                                else if (!_connection.IsDisposed)
                                 {
+                                    // Make sure that we don't inadvertently consuming trailing headers
+                                    // while draining a connection that's being returned back to the pool.
                                     HttpConnection.ParseHeaderNameValue(currentLine, _response, isFromTrailer : true);
                                 }
                             }

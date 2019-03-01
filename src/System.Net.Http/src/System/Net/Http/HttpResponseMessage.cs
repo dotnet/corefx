@@ -120,10 +120,6 @@ namespace System.Net.Http
         {
             get
             {
-                // Make sure that we don't inadvertently consuming trailing headers
-                // while draining a connection that's being returned back to the pool.
-                CheckDisposed();
-
                 if (_trailingHeaders == null)
                 {
                     _trailingHeaders = new HttpResponseHeaders();
