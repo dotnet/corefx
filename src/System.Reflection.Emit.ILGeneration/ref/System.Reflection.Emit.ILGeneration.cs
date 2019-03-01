@@ -56,7 +56,7 @@ namespace System.Reflection.Emit
         public virtual void ThrowException(System.Type excType) { }
         public virtual void UsingNamespace(string usingNamespace) { }
     }
-    public partial struct Label
+    public partial struct Label : IEquatable<System.Reflection.Emit.Label>
     {
         private int _dummyPrimitive;
         public override bool Equals(object obj) { throw null; }
