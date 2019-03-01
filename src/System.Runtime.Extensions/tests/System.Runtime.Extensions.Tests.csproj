@@ -39,6 +39,7 @@
     <Compile Include="System\IO\Path.GetRelativePath.cs" />
     <Compile Include="System\MathTests.netcoreapp.cs" />
     <Compile Include="System\MathF.netcoreapp.cs" />
+    <Compile Include="System\Numerics\BitOperationsTests.cs" />
     <Compile Include="System\StringComparer.netcoreapp.cs" />
     <Compile Include="System\UnloadingAndProcessExitTests.netcoreapp.cs" />
     <Compile Include="System\IO\Path.IsPathFullyQualified.cs" />
@@ -54,7 +55,6 @@
     <Compile Include="System\Runtime\Versioning\FrameworkName.cs" />
     <Compile Include="System\IO\PathTestsBase.cs" />
     <Compile Include="System\Net\WebUtility.cs" />
-    <Compile Include="System\Numerics\BitOperationsTests.cs" />
     <Compile Include="System\BitConverter.cs" />
     <Compile Include="System\Convert.BoxedObjectCheck.cs" />
     <Compile Include="System\Convert.FromBase64.cs" />
