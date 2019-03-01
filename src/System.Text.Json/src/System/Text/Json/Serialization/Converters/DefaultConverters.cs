@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization.Policies;
@@ -13,12 +14,12 @@ namespace System.Text.Json.Serialization.Converters
         public static readonly JsonArrayConverterAttribute s_arrayConverterAttibute = new JsonArrayConverterAttribute();
         public static readonly JsonEnumConverterAttribute s_enumConverterAttibute = new JsonEnumConverterAttribute();
 
-        private const int Max_TypeCode = 18;
+        private const int MaxTypeCode = 18;
 
         private static readonly object[] s_Converters = {
-            null,
-            null,
-            null,
+            null,   // Empty 
+            null,   // Object
+            null,   // DBNull
             new JsonValueConverterBoolean(),
             new JsonValueConverterChar(),
             new JsonValueConverterSByte(),
@@ -33,11 +34,12 @@ namespace System.Text.Json.Serialization.Converters
             new JsonValueConverterDouble(),
             new JsonValueConverterDecimal(),
             new JsonValueConverterDateTime(),
-            null,
+            null,   // (not a value)
             new JsonValueConverterString()
         };
 
-        private static readonly object[] s_NullableConverters = {
+        private static readonly object[] s_NullableConverters = new object[MaxTypeCode + 1]
+        {
             null,
             null,
             null,
@@ -64,7 +66,7 @@ namespace System.Text.Json.Serialization.Converters
             object converter = null;
 
             int typeCode = (int)Type.GetTypeCode(propertyType);
-            if (typeCode <= Max_TypeCode)
+            if (typeCode <= MaxTypeCode)
             {
                 if (isNullable)
                 {
@@ -88,8 +90,7 @@ namespace System.Text.Json.Serialization.Converters
                 return null;
             }
 
-            Type converterType = attr.ConverterType;
-            return converterType;
+            return attr.ConverterType;
         }
 
         public static TAttribute GetPolicy<TAttribute>(
@@ -97,6 +98,8 @@ namespace System.Text.Json.Serialization.Converters
             PropertyInfo propertyInfo,
             JsonSerializerOptions options) where TAttribute : Attribute
         {
+            Debug.Assert(parentClassType != null);
+
             TAttribute attr = null;
             if (propertyInfo != null)
             {
@@ -189,24 +192,16 @@ namespace System.Text.Json.Serialization.Converters
 
             if (attr == null)
             {
-                // Then class type
-                attr = options.GetAttributes<JsonEnumerableConverterAttribute>(parentClassType, inherit: true).Where(a => a.EnumerableType == enumerableType).FirstOrDefault();
+                attr = options.GetAttributes<JsonEnumerableConverterAttribute>(parentClassType, inherit: true).Where(a => a.EnumerableType == enumerableType).FirstOrDefault() ??
+                       options.GetAttributes<JsonEnumerableConverterAttribute>(parentClassType.Assembly).Where(a => a.EnumerableType == enumerableType).FirstOrDefault() ??
+                       options.GetAttributes<JsonEnumerableConverterAttribute>(JsonSerializerOptions.GlobalAttributesProvider).Where(a => a.EnumerableType == enumerableType).FirstOrDefault();
 
                 if (attr == null)
                 {
-                    // Then declaring assembly
-                    attr = options.GetAttributes<JsonEnumerableConverterAttribute>(parentClassType.Assembly).Where(a => a.EnumerableType == enumerableType).FirstOrDefault();
-
-                    if (attr == null)
+                    // Then default
+                    if (enumerableType == typeof(Array))
                     {
-                        // Then global
-                        attr = options.GetAttributes<JsonEnumerableConverterAttribute>(JsonSerializerOptions.GlobalAttributesProvider).Where(a => a.EnumerableType == enumerableType).FirstOrDefault();
-
-                        // Then default
-                        if (enumerableType == typeof(Array))
-                        {
-                            attr = s_arrayConverterAttibute;
-                        }
+                        attr = s_arrayConverterAttibute;
                     }
                 }
             }
@@ -222,7 +217,7 @@ namespace System.Text.Json.Serialization.Converters
         {
             Type propertyTypeNullableStripped;
 
-            JsonValueConverterAttribute attr = GetPropertyValueConverterInternal(parentClassType, propertyInfo, options, propertyType);
+            JsonValueConverterAttribute attr = GetPropertyValueConverterAttribute(parentClassType, propertyInfo, options, propertyType);
             if (attr != null)
             {
                 return attr.GetConverter<TProperty>();
@@ -232,7 +227,7 @@ namespace System.Text.Json.Serialization.Converters
             if (isNullable)
             {
                 propertyTypeNullableStripped = Nullable.GetUnderlyingType(propertyType);
-                attr = GetPropertyValueConverterInternal(parentClassType, propertyInfo, options, propertyTypeNullableStripped);
+                attr = GetPropertyValueConverterAttribute(parentClassType, propertyInfo, options, propertyTypeNullableStripped);
                 if (attr != null)
                 {
                     return attr.GetConverter<TProperty>();
@@ -246,23 +241,17 @@ namespace System.Text.Json.Serialization.Converters
             // For Enums, support both the type Enum plus strongly-typed Enums.
             if (propertyTypeNullableStripped.IsEnum || propertyTypeNullableStripped == typeof(Enum))
             {
-                attr = GetPropertyValueConverterInternal(parentClassType, propertyInfo, options, typeof(Enum));
-                if (attr == null)
-                {
-                    attr = s_enumConverterAttibute;
-                }
+                attr = GetPropertyValueConverterAttribute(parentClassType, propertyInfo, options, typeof(Enum)) ??
+                    s_enumConverterAttibute;
 
-                if (attr != null)
-                {
-                    return attr.GetConverter<TProperty>();
-                }
+                return attr.GetConverter<TProperty>();
             }
 
             object defaultConverter = GetDefaultPropertyValueConverter(propertyTypeNullableStripped, isNullable);
             return (JsonValueConverter<TProperty>)defaultConverter;
         }
 
-        private static JsonValueConverterAttribute GetPropertyValueConverterInternal(
+        private static JsonValueConverterAttribute GetPropertyValueConverterAttribute(
             Type parentClassType,
             PropertyInfo propertyInfo,
             JsonSerializerOptions options,

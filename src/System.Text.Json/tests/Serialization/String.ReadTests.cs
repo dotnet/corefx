@@ -42,5 +42,12 @@ namespace System.Text.Json.Serialization.Tests
             SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(SimpleTestClass.s_json);
             obj.Verify();
         }
+
+        [Fact]
+        public static void EmptyClassWithRandomData()
+        {
+            JsonSerializer.Parse<EmptyClass>(SimpleTestClass.s_json);
+            JsonSerializer.Parse<EmptyClass>(SimpleTestClassWithNulls.s_json);
+        }
     }
 }

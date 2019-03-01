@@ -9,6 +9,7 @@ namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
+        internal static readonly JsonPropertyInfo s_missingProperty = new JsonPropertyInfo<object, object>();
         private static readonly JsonSerializerOptions s_defaultSettings = new JsonSerializerOptions();
 
         private static object ReadCore(
@@ -53,12 +54,20 @@ namespace System.Text.Json.Serialization
                 }
                 else if (tokenType == JsonTokenType.PropertyName)
                 {
-                    Debug.Assert(state.Current.ReturnValue != default);
-                    Debug.Assert(state.Current.JsonClassInfo != default);
+                    if (!state.Current.Drain)
+                    {
+                        Debug.Assert(state.Current.ReturnValue != default);
+                        Debug.Assert(state.Current.JsonClassInfo != default);
 
-                    ReadOnlySpan<byte> propertyName = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
-                    state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(propertyName, state.Current.PropertyIndex);
-                    state.Current.PropertyIndex++;
+                        ReadOnlySpan<byte> propertyName = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
+                        state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(propertyName, state.Current.PropertyIndex);
+                        if (state.Current.JsonPropertyInfo == null)
+                        {
+                            state.Current.JsonPropertyInfo = s_missingProperty;
+                        }
+
+                        state.Current.PropertyIndex++;
+                    }
                 }
                 else if (tokenType == JsonTokenType.StartObject)
                 {

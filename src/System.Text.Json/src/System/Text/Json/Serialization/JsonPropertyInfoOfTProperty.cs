@@ -15,11 +15,14 @@ namespace System.Text.Json.Serialization
 #endif
     abstract class JsonPropertyInfo<TProperty> : JsonPropertyInfo
     {
-        public JsonValueConverter<TProperty> ValueConverter { get; internal set; }
+        // Constructor used for internal identifiers
+        internal JsonPropertyInfo() { }
 
         internal JsonPropertyInfo(Type classType, Type propertyType, PropertyInfo propertyInfo, Type elementType, JsonSerializerOptions options) :
             base(classType, propertyType, propertyInfo, elementType, options)
         { }
+
+        public JsonValueConverter<TProperty> ValueConverter { get; internal set; }
 
         internal override void GetPolicies(JsonSerializerOptions options)
         {

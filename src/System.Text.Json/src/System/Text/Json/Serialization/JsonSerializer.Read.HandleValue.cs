@@ -11,12 +11,12 @@ namespace System.Text.Json.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool HandleValue(JsonTokenType tokenType, JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            if (state.Current.JsonPropertyInfo == null)
+            if (state.Current.Skip())
             {
                 // todo: deserialize loosely-typed object if there is a callback for IJsonTypeConverterOnDeserialized, and then invoke that callback.
                 return false;
             }
-            
+
             bool lastCall = (!state.Current.IsEnumerable() && !state.Current.IsPropertyEnumerable() && state.Current.ReturnValue == null);
             state.Current.JsonPropertyInfo.Read(tokenType, options, ref state, ref reader);
             return lastCall;

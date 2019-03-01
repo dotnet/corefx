@@ -12,7 +12,10 @@ namespace System.Text.Json.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool HandleNull(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options)
         {
-            Debug.Assert(state.Current.JsonPropertyInfo != null);
+            if (state.Current.Skip())
+            {
+                return false;
+            }
 
             JsonPropertyInfo propertyInfo = state.Current.JsonPropertyInfo;
             if (!propertyInfo.CanBeNull)

@@ -18,7 +18,6 @@ namespace System.Text.Json.Serialization.Tests
 
             ClassWithNoSetter objCopy = JsonSerializer.Parse<ClassWithNoSetter>(json);
             Assert.Equal("DefaultValue", objCopy.MyString);
-
         }
 
         [Fact]
@@ -29,10 +28,8 @@ namespace System.Text.Json.Serialization.Tests
             string json = JsonSerializer.ToString(objNoSetter);
             Assert.Equal(@"{""MyString"":""DefaultValue""}", json);
 
-
             ClassWithNoGetter objNoGetter = JsonSerializer.Parse<ClassWithNoGetter>(json);
             Assert.Equal("DefaultValue", objNoGetter.GetMyString());
-
         }
 
         [Fact]

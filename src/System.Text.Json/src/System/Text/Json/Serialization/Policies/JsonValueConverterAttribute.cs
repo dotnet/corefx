@@ -15,10 +15,5 @@ namespace System.Text.Json.Serialization.Policies
         public Type PropertyType { get; protected set; }
 
         public abstract JsonValueConverter<TValue> GetConverter<TValue>();
-
-        public virtual JsonValueConverter<object> GetConverter()
-        {
-            return GetConverter<object>();
-        }
     }
 }

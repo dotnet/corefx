@@ -18,9 +18,6 @@ namespace System.Text.Json.Serialization
 #endif
     class JsonEnumConverterAttribute : JsonValueConverterAttribute
     {
-        private static readonly JsonValueConverter<object> s_stringConverter = new DefaultEnumConverter<object>(true);
-        private static readonly JsonValueConverter<object> s_longConverter = new DefaultEnumConverter<object>(false);
-
         public JsonEnumConverterAttribute()
         {
             PropertyType = typeof(Enum);
@@ -39,15 +36,8 @@ namespace System.Text.Json.Serialization
 
         public override JsonValueConverter<TValue> GetConverter<TValue>()
         {
+            // todo: determine caching strategy for converters
             return new DefaultEnumConverter<TValue>(TreatAsString);
-        }
-
-        public override JsonValueConverter<object> GetConverter()
-        {
-            if (TreatAsString)
-                return s_stringConverter;
-
-            return s_longConverter;
         }
     }
 }

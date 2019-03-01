@@ -11,26 +11,27 @@ namespace System.Text.Json.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void HandleStartObject(JsonSerializerOptions options, ref ReadStack state)
         {
-            Type objType;
+            if (state.Current.Skip())
+            {
+                // todo: deserialize loosely-typed object if there is a callback for IJsonTypeConverterOnDeserialized, and then invoke that callback.
+                state.Push();
+                state.Current.Drain = true;
+                return;
+            }
 
             if (state.Current.IsEnumerable() || state.Current.IsPropertyEnumerable())
             {
                 // An array of objects either on the current property or on a list
-                objType = state.Current.GetElementType();
+                Type objType = state.Current.GetElementType();
                 state.Push();
                 state.Current.JsonClassInfo = options.GetOrAddClass(objType);
             }
             else if (state.Current.JsonPropertyInfo != null)
             {
                 // Nested object
-                objType = state.Current.JsonPropertyInfo.PropertyType;
+                Type objType = state.Current.JsonPropertyInfo.PropertyType;
                 state.Push();
                 state.Current.JsonClassInfo = options.GetOrAddClass(objType);
-            }
-            else if (!state.IsLastFrame)
-            {
-                // todo: deserialize loosely-typed object if there is a callback for IJsonTypeConverterOnDeserialized, and then invoke that callback.
-                return;
             }
 
             JsonClassInfo classInfo = state.Current.JsonClassInfo;
@@ -42,17 +43,18 @@ namespace System.Text.Json.Serialization
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool HandleEndObject(JsonSerializerOptions options, ref ReadStack state)
         {
-            if (state.Current.JsonPropertyInfo == null && !state.IsLastFrame)
+            bool isLastFrame = state.IsLastFrame;
+            if (state.Current.Drain)
             {
-                // the json is not being applied to the object.
-                return false;
+                state.Pop();
+                return isLastFrame;
             }
 
             object value = state.Current.ReturnValue;
 
-            state.Current.JsonClassInfo.CallOnDeserialized(state.Current.TypeConverter, state.Current.ReturnValue, options);
+            state.Current.JsonClassInfo.CallOnDeserialized(state.Current.TypeConverter, value, options);
 
-            if (state.IsLastFrame)
+            if (isLastFrame)
             {
                 state.Current.Reset();
                 state.Current.ReturnValue = value;

@@ -46,6 +46,9 @@ namespace System.Text.Json.Serialization
         // todo: to minimize hashtable lookups, cache JsonClassInfo:
         //public JsonClassInfo ClassInfo;
 
+        // Constructor used for internal identifiers
+        internal JsonPropertyInfo() { }
+
         internal JsonPropertyInfo(Type parentClassType, Type propertyType, PropertyInfo propertyInfo, Type elementType, JsonSerializerOptions options)
         { 
             ParentClassType = parentClassType;

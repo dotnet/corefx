@@ -25,6 +25,7 @@ namespace System.Text.Json.Serialization
 
         // For performance, we order the properties by the first usage and this index helps find the right slot quicker.
         internal int PropertyIndex;
+        internal bool Drain;
 
         internal void Reset()
         {
@@ -32,6 +33,7 @@ namespace System.Text.Json.Serialization
             JsonClassInfo = null;
             TypeConverter = null;
             PropertyIndex = 0;
+            Drain = false;
             ResetProperty();
         }
 
@@ -46,6 +48,11 @@ namespace System.Text.Json.Serialization
         internal bool IsEnumerable()
         {
             return JsonClassInfo.ClassType == ClassType.Enumerable;
+        }
+
+        internal bool Skip()
+        {
+            return Drain || ReferenceEquals(JsonPropertyInfo, JsonSerializer.s_missingProperty);
         }
 
         internal bool IsPropertyEnumerable()

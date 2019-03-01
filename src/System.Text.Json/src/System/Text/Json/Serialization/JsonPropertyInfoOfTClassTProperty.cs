@@ -10,16 +10,14 @@ namespace System.Text.Json.Serialization
     /// <summary>
     /// Represents a strongly-typed property to prevent boxing.
     /// </summary>
-#if MAKE_UNREVIEWED_APIS_INTERNAL
-    internal
-#else
-    public
-#endif
-    class JsonPropertyInfo<TClass, TProperty> : JsonPropertyInfo<TProperty>
+    internal class JsonPropertyInfo<TClass, TProperty> : JsonPropertyInfo<TProperty>
     {
         private bool _isPropertyPolicy;
         internal Func<TClass, TProperty> Get { get; private set; }
         internal Action<TClass, TProperty> Set { get; private set; }
+
+        // Constructor used for internal identifiers
+        internal JsonPropertyInfo() { }
 
         internal JsonPropertyInfo(Type classType, Type propertyType, PropertyInfo propertyInfo, Type elementType, JsonSerializerOptions options) :
             base(classType, propertyType, propertyInfo, elementType, options)

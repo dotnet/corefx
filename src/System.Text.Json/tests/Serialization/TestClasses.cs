@@ -38,6 +38,23 @@ namespace System.Text.Json.Serialization.Tests
         public double MyDouble { get; set; }
         public DateTime MyDateTime { get; set; }
         public SampleEnum MyEnum { get; set; }
+        public short[] MyInt16Array{ get; set; }
+        public int[] MyInt32Array{ get; set; }
+        public long[] MyInt64Array{ get; set; }
+        public ushort[] MyUInt16Array{ get; set; }
+        public uint[] MyUInt32Array{ get; set; }
+        public ulong[] MyUInt64Array{ get; set; }
+        public byte[] MyByteArray{ get; set; }
+        public sbyte[] MySByteArray{ get; set; }
+        public char[] MyCharArray{ get; set; }
+        public string[] MyStringArray{ get; set; }
+        public decimal[] MyDecimalArray{ get; set; }
+        public bool[] MyBooleanTrueArray{ get; set; }
+        public bool[] MyBooleanFalseArray{ get; set; }
+        public float[] MySingleArray{ get; set; }
+        public double[] MyDoubleArray{ get; set; }
+        public DateTime[] MyDateTimeArray{ get; set; }
+        public SampleEnum[] MyEnumArray{ get; set; }
 
         public static readonly string s_json =
                 @"{" +
@@ -57,7 +74,24 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDouble"" : 2.2," +
                 @"""MyDecimal"" : 3.3," +
                 @"""MyDateTime"" : ""2019-01-30T12:01:02.0000000Z""," +
-                @"""MyEnum"" : 2" + // int by default
+                @"""MyEnum"" : 2," + // int by default
+                @"""MyInt16Array"" : [1]," +
+                @"""MyInt32Array"" : [2]," +
+                @"""MyInt64Array"" : [3]," +
+                @"""MyUInt16Array"" : [4]," +
+                @"""MyUInt32Array"" : [5]," +
+                @"""MyUInt64Array"" : [6]," +
+                @"""MyByteArray"" : [7]," +
+                @"""MySByteArray"" : [8]," +
+                @"""MyCharArray"" : [""a""]," +
+                @"""MyStringArray"" : [""Hello""]," +
+                @"""MyBooleanTrueArray"" : [true]," +
+                @"""MyBooleanFalseArray"" : [false]," +
+                @"""MySingleArray"" : [1.1]," +
+                @"""MyDoubleArray"" : [2.2]," +
+                @"""MyDecimalArray"" : [3.3]," +
+                @"""MyDateTimeArray"" : [""2019-01-30T12:01:02.0000000Z""]," +
+                @"""MyEnumArray"" : [2]" + // int by default
                 @"}";
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
@@ -81,6 +115,24 @@ namespace System.Text.Json.Serialization.Tests
             MyDecimal = 3.3m;
             MyDateTime = new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc);
             MyEnum = SampleEnum.Two;
+
+            MyInt16Array = new short[] { 1 };
+            MyInt32Array = new int[] { 2 };
+            MyInt64Array = new long[] { 3 };
+            MyUInt16Array = new ushort[] { 4 };
+            MyUInt32Array = new uint[] { 5 };
+            MyUInt64Array = new ulong[] { 6 };
+            MyByteArray = new byte[] { 7 };
+            MySByteArray = new sbyte[] { 8 };
+            MyCharArray = new char[] { 'a' };
+            MyStringArray = new string[] { "Hello" };
+            MyBooleanTrueArray = new bool[] { true };
+            MyBooleanFalseArray = new bool[] { false };
+            MySingleArray = new float[] { 1.1f };
+            MyDoubleArray = new double[] { 2.2d };
+            MyDecimalArray = new decimal[] { 3.3m };
+            MyDateTimeArray = new DateTime[] { new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc) };
+            MyEnumArray = new SampleEnum[] { SampleEnum.Two };
         }
 
         public void Verify()
@@ -102,6 +154,24 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2.2d, MyDouble);
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTime);
             Assert.Equal(SampleEnum.Two, MyEnum);
+
+            Assert.Equal((short)1, MyInt16Array[0]);
+            Assert.Equal((int)2, MyInt32Array[0]);
+            Assert.Equal((long)3, MyInt64Array[0]);
+            Assert.Equal((ushort)4, MyUInt16Array[0]);
+            Assert.Equal((uint)5, MyUInt32Array[0]);
+            Assert.Equal((ulong)6, MyUInt64Array[0]);
+            Assert.Equal((byte)7, MyByteArray[0]);
+            Assert.Equal((sbyte)8, MySByteArray[0]);
+            Assert.Equal('a', MyCharArray[0]);
+            Assert.Equal("Hello", MyStringArray[0]);
+            Assert.Equal(3.3m, MyDecimalArray[0]);
+            Assert.Equal(false, MyBooleanFalseArray[0]);
+            Assert.Equal(true, MyBooleanTrueArray[0]);
+            Assert.Equal(1.1f, MySingleArray[0]);
+            Assert.Equal(2.2d, MyDoubleArray[0]);
+            Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTimeArray[0]);
+            Assert.Equal(SampleEnum.Two, MyEnumArray[0]);
         }
     }
 
@@ -547,5 +617,65 @@ namespace System.Text.Json.Serialization.Tests
         public string[] MyStringArray { get; set; }
         public const int MyStringArrayArrayCount = 1000;
         public const int MyStringArrayElementStringLength = 50;
+    }
+
+    public class EmptyClass { }
+
+    public class BasicJson : ITestClass
+    {
+        public int age { get; set; }
+        public string first { get; set; }
+        public string last { get; set; }
+        public List<string> phoneNumbers { get; set; }
+        public BasicJsonAddress address { get; set; }
+
+        public void Initialize()
+        {
+            age = 30;
+            first = "John";
+            last = "Smith";
+            phoneNumbers = new List<string> { "425-000-0000", "425-000-0001" };
+            address = new BasicJsonAddress
+            {
+                street = "1 Microsoft Way",
+                city = "Redmond",
+                zip = 98052
+            };
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(30, age);
+            Assert.Equal("John", first);
+            Assert.Equal("Smith", last);
+            Assert.Equal("425-000-0000", phoneNumbers[0]);
+            Assert.Equal("425-000-0001", phoneNumbers[1]);
+            Assert.Equal("1 Microsoft Way", address.street);
+            Assert.Equal("Redmond", address.city);
+            Assert.Equal(98052, address.zip);
+        }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            "{" +
+                @"""age"" : 30," +
+                @"""first"" : ""John""," +
+                @"""last"" : ""Smith""," +
+                @"""phoneNumbers"" : [" +
+                    @"""425-000-0000""," +
+                    @"""425-000-0001""" +
+                @"]," +
+                @"""address"" : {" +
+                    @"""street"" : ""1 Microsoft Way""," +
+                    @"""city"" : ""Redmond""," +
+                    @"""zip"" : 98052" +
+                "}" +
+            "}");
+    }
+
+    public class BasicJsonAddress
+    {
+        public string street { get; set; }
+        public string city { get; set; }
+        public int zip { get; set; }
     }
 }

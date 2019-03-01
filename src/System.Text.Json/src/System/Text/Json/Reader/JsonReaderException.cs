@@ -29,7 +29,7 @@ namespace System.Text.Json
             BytePositionInLine = bytePositionInLine;
         }
 
-        internal JsonReaderException(string message, JsonReaderState state) : base(message)
+        internal JsonReaderException(string message, in JsonReaderState state) : base(message)
         {
             LineNumber = state._lineNumber;
             BytePositionInLine = state._bytePositionInLine;

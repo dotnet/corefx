@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 #if BUILDING_INBOX_LIBRARY
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -12,9 +13,13 @@ namespace System.Text.Json.Serialization
     {
         public override JsonClassInfo.ConstructorDelegate CreateConstructor(Type type)
         {
+            Debug.Assert(type != null);
+
             ConstructorInfo realMethod = type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, binder: null, Type.EmptyTypes, modifiers: null);
             if (realMethod == null)
+            {
                 return null;
+            }
 
             var dynamicMethod = new DynamicMethod(
                 realMethod.Name,

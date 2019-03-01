@@ -22,6 +22,10 @@ namespace System.Text.Json.Serialization
         private static readonly GlobalAttributeInfo s_globalAttributeInfo = new GlobalAttributeInfo();
 
         private static readonly ConcurrentDictionary<ICustomAttributeProvider, object[]> s_reflectionAttributes = new ConcurrentDictionary<ICustomAttributeProvider, object[]>();
+
+        // todo: determine threading guarantees on the List<Attribute>.
+        // Most likely a single thread is adding a new poco type and its attributes, so collisions are not likely.
+        // We could change List<> to thread-safe version if necessary.
         private readonly Lazy<ConcurrentDictionary<ICustomAttributeProvider, List<Attribute>>> _runtimeAttributes = new Lazy<ConcurrentDictionary<ICustomAttributeProvider, List<Attribute>>>();
 
         private static readonly ConcurrentDictionary<Type, JsonClassInfo> s_classes = new ConcurrentDictionary<Type, JsonClassInfo>();

@@ -90,6 +90,11 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short?>((short.MinValue - 1).ToString()));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short?>((short.MaxValue + 1).ToString()));
 
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort>((ushort.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort>((ushort.MaxValue + 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort?>((ushort.MinValue - 1).ToString()));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort?>((ushort.MaxValue + 1).ToString()));
+
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float>((float.MinValue - 1).ToString()));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float>((float.MaxValue + 1).ToString()));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float?>((float.MinValue - 1).ToString()));
@@ -146,6 +151,11 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(short.MinValue, JsonSerializer.Parse<short?>(short.MinValue.ToString()));
             Assert.Equal(short.MaxValue, JsonSerializer.Parse<short?>(short.MaxValue.ToString()));
 
+            Assert.Equal(ushort.MinValue, JsonSerializer.Parse<ushort>(ushort.MinValue.ToString()));
+            Assert.Equal(ushort.MaxValue, JsonSerializer.Parse<ushort>(ushort.MaxValue.ToString()));
+            Assert.Equal(ushort.MinValue, JsonSerializer.Parse<ushort?>(ushort.MinValue.ToString()));
+            Assert.Equal(ushort.MaxValue, JsonSerializer.Parse<ushort?>(ushort.MaxValue.ToString()));
+
             // todo: these fail due to double->float conversion - do we need support in reader?
             //Assert.Equal(float.MinValue, JsonSerializer.Parse<float>(float.MinValue.ToString()));
             //Assert.Equal(float.MaxValue, JsonSerializer.Parse<float>(float.MaxValue.ToString()));
@@ -181,6 +191,83 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(double.MaxValue, JsonSerializer.Parse<double>(double.MaxValue.ToString()));
             Assert.Equal(double.MinValue, JsonSerializer.Parse<double?>(double.MinValue.ToString()));
             Assert.Equal(double.MaxValue, JsonSerializer.Parse<double?>(double.MaxValue.ToString()));
+        }
+
+        [Fact]
+        public static void ValueFail()
+        {
+            string unexpectedString = @"""unexpected string""";
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<byte>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<byte>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<byte?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<byte?>(unexpectedString));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<sbyte>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<sbyte>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<sbyte?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<sbyte?>(unexpectedString));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short?>(unexpectedString));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort?>(unexpectedString));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float?>(unexpectedString));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int?>(unexpectedString));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<uint>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<uint>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<uint?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<uint?>(unexpectedString));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<long>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<long>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<long?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<long?>(unexpectedString));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ulong>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ulong>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ulong?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ulong?>(unexpectedString));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<decimal>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<decimal>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<decimal?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<decimal?>(unexpectedString));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<double>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<double>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<double?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<double?>(unexpectedString));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTime>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTime>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTime?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTime?>(unexpectedString));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<string>("1"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<string>("1"));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<char>("1"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<char>("1"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<char?>("1"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<char?>("1"));
+
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<Enum>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<Enum>(unexpectedString));
         }
 
         [Fact]

@@ -17,7 +17,13 @@ namespace System.Text.Json.Serialization
             ref Utf8JsonReader reader,
             ref ReadStack state)
         {
-            Debug.Assert(state.Current.JsonPropertyInfo != null);
+            if (state.Current.Skip())
+            {
+                // The array is not being applied to the object.
+                state.Push();
+                state.Current.Drain = true;
+                return;
+            }
 
             Type arrayType = state.Current.JsonPropertyInfo.PropertyType;
             if (!typeof(IEnumerable).IsAssignableFrom(arrayType) || (arrayType.IsArray && arrayType.GetArrayRank() > 1))
@@ -70,10 +76,13 @@ namespace System.Text.Json.Serialization
             JsonSerializerOptions options,
             ref ReadStack state)
         {
-            if (state.Current.JsonPropertyInfo == null)
+            bool lastFrame = state.IsLastFrame;
+
+            if (state.Current.Drain)
             {
                 // The array is not being applied to the object.
-                return false;
+                state.Pop();
+                return lastFrame;
             }
 
             IEnumerable value = ReadStackFrame.GetEnumerableValue(state.Current);
@@ -83,8 +92,6 @@ namespace System.Text.Json.Serialization
                 state.Current.ResetProperty();
                 return false;
             }
-
-            bool lastFrame = state.IsLastFrame;
 
             bool setPropertyDirectly;
             if (state.Current.TempEnumerableValues != null)
@@ -104,6 +111,7 @@ namespace System.Text.Json.Serialization
                 setPropertyDirectly = false;
             }
 
+            bool valueReturning = state.Current.PopStackOnEndArray;
             if (state.Current.PopStackOnEndArray)
             {
                 state.Pop();
@@ -126,7 +134,13 @@ namespace System.Text.Json.Serialization
                 // else there must be an outer object, so we'll return false here.
             }
 
-            ReadStackFrame.SetReturnValue(value, options, ref state.Current, setPropertyDirectly : setPropertyDirectly);
+            ReadStackFrame.SetReturnValue(value, options, ref state.Current, setPropertyDirectly: setPropertyDirectly);
+
+            if (!valueReturning)
+            {
+                state.Current.ResetProperty();
+            }
+
             return false;
         }
     }

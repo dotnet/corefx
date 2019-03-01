@@ -37,7 +37,7 @@ namespace System.Text.Json.Serialization.Converters
                     return false;
                 }
 
-                value= (TValue)objValue;
+                value = (TValue)objValue;
                 return true;
 #endif
             }
@@ -95,13 +95,13 @@ namespace System.Text.Json.Serialization.Converters
 
                 if (underlyingType == typeof(ulong))
                 {
-                    // Keep +sign
+                    // Use the ulong converter to prevent conversion into a signed\long value.
                     ulong ulongValue = Convert.ToUInt64(value);
                     writer.WriteNumber(escapedPropertyName, ulongValue);
                 }
                 else
                 {
-                    // long can hold the signed\unsigned values of other integer types
+                    // long can hold the signed\unsigned values of other integer types.
                     long longValue = Convert.ToInt64(value);
                     writer.WriteNumber(escapedPropertyName, longValue);
                 }

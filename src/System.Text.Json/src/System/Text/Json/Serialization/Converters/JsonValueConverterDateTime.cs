@@ -24,13 +24,13 @@ namespace System.Text.Json.Serialization.Converters
 
         public override void Write(DateTime value, ref Utf8JsonWriter writer)
         {
-            // todo: use the appropriate DateTime method once available.
+            // todo: use the appropriate DateTime method once available (https://github.com/dotnet/corefx/issues/34690)
             writer.WriteStringValue(value.ToString("O"));
         }
 
         public override void Write(Span<byte> escapedPropertyName, DateTime value, ref Utf8JsonWriter writer)
         {
-            // todo: use the appropriate DateTime method once available.
+            // todo: use the appropriate DateTime method once available (https://github.com/dotnet/corefx/issues/34690)
             writer.WriteString(escapedPropertyName, value.ToString("O"));
         }
     }
