@@ -14,20 +14,38 @@ scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
 
 usage()
 {
-  echo "Default if no actions are passed in: --restore --build"
+  echo "Common settings:"
+  echo "  --framework                The target group assemblies are built for (short: -f)"
+  echo "  --configuration <value>    Build configuration: 'Debug' or 'Release' (short: -c)"
+  echo "  --verbosity <value>        Msbuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic] (short: -v)"
+  echo "  --binaryLog                Create MSBuild binary log (short: -bl)"
+  echo "  --help                     Print help and exit (short: -h)"
   echo ""
-  echo "CoreFx specific actions:"
-  echo "  --buildtests             Build test projects in the solution"
-  echo "  --clean                  Clean the solution"
+
+  echo "Actions (defaults to --restore --build):"
+  echo "  --restore                  Restore dependencies (short: -r)"
+  echo "  --build                    Build solution (short: -b)"
+  echo "  --buildtests               Build test projects in the solution"
+  echo "  --rebuild                  Rebuild solution"
+  echo "  --test                     Run all unit tests in the solution (short: -t)"
+  echo "  --integrationTest          Run all integration tests in the solution"
+  echo "  --performanceTest          Run all performance tests in the solution"
+  echo "  --pack                     Package build outputs into NuGet packages and Willow components"
+  echo "  --sign                     Sign build outputs"
+  echo "  --publish                  Publish artifacts (e.g. symbols)"
+  echo "  --clean                    Clean the solution"
   echo ""
-  echo "CoreFx specific options:"
-  echo "  --framework              The target group assemblies are built for (short: -f)"
-  echo "  --os                     The operating system assemblies are built for"
-  echo "  --allconfigurations      Build packages for all build configurations"
+
+  echo "Advanced settings:"
   echo "  --coverage               Collect code coverage when testing"
   echo "  --outerloop              Include tests which are marked as OuterLoop"
+  echo "  --allconfigurations      Build packages for all build configurations"
+  echo "  --os                     The operating system assemblies are built for"
   echo "  --arch                   The architecture group (x86, x64, arm, etc.)"
+  echo "  --warnAsError <value>    Sets warnaserror msbuild parameter ('true' or 'false')"
   echo ""
+  echo "Command line arguments starting with '/p:' are passed through to MSBuild."
+  echo "Arguments can also be passed in with a single hyphen."
 }
 
 arguments=''
@@ -46,7 +64,6 @@ while [[ $# > 0 ]]; do
   case "$opt" in
      -help|-h)
       usage
-      "$scriptroot/common/build.sh" --help
       exit 0
       ;;
      -clean)

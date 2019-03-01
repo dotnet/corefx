@@ -14,25 +14,44 @@ Param(
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 function Print-Usage() {
-    Write-Host "Default if no actions are passed in: -restore -build"
-    Write-Host ""
-    Write-Host "CoreFx specific actions:"
-    Write-Host "  -buildtests             Build test projects in the solution"
-    Write-Host "  -clean                  Clean the solution"
-    Write-Host ""
-    Write-Host "CoreFx specific options:"
-    Write-Host "  -framework              The target group assemblies are built for (short: -f)"
-    Write-Host "  -os                     The operating system assemblies are built for"
-    Write-Host "  -allconfigurations      Build packages for all build configurations"
-    Write-Host "  -coverage               Collect code coverage when testing"
-    Write-Host "  -outerloop              Include tests which are marked as OuterLoop"
-    Write-Host "  -arch                   The architecture group (x86, x64, arm, etc.)"
-    Write-Host ""
+  Write-Host "Common settings:"
+  Write-Host "  -framework              The target group assemblies are built for (short: -f)"
+  Write-Host "  -configuration <value>  Build configuration: 'Debug' or 'Release' (short: -c)"
+  Write-Host "  -verbosity <value>      Msbuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic] (short: -v)"
+  Write-Host "  -binaryLog              Output binary log (short: -bl)"
+  Write-Host "  -help                   Print help and exit"
+  Write-Host ""
+
+  Write-Host "Actions (defaults to -restore -build):"
+  Write-Host "  -restore                Restore dependencies (short: -r)"
+  Write-Host "  -build                  Build solution (short: -b)"
+  Write-Host "  -buildtests             Build test projects in the solution"
+  Write-Host "  -rebuild                Rebuild solution"
+  Write-Host "  -test                   Run all unit tests in the solution (short: -t)"
+  Write-Host "  -integrationTest        Run all integration tests in the solution"
+  Write-Host "  -performanceTest        Run all performance tests in the solution"
+  Write-Host "  -pack                   Package build outputs into NuGet packages and Willow components"
+  Write-Host "  -sign                   Sign build outputs"
+  Write-Host "  -publish                Publish artifacts (e.g. symbols)"
+  Write-Host "  -clean                  Clean the solution"
+  Write-Host ""
+
+  Write-Host "Advanced settings:"
+  Write-Host "  -coverage               Collect code coverage when testing"
+  Write-Host "  -outerloop              Include tests which are marked as OuterLoop"
+  Write-Host "  -allconfigurations      Build packages for all build configurations"
+  Write-Host "  -os                     The operating system assemblies are built for"
+  Write-Host "  -arch                   The architecture group (x86, x64, arm, etc.)"
+  Write-Host "  -warnAsError <value>    Sets warnaserror msbuild parameter ('true' or 'false')"
+  Write-Host "  -msbuildEngine <value>  Msbuild engine to use to run build ('dotnet', 'vs', or unspecified)."
+  Write-Host ""
+
+  Write-Host "Command line arguments not listed above are passed thru to msbuild."
+  Write-Host "The above arguments can be shortened as much as to be unambiguous (e.g. -co for configuration, -t for test, etc.)."
 }
 
 if ($help -or (($null -ne $properties) -and ($properties.Contains("/help") -or $properties.Contains("/?")))) {
   Print-Usage
-  Invoke-Expression "& `"$PSScriptRoot/common/build.ps1`" -help"
   exit 0
 }
 
