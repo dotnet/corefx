@@ -10,7 +10,6 @@ namespace System.Text.Json.Serialization
         {
             if (state.Current.Skip())
             {
-                // todo: deserialize loosely-typed object if there is a callback for IJsonTypeConverterOnDeserialized, and then invoke that callback.
                 state.Push();
                 state.Current.Drain = true;
                 return;

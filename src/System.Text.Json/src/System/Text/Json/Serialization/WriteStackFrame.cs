@@ -11,7 +11,6 @@ namespace System.Text.Json.Serialization
         // The object (POCO or IEnumerable) that is being populated
         internal object CurrentValue;
         internal JsonClassInfo JsonClassInfo;
-        internal object TypeConverter;
 
         internal IEnumerator Enumerator;
 
@@ -31,7 +30,6 @@ namespace System.Text.Json.Serialization
         {
             CurrentValue = null;
             JsonClassInfo = null;
-            TypeConverter = null;
             StartObjectWritten = false;
             EndObject();
             EndArray();

@@ -13,7 +13,6 @@ namespace System.Text.Json.Serialization
         // The object (POCO or IEnumerable) that is being populated
         internal object ReturnValue;
         internal JsonClassInfo JsonClassInfo;
-        internal object TypeConverter;
 
         // Current property values
         internal JsonPropertyInfo JsonPropertyInfo;
@@ -31,7 +30,6 @@ namespace System.Text.Json.Serialization
         {
             ReturnValue = null;
             JsonClassInfo = null;
-            TypeConverter = null;
             PropertyIndex = 0;
             Drain = false;
             ResetProperty();

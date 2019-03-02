@@ -8,7 +8,7 @@ namespace System.Text.Json.Serialization.Converters
     {
         private const int MaxTypeCode = 18;
 
-        private static readonly object[] s_Converters = {
+        private static readonly object[] s_Converters = new object[MaxTypeCode + 1] {
             null,   // Empty 
             null,   // Object
             null,   // DBNull
