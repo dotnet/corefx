@@ -56,7 +56,7 @@ namespace System.Reflection.Emit.Tests
             IEquatable<Label> label1 = new Label();
             Label label2 = new Label();
 
-            label1.Equals(label2);
+            Assert.True(label1.Equals(label2));
         }
     }
 }
