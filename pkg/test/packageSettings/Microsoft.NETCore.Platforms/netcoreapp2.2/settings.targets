@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
     <!-- This package will generate validation issues since we usually try to consume same-day packages from corefx that will have a higher

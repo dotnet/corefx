@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build">
+<Project>
   <PropertyGroup>
     <OutDirName>external.$(MSBuildProjectName)</OutDirName>
   </PropertyGroup>

@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build">
+<Project>
   <Import Project="..\Directory.Build.props" />
   <PropertyGroup>
     <ContainsPackageReferences>true</ContainsPackageReferences>

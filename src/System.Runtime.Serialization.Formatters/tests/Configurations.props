@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build">
+﻿<Project DefaultTargets="Build">
   <PropertyGroup>
     <!-- Needs netfx configuration per bug (dotnet/corefx #17575) so tests are actively running in desktop -->
     <BuildConfigurations>

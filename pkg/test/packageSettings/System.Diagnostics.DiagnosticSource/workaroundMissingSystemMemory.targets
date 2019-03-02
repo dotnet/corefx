@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 
 <!-- This file is a work-around and should be removed by 6/2019 (by then a fixed version of System.Memory
      should be available so that System.Memory does not reference NetStandard1.X)

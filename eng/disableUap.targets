@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build">
+<Project>
   <Target Name="RemoveUapvNextContent"
           Condition="'$(KeepUAPContent)' != 'true'"
           DependsOnTargets="GetPackageReport"

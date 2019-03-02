@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project>
   <ItemGroup Condition="'$(RuntimeIdentifier)' != ''">
     <!-- NETCoreApp2.0 had experimental versions of Span and ReadOnlySpan 

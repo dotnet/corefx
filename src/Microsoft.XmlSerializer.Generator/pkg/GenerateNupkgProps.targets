@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
       <BuildDependsOn>
@@ -16,7 +15,7 @@
   <Target Name="GenerateNupkgProps" DependsOnTargets="CalculatePackageVersion">
     <PropertyGroup>
       <PropsFileContents>
-&lt;Project DefaultTargets="Build"&gt;
+&lt;Project&gt;
   &lt;ItemGroup&gt;
     &lt;DotNetCliToolReference Include="$(Id)" Version="$(PackageVersion)" /&gt;
   &lt;/ItemGroup&gt;

@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build">
+<Project>
   <!-- Source of truth for dependency tooling: the commit hash of the dotnet/versions master branch as of the last auto-upgrade. -->
 
   <!-- For detailed explanation of the reference versions see:

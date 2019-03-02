@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build">
+<Project>
   <PropertyGroup>
     <PackageDescriptionFile>$(RepoRoot)pkg/descriptions.json</PackageDescriptionFile>
     <PackageLicenseFile>$(RepoRoot)LICENSE.TXT</PackageLicenseFile>

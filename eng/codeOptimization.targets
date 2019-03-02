@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build">
+<Project>
 
   <PropertyGroup Condition="'$(ApplyPartialNgenOptimization)' == ''">
      <ApplyPartialNgenOptimization Condition="'$(IsReferenceAssembly)' == 'true'">false</ApplyPartialNgenOptimization>

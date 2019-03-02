@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build">
+﻿<Project>
   <Import Project="..\Directory.Build.props" />
   <PropertyGroup>
     <!-- System.Threading.Tasks.Extensions has forwarded types into the runtime on netcoreapp/uap

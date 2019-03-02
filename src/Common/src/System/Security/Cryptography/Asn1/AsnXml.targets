@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build">
+<Project>
   <PropertyGroup>
     <AsnXml />
   </PropertyGroup>

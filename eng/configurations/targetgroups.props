@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project>
+﻿<Project>
   <ItemGroup>
     <TargetGroups Include="netcore50">
       <TargetFramework>netcore50</TargetFramework>

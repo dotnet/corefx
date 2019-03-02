@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build">
+<Project>
 
   <!-- Add path globs specific to native binaries to exclude unnecessary files from packages. -->
   <Choose>

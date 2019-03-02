@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build">
+﻿<Project>
   <PropertyGroup>
     <!-- Include netcoreapp since we need to generate facades between desktop and netcoreapp -->
     <BuildConfigurations>

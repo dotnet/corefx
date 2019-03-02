@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build">
+<Project>
   <ItemGroup>
     <OfficialBuildRID Include="win10-x86">
       <Platform>x86</Platform>
