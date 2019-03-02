@@ -197,13 +197,13 @@ namespace System.Text.Json
         public bool GetBoolean() { throw null; }
         public System.DateTime GetDateTime() { throw null; }
         public System.DateTimeOffset GetDateTimeOffset() { throw null; }
+        public string GetComment() { throw null; }
         public decimal GetDecimal() { throw null; }
         public double GetDouble() { throw null; }
         public System.Guid GetGuid() { throw null; }
         public int GetInt32() { throw null; }
         public long GetInt64() { throw null; }
         public float GetSingle() { throw null; }
-        public string GetComment() { throw null; }
         public string GetString() { throw null; }
         [System.CLSCompliantAttribute(false)]
         public uint GetUInt32() { throw null; }
