@@ -47,6 +47,64 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
+        public void FlushAsyncAwaitableCompletesWhenReaderAdvancesExaminedUnderLow()
+        {
+            PipeWriter writableBuffer = _pipe.Writer.WriteEmpty(PauseWriterThreshold);
+            ValueTask<FlushResult> flushAsync = writableBuffer.FlushAsync();
+
+            Assert.False(flushAsync.IsCompleted);
+
+            ReadResult result = _pipe.Reader.ReadAsync().GetAwaiter().GetResult();
+            SequencePosition examined = result.Buffer.GetPosition(33);
+            _pipe.Reader.AdvanceTo(result.Buffer.Start, examined);
+
+            Assert.True(flushAsync.IsCompleted);
+            FlushResult flushResult = flushAsync.GetAwaiter().GetResult();
+            Assert.False(flushResult.IsCompleted);
+        }
+
+        [Fact]
+        public async Task CanBufferPastPauseThresholdButGetPausedEachTime()
+        {
+            const int loops = 5;
+
+            async Task WriteLoopAsync()
+            {
+                for (int i = 0; i < loops; i++)
+                {
+                    _pipe.Writer.WriteEmpty(PauseWriterThreshold);
+
+                    ValueTask<FlushResult> flushTask = _pipe.Writer.FlushAsync();
+
+                    Assert.False(flushTask.IsCompleted);
+
+                    await flushTask;
+                }
+
+                _pipe.Writer.Complete();
+            }
+
+           Task writingTask = WriteLoopAsync();
+
+            while (true)
+            {
+                ReadResult result = await _pipe.Reader.ReadAsync();
+
+                if (result.IsCompleted)
+                {
+                    _pipe.Reader.AdvanceTo(result.Buffer.End);
+
+                    Assert.Equal(PauseWriterThreshold * loops, result.Buffer.Length);
+                    break;
+                }
+
+                _pipe.Reader.AdvanceTo(result.Buffer.Start, result.Buffer.End);
+            }
+
+            await writingTask;
+        }
+
+        [Fact]
         public void FlushAsyncAwaitableDoesNotCompletesWhenReaderAdvancesUnderHight()
         {
             PipeWriter writableBuffer = _pipe.Writer.WriteEmpty(PauseWriterThreshold);
