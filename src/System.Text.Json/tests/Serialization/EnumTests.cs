@@ -24,17 +24,6 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<SimpleTestClass>(s_jsonStringEnum));
         }
 
-#if !MAKE_UNREVIEWED_APIS_INTERNAL
-        [Fact]
-        public static void EnumAsString()
-        {
-            var options = new JsonSerializerOptions();
-            options.AddAttribute(typeof(SimpleTestClass), new JsonEnumConverterAttribute(treatAsString: true));
-
-            SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(s_jsonStringEnum, options);
-            Assert.Equal(SampleEnum.Two, obj.MyEnum);
-        }
-#endif
         [Fact]
         public static void EnumAsInt()
         {

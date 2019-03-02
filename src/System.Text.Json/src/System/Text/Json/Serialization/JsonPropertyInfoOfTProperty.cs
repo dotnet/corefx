@@ -8,13 +8,11 @@ using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json.Serialization
 {
-#if MAKE_UNREVIEWED_APIS_INTERNAL
-    internal
-#else
-    public
-#endif
-    abstract class JsonPropertyInfo<TProperty> : JsonPropertyInfo
+    internal abstract class JsonPropertyInfo<TProperty> : JsonPropertyInfo
     {
+        // For now, just a global converter.
+        private static readonly JsonValueConverter<TProperty> s_enumConverter = new DefaultEnumConverter<TProperty>(false);
+
         // Constructor used for internal identifiers
         internal JsonPropertyInfo() { }
 
@@ -26,7 +24,23 @@ namespace System.Text.Json.Serialization
 
         internal override void GetPolicies(JsonSerializerOptions options)
         {
-            ValueConverter = DefaultConverters.GetPropertyValueConverter<TProperty>(ParentClassType, PropertyInfo, PropertyType, options);
+            Type propertyType = PropertyType;
+            bool isNullable = propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
+            if (isNullable)
+            {
+                propertyType = Nullable.GetUnderlyingType(propertyType);
+            }
+
+            // For Enums, support both the type Enum plus strongly-typed Enums.
+            if (propertyType.IsEnum || propertyType == typeof(Enum))
+            {
+                ValueConverter = s_enumConverter;
+            }
+            else
+            {
+                ValueConverter = (JsonValueConverter<TProperty>)DefaultConverters.GetDefaultPropertyValueConverter(propertyType, isNullable);
+            }
+
             base.GetPolicies(options);
         }
     }

@@ -525,27 +525,6 @@ namespace System.Text.Json.Serialization.Tests
     {
     }
 
-
-#if !MAKE_UNREVIEWED_APIS_INTERNAL
-    public class OverridePropertyNameDesignTime_TestClass
-    {
-        [JsonPropertyName(Name = "blah")]
-        public Int16 MyInt16 { get; set; }
-
-        public static readonly byte[] s_dataMatchingAttribute = Encoding.UTF8.GetBytes(
-            @"{" +
-            @"""blah"" : 1" +
-            @"}"
-        );
-
-        public static readonly byte[] s_dataNotMatchingAttribute = Encoding.UTF8.GetBytes(
-            @"{" +
-            @"""blah2"" : 1" +
-            @"}"
-        );
-    }
-#endif
-
     public class OverridePropertyNameRuntime_TestClass
     {
         public Int16 MyInt16 { get; set; }

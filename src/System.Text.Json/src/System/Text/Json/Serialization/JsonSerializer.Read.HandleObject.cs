@@ -33,8 +33,6 @@ namespace System.Text.Json.Serialization
 
             JsonClassInfo classInfo = state.Current.JsonClassInfo;
             state.Current.ReturnValue = classInfo.CreateObject();
-            state.Current.TypeConverter = classInfo.CreateTypeConverter(state.Current.ReturnValue);
-            classInfo.CallOnDeserializing(state.Current.TypeConverter, state.Current.ReturnValue, options);
         }
 
         private static bool HandleEndObject(JsonSerializerOptions options, ref ReadStack state)
@@ -47,8 +45,6 @@ namespace System.Text.Json.Serialization
             }
 
             object value = state.Current.ReturnValue;
-
-            state.Current.JsonClassInfo.CallOnDeserialized(state.Current.TypeConverter, value, options);
 
             if (isLastFrame)
             {

@@ -7,22 +7,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text.Json.Serialization.Converters;
-using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json.Serialization
 {
-#if MAKE_UNREVIEWED_APIS_INTERNAL
-    internal
-#else
-    public
-#endif
-    sealed partial class JsonClassInfo
+    internal sealed partial class JsonClassInfo
     {
         // The length of the property name embedded in the key (in bytes).
         private const int PropertyNameKeyLength = 6;
-
-        private Type _converterType;
 
         private readonly List<PropertyRef> _property_refs = new List<PropertyRef>();
         private readonly List<PropertyRef> _property_refs_sorted = new List<PropertyRef>();
@@ -31,8 +22,6 @@ namespace System.Text.Json.Serialization
         internal ConstructorDelegate CreateObject { get; private set; }
 
         internal ClassType ClassType { get; private set; }
-
-        internal JsonEnumerableConverter EnumerableConverter { get; private set; }
 
         // If enumerable, the JsonClassInfo for the element type.
         internal JsonClassInfo ElementClassInfo { get; private set; }
@@ -75,18 +64,6 @@ namespace System.Text.Json.Serialization
                 // Add a single property that maps to the class type so we can have policies applied.
                 AddProperty(type, propertyInfo: null, type, options);
             }
-
-            GetPolicies(options);
-        }
-
-        public JsonPropertyInfo GetProperty(ReadOnlySpan<byte> propertyName)
-        {
-            return GetProperty(propertyName, 0);
-        }
-
-        public JsonPropertyInfo GetProperty(string propertyName)
-        {
-            return GetProperty(Encoding.UTF8.GetBytes(propertyName), 0);
         }
 
         internal JsonPropertyInfo GetProperty(ReadOnlySpan<byte> propertyName, int propertyIndex)
@@ -149,12 +126,6 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(index < _property_refs.Count);
             return _property_refs[index].Info;
-        }
-
-        internal ReadOnlySpan<byte> GetPropertyName(int index)
-        {
-            Debug.Assert(index < _property_refs.Count);
-            return _property_refs[index].Info._name;
         }
 
         internal int PropertyCount
@@ -261,17 +232,6 @@ namespace System.Text.Json.Serialization
                 return ClassType.Enumerable;
 
             return ClassType.Object;
-        }
-
-        internal void GetPolicies(JsonSerializerOptions options)
-        {
-            if (ClassType == ClassType.Enumerable)
-            {
-                EnumerableConverter = DefaultConverters.GetEnumerableConverter(Type, propertyInfo: null, Type, options);
-            }
-
-            _converterType = DefaultConverters.GetTypeConverter(Type, options);
-            InitializeTypeConverterCallbacks();
         }
     }
 }

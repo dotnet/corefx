@@ -26,20 +26,5 @@ namespace System.Text.Json.Serialization.Tests
             string json = JsonSerializer.ToString(input, options);
             Assert.Equal(@"{}", json);
         }
-
-#if !MAKE_UNREVIEWED_APIS_INTERNAL
-        [Fact]
-        public static void OverrideWriteOnAttribute()
-        {
-            JsonSerializerOptions options = new JsonSerializerOptions();
-            JsonPropertyValueAttribute attr = new JsonPropertyValueAttribute();
-            attr.IgnoreNullValueOnWrite = true;
-            options.AddAttribute(typeof(TestClassWithNull), attr);
-
-            var input = new TestClassWithNull();
-            string json = JsonSerializer.ToString(input, options);
-            Assert.Equal(@"{}", json);
-        }
-#endif
     }
 }

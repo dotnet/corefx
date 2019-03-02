@@ -4,7 +4,6 @@
 
 using System.Collections;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json.Serialization
@@ -95,10 +94,7 @@ namespace System.Text.Json.Serialization
             if (state.Current.TempEnumerableValues != null)
             {
                 JsonEnumerableConverter converter = state.Current.JsonPropertyInfo.EnumerableConverter;
-                if (converter == null)
-                {
-                    converter = state.Current.JsonClassInfo.EnumerableConverter;
-                }
+                Debug.Assert(converter != null);
 
                 Type elementType = state.Current.GetElementType();
                 value = converter.CreateFromList(elementType, (IList)value);

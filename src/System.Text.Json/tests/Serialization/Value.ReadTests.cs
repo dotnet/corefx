@@ -157,7 +157,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(ushort.MinValue, JsonSerializer.Parse<ushort?>(ushort.MinValue.ToString()));
             Assert.Equal(ushort.MaxValue, JsonSerializer.Parse<ushort?>(ushort.MaxValue.ToString()));
 
-            // todo: these fail due to double->float conversion - do we need support in reader?
+            // todo: these fail due to double->float conversion
             //Assert.Equal(float.MinValue, JsonSerializer.Parse<float>(float.MinValue.ToString()));
             //Assert.Equal(float.MaxValue, JsonSerializer.Parse<float>(float.MaxValue.ToString()));
             //Assert.Equal(float.MinValue, JsonSerializer.Parse<float?>(float.MinValue.ToString()));
@@ -188,7 +188,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(decimal.MinValue, JsonSerializer.Parse<decimal?>(decimal.MinValue.ToString()));
             Assert.Equal(decimal.MaxValue, JsonSerializer.Parse<decimal?>(decimal.MaxValue.ToString()));
 
-            // todo: these are failing on x86; do we need round-trip format "R"?
+            // todo: these are failing; do we need round-trip format "R"?
             //Assert.Equal(double.MinValue, JsonSerializer.Parse<double>(double.MinValue.ToString()));
             //Assert.Equal(double.MaxValue, JsonSerializer.Parse<double>(double.MaxValue.ToString()));
             //Assert.Equal(double.MinValue, JsonSerializer.Parse<double?>(double.MinValue.ToString()));

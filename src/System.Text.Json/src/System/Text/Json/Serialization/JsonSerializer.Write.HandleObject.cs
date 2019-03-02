@@ -27,10 +27,6 @@ namespace System.Text.Json.Serialization
                     writer.WriteStartObject(state.Current.JsonPropertyInfo._escapedName);
                 }
                 state.Current.StartObjectWritten = true;
-
-                // Create the type converter and allow it to use the writer.
-                state.Current.TypeConverter = classInfo.CreateTypeConverter(state.Current.CurrentValue);
-                classInfo.CallOnSerializing(state.Current.TypeConverter, state.Current.CurrentValue, ref writer, options);
             }
 
             // Determine if we are done enumerating properties.
@@ -39,9 +35,6 @@ namespace System.Text.Json.Serialization
                 HandleObject(options, ref writer, ref state);
                 return false;
             }
-
-            // Invoke the callback and end the object.
-            classInfo.CallOnSerialized(state.Current.TypeConverter, state.Current.CurrentValue, ref writer, options);
 
             writer.WriteEndObject();
 

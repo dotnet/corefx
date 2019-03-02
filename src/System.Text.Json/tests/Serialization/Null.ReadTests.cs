@@ -33,20 +33,5 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", obj.MyString);
             Assert.Equal(1, obj.MyInt);
         }
-
-#if !MAKE_UNREVIEWED_APIS_INTERNAL
-        [Fact]
-        public static void OverrideReadOnAttribute()
-        {
-            JsonSerializerOptions options = new JsonSerializerOptions();
-            JsonPropertyValueAttribute attr = new JsonPropertyValueAttribute();
-            attr.IgnoreNullValueOnRead = true;
-            options.AddAttribute(typeof(TestClassWithNullButInitialized), attr);
-
-            TestClassWithNullButInitialized obj = JsonSerializer.Parse<TestClassWithNullButInitialized>(TestClassWithNullButInitialized.s_json, options);
-            Assert.Equal("Hello", obj.MyString);
-            Assert.Equal(1, obj.MyInt);
-        }
-#endif
     }
 }

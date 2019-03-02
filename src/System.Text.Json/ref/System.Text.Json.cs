@@ -306,9 +306,8 @@ namespace System.Text.Json.Serialization
     }
     public sealed partial class JsonSerializerOptions
     {
-        public JsonSerializerOptions(bool ignoreDesignTimeAttributes = false) { }
+        public JsonSerializerOptions() { }
         public int DefaultBufferSize { get { throw null; } set { } }
-        public bool IgnoreDesignTimeAttributes { get { throw null; } }
         public bool IgnoreNullPropertyValueOnRead { get { throw null; } set { } }
         public bool IgnoreNullPropertyValueOnWrite { get { throw null; } set { } }
         public System.Text.Json.JsonReaderOptions ReaderOptions { get { throw null; } set { } }

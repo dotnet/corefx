@@ -8,16 +8,10 @@ using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json.Serialization
 {
-#if MAKE_UNREVIEWED_APIS_INTERNAL
-    internal
-#else
-    public
-#endif
-    abstract class JsonPropertyInfo
+    internal abstract class JsonPropertyInfo
     {
-        public JsonPropertyNamePolicyAttribute NameConverter { get; private set; }
-        private bool? _ignoreNullPropertyValueOnRead;
-        private bool? _ignoreNullPropertyValueOnWrite;
+        // For now, just a global converter.
+        private static JsonEnumerableConverter s_jsonEnumerableConverter = new DefaultArrayConverter();
 
         internal ClassType ClassType;
 
@@ -67,21 +61,11 @@ namespace System.Text.Json.Serialization
 
         internal bool IgnoreNullPropertyValueOnRead(JsonSerializerOptions options)
         {
-            if (_ignoreNullPropertyValueOnRead.HasValue)
-            {
-                return _ignoreNullPropertyValueOnRead.Value;
-            }
-
             return options.IgnoreNullPropertyValueOnRead;
         }
 
         internal bool IgnoreNullPropertyValueOnWrite(JsonSerializerOptions options)
         {
-            if (_ignoreNullPropertyValueOnWrite.HasValue)
-            {
-                return _ignoreNullPropertyValueOnWrite.Value;
-            }
-
             return options.IgnoreNullPropertyValueOnWrite;
         }
 
@@ -98,18 +82,9 @@ namespace System.Text.Json.Serialization
 
         internal virtual void GetPolicies(JsonSerializerOptions options)
         {
-            JsonPropertyNamePolicyAttribute nameAttribute = DefaultConverters.GetPolicy<JsonPropertyNamePolicyAttribute>(ParentClassType, PropertyInfo, options);
-            if (nameAttribute != null)
+            if (PropertyType.IsArray)
             {
-                NameConverter = nameAttribute;
-            }
-
-            _ignoreNullPropertyValueOnRead = DefaultConverters.GetPropertyValueOption(ParentClassType, PropertyInfo, options, attr => attr.IgnoreNullValueOnRead);
-            _ignoreNullPropertyValueOnWrite = DefaultConverters.GetPropertyValueOption(ParentClassType, PropertyInfo, options, attr => attr.IgnoreNullValueOnWrite);
-
-            if (ElementClassInfo != null)
-            {
-                EnumerableConverter = DefaultConverters.GetEnumerableConverter(ParentClassType, PropertyInfo, PropertyType, options);
+                EnumerableConverter = s_jsonEnumerableConverter;
             }
         }
     }

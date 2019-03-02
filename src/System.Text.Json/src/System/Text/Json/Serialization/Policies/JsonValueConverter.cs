@@ -4,12 +4,7 @@
 
 namespace System.Text.Json.Serialization.Policies
 {
-#if MAKE_UNREVIEWED_APIS_INTERNAL
-    internal
-#else
-    public
-#endif
-    abstract class JsonValueConverter<TValue>
+    internal abstract class JsonValueConverter<TValue>
     {
         public abstract bool TryRead(Type valueType, ref Utf8JsonReader reader, out TValue value);
         public abstract void Write(TValue value, ref Utf8JsonWriter writer);

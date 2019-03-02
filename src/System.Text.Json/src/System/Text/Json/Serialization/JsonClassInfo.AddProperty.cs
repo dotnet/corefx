@@ -3,18 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
-using System.Diagnostics;
 using System.Reflection;
-using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
-#if MAKE_UNREVIEWED_APIS_INTERNAL
-    internal
-#else
-    public
-#endif
-    partial class JsonClassInfo
+    internal partial class JsonClassInfo
     {
         private void AddProperty(Type propertyType, PropertyInfo propertyInfo, Type classType, JsonSerializerOptions options)
         {
@@ -37,7 +30,7 @@ namespace System.Text.Json.Serialization
 
             if (propertyInfo != null)
             {
-                string propertyName = jsonInfo.NameConverter == null ? propertyInfo.Name : jsonInfo.NameConverter.Write(propertyInfo.Name);
+                string propertyName = propertyInfo.Name;
 
                 // At this point propertyName is valid UTF16, so just call the simple UTF16->UTF8 encoder.
                 byte[] propertyNameBytes = Encoding.UTF8.GetBytes(propertyName);
