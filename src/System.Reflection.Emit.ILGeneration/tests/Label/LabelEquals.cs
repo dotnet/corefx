@@ -49,5 +49,14 @@ namespace System.Reflection.Emit.Tests
             Assert.True(lb1 == lb2);
             Assert.False(lb1 != lb2);
         }
+
+        [Fact]
+        public void Equals_IEquatable()
+        {
+            IEquatable<Label> label1 = new Label();
+            Label label2 = new Label();
+
+            label1.Equals(label2);
+        }
     }
 }
