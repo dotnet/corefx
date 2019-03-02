@@ -147,11 +147,6 @@ namespace System.Text.Json
             JsonReaderOptions readerOptions,
             byte[] extraRentedBytes)
         {
-            if (readerOptions.MaxDepth == 0)
-            {
-                readerOptions.MaxDepth = JsonReaderOptions.DefaultMaxDepth;
-            }
-
             ReadOnlySpan<byte> utf8JsonSpan = utf8Json.Span;
             Utf8JsonReader reader = new Utf8JsonReader(
                 utf8JsonSpan,
