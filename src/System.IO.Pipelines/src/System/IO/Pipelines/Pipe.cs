@@ -427,6 +427,20 @@ namespace System.IO.Pipelines
                     examinedEverything = examinedIndex == _readTailIndex;
                 }
 
+                if (examinedSegment != null && _readHead != null)
+                {
+                    // Check if we crossed _maximumSizeLow and complete backpressure
+                    long examinedBytes = GetLength(_readHead, _readHeadIndex, examinedSegment, examinedIndex);
+                    long oldLength = _length;
+                    _length -= examinedBytes;
+
+                    if (oldLength >= _resumeWriterThreshold &&
+                        _length < _resumeWriterThreshold)
+                    {
+                        _writerAwaitable.Complete(out completionData);
+                    }
+                }
+
                 if (consumedSegment != null)
                 {
                     if (_readHead == null)
@@ -437,17 +451,6 @@ namespace System.IO.Pipelines
 
                     returnStart = _readHead;
                     returnEnd = consumedSegment;
-
-                    // Check if we crossed _maximumSizeLow and complete backpressure
-                    long consumedBytes = GetLength(returnStart, _readHeadIndex, consumedSegment, consumedIndex);
-                    long oldLength = _length;
-                    _length -= consumedBytes;
-
-                    if (oldLength >= _resumeWriterThreshold &&
-                        _length < _resumeWriterThreshold)
-                    {
-                        _writerAwaitable.Complete(out completionData);
-                    }
 
                     // Check if we consumed entire last segment
                     // if we are going to return commit head we need to check that there is no writing operation that
@@ -488,11 +491,6 @@ namespace System.IO.Pipelines
                 // but only if writer is not completed yet
                 if (examinedEverything && !_writerCompletion.IsCompleted)
                 {
-                    // Prevent deadlock where reader awaits new data and writer await backpressure
-                    if (!_writerAwaitable.IsCompleted)
-                    {
-                        ThrowHelper.ThrowInvalidOperationException_BackpressureDeadlock(_resumeWriterThreshold);
-                    }
                     _readerAwaitable.SetUncompleted();
                 }
 

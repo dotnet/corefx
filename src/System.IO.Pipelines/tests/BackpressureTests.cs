@@ -30,39 +30,6 @@ namespace System.IO.Pipelines.Tests
         private readonly Pipe _pipe;
 
         [Fact]
-        public void AdvanceThrowsIfFlushActiveAndNotConsumedPastThreshold()
-        {
-            PipeWriter writableBuffer = _pipe.Writer.WriteEmpty(PauseWriterThreshold);
-            ValueTask<FlushResult> flushAsync = writableBuffer.FlushAsync();
-            Assert.False(flushAsync.IsCompleted);
-
-            ReadResult result = _pipe.Reader.ReadAsync().GetAwaiter().GetResult();
-            SequencePosition consumed = result.Buffer.GetPosition(31);
-
-            var exception = Assert.Throws<InvalidOperationException>(() => _pipe.Reader.AdvanceTo(consumed, result.Buffer.End));
-            Assert.Contains("32", exception.Message);
-
-            _pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.End);
-        }
-
-        [Fact]
-        public async Task AdvanceThrowsIfFlushActiveAndNotConsumedPastThresholdWhenFlushIsCanceled()
-        {
-            // Write over the threshold and cancel pending flush
-            _pipe.Writer.WriteEmpty(PauseWriterThreshold);
-            var task = _pipe.Writer.FlushAsync().AsTask();
-            _pipe.Writer.CancelPendingFlush();
-
-            await task;
-
-            // Examine to the end without releasing backpressure
-            var result = await _pipe.Reader.ReadAsync();
-
-            var exception = Assert.Throws<InvalidOperationException>(() => _pipe.Reader.AdvanceTo(result.Buffer.Start, result.Buffer.End));
-            Assert.Contains("32", exception.Message);
-        }
-
-        [Fact]
         public void FlushAsyncAwaitableCompletesWhenReaderAdvancesUnderLow()
         {
             PipeWriter writableBuffer = _pipe.Writer.WriteEmpty(PauseWriterThreshold);

@@ -73,7 +73,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task LengthDecreasedAfterReadAdvanceConsume()
+        public async Task LengthDecreasedAfterReadAdvanceExamined()
         {
             _pipe.Writer.GetMemory(100);
             _pipe.Writer.Advance(10);
@@ -87,13 +87,13 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public async Task LengthNotChangeAfterReadAdvanceExamine()
+        public async Task LengthDoesNotChangeIfExamineDoesNotChange()
         {
             PipeWriter writableBuffer = _pipe.Writer.WriteEmpty(10);
             await writableBuffer.FlushAsync();
 
             ReadResult result = await _pipe.Reader.ReadAsync();
-            _pipe.Reader.AdvanceTo(result.Buffer.Start, result.Buffer.End);
+            _pipe.Reader.AdvanceTo(result.Buffer.Start, result.Buffer.Start);
 
             Assert.Equal(10, _pipe.Length);
         }
