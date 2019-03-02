@@ -18,13 +18,7 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowJsonReaderException_DeserializeUnableToConvertValue(Type propertyType, in Utf8JsonReader reader, in ReadStack state)
         {
-            throw GetJsonReaderException_DeserializeUnableToConvertValue(propertyType, reader, state);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static JsonReaderException GetJsonReaderException_DeserializeUnableToConvertValue(Type propertyType, in Utf8JsonReader reader, in ReadStack state)
-        {
-            return new JsonReaderException(SR.Format(SR.DeserializeUnableToConvertValue, state.PropertyPath, propertyType), reader.CurrentState);
+            throw new JsonReaderException(SR.Format(SR.DeserializeUnableToConvertValue, state.PropertyPath, propertyType), reader.CurrentState);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

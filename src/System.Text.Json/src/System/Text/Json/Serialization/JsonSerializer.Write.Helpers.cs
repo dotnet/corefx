@@ -35,46 +35,67 @@ namespace System.Text.Json.Serialization
             writer.Flush(true);
         }
 
-        private static byte[] WriteCore(object value, Type type, JsonSerializerOptions options)
+        private static byte[] WriteCoreBytes(object value, Type type, JsonSerializerOptions options)
         {
             if (options == null)
                 options = s_defaultSettings;
 
             byte[] result;
-            var writerState = new JsonWriterState(options.WriterOptions);
 
             using (var output = new ArrayBufferWriter<byte>(options.EffectiveBufferSize))
             {
-                var writer = new Utf8JsonWriter(output, writerState);
-
-                if (value == null)
-                {
-                    writer.WriteNullValue();
-                }
-                else
-                {
-                    if (type == null)
-                    {
-                        type = value.GetType();
-                    }
-
-                    WriteStack state = default;
-                    JsonClassInfo classInfo = options.GetOrAddClass(type);
-                    state.Current.JsonClassInfo = classInfo;
-                    state.Current.CurrentValue = value;
-                    if (classInfo.ClassType != ClassType.Object)
-                    {
-                        state.Current.JsonPropertyInfo = classInfo.GetPolicyProperty();
-                    }
-
-                    Write(ref writer, -1, options, ref state);
-                }
-
-                writer.Flush(isFinalBlock: true);
+                WriteCore(output, value, type, options);
                 result = output.WrittenMemory.ToArray();
             }
 
             return result;
+        }
+
+        private static string WriteCoreString(object value, Type type, JsonSerializerOptions options)
+        {
+            if (options == null)
+                options = s_defaultSettings;
+
+            string result;
+
+            using (var output = new ArrayBufferWriter<byte>(options.EffectiveBufferSize))
+            {
+                WriteCore(output, value, type, options);
+                result = JsonReaderHelper.TranscodeHelper(output.WrittenMemory.Span);
+            }
+
+            return result;
+        }
+
+        private static void WriteCore(ArrayBufferWriter<byte> output, object value, Type type, JsonSerializerOptions options)
+        {
+            var writerState = new JsonWriterState(options.WriterOptions);
+            var writer = new Utf8JsonWriter(output, writerState);
+
+            if (value == null)
+            {
+                writer.WriteNullValue();
+            }
+            else
+            {
+                if (type == null)
+                {
+                    type = value.GetType();
+                }
+
+                WriteStack state = default;
+                JsonClassInfo classInfo = options.GetOrAddClass(type);
+                state.Current.JsonClassInfo = classInfo;
+                state.Current.CurrentValue = value;
+                if (classInfo.ClassType != ClassType.Object)
+                {
+                    state.Current.JsonPropertyInfo = classInfo.GetPolicyProperty();
+                }
+
+                Write(ref writer, -1, options, ref state);
+            }
+
+            writer.Flush(isFinalBlock: true);
         }
     }
 }

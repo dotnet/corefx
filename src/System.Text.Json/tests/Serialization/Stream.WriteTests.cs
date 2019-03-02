@@ -77,7 +77,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             // Must be changed if the test classes change:
-            Assert.Equal(551368, stream.TestWriteBytesCount);
+            Assert.Equal(551_368, stream.TestWriteBytesCount);
 
             // We should have more than one write called due to the large byte count.
             Assert.True(stream.TestWriteCount > 0);

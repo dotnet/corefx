@@ -20,9 +20,7 @@ namespace System.Text.Json.Serialization
 
         private static string ToStringInternal(object value, Type type, JsonSerializerOptions options)
         {
-            Span<byte> jsonBytes = WriteCore(value, type, options);
-            string stringJson = JsonReaderHelper.TranscodeHelper(jsonBytes);
-            return stringJson;
+            return WriteCoreString(value, type, options);
         }
     }
 }

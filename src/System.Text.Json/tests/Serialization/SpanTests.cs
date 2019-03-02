@@ -46,7 +46,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void NullObjectOutput()
         {
-            var encodedNull = Encoding.UTF8.GetBytes(@"null");
+            byte[] encodedNull = Encoding.UTF8.GetBytes(@"null");
 
             {
                 byte[] output = JsonSerializer.ToBytes(null, null);

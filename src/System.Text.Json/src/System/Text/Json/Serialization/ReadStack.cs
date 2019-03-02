@@ -45,13 +45,7 @@ namespace System.Text.Json.Serialization
             Current = _previous[--_index];
         }
 
-        public bool IsLastFrame
-        {
-            get
-            {
-                return (_index == 0);
-            }
-        }
+        public bool IsLastFrame => _index == 0;
 
         // Return a property path in the form of: [FullNameOfType].FirstProperty.SecondProperty.LastProperty
         public string PropertyPath

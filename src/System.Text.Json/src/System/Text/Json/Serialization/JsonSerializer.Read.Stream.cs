@@ -95,6 +95,7 @@ namespace System.Text.Json.Serialization
                             // Copy the unprocessed data to the new buffer while shifting the processed bytes.
                             Buffer.BlockCopy(buffer, bytesConsumed, dest, 0, bytesRemaining);
                         }
+
                         ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
                         buffer = dest;
                     }

@@ -9,14 +9,14 @@ namespace System.Text.Json.Serialization
         // Name \ feature is pending closure on API review
         public static byte[] ToBytes<TValue>(TValue value, JsonSerializerOptions options = null)
         {
-            return WriteCore(value, typeof(TValue), options);
+            return WriteCoreBytes(value, typeof(TValue), options);
         }
 
         // Name \ feature is pending closure on API review
         public static byte[] ToBytes(object value, Type type, JsonSerializerOptions options = null)
         {
             VerifyValueAndType(value, type);
-            return WriteCore(value, type, options);
+            return WriteCoreBytes(value, type, options);
         }
     }
 }

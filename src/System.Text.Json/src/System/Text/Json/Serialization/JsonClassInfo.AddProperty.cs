@@ -52,7 +52,8 @@ namespace System.Text.Json.Serialization
                     jsonInfo._escapedName = new byte[written];
                     tempArray.CopyTo(jsonInfo._escapedName, 0);
 
-                    ArrayPool<byte>.Shared.Return(tempArray);
+                    // We clear the array because it is "user data" (although a property name).
+                    ArrayPool<byte>.Shared.Return(tempArray, clearArray: true);
                 }
 
                 _property_refs.Add(new PropertyRef(GetKey(propertyNameBytes), jsonInfo));
