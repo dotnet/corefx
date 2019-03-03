@@ -84,7 +84,7 @@ namespace System.IO.Pipelines.Tests
                 _pipe.Writer.Complete();
             }
 
-           Task writingTask = WriteLoopAsync();
+            Task writingTask = WriteLoopAsync();
 
             while (true)
             {

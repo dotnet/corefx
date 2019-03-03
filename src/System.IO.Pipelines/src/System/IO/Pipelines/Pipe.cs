@@ -60,7 +60,7 @@ namespace System.IO.Pipelines
         private PipeCompletion _writerCompletion;
         private PipeCompletion _readerCompletion;
 
-        // Stores the last examined position, used to calculate how much bytes were to release
+        // Stores the last examined position, used to calculate how many bytes were to release
         // for back pressure management
         private BufferSegment _lastExamined;
         private int _lastExaminedIndex;
@@ -511,6 +511,8 @@ namespace System.IO.Pipelines
                 // but only if writer is not completed yet
                 if (examinedEverything && !_writerCompletion.IsCompleted)
                 {
+                    Debug.Assert(_writerAwaitable.IsCompleted, "PipeWriter.FlushAsync is isn't completed and will deadlock");
+
                     _readerAwaitable.SetUncompleted();
                 }
 

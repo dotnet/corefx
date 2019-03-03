@@ -93,7 +93,7 @@ namespace System.IO.Pipelines.Tests
             await writableBuffer.FlushAsync();
 
             ReadResult result = await _pipe.Reader.ReadAsync();
-            _pipe.Reader.AdvanceTo(result.Buffer.Start, result.Buffer.Start);
+            _pipe.Reader.AdvanceTo(result.Buffer.Start);
 
             Assert.Equal(10, _pipe.Length);
         }
