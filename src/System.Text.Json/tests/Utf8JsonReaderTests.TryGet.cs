@@ -993,9 +993,9 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [MemberData(nameof(GetCommentTestData))]
-        public static void TestingGetComment(string[] inputData)
+        public static void TestingGetComment(string jsonData, string expected)
         {
-            var dataUtf8 = Encoding.ASCII.GetBytes(inputData[0]);
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData);
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
             var reader = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
             bool commentFound = false;
@@ -1013,7 +1013,7 @@ namespace System.Text.Json.Tests
                         break;
                     case JsonTokenType.Comment:
                         commentFound = true;
-                        Assert.Equal(inputData[1], reader.GetComment());
+                        Assert.Equal(expected, reader.GetComment());
                         break;
                     default:
                         Assert.True(false);
@@ -1023,6 +1023,31 @@ namespace System.Text.Json.Tests
             Assert.True(startObjectFound);
             Assert.True(commentFound);
             Assert.True(endObjectFound);
+        }
+        [Theory]
+        [MemberData(nameof(GetCommentUnescapeData))]
+        public static void TestGetCommentUnescape(string jsonData, string expected)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            var reader = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+            bool commentFound = false;
+            while (reader.Read())
+            {
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.Comment:
+                        commentFound = true;
+                        string comment = reader.GetComment();
+                        Assert.Equal(expected, comment);
+                        Assert.NotEqual(Regex.Unescape(expected), comment);
+                        break;
+                    default:
+                        Assert.True(false);
+                        break;
+                }
+            }
+            Assert.True(commentFound);
         }
     }
 }

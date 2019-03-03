@@ -2268,9 +2268,6 @@ namespace System.Text.Json
                 return false;
             }
 
-            // Exclude the /* at start of the comment. idx already points right before the terminal '*/'
-            // for the end of multiline comment.
-            ValueSpan = _buffer.Slice(previousConsumed + 2, idx);
             if (_tokenType != JsonTokenType.Comment)
             {
                 _previousTokenType = _tokenType;

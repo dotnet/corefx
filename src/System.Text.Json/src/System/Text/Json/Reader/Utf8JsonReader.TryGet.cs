@@ -40,13 +40,11 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads value of the next JSON token for a comment from the source transcoded as a <see cref="string"/>,
-        /// preserving the comment delimiters.
+        /// Reads the next JSON token value from the source as a comment, transcoded as a <see cref="string"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of the JSON token that is not a comment.
         /// <seealso cref="TokenType" />
-        /// It will also throw when the JSON string contains invalid UTF-8 bytes, or invalid UTF-16 surrogates.
         /// </exception>
         public string GetComment()
         {
@@ -55,10 +53,6 @@ namespace System.Text.Json
                 throw ThrowHelper.GetInvalidOperationException_ExpectedComment(TokenType);
             }
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            while (span.LastIndexOfAny(JsonConstants.CarriageReturn, JsonConstants.LineFeed) == span.Length - 1)
-            {
-                span = span.Slice(0, span.Length - 1);
-            }
             return JsonReaderHelper.TranscodeHelper(span);
         }
 

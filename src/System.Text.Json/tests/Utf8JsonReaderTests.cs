@@ -3341,12 +3341,45 @@ namespace System.Text.Json.Tests
                 var dataList = new List<object[]>();
                 foreach (var delim in new[] { "\r", "\r\n", "\n" })
                 {
-                    var singleLineComment = "// Single Line Comment ";
-                    dataList.Add(new object[] { new object[] { $"{{ {singleLineComment}{delim} }}", singleLineComment } });
+                    // NOTE: Leading and trailing spaces in the comments are significant.
+                    var singleLineComment = " Single Line Comment ";
+                    dataList.Add(new object[] { $"{{{singleLineComment}{delim}}}", singleLineComment });
 
-                    var multilineComment = $"/* Multiline {delim} Comment */";
-                    dataList.Add(new object[] { new object[] { $"{{ {multilineComment}{delim}}}", multilineComment } });
+                    var multilineComment = $" Multiline {delim} Comment ";
+                    dataList.Add(new object[] { $"{{/*{multilineComment}*/{delim}}}", multilineComment });
                 }
+                return dataList;
+            }
+        }
+
+        public static IEnumerable<object[]> GetCommentUnescapeData
+        {
+            get
+            {
+                var dataList = new List<object[]>();
+
+                var rawComments = new string[]
+                {
+                    "A string \\t with {0}tab",
+                    "A string with {0}invalid UTF16 \\uDD1E"
+                };
+
+                // single line comments
+                foreach (var raw in rawComments)
+                {
+                    var str = string.Format(raw, "");
+                    var cmt = "//" + str;
+                    dataList.Add(new object[] { cmt, str });
+                }
+
+                // multiline comments
+                foreach (var raw in rawComments)
+                {
+                    var str = string.Format(raw, "\n");
+                    var cmt = "/*" + str + "*/";
+                    dataList.Add(new object[] { cmt, str });
+                }
+
                 return dataList;
             }
         }
