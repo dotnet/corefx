@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace System.Buffers.Text.Tests
 {
@@ -12,7 +13,32 @@ namespace System.Buffers.Text.Tests
         {
             get
             {
-                foreach (ParserTestData<DateTime> testData in DateTimeFormatterTestData.ToParserTheoryDataCollection())
+				// Format J tests for DateTime parsing.
+				yield return new ParserTestData<DateTime>("0997-07-16", DateTime.Parse("0997-07-16"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16", DateTime.Parse("1997-07-16"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20", DateTime.Parse("1997-07-16T19:20"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30", DateTime.Parse("1997-07-16T19:20:30"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.45", DateTime.Parse("1997-07-16T19:20:30.45"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555", DateTime.Parse("1997-07-16T19:20:30.4555555"), 'J', expectedSuccess: true);
+                
+                // Test fraction rounding.
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.45555554", DateTime.Parse("1997-07-16T19:20:30.45555554"), 'J', expectedSuccess: true);
+                // DateTime.Parse will round up to 7dp in this case, but we expect parser to truncate.
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.45555555", DateTime.Parse("1997-07-16T19:20:30.4555555"), 'J', expectedSuccess: true);
+
+				// Test with timezone designator.
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555Z", DateTime.ParseExact("1997-07-16T19:20:30.4555555Z", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555+01:00", DateTime.ParseExact("1997-07-16T19:20:30.4555555+01:00", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555-01:00", DateTime.ParseExact("1997-07-16T19:20:30.4555555-01:00", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
+
+				// Invalid strings.
+				yield return new ParserTestData<DateTime>("997-07-16", default, 'J', expectedSuccess: false);
+				yield return new ParserTestData<DateTime>("1997-07", default, 'J', expectedSuccess: false);
+				yield return new ParserTestData<DateTime>("1997-07-6", default, 'J', expectedSuccess: false);
+				yield return new ParserTestData<DateTime>("1997-07-16Z", default, 'J', expectedSuccess: false);
+				yield return new ParserTestData<DateTime>("1997-07-16+01:00", default, 'J', expectedSuccess: false);
+
+				foreach (ParserTestData<DateTime> testData in DateTimeFormatterTestData.ToParserTheoryDataCollection())
                 {
                     bool roundTrippable = testData.FormatSymbol == 'O';
                     if (roundTrippable)
@@ -51,8 +77,33 @@ namespace System.Buffers.Text.Tests
         {
             get
             {
-                // Wrong day of week.
-                yield return new ParserTestData<DateTimeOffset>("Thu, 13 Jan 2017 03:45:32 GMT", default, 'R', expectedSuccess: false);
+				// Format J tests for DateTimeOffset parsing.
+				yield return new ParserTestData<DateTimeOffset>("0997-07-16", DateTimeOffset.Parse("0997-07-16"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16", DateTimeOffset.Parse("1997-07-16"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20", DateTimeOffset.Parse("1997-07-16T19:20"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30", DateTimeOffset.Parse("1997-07-16T19:20:30"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.45", DateTimeOffset.Parse("1997-07-16T19:20:30.45"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.4555555", DateTimeOffset.Parse("1997-07-16T19:20:30.4555555"), 'J', expectedSuccess: true);
+
+				// Test fraction rounding.
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.45555554", DateTimeOffset.Parse("1997-07-16T19:20:30.45555554"), 'J', expectedSuccess: true);
+				// DateTimeOffset.Parse will round up to 7dp in this case, but we expect parser to truncate.
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.45555555", DateTimeOffset.Parse("1997-07-16T19:20:30.4555555"), 'J', expectedSuccess: true);
+
+				// Test with timezone designator.
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.4555555Z", DateTimeOffset.ParseExact("1997-07-16T19:20:30.4555555Z", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.4555555+01:00", DateTimeOffset.ParseExact("1997-07-16T19:20:30.4555555+01:00", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.4555555-01:00", DateTimeOffset.ParseExact("1997-07-16T19:20:30.4555555-01:00", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
+
+				// Invalid strings.
+				yield return new ParserTestData<DateTimeOffset>("997-07-16", default, 'J', expectedSuccess: false);
+				yield return new ParserTestData<DateTimeOffset>("1997-07", default, 'J', expectedSuccess: false);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-6", default, 'J', expectedSuccess: false);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16Z", default, 'J', expectedSuccess: false);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16+01:00", default, 'J', expectedSuccess: false);
+
+				// Wrong day of week.
+				yield return new ParserTestData<DateTimeOffset>("Thu, 13 Jan 2017 03:45:32 GMT", default, 'R', expectedSuccess: false);
 
                 foreach (ParserTestData<DateTimeOffset> bad in GenerateCorruptedDateTimeText("05/08/2017 10:30:45 +00:00", default))
                 {
