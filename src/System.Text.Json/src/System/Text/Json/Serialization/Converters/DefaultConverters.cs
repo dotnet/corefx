@@ -22,7 +22,7 @@ namespace System.Text.Json.Serialization.Converters
             }
             else if (type == typeof(Enum))
             {
-                return new JsonValueConverterNonGenericEnum(false);
+                return new JsonValueConverterEnum(false);
             }
             TypeCode typeCode = Type.GetTypeCode(type);
             switch (typeCode)
