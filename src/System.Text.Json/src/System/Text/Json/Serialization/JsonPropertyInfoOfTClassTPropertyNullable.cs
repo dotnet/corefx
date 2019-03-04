@@ -4,91 +4,16 @@
 
 using System.Diagnostics;
 using System.Reflection;
-using System.Text.Json.Serialization.Converters;
-using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json.Serialization
 {
     /// <summary>
-    /// Represents a strongly-typed property to prevent boxing and to create a direct delegate to the getter\setter.
+    /// Represents a strongly-typed property that is a <see cref="Nullable{T}"/>.
     /// </summary>
-    internal abstract class JsonPropertyInfo<TClass, TProperty, TUnderlying> : JsonPropertyInfo
+    internal sealed class JsonPropertyInfoNullable<TClass, TProperty> : JsonPropertyInfo<TClass, TProperty?, TProperty>
+        where TProperty : struct
     {
-        internal bool _isPropertyPolicy;
-        internal Func<TClass, TProperty> Get { get; private set; }
-        internal Action<TClass, TProperty> Set { get; private set; }
-
-        public JsonValueConverter<TUnderlying> ValueConverter { get; internal set; }
-
-        // Constructor used for internal identifiers
-        internal JsonPropertyInfo() { }
-
-        internal JsonPropertyInfo(Type classType, Type propertyType, PropertyInfo propertyInfo, Type elementType, JsonSerializerOptions options) :
-            base(classType, propertyType, propertyInfo, elementType, options)
-        {
-            if (propertyInfo != null)
-            {
-                if (propertyInfo.GetMethod?.IsPublic == true)
-                {
-                    HasGetter = true;
-                    Get = (Func<TClass, TProperty>)Delegate.CreateDelegate(typeof(Func<TClass, TProperty>), propertyInfo.GetGetMethod());
-                }
-
-                if (propertyInfo.SetMethod?.IsPublic == true)
-                {
-                    HasSetter = true;
-                    Set = (Action<TClass, TProperty>)Delegate.CreateDelegate(typeof(Action<TClass, TProperty>), propertyInfo.GetSetMethod());
-                }
-            }
-            else
-            {
-                _isPropertyPolicy = true;
-                HasGetter = true;
-                HasSetter = true;
-            }
-
-            GetPolicies(options);
-        }
-
-        internal override void GetPolicies(JsonSerializerOptions options)
-        {
-            ValueConverter = DefaultConverters<TUnderlying>.s_converter;
-
-            base.GetPolicies(options);
-        }
-
-        internal override object GetValueAsObject(object obj, JsonSerializerOptions options)
-        {
-            if (_isPropertyPolicy)
-            {
-                return obj;
-            }
-
-            Debug.Assert(Get != null);
-            return Get((TClass)obj);
-        }
-
-        internal override void SetValueAsObject(object obj, object value, JsonSerializerOptions options)
-        {
-            Debug.Assert(Set != null);
-            TProperty typedValue = (TProperty)value;
-
-            if (typedValue != null || !IgnoreNullPropertyValueOnWrite(options))
-            {
-                Set((TClass)obj, (TProperty)value);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Represents a strongly-typed property that is not a <see cref="Nullable{T}"/>.
-    /// </summary>
-    internal sealed class JsonPropertyInfo<TClass, TProperty> : JsonPropertyInfo<TClass, TProperty, TProperty>
-    {
-        // Constructor used for internal identifiers
-        internal JsonPropertyInfo() { }
-
-        internal JsonPropertyInfo(Type classType, Type propertyType, PropertyInfo propertyInfo, Type elementType, JsonSerializerOptions options) :
+        internal JsonPropertyInfoNullable(Type classType, Type propertyType, PropertyInfo propertyInfo, Type elementType, JsonSerializerOptions options) :
             base(classType, propertyType, propertyInfo, elementType, options)
         {
         }
@@ -119,10 +44,7 @@ namespace System.Text.Json.Serialization
                         }
                         else
                         {
-                            if (value != null || !IgnoreNullPropertyValueOnRead(options))
-                            {
-                                Set((TClass)state.Current.ReturnValue, value);
-                            }
+                            Set((TClass)state.Current.ReturnValue, value);
                         }
 
                         return;
@@ -164,10 +86,10 @@ namespace System.Text.Json.Serialization
             }
             else if (HasGetter)
             {
-                TProperty value;
+                TProperty? value;
                 if (_isPropertyPolicy)
                 {
-                    value = (TProperty)current.CurrentValue;
+                    value = (TProperty?)current.CurrentValue;
                 }
                 else
                 {
@@ -189,11 +111,11 @@ namespace System.Text.Json.Serialization
                 {
                     if (_escapedName != null)
                     {
-                        ValueConverter.Write(_escapedName, value, ref writer);
+                        ValueConverter.Write(_escapedName, value.GetValueOrDefault(), ref writer);
                     }
                     else
                     {
-                        ValueConverter.Write(value, ref writer);
+                        ValueConverter.Write(value.GetValueOrDefault(), ref writer);
                     }
                 }
             }
@@ -204,14 +126,14 @@ namespace System.Text.Json.Serialization
             if (ValueConverter != null)
             {
                 Debug.Assert(current.Enumerator != null);
-                TProperty value = (TProperty)current.Enumerator.Current;
+                TProperty? value = (TProperty?)current.Enumerator.Current;
                 if (value == null)
                 {
                     writer.WriteNullValue();
                 }
                 else
                 {
-                    ValueConverter.Write(value, ref writer);
+                    ValueConverter.Write(value.GetValueOrDefault(), ref writer);
                 }
             }
         }

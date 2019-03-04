@@ -6,16 +6,16 @@ using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal sealed class DefaultEnumConverter<TValue> : JsonValueConverter<TValue>
+    internal sealed class JsonValueConverterNonGenericEnum : JsonValueConverter<Enum>
     {
         public bool TreatAsString { get; private set; }
 
-        internal DefaultEnumConverter(bool treatAsString)
+        internal JsonValueConverterNonGenericEnum(bool treatAsString)
         {
             TreatAsString = treatAsString;
         }
 
-        public override bool TryRead(Type valueType, ref Utf8JsonReader reader, out TValue value)
+        public override bool TryRead(Type valueType, ref Utf8JsonReader reader, out Enum value)
         {
             if (TreatAsString)
             {
@@ -31,13 +31,12 @@ namespace System.Text.Json.Serialization.Converters
                 throw new NotImplementedException(SR.EnumConverterNotImplemented);
 #else
                 string enumString = reader.GetString();
-                if (!Enum.TryParse(valueType, enumString, out object objValue))
+                if (!Enum.TryParse(valueType, enumString, out object enumValue))
                 {
                     value = default;
                     return false;
                 }
-
-                value = (TValue)objValue;
+                value = (Enum)enumValue;
                 return true;
 #endif
             }
@@ -49,11 +48,11 @@ namespace System.Text.Json.Serialization.Converters
                 return false;
             }
 
-            value = (TValue)Enum.ToObject(valueType, ulongValue);
+            value = (Enum)Enum.ToObject(valueType, ulongValue);
             return true;
         }
 
-        public override void Write(TValue value, ref Utf8JsonWriter writer)
+        public override void Write(Enum value, ref Utf8JsonWriter writer)
         {
             if (TreatAsString)
             {
@@ -78,7 +77,7 @@ namespace System.Text.Json.Serialization.Converters
             }
         }
 
-        public override void Write(Span<byte> escapedPropertyName, TValue value, ref Utf8JsonWriter writer)
+        public override void Write(Span<byte> escapedPropertyName, Enum value, ref Utf8JsonWriter writer)
         {
             if (TreatAsString)
             {
