@@ -2,13 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Xunit;
-
 namespace System.MemoryTests
 {
     partial class MemoryTests
     {
         [Theory]
+        [InlineData(new int[] { }, 1, new int[] { })]
         [InlineData(new int[] { 1 }, 1, new int[] { })]
         [InlineData(new int[] { 2 }, 1, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, 1, new int[] { 2, 1 })]
@@ -21,9 +20,20 @@ namespace System.MemoryTests
         {
             Memory<int> memory = new Memory<int>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+
+            ReadOnlyMemory<int> rom = new ReadOnlyMemory<int>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<int> span = new Span<int>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<int> ros = new ReadOnlySpan<int>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
         [Theory]
+        [InlineData(new int[] { }, 1, new int[] { })]
         [InlineData(new int[] { 1 }, 1, new int[] { })]
         [InlineData(new int[] { 2 }, 1, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, 1, new int[] { 1, 2 })]
@@ -36,9 +46,19 @@ namespace System.MemoryTests
         {
             Memory<int> memory = new Memory<int>(values).TrimEnd(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<int> rom = new ReadOnlyMemory<int>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<int> span = new Span<int>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<int> ros = new ReadOnlySpan<int>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
         [Theory]
+        [InlineData(new int[] { }, 1, new int[] { })]
         [InlineData(new int[] { 1 }, 1, new int[] { })]
         [InlineData(new int[] { 2 }, 1, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, 1, new int[] { 2 })]
@@ -52,9 +72,20 @@ namespace System.MemoryTests
         {
             Memory<int> memory = new Memory<int>(values).Trim(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<int> rom = new ReadOnlyMemory<int>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<int> span = new Span<int>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<int> ros = new ReadOnlySpan<int>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
         [Theory]
+        [InlineData(new int[] { }, new int[] { 1 }, new int[] { })]
+        [InlineData(new int[] { 1 }, new int[] { }, new int[] { 1 })]
         [InlineData(new int[] { 1 }, new int[] { 1 }, new int[] { })]
         [InlineData(new int[] { 2 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, new int[] { 1 }, new int[] { 2, 1 })]
@@ -70,9 +101,20 @@ namespace System.MemoryTests
         {
             Memory<int> memory = new Memory<int>(values).TrimStart(trims);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<int> rom = new ReadOnlyMemory<int>(values).TrimStart(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<int> span = new Span<int>(values).TrimStart(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<int> ros = new ReadOnlySpan<int>(values).TrimStart(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
         [Theory]
+        [InlineData(new int[] { }, new int[] { 1 }, new int[] { })]
+        [InlineData(new int[] { 1 }, new int[] { }, new int[] { 1 })]
         [InlineData(new int[] { 1 }, new int[] { 1 }, new int[] { })]
         [InlineData(new int[] { 2 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, new int[] { 1 }, new int[] { 1, 2 })]
@@ -88,9 +130,20 @@ namespace System.MemoryTests
         {
             Memory<int> memory = new Memory<int>(values).TrimEnd(trims);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<int> rom = new ReadOnlyMemory<int>(values).TrimEnd(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<int> span = new Span<int>(values).TrimEnd(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<int> ros = new ReadOnlySpan<int>(values).TrimEnd(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
         [Theory]
+        [InlineData(new int[] { }, new int[] { 1 }, new int[] { })]
+        [InlineData(new int[] { 1 }, new int[] { }, new int[] { 1 })]
         [InlineData(new int[] { 1 }, new int[] { 1 }, new int[] { })]
         [InlineData(new int[] { 2 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, new int[] { 1 }, new int[] { 2 })]
@@ -106,6 +159,15 @@ namespace System.MemoryTests
         {
             Memory<int> memory = new Memory<int>(values).Trim(trims);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<int> rom = new ReadOnlyMemory<int>(values).Trim(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<int> span = new Span<int>(values).Trim(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<int> ros = new ReadOnlySpan<int>(values).Trim(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
         private sealed class Foo : IEquatable<Foo>
