@@ -978,7 +978,6 @@ namespace System.Diagnostics
             {
                 if (!s_initialized)
                 {
-                    // Setup signal handling and configure the terminal.
                     if (!Interop.Sys.InitializeTerminalAndSignalHandling())
                     {
                         throw new Win32Exception();
@@ -1014,14 +1013,14 @@ namespace System.Diagnostics
             if (increment > 0)
             {
                 Debug.Assert(s_processStartLock.IsReadLockHeld);
-                Interop.Sys.ConfigureTerminalForChildProcess(true);
+                Interop.Sys.ConfigureTerminalForChildProcess(childUsesTerminal: true);
             }
             else
             {
                 Debug.Assert(s_processStartLock.IsWriteLockHeld);
                 if (childrenUsingTerminalRemaining == 0)
                 {
-                    Interop.Sys.ConfigureTerminalForChildProcess(false);
+                    Interop.Sys.ConfigureTerminalForChildProcess(childUsesTerminal: false);
                 }
             }
         }

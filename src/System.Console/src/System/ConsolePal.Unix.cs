@@ -809,7 +809,6 @@ namespace System
             {
                 if (!s_initialized)
                 {
-                    // Setup signal handling and configure the terminal.
                     if (!Interop.Sys.InitializeTerminalAndSignalHandling())
                     {
                         throw new Win32Exception();

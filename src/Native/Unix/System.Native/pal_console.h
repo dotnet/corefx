@@ -58,7 +58,7 @@ DLLEXPORT int32_t SystemNative_GetWindowSize(WinSize* windowsSize);
 DLLEXPORT int32_t SystemNative_IsATty(intptr_t fd);
 
 /**
- * Initializes signal handling and terminal for use by System.Console and System.Process.
+ * Initializes signal handling and terminal for use by System.Console and System.Diagnostics.Process.
  *
  * Returns 1 on success; otherwise returns 0 and sets errno.
  */
@@ -90,12 +90,12 @@ DLLEXPORT void SystemNative_GetControlCharacters(
 DLLEXPORT int32_t SystemNative_StdinReady(void);
 
 /**
- * Configures the terminal for Console operations.
+ * Configures the terminal for System.Console.
  */
 DLLEXPORT void SystemNative_ConfigureTerminalForConsole(int32_t reading, uint8_t minChars, uint8_t decisecondsTimeout);
 
 /**
- * Configures the terminal for Process operations.
+ * Configures the terminal for child processes.
  */
 DLLEXPORT void SystemNative_ConfigureTerminalForChildProcess(int32_t enable);
 

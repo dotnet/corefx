@@ -249,7 +249,7 @@ void SystemNative_ConfigureTerminalForChildProcess(int32_t childUsesTerminal)
 
         ConfigureTerminal(g_signalForBreak, /* forChild */ childUsesTerminal, /* minChars */ 1, /* decisecondsTimeout */ 0, /* blockIfBackground */ false);
 
-        // Redo "Application mode" when there are no more interactive children.
+        // Redo "Application mode" when there are no more children using the terminal.
         if (!childUsesTerminal)
         {
             WriteKeypadXmit();
