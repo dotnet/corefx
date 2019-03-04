@@ -23,7 +23,7 @@ namespace System.Diagnostics
         private static readonly object s_initializedGate = new object();
         private static readonly Interop.Sys.SigChldCallback s_sigChildHandler = OnSigChild;
         private static readonly ReaderWriterLockSlim s_processStartLock = new ReaderWriterLockSlim();
-        private static int s_interactiveChildProcessCount;
+        private static int s_childrenUsingTerminalCount;
 
         /// <summary>
         /// Puts a Process component in state to interact with operating system processes that run in a 
@@ -373,9 +373,8 @@ namespace System.Diagnostics
             // .NET applications don't echo characters unless there is a Console.Read operation.
             // Unix applications expect the terminal to be in an echoing state by default.
             // To support processes that interact with the terminal (e.g. 'vi'), we need to configure the
-            // terminal to echo. We keep this configuration as long as there are interactive applications.
-            // Based on ProcessStartInfo we determine if the child may be an interactive application.
-            bool isInteractiveChild = !startInfo.RedirectStandardInput && !startInfo.RedirectStandardOutput;
+            // terminal to echo. We keep this configuration as long as there are children possibly using the terminal.
+            bool usesTerminal = !startInfo.RedirectStandardInput && !startInfo.RedirectStandardOutput;
 
             if (startInfo.UseShellExecute)
             {
@@ -400,7 +399,7 @@ namespace System.Diagnostics
                     isExecuting = ForkAndExecProcess(filename, argv, envp, cwd,
                         startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
                         setCredentials, userId, groupId,
-                        out stdinFd, out stdoutFd, out stderrFd, isInteractiveChild,
+                        out stdinFd, out stdoutFd, out stderrFd, usesTerminal,
                         throwOnNoExec: false); // return false instead of throwing on ENOEXEC
                 }
 
@@ -413,7 +412,7 @@ namespace System.Diagnostics
                     ForkAndExecProcess(filename, argv, envp, cwd,
                         startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
                         setCredentials, userId, groupId,
-                        out stdinFd, out stdoutFd, out stderrFd, isInteractiveChild);
+                        out stdinFd, out stdoutFd, out stderrFd, usesTerminal);
                 }
             }
             else
@@ -428,7 +427,7 @@ namespace System.Diagnostics
                 ForkAndExecProcess(filename, argv, envp, cwd,
                     startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
                     setCredentials, userId, groupId,
-                    out stdinFd, out stdoutFd, out stderrFd, isInteractiveChild);
+                    out stdinFd, out stdoutFd, out stderrFd, usesTerminal);
             }
 
             // Configure the parent's ends of the redirection streams.
@@ -463,7 +462,7 @@ namespace System.Diagnostics
             bool redirectStdin, bool redirectStdout, bool redirectStderr,
             bool setCredentials, uint userId, uint groupId,
             out int stdinFd, out int stdoutFd, out int stderrFd,
-            bool isInteractiveChild, bool throwOnNoExec = true)
+            bool usesTerminal, bool throwOnNoExec = true)
         {
             if (string.IsNullOrEmpty(filename))
             {
@@ -475,9 +474,9 @@ namespace System.Diagnostics
             s_processStartLock.EnterReadLock();
             try
             {
-                if (isInteractiveChild)
+                if (usesTerminal)
                 {
-                    ConfigureConsoleForInteractiveChildren(+1);
+                    ConfigureTerminalForChildProcesses(+1);
                 }
 
                 int childPid;
@@ -498,7 +497,7 @@ namespace System.Diagnostics
                 {
                     // Ensure we'll reap this process.
                     // note: SetProcessId will set this if we don't set it first.
-                    _waitStateHolder = new ProcessWaitState.Holder(childPid, isNewChild: true, isInteractiveChild);
+                    _waitStateHolder = new ProcessWaitState.Holder(childPid, isNewChild: true, usesTerminal);
 
                     // Store the child's information into this Process object.
                     Debug.Assert(childPid >= 0);
@@ -522,11 +521,11 @@ namespace System.Diagnostics
             {
                 s_processStartLock.ExitReadLock();
 
-                // We failed to launch an interactive child.
-                if (_waitStateHolder == null && isInteractiveChild)
+                // We failed to launch a child that could use the terminal.
+                if (_waitStateHolder == null && usesTerminal)
                 {
                     s_processStartLock.EnterWriteLock();
-                    ConfigureConsoleForInteractiveChildren(-1);
+                    ConfigureTerminalForChildProcesses(-1);
                     s_processStartLock.ExitWriteLock();
                 }
             }
@@ -973,7 +972,7 @@ namespace System.Diagnostics
                 if (!s_initialized)
                 {
                     // Setup signal handling and configure the terminal.
-                    if (!Interop.Sys.InitializeConsoleAndSignalHandling())
+                    if (!Interop.Sys.InitializeTerminalAndSignalHandling())
                     {
                         throw new Win32Exception();
                     }
@@ -1000,23 +999,22 @@ namespace System.Diagnostics
             }
         }
 
-        internal static void ConfigureConsoleForInteractiveChildren(int increment)
+        internal static void ConfigureTerminalForChildProcesses(int increment)
         {
             Debug.Assert(increment != 0);
 
-            int interactiveChildrenRemaining = Interlocked.Add(ref s_interactiveChildProcessCount, increment);
+            int childrenUsingTerminalRemaining = Interlocked.Add(ref s_childrenUsingTerminalCount, increment);
             if (increment > 0)
             {
                 Debug.Assert(s_processStartLock.IsReadLockHeld);
-                // This will noop if the console is already configured for an interactive child.
-                Interop.Sys.ConfigureConsoleForInteractiveChild(true);
+                Interop.Sys.ConfigureTerminalForChildProcess(true);
             }
             else
             {
                 Debug.Assert(s_processStartLock.IsWriteLockHeld);
-                if (interactiveChildrenRemaining == 0)
+                if (childrenUsingTerminalRemaining == 0)
                 {
-                    Interop.Sys.ConfigureConsoleForInteractiveChild(false);
+                    Interop.Sys.ConfigureTerminalForChildProcess(false);
                 }
             }
         }

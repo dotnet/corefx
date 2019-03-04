@@ -55,9 +55,9 @@ namespace System.Diagnostics
         {
             internal ProcessWaitState _state;
 
-            internal Holder(int processId, bool isNewChild = false, bool isInteractiveChild = false)
+            internal Holder(int processId, bool isNewChild = false, bool usesTerminal = false)
             {
-                _state = ProcessWaitState.AddRef(processId, isNewChild, isInteractiveChild);
+                _state = ProcessWaitState.AddRef(processId, isNewChild, usesTerminal);
             }
 
             ~Holder()
@@ -99,7 +99,7 @@ namespace System.Diagnostics
         /// </summary>
         /// <param name="processId">The process ID for which we need wait state.</param>
         /// <returns>The wait state object.</returns>
-        internal static ProcessWaitState AddRef(int processId, bool isNewChild, bool isInteractiveChild)
+        internal static ProcessWaitState AddRef(int processId, bool isNewChild, bool usesTerminal)
         {
             lock (s_childProcessWaitStates)
             {
@@ -109,7 +109,7 @@ namespace System.Diagnostics
                     // When the PID is recycled for a new child, we remove the old child.
                     s_childProcessWaitStates.Remove(processId);
 
-                    pws = new ProcessWaitState(processId, isChild: true, isInteractiveChild);
+                    pws = new ProcessWaitState(processId, isChild: true, usesTerminal);
                     s_childProcessWaitStates.Add(processId, pws);
                     pws._outstandingRefCount++; // For Holder
                     pws._outstandingRefCount++; // Decremented in CheckChildren
@@ -143,7 +143,7 @@ namespace System.Diagnostics
                         }
                         if (pws == null)
                         {
-                            pws = new ProcessWaitState(processId, isChild: false, isInteractiveChild: false, exitTime);
+                            pws = new ProcessWaitState(processId, isChild: false, usesTerminal: false, exitTime);
                             s_processWaitStates.Add(processId, pws);
                         }
                         pws._outstandingRefCount++;
@@ -196,8 +196,8 @@ namespace System.Diagnostics
         private readonly int _processId;
         /// <summary>Associated process is a child process.</summary>
         private readonly bool _isChild;
-        /// <summary>Associated process is an interactive child process.</summary>
-        private readonly bool _isInteractiveChild;
+        /// <summary>Associated process is a child that can use the terminal.</summary>
+        private readonly bool _usesTerminal;
 
         /// <summary>If a wait operation is in progress, the Task that represents it; otherwise, null.</summary>
         private Task _waitInProgress;
@@ -218,12 +218,12 @@ namespace System.Diagnostics
 
         /// <summary>Initialize the wait state object.</summary>
         /// <param name="processId">The associated process' ID.</param>
-        private ProcessWaitState(int processId, bool isChild, bool isInteractiveChild, DateTime exitTime = default)
+        private ProcessWaitState(int processId, bool isChild, bool usesTerminal, DateTime exitTime = default)
         {
             Debug.Assert(processId >= 0);
             _processId = processId;
             _isChild = isChild;
-            _isInteractiveChild = isInteractiveChild;
+            _usesTerminal = usesTerminal;
             _exitTime = exitTime;
         }
 
@@ -566,7 +566,7 @@ namespace System.Diagnostics
                     _exitCode = exitCode;
 
                     // Update console settings before calling SetExited.
-                    Process.ConfigureConsoleForInteractiveChildren(-1);
+                    Process.ConfigureTerminalForChildProcesses(-1);
 
                     SetExited();
 

@@ -311,8 +311,8 @@
     <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.SysConf.cs">
       <Link>Common\Interop\Unix\Interop.SysConf.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ConfigureConsoleForInteractiveChild.cs">
-      <Link>Common\Interop\Unix\Interop.ConfigureConsoleForInteractiveChild.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ConfigureTerminalForChildProcess.cs">
+      <Link>Common\Interop\Unix\Interop.ConfigureTerminalForChildProcess.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ForkAndExecProcess.cs">
       <Link>Common\Interop\Unix\Interop.ForkAndExecProcess.cs</Link>
@@ -332,8 +332,8 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetSid.cs">
       <Link>Common\Interop\Unix\Interop.GetSid.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.InitializeConsoleAndSignalHandling.cs">
-      <Link>Common\Interop\Unix\Interop.InitializeConsoleAndSignalHandling.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.InitializeTerminalAndSignalHandling.cs">
+      <Link>Common\Interop\Unix\Interop.InitializeTerminalAndSignalHandling.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Kill.cs">
       <Link>Common\Interop\Unix\Interop.Kill.cs</Link>

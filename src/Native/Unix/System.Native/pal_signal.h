@@ -8,7 +8,7 @@
 #include "pal_types.h"
 
 /**
- * Initializes the signal handling, called by InitializeConsoleAndSignalHandling.
+ * Initializes the signal handling, called by InitializeTerminalAndSignalHandling.
  *
  * Returns 1 on success; otherwise returns 0 and sets errno.
  */

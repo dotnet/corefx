@@ -9,7 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_ConfigureConsoleForInteractiveChild")]
-        internal static extern unsafe void ConfigureConsoleForInteractiveChild(bool enable);
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_ConfigureTerminalForChildProcess")]
+        internal static extern unsafe void ConfigureTerminalForChildProcess(bool enable);
     }
 }

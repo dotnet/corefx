@@ -73,56 +73,29 @@ void SystemNative_SetKeypadXmit(const char* terminfoString)
     WriteKeypadXmit();
 }
 
-static bool g_signalForBreak = true;          // tracks whether the terminal should send signals for breaks, such that attributes have been changed
-static bool g_haveInitTermios = false;        // whether g_initTermios has been initialized
-static bool g_hasInteractiveChildren = false; // tracks whether the application has interactive child processes.
-static struct termios g_initTermios;          // the initial attributes captured when Console was initialized
-static bool g_consoleUninitialized = false;   // tracks whether the application is terminating
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
-static volatile bool g_receivedSigTtou = false;
+
+static bool g_signalForBreak = true;          // tracks whether the terminal should send signals for breaks, such that attributes have been changed
+
+static bool g_haveInitTermios = false;        // tracks whether g_initTermios has been initialized
+static struct termios g_initTermios;          // the initial attributes captured
+
+static bool g_hasCurrentTermios = false;      // tracks whether g_currentTermios is valid
+static struct termios g_currentTermios;       // the latest attributes set
+
+// The terminal can be used by the .NET application via the Console class.
+// It may also be used by child processes that is started via the Process class.
+// The terminal needs to be configured different depending on the user.
+// ConfigureTerminalForXXX are called to change the configuration.
+// When it is ambiguous whether we should configure for Console/a child Process,
+// we prefer configuring for the Console.
+static bool g_reading = false;                // tracks whether the application is performing a Console.Read operation
+static bool g_childUsesTerminal = false;      // tracks whether a child process is using the terminal
+static bool g_consoleUninitialized = false;   // tracks whether the application is terminating
+
 static bool g_noTty = false;                  // cache we are not a tty
 
-static void ApplyTerminalSettings(struct termios* termios, bool signalForBreak, bool hasInteractiveChildren)
-{
-    if (signalForBreak)
-        termios->c_lflag |= (uint32_t)ISIG;
-    else
-        termios->c_lflag &= (uint32_t)(~ISIG);
-
-    if (hasInteractiveChildren)
-    {
-        assert(g_haveInitTermios);
-        termios->c_iflag = g_initTermios.c_iflag;
-        termios->c_lflag = g_initTermios.c_lflag;
-    }
-    else
-    {
-        termios->c_iflag &= (uint32_t)(~(IXON | IXOFF));
-        termios->c_lflag &= (uint32_t)(~(ECHO | ICANON | IEXTEN));
-    }
-}
-
-static bool TcGetAttr(struct termios* termios, bool signalForBreak, bool hasInteractiveChildren)
-{
-    if (g_noTty)
-    {
-        errno = ENOTTY;
-        return false;
-    }
-
-    bool rv = tcgetattr(STDIN_FILENO, termios) >= 0;
-
-    if (!rv && errno == ENOTTY)
-    {
-        g_noTty = true;
-    }
-
-    if (rv)
-    {
-        ApplyTerminalSettings(termios, signalForBreak, hasInteractiveChildren);
-    }
-    return rv;
-}
+static volatile bool g_receivedSigTtou = false;
 
 static void ttou_handler(int signo)
 {
@@ -140,14 +113,8 @@ static void InstallTTOUHandler(void (*handler)(int))
     (void)rvSigaction;
 }
 
-static bool TcSetAttr(struct termios* t, bool blockIfBackground)
+static bool TcSetAttr(struct termios* termios, bool blockIfBackground)
 {
-    if (g_noTty)
-    {
-        errno = ENOTTY;
-        return false;
-    }
-
     if (g_consoleUninitialized)
     {
         // The application is exiting, we mustn't change terminal settings.
@@ -164,7 +131,7 @@ static bool TcSetAttr(struct termios* t, bool blockIfBackground)
         g_receivedSigTtou = false;
     }
 
-    bool rv = tcsetattr(STDIN_FILENO, TCSANOW, t) >= 0;
+    bool rv = tcsetattr(STDIN_FILENO, TCSANOW, termios) >= 0;
 
     if (!blockIfBackground)
     {
@@ -179,11 +146,61 @@ static bool TcSetAttr(struct termios* t, bool blockIfBackground)
         InstallTTOUHandler(SIG_DFL);
     }
 
+    if (rv)
+    {
+        g_hasCurrentTermios = true;
+        g_currentTermios = *termios;
+    }
+
     return rv;
+}
+
+static bool ConfigureTerminal(bool signalForBreak, bool forChild, uint8_t minChars, uint8_t decisecondsTimeout, bool blockIfBackground)
+{
+    if (g_noTty)
+    {
+        errno = ENOTTY;
+        return false;
+    }
+
+    g_childUsesTerminal = forChild;
+
+    assert(g_haveInitTermios);
+    struct termios termios = g_initTermios;
+
+    if (signalForBreak)
+        termios.c_lflag |= (uint32_t)ISIG;
+    else
+        termios.c_lflag &= (uint32_t)(~ISIG);
+
+    if (!forChild)
+    {
+        termios.c_iflag &= (uint32_t)(~(IXON | IXOFF));
+        termios.c_lflag &= (uint32_t)(~(ECHO | ICANON | IEXTEN));
+    }
+
+    termios.c_cc[VMIN] = minChars;
+    termios.c_cc[VTIME] = decisecondsTimeout;
+
+    // Check if the settings have changed.
+    if (g_hasCurrentTermios)
+    {
+        if (g_currentTermios.c_lflag == termios.c_lflag &&
+            g_currentTermios.c_iflag == termios.c_iflag &&
+            g_currentTermios.c_cc[VMIN] == termios.c_cc[VMIN] &&
+            g_currentTermios.c_cc[VMIN] == termios.c_cc[VMIN])
+        {
+            return true;
+        }
+    }
+
+    return TcSetAttr(&termios, blockIfBackground);
 }
 
 void UninitializeConsole()
 {
+    assert(g_haveInitTermios);
+
     // This method is called on SIGQUIT/SIGINT from the signal dispatching thread
     // and on atexit.
 
@@ -191,10 +208,7 @@ void UninitializeConsole()
     {
         if (!g_consoleUninitialized)
         {
-            if (g_haveInitTermios)
-            {
-                TcSetAttr(&g_initTermios, /* blockIfBackground */ false);
-            }
+            TcSetAttr(&g_initTermios, /* blockIfBackground */ false);
 
             g_consoleUninitialized = true;
         }
@@ -203,42 +217,42 @@ void UninitializeConsole()
     }
 }
 
-void SystemNative_ConfigureConsoleTimeout(uint8_t minChars, uint8_t decisecondsTimeout)
+void SystemNative_ConfigureTerminalForConsole(int32_t reading, uint8_t minChars, uint8_t decisecondsTimeout)
 {
     if (pthread_mutex_lock(&g_lock) == 0)
     {
-        struct termios termios;
-        if (TcGetAttr(&termios, g_signalForBreak, g_hasInteractiveChildren))
-        {
-            termios.c_cc[VMIN] = minChars;
-            termios.c_cc[VTIME] = decisecondsTimeout;
+        g_reading = reading;
 
-            TcSetAttr(&termios, /* blockIfBackground */ true);
-        }
+        ConfigureTerminal(g_signalForBreak, /* forChild */ false, minChars, decisecondsTimeout, /* blockIfBackground */ true);
+
         pthread_mutex_unlock(&g_lock);
     }
 }
 
-void SystemNative_ConfigureConsoleForInteractiveChild(int32_t hasInteractiveChildren)
+void SystemNative_ConfigureTerminalForChildProcess(int32_t childUsesTerminal)
 {
-    assert(hasInteractiveChildren == 0 || hasInteractiveChildren == 1);
+    assert(childUsesTerminal == 0 || childUsesTerminal == 1);
 
     if (pthread_mutex_lock(&g_lock) == 0)
     {
-        if (g_hasInteractiveChildren != hasInteractiveChildren)
+        // If the application is performing a read, assume the child process won't use the terminal.
+        if (g_reading)
         {
-            struct termios termios;
-            if (TcGetAttr(&termios, g_signalForBreak, hasInteractiveChildren))
-            {
-                TcSetAttr(&termios, /* blockIfBackground */ false);
-            }
-            g_hasInteractiveChildren = hasInteractiveChildren;
+            return;
+        }
 
-            // Redo "Application mode" when there are no more interactive children.
-            if (!hasInteractiveChildren)
-            {
-                WriteKeypadXmit();
-            }
+        // If no more children are using the terminal, invalidate our cached termios.
+        if (!childUsesTerminal)
+        {
+            g_hasCurrentTermios = false;
+        }
+
+        ConfigureTerminal(g_signalForBreak, /* forChild */ childUsesTerminal, /* minChars */ 1, /* decisecondsTimeout */ 0, /* blockIfBackground */ false);
+
+        // Redo "Application mode" when there are no more interactive children.
+        if (!childUsesTerminal)
+        {
+            WriteKeypadXmit();
         }
 
         pthread_mutex_unlock(&g_lock);
@@ -342,9 +356,10 @@ void SystemNative_GetControlCharacters(
 
 int32_t SystemNative_StdinReady()
 {
-    // TODO ??: https://github.com/dotnet/corefx/pull/6619
+    SystemNative_ConfigureTerminalForConsole(1, 1, 0);
     struct pollfd fd = { .fd = STDIN_FILENO, .events = POLLIN };
     int rv = poll(&fd, 1, 0) > 0 ? 1 : 0;
+    SystemNative_ConfigureTerminalForConsole(0, 1, 0);
     return rv;
 }
 
@@ -377,15 +392,12 @@ int32_t SystemNative_SetSignalForBreak(int32_t signalForBreak)
 
     if (pthread_mutex_lock(&g_lock) == 0)
     {
-        struct termios termios;
-        if (TcGetAttr(&termios, signalForBreak, g_hasInteractiveChildren))
+        if (ConfigureTerminal(signalForBreak, /* forChild */ false, /* minChars */ 1, /* decisecondsTimeout */ 0, /* blockIfBackground */ true))
         {
-            if (TcSetAttr(&termios, /* blockIfBackground */ false))
-            {
-                g_signalForBreak = signalForBreak;
-                rv = 1;
-            }
+            g_signalForBreak = signalForBreak;
+            rv = 1;
         }
+
         pthread_mutex_unlock(&g_lock);
     }
 
@@ -399,16 +411,13 @@ void ReinitializeConsole()
 
     if (pthread_mutex_lock(&g_lock) == 0)
     {
-        struct termios termios;
-        if (TcGetAttr(&termios, g_signalForBreak, g_hasInteractiveChildren))
+        if (!g_childUsesTerminal)
         {
-            TcSetAttr(&termios, /* blockIfBackground */ false);
-        }
+            if (g_hasCurrentTermios)
+            {
+                TcSetAttr(&g_currentTermios, /* blockIfBackground */ false);
+            }
 
-        // Redo "Application mode" unless there are interactive children.
-        // In that case, we'll redo it when there are no more interactive children.
-        if (!g_hasInteractiveChildren)
-        {
             WriteKeypadXmit();
         }
 
@@ -416,7 +425,32 @@ void ReinitializeConsole()
     }
 }
 
-int32_t SystemNative_InitializeConsoleAndSignalHandling()
+static bool InitializeTerminalCore()
+{
+    g_haveInitTermios = tcgetattr(STDIN_FILENO, &g_initTermios) >= 0;
+
+    if (!g_haveInitTermios && errno == ENOTTY)
+    {
+        g_noTty = true;
+    }
+
+    if (g_haveInitTermios)
+    {
+        g_hasCurrentTermios = true;
+        g_currentTermios = g_initTermios;
+        g_signalForBreak = g_initTermios.c_lflag & (uint32_t)ISIG;
+
+        atexit(UninitializeConsole);
+    }
+    else
+    {
+        g_signalForBreak = true;
+    }
+
+    return g_haveInitTermios || g_noTty;
+}
+
+int32_t SystemNative_InitializeTerminalAndSignalHandling()
 {
     static int32_t initialized = 0;
 
@@ -425,20 +459,9 @@ int32_t SystemNative_InitializeConsoleAndSignalHandling()
     {
         if (initialized == 0)
         {
-            initialized = InitializeSignalHandlingCore();
-
-            if (initialized == 1)
+            if (InitializeTerminalCore())
             {
-                g_haveInitTermios = tcgetattr(STDIN_FILENO, &g_initTermios) >= 0;
-
-                if (g_haveInitTermios)
-                {
-                    struct termios termios = g_initTermios;
-                    ApplyTerminalSettings(&termios, g_signalForBreak, g_hasInteractiveChildren);
-                    TcSetAttr(&termios, /* blockIfBackground */ false);
-                }
-
-                atexit(UninitializeConsole);
+                initialized = InitializeSignalHandlingCore();
             }
         }
         pthread_mutex_unlock(&g_lock);

@@ -380,7 +380,7 @@ namespace System
                 // involved in reading/writing, such as when accessing a remote system. We also extend
                 // the timeout on the very first request to 15 seconds, to account for potential latency
                 // before we know if we will receive a response.
-                Interop.Sys.ConfigureConsoleTimeout(minChars: (byte)(s_everReceivedCursorPositionResponse ? 1 : 0), decisecondsTimeout: (byte)(s_firstCursorPositionRequest ? 100 : 10));
+                Interop.Sys.ConfigureTerminalForConsole(reading: true, minChars: (byte)(s_everReceivedCursorPositionResponse ? 1 : 0), decisecondsTimeout: (byte)(s_firstCursorPositionRequest ? 100 : 10));
                 try
                 {
                     // Write out the cursor position report request.
@@ -453,7 +453,7 @@ namespace System
                 }
                 finally
                 {
-                    Interop.Sys.ConfigureConsoleTimeout(minChars: 1, decisecondsTimeout: 0);
+                    Interop.Sys.ConfigureTerminalForConsole(reading: false);
                     s_firstCursorPositionRequest = false;
                 }
 
@@ -810,7 +810,7 @@ namespace System
                 if (!s_initialized)
                 {
                     // Setup signal handling and configure the terminal.
-                    if (!Interop.Sys.InitializeConsoleAndSignalHandling())
+                    if (!Interop.Sys.InitializeTerminalAndSignalHandling())
                     {
                         throw new Win32Exception();
                     }

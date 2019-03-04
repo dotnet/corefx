@@ -62,7 +62,7 @@ DLLEXPORT int32_t SystemNative_IsATty(intptr_t fd);
  *
  * Returns 1 on success; otherwise returns 0 and sets errno.
  */
-DLLEXPORT int32_t SystemNative_InitializeConsoleAndSignalHandling(void);
+DLLEXPORT int32_t SystemNative_InitializeTerminalAndSignalHandling(void);
 
 /**
  * Stores the string that can be written to stdout to transition
@@ -90,14 +90,14 @@ DLLEXPORT void SystemNative_GetControlCharacters(
 DLLEXPORT int32_t SystemNative_StdinReady(void);
 
 /**
- * Initializes the terminal in preparation for a read operation.
+ * Configures the terminal for Console operations.
  */
-DLLEXPORT void SystemNative_ConfigureConsoleTimeout(uint8_t minChars, uint8_t decisecondsTimeout);
+DLLEXPORT void SystemNative_ConfigureTerminalForConsole(int32_t reading, uint8_t minChars, uint8_t decisecondsTimeout);
 
 /**
- * Initializes the terminal for running interactive applications.
+ * Configures the terminal for Process operations.
  */
-DLLEXPORT void SystemNative_ConfigureConsoleForInteractiveChild(int32_t enable);
+DLLEXPORT void SystemNative_ConfigureTerminalForChildProcess(int32_t enable);
 
 /**
  * Reads the number of bytes specified into the provided buffer from stdin.

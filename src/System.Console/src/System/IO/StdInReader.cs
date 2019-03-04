@@ -87,6 +87,7 @@ namespace System.IO
             Debug.Assert(_tmpKeys.Count == 0);
             string readLineStr = null;
 
+            Interop.Sys.ConfigureTerminalForConsole(reading: true);
             try
             {
                 // Read key-by-key until we've read a line.
@@ -172,6 +173,8 @@ namespace System.IO
             }
             finally
             {
+                Interop.Sys.ConfigureTerminalForConsole(reading: false);
+
                 // If we're not consuming the read input, make the keys available for a future read
                 while (_tmpKeys.Count > 0)
                 {
@@ -362,31 +365,39 @@ namespace System.IO
             char ch;
             bool isAlt, isCtrl, isShift;
 
-            if (IsUnprocessedBufferEmpty())
+            Interop.Sys.ConfigureTerminalForConsole(reading: true);
+            try
             {
-                // Read in bytes
-                byte* bufPtr = stackalloc byte[BytesToBeRead];
-                int result = ReadStdin(bufPtr, BytesToBeRead);
-                if (result > 0)
+                if (IsUnprocessedBufferEmpty())
                 {
-                    // Append them
-                    AppendExtraBuffer(bufPtr, result);
+                    // Read in bytes
+                    byte* bufPtr = stackalloc byte[BytesToBeRead];
+                    int result = ReadStdin(bufPtr, BytesToBeRead);
+                    if (result > 0)
+                    {
+                        // Append them
+                        AppendExtraBuffer(bufPtr, result);
+                    }
+                    else
+                    {
+                        // Could be empty if EOL entered on its own.  Pick one of the EOL characters we have,
+                        // or just use 0 if none are available.
+                        return new ConsoleKeyInfo((char)
+                            (ConsolePal.s_veolCharacter != ConsolePal.s_posixDisableValue ? ConsolePal.s_veolCharacter :
+                                ConsolePal.s_veol2Character != ConsolePal.s_posixDisableValue ? ConsolePal.s_veol2Character :
+                                ConsolePal.s_veofCharacter != ConsolePal.s_posixDisableValue ? ConsolePal.s_veofCharacter :
+                                0), 
+                            default(ConsoleKey), false, false, false);
+                    }
                 }
-                else
-                {
-                    // Could be empty if EOL entered on its own.  Pick one of the EOL characters we have,
-                    // or just use 0 if none are available.
-                    return new ConsoleKeyInfo((char)
-                        (ConsolePal.s_veolCharacter != ConsolePal.s_posixDisableValue ? ConsolePal.s_veolCharacter :
-                            ConsolePal.s_veol2Character != ConsolePal.s_posixDisableValue ? ConsolePal.s_veol2Character :
-                            ConsolePal.s_veofCharacter != ConsolePal.s_posixDisableValue ? ConsolePal.s_veofCharacter :
-                            0), 
-                        default(ConsoleKey), false, false, false);
-                }
-            }
 
-            MapBufferToConsoleKey(out key, out ch, out isShift, out isAlt, out isCtrl);
-            return new ConsoleKeyInfo(ch, key, isShift, isAlt, isCtrl);
+                MapBufferToConsoleKey(out key, out ch, out isShift, out isAlt, out isCtrl);
+                return new ConsoleKeyInfo(ch, key, isShift, isAlt, isCtrl);
+            }
+            finally
+            {
+                Interop.Sys.ConfigureTerminalForConsole(reading: false);
+            }
         }
 
         /// <summary>Gets whether there's input waiting on stdin.</summary>
