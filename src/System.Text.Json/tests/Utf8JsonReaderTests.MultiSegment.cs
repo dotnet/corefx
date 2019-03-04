@@ -102,7 +102,10 @@ namespace System.Text.Json.Tests
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             ReadOnlyMemory<byte> dataMemory = dataUtf8;
 
-            var sequences = new List<ReadOnlySequence<byte>>();
+            var sequences = new List<ReadOnlySequence<byte>>
+            {
+                new ReadOnlySequence<byte>(dataMemory)
+            };
 
             for (int i = 0; i < dataUtf8.Length; i++)
             {
@@ -164,7 +167,7 @@ namespace System.Text.Json.Tests
 
                 SpanSequenceStatesAreEqualInvalidJson(dataUtf8, sequence, maxDepth, commentHandling);
 
-                var state = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
+                var state = new JsonReaderState(new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = maxDepth });
                 var json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
 
                 try
@@ -192,7 +195,7 @@ namespace System.Text.Json.Tests
 
                 SpanSequenceStatesAreEqualInvalidJson(dataUtf8, sequence, maxDepth, commentHandling);
 
-                var state = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
+                var state = new JsonReaderState(new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = maxDepth });
                 var json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
 
                 try
@@ -205,9 +208,6 @@ namespace System.Text.Json.Tests
                 {
                     Assert.Equal(expectedlineNumber, ex.LineNumber);
                     Assert.Equal(expectedBytePosition, ex.BytePositionInLine);
-                    byte[] consumed = dataUtf8.AsSpan(0, (int)json.BytesConsumed).ToArray();
-                    Assert.Equal(consumed, sequence.Slice(0, json.Position).ToArray());
-                    Assert.Equal(consumed, sequence.Slice(0, json.CurrentState.Position).ToArray());
                 }
             }
         }
@@ -233,10 +233,10 @@ namespace System.Text.Json.Tests
 
         private static void SpanSequenceStatesAreEqualInvalidJson(byte[] dataUtf8, ReadOnlySequence<byte> sequence, int maxDepth, JsonCommentHandling commentHandling)
         {
-            var stateSpan = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
+            var stateSpan = new JsonReaderState(new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = maxDepth });
             var jsonSpan = new Utf8JsonReader(dataUtf8, isFinalBlock: true, stateSpan);
 
-            var stateSequence = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
+            var stateSequence = new JsonReaderState(new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = maxDepth });
             var jsonSequence = new Utf8JsonReader(sequence, isFinalBlock: true, stateSequence);
 
             try
@@ -300,15 +300,17 @@ namespace System.Text.Json.Tests
         public static void AllowCommentStackMismatchMultiSegment(string jsonString, string expectedWithoutComments, string expectedWithComments)
         {
             byte[] data = Encoding.UTF8.GetBytes(jsonString);
-            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(data, 1);
 
+            var sequence = new ReadOnlySequence<byte>(data);
+            TestReadingJsonWithComments(data, sequence, expectedWithoutComments, expectedWithComments);
+
+            sequence = JsonTestHelper.GetSequence(data, 1);
             TestReadingJsonWithComments(data, sequence, expectedWithoutComments, expectedWithComments);
 
             var firstSegment = new BufferSegment<byte>(ReadOnlyMemory<byte>.Empty);
             ReadOnlyMemory<byte> secondMem = data;
             BufferSegment<byte> secondSegment = firstSegment.Append(secondMem);
             sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, secondMem.Length);
-
             TestReadingJsonWithComments(data, sequence, expectedWithoutComments, expectedWithComments);
         }
 
@@ -368,15 +370,16 @@ namespace System.Text.Json.Tests
         public static void SingleJsonValueMultiSegment(string jsonString, string expectedString)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
+            var sequence = new ReadOnlySequence<byte>(dataUtf8);
+            TestReadingSingleValueJson(dataUtf8, sequence, expectedString);
 
+            sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
             TestReadingSingleValueJson(dataUtf8, sequence, expectedString);
 
             var firstSegment = new BufferSegment<byte>(ReadOnlyMemory<byte>.Empty);
             ReadOnlyMemory<byte> secondMem = dataUtf8;
             BufferSegment<byte> secondSegment = firstSegment.Append(secondMem);
             sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, secondMem.Length);
-
             TestReadingSingleValueJson(dataUtf8, sequence, expectedString);
         }
 

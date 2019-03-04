@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
 
   <PropertyGroup>
     <!--
@@ -10,8 +9,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Override strong name key to always be Open for test projects -->
-    <StrongNameKeyId Condition="'$(IsTestProject)' == 'true'">Open</StrongNameKeyId>
+    <!-- Override strong name key to default to Open for test projects,
+         Tests which wish to control this should set TestStrongNameKeyId. -->
+    <TestStrongNameKeyId Condition="'$(TestStrongNameKeyId)' == ''">Open</TestStrongNameKeyId>
+    <StrongNameKeyId Condition="'$(IsTestProject)' == 'true'">$(TestStrongNameKeyId)</StrongNameKeyId>
   </PropertyGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />

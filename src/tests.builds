@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetPathOfFileAbove(Directory.Build.props))" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
 
   <PropertyGroup>
     <!-- When building through build-tests.cmd tests.builds is the main project that is being built. We set IsTestProject to true when the project path has /tests/.
@@ -17,18 +16,10 @@
     <TraversalBuildDependsOn Condition="'$(BuildingUAPVertical)' == 'true'">MakeCommonResourcesPriFile;$(TraversalBuildDependsOn)</TraversalBuildDependsOn>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(RunningSharedFrameworkValidation)' == 'true'">
-    <TestProjectExclusions Include="$(MSBuildThisFileDirectory)*\tests\**\System.Data.Odbc.Tests.csproj" />
-    <TestProjectExclusions Include="$(MSBuildThisFileDirectory)*\tests\**\System.IO.Pipes.Tests.csproj" />
-    <TestProjectExclusions Include="$(MSBuildThisFileDirectory)*\tests\**\Microsoft.XmlSerializer.Generator.Tests.csproj" />
-    <TestProjectExclusions Include="$(MSBuildThisFileDirectory)*\tests\**\System.Reflection.Context.Tests.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <TestProjectFilter Condition="'$(Test)' == 'true'">Tests</TestProjectFilter>
     <TestProjectFilter Condition="'$(IntegrationTest)' == 'true'">IntegrationTests</TestProjectFilter>
     <TestProjectFilter Condition="'$(PerformanceTest)' == 'true'">PerformanceTests</TestProjectFilter>
-
     <_TestProjectFilter Condition="'$(TestProjectFilter)' != ''">.$(TestProjectFilter)</_TestProjectFilter>
     <!-- By default build all test project types to capture build errors in CI. -->
     <_TestProjectFilter Condition="'$(TestProjectFilter)' == '' or '$(BuildAllTests)' == 'true'">Tests</_TestProjectFilter>
@@ -36,12 +27,12 @@
 
   <ItemGroup Condition="'$(BuildAllConfigurations)' != 'true'">
     <!-- Keep in sync with pattern for test projects in build.proj -->
-    <Project Include="$(MSBuildThisFileDirectory)*\tests\**\*$(_TestProjectFilter).csproj" Exclude="@(TestProjectExclusions)" />
-    <Project Include="$(MSBuildThisFileDirectory)*\tests\**\*$(_TestProjectFilter).vbproj" Exclude="@(TestProjectExclusions)" />
+    <Project Include="$(SourceDir)*\tests\**\*$(_TestProjectFilter).csproj" Exclude="@(TestProjectExclusions)" />
+    <Project Include="$(SourceDir)*\tests\**\*$(_TestProjectFilter).vbproj" Exclude="@(TestProjectExclusions)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(BuildAllConfigurations)' == 'true'">
-    <Project Include="$(ProjectDir)pkg\test\testPackages.proj" />
+    <Project Include="$(RepoRoot)pkg\test\testPackages.proj" />
   </ItemGroup>
 
   <Target Name="BinPlaceXUnitRuntimeForNetstandardSuite"
@@ -54,5 +45,5 @@
              ContinueOnError="ErrorAndStop" />
   </Target>
 
-  <Import Project="$([MSBuild]::GetPathOfFileAbove(dir.traversal.targets))"  />
+  <Import Project="$(RepositoryEngineeringDir)dir.traversal.targets" />
 </Project>
