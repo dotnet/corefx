@@ -565,8 +565,11 @@ namespace System.Diagnostics
                 {
                     _exitCode = exitCode;
 
-                    // Update console settings before calling SetExited.
-                    Process.ConfigureTerminalForChildProcesses(-1);
+                    if (_usesTerminal)
+                    {
+                        // Update terminal settings before calling SetExited.
+                        Process.ConfigureTerminalForChildProcesses(-1);
+                    }
 
                     SetExited();
 
