@@ -13,6 +13,22 @@ namespace System.Diagnostics.Tests
     //Complex types are not supported on EventSource for .NET 4.5
     public class DiagnosticSourceEventSourceBridgeTests : RemoteExecutorTestBase
     {
+        // For reasons I am not sure of, we run all these tests in their own sub-process using RemoteInvoke()
+        // However this makes it very inconvinient to debug the test.   By seting this #if to true you stub
+        // out RemoteInvoke and the code will run in-proc which is useful in debugging.  
+#if false    
+        class NullDispose : IDisposable
+        {
+            public void Dispose()
+            {
+            }
+        }
+        static IDisposable RemoteInvoke(Action a)
+        {
+            a();
+            return new NullDispose();
+        }
+#endif 
         /// <summary>
         /// Tests the basic functionality of turning on specific EventSources and specifying 
         /// the events you want.
@@ -264,6 +280,34 @@ namespace System.Diagnostics.Tests
                     Assert.Equal(2, eventSourceListener.LastEvent.Arguments.Count);
                     Assert.Equal(val.GetType().FullName, eventSourceListener.LastEvent.Arguments["cls"]);  // ToString on cls is the class name
                     Assert.Equal("hi2", eventSourceListener.LastEvent.Arguments["propStr2"]);
+                    eventSourceListener.ResetEventCountAndLastEvent();
+
+                    /***************************************************************************************/
+                    // Emit an event with the same schema as the first event.   (uses first-event cache)
+                    val = new MyClass() { };
+                    if (diagnosticSourceListener.IsEnabled("TestEvent1"))
+                        diagnosticSourceListener.Write("TestEvent1", new { propStr = "hiThere", propInt = 5, cls = val });
+
+                    Assert.Equal(1, eventSourceListener.EventCount); // Exactly one more event has been emitted.
+                    Assert.Equal("TestWildCardEventNameSource", eventSourceListener.LastEvent.SourceName);
+                    Assert.Equal("TestEvent1", eventSourceListener.LastEvent.EventName);
+                    Assert.Equal(3, eventSourceListener.LastEvent.Arguments.Count);
+                    Assert.Equal(val.GetType().FullName, eventSourceListener.LastEvent.Arguments["cls"]);  // ToString on cls is the class name
+                    Assert.Equal("hiThere", eventSourceListener.LastEvent.Arguments["propStr"]);
+                    Assert.Equal("5", eventSourceListener.LastEvent.Arguments["propInt"]);
+                    eventSourceListener.ResetEventCountAndLastEvent();
+
+                    /***************************************************************************************/
+                    // Emit an event with the same schema as the second event.  (uses dictionary cache)
+                    if (diagnosticSourceListener.IsEnabled("TestEvent1"))
+                        diagnosticSourceListener.Write("TestEvent1", new { propStr2 = "hi3", cls = val });
+
+                    Assert.Equal(1, eventSourceListener.EventCount); // Exactly one more event has been emitted.
+                    Assert.Equal("TestWildCardEventNameSource", eventSourceListener.LastEvent.SourceName);
+                    Assert.Equal("TestEvent1", eventSourceListener.LastEvent.EventName);
+                    Assert.Equal(2, eventSourceListener.LastEvent.Arguments.Count);
+                    Assert.Equal(val.GetType().FullName, eventSourceListener.LastEvent.Arguments["cls"]);  // ToString on cls is the class name
+                    Assert.Equal("hi3", eventSourceListener.LastEvent.Arguments["propStr2"]);
                     eventSourceListener.ResetEventCountAndLastEvent();
 
                     /***************************************************************************************/
@@ -546,6 +590,20 @@ namespace System.Diagnostics.Tests
                 using (var aspNetCoreSource = new DiagnosticListener("Microsoft.AspNetCore"))
                 using (var entityFrameworkCoreSource = new DiagnosticListener("Microsoft.EntityFrameworkCore"))
                 {
+                    // Sadly we have a problem where if something else has turned on Microsoft-Diagnostics-DiagnosticSource then
+                    // its keywords are ORed with our and because the shortcuts require that IgnoreShortCutKeywords is OFF 
+                    // Something outside this test (the debugger seems to do this), will cause the test to fail.  
+                    // Currently we simply give up in that case (but it really is a deeper problem. 
+                    var IgnoreShortCutKeywords = (EventKeywords)0x0800;
+                    foreach (var eventSource in EventSource.GetSources())
+                    {
+                        if (eventSource.Name == "Microsoft-Diagnostics-DiagnosticSource")
+                        {
+                            if (eventSource.IsEnabled(EventLevel.Informational, IgnoreShortCutKeywords))
+                                return; // Don't do the testing.  
+                        }
+                    }
+
                     // These are from DiagnosticSourceEventListener.  
                     var Messages = (EventKeywords)0x1;
                     var Events = (EventKeywords)0x2;
@@ -712,7 +770,7 @@ namespace System.Diagnostics.Tests
 
         public int EventCount;
         public DiagnosticSourceEvent LastEvent;
-#if DEBUG 
+#if DEBUG
         // Here just for debugging.  Lets you see the last 3 events that were sent.  
         public DiagnosticSourceEvent SecondLast;
         public DiagnosticSourceEvent ThirdLast;
@@ -725,7 +783,7 @@ namespace System.Diagnostics.Tests
         {
             EventCount = 0;
             LastEvent = null;
-#if DEBUG 
+#if DEBUG
             SecondLast = null;
             ThirdLast = null;
 #endif
@@ -742,7 +800,7 @@ namespace System.Diagnostics.Tests
             if (Filter != null && !Filter(anEvent))
                 return;
 
-#if DEBUG 
+#if DEBUG
             ThirdLast = SecondLast;
             SecondLast = LastEvent;
 #endif
@@ -831,7 +889,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        #region private 
+#region private 
         protected override void OnEventWritten(EventWrittenEventArgs eventData)
         {
             bool wroteEvent = false;
@@ -883,7 +941,7 @@ namespace System.Diagnostics.Tests
         }
 
         EventSource _diagnosticSourceEventSource;
-        #endregion
+#endregion
     }
 
     internal sealed class TurnOnAllEventListener : EventListener

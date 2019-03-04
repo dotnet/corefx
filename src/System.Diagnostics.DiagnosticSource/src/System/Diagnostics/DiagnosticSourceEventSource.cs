@@ -1,11 +1,13 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 
 namespace System.Diagnostics
 {
@@ -644,26 +646,37 @@ namespace System.Diagnostics
                 {
                     if (!_noImplicitTransforms)
                     {
+                        // given the type, fetch the implicit transforms for that type, we cache this in 
+                        // one of two places, and if we don't find it we generate it from the type (MakeImplicitTransforms)
                         Type argType = args.GetType();
-                        if (_expectedArgType != argType)
+                        TransformSpec implicitTransforms;
+                        if (argType == _firstImplicitFieldsType && _firstImplicitFieldsTypeTransforms != null)
                         {
-                            // Figure out the default properties to send on to EventSource.  These are all string or primitive properties.  
-                            _implicitTransforms = null;
-                            TransformSpec newSerializableArgs = null;
-                            TypeInfo curTypeInfo = argType.GetTypeInfo();
-                            foreach (var property in curTypeInfo.DeclaredProperties)
-                            {
-                                var propertyType = property.PropertyType;
-                                newSerializableArgs = new TransformSpec(property.Name, 0, property.Name.Length, newSerializableArgs);
-                            }
-                            _expectedArgType = argType;
-                            _implicitTransforms = Reverse(newSerializableArgs);
+                            // This is the hoped for case.  We hit the singleton cache that we have already set.  
+                            implicitTransforms = _firstImplicitFieldsTypeTransforms;
+                        }
+                        else if (_firstImplicitFieldsType == null)
+                        {
+                            // The singleton cache slot is empty, so create the implicit transforms for that type and cache it.  
+                            implicitTransforms = MakeImplicitTransforms(argType);
+                            // Threads race to claim this slot but only one wins, and gets the right to update _firstImplicitFieldsTypeTransforms. 
+                            // We never modify it after that.   
+                            if (implicitTransforms != null && Interlocked.CompareExchange(ref _firstImplicitFieldsType, argType, null) == null)
+                                _firstImplicitFieldsTypeTransforms = implicitTransforms;
+                        }
+                        else
+                        {
+                            // This should only happen when you are wildcarding your events (reasonably rare).   In that case you will probably need many types
+                            // Note currently we don't limit the cache size, but it is limtied by the number of distinct types of objects passed to DiagnosticSource.Write.  
+                            if (_implicitTransformsTable == null)
+                                _implicitTransformsTable = new ConcurrentDictionary<Type, TransformSpec>(1, 8);
+                            implicitTransforms = _implicitTransformsTable.GetOrAdd(argType, MakeImplicitTransforms);
                         }
 
-                        // Fetch all the fields that are already serializable
-                        if (_implicitTransforms != null)
+                        // Fetch all the implicit fields.  
+                        if (implicitTransforms != null)
                         {
-                            for (var serializableArg = _implicitTransforms; serializableArg != null; serializableArg = serializableArg.Next)
+                            for (var serializableArg = implicitTransforms; serializableArg != null; serializableArg = serializableArg.Next)
                                 outputArgs.Add(serializableArg.Morph(args));
                         }
                     }
@@ -684,6 +697,20 @@ namespace System.Diagnostics
             public FilterAndTransform Next;
 
             #region private
+            // Given a type generate all the the implicit transforms for type (that is for every field 
+            // generate the spec that fetches it).  
+            private static TransformSpec MakeImplicitTransforms(Type type)
+            {
+                TransformSpec newSerializableArgs = null;
+                TypeInfo curTypeInfo = type.GetTypeInfo();
+                foreach (var property in curTypeInfo.DeclaredProperties)
+                {
+                    var propertyType = property.PropertyType;
+                    newSerializableArgs = new TransformSpec(property.Name, 0, property.Name.Length, newSerializableArgs);
+                }
+                return Reverse(newSerializableArgs);
+            }
+
             // Reverses a linked list (of TransformSpecs) in place.    
             private static TransformSpec Reverse(TransformSpec list)
             {
@@ -700,12 +727,14 @@ namespace System.Diagnostics
 
             private IDisposable _diagnosticsListenersSubscription; // This is our subscription that listens for new Diagnostic source to appear. 
             private Subscriptions _liveSubscriptions;              // These are the subscriptions that we are currently forwarding to the EventSource.
-            private bool _noImplicitTransforms;                    // Listener can say they don't want implicit transforms.  
-            private Type _expectedArgType;                         // This is the type where 'implicitTransforms is built for'
-            private TransformSpec _implicitTransforms;             // payload to include because the DiagnosticSource's object fields are already serializable 
+            private bool _noImplicitTransforms;                    // Listener can say they don't want implicit transforms.
+            
+            private Type _firstImplicitFieldsType;                 // Special case the first type of object written that has implicit transforms for this filter.  This is the type of that object
+            private TransformSpec _firstImplicitFieldsTypeTransforms;  // The transform for _firstImplicitFieldsType
+            ConcurrentDictionary<Type, TransformSpec> _implicitTransformsTable; // If there is more than one object type for an implicit transform, they go here.   
             private TransformSpec _explicitTransforms;             // payload to include because the user explicitly indicated how to fetch the field.  
             private DiagnosticSourceEventSource _eventSource;      // Where the data is written to.  
-            #endregion
+#endregion
         }
 
         /// <summary>
@@ -775,7 +804,7 @@ namespace System.Diagnostics
             /// </summary>
             public TransformSpec Next;
 
-            #region private 
+#region private 
             /// <summary>
             /// A PropertySpec represents information needed to fetch a property from 
             /// and efficiently.   Thus it represents a '.PROP' in a TransformSpec
@@ -814,7 +843,7 @@ namespace System.Diagnostics
                 /// </summary>
                 public PropertySpec Next;
 
-                #region private
+#region private
                 /// <summary>
                 /// PropertyFetch is a helper class.  It takes a PropertyInfo and then knows how
                 /// to efficiently fetch that property from a .NET object (See Fetch method).  
@@ -850,7 +879,7 @@ namespace System.Diagnostics
                     /// </summary>
                     public virtual object Fetch(object obj) { return null; }
 
-                    #region private 
+#region private 
 
                     private sealed class TypedFetchProperty<TObject, TProperty> : PropertyFetch
                     {
@@ -864,17 +893,17 @@ namespace System.Diagnostics
                         }
                         private readonly Func<TObject, TProperty> _propertyFetch;
                     }
-                    #endregion
+#endregion
                 }
 
                 private string _propertyName;
                 private volatile PropertyFetch _fetchForExpectedType;
-                #endregion
+#endregion
             }
 
             private string _outputName;
             private PropertySpec _fetches;
-            #endregion
+#endregion
         }
 
         /// <summary>
@@ -887,13 +916,13 @@ namespace System.Diagnostics
         {
             public CallbackObserver(Action<T> callback) { _callback = callback; }
 
-            #region private 
+#region private 
             public void OnCompleted() { }
             public void OnError(Exception error) { }
             public void OnNext(T value) { _callback(value); }
 
             private Action<T> _callback;
-            #endregion
+#endregion
         }
 
         // A linked list of IObservable subscriptions (which are IDisposable).  
@@ -910,9 +939,9 @@ namespace System.Diagnostics
             public Subscriptions Next;
         }
 
-        #endregion
+#endregion
 
         private FilterAndTransform _specs;      // Transformation specifications that indicate which sources/events are forwarded.  
-        #endregion
+#endregion
     }
 }
