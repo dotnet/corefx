@@ -197,6 +197,36 @@ namespace System.MemoryTests
 
             Memory<Foo> memory = new Memory<Foo>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<Foo> span = new Span<Foo>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
+        }
+
+        [Fact]
+        public static void MemoryExtensions_TrimStart_Empty_Single_Null()
+        {
+            var values = new Foo[] { };
+            var trim = (Foo)null;
+
+            var expected = new Foo[] { };
+
+            Memory<Foo> memory = new Memory<Foo>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<Foo> span = new Span<Foo>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
         [Fact]
@@ -209,6 +239,15 @@ namespace System.MemoryTests
 
             Memory<Foo> memory = new Memory<Foo>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<Foo> span = new Span<Foo>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimStart(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
         [Fact]
@@ -221,6 +260,15 @@ namespace System.MemoryTests
 
             Memory<Foo> memory = new Memory<Foo>(values).TrimEnd(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<Foo> span = new Span<Foo>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
         [Fact]
@@ -233,6 +281,15 @@ namespace System.MemoryTests
 
             Memory<Foo> memory = new Memory<Foo>(values).TrimEnd(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<Foo> span = new Span<Foo>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
         [Fact]
@@ -245,6 +302,15 @@ namespace System.MemoryTests
 
             Memory<Foo> memory = new Memory<Foo>(values).Trim(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<Foo> span = new Span<Foo>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
         [Fact]
@@ -257,6 +323,15 @@ namespace System.MemoryTests
 
             Memory<Foo> memory = new Memory<Foo>(values).Trim(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<Foo> span = new Span<Foo>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
     }
 }
