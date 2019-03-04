@@ -98,12 +98,14 @@ namespace System.Tests
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("startIndex", () =>
             {
-                fixed (char* value = valueArray) { new string(value, -1, 8); } // Start index < 0
+                fixed (char* value = valueArray)
+                { new string(value, -1, 8); } // Start index < 0
             });
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("length", () =>
             {
-                fixed (char* value = valueArray) { new string(value, 0, -1); } // Length < 0
+                fixed (char* value = valueArray)
+                { new string(value, 0, -1); } // Length < 0
             });
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("ptr", () => new string((char*)null, 0, 1)); // null ptr with non-zero length
@@ -991,7 +993,7 @@ namespace System.Tests
 
                     string s1 = new string(first);
                     string s2 = new string(second);
-                    Assert.True(0 >  string.Compare(s1, s2, StringComparison.Ordinal));
+                    Assert.True(0 > string.Compare(s1, s2, StringComparison.Ordinal));
 
                     var firstSpan = new ReadOnlySpan<char>(first);
                     var secondSpan = new ReadOnlySpan<char>(second);
@@ -1217,7 +1219,7 @@ namespace System.Tests
             Assert.True(s1.Contains(s2));
 
             ReadOnlySpan<char> span = value.AsSpan(0, 3);
-            ReadOnlySpan<char> slice = value.AsSpan(0 ,2);
+            ReadOnlySpan<char> slice = value.AsSpan(0, 2);
             Assert.True(span.Contains(slice, StringComparison.Ordinal));
 
             Assert.True(span.Contains(slice, StringComparison.CurrentCulture));
@@ -1803,7 +1805,8 @@ namespace System.Tests
         [Fact]
         public static void LengthMismatchEndsWith_Char()
         {
-            string value = "456";;
+            string value = "456";
+            ;
 
             string s1 = value.Substring(0, 2);
             string s2 = value.Substring(0, 3);
@@ -1844,7 +1847,7 @@ namespace System.Tests
             Assert.True(c);
 
             ReadOnlySpan<char> span = value1.AsSpan(0, 3);
-            ReadOnlySpan<char> slice = value2.AsSpan(0 ,3);
+            ReadOnlySpan<char> slice = value2.AsSpan(0, 3);
             c = span.EndsWith(slice);
             Assert.True(c);
         }
@@ -1989,7 +1992,7 @@ namespace System.Tests
             Assert.False(s1.EndsWith(s2, StringComparison.InvariantCultureIgnoreCase));
             Assert.False(s1.EndsWith(s2, StringComparison.OrdinalIgnoreCase));
 
-            ReadOnlySpan<char> span = value.AsSpan(0 ,2);
+            ReadOnlySpan<char> span = value.AsSpan(0, 2);
             ReadOnlySpan<char> slice = value.AsSpan(0, 3);
             Assert.False(span.EndsWith(slice, StringComparison.Ordinal));
 
@@ -2016,7 +2019,7 @@ namespace System.Tests
             Assert.True(s1.EndsWith(s2, StringComparison.OrdinalIgnoreCase));
 
             ReadOnlySpan<char> span = value.AsSpan(0, 3);
-            ReadOnlySpan<char> slice = value.AsSpan(1 ,2);
+            ReadOnlySpan<char> slice = value.AsSpan(1, 2);
             Assert.True(span.EndsWith(slice, StringComparison.Ordinal));
 
             Assert.True(span.EndsWith(slice, StringComparison.CurrentCulture));
@@ -2354,7 +2357,8 @@ namespace System.Tests
 
             // Enumerator should throw when accessing Current before starting enumeration
             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
-            while (enumerator.MoveNext()) ;
+            while (enumerator.MoveNext())
+                ;
 
             // Enumerator should throw when accessing Current after finishing enumeration
             Assert.False(enumerator.MoveNext());
@@ -2395,7 +2399,8 @@ namespace System.Tests
 
             // Enumerator should throw when accessing Current before starting enumeration
             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
-            while (enumerator.MoveNext()) ;
+            while (enumerator.MoveNext())
+                ;
 
             // Enumerator should throw when accessing Current after finishing enumeration
             Assert.False(enumerator.MoveNext());
