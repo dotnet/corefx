@@ -559,9 +559,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     for (int j = 0; j < onlineChain.ChainElements.Count; j++)
                     {
-                        X509ChainStatusFlags chainFlags = onlineChain.ChainStatus.Aggregate(
-                            X509ChainStatusFlags.NoError,
-                            (cur, status) => cur | status.Status);
+                        X509ChainStatusFlags chainFlags = onlineChain.AllStatusFlags();
 
                         const X509ChainStatusFlags WontCheck =
                             X509ChainStatusFlags.RevocationStatusUnknown | X509ChainStatusFlags.UntrustedRoot;
@@ -577,9 +575,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                         // Since `NoError` gets mapped as the empty array, just look for non-empty arrays
                         if (chainElement.ChainElementStatus.Length > 0)
                         {
-                            X509ChainStatusFlags allFlags = chainElement.ChainElementStatus.Aggregate(
-                                X509ChainStatusFlags.NoError,
-                                (cur, status) => cur | status.Status);
+                            X509ChainStatusFlags allFlags = chainElement.AllStatusFlags();
 
                             Console.WriteLine(
                                 $"{nameof(VerifyWithRevocation)}: online attempt {i} - errors at depth {j}: {allFlags}");
@@ -696,10 +692,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 chain.Build(cert);
 
-                X509ChainStatusFlags allFlags =
-                    chain.ChainStatus.Select(cs => cs.Status).Aggregate(
-                        X509ChainStatusFlags.NoError,
-                        (a, b) => a | b);
+                X509ChainStatusFlags allFlags = chain.AllStatusFlags();
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
@@ -714,6 +707,39 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 }
 
                 Assert.Equal(expectedFlags, allFlags);
+            }
+        }
+
+        [Fact]
+        public static void ChainErrorsAtMultipleLayers()
+        {
+            TestData.MakeTestChain3(
+                out X509Certificate2 endEntityCert,
+                out X509Certificate2 intermediateCert,
+                out X509Certificate2 rootCert);
+
+            using (endEntityCert)
+            using (intermediateCert)
+            using (rootCert)
+            using (ChainHolder chainHolder = new ChainHolder())
+            {
+                X509Chain chain = chainHolder.Chain;
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.VerificationFlags |= X509VerificationFlags.AllowUnknownCertificateAuthority;
+                chain.ChainPolicy.ExtraStore.Add(intermediateCert);
+                chain.ChainPolicy.ExtraStore.Add(rootCert);
+                chain.ChainPolicy.VerificationTime = endEntityCert.NotAfter.AddDays(1);
+
+                Assert.Equal(false, chain.Build(endEntityCert));
+
+                Assert.Equal(3, chain.ChainElements.Count);
+                Assert.Equal(X509ChainStatusFlags.NotTimeValid, chain.ChainElements[0].AllStatusFlags());
+                Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[1].AllStatusFlags());
+                Assert.Equal(X509ChainStatusFlags.UntrustedRoot, chain.ChainElements[2].AllStatusFlags());
+
+                Assert.Equal(
+                    X509ChainStatusFlags.NotTimeValid | X509ChainStatusFlags.UntrustedRoot,
+                    chain.AllStatusFlags());
             }
         }
 
@@ -735,6 +761,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(cert.RawData, chain.ChainElements[0].Certificate.RawData);
                 Assert.Equal(issuer.RawData, chain.ChainElements[1].Certificate.RawData);
             }
+        }
+
+        private static X509ChainStatusFlags AllStatusFlags(this X509Chain chain)
+        {
+            return chain.ChainStatus.Aggregate(
+                X509ChainStatusFlags.NoError,
+                (f, s) => f | s.Status);
+        }
+
+        private static X509ChainStatusFlags AllStatusFlags(this X509ChainElement chainElement)
+        {
+            return chainElement.ChainElementStatus.Aggregate(
+                X509ChainStatusFlags.NoError,
+                (f, s) => f | s.Status);
         }
     }
 }
