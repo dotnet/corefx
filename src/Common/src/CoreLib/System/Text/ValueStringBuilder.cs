@@ -45,7 +45,7 @@ namespace System.Text
         public void EnsureCapacity(int capacity)
         {
             if (capacity > _chars.Length)
-                Grow(capacity - _chars.Length);
+                Grow(capacity - _pos);
         }
 
         /// <summary>
