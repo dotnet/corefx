@@ -365,9 +365,10 @@ namespace System.Diagnostics
             bool setCredentials = !string.IsNullOrEmpty(startInfo.UserName);
             uint userId = 0;
             uint groupId = 0;
+            uint[] groups = null;
             if (setCredentials)
             {
-                (userId, groupId) = GetUserAndGroupIds(startInfo);
+                (userId, groupId, groups) = GetUserAndGroupIds(startInfo);
             }
 
             // .NET applications don't echo characters unless there is a Console.Read operation.
@@ -398,7 +399,7 @@ namespace System.Diagnostics
 
                     isExecuting = ForkAndExecProcess(filename, argv, envp, cwd,
                         startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
-                        setCredentials, userId, groupId,
+                        setCredentials, userId, groupId, groups,
                         out stdinFd, out stdoutFd, out stderrFd, usesTerminal,
                         throwOnNoExec: false); // return false instead of throwing on ENOEXEC
                 }
@@ -411,7 +412,7 @@ namespace System.Diagnostics
 
                     ForkAndExecProcess(filename, argv, envp, cwd,
                         startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
-                        setCredentials, userId, groupId,
+                        setCredentials, userId, groupId, groups,
                         out stdinFd, out stdoutFd, out stderrFd, usesTerminal);
                 }
             }
@@ -426,7 +427,7 @@ namespace System.Diagnostics
 
                 ForkAndExecProcess(filename, argv, envp, cwd,
                     startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
-                    setCredentials, userId, groupId,
+                    setCredentials, userId, groupId, groups,
                     out stdinFd, out stdoutFd, out stderrFd, usesTerminal);
             }
 
@@ -460,7 +461,7 @@ namespace System.Diagnostics
         private bool ForkAndExecProcess(
             string filename, string[] argv, string[] envp, string cwd,
             bool redirectStdin, bool redirectStdout, bool redirectStderr,
-            bool setCredentials, uint userId, uint groupId,
+            bool setCredentials, uint userId, uint groupId, uint[] groups,
             out int stdinFd, out int stdoutFd, out int stderrFd,
             bool usesTerminal, bool throwOnNoExec = true)
         {
@@ -489,7 +490,7 @@ namespace System.Diagnostics
                 int errno = Interop.Sys.ForkAndExecProcess(
                     filename, argv, envp, cwd,
                     redirectStdin, redirectStdout, redirectStderr,
-                    setCredentials, userId, groupId,
+                    setCredentials, userId, groupId, groups,
                     out childPid,
                     out stdinFd, out stdoutFd, out stderrFd);
 
@@ -862,7 +863,7 @@ namespace System.Diagnostics
             return _waitStateHolder._state;
         }
 
-        private static (uint userId, uint groupId) GetUserAndGroupIds(ProcessStartInfo startInfo)
+        private static (uint userId, uint groupId, uint[] groups) GetUserAndGroupIds(ProcessStartInfo startInfo)
         {
             Debug.Assert(!string.IsNullOrEmpty(startInfo.UserName));
 
@@ -874,7 +875,13 @@ namespace System.Diagnostics
                 throw new Win32Exception(SR.Format(SR.UserDoesNotExist, startInfo.UserName));
             }
 
-            return (userId.Value, groupId.Value);
+            uint[] groups = Interop.Sys.GetGroupList(startInfo.UserName, groupId.Value);
+            if (groups == null)
+            {
+                throw new Win32Exception(SR.Format(SR.UserGroupsCannotBeDetermined, startInfo.UserName));
+            }
+
+            return (userId.Value, groupId.Value, groups);
         }
 
         private unsafe static (uint? userId, uint? groupId) GetUserAndGroupIds(string userName)
