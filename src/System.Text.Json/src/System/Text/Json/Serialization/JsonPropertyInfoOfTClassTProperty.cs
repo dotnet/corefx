@@ -105,13 +105,7 @@ namespace System.Text.Json.Serialization
             {
                 if (ValueConverter != null)
                 {
-                    Type propertyType = PropertyType;
-                    if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                    {
-                        propertyType = Nullable.GetUnderlyingType(propertyType);
-                    }
-
-                    if (ValueConverter.TryRead(propertyType, ref reader, out TProperty value))
+                    if (ValueConverter.TryRead(PropertyType, ref reader, out TProperty value))
                     {
                         if (state.Current.ReturnValue == null)
                         {
@@ -137,13 +131,7 @@ namespace System.Text.Json.Serialization
         {
             if (ValueConverter != null)
             {
-                Type propertyType = PropertyType;
-                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                {
-                    propertyType = Nullable.GetUnderlyingType(propertyType);
-                }
-
-                if (ValueConverter.TryRead(propertyType, ref reader, out TProperty value))
+                if (ValueConverter.TryRead(PropertyType, ref reader, out TProperty value))
                 {
                     ReadStackFrame.SetReturnValue(value, options, ref state.Current);
                     return;

@@ -13,6 +13,9 @@ namespace System.Text.Json.Serialization
     internal sealed class JsonPropertyInfoNullable<TClass, TProperty> : JsonPropertyInfo<TClass, TProperty?, TProperty>
         where TProperty : struct
     {
+        // should this be cached somewhere else so that it's not populated per TClass as well as TProperty?
+        private static readonly Type s_underlyingType = typeof(TProperty);
+
         internal JsonPropertyInfoNullable(Type classType, Type propertyType, PropertyInfo propertyInfo, Type elementType, JsonSerializerOptions options) :
             base(classType, propertyType, propertyInfo, elementType, options)
         {
@@ -30,13 +33,7 @@ namespace System.Text.Json.Serialization
             {
                 if (ValueConverter != null)
                 {
-                    Type propertyType = PropertyType;
-                    if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                    {
-                        propertyType = Nullable.GetUnderlyingType(propertyType);
-                    }
-
-                    if (ValueConverter.TryRead(propertyType, ref reader, out TProperty value))
+                    if (ValueConverter.TryRead(s_underlyingType, ref reader, out TProperty value))
                     {
                         if (state.Current.ReturnValue == null)
                         {
@@ -59,13 +56,7 @@ namespace System.Text.Json.Serialization
         {
             if (ValueConverter != null)
             {
-                Type propertyType = PropertyType;
-                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                {
-                    propertyType = Nullable.GetUnderlyingType(propertyType);
-                }
-
-                if (ValueConverter.TryRead(propertyType, ref reader, out TProperty value))
+                if (ValueConverter.TryRead(s_underlyingType, ref reader, out TProperty value))
                 {
                     ReadStackFrame.SetReturnValue(value, options, ref state.Current);
                     return;
