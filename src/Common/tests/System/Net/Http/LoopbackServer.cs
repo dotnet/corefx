@@ -401,8 +401,19 @@ namespace System.Net.Test.Common
                     _readStart += copyLength;
                     return copyLength;
                 }
+#if NETSTANDARD
+                // stream does not have Memory<t> overload
+                byte[] tempBuffer = new byte[size];
+                int readLength = await _stream.ReadAsync(tempBuffer, 0, size);
+                if (readLength > 0)
+                {
+                    tempBuffer.AsSpan(readLength).CopyTo(buffer.Span.Slice(offset, size));
+                }
 
+                return readLength;
+#else
                 return await _stream.ReadAsync(buffer.Slice(offset, size)).ConfigureAwait(false);
+#endif
             }
 
             // Read until we either get requested data or we hit end of stream.
