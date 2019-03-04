@@ -2,6 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
+using Xunit;
+
 namespace System.MemoryTests
 {
     partial class MemoryTests
@@ -187,13 +191,20 @@ namespace System.MemoryTests
             public static implicit operator int? (Foo foo) => foo?.Value;
         }
 
-        [Fact]
-        public static void MemoryExtensions_TrimStart_Single_Null()
+        public static readonly IEnumerable<object[]> IdempotentValues = new Foo[][]
         {
-            var values = new Foo[] { null, null, 1, 2, null, null };
-            var trim = (Foo)null;
+            null,
+            new Foo[] { },
+            new Foo[] { null, 1, 2, 3, null, 2, 1, null }
+        };
 
-            var expected = new Foo[] { 1, 2, null, null };
+        [Theory]
+        [MemberData(nameof(IdempotentValues))]
+        public static void MemoryExtensions_TrimStart_Idempotent(Foo[] values)
+        {
+            Foo[] expected = values;
+
+            Foo trim = null;
 
             Memory<Foo> memory = new Memory<Foo>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
@@ -206,15 +217,99 @@ namespace System.MemoryTests
 
             ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
+
+            var trims = new Foo[] { };
+
+            Memory<Foo> memory = new Memory<Foo>(values).TrimStart(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).TrimStart(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<Foo> span = new Span<Foo>(values).TrimStart(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimStart(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
+        }
+
+        [Theory]
+        [MemberData(nameof(IdempotentValues))]
+        public static void MemoryExtensions_TrimEnd_Idempotent(Foo[] values)
+        {
+            Foo[] expected = values;
+
+            Foo trim = null;
+
+            Memory<Foo> memory = new Memory<Foo>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<Foo> span = new Span<Foo>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimEnd(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
+
+            var trims = new Foo[] { };
+
+            Memory<Foo> memory = new Memory<Foo>(values).TrimEnd(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).TrimEnd(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<Foo> span = new Span<Foo>(values).TrimEnd(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimEnd(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
+        }
+
+        [Theory]
+        [MemberData(nameof(IdempotentValues))]
+        public static void MemoryExtensions_Trim_Idempotent(Foo[] values)
+        {
+            Foo[] expected = values;
+
+            Foo trim = null;
+
+            Memory<Foo> memory = new Memory<Foo>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<Foo> span = new Span<Foo>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).Trim(trim);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
+
+            var trims = new Foo[] { };
+
+            Memory<Foo> memory = new Memory<Foo>(values).Trim(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
+
+            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).Trim(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
+
+            Span<Foo> span = new Span<Foo>(values).Trim(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
+
+            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).Trim(trims);
+            Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
         [Fact]
-        public static void MemoryExtensions_TrimStart_Empty_Single_Null()
+        public static void MemoryExtensions_TrimStart_Single_Null()
         {
-            var values = new Foo[] { };
+            var values = new Foo[] { null, null, 1, 2, null, null };
             var trim = (Foo)null;
 
-            var expected = new Foo[] { };
+            var expected = new Foo[] { 1, 2, null, null };
 
             Memory<Foo> memory = new Memory<Foo>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
