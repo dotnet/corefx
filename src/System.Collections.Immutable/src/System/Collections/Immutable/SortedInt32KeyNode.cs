@@ -555,17 +555,21 @@ namespace System.Collections.Immutable
         [Pure]
         private SortedInt32KeyNode<TValue> Search(int key)
         {
-            if (this.IsEmpty || key == _key)
+            SortedInt32KeyNode<TValue> node = this;
+
+            while (!node.IsEmpty && key != node._key)
             {
-                return this;
+                if (key > node._key)
+                {
+                    node = node._right;
+                }
+                else
+                {
+                    node = node._left;
+                }
             }
 
-            if (key > _key)
-            {
-                return _right.Search(key);
-            }
-
-            return _left.Search(key);
+            return node;
         }
     }
 }
