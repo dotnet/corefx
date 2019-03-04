@@ -160,7 +160,7 @@ uint32_t NetSecurityNative_ImportTargetName(uint32_t* minorStatus,
 
     if (isNtlmTarget)
     {
-        nameType = (gss_OID)GSS_C_NT_HOSTBASED_SERVICE;
+        nameType = GSS_C_NT_HOSTBASED_SERVICE;
     }
     else
     {
