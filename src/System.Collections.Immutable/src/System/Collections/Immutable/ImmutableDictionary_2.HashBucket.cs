@@ -256,7 +256,7 @@ namespace System.Collections.Immutable
             /// Gets the value for the given key in the collection if one exists..
             /// </summary>
             /// <param name="key">The key to search for.</param>
-            /// <param name="comparers">The key comparer.</param>
+            /// <param name="comparers">The comparers.</param>
             /// <param name="value">The value for the given key.</param>
             /// <returns>A value indicating whether the key was found.</returns>
             internal bool TryGetValue(TKey key, Comparers comparers, out TValue value)

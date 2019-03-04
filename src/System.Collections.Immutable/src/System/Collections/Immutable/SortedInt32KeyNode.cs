@@ -200,8 +200,28 @@ namespace System.Collections.Immutable
         [Pure]
         internal TValue GetValueOrDefault(int key)
         {
-            var match = this.Search(key);
-            return match.IsEmpty ? default(TValue) : match._value;
+            SortedInt32KeyNode<TValue> node = this;
+            while (true)
+            {
+                if (node.IsEmpty)
+                {
+                    return default(TValue);
+                }
+
+                if (key == node._key)
+                {
+                    return node._value;
+                }
+
+                if (key > node._key)
+                {
+                    node = node._right;
+                }
+                else
+                {
+                    node = node._left;
+                }
+            }
         }
 
         /// <summary>
@@ -213,16 +233,29 @@ namespace System.Collections.Immutable
         [Pure]
         internal bool TryGetValue(int key, out TValue value)
         {
-            var match = this.Search(key);
-            if (match.IsEmpty)
+            SortedInt32KeyNode<TValue> node = this;
+            while (true)
             {
-                value = default(TValue);
-                return false;
-            }
-            else
-            {
-                value = match._value;
-                return true;
+                if (node.IsEmpty)
+                {
+                    value = default(TValue);
+                    return false;
+                }
+
+                if (key == node._key)
+                {
+                    value = node._value;
+                    return true;
+                }
+
+                if (key > node._key)
+                {
+                    node = node._right;
+                }
+                else
+                {
+                    node = node._left;
+                }
             }
         }
 
@@ -546,30 +579,6 @@ namespace System.Collections.Immutable
                 _height = checked((byte)(1 + Math.Max(_left._height, _right._height)));
                 return this;
             }
-        }
-
-        /// <summary>
-        /// Searches the specified key. Callers are expected to validate arguments.
-        /// </summary>
-        /// <param name="key">The key.</param>
-        [Pure]
-        private SortedInt32KeyNode<TValue> Search(int key)
-        {
-            SortedInt32KeyNode<TValue> node = this;
-
-            while (!node.IsEmpty && key != node._key)
-            {
-                if (key > node._key)
-                {
-                    node = node._right;
-                }
-                else
-                {
-                    node = node._left;
-                }
-            }
-
-            return node;
         }
     }
 }
