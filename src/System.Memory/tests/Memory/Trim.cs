@@ -174,7 +174,7 @@ namespace System.MemoryTests
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
-        private sealed class Foo : IEquatable<Foo>
+        public sealed class Foo : IEquatable<Foo>
         {
             public int Value { get; set; }
 
@@ -191,11 +191,10 @@ namespace System.MemoryTests
             public static implicit operator int? (Foo foo) => foo?.Value;
         }
 
-        public static readonly IEnumerable<object[]> IdempotentValues = new Foo[][]
+        public static IEnumerable<object[]> IdempotentValues => new object[][]
         {
-            null,
-            new Foo[] { },
-            new Foo[] { null, 1, 2, 3, null, 2, 1, null }
+            new object[1] { new Foo[] { } },
+            new object[1] { new Foo[] { null, 1, 2, 3, null, 2, 1, null } }
         };
 
         [Theory]
@@ -204,7 +203,7 @@ namespace System.MemoryTests
         {
             Foo[] expected = values;
 
-            Foo trim = null;
+            Foo[] trim = null;
 
             Memory<Foo> memory = new Memory<Foo>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
@@ -218,18 +217,18 @@ namespace System.MemoryTests
             ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
 
-            var trims = new Foo[] { };
+            trim = new Foo[] { };
 
-            Memory<Foo> memory = new Memory<Foo>(values).TrimStart(trims);
+            memory = new Memory<Foo>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
 
-            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).TrimStart(trims);
+            rom = new ReadOnlyMemory<Foo>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
 
-            Span<Foo> span = new Span<Foo>(values).TrimStart(trims);
+            span = new Span<Foo>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
 
-            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimStart(trims);
+            ros = new ReadOnlySpan<Foo>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
@@ -239,7 +238,7 @@ namespace System.MemoryTests
         {
             Foo[] expected = values;
 
-            Foo trim = null;
+            Foo[] trim = null;
 
             Memory<Foo> memory = new Memory<Foo>(values).TrimEnd(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
@@ -253,18 +252,18 @@ namespace System.MemoryTests
             ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimEnd(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
 
-            var trims = new Foo[] { };
+            trim = new Foo[] { };
 
-            Memory<Foo> memory = new Memory<Foo>(values).TrimEnd(trims);
+            memory = new Memory<Foo>(values).TrimEnd(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
 
-            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).TrimEnd(trims);
+            rom = new ReadOnlyMemory<Foo>(values).TrimEnd(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
 
-            Span<Foo> span = new Span<Foo>(values).TrimEnd(trims);
+            span = new Span<Foo>(values).TrimEnd(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
 
-            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).TrimEnd(trims);
+            ros = new ReadOnlySpan<Foo>(values).TrimEnd(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
@@ -274,7 +273,7 @@ namespace System.MemoryTests
         {
             Foo[] expected = values;
 
-            Foo trim = null;
+            Foo[] trim = null;
 
             Memory<Foo> memory = new Memory<Foo>(values).Trim(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
@@ -288,18 +287,18 @@ namespace System.MemoryTests
             ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).Trim(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
 
-            var trims = new Foo[] { };
+            trim = new Foo[] { };
 
-            Memory<Foo> memory = new Memory<Foo>(values).Trim(trims);
+            memory = new Memory<Foo>(values).Trim(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
 
-            ReadOnlyMemory<Foo> rom = new ReadOnlyMemory<Foo>(values).Trim(trims);
+            rom = new ReadOnlyMemory<Foo>(values).Trim(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
 
-            Span<Foo> span = new Span<Foo>(values).Trim(trims);
+            span = new Span<Foo>(values).Trim(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, span.ToArray()));
 
-            ReadOnlySpan<Foo> ros = new ReadOnlySpan<Foo>(values).Trim(trims);
+            ros = new ReadOnlySpan<Foo>(values).Trim(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, ros.ToArray()));
         }
 
@@ -307,8 +306,7 @@ namespace System.MemoryTests
         public static void MemoryExtensions_TrimStart_Single_Null()
         {
             var values = new Foo[] { null, null, 1, 2, null, null };
-            var trim = (Foo)null;
-
+            Foo trim = null;
             var expected = new Foo[] { 1, 2, null, null };
 
             Memory<Foo> memory = new Memory<Foo>(values).TrimStart(trim);
@@ -329,7 +327,6 @@ namespace System.MemoryTests
         {
             var values = new Foo[] { null, 1, 2, 3, null, 2, 1, null };
             var trim = new Foo[] { null, 1, 2 };
-
             var expected = new Foo[] { 3, null, 2, 1, null };
 
             Memory<Foo> memory = new Memory<Foo>(values).TrimStart(trim);
@@ -349,8 +346,7 @@ namespace System.MemoryTests
         public static void MemoryExtensions_TrimEnd_Single_Null()
         {
             var values = new Foo[] { null, null, 1, 2, null, null };
-            var trim = (Foo)null;
-
+            Foo trim = null;
             var expected = new Foo[] { null, null, 1, 2 };
 
             Memory<Foo> memory = new Memory<Foo>(values).TrimEnd(trim);
@@ -371,7 +367,6 @@ namespace System.MemoryTests
         {
             var values = new Foo[] { null, 1, 2, 3, null, 2, 1, null };
             var trim = new Foo[] { null, 1, 2 };
-
             var expected = new Foo[] { null, 1, 2, 3 };
 
             Memory<Foo> memory = new Memory<Foo>(values).TrimEnd(trim);
@@ -391,8 +386,7 @@ namespace System.MemoryTests
         public static void MemoryExtensions_Trim_Single_Null()
         {
             var values = new Foo[] { null, null, 1, 2, null, null };
-            var trim = (Foo)null;
-
+            Foo trim = null;
             var expected = new Foo[] { 1, 2 };
 
             Memory<Foo> memory = new Memory<Foo>(values).Trim(trim);
@@ -413,7 +407,6 @@ namespace System.MemoryTests
         {
             var values = new Foo[] { null, 1, 2, 3, null, 2, 1, null };
             var trim = new Foo[] { null, 1, 2 };
-
             var expected = new Foo[] { 3 };
 
             Memory<Foo> memory = new Memory<Foo>(values).Trim(trim);
