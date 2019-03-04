@@ -143,7 +143,7 @@ static void* SignalHandlerLoop(void* arg)
         }
         else if (signalCode == SIGCONT)
         {
-            ReinitializeConsole();
+            ReinitializeTerminal();
         }
         else
         {
@@ -178,7 +178,7 @@ void SystemNative_UnregisterForCtrl()
 void SystemNative_RestoreAndHandleCtrl(CtrlCode ctrlCode)
 {
     int signalCode = ctrlCode == Break ? SIGQUIT : SIGINT;
-    UninitializeConsole();
+    UninitializeTerminal();
     sigaction(signalCode, OrigActionFor(signalCode), NULL);
     kill(getpid(), signalCode);
 }

@@ -129,9 +129,9 @@ typedef void (*CtrlCallback)(CtrlCode signalCode);
 /**
  * Called by pal_signal.cpp to reinitialize the console on SIGCONT/SIGCHLD.
  */
-void ReinitializeConsole(void);
+void ReinitializeTerminal(void);
 
 /**
  * Called by pal_signal.cpp to uninitialize the console on SIGINT/SIGQUIT.
  */
-void UninitializeConsole(void);
+void UninitializeTerminal(void);

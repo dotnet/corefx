@@ -91,7 +91,7 @@ static struct termios g_currentTermios;       // the latest attributes set
 // we prefer configuring for the Console.
 static bool g_reading = false;                // tracks whether the application is performing a Console.Read operation
 static bool g_childUsesTerminal = false;      // tracks whether a child process is using the terminal
-static bool g_consoleUninitialized = false;   // tracks whether the application is terminating
+static bool g_terminalUninitialized = false;  // tracks whether the application is terminating
 
 static bool g_noTty = false;                  // cache we are not a tty
 
@@ -115,7 +115,7 @@ static void InstallTTOUHandler(void (*handler)(int))
 
 static bool TcSetAttr(struct termios* termios, bool blockIfBackground)
 {
-    if (g_consoleUninitialized)
+    if (g_terminalUninitialized)
     {
         // The application is exiting, we mustn't change terminal settings.
         return true;
@@ -197,7 +197,7 @@ static bool ConfigureTerminal(bool signalForBreak, bool forChild, uint8_t minCha
     return TcSetAttr(&termios, blockIfBackground);
 }
 
-void UninitializeConsole()
+void UninitializeTerminal()
 {
     assert(g_haveInitTermios);
 
@@ -206,11 +206,11 @@ void UninitializeConsole()
 
     if (pthread_mutex_lock(&g_lock) == 0)
     {
-        if (!g_consoleUninitialized)
+        if (!g_terminalUninitialized)
         {
             TcSetAttr(&g_initTermios, /* blockIfBackground */ false);
 
-            g_consoleUninitialized = true;
+            g_terminalUninitialized = true;
         }
 
         pthread_mutex_unlock(&g_lock);
@@ -404,9 +404,9 @@ int32_t SystemNative_SetSignalForBreak(int32_t signalForBreak)
     return rv;
 }
 
-void ReinitializeConsole()
+void ReinitializeTerminal()
 {
-    // Restores the state of the console after being suspended.
+    // Restores the state of the terminal after being suspended.
     // pal_signal.cpp calls this on SIGCONT from the signal handling thread.
 
     if (pthread_mutex_lock(&g_lock) == 0)
@@ -440,7 +440,7 @@ static bool InitializeTerminalCore()
         g_currentTermios = g_initTermios;
         g_signalForBreak = g_initTermios.c_lflag & (uint32_t)ISIG;
 
-        atexit(UninitializeConsole);
+        atexit(UninitializeTerminal);
     }
     else
     {
