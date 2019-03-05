@@ -1638,11 +1638,8 @@ namespace System.ServiceModel.Syndication.Tests
             }
         }
 
-//        [Theory]
-        [InlineData(@"<rss version=""2.0""></rss>")]
-        [InlineData(@"<app:feed xmlns:app=""http://www.w3.org/2005/Atom"" version=""2.0""></app:feed>")]
-        [InlineData(@"<rss xmlns=""different"" version=""2.0""></rss>")]
-        [InlineData(@"<different xmlns=""http://www.w3.org/2005/Atom"" version=""2.0""></different>")]
+        [Theory]
+        [InlineData(@"<rss version=""2.0""><channel></channel></rss>")]
         public void ReadXml_ValidReader_Success(string xmlString)
         {
             using (var stringReader = new StringReader(xmlString))
@@ -1690,6 +1687,21 @@ namespace System.ServiceModel.Syndication.Tests
 
                 IXmlSerializable formatter = new NullCreatedFeedFormatter();
                 AssertExtensions.Throws<ArgumentNullException>("feed", () => formatter.ReadXml(reader));
+            }
+        }
+
+        [Theory]
+        [InlineData(@"<rss version=""2.0""></rss>")]
+        [InlineData(@"<app:feed xmlns:app=""http://www.w3.org/2005/Atom"" version=""2.0""></app:feed>")]
+        [InlineData(@"<rss xmlns=""different"" version=""2.0""></rss>")]
+        [InlineData(@"<different xmlns=""http://www.w3.org/2005/Atom"" version=""2.0""></different>")]
+        public void ReadXml_CantRead_ThrowsXmlException(string xmlString)
+        {
+            using (var stringReader = new StringReader(xmlString))
+            using (XmlReader reader = XmlReader.Create(stringReader))
+            {
+                IXmlSerializable formatter = new Rss20FeedFormatter();
+                Assert.Throws<XmlException>(() => formatter.ReadXml(reader));
             }
         }
 
