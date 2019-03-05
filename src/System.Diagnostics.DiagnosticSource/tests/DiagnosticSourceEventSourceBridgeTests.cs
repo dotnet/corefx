@@ -13,9 +13,10 @@ namespace System.Diagnostics.Tests
     //Complex types are not supported on EventSource for .NET 4.5
     public class DiagnosticSourceEventSourceBridgeTests : RemoteExecutorTestBase
     {
-        // For reasons I am not sure of, we run all these tests in their own sub-process using RemoteInvoke()
-        // However this makes it very inconvinient to debug the test.   By seting this #if to true you stub
-        // out RemoteInvoke and the code will run in-proc which is useful in debugging.  
+        // To avoid interactions between tests when they are run in parallel, we run all these tests in their 
+        // own sub-process using RemoteInvoke()  However this makes it very inconvinient to debug the test.   
+        // By seting this #if to true you stub out RemoteInvoke and the code will run in-proc which is useful 
+        // in debugging.
 #if false    
         class NullDispose : IDisposable
         {
@@ -118,7 +119,7 @@ namespace System.Diagnostics.Tests
         /// Test that things work properly for Linux newline conventions. 
         /// </summary>
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot,"This is linux specific test")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "This is linux specific test")]
         public void LinuxNewLineConventions()
         {
             RemoteInvoke(() =>
@@ -727,7 +728,7 @@ namespace System.Diagnostics.Tests
                             }
                             ce.Signal();
                         })
-                        {  IsBackground = true }.Start();
+                        { IsBackground = true }.Start();
                     }
                     ce.Wait();
                 }
@@ -794,7 +795,7 @@ namespace System.Diagnostics.Tests
         /// </summary>
         public Predicate<DiagnosticSourceEvent> Filter;
 
-#region private 
+        #region private 
         private void UpdateLastEvent(DiagnosticSourceEvent anEvent)
         {
             if (Filter != null && !Filter(anEvent))
@@ -808,7 +809,7 @@ namespace System.Diagnostics.Tests
             EventCount++;
             LastEvent = anEvent;
         }
-#endregion
+        #endregion
     }
 
     /// <summary>
@@ -889,7 +890,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-#region private 
+        #region private 
         protected override void OnEventWritten(EventWrittenEventArgs eventData)
         {
             bool wroteEvent = false;
@@ -941,7 +942,7 @@ namespace System.Diagnostics.Tests
         }
 
         EventSource _diagnosticSourceEventSource;
-#endregion
+        #endregion
     }
 
     internal sealed class TurnOnAllEventListener : EventListener
