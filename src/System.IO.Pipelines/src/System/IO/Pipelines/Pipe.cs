@@ -488,9 +488,13 @@ namespace System.IO.Pipelines
                         _readHead = nextBlock;
                         _readHeadIndex = 0;
 
-                        // The last examined index and the read head should be in sync
-                        _lastExamined = nextBlock;
-                        _lastExaminedIndex = 0;
+                        // Only update the last examined if the same as consumed
+                        if (consumedSegment == examinedSegment)
+                        {
+                            // The last examined index and the read head should be in sync
+                            _lastExamined = nextBlock;
+                            _lastExaminedIndex = 0;
+                        }
 
                         // Reset the writing head to null if it's the return block
                         // then null it out as we're about to reset that memory
