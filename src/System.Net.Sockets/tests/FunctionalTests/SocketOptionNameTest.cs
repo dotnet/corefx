@@ -159,9 +159,11 @@ namespace System.Net.Sockets.Tests
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: dotnet/corefx #29929
         public async Task MulticastInterface_Set_IPv6_AnyInterface_Succeeds()
         {
-            if (PlatformDetection.IsRedHatFamily6)
+            if (PlatformDetection.IsRedHatFamily7 || PlatformDetection.IsOSX)
             {
-                return; // [ActiveIssue(34809)]
+                // RH7 seems to have issues with multicast in Azure. Same code and setup can pass when executed outside of Azure.
+                // OSX lacks multicast routes. Probably not worth of fixing test to add them. Send fails with "no route" message.
+                throw new SkipTestException("IPv6 multicast environment not available");
             }
 
             // On all platforms, index 0 means "any interface"
