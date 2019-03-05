@@ -1071,6 +1071,7 @@ namespace System.Net.Http.Functional.Tests
                 dribble ? new LoopbackServer.Options { StreamWrapper = s => new DribbleStream(s) } : null);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Doesn't support TrailingHeaders")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -1130,6 +1131,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Doesn't support TrailingHeaders")]
         [Fact]
         public async Task GetAsyncResponseHeadersReadOption_TrailingHeaders_Available()
         {
@@ -1196,6 +1198,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Doesn't support TrailingHeaders")]
         [Fact]
         public async Task GetAsync_ForbiddenTrailingHeaders_Throws()
         {
@@ -1228,6 +1231,7 @@ namespace System.Net.Http.Functional.Tests
                 "\r\n"));
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Doesn't support TrailingHeaders")]
         [Fact]
         public async Task GetAsync_MissingTrailer_TrailingHeadersAccepted()
         {
@@ -1269,6 +1273,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Doesn't support TrailingHeaders")]
         [Fact]
         public async Task GetAsync_NoTrailingHeaders_EmptyCollection()
         {
