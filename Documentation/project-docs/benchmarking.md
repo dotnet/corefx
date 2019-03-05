@@ -120,7 +120,7 @@ class Program
 
 7. Go to the corresponding CoreCLR source folder where the API you want to change exists (for example `coreclr\src\System.Private.CoreLib\shared\System`)
 8. Apply the optimization that you want to test
-9. Rebuild System.Private.Corelib with your change (optionally adding `-skipnative -skipbuildpackages` if the change is isolated to managed code):
+9. Rebuild System.Private.Corelib with your change (optionally adding `-skipnative` if the change is isolated to managed code):
 
         C:\Projects\coreclr>build.cmd -release -skiptests -skipnative -skipbuildpackages
 
