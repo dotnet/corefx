@@ -734,6 +734,14 @@ namespace System.IO
                 finally { thisRef._asyncState.Release(); }
             }, this, CancellationToken.None, TaskContinuationOptions.DenyChildAttach, TaskScheduler.Default));
         }
+        
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            // The Windows implementation overrides CopyToAsync.  The Unix implementation should do so as well
+            // then to ensure the right overrides on this non-sealed type are exposed, but it doesn't have any
+            // special logic, and so just delegates to the base.
+            return base.CopyToAsync(destination, bufferSize, cancellationToken);
+        }
 
         /// <summary>Sets the current position of this stream to the given value.</summary>
         /// <param name="offset">The point relative to origin from which to begin seeking. </param>
