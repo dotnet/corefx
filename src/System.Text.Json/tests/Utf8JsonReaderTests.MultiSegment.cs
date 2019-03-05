@@ -158,8 +158,8 @@ namespace System.Text.Json.Tests
                     JsonReaderState jsonState = json.CurrentState;
                     byte[] consumedArray = sequence.Slice(0, consumed).ToArray();
                     Assert.Equal(consumedArray, sequence.Slice(0, json.Position).ToArray());
-                    Assert.Equal(consumedArray, sequence.Slice(0, jsonState.Position).ToArray());
-                    json = new Utf8JsonReader(sequence.Slice(consumed), isFinalBlock: true, json.CurrentState);
+                    Assert.True(json.Position.Equals(jsonState.Position));
+                    json = new Utf8JsonReader(sequence.Slice(consumed), isFinalBlock: true, jsonState);
                     while (json.Read())
                         ;
                     Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
@@ -355,7 +355,7 @@ namespace System.Text.Json.Tests
 
             Assert.Equal(expectedWithComments, builder.ToString());
             Assert.Equal(inputData, sequence.Slice(0, json.Position).ToArray());
-            Assert.Equal(inputData, sequence.Slice(0, json.CurrentState.Position).ToArray());
+            Assert.True(json.Position.Equals(json.CurrentState.Position));
 
             state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
             json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
@@ -379,7 +379,7 @@ namespace System.Text.Json.Tests
 
             Assert.Equal(expectedWithoutComments, builder.ToString());
             Assert.Equal(inputData, sequence.Slice(0, json.Position).ToArray());
-            Assert.Equal(inputData, sequence.Slice(0, json.CurrentState.Position).ToArray());
+            Assert.True(json.Position.Equals(json.CurrentState.Position));
         }
 
         [Theory]
@@ -425,7 +425,7 @@ namespace System.Text.Json.Tests
 
                 Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(inputData, sequence.Slice(0, json.Position).ToArray());
-                Assert.Equal(inputData, sequence.Slice(0, json.CurrentState.Position).ToArray());
+                Assert.True(json.Position.Equals(json.CurrentState.Position));
             }
         }
 
