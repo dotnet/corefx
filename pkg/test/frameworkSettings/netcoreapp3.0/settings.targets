@@ -6,4 +6,10 @@
     <!-- use the most recent MS.NETCore.App we have from upstack -->
     <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
+  <!-- Unix CoreLib contains EventRegistrationToken but no other
+       types from System.Runtime.InteropServices.WindowsRuntime.
+       https://github.com/dotnet/corefx/issues/35792 -->
+  <ItemGroup Condition="'$(RuntimeIdentifier)' != '' AND !$(RuntimeIdentifier.StartsWith('win'))">
+    <IgnoredTypes Include="System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken" />
+  </ItemGroup>
 </Project>
