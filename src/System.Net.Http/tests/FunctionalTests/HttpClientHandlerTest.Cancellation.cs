@@ -355,7 +355,16 @@ namespace System.Net.Http.Functional.Tests
 
                     using (HttpClient client = CreateHttpClient())
                     {
-                        TaskCanceledException ex = await Assert.ThrowsAsync<TaskCanceledException>(() => client.GetAsync(uri, cts.Token));
+                        OperationCanceledException ex = null;
+                        try
+                        {
+                            await client.GetAsync(uri, cts.Token);
+                        }
+                        catch(OperationCanceledException e)
+                        {
+                            ex = e;
+                        }
+                        Assert.True(ex != null, "Expected OperationCancelledException, but no exception was thrown.");
 
                         Assert.True(cts.Token.IsCancellationRequested, "cts token IsCancellationRequested");
 

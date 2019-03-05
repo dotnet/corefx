@@ -430,10 +430,21 @@ namespace System.Net.Http
 
             public void Cancel()
             {
+                bool signalWaiter;
                 lock (SyncObject)
                 {
                     Task ignored = _connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel);
+                    _state = StreamState.Aborted;
+
+                    signalWaiter = _hasWaiter;
+                    _hasWaiter = false;
                 }
+                if (signalWaiter)
+                {
+                    _waitSource.SetResult(true);
+                }
+
+                _connection.RemoveStream(this);
             }
 
             // This object is itself usable as a backing source for ValueTask.  Since there's only ever one awaiter
