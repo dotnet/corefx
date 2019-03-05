@@ -132,7 +132,7 @@ class Program
 
   - Force refresh of CoreCLR hard-link copy(this ends up being much faster than the first option):
    
-          C:\Projects\corefx>build.cmd -restore /p:CoreCLROverridePath=C:\Projects\coreclr\bin\Product\Windows_NT.x64.Release /p:ConfigurationGroup=Release
+          C:\Projects\corefx>build.cmd -restore -c Release /p:CoreCLROverridePath=C:\Projects\coreclr\bin\Product\Windows_NT.x64.Release
 
 11. Run the benchmarks using `--coreRun` from the first step. Save the results in a dedicated folder.
 
