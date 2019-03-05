@@ -713,14 +713,65 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [Fact]
         public static void ChainErrorsAtMultipleLayers()
         {
-            TestData.MakeTestChain3(
-                out X509Certificate2 endEntityCert,
-                out X509Certificate2 intermediateCert,
-                out X509Certificate2 rootCert);
+            // These certificates were generated for this test using CertificateRequest
+            // but the netstandard(2.0) version of this test library doesn't have
+            // CertificateRequest available.
+            //
+            // These certificates have been hard-coded to enable the scenario on
+            // netstandard.
+            byte[] endEntityBytes = Encoding.ASCII.GetBytes(@"
+-----BEGIN CERTIFICATE-----
+MIIC6DCCAdCgAwIBAgIQAKjmD7+TWUwQN2ucajn9kTANBgkqhkiG9w0BAQsFADAXMRUwEwYDVQQD
+EwxJbnRlcm1lZGlhdGUwHhcNMTkwMzAzMjM1NzA3WhcNMTkwNjAzMjM1NzA3WjAVMRMwEQYDVQQD
+EwpFbmQtRW50aXR5MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxTybBkpMdQ8IeL1C
+jG755+ifQfqjNt4+Xhm3pbMi+nCRD68tym1xviUka1hQmx+I1mptswW0Laq1owur0r2KanKoIP2F
+i2h6orOOdslMFPMWqCuNTU4C7cUxokaWah0R7FihwW+aBeWgxG948Cvt+ByQeR1ns9yo7wa8f8kT
+IwzOUu0v1Yj5oW5bOn/cmIBE1C5CD5RivPMGUXX8mZ/myNh16dLQqJW5yQt/uvfr7lkNWC0qq+v7
+Ely4+X27acwMTdtk4chcr5/bTS5FXV7HVqwhajOmm6WrzagPZBELWKRk2EaJkha/MLrBqNfHExs4
+sx2ks+TTclrOrRzG+AUBuQIDAQABozIwMDAMBgNVHRMBAf8EAjAAMAsGA1UdDwQEAwIF4DATBgNV
+HSUEDDAKBggrBgEFBQcDAjANBgkqhkiG9w0BAQsFAAOCAQEAbrEbiw4gpgWi3SJ+sGrfcWCAldpx
+0735hkkYz94OsJjIwWfgQ03pYZwjcnIE4Ln0PU2E52D2ldsJlAE376hpNxdO0X4RLpZVZPEjKGTF
+v2Rf+d0cpqha5J//mqcTTm7F58JRKyfEQn0pqfxx4VyXeLfEsqYbT3kY7ufK0km3Jst0DGw2AGue
+MPmiZicaNlXPVO9vyW4s6J23+kol6X8K2rnVht9jagfnOQ990Ux2xXGyDGM4I0pvW1Zo4vid/eli
+psHHsU9xg0o7L2WXD5qYhD2JCQIVWNRmRZCf1luWlKqUaqWWONMJ44hk8Md+ohxpyCRmbtLRZPzd
+wlkQzPsc9A==
+-----END CERTIFICATE-----");
+            byte[] intermediateBytes = Encoding.ASCII.GetBytes(@"
+-----BEGIN CERTIFICATE-----
+MIIC1DCCAbygAwIBAgIPRoY1rB2tMVJeYB4GILkNMA0GCSqGSIb3DQEBCwUAMBQxEjAQBgNVBAMT
+CVRlc3QgUm9vdDAeFw0xOTAyMTgyMzU3MDdaFw0yMDAyMTgyMzU3MDdaMBcxFTATBgNVBAMTDElu
+dGVybWVkaWF0ZTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALxYzEN6nYvQ0TOg/jOF
+wdBGRUYhTiJpYGFBh9826X5vKlbCS1UAcjFRXmKtJ4WZ8v3peCBPxvVe/1KR38+MWNVtO4B1GBvr
+qR2T9k1ewgn0lO3i6krnIAhJQ+F94xGcsRAfZjXBh7lOmTE9ZlDhDJWkehBIs5TteiBOfbGDml2S
+v7x81cmm2o/sDoP1oVGhezOkFtI2/NdZYKxRthnjDywN3W4KFataJFATVv/yq+QjcLEWrXFRpzDE
+rpVdYmj66kaAnu9D4sHhFqOk1SX3JvcB361stVuUPp2ri75MaaXakweH6X/Yb4nPNV6m1ENwMoDy
+HqrZrHSK8SpzfhY9aB0CAwEAAaMgMB4wDwYDVR0TAQH/BAUwAwEB/zALBgNVHQ8EBAMCAYYwDQYJ
+KoZIhvcNAQELBQADggEBAC4oJ2SH+Ov4QIMXo7mwGSrwONkdMuKyyM9shZiGEH+zIO9SVuPuvtQG
+cePR2bijSz2DtjySi+ST8y3Ql7A3isfbXYPDFmnkzKP6hGvLkctc8eO8U1x7ny+QW1max0gm3UA8
+CY0IMP8pCHUZH9OX/K0N9L+GItqlBK8G4grJ4o43da2x9L0hIrdauPadaGcJalf8k1ymhJ4VDj7t
+ueuTl2qTtbBh015GuEld61EBXSBLIUqwOAeFYrNJbC4J2mXgnLTWC380cBf5KWeSdjLYgk2sZ1V4
+FKKQecZIhxdlDGzMAbbmEV+2EqS+As2C7+y4dkpG4nnbQe/4AFr8vekHdrI=
+-----END CERTIFICATE-----");
+            byte[] rootBytes = Encoding.ASCII.GetBytes(@"
+-----BEGIN CERTIFICATE-----
+MIICyjCCAbKgAwIBAgIIKKt3K3rRbvQwDQYJKoZIhvcNAQELBQAwFDESMBAGA1UEAxMJVGVzdCBS
+b290MB4XDTE5MDIwNDIzNTcwN1oXDTIxMDIwNDIzNTcwN1owFDESMBAGA1UEAxMJVGVzdCBSb290
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiM7tv4YvqmWYGF1vbeM2cQWV1NVBxKU4
+ZK5XEJHZirzE2HCiA0+hI/UD7xnfBrzGQRLsHnp9vfhBi/0wenSIKTckxcGGpuM+JzNoVF97uFSd
+bKvfIwQZzbdRGyTF1eoQWCylsZsnZOXg8c/yoFhG2TJB38l09RYn+HkMkapQERFKSXPZ7taNVJNb
+Sedp3l9jO0aVmh9rmJ7taBXBfWDmSWqhkxjkEcbiRxB7z5K8YxZBlHQCLqf43JiCbKIMBHdzTg+N
+lEBkBGp6T2hoJ4/A1uwvhesjmyqagZrC2NnzOWOxUQ/WujIUfS62ii/yDkP4Jo3745lJ9XXoPbIw
+AwvWYQIDAQABoyAwHjAPBgNVHRMBAf8EBTADAQH/MAsGA1UdDwQEAwIBhjANBgkqhkiG9w0BAQsF
+AAOCAQEAA/pfswrUzcLP5UfmHgQDc1slJjh0btnkN+4dxCCTLcnteJCTumYw+/82qL+O4t1KlzlS
+2Eqgyx0u48YmwDp/5jWAvT8RX8pvV3Prd7T8/dp/ucES7R9r3zF2Rmw5Me9iq1yaLAypGyBGqV1J
+HAwJjH/eKZ5iuOMhFljs2R5Gh5rRsQjNVUCRsolCds4d1f+76fi2SGaKqkAA4gzg1c71SPTAaUPR
+ythjxnoCBDVFmwV5opXZj9qIZoUdH92gCVFgMWkxWCYWzyH78uIUzV1oo+KNwK1SCTnfVHcfWRIL
+tHP28fj0LUop/QFojSZPsaPAW6JvoQ0t4hd6WoyX6z7FsA==
+-----END CERTIFICATE-----");
 
-            using (endEntityCert)
-            using (intermediateCert)
-            using (rootCert)
+            using (X509Certificate2 endEntityCert = new X509Certificate2(endEntityBytes))
+            using (X509Certificate2 intermediateCert = new X509Certificate2(intermediateBytes))
+            using (X509Certificate2 rootCert = new X509Certificate2(rootBytes))
             using (ChainHolder chainHolder = new ChainHolder())
             {
                 X509Chain chain = chainHolder.Chain;
