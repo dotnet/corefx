@@ -4,12 +4,12 @@
 
 #include "pal_x509.h"
 
-#include <stdbool.h>
+#include "../Common/pal_safecrt.h"
 #include <assert.h>
 #include <dirent.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
-#include "../Common/pal_safecrt.h"
 
 c_static_assert(PAL_X509_V_OK == X509_V_OK);
 c_static_assert(PAL_X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT);
@@ -521,7 +521,8 @@ X509_STORE* CryptoNative_X509ChainNew(X509Stack* systemTrust, const char* userTr
                 if (!X509_STORE_add_cert(store, cert))
                 {
                     // cert refcount is still 1
-                    if (ERR_get_error() != ERR_PACK(ERR_LIB_X509, X509_F_X509_STORE_ADD_CERT, X509_R_CERT_ALREADY_IN_HASH_TABLE))
+                    if (ERR_get_error() !=
+                        ERR_PACK(ERR_LIB_X509, X509_F_X509_STORE_ADD_CERT, X509_R_CERT_ALREADY_IN_HASH_TABLE))
                     {
                         // cert refcount goes to 0
                         X509_free(cert);
@@ -600,7 +601,6 @@ int32_t CryptoNative_X509StackAddDirectoryStore(X509Stack* stack, char* storePat
             // Just clear it all.
             ERR_clear_error();
         }
-
     }
 
     return clearError;
@@ -823,7 +823,8 @@ static char* BuildOcspCacheFilename(char* cachePath, X509* subject)
         unsigned long issuerHash = X509_issuer_name_hash(subject);
         unsigned long subjectHash = X509_subject_name_hash(subject);
 
-        size_t written = (size_t)snprintf(fullPath, allocSize, "%s/%08lx.%08lx.ocsp", cachePath, issuerHash, subjectHash);
+        size_t written =
+            (size_t)snprintf(fullPath, allocSize, "%s/%08lx.%08lx.ocsp", cachePath, issuerHash, subjectHash);
         assert(written == allocSize - 1);
         (void)written;
 
@@ -845,14 +846,13 @@ static OCSP_CERTID* MakeCertId(X509* subject, X509* issuer)
     return OCSP_cert_to_id(EVP_sha1(), subject, issuer);
 }
 
-static X509VerifyStatusCode CheckOcsp(
-    OCSP_REQUEST* req,
-    OCSP_RESPONSE* resp,
-    X509* subject,
-    X509* issuer,
-    X509_STORE_CTX* storeCtx,
-    ASN1_GENERALIZEDTIME** thisUpdate,
-    ASN1_GENERALIZEDTIME** nextUpdate)
+static X509VerifyStatusCode CheckOcsp(OCSP_REQUEST* req,
+                                      OCSP_RESPONSE* resp,
+                                      X509* subject,
+                                      X509* issuer,
+                                      X509_STORE_CTX* storeCtx,
+                                      ASN1_GENERALIZEDTIME** thisUpdate,
+                                      ASN1_GENERALIZEDTIME** nextUpdate)
 {
     if (thisUpdate != NULL)
     {
@@ -1013,9 +1013,7 @@ X509VerifyStatusCode CryptoNative_X509ChainGetCachedOcspStatus(X509_STORE_CTX* s
             // if thisUpdate < oldest || nextUpdate < now, reject.
             //
             // Since X509_cmp(_current)_time returns 0 on error, do a <= 0 check.
-            if (nextUpdate == NULL ||
-                thisUpdate == NULL ||
-                X509_cmp_current_time(nextUpdate) <= 0 ||
+            if (nextUpdate == NULL || thisUpdate == NULL || X509_cmp_current_time(nextUpdate) <= 0 ||
                 X509_cmp_time(thisUpdate, &oldest) <= 0)
             {
                 ret = PAL_X509_V_ERR_UNABLE_TO_GET_CRL;
@@ -1097,11 +1095,8 @@ OCSP_REQUEST* CryptoNative_X509ChainBuildOcspRequest(X509_STORE_CTX* storeCtx)
     return req;
 }
 
-X509VerifyStatusCode CryptoNative_X509ChainVerifyOcsp(
-    X509_STORE_CTX* storeCtx,
-    OCSP_REQUEST* req,
-    OCSP_RESPONSE* resp,
-    char* cachePath)
+X509VerifyStatusCode
+CryptoNative_X509ChainVerifyOcsp(X509_STORE_CTX* storeCtx, OCSP_REQUEST* req, OCSP_RESPONSE* resp, char* cachePath)
 {
     if (storeCtx == NULL || req == NULL || resp == NULL)
     {
@@ -1144,9 +1139,7 @@ X509VerifyStatusCode CryptoNative_X509ChainVerifyOcsp(
 
             // If the response is within our caching policy (which requires a nextUpdate value)
             // then try to cache it.
-            if (nextUpdate != NULL &&
-                thisUpdate != NULL &&
-                X509_cmp_time(thisUpdate, &oldest) > 0)
+            if (nextUpdate != NULL && thisUpdate != NULL && X509_cmp_time(thisUpdate, &oldest) > 0)
             {
                 char* fullPath = BuildOcspCacheFilename(cachePath, subject);
 
