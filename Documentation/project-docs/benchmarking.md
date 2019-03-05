@@ -130,14 +130,9 @@ class Program
 
           C:\Projects\corefx>build.cmd -c Release /p:CoreCLROverridePath=C:\Projects\coreclr\bin\Product\Windows_NT.x64.Release
 
-  - Force refresh of CoreCLR hard-link copy:
+  - Force refresh of CoreCLR hard-link copy(this ends up being much faster than the first option):
    
-          C:\Projects\corefx>msbuild /p:CoreCLROverridePath=C:\Projects\coreclr\bin\Product\Windows_NT.x64.Release\ ./external/runtime/runtime.depproj /p:ConfigurationGroup=Release
-  
-  - Manually copy over the relevant files from within the root of the coreclr output folder to where `CoreRun.exe` lives within corefx (excluding the subdirectories). This ends up being much faster than the first option and if the only thing that changed is   `System.Private.Corelib.dll`, just copy that over:
-
-          Copy from: C:\Projects\coreclr\bin\Product\Windows_NT.x64.Release
-          To: C:\Projects\corefx\artifacts\bin\testhost\netcoreapp-Windows_NT-Release-x64\shared\Microsoft.NETCore.App\9.9.9\
+          C:\Projects\corefx>build.cmd -restore /p:CoreCLROverridePath=C:\git\coreclr\bin\Product\Windows_NT.x64.Release
 
 11. Run the benchmarks using `--coreRun` from the first step. Save the results in a dedicated folder.
 
