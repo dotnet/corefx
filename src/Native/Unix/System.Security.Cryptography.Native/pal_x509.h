@@ -358,6 +358,14 @@ the current chain to make chain builds after Reset faster.
 DLLEXPORT int32_t CryptoNative_X509StoreCtxCommitToChain(X509_STORE_CTX* storeCtx);
 
 /*
+Duplicates any certificate at or below the level where the error marker is.
+
+Outputs a new store with a clone of the root, if necessary.
+The new store does not have any properties set other than the trust. (Mainly, CRLs are lost)
+*/
+DLLEXPORT int32_t CryptoNative_X509StoreCtxResetForSignatureError(X509_STORE_CTX* storeCtx, X509_STORE** newStore);
+
+/*
 Look for a cached OCSP response appropriate to the end-entity certificate using the issuer as
 determined by the chain in storeCtx.
 */

@@ -672,7 +672,13 @@ int32_t CryptoNative_X509StoreCtxCommitToChain(X509_STORE_CTX* storeCtx)
             // For a fully trusted chain this will add the trust root redundantly to the
             // untrusted lookup set, but the resulting extra work is small compared to the
             // risk of being wrong about promoting trust or losing the chain at this point.
-            sk_X509_push(untrusted, cur);
+            if (!sk_X509_push(untrusted, cur))
+            {
+                X509err(X509_F_X509_VERIFY_CERT, ERR_R_MALLOC_FAILURE);
+                X509_free(cur);
+                sk_X509_pop_free(chain, X509_free);
+                return 0;
+            }
         }
     }
 
@@ -680,6 +686,126 @@ int32_t CryptoNative_X509StoreCtxCommitToChain(X509_STORE_CTX* storeCtx)
     // and pop_free, other than free saves a bit of work.
     sk_X509_free(chain);
     return 1;
+}
+
+int32_t CryptoNative_X509StoreCtxResetForSignatureError(X509_STORE_CTX* storeCtx, X509_STORE** newStore)
+{
+    if (storeCtx == NULL || newStore == NULL)
+    {
+        return -1;
+    }
+
+    *newStore = NULL;
+
+    int errorDepth = X509_STORE_CTX_get_error_depth(storeCtx);
+    X509Stack* chain = X509_STORE_CTX_get0_chain(storeCtx);
+    int chainLength = sk_X509_num(chain);
+    X509_STORE* store = X509_STORE_CTX_get0_store(storeCtx);
+
+    // If the signature error was reported at the last element
+    if (chainLength - 1 == errorDepth)
+    {
+        X509* root;
+        X509* last = sk_X509_value(chain, errorDepth);
+
+        // If the last element is in the trust store we need to build a new trust store.
+        if (X509_STORE_CTX_get1_issuer(&root, storeCtx, last))
+        {
+            if (root == last)
+            {
+                // We know it's a non-zero refcount after this because last has one, too.
+                // So go ahead and undo the get1.
+                X509_free(root);
+
+                X509_STORE* tmpNew = X509_STORE_new();
+
+                if (tmpNew == NULL)
+                {
+                    return 0;
+                }
+
+                X509* duplicate = X509_dup(last);
+
+                if (duplicate == NULL)
+                {
+                    X509_STORE_free(tmpNew);
+                    return 0;
+                }
+
+                if (!X509_STORE_add_cert(tmpNew, duplicate))
+                {
+                    X509_free(duplicate);
+                    X509_STORE_free(tmpNew);
+                    return 0;
+                }
+
+                *newStore = tmpNew;
+                store = tmpNew;
+                chainLength--;
+            }
+            else
+            {
+                // This really shouldn't happen, since if we could have resolved it now
+                // it should have resolved during chain walk.
+                //
+                // But better safe than sorry.
+                X509_free(root);
+            }
+        }
+    }
+
+    X509Stack* untrusted = X509_STORE_CTX_get0_untrusted(storeCtx);
+    X509* cur;
+
+    while ((cur = sk_X509_pop(untrusted)) != NULL)
+    {
+        X509_free(cur);
+    }
+
+    for (int i = chainLength - 1; i > 0; --i)
+    {
+        cur = sk_X509_value(chain, i);
+
+        // errorDepth and lower need to be duplicated to avoid x->valid taint.
+        if (i <= errorDepth)
+        {
+            X509* duplicate = X509_dup(cur);
+
+            if (duplicate == NULL)
+            {
+                return 0;
+            }
+
+            if (!sk_X509_push(untrusted, duplicate))
+            {
+                X509err(X509_F_X509_VERIFY_CERT, ERR_R_MALLOC_FAILURE);
+                X509_free(duplicate);
+                return 0;
+            }
+        }
+        else
+        {
+            if (sk_X509_push(untrusted, cur))
+            {
+                X509_up_ref(cur);
+            }
+            else
+            {
+                X509err(X509_F_X509_VERIFY_CERT, ERR_R_MALLOC_FAILURE);
+                return 0;
+            }
+        }
+    }
+
+    X509* leafDup = X509_dup(X509_STORE_CTX_get0_cert(storeCtx));
+
+    if (leafDup == NULL)
+    {
+        return 0;
+    }
+
+    X509_STORE_CTX_cleanup(storeCtx);
+    return CryptoNative_X509StoreCtxInit(storeCtx, store, leafDup, untrusted);
 }
 
 static char* BuildOcspCacheFilename(char* cachePath, X509* subject)
