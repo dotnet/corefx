@@ -440,7 +440,7 @@ namespace System.Diagnostics
 
                 // Points just beyond the last point in the string that has yet to be parsed.   Thus we start with the whole string.  
                 int endIdx = filterAndPayloadSpecs.Length;
-                 for (;;)
+                for (;;)
                 {
                     // Skip trailing whitespace.
                     while (0 < endIdx && char.IsWhiteSpace(filterAndPayloadSpecs[endIdx - 1]))
@@ -538,7 +538,7 @@ namespace System.Diagnostics
                 // Parse all the explicit transforms, if present
                 if (startTransformIdx < endIdx)
                 {
-                     for (;;)
+                    for (;;)
                     {
                         int specStartIdx = startTransformIdx;
                         int semiColonIdx = filterAndPayloadSpec.LastIndexOf(';', endIdx - 1, endIdx - startTransformIdx);
@@ -674,7 +674,7 @@ namespace System.Diagnostics
                         // implicitTransformas now fetched from cache or constructed, use it to Fetch all the implicit fields.  
                         if (implicitTransforms != null)
                         {
-                            for (var serializableArg = implicitTransforms; serializableArg != null; serializableArg = serializableArg.Next)
+                            for (TransformSpec serializableArg = implicitTransforms; serializableArg != null; serializableArg = serializableArg.Next)
                                 outputArgs.Add(serializableArg.Morph(args));
                         }
                     }
@@ -726,7 +726,6 @@ namespace System.Diagnostics
             private IDisposable _diagnosticsListenersSubscription; // This is our subscription that listens for new Diagnostic source to appear. 
             private Subscriptions _liveSubscriptions;              // These are the subscriptions that we are currently forwarding to the EventSource.
             private bool _noImplicitTransforms;                    // Listener can say they don't want implicit transforms.
-
             private ImplicitTransformEntry _firstImplicitTransformsEntry; // The transform for _firstImplicitFieldsType
             private ConcurrentDictionary<Type, TransformSpec> _implicitTransformsTable; // If there is more than one object type for an implicit transform, they go here.   
             private TransformSpec _explicitTransforms;             // payload to include because the user explicitly indicated how to fetch the field.  
