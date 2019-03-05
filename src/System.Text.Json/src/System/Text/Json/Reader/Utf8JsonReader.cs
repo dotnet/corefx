@@ -215,6 +215,75 @@ namespace System.Text.Json
             return retVal;
         }
 
+        public bool ValueEquals(ReadOnlySpan<byte> other)
+        {
+            if (TokenType != JsonTokenType.PropertyName && TokenType != JsonTokenType.String)
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (HasValueSequence)
+            {
+                return CompareToSequence(other);
+            }
+
+            if (_stringHasEscaping)
+            {
+                return UnescapeAndCompare(other);
+            }
+
+            return other.SequenceEqual(ValueSpan);
+        }
+
+        private bool CompareToSequence(ReadOnlySpan<byte> other)
+        {
+            Debug.Assert(HasValueSequence);
+
+            if (_stringHasEscaping)
+            {
+                return UnescapeSequenceAndCompare(other);
+            }
+
+            ReadOnlySequence<byte> localSequence = ValueSequence;
+
+            int matchedSoFar = 0;
+
+            foreach (ReadOnlyMemory<byte> memory in localSequence)
+            {
+                ReadOnlySpan<byte> span = memory.Span;
+
+                if (other.Slice(matchedSoFar).StartsWith(span))
+                {
+                    matchedSoFar += span.Length;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return other.Length == matchedSoFar;
+        }
+
+        private bool UnescapeAndCompare(ReadOnlySpan<byte> other)
+        {
+            Debug.Assert(!HasValueSequence);
+            ReadOnlySpan<byte> localSpan = ValueSpan;
+            int idx = localSpan.IndexOf(JsonConstants.BackSlash);
+            Debug.Assert(idx != -1);
+
+            if (!other.StartsWith(localSpan.Slice(0, idx)))
+            {
+                return false;
+            }
+
+            return JsonReaderHelper.UnescapeAndCompare(localSpan.Slice(idx), other.Slice(idx));
+        }
+
+        private bool UnescapeSequenceAndCompare(ReadOnlySpan<byte> other)
+        {
+            throw new NotImplementedException();
+        }
+
         private void StartObject()
         {
             if (CurrentDepth >= _readerOptions.MaxDepth)

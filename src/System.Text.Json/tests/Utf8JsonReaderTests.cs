@@ -1738,6 +1738,63 @@ namespace System.Text.Json.Tests
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
         }
 
+        [Fact]
+        public static void TestValueEqualsBasic()
+        {
+            byte[] connectionId = Encoding.UTF8.GetBytes("connectionId");
+            byte[] availableTransports = Encoding.UTF8.GetBytes("availableTransports");
+            bool foundId = false;
+            bool foundTransports = false;
+
+            string jsonString = "{\"conne\\u0063tionId\":\"123\",\"availableTransports\":[]}";
+            byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(utf8Data, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.PropertyName)
+                {
+                    if (json.ValueEquals(connectionId))
+                    {
+                        foundId = true;
+                    }
+                    else if (json.ValueEquals(availableTransports))
+                    {
+                        foundTransports = true;
+                    }
+                }
+            }
+
+            Assert.True(foundId);
+            Assert.True(foundTransports);
+        }
+
+        [Theory]
+        [InlineData("{\"name\": 1234}", "name", true)]
+        [InlineData("{\"name\": 1234}", "", false)]
+        [InlineData("{\"\": 1234}", "name", false)]
+        [InlineData("{\"\": 1234}", "", true)]
+        public static void TestValueEquals(string jsonString, string lookUpString, bool expectedFound)
+        {
+            byte[] lookup = Encoding.UTF8.GetBytes(lookUpString);
+            byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
+            bool found = false;
+
+            var json = new Utf8JsonReader(utf8Data, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.PropertyName)
+                {
+                    if (json.ValueEquals(lookup))
+                    {
+                        found = true;
+                    }
+                }
+            }
+
+            Assert.Equal(expectedFound, found);
+        }
+
         public static IEnumerable<object[]> TestCases
         {
             get

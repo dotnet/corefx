@@ -193,6 +193,7 @@ namespace System.Text.Json
         public bool TryGetUInt32(out uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public bool TryGetUInt64(out ulong value) { throw null; }
+        public bool ValueEquals(ReadOnlySpan<byte> other) { throw null; }
     }
     public ref partial struct Utf8JsonWriter
     {
