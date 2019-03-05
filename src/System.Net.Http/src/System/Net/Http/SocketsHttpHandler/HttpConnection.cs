@@ -154,8 +154,6 @@ namespace System.Net.Http
             }
         }
 
-        private bool IsDisposed => _disposed == 1;
-
         /// <summary>Awaits a task, ignoring any resulting exceptions.</summary>
         private static async void IgnoreExceptionsAsync(ValueTask<int> task)
         {

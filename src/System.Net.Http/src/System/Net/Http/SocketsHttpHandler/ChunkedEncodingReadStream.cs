@@ -311,7 +311,7 @@ namespace System.Net.Http
                                     break;
                                 }
                                 // Parse the trailers.
-                                else if (!_connection.IsDisposed)
+                                else if (!IsDisposed)
                                 {
                                     // Make sure that we don't inadvertently consuming trailing headers
                                     // while draining a connection that's being returned back to the pool.

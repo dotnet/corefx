@@ -28,6 +28,8 @@ namespace System.Net.Http
 
             public virtual bool NeedsDrain => false;
 
+            internal bool IsDisposed => _disposed == 1;
+
             public virtual Task<bool> DrainAsync(int maxDrainBytes)
             {
                 Debug.Fail($"DrainAsync should not be called for this response stream: {GetType()}");
