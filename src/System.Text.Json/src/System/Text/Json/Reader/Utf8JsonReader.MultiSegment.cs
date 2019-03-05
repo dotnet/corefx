@@ -2145,14 +2145,18 @@ namespace System.Text.Json
                     }
                     break;
                 }
-                idx = localBuffer.IndexOfAny(JsonConstants.CarriageReturn, JsonConstants.LineFeed);
+                idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn);
                 if (idx != -1)
                 {
                     if (localBuffer[idx] == JsonConstants.LineFeed)
                     {
                         break;
                     }
-                    if ((idx + 1) < localBuffer.Length)
+
+                    // If we are here, we have definintely found a \r. So now to check if \n follows.
+                    Debug.Assert(localBuffer[idx] == JsonConstants.CarriageReturn);
+
+                    if (idx < localBuffer.Length - 1)
                     {
                         if (localBuffer[idx + 1] == JsonConstants.LineFeed)
                         {
@@ -2327,14 +2331,18 @@ namespace System.Text.Json
                     HasValueSequence = true;
                     break;
                 }
-                idx = localBuffer.IndexOfAny(JsonConstants.CarriageReturn, JsonConstants.LineFeed);
+                idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn);
                 if (idx != -1)
                 {
                     if (localBuffer[idx] == JsonConstants.LineFeed)
                     {
                         break;
                     }
-                    if ((idx + 1) < localBuffer.Length)
+
+                    // If we are here, we have definintely found a \r. So now to check if \n follows.
+                    Debug.Assert(localBuffer[idx] == JsonConstants.CarriageReturn);
+
+                    if (idx < localBuffer.Length - 1)
                     {
                         if (localBuffer[idx + 1] == JsonConstants.LineFeed)
                         {

@@ -570,11 +570,8 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [MemberData(nameof(SingleLineCommentData))]
-        public static void ConsumeSingleLineCommentMultiSpanTest(string[] inputData)
+        public static void ConsumeSingleLineCommentMultiSpanTest(string expected, string[] inputData)
         {
-            string expected = inputData[inputData.Length - 1];
-            inputData = inputData.Take(inputData.Length - 1).ToArray();
-
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
             int bytesConsumed = 0;
             var dataUtf8 = new byte[] { };
@@ -582,7 +579,7 @@ namespace System.Text.Json.Tests
             for (int count = 0; count < inputData.Length; ++count)
             {
                 bool isFinal = (count == inputData.Length - 1);
-                dataUtf8 = dataUtf8.Concat(Encoding.ASCII.GetBytes(inputData[count])).ToArray();
+                dataUtf8 = dataUtf8.Concat(Encoding.UTF8.GetBytes(inputData[count])).ToArray();
                 ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
                 var json = new Utf8JsonReader(sequence, isFinalBlock: isFinal, state);
                 while (json.Read())
@@ -594,7 +591,7 @@ namespace System.Text.Json.Tests
                             break;
                         case JsonTokenType.Comment:
                             var actual = json.HasValueSequence ? json.ValueSequence.ToArray() : json.ValueSpan.ToArray();
-                            Assert.Equal(Encoding.ASCII.GetBytes(expected), actual);
+                            Assert.Equal(Encoding.UTF8.GetBytes(expected), actual);
                             break;
                         default:
                             Assert.True(false);
@@ -607,11 +604,8 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [MemberData(nameof(SingleLineCommentData))]
-        public static void SkipSingleLineCommentMultiSpanTest(string[] inputData)
+        public static void SkipSingleLineCommentMultiSpanTest(string _, string[] inputData)
         {
-            string expected = inputData[inputData.Length - 1];
-            inputData = inputData.Take(inputData.Length - 1).ToArray();
-
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
             int bytesConsumed = 0;
             var dataUtf8 = new byte[] { };
@@ -619,7 +613,7 @@ namespace System.Text.Json.Tests
             for (int count = 0; count < inputData.Length; ++count)
             {
                 bool isFinal = (count == inputData.Length - 1);
-                dataUtf8 = dataUtf8.Concat(Encoding.ASCII.GetBytes(inputData[count])).ToArray();
+                dataUtf8 = dataUtf8.Concat(Encoding.UTF8.GetBytes(inputData[count])).ToArray();
                 ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
                 var json = new Utf8JsonReader(sequence, isFinalBlock: isFinal, state);
                 while (json.Read())

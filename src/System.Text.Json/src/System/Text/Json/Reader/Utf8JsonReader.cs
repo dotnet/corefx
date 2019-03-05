@@ -1712,14 +1712,18 @@ namespace System.Text.Json
 
         private bool SkipSingleLineComment(ReadOnlySpan<byte> localBuffer, out int idx)
         {
-            idx = localBuffer.IndexOfAny(JsonConstants.CarriageReturn, JsonConstants.LineFeed);
+            idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn);
             if (idx != -1)
             {
                 if (localBuffer[idx] == JsonConstants.LineFeed)
                 {
                     goto EndOfComment;
                 }
-                if ((idx + 1) < localBuffer.Length)
+
+                // If we are here, we have definintely found a \r. So now to check if \n follows.
+                Debug.Assert(localBuffer[idx] == JsonConstants.CarriageReturn);
+
+                if (idx < localBuffer.Length - 1)
                 {
                     if (localBuffer[idx + 1] == JsonConstants.LineFeed)
                     {
