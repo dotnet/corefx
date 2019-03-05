@@ -378,7 +378,8 @@ namespace System.Net.Http.Functional.Tests
                 },
                 async server =>
                 {
-                    Assert.Equal(clientCanceled.Task, await Task.WhenAny(server.HandleRequestAsync(), clientCanceled.Task));
+                    Task serverTask = server.HandleRequestAsync();
+                    await clientCanceled.Task;
                 });
         }
 
