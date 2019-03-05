@@ -8,12 +8,6 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using Internal.Runtime.CompilerServices;
 
-#if BIT64
-using nuint = System.UInt64;
-#else
-using nuint = System.UInt32;
-#endif
-
 namespace System.Buffers.Text
 {
     // AVX2 version based on https://github.com/aklomp/base64/tree/e516d769a2a432c08404f1981e73b431566057be/lib/arch/avx2
@@ -69,8 +63,8 @@ namespace System.Buffers.Text
 
                 byte* src = srcBytes;
                 byte* dest = destBytes;
-                byte* srcEnd = srcBytes + (nuint)srcLength;
-                byte* srcMax = srcBytes + (nuint)maxSrcLength;
+                byte* srcEnd = srcBytes + (uint)srcLength;
+                byte* srcMax = srcBytes + (uint)maxSrcLength;
 
                 if (maxSrcLength >= 16)
                 {
@@ -190,9 +184,8 @@ namespace System.Buffers.Text
 
                 int leftover = dataLength - (dataLength / 3) * 3; // how many bytes after packs of 3
 
-                // PERF: use nuint to avoid the sign-extensions
-                nuint destinationIndex = (nuint)(encodedLength - 4);
-                nuint sourceIndex = (nuint)(dataLength - leftover);
+                uint destinationIndex = (uint)(encodedLength - 4);
+                uint sourceIndex = (uint)(dataLength - leftover);
                 uint result = 0;
 
                 // encode last pack to avoid conditional in the main loop
@@ -340,46 +333,46 @@ namespace System.Buffers.Text
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe uint Encode(byte* threeBytes, ref byte encodingMap)
         {
-            nuint t0 = threeBytes[0];
-            nuint t1 = threeBytes[1];
-            nuint t2 = threeBytes[2];
+            uint t0 = threeBytes[0];
+            uint t1 = threeBytes[1];
+            uint t2 = threeBytes[2];
 
-            nuint i = (t0 << 16) | (t1 << 8) | t2;
+            uint i = (t0 << 16) | (t1 << 8) | t2;
 
-            nuint i0 = Unsafe.Add(ref encodingMap, (IntPtr)(i >> 18));
-            nuint i1 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 12) & 0x3F));
-            nuint i2 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 6) & 0x3F));
-            nuint i3 = Unsafe.Add(ref encodingMap, (IntPtr)(i & 0x3F));
+            uint i0 = Unsafe.Add(ref encodingMap, (IntPtr)(i >> 18));
+            uint i1 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 12) & 0x3F));
+            uint i2 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 6) & 0x3F));
+            uint i3 = Unsafe.Add(ref encodingMap, (IntPtr)(i & 0x3F));
 
-            return (uint)(i0 | (i1 << 8) | (i2 << 16) | (i3 << 24));
+            return i0 | (i1 << 8) | (i2 << 16) | (i3 << 24);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe uint EncodeAndPadOne(byte* twoBytes, ref byte encodingMap)
         {
-            nuint t0 = twoBytes[0];
-            nuint t1 = twoBytes[1];
+            uint t0 = twoBytes[0];
+            uint t1 = twoBytes[1];
 
-            nuint i = (t0 << 16) | (t1 << 8);
+            uint i = (t0 << 16) | (t1 << 8);
 
-            nuint i0 = Unsafe.Add(ref encodingMap, (IntPtr)(i >> 18));
-            nuint i1 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 12) & 0x3F));
-            nuint i2 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 6) & 0x3F));
+            uint i0 = Unsafe.Add(ref encodingMap, (IntPtr)(i >> 18));
+            uint i1 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 12) & 0x3F));
+            uint i2 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 6) & 0x3F));
 
-            return (uint)(i0 | (i1 << 8) | (i2 << 16) | (EncodingPad << 24));
+            return i0 | (i1 << 8) | (i2 << 16) | (EncodingPad << 24);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe uint EncodeAndPadTwo(byte* oneByte, ref byte encodingMap)
         {
-            nuint t0 = oneByte[0];
+            uint t0 = oneByte[0];
 
-            nuint i = t0 << 8;
+            uint i = t0 << 8;
 
-            nuint i0 = Unsafe.Add(ref encodingMap, (IntPtr)(i >> 10));
-            nuint i1 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 4) & 0x3F));
+            uint i0 = Unsafe.Add(ref encodingMap, (IntPtr)(i >> 10));
+            uint i1 = Unsafe.Add(ref encodingMap, (IntPtr)((i >> 4) & 0x3F));
 
-            return (uint)(i0 | (i1 << 8) | (EncodingPad << 16) | (EncodingPad << 24));
+            return i0 | (i1 << 8) | (EncodingPad << 16) | (EncodingPad << 24);
         }
 
         private const uint EncodingPad = '='; // '=', for padding

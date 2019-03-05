@@ -8,12 +8,6 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using Internal.Runtime.CompilerServices;
 
-#if BIT64
-using nuint = System.UInt64;
-#else
-using nuint = System.UInt32;
-#endif
-
 namespace System.Buffers.Text
 {
     // AVX2 version based on https://github.com/aklomp/base64/tree/e516d769a2a432c08404f1981e73b431566057be/lib/arch/avx2
@@ -67,8 +61,8 @@ namespace System.Buffers.Text
 
                 byte* src = srcBytes;
                 byte* dest = destBytes;
-                byte* srcEnd = srcBytes + (nuint)srcLength;
-                byte* srcMax = srcBytes + (nuint)maxSrcLength;
+                byte* srcEnd = srcBytes + (uint)srcLength;
+                byte* srcMax = srcBytes + (uint)maxSrcLength;
 
                 if (maxSrcLength >= 24)
                 {
@@ -106,7 +100,7 @@ namespace System.Buffers.Text
                     maxSrcLength = (destLength / 3) * 4;
                 }
 
-                srcMax = srcBytes + (nuint)maxSrcLength;
+                srcMax = srcBytes + (uint)maxSrcLength;
                 while (src < srcMax)
                 {
                     int result = Decode(src, ref decodingMap);
@@ -147,7 +141,7 @@ namespace System.Buffers.Text
 
                 i0 |= i1;
 
-                byte* destMax = destBytes + (nuint)destLength;
+                byte* destMax = destBytes + (uint)destLength;
 
                 if (t3 != EncodingPad)
                 {
@@ -456,10 +450,10 @@ namespace System.Buffers.Text
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe int Decode(byte* encodedBytes, ref sbyte decodingMap)
         {
-            nuint t0 = encodedBytes[0];
-            nuint t1 = encodedBytes[1];
-            nuint t2 = encodedBytes[2];
-            nuint t3 = encodedBytes[3];
+            uint t0 = encodedBytes[0];
+            uint t1 = encodedBytes[1];
+            uint t2 = encodedBytes[2];
+            uint t3 = encodedBytes[3];
 
             int i0 = Unsafe.Add(ref decodingMap, (IntPtr)t0);
             int i1 = Unsafe.Add(ref decodingMap, (IntPtr)t1);
