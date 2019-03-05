@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Numerics;
+using System.Reflection.Internal;
 
 namespace System.Reflection.PortableExecutable
 {
