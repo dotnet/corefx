@@ -87,7 +87,7 @@ namespace System.IO
             Debug.Assert(_tmpKeys.Count == 0);
             string readLineStr = null;
 
-            Interop.Sys.ConfigureTerminalForConsole(reading: true);
+            Interop.Sys.InitializeConsoleBeforeRead();
             try
             {
                 // Read key-by-key until we've read a line.
@@ -173,7 +173,7 @@ namespace System.IO
             }
             finally
             {
-                Interop.Sys.ConfigureTerminalForConsole(reading: false);
+                Interop.Sys.UninitializeConsoleAfterRead();
 
                 // If we're not consuming the read input, make the keys available for a future read
                 while (_tmpKeys.Count > 0)
@@ -361,11 +361,11 @@ namespace System.IO
             }
 
             previouslyProcessed = false;
+            Interop.Sys.InitializeConsoleBeforeRead();
             ConsoleKey key;
             char ch;
             bool isAlt, isCtrl, isShift;
 
-            Interop.Sys.ConfigureTerminalForConsole(reading: true);
             try
             {
                 if (IsUnprocessedBufferEmpty())
@@ -384,9 +384,9 @@ namespace System.IO
                         // or just use 0 if none are available.
                         return new ConsoleKeyInfo((char)
                             (ConsolePal.s_veolCharacter != ConsolePal.s_posixDisableValue ? ConsolePal.s_veolCharacter :
-                                ConsolePal.s_veol2Character != ConsolePal.s_posixDisableValue ? ConsolePal.s_veol2Character :
-                                ConsolePal.s_veofCharacter != ConsolePal.s_posixDisableValue ? ConsolePal.s_veofCharacter :
-                                0), 
+                             ConsolePal.s_veol2Character != ConsolePal.s_posixDisableValue ? ConsolePal.s_veol2Character :
+                             ConsolePal.s_veofCharacter != ConsolePal.s_posixDisableValue ? ConsolePal.s_veofCharacter :
+                             0), 
                             default(ConsoleKey), false, false, false);
                     }
                 }
@@ -396,7 +396,7 @@ namespace System.IO
             }
             finally
             {
-                Interop.Sys.ConfigureTerminalForConsole(reading: false);
+                Interop.Sys.UninitializeConsoleAfterRead();
             }
         }
 

@@ -90,9 +90,14 @@ DLLEXPORT void SystemNative_GetControlCharacters(
 DLLEXPORT int32_t SystemNative_StdinReady(void);
 
 /**
- * Configures the terminal for System.Console.
+ * Configures the terminal for System.Console Read.
  */
-DLLEXPORT void SystemNative_ConfigureTerminalForConsole(int32_t reading, uint8_t minChars, uint8_t decisecondsTimeout);
+DLLEXPORT void SystemNative_InitializeConsoleBeforeRead(uint8_t minChars, uint8_t decisecondsTimeout);
+
+/**
+ * Configures the terminal after System.Console Read.
+ */
+DLLEXPORT void SystemNative_UninitializeConsoleAfterRead(void);
 
 /**
  * Configures the terminal for child processes.

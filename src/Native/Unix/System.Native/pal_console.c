@@ -217,13 +217,23 @@ void UninitializeTerminal()
     }
 }
 
-void SystemNative_ConfigureTerminalForConsole(int32_t reading, uint8_t minChars, uint8_t decisecondsTimeout)
+void SystemNative_InitializeConsoleBeforeRead(uint8_t minChars, uint8_t decisecondsTimeout)
 {
     if (pthread_mutex_lock(&g_lock) == 0)
     {
-        g_reading = reading;
+        g_reading = true;
 
         ConfigureTerminal(g_signalForBreak, /* forChild */ false, minChars, decisecondsTimeout, /* blockIfBackground */ true);
+
+        pthread_mutex_unlock(&g_lock);
+    }
+}
+
+void SystemNative_UninitializeConsoleAfterRead()
+{
+    if (pthread_mutex_lock(&g_lock) == 0)
+    {
+        g_reading = false;
 
         pthread_mutex_unlock(&g_lock);
     }
@@ -356,10 +366,10 @@ void SystemNative_GetControlCharacters(
 
 int32_t SystemNative_StdinReady()
 {
-    SystemNative_ConfigureTerminalForConsole(1, 1, 0);
+    SystemNative_InitializeConsoleBeforeRead(1, 0);
     struct pollfd fd = { .fd = STDIN_FILENO, .events = POLLIN };
     int rv = poll(&fd, 1, 0) > 0 ? 1 : 0;
-    SystemNative_ConfigureTerminalForConsole(0, 1, 0);
+    SystemNative_UninitializeConsoleAfterRead();
     return rv;
 }
 
