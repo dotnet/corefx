@@ -139,7 +139,7 @@ namespace System.Reflection.Metadata
                     break;
 
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail("");
                     return default(BlobHandle);
             }
 

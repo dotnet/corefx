@@ -546,7 +546,7 @@ namespace System.ServiceProcess
             try
             {
                 OnShutdown();
-                WriteLogEntry(SR.Format(SR.ShutdownOK));
+                WriteLogEntry(SR.ShutdownOK);
 
                 if (_status.currentState == ServiceControlStatus.STATE_PAUSED || _status.currentState == ServiceControlStatus.STATE_RUNNING)
                 {

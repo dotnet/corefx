@@ -105,7 +105,7 @@ namespace System.Text.Unicode
 #if DEBUG
             if (!Char.IsSurrogate(first))
             {
-                Debug.Assert(false, "This case should've been handled by the fast path.");
+                Debug.Fail("This case should've been handled by the fast path.");
                 wasSurrogatePair = false;
                 return first;
             }
@@ -162,7 +162,7 @@ namespace System.Text.Unicode
 
             if (!char.IsSurrogate(firstChar))
             {
-                Debug.Assert(false, "This case should've been handled by the fast path.");
+                Debug.Fail("This case should've been handled by the fast path.");
                 return firstChar;
             }
             else if (char.IsHighSurrogate(firstChar))

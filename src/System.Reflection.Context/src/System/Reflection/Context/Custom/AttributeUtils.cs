@@ -200,7 +200,7 @@ namespace System.Reflection.Context.Custom
             foreach (object attr in attributes)
             {
                 if (attr == null)
-                    throw new InvalidOperationException(SR.Format(SR.InvalidOperation_NullAttribute));
+                    throw new InvalidOperationException(SR.InvalidOperation_NullAttribute);
 
                 if (attributeFilterType.IsInstanceOfType(attr))
                     yield return attr;

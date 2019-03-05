@@ -1992,7 +1992,7 @@ namespace System.Net.Sockets
         {
             if (level == IPProtectionLevel.Unspecified)
             {
-                throw new ArgumentException(SR.Format(SR.net_sockets_invalid_optionValue_all), nameof(level));
+                throw new ArgumentException(SR.net_sockets_invalid_optionValue_all, nameof(level));
             }
 
             if (_addressFamily == AddressFamily.InterNetworkV6)

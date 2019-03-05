@@ -845,7 +845,7 @@ namespace System.DirectoryServices.AccountManagement
                                         this.MachineUserSuppliedName);
 
                 throw new PrincipalOperationException(
-                            string.Format(CultureInfo.CurrentCulture,
+                            SR.Format(CultureInfo.CurrentCulture,
                                           SR.SAMStoreCtxCantResolveSidForCrossStore,
                                           err));
             }
@@ -1081,7 +1081,7 @@ namespace System.DirectoryServices.AccountManagement
                 else
                 {
                     throw new PrincipalOperationException(
-                                    string.Format(
+                                    SR.Format(
                                         CultureInfo.CurrentCulture,
                                         SR.SAMStoreCtxUnableToRetrieveFlatMachineName,
                                         err));
@@ -1104,7 +1104,7 @@ namespace System.DirectoryServices.AccountManagement
             }
             else
             {
-                Debug.Assert(false);
+                Debug.Fail("Property not found");
                 return false;
             }
         }

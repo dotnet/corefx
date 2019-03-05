@@ -138,7 +138,7 @@ namespace System.Xml.Schema
                     return false;
 
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail("");
                     break;
             }
             return true;

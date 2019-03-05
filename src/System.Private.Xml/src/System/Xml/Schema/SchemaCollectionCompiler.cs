@@ -1402,7 +1402,7 @@ namespace System.Xml.Schema
             }
             else
             {
-                Debug.Assert(false);
+                Debug.Fail("");
             }
 
             return false;
@@ -2643,7 +2643,7 @@ namespace System.Xml.Schema
             }
             else
             {
-                Debug.Assert(false);
+                Debug.Fail("");
             }
             if (particle.MinOccurs == decimal.One && particle.MaxOccurs == decimal.One)
             {

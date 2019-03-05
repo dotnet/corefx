@@ -184,7 +184,7 @@ namespace System.Runtime.Serialization
                 {
                     if (!holder.CanSurrogatedObjectValueChange && returnValue != holder.ObjectValue)
                     {
-                        throw new SerializationException(string.Format(CultureInfo.CurrentCulture, SR.Serialization_NotCyclicallyReferenceableSurrogate, surrogate.GetType().FullName));
+                        throw new SerializationException(SR.Format(CultureInfo.CurrentCulture, SR.Serialization_NotCyclicallyReferenceableSurrogate, surrogate.GetType().FullName));
                     }
                     holder.SetObjectValue(returnValue, this);
                 }

@@ -436,7 +436,7 @@ namespace Internal.NativeCrypto
                     }
                     default:
                     {
-                        Debug.Assert(false);
+                        Debug.Fail("");
                         break;
                     }
                 }
@@ -593,7 +593,7 @@ namespace Internal.NativeCrypto
                     }
                 default:
                     {
-                        Debug.Assert(false);
+                        Debug.Fail("");
                         break;
                     }
             }

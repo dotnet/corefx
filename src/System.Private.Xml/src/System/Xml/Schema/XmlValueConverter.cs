@@ -265,7 +265,7 @@ namespace System.Xml.Schema
                     break;
 
                 default:
-                    Debug.Assert(false, "Type code " + typeCode + " is not supported.");
+                    Debug.Fail("Type code " + typeCode + " is not supported.");
                     break;
             }
 

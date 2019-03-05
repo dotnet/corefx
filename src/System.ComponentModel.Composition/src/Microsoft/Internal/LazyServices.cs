@@ -21,7 +21,7 @@ namespace Microsoft.Internal
             if (value == null)
             {
                 throw new InvalidOperationException(
-                    string.Format(CultureInfo.CurrentCulture, SR.LazyServices_LazyResolvesToNull, typeof(T), argument));
+                    SR.Format(CultureInfo.CurrentCulture, SR.LazyServices_LazyResolvesToNull, typeof(T), argument));
             }
 
             return value;

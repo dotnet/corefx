@@ -1917,7 +1917,7 @@ namespace System.Xml.Xsl
                 return XmlQueryCardinality.ZeroOrMore;
 
             default:
-                Debug.Assert(false);
+                Debug.Fail("");
                 return XmlQueryCardinality.None;
             }
         }

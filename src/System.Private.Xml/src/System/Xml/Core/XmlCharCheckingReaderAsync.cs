@@ -45,7 +45,7 @@ namespace System.Xml
                     break;
 
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail("");
                     return false;
             }
 

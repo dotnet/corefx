@@ -150,7 +150,7 @@ namespace System.Text.Json
             }
             else
             {
-                return new InvalidOperationException(SR.Format(SR.EmptyJsonIsInvalid));
+                return new InvalidOperationException(SR.EmptyJsonIsInvalid);
             }
         }
 

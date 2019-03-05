@@ -221,7 +221,7 @@ namespace System.DirectoryServices.AccountManagement
                 GlobalDebug.WriteLineIf(GlobalDebug.Warn, "SDSUtils", "InsertPrincipal: Bad principal type:" + p.GetType().ToString());
 
                 throw new InvalidOperationException(
-                                string.Format(CultureInfo.CurrentCulture, SR.StoreCtxUnsupportedPrincipalTypeForSave, p.GetType().ToString()));
+                                SR.Format(CultureInfo.CurrentCulture, SR.StoreCtxUnsupportedPrincipalTypeForSave, p.GetType().ToString()));
             }
 
             // Commit the properties

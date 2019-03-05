@@ -429,7 +429,7 @@ namespace System.DirectoryServices.AccountManagement
                                         err);
 
                 throw new PrincipalOperationException(
-                            string.Format(CultureInfo.CurrentCulture,
+                            SR.Format(CultureInfo.CurrentCulture,
                                           SR.SAMStoreCtxErrorEnumeratingGroup,
                                           err));
             }
