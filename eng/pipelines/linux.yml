@@ -106,15 +106,14 @@ jobs:
                 _dockerContainer: alpine_36_container
                 _buildScriptPrefix: ''
                 _buildExtraArguments: /p:RuntimeOS=linux-musl
-            
-            ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-              musl_arm64_Release:
-                _BuildConfig: Release
-                _architecture: arm64
-                _framework: netcoreapp
-                _dockerContainer: alpine_37_arm64_container
-                _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
-                _buildExtraArguments: -warnAsError false /p:BuildNativeClang=--clang5.0 /p:RuntimeOS=linux-musl
+
+            musl_arm64_Release:
+              _BuildConfig: Release
+              _architecture: arm64
+              _framework: netcoreapp
+              _dockerContainer: alpine_37_arm64_container
+              _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
+              _buildExtraArguments: -warnAsError false /p:BuildNativeClang=--clang5.0 /p:RuntimeOS=linux-musl
 
             arm_Release:
               _BuildConfig: Release
