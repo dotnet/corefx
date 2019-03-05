@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Reflection.Internal;
+using System.Numerics;
 
 namespace System.Reflection.PortableExecutable
 {
@@ -65,12 +65,12 @@ namespace System.Reflection.PortableExecutable
             ulong sizeOfHeapReserve = 0x00100000,
             ulong sizeOfHeapCommit = 0x1000)
         {
-            if (fileAlignment < 512 || fileAlignment > 64 * 1024 || BitArithmetic.CountBits(fileAlignment) != 1)
+            if (fileAlignment < 512 || fileAlignment > 64 * 1024 || BitOperations.PopCount(unchecked((uint)fileAlignment)) != 1)
             {
                 Throw.ArgumentOutOfRange(nameof(fileAlignment));
             }
 
-            if (sectionAlignment < fileAlignment || BitArithmetic.CountBits(sectionAlignment) != 1)
+            if (sectionAlignment < fileAlignment || BitOperations.PopCount(unchecked((uint)sectionAlignment)) != 1)
             {
                 Throw.ArgumentOutOfRange(nameof(sectionAlignment));
             }
@@ -98,7 +98,7 @@ namespace System.Reflection.PortableExecutable
 
         public static PEHeaderBuilder CreateExecutableHeader()
         {
-            return new PEHeaderBuilder(imageCharacteristics : Characteristics.ExecutableImage);
+            return new PEHeaderBuilder(imageCharacteristics: Characteristics.ExecutableImage);
         }
 
         public static PEHeaderBuilder CreateLibraryHeader()
@@ -111,8 +111,8 @@ namespace System.Reflection.PortableExecutable
         internal int ComputeSizeOfPEHeaders(int sectionCount) =>
             PEBuilder.DosHeaderSize +
             PEHeaders.PESignatureSize +
-            CoffHeader.Size + 
-            PEHeader.Size(Is32Bit) + 
+            CoffHeader.Size +
+            PEHeader.Size(Is32Bit) +
             SectionHeader.Size * sectionCount;
     }
 }

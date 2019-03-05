@@ -1262,7 +1262,7 @@ namespace System.Net.WebSockets
             Debug.Assert(maskIndex < sizeof(int));
 
             int maskShift = maskIndex * 8;
-            int shiftedMask = (int)(((uint)mask >> maskShift) | ((uint)mask << (32 - maskShift)));
+            int shiftedMask = (int)BitOperations.RotateRight((uint)mask, maskShift);
 
             // Try to use SIMD.  We can if the number of bytes we're trying to mask is at least as much
             // as the width of a vector and if the width is an even multiple of the mask.
