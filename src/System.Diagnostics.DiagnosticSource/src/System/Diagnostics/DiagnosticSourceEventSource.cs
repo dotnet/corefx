@@ -660,14 +660,20 @@ namespace System.Diagnostics
                         {
                             // _firstImplicitTransformsEntry, we should fill it.  
                             implicitTransforms = MakeImplicitTransforms(argType);
-                            Interlocked.CompareExchange(ref _firstImplicitTransformsEntry, new ImplicitTransformEntry() { Type = argType, Transforms = implicitTransforms }, null);
+                            Interlocked.CompareExchange(ref _firstImplicitTransformsEntry, 
+                                new ImplicitTransformEntry() { Type = argType, Transforms = implicitTransforms }, null);
                         }
                         else
                         {
-                            // This should only happen when you are wildcarding your events (reasonably rare).   In that case you will probably need many types
-                            // Note currently we don't limit the cache size, but it is limited by the number of distinct types of objects passed to DiagnosticSource.Write.  
+                            // This should only happen when you are wildcarding your events (reasonably rare).   
+                            // In that case you will probably need many types
+                            // Note currently we don't limit the cache size, but it is limited by the number of 
+                            // distinct types of objects passed to DiagnosticSource.Write.  
                             if (_implicitTransformsTable == null)
-                                Interlocked.CompareExchange(ref _implicitTransformsTable, new ConcurrentDictionary<Type, TransformSpec>(1, 8), null);
+                            {
+                                Interlocked.CompareExchange(ref _implicitTransformsTable,
+                                    new ConcurrentDictionary<Type, TransformSpec>(1, 8), null);
+                            }
                             implicitTransforms = _implicitTransformsTable.GetOrAdd(argType, MakeImplicitTransforms);
                         }
 
