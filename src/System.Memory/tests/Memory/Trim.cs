@@ -8,23 +8,22 @@ using Xunit;
 
 namespace System.MemoryTests
 {
-    partial class MemoryTests
+    public static partial class MemoryTests
     {
         [Theory]
-        [InlineData(new int[] { }, 1, new int[] { })]
-        [InlineData(new int[] { 1 }, 1, new int[] { })]
+        [InlineData(new int[0], 1, new int[0])]
+        [InlineData(new int[] { 1 }, 1, new int[0])]
         [InlineData(new int[] { 2 }, 1, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, 1, new int[] { 2, 1 })]
         [InlineData(new int[] { 1, 1, 2, 1 }, 1, new int[] { 2, 1 })]
         [InlineData(new int[] { 1, 1, 2, 1 }, 2, new int[] { 1, 1, 2, 1 })]
         [InlineData(new int[] { 1, 1, 2, 1 }, 3, new int[] { 1, 1, 2, 1 })]
         [InlineData(new int[] { 1, 1, 1, 2 }, 1, new int[] { 2 })]
-        [InlineData(new int[] { 1, 1, 1, 1 }, 1, new int[] { })]
+        [InlineData(new int[] { 1, 1, 1, 1 }, 1, new int[0])]
         public static void MemoryExtensions_TrimStart_Single(int[] values, int trim, int[] expected)
         {
             Memory<int> memory = new Memory<int>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, memory.ToArray()));
-
 
             ReadOnlyMemory<int> rom = new ReadOnlyMemory<int>(values).TrimStart(trim);
             Assert.True(System.Linq.Enumerable.SequenceEqual(expected, rom.ToArray()));
@@ -37,15 +36,15 @@ namespace System.MemoryTests
         }
 
         [Theory]
-        [InlineData(new int[] { }, 1, new int[] { })]
-        [InlineData(new int[] { 1 }, 1, new int[] { })]
+        [InlineData(new int[0], 1, new int[0])]
+        [InlineData(new int[] { 1 }, 1, new int[0])]
         [InlineData(new int[] { 2 }, 1, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, 1, new int[] { 1, 2 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, 1, new int[] { 1, 2 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, 2, new int[] { 1, 2, 1, 1 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, 3, new int[] { 1, 2, 1, 1 })]
         [InlineData(new int[] { 2, 1, 1, 1 }, 1, new int[] { 2 })]
-        [InlineData(new int[] { 1, 1, 1, 1 }, 1, new int[] { })]
+        [InlineData(new int[] { 1, 1, 1, 1 }, 1, new int[0])]
         public static void MemoryExtensions_TrimEnd_Single(int[] values, int trim, int[] expected)
         {
             Memory<int> memory = new Memory<int>(values).TrimEnd(trim);
@@ -62,8 +61,8 @@ namespace System.MemoryTests
         }
 
         [Theory]
-        [InlineData(new int[] { }, 1, new int[] { })]
-        [InlineData(new int[] { 1 }, 1, new int[] { })]
+        [InlineData(new int[0], 1, new int[0])]
+        [InlineData(new int[] { 1 }, 1, new int[0])]
         [InlineData(new int[] { 2 }, 1, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, 1, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, 1, new int[] { 2 })]
@@ -71,7 +70,7 @@ namespace System.MemoryTests
         [InlineData(new int[] { 1, 2, 1, 1 }, 3, new int[] { 1, 2, 1, 1 })]
         [InlineData(new int[] { 2, 1, 1, 1 }, 1, new int[] { 2 })]
         [InlineData(new int[] { 1, 1, 1, 2 }, 1, new int[] { 2 })]
-        [InlineData(new int[] { 1, 1, 1, 1 }, 1, new int[] { })]
+        [InlineData(new int[] { 1, 1, 1, 1 }, 1, new int[0])]
         public static void MemoryExtensions_Trim_Single(int[] values, int trim, int[] expected)
         {
             Memory<int> memory = new Memory<int>(values).Trim(trim);
@@ -88,19 +87,20 @@ namespace System.MemoryTests
         }
 
         [Theory]
-        [InlineData(new int[] { }, new int[] { 1 }, new int[] { })]
-        [InlineData(new int[] { 1 }, new int[] { }, new int[] { 1 })]
-        [InlineData(new int[] { 1 }, new int[] { 1 }, new int[] { })]
+        [InlineData(new int[0], new int[0], new int[0])]
+        [InlineData(new int[0], new int[] { 1 }, new int[0])]
+        [InlineData(new int[] { 1 }, new int[0], new int[] { 1 })]
+        [InlineData(new int[] { 1 }, new int[] { 1 }, new int[0])]
         [InlineData(new int[] { 2 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, new int[] { 1 }, new int[] { 2, 1 })]
         [InlineData(new int[] { 1, 1, 2, 1 }, new int[] { 1 }, new int[] { 2, 1 })]
         [InlineData(new int[] { 1, 1, 2, 1 }, new int[] { 2 }, new int[] { 1, 1, 2, 1 })]
         [InlineData(new int[] { 1, 1, 2, 1 }, new int[] { 3 }, new int[] { 1, 1, 2, 1 })]
-        [InlineData(new int[] { 1, 1, 2, 1 }, new int[] { 1, 2 }, new int[] { })]
+        [InlineData(new int[] { 1, 1, 2, 1 }, new int[] { 1, 2 }, new int[0])]
         [InlineData(new int[] { 1, 1, 2, 3 }, new int[] { 1, 2 }, new int[] { 3 })]
         [InlineData(new int[] { 1, 1, 2, 3 }, new int[] { 1, 2, 4 }, new int[] { 3 })]
         [InlineData(new int[] { 1, 1, 1, 2 }, new int[] { 1 }, new int[] { 2 })]
-        [InlineData(new int[] { 1, 1, 1, 1 }, new int[] { 1 }, new int[] { })]
+        [InlineData(new int[] { 1, 1, 1, 1 }, new int[] { 1 }, new int[0])]
         public static void MemoryExtensions_TrimStart_Multi(int[] values, int[] trims, int[] expected)
         {
             Memory<int> memory = new Memory<int>(values).TrimStart(trims);
@@ -117,19 +117,20 @@ namespace System.MemoryTests
         }
 
         [Theory]
-        [InlineData(new int[] { }, new int[] { 1 }, new int[] { })]
-        [InlineData(new int[] { 1 }, new int[] { }, new int[] { 1 })]
-        [InlineData(new int[] { 1 }, new int[] { 1 }, new int[] { })]
+        [InlineData(new int[0], new int[0], new int[0])]
+        [InlineData(new int[0], new int[] { 1 }, new int[0])]
+        [InlineData(new int[] { 1 }, new int[0], new int[] { 1 })]
+        [InlineData(new int[] { 1 }, new int[] { 1 }, new int[0])]
         [InlineData(new int[] { 2 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, new int[] { 1 }, new int[] { 1, 2 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 1 }, new int[] { 1, 2 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 2 }, new int[] { 1, 2, 1, 1 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 3 }, new int[] { 1, 2, 1, 1 })]
-        [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 1, 2 }, new int[] { })]
+        [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 1, 2 }, new int[0])]
         [InlineData(new int[] { 3, 2, 1, 1 }, new int[] { 1, 2 }, new int[] { 3 })]
         [InlineData(new int[] { 3, 2, 1, 1 }, new int[] { 1, 2, 4 }, new int[] { 3 })]
         [InlineData(new int[] { 2, 1, 1, 1 }, new int[] { 1 }, new int[] { 2 })]
-        [InlineData(new int[] { 1, 1, 1, 1 }, new int[] { 1 }, new int[] { })]
+        [InlineData(new int[] { 1, 1, 1, 1 }, new int[] { 1 }, new int[0])]
         public static void MemoryExtensions_TrimEnd_Multi(int[] values, int[] trims, int[] expected)
         {
             Memory<int> memory = new Memory<int>(values).TrimEnd(trims);
@@ -146,19 +147,20 @@ namespace System.MemoryTests
         }
 
         [Theory]
-        [InlineData(new int[] { }, new int[] { 1 }, new int[] { })]
-        [InlineData(new int[] { 1 }, new int[] { }, new int[] { 1 })]
-        [InlineData(new int[] { 1 }, new int[] { 1 }, new int[] { })]
+        [InlineData(new int[0], new int[0], new int[0])]
+        [InlineData(new int[0], new int[] { 1 }, new int[0])]
+        [InlineData(new int[] { 1 }, new int[0], new int[] { 1 })]
+        [InlineData(new int[] { 1 }, new int[] { 1 }, new int[0])]
         [InlineData(new int[] { 2 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 1 }, new int[] { 2 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 2 }, new int[] { 1, 2, 1, 1 })]
         [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 3 }, new int[] { 1, 2, 1, 1 })]
-        [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 1, 2 }, new int[] { })]
+        [InlineData(new int[] { 1, 2, 1, 1 }, new int[] { 1, 2 }, new int[0])]
         [InlineData(new int[] { 2, 1, 3, 2, 1, 1 }, new int[] { 1, 2 }, new int[] { 3 })]
         [InlineData(new int[] { 2, 1, 3, 2, 1, 1 }, new int[] { 1, 2, 4 }, new int[] { 3 })]
         [InlineData(new int[] { 1, 2, 1, 1, 1 }, new int[] { 1 }, new int[] { 2 })]
-        [InlineData(new int[] { 1, 1, 1, 1 }, new int[] { 1 }, new int[] { })]
+        [InlineData(new int[] { 1, 1, 1, 1 }, new int[] { 1 }, new int[0])]
         public static void MemoryExtensions_Trim_Multi(int[] values, int[] trims, int[] expected)
         {
             Memory<int> memory = new Memory<int>(values).Trim(trims);
