@@ -38,7 +38,7 @@ namespace Internal.Cryptography.Pal.AnyOS
 
             try
             {
-                if (!reader.TryGetPrimitiveOctetStringBytes(out var contents))
+                if (!reader.TryReadPrimitiveOctetStringBytes(out var contents))
                 {
                     if (reader.TryCopyOctetStringBytes(tmp, out int bytesWritten))
                     {
@@ -110,7 +110,7 @@ namespace Internal.Cryptography.Pal.AnyOS
         {
             // Read using BER because the CMS specification says the encoding is BER.
             AsnReader reader = new AsnReader(encodedUtcTime, AsnEncodingRules.BER);
-            DateTimeOffset value = reader.GetUtcTime();
+            DateTimeOffset value = reader.ReadUtcTime();
             reader.ThrowIfNotEmpty();
             return value.UtcDateTime;
         }
