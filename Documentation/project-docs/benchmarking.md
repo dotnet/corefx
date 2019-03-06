@@ -130,7 +130,7 @@ class Program
 
           C:\Projects\corefx>build.cmd -c Release /p:CoreCLROverridePath=C:\Projects\coreclr\bin\Product\Windows_NT.x64.Release
 
-  - Force refresh of CoreCLR hard-link copy(this ends up being much faster than the first option):
+  - Force refresh of CoreCLR hard-link copy (this ends up being much faster than the first option):
    
           C:\Projects\corefx>build.cmd -restore -c Release /p:CoreCLROverridePath=C:\Projects\coreclr\bin\Product\Windows_NT.x64.Release
 
