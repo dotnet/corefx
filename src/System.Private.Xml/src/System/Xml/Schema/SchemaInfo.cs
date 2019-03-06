@@ -303,7 +303,7 @@ namespace System.Xml.Schema
                     break;
 
                 default:
-                    Debug.Fail("");
+                    Debug.Fail($"Unexpected match state {attributeMatchState}");
                     break;
             }
             return attDef;

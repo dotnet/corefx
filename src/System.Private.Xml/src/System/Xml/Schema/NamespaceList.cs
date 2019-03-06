@@ -110,7 +110,7 @@ namespace System.Xml.Schema
                 case ListType.Set:
                     return _set[ns] != null;
             }
-            Debug.Fail("");
+            Debug.Fail($"Unexpected type {_type}");
             return false;
         }
 
@@ -155,7 +155,7 @@ namespace System.Xml.Schema
                     }
                     return sb.ToString();
             }
-            Debug.Fail("");
+            Debug.Fail($"Unexpected type {_type}");
             return string.Empty;
         }
 

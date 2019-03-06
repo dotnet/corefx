@@ -338,7 +338,6 @@ namespace System.DirectoryServices.AccountManagement
                 {
                     throw new InvalidOperationException(
                                        SR.Format(
-                                           CultureInfo.CurrentCulture,
                                            SR.StoreCtxMultipleFiltersForPropertyUnsupported,
                                            PropertyNamesExternal.GetExternalForm(ExpirationDateFilter.PropertyNameStatic)));
                 }

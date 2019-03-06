@@ -416,7 +416,8 @@ namespace Microsoft.Win32
                     s_className = string.Format(
                         System.Globalization.CultureInfo.InvariantCulture,
                         ".NET-BroadcastEventWindow.{0:x}.{1}",
-                        AppDomain.CurrentDomain.GetHashCode(), s_domainQualifier);
+                        AppDomain.CurrentDomain.GetHashCode(),
+                        s_domainQualifier);
 
                     Interop.User32.WNDCLASS tempwndclass = new Interop.User32.WNDCLASS();
                     tempwndclass.hbrBackground = (IntPtr)(Interop.User32.COLOR_WINDOW + 1);

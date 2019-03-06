@@ -171,7 +171,7 @@ namespace System.Xml
                     // Needed only for XmlTextReader
                     //XmlTextReader can't execute Async method.
                     case ParsingFunction.OpenUrl:
-                        Debug.Fail("");
+                        Debug.Fail($"Unexpected parsing function {_parsingFunction}");
                         break;
                     case ParsingFunction.SwitchToInteractive:
                         Debug.Assert(!_ps.appendMode);
@@ -260,7 +260,7 @@ namespace System.Xml
                     case ParsingFunction.InReadElementContentAsBinary:
                         return FinishReadElementContentAsBinaryAsync().CallBoolTaskFuncWhenFinishAsync(thisRef => thisRef.ReadAsync(), this);
                     default:
-                        Debug.Fail("");
+                        Debug.Fail($"Unexpected parsing function {_parsingFunction}");
                         break;
                 }
             }
@@ -319,7 +319,7 @@ namespace System.Xml
                 switch (_parsingFunction)
                 {
                     case ParsingFunction.InReadAttributeValue:
-                        Debug.Fail("");
+                        Debug.Fail($"Unexpected parsing function {_parsingFunction}");
                         break;
                     // Needed only for XmlTextReader (ReadChars, ReadBase64, ReadBinHex)
                     case ParsingFunction.InIncrementalRead:
@@ -1492,7 +1492,7 @@ namespace System.Xml
                             xmlDeclState = 3;
                             break;
                         default:
-                            Debug.Fail("");
+                            Debug.Fail($"Unexpected xmlDeclState {xmlDeclState}");
                             break;
                     }
                     sb.Append(chars, _ps.charPos, pos - _ps.charPos);

@@ -718,7 +718,7 @@ namespace System.Xml.Schema
                             break;
 
                         default:
-                            Debug.Fail("");
+                            Debug.Fail($"Unexpected compositor {external.Compositor}");
                             break;
                     }
                 }

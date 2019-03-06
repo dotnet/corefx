@@ -1524,7 +1524,7 @@ namespace System.Runtime.Serialization
 #if uapaot
                 if (XmlFormatGetOnlyCollectionReaderDelegate == null)
                 {
-                    throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, UnderlyingType.ToString()));
+                    throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, UnderlyingType));
                 }
 #endif
                 XmlFormatGetOnlyCollectionReaderDelegate(xmlReader, context, CollectionItemName, Namespace, this);

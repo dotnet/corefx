@@ -155,7 +155,7 @@ namespace Microsoft.Internal
             else
             {
                 throw new InvalidOperationException(
-                    SR.Format(CultureInfo.CurrentCulture, SR.InvalidMetadataValue, value.GetType().FullName));
+                    SR.Format(SR.InvalidMetadataValue, value.GetType().FullName));
             }
         }
 

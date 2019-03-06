@@ -1335,7 +1335,7 @@ namespace System.Xml.Schema
                     builder._sequence.Items.Add(builder._element);
                     break;
                 default:
-                    Debug.Fail("");
+                    Debug.Fail($"Unexpected parent element {builder.ParentElement}");
                     break;
             }
         }
@@ -2376,7 +2376,7 @@ namespace System.Xml.Schema
                     _attributeGroup.Attributes.Add(value);
                     break;
                 default:
-                    Debug.Fail("");
+                    Debug.Fail($"Unexpected parent element {this.ParentElement}");
                     break;
             }
         }
@@ -2425,7 +2425,7 @@ namespace System.Xml.Schema
                     ((XmlSchemaGroupBase)this.ParentContainer).Items.Add(particle);
                     break;
                 default:
-                    Debug.Fail("");
+                    Debug.Fail($"Unexpected parent element {this.ParentElement}");
                     break;
             }
         }

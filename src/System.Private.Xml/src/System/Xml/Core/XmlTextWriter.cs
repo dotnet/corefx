@@ -993,7 +993,7 @@ namespace System.Xml
                     case State.Closed:
                         return WriteState.Closed;
                     default:
-                        Debug.Fail("");
+                        Debug.Fail($"Unexpected state {_currentState}");
                         return WriteState.Error;
                 }
             }

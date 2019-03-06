@@ -2145,9 +2145,7 @@ namespace System.DirectoryServices.AccountManagement
                                                 serverName);
 
                         throw new PrincipalOperationException(
-                                SR.Format(CultureInfo.CurrentCulture,
-                                                  SR.ADStoreCtxCantResolveSidForCrossStore,
-                                                  err));
+                                SR.Format(SR.ADStoreCtxCantResolveSidForCrossStore, err));
                     }
 
                     GlobalDebug.WriteLineIf(GlobalDebug.Info,

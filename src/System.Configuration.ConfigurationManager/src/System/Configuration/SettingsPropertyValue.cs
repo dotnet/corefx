@@ -206,7 +206,7 @@ namespace System.Configuration
                     TypeConverter converter = TypeDescriptor.GetConverter(type);
                     if (converter != null && converter.CanConvertTo(typeof(string)) && converter.CanConvertFrom(typeof(string)))
                         return converter.ConvertFromInvariantString(serializedValue);
-                    throw new ArgumentException(SR.Format(SR.Unable_to_convert_type_from_string, type.ToString()), nameof(type));
+                    throw new ArgumentException(SR.Format(SR.Unable_to_convert_type_from_string, type), nameof(type));
                 default:
                     return null;
             }
@@ -246,7 +246,7 @@ namespace System.Configuration
                         TypeConverter converter = TypeDescriptor.GetConverter(type);
                         if (converter != null && converter.CanConvertTo(typeof(string)) && converter.CanConvertFrom(typeof(string)))
                             return converter.ConvertToInvariantString(propertyValue);
-                        throw new ArgumentException(SR.Format(SR.Unable_to_convert_type_to_string, type.ToString()), nameof(type));
+                        throw new ArgumentException(SR.Format(SR.Unable_to_convert_type_to_string, type), nameof(type));
                     case SettingsSerializeAs.Xml:
                         XmlSerializer xs = new XmlSerializer(type);
                         StringWriter sw = new StringWriter(CultureInfo.InvariantCulture);

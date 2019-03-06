@@ -627,7 +627,7 @@ namespace System.Xml.Xsl.IlGen
                     case 6: opcode = OpCodes.Ldc_I4_6; break;
                     case 7: opcode = OpCodes.Ldc_I4_7; break;
                     case 8: opcode = OpCodes.Ldc_I4_8; break;
-                    default: Debug.Fail(""); return;
+                    default: Debug.Fail($"Unexpected int val {intVal}"); return;
                 }
                 Emit(opcode);
             }

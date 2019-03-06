@@ -71,7 +71,7 @@ namespace System.Configuration
                 catch (Exception)
                 {
                     string displayString = (val.Length == 0) ? SR.AppSettingsReaderEmptyString : val;
-                    throw new InvalidOperationException(SR.Format(SR.AppSettingsReaderCantParse, displayString, key, type.ToString()));
+                    throw new InvalidOperationException(SR.Format(SR.AppSettingsReaderCantParse, displayString, key, type));
                 }
             }
         }

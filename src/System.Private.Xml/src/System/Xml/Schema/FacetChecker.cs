@@ -461,7 +461,7 @@ namespace System.Xml.Schema
                         break;
 
                     default:
-                        Debug.Fail("");
+                        Debug.Fail($"Unexpected facet type {facet.FacetType}");
                         break;
                 }
             }

@@ -1449,7 +1449,7 @@ namespace System.Diagnostics
             }
 
             if (!foundCategory)
-                throw new InvalidOperationException(SR.Format(SR.CantReadCategoryIndex, categoryIndex.ToString(CultureInfo.CurrentCulture)));
+                throw new InvalidOperationException(SR.Format(SR.CantReadCategoryIndex, categoryIndex.ToString()));
 
             ref readonly PERF_OBJECT_TYPE perfObject = ref MemoryMarshal.AsRef<PERF_OBJECT_TYPE>(data.Slice(pos));
 

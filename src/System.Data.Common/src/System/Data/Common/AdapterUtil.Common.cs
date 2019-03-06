@@ -278,7 +278,7 @@ namespace System.Data.Common
         //
         internal static Exception WrongType(Type got, Type expected)
         {
-            return Argument(SR.Format(SR.SQL_WrongType, got.ToString(), expected.ToString()));
+            return Argument(SR.Format(SR.SQL_WrongType, got, expected));
         }
 
         //

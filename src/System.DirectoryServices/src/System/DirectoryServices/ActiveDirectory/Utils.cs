@@ -2247,7 +2247,6 @@ namespace System.DirectoryServices.ActiveDirectory
                 {
                     throw new InvalidOperationException(
                                     SR.Format(
-                                            CultureInfo.CurrentCulture,
                                             SR.UnableToRetrieveDomainInfo,
                                             err));
                 }

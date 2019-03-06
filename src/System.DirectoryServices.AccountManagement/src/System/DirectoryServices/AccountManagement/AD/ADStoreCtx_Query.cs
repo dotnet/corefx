@@ -162,7 +162,6 @@ namespace System.DirectoryServices.AccountManagement
                         // Must be a property we don't support
                         throw new InvalidOperationException(
                                     SR.Format(
-                                        CultureInfo.CurrentCulture,
                                         SR.StoreCtxUnsupportedPropertyForQuery,
                                         PropertyNamesExternal.GetExternalForm(filter.PropertyName)));
                     }
@@ -206,9 +205,8 @@ namespace System.DirectoryServices.AccountManagement
                 string objClass = ExtensionHelper.ReadStructuralObjectClass(principalType);
                 if (null == objClass)
                 {
-                    Debug.Fail("ADStoreCtx.GetObjectClassPortion: fell off end looking for " + principalType.ToString());
-                    throw new InvalidOperationException(
-                                    SR.Format(CultureInfo.CurrentCulture, SR.StoreCtxUnsupportedPrincipalTypeForQuery, principalType.ToString()));
+                    Debug.Fail($"ADStoreCtx.GetObjectClassPortion: fell off end looking for {principalType}");
+                    throw new InvalidOperationException(SR.Format(SR.StoreCtxUnsupportedPrincipalTypeForQuery, principalType));
                 }
                 StringBuilder SB = new StringBuilder();
                 SB.Append("(&(objectClass=");
@@ -735,7 +733,6 @@ namespace System.DirectoryServices.AccountManagement
                     // setting as special ACEs in the ntSecurityDescriptor).
                     throw new InvalidOperationException(
                                             SR.Format(
-                                                    CultureInfo.CurrentCulture,
                                                     SR.StoreCtxUnsupportedPropertyForQuery,
                                                     PropertyNamesExternal.GetExternalForm(filter.PropertyName)));
 

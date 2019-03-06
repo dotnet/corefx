@@ -436,7 +436,7 @@ namespace System.Xml
                     _fragmentType = XmlNodeType.Document;
                     break;
                 default:
-                    Debug.Fail("");
+                    Debug.Fail($"Unexpected conformance level {settings.ConformanceLevel}");
                     goto case ConformanceLevel.Document;
             }
         }
@@ -814,7 +814,7 @@ namespace System.Xml
                     case XmlNodeType.None: settings.ConformanceLevel = ConformanceLevel.Auto; break;
                     case XmlNodeType.Element: settings.ConformanceLevel = ConformanceLevel.Fragment; break;
                     case XmlNodeType.Document: settings.ConformanceLevel = ConformanceLevel.Document; break;
-                    default: Debug.Fail(""); goto case XmlNodeType.None;
+                    default: Debug.Fail($"Unexpected fragment type {_fragmentType}"); goto case XmlNodeType.None;
                 }
                 settings.CheckCharacters = _checkCharacters;
                 settings.LineNumberOffset = _lineNumberOffset;
@@ -1304,7 +1304,7 @@ namespace System.Xml
                         FinishReadElementContentAsBinary();
                         continue;
                     default:
-                        Debug.Fail("");
+                        Debug.Fail($"Unexpected parsing function {_parsingFunction}");
                         break;
                 }
             }
@@ -1332,7 +1332,7 @@ namespace System.Xml
                 switch (_parsingFunction)
                 {
                     case ParsingFunction.InReadAttributeValue:
-                        Debug.Fail("");
+                        Debug.Fail($"Unexpected parsing function {_parsingFunction}");
                         break;
                     case ParsingFunction.InIncrementalRead:
                         FinishIncrementalRead();
@@ -1486,7 +1486,7 @@ namespace System.Xml
                         _emptyEntityInAttributeResolved = true;
                         break;
                     default:
-                        Debug.Fail("");
+                        Debug.Fail("Unexpected entity type");
                         throw new XmlException(SR.Xml_InternalError, string.Empty);
                 }
             }
@@ -1512,7 +1512,7 @@ namespace System.Xml
                         _parsingFunction = ParsingFunction.AfterResolveEmptyEntityInContent;
                         break;
                     default:
-                        Debug.Fail("");
+                        Debug.Fail("Unexpected entity type");
                         throw new XmlException(SR.Xml_InternalError, string.Empty);
                 }
             }
@@ -3849,7 +3849,7 @@ namespace System.Xml
                             xmlDeclState = 3;
                             break;
                         default:
-                            Debug.Fail("");
+                            Debug.Fail($"Unexpected xmlDeclState {xmlDeclState}");
                             break;
                     }
                     sb.Append(chars, _ps.charPos, pos - _ps.charPos);
@@ -6202,7 +6202,7 @@ namespace System.Xml
         {
             if (_parsingStatesStackTop == -1)
             {
-                Debug.Fail("");
+                Debug.Fail($"Unexpected parsing states stack top {_parsingStatesStackTop}");
                 Throw(SR.Xml_InternalError);
             }
 
@@ -8352,7 +8352,7 @@ namespace System.Xml
                         pos = startPos;
                         break;
                     default:
-                        Debug.Fail("");
+                        Debug.Fail($"Unexpected read state {_incReadState}");
                         break;
                 }
                 Debug.Assert(_incReadState == IncrementalReadState.Text ||

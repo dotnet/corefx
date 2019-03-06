@@ -3129,7 +3129,7 @@ namespace System.Xml.Xsl.IlGen
                     break;
 
                 default:
-                    Debug.Fail("");
+                    Debug.Fail($"Unexpected node type {ndProp.NodeType}");
                     break;
             }
 
@@ -4297,7 +4297,7 @@ namespace System.Xml.Xsl.IlGen
                             case QilNodeType.Le: opcode = OpCodes.Bgt_Un; break;
                             case QilNodeType.Eq: opcode = OpCodes.Bne_Un; break;
                             case QilNodeType.Ne: opcode = OpCodes.Beq; break;
-                            default: Debug.Fail(""); opcode = OpCodes.Nop; break;
+                            default: Debug.Fail($"Unexpected rel op {relOp}"); opcode = OpCodes.Nop; break;
                         }
                     }
                     else
@@ -4310,7 +4310,7 @@ namespace System.Xml.Xsl.IlGen
                             case QilNodeType.Le: opcode = OpCodes.Bgt; break;
                             case QilNodeType.Eq: opcode = OpCodes.Bne_Un; break;
                             case QilNodeType.Ne: opcode = OpCodes.Beq; break;
-                            default: Debug.Fail(""); opcode = OpCodes.Nop; break;
+                            default: Debug.Fail($"Unexpected rel op {relOp}"); opcode = OpCodes.Nop; break;
                         }
                     }
                     _helper.Emit(opcode, _iterCurr.LabelBranch);
@@ -4326,7 +4326,7 @@ namespace System.Xml.Xsl.IlGen
                         case QilNodeType.Le: opcode = OpCodes.Ble; break;
                         case QilNodeType.Eq: opcode = OpCodes.Beq; break;
                         case QilNodeType.Ne: opcode = OpCodes.Bne_Un; break;
-                        default: Debug.Fail(""); opcode = OpCodes.Nop; break;
+                        default: Debug.Fail($"Unexpected rel op {relOp}"); opcode = OpCodes.Nop; break;
                     }
                     _helper.Emit(opcode, _iterCurr.LabelBranch);
                     _iterCurr.Storage = StorageDescriptor.None();
@@ -4345,7 +4345,7 @@ namespace System.Xml.Xsl.IlGen
                                 case QilNodeType.Ge: opcode = OpCodes.Bge_S; break;
                                 case QilNodeType.Le: opcode = OpCodes.Ble_S; break;
                                 case QilNodeType.Ne: opcode = OpCodes.Bne_Un_S; break;
-                                default: Debug.Fail(""); opcode = OpCodes.Nop; break;
+                                default: Debug.Fail($"Unexpected rel op {relOp}"); opcode = OpCodes.Nop; break;
                             }
 
                             // Push "true" if comparison succeeds, "false" otherwise

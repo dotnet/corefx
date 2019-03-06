@@ -418,7 +418,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             if (_sourceProvider == null)
             {
-                throw new InvalidOperationException(SR.Format(CultureInfo.CurrentCulture, SR.ObjectMustBeInitialized, "SourceProvider")); // NOLOC
+                throw new InvalidOperationException(SR.Format(SR.ObjectMustBeInitialized, "SourceProvider")); // NOLOC
             }
         }
 

@@ -350,7 +350,7 @@ namespace System.Text.Json
                 builder.Append("...");
             }
 
-            throw new ArgumentException(SR.Format(SR.CannotWriteInvalidUTF8, builder.ToString()));
+            throw new ArgumentException(SR.Format(SR.CannotWriteInvalidUTF8, builder));
         }
 
         public static void ThrowArgumentException_InvalidUTF16(int charAsInt)

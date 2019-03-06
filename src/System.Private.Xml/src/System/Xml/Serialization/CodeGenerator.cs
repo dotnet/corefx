@@ -67,7 +67,7 @@ namespace System.Xml.Serialization
                 if (iFace == iType)
                     return;
             }
-            Debug.Fail("");
+            Debug.Fail("Interface not found");
 #endif
         }
 
@@ -186,7 +186,7 @@ namespace System.Xml.Serialization
             object var;
             if (TryGetVariable(name, out var))
                 return var;
-            System.Diagnostics.Debug.Fail("");
+            System.Diagnostics.Debug.Fail("Variable not found");
             return null;
         }
 

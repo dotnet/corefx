@@ -38,7 +38,7 @@ namespace System.Text
             if (charCount < 0)
                 throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException(nameof(charCount), SR.ValueMustBeNonNegative));
             if ((charCount % 4) != 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new FormatException(SR.Format(SR.XmlInvalidBase64Length, charCount.ToString(NumberFormatInfo.CurrentInfo))));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new FormatException(SR.Format(SR.XmlInvalidBase64Length, charCount.ToString())));
             return charCount / 4 * 3;
         }
 
@@ -70,7 +70,7 @@ namespace System.Text
             if (count == 0)
                 return 0;
             if ((count % 4) != 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new FormatException(SR.Format(SR.XmlInvalidBase64Length, count.ToString(NumberFormatInfo.CurrentInfo))));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new FormatException(SR.Format(SR.XmlInvalidBase64Length, count.ToString())));
             fixed (byte* _char2val = &s_char2val[0])
             {
                 fixed (char* _chars = &chars[index])
@@ -133,7 +133,7 @@ namespace System.Text
             if (charCount == 0)
                 return 0;
             if ((charCount % 4) != 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new FormatException(SR.Format(SR.XmlInvalidBase64Length, charCount.ToString(NumberFormatInfo.CurrentInfo))));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new FormatException(SR.Format(SR.XmlInvalidBase64Length, charCount.ToString())));
             fixed (byte* _char2val = &s_char2val[0])
             {
                 fixed (char* _chars = &chars[charIndex])
@@ -211,7 +211,7 @@ namespace System.Text
             if (charCount == 0)
                 return 0;
             if ((charCount % 4) != 0)
-                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new FormatException(SR.Format(SR.XmlInvalidBase64Length, charCount.ToString(NumberFormatInfo.CurrentInfo))));
+                throw System.Runtime.Serialization.DiagnosticUtility.ExceptionUtility.ThrowHelperError(new FormatException(SR.Format(SR.XmlInvalidBase64Length, charCount.ToString())));
             fixed (byte* _char2val = &s_char2val[0])
             {
                 fixed (byte* _chars = &chars[charIndex])

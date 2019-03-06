@@ -312,7 +312,7 @@ namespace System.ComponentModel.Composition
                 if (propertyInfo.CanWrite)
                 {
                     // The MetadataView '{0}' is invalid because property '{1}' has a property set method.
-                    throw new NotSupportedException(SR.Format(CultureInfo.CurrentCulture,
+                    throw new NotSupportedException(SR.Format(
                         SR.InvalidSetterOnMetadataField,
                         viewType,
                         propertyName));

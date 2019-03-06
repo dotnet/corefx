@@ -192,7 +192,7 @@ namespace System.Reflection.Context.Custom
                 allowMultiple = usage.AllowMultiple;
             }
             else
-                throw new FormatException(SR.Format(SR.Format_AttributeUsage, attributeFilterType.ToString()));
+                throw new FormatException(SR.Format(SR.Format_AttributeUsage, attributeFilterType));
         }
 
         internal static IEnumerable<object> FilterCustomAttributes(IEnumerable<object> attributes, Type attributeFilterType)

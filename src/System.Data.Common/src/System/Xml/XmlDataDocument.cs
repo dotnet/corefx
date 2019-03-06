@@ -81,7 +81,7 @@ namespace System.Xml
 #if DEBUG
             object val = _pointers[pointer];
             if (val != (object)pointer)
-                Debug.Fail("");
+                Debug.Fail("Pointer not present");
 #endif
         }
         // This function attaches the DataSet to XmlDataDocument
@@ -1092,7 +1092,7 @@ namespace System.Xml
                     return true;
 
                 case XmlNodeType.EntityReference:
-                    Debug.Fail("");
+                    Debug.Fail("Found entity reference");
                     return false;
 
                 default:

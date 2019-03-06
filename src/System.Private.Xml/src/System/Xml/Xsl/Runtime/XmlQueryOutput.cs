@@ -1191,7 +1191,7 @@ namespace System.Xml.Xsl.Runtime
                     break;
 
                 default:
-                    Debug.Fail("");
+                    Debug.Fail($"Unexpected node type {navigator.NodeType}");
                     break;
             }
 

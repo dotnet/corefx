@@ -57,7 +57,7 @@ namespace System.ComponentModel.Composition
         {
             get
             {
-                return SR.Format(CultureInfo.CurrentCulture, 
+                return SR.Format(
                     SR.CompositionException_ChangesRejected,
                     base.Message);
             }

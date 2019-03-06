@@ -850,13 +850,13 @@ nameof(type),
                 {
                     throw new ArgumentOutOfRangeException(
 nameof(opaque),
-                        SR.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_ArrayLength, 0, MaxOpaqueLength));
+                        SR.Format(SR.ArgumentOutOfRange_ArrayLength, 0, MaxOpaqueLength));
                 }
                 else if (opaque.Length % 4 != 0)
                 {
                     throw new ArgumentOutOfRangeException(
 nameof(opaque),
-                        SR.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_ArrayLengthMultiple, 4));
+                        SR.Format(SR.ArgumentOutOfRange_ArrayLengthMultiple, 4));
                 }
             }
 
@@ -1303,13 +1303,13 @@ nameof(opaque),
                 {
                     throw new ArgumentOutOfRangeException(
 nameof(opaque),
-                        SR.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_ArrayLength, 0, MaxOpaqueLengthInternal));
+                        SR.Format(SR.ArgumentOutOfRange_ArrayLength, 0, MaxOpaqueLengthInternal));
                 }
                 else if (opaque.Length % 4 != 0)
                 {
                     throw new ArgumentOutOfRangeException(
 nameof(opaque),
-                        SR.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_ArrayLengthMultiple, 4));
+                        SR.Format(SR.ArgumentOutOfRange_ArrayLengthMultiple, 4));
                 }
             }
 

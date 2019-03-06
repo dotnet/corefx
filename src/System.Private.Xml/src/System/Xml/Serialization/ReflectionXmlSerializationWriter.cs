@@ -1409,7 +1409,7 @@ namespace System.Xml.Serialization
 
                 if (!foundMatchedMember)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, $"Could not find member named {memberName} of type {declaringType.ToString()}"));
+                    throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, $"Could not find member named {memberName} of type {declaringType}"));
                 }
 
                 declaringType = currentType;

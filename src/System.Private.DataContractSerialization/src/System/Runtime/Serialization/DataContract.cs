@@ -79,7 +79,7 @@ namespace System.Runtime.Serialization
                 {
                     if (DataContractSerializer.Option == SerializationOption.CodeGenOnly)
                     {
-                        throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, type.ToString()));
+                        throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, type));
                     }
                 }
             }

@@ -845,9 +845,7 @@ namespace System.DirectoryServices.AccountManagement
                                         this.MachineUserSuppliedName);
 
                 throw new PrincipalOperationException(
-                            SR.Format(CultureInfo.CurrentCulture,
-                                          SR.SAMStoreCtxCantResolveSidForCrossStore,
-                                          err));
+                            SR.Format(SR.SAMStoreCtxCantResolveSidForCrossStore, err));
             }
 
             GlobalDebug.WriteLineIf(GlobalDebug.Info,
@@ -1082,7 +1080,6 @@ namespace System.DirectoryServices.AccountManagement
                 {
                     throw new PrincipalOperationException(
                                     SR.Format(
-                                        CultureInfo.CurrentCulture,
                                         SR.SAMStoreCtxUnableToRetrieveFlatMachineName,
                                         err));
                 }

@@ -138,7 +138,7 @@ namespace System.Xml.Schema
                     return false;
 
                 default:
-                    Debug.Fail("");
+                    Debug.Fail($"Unexpected root type {rootType}");
                     break;
             }
             return true;

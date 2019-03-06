@@ -230,7 +230,7 @@ namespace System.ComponentModel.Composition.Primitives
                     if ((metadataItem.Key == null) || (metadataItem.Value == null))
                     {
                         throw new InvalidOperationException(
-                            SR.Format(CultureInfo.CurrentCulture, SR.Argument_NullElement, "requiredMetadata"));
+                            SR.Format(SR.Argument_NullElement, "requiredMetadata"));
                     }
                 }
                 _isRequiredMetadataValidated = true;

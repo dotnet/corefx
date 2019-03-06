@@ -1280,12 +1280,12 @@ namespace System.Configuration
             if (value != null)
             {
                 throw new ConfigurationErrorsException(
-                    SR.Format(CultureInfo.CurrentCulture, format, attribToLockTrim, sb.ToString()),
+                    SR.Format(format, attribToLockTrim, sb),
                     value.SourceInfo.FileName, value.SourceInfo.LineNumber);
             }
 
-            throw new ConfigurationErrorsException(SR.Format(CultureInfo.CurrentCulture, format,
-                attribToLockTrim, sb.ToString()));
+            throw new ConfigurationErrorsException(SR.Format(format,
+                attribToLockTrim, sb));
         }
 
         private ConfigurationLockCollection ParseLockedAttributes(ConfigurationValue value,

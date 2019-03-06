@@ -386,7 +386,7 @@ namespace System
         internal unsafe bool InternalIsWellFormedOriginalString()
         {
             if (UserDrivenParsing)
-                throw new InvalidOperationException(SR.Format(SR.net_uri_UserDrivenParsing, this.GetType().ToString()));
+                throw new InvalidOperationException(SR.Format(SR.net_uri_UserDrivenParsing, this.GetType()));
 
             fixed (char* str = _string)
             {
