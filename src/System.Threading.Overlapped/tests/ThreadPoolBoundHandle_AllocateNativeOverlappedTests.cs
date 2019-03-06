@@ -83,7 +83,9 @@ public partial class ThreadPoolBoundHandleTests
     {
         using(ThreadPoolBoundHandle handle = CreateThreadPoolBoundHandle())
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => handle.AllocateNativeOverlapped((_, __, ___) => { }, new object(), new NonBlittableType() { s = "foo" }));
+            AssertExtensions.Throws<ArgumentException>(
+                PlatformDetection.IsFullFramework ? null : "userData",
+                () => handle.AllocateNativeOverlapped((_, __, ___) => { }, new object(), new NonBlittableType() { s = "foo" }));
         }
     }
 
@@ -131,7 +133,9 @@ public partial class ThreadPoolBoundHandleTests
         };
         using(ThreadPoolBoundHandle handle = CreateThreadPoolBoundHandle())
         {
-            AssertExtensions.Throws<ArgumentException>(null, () => handle.AllocateNativeOverlapped((_, __, ___) => { }, new object(), array));
+            AssertExtensions.Throws<ArgumentException>(
+                PlatformDetection.IsFullFramework ? null : "userData",
+                () => handle.AllocateNativeOverlapped((_, __, ___) => { }, new object(), array));
         }
     }
 
