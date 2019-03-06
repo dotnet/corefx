@@ -28,7 +28,7 @@ namespace System.Net.Http
 
             public virtual bool NeedsDrain => false;
 
-            internal bool IsDisposed => _disposed == 1;
+            protected bool IsDisposed => _disposed == 1;
 
             public virtual Task<bool> DrainAsync(int maxDrainBytes)
             {

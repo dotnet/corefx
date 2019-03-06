@@ -12,19 +12,13 @@ using Xunit;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public abstract partial class HttpClientHandlerTest : HttpClientHandlerTestBase
+    public abstract class HttpClientHandlerTest_TrailingHeaders_Test : HttpClientHandlerTestBase
     {
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
         public async Task GetAsyncDeafultCompletionOption_TrailingHeaders_Available(bool includeTrailerHeader)
         {
-            if (!UseSocketsHttpHandler)
-            {
-                // PlatformHandlers don't support trailers.
-                return;
-            }
-
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
@@ -76,12 +70,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsyncResponseHeadersReadOption_TrailingHeaders_Available()
         {
-            if (!UseSocketsHttpHandler)
-            {
-                // PlatformHandlers don't support trailers.
-                return;
-            }
-
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
@@ -142,12 +130,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_ForbiddenTrailingHeaders_Throws()
         {
-            if (!UseSocketsHttpHandler)
-            {
-                // PlatformHandlers don't support trailers.
-                return;
-            }
-
             await LoopbackServer.CreateClientAndServerAsync(async url =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
@@ -174,12 +156,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_MissingTrailer_TrailingHeadersAccepted()
         {
-            if (!UseSocketsHttpHandler)
-            {
-                // PlatformHandlers don't support trailers.
-                return;
-            }
-
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
@@ -215,12 +191,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_NoTrailingHeaders_EmptyCollection()
         {
-            if (!UseSocketsHttpHandler)
-            {
-                // PlatformHandlers don't support trailers.
-                return;
-            }
-
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
