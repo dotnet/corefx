@@ -11,8 +11,6 @@ namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
-        private const int HalfMaxValue = int.MaxValue / 2;
-
         public static ValueTask<TValue> ReadAsync<TValue>(Stream utf8Json, JsonSerializerOptions options = null, CancellationToken cancellationToken = default)
         {
             if (utf8Json == null)
@@ -34,8 +32,7 @@ namespace System.Text.Json.Serialization
 
         private static async ValueTask<TValue> ReadAsync<TValue>(Stream utf8Json, Type returnType, JsonSerializerOptions options = null, CancellationToken cancellationToken = default)
         {
-            if (options == null)
-                options = s_defaultSettings;
+            options ??= s_defaultSettings;
 
             ReadStack state = default;
             JsonClassInfo classInfo = options.GetOrAddClass(returnType);
@@ -45,37 +42,56 @@ namespace System.Text.Json.Serialization
                 state.Current.JsonPropertyInfo = classInfo.GetPolicyProperty();
             }
 
-            var readerState = new JsonReaderState(options: options.ReaderOptions);
-
-            int bytesRemaining = 0;
-            int bytesRead;
+            var readerState = new JsonReaderState(options.ReaderOptions);
 
             // todo: switch to ArrayBuffer implementation to handle and simplify the allocs?
             byte[] buffer = ArrayPool<byte>.Shared.Rent(options.EffectiveBufferSize);
-            int bufferSize = buffer.Length;
-            int deserializeBufferSize;
-            bool isFinalBlock;
+            int bytesInBuffer = 0;
+            long totalBytesRead = 0;
+            int clearMax = 0;
 
             try
             {
-                do
+                while (true)
                 {
-                    int bytesToRead = bufferSize - bytesRemaining;
-                    bytesRead = await utf8Json.ReadAsync(buffer, bytesRemaining, bytesToRead, cancellationToken).ConfigureAwait(false);
+                    // Read from the stream until either our buffer is filled or we hit EOF.
+                    // Calling ReadCore is relatively expensive, so we minimize the number of times
+                    // we need to call it.
+                    bool isFinalBlock = false;
+                    while (true)
+                    {
+                        int bytesRead = await utf8Json.ReadAsync(buffer.AsMemory(bytesInBuffer), cancellationToken).ConfigureAwait(false);
 
-                    deserializeBufferSize = bytesRemaining + bytesRead;
-                    isFinalBlock = (bytesRead == 0);
+                        if (bytesRead == 0)
+                        {
+                            isFinalBlock = true;
+                            break;
+                        }
 
+                        totalBytesRead += bytesRead;
+                        bytesInBuffer += bytesRead;
+
+                        if (bytesInBuffer > clearMax)
+                        {
+                            clearMax = bytesRead;
+                        }
+
+                        if (bytesInBuffer == buffer.Length)
+                        {
+                            break;
+                        }
+                    }
+
+                    // Process the data available
                     ReadCore(
                         ref readerState,
                         isFinalBlock,
-                        buffer,
-                        deserializeBufferSize,
+                        new Span<byte>(buffer, 0, bytesInBuffer),
                         options,
                         ref state);
 
                     int bytesConsumed = (int)readerState.BytesConsumed;
-                    bytesRemaining = deserializeBufferSize - bytesConsumed;
+                    bytesInBuffer -= bytesConsumed;
 
                     if (isFinalBlock)
                     {
@@ -83,38 +99,39 @@ namespace System.Text.Json.Serialization
                     }
 
                     // Check if we need to shift or expand the buffer because there wasn't enough data to complete deserialization.
-                    if (bytesConsumed <= (bufferSize / 2))
+                    if ((uint)bytesInBuffer > ((uint)buffer.Length / 2))
                     {
                         // We have less than half the buffer available, double the buffer size.
-                        bufferSize = (bufferSize < HalfMaxValue) ? bufferSize * 2 : int.MaxValue;
+                        byte[] dest = ArrayPool<byte>.Shared.Rent((buffer.Length < (int.MaxValue / 2)) ? buffer.Length * 2 : int.MaxValue);
+                        
+                        // Copy the unprocessed data to the new buffer while shifting the processed bytes.
+                        Buffer.BlockCopy(buffer, bytesConsumed, dest, 0, bytesInBuffer);
 
-                        byte[] dest = ArrayPool<byte>.Shared.Rent(bufferSize);
-                        bufferSize = dest.Length;
-                        if (bytesRemaining > 0)
-                        {
-                            // Copy the unprocessed data to the new buffer while shifting the processed bytes.
-                            Buffer.BlockCopy(buffer, bytesConsumed, dest, 0, bytesRemaining);
-                        }
+                        new Span<byte>(buffer, 0, clearMax).Clear();
+                        ArrayPool<byte>.Shared.Return(buffer);
 
-                        ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
+                        clearMax = bytesInBuffer;
                         buffer = dest;
                     }
-                    else if (bytesRemaining > 0)
+                    else if (bytesInBuffer != 0)
                     {
                         // Shift the processed bytes to the beginning of buffer to make more room.
-                        Buffer.BlockCopy(buffer, bytesConsumed, buffer, 0, bytesRemaining);
+                        Buffer.BlockCopy(buffer, bytesConsumed, buffer, 0, bytesInBuffer);
                     }
-                } while (true);
+                }
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
+                // Clear only what we used and return the buffer to the pool
+                new Span<byte>(buffer, 0, clearMax).Clear();
+                ArrayPool<byte>.Shared.Return(buffer);
             }
 
-            if (bytesRemaining != 0)
+            if (bytesInBuffer != 0)
             {
-                throw new JsonReaderException(SR.Format(SR.DeserializeDataRemaining,
-                    deserializeBufferSize, bytesRemaining), readerState);
+                throw new JsonReaderException(
+                    SR.Format(SR.DeserializeDataRemaining, totalBytesRead, bytesInBuffer),
+                    readerState);
             }
 
             return (TValue)state.Current.ReturnValue;
@@ -123,12 +140,11 @@ namespace System.Text.Json.Serialization
         private static void ReadCore(
             ref JsonReaderState readerState,
             bool isFinalBlock,
-            byte[] buffer,
-            int bytesToRead,
+            Span<byte> buffer,
             JsonSerializerOptions options,
             ref ReadStack state)
         {
-            Utf8JsonReader reader = new Utf8JsonReader(buffer.AsSpan(0, bytesToRead), isFinalBlock, readerState);
+            var reader = new Utf8JsonReader(buffer, isFinalBlock, readerState);
 
             ReadCore(
                 options,
