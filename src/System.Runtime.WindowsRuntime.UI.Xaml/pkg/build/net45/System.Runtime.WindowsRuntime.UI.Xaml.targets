@@ -20,7 +20,7 @@
     </When>
   </Choose>
   <!-- when this package is referenced as a nuget reference the binding redirect is still present, add a target to remove it -->
-  <Target Name="_RemoveWindowsRuntimeSuggestedRedirect" 
+  <Target Name="_RemoveWindowsRuntimeUIXamlSuggestedRedirect" 
       BeforeTargets="GenerateBindingRedirects" 
       DependsOnTargets="ResolveAssemblyReferences"
       Condition="'$(DoNotReferenceWinRT)' != 'true'">
