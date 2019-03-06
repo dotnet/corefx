@@ -75,7 +75,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 1, 1, 0 };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadBoolean(Asn1Tag.Null));
 
@@ -99,7 +99,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x80, 1, 0xFF };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadBoolean(Asn1Tag.Null));
 

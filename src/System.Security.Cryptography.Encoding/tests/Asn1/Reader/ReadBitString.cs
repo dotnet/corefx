@@ -250,7 +250,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal(expectedHex, output.AsSpan(0, bytesWritten).ByteArrayToHex());
         }
 
-        private static void TryCopyBitStringBytes_Throws(
+        private static void TryCopyBitStringBytes_ThrowsCore(
             PublicEncodingRules ruleSet,
             byte[] input)
         {
@@ -327,7 +327,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
-            TryCopyBitStringBytes_Throws(ruleSet, inputData);
+            TryCopyBitStringBytes_ThrowsCore(ruleSet, inputData);
         }
 
         [Fact]
@@ -345,7 +345,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[2] = 0x03;
             input[3] = 0xE9;
 
-            TryCopyBitStringBytes_Throws(PublicEncodingRules.CER, input);
+            TryCopyBitStringBytes_ThrowsCore(PublicEncodingRules.CER, input);
         }
 
         [Fact]
@@ -374,7 +374,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[5] = 0xE9;
             // EOC implicit since the byte[] initializes to zeros
 
-            TryCopyBitStringBytes_Throws(PublicEncodingRules.CER, input);
+            TryCopyBitStringBytes_ThrowsCore(PublicEncodingRules.CER, input);
         }
 
         [Fact]
@@ -413,7 +413,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[1011] = 0x02;
             // EOC implicit since the byte[] initializes to zeros
 
-            TryCopyBitStringBytes_Throws(PublicEncodingRules.CER, input);
+            TryCopyBitStringBytes_ThrowsCore(PublicEncodingRules.CER, input);
         }
 
         [Fact]
@@ -541,7 +541,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 3, 2, 1, 0x7E };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.TryReadPrimitiveBitStringValue(Asn1Tag.Null, out _, out _));
 
@@ -567,7 +567,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x87, 2, 0, 0x80 };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.TryReadPrimitiveBitStringValue(Asn1Tag.Null, out _, out _));
 

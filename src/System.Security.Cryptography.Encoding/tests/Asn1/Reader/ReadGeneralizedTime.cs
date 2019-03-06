@@ -211,7 +211,6 @@ namespace System.Security.Cryptography.Tests.Asn1
         [Theory]
         [InlineData(PublicEncodingRules.BER, "2017121900.06861111087Z")]
         [InlineData(PublicEncodingRules.BER, "201712190004.11666665167Z")]
-        [InlineData(PublicEncodingRules.BER, "201712190004.11666665167Z")]
         [InlineData(PublicEncodingRules.BER, "20171219000406.9999991Z")]
         [InlineData(PublicEncodingRules.CER, "20171219000406.9999991Z")]
         [InlineData(PublicEncodingRules.DER, "20171219000406.9999991Z")]
@@ -441,7 +440,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData("yyyyMMddHHmm.minuteFrac-HH:mm", "18183230313730393038323335382E30303030352D30313A3138")]
         [InlineData("yyyyMMddHHmmss,secondFrac-HH:mm", "181932303136313130363031323334352C393939392D30313A3138")]
         [InlineData("yyyyMMddHHmmss.secondFrac-HH:mm", "181932303136313130363031323334352E393939392D30313A3138")]
-        public static void ReadGeneralizedTime_Throws(string description, string inputHex)
+        public static void GetGeneralizedTime_Throws(string description, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, AsnEncodingRules.BER);
@@ -458,7 +457,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = "180F32303136313130363031323334355A".HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadGeneralizedTime(Asn1Tag.Null));
 
@@ -485,7 +484,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = "850F32303136313130363031323334355A".HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadGeneralizedTime(Asn1Tag.Null));
 

@@ -622,7 +622,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] data = { 0x0A, 0x01, 0x00 };
             AsnReader reader = new AsnReader(data, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "tEnum",
                 () => reader.ReadEnumeratedValue<AssemblyFlags>());
         }
@@ -683,7 +683,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x0A, 1, 0x7E };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadEnumeratedValue<ShortBacked>(Asn1Tag.Null));
 
@@ -708,7 +708,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x87, 2, 0, 0x80 };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadEnumeratedValue<ShortBacked>(Asn1Tag.Null));
 

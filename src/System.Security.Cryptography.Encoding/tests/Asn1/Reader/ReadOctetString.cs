@@ -28,7 +28,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             bool didRead = reader.TryReadPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents);
 
-            Assert.False(didRead, "reader.TryGetOctetStringBytes");
+            Assert.False(didRead, "reader.TryReadOctetStringBytes");
             Assert.Equal(0, contents.Length);
         }
 
@@ -49,7 +49,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             bool didRead = reader.TryReadPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents);
 
-            Assert.True(didRead, "reader.TryGetOctetStringBytes");
+            Assert.True(didRead, "reader.TryReadOctetStringBytes");
             Assert.Equal(expectedLength, contents.Length);
         }
 
@@ -119,7 +119,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             bool success = reader.TryReadPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents);
 
-            Assert.True(success, "reader.TryGetOctetStringBytes");
+            Assert.True(success, "reader.TryReadOctetStringBytes");
             Assert.Equal(1000, contents.Length);
 
             // Check that it is, in fact, the same memory. No copies with this API.
@@ -207,7 +207,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal(expectedHex, output.AsSpan(0, bytesWritten).ByteArrayToHex());
         }
 
-        private static void TryCopyOctetStringBytes_Throws(
+        private static void TryCopyOctetStringBytes_ThrowsCore(
             PublicEncodingRules ruleSet,
             byte[] input)
         {
@@ -256,7 +256,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
-            TryCopyOctetStringBytes_Throws(ruleSet, inputData);
+            TryCopyOctetStringBytes_ThrowsCore(ruleSet, inputData);
         }
 
         [Fact]
@@ -285,7 +285,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[5] = 0xE9;
             // EOC implicit since the byte[] initializes to zeros
 
-            TryCopyOctetStringBytes_Throws(PublicEncodingRules.CER, input);
+            TryCopyOctetStringBytes_ThrowsCore(PublicEncodingRules.CER, input);
         }
 
         [Fact]
@@ -323,7 +323,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[1011] = 0x02;
             // EOC implicit since the byte[] initializes to zeros
 
-            TryCopyOctetStringBytes_Throws(PublicEncodingRules.CER, input);
+            TryCopyOctetStringBytes_ThrowsCore(PublicEncodingRules.CER, input);
         }
 
         [Fact]
@@ -439,7 +439,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 4, 1, 0x7E };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.TryReadPrimitiveOctetStringBytes(Asn1Tag.Null, out _));
 
@@ -464,7 +464,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x87, 2, 0, 0x80 };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.TryReadPrimitiveOctetStringBytes(Asn1Tag.Null, out _));
 
