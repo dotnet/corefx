@@ -14,6 +14,7 @@
     <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard'">4.3.0.0</AssemblyVersion>
   </PropertyGroup>
   <Import Project="$(CommonPath)\System\Security\Cryptography\Asn1\AsnXml.targets"/>
+  <Import Project="$(CommonPath)\System\Security\Cryptography\System.Security.Cryptography.Asn1.Shared.projitems" />
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(TargetsWindows)' == 'true'">
     <Compile Include="System\Security\Cryptography\AesCng.cs" />
     <Compile Include="System\Security\Cryptography\CngAlgorithm.cs" />
@@ -229,15 +230,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Memory\PointerMemoryManager.cs">
       <Link>Common\System\Memory\PointerMemoryManager.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1V2.cs">
-      <Link>Common\System\Security\Cryptography\Asn1V2.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnReader.cs">
-      <Link>Common\System\Security\Cryptography\AsnReader.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnWriter.cs">
-      <Link>Common\System\Security\Cryptography\AsnWriter.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\CngPkcs8.cs">
       <Link>Common\System\Security\Cryptography\CngPkcs8.cs</Link>

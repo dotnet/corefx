@@ -128,7 +128,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
                     Assert.True(writer.TryEncode(answerBuf, out _));
                 }
-                Assert.True(Asn1Tag.TryParse(answerBuf, out Asn1Tag writtenTag, out _));
+                Assert.True(Asn1Tag.TryDecode(answerBuf, out Asn1Tag writtenTag, out _));
 
                 if (expectConstructed)
                 {

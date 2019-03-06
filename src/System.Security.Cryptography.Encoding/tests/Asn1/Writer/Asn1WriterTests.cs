@@ -47,7 +47,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte* stackspace = stackalloc byte[10];
             Span<byte> dest = new Span<byte>(stackspace, 10);
 
-            Assert.True(tag.TryWrite(dest, out int size));
+            Assert.True(tag.TryEncode(dest, out int size));
             return dest.Slice(0, size).ByteArrayToHex();
         }
     }
