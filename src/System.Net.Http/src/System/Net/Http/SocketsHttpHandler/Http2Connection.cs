@@ -930,12 +930,8 @@ namespace System.Net.Http
             // write lock
             await _headerSerializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
-            int streamId = 0;
-            int totalSize = 0;
-            Http2Stream http2Stream = null;
-            ReadOnlyMemory<byte> remaining = null;
-            ReadOnlyMemory<byte> current = null;
-            FrameFlags flags;
+            Http2Stream http2Stream = AddStream(request);
+            int streamId = http2Stream.StreamId;
 
             try
             {
@@ -945,33 +941,21 @@ namespace System.Net.Http
                 // Generate the entire header block, without framing, into the connection header buffer.
                 WriteHeaders(request);
 
-                remaining = _headerBuffer.ActiveMemory;
+                ReadOnlyMemory<byte> remaining = _headerBuffer.ActiveMemory;
                 Debug.Assert(remaining.Length > 0);
 
                 // Calculate the total number of bytes we're going to use (content + headers).
-                totalSize = remaining.Length + (remaining.Length / FrameHeader.MaxLength) * FrameHeader.Size +
+                int totalSize = remaining.Length + (remaining.Length / FrameHeader.MaxLength) * FrameHeader.Size +
                                 (remaining.Length % FrameHeader.MaxLength == 0 ? FrameHeader.Size : 0);
 
                 // Split into frames and send.
+                ReadOnlyMemory<byte> current;
                 (current, remaining) = SplitBuffer(remaining, FrameHeader.MaxLength);
 
-                flags =
+                FrameFlags flags =
                     (remaining.Length == 0 ? FrameFlags.EndHeaders : FrameFlags.None) |
                     (request.Content == null ? FrameFlags.EndStream : FrameFlags.None);
-            }
-            catch
-            {
-                _headerBuffer.Discard(_headerBuffer.ActiveMemory.Length);
-                http2Stream.Dispose();
-                throw;
-            }
-            finally
-            {
-                _headerSerializationLock.Release();
-            }
 
-            try
-            {
                 // Note, HEADERS and CONTINUATION frames must be together, so hold the writer lock across sending all of them.
                 await StartWriteAsync(totalSize).ConfigureAwait(false);
 
@@ -1002,6 +986,7 @@ namespace System.Net.Http
             finally
             {
                 _headerBuffer.Discard(_headerBuffer.ActiveMemory.Length);
+                _headerSerializationLock.Release();
             }
 
             return http2Stream;
