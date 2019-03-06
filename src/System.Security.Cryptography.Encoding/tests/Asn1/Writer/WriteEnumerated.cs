@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.X509Certificates;
 using Test.Cryptography;
@@ -256,21 +255,21 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                AssertExtensions.Throws<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     "tEnum",
                     () => writer.WriteEnumeratedValue(OpenFlags.IncludeArchived));
 
-                AssertExtensions.Throws<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     "tEnum",
                     () => writer.WriteEnumeratedValue(
                         new Asn1Tag(TagClass.ContextSpecific, 13),
                         OpenFlags.IncludeArchived));
 
-                AssertExtensions.Throws<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     "tEnum",
                     () => writer.WriteEnumeratedValue((object)OpenFlags.IncludeArchived));
 
-                AssertExtensions.Throws<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     "tEnum",
                     () => writer.WriteEnumeratedValue(
                         new Asn1Tag(TagClass.ContextSpecific, 13),
@@ -314,11 +313,11 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                AssertExtensions.Throws<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteEnumeratedValue(Asn1Tag.EndOfContents, ReadEnumerated.IntBacked.Pillow));
 
-                AssertExtensions.Throws<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteEnumeratedValue(Asn1Tag.EndOfContents, (object)ReadEnumerated.IntBacked.Pillow));
             }
@@ -332,11 +331,11 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                AssertExtensions.Throws<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>(
                     "enumValue",
                     () => writer.WriteEnumeratedValue(null));
 
-                AssertExtensions.Throws<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>(
                     "enumValue",
                     () => writer.WriteEnumeratedValue(
                         new Asn1Tag(TagClass.ContextSpecific, 1),
@@ -411,6 +410,116 @@ namespace System.Security.Cryptography.Tests.Asn1
                     (object)ReadEnumerated.SByteBacked.Fluff);
 
                 Verify(writer, "0A0900FACEF00DCAFEBEEF" + "800153");
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteAfterDispose(bool empty)
+        {
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                if (!empty)
+                {
+                    writer.WriteNull();
+                }
+
+                writer.Dispose();
+
+                // Type not enum
+                Assert.Throws<ArgumentException>(
+                    "enumType",
+                    () => writer.WriteEnumeratedValue(false));
+
+                // Type not enum
+                Assert.Throws<ArgumentException>(
+                    "enumType",
+                    () => writer.WriteEnumeratedValue((object)"hi"));
+
+                Assert.Throws<ArgumentNullException>(
+                    "enumValue",
+                    () => writer.WriteEnumeratedValue((object)null));
+
+                // valid input
+                Assert.Throws<ObjectDisposedException>(
+                    () => writer.WriteEnumeratedValue(ReadEnumerated.UIntBacked.Fluff));
+
+                // Type is [Flags]
+                Assert.Throws<ArgumentException>(
+                    "tEnum",
+                    () => writer.WriteEnumeratedValue(ReadNamedBitList.LongFlags.Mid));
+
+                // valid input
+                Assert.Throws<ObjectDisposedException>(
+                    () => writer.WriteEnumeratedValue((object)ReadEnumerated.SByteBacked.Fluff));
+
+                // Unboxed type is [Flags]
+                Assert.Throws<ArgumentException>(
+                    "tEnum",
+                    () => writer.WriteEnumeratedValue((object)ReadNamedBitList.ULongFlags.Mid));
+
+                Assert.Throws<ArgumentException>(
+                    "tag",
+                    () => writer.WriteEnumeratedValue(Asn1Tag.Integer, false));
+
+                Assert.Throws<ArgumentException>(
+                    "tag",
+                    () => writer.WriteEnumeratedValue(Asn1Tag.Integer, (object)"hi"));
+
+                Assert.Throws<ArgumentNullException>(
+                    "enumValue",
+                    () => writer.WriteEnumeratedValue(Asn1Tag.Integer, (object)null));
+
+                Assert.Throws<ArgumentException>(
+                    "tag",
+                    () => writer.WriteEnumeratedValue(Asn1Tag.Integer, ReadEnumerated.UIntBacked.Fluff));
+
+                Assert.Throws<ArgumentException>(
+                    "tag",
+                    () => writer.WriteEnumeratedValue(Asn1Tag.Integer, ReadNamedBitList.LongFlags.Mid));
+
+                Assert.Throws<ArgumentException>(
+                    "tag",
+                    () => writer.WriteEnumeratedValue(Asn1Tag.Integer, (object)ReadEnumerated.SByteBacked.Fluff));
+
+                Assert.Throws<ArgumentException>(
+                    "tag",
+                    () => writer.WriteEnumeratedValue(Asn1Tag.Integer, (object)ReadNamedBitList.ULongFlags.Mid));
+
+                Asn1Tag tag = new Asn1Tag(TagClass.Private, 6);
+
+                // Type not enum
+                Assert.Throws<ArgumentException>(
+                    "enumType",
+                    () => writer.WriteEnumeratedValue(tag, false));
+
+                // Type not enum
+                Assert.Throws<ArgumentException>(
+                    "enumType",
+                    () => writer.WriteEnumeratedValue(tag, (object)"hi"));
+
+                Assert.Throws<ArgumentNullException>(
+                    "enumValue",
+                    () => writer.WriteEnumeratedValue(tag, (object)null));
+
+                // valid input
+                Assert.Throws<ObjectDisposedException>(
+                    () => writer.WriteEnumeratedValue(tag, ReadEnumerated.UIntBacked.Fluff));
+
+                // Type is [Flags]
+                Assert.Throws<ArgumentException>(
+                    "tEnum",
+                    () => writer.WriteEnumeratedValue(tag, ReadNamedBitList.LongFlags.Mid));
+
+                // valid input
+                Assert.Throws<ObjectDisposedException>(
+                    () => writer.WriteEnumeratedValue(tag, (object)ReadEnumerated.SByteBacked.Fluff));
+
+                // Unboxed type is [Flags]
+                Assert.Throws<ArgumentException>(
+                    "tEnum",
+                    () => writer.WriteEnumeratedValue(tag, (object)ReadNamedBitList.ULongFlags.Mid));
             }
         }
     }

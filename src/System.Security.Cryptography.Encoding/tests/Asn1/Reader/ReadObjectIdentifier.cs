@@ -130,9 +130,9 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = "06028837".HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
-                () => reader.GetIntegerBytes(Asn1Tag.Null));
+                () => reader.ReadIntegerBytes(Asn1Tag.Null));
 
             Assert.True(reader.HasData, "HasData after bad universal tag");
 
@@ -154,9 +154,9 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = "87028837".HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
-                () => reader.GetIntegerBytes(Asn1Tag.Null));
+                () => reader.ReadIntegerBytes(Asn1Tag.Null));
 
             Assert.True(reader.HasData, "HasData after bad universal tag");
 

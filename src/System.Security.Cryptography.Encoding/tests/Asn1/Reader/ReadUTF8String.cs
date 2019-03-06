@@ -129,7 +129,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-            string value = reader.GetCharacterString(UniversalTagNumber.UTF8String);
+            string value = reader.ReadCharacterString(UniversalTagNumber.UTF8String);
 
             Assert.Equal(expectedValue, value);
         }
@@ -228,13 +228,13 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            bool got = reader.TryGetPrimitiveCharacterStringBytes(
+            bool got = reader.TryReadPrimitiveCharacterStringBytes(
                 UniversalTagNumber.UTF8String,
                 out ReadOnlyMemory<byte> contents);
 
             if (expectSuccess)
             {
-                Assert.True(got, "reader.TryGetUTF8StringBytes");
+                Assert.True(got, "reader.TryReadUTF8StringBytes");
 
                 Assert.True(
                     Unsafe.AreSame(
@@ -243,7 +243,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             }
             else
             {
-                Assert.False(got, "reader.TryGetUTF8StringBytes");
+                Assert.False(got, "reader.TryReadUTF8StringBytes");
                 Assert.True(contents.IsEmpty, "contents.IsEmpty");
             }
         }
@@ -271,7 +271,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
             Assert.Throws<CryptographicException>(
-                () => reader.TryGetPrimitiveCharacterStringBytes(UniversalTagNumber.UTF8String, out _));
+                () => reader.TryReadPrimitiveCharacterStringBytes(UniversalTagNumber.UTF8String, out _));
         }
 
         [Theory]
@@ -336,7 +336,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal(252, outputData[0]);
         }
 
-        private static void TryCopyUTF8String_Throws(PublicEncodingRules ruleSet, byte[] inputData)
+        private static void TryCopyUTF8String_ThrowsCore(PublicEncodingRules ruleSet, byte[] inputData)
         {
             char[] outputData = new char[inputData.Length + 1];
             outputData[0] = 'a';
@@ -365,7 +365,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
             Assert.Throws<CryptographicException>(
-                () => reader.GetCharacterString(UniversalTagNumber.UTF8String));
+                () => reader.ReadCharacterString(UniversalTagNumber.UTF8String));
         }
 
         [Theory]
@@ -418,7 +418,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
-            TryCopyUTF8String_Throws(ruleSet, inputData);
+            TryCopyUTF8String_ThrowsCore(ruleSet, inputData);
         }
 
         [Fact]
@@ -447,7 +447,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[5] = 0xE9;
             // EOC implicit since the byte[] initializes to zeros
 
-            TryCopyUTF8String_Throws(PublicEncodingRules.CER, input);
+            TryCopyUTF8String_ThrowsCore(PublicEncodingRules.CER, input);
         }
 
         [Fact]
@@ -485,7 +485,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[1011] = 0x02;
             // EOC implicit since the byte[] initializes to zeros
 
-            TryCopyUTF8String_Throws(PublicEncodingRules.CER, input);
+            TryCopyUTF8String_ThrowsCore(PublicEncodingRules.CER, input);
         }
 
         [Fact]
@@ -604,18 +604,18 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
             const UniversalTagNumber EncodingType = UniversalTagNumber.UTF8String;
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
-                () => reader.TryGetPrimitiveCharacterStringBytes(Asn1Tag.Null, EncodingType, out _));
+                () => reader.TryReadPrimitiveCharacterStringBytes(Asn1Tag.Null, EncodingType, out _));
 
             Assert.True(reader.HasData, "HasData after bad universal tag");
 
             Assert.Throws<CryptographicException>(
-                () => reader.TryGetPrimitiveCharacterStringBytes(new Asn1Tag(TagClass.ContextSpecific, 0), EncodingType, out _));
+                () => reader.TryReadPrimitiveCharacterStringBytes(new Asn1Tag(TagClass.ContextSpecific, 0), EncodingType, out _));
 
             Assert.True(reader.HasData, "HasData after wrong tag");
 
-            Assert.True(reader.TryGetPrimitiveCharacterStringBytes(EncodingType, out ReadOnlyMemory<byte> value));
+            Assert.True(reader.TryReadPrimitiveCharacterStringBytes(EncodingType, out ReadOnlyMemory<byte> value));
             Assert.Equal("656C", value.ByteArrayToHex());
             Assert.False(reader.HasData, "HasData after read");
         }
@@ -631,29 +631,29 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             const UniversalTagNumber EncodingType = UniversalTagNumber.UTF8String;
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
-                () => reader.TryGetPrimitiveCharacterStringBytes(Asn1Tag.Null, EncodingType, out _));
+                () => reader.TryReadPrimitiveCharacterStringBytes(Asn1Tag.Null, EncodingType, out _));
 
             Assert.True(reader.HasData, "HasData after bad universal tag");
 
             Assert.Throws<CryptographicException>(
-                () => reader.TryGetPrimitiveCharacterStringBytes(EncodingType, out _));
+                () => reader.TryReadPrimitiveCharacterStringBytes(EncodingType, out _));
 
             Assert.True(reader.HasData, "HasData after default tag");
 
             Assert.Throws<CryptographicException>(
-                () => reader.TryGetPrimitiveCharacterStringBytes(new Asn1Tag(TagClass.Application, 0), EncodingType, out _));
+                () => reader.TryReadPrimitiveCharacterStringBytes(new Asn1Tag(TagClass.Application, 0), EncodingType, out _));
 
             Assert.True(reader.HasData, "HasData after wrong custom class");
 
             Assert.Throws<CryptographicException>(
-                () => reader.TryGetPrimitiveCharacterStringBytes(new Asn1Tag(TagClass.ContextSpecific, 1), EncodingType, out _));
+                () => reader.TryReadPrimitiveCharacterStringBytes(new Asn1Tag(TagClass.ContextSpecific, 1), EncodingType, out _));
 
             Assert.True(reader.HasData, "HasData after wrong custom tag value");
 
             Assert.True(
-                reader.TryGetPrimitiveCharacterStringBytes(
+                reader.TryReadPrimitiveCharacterStringBytes(
                     new Asn1Tag(TagClass.ContextSpecific, 7),
                     EncodingType,
                     out ReadOnlyMemory<byte> value));
@@ -679,7 +679,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
             Assert.True(
-                reader.TryGetPrimitiveCharacterStringBytes(
+                reader.TryReadPrimitiveCharacterStringBytes(
                     new Asn1Tag((TagClass)tagClass, tagValue, true),
                     UniversalTagNumber.UTF8String,
                     out ReadOnlyMemory<byte> val1));
@@ -689,7 +689,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
             Assert.True(
-                reader.TryGetPrimitiveCharacterStringBytes(
+                reader.TryReadPrimitiveCharacterStringBytes(
                     new Asn1Tag((TagClass)tagClass, tagValue, false),
                     UniversalTagNumber.UTF8String,
                     out ReadOnlyMemory<byte> val2));

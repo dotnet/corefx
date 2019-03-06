@@ -31,7 +31,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                AssertExtensions.Throws<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteNull(Asn1Tag.EndOfContents));
             }
@@ -49,6 +49,32 @@ namespace System.Security.Cryptography.Tests.Asn1
                 writer.WriteNull(new Asn1Tag(UniversalTagNumber.Null, true));
 
                 Verify(writer, "87000500");
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteAfterDispose(bool empty)
+        {
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                if (!empty)
+                {
+                    writer.WriteBoolean(true);
+                }
+
+                writer.Dispose();
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => writer.WriteNull());
+
+                Assert.Throws<ArgumentException>(
+                    "tag",
+                    () => writer.WriteNull(Asn1Tag.Integer));
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => writer.WriteNull(new Asn1Tag(TagClass.Private, 3)));
             }
         }
     }

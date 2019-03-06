@@ -314,7 +314,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                AssertExtensions.Throws<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>(
                     "str",
                     () => WriteString(writer, null));
             }
@@ -324,7 +324,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                AssertExtensions.Throws<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>(
                     "str",
                     () => WriteString(writer, new Asn1Tag(TagClass.ContextSpecific, 3), null));
             }
@@ -334,7 +334,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                AssertExtensions.Throws<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     "tag",
                     () => WriteString(writer, Asn1Tag.EndOfContents, "hi"));
             }
@@ -344,7 +344,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                AssertExtensions.Throws<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     "tag",
                     () => WriteSpan(writer, Asn1Tag.EndOfContents, "hi".AsSpan()));
             }
@@ -492,6 +492,56 @@ namespace System.Security.Cryptography.Tests.Asn1
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
             {
                 Assert.Throws<EncoderFallbackException>(() => WriteSpan(writer, input.AsSpan()));
+            }
+        }
+
+        protected void WriteAfterDispose_Span(bool empty)
+        {
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                if (!empty)
+                {
+                    writer.WriteNull();
+                }
+
+                writer.Dispose();
+
+                string input = "1";
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => WriteSpan(writer, input));
+
+                Assert.Throws<ArgumentException>(
+                    "tag",
+                    () => WriteSpan(writer, Asn1Tag.Boolean, input));
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => WriteSpan(writer, new Asn1Tag(TagClass.Application, 0), input));
+            }
+        }
+
+        protected void WriteAfterDispose_String(bool empty)
+        {
+            using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+            {
+                if (!empty)
+                {
+                    writer.WriteNull();
+                }
+
+                writer.Dispose();
+
+                string input = "1";
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => WriteString(writer, input));
+
+                Assert.Throws<ArgumentException>(
+                    "tag",
+                    () => WriteString(writer, Asn1Tag.Boolean, input));
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => WriteString(writer, new Asn1Tag(TagClass.Application, 0), input));
             }
         }
     }

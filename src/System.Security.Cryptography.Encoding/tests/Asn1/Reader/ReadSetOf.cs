@@ -146,7 +146,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 lastTag = tag.TagValue;
 
                 // Ignore the return, just drain it.
-                setOf.GetEncodedValue();
+                setOf.ReadEncodedValue();
             }
 
             Assert.Equal(lastTagValue, lastTag);
@@ -160,7 +160,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = "31020500".HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadSetOf(Asn1Tag.Null));
 
@@ -172,7 +172,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.True(reader.HasData, "HasData after wrong tag");
 
             AsnReader seq = reader.ReadSetOf();
-            Assert.Equal("0500", seq.GetEncodedValue().ByteArrayToHex());
+            Assert.Equal("0500", seq.ReadEncodedValue().ByteArrayToHex());
 
             Assert.False(reader.HasData, "HasData after read");
         }
@@ -185,7 +185,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = "318005000000".HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadSetOf(Asn1Tag.Null));
 
@@ -197,7 +197,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.True(reader.HasData, "HasData after wrong tag");
 
             AsnReader seq = reader.ReadSetOf();
-            Assert.Equal("0500", seq.GetEncodedValue().ByteArrayToHex());
+            Assert.Equal("0500", seq.ReadEncodedValue().ByteArrayToHex());
 
             Assert.False(reader.HasData, "HasData after read");
         }
@@ -210,7 +210,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = "A5020500".HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadSetOf(Asn1Tag.Null));
 
@@ -231,7 +231,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.True(reader.HasData, "HasData after wrong custom tag value");
 
             AsnReader seq = reader.ReadSetOf(new Asn1Tag(TagClass.ContextSpecific, 5));
-            Assert.Equal("0500", seq.GetEncodedValue().ByteArrayToHex());
+            Assert.Equal("0500", seq.ReadEncodedValue().ByteArrayToHex());
 
             Assert.False(reader.HasData, "HasData after reading value");
         }
@@ -244,7 +244,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = "A58005000000".HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadSetOf(Asn1Tag.Null));
 
@@ -265,7 +265,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.True(reader.HasData, "HasData after wrong custom tag value");
 
             AsnReader seq = reader.ReadSetOf(new Asn1Tag(TagClass.ContextSpecific, 5));
-            Assert.Equal("0500", seq.GetEncodedValue().ByteArrayToHex());
+            Assert.Equal("0500", seq.ReadEncodedValue().ByteArrayToHex());
 
             Assert.False(reader.HasData, "HasData after reading value");
         }
@@ -298,7 +298,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             Assert.False(reader.HasData);
 
-            Assert.Equal(val1.GetEncodedValue().ByteArrayToHex(), val2.GetEncodedValue().ByteArrayToHex());
+            Assert.Equal(val1.ReadEncodedValue().ByteArrayToHex(), val2.ReadEncodedValue().ByteArrayToHex());
         }
     }
 }

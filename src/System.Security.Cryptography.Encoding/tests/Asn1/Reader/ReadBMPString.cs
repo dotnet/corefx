@@ -129,7 +129,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-            string value = reader.GetCharacterString(UniversalTagNumber.BMPString);
+            string value = reader.ReadCharacterString(UniversalTagNumber.BMPString);
 
             Assert.Equal(expectedValue, value);
         }
@@ -335,7 +335,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal(252, outputData[0]);
         }
 
-        private static void TryCopyBMPString_Throws(PublicEncodingRules ruleSet, byte[] inputData)
+        private static void TryCopyBMPString_ThrowsCore(PublicEncodingRules ruleSet, byte[] inputData)
         {
             char[] outputData = new char[inputData.Length + 1];
             outputData[0] = 'a';
@@ -385,7 +385,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Throws<CryptographicException>(
                 () =>
                 {
-                    reader.GetCharacterString(UniversalTagNumber.BMPString);
+                    reader.ReadCharacterString(UniversalTagNumber.BMPString);
                 });
         }
 
@@ -442,7 +442,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
-            TryCopyBMPString_Throws(ruleSet, inputData);
+            TryCopyBMPString_ThrowsCore(ruleSet, inputData);
         }
 
         [Fact]
@@ -471,7 +471,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[5] = 0xE9;
             // EOC implicit since the byte[] initializes to zeros
 
-            TryCopyBMPString_Throws(PublicEncodingRules.CER, input);
+            TryCopyBMPString_ThrowsCore(PublicEncodingRules.CER, input);
         }
 
         [Fact]
@@ -509,7 +509,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[1011] = 0x02;
             // EOC implicit since the byte[] initializes to zeros
 
-            TryCopyBMPString_Throws(PublicEncodingRules.CER, input);
+            TryCopyBMPString_ThrowsCore(PublicEncodingRules.CER, input);
         }
 
         [Fact]
@@ -619,7 +619,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x1E, 4, 0, (byte)'h', 0, (byte)'i' };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.TryGetBMPStringBytes(Asn1Tag.Null, out _));
 
@@ -644,7 +644,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x87, 2, 0x20, 0x10 };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.TryGetBMPStringBytes(Asn1Tag.Null, out _));
 
@@ -715,7 +715,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             this AsnReader reader,
             out ReadOnlyMemory<byte> contents)
         {
-            return reader.TryGetPrimitiveCharacterStringBytes(
+            return reader.TryReadPrimitiveCharacterStringBytes(
                 UniversalTagNumber.BMPString,
                 out contents);
         }
@@ -725,7 +725,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Asn1Tag expectedTag,
             out ReadOnlyMemory<byte> contents)
         {
-            return reader.TryGetPrimitiveCharacterStringBytes(
+            return reader.TryReadPrimitiveCharacterStringBytes(
                 expectedTag,
                 UniversalTagNumber.BMPString,
                 out contents);

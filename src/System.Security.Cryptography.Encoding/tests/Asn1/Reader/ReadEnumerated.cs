@@ -72,7 +72,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-            TEnum value = reader.GetEnumeratedValue<TEnum>();
+            TEnum value = reader.ReadEnumeratedValue<TEnum>();
             Assert.Equal(expectedValue, value);
         }
 
@@ -284,7 +284,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(() => reader.GetEnumeratedValue<ByteBacked>());
+            Assert.Throws<CryptographicException>(() => reader.ReadEnumeratedValue<ByteBacked>());
         }
 
         [Theory]
@@ -336,7 +336,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(() => reader.GetEnumeratedValue<SByteBacked>());
+            Assert.Throws<CryptographicException>(() => reader.ReadEnumeratedValue<SByteBacked>());
         }
 
         [Theory]
@@ -385,7 +385,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(() => reader.GetEnumeratedValue<ShortBacked>());
+            Assert.Throws<CryptographicException>(() => reader.ReadEnumeratedValue<ShortBacked>());
         }
 
         [Theory]
@@ -437,7 +437,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(() => reader.GetEnumeratedValue<UShortBacked>());
+            Assert.Throws<CryptographicException>(() => reader.ReadEnumeratedValue<UShortBacked>());
         }
 
 
@@ -481,7 +481,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(() => reader.GetEnumeratedValue<IntBacked>());
+            Assert.Throws<CryptographicException>(() => reader.ReadEnumeratedValue<IntBacked>());
         }
 
         [Theory]
@@ -524,7 +524,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(() => reader.GetEnumeratedValue<UIntBacked>());
+            Assert.Throws<CryptographicException>(() => reader.ReadEnumeratedValue<UIntBacked>());
         }
         
         [Theory]
@@ -561,7 +561,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(() => reader.GetEnumeratedValue<LongBacked>());
+            Assert.Throws<CryptographicException>(() => reader.ReadEnumeratedValue<LongBacked>());
         }
 
         [Theory]
@@ -598,7 +598,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(() => reader.GetEnumeratedValue<ULongBacked>());
+            Assert.Throws<CryptographicException>(() => reader.ReadEnumeratedValue<ULongBacked>());
         }
 
         [Theory]
@@ -610,7 +610,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] data = { 0x0A, 0x01, 0x00 };
             AsnReader reader = new AsnReader(data, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<ArgumentException>(() => reader.GetEnumeratedValue<Guid>());
+            Assert.Throws<ArgumentException>(() => reader.ReadEnumeratedValue<Guid>());
         }
 
         [Theory]
@@ -622,9 +622,9 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] data = { 0x0A, 0x01, 0x00 };
             AsnReader reader = new AsnReader(data, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "tEnum",
-                () => reader.GetEnumeratedValue<AssemblyFlags>());
+                () => reader.ReadEnumeratedValue<AssemblyFlags>());
         }
 
         [Theory]
@@ -639,7 +639,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] data = ("0A10" + Payload + "020100").HexToByteArray();
             AsnReader reader = new AsnReader(data, (AsnEncodingRules)ruleSet);
 
-            ReadOnlyMemory<byte> contents = reader.GetEnumeratedBytes();
+            ReadOnlyMemory<byte> contents = reader.ReadEnumeratedBytes();
             Assert.Equal(0x10, contents.Length);
             Assert.Equal(Payload, contents.ByteArrayToHex());
         }
@@ -671,7 +671,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<CryptographicException>(() => reader.GetEnumeratedBytes());
+            Assert.Throws<CryptographicException>(() => reader.ReadEnumeratedBytes());
         }
 
         [Theory]
@@ -683,18 +683,18 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x0A, 1, 0x7E };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
-                () => reader.GetEnumeratedValue<ShortBacked>(Asn1Tag.Null));
+                () => reader.ReadEnumeratedValue<ShortBacked>(Asn1Tag.Null));
 
             Assert.True(reader.HasData, "HasData after bad universal tag");
 
             Assert.Throws<CryptographicException>(
-                () => reader.GetEnumeratedValue<ShortBacked>(new Asn1Tag(TagClass.ContextSpecific, 0)));
+                () => reader.ReadEnumeratedValue<ShortBacked>(new Asn1Tag(TagClass.ContextSpecific, 0)));
 
             Assert.True(reader.HasData, "HasData after wrong tag");
 
-            ShortBacked value = reader.GetEnumeratedValue<ShortBacked>();
+            ShortBacked value = reader.ReadEnumeratedValue<ShortBacked>();
             Assert.Equal((ShortBacked)0x7E, value);
             Assert.False(reader.HasData, "HasData after read");
         }
@@ -708,27 +708,27 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x87, 2, 0, 0x80 };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            AssertExtensions.Throws<ArgumentException>(
+            Assert.Throws<ArgumentException>(
                 "expectedTag",
-                () => reader.GetEnumeratedValue<ShortBacked>(Asn1Tag.Null));
+                () => reader.ReadEnumeratedValue<ShortBacked>(Asn1Tag.Null));
 
             Assert.True(reader.HasData, "HasData after bad universal tag");
 
-            Assert.Throws<CryptographicException>(() => reader.GetEnumeratedValue<ShortBacked>());
+            Assert.Throws<CryptographicException>(() => reader.ReadEnumeratedValue<ShortBacked>());
 
             Assert.True(reader.HasData, "HasData after default tag");
 
             Assert.Throws<CryptographicException>(
-                () => reader.GetEnumeratedValue<ShortBacked>(new Asn1Tag(TagClass.Application, 0)));
+                () => reader.ReadEnumeratedValue<ShortBacked>(new Asn1Tag(TagClass.Application, 0)));
 
             Assert.True(reader.HasData, "HasData after wrong custom class");
 
             Assert.Throws<CryptographicException>(
-                () => reader.GetEnumeratedValue<ShortBacked>(new Asn1Tag(TagClass.ContextSpecific, 1)));
+                () => reader.ReadEnumeratedValue<ShortBacked>(new Asn1Tag(TagClass.ContextSpecific, 1)));
 
             Assert.True(reader.HasData, "HasData after wrong custom tag value");
 
-            ShortBacked value = reader.GetEnumeratedValue<ShortBacked>(new Asn1Tag(TagClass.ContextSpecific, 7));
+            ShortBacked value = reader.ReadEnumeratedValue<ShortBacked>(new Asn1Tag(TagClass.ContextSpecific, 7));
             Assert.Equal((ShortBacked)0x80, value);
             Assert.False(reader.HasData, "HasData after reading value");
         }
@@ -748,10 +748,10 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-            ShortBacked val1 = reader.GetEnumeratedValue<ShortBacked>(new Asn1Tag((TagClass)tagClass, tagValue, true));
+            ShortBacked val1 = reader.ReadEnumeratedValue<ShortBacked>(new Asn1Tag((TagClass)tagClass, tagValue, true));
             Assert.False(reader.HasData);
             reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
-            ShortBacked val2 = reader.GetEnumeratedValue<ShortBacked>(new Asn1Tag((TagClass)tagClass, tagValue, false));
+            ShortBacked val2 = reader.ReadEnumeratedValue<ShortBacked>(new Asn1Tag((TagClass)tagClass, tagValue, false));
             Assert.False(reader.HasData);
 
             Assert.Equal(val1, val2);
