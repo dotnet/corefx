@@ -9,12 +9,12 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <ProjectNTfsCurrentRef>a481b09c740d6e19f6d033429800991cef096fe0</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>a481b09c740d6e19f6d033429800991cef096fe0</ProjectNTfsTestILCCurrentRef>
+    <ProjectNTfsCurrentRef>139d174fa87f35164137ba19b52cec7361325475</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>139d174fa87f35164137ba19b52cec7361325475</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>8bd1ec5fac9f0eec34ff6b34b1d878b4359e02dd</SniCurrentRef>
     <StandardCurrentRef>9004703a1923e5c5582ceb8d79712df777412446</StandardCurrentRef>
-    <BuildToolsCurrentRef>a481b09c740d6e19f6d033429800991cef096fe0</BuildToolsCurrentRef>
-    <CoreFxOptimizationDataCurrentRef>a481b09c740d6e19f6d033429800991cef096fe0</CoreFxOptimizationDataCurrentRef>
+    <BuildToolsCurrentRef>139d174fa87f35164137ba19b52cec7361325475</BuildToolsCurrentRef>
+    <CoreFxOptimizationDataCurrentRef>139d174fa87f35164137ba19b52cec7361325475</CoreFxOptimizationDataCurrentRef>
   </PropertyGroup>
 
   <!-- Product dependency versions. -->
@@ -27,9 +27,9 @@
 
   <!-- Tests/infrastructure dependency versions. -->
   <PropertyGroup>
-    <ProjectNTfsExpectedPrerelease>beta-27428-00</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>beta-27428-00</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-27428-00</ProjectNTfsTestILCPackageVersion>
+    <ProjectNTfsExpectedPrerelease>beta-27505-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-27505-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-27505-00</ProjectNTfsTestILCPackageVersion>
 
     <!-- CoreFX-built SNI identity package -->
     <RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeNativeSystemDataSqlClientSniPackageVersion>
@@ -51,13 +51,13 @@
     <TestILCArmretPackageVersion>$(ProjectNTfsTestILCPackageVersion)</TestILCArmretPackageVersion>
     <TestILCX86retPackageVersion>$(ProjectNTfsTestILCPackageVersion)</TestILCX86retPackageVersion>
     <OptimizationDataVersion>2.0.0-rc-61101-17</OptimizationDataVersion>
-    <CoreFxOptimizationDataVersion>99.99.99-master-20190227.1</CoreFxOptimizationDataVersion>
+    <CoreFxOptimizationDataVersion>99.99.99-master-20190305.1</CoreFxOptimizationDataVersion>
   </PropertyGroup>
 
   <!-- Package versions used as toolsets -->
   <PropertyGroup>
     <BuildToolsPackage>microsoft.dotnet.buildtools</BuildToolsPackage>
-    <BuildToolsPackageVersion>3.0.0-preview1-03727-01</BuildToolsPackageVersion>
+    <BuildToolsPackageVersion>3.0.0-preview1-03805-01</BuildToolsPackageVersion>
   </PropertyGroup>
 
   <!-- Publish symbol build task package -->
