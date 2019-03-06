@@ -1770,66 +1770,89 @@ namespace System.Text.Json.Tests
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
         }
 
-        [Theory]
-        [MemberData(nameof(SingleLineCommentData))]
-        public static void ConsumeSingleLineCommentSingleSpanTest(string expected, string[] inputData)
+        struct SingleCommentVerifyInfo
         {
-            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
-            int bytesConsumed = 0;
-            var dataUtf8 = new byte[] { };
+            public bool startObjectFound;
+            public bool endObjectFound;
+            public bool commentFound;
+        }
 
-            for (int count = 0; count < inputData.Length; ++count)
+        private static void VerifyReadLoop(ref Utf8JsonReader json, string expected, ref SingleCommentVerifyInfo verifyInfo)
+        {
+            while (json.Read())
             {
-                bool isFinal = (count == inputData.Length - 1);
-                dataUtf8 = dataUtf8.Concat(Encoding.UTF8.GetBytes(inputData[count])).ToArray();
-                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: isFinal, state);
-                while (json.Read())
+                switch (json.TokenType)
                 {
-                    switch (json.TokenType)
-                    {
-                        case JsonTokenType.StartObject:
-                        case JsonTokenType.EndObject:
-                            break;
-                        case JsonTokenType.Comment:
-                            Assert.Equal(Encoding.UTF8.GetBytes(expected), json.ValueSpan.ToArray());
-                            break;
-                        default:
-                            Assert.True(false);
-                            break;
-                    }
+                    case JsonTokenType.StartObject:
+                        verifyInfo.startObjectFound = true;
+                        break;
+                    case JsonTokenType.EndObject:
+                        verifyInfo.endObjectFound = true;
+                        break;
+                    case JsonTokenType.Comment:
+                        expected?.Equals(Encoding.UTF8.GetString(json.ValueSpan));
+                        verifyInfo.commentFound = true;
+                        break;
+                    default:
+                        Assert.True(false);
+                        break;
                 }
-                dataUtf8 = dataUtf8.Skip(bytesConsumed).ToArray();
             }
         }
 
         [Theory]
         [MemberData(nameof(SingleLineCommentData))]
-        public static void SkipSingleLineCommentSingleSpanTest(string _, string[] inputData)
+        public static void ConsumeSingleLineCommentSingleSpanTest(string expected)
         {
-            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
-            int bytesConsumed = 0;
-            var dataUtf8 = new byte[] { };
+            var jsonData = "{" + expected + "}";
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData);
 
-            for (int count = 0; count < inputData.Length; ++count)
+            for (int i = 0; i < jsonData.Length; i++)
             {
-                bool isFinal = (count == inputData.Length - 1);
-                dataUtf8 = dataUtf8.Concat(Encoding.UTF8.GetBytes(inputData[count])).ToArray();
-                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: isFinal, state);
-                while (json.Read())
+                var verifyInfo = new SingleCommentVerifyInfo
                 {
-                    switch (json.TokenType)
-                    {
-                        case JsonTokenType.StartObject:
-                        case JsonTokenType.EndObject:
-                            break;
-                        default:
-                            // It is expected that the comment is skipped in entirety. If it doesn't,
-                            // this default case will catch that.
-                            Assert.True(false);
-                            break;
-                    }
-                }
-                dataUtf8 = dataUtf8.Skip(bytesConsumed).ToArray();
+                    startObjectFound = false,
+                    endObjectFound = false,
+                    commentFound = false
+                };
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+                var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
+                VerifyReadLoop(ref json, expected, ref verifyInfo);
+
+                json = new Utf8JsonReader(dataUtf8.AsSpan((int)state.BytesConsumed), isFinalBlock: true, state);
+                VerifyReadLoop(ref json, expected, ref verifyInfo);
+
+                Assert.True(verifyInfo.startObjectFound);
+                Assert.True(verifyInfo.endObjectFound);
+                Assert.True(verifyInfo.commentFound);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(SingleLineCommentData))]
+        public static void SkipSingleLineCommentSingleSpanTest(string expected)
+        {
+            var jsonData = "{" + expected + "}";
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData);
+
+            for (int i = 0; i < jsonData.Length; i++)
+            {
+                var verifyInfo = new SingleCommentVerifyInfo
+                {
+                    startObjectFound = false,
+                    endObjectFound = false,
+                    commentFound = false
+                };
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
+                var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
+                VerifyReadLoop(ref json, null, ref verifyInfo);
+
+                json = new Utf8JsonReader(dataUtf8.AsSpan((int)state.BytesConsumed), isFinalBlock: true, state);
+                VerifyReadLoop(ref json, null, ref verifyInfo);
+
+                Assert.True(verifyInfo.startObjectFound);
+                Assert.True(verifyInfo.endObjectFound);
+                Assert.False(verifyInfo.commentFound);
             }
         }
 
@@ -2067,27 +2090,23 @@ namespace System.Text.Json.Tests
         {
             get
             {
-                // Each entry in the list consists of two elements,
-                //   A string           : Expected value
-                //   An array of strings: Fragments of input json generated by splitting the json
-                //                        in different places i.e. before / after line separator
                 return new List<object[]>
                 {
                     // \r as the line separator
-                    new object[] { "//Comment\r",   new object[] { "{//Comment\r}"             } },
-                    new object[] { "//Comment\r",   new object[] { "{//Comment\r"    , "}"     } },
-                    new object[] { "//Comment\r",   new object[] { "{//Comment"      , "\r}"   } },
+                    new object [] {"//Comment\r" },
+                    new object [] {"//Comment\r" },
+                    new object [] {"//Comment\r" },
 
                     // \r\n as line separator
-                    new object[] { "//Comment\r\n", new object[] { "{//Comment\r\n}"           } },
-                    new object[] { "//Comment\r\n", new object[] { "{//Comment\r\n"  , "}"     } },
-                    new object[] { "//Comment\r\n", new object[] { "{//Comment\r"    , "\n}"   } },
-                    new object[] { "//Comment\r\n", new object[] { "{//Comment"      , "\r\n}" } },
+                    new object [] {"//Comment\r\n" },
+                    new object [] {"//Comment\r\n" },
+                    new object [] {"//Comment\r\n" },
+                    new object [] {"//Comment\r\n" },
 
                     // \n as line separator
-                    new object[] { "//Comment\n",   new object[] { "{//Comment\n}"             } },
-                    new object[] { "//Comment\n",   new object[] { "{//Comment\n"    , "}"     } },
-                    new object[] { "//Comment\n",   new object[] { "{//Comment"      , "\n}"   } },
+                    new object [] {"//Comment\n" },
+                    new object [] {"//Comment\n" },
+                    new object [] {"//Comment\n" }
                 };
             }
         }
