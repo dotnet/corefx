@@ -911,8 +911,8 @@ namespace Internal.Cryptography.Pal
             internal bool AbortedForSignatureError { get; private set; }
 
             internal WorkingChain()
+                : this(s_defaultAbort)
             {
-                AbortOnSignatureError = s_defaultAbort;
             }
 
             internal WorkingChain(bool abortOnSignatureError)
