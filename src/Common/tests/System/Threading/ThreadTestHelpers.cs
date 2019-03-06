@@ -123,6 +123,11 @@ namespace System.Threading.Tests
             WaitForConditionWithCustomDelay(condition, () => Thread.Yield());
         }
 
+        public static void WaitForConditionWithoutRelinquishingTimeSlice(Func<bool> condition)
+        {
+            WaitForConditionWithCustomDelay(condition, () => Thread.SpinWait(1));
+        }
+
         public static void WaitForConditionWithCustomDelay(Func<bool> condition, Action delay)
         {
             if (condition())

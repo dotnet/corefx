@@ -198,6 +198,8 @@ namespace System.Threading.ThreadPools.Tests
             var workStarted = new AutoResetEvent(false);
             int completeWork = 0;
             int simultaneousWorkCount = 0;
+            int simultaneousLocalWorkCount = 0;
+            int simultaneousGlobalWorkCount = 0;
             var allWorkCompleted = new ManualResetEvent(false);
             Exception backgroundEx = null;
             Action work = () =>
@@ -207,9 +209,8 @@ namespace System.Threading.ThreadPools.Tests
                 {
                     // Blocking can affect thread pool thread injection heuristics, so don't block, pretend like a
                     // long-running CPU-bound work item
-                    ThreadTestHelpers.WaitForConditionWithCustomDelay(
-                        () => Interlocked.CompareExchange(ref completeWork, 0, 0) != 0,
-                        () => Thread.SpinWait(1));
+                    ThreadTestHelpers.WaitForConditionWithoutRelinquishingTimeSlice(
+                        () => Interlocked.CompareExchange(ref completeWork, 0, 0) != 0);
                 }
                 catch (Exception ex)
                 {
@@ -224,6 +225,7 @@ namespace System.Threading.ThreadPools.Tests
                 }
             };
             WaitCallback threadPoolWork = data => work();
+            Action<object> threadPoolLocalWork = data => work();
             TimerCallback timerWork = data => work();
             WaitOrTimerCallback waitWork = (data, timedOut) => work();
 
@@ -241,6 +243,7 @@ namespace System.Threading.ThreadPools.Tests
                         break;
                     }
                     ++simultaneousWorkCount;
+                    ++simultaneousGlobalWorkCount;
                     ThreadPool.QueueUserWorkItem(threadPoolWork);
                     workStarted.CheckedWait();
 
@@ -249,6 +252,16 @@ namespace System.Threading.ThreadPools.Tests
                         break;
                     }
                     ++simultaneousWorkCount;
+                    ++simultaneousLocalWorkCount;
+                    ThreadPool.QueueUserWorkItem(threadPoolLocalWork, null, preferLocal: true);
+                    workStarted.CheckedWait();
+
+                    if (simultaneousWorkCount >= maxSimultaneousWorkCount)
+                    {
+                        break;
+                    }
+                    ++simultaneousWorkCount;
+                    ++simultaneousGlobalWorkCount;
                     timers.Add(new Timer(timerWork, null, 1, Timeout.Infinite));
                     workStarted.CheckedWait();
 
@@ -257,6 +270,7 @@ namespace System.Threading.ThreadPools.Tests
                         break;
                     }
                     ++simultaneousWorkCount;
+                    ++simultaneousGlobalWorkCount;
                     ThreadPool.RegisterWaitForSingleObject(
                         signaledEvent,
                         waitWork,
@@ -277,9 +291,16 @@ namespace System.Threading.ThreadPools.Tests
             Assert.True(ThreadPool.ThreadCount >= maxSimultaneousWorkCount);
 
             // Schedule more work that would not all be scheduled and roughly verify the pending work item count
-            maxSimultaneousWorkCount = processorCount * 8;
+            maxSimultaneousWorkCount = processorCount * 64;
             scheduleWork();
-            Assert.True(ThreadPool.PendingWorkItemCount >= processorCount);
+            // The following is assuming that no more than (processorCount * 8) work items will be scheduled to run
+            // simultaneously
+            int minExpectedPendingLocalWorkCount = Math.Max(1, simultaneousLocalWorkCount - processorCount * 8);
+            int minExpectedPendingGlobalWorkCount = Math.Max(1, simultaneousGlobalWorkCount - processorCount * 8);
+            int minExpectedPendingWorkCount = minExpectedPendingLocalWorkCount + minExpectedPendingGlobalWorkCount;
+            Assert.True(ThreadPool.PendingLocalWorkItemCount >= minExpectedPendingLocalWorkCount);
+            Assert.True(ThreadPool.PendingGlobalWorkItemCount >= minExpectedPendingGlobalWorkCount);
+            Assert.True(ThreadPool.PendingWorkItemCount >= minExpectedPendingWorkCount);
 
             // Complete the work and verify the completed work item count
             Interlocked.Exchange(ref completeWork, 1);
