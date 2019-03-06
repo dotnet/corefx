@@ -802,7 +802,7 @@ namespace System.Buffers.Text.Tests
             }
         }
 
-		[Benchmark(InnerIterationCount = InnerCount)]
+        [Benchmark(InnerIterationCount = InnerCount)]
         [InlineData("Fri, 30 Jun 2000 03:15:45 GMT")] // standard parse
         private static void StringToTimeOffsetR_Baseline(string text)
         {

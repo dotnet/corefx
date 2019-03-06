@@ -13,48 +13,49 @@ namespace System.Buffers.Text.Tests
         {
             get
             {
-				// Format J tests for DateTime parsing.
-				yield return new ParserTestData<DateTime>("0997-07-16", DateTime.Parse("0997-07-16"), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTime>("1997-07-16", DateTime.Parse("1997-07-16"), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20", DateTime.Parse("1997-07-16T19:20"), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30", DateTime.Parse("1997-07-16T19:20:30"), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.45", DateTime.Parse("1997-07-16T19:20:30.45"), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555", DateTime.Parse("1997-07-16T19:20:30.4555555"), 'J', expectedSuccess: true);
+				// Format I tests for DateTime parsing.
+				yield return new ParserTestData<DateTime>("0997-07-16", DateTime.Parse("0997-07-16"), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16", DateTime.Parse("1997-07-16"), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20", DateTime.Parse("1997-07-16T19:20"), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30", DateTime.Parse("1997-07-16T19:20:30"), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.45", DateTime.Parse("1997-07-16T19:20:30.45"), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555", DateTime.Parse("1997-07-16T19:20:30.4555555"), 'I', expectedSuccess: true);
 
 				// Skip test T24:00 till #35830 is fixed.
-				// yield return new ParserTestData<DateTime>("1997-07-16T24:00", DateTime.Parse("1997-07-17T00:00"), 'J', expectedSuccess: true);
-				// yield return new ParserTestData<DateTime>("1997-07-16T24:30", DateTime.Parse("1997-07-17T00:30"), 'J', expectedSuccess: true);
+				// yield return new ParserTestData<DateTime>("1997-07-16T24:00", DateTime.Parse("1997-07-17T00:00"), 'I', expectedSuccess: true);
+				// yield return new ParserTestData<DateTime>("1997-07-16T24:30", DateTime.Parse("1997-07-17T00:30"), 'I', expectedSuccess: true);
 
 				// Test junk data appended.
-				// We expect the parse to read only the first 10 characters.
-				yield return new ParserTestData<DateTime>("0997-07-160997-07-16", DateTime.Parse("0997-07-16"), 'J', expectedSuccess: true) { ExpectedBytesConsumed = 10 };
-				yield return new ParserTestData<DateTime>("0997-07-16abc", DateTime.Parse("0997-07-16"), 'J', expectedSuccess: true) { ExpectedBytesConsumed = 10 };
-				yield return new ParserTestData<DateTime>("0997-07-16,0997-07-16", DateTime.Parse("0997-07-16"), 'J', expectedSuccess: true) { ExpectedBytesConsumed = 10 };
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20abc", DateTime.Parse("1997-07-16T19:20"), 'J', expectedSuccess: true) { ExpectedBytesConsumed = 16 };
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20, 123", DateTime.Parse("1997-07-16T19:20"), 'J', expectedSuccess: true) { ExpectedBytesConsumed = 16 };
+				// We expect the parser to read only the first 10 characters.
+				yield return new ParserTestData<DateTime>("0997-07-160997-07-16", DateTime.Parse("0997-07-16"), 'I', expectedSuccess: true) { ExpectedBytesConsumed = 10 };
+				yield return new ParserTestData<DateTime>("0997-07-16abc", DateTime.Parse("0997-07-16"), 'I', expectedSuccess: true) { ExpectedBytesConsumed = 10 };
+				yield return new ParserTestData<DateTime>("0997-07-16,0997-07-16", DateTime.Parse("0997-07-16"), 'I', expectedSuccess: true) { ExpectedBytesConsumed = 10 };
+				// We expect the parser to read only the first 16 characters.
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20abc", DateTime.Parse("1997-07-16T19:20"), 'I', expectedSuccess: true) { ExpectedBytesConsumed = 16 };
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20, 123", DateTime.Parse("1997-07-16T19:20"), 'I', expectedSuccess: true) { ExpectedBytesConsumed = 16 };
 
 				// Test fraction rounding.
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.45555554", DateTime.Parse("1997-07-16T19:20:30.45555554"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.45555554", DateTime.Parse("1997-07-16T19:20:30.45555554"), 'I', expectedSuccess: true);
 				// We expect the parser to truncate. `DateTime.Parse` will round up to 7dp in this case,
 				// so we pass a string representing the Datetime we expect to the `Parse` method.
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.45555555", DateTime.Parse("1997-07-16T19:20:30.4555555"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.45555555", DateTime.Parse("1997-07-16T19:20:30.4555555"), 'I', expectedSuccess: true);
 
 				// Test with timezone designator.
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555Z", DateTime.ParseExact("1997-07-16T19:20:30.4555555Z", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555+01:00", DateTime.ParseExact("1997-07-16T19:20:30.4555555+01:00", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555-01:00", DateTime.ParseExact("1997-07-16T19:20:30.4555555-01:00", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555+04:30", DateTime.ParseExact("1997-07-16T19:20:30.4555555+04:30", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555-04:30", DateTime.ParseExact("1997-07-16T19:20:30.4555555-04:30", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555Z", DateTime.ParseExact("1997-07-16T19:20:30.4555555Z", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555+01:00", DateTime.ParseExact("1997-07-16T19:20:30.4555555+01:00", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555-01:00", DateTime.ParseExact("1997-07-16T19:20:30.4555555-01:00", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555+04:30", DateTime.ParseExact("1997-07-16T19:20:30.4555555+04:30", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTime>("1997-07-16T19:20:30.4555555-04:30", DateTime.ParseExact("1997-07-16T19:20:30.4555555-04:30", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'I', expectedSuccess: true);
 
 				// Invalid strings.
-				yield return new ParserTestData<DateTime>("997-07-16", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTime>("1997-07", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTime>("1997-7-06", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTime>("1997-07-16T", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTime>("1997-07-6", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTime>("1997-07-6T01", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTime>("1997-07-16Z", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTime>("1997-07-16+01:00", default, 'J', expectedSuccess: false);
+				yield return new ParserTestData<DateTime>("997-07-16", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTime>("1997-07", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTime>("1997-7-06", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTime>("1997-07-16T", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTime>("1997-07-6", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTime>("1997-07-6T01", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTime>("1997-07-16Z", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTime>("1997-07-16+01:00", default, 'I', expectedSuccess: false);
 
 				foreach (ParserTestData<DateTime> testData in DateTimeFormatterTestData.ToParserTheoryDataCollection())
                 {
@@ -95,45 +96,46 @@ namespace System.Buffers.Text.Tests
         {
             get
             {
-				// Format J tests for DateTimeOffset parsing.
-				yield return new ParserTestData<DateTimeOffset>("0997-07-16", DateTimeOffset.Parse("0997-07-16"), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16", DateTimeOffset.Parse("1997-07-16"), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20", DateTimeOffset.Parse("1997-07-16T19:20"), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30", DateTimeOffset.Parse("1997-07-16T19:20:30"), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.45", DateTimeOffset.Parse("1997-07-16T19:20:30.45"), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.4555555", DateTimeOffset.Parse("1997-07-16T19:20:30.4555555"), 'J', expectedSuccess: true);
+				// Format I tests for DateTimeOffset parsing.
+				yield return new ParserTestData<DateTimeOffset>("0997-07-16", DateTimeOffset.Parse("0997-07-16"), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16", DateTimeOffset.Parse("1997-07-16"), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20", DateTimeOffset.Parse("1997-07-16T19:20"), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30", DateTimeOffset.Parse("1997-07-16T19:20:30"), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.45", DateTimeOffset.Parse("1997-07-16T19:20:30.45"), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.4555555", DateTimeOffset.Parse("1997-07-16T19:20:30.4555555"), 'I', expectedSuccess: true);
 
 				// Skip test T24:00 till #35830 is fixed.
-				// yield return new ParserTestData<DateTimeOffset>("1997-07-16T24:00", DateTimeOffset.Parse("1997-07-17T00:00"), 'J', expectedSuccess: true);
-				// yield return new ParserTestData<DateTimeOffset>("1997-07-16T24:30", DateTimeOffset.Parse("1997-07-17T00:30"), 'J', expectedSuccess: true);
+				// yield return new ParserTestData<DateTimeOffset>("1997-07-16T24:00", DateTimeOffset.Parse("1997-07-17T00:00"), 'I', expectedSuccess: true);
+				// yield return new ParserTestData<DateTimeOffset>("1997-07-16T24:30", DateTimeOffset.Parse("1997-07-17T00:30"), 'I', expectedSuccess: true);
 
 				// Test junk data appended.
-				// We expect the parse to read only the first 10 characters.
-				yield return new ParserTestData<DateTimeOffset>("0997-07-160997-07-16", DateTimeOffset.Parse("0997-07-16"), 'J', expectedSuccess: true) { ExpectedBytesConsumed = 10 };
-				yield return new ParserTestData<DateTimeOffset>("0997-07-16abc", DateTimeOffset.Parse("0997-07-16"), 'J', expectedSuccess: true) { ExpectedBytesConsumed = 10 };
-				yield return new ParserTestData<DateTimeOffset>("0997-07-16,0997-07-16", DateTimeOffset.Parse("0997-07-16"), 'J', expectedSuccess: true) { ExpectedBytesConsumed = 10 };
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20abc", DateTimeOffset.Parse("1997-07-16T19:20"), 'J', expectedSuccess: true) { ExpectedBytesConsumed = 16 };
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20, 123", DateTimeOffset.Parse("1997-07-16T19:20"), 'J', expectedSuccess: true) { ExpectedBytesConsumed = 16 };
+				// We expect the parser to read only the first 10 characters.
+				yield return new ParserTestData<DateTimeOffset>("0997-07-160997-07-16", DateTimeOffset.Parse("0997-07-16"), 'I', expectedSuccess: true) { ExpectedBytesConsumed = 10 };
+				yield return new ParserTestData<DateTimeOffset>("0997-07-16abc", DateTimeOffset.Parse("0997-07-16"), 'I', expectedSuccess: true) { ExpectedBytesConsumed = 10 };
+				yield return new ParserTestData<DateTimeOffset>("0997-07-16,0997-07-16", DateTimeOffset.Parse("0997-07-16"), 'I', expectedSuccess: true) { ExpectedBytesConsumed = 10 };
+				// We expect the parser to read only the first 16 characters.
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20abc", DateTimeOffset.Parse("1997-07-16T19:20"), 'I', expectedSuccess: true) { ExpectedBytesConsumed = 16 };
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20, 123", DateTimeOffset.Parse("1997-07-16T19:20"), 'I', expectedSuccess: true) { ExpectedBytesConsumed = 16 };
 
 				// Test fraction rounding.
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.45555554", DateTimeOffset.Parse("1997-07-16T19:20:30.45555554"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.45555554", DateTimeOffset.Parse("1997-07-16T19:20:30.45555554"), 'I', expectedSuccess: true);
 				// DateTimeOffset.Parse will round up to 7dp in this case, but we expect parser to truncate.
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.45555555", DateTimeOffset.Parse("1997-07-16T19:20:30.4555555"), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.45555555", DateTimeOffset.Parse("1997-07-16T19:20:30.4555555"), 'I', expectedSuccess: true);
 
 				// Test with timezone designator.
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.4555555Z", DateTimeOffset.ParseExact("1997-07-16T19:20:30.4555555Z", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.4555555+01:00", DateTimeOffset.ParseExact("1997-07-16T19:20:30.4555555+01:00", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.4555555-01:00", DateTimeOffset.ParseExact("1997-07-16T19:20:30.4555555-01:00", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'J', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.4555555Z", DateTimeOffset.ParseExact("1997-07-16T19:20:30.4555555Z", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.4555555+01:00", DateTimeOffset.ParseExact("1997-07-16T19:20:30.4555555+01:00", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'I', expectedSuccess: true);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T19:20:30.4555555-01:00", DateTimeOffset.ParseExact("1997-07-16T19:20:30.4555555-01:00", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind), 'I', expectedSuccess: true);
 
 				// Invalid strings.
-				yield return new ParserTestData<DateTimeOffset>("997-07-16", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTimeOffset>("1997-07", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTimeOffset>("1997-7-06", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16T", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTimeOffset>("1997-07-6", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTimeOffset>("1997-07-6T01", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16Z", default, 'J', expectedSuccess: false);
-				yield return new ParserTestData<DateTimeOffset>("1997-07-16+01:00", default, 'J', expectedSuccess: false);
+				yield return new ParserTestData<DateTimeOffset>("997-07-16", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTimeOffset>("1997-07", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTimeOffset>("1997-7-06", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16T", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-6", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-6T01", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16Z", default, 'I', expectedSuccess: false);
+				yield return new ParserTestData<DateTimeOffset>("1997-07-16+01:00", default, 'I', expectedSuccess: false);
 
 				// Wrong day of week.
 				yield return new ParserTestData<DateTimeOffset>("Thu, 13 Jan 2017 03:45:32 GMT", default, 'R', expectedSuccess: false);
