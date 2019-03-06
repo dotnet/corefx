@@ -106,7 +106,6 @@ namespace System.Buffers.Text.Tests
                 yield return new SupportedFormat('R', supportsPrecision: false);
                 yield return new SupportedFormat('l', supportsPrecision: false);
                 yield return new SupportedFormat('O', supportsPrecision: false);
-                // yield return new SupportedFormat('J', supportsPrecision: false);
             }
         }
 
@@ -120,7 +119,6 @@ namespace System.Buffers.Text.Tests
                 yield return new SupportedFormat('R', supportsPrecision: false);
                 yield return new SupportedFormat('l', supportsPrecision: false);
                 yield return new SupportedFormat('O', supportsPrecision: false);
-                // yield return new SupportedFormat('J', supportsPrecision: false);
             }
         }
 

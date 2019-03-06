@@ -803,58 +803,6 @@ namespace System.Buffers.Text.Tests
         }
 
 		[Benchmark(InnerIterationCount = InnerCount)]
-		[InlineData("1997-07-16")]
-		[InlineData("1997-07-16T19:20")]
-		[InlineData("1997-07-16T19:20:30")]
-		[InlineData("1997-07-16T19:20:30.45")]
-		[InlineData("1997-07-16T19:20+01:00")]
-		[InlineData("1997-07-16T19:20:30+01:00")]
-		[InlineData("1997-07-16T19:20:30.45+01:00")]
-		private static void ByteSpanToDateTimeJ(string text)
-		{
-			byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
-			ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
-
-			foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-			{
-				using (iteration.StartMeasurement())
-				{
-					for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-					{
-						Utf8Parser.TryParse(utf8ByteSpan, out DateTime value, out int bytesConsumed, 'J');
-						TestHelpers.DoNotIgnore(value, bytesConsumed);
-					}
-				}
-			}
-		}
-
-		[Benchmark(InnerIterationCount = InnerCount)]
-		[InlineData("1997-07-16")]
-		[InlineData("1997-07-16T19:20")]
-		[InlineData("1997-07-16T19:20:30")]
-		[InlineData("1997-07-16T19:20:30.45")]
-		[InlineData("1997-07-16T19:20+01:00")]
-		[InlineData("1997-07-16T19:20:30+01:00")]
-		[InlineData("1997-07-16T19:20:30.45+01:00")]
-		private static void ByteSpanToDateTimeOffsetJ(string text)
-		{
-			byte[] utf8ByteArray = Encoding.UTF8.GetBytes(text);
-			ReadOnlySpan<byte> utf8ByteSpan = utf8ByteArray;
-
-			foreach (BenchmarkIteration iteration in Benchmark.Iterations)
-			{
-				using (iteration.StartMeasurement())
-				{
-					for (int i = 0; i < Benchmark.InnerIterationCount; i++)
-					{
-						Utf8Parser.TryParse(utf8ByteSpan, out DateTimeOffset value, out int bytesConsumed, 'J');
-						TestHelpers.DoNotIgnore(value, bytesConsumed);
-					}
-				}
-			}
-		}
-
-		[Benchmark(InnerIterationCount = InnerCount)]
         [InlineData("Fri, 30 Jun 2000 03:15:45 GMT")] // standard parse
         private static void StringToTimeOffsetR_Baseline(string text)
         {
