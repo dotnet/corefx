@@ -13,8 +13,8 @@
     <GeneratePlatformNotSupportedAssemblyMessage>SR.PlatformNotSupported_CryptographyCng</GeneratePlatformNotSupportedAssemblyMessage>
     <AssemblyVersion Condition="'$(TargetGroup)' == 'netstandard'">4.3.0.0</AssemblyVersion>
   </PropertyGroup>
-  <Import Project="$(CommonPath)\System\Security\Cryptography\Asn1\AsnXml.targets"/>
-  <Import Project="$(CommonPath)\System\Security\Cryptography\System.Security.Cryptography.Asn1.Shared.projitems" />
+  <Import Project="$(CommonPath)\System\Security\Cryptography\Asn1\AsnXml.targets" Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(TargetsWindows)' == 'true'" />
+  <Import Project="$(CommonPath)\System\Security\Cryptography\System.Security.Cryptography.Asn1.Shared.projitems" Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(TargetsWindows)' == 'true'" />
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true' AND '$(TargetsWindows)' == 'true'">
     <Compile Include="System\Security\Cryptography\AesCng.cs" />
     <Compile Include="System\Security\Cryptography\CngAlgorithm.cs" />
