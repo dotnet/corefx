@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1770,28 +1771,25 @@ namespace System.Text.Json.Tests
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
         }
 
-        struct SingleCommentVerifyInfo
-        {
-            public bool startObjectFound;
-            public bool endObjectFound;
-            public bool commentFound;
-        }
-
-        private static void VerifyReadLoop(ref Utf8JsonReader json, string expected, ref SingleCommentVerifyInfo verifyInfo)
+        private static void VerifyReadLoop(ref Utf8JsonReader json, string expected)
         {
             while (json.Read())
             {
                 switch (json.TokenType)
                 {
                     case JsonTokenType.StartObject:
-                        verifyInfo.startObjectFound = true;
-                        break;
                     case JsonTokenType.EndObject:
-                        verifyInfo.endObjectFound = true;
                         break;
                     case JsonTokenType.Comment:
-                        expected?.Equals(Encoding.UTF8.GetString(json.ValueSpan));
-                        verifyInfo.commentFound = true;
+                        if (expected != null)
+                        {
+                            byte[] data = json.HasValueSequence ? json.ValueSequence.ToArray() : json.ValueSpan.ToArray();
+                            Assert.Equal(expected, Encoding.UTF8.GetString(data));
+                        }
+                        else
+                        {
+                            Assert.True(false);
+                        }
                         break;
                     default:
                         Assert.True(false);
@@ -1809,22 +1807,12 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < jsonData.Length; i++)
             {
-                var verifyInfo = new SingleCommentVerifyInfo
-                {
-                    startObjectFound = false,
-                    endObjectFound = false,
-                    commentFound = false
-                };
                 var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
                 var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
-                VerifyReadLoop(ref json, expected, ref verifyInfo);
+                VerifyReadLoop(ref json, expected);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)state.BytesConsumed), isFinalBlock: true, state);
-                VerifyReadLoop(ref json, expected, ref verifyInfo);
-
-                Assert.True(verifyInfo.startObjectFound);
-                Assert.True(verifyInfo.endObjectFound);
-                Assert.True(verifyInfo.commentFound);
+                VerifyReadLoop(ref json, expected);
             }
         }
 
@@ -1837,22 +1825,12 @@ namespace System.Text.Json.Tests
 
             for (int i = 0; i < jsonData.Length; i++)
             {
-                var verifyInfo = new SingleCommentVerifyInfo
-                {
-                    startObjectFound = false,
-                    endObjectFound = false,
-                    commentFound = false
-                };
                 var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
                 var json = new Utf8JsonReader(dataUtf8.AsSpan(0, i), isFinalBlock: false, state);
-                VerifyReadLoop(ref json, null, ref verifyInfo);
+                VerifyReadLoop(ref json, null);
 
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)state.BytesConsumed), isFinalBlock: true, state);
-                VerifyReadLoop(ref json, null, ref verifyInfo);
-
-                Assert.True(verifyInfo.startObjectFound);
-                Assert.True(verifyInfo.endObjectFound);
-                Assert.False(verifyInfo.commentFound);
+                VerifyReadLoop(ref json, null);
             }
         }
 
