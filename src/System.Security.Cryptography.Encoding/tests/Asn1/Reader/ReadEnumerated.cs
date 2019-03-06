@@ -279,7 +279,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.CER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.DER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.BER, "2A030A0100")]
-        public static void GetEnumeratedValue_Invalid_Byte(PublicEncodingRules ruleSet, string inputHex)
+        public static void ReadEnumeratedValue_Invalid_Byte(PublicEncodingRules ruleSet, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
@@ -331,7 +331,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.CER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.DER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.BER, "2A030A0100")]
-        public static void GetEnumeratedValue_Invalid_SByte(PublicEncodingRules ruleSet, string inputHex)
+        public static void ReadEnumeratedValue_Invalid_SByte(PublicEncodingRules ruleSet, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
@@ -380,7 +380,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.CER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.DER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.BER, "2A030A0100")]
-        public static void GetEnumeratedValue_Invalid_Short(PublicEncodingRules ruleSet, string inputHex)
+        public static void ReadEnumeratedValue_Invalid_Short(PublicEncodingRules ruleSet, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
@@ -432,7 +432,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.CER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.DER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.BER, "2A030A0100")]
-        public static void GetEnumeratedValue_Invalid_UShort(PublicEncodingRules ruleSet, string inputHex)
+        public static void ReadEnumeratedValue_Invalid_UShort(PublicEncodingRules ruleSet, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
@@ -476,7 +476,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.CER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.DER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.BER, "2A030A0100")]
-        public static void GetEnumeratedValue_Invalid_Int(PublicEncodingRules ruleSet, string inputHex)
+        public static void ReadEnumeratedValue_Invalid_Int(PublicEncodingRules ruleSet, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
@@ -519,7 +519,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.CER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.DER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.BER, "2A030A0100")]
-        public static void GetEnumeratedValue_Invalid_UInt(PublicEncodingRules ruleSet, string inputHex)
+        public static void ReadEnumeratedValue_Invalid_UInt(PublicEncodingRules ruleSet, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
@@ -556,7 +556,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.CER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.DER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.BER, "2A030A0100")]
-        public static void GetEnumeratedValue_Invalid_Long(PublicEncodingRules ruleSet, string inputHex)
+        public static void ReadEnumeratedValue_Invalid_Long(PublicEncodingRules ruleSet, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
@@ -593,7 +593,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.CER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.DER, "0A09010203040506070809")]
         [InlineData(PublicEncodingRules.BER, "2A030A0100")]
-        public static void GetEnumeratedValue_Invalid_ULong(PublicEncodingRules ruleSet, string inputHex)
+        public static void ReadEnumeratedValue_Invalid_ULong(PublicEncodingRules ruleSet, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
@@ -605,7 +605,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER)]
         [InlineData(PublicEncodingRules.CER)]
         [InlineData(PublicEncodingRules.DER)]
-        public static void GetEnumeratedValue_NonEnumType(PublicEncodingRules ruleSet)
+        public static void ReadEnumeratedValue_NonEnumType(PublicEncodingRules ruleSet)
         {
             byte[] data = { 0x0A, 0x01, 0x00 };
             AsnReader reader = new AsnReader(data, (AsnEncodingRules)ruleSet);
@@ -617,7 +617,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER)]
         [InlineData(PublicEncodingRules.CER)]
         [InlineData(PublicEncodingRules.DER)]
-        public static void GetEnumeratedValue_FlagsEnum(PublicEncodingRules ruleSet)
+        public static void ReadEnumeratedValue_FlagsEnum(PublicEncodingRules ruleSet)
         {
             byte[] data = { 0x0A, 0x01, 0x00 };
             AsnReader reader = new AsnReader(data, (AsnEncodingRules)ruleSet);
@@ -631,7 +631,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER)]
         [InlineData(PublicEncodingRules.CER)]
         [InlineData(PublicEncodingRules.DER)]
-        public static void GetEnumeratedBytes(PublicEncodingRules ruleSet)
+        public static void ReadEnumeratedBytes(PublicEncodingRules ruleSet)
         {
             const string Payload = "0102030405060708090A0B0C0D0E0F10";
 
@@ -666,7 +666,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         [InlineData(PublicEncodingRules.BER, "0A81")]
         [InlineData(PublicEncodingRules.CER, "0A81")]
         [InlineData(PublicEncodingRules.DER, "0A81")]
-        public static void GetEnumeratedBytes_Throws(PublicEncodingRules ruleSet, string inputHex)
+        public static void ReadEnumeratedBytes_Throws(PublicEncodingRules ruleSet, string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);

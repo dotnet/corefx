@@ -403,7 +403,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         }
 
         [Fact]
-        public static void GetIntegerBytes()
+        public static void ReadIntegerBytes()
         {
             const string Payload = "0102030405060708090A0B0C0D0E0F10";
 

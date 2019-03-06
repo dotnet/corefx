@@ -30,7 +30,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 certReader.TryReadPrimitiveBitStringValue(
                     out int unusedBitCount,
                     out ReadOnlyMemory<byte> signature),
-                "certReader.TryGetBitStringBytes");
+                "certReader.TryReadPrimitiveBitStringValue");
 
             Assert.Equal(0, unusedBitCount);
             AssertRefSame(signature, ref bytes[1176], "Signature is a ref to bytes[1176]");
@@ -90,7 +90,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 subjectPublicKeyInfo.TryReadPrimitiveBitStringValue(
                     out unusedBitCount,
                     out ReadOnlyMemory<byte> encodedPublicKey),
-                "subjectPublicKeyInfo.TryGetBitStringBytes");
+                "subjectPublicKeyInfo.TryReadBitStringBytes");
 
             Assert.Equal(0, unusedBitCount);
             AssertRefSame(encodedPublicKey, ref bytes[498], "Encoded public key starts at byte 498");

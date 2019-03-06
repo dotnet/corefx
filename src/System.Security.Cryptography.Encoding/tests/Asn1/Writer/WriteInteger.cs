@@ -425,8 +425,10 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteInteger(BigInteger.One));
 
+#if NETCOREAPP
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteInteger(BigInteger.One.ToByteArray(isBigEndian: true)));
+#endif
 
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteInteger(Array.Empty<byte>()));
@@ -449,9 +451,11 @@ namespace System.Security.Cryptography.Tests.Asn1
                     "tag",
                     () => writer.WriteInteger(Asn1Tag.Boolean, BigInteger.One));
 
+#if NETCOREAPP
                 Assert.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteInteger(Asn1Tag.Boolean, BigInteger.One.ToByteArray(isBigEndian: true)));
+#endif
 
                 Assert.Throws<ArgumentException>(
                     "tag",
@@ -476,8 +480,10 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteInteger(tag, BigInteger.One));
 
+#if NETCOREAPP
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteInteger(tag, BigInteger.One.ToByteArray(isBigEndian: true)));
+#endif
 
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteInteger(tag, Array.Empty<byte>()));

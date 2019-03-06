@@ -506,6 +506,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
                 writer.Dispose();
 
+#if NETCOREAPP
                 string input = "1";
 
                 Assert.Throws<ObjectDisposedException>(
@@ -517,6 +518,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
                 Assert.Throws<ObjectDisposedException>(
                     () => WriteSpan(writer, new Asn1Tag(TagClass.Application, 0), input));
+#endif
             }
         }
 

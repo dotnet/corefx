@@ -31,7 +31,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 out int unusedBitCount,
                 out ReadOnlyMemory<byte> contents);
 
-            Assert.False(didRead, "reader.TryGetBitStringBytes");
+            Assert.False(didRead, "reader.TryReadBitStringBytes");
             Assert.Equal(0, unusedBitCount);
             Assert.Equal(0, contents.Length);
         }
@@ -55,7 +55,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 out int unusedBitCount,
                 out ReadOnlyMemory<byte> contents);
 
-            Assert.True(didRead, "reader.TryGetBitStringBytes");
+            Assert.True(didRead, "reader.TryReadBitStringBytes");
             Assert.Equal(expectedUnusedBitCount, unusedBitCount);
             Assert.Equal(expectedLength, contents.Length);
         }
@@ -143,7 +143,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 out int unusedBitCount,
                 out ReadOnlyMemory<byte> contents);
 
-            Assert.True(success, "reader.TryGetBitStringBytes");
+            Assert.True(success, "reader.TryReadBitStringBytes");
             Assert.Equal(input[4], unusedBitCount);
             Assert.Equal(999, contents.Length);
 

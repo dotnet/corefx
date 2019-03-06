@@ -53,7 +53,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             bool parsed = Asn1Tag.TryDecode(inputBytes, out Asn1Tag tag, out int bytesRead);
 
-            Assert.True(parsed, "Asn1Tag.TryParse");
+            Assert.True(parsed, "Asn1Tag.TryDecode");
             Assert.Equal(inputBytes.Length, bytesRead);
             Assert.Equal((TagClass)tagClass, tag.TagClass);
             Assert.Equal(tagValue, tag.TagValue);
@@ -142,7 +142,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             bool parsed = Asn1Tag.TryDecode(inputBytes, out Asn1Tag tag, out int bytesRead);
 
-            Assert.True(parsed, "Asn1Tag.TryParse");
+            Assert.True(parsed, "Asn1Tag.TryDecode");
             Assert.Equal(inputHex.Length / 2, bytesRead);
             Assert.Equal((TagClass)tagClass, tag.TagClass);
             Assert.Equal(tagValue, tag.TagValue);
