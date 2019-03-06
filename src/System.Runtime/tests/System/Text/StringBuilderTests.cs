@@ -930,7 +930,7 @@ namespace System.Text.Tests
 
             builder.AppendFormat(formatter, "{0:}}}", 5);
             // Previously escaped brace would be passed in as the format specifier, now first brace closes the argument hole
-            Assert.False(formatter.LastFormat != null && formatter.LastFormat.Contains('}'));
+            Assert.False(formatter.LastFormat != null && formatter.LastFormat.Contains("}"));
             // Previously this would be allowed and escaped brace would be passed in, now brace is not allowed in custom format
             Assert.Throws<FormatException>(() => builder.AppendFormat("{0:{{}", new string[10])); // Format with custom format contains {
         }
