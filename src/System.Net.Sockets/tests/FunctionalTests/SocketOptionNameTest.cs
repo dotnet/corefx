@@ -87,11 +87,6 @@ namespace System.Net.Sockets.Tests
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: dotnet/corefx #29929
         public async Task MulticastInterface_Set_AnyInterface_Succeeds()
         {
-            if (PlatformDetection.IsRedHatFamily6)
-            {
-                return; // [ActiveIssue(34809)]
-            }
-
             // On all platforms, index 0 means "any interface"
             await MulticastInterface_Set_Helper(0);
         }
@@ -157,12 +152,12 @@ namespace System.Net.Sockets.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: dotnet/corefx #29929
+        [PlatformSpecific(~TestPlatforms.OSX)]
         public async Task MulticastInterface_Set_IPv6_AnyInterface_Succeeds()
         {
-            if (PlatformDetection.IsRedHatFamily7 || PlatformDetection.IsOSX)
+            if (PlatformDetection.IsRedHatFamily7)
             {
                 // RH7 seems to have issues with multicast in Azure. Same code and setup can pass when executed outside of Azure.
-                // OSX lacks multicast routes. Probably not worth of fixing test to add them. Send fails with "no route" message.
                 throw new SkipTestException("IPv6 multicast environment not available");
             }
 
