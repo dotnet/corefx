@@ -438,7 +438,7 @@ namespace System.Security.Cryptography.Pkcs
                 ConfidentialityMode == Pkcs12ConfidentialityMode.PublicKey)
             {
                 writer = new AsnWriter(AsnEncodingRules.BER);
-                writer.WriteEncodedValue(_encrypted);
+                writer.WriteEncodedValue(_encrypted.Span);
                 return writer;
             }
 

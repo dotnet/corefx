@@ -93,7 +93,7 @@ namespace System.Security.Cryptography.Pkcs
 
             Asn1Tag contextSpecific0 = new Asn1Tag(TagClass.ContextSpecific, 0);
             writer.PushSequence(contextSpecific0);
-            writer.WriteEncodedValue(EncodedBagValue);
+            writer.WriteEncodedValue(EncodedBagValue.Span);
             writer.PopSequence(contextSpecific0);
 
             if (_attributes?.Count > 0)
