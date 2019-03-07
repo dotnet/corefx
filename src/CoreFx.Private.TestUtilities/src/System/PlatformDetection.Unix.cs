@@ -51,6 +51,8 @@ namespace System
         public static bool IsRedHatFamily7 => IsRedHatFamilyAndVersion(7);
         public static bool IsNotFedoraOrRedHatFamily => !IsFedora && !IsRedHatFamily;
 
+        public static bool SupportsSsl3 => (PlatformDetection.IsOSX || (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && PlatformDetection.OpenSslVersion < new Version(1, 0, 2) && !PlatformDetection.IsDebian));
+
         public static Version OSXVersion { get; } = ToVersion(Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion);
 
         public static Version OpenSslVersion => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? Interop.OpenSsl.OpenSslVersion : throw new PlatformNotSupportedException();
