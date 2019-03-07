@@ -484,7 +484,8 @@ namespace System.Security.Cryptography
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(decrypted.Array, clearArray: true);
+                CryptographicOperations.ZeroMemory(decrypted);
+                ArrayPool<byte>.Shared.Return(decrypted.Array);
             }
         }
 
@@ -522,7 +523,8 @@ namespace System.Security.Cryptography
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(decrypted.Array, clearArray: true);
+                CryptographicOperations.ZeroMemory(decrypted);
+                ArrayPool<byte>.Shared.Return(decrypted.Array);
             }
         }
     }
