@@ -892,8 +892,7 @@ namespace System.Text.Tests
 
             Assert.Throws<FormatException>(() => builder.AppendFormat("}", "")); // Format has unescaped }
             Assert.Throws<FormatException>(() => builder.AppendFormat("}a", "")); // Format has unescaped }
-
-            Assert.Throws<FormatException>(() => builder.AppendFormat("{0:}}", new string[10])); // Format has unescaped }
+            Assert.Throws<FormatException>(() => builder.AppendFormat("{0:}}", "")); // Format has unescaped }
 
             Assert.Throws<FormatException>(() => builder.AppendFormat("{\0", "")); // Format has invalid character after {
             Assert.Throws<FormatException>(() => builder.AppendFormat("{a", "")); // Format has invalid character after {
