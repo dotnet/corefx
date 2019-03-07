@@ -143,5 +143,28 @@ namespace System.ComponentModel.Tests
 
             Assert.True(propertyDescriptor.ShouldSerializeValue(component));
         }
+
+        [Fact]
+        public static void ReadOnlyPropertyReturnsTrue()
+        {
+            var foo = new ReadOnlyPropertyTestClass();
+            PropertyDescriptor property = TypeDescriptor.GetProperties(foo).Find("BarReadOnly", true);
+            Assert.True(property.IsReadOnly);
+        }
+
+        [Fact]
+        public static void ReadOnlyPropertyReturnsFalse()
+        {
+            var foo = new ReadOnlyPropertyTestClass();
+            PropertyDescriptor property = TypeDescriptor.GetProperties(foo).Find("BarNotReadOnly", true);
+            Assert.False(property.IsReadOnly);
+        }
+
+
+        class ReadOnlyPropertyTestClass
+        {
+            public bool BarReadOnly { get; private set; }
+            public bool BarNotReadOnly { get; set; }
+        }
     }
 }
