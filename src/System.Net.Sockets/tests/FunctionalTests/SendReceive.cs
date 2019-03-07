@@ -43,7 +43,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [ActiveIssue(16945)] // Packet loss, potentially due to other tests running at the same time
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(Loopbacks))]
@@ -69,6 +68,8 @@ namespace System.Net.Sockets.Tests
             var receiverAck = new SemaphoreSlim(0);
             var senderAck = new SemaphoreSlim(0);
 
+            _output.WriteLine($"{DateTime.Now}: Sending data from {rightEndpoint} to {leftEndpoint}");
+
             var receivedChecksums = new uint?[DatagramsToSend];
             Task leftThread = Task.Run(async () =>
             {
@@ -88,7 +89,13 @@ namespace System.Net.Sockets.Tests
                         receivedChecksums[datagramId] = Fletcher32.Checksum(recvBuffer, 0, result.ReceivedBytes);
 
                         receiverAck.Release();
-                        Assert.True(await senderAck.WaitAsync(TestTimeout));
+                        bool gotAck = await senderAck.WaitAsync(TestTimeout);
+                        if (!gotAck)
+                        {
+                            _output.WriteLine($"{DateTime.Now}: Timeout waiting {TestTimeout} for senderAck in iteration {i}");
+                        }
+
+                        Assert.True(gotAck);
                     }
                 }
             });
@@ -105,7 +112,12 @@ namespace System.Net.Sockets.Tests
 
                     int sent = await SendToAsync(right, new ArraySegment<byte>(sendBuffer), leftEndpoint);
 
-                    Assert.True(await receiverAck.WaitAsync(AckTimeout));
+                    bool gotAck = await receiverAck.WaitAsync(AckTimeout);
+                    if (!gotAck)
+                    {
+                        _output.WriteLine($"{DateTime.Now}: Timeout waiting {AckTimeout} for receiverAck in iteration {i}. Receiver is in {leftThread.Status}");
+                    }
+                    Assert.True(gotAck);
                     senderAck.Release();
 
                     Assert.Equal(DatagramSize, sent);
