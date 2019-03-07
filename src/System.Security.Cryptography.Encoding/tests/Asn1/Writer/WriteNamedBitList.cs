@@ -150,11 +150,11 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                Assert.Throws<ArgumentNullException>(
+                AssertExtensions.Throws<ArgumentNullException>(
                     "enumValue",
                     () => writer.WriteNamedBitList(null));
 
-                Assert.Throws<ArgumentNullException>(
+                AssertExtensions.Throws<ArgumentNullException>(
                     "enumValue",
                     () => writer.WriteNamedBitList(new Asn1Tag(TagClass.ContextSpecific, 1), null));
             }

@@ -112,7 +112,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteUtcTime(Asn1Tag.EndOfContents, DateTimeOffset.Now));
             }
@@ -142,7 +142,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             {
                 Assert.Equal(0, writer.GetEncodedLength());
 
-                Assert.Throws<ArgumentOutOfRangeException>(
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     "value",
                     () => writer.WriteUtcTime(input, input.Year - 1));
 
@@ -156,7 +156,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
                 writer.Reset();
 
-                Assert.Throws<ArgumentOutOfRangeException>(
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     "value",
                     () => writer.WriteUtcTime(input, input.Year + 100));
 
@@ -180,7 +180,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Equal(15, writer.GetEncodedLength());
 
                 // 1949 after ToUniversal
-                Assert.Throws<ArgumentOutOfRangeException>(
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     "value",
                     () =>
                         writer.WriteUtcTime(
@@ -191,7 +191,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Equal(15, writer.GetEncodedLength());
 
                 // 2050 after ToUniversal
-                Assert.Throws<ArgumentOutOfRangeException>(
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     "value",
                     () =>
                         writer.WriteUtcTime(
@@ -234,23 +234,23 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteUtcTime(DateTimeOffset.Now));
 
-                Assert.Throws<ArgumentOutOfRangeException>(
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     "value",
                     () => writer.WriteUtcTime(DateTimeOffset.Now, 1999));
 
-                Assert.Throws<ArgumentOutOfRangeException>(
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     "value",
                     () => writer.WriteUtcTime(DateTimeOffset.Now, 8999));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteUtcTime(Asn1Tag.Integer, DateTimeOffset.Now));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteUtcTime(Asn1Tag.Integer, DateTimeOffset.Now, 1999));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteUtcTime(Asn1Tag.Integer, DateTimeOffset.Now, 8999));
 
@@ -259,11 +259,11 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteUtcTime(tag, DateTimeOffset.Now));
 
-                Assert.Throws<ArgumentOutOfRangeException>(
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     "value",
                     () => writer.WriteUtcTime(tag, DateTimeOffset.Now, 1999));
 
-                Assert.Throws<ArgumentOutOfRangeException>(
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     "value",
                     () => writer.WriteUtcTime(tag, DateTimeOffset.Now, 8999));
             }

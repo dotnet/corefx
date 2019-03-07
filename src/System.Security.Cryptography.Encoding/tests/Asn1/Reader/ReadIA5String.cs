@@ -585,7 +585,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x16, 2, (byte)'e', (byte)'l' };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.TryGetIA5StringBytes(Asn1Tag.Null, out _));
 
@@ -610,7 +610,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x87, 2, (byte)'h', (byte)'i' };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.TryGetIA5StringBytes(Asn1Tag.Null, out _));
 
