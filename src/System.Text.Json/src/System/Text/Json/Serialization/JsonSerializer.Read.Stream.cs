@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,7 +61,13 @@ namespace System.Text.Json.Serialization
                     bool isFinalBlock = false;
                     while (true)
                     {
-                        int bytesRead = await utf8Json.ReadAsync(buffer.AsMemory(bytesInBuffer), cancellationToken).ConfigureAwait(false);
+                        int bytesRead = await utf8Json.ReadAsync(
+#if BUILDING_INBOX_LIBRARY
+                            buffer.AsMemory(bytesInBuffer),
+#else
+                            buffer, bytesInBuffer, buffer.Length - bytesInBuffer,
+#endif
+                            cancellationToken).ConfigureAwait(false);
 
                         if (bytesRead == 0)
                         {
@@ -71,15 +78,15 @@ namespace System.Text.Json.Serialization
                         totalBytesRead += bytesRead;
                         bytesInBuffer += bytesRead;
 
-                        if (bytesInBuffer > clearMax)
-                        {
-                            clearMax = bytesRead;
-                        }
-
                         if (bytesInBuffer == buffer.Length)
                         {
                             break;
                         }
+                    }
+
+                    if (bytesInBuffer > clearMax)
+                    {
+                        clearMax = bytesInBuffer;
                     }
 
                     // Process the data available
@@ -90,6 +97,7 @@ namespace System.Text.Json.Serialization
                         options,
                         ref state);
 
+                    Debug.Assert(readerState.BytesConsumed <= bytesInBuffer);
                     int bytesConsumed = (int)readerState.BytesConsumed;
                     bytesInBuffer -= bytesConsumed;
 
