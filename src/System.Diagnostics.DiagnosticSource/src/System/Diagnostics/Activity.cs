@@ -457,11 +457,7 @@ namespace System.Diagnostics
         /// which will have the effect of updating Activity's instance so all subsequent uses
         /// share the same converted string.  
         /// </summary>
-        public ref
-#if !NETSTANDARD1_3 // Could not get this to build with ref readonly returns. 
-        readonly
-#endif
-            ActivitySpanId SpanId
+        public ref readonly ActivitySpanId SpanId
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
             [System.Security.SecuritySafeCriticalAttribute]
@@ -491,11 +487,7 @@ namespace System.Diagnostics
         /// which will have the effect of updating Activity's instance so all subsequent uses
         /// share the same converted string.  
         /// </summary>
-        public ref
-#if !NETSTANDARD1_3 // Could not get this to build with ref readonly returns. 
-        readonly
-#endif
-             ActivityTraceId TraceId
+        public ref readonly ActivityTraceId TraceId
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
             [System.Security.SecuritySafeCriticalAttribute]
@@ -518,11 +510,7 @@ namespace System.Diagnostics
         /// If the parent Activity ID has the W3C format, this returns the ID for the SpanId part of the ParentId.  
         /// Otherwise it returns a zero SpanId. 
         /// </summary>
-        public ref
-#if !NETSTANDARD1_3 // Could not get this to build with ref readonly returns. 
-        readonly
-#endif
-             ActivitySpanId ParentSpanId
+        public ref readonly ActivitySpanId ParentSpanId
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
             [System.Security.SecuritySafeCriticalAttribute]
