@@ -39,6 +39,7 @@ namespace System
     public static partial class PlatformDetection
     {
         public static bool IsReflectionEmitSupported;
+        public static bool SupportsSsl3 { get { throw null; } }
         public static bool ClientWebSocketPartialMessagesSupported { get { throw null; } }
         public static bool HasWindowsShell { get { throw null; } }
         public static bool IsArmProcess { get { throw null; } }
@@ -90,6 +91,7 @@ namespace System
         public static bool IsUbuntu1710 { get { throw null; } }
         public static bool IsUbuntu1710OrHigher { get { throw null; } }
         public static bool IsUbuntu1804 { get { throw null; } }
+        public static bool IsUbuntu1810OrHigher { get { throw null; } }
         public static bool IsWindows { get { throw null; } }
         public static bool IsWindows10Version1607OrGreater { get { throw null; } } // >= Windows 10 Anniversary Update
         public static bool IsWindows10Version1703OrGreater { get { throw null; } } // >= Windows 10 Creators Update
