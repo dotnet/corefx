@@ -1093,7 +1093,7 @@ namespace System.Diagnostics.Tests
                 StringBuilder builder = new StringBuilder();
                 foreach (Process process in Process.GetProcesses())
                 {
-                    builder.AppendFormat("Pid: {0} Name: {1}'", process.Id, process.ProcessName);
+                    builder.AppendFormat("Pid: '{0}' Name: '{1}'", process.Id, process.ProcessName);
                     try
                     {
                         builder.AppendFormat(" Main module: '{0}'", process.MainModule.FileName);
