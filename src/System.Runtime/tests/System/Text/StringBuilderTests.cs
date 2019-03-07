@@ -916,8 +916,8 @@ namespace System.Text.Tests
             Assert.Throws<FormatException>(() => builder.AppendFormat("{0:", new string[10])); // Format with colon is not closed
             Assert.Throws<FormatException>(() => builder.AppendFormat("{0:    ", new string[10])); // Format with colon and spaces is not closed
 
-            Assert.Throws<FormatException>(() => builder.AppendFormat("{0:{", new string[10])); // Format with custom format contains {
-            Assert.Throws<FormatException>(() => builder.AppendFormat("{0:{}", new string[10])); // Format with custom format contains {
+            Assert.Throws<FormatException>(() => builder.AppendFormat("{0:{", new string[10])); // Format with custom format contains unescaped {
+            Assert.Throws<FormatException>(() => builder.AppendFormat("{0:{}", new string[10])); // Format with custom format contains unescaped {
         }
 
         [Fact]
@@ -925,14 +925,14 @@ namespace System.Text.Tests
         public static void AppendFormat_NoEscapedBracesInCustomFormatSpecifier()
         {
             // Tests new rule which does not allow escaped braces in the custom format specifier
-            var builder = new StringBuilder("Hello");
-            var formatter = new CustomFormatter();
+            var builder = new StringBuilder();
+            builder.AppendFormat("{0:}}}", 0);
 
-            builder.AppendFormat(formatter, "{0:}}}", 5);
-            // Previously escaped brace would be passed in as the format specifier, now first brace closes the argument hole
-            Assert.False(formatter.LastFormat != null && formatter.LastFormat.Contains("}"));
-            // Previously this would be allowed and escaped brace would be passed in, now brace is not allowed in custom format
-            Assert.Throws<FormatException>(() => builder.AppendFormat("{0:{{}", new string[10])); // Format with custom format contains {
+            // Previous behavior: first two closing braces would be escaped and passed in as the custom format specifier, thus result = "}"
+            // New behavior: first closing brace closes the argument hole and next two are escaped as part of the format, thus result = "0}"
+            Assert.Equal("0}", builder.ToString());
+            // Previously this would be allowed and escaped brace would be passed into the custom format, now this is unsupported
+            Assert.Throws<FormatException>(() => builder.AppendFormat("{0:{{}", 0)); // Format with custom format contains {
         }
 
         [Fact]
@@ -1845,13 +1845,7 @@ namespace System.Text.Tests
 
         public class CustomFormatter : ICustomFormatter, IFormatProvider
         {
-            public string LastFormat { get; private set; }
-            public string Format(string format, object arg, IFormatProvider formatProvider)
-            {
-                LastFormat = format;
-                return "abc";
-            }
-
+            public string Format(string format, object arg, IFormatProvider formatProvider) => "abc";
             public object GetFormat(Type formatType) => this;
         }
     }
