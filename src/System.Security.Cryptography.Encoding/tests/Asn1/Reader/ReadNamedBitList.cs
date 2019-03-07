@@ -163,7 +163,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex = "030100";
             AsnReader reader = new AsnReader(inputHex.HexToByteArray(), (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "tFlagsEnum",
                 () => reader.ReadNamedBitListValue<AsnEncodingRules>());
 
@@ -225,7 +225,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 3, 2, 1, 2 };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadNamedBitListValue<X509KeyUsageCSharpStyle>(Asn1Tag.Null));
 
@@ -251,7 +251,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x87, 2, 2, 4 };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadNamedBitListValue<X509KeyUsageCSharpStyle>(Asn1Tag.Null));
 

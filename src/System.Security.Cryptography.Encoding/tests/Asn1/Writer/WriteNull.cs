@@ -31,7 +31,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteNull(Asn1Tag.EndOfContents));
             }
@@ -69,7 +69,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteNull());
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteNull(Asn1Tag.Integer));
 

@@ -152,11 +152,11 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteOctetString(Asn1Tag.EndOfContents, ReadOnlySpan<byte>.Empty));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteOctetString(Asn1Tag.EndOfContents, new byte[1]));
             }
@@ -179,7 +179,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteOctetString(ReadOnlySpan<byte>.Empty));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteOctetString(Asn1Tag.Integer, ReadOnlySpan<byte>.Empty));
 

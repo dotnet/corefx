@@ -234,7 +234,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteGeneralizedTime(Asn1Tag.EndOfContents, DateTimeOffset.Now, omitFractionalSeconds));
             }
@@ -276,11 +276,11 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteGeneralizedTime(DateTimeOffset.UtcNow, true));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteGeneralizedTime(Asn1Tag.Integer, DateTimeOffset.Now));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteGeneralizedTime(Asn1Tag.Integer, DateTimeOffset.Now, true));
 

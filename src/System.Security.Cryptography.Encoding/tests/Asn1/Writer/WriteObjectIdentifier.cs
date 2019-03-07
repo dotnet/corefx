@@ -68,7 +68,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             {
                 if (nonOidValue == null)
                 {
-                    Assert.Throws<ArgumentNullException>(
+                    AssertExtensions.Throws<ArgumentNullException>(
                         "oidValue",
                         () => writer.WriteObjectIdentifier(nonOidValue));
                 }
@@ -161,7 +161,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
             {
-                Assert.Throws<ArgumentNullException>(
+                AssertExtensions.Throws<ArgumentNullException>(
                     "oidValue",
                     () =>
                     {
@@ -184,7 +184,7 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.BER))
             {
-                Assert.Throws<ArgumentNullException>(
+                AssertExtensions.Throws<ArgumentNullException>(
                     "oid",
                     () =>
                     {
@@ -209,15 +209,15 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.EndOfContents, "1.1"));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.EndOfContents, "1.1".AsSpan()));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.EndOfContents, new Oid("1.1", "1.1")));
             }
@@ -275,7 +275,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteObjectIdentifier("4.0"));
 
-                Assert.Throws<ArgumentNullException>(
+                AssertExtensions.Throws<ArgumentNullException>(
                     "oidValue",
                     () => writer.WriteObjectIdentifier((string)null));
 
@@ -312,83 +312,83 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteObjectIdentifier(new Oid(null, "null")));
 
-                Assert.Throws<ArgumentNullException>(
+                AssertExtensions.Throws<ArgumentNullException>(
                     "oid",
                     () => writer.WriteObjectIdentifier((Oid)null));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteBoolean(Asn1Tag.Integer, false));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, "0.0"));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, "0"));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, "0.0q"));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, "123"));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, "4.0"));
 
-                Assert.Throws<ArgumentNullException>(
+                AssertExtensions.Throws<ArgumentNullException>(
                     "oidValue",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, (string)null));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, "0.0".AsSpan()));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, "0".AsSpan()));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, "0.0q".AsSpan()));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, "123".AsSpan()));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, "4.0".AsSpan()));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, new Oid("0.0", "valid")));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, new Oid("0", "short")));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, new Oid("0.0q", "invalid")));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, new Oid("123", "invalid")));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, new Oid("4.0", "invalid")));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, new Oid(null, "null")));
 
-                Assert.Throws<ArgumentNullException>(
+                AssertExtensions.Throws<ArgumentNullException>(
                     "oid",
                     () => writer.WriteObjectIdentifier(Asn1Tag.Integer, (Oid)null));
 
@@ -409,7 +409,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteObjectIdentifier(tag, "4.0"));
 
-                Assert.Throws<ArgumentNullException>(
+                AssertExtensions.Throws<ArgumentNullException>(
                     "oidValue",
                     () => writer.WriteObjectIdentifier(tag, (string)null));
 
@@ -446,7 +446,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteObjectIdentifier(tag, new Oid(null, "null")));
 
-                Assert.Throws<ArgumentNullException>(
+                AssertExtensions.Throws<ArgumentNullException>(
                     "oid",
                     () => writer.WriteObjectIdentifier(tag, (Oid)null));
             }

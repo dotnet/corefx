@@ -232,13 +232,13 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                ArgumentOutOfRangeException exception = Assert.Throws<ArgumentOutOfRangeException>(
+                ArgumentOutOfRangeException exception = AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     nameof(unusedBitCount),
                     () => writer.WriteBitString(data, unusedBitCount));
 
                 Assert.Equal(unusedBitCount, exception.ActualValue);
 
-                exception = Assert.Throws<ArgumentOutOfRangeException>(
+                exception = AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     nameof(unusedBitCount),
                     () => writer.WriteBitString(new Asn1Tag(TagClass.ContextSpecific, 5), data, unusedBitCount));
 
@@ -311,11 +311,11 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteBitString(Asn1Tag.EndOfContents, ReadOnlySpan<byte>.Empty));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteBitString(Asn1Tag.EndOfContents, new byte[1]));
             }
@@ -341,11 +341,11 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteBitString(ReadOnlySpan<byte>.Empty, 1));
 
-                Assert.Throws<ArgumentOutOfRangeException>(
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     "unusedBitCount",
                     () => writer.WriteBitString(ReadOnlySpan<byte>.Empty, 9));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteBitString(Asn1Tag.Boolean, ReadOnlySpan<byte>.Empty));
 
@@ -357,7 +357,7 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteBitString(tag, ReadOnlySpan<byte>.Empty, 1));
 
-                Assert.Throws<ArgumentOutOfRangeException>(
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     "unusedBitCount",
                     () => writer.WriteBitString(tag, ReadOnlySpan<byte>.Empty, 9));
             }

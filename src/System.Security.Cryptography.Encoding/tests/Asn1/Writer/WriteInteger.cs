@@ -369,15 +369,15 @@ namespace System.Security.Cryptography.Tests.Asn1
         {
             using (AsnWriter writer = new AsnWriter((AsnEncodingRules)ruleSet))
             {
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteInteger(Asn1Tag.EndOfContents, 0L));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteInteger(Asn1Tag.EndOfContents, 0UL));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteInteger(Asn1Tag.EndOfContents, BigInteger.Zero));
             }
@@ -439,33 +439,33 @@ namespace System.Security.Cryptography.Tests.Asn1
                 Assert.Throws<ObjectDisposedException>(
                     () => writer.WriteInteger(new byte[] { 0xFF, 0xFF }));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteInteger(Asn1Tag.Boolean, 1));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteInteger(Asn1Tag.Boolean, 1UL));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteInteger(Asn1Tag.Boolean, BigInteger.One));
 
 #if netcoreapp
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteInteger(Asn1Tag.Boolean, BigInteger.One.ToByteArray(isBigEndian: true)));
 #endif
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteInteger(Asn1Tag.Boolean, Array.Empty<byte>()));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteInteger(Asn1Tag.Boolean, new byte[] { 0, 0 }));
 
-                Assert.Throws<ArgumentException>(
+                AssertExtensions.Throws<ArgumentException>(
                     "tag",
                     () => writer.WriteInteger(Asn1Tag.Boolean, new byte[] { 0xFF, 0xFF }));
 

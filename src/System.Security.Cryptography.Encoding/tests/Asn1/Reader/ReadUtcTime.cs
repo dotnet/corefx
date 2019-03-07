@@ -152,7 +152,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = "170D3530303130323132333435365A".HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadUtcTime(Asn1Tag.Null));
 
@@ -179,7 +179,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = "850D3530303130323132333435365A".HexToByteArray();
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.ReadUtcTime(Asn1Tag.Null));
 

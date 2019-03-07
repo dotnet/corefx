@@ -604,7 +604,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
             const UniversalTagNumber EncodingType = UniversalTagNumber.UTF8String;
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.TryReadPrimitiveCharacterStringBytes(Asn1Tag.Null, EncodingType, out _));
 
@@ -631,7 +631,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             const UniversalTagNumber EncodingType = UniversalTagNumber.UTF8String;
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.TryReadPrimitiveCharacterStringBytes(Asn1Tag.Null, EncodingType, out _));
 
