@@ -1073,35 +1073,42 @@ namespace System.Diagnostics.Tests
             Assert.NotEmpty(currentProcess.ProcessName);
 
             Process[] processes = Process.GetProcessesByName(currentProcess.ProcessName);
-
-            // Print list of active processes in case of failure https://github.com/dotnet/corefx/issues/35783
-            StringBuilder builder = new StringBuilder();
-            foreach (Process process in Process.GetProcesses())
-            {
-                builder.AppendFormat("Name: {0}'", process.ProcessName);
-                try
-                {
-                    builder.AppendFormat(" Main module: '{0}'", process.MainModule.FileName);
-                }
-                catch
-                {
-                    // We cannot read main module of all processes
-                }
-                builder.AppendLine();
-            }
-
             try
             { 
                 Assert.NotEmpty(processes);
             }
             catch
             {
-                // We cannot use xunit ITestOutputHelper because is not marshallable by RemoteInvoker
-                Console.WriteLine(builder);
+                PrintProcesses();
                 throw;
             }
 
             Assert.All(processes, process => Assert.Equal(".", process.MachineName));
+
+            return;
+
+            // Print list of active processes in case of failure https://github.com/dotnet/corefx/issues/35783
+            void PrintProcesses()
+            {
+                StringBuilder builder = new StringBuilder();
+                foreach (Process process in Process.GetProcesses())
+                {
+                    builder.AppendFormat("Name: {0}'", process.ProcessName);
+                    try
+                    {
+                        builder.AppendFormat(" Main module: '{0}'", process.MainModule.FileName);
+                    }
+                    catch
+                    {
+                        // We cannot obtain main module of all processes
+                    }
+                    builder.AppendLine();
+                }
+
+                // We cannot use xunit ITestOutputHelper because is not marshallable by RemoteInvoker
+                Console.WriteLine(builder);
+            }
+
         }
 
         public static IEnumerable<object[]> MachineName_TestData()
