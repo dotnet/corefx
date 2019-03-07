@@ -362,12 +362,12 @@ namespace System.IO
 
             previouslyProcessed = false;
             Interop.Sys.InitializeConsoleBeforeRead();
-            ConsoleKey key;
-            char ch;
-            bool isAlt, isCtrl, isShift;
-
             try
             {
+                ConsoleKey key;
+                char ch;
+                bool isAlt, isCtrl, isShift;
+
                 if (IsUnprocessedBufferEmpty())
                 {
                     // Read in bytes
