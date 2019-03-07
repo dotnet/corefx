@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <NETStandardVersion Condition="$(TargetFramework.StartsWith('netstandard'))">$(TargetFramework.SubString(11))</NETStandardVersion>
     <IsNETStandard1x Condition="$(NETStandardVersion.StartsWith('1.'))">true</IsNETStandard1x>
@@ -76,7 +75,23 @@
     </BinPlaceConfiguration>
   </ItemGroup>
 
-  <Target Name="AddNETStandardRefs" AfterTargets="ResolveReferences"
+  <Target Name="AddNETStandard21Refs" AfterTargets="ResolveReferences">
+    <PropertyGroup>
+      <_NETStandard21RefFolder>$(PackagesDir)$(NETStandardLibraryPackageId.ToLower())\$(NETStandardLibraryPackageVersion)\build\netstandard2.1\ref</_NETStandard21RefFolder>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_NetStandard21Files Include="$(_NETStandard21RefFolder)\*.dll" />
+    </ItemGroup>
+
+    <Error Condition="'@(_NetStandard21Files)' == ''" Text="Could not find package assets for netstandard2.1" />
+
+    <Copy SourceFiles="@(_NetStandard21Files)"
+          DestinationFolder="$(NetStandard21RefPath)"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="AddNETStandard20Refs" AfterTargets="ResolveReferences"
           Condition="'$(_NETStandardTFMFolder)' != ''">
     <PropertyGroup>
       <_NETStandardRefFolder>$(PackagesDir)$(NETStandardLibraryPackageId.ToLower())\$(NETStandardLibraryPackageVersion)\build\$(_NETStandardTFMFolder)\ref</_NETStandardRefFolder>
@@ -88,6 +103,8 @@
         Include="$(_NETStandardRefFolder)\*.dll"
         Exclude="@(ExcludeNetStandardRefs -> '$(_NETStandardRefFolder)\%(Identity).dll')" />
     </ItemGroup>
+
+    <Error Condition="'@(NetStandardRefs)' == ''" Text="Could not find package assets for netstandard2.0" />
 
     <ItemGroup>
       <Reference Include="@(NetStandardRefs)">

@@ -32,6 +32,15 @@ namespace System
         private const int Int64Precision = 19;
         private const int UInt64Precision = 20;
 
+        private const int DoubleMaxExponent = 309;
+        private const int DoubleMinExponent = -324;
+
+        private const int FloatingPointMaxExponent = DoubleMaxExponent;
+        private const int FloatingPointMinExponent = DoubleMinExponent;
+
+        private const int SingleMaxExponent = 39;
+        private const int SingleMinExponent = -45;
+
         /// <summary>Map from an ASCII char to its hex value, e.g. arr['b'] == 11. 0xFF means it's not a hex digit.</summary>
         internal static ReadOnlySpan<byte> CharToHexLookup => new byte[]
         {
@@ -1623,14 +1632,29 @@ namespace System
                 {
                     c = *++p;
 
-                    // At this point we should either be at the end of the buffer, or just
-                    // have a single rounding digit left, and the next should be the end
-                    Debug.Assert((c == 0) || (p[1] == 0));
+                    bool hasZeroTail = !number.HasNonZeroTail;
 
-                    if (((c == 0) || c == '0') && !number.HasNonZeroTail)
+                    // We might still have some additional digits, in which case they need
+                    // to be considered as part of hasZeroTail. Some examples of this are:
+                    //  * 3.0500000000000000000001e-27
+                    //  * 3.05000000000000000000001e-27
+                    // In these cases, we will have processed 3 and 0, and ended on 5. The
+                    // buffer, however, will still contain a number of trailing zeros and
+                    // a trailing non-zero number.
+
+                    while ((c != 0) && hasZeroTail)
                     {
-                        // When the next digit is 5, the number is even, and all following digits are zero
-                        // we don't need to round.
+                        hasZeroTail &= (c == '0');
+                        c = *++p;
+                    }
+
+                    // We should either be at the end of the stream or have a non-zero tail
+                    Debug.Assert((c == 0) || !hasZeroTail);
+
+                    if (hasZeroTail)
+                    {
+                        // When the next digit is 5, the number is even, and all following
+                        // digits are zero we don't need to round.
                         goto NoRounding;
                     }
                 }
@@ -1949,18 +1973,44 @@ namespace System
         internal static double NumberToDouble(ref NumberBuffer number)
         {
             number.CheckConsistency();
+            double result;
 
-            ulong bits = NumberToFloatingPointBits(ref number, in FloatingPointInfo.Double);
-            double result = BitConverter.Int64BitsToDouble((long)(bits));
+            if (number.Scale > DoubleMaxExponent)
+            {
+                result = double.PositiveInfinity;
+            }
+            else if (number.Scale < DoubleMinExponent)
+            {
+                result = 0;
+            }
+            else
+            {
+                ulong bits = NumberToFloatingPointBits(ref number, in FloatingPointInfo.Double);
+                result = BitConverter.Int64BitsToDouble((long)(bits));
+            }
+
             return number.IsNegative ? -result : result;
         }
 
         internal static float NumberToSingle(ref NumberBuffer number)
         {
             number.CheckConsistency();
+            float result;
 
-            uint bits = (uint)(NumberToFloatingPointBits(ref number, in FloatingPointInfo.Single));
-            float result = BitConverter.Int32BitsToSingle((int)(bits));
+            if (number.Scale > SingleMaxExponent)
+            {
+                result = float.PositiveInfinity;
+            }
+            else if (number.Scale < SingleMinExponent)
+            {
+                result = 0;
+            }
+            else
+            {
+                uint bits = (uint)(NumberToFloatingPointBits(ref number, in FloatingPointInfo.Single));
+                result = BitConverter.Int32BitsToSingle((int)(bits));
+            }
+
             return number.IsNegative ? -result : result;
         }
     }

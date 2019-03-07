@@ -10,7 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Threading;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
@@ -874,7 +873,7 @@ namespace System.Diagnostics
         {
             EventLogEntry entry = GetEntryAtNoThrow(index);
             if (entry == null)
-                throw new ArgumentException(SR.Format(SR.IndexOutOfBounds, index.ToString(CultureInfo.CurrentCulture)));
+                throw new ArgumentException(SR.Format(SR.IndexOutOfBounds, index.ToString()));
             return entry;
         }
 
@@ -953,7 +952,7 @@ namespace System.Diagnostics
 
                 if (!success)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.CantReadLogEntryAt, index.ToString(CultureInfo.CurrentCulture)), new Win32Exception());
+                    throw new InvalidOperationException(SR.Format(SR.CantReadLogEntryAt, index.ToString()), new Win32Exception());
                 }
             }
 
@@ -1109,7 +1108,7 @@ namespace System.Diagnostics
                 {
                     e = new Win32Exception();
                 }
-                throw new InvalidOperationException(SR.Format(SR.CantOpenLog, logname.ToString(), currentMachineName, e?.Message ?? ""));
+                throw new InvalidOperationException(SR.Format(SR.CantOpenLog, logname, currentMachineName, e?.Message ?? ""));
             }
 
             readHandle = handle;
@@ -1171,7 +1170,6 @@ namespace System.Diagnostics
             boolFlags[Flag_monitoring] = isMonitoring;
         }
 
-        [HostProtection(Synchronization = true)]
         private static void RemoveListenerComponent(EventLogInternal component, string compLogName)
         {
             lock (InternalSyncObject)
@@ -1313,7 +1311,7 @@ namespace System.Diagnostics
                         string rightLogName = EventLog.LogNameFromSourceName(sourceName, currentMachineName);
                         string currentLogName = GetLogName(currentMachineName);
                         if (rightLogName != null && currentLogName != null && !string.Equals(rightLogName, currentLogName, StringComparison.OrdinalIgnoreCase))
-                            throw new ArgumentException(SR.Format(SR.LogSourceMismatch, Source.ToString(), currentLogName, rightLogName));
+                            throw new ArgumentException(SR.Format(SR.LogSourceMismatch, Source, currentLogName, rightLogName));
                     }
                 }
                 finally
@@ -1330,7 +1328,7 @@ namespace System.Diagnostics
                 string rightLogName = EventLog._InternalLogNameFromSourceName(sourceName, currentMachineName);
                 string currentLogName = GetLogName(currentMachineName);
                 if (rightLogName != null && currentLogName != null && !string.Equals(rightLogName, currentLogName, StringComparison.OrdinalIgnoreCase))
-                    throw new ArgumentException(SR.Format(SR.LogSourceMismatch, Source.ToString(), currentLogName, rightLogName));
+                    throw new ArgumentException(SR.Format(SR.LogSourceMismatch, Source, currentLogName, rightLogName));
             }
             boolFlags[Flag_sourceVerified] = true;
         }

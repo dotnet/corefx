@@ -19,13 +19,13 @@ parameters:
   DotNetCliVersion: ''               # optional -- version of the CLI to send to Helix; based on this: https://raw.githubusercontent.com/dotnet/core/master/release-notes/releases.json
   EnableXUnitReporter: false         # optional -- true enables XUnit result reporting to Mission Control
   WaitForWorkItemCompletion: true    # optional -- true will make the task wait until work items have been completed and fail the build if work items fail. False is "fire and forget."
-  IsExternal: false                  # optional -- true requires Creator and will make the Mission Control results visible to folks outside the Microsoft Org
+  IsExternal: false                  # [DEPRECATED] -- doesn't do anything, jobs are external if HelixAccessToken is empty and Creator is set
   Creator: ''                        # optional -- if the build is external, use this to specify who is sending the job
   condition: succeeded()             # optional -- condition for step to execute; defaults to succeeded()
   continueOnError: false             # optional -- determines whether to continue the build if the step errors; defaults to false
 
 steps:
-  - powershell: 'powershell "$env:BUILD_SOURCESDIRECTORY\eng\common\msbuild.ps1 $env:BUILD_SOURCESDIRECTORY\eng\common\helixpublish.proj /bl:$env:BUILD_SOURCESDIRECTORY\artifacts\log\$env:BuildConfig\SendToHelix.binlog"'
+  - powershell: 'powershell "$env:BUILD_SOURCESDIRECTORY\eng\common\msbuild.ps1 $env:BUILD_SOURCESDIRECTORY\eng\common\helixpublish.proj /restore /t:Test /bl:$env:BUILD_SOURCESDIRECTORY\artifacts\log\$env:BuildConfig\SendToHelix.binlog"'
     displayName: Send job to Helix (Windows)
     env:
       BuildConfig: $(_BuildConfig)
@@ -49,11 +49,10 @@ steps:
       DotNetCliVersion: ${{ parameters.DotNetCliVersion }}
       EnableXUnitReporter: ${{ parameters.EnableXUnitReporter }}
       WaitForWorkItemCompletion: ${{ parameters.WaitForWorkItemCompletion }}
-      IsExternal: ${{ parameters.IsExternal }}
       Creator: ${{ parameters.Creator }}
     condition: and(${{ parameters.condition }}, eq(variables['Agent.Os'], 'Windows_NT'))
     continueOnError: ${{ parameters.continueOnError }}
-  - script: $BUILD_SOURCESDIRECTORY/eng/common/msbuild.sh $BUILD_SOURCESDIRECTORY/eng/common/helixpublish.proj /bl:$BUILD_SOURCESDIRECTORY/artifacts/log/$BuildConfig/SendToHelix.binlog
+  - script: $BUILD_SOURCESDIRECTORY/eng/common/msbuild.sh $BUILD_SOURCESDIRECTORY/eng/common/helixpublish.proj /restore /t:Test /bl:$BUILD_SOURCESDIRECTORY/artifacts/log/$BuildConfig/SendToHelix.binlog
     displayName: Send job to Helix (Unix)
     env:
       BuildConfig: $(_BuildConfig)
@@ -77,7 +76,6 @@ steps:
       DotNetCliVersion: ${{ parameters.DotNetCliVersion }}
       EnableXUnitReporter: ${{ parameters.EnableXUnitReporter }}
       WaitForWorkItemCompletion: ${{ parameters.WaitForWorkItemCompletion }}
-      IsExternal: ${{ parameters.IsExternal }}
       Creator: ${{ parameters.Creator }}
     condition: and(${{ parameters.condition }}, ne(variables['Agent.Os'], 'Windows_NT'))
     continueOnError: ${{ parameters.continueOnError }}

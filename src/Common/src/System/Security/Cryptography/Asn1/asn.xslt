@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<xsl:stylesheet version="1.0"
+﻿<xsl:stylesheet version="1.0"
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   xmlns:asn="http://schemas.dot.net/asnxml/201808/"
@@ -41,7 +40,11 @@
     <xsl:apply-templates/>
   </xsl:template>
 
-  <xsl:template match="asn:Sequence">using System;<xsl:if test="asn:SequenceOf | asn:SetOf">
+  <xsl:template match="asn:Sequence">// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;<xsl:if test="asn:SequenceOf | asn:SetOf">
 using System.Collections.Generic;</xsl:if>
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -114,7 +117,11 @@ namespace <xsl:value-of select="@namespace" />
 }
 </xsl:template>
 
-    <xsl:template match="asn:Choice">using System;<xsl:if test="asn:SequenceOf | asn:SetOf">
+    <xsl:template match="asn:Choice">// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;<xsl:if test="asn:SequenceOf | asn:SetOf">
 using System.Collections.Generic;</xsl:if>
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;

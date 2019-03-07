@@ -1,37 +1,31 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Licensed to the .NET Foundation under one or more agreements. The .NET Foundation licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
 <Project DefaultTargets="Build">
-
-  <UsingTask TaskName="UpdateVSConfigurations" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
   <Import Project="Directory.Build.props" />
 
   <PropertyGroup>
-    <BuildRestore Condition="'$(BuildRestore)' == ''">true</BuildRestore>
     <BuildNative Condition="'$(BuildNative)' == ''">true</BuildNative>
     <BuildManaged Condition="'$(BuildManaged)' == ''">true</BuildManaged>
-    <BuildTests Condition="'$(BuildTests)' == ''">false</BuildTests>
     <BuildPackages Condition="'$(BuildPackages)' == ''">true</BuildPackages>
 
-    <BuildDependsOn Condition="'$(BuildRestore)' == 'true'">$(BuildDependsOn);Restore</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildNative)' == 'true'">$(BuildDependsOn);BuildNative</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildManaged)' == 'true'">$(BuildDependsOn);BuildManaged</BuildDependsOn>
-    <BuildDependsOn Condition="'$(BuildTests)' == 'true'">$(BuildDependsOn);Test</BuildDependsOn>
     <BuildDependsOn Condition="'$(BuildPackages)' == 'true'">$(BuildDependsOn);Pack</BuildDependsOn>
 
     <!-- Explicitly set Configuration based on BuildConfiguration for the root projects -->
     <ProjectProperties>Configuration=$(BuildConfiguration)</ProjectProperties>
   </PropertyGroup>
 
-  <Import Project="$(ToolsDir)VersionTools.targets" Condition="Exists('$(ToolsDir)VersionTools.targets')" />
+  <!-- remove once we no longer use maestro v1 updating -->
+  <Import Project="$(RepositoryEngineeringDir)VersionTools.targets" />
 
   <Import Project="Directory.Build.targets" />
 
-  <Target Name="Restore" DependsOnTargets="GenerateConfigurationProps;RestoreOptionalToolingPackages;RestoreOptimizationDataPackage">
+  <Target Name="Restore" DependsOnTargets="GenerateConfigurationProps">
     <ItemGroup>
       <_RestoreProjects Include="external\dir.proj" />
     </ItemGroup>
 
+    <MSBuild Projects="@(_RestoreProjects)" Properties="$(ProjectProperties);DefaultBuildAllTarget=Restore" />
     <MSBuild Projects="@(_RestoreProjects)" Properties="$(ProjectProperties)" />
   </Target>
 
@@ -59,12 +53,44 @@
     <MSBuild Projects="@(_BuildMangedProjects)" Properties="$(ProjectProperties)" />
   </Target>
 
+  <Target Name="BuildTests">
+    <ItemGroup>
+      <_TestProjects Include="src\tests.builds" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_TestProjects)"
+             Targets="BuildAllProjects"
+             Properties="$(ProjectProperties);BuildTests=true" />
+  </Target>
+
   <Target Name="Test">
     <ItemGroup>
       <_TestProjects Include="src\tests.builds" />
     </ItemGroup>
 
-    <MSBuild Projects="@(_TestProjects)" Properties="$(ProjectProperties)" />
+    <MSBuild Projects="@(_TestProjects)"
+             Targets="TestAllProjects"
+             Properties="$(ProjectProperties);Test=true" />
+  </Target>
+
+  <Target Name="IntegrationTest">
+    <ItemGroup>
+      <_TestProjects Include="src\tests.builds" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_TestProjects)"
+             Targets="TestAllProjects"
+             Properties="$(ProjectProperties);IntegrationTest=true" />
+  </Target>
+
+  <Target Name="PerformanceTest">
+    <ItemGroup>
+      <_TestProjects Include="src\tests.builds" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(_TestProjects)"
+             Targets="TestAllProjects"
+             Properties="$(ProjectProperties);PerformanceTest=true" />
   </Target>
 
   <Target Name="Pack">
@@ -74,8 +100,6 @@
 
     <MSBuild Projects="@(_PackProjects)" Properties="$(ProjectProperties)" />
   </Target>
-
-  <Import Project="$(ToolsDir)clean.targets" />
 
   <Target Name="Build" DependsOnTargets="$(BuildDependsOn)" />
 
@@ -90,18 +114,15 @@
   <!-- Hook that can be used to insert custom build tasks to the build process such as setup and/or cleanup tasks -->
   <Import Project="build.override.targets" Condition="Exists('build.override.targets')" />
 
-  <Target Name="UpdateVSConfigurations">
-    <Message Importance="High" Text="Updating configurations for projects ..." />
+  <!-- set up inputs for UpdateVSConfigurations in a target to avoid globbing all the time -->
+  <Target Name="_setProjectsToUpdate" BeforeTargets="UpdateVSConfigurations">
     <ItemGroup>
-      <_projectsToExcludeFromUpdate Include="$(MSBuildThisFileDirectory)src/SharedFrameworkValidation/**/*.csproj" />
-      <_projectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*csproj" Exclude="@(_projectsToExcludeFromUpdate)" />
-      <_projectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*ilproj" Exclude="@(_projectsToExcludeFromUpdate)" />
-      <_projectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*vbproj" Exclude="@(_projectsToExcludeFromUpdate)" />
+      <ProjectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*csproj" />
+      <ProjectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*ilproj" />
+      <ProjectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*vbproj" />
       <_solutionsToUpdateFiles Include="$(MSBuildThisFileDirectory)src/*/Directory.Build.props" />
-      <_solutionsToUpdate Include="@(_solutionsToUpdateFiles->'%(RootDir)%(Directory)')" Exclude="@(_solutionsToExcludeFromUpdate)" />
+      <SolutionsToUpdate Include="@(_solutionsToUpdateFiles->'%(RootDir)%(Directory)')" Exclude="@(_solutionsToExcludeFromUpdate)" />
     </ItemGroup>
-    <UpdateVSConfigurations ProjectsToUpdate="@(_projectsToUpdate)" SolutionsToUpdate="@(_solutionsToUpdate)" />
-    <Message Importance="High" Text="Updating configurations for projects ... Done." />
   </Target>
 
   <!-- Define an empty Execute target for Arcade's publish to BAR finds it: https://github.com/dotnet/arcade/issues/1452 -->

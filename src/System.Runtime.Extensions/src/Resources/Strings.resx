@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -166,6 +165,9 @@
   <data name="Arg_AppDomainUnloadedException" xml:space="preserve">
     <value>Attempted to access an unloaded AppDomain.</value>
   </data>
+  <data name="Arg_SwitchExpressionException" xml:space="preserve">
+    <value>Non-exhaustive switch expression failed to match its input.</value>
+  </data>
   <data name="ZeroLengthString" xml:space="preserve">
     <value>String cannot have zero length.</value>
   </data>
@@ -292,7 +294,19 @@
   <data name="PlatformNotSupported_Principal" xml:space="preserve">
     <value>Windows Principal functionality is not supported on this platform.</value>
   </data>
+  <data name="SwitchExpressionException_UnmatchedValue" xml:space="preserve">
+    <value>Unmatched value was {0}.</value>
+  </data>
   <data name="IO_PathTooLong_Path" xml:space="preserve">
     <value>The path '{0}' is too long, or a component of the specified path is too long.</value>
+  </data>
+  <data name="Argument_StringZeroLength" xml:space="preserve">
+    <value>String cannot be of zero length.</value>
+  </data>
+  <data name="Arg_EntryPointNotFoundException" xml:space="preserve">
+    <value>Entry point was not found.</value>
+  </data>
+  <data name="Arg_PlatformNotSupported" xml:space="preserve">
+    <value>Operation is not supported on this platform.</value>
   </data>
 </root>

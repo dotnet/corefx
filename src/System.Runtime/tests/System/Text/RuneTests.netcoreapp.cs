@@ -129,6 +129,21 @@ namespace System.Text.Tests
         }
 
         [Theory]
+        [MemberData(nameof(SurrogatePairTestData_ValidOnly))]
+        public static void Ctor_SurrogatePair_Valid(char highSurrogate, char lowSurrogate, int expectedValue)
+        {
+            Assert.Equal(expectedValue, new Rune(highSurrogate, lowSurrogate).Value);
+        }
+
+        [Theory]
+        [MemberData(nameof(SurrogatePairTestData_InvalidOnly))]
+        public static void Ctor_SurrogatePair_Valid(char highSurrogate, char lowSurrogate)
+        {
+            string expectedParamName = !char.IsHighSurrogate(highSurrogate) ? nameof(highSurrogate) : nameof(lowSurrogate);
+            Assert.Throws<ArgumentOutOfRangeException>(expectedParamName, () => new Rune(highSurrogate, lowSurrogate));
+        }
+
+        [Theory]
         [InlineData('A', 'a', -1)]
         [InlineData('A', 'A', 0)]
         [InlineData('a', 'A', 1)]
@@ -366,6 +381,22 @@ namespace System.Text.Tests
         }
 
         [Theory]
+        [MemberData(nameof(SurrogatePairTestData_InvalidOnly))]
+        public static void TryCreate_SurrogateChars_Invalid(char highSurrogate, char lowSurrogate)
+        {
+            Assert.False(Rune.TryCreate(highSurrogate, lowSurrogate, out Rune result));
+            Assert.Equal(0, result.Value);
+        }
+
+        [Theory]
+        [MemberData(nameof(SurrogatePairTestData_ValidOnly))]
+        public static void TryCreate_SurrogateChars_Valid(char highSurrogate, char lowSurrogate, int expectedValue)
+        {
+            Assert.True(Rune.TryCreate(highSurrogate, lowSurrogate, out Rune result));
+            Assert.Equal(expectedValue, result.Value);
+        }
+
+        [Theory]
         [MemberData(nameof(GeneralTestData_BmpCodePoints_NoSurrogates))]
         [MemberData(nameof(GeneralTestData_SupplementaryCodePoints_ValidOnly))]
         public static void TryCreate_Int32_Valid(GeneralTestData testData)
@@ -454,14 +485,14 @@ namespace System.Text.Tests
             // First, try with a buffer that's too short
 
             Span<byte> utf8Buffer = stackalloc byte[rune.Utf8SequenceLength - 1];
-            bool success = TryEncodeToUtf8Bytes_Fn(ref rune, utf8Buffer, out int bytesWritten);
+            bool success = rune.TryEncodeToUtf8Bytes(utf8Buffer, out int bytesWritten);
             Assert.False(success);
             Assert.Equal(0, bytesWritten);
 
             // Then, try with a buffer that's appropriately sized
 
             utf8Buffer = stackalloc byte[rune.Utf8SequenceLength];
-            success = TryEncodeToUtf8Bytes_Fn(ref rune, utf8Buffer, out bytesWritten);
+            success = rune.TryEncodeToUtf8Bytes(utf8Buffer, out bytesWritten);
             Assert.True(success);
             Assert.Equal(testData.Utf8Sequence.Length, bytesWritten);
             Assert.True(utf8Buffer.SequenceEqual(testData.Utf8Sequence));
@@ -469,19 +500,10 @@ namespace System.Text.Tests
             // Finally, try with a buffer that's too long (should succeed)
 
             utf8Buffer = stackalloc byte[rune.Utf8SequenceLength + 1];
-            success = TryEncodeToUtf8Bytes_Fn(ref rune, utf8Buffer, out bytesWritten);
+            success = rune.TryEncodeToUtf8Bytes(utf8Buffer, out bytesWritten);
             Assert.True(success);
             Assert.Equal(testData.Utf8Sequence.Length, bytesWritten);
             Assert.True(utf8Buffer.Slice(0, testData.Utf8Sequence.Length).SequenceEqual(testData.Utf8Sequence));
-        }
-
-        private delegate bool TryEncodeToUtf8Bytes_Del(ref Rune rune, Span<byte> destination, out int bytesWritten);
-        private static readonly TryEncodeToUtf8Bytes_Del TryEncodeToUtf8Bytes_Fn = CreateTryEncodeToUtf8BytesDelegate();
-
-        private static TryEncodeToUtf8Bytes_Del CreateTryEncodeToUtf8BytesDelegate()
-        {
-            var methodInfo = typeof(Rune).GetMethod("TryEncodeToUtf8Bytes", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            return (TryEncodeToUtf8Bytes_Del)methodInfo.CreateDelegate(typeof(TryEncodeToUtf8Bytes_Del));
         }
     }
 }

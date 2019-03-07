@@ -117,12 +117,6 @@ namespace System
                                                     ExceptionResource.ArgumentOutOfRange_Count);
         }
 
-        internal static void ThrowArgumentOutOfRangeException_ArgumentOutOfRange_Enum()
-        {
-            throw GetArgumentOutOfRangeException(ExceptionArgument.type, 
-                                                    ExceptionResource.ArgumentOutOfRange_Enum);
-        }
-
         internal static void ThrowWrongKeyTypeArgumentException<T>(T key, Type targetType)
         {
             // Generic key to move the boxing to the right hand side of throw
@@ -195,6 +189,11 @@ namespace System
         internal static void ThrowArgumentOutOfRangeException(ExceptionArgument argument, int paramNumber, ExceptionResource resource)
         {
             throw GetArgumentOutOfRangeException(argument, paramNumber, resource);
+        }
+
+        internal static void ThrowInvalidOperationException()
+        {
+            throw new InvalidOperationException();
         }
 
         internal static void ThrowInvalidOperationException(ExceptionResource resource)
@@ -307,6 +306,11 @@ namespace System
             throw new InvalidOperationException(SR.InvalidOperation_HandleIsNotInitialized);
         }
 
+        internal static void ThrowInvalidOperationException_HandleIsNotPinned()
+        {
+            throw new InvalidOperationException(SR.InvalidOperation_HandleIsNotPinned);
+        }
+
         internal static void ThrowArraySegmentCtorValidationFailedExceptions(Array array, int offset, int count)
         {
             throw GetArraySegmentCtorValidationFailedException(array, offset, count);
@@ -362,7 +366,7 @@ namespace System
 
         private static KeyNotFoundException GetKeyNotFoundException(object key)
         {
-            return new KeyNotFoundException(SR.Format(SR.Arg_KeyNotFoundWithKey, key.ToString()));
+            return new KeyNotFoundException(SR.Format(SR.Arg_KeyNotFoundWithKey, key));
         }
 
         private static ArgumentOutOfRangeException GetArgumentOutOfRangeException(ExceptionArgument argument, ExceptionResource resource)
@@ -399,7 +403,8 @@ namespace System
                 ThrowHelper.ThrowArgumentNullException(argName);
         }
 
-        internal static void ThrowNotSupportedExceptionIfNonNumericType<T>()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static void ThrowForUnsupportedVectorBaseType<T>() where T : struct
         {
             if (typeof(T) != typeof(byte) && typeof(T) != typeof(sbyte) &&
                 typeof(T) != typeof(short) && typeof(T) != typeof(ushort) &&
@@ -407,7 +412,7 @@ namespace System
                 typeof(T) != typeof(long) && typeof(T) != typeof(ulong) &&
                 typeof(T) != typeof(float) && typeof(T) != typeof(double))
             {
-                throw new NotSupportedException(SR.Arg_TypeNotSupported);
+                ThrowNotSupportedException(ExceptionResource.Arg_TypeNotSupported);
             }
         }
 
@@ -723,9 +728,10 @@ namespace System
                     return SR.NotSupported_FixedSizeCollection;
                 case ExceptionResource.Rank_MultiDimNotSupported:
                     return SR.Rank_MultiDimNotSupported;
+                case ExceptionResource.Arg_TypeNotSupported:
+                    return SR.Arg_TypeNotSupported;
                 default:
-                    Debug.Assert(false,
-                        "The enum value is not defined, please check the ExceptionResource Enum.");
+                    Debug.Fail("The enum value is not defined, please check the ExceptionResource Enum.");
                     return "";
             }
         }
@@ -880,5 +886,6 @@ namespace System
         InvalidOperation_IComparerFailed,
         NotSupported_FixedSizeCollection,
         Rank_MultiDimNotSupported,
+        Arg_TypeNotSupported,
     }
 }

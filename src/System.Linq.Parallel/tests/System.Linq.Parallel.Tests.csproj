@@ -2,6 +2,8 @@
   <PropertyGroup>
     <ProjectGuid>{A7074928-82C3-4739-88FE-9B528977950C}</ProjectGuid>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;uap-Debug;uap-Release</Configurations>
+    <!-- Avoid extreme slowness when running NETFX tests (ie with xunit.console.exe) -->
+    <XUnitNoAppdomain>true</XUnitNoAppdomain>
   </PropertyGroup>
   <!-- Compiled Source Files -->
   <ItemGroup>
@@ -77,5 +79,9 @@
     <Compile Include="PlinqModesTests.cs" />
     <Compile Include="WithCancellationTests.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>
