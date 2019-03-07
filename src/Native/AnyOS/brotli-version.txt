@@ -3,4 +3,3 @@ https://github.com/google/brotli/releases/tag/v1.0.7
 
 Patched to add MSVC intrinsics for TZCNT and BSR
 https://github.com/google/brotli/pull/636
-
