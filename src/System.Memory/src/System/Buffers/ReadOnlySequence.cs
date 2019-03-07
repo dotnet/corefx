@@ -16,7 +16,7 @@ namespace System.Buffers
     [DebuggerDisplay("{ToString(),raw}")]
     public readonly partial struct ReadOnlySequence<T>
     {
-        // The data is essinatlly two SequencePositions, however the Start and End SequencePositions are deconstructed to improve packing.
+        // The data is essentially two SequencePositions, however the Start and End SequencePositions are deconstructed to improve packing.
         private readonly object _startObject;
         private readonly object _endObject;
         private readonly int _startInteger;
