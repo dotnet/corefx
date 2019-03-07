@@ -484,6 +484,16 @@ extern "C" int32_t local_SSL_is_init_finished(const SSL* ssl)
     return SSL_state(ssl) == SSL_ST_OK;
 }
 
+extern "C" X509Stack* local_X509_STORE_CTX_get0_chain(X509_STORE_CTX* ctx)
+{
+    return ctx ? ctx->chain : NULL;
+}
+
+extern "C" X509_STORE* local_X509_STORE_CTX_get0_store(X509_STORE_CTX* ctx)
+{
+    return ctx ? ctx->ctx: NULL;
+}
+
 extern "C" X509Stack* local_X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx)
 {
     return ctx ? ctx->untrusted : nullptr;

@@ -50,6 +50,8 @@ namespace Internal.Cryptography.Pal
             WorkingChain workingChain = new WorkingChain();
             Interop.Crypto.X509StoreVerifyCallback workingCallback = workingChain.VerifyCallback;
 
+            SafeX509StoreHandle tmpClonedStore = null;
+
             // An X509_STORE is more comparable to Cryptography.X509Certificate2Collection than to
             // Cryptography.X509Store. So read this with OpenSSL eyes, not CAPI/CNG eyes.
             //
@@ -129,6 +131,26 @@ namespace Internal.Cryptography.Pal
                     throw Interop.Crypto.CreateOpenSslCryptographicException();
                 }
 
+                if (workingChain.AbortedForSignatureError)
+                {
+                    Debug.Assert(verify == 0, "verify should have returned false for signature error");
+
+                    Interop.Crypto.X509StoreCtxResetForSignatureError(storeCtx, out tmpClonedStore);
+
+                    // Reset to a WorkingChain that won't fail.
+                    workingChain = new WorkingChain(abortOnSignatureError: false);
+                    workingCallback = workingChain.VerifyCallback;
+                    Interop.Crypto.X509StoreCtxSetVerifyCallback(storeCtx, workingCallback);
+
+                    Interop.Crypto.SetX509ChainVerifyTime(storeCtx, verificationTime);
+                    verify = Interop.Crypto.X509VerifyCert(storeCtx);
+
+                    if (verify < 0)
+                    {
+                        throw Interop.Crypto.CreateOpenSslCryptographicException();
+                    }
+                }
+
                 // Because our callback tells OpenSSL that every problem is ignorable, it should tell us that the
                 // chain is just fine (unless it returned a negative code for an exception)
                 Debug.Assert(verify == 1, "verify == 1");
@@ -166,6 +188,7 @@ namespace Internal.Cryptography.Pal
                 }
             }
 
+            tmpClonedStore?.Dispose();
             GC.KeepAlive(workingCallback);
 
             if ((certificatePolicy != null && certificatePolicy.Count > 0) ||
@@ -636,6 +659,19 @@ namespace Internal.Cryptography.Pal
             internal readonly List<List<Interop.Crypto.X509VerifyStatusCode>> Errors =
                 new List<List<Interop.Crypto.X509VerifyStatusCode>>();
 
+            internal bool AbortOnSignatureError { get; }
+            internal bool AbortedForSignatureError { get; private set; }
+
+            internal WorkingChain()
+                : this(abortOnSignatureError: true)
+            {
+            }
+
+            internal WorkingChain(bool abortOnSignatureError)
+            {
+                AbortOnSignatureError = abortOnSignatureError;
+            }
+
             internal int VerifyCallback(int ok, IntPtr ctx)
             {
                 if (ok != 0)
@@ -649,6 +685,13 @@ namespace Internal.Cryptography.Pal
                     {
                         Interop.Crypto.X509VerifyStatusCode errorCode = Interop.Crypto.X509StoreCtxGetError(storeCtx);
                         int errorDepth = Interop.Crypto.X509StoreCtxGetErrorDepth(storeCtx);
+
+                        if (AbortOnSignatureError &&
+                            errorCode == Interop.Crypto.X509VerifyStatusCode.X509_V_ERR_CERT_SIGNATURE_FAILURE)
+                        {
+                            AbortedForSignatureError = true;
+                            return 0;
+                        }
 
                         // We don't report "OK" as an error.
                         // For compatibility with Windows / .NET Framework, do not report X509_V_CRL_NOT_YET_VALID.
