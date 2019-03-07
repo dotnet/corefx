@@ -22,6 +22,9 @@ namespace System.Net.Http
     {
         private static class SslProvider
         {
+            // SP_PROT_TLS1_3 / SslProtocols.Tls13 in netcoreapp3.0
+            private const SslProtocols Tls13Protocol = (SslProtocols)12288;
+
             private static readonly Interop.Http.SslCtxCallback s_sslCtxCallback = SslCtxCallback;
             private static readonly Interop.Ssl.AppVerifyCallback s_sslVerifyCallback = VerifyCertChain;
             private static readonly Oid s_serverAuthOid = new Oid("1.3.6.1.5.5.7.3.1");
@@ -233,8 +236,12 @@ namespace System.Net.Http
                     case SslProtocols.Tls12:
                         curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1_2;
                         break;
+                    case Tls13Protocol:
+                        curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1_3;
+                        break;
 
                     case SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12:
+                    case SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | Tls13Protocol:
                         curlSslVersion = Interop.Http.CurlSslVersion.CURL_SSLVERSION_TLSv1;
                         break;
 
