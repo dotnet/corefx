@@ -13,6 +13,7 @@ using System.Security;
 using System.Text;
 using System.Threading;
 using Xunit;
+using Xunit.Sdk;
 
 namespace System.Diagnostics.Tests
 {
@@ -1074,13 +1075,12 @@ namespace System.Diagnostics.Tests
 
             Process[] processes = Process.GetProcessesByName(currentProcess.ProcessName);
             try
-            { 
+            {
                 Assert.NotEmpty(processes);
             }
-            catch
+            catch(TrueException)
             {
-                PrintProcesses();
-                throw;
+                throw new TrueException(PrintProcesses(), false);
             }
 
             Assert.All(processes, process => Assert.Equal(".", process.MachineName));
@@ -1088,7 +1088,7 @@ namespace System.Diagnostics.Tests
             return;
 
             // Print list of active processes in case of failure https://github.com/dotnet/corefx/issues/35783
-            void PrintProcesses()
+            string PrintProcesses()
             {
                 StringBuilder builder = new StringBuilder();
                 foreach (Process process in Process.GetProcesses())
@@ -1104,12 +1104,9 @@ namespace System.Diagnostics.Tests
                     }
                     builder.AppendLine();
                 }
-
-                // We cannot use xunit ITestOutputHelper because is not marshallable by RemoteInvoker
-                Console.Write(builder);
-                Console.WriteLine("Current process id: {0}", Process.GetCurrentProcess().Id);
+                builder.AppendFormat("Current process id: {0}", Process.GetCurrentProcess().Id);
+                return builder.ToString();
             }
-
         }
 
         public static IEnumerable<object[]> MachineName_TestData()
