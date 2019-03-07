@@ -174,9 +174,9 @@ namespace System.Text.Tests
         [InlineData(new char[] { '\ud800' }, OperationStatus.NeedMoreData, 0xFFFD, 1)] // high surrogate at end of buffer
         [InlineData(new char[] { '\ud800', '\ud800' }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone high surrogate
         [InlineData(new char[] { '\ud800', '\u1234' }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone high surrogate
-        public static void Decode(char[] data, OperationStatus expectedOperationStatus, int expectedRuneValue, int expectedCharsConsumed)
+        public static void DecodeUtf16(char[] data, OperationStatus expectedOperationStatus, int expectedRuneValue, int expectedCharsConsumed)
         {
-            Assert.Equal(expectedOperationStatus, Rune.Decode(data, out Rune actualRune, out int actualCharsConsumed));
+            Assert.Equal(expectedOperationStatus, Rune.DecodeUtf16(data, out Rune actualRune, out int actualCharsConsumed));
             Assert.Equal(expectedRuneValue, actualRune.Value);
             Assert.Equal(expectedCharsConsumed, actualCharsConsumed);
         }
@@ -188,9 +188,9 @@ namespace System.Text.Tests
         [InlineData(new char[] { '\ud83d', '\ude32' }, OperationStatus.Done, 0x1F632, 2)] // supplementary value (U+1F632 ASTONISHED FACE)
         [InlineData(new char[] { '\u1234', '\udc00' }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone low surrogate
         [InlineData(new char[] { '\udc00' }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone low surrogate
-        public static void DecodeFromEnd(char[] data, OperationStatus expectedOperationStatus, int expectedRuneValue, int expectedCharsConsumed)
+        public static void DecodeUtf16FromEnd(char[] data, OperationStatus expectedOperationStatus, int expectedRuneValue, int expectedCharsConsumed)
         {
-            Assert.Equal(expectedOperationStatus, Rune.DecodeFromEnd(data, out Rune actualRune, out int actualCharsConsumed));
+            Assert.Equal(expectedOperationStatus, Rune.DecodeUtf16FromEnd(data, out Rune actualRune, out int actualCharsConsumed));
             Assert.Equal(expectedRuneValue, actualRune.Value);
             Assert.Equal(expectedCharsConsumed, actualCharsConsumed);
         }
