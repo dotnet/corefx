@@ -506,19 +506,17 @@ namespace System.Security.Cryptography.Tests.Asn1
 
                 writer.Dispose();
 
-#if netcoreapp
                 string input = "1";
 
                 Assert.Throws<ObjectDisposedException>(
-                    () => WriteSpan(writer, input));
+                    () => WriteSpan(writer, input.AsSpan()));
 
                 AssertExtensions.Throws<ArgumentException>(
                     "tag",
-                    () => WriteSpan(writer, Asn1Tag.Boolean, input));
+                    () => WriteSpan(writer, Asn1Tag.Boolean, input.AsSpan()));
 
                 Assert.Throws<ObjectDisposedException>(
-                    () => WriteSpan(writer, new Asn1Tag(TagClass.Application, 0), input));
-#endif
+                    () => WriteSpan(writer, new Asn1Tag(TagClass.Application, 0), input.AsSpan()));
             }
         }
 
