@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Project>
   <Import Project="$([MSBuild]::GetPathOfFileAbove(Directory.Build.props))" />
 
@@ -6,6 +5,9 @@
   <Target Name="Build" DependsOnTargets="GenerateNativeVersionFile;BuildNativeUnix;BuildNativeWindows" />
 
   <PropertyGroup>
+    <!-- Hardcode version paths in a global location. -->
+    <NativeVersionFile Condition="'$(OS)' == 'Windows_NT'">$(ArtifactsObjDir)_version.h</NativeVersionFile>
+    <NativeVersionFile Condition="'$(OS)' != 'Windows_NT'">$(ArtifactsObjDir)_version.c</NativeVersionFile>
     <_BuildNativeArgs>$(ArchGroup) $(ConfigurationGroup) $(OSGroup) outconfig $(Configuration)</_BuildNativeArgs>
   </PropertyGroup>
 

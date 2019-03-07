@@ -60,15 +60,20 @@ namespace System.IO.Pipelines
         private PipeCompletion _writerCompletion;
         private PipeCompletion _readerCompletion;
 
-        // The read head which is the extent of the IPipelineReader's consumed bytes
+        // Stores the last examined position, used to calculate how many bytes were to release
+        // for back pressure management
+        private BufferSegment _lastExamined;
+        private int _lastExaminedIndex;
+
+        // The read head which is the extent of the PipeReader's consumed bytes
         private BufferSegment _readHead;
         private int _readHeadIndex;
 
-        // The commit head which is the extent of the bytes available to the IPipelineReader to consume
+        // The commit head which is the extent of the bytes available to the PipeReader to consume
         private BufferSegment _readTail;
         private int _readTailIndex;
 
-        // The write head which is the extent of the IPipelineWriter's written bytes
+        // The write head which is the extent of the PipeWriter's written bytes
         private BufferSegment _writingHead;
         private Memory<byte> _writingMemory;
         private int _buffered;
@@ -125,6 +130,7 @@ namespace System.IO.Pipelines
             _writerAwaitable = new PipeAwaitable(completed: true, _useSynchronizationContext);
             _readTailIndex = 0;
             _readHeadIndex = 0;
+            _lastExaminedIndex = 0;
             _currentWriteLength = 0;
             _length = 0;
         }
@@ -187,7 +193,7 @@ namespace System.IO.Pipelines
                     BufferSegment newSegment = AllocateSegment(sizeHint);
 
                     // Set all the pointers
-                    _writingHead = _readHead = _readTail = newSegment;
+                    _writingHead = _readHead = _readTail = _lastExamined = newSegment;
                 }
                 else
                 {
@@ -258,6 +264,11 @@ namespace System.IO.Pipelines
 
         private void ReturnSegmentUnsynchronized(BufferSegment segment)
         {
+            Debug.Assert(segment != _readHead, "Returning _readHead segment that's in use!");
+            Debug.Assert(segment != _readTail, "Returning _readTail segment that's in use!");
+            Debug.Assert(segment != _writingHead, "Returning _writingHead segment that's in use!");
+            Debug.Assert(segment != _lastExamined, "Returning _lastExamined segment that's in use!");
+
             if (_pooledSegmentCount < _bufferSegmentPool.Length)
             {
                 _bufferSegmentPool[_pooledSegmentCount] = segment;
@@ -303,28 +314,20 @@ namespace System.IO.Pipelines
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void Advance(int bytesWritten)
         {
-            if (_writingHead == null)
-            {
-                ThrowHelper.ThrowInvalidOperationException_NotWritingNoAlloc();
-            }
-
-            if (bytesWritten >= 0)
-            {
-                Debug.Assert(_writingHead.Next == null);
-
-                if (bytesWritten > _writingMemory.Length)
-                {
-                    ThrowHelper.ThrowInvalidOperationException_AdvancingPastBufferSize();
-                }
-
-                _currentWriteLength += bytesWritten;
-                _buffered += bytesWritten;
-                _writingMemory = _writingMemory.Slice(bytesWritten);
-            }
-            else
+            if ((uint)bytesWritten > (uint)_writingMemory.Length)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.bytesWritten);
             }
+
+            AdvanceCore(bytesWritten);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void AdvanceCore(int bytesWritten)
+        {
+            _currentWriteLength += bytesWritten;
+            _buffered += bytesWritten;
+            _writingMemory = _writingMemory.Slice(bytesWritten);
         }
 
         internal ValueTask<FlushResult> FlushAsync(CancellationToken cancellationToken)
@@ -435,6 +438,30 @@ namespace System.IO.Pipelines
                     examinedEverything = examinedIndex == _readTailIndex;
                 }
 
+                if (examinedSegment != null && _lastExamined != null)
+                {
+                    long examinedBytes = GetLength(_lastExamined, _lastExaminedIndex, examinedSegment, examinedIndex);
+                    long oldLength = _length;
+
+                    if (examinedBytes < 0)
+                    {
+                        ThrowHelper.ThrowInvalidOperationException_AdvanceToInvalidCursor();
+                    }
+
+                    _length -= examinedBytes;
+
+                    _lastExamined = examinedSegment;
+                    _lastExaminedIndex = examinedIndex;
+
+                    Debug.Assert(_length >= 0, "Length has gone negative");
+
+                    if (oldLength >= _resumeWriterThreshold &&
+                        _length < _resumeWriterThreshold)
+                    {
+                        _writerAwaitable.Complete(out completionData);
+                    }
+                }
+
                 if (consumedSegment != null)
                 {
                     if (_readHead == null)
@@ -445,17 +472,6 @@ namespace System.IO.Pipelines
 
                     returnStart = _readHead;
                     returnEnd = consumedSegment;
-
-                    // Check if we crossed _maximumSizeLow and complete backpressure
-                    long consumedBytes = GetLength(returnStart, _readHeadIndex, consumedSegment, consumedIndex);
-                    long oldLength = _length;
-                    _length -= consumedBytes;
-
-                    if (oldLength >= _resumeWriterThreshold &&
-                        _length < _resumeWriterThreshold)
-                    {
-                        _writerAwaitable.Complete(out completionData);
-                    }
 
                     // Check if we consumed entire last segment
                     // if we are going to return commit head we need to check that there is no writing operation that
@@ -471,6 +487,14 @@ namespace System.IO.Pipelines
 
                         _readHead = nextBlock;
                         _readHeadIndex = 0;
+
+                        // Only update the last examined if the same as consumed
+                        if (consumedSegment == examinedSegment)
+                        {
+                            // The last examined index and the read head should be in sync
+                            _lastExamined = nextBlock;
+                            _lastExaminedIndex = 0;
+                        }
 
                         // Reset the writing head to null if it's the return block
                         // then null it out as we're about to reset that memory
@@ -496,11 +520,8 @@ namespace System.IO.Pipelines
                 // but only if writer is not completed yet
                 if (examinedEverything && !_writerCompletion.IsCompleted)
                 {
-                    // Prevent deadlock where reader awaits new data and writer await backpressure
-                    if (!_writerAwaitable.IsCompleted)
-                    {
-                        ThrowHelper.ThrowInvalidOperationException_BackpressureDeadlock(_resumeWriterThreshold);
-                    }
+                    Debug.Assert(_writerAwaitable.IsCompleted, "PipeWriter.FlushAsync is isn't completed and will deadlock");
+
                     _readerAwaitable.SetUncompleted();
                 }
 
@@ -768,6 +789,7 @@ namespace System.IO.Pipelines
                 _writingHead = null;
                 _readHead = null;
                 _readTail = null;
+                _lastExamined = null;
             }
         }
 
@@ -908,6 +930,63 @@ namespace System.IO.Pipelines
             if (_readerCompletion.IsCompletedOrThrow())
             {
                 result._resultFlags |= ResultFlags.Completed;
+            }
+        }
+
+        internal ValueTask<FlushResult> WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
+        {
+            if (_writerCompletion.IsCompleted)
+            {
+                ThrowHelper.ThrowInvalidOperationException_NoWritingAllowed();
+            }
+
+            // Allocate whatever the pool gives us so we can write, this also marks the
+            // state as writing
+            AllocateWriteHeadIfNeeded(0);
+
+            if (source.Length <= _writingMemory.Length)
+            {
+                source.CopyTo(_writingMemory);
+
+                AdvanceCore(source.Length);
+            }
+            else
+            {
+                // This is the multi segment copy
+                WriteMultiSegment(source.Span);
+            }
+
+            return FlushAsync(cancellationToken);
+        }
+
+        private void WriteMultiSegment(ReadOnlySpan<byte> source)
+        {
+            Span<byte> destination = _writingMemory.Span;
+
+            while (true)
+            {
+                int writable = Math.Min(destination.Length, source.Length);
+                source.Slice(0, writable).CopyTo(destination);
+                source = source.Slice(writable);
+                AdvanceCore(writable);
+
+                if (source.Length == 0)
+                {
+                    break;
+                }
+
+                // We filled the segment
+                _writingHead.End += writable;
+                _buffered = 0;
+
+                // This is optimized to use pooled memory. That's why we pass 0 instead of
+                // source.Length
+                BufferSegment newSegment = AllocateSegment(0);
+
+                _writingHead.SetNext(newSegment);
+                _writingHead = newSegment;
+
+                destination = _writingMemory.Span;
             }
         }
 
