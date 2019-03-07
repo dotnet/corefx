@@ -16,7 +16,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
             byte[] encoded = writer.Encode();
             Assert.Equal(expectedHex, encoded.ByteArrayToHex());
-            Assert.Equal(encoded.Length, expectedSize);
+            Assert.Equal(expectedSize, encoded.Length);
 
             // Now verify TryEncode's boundary conditions.
             byte[] encoded2 = new byte[encoded.Length + 3];
