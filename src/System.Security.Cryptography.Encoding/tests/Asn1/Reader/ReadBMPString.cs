@@ -619,7 +619,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x1E, 4, 0, (byte)'h', 0, (byte)'i' };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.TryReadBMPStringBytes(Asn1Tag.Null, out _));
 
@@ -644,7 +644,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             byte[] inputData = { 0x87, 2, 0x20, 0x10 };
             AsnReader reader = new AsnReader(inputData, (AsnEncodingRules)ruleSet);
 
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "expectedTag",
                 () => reader.TryReadBMPStringBytes(Asn1Tag.Null, out _));
 
