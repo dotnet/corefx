@@ -117,7 +117,7 @@ namespace System.IO
             {
                 if ((attributes & FileAttributes.Hidden) != 0)
                 {
-                    if ((_fileStatus.UserFlags & (uint)Interop.Sys.UserFlags.UF_HIDDEN) != (uint)Interop.Sys.UserFlags.UF_HIDDEN)
+                    if ((_fileStatus.UserFlags & (uint)Interop.Sys.UserFlags.UF_HIDDEN) == 0)
                     {
                         // If Hidden flag is set and cached file status does not have the flag set then set it
                         Interop.CheckIo(Interop.Sys.LChflags(path, (uint)Interop.Sys.UserFlags.UF_HIDDEN), path, InitiallyDirectory);
