@@ -33,7 +33,6 @@ internal static partial class Interop
             internal long BirthTimeNsec;
             internal long Dev;
             internal long Ino;
-            internal uint UserFlags;
         }
 
         internal static class FileTypes
