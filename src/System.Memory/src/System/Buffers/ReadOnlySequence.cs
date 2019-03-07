@@ -441,7 +441,7 @@ namespace System.Buffers
         public ReadOnlySequence<T> Slice(SequencePosition start)
         {
             BoundsCheck(start);
-            return SliceImpl(start, End);
+            return SliceImpl(start);
         }
 
         /// <summary>
@@ -456,8 +456,8 @@ namespace System.Buffers
             if (start == 0)
                 return this;
 
-            SequencePosition begin = Seek(Start, End, start, ExceptionArgument.start);
-            return SliceImpl(begin, End);
+            SequencePosition begin = Seek(start, ExceptionArgument.start);
+            return SliceImpl(begin);
         }
 
         /// <inheritdoc />
@@ -490,7 +490,13 @@ namespace System.Buffers
         /// <summary>
         /// Returns a new <see cref="SequencePosition"/> at an <paramref name="offset"/> from the start of the sequence.
         /// </summary>
-        public SequencePosition GetPosition(long offset) => GetPosition(offset, Start);
+        public SequencePosition GetPosition(long offset)
+        {
+            if (offset < 0)
+                ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
+
+            return Seek(offset);
+        }
 
         /// <summary>
         /// Returns a new <see cref="SequencePosition"/> at an <paramref name="offset"/> from the <paramref name="origin"/>
@@ -500,7 +506,7 @@ namespace System.Buffers
             if (offset < 0)
                 ThrowHelper.ThrowArgumentOutOfRangeException_OffsetOutOfRange();
 
-            return Seek(origin, End, offset, ExceptionArgument.offset);
+            return Seek(origin, offset);
         }
 
         /// <summary>

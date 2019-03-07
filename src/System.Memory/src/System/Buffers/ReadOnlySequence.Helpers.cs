@@ -155,13 +155,12 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private SequencePosition Seek(in SequencePosition start, in SequencePosition end, long offset, ExceptionArgument argument)
+        internal SequencePosition Seek(long offset, ExceptionArgument exceptionArgument = ExceptionArgument.offset)
         {
-            int startIndex = GetIndex(start);
-            int endIndex = GetIndex(end);
-
-            object startObject = start.GetObject();
-            object endObject = end.GetObject();
+            object startObject = _startObject;
+            object endObject = _endObject;
+            int startIndex = GetIndex(_startInteger);
+            int endIndex = GetIndex(_endInteger);
 
             if (startObject != endObject)
             {
@@ -178,13 +177,49 @@ namespace System.Buffers
                     ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
 
                 // End of segment. Move to start of next.
-                return SeekMultiSegment(startSegment.Next, endObject, endIndex, offset - currentLength, argument);
+                return SeekMultiSegment(startSegment.Next, endObject, endIndex, offset - currentLength, exceptionArgument);
             }
 
             Debug.Assert(startObject == endObject);
 
             if (endIndex - startIndex < offset)
-                ThrowHelper.ThrowArgumentOutOfRangeException(argument);
+                ThrowHelper.ThrowArgumentOutOfRangeException(exceptionArgument);
+
+        // Single segment Seek
+        IsSingleSegment:
+            return new SequencePosition(startObject, startIndex + (int)offset);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private SequencePosition Seek(in SequencePosition start, long offset)
+        {
+            object startObject = start.GetObject();
+            object endObject = _endObject;
+            int startIndex = GetIndex(start);
+            int endIndex = GetIndex(_endInteger);
+
+            if (startObject != endObject)
+            {
+                Debug.Assert(startObject != null);
+                var startSegment = (ReadOnlySequenceSegment<T>)startObject;
+
+                int currentLength = startSegment.Memory.Length - startIndex;
+
+                // Position in start segment, defer to single segment seek
+                if (currentLength > offset)
+                    goto IsSingleSegment;
+
+                if (currentLength < 0)
+                    ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
+
+                // End of segment. Move to start of next.
+                return SeekMultiSegment(startSegment.Next, endObject, endIndex, offset - currentLength, ExceptionArgument.offset);
+            }
+
+            Debug.Assert(startObject == endObject);
+
+            if (endIndex - startIndex < offset)
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.offset);
 
         // Single segment Seek
         IsSingleSegment:
@@ -353,6 +388,21 @@ namespace System.Buffers
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private ReadOnlySequence<T> SliceImpl(in SequencePosition start)
+        {
+            // In this method we reset high order bits from indices
+            // of positions that were passed in
+            // and apply type bits specific for current ReadOnlySequence type
+
+            return new ReadOnlySequence<T>(
+                start.GetObject(),
+                GetIndex(start) | (_startInteger & ReadOnlySequence.FlagBitMask),
+                _endObject,
+                _endInteger
+            );
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetLength()
         {
             object startObject = _startObject;
@@ -490,15 +540,13 @@ namespace System.Buffers
         {
             first = default;
             next = default;
-            SequencePosition start = Start;
-            int startIndex = start.GetInteger();
-            object startObject = start.GetObject();
+            object startObject = _startObject;
+            int startIndex = _startInteger;
 
             if (startObject != null)
             {
-                SequencePosition end = End;
-                int endIndex = end.GetInteger();
-                bool hasMultipleSegments = startObject != end.GetObject();
+                bool hasMultipleSegments = startObject != _endObject;
+                int endIndex = _endInteger;
 
                 if (startIndex >= 0)
                 {
