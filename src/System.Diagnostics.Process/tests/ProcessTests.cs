@@ -1093,7 +1093,7 @@ namespace System.Diagnostics.Tests
                 StringBuilder builder = new StringBuilder();
                 foreach (Process process in Process.GetProcesses())
                 {
-                    builder.AppendFormat("Name: {0}'", process.ProcessName);
+                    builder.AppendFormat("Pid: {0} Name: {1}'", process.Id, process.ProcessName);
                     try
                     {
                         builder.AppendFormat(" Main module: '{0}'", process.MainModule.FileName);
@@ -1106,7 +1106,8 @@ namespace System.Diagnostics.Tests
                 }
 
                 // We cannot use xunit ITestOutputHelper because is not marshallable by RemoteInvoker
-                Console.WriteLine(builder);
+                Console.Write(builder);
+                Console.WriteLine("Current process id: {0}", Process.GetCurrentProcess().Id);
             }
 
         }
