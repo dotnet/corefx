@@ -1069,9 +1069,38 @@ namespace System.Diagnostics.Tests
         {
             // Get the current process using its name
             Process currentProcess = Process.GetCurrentProcess();
+            Assert.NotNull(currentProcess.ProcessName);
+            Assert.NotEmpty(currentProcess.ProcessName);
 
             Process[] processes = Process.GetProcessesByName(currentProcess.ProcessName);
-            Assert.NotEmpty(processes);
+
+            // Print list of active processes in case of failure https://github.com/dotnet/corefx/issues/35783
+            StringBuilder builder = new StringBuilder();
+            foreach (Process process in Process.GetProcesses())
+            {
+                builder.AppendFormat("Name: {0}'", process.ProcessName);
+                try
+                {
+                    builder.AppendFormat(" Main module: '{0}'", process.MainModule.FileName);
+                }
+                catch
+                {
+                    // We cannot read main module of all processes
+                }
+                builder.AppendLine();
+            }
+
+            try
+            { 
+                Assert.NotEmpty(processes);
+            }
+            catch
+            {
+                // We cannot use xunit ITestOutputHelper because is not marshallable by RemoteInvoker
+                Console.WriteLine(builder);
+                throw;
+            }
+
             Assert.All(processes, process => Assert.Equal(".", process.MachineName));
         }
 
