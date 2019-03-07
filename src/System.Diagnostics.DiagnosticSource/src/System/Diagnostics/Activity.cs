@@ -878,20 +878,17 @@ namespace System.Diagnostics
         /// </summary>
         public string ToHexString()
         {
-            get
+            if (_asHexString == null)
             {
-                if (_asHexString == null)
+                fixed (ulong* idPtr = &_id1)
                 {
-                    fixed (ulong* idPtr = &_id1)
-                    {
-                        // Cast away the read-only-ness of _asHexString, and assign the converted value to it.  
-                        // We are OK with this because conceptually the class is still read-only.  
-                        ref string strRef = ref Unsafe.AsRef(in _asHexString);
-                        strRef = SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2));
-                    }
+                    // Cast away the read-only-ness of _asHexString, and assign the converted value to it.  
+                    // We are OK with this because conceptually the class is still read-only.  
+                    ref string strRef = ref Unsafe.AsRef(in _asHexString);
+                    strRef = SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2));
                 }
-                return _asHexString;
             }
+            return _asHexString;
         }
 
         /// <summary>
@@ -1070,22 +1067,19 @@ namespace System.Diagnostics
         /// Returns the TraceId as a 16 character hexadecimal string.  
         /// </summary>
         /// <returns></returns>
-        public string AsHexString
+        public string ToHexString()
         {
-            get
+            if (_asHexString == null)
             {
-                if (_asHexString == null)
+                fixed (ulong* idPtr = &_id1)
                 {
-                    fixed (ulong* idPtr = &_id1)
-                    {
-                        // Cast away the read-only-ness of _asHexString, and assign the converted value to it.  
-                        // We are OK with this because conceptually the class is still read-only.  
-                        ref string strRef = ref Unsafe.AsRef(in _asHexString);
-                        strRef = ActivityTraceId.SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong)));
-                    }
+                    // Cast away the read-only-ness of _asHexString, and assign the converted value to it.  
+                    // We are OK with this because conceptually the class is still read-only.  
+                    ref string strRef = ref Unsafe.AsRef(in _asHexString);
+                    strRef = ActivityTraceId.SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong)));
                 }
-                return _asHexString;
             }
+            return _asHexString;
         }
 
         /// <summary>
