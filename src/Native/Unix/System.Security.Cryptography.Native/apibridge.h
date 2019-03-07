@@ -35,6 +35,8 @@ extern "C" int32_t local_X509_NAME_get0_der(X509_NAME* x509Name, const uint8_t**
 extern "C" int32_t local_X509_PUBKEY_get0_param(
     ASN1_OBJECT** palgOid, const uint8_t** pkeyBytes, int* pkeyBytesLen, X509_ALGOR** palg, X509_PUBKEY* pubkey);
 extern "C" X509* local_X509_STORE_CTX_get0_cert(X509_STORE_CTX* ctx);
+extern "C" STACK_OF(X509)* local_X509_STORE_CTX_get0_chain(X509_STORE_CTX* ctx);
+extern "C" X509_STORE* local_X509_STORE_CTX_get0_store(X509_STORE_CTX* ctx);
 extern "C" STACK_OF(X509) * local_X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx);
 extern "C" const ASN1_TIME* local_X509_get0_notAfter(const X509* x509);
 extern "C" const ASN1_TIME* local_X509_get0_notBefore(const X509* x509);
