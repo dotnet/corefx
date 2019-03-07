@@ -506,7 +506,7 @@ namespace System.Security.Cryptography.Tests.Asn1
 
                 writer.Dispose();
 
-#if NETCOREAPP
+#if netcoreapp
                 string input = "1";
 
                 Assert.Throws<ObjectDisposedException>(
