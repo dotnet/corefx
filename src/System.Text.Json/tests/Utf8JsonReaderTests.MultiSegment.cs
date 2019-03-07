@@ -571,21 +571,17 @@ namespace System.Text.Json.Tests
         public static void ConsumeSingleLineCommentMultiSpanTest(string expected)
         {
             string jsonData = "{" + expected + "}";
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
 
             for (int i = 0; i < jsonData.Length; i++)
             {
                 var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
 
-                byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData, 0, i);
-                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
-
-                var json = new Utf8JsonReader(sequence, isFinalBlock: false, state);
+                var json = new Utf8JsonReader(sequence.Slice(0, i), isFinalBlock: false, state);
                 VerifyReadLoop(ref json, expected);
 
-                dataUtf8 = Encoding.UTF8.GetBytes(jsonData, (int)state.BytesConsumed, jsonData.Length);
-                sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
-                
-                json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
+                json = new Utf8JsonReader(sequence.Slice(state.BytesConsumed), isFinalBlock: true, state);
                 VerifyReadLoop(ref json, expected);
             }
         }
@@ -595,21 +591,17 @@ namespace System.Text.Json.Tests
         public static void SkipSingleLineCommentMultiSpanTest(string expected)
         {
             string jsonData = "{" + expected + "}";
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
 
             for (int i = 0; i < jsonData.Length; i++)
             {
                 var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
 
-                byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData, 0, i);
-                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
-
-                var json = new Utf8JsonReader(sequence, isFinalBlock: false, state);
+                var json = new Utf8JsonReader(sequence.Slice(0, i), isFinalBlock: false, state);
                 VerifyReadLoop(ref json, null);
 
-                dataUtf8 = Encoding.UTF8.GetBytes(jsonData, (int)state.BytesConsumed, jsonData.Length);
-                sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
-
-                json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
+                json = new Utf8JsonReader(sequence.Slice(state.BytesConsumed), isFinalBlock: true, state);
                 VerifyReadLoop(ref json, null);
             }
         }
