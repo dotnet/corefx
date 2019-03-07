@@ -581,6 +581,7 @@ namespace System.PrivateUri.Tests
 
         [Theory]
         [MemberData(nameof(AllForbiddenDecompositions))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Disable until the .NET FX CI machines get the latest patches.")]
         public void Iri_AllForbiddenDecompositions_IdnHostThrows(string scheme, string host)
         {
             Uri uri = new Uri(scheme + "://" + host);
