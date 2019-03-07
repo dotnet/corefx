@@ -53,7 +53,7 @@ namespace System.Net.Sockets.Tests
             // TODO #5185: Harden against packet loss
             const int DatagramSize = 256;
             const int DatagramsToSend = 256;
-            const int AckTimeout = 1000;
+            const int AckTimeout = 5000;
             const int TestTimeout = 30000;
 
             var left = new Socket(leftAddress.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
@@ -90,12 +90,7 @@ namespace System.Net.Sockets.Tests
 
                         receiverAck.Release();
                         bool gotAck = await senderAck.WaitAsync(TestTimeout);
-                        if (!gotAck)
-                        {
-                            _output.WriteLine($"{DateTime.Now}: Timeout waiting {TestTimeout} for senderAck in iteration {i}");
-                        }
-
-                        Assert.True(gotAck);
+                        Assert.True(gotAck, $"{DateTime.Now}: Timeout waiting {TestTimeout} for senderAck in iteration {i}");
                     }
                 }
             });
@@ -113,11 +108,7 @@ namespace System.Net.Sockets.Tests
                     int sent = await SendToAsync(right, new ArraySegment<byte>(sendBuffer), leftEndpoint);
 
                     bool gotAck = await receiverAck.WaitAsync(AckTimeout);
-                    if (!gotAck)
-                    {
-                        _output.WriteLine($"{DateTime.Now}: Timeout waiting {AckTimeout} for receiverAck in iteration {i}. Receiver is in {leftThread.Status}");
-                    }
-                    Assert.True(gotAck);
+                    Assert.True(gotAck, $"{DateTime.Now}: Timeout waiting {AckTimeout} for receiverAck in iteration {i} after sending {sent}. Receiver is in {leftThread.Status}");
                     senderAck.Release();
 
                     Assert.Equal(DatagramSize, sent);
