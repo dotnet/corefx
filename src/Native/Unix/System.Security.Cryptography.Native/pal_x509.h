@@ -303,3 +303,12 @@ Unlike X509Duplicate, this modifies an existing object, so no new memory is allo
 Returns the input value.
 */
 extern "C" X509* CryptoNative_X509UpRef(X509* x509);
+
+/*
+Duplicates any certificate at or below the level where the error marker is.
+
+Outputs a new store with a clone of the root, if necessary.
+
+The new store does not have any properties set other than the trust. (Mainly, CRLs are lost)
+*/
+extern "C" int32_t CryptoNative_X509StoreCtxResetForSignatureError(X509_STORE_CTX* storeCtx, X509_STORE** newStore);
