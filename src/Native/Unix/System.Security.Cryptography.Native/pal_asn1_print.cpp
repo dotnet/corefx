@@ -31,7 +31,7 @@ static_assert(PAL_ASN1_STRFLGS_UTF8_CONVERT == ASN1_STRFLGS_UTF8_CONVERT, "");
 
 extern "C" ASN1_STRING* CryptoNative_DecodeAsn1TypeBytes(const uint8_t* buf, int32_t len, Asn1StringTypeFlags type)
 {
-#if NEED_OPENSSL_1_0
+#ifdef NEED_OPENSSL_1_0
     if (!API_EXISTS(d2i_ASN1_type_bytes) || !buf || !len)
     {
         return nullptr;

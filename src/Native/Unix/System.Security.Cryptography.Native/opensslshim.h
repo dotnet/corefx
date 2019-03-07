@@ -119,6 +119,7 @@ extern "C" int OPENSSL_init_ssl(uint64_t opts, const OPENSSL_INIT_SETTINGS* sett
 extern "C" void OPENSSL_sk_free(OPENSSL_STACK*);
 extern "C" OPENSSL_STACK* OPENSSL_sk_new_null(void);
 extern "C" int OPENSSL_sk_num(const OPENSSL_STACK*);
+extern "C" void* OPENSSL_sk_pop(OPENSSL_STACK* st);
 extern "C" void OPENSSL_sk_pop_free(OPENSSL_STACK* st, void (*func)(void*));
 extern "C" int OPENSSL_sk_push(OPENSSL_STACK* st, const void* data);
 extern "C" void* OPENSSL_sk_value(const OPENSSL_STACK*, int);
@@ -143,7 +144,8 @@ extern "C" int32_t X509_NAME_get0_der(X509_NAME* x509Name, const uint8_t** pder,
 extern "C" int32_t X509_PUBKEY_get0_param(
     ASN1_OBJECT** palgOid, const uint8_t** pkeyBytes, int* pkeyBytesLen, X509_ALGOR** palg, X509_PUBKEY* pubkey);
 extern "C" X509* X509_STORE_CTX_get0_cert(X509_STORE_CTX* ctx);
-extern "C" STACK_OF(X509) * X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx);
+extern "C" STACK_OF(X509)* X509_STORE_CTX_get0_chain(X509_STORE_CTX* ctx);
+extern "C" STACK_OF(X509)* X509_STORE_CTX_get0_untrusted(X509_STORE_CTX* ctx);
 extern "C" const ASN1_TIME* X509_get0_notAfter(const X509* x509);
 extern "C" const ASN1_TIME* X509_get0_notBefore(const X509* x509);
 extern "C" ASN1_BIT_STRING* X509_get0_pubkey_bitstr(const X509* x509);
@@ -151,6 +153,10 @@ extern "C" const X509_ALGOR* X509_get0_tbs_sigalg(const X509* x509);
 extern "C" X509_PUBKEY* X509_get_X509_PUBKEY(const X509* x509);
 extern "C" int32_t X509_get_version(const X509* x509);
 extern "C" int32_t X509_up_ref(X509* x509);
+#endif
+
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_0_2_RTM
+extern "C" X509_STORE* X509_STORE_CTX_get0_store(X509_STORE_CTX* ctx);
 #endif
 
 #if !HAVE_OPENSSL_ALPN
@@ -354,6 +360,7 @@ extern "C" void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** pro
     RENAMED_FUNCTION(OPENSSL_sk_free, sk_free) \
     RENAMED_FUNCTION(OPENSSL_sk_new_null, sk_new_null) \
     RENAMED_FUNCTION(OPENSSL_sk_num, sk_num) \
+    RENAMED_FUNCTION(OPENSSL_sk_pop, sk_pop) \
     RENAMED_FUNCTION(OPENSSL_sk_pop_free, sk_pop_free) \
     RENAMED_FUNCTION(OPENSSL_sk_push, sk_push) \
     RENAMED_FUNCTION(OPENSSL_sk_value, sk_value) \
@@ -478,13 +485,17 @@ extern "C" void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** pro
     FALLBACK_FUNCTION(X509_PUBKEY_get0_param) \
     REQUIRED_FUNCTION(X509_STORE_add_cert) \
     REQUIRED_FUNCTION(X509_STORE_add_crl) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_cleanup) \
     REQUIRED_FUNCTION(X509_STORE_CTX_free) \
-    REQUIRED_FUNCTION(X509_STORE_CTX_get0_param) \
-    REQUIRED_FUNCTION(X509_STORE_CTX_get1_chain) \
     REQUIRED_FUNCTION(X509_STORE_CTX_get_error) \
     REQUIRED_FUNCTION(X509_STORE_CTX_get_error_depth) \
     FALLBACK_FUNCTION(X509_STORE_CTX_get0_cert) \
+    FALLBACK_FUNCTION(X509_STORE_CTX_get0_chain) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_get0_param) \
+    FALLBACK_FUNCTION(X509_STORE_CTX_get0_store) \
     FALLBACK_FUNCTION(X509_STORE_CTX_get0_untrusted) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_get1_chain) \
+    REQUIRED_FUNCTION(X509_STORE_CTX_get1_issuer) \
     REQUIRED_FUNCTION(X509_STORE_CTX_init) \
     REQUIRED_FUNCTION(X509_STORE_CTX_new) \
     REQUIRED_FUNCTION(X509_STORE_CTX_set_flags) \
@@ -699,6 +710,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define OPENSSL_sk_free OPENSSL_sk_free_ptr
 #define OPENSSL_sk_new_null OPENSSL_sk_new_null_ptr
 #define OPENSSL_sk_num OPENSSL_sk_num_ptr
+#define OPENSSL_sk_pop OPENSSL_sk_pop_ptr
 #define OPENSSL_sk_pop_free OPENSSL_sk_pop_free_ptr
 #define OPENSSL_sk_push OPENSSL_sk_push_ptr
 #define OPENSSL_sk_value OPENSSL_sk_value_ptr
@@ -740,6 +752,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define sk_free OPENSSL_sk_free_ptr
 #define sk_new_null OPENSSL_sk_new_null_ptr
 #define sk_num OPENSSL_sk_num_ptr
+#define sk_pop OPENSSL_sk_pop_ptr
 #define sk_pop_free OPENSSL_sk_pop_free_ptr
 #define sk_push OPENSSL_sk_push_ptr
 #define sk_value OPENSSL_sk_value_ptr
@@ -830,11 +843,15 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_PUBKEY_get X509_PUBKEY_get_ptr
 #define X509_STORE_add_cert X509_STORE_add_cert_ptr
 #define X509_STORE_add_crl X509_STORE_add_crl_ptr
+#define X509_STORE_CTX_cleanup X509_STORE_CTX_cleanup_ptr
 #define X509_STORE_CTX_free X509_STORE_CTX_free_ptr
 #define X509_STORE_CTX_get0_cert X509_STORE_CTX_get0_cert_ptr
+#define X509_STORE_CTX_get0_chain X509_STORE_CTX_get0_chain_ptr
 #define X509_STORE_CTX_get0_param X509_STORE_CTX_get0_param_ptr
 #define X509_STORE_CTX_get0_untrusted X509_STORE_CTX_get0_untrusted_ptr
+#define X509_STORE_CTX_get0_store X509_STORE_CTX_get0_store_ptr
 #define X509_STORE_CTX_get1_chain X509_STORE_CTX_get1_chain_ptr
+#define X509_STORE_CTX_get1_issuer X509_STORE_CTX_get1_issuer_ptr
 #define X509_STORE_CTX_get_error X509_STORE_CTX_get_error_ptr
 #define X509_STORE_CTX_get_error_depth X509_STORE_CTX_get_error_depth_ptr
 #define X509_STORE_CTX_init X509_STORE_CTX_init_ptr
@@ -876,6 +893,9 @@ FOR_ALL_OPENSSL_FUNCTIONS
 // type-safe OPENSSL_sk_push
 #define sk_X509_push(stack,value) OPENSSL_sk_push((OPENSSL_STACK*)(1 ? stack : (STACK_OF(X509)*)0), (const void*)(1 ? value : (X509*)0))
 #define sk_X509_NAME_push(stack,value) OPENSSL_sk_push((OPENSSL_STACK*)(1 ? stack : (STACK_OF(X509_NAME)*)0), (const void*)(1 ? value : (X509_NAME*)0))
+
+// type-safe OPENSSL_sk_pop
+#define sk_X509_pop(stack) (X509*)OPENSSL_sk_pop((OPENSSL_STACK*)(1 ? stack : (STACK_OF(X509)*)0))
 
 // type-safe OPENSSL_sk_pop_free
 #define sk_X509_pop_free(stack, freefunc) OPENSSL_sk_pop_free((OPENSSL_STACK*)(1 ? stack : (STACK_OF(X509)*)0), (OPENSSL_sk_freefunc)(1 ? freefunc : (sk_X509_freefunc)0))
@@ -923,6 +943,8 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_NAME_get0_der local_X509_NAME_get0_der
 #define X509_PUBKEY_get0_param local_X509_PUBKEY_get0_param
 #define X509_STORE_CTX_get0_cert local_X509_STORE_CTX_get0_cert
+#define X509_STORE_CTX_get0_chain local_X509_STORE_CTX_get0_chain
+#define X509_STORE_CTX_get0_store local_X509_STORE_CTX_get0_store
 #define X509_STORE_CTX_get0_untrusted local_X509_STORE_CTX_get0_untrusted
 #define X509_get0_notAfter local_X509_get0_notAfter
 #define X509_get0_notBefore local_X509_get0_notBefore
@@ -932,12 +954,20 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_get_version local_X509_get_version
 #define X509_up_ref local_X509_up_ref
 
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_0_2_RTM
+
+#define X509_STORE_CTX_get0_store local_X509_STORE_CTX_get0_store
+
+#endif
+
+
 // Restore the old names for RENAMED_FUNCTION functions.
 #define EVP_MD_CTX_free EVP_MD_CTX_destroy
 #define EVP_MD_CTX_new EVP_MD_CTX_create
 #define OPENSSL_sk_free sk_free
 #define OPENSSL_sk_new_null sk_new_null
 #define OPENSSL_sk_num sk_num
+#define OPENSSL_sk_pop sk_pop
 #define OPENSSL_sk_pop_free sk_pop_free
 #define OPENSSL_sk_push sk_push
 #define OPENSSL_sk_value sk_value
