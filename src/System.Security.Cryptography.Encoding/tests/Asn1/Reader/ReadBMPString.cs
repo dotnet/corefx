@@ -335,7 +335,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal(252, outputData[0]);
         }
 
-        private static void TryCopyBMPString_ThrowsCore(PublicEncodingRules ruleSet, byte[] inputData)
+        private static void TryCopyBMPString_Throws(PublicEncodingRules ruleSet, byte[] inputData)
         {
             char[] outputData = new char[inputData.Length + 1];
             outputData[0] = 'a';
@@ -442,7 +442,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
-            TryCopyBMPString_ThrowsCore(ruleSet, inputData);
+            TryCopyBMPString_Throws(ruleSet, inputData);
         }
 
         [Fact]
@@ -471,7 +471,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[5] = 0xE9;
             // EOC implicit since the byte[] initializes to zeros
 
-            TryCopyBMPString_ThrowsCore(PublicEncodingRules.CER, input);
+            TryCopyBMPString_Throws(PublicEncodingRules.CER, input);
         }
 
         [Fact]
@@ -509,7 +509,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[1011] = 0x02;
             // EOC implicit since the byte[] initializes to zeros
 
-            TryCopyBMPString_ThrowsCore(PublicEncodingRules.CER, input);
+            TryCopyBMPString_Throws(PublicEncodingRules.CER, input);
         }
 
         [Fact]

@@ -322,7 +322,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             Assert.Equal(252, outputData[0]);
         }
 
-        private static void TryCopyIA5String_ThrowsCore(PublicEncodingRules ruleSet, byte[] inputData)
+        private static void TryCopyIA5String_Throws(PublicEncodingRules ruleSet, byte[] inputData)
         {
             char[] outputData = new char[inputData.Length + 1];
             outputData[0] = 'a';
@@ -404,7 +404,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             string inputHex)
         {
             byte[] inputData = inputHex.HexToByteArray();
-            TryCopyIA5String_ThrowsCore(ruleSet, inputData);
+            TryCopyIA5String_Throws(ruleSet, inputData);
         }
 
         [Fact]
@@ -433,7 +433,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[5] = 0xE9;
             // EOC implicit since the byte[] initializes to zeros
 
-            TryCopyIA5String_ThrowsCore(PublicEncodingRules.CER, input);
+            TryCopyIA5String_Throws(PublicEncodingRules.CER, input);
         }
 
         [Fact]
@@ -471,7 +471,7 @@ namespace System.Security.Cryptography.Tests.Asn1
             input[1011] = 0x02;
             // EOC implicit since the byte[] initializes to zeros
 
-            TryCopyIA5String_ThrowsCore(PublicEncodingRules.CER, input);
+            TryCopyIA5String_Throws(PublicEncodingRules.CER, input);
         }
 
         [Fact]
