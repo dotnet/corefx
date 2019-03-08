@@ -660,8 +660,7 @@ namespace System.Diagnostics
                         {
                             // _firstImplicitTransformsEntry is empty, we should fill it.  
                             // Note that it is OK that two threads may race and both call MakeImplicitTransforms on their own
-                            // (that is we don't expect exactly once initialization of _firstImplicitTransformsEntry
-                            implicitTransforms = MakeImplicitTransforms(argType);
+                            // (that is we don't expect exactly once initialization of _firstImplicitTransformsEntry)                            implicitTransforms = MakeImplicitTransforms(argType);
                             Interlocked.CompareExchange(ref _firstImplicitTransformsEntry, 
                                 new ImplicitTransformEntry() { Type = argType, Transforms = implicitTransforms }, null);
                         }
