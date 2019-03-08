@@ -425,6 +425,12 @@ namespace System.IO.Pipelines
 
         private void AdvanceReader(BufferSegment consumedSegment, int consumedIndex, BufferSegment examinedSegment, int examinedIndex)
         {
+            // Throw if examined < consumed
+            if (consumedSegment != null && consumedSegment != null && GetLength(consumedSegment, consumedIndex, examinedSegment, examinedIndex) < 0)
+            {
+                ThrowHelper.ThrowInvalidOperationException_InvalidExaminedOrConsumedPosition();
+            }
+
             BufferSegment returnStart = null;
             BufferSegment returnEnd = null;
 
@@ -445,7 +451,7 @@ namespace System.IO.Pipelines
 
                     if (examinedBytes < 0)
                     {
-                        ThrowHelper.ThrowInvalidOperationException_AdvanceToInvalidCursor();
+                        ThrowHelper.ThrowInvalidOperationException_InvalidExaminedPosition();
                     }
 
                     _length -= examinedBytes;
