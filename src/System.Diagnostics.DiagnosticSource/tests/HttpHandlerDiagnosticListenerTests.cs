@@ -132,6 +132,8 @@ namespace System.Diagnostics.Tests
                 HttpWebRequest startRequest = ReadPublicProperty<HttpWebRequest>(startEvent.Value, "Request");
                 Assert.NotNull(startRequest);
                 Assert.NotNull(startRequest.Headers["Request-Id"]);
+                Assert.Null(startRequest.Headers["traceparent"]);
+                Assert.Null(startRequest.Headers["tracestate"]);
 
                 KeyValuePair<string, object> stopEvent;
                 Assert.True(eventRecords.Records.TryDequeue(out stopEvent));
