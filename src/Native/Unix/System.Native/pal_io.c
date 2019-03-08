@@ -178,7 +178,7 @@ static void ConvertFileStatus(const struct stat_* src, FileStatus* dst)
 #endif
 
 #if defined(HAVE_STAT_FLAGS) && defined(UF_HIDDEN)
-    dst->UserFlags = (src->st_flags & UF_HIDDEN == UF_HIDDEN) ? PAL_UF_HIDDEN : 0;
+    dst->UserFlags = ((src->st_flags & UF_HIDDEN) == UF_HIDDEN) ? PAL_UF_HIDDEN : 0;
 #else
     dst->UserFlags = 0;
 #endif
