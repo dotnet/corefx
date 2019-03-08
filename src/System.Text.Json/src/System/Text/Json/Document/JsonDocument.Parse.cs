@@ -12,6 +12,8 @@ namespace System.Text.Json
 {
     public sealed partial class JsonDocument
     {
+        private static readonly byte[] Utf8Bom = { 0xEF, 0xBB, 0xBF };
+
         private const int UnseekableStreamInitialRentSize = 4096;
 
         /// <summary>
@@ -298,7 +300,7 @@ namespace System.Text.Json
                 {
                     // Ask for 1 more than the length to avoid resizing later,
                     // which is unnecessary in the common case where the stream length doesn't change.
-                    long expectedLength = Math.Max(0, stream.Length - stream.Position) + 1;
+                    long expectedLength = Math.Max(Utf8Bom.Length, stream.Length - stream.Position) + 1;
                     rented = ArrayPool<byte>.Shared.Rent(checked((int)expectedLength));
                 }
                 else
@@ -307,6 +309,27 @@ namespace System.Text.Json
                 }
 
                 int lastRead;
+
+                // Read up to 3 bytes to see if it's the UTF-8 BOM
+                do
+                {
+                    // No need for checking for growth, the minimal rent sizes both guarantee it'll fit.
+                    Debug.Assert(rented.Length >= Utf8Bom.Length);
+
+                    lastRead = stream.Read(
+                        rented,
+                        written,
+                        Utf8Bom.Length - written);
+
+                    written += lastRead;
+                } while (lastRead > 0 && written < Utf8Bom.Length);
+
+                // If we have 3 bytes, and they're the BOM, reset the write position to 0.
+                if (written == Utf8Bom.Length &&
+                    Utf8Bom.AsSpan().SequenceEqual(rented.AsSpan(0, Utf8Bom.Length)))
+                {
+                    written = 0;
+                }
 
                 do
                 {
@@ -357,7 +380,7 @@ namespace System.Text.Json
                 {
                     // Ask for 1 more than the length to avoid resizing later,
                     // which is unnecessary in the common case where the stream length doesn't change.
-                    long expectedLength = Math.Max(0, stream.Length - stream.Position) + 1;
+                    long expectedLength = Math.Max(Utf8Bom.Length, stream.Length - stream.Position) + 1;
                     rented = ArrayPool<byte>.Shared.Rent(checked((int)expectedLength));
                 }
                 else
@@ -366,6 +389,28 @@ namespace System.Text.Json
                 }
 
                 int lastRead;
+
+                // Read up to 3 bytes to see if it's the UTF-8 BOM
+                do
+                {
+                    // No need for checking for growth, the minimal rent sizes both guarantee it'll fit.
+                    Debug.Assert(rented.Length >= Utf8Bom.Length);
+
+                    lastRead = await stream.ReadAsync(
+                        rented,
+                        written,
+                        Utf8Bom.Length - written,
+                        cancellationToken).ConfigureAwait(false);
+
+                    written += lastRead;
+                } while (lastRead > 0 && written < Utf8Bom.Length);
+
+                // If we have 3 bytes, and they're the BOM, reset the write position to 0.
+                if (written == Utf8Bom.Length &&
+                    Utf8Bom.AsSpan().SequenceEqual(rented.AsSpan(0, Utf8Bom.Length)))
+                {
+                    written = 0;
+                }
 
                 do
                 {
