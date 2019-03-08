@@ -873,7 +873,7 @@ namespace System.Diagnostics
                     // Cast away the read-only-ness of _asHexString, and assign the converted value to it.  
                     // We are OK with this because conceptually the class is still read-only.  
                     ref string strRef = ref Unsafe.AsRef(in _asHexString);
-                    strRef = SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2));
+                    Interlocked.CompareExchange(ref strRef, SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong) * 2)), null);
                 }
             }
             return _asHexString;
@@ -1064,7 +1064,7 @@ namespace System.Diagnostics
                     // Cast away the read-only-ness of _asHexString, and assign the converted value to it.  
                     // We are OK with this because conceptually the class is still read-only.  
                     ref string strRef = ref Unsafe.AsRef(in _asHexString);
-                    strRef = ActivityTraceId.SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong)));
+                    Interlocked.CompareExchange(ref strRef, ActivityTraceId.SpanToHexString(new ReadOnlySpan<byte>(idPtr, sizeof(ulong))), null);
                 }
             }
             return _asHexString;
