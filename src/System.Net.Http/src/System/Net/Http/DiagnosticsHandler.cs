@@ -83,6 +83,10 @@ namespace System.Net.Http
                 if (currentActivity.IdFormat == ActivityIdFormat.W3C && !request.Headers.Contains(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName))
                 {
                     request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName, currentActivity.Id);
+                    if (currentActivity.TraceStateString != null)
+                    {
+                        request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceStateHeaderName, currentActivity.TraceStateString);
+                    }
                 }
                 else if(!request.Headers.Contains(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName))
                 {

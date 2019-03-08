@@ -306,7 +306,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public void SendAsync_ExpectedDiagnosticSourceActivityLogging()
+        public void SendAsync_ExpectedDiagnosticSourceActivityLoggingRequestId()
         {
             RemoteInvoke(useSocketsHttpHandlerString =>
             {
@@ -327,6 +327,83 @@ namespace System.Net.Http.Functional.Tests
                     if (kvp.Key.Equals("System.Net.Http.Request")) { requestLogged = true; }
                     else if (kvp.Key.Equals("System.Net.Http.Response")) { responseLogged = true; }
                     else if (kvp.Key.Equals("System.Net.Http.Exception")) { exceptionLogged = true; }
+                    else if (kvp.Key.Equals("System.Net.Http.HttpRequestOut.Start"))
+                    {
+                        Assert.NotNull(kvp.Value);
+                        Assert.NotNull(Activity.Current);
+                        Assert.Equal(parentActivity, Activity.Current.Parent);
+                        GetPropertyValueFromAnonymousTypeInstance<HttpRequestMessage>(kvp.Value, "Request");
+
+                        activityStartLogged = true;
+                    }
+                    else if (kvp.Key.Equals("System.Net.Http.HttpRequestOut.Stop"))
+                    {
+                        Assert.NotNull(kvp.Value);
+                        Assert.NotNull(Activity.Current);
+                        Assert.Equal(parentActivity, Activity.Current.Parent);
+                        Assert.True(Activity.Current.Duration != TimeSpan.Zero);
+                        GetPropertyValueFromAnonymousTypeInstance<HttpRequestMessage>(kvp.Value, "Request");
+                        GetPropertyValueFromAnonymousTypeInstance<HttpResponseMessage>(kvp.Value, "Response");
+                        var requestStatus = GetPropertyValueFromAnonymousTypeInstance<TaskStatus>(kvp.Value, "RequestTaskStatus");
+                        Assert.Equal(TaskStatus.RanToCompletion, requestStatus);
+
+                        activityStopLogged = true;
+                    }
+                });
+
+                using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
+                {
+                    diagnosticListenerObserver.Enable(s => s.Contains("HttpRequestOut"));
+                    using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString))
+                    {
+                        LoopbackServer.CreateServerAsync(async (server, url) =>
+                        {
+                            Task<List<string>> requestLines = server.AcceptConnectionSendResponseAndCloseAsync();
+                            Task<HttpResponseMessage> response = client.GetAsync(url);
+                            await new Task[] { response, requestLines }.WhenAllOrAnyFailed();
+
+                            AssertHeadersAreInjected(requestLines.Result, parentActivity);
+                            response.Result.Dispose();
+                        }).Wait();
+                    }
+
+                    Assert.True(activityStartLogged, "HttpRequestOut.Start was not logged.");
+                    Assert.False(requestLogged, "Request was logged when Activity logging was enabled.");
+                    // Poll with a timeout since logging response is not synchronized with returning a response.
+                    WaitForTrue(() => activityStopLogged, TimeSpan.FromSeconds(1), "HttpRequestOut.Stop was not logged within 1 second timeout.");
+                    Assert.False(exceptionLogged, "Exception was logged for successful request");
+                    Assert.False(responseLogged, "Response was logged when Activity logging was enabled.");
+                    diagnosticListenerObserver.Disable();
+                }
+
+                return SuccessExitCode;
+            }, UseSocketsHttpHandler.ToString()).Dispose();
+        }
+
+        [Fact]
+        public void SendAsync_ExpectedDiagnosticSourceActivityLoggingW3C()
+        {
+            RemoteInvoke(useSocketsHttpHandlerString =>
+            {
+                bool requestLogged = false;
+                bool responseLogged = false;
+                bool activityStartLogged = false;
+                bool activityStopLogged = false;
+                bool exceptionLogged = false;
+
+                Activity parentActivity = new Activity("parent");
+                parentActivity.SetParentId(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom());
+                parentActivity.AddBaggage("moreBaggage", Guid.NewGuid().ToString());
+                parentActivity.Start();
+
+                var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(kvp =>
+                {
+                    if (kvp.Key.Equals("System.Net.Http.Request"))
+                    { requestLogged = true; }
+                    else if (kvp.Key.Equals("System.Net.Http.Response"))
+                    { responseLogged = true; }
+                    else if (kvp.Key.Equals("System.Net.Http.Exception"))
+                    { exceptionLogged = true; }
                     else if (kvp.Key.Equals("System.Net.Http.HttpRequestOut.Start"))
                     {
                         Assert.NotNull(kvp.Value);
@@ -418,6 +495,59 @@ namespace System.Net.Http.Functional.Tests
                     using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString))
                     {
                         client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
+                    }
+
+                    Assert.True(activityStartLogged, "HttpRequestOut.Start was not logged.");
+
+                    // Poll with a timeout since logging response is not synchronized with returning a response.
+                    WaitForTrue(() => activityStopLogged, TimeSpan.FromSeconds(1), "HttpRequestOut.Stop was not logged within 1 second timeout.");
+                    diagnosticListenerObserver.Disable();
+                }
+
+                return SuccessExitCode;
+            }, UseSocketsHttpHandler.ToString()).Dispose();
+        }
+
+        [OuterLoop("Uses external server")]
+        [Fact]
+        public void SendAsync_ExpectedDiagnosticSourceActivityLoggingDoesNotOverwriteW3CTraceParentHeader()
+        {
+            RemoteInvoke(useSocketsHttpHandlerString =>
+            {
+                bool activityStartLogged = false;
+                bool activityStopLogged = false;
+
+                Activity parentActivity = new Activity("parent");
+                parentActivity.SetParentId(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom());
+                parentActivity.TraceStateString = "some=state";
+                parentActivity.Start();
+
+                string customTraceParentHeader = "00-abcdef0123456789abcdef0123456789-abcdef0123456789-01";
+                var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(kvp =>
+                {
+                    if (kvp.Key.Equals("System.Net.Http.HttpRequestOut.Start"))
+                    {
+                        var request = GetPropertyValueFromAnonymousTypeInstance<HttpRequestMessage>(kvp.Value, "Request");
+                        Assert.Single(request.Headers.GetValues("traceparent"));
+                        Assert.False(request.Headers.TryGetValues("tracestate", out var _));
+                        Assert.Equal(customTraceParentHeader, request.Headers.GetValues("traceparent").Single());
+                        
+                        activityStartLogged = true;
+                    }
+                    else if (kvp.Key.Equals("System.Net.Http.HttpRequestOut.Stop"))
+                    {
+                        activityStopLogged = true;
+                    }
+                });
+
+                using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
+                {
+                    diagnosticListenerObserver.Enable();
+                    using (var request = new HttpRequestMessage(HttpMethod.Get, Configuration.Http.RemoteEchoServer))
+                    using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString))
+                    {
+                        request.Headers.Add("traceparent", customTraceParentHeader);
+                        client.SendAsync(request).Result.Dispose();
                     }
 
                     Assert.True(activityStartLogged, "HttpRequestOut.Start was not logged.");
@@ -831,17 +961,47 @@ namespace System.Net.Http.Functional.Tests
             Assert.False(SpinWait.SpinUntil(p, timeout), message);
         }
 
+        private static string GetHeaderValue(string name, List<string> requestLines)
+        {
+            string header = null;
+
+            foreach (var line in requestLines)
+            {
+                if (line.StartsWith(name))
+                {
+                    header = line.Substring(name.Length).Trim(' ', ':');
+                }
+            }
+
+            return header;
+        }
+
         private static void AssertHeadersAreInjected(List<string> requestLines, Activity parent)
         {
-            string requestId = null;
+            string requestId = GetHeaderValue("Request-Id", requestLines);
+            string traceparent = GetHeaderValue("traceparent", requestLines);
+            string tracestate = GetHeaderValue("tracestate", requestLines);
+
+            if (parent.IdFormat == ActivityIdFormat.Hierarchical)
+            {
+                Assert.True(requestId != null, "Request-Id was not injected when instrumentation was enabled");
+                Assert.True(requestId.StartsWith(parent.Id));
+                Assert.NotEqual(parent.Id, requestId);
+                Assert.Null(traceparent);
+                Assert.Null(tracestate);
+            }
+            else if (parent.IdFormat == ActivityIdFormat.W3C)
+            {
+                Assert.Null(requestId);
+                Assert.True(traceparent != null, "traceparent was not injected when W3C instrumentation was enabled");
+                Assert.True(traceparent.StartsWith($"00-{parent.TraceId.ToHexString()}-"));
+                Assert.Equal(parent.TraceStateString, tracestate);
+            }
+
             var correlationContext = new List<NameValueHeaderValue>();
 
             foreach (var line in requestLines)
             {
-                if (line.StartsWith("Request-Id"))
-                {
-                    requestId = line.Substring("Request-Id".Length).Trim(' ', ':');
-                }
                 if (line.StartsWith("Correlation-Context"))
                 {
                     var corrCtxString = line.Substring("Correlation-Context".Length).Trim(' ', ':');
@@ -851,9 +1011,6 @@ namespace System.Net.Http.Functional.Tests
                     }
                 }
             }
-            Assert.True(requestId != null, "Request-Id was not injected when instrumentation was enabled");
-            Assert.True(requestId.StartsWith(parent.Id));
-            Assert.NotEqual(parent.Id, requestId);
 
             List<KeyValuePair<string, string>> baggage = parent.Baggage.ToList();
             Assert.Equal(baggage.Count, correlationContext.Count);
@@ -869,6 +1026,13 @@ namespace System.Net.Http.Functional.Tests
             {
                 Assert.False(line.StartsWith("Request-Id"),
                     "Request-Id header was injected when instrumentation was disabled");
+
+                Assert.False(line.StartsWith("traceparent"),
+                    "traceparent header was injected when instrumentation was disabled");
+
+                Assert.False(line.StartsWith("tracestate"),
+                    "tracestate header was injected when instrumentation was disabled");
+
                 Assert.False(line.StartsWith("Correlation-Context"),
                     "Correlation-Context header was injected when instrumentation was disabled");
             }
