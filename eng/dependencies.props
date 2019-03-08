@@ -31,7 +31,7 @@
     <RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeNativeSystemDataSqlClientSniPackageVersion>
 
     <!-- xunit test dependency version  -->
-    <MicrosoftNetTestSdkPackageVersion>16.0.0-preview-20181205-02</MicrosoftNetTestSdkPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>16.0.1</MicrosoftNETTestSdkPackageVersion>
     <XUnitPackageVersion>2.4.1-pre.build.4059</XUnitPackageVersion>
     <XUnitPerformancePackageVersion>1.0.0-beta-build0020</XUnitPerformancePackageVersion>
     <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
@@ -143,7 +143,7 @@
     </StaticDependency>
 
     <StaticDependency Include="Microsoft.NET.Test.Sdk">
-      <Version>$(MicrosoftNetTestSdkPackageVersion)</Version>
+      <Version>$(MicrosoftNETTestSdkPackageVersion)</Version>
     </StaticDependency>
 
     <PerformancePackDependency Include="xunit.performance.core" />
