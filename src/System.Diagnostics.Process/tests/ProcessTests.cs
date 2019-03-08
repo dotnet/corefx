@@ -1078,16 +1078,15 @@ namespace System.Diagnostics.Tests
             {
                 Assert.NotEmpty(processes);
             }
-            catch(TrueException)
+            catch (TrueException)
             {
                 throw new TrueException(PrintProcesses(), false);
             }
 
             Assert.All(processes, process => Assert.Equal(".", process.MachineName));
-
             return;
 
-            // Print list of active processes in case of failure https://github.com/dotnet/corefx/issues/35783
+            // Outputs a list of active processes in case of failure: https://github.com/dotnet/corefx/issues/35783
             string PrintProcesses()
             {
                 StringBuilder builder = new StringBuilder();
@@ -1104,6 +1103,7 @@ namespace System.Diagnostics.Tests
                     }
                     builder.AppendLine();
                 }
+                
                 builder.AppendFormat("Current process id: {0}", Process.GetCurrentProcess().Id);
                 return builder.ToString();
             }
