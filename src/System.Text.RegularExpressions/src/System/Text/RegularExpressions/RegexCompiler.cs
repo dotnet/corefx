@@ -72,6 +72,7 @@ namespace System.Text.RegularExpressions
         private LocalBuilder _tempV;
         private LocalBuilder _temp2V;
         private LocalBuilder _temp3V;
+        private LocalBuilder _loopV;         // counter for setrep and setloop
 
         protected RegexCode _code;              // the RegexCode object (used for debugging only)
         protected int[] _codes;             // the RegexCodes being translated
@@ -110,6 +111,7 @@ namespace System.Text.RegularExpressions
         private const int Lazybranchcountback2 = 8;    // back2 part of lazybranchcount
         private const int Forejumpback = 9;    // back part of forejump
         private const int Uniquecount = 10;
+        private const int LoopTimeoutCheckCount = 2000; // A conservative value to guarantee the correct timeout handling.
 
         static RegexCompiler()
         {
@@ -365,6 +367,22 @@ namespace System.Text.RegularExpressions
         private void Ret()
         {
             _ilg.Emit(OpCodes.Ret);
+        }
+
+        /*
+         * A macro for _ilg.Emit(OpCodes.Rem)
+         */
+        private void Rem()
+        {
+            _ilg.Emit(OpCodes.Rem);
+        }
+
+        /*
+         * A macro for _ilg.Emit(OpCodes.Ceq)
+         */
+        private void Ceq()
+        {
+            _ilg.Emit(OpCodes.Ceq);
         }
 
         /*
@@ -1584,6 +1602,7 @@ namespace System.Text.RegularExpressions
             _tempV = DeclareInt();
             _temp2V = DeclareInt();
             _temp3V = DeclareInt();
+            _loopV = DeclareInt();
             _textbegV = DeclareInt();
             _textendV = DeclareInt();
             _textstartV = DeclareInt();
@@ -2479,7 +2498,7 @@ namespace System.Text.RegularExpressions
 
                         Ldstr(_strings[Operand(0)]);
                         Call(s_charInSetM);
-
+                        
                         BrfalseFar(_backtrack);
                     }
                     else
@@ -2765,6 +2784,7 @@ namespace System.Text.RegularExpressions
 
                         if (Code() == RegexCode.Setrep)
                         {
+                            EmitTimeoutCheck();
                             Ldstr(_strings[Operand(0)]);
                             Call(s_charInSetM);
 
@@ -2874,6 +2894,7 @@ namespace System.Text.RegularExpressions
 
                         if (Code() == RegexCode.Setloop)
                         {
+                            EmitTimeoutCheck();
                             Ldstr(_strings[Operand(0)]);
                             Call(s_charInSetM);
 
@@ -3082,6 +3103,29 @@ namespace System.Text.RegularExpressions
                 default:
                     throw new NotImplementedException(SR.UnimplementedState);
             }
+        }
+
+        private void EmitTimeoutCheck()
+        {
+            Label label = DefineLabel();
+
+            // Increment counter for each loop iteration.
+            Ldloc(_loopV);
+            Ldc(1);
+            Add();
+            Stloc(_loopV);
+
+            // Emit code to check the timeout every 2000th-iteration.
+            Ldloc(_loopV);
+            Ldc(LoopTimeoutCheckCount);
+            Rem();
+            Ldc(0);
+            Ceq();
+            Brfalse(label);
+            Ldthis();
+            Callvirt(s_checkTimeoutM);
+
+            MarkLabel(label);
         }
     }
 }
