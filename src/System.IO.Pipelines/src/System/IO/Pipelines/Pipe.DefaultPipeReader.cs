@@ -30,6 +30,8 @@ namespace System.IO.Pipelines
 
             public override void AdvanceTo(SequencePosition consumed, SequencePosition examined) => _pipe.AdvanceReader(consumed, examined);
 
+            internal override PipeReaderStream CreateStream() => new DefaultPipeReaderStream(this);
+
             public override void CancelPendingRead() => _pipe.CancelPendingRead();
 
             public override void Complete(Exception exception = null) => _pipe.CompleteReader(exception);
@@ -41,6 +43,22 @@ namespace System.IO.Pipelines
             public ReadResult GetResult(short token) => _pipe.GetReadAsyncResult();
 
             public void OnCompleted(Action<object> continuation, object state, short token, ValueTaskSourceOnCompletedFlags flags) => _pipe.OnReadAsyncCompleted(continuation, state, flags);
+
+            private sealed class DefaultPipeReaderStream : PipeReaderStream
+            {
+                private readonly Pipe _pipe;
+
+                internal DefaultPipeReaderStream(DefaultPipeReader reader) : base(reader) => _pipe = reader._pipe;
+
+                public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
+                {
+                    ValueTask<int> syncResult = default;
+                    ValueTask<ReadResult> asyncResult = default;
+                    return _pipe.TryReadAsync(buffer.Span, cancellationToken, ref syncResult, ref asyncResult) ?
+                        syncResult :
+                        FinishReadAsync(buffer, asyncResult);
+                }
+            }
         }
     }
 }

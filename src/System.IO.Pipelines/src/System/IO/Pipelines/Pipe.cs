@@ -692,6 +692,62 @@ namespace System.IO.Pipelines
             }
         }
 
+        internal bool TryReadAsync(Span<byte> buffer, CancellationToken cancellationToken, ref ValueTask<int> vtInt, ref ValueTask<ReadResult> vtResult)
+        {
+            Debug.Assert(vtInt == default);
+            Debug.Assert(vtResult == default);
+
+            if (_readerCompletion.IsCompleted)
+            {
+                ThrowHelper.ThrowInvalidOperationException_NoReadingAllowed();
+            }
+
+            lock (_sync)
+            {
+                _readerAwaitable.BeginOperation(cancellationToken, s_signalReaderAwaitable, this);
+
+                if (!_readerAwaitable.IsCompleted)
+                {
+                    vtResult = new ValueTask<ReadResult>(_reader, token: 0);
+                    return false; // completing asynchronously
+                }
+
+                GetReadResult(out ReadResult readResult);
+
+                if (readResult.IsCanceled)
+                {
+                    vtInt = new ValueTask<int>(Task.FromCanceled<int>(new CancellationToken(true)));
+                }
+                else
+                {
+                    long bufferLength = readResult._resultBuffer.Length;
+                    SequencePosition end;
+
+                    if (bufferLength == 0)
+                    {
+                        end = readResult._resultBuffer.End;
+                    }
+                    else if (bufferLength <= buffer.Length)
+                    {
+                        readResult._resultBuffer.CopyTo(buffer);
+                        vtInt = new ValueTask<int>((int)bufferLength);
+                        end = readResult._resultBuffer.End;
+                    }
+                    else
+                    {
+                        ReadOnlySequence<byte> slice = readResult._resultBuffer.Slice(0, buffer.Length);
+                        slice.CopyTo(buffer);
+                        vtInt = new ValueTask<int>(buffer.Length);
+                        end = slice.End;
+                    }
+
+                    AdvanceReader(in end, in end);
+                }
+
+                return true; // completed synchronously
+            }
+        }
+
         private static void ScheduleCallbacks(PipeScheduler scheduler, PipeCompletionCallbacks completionCallbacks)
         {
             Debug.Assert(completionCallbacks != null);

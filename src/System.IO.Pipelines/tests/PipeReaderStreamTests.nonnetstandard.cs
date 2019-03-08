@@ -200,6 +200,67 @@ namespace System.IO.Pipelines.Tests
             Assert.True(pipeReader.AdvanceToCalled);
         }
 
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public async Task MultipleReadsToReadAllDataFromPipeReaderAsStream(bool syncCompletion, bool baseAsStream)
+        {
+            var pipe = new Pipe();
+            PipeReader reader = baseAsStream ? new TestAsStreamPipeReader(pipe.Reader) : pipe.Reader;
+            Stream stream = reader.AsStream();
+
+            const int NumReads = 100;
+            const int BytesPerRead = 10;
+            var actualBytes = new byte[NumReads * BytesPerRead];
+            new Random().NextBytes(actualBytes);
+
+            var buffer = new byte[BytesPerRead];
+            ValueTask<int> read;
+
+            if (syncCompletion)
+            {
+                await pipe.Writer.WriteAsync(actualBytes);
+            }
+
+            // Read all the data from the pipe
+            for (int i = 0; i < NumReads; i++)
+            {
+                read = stream.ReadAsync(buffer);
+                if (!syncCompletion)
+                {
+                    await pipe.Writer.WriteAsync(actualBytes.AsSpan(i * BytesPerRead, BytesPerRead).ToArray());
+                }
+                Assert.Equal(BytesPerRead, await read);
+            }
+
+            // Have a pending read and cancel it
+            read = stream.ReadAsync(buffer);
+            pipe.CancelPendingRead();
+            await Assert.ThrowsAsync<OperationCanceledException>(async () => await read);
+
+            // Complete the pipe and read EOF
+            if (syncCompletion)
+            {
+                pipe.Writer.Complete();
+                Assert.Equal(0, await stream.ReadAsync(buffer));
+            }
+            else
+            {
+                read = stream.ReadAsync(buffer);
+                pipe.Writer.Complete();
+                Assert.Equal(0, await read);
+            }
+
+            // Reading again returns 0 again
+            Assert.Equal(0, await stream.ReadAsync(buffer));
+
+            // Try to read after it's been completed.
+            reader.Complete();
+            Assert.Throws<InvalidOperationException>(() => { stream.ReadAsync(buffer); });
+        }
+
         [Fact]
         public void AsStreamReturnsSameInstance()
         {
@@ -288,6 +349,23 @@ namespace System.IO.Pipelines.Tests
             {
                 throw new NotImplementedException();
             }
+        }
+
+        /// <summary>Delegates to the wrapped reader for all operations other than AsStream.</summary>
+        internal sealed class TestAsStreamPipeReader : PipeReader
+        {
+            private PipeReader _reader;
+
+            public TestAsStreamPipeReader(PipeReader reader) => _reader = reader;
+
+            public override void AdvanceTo(SequencePosition consumed) => _reader.AdvanceTo(consumed);
+            public override void AdvanceTo(SequencePosition consumed, SequencePosition examined) => _reader.AdvanceTo(consumed, examined);
+            public override void CancelPendingRead() => _reader.CancelPendingRead();
+            public override void Complete(Exception exception = null) => _reader.Complete(exception);
+            public override Task CopyToAsync(Stream destination, CancellationToken cancellationToken = default(CancellationToken)) => _reader.CopyToAsync(destination, cancellationToken);
+            public override void OnWriterCompleted(Action<Exception, object> callback, object state) => _reader.OnWriterCompleted(callback, state);
+            public override ValueTask<ReadResult> ReadAsync(CancellationToken cancellationToken = default(CancellationToken)) => _reader.ReadAsync(cancellationToken);
+            public override bool TryRead(out ReadResult result) => _reader.TryRead(out result);
         }
 
         public static IEnumerable<object[]> ReadCalls

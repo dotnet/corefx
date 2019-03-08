@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace System.IO.Pipelines
 {
-    internal sealed class PipeReaderStream : Stream
+    internal class PipeReaderStream : Stream
     {
         private readonly PipeReader _pipeReader;
 
@@ -20,30 +20,30 @@ namespace System.IO.Pipelines
             _pipeReader = pipeReader;
         }
 
-        public override bool CanRead => true;
+        public sealed override bool CanRead => true;
 
-        public override bool CanSeek => false;
+        public sealed override bool CanSeek => false;
 
-        public override bool CanWrite => false;
+        public sealed override bool CanWrite => false;
 
-        public override long Length => throw new NotSupportedException();
+        public sealed override long Length => throw new NotSupportedException();
 
-        public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+        public sealed override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
 
-        public override void Flush()
+        public sealed override void Flush()
         {
         }
 
-        public override int Read(byte[] buffer, int offset, int count)
+        public sealed override int Read(byte[] buffer, int offset, int count)
         {
             return ReadAsync(buffer, offset, count).GetAwaiter().GetResult();
         }
 
-        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public sealed override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
-        public override void SetLength(long value) => throw new NotSupportedException();
+        public sealed override void SetLength(long value) => throw new NotSupportedException();
 
-        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+        public sealed override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 
         public sealed override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state) =>
             TaskToApm.Begin(ReadAsync(buffer, offset, count, default), callback, state);
@@ -51,22 +51,20 @@ namespace System.IO.Pipelines
         public sealed override int EndRead(IAsyncResult asyncResult) =>
             TaskToApm.End<int>(asyncResult);
 
-        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-        {
-            return ReadAsyncInternal(new Memory<byte>(buffer, offset, count), cancellationToken).AsTask();
-        }
+        public sealed override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
+            ReadAsyncInternal(new Memory<byte>(buffer, offset, count), cancellationToken).AsTask();
 
 #if !netstandard
-        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
-        {
-            return ReadAsyncInternal(buffer, cancellationToken);
-        }
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default) =>
+            ReadAsyncInternal(buffer, cancellationToken);
 #endif
 
-        private async ValueTask<int> ReadAsyncInternal(Memory<byte> buffer, CancellationToken cancellationToken)
-        {
-            ReadResult result = await _pipeReader.ReadAsync(cancellationToken).ConfigureAwait(false);
+        private ValueTask<int> ReadAsyncInternal(Memory<byte> buffer, CancellationToken cancellationToken) =>
+            FinishReadAsync(buffer, _pipeReader.ReadAsync(cancellationToken));
 
+        internal async ValueTask<int> FinishReadAsync(Memory<byte> buffer, ValueTask<ReadResult> task)
+        {
+            ReadResult result = await task.ConfigureAwait(false);
             if (result.IsCanceled)
             {
                 ThrowHelper.ThrowOperationCanceledException_ReadCanceled();
@@ -105,7 +103,7 @@ namespace System.IO.Pipelines
             return 0;
         }
 
-        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        public sealed override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
         {
             // Delegate to CopyToAsync on the PipeReader
             return _pipeReader.CopyToAsync(destination, cancellationToken);

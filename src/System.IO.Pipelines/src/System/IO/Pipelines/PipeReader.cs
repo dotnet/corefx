@@ -54,10 +54,11 @@ namespace System.IO.Pipelines
         /// Returns a <see cref="Stream"/> that wraps the <see cref="PipeReader"/>.
         /// </summary>
         /// <returns>The <see cref="Stream"/>.</returns>
-        public virtual Stream AsStream()
-        {
-            return _stream ?? (_stream = new PipeReaderStream(this));
-        }
+        public virtual Stream AsStream() => _stream ?? (_stream = CreateStream());
+
+        /// <summary>Creates a <see cref="Stream"/> to be returned from <see cref="AsStream"/>.</summary>
+        /// <returns>The <see cref="Stream"/>.</returns>
+        internal virtual PipeReaderStream CreateStream() => new PipeReaderStream(this);
 
         /// <summary>
         /// Cancel to currently pending or if none is pending next call to <see cref="ReadAsync"/>, without completing the <see cref="PipeReader"/>.
