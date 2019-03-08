@@ -658,7 +658,9 @@ namespace System.Diagnostics
                         }
                         else if (cacheEntry == null)
                         {
-                            // _firstImplicitTransformsEntry, we should fill it.  
+                            // _firstImplicitTransformsEntry is empty, we should fill it.  
+                            // Note that it is OK that two threads may race and both call MakeImplicitTransforms on their own
+                            // (that is we don't expect exactly once initialization of _firstImplicitTransformsEntry
                             implicitTransforms = MakeImplicitTransforms(argType);
                             Interlocked.CompareExchange(ref _firstImplicitTransformsEntry, 
                                 new ImplicitTransformEntry() { Type = argType, Transforms = implicitTransforms }, null);
@@ -674,7 +676,7 @@ namespace System.Diagnostics
                                 Interlocked.CompareExchange(ref _implicitTransformsTable,
                                     new ConcurrentDictionary<Type, TransformSpec>(1, 8), null);
                             }
-                            implicitTransforms = _implicitTransformsTable.GetOrAdd(argType, MakeImplicitTransforms);
+                            implicitTransforms = _implicitTransformsTable.GetOrAdd(argType, type => MakeImplicitTransforms(type));
                         }
 
                         // implicitTransformas now fetched from cache or constructed, use it to Fetch all the implicit fields.  
