@@ -142,10 +142,6 @@
       <Version>$(XUnitPackageVersion)</Version>
     </StaticDependency>
 
-    <StaticDependency Include="Microsoft.NET.Test.Sdk">
-      <Version>$(MicrosoftNETTestSdkPackageVersion)</Version>
-    </StaticDependency>
-
     <PerformancePackDependency Include="xunit.performance.core" />
     <PerformancePackDependency Include="xunit.performance.api" />
     <PerformancePackDependency Include="xunit.performance.execution" />
