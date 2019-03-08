@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -147,6 +148,91 @@ namespace System.Diagnostics.Tests
         /// </summary>
         [OuterLoop]
         [Fact]
+        public async Task TestW3CHeaders()
+        {
+            try
+            {
+                using (var eventRecords = new EventObserverAndRecorder())
+                {
+                    Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+                    Activity.ForceDefaultIdFormat = true;
+                    // Send a random Http request to generate some events
+                    using (var client = new HttpClient())
+                    {
+                        (await client.GetAsync(Configuration.Http.RemoteEchoServer)).Dispose();
+                    }
+
+                    // Check to make sure: The first record must be a request, the next record must be a response. 
+                    KeyValuePair<string, object> startEvent;
+                    Assert.True(eventRecords.Records.TryDequeue(out startEvent));
+                    Assert.Equal("System.Net.Http.Desktop.HttpRequestOut.Start", startEvent.Key);
+                    HttpWebRequest startRequest = ReadPublicProperty<HttpWebRequest>(startEvent.Value, "Request");
+                    Assert.NotNull(startRequest);
+
+                    var traceparent = startRequest.Headers["traceparent"];
+                    Assert.NotNull(traceparent);
+                    Assert.True(Regex.IsMatch(traceparent, "^[0-9a-f][0-9a-f]-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f][0-9a-f]$"));
+                    Assert.Null(startRequest.Headers["tracestate"]);
+                    Assert.Null(startRequest.Headers["Request-Id"]);
+                }
+            }
+            finally
+            {
+                CleanUp();
+            }
+        }
+
+        /// <summary>
+        /// Test to make sure we get both request and response events.
+        /// </summary>
+        [OuterLoop]
+        [Fact]
+        public async Task TestW3CHeadersTraceState()
+        {
+            try
+            {
+                using (var eventRecords = new EventObserverAndRecorder())
+                {
+                    var parent = new Activity("w3c activity");
+                    parent.SetParentId(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom());
+                    parent.TraceStateString = "some=state";
+                    parent.Start();
+
+                    // Send a random Http request to generate some events
+                    using (var client = new HttpClient())
+                    {
+                        (await client.GetAsync(Configuration.Http.RemoteEchoServer)).Dispose();
+                    }
+
+                    parent.Stop();
+
+                    // Check to make sure: The first record must be a request, the next record must be a response. 
+                    KeyValuePair<string, object> startEvent;
+                    Assert.True(eventRecords.Records.TryDequeue(out startEvent));
+                    Assert.Equal("System.Net.Http.Desktop.HttpRequestOut.Start", startEvent.Key);
+                    HttpWebRequest startRequest = ReadPublicProperty<HttpWebRequest>(startEvent.Value, "Request");
+                    Assert.NotNull(startRequest);
+
+                    var traceparent = startRequest.Headers["traceparent"];
+                    var tracestate = startRequest.Headers["tracestate"];
+                    Assert.NotNull(traceparent);
+                    Assert.Equal("some=state", tracestate);
+                    Assert.True(traceparent.StartsWith($"00-{parent.TraceId.ToHexString()}-"));
+                    Assert.True(Regex.IsMatch(traceparent, "^[0-9a-f]{2}-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$"));
+                    Assert.Null(startRequest.Headers["Request-Id"]);
+                }
+            }
+            finally
+            {
+                CleanUp();
+            }
+        }
+
+        /// <summary>
+        /// Test to make sure we get both request and response events.
+        /// </summary>
+        [OuterLoop]
+        [Fact]
         public async Task TestResponseWithoutContentEvents()
         {
             using (var eventRecords = new EventObserverAndRecorder())
@@ -237,7 +323,7 @@ namespace System.Diagnostics.Tests
         public async Task TestCanceledRequest()
         {
             CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            using (var eventRecords = new EventObserverAndRecorder( _ => { cts.Cancel();}))
+            using (var eventRecords = new EventObserverAndRecorder(_ => { cts.Cancel(); }))
             {
                 using (var client = new HttpClient())
                 {
@@ -483,6 +569,18 @@ namespace System.Diagnostics.Tests
                         Assert.NotNull(pair.Value.Item2);
                     }
                 }
+            }
+        }
+
+
+        public void CleanUp()
+        {
+            Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
+            Activity.ForceDefaultIdFormat = false;
+
+            while (Activity.Current != null)
+            {
+                Activity.Current.Stop();
             }
         }
 
