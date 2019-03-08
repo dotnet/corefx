@@ -14,7 +14,6 @@ namespace System.Tests
         protected abstract string InvariantToStringDouble(double d, string format);
         protected abstract string InvariantToStringSingle(float f, string format);
 
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/35566")]
         [Theory]
         [InlineData(double.Epsilon, "¤0.00")]
         [InlineData(double.MaxValue, "¤179,769,313,486,231,570,814,527,423,731,704,356,798,070,567,525,844,996,598,917,476,803,157,260,780,028,538,760,589,558,632,766,878,171,540,458,953,514,382,464,234,321,326,889,464,182,768,467,546,703,537,516,986,049,910,576,551,282,076,245,490,090,389,328,944,075,868,508,455,133,942,304,583,236,903,222,948,165,808,559,332,123,348,274,797,826,204,144,723,168,738,177,180,919,299,881,250,404,026,184,124,858,368.00")]
@@ -26,7 +25,6 @@ namespace System.Tests
         [InlineData(1844674407370955.25, "¤1,844,674,407,370,955.25")]
         public void TestFormatterDouble_C(double value, string expectedResult) => TestFormatterDouble_Standard(value, "C", expectedResult);
 
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/35566")]
         [Theory]
         [InlineData(double.Epsilon, "¤0.0000")]
         [InlineData(double.MaxValue, "¤179,769,313,486,231,570,814,527,423,731,704,356,798,070,567,525,844,996,598,917,476,803,157,260,780,028,538,760,589,558,632,766,878,171,540,458,953,514,382,464,234,321,326,889,464,182,768,467,546,703,537,516,986,049,910,576,551,282,076,245,490,090,389,328,944,075,868,508,455,133,942,304,583,236,903,222,948,165,808,559,332,123,348,274,797,826,204,144,723,168,738,177,180,919,299,881,250,404,026,184,124,858,368.0000")]
@@ -38,7 +36,6 @@ namespace System.Tests
         [InlineData(1844674407370955.25, "¤1,844,674,407,370,955.2500")]
         public void TestFormatterDouble_C4(double value, string expectedResult) => TestFormatterDouble_Standard(value, "C4", expectedResult);
 
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/35566")]
         [Theory]
         [InlineData(double.Epsilon, "¤0.00000000000000000000")]
         [InlineData(double.MaxValue, "¤179,769,313,486,231,570,814,527,423,731,704,356,798,070,567,525,844,996,598,917,476,803,157,260,780,028,538,760,589,558,632,766,878,171,540,458,953,514,382,464,234,321,326,889,464,182,768,467,546,703,537,516,986,049,910,576,551,282,076,245,490,090,389,328,944,075,868,508,455,133,942,304,583,236,903,222,948,165,808,559,332,123,348,274,797,826,204,144,723,168,738,177,180,919,299,881,250,404,026,184,124,858,368.00000000000000000000")]
@@ -263,7 +260,6 @@ namespace System.Tests
             Assert.Equal(expectedResult, actualResult);
         }
 
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/35566")]
         [Theory]
         [InlineData(float.Epsilon, "¤0.00")]
         [InlineData(float.MaxValue, "¤340,282,346,638,528,859,811,704,183,484,516,925,440.00")]
@@ -275,7 +271,6 @@ namespace System.Tests
         [InlineData(429496.72, "¤429,496.72")]
         public void TestFormatterSingle_C(float value, string expectedResult) => TestFormatterSingle_Standard(value, "C", expectedResult);
 
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/35566")]
         [Theory]
         [InlineData(float.Epsilon, "¤0.0000")]
         [InlineData(float.MaxValue, "¤340,282,346,638,528,859,811,704,183,484,516,925,440.0000")]
@@ -287,7 +282,6 @@ namespace System.Tests
         [InlineData(429496.72, "¤429,496.7188")]
         public void TestFormatterSingle_C4(float value, string expectedResult) => TestFormatterSingle_Standard(value, "C4", expectedResult);
 
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/35566")]
         [Theory]
         [InlineData(float.Epsilon, "¤0.00000000000000000000")]
         [InlineData(float.MaxValue, "¤340,282,346,638,528,859,811,704,183,484,516,925,440.00000000000000000000")]
