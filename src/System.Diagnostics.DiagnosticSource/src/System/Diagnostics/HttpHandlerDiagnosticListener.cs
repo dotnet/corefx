@@ -605,31 +605,44 @@ namespace System.Diagnostics
 
                 if (activity.IdFormat == ActivityIdFormat.W3C)
                 {
-                    request.Headers.Add(TraceParentHeaderName, activity.Id);
-                    if (activity.TraceStateString != null)
+                    // do not inject header if it was injected already 
+                    // perhaps tracing systems wants to override it
+                    if (request.Headers[TraceParentHeaderName] == null)
                     {
-                        request.Headers.Add(TraceStateHeaderName, activity.TraceStateString);
+                        request.Headers.Add(TraceParentHeaderName, activity.Id);
+                        if (activity.TraceStateString != null)
+                        {
+                            request.Headers.Add(TraceStateHeaderName, activity.TraceStateString);
+                        }
                     }
                 }
                 else
                 {
-                    request.Headers.Add(RequestIdHeaderName, activity.Id);
+                    // do not inject header if it was injected already 
+                    // perhaps tracing systems wants to override it
+                    if (request.Headers[RequestIdHeaderName] == null)
+                    {
+                        request.Headers.Add(RequestIdHeaderName, activity.Id);
+                    }
                 }
 
-                // we expect baggage to be empty or contain a few items
-                using (IEnumerator<KeyValuePair<string, string>> e = activity.Baggage.GetEnumerator())
+                if (request.Headers[CorrelationContextHeaderName] == null)
                 {
-                    if (e.MoveNext())
+                    // we expect baggage to be empty or contain a few items
+                    using (IEnumerator<KeyValuePair<string, string>> e = activity.Baggage.GetEnumerator())
                     {
-                        StringBuilder baggage = new StringBuilder();
-                        do
+                        if (e.MoveNext())
                         {
-                            KeyValuePair<string, string> item = e.Current;
-                            baggage.Append(item.Key).Append('=').Append(item.Value).Append(',');
+                            StringBuilder baggage = new StringBuilder();
+                            do
+                            {
+                                KeyValuePair<string, string> item = e.Current;
+                                baggage.Append(item.Key).Append('=').Append(item.Value).Append(',');
+                            }
+                            while (e.MoveNext());
+                            baggage.Remove(baggage.Length - 1, 1);
+                            request.Headers.Add(CorrelationContextHeaderName, baggage.ToString());
                         }
-                        while (e.MoveNext());
-                        baggage.Remove(baggage.Length - 1, 1);
-                        request.Headers.Add(CorrelationContextHeaderName, baggage.ToString());
                     }
                 }
 
