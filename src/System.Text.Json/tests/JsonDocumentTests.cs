@@ -38,6 +38,9 @@ namespace System.Text.Json.Tests
                 new object[] { "\u00EF\u00BB\u00BE1" },
                 new object[] { "\u00EF\u00BB\u00FB" },
                 new object[] { "\u00EF\u00BB\u00FB1" },
+
+                // Legal BOM, but no payload.
+                new object[] { "\u00EF\u00BB\u00BF" },
             };
 
         public static IEnumerable<object[]> ReducedTestCases { get; } =
