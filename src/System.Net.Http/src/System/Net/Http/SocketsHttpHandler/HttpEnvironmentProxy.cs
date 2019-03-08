@@ -93,9 +93,11 @@ namespace System.Net.Http
         private const string EnvAllProxyUC = "ALL_PROXY";
         private const string EnvAllProxyLC = "all_proxy";
         private const string EnvHttpProxyLC = "http_proxy";
+        private const string EnvHttpProxyUC = "HTTP_PROXY";
         private const string EnvHttpsProxyLC = "https_proxy";
         private const string EnvHttpsProxyUC = "HTTPS_PROXY";
         private const string EnvNoProxyLC = "no_proxy";
+        private const string EnvNoProxyUC = "NO_PROXY";
 
         private Uri _httpProxyUri;      // String URI for HTTP requests
         private Uri _httpsProxyUri;     // String URI for HTTPS requests
@@ -109,7 +111,8 @@ namespace System.Net.Http
             // Note that curl uses HTTPS_PROXY but not HTTP_PROXY.
             // For http, only http_proxy and generic variables are used.
 
-            Uri httpProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpProxyLC));
+            Uri httpProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpProxyLC)) ??
+                             GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpProxyUC));
             Uri httpsProxy = GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyLC)) ??
                              GetUriFromString(Environment.GetEnvironmentVariable(EnvHttpsProxyUC));
 
@@ -135,8 +138,8 @@ namespace System.Net.Http
                 proxy = null;
                 return false;
             }
-
-            proxy = new HttpEnvironmentProxy(httpProxy, httpsProxy, Environment.GetEnvironmentVariable(EnvNoProxyLC));
+			string noProxy = Environment.GetEnvironmentVariable(EnvNoProxyLC) ?? Environment.GetEnvironmentVariable(EnvNoProxyUC);
+            proxy = new HttpEnvironmentProxy(httpProxy, httpsProxy, noProxy);
             return true;
         }
 
