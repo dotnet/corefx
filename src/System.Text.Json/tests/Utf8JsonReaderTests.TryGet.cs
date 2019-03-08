@@ -12,6 +12,55 @@ namespace System.Text.Json.Tests
 {
     public static partial class Utf8JsonReaderTests
     {
+        // Test string, Argument to DateTime(Offset).Parse(Exact)
+        public static IEnumerable<object[]> ValidISO8601Tests()
+        {
+            yield return new object[] { "\"0997-07-16\"", "0997-07-16" };
+            yield return new object[] { "\"1997-07-16\"", "1997-07-16" };
+            yield return new object[] { "\"1997-07-16T19:20\"", "1997-07-16T19:20" };
+            yield return new object[] { "\"1997-07-16T19:20:30\"", "1997-07-16T19:20:30" };
+            yield return new object[] { "\"1997-07-16T19:20:30.45\"", "1997-07-16T19:20:30.45" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555\"", "1997-07-16T19:20:30.4555555" };
+
+            // Skip test T24:00 till #35830 is fixed.
+            // yield return new object[] { "\"1997-07-16T24:00\"", "1997-07-16T24:00" };
+
+            // Test fraction rounding.
+            yield return new object[] { "\"1997-07-16T19:20:30.45555554\"", "1997-07-16T19:20:30.45555554" };
+            // We expect the parser to truncate. `DateTime(Offset).Parse` will round up to 7dp in this case,
+            // so we pass a string representing the Datetime(Offset) we expect to the `Parse` method.
+            yield return new object[] { "\"1997-07-16T19:20:30.45555555\"", "1997-07-16T19:20:30.4555555" };
+
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555+01:00\"", "1997-07-16T19:20:30.4555555+01:00" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555-01:00\"", "1997-07-16T19:20:30.4555555-01:00" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555+04:30\"", "1997-07-16T19:20:30.4555555+04:30" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555-04:30\"", "1997-07-16T19:20:30.4555555-04:30" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555+0100\"", "1997-07-16T19:20:30.4555555+01:00" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555-0100\"", "1997-07-16T19:20:30.4555555-01:00" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555+0430\"", "1997-07-16T19:20:30.4555555+04:30" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555-0430\"", "1997-07-16T19:20:30.4555555-04:30" };
+        }
+
+        public static IEnumerable<object[]> InvalidISO8601Tests()
+        {
+            // Test junk data appended.
+            yield return new object[] { "\"0997-07-160997-07-16\"" };
+            yield return new object[] { "\"0997-07-16abc\"" };
+            yield return new object[] { "\"0997-07-16,0997-07-16\"" };
+            yield return new object[] { "\"1997-07-16T19:20abc\"" };
+            yield return new object[] { "\"1997-07-16T19:20, 123\"" };
+
+            // Other invalid strings.
+            yield return new object[] { "\"997-07-16\"" };
+            yield return new object[] { "\"1997-07\"" };
+            yield return new object[] { "\"1997-7-06\"" };
+            yield return new object[] { "\"1997-07-16T\"" };
+            yield return new object[] { "\"1997-07-6\"" };
+            yield return new object[] { "\"1997-07-6T01\"" };
+            yield return new object[] { "\"1997-07-16Z\"" };
+            yield return new object[] { "\"1997-07-16+01:00\"" };
+        }
+
         [Fact]
         public static void TestingNumbers_TryGetMethods()
         {
@@ -490,6 +539,38 @@ namespace System.Text.Json.Tests
                     }
                     catch (InvalidOperationException)
                     { }
+
+                    try
+                    {
+                        DateTime value = json.GetDateTime();
+                        Assert.True(false, "Expected GetDateTime to throw InvalidOperationException due to mismatched token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetDateTime(out DateTime value);
+                        Assert.True(false, "Expected GetDateTime to throw InvalidOperationException due to mismatched token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        DateTimeOffset value = json.GetDateTimeOffset();
+                        Assert.True(false, "Expected GetDateTime to throw InvalidOperationException due to mismatched token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetDateTimeOffset(out DateTimeOffset value);
+                        Assert.True(false, "Expected GetDateTime to throw InvalidOperationException due to mismatched token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
                 }
 
                 if (json.TokenType != JsonTokenType.True && json.TokenType != JsonTokenType.False)
@@ -762,6 +843,139 @@ namespace System.Text.Json.Tests
                             Assert.Equal(ex.InnerException.GetType(), typeof(DecoderFallbackException));
                         }
                     }
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidISO8601Tests))]
+        public static void TestingStringsConversionToDateTime(string jsonString, string expectedString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    DateTime expected = DateTime.Parse(expectedString);
+
+                    Assert.True(json.TryGetDateTime(out DateTime actual));
+                    Assert.Equal(expected, actual);
+
+                    Assert.Equal(expected, json.GetDateTime());
+                }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
+
+        [Theory]
+        [MemberData(nameof(ValidISO8601Tests))]
+        public static void TestingStringsConversionToDateTimeOffset(string jsonString, string expectedString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    DateTimeOffset expected = DateTimeOffset.Parse(expectedString);
+
+                    Assert.True(json.TryGetDateTime(out DateTime actual));
+                    Assert.Equal(expected, actual);
+
+                    Assert.Equal(expected, json.GetDateTime());
+                }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
+
+        [Fact]
+        public static void TestingStringsWithUTCOffsetToDateTime()
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes("\"1997-07-16T19:20:30.4555555Z\"");
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    DateTime expected = DateTime.ParseExact("1997-07-16T19:20:30.4555555Z", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+
+                    Assert.True(json.TryGetDateTime(out DateTime actual));
+                    Assert.Equal(expected, actual);
+
+                    Assert.Equal(expected, json.GetDateTime());
+                }
+            }
+        }
+
+        [Fact]
+        public static void TestingStringsWithUTCOffsetToDateTimeOffset()
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes("\"1997-07-16T19:20:30.4555555Z\"");
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    DateTimeOffset expected = DateTimeOffset.ParseExact("1997-07-16T19:20:30.4555555Z", "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+
+                    Assert.True(json.TryGetDateTimeOffset(out DateTimeOffset actual));
+                    Assert.Equal(expected, actual);
+
+                    Assert.Equal(expected, json.GetDateTime());
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidISO8601Tests))]
+        public static void TestingStringsInvalidConversionToDateTime(string jsonString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                Assert.False(json.TryGetDateTime(out DateTime actualDateTime));
+
+                try
+                {
+                    DateTime value = json.GetDateTime();
+                    Assert.True(false, "Expected GetDateTime to throw FormatException due to invalid ISO 8601 input.");
+                }
+                catch (FormatException)
+                { }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidISO8601Tests))]
+        public static void TestingStringsInvalidConversionToDateTimeOffset(string jsonString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    Assert.False(json.TryGetDateTimeOffset(out DateTimeOffset actualDateTime));
+
+                    try
+                    {
+                        DateTimeOffset value = json.GetDateTime();
+                        Assert.True(false, "Expected GetDateTimeOffset to throw FormatException due to invalid ISO 8601 input.");
+                    }
+                    catch (FormatException)
+                    { }
                 }
             }
         }
