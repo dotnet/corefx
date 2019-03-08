@@ -160,10 +160,23 @@ namespace System.ComponentModel.Tests
             Assert.False(property.IsReadOnly);
         }
 
-        class ReadOnlyPropertyTestClass
+        [Fact]
+        public static void ReadOnlyVirtualPropertyReturnsTrue()
+        {
+            PropertyDescriptor property = TypeDescriptor.GetProperties(typeof(ReadOnlyPropertyTestClass), new[] { BrowsableAttribute.Yes }).Find("BarReadOnlyBaseClass", true);
+            Assert.True(property.IsReadOnly);
+        }
+
+        class ReadOnlyPropertyTestBaseClass
+        {
+            public virtual bool BarReadOnlyBaseClass { get; }
+        }
+
+        class ReadOnlyPropertyTestClass : ReadOnlyPropertyTestBaseClass
         {
             public bool BarReadOnly { get; private set; }
             public bool BarNotReadOnly { get; set; }
+            public override bool BarReadOnlyBaseClass { get; }
         }
     }
 }
