@@ -540,14 +540,17 @@ namespace System.Net.Test.Common
             await WriteFrameAsync(headersFrame).ConfigureAwait(false);
         }
 
-        public async Task SendResponseHeadersAsync(int streamId, bool endStream = true, HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null)
+        public async Task SendResponseHeadersAsync(int streamId, bool endStream = true, HttpStatusCode statusCode = HttpStatusCode.OK, bool hasStatusCode = true, IList<HttpHeaderData> headers = null)
         {
             // For now, only support headers that fit in a single frame
             byte[] headerBlock = new byte[Frame.MaxFrameLength];
             int bytesGenerated = 0;
 
-            string statusCodeString = ((int)statusCode).ToString();
-            bytesGenerated += EncodeHeader(new HttpHeaderData(":status", statusCodeString), headerBlock.AsSpan());
+            if (hasStatusCode)
+            {
+                string statusCodeString = ((int)statusCode).ToString();
+                bytesGenerated += EncodeHeader(new HttpHeaderData(":status", statusCodeString), headerBlock.AsSpan());
+            }
 
             if (headers != null)
             {
