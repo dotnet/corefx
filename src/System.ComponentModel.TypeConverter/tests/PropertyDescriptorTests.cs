@@ -160,7 +160,6 @@ namespace System.ComponentModel.Tests
             Assert.False(property.IsReadOnly);
         }
 
-
         class ReadOnlyPropertyTestClass
         {
             public bool BarReadOnly { get; private set; }
