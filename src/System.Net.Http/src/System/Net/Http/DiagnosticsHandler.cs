@@ -90,7 +90,14 @@ namespace System.Net.Http
                         do
                         {
                             KeyValuePair<string, string> item = e.Current;
-                            baggage.Add(new NameValueHeaderValue(item.Key, item.Value).ToString());
+                            try
+                            {
+                                baggage.Add(new NameValueHeaderValue(item.Key, item.Value).ToString());
+                            }
+                            catch (FormatException)
+                            {
+                                // invalid Http token in baggage
+                            }
                         }
                         while (e.MoveNext());
                         request.Headers.Add(DiagnosticsHandlerLoggingStrings.CorrelationContextHeaderName, baggage);

@@ -380,6 +380,63 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
+        [Fact]
+        public void SendAsync_ExpectedDiagnosticSourceActivityLogging_InvalidBaggage()
+        {
+            RemoteInvoke(useSocketsHttpHandlerString =>
+            {
+                bool activityStopLogged = false;
+                bool exceptionLogged = false;
+
+                Activity parentActivity = new Activity("parent");
+                parentActivity.AddBaggage("bad/key", "value");
+                parentActivity.AddBaggage("good_key", "bad/value");
+                parentActivity.AddBaggage("key", "value");
+                parentActivity.Start();
+
+                var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(kvp =>
+                {
+                    if (kvp.Key.Equals("System.Net.Http.HttpRequestOut.Stop"))
+                    {
+                        Assert.NotNull(kvp.Value);
+                        Assert.NotNull(Activity.Current);
+                        Assert.Equal(parentActivity, Activity.Current.Parent);
+                        Assert.True(Activity.Current.Duration != TimeSpan.Zero);
+                        var request = GetPropertyValueFromAnonymousTypeInstance<HttpRequestMessage>(kvp.Value, "Request");
+                        Assert.True(request.Headers.TryGetValues("Request-Id", out var requestId));
+                        Assert.True(request.Headers.TryGetValues("Correlation-Context", out var correlationContext));
+                        Assert.Single(correlationContext);
+                        Assert.Equal("key=value", correlationContext.Single());
+
+                        var requestStatus = GetPropertyValueFromAnonymousTypeInstance<TaskStatus>(kvp.Value, "RequestTaskStatus");
+                        Assert.Equal(TaskStatus.RanToCompletion, requestStatus);
+
+                        activityStopLogged = true;
+                    }
+                    else if (kvp.Key.Equals("System.Net.Http.Exception"))
+                    {
+                        exceptionLogged = true;
+                    }
+                });
+
+                using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
+                { 
+                    diagnosticListenerObserver.Enable(s => s.Contains("HttpRequestOut"));
+                    using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString))
+                    {
+                        client.GetAsync(Configuration.Http.RemoteEchoServer).Result.Dispose();
+                    }
+
+                    // Poll with a timeout since logging response is not synchronized with returning a response.
+                    WaitForTrue(() => activityStopLogged, TimeSpan.FromSeconds(1), "Response was not logged within 1 second timeout.");
+                    Assert.False(exceptionLogged, "Exception was logged for successful request");
+                    diagnosticListenerObserver.Disable();
+                }
+
+                return SuccessExitCode;
+            }, UseSocketsHttpHandler.ToString()).Dispose();
+        }
+
         [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceActivityLoggingDoesNotOverwriteHeader()
