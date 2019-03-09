@@ -1,4 +1,8 @@
-﻿using System.Diagnostics;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
@@ -51,6 +55,8 @@ namespace System.Text.Json
         // YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45-01:00)
         // YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+0100)
         // YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45-0100)
+        // YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01)
+        // YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45-01)
         private static bool TryParseDateTimeOffset(ReadOnlySpan<byte> source, out DateTimeOffset value, out int bytesConsumed, out DateTimeKind kind)
         {
             // Source does not have enough characters for YYYY-MM-DD
@@ -114,7 +120,7 @@ namespace System.Text.Json
 
             byte curByte = source[10];
 
-            if (curByte == JsonConstants.UtcOffsetToken || curByte == JsonConstants.Plus || curByte == JsonConstants.Minus)
+            if (curByte == JsonConstants.UtcOffsetToken || curByte == JsonConstants.Plus || curByte == JsonConstants.Hyphen)
             {
                 goto ReturnFalse;
             }
@@ -162,7 +168,7 @@ namespace System.Text.Json
                 offsetToken = JsonConstants.UtcOffsetToken;
                 goto FinishedParsing;
             }
-            else if (curByte == JsonConstants.Plus || curByte == JsonConstants.Minus)
+            else if (curByte == JsonConstants.Plus || curByte == JsonConstants.Hyphen)
             {
                 offsetToken = curByte;
                 sourceIndex++;
@@ -195,7 +201,7 @@ namespace System.Text.Json
                 offsetToken = JsonConstants.UtcOffsetToken;
                 goto FinishedParsing;
             }
-            else if (curByte == JsonConstants.Plus || curByte == JsonConstants.Minus)
+            else if (curByte == JsonConstants.Plus || curByte == JsonConstants.Hyphen)
             {
                 offsetToken = curByte;
                 sourceIndex++;
@@ -217,28 +223,30 @@ namespace System.Text.Json
 
             sourceIndex = 20;
 
+            // Parse fraction
             {
+                int numDigitsRead = 0;
+
                 while (sourceIndex < source.Length && IsDigit(curByte = source[sourceIndex]))
                 {
                     int prevFractionTimesTen = fraction * 10;
 
-                    if (!(prevFractionTimesTen + (int)(curByte - (uint)'0') <= JsonConstants.MaxDateTimeFraction))
+                    if ((prevFractionTimesTen + (int)(curByte - (uint)'0') <= JsonConstants.MaxDateTimeFraction) && (numDigitsRead < JsonConstants.DateTimeNumFractionDigits))
                     {
-                        sourceIndex++;
-                        break;
+                        fraction = prevFractionTimesTen + (int)(curByte - (uint)'0');
+                        numDigitsRead++;
                     }
 
-                    fraction = prevFractionTimesTen + (int)(curByte - (uint)'0');
                     sourceIndex++;
                 }
-            }
 
-            if (fraction != 0)
-            {
-                // Note this is 1 order of magnitude less than JsonConstants.MaxDateTimeFraction
-                while (fraction <= JsonConstants.MaxDateTimeFractionDiv10)
+                if (fraction != 0)
                 {
-                    fraction *= 10;
+                    while (numDigitsRead < JsonConstants.DateTimeNumFractionDigits)
+                    {
+                        fraction *= 10;
+                        numDigitsRead++;
+                    }
                 }
             }
 
@@ -256,7 +264,7 @@ namespace System.Text.Json
                 offsetToken = JsonConstants.UtcOffsetToken;
                 goto FinishedParsing;
             }
-            else if (curByte == JsonConstants.Plus || curByte == JsonConstants.Minus)
+            else if (curByte == JsonConstants.Plus || curByte == JsonConstants.Hyphen)
             {
                 offsetToken = source[sourceIndex++];
                 goto ParseOffset;
@@ -265,8 +273,8 @@ namespace System.Text.Json
             goto FinishedParsing;
 
         ParseOffset:
-            // Source does not have enough characters for YYYY-MM-DDThh:mm:ss.s+|-hh[:]mm
-            if (source.Length - sourceIndex < 4)
+            // Source does not have enough characters for YYYY-MM-DDThh:mm:ss.s+|-hh
+            if (source.Length - sourceIndex < 2)
             {
                 goto ReturnFalse;
             }
@@ -277,9 +285,25 @@ namespace System.Text.Json
             }
             sourceIndex += 2;
 
+            // We now have YYYY-MM-DDThh:mm:ss.s+|-hh
+            bytesConsumed = sourceIndex;
+
+            // Source does not have enough characters for YYYY-MM-DDThh:mm:ss.s+|-hhmm
+            if (source.Length - sourceIndex < 2)
+            {
+                goto FinishedParsing;
+            }
+
+            // Source should be of format YYYY-MM-DDThh:mm:ss.s+|-hh:mm
             if (source[sourceIndex] == JsonConstants.Colon)
             {
-                sourceIndex += 1;
+                sourceIndex++;
+
+                // Source does not have enough characters for YYYY-MM-DDThh:mm:ss.s+|-hh:mm
+                if (source.Length - sourceIndex < 2)
+                {
+                    goto ReturnFalse;
+                }
             }
 
             if (!TryGetNextTwoDigits(source.Slice(start: sourceIndex, length: 2), out offsetMinutes))
@@ -292,7 +316,7 @@ namespace System.Text.Json
             bytesConsumed = sourceIndex;
 
         FinishedParsing:
-            if ((offsetToken != JsonConstants.UtcOffsetToken) && (offsetToken != JsonConstants.Plus) && (offsetToken != JsonConstants.Minus))
+            if ((offsetToken != JsonConstants.UtcOffsetToken) && (offsetToken != JsonConstants.Plus) && (offsetToken != JsonConstants.Hyphen))
             {
                 if (!TryCreateDateTimeOffsetInterpretingDataAsLocalTime(year: year, month: month, day: day, hour: hour, minute: minute, second: second, fraction: fraction, out value))
                 {
@@ -315,9 +339,9 @@ namespace System.Text.Json
                 return true;
             }
 
-            Debug.Assert(offsetToken == JsonConstants.Plus || offsetToken == JsonConstants.Minus);
+            Debug.Assert(offsetToken == JsonConstants.Plus || offsetToken == JsonConstants.Hyphen);
 
-            if (!TryCreateDateTimeOffset(year: year, month: month, day: day, hour: hour, minute: minute, second: second, fraction: fraction, offsetNegative: offsetToken == JsonConstants.Minus, offsetHours: offsetHours, offsetMinutes: offsetMinutes, out value))
+            if (!TryCreateDateTimeOffset(year: year, month: month, day: day, hour: hour, minute: minute, second: second, fraction: fraction, offsetNegative: offsetToken == JsonConstants.Hyphen, offsetHours: offsetHours, offsetMinutes: offsetMinutes, out value))
             {
                 goto ReturnFalse;
             }
@@ -333,7 +357,7 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryGetNextTwoDigits(ReadOnlySpan<byte> source, out int value)
+        private static bool TryGetNextTwoDigits(ReadOnlySpan<byte> source, out int value)
         {
             Debug.Assert(source.Length == 2);
 
@@ -349,6 +373,8 @@ namespace System.Text.Json
             value = (int)(digit1 * 10 + digit2);
             return true;
         }
+
+        // The following methods are borrowed verbatim from src/Common/src/CoreLib/System/Buffers/Text/Utf8Parser/Utf8Parser.Date.Helpers.cs
 
         /// <summary>
         /// Overflow-safe DateTimeOffset factory.

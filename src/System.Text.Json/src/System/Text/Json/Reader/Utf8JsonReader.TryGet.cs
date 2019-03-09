@@ -245,15 +245,10 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value is of unsupported or incorrect ISO 8601 format.
+        /// Thrown if the JSON token value is of an unsupported format. Only a subset of ISO 8601 formats are supported.
         /// </exception>
         public DateTime GetDateTime()
         {
-            if (TokenType != JsonTokenType.String)
-            {
-                throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
-            }
-
             if (!TryGetDateTime(out DateTime value))
             {
                 throw ThrowHelper.GetFormatException(DateType.DateTime);
@@ -273,18 +268,13 @@ namespace System.Text.Json
         /// <seealso cref="TokenType" />
         /// </exception>
         /// <exception cref="FormatException">
-        /// Thrown if the JSON token value is of unsupported or incorrect ISO 8601 format.
+        /// Thrown if the JSON token value is of an unsupported format. Only a subset of ISO 8601 formats are supported.
         /// </exception>
         public DateTimeOffset GetDateTimeOffset()
         {
-            if (TokenType != JsonTokenType.String)
-            {
-                throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
-            }
-
             if (!TryGetDateTimeOffset(out DateTimeOffset value))
             {
-                throw ThrowHelper.GetFormatException(DateType.DateTime);
+                throw ThrowHelper.GetFormatException(DateType.DateTimeOffset);
             }
 
             return value;

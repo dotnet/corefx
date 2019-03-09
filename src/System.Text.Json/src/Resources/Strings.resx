@@ -303,9 +303,6 @@
     <value>EnumConverter is not yet supported on .NET Standard 2.0.</value>
   </data>
   <data name="FormatDateTime" xml:space="preserve">
-    <value>The JSON value is of unsupported or incorrect ISO 8601 format.</value>
-  </data>
-  <data name="FormatDateTimeOffset" xml:space="preserve">
-    <value>The JSON value is of unsupported or incorrect ISO 8601 format.</value>
+    <value>The JSON value is of unsupported DateTime format.</value>
   </data>
 </root>

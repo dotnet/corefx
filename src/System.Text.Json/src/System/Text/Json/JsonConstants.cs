@@ -23,7 +23,6 @@ namespace System.Text.Json
         public const byte FormFeed = (byte)'\f';
         public const byte Asterisk = (byte)'*';
         public const byte Colon = (byte)':';
-        public const byte Minus = (byte)'-';
         public const byte Period = (byte)'.';
         public const byte Plus = (byte)'+';
         public const byte Hyphen = (byte)'-';
@@ -64,8 +63,8 @@ namespace System.Text.Json
         public const int MaximumFormatDateTimeLength = 27;    // StandardFormat 'O', e.g. 2017-06-12T05:30:45.7680000
         public const int MaximumFormatDateTimeOffsetLength = 33;  // StandardFormat 'O', e.g. 2017-06-12T05:30:45.7680000-07:00
         public const int MaxDateTimeUtcOffsetHours = 14; // The UTC offset portion of a TimeSpan or DateTime can be no more than 14 hours and no less than -14 hours.
+        public const int DateTimeNumFractionDigits = 7;  // TimeSpan and DateTime formats allow exactly up to many digits for specifying the fraction after the seconds.
         public const int MaxDateTimeFraction = 9_999_999;  // The largest fraction expressible by TimeSpan and DateTime formats
-        public const int MaxDateTimeFractionDiv10 = 999_999;
 
         internal const char ScientificNotationFormat = 'e';
 
