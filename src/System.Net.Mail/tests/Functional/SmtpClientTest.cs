@@ -309,7 +309,7 @@ namespace System.Net.Mail.Tests
         [InlineData("howdydoo")]
         [InlineData("")]
         [InlineData(null)]
-        public void TestMailDeliveryAsync(string body)
+        async public Task TestMailDeliveryAsync(string body)
         {
             SmtpServer server = new SmtpServer();
             SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
@@ -320,10 +320,7 @@ namespace System.Net.Mail.Tests
             {
                 Thread t = new Thread(server.Run);
                 t.Start();
-                using (var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
-                {
-                    client.SendMailAsync(msg).Wait(cts.Token);
-                }
+                await client.SendMailAsync(msg).TimeoutAfter((int)TimeSpan.FromSeconds(30).TotalMilliseconds);
                 t.Join();
 
                 Assert.Equal("<foo@example.com>", server.MailFrom);
