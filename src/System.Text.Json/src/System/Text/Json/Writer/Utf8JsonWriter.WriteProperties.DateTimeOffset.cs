@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
-using System.Buffers.Text;
 using System.Diagnostics;
 
 namespace System.Text.Json
@@ -271,10 +270,10 @@ namespace System.Text.Json
 
         private void FormatLoop(DateTimeOffset value, ref int idx)
         {
-            if (!Utf8Formatter.TryFormat(value, _buffer.Slice(idx), out int bytesWritten, s_dateTimeStandardFormat))
+            if (!JsonWriterHelper.TryFormatToISO(value, _buffer.Slice(idx), out int bytesWritten))
             {
                 AdvanceAndGrow(ref idx, JsonConstants.MaximumFormatDateTimeOffsetLength);
-                bool result = Utf8Formatter.TryFormat(value, _buffer, out bytesWritten, s_dateTimeStandardFormat);
+                bool result = JsonWriterHelper.TryFormatToISO(value, _buffer, out bytesWritten);
                 Debug.Assert(result);
             }
             idx += bytesWritten;

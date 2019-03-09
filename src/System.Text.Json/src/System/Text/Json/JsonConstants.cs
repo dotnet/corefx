@@ -22,6 +22,12 @@ namespace System.Text.Json
         public const byte BackSpace = (byte)'\b';
         public const byte FormFeed = (byte)'\f';
         public const byte Asterisk = (byte)'*';
+        public const byte Colon = (byte)':';
+        public const byte Period = (byte)'.';
+        public const byte Plus = (byte)'+';
+        public const byte Hyphen = (byte)'-';
+        public const byte UtcOffsetToken = (byte)'Z';
+        public const byte TimePrefix = (byte)'T';
 
         public static ReadOnlySpan<byte> TrueValue => new byte[] { (byte)'t', (byte)'r', (byte)'u', (byte)'e' };
         public static ReadOnlySpan<byte> FalseValue => new byte[] { (byte)'f', (byte)'a', (byte)'l', (byte)'s', (byte)'e' };
@@ -56,6 +62,8 @@ namespace System.Text.Json
         public const int MaximumFormatGuidLength = 36;    // default (i.e. 'D'), 8 + 4 + 4 + 4 + 12 + 4 for the hyphens (e.g. 094ffa0a-0442-494d-b452-04003fa755cc)
         public const int MaximumFormatDateTimeLength = 27;    // StandardFormat 'O', e.g. 2017-06-12T05:30:45.7680000
         public const int MaximumFormatDateTimeOffsetLength = 33;  // StandardFormat 'O', e.g. 2017-06-12T05:30:45.7680000-07:00
+
+        public static readonly TimeSpan NullUtcOffset = TimeSpan.MinValue;  // Utc offsets must range from -14:00 to 14:00 so this is never a valid offset.
 
         internal const char ScientificNotationFormat = 'e';
 
