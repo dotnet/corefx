@@ -37,7 +37,7 @@ namespace System.Globalization.Tests
         public void NegativeSign_SetNull_ThrowsArgumentNullException()
         {
             var format = new NumberFormatInfo();
-            AssertExtensions.Throws<ArgumentNullException>("NegativeSign", () => format.NegativeSign = null);
+            AssertExtensions.Throws<ArgumentNullException>("value", "NegativeSign", () => format.NegativeSign = null);
         }
 
         [Fact]
