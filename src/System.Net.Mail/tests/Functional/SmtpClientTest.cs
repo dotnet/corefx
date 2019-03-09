@@ -309,7 +309,7 @@ namespace System.Net.Mail.Tests
         [InlineData("howdydoo")]
         [InlineData("")]
         [InlineData(null)]
-        async public Task TestMailDeliveryAsync(string body)
+        public async Task TestMailDeliveryAsync(string body)
         {
             SmtpServer server = new SmtpServer();
             SmtpClient client = new SmtpClient("localhost", server.EndPoint.Port);
