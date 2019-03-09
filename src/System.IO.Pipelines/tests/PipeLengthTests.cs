@@ -207,5 +207,35 @@ namespace System.IO.Pipelines.Tests
             ReadResult result = await _pipe.Reader.ReadAsync();
             Assert.Throws<InvalidOperationException>(() => _pipe.Reader.AdvanceTo(result.Buffer.End, result.Buffer.Start));
         }
+
+        [Fact]
+        public async Task NullConsumedOrExaminedNoops()
+        {
+            _pipe.Writer.WriteEmpty(10);
+            await _pipe.Writer.FlushAsync();
+
+            ReadResult result = await _pipe.Reader.ReadAsync();
+            _pipe.Reader.AdvanceTo(default, result.Buffer.End);
+        }
+
+        [Fact]
+        public async Task NullExaminedNoops()
+        {
+            _pipe.Writer.WriteEmpty(10);
+            await _pipe.Writer.FlushAsync();
+
+            ReadResult result = await _pipe.Reader.ReadAsync();
+            _pipe.Reader.AdvanceTo(result.Buffer.Start, default);
+        }
+
+        [Fact]
+        public async Task NullExaminedAndConsumedNoops()
+        {
+            _pipe.Writer.WriteEmpty(10);
+            await _pipe.Writer.FlushAsync();
+
+            ReadResult result = await _pipe.Reader.ReadAsync();
+            _pipe.Reader.AdvanceTo(default, default);
+        }
     }
 }
