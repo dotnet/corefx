@@ -1253,7 +1253,7 @@ namespace System.Threading.Tasks.Tests
                     await await Task.Factory.StartNew(() => func(count), CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default) :
                     count;
             };
-            func(DiveDepth).Wait();
+            func(0).Wait();
         }
 
         [Theory]
