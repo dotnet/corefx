@@ -153,7 +153,7 @@ namespace System.Net.Http.Functional.Tests
                         {
                             Task<List<string>> requestLines = server.AcceptConnectionSendResponseAndCloseAsync();
                             Task<HttpResponseMessage> response = client.GetAsync(url);
-                            await new Task[] {response, requestLines}.WhenAllOrAnyFailed();
+                            await new Task[] { response, requestLines }.WhenAllOrAnyFailed();
 
                             AssertNoHeadersAreInjected(requestLines.Result);
                             response.Result.Dispose();
@@ -384,7 +384,7 @@ namespace System.Net.Http.Functional.Tests
                         {
                             Task<List<string>> requestLines = server.AcceptConnectionSendResponseAndCloseAsync();
                             Task<HttpResponseMessage> response = client.GetAsync(url);
-                            await new Task[] {response, requestLines}.WhenAllOrAnyFailed();
+                            await new Task[] { response, requestLines }.WhenAllOrAnyFailed();
 
                             AssertHeadersAreInjected(requestLines.Result, parentActivity);
                             response.Result.Dispose();
@@ -469,7 +469,7 @@ namespace System.Net.Http.Functional.Tests
                         {
                             Task<List<string>> requestLines = server.AcceptConnectionSendResponseAndCloseAsync();
                             Task<HttpResponseMessage> response = client.GetAsync(url);
-                            await new Task[] {response, requestLines}.WhenAllOrAnyFailed();
+                            await new Task[] { response, requestLines }.WhenAllOrAnyFailed();
 
                             AssertHeadersAreInjected(requestLines.Result, parentActivity);
                             response.Result.Dispose();
@@ -520,6 +520,9 @@ namespace System.Net.Http.Functional.Tests
                             GetPropertyValueFromAnonymousTypeInstance<HttpRequestMessage>(kvp.Value, "Request");
                         Assert.Single(request.Headers.GetValues("Request-Id"));
                         Assert.Equal(customRequestIdHeader, request.Headers.GetValues("Request-Id").Single());
+
+                        Assert.False(request.Headers.TryGetValues("traceparent", out var _));
+                        Assert.False(request.Headers.TryGetValues("tracestate", out var _));
                         activityStopLogged = true;
                     }
                 });
@@ -568,6 +571,8 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Single(request.Headers.GetValues("traceparent"));
                         Assert.False(request.Headers.TryGetValues("tracestate", out var _));
                         Assert.Equal(customTraceParentHeader, request.Headers.GetValues("traceparent").Single());
+
+                        Assert.False(request.Headers.TryGetValues("Request-Id", out var _));
 
                         activityStartLogged = true;
                     }

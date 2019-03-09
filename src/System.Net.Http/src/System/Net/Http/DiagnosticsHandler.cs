@@ -80,17 +80,23 @@ namespace System.Net.Http
             Activity currentActivity = Activity.Current;
             if (currentActivity != null)
             {
-                if (currentActivity.IdFormat == ActivityIdFormat.W3C && !request.Headers.Contains(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName))
+                if (currentActivity.IdFormat == ActivityIdFormat.W3C)
                 {
-                    request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName, currentActivity.Id);
-                    if (currentActivity.TraceStateString != null)
+                    if (!request.Headers.Contains(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName))
                     {
-                        request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceStateHeaderName, currentActivity.TraceStateString);
+                        request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName, currentActivity.Id);
+                        if (currentActivity.TraceStateString != null)
+                        {
+                            request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceStateHeaderName, currentActivity.TraceStateString);
+                        }
                     }
                 }
-                else if(!request.Headers.Contains(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName))
+                else
                 {
-                    request.Headers.Add(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName, currentActivity.Id);
+                    if (!request.Headers.Contains(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName))
+                    {
+                        request.Headers.Add(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName, currentActivity.Id);
+                    }
                 }
 
                 //we expect baggage to be empty or contain a few items
