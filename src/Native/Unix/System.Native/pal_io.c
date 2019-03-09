@@ -227,7 +227,7 @@ int32_t SystemNative_Stat2(const char* path, FileStatus* output)
 
 int32_t SystemNative_FStat2(intptr_t fd, FileStatus* output)
 {
-    return SystemNative_FStat(path, output);
+    return SystemNative_FStat(fd, output);
 }
 
 int32_t SystemNative_LStat2(const char* path, FileStatus* output)
