@@ -139,7 +139,7 @@
     <value>The examined position must be greater than or equal to the consumed position.</value>
   </data>
   <data name="InvalidExaminedPosition" xml:space="preserve">
-    <value>Invalid examined position specified. The current examined position is less than the current examined position.</value>
+    <value>Invalid examined position specified. The examined position is less than the consumed position.</value>
   </data>
   <data name="InvalidZeroByteRead" xml:space="preserve">
     <value>The PipeReader returned 0 bytes when the ReadResult was not completed or canceled.</value>
