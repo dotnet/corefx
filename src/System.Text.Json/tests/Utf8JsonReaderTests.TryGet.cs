@@ -165,6 +165,8 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"1997-07-16T19:20:30.4555555+14 00\"" };
 
             // Proper format but invalid time fields
+            yield return new object[] { "\"0000-07-16T19:20:30.4555555+14:30\"" };
+            yield return new object[] { "\"0000-07-16T19:20:30.4555555-14:30\"" };
             yield return new object[] { "\"0000-07-16T19:20:30.4555555+10:00\"" };
             yield return new object[] { "\"1997-00-16T19:20:30.4555555+10:00\"" };
             yield return new object[] { "\"1997-07-16T25:20:30.4555555+10:00\"" };
