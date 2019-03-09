@@ -275,7 +275,7 @@ namespace System.Buffers
         public override bool Equals(object obj) { throw null; }
         public override int GetHashCode() { throw null; }
         public static bool operator ==(System.Buffers.StandardFormat left, System.Buffers.StandardFormat right) { throw null; }
-        public static implicit operator System.Buffers.StandardFormat (char symbol) { throw null; }
+        public static implicit operator System.Buffers.StandardFormat(char symbol) { throw null; }
         public static bool operator !=(System.Buffers.StandardFormat left, System.Buffers.StandardFormat right) { throw null; }
         public static System.Buffers.StandardFormat Parse(System.ReadOnlySpan<char> format) { throw null; }
         public static System.Buffers.StandardFormat Parse(string format) { throw null; }
