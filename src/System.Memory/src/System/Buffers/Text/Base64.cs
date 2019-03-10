@@ -20,7 +20,7 @@ namespace System.Buffers.Text
             if (readEnd > srcEnd)
             {
                 int srcIndex = (int)(src - srcStart);
-                throw new InvalidOperationException($"Read for {typeof(TVector)} is not within safe bounds. srcIndex: {srcIndex}, srcLength: {srcLength}");
+                Debug.Fail($"Read for {typeof(TVector)} is not within safe bounds. srcIndex: {srcIndex}, srcLength: {srcLength}");
             }
         }
 
@@ -34,7 +34,7 @@ namespace System.Buffers.Text
             if (writeEnd > destEnd)
             {
                 int destIndex = (int)(dest - destStart);
-                throw new InvalidOperationException($"Write for {typeof(TVector)} is not within safe bounds. destIndex: {destIndex}, destLength: {destLength}");
+                Debug.Fail($"Write for {typeof(TVector)} is not within safe bounds. destIndex: {destIndex}, destLength: {destLength}");
             }
         }
     }
