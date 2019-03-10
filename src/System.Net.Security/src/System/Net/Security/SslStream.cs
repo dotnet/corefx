@@ -91,7 +91,10 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.NegotiatedApplicationProtocol;
+                if (Context == null)
+                    return default;
+
+                return Context.NegotiatedApplicationProtocol;
             }
         }
 
@@ -442,7 +445,7 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.IsAuthenticated;
+                return _context != null && _context.IsValidContext && _exception == null && HandshakeCompleted;
             }
         }
 
@@ -450,7 +453,10 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.IsMutuallyAuthenticated;
+                return
+                    IsAuthenticated &&
+                    (Context.IsServer ? Context.LocalServerCertificate : Context.LocalClientCertificate) != null &&
+                    Context.IsRemoteCertificateAvailable; /* does not work: Context.IsMutualAuthFlag;*/
             }
         }
 
@@ -474,7 +480,7 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.IsServer;
+                return Context != null && Context.IsServer;
             }
         }
 
@@ -482,7 +488,50 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.SslProtocol;
+                CheckThrow(true);
+                SslConnectionInfo info = Context.ConnectionInfo;
+                if (info == null)
+                {
+                    return SslProtocols.None;
+                }
+
+                SslProtocols proto = (SslProtocols)info.Protocol;
+                SslProtocols ret = SslProtocols.None;
+
+#pragma warning disable 0618 // Ssl2, Ssl3 are deprecated.
+                // Restore client/server bits so the result maps exactly on published constants.
+                if ((proto & SslProtocols.Ssl2) != 0)
+                {
+                    ret |= SslProtocols.Ssl2;
+                }
+
+                if ((proto & SslProtocols.Ssl3) != 0)
+                {
+                    ret |= SslProtocols.Ssl3;
+                }
+#pragma warning restore
+
+                if ((proto & SslProtocols.Tls) != 0)
+                {
+                    ret |= SslProtocols.Tls;
+                }
+
+                if ((proto & SslProtocols.Tls11) != 0)
+                {
+                    ret |= SslProtocols.Tls11;
+                }
+
+                if ((proto & SslProtocols.Tls12) != 0)
+                {
+                    ret |= SslProtocols.Tls12;
+                }
+
+                if ((proto & SslProtocols.Tls13) != 0)
+                {
+                    ret |= SslProtocols.Tls13;
+                }
+
+                return ret;
             }
         }
 
@@ -490,15 +539,19 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.CheckCertRevocationStatus;
+                return Context != null && Context.CheckCertRevocationStatus != X509RevocationMode.NoCheck;
             }
         }
 
+        //
+        // This will return selected local cert for both client/server streams
+        //
         public virtual X509Certificate LocalCertificate
         {
             get
             {
-                return _sslState.LocalCertificate;
+                CheckThrow(true);
+                return InternalLocalCertificate;
             }
         }
 
@@ -516,7 +569,13 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.CipherAlgorithm;
+                CheckThrow(true);
+                SslConnectionInfo info = Context.ConnectionInfo;
+                if (info == null)
+                {
+                    return CipherAlgorithmType.None;
+                }
+                return (CipherAlgorithmType)info.DataCipherAlg;
             }
         }
 
@@ -524,7 +583,14 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.CipherStrength;
+                CheckThrow(true);
+                SslConnectionInfo info = Context.ConnectionInfo;
+                if (info == null)
+                {
+                    return 0;
+                }
+
+                return info.DataKeySize;
             }
         }
 
@@ -532,7 +598,13 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.HashAlgorithm;
+                CheckThrow(true);
+                SslConnectionInfo info = Context.ConnectionInfo;
+                if (info == null)
+                {
+                    return (HashAlgorithmType)0;
+                }
+                return (HashAlgorithmType)info.DataHashAlg;
             }
         }
 
@@ -540,7 +612,14 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.HashStrength;
+                CheckThrow(true);
+                SslConnectionInfo info = Context.ConnectionInfo;
+                if (info == null)
+                {
+                    return 0;
+                }
+
+                return info.DataHashKeySize;
             }
         }
 
@@ -548,7 +627,14 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.KeyExchangeAlgorithm;
+                CheckThrow(true);
+                SslConnectionInfo info = Context.ConnectionInfo;
+                if (info == null)
+                {
+                    return (ExchangeAlgorithmType)0;
+                }
+
+                return (ExchangeAlgorithmType)info.KeyExchangeAlg;
             }
         }
 
@@ -556,7 +642,14 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.KeyExchangeStrength;
+                CheckThrow(true);
+                SslConnectionInfo info = Context.ConnectionInfo;
+                if (info == null)
+                {
+                    return 0;
+                }
+
+                return info.KeyExchKeySize;
             }
         }
 
@@ -651,12 +744,12 @@ namespace System.Net.Security
 
         public override void Flush()
         {
-            _sslState.Flush();
+            InnerStream.Flush();
         }
 
         public override Task FlushAsync(CancellationToken cancellationToken)
         {
-            return _sslState.FlushAsync(cancellationToken);
+            return InnerStream.FlushAsync(cancellationToken);
         }
 
         protected override void Dispose(bool disposing)
@@ -669,7 +762,7 @@ namespace System.Net.Security
                     _remoteCertificate = null;
                     _remoteCertificateExposed = false;
                 }
-                _sslState.Close();
+                CloseInternal();
             }
             finally
             {
@@ -681,7 +774,7 @@ namespace System.Net.Security
         {
             try
             {
-                _sslState.Close();
+                CloseInternal();
             }
             finally
             {

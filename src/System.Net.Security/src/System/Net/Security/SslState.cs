@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace System.Net.Security
 {
-    internal class SslState
+    public partial class SslStream
     {
         private static int s_uniqueNameInteger = 123;
         private static AsyncProtocolCallback s_partialFrameCallback = new AsyncProtocolCallback(PartialFrameCallback);
@@ -66,16 +66,6 @@ namespace System.Net.Security
 
         private int _lockReadState;
         private object _queuedReadStateRequest;
-
-        //
-        //  The public Client and Server classes enforce the parameters rules before
-        //  calling into this .ctor.
-        //
-        internal SslState(Stream innerStream)
-        {
-            _innerStream = innerStream;
-            _secureStream = new SslStreamInternal(this);
-        }
 
         /// <summary>Set as the _exception when the instance is disposed.</summary>
         private static readonly ExceptionDispatchInfo s_disposedSentinel = ExceptionDispatchInfo.Capture(new ObjectDisposedException(nameof(SslStream)));
@@ -159,61 +149,11 @@ namespace System.Net.Security
             }
         }
 
-        internal SslApplicationProtocol NegotiatedApplicationProtocol
-        {
-            get
-            {
-                if (Context == null)
-                    return default;
-
-                return Context.NegotiatedApplicationProtocol;
-            }
-        }
-
-        internal bool IsAuthenticated
-        {
-            get
-            {
-                return _context != null && _context.IsValidContext && _exception == null && HandshakeCompleted;
-            }
-        }
-
-        internal bool IsMutuallyAuthenticated
-        {
-            get
-            {
-                return
-                    IsAuthenticated &&
-                    (Context.IsServer ? Context.LocalServerCertificate : Context.LocalClientCertificate) != null &&
-                    Context.IsRemoteCertificateAvailable; /* does not work: Context.IsMutualAuthFlag;*/
-            }
-        }
-
         internal bool RemoteCertRequired
         {
             get
             {
                 return Context == null || Context.RemoteCertRequired;
-            }
-        }
-
-        internal bool IsServer
-        {
-            get
-            {
-                return Context != null && Context.IsServer;
-            }
-        }
-
-        //
-        // This will return selected local cert for both client/server streams
-        //
-        internal X509Certificate LocalCertificate
-        {
-            get
-            {
-                CheckThrow(true);
-                return InternalLocalCertificate;
             }
         }
 
@@ -230,14 +170,6 @@ namespace System.Net.Security
             return (Context == null) ? null : Context.GetChannelBinding(kind);
         }
 
-        internal bool CheckCertRevocationStatus
-        {
-            get
-            {
-                return Context != null && Context.CheckCertRevocationStatus != X509RevocationMode.NoCheck;
-            }
-        }
-
         internal bool IsShutdown
         {
             get
@@ -245,147 +177,8 @@ namespace System.Net.Security
                 return _shutdown;
             }
         }
-
-        internal CipherAlgorithmType CipherAlgorithm
-        {
-            get
-            {
-                CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
-                if (info == null)
-                {
-                    return CipherAlgorithmType.None;
-                }
-                return (CipherAlgorithmType)info.DataCipherAlg;
-            }
-        }
-
-        internal int CipherStrength
-        {
-            get
-            {
-                CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
-                if (info == null)
-                {
-                    return 0;
-                }
-
-                return info.DataKeySize;
-            }
-        }
-
-        internal HashAlgorithmType HashAlgorithm
-        {
-            get
-            {
-                CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
-                if (info == null)
-                {
-                    return (HashAlgorithmType)0;
-                }
-                return (HashAlgorithmType)info.DataHashAlg;
-            }
-        }
-
-        internal int HashStrength
-        {
-            get
-            {
-                CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
-                if (info == null)
-                {
-                    return 0;
-                }
-
-                return info.DataHashKeySize;
-            }
-        }
-
-        internal ExchangeAlgorithmType KeyExchangeAlgorithm
-        {
-            get
-            {
-                CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
-                if (info == null)
-                {
-                    return (ExchangeAlgorithmType)0;
-                }
-
-                return (ExchangeAlgorithmType)info.KeyExchangeAlg;
-            }
-        }
-
-        internal int KeyExchangeStrength
-        {
-            get
-            {
-                CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
-                if (info == null)
-                {
-                    return 0;
-                }
-
-                return info.KeyExchKeySize;
-            }
-        }
-
-        internal SslProtocols SslProtocol
-        {
-            get
-            {
-                CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
-                if (info == null)
-                {
-                    return SslProtocols.None;
-                }
-
-                SslProtocols proto = (SslProtocols)info.Protocol;
-                SslProtocols ret = SslProtocols.None;
-
-#pragma warning disable 0618 // Ssl2, Ssl3 are deprecated.
-                // Restore client/server bits so the result maps exactly on published constants.
-                if ((proto & SslProtocols.Ssl2) != 0)
-                {
-                    ret |= SslProtocols.Ssl2;
-                }
-
-                if ((proto & SslProtocols.Ssl3) != 0)
-                {
-                    ret |= SslProtocols.Ssl3;
-                }
-#pragma warning restore
-
-                if ((proto & SslProtocols.Tls) != 0)
-                {
-                    ret |= SslProtocols.Tls;
-                }
-
-                if ((proto & SslProtocols.Tls11) != 0)
-                {
-                    ret |= SslProtocols.Tls11;
-                }
-
-                if ((proto & SslProtocols.Tls12) != 0)
-                {
-                    ret |= SslProtocols.Tls12;
-                }
-
-                if ((proto & SslProtocols.Tls13) != 0)
-                {
-                    ret |= SslProtocols.Tls13;
-                }
-
-                return ret;
-            }
-        }
-
-        internal Stream InnerStream
+        
+        internal Stream InternalInnerStream
         {
             get
             {
@@ -453,20 +246,10 @@ namespace System.Net.Security
             }
         }
 
-        internal void Flush()
-        {
-            InnerStream.Flush();
-        }
-
-        internal Task FlushAsync(CancellationToken cancellationToken)
-        {
-            return InnerStream.FlushAsync(cancellationToken);
-        }
-
         //
         // This is to not depend on GC&SafeHandle class if the context is not needed anymore.
         //
-        internal void Close()
+        internal void CloseInternal()
         {
             _exception = s_disposedSentinel;
             Context?.Close();
@@ -1038,14 +821,14 @@ namespace System.Net.Security
             }
 
             AsyncProtocolRequest asyncRequest;
-            SslState sslState;
+            SslStream sslState;
 
 #if DEBUG
             try
             {
 #endif
                 asyncRequest = (AsyncProtocolRequest)transportResult.AsyncState;
-                sslState = (SslState)asyncRequest.AsyncObject;
+                sslState = (SslStream)asyncRequest.AsyncObject;
 #if DEBUG
             }
             catch (Exception exception) when (!ExceptionCheck.IsFatal(exception))
@@ -1088,7 +871,7 @@ namespace System.Net.Security
                 NetEventSource.Enter(null);
 
             // Async ONLY completion.
-            SslState sslState = (SslState)asyncRequest.AsyncObject;
+            SslStream sslState = (SslStream)asyncRequest.AsyncObject;
             try
             {
                 sslState.StartReadFrame(asyncRequest.Buffer, asyncRequest.Result, asyncRequest);
@@ -1113,7 +896,7 @@ namespace System.Net.Security
                 NetEventSource.Enter(null);
 
             // Async ONLY completion.
-            SslState sslState = (SslState)asyncRequest.AsyncObject;
+            SslStream sslState = (SslStream)asyncRequest.AsyncObject;
             try
             {
                 if (asyncRequest.Result == 0)
