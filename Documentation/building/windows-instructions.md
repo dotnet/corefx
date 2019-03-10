@@ -125,6 +125,8 @@ For more details, or to test an individual project, see the [developer guide top
 4. Select the corresponding launch profile (green arrow, i.e. `.NET Core xUnit Console`)
 5. F5 (Debug)
 
+For advanced debugging using Visual Studio see [Build, Run and Debug tests using Visual Studio](https://github.com/dotnet/corefx/wiki/Build-and-run-tests#build-run-and-debug-tests-using-visual-studio)
+
 For advanced debugging using WinDBG see [Debugging CoreFX on Windows](https://github.com/dotnet/corefx/blob/master/Documentation/debugging/windows-instructions.md)
 
 ### Notes
