@@ -11,16 +11,8 @@ using System.Threading.Tasks;
 
 namespace System.Net.Security
 {
-    internal class SslState
+    public partial class SslStream
     {
-        //
-        //  The public Client and Server classes enforce the parameters rules before
-        //  calling into this .ctor.
-        //
-        internal SslState(Stream innerStream)
-        {
-        }
-
         internal void ValidateCreateContext(SslClientAuthenticationOptions sslClientAuthenticationOptions, RemoteCertValidationCallback remoteCallback, LocalCertSelectionCallback localCallback)
         {
         }
@@ -29,29 +21,6 @@ namespace System.Net.Security
         {
         }
 
-        internal SslApplicationProtocol NegotiatedApplicationProtocol
-        {
-            get
-            {
-                return default;
-            }
-        }
-
-        internal bool IsAuthenticated
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        internal bool IsMutuallyAuthenticated
-        {
-            get
-            {
-                return false;
-            }
-        }
 
         internal bool RemoteCertRequired
         {
@@ -61,18 +30,9 @@ namespace System.Net.Security
             }
         }
 
-        internal bool IsServer
-        {
-            get
-            {
-                return false;
-            }
-        }
+        private X509Certificate InternalLocalCertificate => default;
 
-        //
-        // This will return selected local cert for both client/server streams
-        //
-        internal X509Certificate LocalCertificate
+        internal SslStreamInternal SecureStream
         {
             get
             {
@@ -80,105 +40,17 @@ namespace System.Net.Security
             }
         }
 
-        internal ChannelBinding GetChannelBinding(ChannelBindingKind kind)
-        {
-            return null;
-        }
-
-        internal bool CheckCertRevocationStatus
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        internal CipherAlgorithmType CipherAlgorithm
-        {
-            get
-            {
-                return CipherAlgorithmType.Null;
-            }
-        }
-
-        internal int CipherStrength
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
-        internal HashAlgorithmType HashAlgorithm
-        {
-            get
-            {
-                return HashAlgorithmType.None;
-            }
-        }
-
-        internal int HashStrength
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
-        internal ExchangeAlgorithmType KeyExchangeAlgorithm
-        {
-            get
-            {
-                return ExchangeAlgorithmType.None;
-            }
-        }
-
-        internal int KeyExchangeStrength
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
-        internal SslProtocols SslProtocol
-        {
-            get
-            {
-                return SslProtocols.None;
-            }
-        }
-
-        internal _SslStream SecureStream
-        {
-            get
-            {
-                return null;
-            }
-        }
+        internal bool HandshakeCompleted => default;
 
         public bool IsShutdown { get; internal set; }
 
-        internal void CheckThrow(bool authSucessCheck)
+        internal void CheckThrow(bool authSuccessCheck, bool shutdownCheck = false)
         {
         }
 
-        internal void Flush()
+        internal void CloseInternal()
         {
         }
-
-        internal Task FlushAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
-        //
-        // This is to not depend on GC&SafeHandle class if the context is not needed anymore.
-        //
-        internal void Close()
-        {
-        }
-
         //
         // This method assumes that a SSPI context is already in a good shape.
         // For example it is either a fresh context or already authenticated context that needs renegotiation.
@@ -190,20 +62,33 @@ namespace System.Net.Security
         internal void EndProcessAuthentication(IAsyncResult result)
         {
         }
-
-        internal IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal void EndShutdown(IAsyncResult asyncResult)
-        {
-            throw new NotImplementedException();
-        }
     }
 
-    internal class _SslStream : Stream
+    internal class SecureChannel
     {
+        internal bool IsValidContext => default;
+        internal bool IsServer => default;
+        internal SslConnectionInfo ConnectionInfo => default;
+        internal ChannelBinding GetChannelBinding(ChannelBindingKind kind) => default;
+        internal X509Certificate LocalServerCertificate => default;
+        internal bool IsRemoteCertificateAvailable => default;
+        internal SslApplicationProtocol NegotiatedApplicationProtocol => default;
+        internal X509Certificate LocalClientCertificate => default;
+        internal X509RevocationMode CheckCertRevocationStatus => default;
+        internal ProtocolToken CreateShutdownToken() => default;
+    }
+
+    internal class ProtocolToken
+    {
+        internal byte[] Payload;
+    }
+
+    internal class SslStreamInternal : Stream
+    {
+        public SslStreamInternal(SslStream stream)
+        {
+        }
+
         public override bool CanRead
         {
             get
@@ -278,7 +163,7 @@ namespace System.Net.Security
         {
             throw new NotImplementedException();
         }
-                
+
         public new ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();

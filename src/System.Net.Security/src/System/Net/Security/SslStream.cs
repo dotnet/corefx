@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
@@ -36,9 +37,8 @@ namespace System.Net.Security
     internal delegate X509Certificate LocalCertSelectionCallback(string targetHost, X509CertificateCollection localCertificates, X509Certificate2 remoteCertificate, string[] acceptableIssuers);
     internal delegate X509Certificate ServerCertSelectionCallback(string hostName);
 
-    public class SslStream : AuthenticatedStream
+    public partial class SslStream : AuthenticatedStream
     {
-        private SslState _sslState;
         private X509Certificate2 _remoteCertificate;
         private bool _remoteCertificateExposed;
 
@@ -48,6 +48,13 @@ namespace System.Net.Security
         internal RemoteCertValidationCallback _certValidationDelegate;
         internal LocalCertSelectionCallback _certSelectionDelegate;
         internal EncryptionPolicy _encryptionPolicy;
+
+        private readonly Stream _innerStream;
+        private readonly SslStreamInternal _secureStream;
+        private SecureChannel _context;
+
+        private ExceptionDispatchInfo _exception;
+        private bool _shutdown;
 
         public SslStream(Stream innerStream)
                 : this(innerStream, false, null, null)
@@ -84,17 +91,19 @@ namespace System.Net.Security
             _encryptionPolicy = encryptionPolicy;
             _certValidationDelegate = new RemoteCertValidationCallback(UserCertValidationCallbackWrapper);
             _certSelectionDelegate = userCertificateSelectionCallback == null ? null : new LocalCertSelectionCallback(UserCertSelectionCallbackWrapper);
-            _sslState = new SslState(innerStream);
+
+            _innerStream = innerStream;
+            _secureStream = new SslStreamInternal(this);
         }
 
         public SslApplicationProtocol NegotiatedApplicationProtocol
         {
             get
             {
-                if (Context == null)
+                if (_context == null)
                     return default;
 
-                return Context.NegotiatedApplicationProtocol;
+                return _context.NegotiatedApplicationProtocol;
             }
         }
 
@@ -129,7 +138,7 @@ namespace System.Net.Security
             _remoteCertificate = certificate == null ? null : new X509Certificate2(certificate);
             if (_userCertificateValidationCallback == null)
             {
-                if (!_sslState.RemoteCertRequired)
+                if (!RemoteCertRequired)
                 {
                     sslPolicyErrors &= ~SslPolicyErrors.RemoteCertificateNotAvailable;
                 }
@@ -211,16 +220,16 @@ namespace System.Net.Security
             SetAndVerifyValidationCallback(sslClientAuthenticationOptions.RemoteCertificateValidationCallback);
             SetAndVerifySelectionCallback(sslClientAuthenticationOptions.LocalCertificateSelectionCallback);
 
-            _sslState.ValidateCreateContext(sslClientAuthenticationOptions, _certValidationDelegate, _certSelectionDelegate);
+            ValidateCreateContext(sslClientAuthenticationOptions, _certValidationDelegate, _certSelectionDelegate);
 
-            LazyAsyncResult result = new LazyAsyncResult(_sslState, asyncState, asyncCallback);
-            _sslState.ProcessAuthentication(result);
+            LazyAsyncResult result = new LazyAsyncResult(this, asyncState, asyncCallback);
+            ProcessAuthentication(result);
             return result;
         }
 
         public virtual void EndAuthenticateAsClient(IAsyncResult asyncResult)
         {
-            _sslState.EndProcessAuthentication(asyncResult);
+            EndProcessAuthentication(asyncResult);
         }
 
         //
@@ -261,26 +270,32 @@ namespace System.Net.Security
         {
             SetAndVerifyValidationCallback(sslServerAuthenticationOptions.RemoteCertificateValidationCallback);
 
-            _sslState.ValidateCreateContext(CreateAuthenticationOptions(sslServerAuthenticationOptions));
+            ValidateCreateContext(CreateAuthenticationOptions(sslServerAuthenticationOptions));
 
-            LazyAsyncResult result = new LazyAsyncResult(_sslState, asyncState, asyncCallback);
-            _sslState.ProcessAuthentication(result);
+            LazyAsyncResult result = new LazyAsyncResult(this, asyncState, asyncCallback);
+            ProcessAuthentication(result);
             return result;
         }
 
         public virtual void EndAuthenticateAsServer(IAsyncResult asyncResult)
         {
-            _sslState.EndProcessAuthentication(asyncResult);
+            EndProcessAuthentication(asyncResult);
         }
 
         internal virtual IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
         {
-            return _sslState.BeginShutdown(asyncCallback, asyncState);
+            CheckThrow(authSuccessCheck: true, shutdownCheck: true);
+
+            ProtocolToken message = _context.CreateShutdownToken();
+            return TaskToApm.Begin(InnerStream.WriteAsync(message.Payload, 0, message.Payload.Length), asyncCallback, asyncState);
         }
 
         internal virtual void EndShutdown(IAsyncResult asyncResult)
         {
-            _sslState.EndShutdown(asyncResult);
+            CheckThrow(authSuccessCheck: true, shutdownCheck: true);
+
+            TaskToApm.End(asyncResult);
+            _shutdown = true;
         }
 
         public TransportContext TransportContext
@@ -293,7 +308,7 @@ namespace System.Net.Security
 
         internal ChannelBinding GetChannelBinding(ChannelBindingKind kind)
         {
-            return _sslState.GetChannelBinding(kind);
+            return (_context == null) ? null : _context.GetChannelBinding(kind);
         }
 
         #region Synchronous methods
@@ -326,8 +341,8 @@ namespace System.Net.Security
             SetAndVerifyValidationCallback(sslClientAuthenticationOptions.RemoteCertificateValidationCallback);
             SetAndVerifySelectionCallback(sslClientAuthenticationOptions.LocalCertificateSelectionCallback);
 
-            _sslState.ValidateCreateContext(sslClientAuthenticationOptions, _certValidationDelegate, _certSelectionDelegate);
-            _sslState.ProcessAuthentication(null);
+            ValidateCreateContext(sslClientAuthenticationOptions, _certValidationDelegate, _certSelectionDelegate);
+            ProcessAuthentication(null);
         }
 
         public virtual void AuthenticateAsServer(X509Certificate serverCertificate)
@@ -358,8 +373,8 @@ namespace System.Net.Security
         {
             SetAndVerifyValidationCallback(sslServerAuthenticationOptions.RemoteCertificateValidationCallback);
 
-            _sslState.ValidateCreateContext(CreateAuthenticationOptions(sslServerAuthenticationOptions));
-            _sslState.ProcessAuthentication(null);
+            ValidateCreateContext(CreateAuthenticationOptions(sslServerAuthenticationOptions));
+            ProcessAuthentication(null);
         }
         #endregion
 
@@ -455,8 +470,8 @@ namespace System.Net.Security
             {
                 return
                     IsAuthenticated &&
-                    (Context.IsServer ? Context.LocalServerCertificate : Context.LocalClientCertificate) != null &&
-                    Context.IsRemoteCertificateAvailable; /* does not work: Context.IsMutualAuthFlag;*/
+                    (_context.IsServer ? _context.LocalServerCertificate : _context.LocalClientCertificate) != null &&
+                    _context.IsRemoteCertificateAvailable; /* does not work: Context.IsMutualAuthFlag;*/
             }
         }
 
@@ -480,7 +495,7 @@ namespace System.Net.Security
         {
             get
             {
-                return Context != null && Context.IsServer;
+                return _context != null && _context.IsServer;
             }
         }
 
@@ -489,7 +504,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
                     return SslProtocols.None;
@@ -539,7 +554,7 @@ namespace System.Net.Security
         {
             get
             {
-                return Context != null && Context.CheckCertRevocationStatus != X509RevocationMode.NoCheck;
+                return _context != null && _context.CheckCertRevocationStatus != X509RevocationMode.NoCheck;
             }
         }
 
@@ -559,7 +574,7 @@ namespace System.Net.Security
         {
             get
             {
-                _sslState.CheckThrow(true);
+                CheckThrow(true);
                 _remoteCertificateExposed = true;
                 return _remoteCertificate;
             }
@@ -570,7 +585,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
                     return CipherAlgorithmType.None;
@@ -584,7 +599,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
                     return 0;
@@ -599,7 +614,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
                     return (HashAlgorithmType)0;
@@ -613,7 +628,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
                     return 0;
@@ -628,7 +643,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
                     return (ExchangeAlgorithmType)0;
@@ -643,7 +658,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = Context.ConnectionInfo;
+                SslConnectionInfo info = _context.ConnectionInfo;
                 if (info == null)
                 {
                     return 0;
@@ -668,7 +683,7 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.IsAuthenticated && InnerStream.CanRead;
+                return IsAuthenticated && InnerStream.CanRead;
             }
         }
 
@@ -684,7 +699,7 @@ namespace System.Net.Security
         {
             get
             {
-                return _sslState.IsAuthenticated && InnerStream.CanWrite && !_sslState.IsShutdown;
+                return IsAuthenticated && InnerStream.CanWrite && !IsShutdown;
             }
         }
 
@@ -784,62 +799,62 @@ namespace System.Net.Security
 
         public override int ReadByte()
         {
-            return _sslState.SecureStream.ReadByte();
+            return SecureStream.ReadByte();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            return _sslState.SecureStream.Read(buffer, offset, count);
+            return SecureStream.Read(buffer, offset, count);
         }
 
         public void Write(byte[] buffer)
         {
-            _sslState.SecureStream.Write(buffer, 0, buffer.Length);
+            SecureStream.Write(buffer, 0, buffer.Length);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            _sslState.SecureStream.Write(buffer, offset, count);
+            SecureStream.Write(buffer, offset, count);
         }
 
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
         {
-            return _sslState.SecureStream.BeginRead(buffer, offset, count, asyncCallback, asyncState);
+            return SecureStream.BeginRead(buffer, offset, count, asyncCallback, asyncState);
         }
 
         public override int EndRead(IAsyncResult asyncResult)
         {
-            return _sslState.SecureStream.EndRead(asyncResult);
+            return SecureStream.EndRead(asyncResult);
         }
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
         {
-            return _sslState.SecureStream.BeginWrite(buffer, offset, count, asyncCallback, asyncState);
+            return SecureStream.BeginWrite(buffer, offset, count, asyncCallback, asyncState);
         }
 
         public override void EndWrite(IAsyncResult asyncResult)
         {
-            _sslState.SecureStream.EndWrite(asyncResult);
+            SecureStream.EndWrite(asyncResult);
         }
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            return _sslState.SecureStream.WriteAsync(buffer, offset, count, cancellationToken);
+            return SecureStream.WriteAsync(buffer, offset, count, cancellationToken);
         }
 
         public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
-            return _sslState.SecureStream.WriteAsync(buffer, cancellationToken);
+            return SecureStream.WriteAsync(buffer, cancellationToken);
         }
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            return _sslState.SecureStream.ReadAsync(buffer, offset, count, cancellationToken);
+            return SecureStream.ReadAsync(buffer, offset, count, cancellationToken);
         }
 
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
-            return _sslState.SecureStream.ReadAsync(buffer, cancellationToken);
+            return SecureStream.ReadAsync(buffer, cancellationToken);
         }
     }
 }

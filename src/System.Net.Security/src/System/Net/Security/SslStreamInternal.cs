@@ -18,7 +18,7 @@ namespace System.Net.Security
         private const int FrameOverhead = 32;
         private const int ReadBufferSize = 4096 * 4 + FrameOverhead;         // We read in 16K chunks + headers.
 
-        private readonly SslState _sslState;
+        private readonly SslStream _sslState;
         private int _nestedWrite;
         private int _nestedRead;
 
@@ -31,7 +31,7 @@ namespace System.Net.Security
         private int _decryptedBytesOffset;
         private int _decryptedBytesCount;
 
-        internal SslStreamInternal(SslState sslState)
+        internal SslStreamInternal(SslStream sslState)
         {
             _sslState = sslState;
 

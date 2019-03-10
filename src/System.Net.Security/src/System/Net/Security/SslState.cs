@@ -24,17 +24,11 @@ namespace System.Net.Security
 
         internal SslAuthenticationOptions _sslAuthenticationOptions;
 
-        private readonly Stream _innerStream;
-        private readonly SslStreamInternal _secureStream;
-
         private int _nestedAuth;
-        private SecureChannel _context;
-
+        
         private bool _handshakeCompleted;
-        private bool _shutdown;
-
+        
         private SecurityStatusPal _securityStatus;
-        private ExceptionDispatchInfo _exception;
 
         private enum CachedSessionStatus : byte
         {
@@ -91,12 +85,12 @@ namespace System.Net.Security
         {
             ThrowIfExceptional();
 
-            if (Context != null && Context.IsValidContext)
+            if (_context != null && _context.IsValidContext)
             {
                 throw new InvalidOperationException(SR.net_auth_reauth);
             }
 
-            if (Context != null && IsServer)
+            if (_context != null && IsServer)
             {
                 throw new InvalidOperationException(SR.net_auth_client_server);
             }
@@ -126,12 +120,12 @@ namespace System.Net.Security
         {
             ThrowIfExceptional();
 
-            if (Context != null && Context.IsValidContext)
+            if (_context != null && _context.IsValidContext)
             {
                 throw new InvalidOperationException(SR.net_auth_reauth);
             }
 
-            if (Context != null && !IsServer)
+            if (_context != null && !IsServer)
             {
                 throw new InvalidOperationException(SR.net_auth_client_server);
             }
@@ -153,23 +147,20 @@ namespace System.Net.Security
         {
             get
             {
-                return Context == null || Context.RemoteCertRequired;
+                return _context == null || _context.RemoteCertRequired;
             }
         }
+
+        private object SyncLock => _context;
 
         private X509Certificate InternalLocalCertificate
         {
             get
             {
-                return Context.IsServer ? Context.LocalServerCertificate : Context.LocalClientCertificate;
+                return _context.IsServer ? _context.LocalServerCertificate : _context.LocalClientCertificate;
             }
         }
-
-        internal ChannelBinding GetChannelBinding(ChannelBindingKind kind)
-        {
-            return (Context == null) ? null : Context.GetChannelBinding(kind);
-        }
-
+        
         internal bool IsShutdown
         {
             get
@@ -199,7 +190,7 @@ namespace System.Net.Security
         {
             get
             {
-                return Context.MaxDataSize;
+                return _context.MaxDataSize;
             }
         }
 
@@ -212,7 +203,7 @@ namespace System.Net.Security
                 _exception = ExceptionDispatchInfo.Capture(e);
             }
 
-            Context?.Close();
+            _context?.Close();
         }
 
         private bool HandshakeCompleted
@@ -222,15 +213,7 @@ namespace System.Net.Security
                 return _handshakeCompleted;
             }
         }
-
-        private SecureChannel Context
-        {
-            get
-            {
-                return _context;
-            }
-        }
-
+        
         internal void CheckThrow(bool authSuccessCheck, bool shutdownCheck = false)
         {
             ThrowIfExceptional();
@@ -252,14 +235,14 @@ namespace System.Net.Security
         internal void CloseInternal()
         {
             _exception = s_disposedSentinel;
-            Context?.Close();
+            _context?.Close();
             _secureStream?.Dispose();
         }
 
         internal SecurityStatusPal EncryptData(ReadOnlyMemory<byte> buffer, ref byte[] outBuffer, out int outSize)
         {
             CheckThrow(true);
-            return Context.Encrypt(buffer, ref outBuffer, out outSize);
+            return _context.Encrypt(buffer, ref outBuffer, out outSize);
         }
 
         internal SecurityStatusPal DecryptData(byte[] buffer, ref int offset, ref int count)
@@ -270,7 +253,7 @@ namespace System.Net.Security
 
         private SecurityStatusPal PrivateDecryptData(byte[] buffer, ref int offset, ref int count)
         {
-            return Context.Decrypt(buffer, ref offset, ref count);
+            return _context.Decrypt(buffer, ref offset, ref count);
         }
 
         //
@@ -278,7 +261,7 @@ namespace System.Net.Security
         //
         private Exception EnqueueOldKeyDecryptedData(byte[] buffer, int offset, int count)
         {
-            lock (this)
+            lock (SyncLock)
             {
                 if (_queuedReadCount + count > MaxQueuedReadBytes)
                 {
@@ -352,7 +335,7 @@ namespace System.Net.Security
                 //  A trick to discover and avoid cached sessions.
                 _CachedSession = CachedSessionStatus.Unknown;
 
-                ForceAuthentication(Context.IsServer, null, asyncRequest);
+                ForceAuthentication(_context.IsServer, null, asyncRequest);
 
                 // Not aync so the connection is completed at this point.
                 if (lazyResult == null && NetEventSource.IsEnabled)
@@ -390,7 +373,7 @@ namespace System.Net.Security
         //
         internal void ReplyOnReAuthentication(byte[] buffer)
         {
-            lock (this)
+            lock (SyncLock)
             {
                 // Note we are already inside the read, so checking for already going concurrent handshake.
                 _lockReadState = LockHandshake;
@@ -524,12 +507,12 @@ namespace System.Net.Security
         //
         private void StartSendBlob(byte[] incoming, int count, AsyncProtocolRequest asyncRequest)
         {
-            ProtocolToken message = Context.NextMessage(incoming, 0, count);
+            ProtocolToken message = _context.NextMessage(incoming, 0, count);
             _securityStatus = message.Status;
 
             if (message.Size != 0)
             {
-                if (Context.IsServer && _CachedSession == CachedSessionStatus.Unknown)
+                if (_context.IsServer && _CachedSession == CachedSessionStatus.Unknown)
                 {
                     //
                     //[Schannel] If the first call to ASC returns a token less than 200 bytes,
@@ -795,9 +778,9 @@ namespace System.Net.Security
             if (NetEventSource.IsEnabled)
                 NetEventSource.Enter(this);
 
-            Context.ProcessHandshakeSuccess();
+            _context.ProcessHandshakeSuccess();
 
-            if (!Context.VerifyRemoteCertificate(_sslAuthenticationOptions.CertValidationDelegate, ref alertToken))
+            if (!_context.VerifyRemoteCertificate(_sslAuthenticationOptions.CertValidationDelegate, ref alertToken))
             {
                 _handshakeCompleted = false;
 
@@ -922,7 +905,7 @@ namespace System.Net.Security
         private bool CheckEnqueueHandshakeRead(ref byte[] buffer, AsyncProtocolRequest request)
         {
             LazyAsyncResult lazyResult = null;
-            lock (this)
+            lock (SyncLock)
             {
                 if (_lockReadState == LockPendingRead)
                 {
@@ -953,7 +936,7 @@ namespace System.Net.Security
 
         private void FinishHandshakeRead(int newState)
         {
-            lock (this)
+            lock (SyncLock)
             {
                 // Lock is redundant here. Included for clarity.
                 int lockState = Interlocked.Exchange(ref _lockReadState, newState);
@@ -983,7 +966,7 @@ namespace System.Net.Security
             }
 
             LazyAsyncResult lazyResult = null;
-            lock (this)
+            lock (SyncLock)
             {
                 int result = CheckOldKeyDecryptedData(buffer);
                 if (result != -1)
@@ -1006,7 +989,7 @@ namespace System.Net.Security
             }
             // Need to exit from lock before waiting.
             lazyResult.InternalWaitForCompletion();
-            lock (this)
+            lock (SyncLock)
             {
                 return CheckOldKeyDecryptedData(buffer);
             }
@@ -1022,7 +1005,7 @@ namespace System.Net.Security
                 return new ValueTask<int>(CheckOldKeyDecryptedData(buffer));
             }
 
-            lock (this)
+            lock (SyncLock)
             {
                 int result = CheckOldKeyDecryptedData(buffer);
                 if (result != -1)
@@ -1054,7 +1037,7 @@ namespace System.Net.Security
                 return;
             }
 
-            lock (this)
+            lock (SyncLock)
             {
                 LazyAsyncResult ar = _queuedReadStateRequest as LazyAsyncResult;
                 if (ar != null)
@@ -1081,7 +1064,7 @@ namespace System.Net.Security
                 return Task.CompletedTask;
             }
 
-            lock (this)
+            lock (SyncLock)
             {
                 if (_lockWriteState != LockHandshake)
                 {
@@ -1108,7 +1091,7 @@ namespace System.Net.Security
             }
 
             LazyAsyncResult lazyResult = null;
-            lock (this)
+            lock (SyncLock)
             {
                 if (_lockWriteState != LockHandshake)
                 {
@@ -1137,7 +1120,7 @@ namespace System.Net.Security
                 return;
             }
 
-            lock (this)
+            lock (SyncLock)
             {
                 HandleQueuedCallback(ref _queuedWriteStateRequest);
             }
@@ -1187,7 +1170,7 @@ namespace System.Net.Security
         {
             LazyAsyncResult lazyResult = null;
 
-            lock (this)
+            lock (SyncLock)
             {
                 if (_lockWriteState == LockPendingWrite)
                 {
@@ -1219,7 +1202,7 @@ namespace System.Net.Security
         {
             try
             {
-                lock (this)
+                lock (SyncLock)
                 {
                     if (e != null)
                     {
@@ -1460,7 +1443,7 @@ namespace System.Net.Security
             }
 
             // When server has replied the framing is already fixed depending on the prior client packet
-            if (!Context.IsServer || _Framing == Framing.Unified)
+            if (!_context.IsServer || _Framing == Framing.Unified)
             {
                 return Framing.BeforeSSL3;
             }
@@ -1528,7 +1511,7 @@ namespace System.Net.Security
 
             try
             {
-                ForceAuthentication(Context.IsServer, request.Buffer, request);
+                ForceAuthentication(_context.IsServer, request.Buffer, request);
             }
             catch (Exception e)
             {
@@ -1615,22 +1598,6 @@ namespace System.Net.Security
 
                 FinishHandshake(exception, null);
             }
-        }
-
-        internal IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
-        {
-            CheckThrow(authSuccessCheck: true, shutdownCheck: true);
-
-            ProtocolToken message = Context.CreateShutdownToken();
-            return TaskToApm.Begin(InnerStream.WriteAsync(message.Payload, 0, message.Payload.Length), asyncCallback, asyncState);
-        }
-
-        internal void EndShutdown(IAsyncResult result)
-        {
-            CheckThrow(authSuccessCheck: true, shutdownCheck: true);
-
-            TaskToApm.End(result);
-            _shutdown = true;
         }
     }
 }
