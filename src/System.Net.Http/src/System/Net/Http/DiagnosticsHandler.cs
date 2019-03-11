@@ -36,7 +36,7 @@ namespace System.Net.Http
             //HttpClientHandler is responsible to call DiagnosticsHandler.IsEnabled() before forwarding request here.
             //This code will not be reached if no one listens to 'HttpHandlerDiagnosticListener', unless consumer unsubscribes
             //from DiagnosticListener right after the check. So some requests happening right after subscription starts
-            //might not be instrumented. Similarly, when consumer unsubscribes, extra requests might be instumented
+            //might not be instrumented. Similarly, when consumer unsubscribes, extra requests might be instrumented
 
             if (request == null)
             {
@@ -96,7 +96,24 @@ namespace System.Net.Http
                             }
                             catch (FormatException)
                             {
-                                // invalid Http token in baggage
+                                // invalid Http token in baggage.
+                                // Baggage contains arbitrary context that flows with the request
+                                // across process boundaries.
+                                // Baggage could have been added by upstream component and propagated
+                                // (not necessarily over HTTP). In this case baggage could be added by the framework/library
+                                // and user has no control over it. User could have added invalid token themselves through
+                                // Activity.AddBaggage API.
+                                //
+                                // Activity.AddBaggage does not do any validation because it does not know 
+                                // which protocol will propagate the context and does not know protocol limitations.
+                                //
+                                // So it may happen that if any of the applications that processed the transaction so far
+                                // added invalid HTTP token and we just discovered it now. Throwing here will break the
+                                // application logic. 
+                                //
+                                // So we are ignoring this token. The best way to discover it is through first chance exception.
+                                // This is typical approach in the Activity as we do not want to break the app
+                                // when diagnostics is invalid.
                             }
                         }
                         while (e.MoveNext());
@@ -121,7 +138,7 @@ namespace System.Net.Http
             {
                 if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ExceptionEventName))
                 {
-                    //If request was initialy instrumented, Activity.Current has all necessary context for logging
+                    //If request was initially instrumented, Activity.Current has all necessary context for logging
                     //Request is passed to provide some context if instrumentation was disabled and to avoid
                     //extensive Activity.Tags usage to tunnel request properties
                     s_diagnosticListener.Write(DiagnosticsHandlerLoggingStrings.ExceptionEventName, new { Exception = ex, Request = request });
@@ -136,7 +153,7 @@ namespace System.Net.Http
                     s_diagnosticListener.StopActivity(activity, new
                     {
                         Response = responseTask?.Status == TaskStatus.RanToCompletion ? responseTask.Result : null,
-                        //If request is failed or cancelled, there is no reponse, therefore no information about request;
+                        //If request is failed or cancelled, there is no response, therefore no information about request;
                         //pass the request in the payload, so consumers can have it in Stop for failed/canceled requests
                         //and not retain all requests in Start 
                         Request = request,
