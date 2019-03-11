@@ -20,38 +20,14 @@ namespace System.Net.Security
         private int _nestedWrite;
         private int _nestedRead;
 
-        // Never updated directly, special properties are used.  This is the read buffer.
-        private byte[] _internalBuffer;
-
-        private int _internalOffset;
-        private int _internalBufferCount;
-
-        private int _decryptedBytesOffset;
-        private int _decryptedBytesCount;
-
         internal SslStreamInternal(SslStream sslState)
         {
             _sslState = sslState;
 
-            _decryptedBytesOffset = 0;
-            _decryptedBytesCount = 0;
+            _sslState._decryptedBytesOffset = 0;
+            _sslState._decryptedBytesCount = 0;
         }
-
-        //We will only free the read buffer if it
-        //actually contains no decrypted or encrypted bytes
-        private void ReturnReadBufferIfEmpty()
-        {
-            if (_internalBuffer != null && _decryptedBytesCount == 0 && _internalBufferCount == 0)
-            {
-                ArrayPool<byte>.Shared.Return(_internalBuffer);
-                _internalBuffer = null;
-                _internalBufferCount = 0;
-                _internalOffset = 0;
-                _decryptedBytesCount = 0;
-                _decryptedBytesOffset = 0;
-            }
-        }
-
+        
         ~SslStreamInternal()
         {
             Dispose(disposing: false);
@@ -61,7 +37,7 @@ namespace System.Net.Security
         {
             Dispose(disposing: true);
 
-            if (_internalBuffer == null)
+            if (_sslState._internalBuffer == null)
             {
                 // Suppress finalizer if the read buffer was returned.
                 GC.SuppressFinalize(this);
@@ -76,12 +52,12 @@ namespace System.Net.Security
             // subsequent Reads first check if the context is still available.
             if (Interlocked.CompareExchange(ref _nestedRead, 1, 0) == 0)
             {
-                byte[] buffer = _internalBuffer;
+                byte[] buffer = _sslState._internalBuffer;
                 if (buffer != null)
                 {
-                    _internalBuffer = null;
-                    _internalBufferCount = 0;
-                    _internalOffset = 0;
+                    _sslState._internalBuffer = null;
+                    _sslState._internalBufferCount = 0;
+                    _sslState._internalOffset = 0;
                     ArrayPool<byte>.Shared.Return(buffer);
                 }
             }
@@ -97,11 +73,11 @@ namespace System.Net.Security
             // If there's any data in the buffer, take one byte, and we're done.
             try
             {
-                if (_decryptedBytesCount > 0)
+                if (_sslState._decryptedBytesCount > 0)
                 {
-                    int b = _internalBuffer[_decryptedBytesOffset++];
-                    _decryptedBytesCount--;
-                    ReturnReadBufferIfEmpty();
+                    int b = _sslState._internalBuffer[_sslState._decryptedBytesOffset++];
+                    _sslState._decryptedBytesCount--;
+                    _sslState.ReturnReadBufferIfEmpty();
                     return b;
                 }
             }
@@ -121,25 +97,7 @@ namespace System.Net.Security
             Debug.Assert(bytesRead == 0 || bytesRead == 1);
             return bytesRead == 1 ? oneByte[0] : -1;
         }
-        
-        private void ResetReadBuffer()
-        {
-            Debug.Assert(_decryptedBytesCount == 0);
-
-            if (_internalBuffer == null)
-            {
-                _internalBuffer = ArrayPool<byte>.Shared.Rent(ReadBufferSize);
-            }
-            else if (_internalOffset > 0)
-            {
-                // We have buffered data at a non-zero offset.
-                // To maximize the buffer space available for the next read,
-                // copy the existing data down to the beginning of the buffer.
-                Buffer.BlockCopy(_internalBuffer, _internalOffset, _internalBuffer, 0, _internalBufferCount);
-                _internalOffset = 0;
-            }
-        }
-        
+                
         internal async ValueTask<int> ReadAsyncInternal<TReadAdapter>(TReadAdapter adapter, Memory<byte> buffer)
             where TReadAdapter : ISslReadAdapter
         {
@@ -153,9 +111,9 @@ namespace System.Net.Security
                 while (true)
                 {
                     int copyBytes;
-                    if (_decryptedBytesCount != 0)
+                    if (_sslState._decryptedBytesCount != 0)
                     {
-                        copyBytes = CopyDecryptedData(buffer);
+                        copyBytes = _sslState.CopyDecryptedData(buffer);
 
                         _sslState.FinishRead(null);
 
@@ -168,14 +126,14 @@ namespace System.Net.Security
                         return copyBytes;
                     }
 
-                    ResetReadBuffer();
+                    _sslState.ResetReadBuffer();
                     int readBytes = await FillBufferAsync(adapter, SecureChannel.ReadHeaderSize).ConfigureAwait(false);
                     if (readBytes == 0)
                     {
                         return 0;
                     }
 
-                    int payloadBytes = _sslState.GetRemainingFrameSize(_internalBuffer, _internalOffset, readBytes);
+                    int payloadBytes = _sslState.GetRemainingFrameSize(_sslState._internalBuffer, _sslState._internalOffset, readBytes);
                     if (payloadBytes < 0)
                     {
                         throw new IOException(SR.net_frame_read_size);
@@ -191,23 +149,23 @@ namespace System.Net.Security
                     // At this point, readBytes contains the size of the header plus body.
                     // Set _decrytpedBytesOffset/Count to the current frame we have (including header)
                     // DecryptData will decrypt in-place and modify these to point to the actual decrypted data, which may be smaller.
-                    _decryptedBytesOffset = _internalOffset;
-                    _decryptedBytesCount = readBytes;
-                    SecurityStatusPal status = _sslState.DecryptData(_internalBuffer, ref _decryptedBytesOffset, ref _decryptedBytesCount);
+                    _sslState._decryptedBytesOffset = _sslState._internalOffset;
+                    _sslState._decryptedBytesCount = readBytes;
+                    SecurityStatusPal status = _sslState.DecryptData();
 
                     // Treat the bytes we just decrypted as consumed
                     // Note, we won't do another buffer read until the decrypted bytes are processed
-                    ConsumeBufferedBytes(readBytes);
+                    _sslState.ConsumeBufferedBytes(readBytes);
 
                     if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
                     {
                         byte[] extraBuffer = null;
-                        if (_decryptedBytesCount != 0)
+                        if (_sslState._decryptedBytesCount != 0)
                         {
-                            extraBuffer = new byte[_decryptedBytesCount];
-                            Buffer.BlockCopy(_internalBuffer, _decryptedBytesOffset, extraBuffer, 0, _decryptedBytesCount);
+                            extraBuffer = new byte[_sslState._decryptedBytesCount];
+                            Buffer.BlockCopy(_sslState._internalBuffer, _sslState._decryptedBytesOffset, extraBuffer, 0, _sslState._decryptedBytesCount);
 
-                            _decryptedBytesCount = 0;
+                            _sslState._decryptedBytesCount = 0;
                         }
 
                         ProtocolToken message = new ProtocolToken(null, status);
@@ -308,15 +266,15 @@ namespace System.Net.Security
         private ValueTask<int> FillBufferAsync<TReadAdapter>(TReadAdapter adapter, int minSize)
             where TReadAdapter : ISslReadAdapter
         {
-            if (_internalBufferCount >= minSize)
+            if (_sslState._internalBufferCount >= minSize)
             {
                 return new ValueTask<int>(minSize);
             }
 
-            int initialCount = _internalBufferCount;
+            int initialCount = _sslState._internalBufferCount;
             do
             {
-                ValueTask<int> t = adapter.ReadAsync(_internalBuffer, _internalBufferCount, _internalBuffer.Length - _internalBufferCount);
+                ValueTask<int> t = adapter.ReadAsync(_sslState._internalBuffer, _sslState._internalBufferCount, _sslState._internalBuffer.Length - _sslState._internalBufferCount);
                 if (!t.IsCompletedSuccessfully)
                 {
                     return InternalFillBufferAsync(adapter, t, minSize, initialCount);
@@ -324,7 +282,7 @@ namespace System.Net.Security
                 int bytes = t.Result;
                 if (bytes == 0)
                 {
-                    if (_internalBufferCount != initialCount)
+                    if (_sslState._internalBufferCount != initialCount)
                     {
                         // We read some bytes, but not as many as we expected, so throw.
                         throw new IOException(SR.net_io_eof);
@@ -333,8 +291,8 @@ namespace System.Net.Security
                     return new ValueTask<int>(0);
                 }
 
-                _internalBufferCount += bytes;
-            } while (_internalBufferCount < minSize);
+                _sslState._internalBufferCount += bytes;
+            } while (_sslState._internalBufferCount < minSize);
 
             return new ValueTask<int>(minSize);
 
@@ -345,7 +303,7 @@ namespace System.Net.Security
                     int b = await task.ConfigureAwait(false);
                     if (b == 0)
                     {
-                        if (_internalBufferCount != initial)
+                        if (_sslState._internalBufferCount != initial)
                         {
                             throw new IOException(SR.net_io_eof);
                         }
@@ -353,42 +311,15 @@ namespace System.Net.Security
                         return 0;
                     }
 
-                    _internalBufferCount += b;
-                    if (_internalBufferCount >= min)
+                    _sslState._internalBufferCount += b;
+                    if (_sslState._internalBufferCount >= min)
                     {
                         return min;
                     }
 
-                    task = adap.ReadAsync(_internalBuffer, _internalBufferCount, _internalBuffer.Length - _internalBufferCount);
+                    task = adap.ReadAsync(_sslState._internalBuffer, _sslState._internalBufferCount, _sslState._internalBuffer.Length - _sslState._internalBufferCount);
                 }
             }
-        }
-
-        private void ConsumeBufferedBytes(int byteCount)
-        {
-            Debug.Assert(byteCount >= 0);
-            Debug.Assert(byteCount <= _internalBufferCount);
-
-            _internalOffset += byteCount;
-            _internalBufferCount -= byteCount;
-
-            ReturnReadBufferIfEmpty();
-        }
-
-        private int CopyDecryptedData(Memory<byte> buffer)
-        {
-            Debug.Assert(_decryptedBytesCount > 0);
-
-            int copyBytes = Math.Min(_decryptedBytesCount, buffer.Length);
-            if (copyBytes != 0)
-            {
-                new Span<byte>(_internalBuffer, _decryptedBytesOffset, copyBytes).CopyTo(buffer.Span);
-
-                _decryptedBytesOffset += copyBytes;
-                _decryptedBytesCount -= copyBytes;
-            }
-            ReturnReadBufferIfEmpty();
-            return copyBytes;
         }
     }
 }

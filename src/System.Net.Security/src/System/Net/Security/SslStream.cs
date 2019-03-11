@@ -799,7 +799,8 @@ namespace System.Net.Security
 
         public override int ReadByte()
         {
-            return SecureStream.ReadByte();
+            CheckThrow(true);
+            return _secureStream.ReadByte();
         }
 
         public override int Read(byte[] buffer, int offset, int count)

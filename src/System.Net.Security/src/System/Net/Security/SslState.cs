@@ -65,6 +65,15 @@ namespace System.Net.Security
         private int _lockReadState;
         private object _queuedReadStateRequest;
 
+        // Never updated directly, special properties are used.  This is the read buffer.
+        internal byte[] _internalBuffer;
+
+        internal int _internalOffset;
+        internal int _internalBufferCount;
+
+        internal int _decryptedBytesOffset;
+        internal int _decryptedBytesCount;
+
         /// <summary>Set as the _exception when the instance is disposed.</summary>
         private static readonly ExceptionDispatchInfo s_disposedSentinel = ExceptionDispatchInfo.Capture(new ObjectDisposedException(nameof(SslStream)));
 
@@ -180,16 +189,7 @@ namespace System.Net.Security
                 return _innerStream;
             }
         }
-
-        internal SslStreamInternal SecureStream
-        {
-            get
-            {
-                CheckThrow(true);
-                return _secureStream;
-            }
-        }
-
+        
         internal int MaxDataSize
         {
             get
@@ -249,10 +249,10 @@ namespace System.Net.Security
             return _context.Encrypt(buffer, ref outBuffer, out outSize);
         }
 
-        internal SecurityStatusPal DecryptData(byte[] buffer, ref int offset, ref int count)
+        internal SecurityStatusPal DecryptData()
         {
             CheckThrow(true);
-            return PrivateDecryptData(buffer, ref offset, ref count);
+            return PrivateDecryptData(_internalBuffer, ref _decryptedBytesOffset, ref _decryptedBytesCount);
         }
 
         private SecurityStatusPal PrivateDecryptData(byte[] buffer, ref int offset, ref int count)
@@ -1334,6 +1334,66 @@ namespace System.Net.Security
             if (count > buffer.Length - offset)
             {
                 throw new ArgumentOutOfRangeException(nameof(count), SR.net_offset_plus_count);
+            }
+        }
+
+        //We will only free the read buffer if it
+        //actually contains no decrypted or encrypted bytes
+        internal void ReturnReadBufferIfEmpty()
+        {
+            if (_internalBuffer != null && _decryptedBytesCount == 0 && _internalBufferCount == 0)
+            {
+                ArrayPool<byte>.Shared.Return(_internalBuffer);
+                _internalBuffer = null;
+                _internalBufferCount = 0;
+                _internalOffset = 0;
+                _decryptedBytesCount = 0;
+                _decryptedBytesOffset = 0;
+            }
+        }
+
+        internal void ConsumeBufferedBytes(int byteCount)
+        {
+            Debug.Assert(byteCount >= 0);
+            Debug.Assert(byteCount <= _internalBufferCount);
+
+            _internalOffset += byteCount;
+            _internalBufferCount -= byteCount;
+
+            ReturnReadBufferIfEmpty();
+        }
+
+        internal int CopyDecryptedData(Memory<byte> buffer)
+        {
+            Debug.Assert(_decryptedBytesCount > 0);
+
+            int copyBytes = Math.Min(_decryptedBytesCount, buffer.Length);
+            if (copyBytes != 0)
+            {
+                new Span<byte>(_internalBuffer, _decryptedBytesOffset, copyBytes).CopyTo(buffer.Span);
+
+                _decryptedBytesOffset += copyBytes;
+                _decryptedBytesCount -= copyBytes;
+            }
+            ReturnReadBufferIfEmpty();
+            return copyBytes;
+        }
+
+        internal void ResetReadBuffer()
+        {
+            Debug.Assert(_decryptedBytesCount == 0);
+
+            if (_internalBuffer == null)
+            {
+                _internalBuffer = ArrayPool<byte>.Shared.Rent(ReadBufferSize);
+            }
+            else if (_internalOffset > 0)
+            {
+                // We have buffered data at a non-zero offset.
+                // To maximize the buffer space available for the next read,
+                // copy the existing data down to the beginning of the buffer.
+                Buffer.BlockCopy(_internalBuffer, _internalOffset, _internalBuffer, 0, _internalBufferCount);
+                _internalOffset = 0;
             }
         }
 
