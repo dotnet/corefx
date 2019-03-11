@@ -147,47 +147,17 @@ namespace System.Net.Security
             }
         }
 
-        private bool RemoteCertRequired
-        {
-            get
-            {
-                return _context == null || _context.RemoteCertRequired;
-            }
-        }
+        private bool RemoteCertRequired => _context == null || _context.RemoteCertRequired;
 
         private object SyncLock => _context;
 
-        private X509Certificate InternalLocalCertificate
-        {
-            get
-            {
-                return _context.IsServer ? _context.LocalServerCertificate : _context.LocalClientCertificate;
-            }
-        }
-        
-        private bool IsShutdown
-        {
-            get
-            {
-                return _shutdown;
-            }
-        }
-        
-        private Stream InternalInnerStream
-        {
-            get
-            {
-                return _innerStream;
-            }
-        }
-        
-        private int MaxDataSize
-        {
-            get
-            {
-                return _context.MaxDataSize;
-            }
-        }
+        private X509Certificate InternalLocalCertificate => _context.IsServer ? _context.LocalServerCertificate : _context.LocalClientCertificate;
+
+        private bool IsShutdown => _shutdown;
+
+        private Stream InternalInnerStream => _innerStream;
+
+        private int MaxDataSize => _context.MaxDataSize;
 
         private void SetException(Exception e)
         {
@@ -201,14 +171,8 @@ namespace System.Net.Security
             _context?.Close();
         }
 
-        private bool HandshakeCompleted
-        {
-            get
-            {
-                return _handshakeCompleted;
-            }
-        }
-        
+        private bool HandshakeCompleted => _handshakeCompleted;
+
         private void CheckThrow(bool authSuccessCheck, bool shutdownCheck = false)
         {
             ThrowIfExceptional();
@@ -303,6 +267,7 @@ namespace System.Net.Security
             }
             return -1;
         }
+
         //
         // This method assumes that a SSPI context is already in a good shape.
         // For example it is either a fresh context or already authenticated context that needs renegotiation.

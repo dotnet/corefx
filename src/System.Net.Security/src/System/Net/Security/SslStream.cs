@@ -165,10 +165,7 @@ namespace System.Net.Security
             return _userCertificateSelectionCallback(this, targetHost, localCertificates, remoteCertificate, acceptableIssuers);
         }
 
-        private X509Certificate ServerCertSelectionCallbackWrapper(string targetHost)
-        {
-            return _userServerCertificateSelectionCallback(this, targetHost);
-        }
+        private X509Certificate ServerCertSelectionCallbackWrapper(string targetHost) => _userServerCertificateSelectionCallback(this, targetHost);
 
         private SslAuthenticationOptions CreateAuthenticationOptions(SslServerAuthenticationOptions sslServerAuthenticationOptions)
         {
@@ -236,10 +233,7 @@ namespace System.Net.Security
             return result;
         }
 
-        public virtual void EndAuthenticateAsClient(IAsyncResult asyncResult)
-        {
-            EndProcessAuthentication(asyncResult);
-        }
+        public virtual void EndAuthenticateAsClient(IAsyncResult asyncResult) => EndProcessAuthentication(asyncResult);
 
         //
         // Server side auth.
@@ -286,10 +280,7 @@ namespace System.Net.Security
             return result;
         }
 
-        public virtual void EndAuthenticateAsServer(IAsyncResult asyncResult)
-        {
-            EndProcessAuthentication(asyncResult);
-        }
+        public virtual void EndAuthenticateAsServer(IAsyncResult asyncResult) => EndProcessAuthentication(asyncResult);
 
         internal virtual IAsyncResult BeginShutdown(AsyncCallback asyncCallback, object asyncState)
         {
@@ -456,13 +447,7 @@ namespace System.Net.Security
                 this);
         #endregion
 
-        public override bool IsAuthenticated
-        {
-            get
-            {
-                return _context != null && _context.IsValidContext && _exception == null && HandshakeCompleted;
-            }
-        }
+        public override bool IsAuthenticated => _context != null && _context.IsValidContext && _exception == null && HandshakeCompleted;
 
         public override bool IsMutuallyAuthenticated
         {
@@ -475,29 +460,11 @@ namespace System.Net.Security
             }
         }
 
-        public override bool IsEncrypted
-        {
-            get
-            {
-                return IsAuthenticated;
-            }
-        }
+        public override bool IsEncrypted => IsAuthenticated;
 
-        public override bool IsSigned
-        {
-            get
-            {
-                return IsAuthenticated;
-            }
-        }
+        public override bool IsSigned => IsAuthenticated;
 
-        public override bool IsServer
-        {
-            get
-            {
-                return _context != null && _context.IsServer;
-            }
-        }
+        public override bool IsServer => _context != null && _context.IsServer;
 
         public virtual SslProtocols SslProtocol
         {
@@ -550,13 +517,7 @@ namespace System.Net.Security
             }
         }
 
-        public virtual bool CheckCertRevocationStatus
-        {
-            get
-            {
-                return _context != null && _context.CheckCertRevocationStatus != X509RevocationMode.NoCheck;
-            }
-        }
+        public virtual bool CheckCertRevocationStatus => _context != null && _context.CheckCertRevocationStatus != X509RevocationMode.NoCheck;
 
         //
         // This will return selected local cert for both client/server streams
@@ -671,101 +632,41 @@ namespace System.Net.Security
         //
         // Stream contract implementation.
         //
-        public override bool CanSeek
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool CanSeek => false;
 
-        public override bool CanRead
-        {
-            get
-            {
-                return IsAuthenticated && InnerStream.CanRead;
-            }
-        }
+        public override bool CanRead => IsAuthenticated && InnerStream.CanRead;
 
-        public override bool CanTimeout
-        {
-            get
-            {
-                return InnerStream.CanTimeout;
-            }
-        }
+        public override bool CanTimeout => InnerStream.CanTimeout;
 
-        public override bool CanWrite
-        {
-            get
-            {
-                return IsAuthenticated && InnerStream.CanWrite && !IsShutdown;
-            }
-        }
+        public override bool CanWrite => IsAuthenticated && InnerStream.CanWrite && !IsShutdown;
 
         public override int ReadTimeout
         {
-            get
-            {
-                return InnerStream.ReadTimeout;
-            }
-            set
-            {
-                InnerStream.ReadTimeout = value;
-            }
+            get => InnerStream.ReadTimeout;
+            set => InnerStream.ReadTimeout = value;
         }
 
         public override int WriteTimeout
         {
-            get
-            {
-                return InnerStream.WriteTimeout;
-            }
-            set
-            {
-                InnerStream.WriteTimeout = value;
-            }
+            get => InnerStream.WriteTimeout;
+            set => InnerStream.WriteTimeout = value;
         }
 
-        public override long Length
-        {
-            get
-            {
-                return InnerStream.Length;
-            }
-        }
+        public override long Length => InnerStream.Length;
 
         public override long Position
         {
-            get
-            {
-                return InnerStream.Position;
-            }
-            set
-            {
-                throw new NotSupportedException(SR.net_noseek);
-            }
+            get => InnerStream.Position;
+            set => throw new NotSupportedException(SR.net_noseek);
         }
 
-        public override void SetLength(long value)
-        {
-            InnerStream.SetLength(value);
-        }
+        public override void SetLength(long value) => InnerStream.SetLength(value);
 
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            throw new NotSupportedException(SR.net_noseek);
-        }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException(SR.net_noseek);
 
-        public override void Flush()
-        {
-            InnerStream.Flush();
-        }
+        public override void Flush() => InnerStream.Flush();
 
-        public override Task FlushAsync(CancellationToken cancellationToken)
-        {
-            return InnerStream.FlushAsync(cancellationToken);
-        }
+        public override Task FlushAsync(CancellationToken cancellationToken) => InnerStream.FlushAsync(cancellationToken);
 
         protected override void Dispose(bool disposing)
         {
@@ -841,10 +742,7 @@ namespace System.Net.Security
             return ReadAsyncInternal(reader, new Memory<byte>(buffer, offset, count)).GetAwaiter().GetResult();
         }
 
-        public void Write(byte[] buffer)
-        {
-            Write(buffer, 0, buffer.Length);
-        }
+        public void Write(byte[] buffer) => Write(buffer, 0, buffer.Length);
 
         public override void Write(byte[] buffer, int offset, int count)
         {

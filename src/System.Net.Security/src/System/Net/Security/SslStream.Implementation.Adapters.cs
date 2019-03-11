@@ -9,19 +9,19 @@ namespace System.Net.Security
     // This contains adapters to allow a single code path for sync/async logic
     public partial class SslStream
     {
-        internal interface ISslWriteAdapter
+        private interface ISslWriteAdapter
         {
             Task LockAsync();
             ValueTask WriteAsync(byte[] buffer, int offset, int count);
         }
 
-        internal interface ISslReadAdapter
+        private interface ISslReadAdapter
         {
             ValueTask<int> ReadAsync(byte[] buffer, int offset, int count);
             ValueTask<int> LockAsync(Memory<byte> buffer);
         }
 
-        internal readonly struct SslReadAsync : ISslReadAdapter
+        private readonly struct SslReadAsync : ISslReadAdapter
         {
             private readonly SslStream _sslStream;
             private readonly CancellationToken _cancellationToken;
@@ -37,7 +37,7 @@ namespace System.Net.Security
             public ValueTask<int> LockAsync(Memory<byte> buffer) => _sslStream.CheckEnqueueReadAsync(buffer);
         }
 
-        internal readonly struct SslReadSync : ISslReadAdapter
+        private readonly struct SslReadSync : ISslReadAdapter
         {
             private readonly SslStream _sslStream;
 
@@ -48,7 +48,7 @@ namespace System.Net.Security
             public ValueTask<int> LockAsync(Memory<byte> buffer) => new ValueTask<int>(_sslStream.CheckEnqueueRead(buffer));
         }
 
-        internal readonly struct SslWriteAsync : ISslWriteAdapter
+        private readonly struct SslWriteAsync : ISslWriteAdapter
         {
             private readonly SslStream _sslStream;
             private readonly CancellationToken _cancellationToken;
@@ -64,7 +64,7 @@ namespace System.Net.Security
             public ValueTask WriteAsync(byte[] buffer, int offset, int count) => _sslStream.InnerStream.WriteAsync(new ReadOnlyMemory<byte>(buffer, offset, count), _cancellationToken);
         }
 
-        internal readonly struct SslWriteSync : ISslWriteAdapter
+        private readonly struct SslWriteSync : ISslWriteAdapter
         {
             private readonly SslStream _sslStream;
 
