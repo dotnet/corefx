@@ -18,7 +18,7 @@ namespace System.IO.Pipelines
     public sealed partial class Pipe
     {
         internal const int InitialSegmentPoolSize = 16; // 65K
-        internal const int MaxPoolSize = 256; // 1MB
+        internal const int MaxSegmentPoolSize = 256; // 1MB
 
         private static readonly Action<object> s_signalReaderAwaitable = state => ((Pipe)state).ReaderCancellationRequested();
         private static readonly Action<object> s_signalWriterAwaitable = state => ((Pipe)state).WriterCancellationRequested();
@@ -44,7 +44,8 @@ namespace System.IO.Pipelines
         private readonly PipeScheduler _readerScheduler;
         private readonly PipeScheduler _writerScheduler;
 
-        private readonly BufferSegmentStack _bufferSegmentPool;
+        // Mutable struct! Don't make this readonly
+        private BufferSegmentStack _bufferSegmentPool;
 
         private readonly DefaultPipeReader _reader;
         private readonly DefaultPipeWriter _writer;
@@ -268,7 +269,7 @@ namespace System.IO.Pipelines
             Debug.Assert(segment != _writingHead, "Returning _writingHead segment that's in use!");
             Debug.Assert(segment != _lastExamined, "Returning _lastExamined segment that's in use!");
 
-            if (_bufferSegmentPool.Count < MaxPoolSize)
+            if (_bufferSegmentPool.Count < MaxSegmentPoolSize)
             {
                 _bufferSegmentPool.Push(segment);
             }
