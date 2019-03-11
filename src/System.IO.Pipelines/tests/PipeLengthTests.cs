@@ -170,6 +170,8 @@ namespace System.IO.Pipelines.Tests
             // Start of the next block
             SequencePosition startOfSecondBlock = result.Buffer.GetPosition(_pool.MaxBufferSize);
 
+            Assert.NotSame(endOfFirstBlock.GetObject(), startOfSecondBlock.GetObject());
+
             // This should return the first segment
             _pipe.Reader.AdvanceTo(startOfSecondBlock, endOfFirstBlock);
 
