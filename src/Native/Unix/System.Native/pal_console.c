@@ -73,7 +73,7 @@ void SystemNative_SetKeypadXmit(const char* terminfoString)
     WriteKeypadXmit();
 }
 
-static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER; // prevents races when initializing and changing the terminal.
 
 static bool g_signalForBreak = true;          // tracks whether the terminal should send signals for breaks, such that attributes have been changed
 
@@ -146,6 +146,7 @@ static bool TcSetAttr(struct termios* termios, bool blockIfBackground)
         InstallTTOUHandler(SIG_DFL);
     }
 
+    // On success, update the cached value.
     if (rv)
     {
         g_hasCurrentTermios = true;

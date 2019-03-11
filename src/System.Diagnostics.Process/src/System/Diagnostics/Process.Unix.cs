@@ -1005,6 +1005,10 @@ namespace System.Diagnostics
             }
         }
 
+        /// <summary>
+        /// This method is called when the number of child processes that are using the terminal changes.
+        /// It updates the terminal configuration if necessary.
+        /// </summary>
         internal static void ConfigureTerminalForChildProcesses(int increment)
         {
             Debug.Assert(increment != 0);
@@ -1013,13 +1017,17 @@ namespace System.Diagnostics
             if (increment > 0)
             {
                 Debug.Assert(s_processStartLock.IsReadLockHeld);
+
+                // At least one child is using the terminal.
                 Interop.Sys.ConfigureTerminalForChildProcess(childUsesTerminal: true);
             }
             else
             {
                 Debug.Assert(s_processStartLock.IsWriteLockHeld);
+
                 if (childrenUsingTerminalRemaining == 0)
                 {
+                    // No more children are using the terminal.
                     Interop.Sys.ConfigureTerminalForChildProcess(childUsesTerminal: false);
                 }
             }
