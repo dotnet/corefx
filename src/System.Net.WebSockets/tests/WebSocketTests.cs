@@ -129,7 +129,11 @@ namespace System.Net.WebSockets.Tests
         [InlineData(WebSocketState.Open, new WebSocketState[] { WebSocketState.Aborted, WebSocketState.CloseSent })]
         public static void ThrowOnInvalidState_ThrowsIfNotInValidList(WebSocketState state, WebSocketState[] validStates)
         {
-            Assert.Throws<WebSocketException>(() => ExposeProtectedWebSocket.ThrowOnInvalidState(state, validStates));
+            WebSocketException wse = Assert.Throws<WebSocketException>(() => ExposeProtectedWebSocket.ThrowOnInvalidState(state, validStates));
+            if (!PlatformDetection.IsFullFramework) // https://github.com/dotnet/corefx/issues/30779
+            {
+                Assert.Equal(WebSocketError.InvalidState, wse.WebSocketErrorCode);
+            }
         }
 
         [Theory]
