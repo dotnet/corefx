@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Security.Authentication;
@@ -55,6 +56,16 @@ namespace System.Net.Security
 
         private ExceptionDispatchInfo _exception;
         private bool _shutdown;
+
+        // Never updated directly, special properties are used.  This is the read buffer.
+        internal byte[] _internalBuffer;
+        internal int _internalOffset;
+        internal int _internalBufferCount;
+        internal int _decryptedBytesOffset;
+        internal int _decryptedBytesCount;
+
+        private int _nestedWrite;
+        private int _nestedRead;
 
         public SslStream(Stream innerStream)
                 : this(innerStream, false, null, null)
@@ -800,7 +811,37 @@ namespace System.Net.Security
         public override int ReadByte()
         {
             CheckThrow(true);
-            return _secureStream.ReadByte();
+            if (Interlocked.Exchange(ref _nestedRead, 1) == 1)
+            {
+                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, "ReadByte", "read"));
+            }
+
+            // If there's any data in the buffer, take one byte, and we're done.
+            try
+            {
+                if (_decryptedBytesCount > 0)
+                {
+                    int b = _internalBuffer[_decryptedBytesOffset++];
+                    _decryptedBytesCount--;
+                    ReturnReadBufferIfEmpty();
+                    return b;
+                }
+            }
+            finally
+            {
+                // Regardless of whether we were able to read a byte from the buffer,
+                // reset the read tracking.  If we weren't able to read a byte, the
+                // subsequent call to Read will set the flag again.
+                _nestedRead = 0;
+            }
+
+            // Otherwise, fall back to reading a byte via Read, the same way Stream.ReadByte does.
+            // This allocation is unfortunate but should be relatively rare, as it'll only occur once
+            // per buffer fill internally by Read.
+            byte[] oneByte = new byte[1];
+            int bytesRead = Read(oneByte, 0, 1);
+            Debug.Assert(bytesRead == 0 || bytesRead == 1);
+            return bytesRead == 1 ? oneByte[0] : -1;
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -808,7 +849,7 @@ namespace System.Net.Security
             CheckThrow(true);
             ValidateParameters(buffer, offset, count);
             SslReadSync reader = new SslReadSync(this);
-            return _secureStream.ReadAsyncInternal(reader, new Memory<byte>(buffer, offset, count)).GetAwaiter().GetResult();
+            return ReadAsyncInternal(reader, new Memory<byte>(buffer, offset, count)).GetAwaiter().GetResult();
         }
 
         public void Write(byte[] buffer)
@@ -822,7 +863,7 @@ namespace System.Net.Security
             ValidateParameters(buffer, offset, count);
 
             SslWriteSync writeAdapter = new SslWriteSync(this);
-            _secureStream.WriteAsyncInternal(writeAdapter, new ReadOnlyMemory<byte>(buffer, offset, count)).GetAwaiter().GetResult();
+            WriteAsyncInternal(writeAdapter, new ReadOnlyMemory<byte>(buffer, offset, count)).GetAwaiter().GetResult();
         }
 
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
@@ -860,7 +901,7 @@ namespace System.Net.Security
         {
             CheckThrow(true);
             SslWriteAsync writeAdapter = new SslWriteAsync(this, cancellationToken);
-            return _secureStream.WriteAsyncInternal(writeAdapter, buffer);
+            return WriteAsyncInternal(writeAdapter, buffer);
         }
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
@@ -868,14 +909,14 @@ namespace System.Net.Security
             CheckThrow(true);
             ValidateParameters(buffer, offset, count);
             SslReadAsync read = new SslReadAsync(this, cancellationToken);
-            return _secureStream.ReadAsyncInternal(read, new Memory<byte>(buffer, offset, count)).AsTask();
+            return ReadAsyncInternal(read, new Memory<byte>(buffer, offset, count)).AsTask();
         }
 
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
             CheckThrow(true);
             SslReadAsync read = new SslReadAsync(this, cancellationToken);
-            return _secureStream.ReadAsyncInternal(read, buffer);
+            return ReadAsyncInternal(read, buffer);
         }
     }
 }

@@ -16,13 +16,16 @@ namespace System.Net.Security
     {
         internal void ValidateCreateContext(SslClientAuthenticationOptions sslClientAuthenticationOptions, RemoteCertValidationCallback remoteCallback, LocalCertSelectionCallback localCallback)
         {
-            if(_shutdown == true)
+            if(_shutdown == true && _nestedWrite == 0)
             {
 
             }
             _context = null;
             _exception = null;
-
+            _internalBuffer = null;
+            _internalBufferCount = 0;
+            _internalOffset = 0;
+            _nestedWrite = 0;
         }
 
         internal void ValidateParameters(byte[] buffer, int offset, int count)
@@ -32,6 +35,11 @@ namespace System.Net.Security
         internal void ValidateCreateContext(SslAuthenticationOptions sslAuthenticationOptions)
         {
         }
+
+        internal ValueTask WriteAsyncInternal<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
+            where TWriteAdapter : struct, ISslWriteAdapter => default;
+
+        internal ValueTask<int> ReadAsyncInternal<TReadAdapter>(TReadAdapter adapter, Memory<byte> buffer) => default;
 
         internal Task CheckEnqueueWriteAsync() => default;
 
@@ -81,6 +89,10 @@ namespace System.Net.Security
         }
 
         internal void EndProcessAuthentication(IAsyncResult result)
+        {
+        }
+
+        internal void ReturnReadBufferIfEmpty()
         {
         }
     }

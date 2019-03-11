@@ -65,15 +65,6 @@ namespace System.Net.Security
         private int _lockReadState;
         private object _queuedReadStateRequest;
 
-        // Never updated directly, special properties are used.  This is the read buffer.
-        internal byte[] _internalBuffer;
-
-        internal int _internalOffset;
-        internal int _internalBufferCount;
-
-        internal int _decryptedBytesOffset;
-        internal int _decryptedBytesCount;
-
         /// <summary>Set as the _exception when the instance is disposed.</summary>
         private static readonly ExceptionDispatchInfo s_disposedSentinel = ExceptionDispatchInfo.Capture(new ObjectDisposedException(nameof(SslStream)));
 
@@ -1337,6 +1328,25 @@ namespace System.Net.Security
             }
         }
 
+        internal void SslStreamInternalDispose(bool disposing)
+        {
+            // Ensure a Read operation is not in progress,
+            // block potential reads since SslStream is disposing.
+            // This leaves the _nestedRead = 1, but that's ok, since
+            // subsequent Reads first check if the context is still available.
+            if (Interlocked.CompareExchange(ref _nestedRead, 1, 0) == 0)
+            {
+                byte[] buffer = _internalBuffer;
+                if (buffer != null)
+                {
+                    _internalBuffer = null;
+                    _internalBufferCount = 0;
+                    _internalOffset = 0;
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
+            }
+        }
+
         //We will only free the read buffer if it
         //actually contains no decrypted or encrypted bytes
         internal void ReturnReadBufferIfEmpty()
@@ -1349,6 +1359,230 @@ namespace System.Net.Security
                 _internalOffset = 0;
                 _decryptedBytesCount = 0;
                 _decryptedBytesOffset = 0;
+            }
+        }
+
+        internal async ValueTask<int> ReadAsyncInternal<TReadAdapter>(TReadAdapter adapter, Memory<byte> buffer)
+            where TReadAdapter : ISslReadAdapter
+        {
+            if (Interlocked.Exchange(ref _nestedRead, 1) == 1)
+            {
+                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, nameof(SslStream.ReadAsync), "read"));
+            }
+
+            try
+            {
+                while (true)
+                {
+                    int copyBytes;
+                    if (_decryptedBytesCount != 0)
+                    {
+                        copyBytes = CopyDecryptedData(buffer);
+
+                        FinishRead(null);
+
+                        return copyBytes;
+                    }
+
+                    copyBytes = await adapter.LockAsync(buffer).ConfigureAwait(false);
+                    if (copyBytes > 0)
+                    {
+                        return copyBytes;
+                    }
+
+                    ResetReadBuffer();
+                    int readBytes = await FillBufferAsync(adapter, SecureChannel.ReadHeaderSize).ConfigureAwait(false);
+                    if (readBytes == 0)
+                    {
+                        return 0;
+                    }
+
+                    int payloadBytes = GetRemainingFrameSize(_internalBuffer, _internalOffset, readBytes);
+                    if (payloadBytes < 0)
+                    {
+                        throw new IOException(SR.net_frame_read_size);
+                    }
+
+                    readBytes = await FillBufferAsync(adapter, SecureChannel.ReadHeaderSize + payloadBytes).ConfigureAwait(false);
+                    Debug.Assert(readBytes >= 0);
+                    if (readBytes == 0)
+                    {
+                        throw new IOException(SR.net_io_eof);
+                    }
+
+                    // At this point, readBytes contains the size of the header plus body.
+                    // Set _decrytpedBytesOffset/Count to the current frame we have (including header)
+                    // DecryptData will decrypt in-place and modify these to point to the actual decrypted data, which may be smaller.
+                    _decryptedBytesOffset = _internalOffset;
+                    _decryptedBytesCount = readBytes;
+                    SecurityStatusPal status = DecryptData();
+
+                    // Treat the bytes we just decrypted as consumed
+                    // Note, we won't do another buffer read until the decrypted bytes are processed
+                    ConsumeBufferedBytes(readBytes);
+
+                    if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
+                    {
+                        byte[] extraBuffer = null;
+                        if (_decryptedBytesCount != 0)
+                        {
+                            extraBuffer = new byte[_decryptedBytesCount];
+                            Buffer.BlockCopy(_internalBuffer, _decryptedBytesOffset, extraBuffer, 0, _decryptedBytesCount);
+
+                            _decryptedBytesCount = 0;
+                        }
+
+                        ProtocolToken message = new ProtocolToken(null, status);
+                        if (NetEventSource.IsEnabled)
+                            NetEventSource.Info(null, $"***Processing an error Status = {message.Status}");
+
+                        if (message.Renegotiate)
+                        {
+                            if (!_sslAuthenticationOptions.AllowRenegotiation)
+                            {
+                                throw new IOException(SR.net_ssl_io_renego);
+                            }
+
+                            ReplyOnReAuthentication(extraBuffer);
+
+                            // Loop on read.
+                            continue;
+                        }
+
+                        if (message.CloseConnection)
+                        {
+                            FinishRead(null);
+                            return 0;
+                        }
+
+                        throw new IOException(SR.net_io_decrypt, message.GetException());
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                FinishRead(null);
+
+                if (e is IOException)
+                {
+                    throw;
+                }
+
+                throw new IOException(SR.net_io_read, e);
+            }
+            finally
+            {
+                _nestedRead = 0;
+            }
+        }
+
+        private ValueTask<int> FillBufferAsync<TReadAdapter>(TReadAdapter adapter, int minSize)
+            where TReadAdapter : ISslReadAdapter
+        {
+            if (_internalBufferCount >= minSize)
+            {
+                return new ValueTask<int>(minSize);
+            }
+
+            int initialCount = _internalBufferCount;
+            do
+            {
+                ValueTask<int> t = adapter.ReadAsync(_internalBuffer, _internalBufferCount, _internalBuffer.Length - _internalBufferCount);
+                if (!t.IsCompletedSuccessfully)
+                {
+                    return InternalFillBufferAsync(adapter, t, minSize, initialCount);
+                }
+                int bytes = t.Result;
+                if (bytes == 0)
+                {
+                    if (_internalBufferCount != initialCount)
+                    {
+                        // We read some bytes, but not as many as we expected, so throw.
+                        throw new IOException(SR.net_io_eof);
+                    }
+
+                    return new ValueTask<int>(0);
+                }
+
+                _internalBufferCount += bytes;
+            } while (_internalBufferCount < minSize);
+
+            return new ValueTask<int>(minSize);
+
+            async ValueTask<int> InternalFillBufferAsync(TReadAdapter adap, ValueTask<int> task, int min, int initial)
+            {
+                while (true)
+                {
+                    int b = await task.ConfigureAwait(false);
+                    if (b == 0)
+                    {
+                        if (_internalBufferCount != initial)
+                        {
+                            throw new IOException(SR.net_io_eof);
+                        }
+
+                        return 0;
+                    }
+
+                    _internalBufferCount += b;
+                    if (_internalBufferCount >= min)
+                    {
+                        return min;
+                    }
+
+                    task = adap.ReadAsync(_internalBuffer, _internalBufferCount, _internalBuffer.Length - _internalBufferCount);
+                }
+            }
+        }
+
+        internal ValueTask WriteAsyncInternal<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
+            where TWriteAdapter : struct, ISslWriteAdapter
+        {
+            CheckThrow(authSuccessCheck: true, shutdownCheck: true);
+
+            if (buffer.Length == 0 && !SslStreamPal.CanEncryptEmptyMessage)
+            {
+                // If it's an empty message and the PAL doesn't support that, we're done.
+                return default;
+            }
+
+            if (Interlocked.Exchange(ref _nestedWrite, 1) == 1)
+            {
+                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, nameof(WriteAsync), "write"));
+            }
+
+            ValueTask t = buffer.Length < MaxDataSize ?
+                    WriteSingleChunk(writeAdapter, buffer) :
+                    new ValueTask(WriteAsyncChunked(writeAdapter, buffer));
+
+            if (t.IsCompletedSuccessfully)
+            {
+                _nestedWrite = 0;
+                return t;
+            }
+            return new ValueTask(ExitWriteAsync(t));
+
+            async Task ExitWriteAsync(ValueTask task)
+            {
+                try
+                {
+                    await task.ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    FinishWrite();
+
+                    if (e is IOException)
+                    {
+                        throw;
+                    }
+
+                    throw new IOException(SR.net_io_write, e);
+                }
+                finally
+                {
+                    _nestedWrite = 0;
+                }
             }
         }
 
