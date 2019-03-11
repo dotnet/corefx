@@ -1875,6 +1875,56 @@
         "rhel.7.5-x64-corert"
       ]
     },
+    "rhel.8": {
+      "#import": [
+        "rhel"
+      ]
+    },
+    "rhel.8-corert": {
+      "#import": [
+        "rhel.8",
+        "rhel-corert"
+      ]
+    },
+    "rhel.8-x64": {
+      "#import": [
+        "rhel.8",
+        "rhel-x64"
+      ]
+    },
+    "rhel.8-x64-corert": {
+      "#import": [
+        "rhel.8-corert",
+        "rhel.8-x64",
+        "rhel.8",
+        "rhel-x64-corert"
+      ]
+    },
+    "rhel.8.0": {
+      "#import": [
+        "rhel.8"
+      ]
+    },
+    "rhel.8.0-corert": {
+      "#import": [
+        "rhel.8.0",
+        "rhel.8-corert"
+      ]
+    },
+    "rhel.8.0-x64": {
+      "#import": [
+        "rhel.8.0",
+        "rhel.8-x64"
+      ]
+    },
+    "rhel.8.0-x64-corert": {
+      "#import": [
+        "rhel.8.0-corert",
+        "rhel.8.0-x64",
+        "rhel.8.0",
+        "rhel.8-x64-corert"
+      ]
+    },
     "sles": {
       "#import": [
         "linux"
