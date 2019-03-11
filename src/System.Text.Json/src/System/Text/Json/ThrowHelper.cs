@@ -459,8 +459,10 @@ namespace System.Text.Json
             switch (dateType)
             {
                 case DateType.DateTime:
-                case DateType.DateTimeOffset:
                     message = SR.FormatDateTime;
+                    break;
+                case DateType.DateTimeOffset:
+                    message = SR.FormatDateTimeOffset;
                     break;
                 default:
                     Debug.Fail($"The DateType enum value: {dateType} is not part of the switch. Add the appropriate case and exception message.");

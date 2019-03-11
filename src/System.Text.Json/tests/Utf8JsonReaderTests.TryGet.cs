@@ -55,7 +55,7 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"1997-07-16T19:20:30.777777700\"", "1997-07-16T19:20:30.7777777" };
             yield return new object[] { "\"1997-07-16T19:20:30.45555554\"", "1997-07-16T19:20:30.45555554" };
             // We expect the parser to truncate. `DateTime(Offset).Parse` will round up to 7dp in these cases,
-            // so we pass a strings representing the Datetime(Offset) we expect to the `Parse` method.
+            // so we pass a string representing the Datetime(Offset) we expect to the `Parse` method.
             yield return new object[] { "\"1997-07-16T19:20:30.45555555\"", "1997-07-16T19:20:30.4555555" };
             yield return new object[] { "\"1997-07-16T19:20:30.4555555555555555555\"", "1997-07-16T19:20:30.4555555" };
 
@@ -86,10 +86,11 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"2020-02-29T19:20:30.4555555+10:00\"", "2020-02-29T19:20:30.4555555+10:00" };
         }
 
-        // UTC TZD test is separate because `DateTime.Parse` for strings with `Z` TZD will return
+        // UTC TZD tests are separate because `DateTime.Parse` for strings with `Z` TZD will return
         // a `DateTime` with `DateTimeKind.Local` i.e `+00:00` which does not equal our expected result,
         // a `DateTime` with `DateTimeKind.Utc` i.e `Z`.
         // Instead, we need to use `DateTime.ParseExact` which returns a DateTime Utc `DateTimeKind`.
+        //
         // Test string, Argument to DateTime(Offset).Parse(Exact)
         public static IEnumerable<object[]> ValidISO8601TestsWithUtcOffset()
         {
@@ -165,16 +166,17 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"1997-07-16T19:20:30.4555555+14 00\"" };
 
             // Proper format but invalid time fields
-            yield return new object[] { "\"0000-07-16T19:20:30.4555555+14:30\"" };
-            yield return new object[] { "\"0000-07-16T19:20:30.4555555-14:30\"" };
-            yield return new object[] { "\"0000-07-16T19:20:30.4555555+10:00\"" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555+14:30\"" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555-14:30\"" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555+15:00\"" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555-15:00\"" };
             yield return new object[] { "\"1997-00-16T19:20:30.4555555+10:00\"" };
             yield return new object[] { "\"1997-07-16T25:20:30.4555555+10:00\"" };
             yield return new object[] { "\"1997-07-16T19:60:30.4555555+10:00\"" };
             yield return new object[] { "\"1997-07-16T19:20:60.4555555+10:00\"" };
-            yield return new object[] { "\"2019-02-29T19:20:30.4555555+10:00\"" };
             yield return new object[] { "\"1997-07-16T19:20:30.4555555+10:60\"" };
-            yield return new object[] { "\"1997-07-16T19:20:30.4555555+14:30\"" };
+            yield return new object[] { "\"0000-07-16T19:20:30.4555555+10:00\"" };
+            yield return new object[] { "\"2019-02-29T19:20:30.4555555+10:00\"" };
         }
 
         [Fact]
