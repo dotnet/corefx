@@ -73,7 +73,7 @@ namespace System.Net.Http
             int idx = value.IndexOf(':');
             if (idx != -1)
             {
-                password = value.Substring(idx+1);
+                password = value.Substring(idx + 1);
                 value = value.Substring(0, idx);
             }
 
@@ -81,7 +81,7 @@ namespace System.Net.Http
             if (idx != -1)
             {
                 domain = value.Substring(0, idx);
-                value = value.Substring(idx+1);
+                value = value.Substring(idx + 1);
             }
 
             return new NetworkCredential(value, password, domain);
@@ -138,7 +138,7 @@ namespace System.Net.Http
                 proxy = null;
                 return false;
             }
-			string noProxy = Environment.GetEnvironmentVariable(EnvNoProxyLC) ?? Environment.GetEnvironmentVariable(EnvNoProxyUC);
+            string noProxy = Environment.GetEnvironmentVariable(EnvNoProxyLC) ?? Environment.GetEnvironmentVariable(EnvNoProxyUC);
             proxy = new HttpEnvironmentProxy(httpProxy, httpsProxy, noProxy);
             return true;
         }

@@ -20,9 +20,10 @@ namespace System.Net.Http.Tests
         // to be sure they do not interfere with the test.
         private void CleanEnv()
         {
-            List<string>  vars = new List<string>() { "http_proxy", "HTTPS_PROXY", "https_proxy",
+            List<string> vars = new List<string>() { "http_proxy", "HTTP_PROXY",
+                                                      "https_proxy", "HTTPS_PROXY",
                                                       "all_proxy", "ALL_PROXY",
-                                                      "NO_PROXY" };
+                                                      "no_proxy", "NO_PROXY" };
             foreach (string v in vars)
             {
                 Environment.SetEnvironmentVariable(v, null);
@@ -114,7 +115,7 @@ namespace System.Net.Http.Tests
         [InlineData("HTTP://ABC.COM/", "abc.com", "80", null, null)]
         [InlineData("http://10.30.62.64:7890/", "10.30.62.64", "7890", null, null)]
         [InlineData("http://1.2.3.4:8888/foo", "1.2.3.4", "8888", null, null)]
-        public void HttpProxy_Uri_Parsing(string _input, string _host, string _port, string _user , string _password)
+        public void HttpProxy_Uri_Parsing(string _input, string _host, string _port, string _user, string _password)
         {
             RemoteInvoke((input, host, port, user, password) =>
             {
@@ -148,7 +149,7 @@ namespace System.Net.Http.Tests
                 }
 
                 return SuccessExitCode;
-            }, _input, _host, _port, _user ?? "null" , _password ?? "null").Dispose();
+            }, _input, _host, _port, _user ?? "null", _password ?? "null").Dispose();
         }
 
         [Fact]
@@ -204,7 +205,22 @@ namespace System.Net.Http.Tests
                 Assert.True(p.IsBypassed(new Uri("http://www.test.com")));
 
                 return SuccessExitCode;
-           }).Dispose();
+            }).Dispose();
+        }
+
+        [Fact]
+        public void HttpProxy_TryCreate_UpperCaseVariables()
+        {
+            RemoteInvoke(() =>
+            {
+                IWebProxy p;
+                Environment.SetEnvironmentVariable("HTTP_PROXY", "http://foo:bar@1.1.1.1:3000");
+                Environment.SetEnvironmentVariable("NO_PROXY", ".test.com,, foo.com");
+                Assert.True(HttpEnvironmentProxy.TryCreate(out p));
+                Assert.True(p.IsBypassed(new Uri("http://test.com")));
+                Assert.False(p.IsBypassed(new Uri("http://1test.com")));
+                return SuccessExitCode;
+            }).Dispose();
         }
     }
 }
