@@ -44,7 +44,7 @@ namespace System.IO.Pipelines
         private readonly PipeScheduler _readerScheduler;
         private readonly PipeScheduler _writerScheduler;
 
-        private readonly Stack<BufferSegment> _bufferSegmentPool;
+        private readonly BufferSegmentStack _bufferSegmentPool;
 
         private readonly DefaultPipeReader _reader;
         private readonly DefaultPipeWriter _writer;
@@ -101,7 +101,7 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.options);
             }
 
-            _bufferSegmentPool = new Stack<BufferSegment>(InitialSegmentPoolSize);
+            _bufferSegmentPool = new BufferSegmentStack(InitialSegmentPoolSize);
 
             _operationState = default;
             _readerCompletion = default;
@@ -253,9 +253,9 @@ namespace System.IO.Pipelines
 
         private BufferSegment CreateSegmentUnsynchronized()
         {
-            if (_bufferSegmentPool.Count > 0)
+            if (_bufferSegmentPool.TryPop(out BufferSegment segment))
             {
-                return _bufferSegmentPool.Pop();
+                return segment;
             }
 
             return new BufferSegment();
