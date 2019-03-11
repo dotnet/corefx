@@ -2126,8 +2126,10 @@ namespace System.Text.Json
         private bool SkipSingleLineComment(ReadOnlySpan<byte> localBuffer, out int idx)
         {
             idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn);
+            int toConsume = 0;
             if (idx != -1)
             {
+                toConsume = idx;
                 if (localBuffer[idx] == JsonConstants.LineFeed)
                 {
                     goto EndOfComment;
@@ -2140,7 +2142,7 @@ namespace System.Text.Json
                 {
                     if (localBuffer[idx + 1] == JsonConstants.LineFeed)
                     {
-                        idx++;
+                        toConsume = idx + 1;
                     }
                     goto EndOfComment;
                 }
@@ -2148,6 +2150,7 @@ namespace System.Text.Json
             if (IsLastSpan)
             {
                 idx = localBuffer.Length;
+                toConsume = idx;
                 // Assume everything on this line is a comment and there is no more data.
                 _bytePositionInLine += 2 + localBuffer.Length;
                 goto Done;
@@ -2158,7 +2161,7 @@ namespace System.Text.Json
             }
 
         EndOfComment:
-            idx++;
+            toConsume += 1;
             _bytePositionInLine = 0;
             _lineNumber++;
 
@@ -2200,7 +2203,7 @@ namespace System.Text.Json
             _lineNumber += newLines;
             if (newLineIndex != -1)
             {
-                _bytePositionInLine = idx - newLineIndex;
+                _bytePositionInLine = 2 + idx - (newLineIndex + 1);
             }
             else
             {
@@ -2261,7 +2264,8 @@ namespace System.Text.Json
                 return false;
             }
 
-            ValueSpan = _buffer.Slice(previousConsumed, idx + 3); // Include the slash/asterisk and final slash at the end of the comment as part of it.
+            // Exclude the /* at start of the comment
+            ValueSpan = _buffer.Slice(previousConsumed + 2, idx);
             if (_tokenType != JsonTokenType.Comment)
             {
                 _previousTokenType = _tokenType;

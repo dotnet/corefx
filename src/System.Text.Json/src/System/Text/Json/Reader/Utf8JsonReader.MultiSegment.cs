@@ -2458,8 +2458,10 @@ namespace System.Text.Json
         Done:
             if (HasValueSequence)
             {
-                SequencePosition end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + idx);
+                SequencePosition end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger());
                 ReadOnlySequence<byte> commentSequence = _sequence.Slice(start, end);
+                int backtrack = expectLF ? 1 : 0;
+                commentSequence = commentSequence.Slice(2, commentSequence.Length - 2 - backtrack);
                 if (commentSequence.IsSingleSegment)
                 {
                     ValueSpan = commentSequence.First.Span;
@@ -2472,7 +2474,8 @@ namespace System.Text.Json
             }
             else
             {
-                ValueSpan = _buffer.Slice(previousConsumed, idx + 2);   // Include the double slash and potential line feed at the end of the comment as part of it.
+                // Exclude the // at start of the comment
+                ValueSpan = _buffer.Slice(previousConsumed + 2, idx);
             }
 
             if (_tokenType != JsonTokenType.Comment)
@@ -2581,9 +2584,10 @@ namespace System.Text.Json
         Done:
             if (HasValueSequence)
             {
-                // Include the final slash at the end of the comment as part of it.
+                // Exclude the * before the final slash
                 SequencePosition end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + i + 1);
                 ReadOnlySequence<byte> commentSequence = _sequence.Slice(start, end);
+                commentSequence = commentSequence.Slice(2, commentSequence.Length - 4);
                 if (commentSequence.IsSingleSegment)
                 {
                     ValueSpan = commentSequence.First.Span;
@@ -2596,7 +2600,8 @@ namespace System.Text.Json
             }
             else
             {
-                ValueSpan = _buffer.Slice(previousConsumed, i + 3); // Include the slash/asterisk and final slash at the end of the comment as part of it.
+                // Exclude the /* and the trailing */
+                ValueSpan = _buffer.Slice(previousConsumed + 2, i - 1);
             }
 
             if (_tokenType != JsonTokenType.Comment)
