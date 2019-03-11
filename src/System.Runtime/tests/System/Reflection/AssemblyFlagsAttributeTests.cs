@@ -11,48 +11,48 @@ namespace System.Reflection.Tests
     public class AssemblyFlagsAttributeTests
     {
         [Theory]
-        [InlineData(AssemblyNameFlags.None, 0)]
-        [InlineData(AssemblyNameFlags.EnableJITcompileOptimizer, 16384)]
-        [InlineData(AssemblyNameFlags.EnableJITcompileTracking, 32768)]
-        [InlineData(AssemblyNameFlags.PublicKey, 1)]
-        [InlineData(AssemblyNameFlags.Retargetable, 256)]
-        [InlineData(int.MinValue, 2147483648)]
-        [InlineData((AssemblyNameFlags)(AssemblyNameFlags.None - 1), uint.MaxValue)]
-        [InlineData((AssemblyNameFlags)int.MaxValue, 2147483647)]
-        public void Ctor_AssemblyNameFlags(AssemblyNameFlags assemblyFlags, uint expectedFlags)
+        [InlineData(AssemblyNameFlags.None)]
+        [InlineData(AssemblyNameFlags.EnableJITcompileOptimizer)]
+        [InlineData(AssemblyNameFlags.EnableJITcompileTracking)]
+        [InlineData(AssemblyNameFlags.PublicKey)]
+        [InlineData(AssemblyNameFlags.Retargetable)]
+        [InlineData(int.MinValue)]
+        [InlineData((AssemblyNameFlags)(AssemblyNameFlags.None - 1))]
+        [InlineData((AssemblyNameFlags)int.MaxValue)]
+        public void Ctor_AssemblyNameFlags(AssemblyNameFlags assemblyFlags)
         {
             var attribute = new AssemblyFlagsAttribute(assemblyFlags);
-            Assert.Equal(expectedFlags, attribute.Flags);
+            Assert.Equal((uint)assemblyFlags, attribute.Flags);
             Assert.Equal((int)assemblyFlags, attribute.AssemblyFlags);
         }
 
         [Theory]
-        [InlineData(0, 0)]
-        [InlineData(16384, 16384)]
-        [InlineData(32768, 32768)]
-        [InlineData(1, 1)]
-        [InlineData(256, 256)]
-        [InlineData(uint.MaxValue, -1)]
-        public void Ctor_UInt(uint flags, int expectedAssemblyFlags)
+        [InlineData(0)]
+        [InlineData(16384)]
+        [InlineData(32768)]
+        [InlineData(1)]
+        [InlineData(256)]
+        [InlineData(uint.MaxValue)]
+        public void Ctor_UInt(uint flags)
         {
             var attribute = new AssemblyFlagsAttribute(flags);
             Assert.Equal(flags, attribute.Flags);
-            Assert.Equal(expectedAssemblyFlags, attribute.AssemblyFlags);
+            Assert.Equal((int)flags, attribute.AssemblyFlags);
         }
 
         [Theory]
-        [InlineData(0, 0)]
-        [InlineData(16384, 16384)]
-        [InlineData(32768, 32768)]
-        [InlineData(1, 1)]
-        [InlineData(256, 256)]
-        [InlineData(int.MinValue, 2147483648)]
-        [InlineData(-1, uint.MaxValue)]
-        [InlineData(int.MaxValue, 2147483647)]
-        public void Ctor_Int(int assemblyFlags, uint expectedFlags)
+        [InlineData(0)]
+        [InlineData(16384)]
+        [InlineData(32768)]
+        [InlineData(1)]
+        [InlineData(256)]
+        [InlineData(int.MinValue)]
+        [InlineData(-1)]
+        [InlineData(int.MaxValue)]
+        public void Ctor_Int(int assemblyFlags)
         {
             var attribute = new AssemblyFlagsAttribute(assemblyFlags);
-            Assert.Equal(expectedFlags, attribute.Flags);
+            Assert.Equal((uint)assemblyFlags, attribute.Flags);
             Assert.Equal(assemblyFlags, attribute.AssemblyFlags);
         }
     }

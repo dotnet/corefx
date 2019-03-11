@@ -10,16 +10,16 @@ namespace System.Reflection.Tests
     public class AssemblyAlgorithmIdAttributeTests
     {
         [Theory]
-        [InlineData((Configuration.Assemblies.AssemblyHashAlgorithm)(Configuration.Assemblies.AssemblyHashAlgorithm.None - 1), 4294967295)]
-        [InlineData(Configuration.Assemblies.AssemblyHashAlgorithm.MD5, 32771)]
-        [InlineData(Configuration.Assemblies.AssemblyHashAlgorithm.SHA1, 32772)]
-        [InlineData(Configuration.Assemblies.AssemblyHashAlgorithm.SHA256, 32780)]
-        [InlineData(Configuration.Assemblies.AssemblyHashAlgorithm.SHA384, 32781)]
-        [InlineData(Configuration.Assemblies.AssemblyHashAlgorithm.SHA512, 32782)]
-        public void Ctor_AssemblyHashAlgorithm(Configuration.Assemblies.AssemblyHashAlgorithm algorithmId, uint expectedAlgorithmId)
+        [InlineData((Configuration.Assemblies.AssemblyHashAlgorithm)(Configuration.Assemblies.AssemblyHashAlgorithm.None - 1))]
+        [InlineData(Configuration.Assemblies.AssemblyHashAlgorithm.MD5)]
+        [InlineData(Configuration.Assemblies.AssemblyHashAlgorithm.SHA1)]
+        [InlineData(Configuration.Assemblies.AssemblyHashAlgorithm.SHA256)]
+        [InlineData(Configuration.Assemblies.AssemblyHashAlgorithm.SHA384)]
+        [InlineData(Configuration.Assemblies.AssemblyHashAlgorithm.SHA512)]
+        public void Ctor_AssemblyHashAlgorithm(Configuration.Assemblies.AssemblyHashAlgorithm algorithmId)
         {
             var attribute = new AssemblyAlgorithmIdAttribute(algorithmId);
-            Assert.Equal(expectedAlgorithmId, attribute.AlgorithmId);
+            Assert.Equal((uint)algorithmId, attribute.AlgorithmId);
         }
 
         [Theory]

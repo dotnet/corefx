@@ -11,6 +11,7 @@ namespace System.Reflection.Tests
         [Theory]
         [InlineData("")]
         [InlineData("version")]
+        [InlineData("1.2.3.4.5")]
         public void Ctor_String(string version)
         {
             var attribute = new AssemblyFileVersionAttribute(version);

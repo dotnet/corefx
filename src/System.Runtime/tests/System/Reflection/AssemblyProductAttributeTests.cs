@@ -12,6 +12,7 @@ namespace System.Reflection.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("product")]
+        [InlineData(".NET Core")]
         public void Ctor_String(string product)
         {
             var attribute = new AssemblyProductAttribute(product);

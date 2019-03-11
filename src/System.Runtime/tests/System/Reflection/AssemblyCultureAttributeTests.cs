@@ -11,7 +11,7 @@ namespace System.Reflection.Tests
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        [InlineData("culture")]
+        [InlineData("Czech")]
         public void Ctor_String(string culture)
         {
             var attribute = new AssemblyCultureAttribute(culture);

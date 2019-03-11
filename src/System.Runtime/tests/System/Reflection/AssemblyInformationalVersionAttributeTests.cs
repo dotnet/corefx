@@ -11,7 +11,8 @@ namespace System.Reflection.Tests
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        [InlineData("delaySign")]
+        [InlineData("version")]
+        [InlineData("3.4.5.6.7")]
         public void Ctor_String(string informationalVersion)
         {
             var attribute = new AssemblyInformationalVersionAttribute(informationalVersion);

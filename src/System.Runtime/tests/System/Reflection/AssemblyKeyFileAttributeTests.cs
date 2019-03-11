@@ -12,6 +12,7 @@ namespace System.Reflection.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("keyFile")]
+        [InlineData("KeyFile.snk")]
         public void Ctor_String(string keyFile)
         {
             var attribute = new AssemblyKeyFileAttribute(keyFile);
