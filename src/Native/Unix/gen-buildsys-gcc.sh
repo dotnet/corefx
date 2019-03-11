@@ -1,16 +1,16 @@
 #!/usr/bin/env sh
 #
-# This file invokes cmake and generates the build system for gcc.
+# This file invokes cmake and generates the build system for Gcc.
 #
 
 if [ $# -lt 4 ]
 then
   echo "Usage..."
-  echo "gen-buildsys-clang.sh <path to top level CMakeLists.txt> <GccMajorVersion> <GccMinorVersion> <Architecture> [build flavor] [cmakeargs]"
-  echo "Specify the path to the top level CMake file - <ProjectK>/src/NDP"
+  echo "gen-buildsys-gcc.sh <path to top level CMakeLists.txt> <GccMajorVersion> <GccMinorVersion> <Architecture> [build flavor] [cmakeargs]"
+  echo "Specify the path to the top level CMake file - <corefx>/src/Native/Unix"
   echo "Specify the gcc version to use, split into major and minor version"
   echo "Specify the target architecture."
-  echo "Optionally specify the build configuration (flavor.) Defaults to DEBUG."
+  echo "Optionally specify the build configuration (flavor.) Defaults to DEBUG." 
   echo "Optionally pass additional arguments to CMake call."
   exit 1
 fi
@@ -35,22 +35,30 @@ elif command -v "${gcc_prefix}gcc$2$3" > /dev/null
 elif command -v "${gcc_prefix}gcc-$2$3" > /dev/null
     then
         desired_gcc_version="-$2$3"
-elif command -v "${gcc_prefix}"gcc > /dev/null
+elif command -v "${gcc_prefix}gcc" > /dev/null
     then
         desired_gcc_version=
 else
-    echo "Unable to find \"${gcc_prefix}\"gcc Compiler"
+    echo "Unable to find ${gcc_prefix}gcc Compiler"
     exit 1
 fi
 
-if [ -z "$CC" ]; then
-  CC="$(command -v "${gcc_prefix}"gcc"$desired_gcc_version")"
-  export CC
+if [ -z "$CLR_CC" ]; then
+    CC="$(command -v "${gcc_prefix}gcc$desired_gcc_version")"
+else
+    CC="$CLR_CC"
 fi
+
+if [ -z "$CLR_CXX" ]; then
+    CXX="$(command -v "${gcc_prefix}g++$desired_gcc_version")"
+else
+    CXX="$CLR_CXX"
+fi
+
+export CC CXX
 
 build_arch="$4"
 buildtype=DEBUG
-generator="Unix Makefiles"
 __UnprocessedCMakeArgs=""
 
 ITER=-1
@@ -63,9 +71,6 @@ for i in "$@"; do
       DEBUG | CHECKED | RELEASE | RELWITHDEBINFO | MINSIZEREL)
       buildtype=$upperI
       ;;
-      NINJA)
-      generator=Ninja
-      ;;
       *)
       __UnprocessedCMakeArgs="${__UnprocessedCMakeArgs}${__UnprocessedCMakeArgs:+ }$i"
     esac
@@ -74,6 +79,12 @@ done
 OS=$(uname)
 
 locate_gcc_exec() {
+  ENV_KNOB="CLR_$(echo "$1" | tr '[:lower:]' '[:upper:]')"
+  if env | grep -q "^$ENV_KNOB="; then
+    eval "echo \"\$$ENV_KNOB\""
+    return
+  fi
+
   if command -v "$gcc_prefix$1$desired_gcc_version" > /dev/null 2>&1
   then
     command -v "$gcc_prefix$1$desired_gcc_version"
@@ -85,27 +96,17 @@ locate_gcc_exec() {
   fi
 }
 
+if ! gcc_link="$(locate_gcc_exec link)"; then { echo "Unable to locate link"; exit 1; } fi
+
 if ! gcc_ar="$(locate_gcc_exec ar)"; then { echo "Unable to locate gcc-ar"; exit 1; } fi
 
-if [ -z "$NM" ]; then
-  if ! gcc_nm="$(locate_gcc_exec nm)"; then { echo "Unable to locate gcc-nm"; exit 1; } fi
-else
-  gcc_nm="$NM"
-fi
+if ! gcc_nm="$(locate_gcc_exec nm)"; then { echo "Unable to locate gcc-nm"; exit 1; } fi
 
 if [ "$OS" = "Linux" ] || [ "$OS" = "FreeBSD" ] || [ "$OS" = "OpenBSD" ] || [ "$OS" = "NetBSD" ] || [ "$OS" = "SunOS" ]; then
-  if [ -z "$OBJDUMP" ]; then
-    if ! gcc_objdump="$(locate_gcc_exec objdump)"; then { echo "Unable to locate gcc-objdump"; exit 1; } fi
-  else
-    gcc_objdump="$OBJDUMP"
-  fi
+  if ! gcc_objdump="$(locate_gcc_exec objdump)"; then { echo "Unable to locate gcc-objdump"; exit 1; } fi
 fi
 
-if [ -z "$OBJCOPY" ]; then
-  if ! gcc_objcopy="$(locate_gcc_exec objcopy)"; then { echo "Unable to locate gcc-objcopy"; exit 1; } fi
-else
-  gcc_objcopy="$OBJCOPY"
-fi
+if ! gcc_objcopy="$(locate_gcc_exec objcopy)"; then { echo "Unable to locate gcc-objcopy"; exit 1; } fi
 
 if ! gcc_ranlib="$(locate_gcc_exec ranlib)"; then { echo "Unable to locate gcc-ranlib"; exit 1; } fi
 
@@ -127,20 +128,22 @@ if [ "$CROSSCOMPILE" = "1" ]; then
     export TARGET_BUILD_ARCH=$build_arch
     cmake_extra_defines="$cmake_extra_defines -C $CONFIG_DIR/tryrun.cmake"
     cmake_extra_defines="$cmake_extra_defines -DCMAKE_TOOLCHAIN_FILE=$CONFIG_DIR/toolchain.cmake"
+    cmake_extra_defines="$cmake_extra_defines --sysroot=$ROOTFS_DIR"
+    cmake_extra_defines="$cmake_extra_defines -DCLR_UNIX_CROSS_BUILD=1"
 fi
 if [ "$build_arch" = "armel" ]; then
     cmake_extra_defines="$cmake_extra_defines -DARM_SOFTFP=1"
 fi
 
 cmake \
-  -G "$generator" \
   "-DCMAKE_AR=$gcc_ar" \
+  "-DCMAKE_LINKER=$gcc_link" \
   "-DCMAKE_NM=$gcc_nm" \
   "-DCMAKE_RANLIB=$gcc_ranlib" \
   "-DCMAKE_OBJCOPY=$gcc_objcopy" \
   "-DCMAKE_OBJDUMP=$gcc_objdump" \
   "-DCMAKE_BUILD_TYPE=$buildtype" \
   "-DCMAKE_EXPORT_COMPILE_COMMANDS=1 " \
-  "$cmake_extra_defines" \
+  $cmake_extra_defines \
   "$__UnprocessedCMakeArgs" \
   "$1"
