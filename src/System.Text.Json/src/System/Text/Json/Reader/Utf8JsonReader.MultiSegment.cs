@@ -2460,8 +2460,7 @@ namespace System.Text.Json
             {
                 SequencePosition end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger());
                 ReadOnlySequence<byte> commentSequence = _sequence.Slice(start, end);
-                int backtrack = expectLF ? 1 : 0;
-                commentSequence = commentSequence.Slice(2, commentSequence.Length - 2 - backtrack);
+                commentSequence = commentSequence.Slice(2, commentSequence.Length - 2 - (expectLF ? 1 : 0));
                 if (commentSequence.IsSingleSegment)
                 {
                     ValueSpan = commentSequence.First.Span;
@@ -2584,10 +2583,10 @@ namespace System.Text.Json
         Done:
             if (HasValueSequence)
             {
-                // Exclude the * before the final slash
-                SequencePosition end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + i + 1);
+                SequencePosition end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + i);
                 ReadOnlySequence<byte> commentSequence = _sequence.Slice(start, end);
-                commentSequence = commentSequence.Slice(2, commentSequence.Length - 4);
+                // Exclude the /* and the trailing *
+                commentSequence = commentSequence.Slice(2, commentSequence.Length - 3);
                 if (commentSequence.IsSingleSegment)
                 {
                     ValueSpan = commentSequence.First.Span;
@@ -2600,7 +2599,7 @@ namespace System.Text.Json
             }
             else
             {
-                // Exclude the /* and the trailing */
+                // Exclude the /* and the trailing *
                 ValueSpan = _buffer.Slice(previousConsumed + 2, i - 1);
             }
 

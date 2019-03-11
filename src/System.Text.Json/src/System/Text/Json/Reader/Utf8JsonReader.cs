@@ -2166,7 +2166,7 @@ namespace System.Text.Json
             _lineNumber++;
 
         Done:
-            _consumed += 2 + idx;
+            _consumed += 2 + toConsume;
             return true;
         }
 
@@ -2186,28 +2186,27 @@ namespace System.Text.Json
                 }
                 if (foundIdx != 0 && localBuffer[foundIdx + idx - 1] == JsonConstants.Asterisk)
                 {
-                    idx += foundIdx;
+                    idx += foundIdx - 1;
                     break;
                 }
                 idx += foundIdx + 1;
             }
 
-            Debug.Assert(idx >= 1);
-
             // Consume the /* and */ characters that are part of the multi-line comment.
             // Since idx is pointing at right after the final '*' (i.e. before the last '/'), we don't need to count that character.
             // Hence, we increment consumed by 3 (instead of 4).
-            _consumed += 4 + idx - 1;
+            _consumed += 4 + idx;
 
-            (int newLines, int newLineIndex) = JsonReaderHelper.CountNewLines(localBuffer.Slice(0, idx - 1));
+            (int newLines, int newLineIndex) = JsonReaderHelper.CountNewLines(localBuffer.Slice(0, idx));
             _lineNumber += newLines;
             if (newLineIndex != -1)
             {
+                // Exclude linefeed while resetting position
                 _bytePositionInLine = 2 + idx - (newLineIndex + 1);
             }
             else
             {
-                _bytePositionInLine += 4 + idx - 1;
+                _bytePositionInLine += 4 + idx;
             }
             return true;
         }
@@ -2248,7 +2247,8 @@ namespace System.Text.Json
                 return false;
             }
 
-            ValueSpan = _buffer.Slice(previousConsumed, idx + 2);   // Include the double slash and potential line feed at the end of the comment as part of it.
+            // Exclude // at the beginning of the comment
+            ValueSpan = _buffer.Slice(previousConsumed + 2, idx);
             if (_tokenType != JsonTokenType.Comment)
             {
                 _previousTokenType = _tokenType;
@@ -2264,7 +2264,7 @@ namespace System.Text.Json
                 return false;
             }
 
-            // Exclude the /* at start of the comment
+            // Exclude /* and trailing */ in the comment
             ValueSpan = _buffer.Slice(previousConsumed + 2, idx);
             if (_tokenType != JsonTokenType.Comment)
             {
