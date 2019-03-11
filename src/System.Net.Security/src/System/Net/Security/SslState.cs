@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -54,6 +55,9 @@ namespace System.Net.Security
         private const int LockPendingWrite = 3;
         private const int LockRead = 4;
         private const int LockPendingRead = 6;
+
+        private const int FrameOverhead = 32;
+        internal const int ReadBufferSize = 4096 * 4 + FrameOverhead;         // We read in 16K chunks + headers.
 
         private int _lockWriteState;
         private object _queuedWriteStateRequest;
@@ -1236,6 +1240,100 @@ namespace System.Net.Security
                         asyncRequest.CompleteUser();
                     }
                 }
+            }
+        }
+
+        internal async Task WriteAsyncChunked<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
+            where TWriteAdapter : struct, ISslWriteAdapter
+        {
+            do
+            {
+                int chunkBytes = Math.Min(buffer.Length, MaxDataSize);
+                await WriteSingleChunk(writeAdapter, buffer.Slice(0, chunkBytes)).ConfigureAwait(false);
+                buffer = buffer.Slice(chunkBytes);
+
+            } while (buffer.Length != 0);
+        }
+
+        internal ValueTask WriteSingleChunk<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
+            where TWriteAdapter : struct, ISslWriteAdapter
+        {
+            // Request a write IO slot.
+            Task ioSlot = writeAdapter.LockAsync();
+            if (!ioSlot.IsCompletedSuccessfully)
+            {
+                // Operation is async and has been queued, return.
+                return new ValueTask(WaitForWriteIOSlot(writeAdapter, ioSlot, buffer));
+            }
+
+            byte[] rentedBuffer = ArrayPool<byte>.Shared.Rent(buffer.Length + FrameOverhead);
+            byte[] outBuffer = rentedBuffer;
+
+            SecurityStatusPal status = EncryptData(buffer, ref outBuffer, out int encryptedBytes);
+
+            if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
+            {
+                // Re-handshake status is not supported.
+                ArrayPool<byte>.Shared.Return(rentedBuffer);
+                ProtocolToken message = new ProtocolToken(null, status);
+                return new ValueTask(Task.FromException(new IOException(SR.net_io_encrypt, message.GetException())));
+            }
+
+            ValueTask t = writeAdapter.WriteAsync(outBuffer, 0, encryptedBytes);
+            if (t.IsCompletedSuccessfully)
+            {
+                ArrayPool<byte>.Shared.Return(rentedBuffer);
+                FinishWrite();
+                return t;
+            }
+            else
+            {
+                return new ValueTask(CompleteAsync(t, rentedBuffer));
+            }
+
+            async Task WaitForWriteIOSlot(TWriteAdapter wAdapter, Task lockTask, ReadOnlyMemory<byte> buff)
+            {
+                await lockTask.ConfigureAwait(false);
+                await WriteSingleChunk(wAdapter, buff).ConfigureAwait(false);
+            }
+
+            async Task CompleteAsync(ValueTask writeTask, byte[] bufferToReturn)
+            {
+                try
+                {
+                    await writeTask.ConfigureAwait(false);
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(bufferToReturn);
+                    FinishWrite();
+                }
+            }
+        }
+
+        //
+        // Validates user parameters for all Read/Write methods.
+        //
+        internal void ValidateParameters(byte[] buffer, int offset, int count)
+        {
+            if (buffer == null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
+
+            if (count > buffer.Length - offset)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count), SR.net_offset_plus_count);
             }
         }
 

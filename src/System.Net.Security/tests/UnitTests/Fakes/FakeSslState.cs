@@ -25,6 +25,10 @@ namespace System.Net.Security
 
         }
 
+        internal void ValidateParameters(byte[] buffer, int offset, int count)
+        {
+        }
+
         internal void ValidateCreateContext(SslAuthenticationOptions sslAuthenticationOptions)
         {
         }
@@ -123,11 +127,7 @@ namespace System.Net.Security
 
         internal ValueTask WriteAsyncInternal<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
             where TWriteAdapter : struct, ISslWriteAdapter => default;
-
-        internal void ValidateParameters(byte[] buffer, int offset, int count)
-        {
-        }
-
+        
         public override bool CanSeek
         {
             get
