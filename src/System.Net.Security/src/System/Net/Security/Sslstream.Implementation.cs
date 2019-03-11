@@ -231,7 +231,7 @@ namespace System.Net.Security
         {
             _exception = s_disposedSentinel;
             _context?.Close();
-            SslStreamInternalDispose();
+            InternalDispose();
         }
 
         private SecurityStatusPal EncryptData(ReadOnlyMemory<byte> buffer, ref byte[] outBuffer, out int outSize)
@@ -1333,7 +1333,7 @@ namespace System.Net.Security
             Dispose(disposing: false);
         }
 
-        private void SslStreamInternalDispose()
+        private void InternalDispose()
         {
             // Ensure a Read operation is not in progress,
             // block potential reads since SslStream is disposing.
