@@ -45,9 +45,6 @@ namespace System.Buffers.Text
             fixed (byte* srcBytes = &MemoryMarshal.GetReference(bytes))
             fixed (byte* destBytes = &MemoryMarshal.GetReference(utf8))
             {
-                // PERF: needs to be initialized here, for good codegen
-                ref byte encodingMap = ref s_encodingMap[0];
-
                 int srcLength = bytes.Length;
                 int destLength = utf8.Length;
                 int maxSrcLength;
@@ -87,6 +84,7 @@ namespace System.Buffers.Text
                     }
                 }
 
+                ref byte encodingMap = ref MemoryMarshal.GetReference(s_encodingMap);
                 uint result = 0;
 
                 srcMax -= 2;
@@ -176,8 +174,6 @@ namespace System.Buffers.Text
 
             fixed (byte* bufferBytes = &MemoryMarshal.GetReference(buffer))
             {
-                ref byte encodingMap = ref s_encodingMap[0];
-
                 int encodedLength = GetMaxEncodedToUtf8Length(dataLength);
                 if (buffer.Length < encodedLength)
                     goto FalseExit;
@@ -187,6 +183,7 @@ namespace System.Buffers.Text
                 uint destinationIndex = (uint)(encodedLength - 4);
                 uint sourceIndex = (uint)(dataLength - leftover);
                 uint result = 0;
+                ref byte encodingMap = ref MemoryMarshal.GetReference(s_encodingMap);
 
                 // encode last pack to avoid conditional in the main loop
                 if (leftover != 0)
@@ -380,7 +377,7 @@ namespace System.Buffers.Text
         private const int MaximumEncodeLength = (int.MaxValue / 4) * 3; // 1610612733
 
         // Pre-computing this table using a custom string(s_characters) and GenerateEncodingMapAndVerify (found in tests)
-        private static readonly byte[] s_encodingMap = {
+        private static ReadOnlySpan<byte> s_encodingMap => new byte[] {
             65, 66, 67, 68, 69, 70, 71, 72,         //A..H
             73, 74, 75, 76, 77, 78, 79, 80,         //I..P
             81, 82, 83, 84, 85, 86, 87, 88,         //Q..X

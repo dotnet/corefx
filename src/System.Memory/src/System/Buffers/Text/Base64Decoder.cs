@@ -44,9 +44,6 @@ namespace System.Buffers.Text
             fixed (byte* srcBytes = &MemoryMarshal.GetReference(utf8))
             fixed (byte* destBytes = &MemoryMarshal.GetReference(bytes))
             {
-                // PERF: needs to be initialized here, for good codegen
-                ref sbyte decodingMap = ref s_decodingMap[0];
-
                 int srcLength = utf8.Length & ~0x3;  // only decode input up to the closest multiple of 4.
                 int destLength = bytes.Length;
                 int maxSrcLength = srcLength;
@@ -100,7 +97,9 @@ namespace System.Buffers.Text
                     maxSrcLength = (destLength / 3) * 4;
                 }
 
+                ref sbyte decodingMap = ref MemoryMarshal.GetReference(s_decodingMap);
                 srcMax = srcBytes + (uint)maxSrcLength;
+
                 while (src < srcMax)
                 {
                     int result = Decode(src, ref decodingMap);
@@ -259,8 +258,6 @@ namespace System.Buffers.Text
 
             fixed (byte* bufferBytes = &MemoryMarshal.GetReference(buffer))
             {
-                ref sbyte decodingMap = ref s_decodingMap[0];
-
                 int bufferLength = buffer.Length;
                 uint sourceIndex = 0;
                 uint destIndex = 0;
@@ -270,6 +267,8 @@ namespace System.Buffers.Text
                     goto InvalidExit;
                 if (bufferLength == 0)
                     goto DoneExit;
+
+                ref sbyte decodingMap = ref MemoryMarshal.GetReference(s_decodingMap);
 
                 while (sourceIndex < bufferLength - 4)
                 {
@@ -480,7 +479,7 @@ namespace System.Buffers.Text
         }
 
         // Pre-computing this table using a custom string(s_characters) and GenerateDecodingMapAndVerify (found in tests)
-        private static readonly sbyte[] s_decodingMap = {
+        private static ReadOnlySpan<sbyte> s_decodingMap => new sbyte[] {
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,         //62 is placed at index 43 (for +), 63 at index 47 (for /)
