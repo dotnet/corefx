@@ -23,7 +23,7 @@ namespace System.Net.Security
         private static AsyncProtocolCallback s_readFrameCallback = new AsyncProtocolCallback(ReadFrameCallback);
         private static AsyncCallback s_writeCallback = new AsyncCallback(WriteCallback);
 
-        internal SslAuthenticationOptions _sslAuthenticationOptions;
+        private SslAuthenticationOptions _sslAuthenticationOptions;
 
         private int _nestedAuth;
         
@@ -57,7 +57,7 @@ namespace System.Net.Security
         private const int LockPendingRead = 6;
 
         private const int FrameOverhead = 32;
-        internal const int ReadBufferSize = 4096 * 4 + FrameOverhead;         // We read in 16K chunks + headers.
+        private const int ReadBufferSize = 4096 * 4 + FrameOverhead;         // We read in 16K chunks + headers.
 
         private int _lockWriteState;
         private object _queuedWriteStateRequest;
@@ -85,7 +85,7 @@ namespace System.Net.Security
             }
         }
 
-        internal void ValidateCreateContext(SslClientAuthenticationOptions sslClientAuthenticationOptions, RemoteCertValidationCallback remoteCallback, LocalCertSelectionCallback localCallback)
+        private void ValidateCreateContext(SslClientAuthenticationOptions sslClientAuthenticationOptions, RemoteCertValidationCallback remoteCallback, LocalCertSelectionCallback localCallback)
         {
             ThrowIfExceptional();
 
@@ -120,7 +120,7 @@ namespace System.Net.Security
             }
         }
 
-        internal void ValidateCreateContext(SslAuthenticationOptions sslAuthenticationOptions)
+        private void ValidateCreateContext(SslAuthenticationOptions sslAuthenticationOptions)
         {
             ThrowIfExceptional();
 
@@ -147,7 +147,7 @@ namespace System.Net.Security
             }
         }
 
-        internal bool RemoteCertRequired
+        private bool RemoteCertRequired
         {
             get
             {
@@ -165,7 +165,7 @@ namespace System.Net.Security
             }
         }
         
-        internal bool IsShutdown
+        private bool IsShutdown
         {
             get
             {
@@ -173,7 +173,7 @@ namespace System.Net.Security
             }
         }
         
-        internal Stream InternalInnerStream
+        private Stream InternalInnerStream
         {
             get
             {
@@ -181,7 +181,7 @@ namespace System.Net.Security
             }
         }
         
-        internal int MaxDataSize
+        private int MaxDataSize
         {
             get
             {
@@ -209,7 +209,7 @@ namespace System.Net.Security
             }
         }
         
-        internal void CheckThrow(bool authSuccessCheck, bool shutdownCheck = false)
+        private void CheckThrow(bool authSuccessCheck, bool shutdownCheck = false)
         {
             ThrowIfExceptional();
 
@@ -227,20 +227,20 @@ namespace System.Net.Security
         //
         // This is to not depend on GC&SafeHandle class if the context is not needed anymore.
         //
-        internal void CloseInternal()
+        private void CloseInternal()
         {
             _exception = s_disposedSentinel;
             _context?.Close();
-            _secureStream?.Dispose();
+            SslStreamInternalDispose();
         }
 
-        internal SecurityStatusPal EncryptData(ReadOnlyMemory<byte> buffer, ref byte[] outBuffer, out int outSize)
+        private SecurityStatusPal EncryptData(ReadOnlyMemory<byte> buffer, ref byte[] outBuffer, out int outSize)
         {
             CheckThrow(true);
             return _context.Encrypt(buffer, ref outBuffer, out outSize);
         }
 
-        internal SecurityStatusPal DecryptData()
+        private SecurityStatusPal DecryptData()
         {
             CheckThrow(true);
             return PrivateDecryptData(_internalBuffer, ref _decryptedBytesOffset, ref _decryptedBytesCount);
@@ -281,7 +281,7 @@ namespace System.Net.Security
         //
         // Must be called under the lock in case concurrent handshake is going.
         //
-        internal int CheckOldKeyDecryptedData(Memory<byte> buffer)
+        private int CheckOldKeyDecryptedData(Memory<byte> buffer)
         {
             CheckThrow(true);
             if (_queuedReadData != null)
@@ -307,7 +307,7 @@ namespace System.Net.Security
         // This method assumes that a SSPI context is already in a good shape.
         // For example it is either a fresh context or already authenticated context that needs renegotiation.
         //
-        internal void ProcessAuthentication(LazyAsyncResult lazyResult)
+        private void ProcessAuthentication(LazyAsyncResult lazyResult)
         {
             if (Interlocked.Exchange(ref _nestedAuth, 1) == 1)
             {
@@ -366,7 +366,7 @@ namespace System.Net.Security
         //
         // This is used to reply on re-handshake when received SEC_I_RENEGOTIATE on Read().
         //
-        internal void ReplyOnReAuthentication(byte[] buffer)
+        private void ReplyOnReAuthentication(byte[] buffer)
         {
             lock (SyncLock)
             {
@@ -445,7 +445,7 @@ namespace System.Net.Security
             }
         }
 
-        internal void EndProcessAuthentication(IAsyncResult result)
+        private void EndProcessAuthentication(IAsyncResult result)
         {
             if (result == null)
             {
@@ -480,7 +480,7 @@ namespace System.Net.Security
             }
         }
 
-        internal void InternalEndProcessAuthentication(LazyAsyncResult lazyResult)
+        private void InternalEndProcessAuthentication(LazyAsyncResult lazyResult)
         {
             // No "artificial" timeouts implemented so far, InnerStream controls that.
             lazyResult.InternalWaitForCompletion();
@@ -950,7 +950,7 @@ namespace System.Net.Security
         // -1    - proceed
         // 0     - queued
         // X     - some bytes are ready, no need for IO
-        internal int CheckEnqueueRead(Memory<byte> buffer)
+        private int CheckEnqueueRead(Memory<byte> buffer)
         {
             int lockState = Interlocked.CompareExchange(ref _lockReadState, LockRead, LockNone);
 
@@ -990,7 +990,7 @@ namespace System.Net.Security
             }
         }
 
-        internal ValueTask<int> CheckEnqueueReadAsync(Memory<byte> buffer)
+        private ValueTask<int> CheckEnqueueReadAsync(Memory<byte> buffer)
         {
             int lockState = Interlocked.CompareExchange(ref _lockReadState, LockRead, LockNone);
 
@@ -1023,7 +1023,7 @@ namespace System.Net.Security
             }
         }
 
-        internal void FinishRead(byte[] renegotiateBuffer)
+        private void FinishRead(byte[] renegotiateBuffer)
         {
             int lockState = Interlocked.CompareExchange(ref _lockReadState, LockNone, LockRead);
 
@@ -1050,7 +1050,7 @@ namespace System.Net.Security
             }
         }
 
-        internal Task CheckEnqueueWriteAsync()
+        private Task CheckEnqueueWriteAsync()
         {
             // Clear previous request.
             int lockState = Interlocked.CompareExchange(ref _lockWriteState, LockWrite, LockNone);
@@ -1074,7 +1074,7 @@ namespace System.Net.Security
             }
         }
 
-        internal void CheckEnqueueWrite()
+        private void CheckEnqueueWrite()
         {
             // Clear previous request.
             _queuedWriteStateRequest = null;
@@ -1107,7 +1107,7 @@ namespace System.Net.Security
             return;
         }
 
-        internal void FinishWrite()
+        private void FinishWrite()
         {
             int lockState = Interlocked.CompareExchange(ref _lockWriteState, LockNone, LockWrite);
             if (lockState != LockHandshake)
@@ -1234,7 +1234,7 @@ namespace System.Net.Security
             }
         }
 
-        internal async Task WriteAsyncChunked<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
+        private async Task WriteAsyncChunked<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
             where TWriteAdapter : struct, ISslWriteAdapter
         {
             do
@@ -1246,7 +1246,7 @@ namespace System.Net.Security
             } while (buffer.Length != 0);
         }
 
-        internal ValueTask WriteSingleChunk<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
+        private ValueTask WriteSingleChunk<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
             where TWriteAdapter : struct, ISslWriteAdapter
         {
             // Request a write IO slot.
@@ -1305,7 +1305,7 @@ namespace System.Net.Security
         //
         // Validates user parameters for all Read/Write methods.
         //
-        internal void ValidateParameters(byte[] buffer, int offset, int count)
+        private void ValidateParameters(byte[] buffer, int offset, int count)
         {
             if (buffer == null)
             {
@@ -1328,7 +1328,12 @@ namespace System.Net.Security
             }
         }
 
-        internal void SslStreamInternalDispose(bool disposing)
+        ~SslStream()
+        {
+            Dispose(disposing: false);
+        }
+
+        private void SslStreamInternalDispose()
         {
             // Ensure a Read operation is not in progress,
             // block potential reads since SslStream is disposing.
@@ -1345,11 +1350,17 @@ namespace System.Net.Security
                     ArrayPool<byte>.Shared.Return(buffer);
                 }
             }
+
+            if (_internalBuffer == null)
+            {
+                // Suppress finalizer if the read buffer was returned.
+                GC.SuppressFinalize(this);
+            }
         }
 
         //We will only free the read buffer if it
         //actually contains no decrypted or encrypted bytes
-        internal void ReturnReadBufferIfEmpty()
+        private void ReturnReadBufferIfEmpty()
         {
             if (_internalBuffer != null && _decryptedBytesCount == 0 && _internalBufferCount == 0)
             {
@@ -1362,7 +1373,7 @@ namespace System.Net.Security
             }
         }
 
-        internal async ValueTask<int> ReadAsyncInternal<TReadAdapter>(TReadAdapter adapter, Memory<byte> buffer)
+        private async ValueTask<int> ReadAsyncInternal<TReadAdapter>(TReadAdapter adapter, Memory<byte> buffer)
             where TReadAdapter : ISslReadAdapter
         {
             if (Interlocked.Exchange(ref _nestedRead, 1) == 1)
@@ -1535,7 +1546,7 @@ namespace System.Net.Security
             }
         }
 
-        internal ValueTask WriteAsyncInternal<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
+        private ValueTask WriteAsyncInternal<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
             where TWriteAdapter : struct, ISslWriteAdapter
         {
             CheckThrow(authSuccessCheck: true, shutdownCheck: true);
@@ -1586,7 +1597,7 @@ namespace System.Net.Security
             }
         }
 
-        internal void ConsumeBufferedBytes(int byteCount)
+        private void ConsumeBufferedBytes(int byteCount)
         {
             Debug.Assert(byteCount >= 0);
             Debug.Assert(byteCount <= _internalBufferCount);
@@ -1597,7 +1608,7 @@ namespace System.Net.Security
             ReturnReadBufferIfEmpty();
         }
 
-        internal int CopyDecryptedData(Memory<byte> buffer)
+        private int CopyDecryptedData(Memory<byte> buffer)
         {
             Debug.Assert(_decryptedBytesCount > 0);
 
@@ -1613,7 +1624,7 @@ namespace System.Net.Security
             return copyBytes;
         }
 
-        internal void ResetReadBuffer()
+        private void ResetReadBuffer()
         {
             Debug.Assert(_decryptedBytesCount == 0);
 
@@ -1845,7 +1856,7 @@ namespace System.Net.Security
 
         //
         // This is called from SslStream class too.
-        internal int GetRemainingFrameSize(byte[] buffer, int offset, int dataSize)
+        private int GetRemainingFrameSize(byte[] buffer, int offset, int dataSize)
         {
             if (NetEventSource.IsEnabled)
                 NetEventSource.Enter(this, buffer, offset, dataSize);

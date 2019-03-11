@@ -20,7 +20,7 @@
     <Compile Include="System\Security\Authentication\InvalidCredentialExceptionTest.cs" />
     <Compile Include="TlsAlertsMatchWindowsInterop.cs" />
     <!-- Fakes -->
-    <Compile Include="Fakes\FakeSslState.cs" />
+    <Compile Include="Fakes\FakeSslStream.Implementation.cs" />
     <Compile Include="Fakes\FakeAuthenticatedStream.cs" />
     <Compile Include="Fakes\FakeLazyAsyncResult.cs" />
     <!-- Common test files -->

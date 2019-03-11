@@ -51,7 +51,6 @@ namespace System.Net.Security
         internal EncryptionPolicy _encryptionPolicy;
 
         private readonly Stream _innerStream;
-        private readonly SslStreamInternal _secureStream;
         private SecureChannel _context;
 
         private ExceptionDispatchInfo _exception;
@@ -104,7 +103,6 @@ namespace System.Net.Security
             _certSelectionDelegate = userCertificateSelectionCallback == null ? null : new LocalCertSelectionCallback(UserCertSelectionCallbackWrapper);
 
             _innerStream = innerStream;
-            _secureStream = new SslStreamInternal(this);
         }
 
         public SslApplicationProtocol NegotiatedApplicationProtocol
@@ -309,18 +307,9 @@ namespace System.Net.Security
             _shutdown = true;
         }
 
-        public TransportContext TransportContext
-        {
-            get
-            {
-                return new SslStreamContext(this);
-            }
-        }
+        public TransportContext TransportContext => new SslStreamContext(this);
 
-        internal ChannelBinding GetChannelBinding(ChannelBindingKind kind)
-        {
-            return (_context == null) ? null : _context.GetChannelBinding(kind);
-        }
+        internal ChannelBinding GetChannelBinding(ChannelBindingKind kind) => _context?.GetChannelBinding(kind);
 
         #region Synchronous methods
         public virtual void AuthenticateAsClient(string targetHost)
