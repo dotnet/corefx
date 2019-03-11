@@ -7,6 +7,67 @@
 
 namespace System
 {
+    public readonly partial struct Char8 : IComparable<Char8>, IEquatable<Char8>
+    {
+        private readonly int _dummy;
+        public static bool operator ==(Char8 a, Char8 b) => throw null;
+        public static bool operator !=(Char8 a, Char8 b) => throw null;
+        public static bool operator <(Char8 a, Char8 b) => throw null;
+        public static bool operator <=(Char8 a, Char8 b) => throw null;
+        public static bool operator >(Char8 a, Char8 b) => throw null;
+        public static bool operator >=(Char8 a, Char8 b) => throw null;
+        public static implicit operator byte(Char8 value) => throw null;
+        [CLSCompliant(false)]
+        public static explicit operator sbyte(Char8 value) => throw null;
+        public static explicit operator char(Char8 value) => throw null;
+        public static implicit operator short(Char8 value) => throw null;
+        [CLSCompliant(false)]
+        public static implicit operator ushort(Char8 value) => throw null;
+        public static implicit operator int(Char8 value) => throw null;
+        [CLSCompliant(false)]
+        public static implicit operator uint(Char8 value) => throw null;
+        public static implicit operator long(Char8 value) => throw null;
+        [CLSCompliant(false)]
+        public static implicit operator ulong(Char8 value) => throw null;
+        public static implicit operator Char8(byte value) => throw null;
+        [CLSCompliant(false)]
+        public static explicit operator Char8(sbyte value) => throw null;
+        public static explicit operator Char8(char value) => throw null;
+        public static explicit operator Char8(short value) => throw null;
+        [CLSCompliant(false)]
+        public static explicit operator Char8(ushort value) => throw null;
+        public static explicit operator Char8(int value) => throw null;
+        [CLSCompliant(false)]
+        public static explicit operator Char8(uint value) => throw null;
+        public static explicit operator Char8(long value) => throw null;
+        [CLSCompliant(false)]
+        public static explicit operator Char8(ulong value) => throw null;
+        public int CompareTo(Char8 other) => throw null;
+        public override bool Equals(object obj) => throw null;
+        public bool Equals(Char8 other) => throw null;
+        public override int GetHashCode() => throw null;
+        public override string ToString() => throw null;
+    }
+    public static partial class Utf8Extensions
+    {
+        public static ReadOnlySpan<byte> AsBytes(this ReadOnlySpan<Char8> text) => throw null;
+        public static ReadOnlySpan<byte> AsBytes(this Utf8String text) => throw null;
+        public static ReadOnlySpan<byte> AsBytes(this Utf8String text, int start) => throw null;
+        public static ReadOnlySpan<byte> AsBytes(this Utf8String text, int start, int length) => throw null;
+        public static ReadOnlySpan<Char8> AsSpan(this Utf8String text) => throw null;
+        public static ReadOnlySpan<Char8> AsSpan(this Utf8String text, int start) => throw null;
+        public static ReadOnlySpan<Char8> AsSpan(this Utf8String text, int start, int length) => throw null;
+        public static ReadOnlyMemory<Char8> AsMemory(this Utf8String text) => throw null;
+        public static ReadOnlyMemory<Char8> AsMemory(this Utf8String text, int start) => throw null;
+        public static ReadOnlyMemory<Char8> AsMemory(this Utf8String text, Index startIndex) => throw null;
+        public static ReadOnlyMemory<Char8> AsMemory(this Utf8String text, int start, int length) => throw null;
+        public static ReadOnlyMemory<Char8> AsMemory(this Utf8String text, Range range) => throw null;
+        public static ReadOnlyMemory<byte> AsMemoryBytes(this Utf8String text) => throw null;
+        public static ReadOnlyMemory<byte> AsMemoryBytes(this Utf8String text, int start) => throw null;
+        public static ReadOnlyMemory<byte> AsMemoryBytes(this Utf8String text, Index startIndex) => throw null;
+        public static ReadOnlyMemory<byte> AsMemoryBytes(this Utf8String text, int start, int length) => throw null;
+        public static ReadOnlyMemory<byte> AsMemoryBytes(this Utf8String text, Range range) => throw null;
+    }
     public sealed partial class Utf8String : IEquatable<Utf8String>
     {
         public static readonly Utf8String Empty;
@@ -19,8 +80,13 @@ namespace System
         [CLSCompliant(false)]
         public unsafe Utf8String(char* value) { }
         public Utf8String(string value) { }
+        public static explicit operator ReadOnlySpan<byte>(Utf8String value) => throw null;
+        public static implicit operator ReadOnlySpan<Char8>(Utf8String value) => throw null;
         public static bool operator ==(Utf8String a, Utf8String b) => throw null;
         public static bool operator !=(Utf8String a, Utf8String b) => throw null;
+        public Char8 this[Index index] => throw null;
+        public Char8 this[int index] => throw null;
+        public Utf8String this[Range range] => throw null;
         public int Length => throw null;
         public override bool Equals(object obj) => throw null;
         public bool Equals(Utf8String value) => throw null;
@@ -28,10 +94,13 @@ namespace System
         public override int GetHashCode() => throw null;
         [ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)] // for compiler use only
         public ref readonly byte GetPinnableReference() => throw null;
+        public static bool IsNullOrEmpty(Utf8String value) => throw null;
+        public Utf8String Substring(Index startIndex) => throw null;
+        public Utf8String Substring(int startIndex) => throw null;
+        public Utf8String Substring(int startIndex, int length) => throw null;
+        public Utf8String Substring(Range range) => throw null;
+        public byte[] ToByteArray() => throw null;
+        public byte[] ToByteArray(int startIndex, int length) => throw null;
         public override string ToString() => throw null;
-    }
-    public static partial class Utf8StringExtensions
-    {
-        public static ReadOnlySpan<byte> AsBytes(this Utf8String text) => throw null;
     }
 }

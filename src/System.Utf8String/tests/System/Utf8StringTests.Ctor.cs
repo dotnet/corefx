@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Reflection;
+using System.Buffers;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Xunit;
 
 using static System.Tests.Utf8TestUtilities;
@@ -44,22 +43,23 @@ namespace System.Tests
         [Fact]
         public static void Ctor_BytePointer_NullOrEmpty_ReturnsEmpty()
         {
-            byte nullByte = 0;
+            byte[] inputData = new byte[] { 0 }; // standalone null byte
 
-            Assert.Same(Utf8String.Empty, new Utf8String((byte*)null));
-            Assert.Same(Utf8String.Empty, new Utf8String(&nullByte));
+            using (BoundedMemory<byte> boundedMemory = BoundedMemory.AllocateFromExistingData(inputData))
+            {
+                Assert.Same(Utf8String.Empty, new Utf8String((byte*)null));
+                Assert.Same(Utf8String.Empty, new Utf8String((byte*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(boundedMemory.Span))));
+            }
         }
 
         [Fact]
         public static void Ctor_BytePointer_ValidData_ReturnsOriginalContents()
         {
             byte[] inputData = new byte[] { (byte)'H', (byte)'e', (byte)'l', (byte)'l', (byte)'o', (byte)'\0' };
-            Utf8String expected = u8("Hello");
 
-            fixed (byte* pData = inputData)
+            using (BoundedMemory<byte> boundedMemory = BoundedMemory.AllocateFromExistingData(inputData))
             {
-                var actual = new Utf8String(pData);
-                Assert.Equal(expected, actual);
+                Assert.Equal(u8("Hello"), new Utf8String((byte*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(boundedMemory.Span))));
             }
         }
 
@@ -67,12 +67,10 @@ namespace System.Tests
         public static void Ctor_BytePointer_InvalidData_FixesUpData()
         {
             byte[] inputData = new byte[] { (byte)'H', (byte)'e', (byte)0xFF, (byte)'l', (byte)'o', (byte)'\0' };
-            Utf8String expected = u8("He\uFFFDlo");
 
-            fixed (byte* pData = inputData)
+            using (BoundedMemory<byte> boundedMemory = BoundedMemory.AllocateFromExistingData(inputData))
             {
-                var actual = new Utf8String(pData);
-                Assert.Equal(expected, actual);
+                Assert.Equal(u8("He\uFFFDlo"), new Utf8String((byte*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(boundedMemory.Span))));
             }
         }
 
@@ -132,35 +130,34 @@ namespace System.Tests
         [Fact]
         public static void Ctor_CharPointer_NullOrEmpty_ReturnsEmpty()
         {
-            char nullChar = '\0';
+            char[] inputData = new char[] { '\0' }; // standalone null char
 
-            Assert.Same(Utf8String.Empty, new Utf8String((char*)null));
-            Assert.Same(Utf8String.Empty, new Utf8String(&nullChar));
+            using (BoundedMemory<char> boundedMemory = BoundedMemory.AllocateFromExistingData(inputData))
+            {
+                Assert.Same(Utf8String.Empty, new Utf8String((char*)null));
+                Assert.Same(Utf8String.Empty, new Utf8String((char*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(boundedMemory.Span))));
+            }
         }
 
         [Fact]
         public static void Ctor_CharPointer_ValidData_ReturnsOriginalContents()
         {
-            const string inputData = "Hello";
-            Utf8String expected = u8("Hello");
+            char[] inputData = new char[] { 'H', 'e', 'l', 'l', 'o', '\0' };
 
-            fixed (char* pData = inputData)
+            using (BoundedMemory<char> boundedMemory = BoundedMemory.AllocateFromExistingData(inputData))
             {
-                var actual = new Utf8String(pData);
-                Assert.Equal(expected, actual);
+                Assert.Equal(u8("Hello"), new Utf8String((char*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(boundedMemory.Span))));
             }
         }
 
         [Fact]
         public static void Ctor_CharPointer_InvalidData_FixesUpData()
         {
-            char[] inputData = new char[] { 'H', 'e', '\uD800', 'l', 'o', '\0' };
-            Utf8String expected = u8("He\uFFFDlo");
+            char[] inputData = new char[] { 'H', 'e', '\uD800', 'l', 'o', '\0' }; // standalone surrogate
 
-            fixed (char* pData = inputData)
+            using (BoundedMemory<char> boundedMemory = BoundedMemory.AllocateFromExistingData(inputData))
             {
-                var actual = new Utf8String(pData);
-                Assert.Equal(expected, actual);
+                Assert.Equal(u8("He\uFFFDlo"), new Utf8String((char*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(boundedMemory.Span))));
             }
         }
 

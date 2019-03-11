@@ -11,12 +11,26 @@ namespace Xunit
     {
         public static void Equal<T>(ReadOnlySpan<T> a, ReadOnlySpan<T> b, IEqualityComparer<T> comparer = null) where T : IEquatable<T>
         {
-            Assert.Equal(a.ToArray(), b.ToArray(), comparer);
+            if (comparer is null)
+            {
+                Assert.Equal(a.ToArray(), b.ToArray());
+            }
+            else
+            {
+                Assert.Equal(a.ToArray(), b.ToArray(), comparer);
+            }
         }
 
         public static void Equal<T>(Span<T> a, Span<T> b, IEqualityComparer<T> comparer = null) where T : IEquatable<T>
         {
-            Assert.Equal(a.ToArray(), b.ToArray(), comparer);
+            if (comparer is null)
+            {
+                Assert.Equal(a.ToArray(), b.ToArray());
+            }
+            else
+            {
+                Assert.Equal(a.ToArray(), b.ToArray(), comparer);
+            }
         }
     }
 }

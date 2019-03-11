@@ -7,9 +7,6 @@
     <RootNamespace>System</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Utf8StringExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
   </ItemGroup>
 </Project>
