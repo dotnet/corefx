@@ -15,6 +15,13 @@ namespace System.Net.Security
     {
         internal void ValidateCreateContext(SslClientAuthenticationOptions sslClientAuthenticationOptions, RemoteCertValidationCallback remoteCallback, LocalCertSelectionCallback localCallback)
         {
+            if(_shutdown == true)
+            {
+
+            }
+            _context = null;
+            _exception = null;
+
         }
 
         internal void ValidateCreateContext(SslAuthenticationOptions sslAuthenticationOptions)
@@ -80,6 +87,10 @@ namespace System.Net.Security
 
     internal class ProtocolToken
     {
+        public ProtocolToken()
+        {
+            Payload = null; 
+        }
         internal byte[] Payload;
     }
 
