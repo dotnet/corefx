@@ -211,7 +211,7 @@ namespace System.Net.Http.Tests
         [Theory]
         [InlineData("HTTP_PROXY", "NO_PROXY")]
         [InlineData("http_proxy", "no_proxy")]
-        public void HttpProxy_TryCreate_CaseInsenstiveVariables(string proxy, string noProxy)
+        public void HttpProxy_TryCreate_CaseInsensitiveVariables(string proxy, string noProxy)
         {
             var options = new RemoteInvokeOptions();
             options.StartInfo.EnvironmentVariables.Add(proxy, "http://foo:bar@1.1.1.1:3000");
