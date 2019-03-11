@@ -208,19 +208,25 @@ namespace System.Net.Http.Tests
             }).Dispose();
         }
 
-        [Fact]
-        public void HttpProxy_TryCreate_UpperCaseVariables()
+        [Theory]
+        [InlineData("HTTP_PROXY", "NO_PROXY")]
+        [InlineData("http_proxy", "no_proxy")]
+        public void HttpProxy_TryCreate_CaseInsenstiveVariables(string proxy, string noProxy)
         {
+            var options = new RemoteInvokeOptions();
+            options.StartInfo.EnvironmentVariables.Add(proxy, "http://foo:bar@1.1.1.1:3000");
+            options.StartInfo.EnvironmentVariables.Add(noProxy, ".test.com, foo.com");
             RemoteInvoke(() =>
             {
-                IWebProxy p;
-                Environment.SetEnvironmentVariable("HTTP_PROXY", "http://foo:bar@1.1.1.1:3000");
-                Environment.SetEnvironmentVariable("NO_PROXY", ".test.com,, foo.com");
-                Assert.True(HttpEnvironmentProxy.TryCreate(out p));
+                Assert.True(HttpEnvironmentProxy.TryCreate(out IWebProxy p));
+                Assert.NotNull(p);
                 Assert.True(p.IsBypassed(new Uri("http://test.com")));
                 Assert.False(p.IsBypassed(new Uri("http://1test.com")));
+                // Adding slash at the end since AbsoluteUri will include it
+                Assert.Equal("http://foo:bar@1.1.1.1:3000/", p.GetProxy(new Uri("http://1test.com")).AbsoluteUri);
+
                 return SuccessExitCode;
-            }).Dispose();
+            }, options).Dispose();
         }
     }
 }

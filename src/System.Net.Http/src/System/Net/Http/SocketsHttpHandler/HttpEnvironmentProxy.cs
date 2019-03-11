@@ -138,6 +138,7 @@ namespace System.Net.Http
                 proxy = null;
                 return false;
             }
+
             string noProxy = Environment.GetEnvironmentVariable(EnvNoProxyLC) ?? Environment.GetEnvironmentVariable(EnvNoProxyUC);
             proxy = new HttpEnvironmentProxy(httpProxy, httpsProxy, noProxy);
             return true;
