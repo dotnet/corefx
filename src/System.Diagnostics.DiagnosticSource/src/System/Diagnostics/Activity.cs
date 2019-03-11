@@ -573,6 +573,99 @@ namespace System.Diagnostics
         /// </summary>
         public static bool ForceDefaultIdFormat { get; set; }
 
+        /* Activity Sampling Support */
+        /// <summary>
+        /// If true (set by StartWithSampling) 
+        /// </summary>
+        public bool Recording { get; private set; }
+
+        /// <summary>
+        /// Indicates the desire that the current activity should be Recorded (sampled).  
+        /// It may not be honored because there are already too many samples based on 
+        /// the desired SamplingPercent.   
+        /// </summary>
+        public void SetRecordingDesired()
+        {
+            // TODO NOT DONE.  
+        }
+
+        /// <summary>
+        /// CreateActivityIfRecording is intended to be used to support activity sampling.  It is to 
+        /// be used when the activity has no parent (it might have an external Parent ID), and the 
+        /// activity is not too big (otherwise when logging is on, too much recording happens.  
+        /// 
+        /// You pass the operation name, and this method will return an Activity (if this activity 
+        /// is to be recorded), or null if it is not.   It is expected that you set Activity.Current with this.  
+        /// 
+        /// This overload is meant to be used when the activity has no logical parent (e.g. it did not
+        /// come from outside the process, it is a new top-level piece of work).  
+        /// </summary>
+        static Activity CreateActivityIfRecording(string operationName)
+        {
+            return CreateActivityIfRecording(operationName, false, s_sampling.NextHash());
+        }
+
+        /// <summary>
+        /// CreateActivityIfRecording is intended to be used to support activity sampling.  It is to 
+        /// be used when the activity has no parent (it might have an external Parent ID), and the 
+        /// activity is not too big (otherwise when logging is on, too much recording happens.  
+        /// 
+        /// You pass the operation name, and this method will return an Activity (if this activity 
+        /// is to be recorded), or null if it is not.   It is expected that you set Activity.Current with this.  
+        /// 
+        /// This overload is intended to be used when the activity comes from outside the process and
+        /// you have a activity ID for your parent.  If 'parentID' is in W3C format, we try to respect
+        /// the 'recording' bit of the ID, otherwise we use the last 2 bytes (4 chars) as a hash 
+        /// to determine if it will be selected as a 'wildcard' sample.   
+        /// </summary>
+        static Activity CreateActivityIfRecording(string operationName, string parentID)
+        {
+            if (IsW3CId(parentID))
+            {
+                bool recordingBit = ((parentID[54] - '0') & 1) != 0;   // Convert the last character to an byte and take the LSB which is the Recording bit.  
+
+                // Convert the LCB of the SpanID to a 64bit  binary number.  
+                int hash = ((((parentID[48] - '0') & 0xF) << 4 + ((parentID[49] - '0') & 0xF)) << 4 + ((parentID[50] - '0') & 0xF)) << ((parentID[51] - '0') & 0xF);
+                return CreateActivityIfRecording(operationName, recordingBit, (ushort)hash);
+            }
+            return CreateActivityIfRecording(operationName, false, (ushort)parentID.GetHashCode());
+        }
+
+        /// <summary>
+        ///  TODO make public?
+        /// </summary>
+        private static Activity CreateActivityIfRecording(string operationName, bool recordingDesired, ushort parentIDHash)
+        {
+            if (!s_sampling.ShouldSample(recordingDesired, parentIDHash))
+                return null;
+            Activity ret = new Activity(operationName);
+            ret.Recording = true;
+            return ret;
+        }
+
+        /// <summary>
+        /// Returns true if ActivitySampling is currently on.   You turn on ActivitySampling by 
+        /// using RegisterActivityConfig.  
+        /// </summary>
+        public static bool IsActivitySamplingEnabled { get { return s_sampling.IsActivitySamplingEnabled; } }
+
+        /// <summary>
+        /// Activities support sampling.   Logging systems are strongly encouraged to support sampling 
+        /// by adding the following check before they actually log (the logging system gets to decide 
+        /// what verbosity level does this (we recommend info or more verbose).
+        /// 
+        /// To turn on logging you create a ActivityConfig class (which specifies the degree of filtering)
+        /// and call RegisterActivityConfig.  Once registered this config is active until the config object
+        /// is Disposed (Or dies and is finalized).    This way multiple logging systems can ask for 
+        /// varying levels of sampling and you get the union (Most verbose) of what is currently active. 
+        /// 
+        /// Finally it should be noted that all logging systems have to be prepared to receive more events
+        /// than they asked for (thus sampling is a perf optimization).   If the logging system wishes 
+        /// to insure some limit, it should do that filtering after receiving the event (when it has complete 
+        /// control).   The goal of activity sampling is to simply make logging CHEAP.   
+        /// </summary>
+        public static void RegisterActivityConfig(ActivityConfig config) { s_sampling.RegisterSamplingConfig(config); }
+
         #region private 
         /// <summary>
         /// Returns true if 'id' has the format of a WC3 id see https://w3c.github.io/trace-context
@@ -777,6 +870,7 @@ namespace System.Diagnostics
         }
 
         private static ActivityIdFormat s_DefaultIdFormat;
+        private static Sampling s_sampling = new Sampling();
 
         private KeyValueListNode _tags;
         private KeyValueListNode _baggage;
@@ -1117,5 +1211,184 @@ namespace System.Diagnostics
         readonly ulong _id1;
         readonly string _asHexString;   // Caches the Hex string  
         #endregion
+    }
+
+    /// <summary>
+    /// Sampling is simple a class that encapsulates the policy on sampling.  
+    /// Users can request sampling by creating a ActivityConfig, setting 
+    /// the 'SamplingPercent field and 
+    /// </summary>
+    internal class Sampling
+    {
+        public Sampling()
+        {
+            _sampleIfLessEq = 0xFFFF;   // Set to 100% sampling by default.  
+        }
+
+        /// <summary>
+        /// A property that simply keeps track of whether Activity sampling is currently on 
+        /// (that is there is a configuration that is still active that requested it).  
+        /// </summary>
+        public bool IsActivitySamplingEnabled { get; set; }
+
+        /// <summary>
+        /// Activities without an in-process parent (either because they are a root activity or 
+        /// their parent is off machine (they only have an ID), are sampled at this Percentage.
+        /// Thus if this is 5, then it means 5 out of every 100 non-parented activity will have its
+        /// 'Recording' property turned on.    The smallest this can be is  .0015 which means 
+        /// only 1 out of every 64K non-parented activities will be sampled.   
+        /// </summary>
+        public double SamplingPercent
+        {
+            get { return _sampleIfLessEq / (double)0XFFFF; }
+        }
+
+        public void RegisterSamplingConfig(ActivityConfig config)
+        {
+            if (config._next != null)
+                throw new InvalidOperationException("Can only register sampling configuration once");
+            config._next = _configs;
+            _configs = config;
+
+            if (config.SamplingPercent < SamplingPercent)
+                SetSamplingPercent(config.SamplingPercent);
+        }
+
+        #region private 
+        private void SetSamplingPercent(double value)
+        {
+            if (100 <= value)
+                _sampleIfLessEq = 0xFFFF;
+            else if (value < 0)
+                _sampleIfLessEq = 0;
+            else
+                _sampleIfLessEq = (ushort)((value * 0xFFFF) / 100.0);
+        }
+
+        internal ushort NextHash()
+        {
+            int oldValue = _defaultHash;
+            return (ushort)Interlocked.CompareExchange(ref _defaultHash, oldValue, oldValue * 214013 + 2531011);
+        }
+
+        // 
+
+        /// <summary>
+        /// This is the heart of the class.  Given a bool that says whether there was an explicit request to sample
+        /// along with a random ushort ideally related to the activity that is uniformly distributed over the 64K values
+        /// return true if you should take a sample.   
+        /// 
+        /// This routine tries to honor explicit requests but guarantees on average to only sample SamplingRequest
+        /// percent of the activities.   
+        /// </summary>
+        internal bool ShouldSample(bool recordingDesired, ushort activityIdHash)
+        {
+            // Is this  activity one that we would sample by pure random chance?
+            if (activityIdHash <= _sampleIfLessEq)
+            {
+                // Is our 'bank' of samples exhausted? (we need to forgo a random sample to swap for the next explicitly requested activity.    
+                if (_samplesForExplicitRecording <= 0)
+                {
+                    if (recordingDesired)   // Is this request explicitly requested to be sampled, in that case we immediately use it
+                        return true;
+                    else
+                    {
+                        // Otherwise don't sample but remember we have a sample 'banked' for the next explicitly requests sample.  
+                        Interlocked.Increment(ref _samplesForExplicitRecording);
+                        return false;
+                    }
+                }
+                else   // we already sample in the bank, we can go ahead and sample this one.  
+                    return true;
+            }
+
+            // We get here if we would not sample by pure random chance.  Only return true if there was an explicit 
+            // request and we have a sample 'in the bank'.   (And decrement the count to show we used the banked sample).  
+            if (recordingDesired && 0 < _samplesForExplicitRecording)
+            {
+                Interlocked.Decrement(ref _samplesForExplicitRecording);
+                return true;
+            }
+            return false;
+        }
+
+        internal void Remove(ActivityConfig config)
+        {
+            // TODO NOT DONE.  
+            // Search for entry, and compute the new sampling rate.  
+        }
+
+        // If the random ushort is less than or equal to this number than we should sample (it has a good rate.   
+        ushort _sampleIfLessEq;
+
+        // If the user set a 1% sampling rate, then we 1/100 the time ShouldSample should return true.   However
+        // we do want to honor explicit requests as much as we can.   Thus we want to swap out a 'random' sample
+        // for every explicit request.  We do this by 'banking' samples.   _samplesForExplicitRecording is the 
+        // number of samples we have 'banked' for this use.  When this is < 1, then we DON'T do a random sample
+        // and instead put it in the back (Incrementing this).  If this number is > 0 when an explicit request
+        // to sample comes in then we honor it (and Decrement it),   In a race free environment this variable 
+        // should ping-pong between 0 and 1, but with multiple threads is might over or under shoot a bit, but 
+        // on average we always keep the rate that was asked for because explicit request have been 'swapped' 
+        // for an activity that would have been sampled by pure random chance.  
+        int _samplesForExplicitRecording;
+
+        // If we have no parent ID to make a random number out of, we create a random number ourselves.  This
+        // is the value we use for the random number generation
+        int _defaultHash;
+
+        // There can be multiple requests for sampling.  We take the union of them (the highest %), however
+        // we have to remember all of the requests so when some go away we know what the new sampling rate
+        // should be for the once left behind.  
+        ActivityConfig _configs;    // This is a linked list of registrations.  
+        #endregion
+    }
+
+    /// <summary>
+    /// ActivityConfig represents a request to configure global variables that
+    /// influence Activity processing.   You create one of these, set the variables
+    /// you wish, and pass it to Activity.RegisterActivityConfig.   You remove
+    /// that configuration by calling Dispose() on the ActivityConfig.  
+    /// </summary>
+    public sealed class ActivityConfig : IDisposable
+    {
+        public ActivityConfig(double samplingPercent)
+        {
+            SamplingPercent = samplingPercent;
+        }
+
+        /// <summary>
+        /// Sets the desired Sampling Percentage.   If this is set to 1 
+        /// then 1% of the 'Activty.Recording' bit is turn on for only 
+        /// 1% of all top-level activities (and their descendants).  
+        /// Setting this to ANY value will also set the Activity.IsActivitySamplingEnabled
+        /// to true.   
+        /// 
+        /// DiagnosticSource.IsEnabled in particular honors the Activty.Recording 
+        /// bit if Activity.IsActivitySamplingEnabled is enabled, and other logging
+        /// systems are encouraged to also honor sampling in the same way.  
+        /// 
+        /// If several requests are sampling rates are active concurrently the
+        /// maximum value is chosen.   
+        /// </summary>
+        public double SamplingPercent { get; set; }
+
+        ~ActivityConfig()
+        {
+            Dispose();
+        }
+
+        /// <summary>
+        /// Disposing an ActivityConfig object will remove its configuration information
+        /// so the configuration is recomputed based on any configurations that
+        /// are still active after the Dispose.  
+        /// </summary>
+        public void Dispose()
+        {
+            if (_owner != null)
+                _owner.Remove(this);
+        }
+
+        Sampling _owner;
+        internal ActivityConfig _next;   // next config in the list;
     }
 }

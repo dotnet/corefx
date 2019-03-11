@@ -210,10 +210,6 @@ namespace System.Diagnostics
             return Name;
         }
 
-        #region private
-
-        // NotificationSource implementation
-
         /// <summary>
         /// Determines whether there are any registered subscribers
         /// </summary>
@@ -223,7 +219,7 @@ namespace System.Diagnostics
         /// to ensure somebody listens to the DiagnosticListener at all.</remarks>
         public bool IsEnabled()
         {
-            return _subscriptions != null;
+            return _subscriptions != null && IsSamplingOn();
         }
 
         /// <summary>
@@ -234,7 +230,7 @@ namespace System.Diagnostics
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
             {
                 if (curSubscription.IsEnabled1Arg == null || curSubscription.IsEnabled1Arg(name))
-                    return true;
+                    return IsSamplingOn();
             }
             return false;
         }
@@ -248,7 +244,7 @@ namespace System.Diagnostics
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
             {
                 if (curSubscription.IsEnabled3Arg == null || curSubscription.IsEnabled3Arg(name, arg1, arg2))
-                    return true;
+                    return IsSamplingOn();
             }
             return false;
         }
@@ -260,6 +256,18 @@ namespace System.Diagnostics
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
                 curSubscription.Observer.OnNext(new KeyValuePair<string, object>(name, value));
+        }
+
+        #region private
+        private bool IsSamplingOn()
+        {
+            if (Activity.IsActivitySamplingEnabled)
+            {
+                var cur = Activity.Current;
+                if (cur == null || !cur.Recording)
+                    return false;
+            }
+            return true;
         }
 
         // Note that Subscriptions are READ ONLY.   This means you never update any fields (even on removal!)
