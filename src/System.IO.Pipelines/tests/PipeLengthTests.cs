@@ -147,6 +147,45 @@ namespace System.IO.Pipelines.Tests
             await _pipe.Writer.FlushAsync();
 
             result = await _pipe.Reader.ReadAsync();
+            _pipe.Reader.AdvanceTo(result.Buffer.Start);
+
+            Assert.Equal(8192, _pipe.Length);
+
+            result = await _pipe.Reader.ReadAsync();
+            _pipe.Reader.AdvanceTo(result.Buffer.End);
+
+            Assert.Equal(0, _pipe.Length);
+        }
+
+        [Fact]
+        public async Task PooledSegmentsDontAffectLastExaminedSegmentEmptyGapWithDifferentBlocks()
+        {
+            _pipe.Writer.WriteEmpty(_pool.MaxBufferSize);
+            _pipe.Writer.WriteEmpty(_pool.MaxBufferSize);
+            await _pipe.Writer.FlushAsync();
+
+            ReadResult result = await _pipe.Reader.ReadAsync();
+            // This gets the end of the first block
+            SequencePosition endOfFirstBlock = result.Buffer.Slice(result.Buffer.Start, _pool.MaxBufferSize).End;
+            // Start of the next block
+            SequencePosition startOfSecondBlock = result.Buffer.GetPosition(_pool.MaxBufferSize);
+
+            // This should return the first segment
+            _pipe.Reader.AdvanceTo(startOfSecondBlock, endOfFirstBlock);
+
+            // One block remaining
+            Assert.Equal(4096, _pipe.Length);
+
+            // This should use the segment that was returned
+            _pipe.Writer.WriteEmpty(_pool.MaxBufferSize);
+            await _pipe.Writer.FlushAsync();
+
+            result = await _pipe.Reader.ReadAsync();
+            _pipe.Reader.AdvanceTo(result.Buffer.Start);
+
+            Assert.Equal(8192, _pipe.Length);
+
+            result = await _pipe.Reader.ReadAsync();
             _pipe.Reader.AdvanceTo(result.Buffer.End);
 
             Assert.Equal(0, _pipe.Length);
