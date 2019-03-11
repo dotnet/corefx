@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Net.Security.SslStream;
 
 namespace System.Net.Security
 {
@@ -151,12 +152,6 @@ namespace System.Net.Security
             return ReadAsyncInternal(read, new Memory<byte>(buffer, offset, count)).AsTask();
         }
 
-        internal ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
-        {
-            SslReadAsync read = new SslReadAsync(_sslState, cancellationToken);
-            return ReadAsyncInternal(read, buffer);
-        }
-
         internal int EndRead(IAsyncResult asyncResult) => TaskToApm.End<int>(asyncResult);
 
         internal IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
@@ -199,7 +194,7 @@ namespace System.Net.Security
         //
         // Validates user parameters for all Read/Write methods.
         //
-        private void ValidateParameters(byte[] buffer, int offset, int count)
+        internal void ValidateParameters(byte[] buffer, int offset, int count)
         {
             if (buffer == null)
             {
@@ -222,7 +217,7 @@ namespace System.Net.Security
             }
         }
 
-        private async ValueTask<int> ReadAsyncInternal<TReadAdapter>(TReadAdapter adapter, Memory<byte> buffer)
+        internal async ValueTask<int> ReadAsyncInternal<TReadAdapter>(TReadAdapter adapter, Memory<byte> buffer)
             where TReadAdapter : ISslReadAdapter
         {
             if (Interlocked.Exchange(ref _nestedRead, 1) == 1)

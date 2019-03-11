@@ -18,7 +18,7 @@
     <Compile Include="System\Net\Security\SslAuthenticationOptions.cs" />
     <Compile Include="System\Net\Security\SslClientAuthenticationOptions.cs" />
     <Compile Include="System\Net\Security\SslServerAuthenticationOptions.cs" />
-    <Compile Include="System\Net\Security\SslStreamInternal.Adapters.cs" />
+    <Compile Include="System\Net\Security\SslStream.Implementation.Adapters.cs" />
     <Compile Include="System\Net\SslStreamContext.cs" />
     <Compile Include="System\Net\Security\AuthenticatedStream.cs" />
     <Compile Include="System\Net\Security\NetEventSource.Security.cs" />

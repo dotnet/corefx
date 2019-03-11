@@ -8,6 +8,7 @@ using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Net.Security.SslStream;
 
 namespace System.Net.Security
 {
@@ -28,6 +29,15 @@ namespace System.Net.Security
         {
         }
 
+        internal Task CheckEnqueueWriteAsync() => default;
+
+        internal void CheckEnqueueWrite()
+        {
+        }
+
+        internal ValueTask<int> CheckEnqueueReadAsync(Memory<byte> buffer) => default;
+
+        internal int CheckEnqueueRead(Memory<byte> buffer) => default;
 
         internal bool RemoteCertRequired
         {
@@ -107,6 +117,9 @@ namespace System.Net.Security
                 throw new NotImplementedException();
             }
         }
+
+        internal ValueTask<int> ReadAsyncInternal<TReadAdapter>(TReadAdapter adapter, Memory<byte> buffer)
+            where TReadAdapter : ISslReadAdapter => default;
 
         public override bool CanSeek
         {

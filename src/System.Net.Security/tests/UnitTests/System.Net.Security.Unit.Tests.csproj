@@ -48,6 +48,9 @@
     <Compile Include="..\..\src\System\Net\Security\SslConnectionInfo.cs">
       <Link>ProductionCode\System\Net\Security\SslConnectionInfo.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Security\SslStream.Implementation.Adapters.cs">
+      <Link>ProductionCode\System\Net\Security\SslStream.Implementation.Adapters.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\System\Net\SslStreamContext.cs">
       <Link>ProductionCode\System\Net\SslStreamContext.cs</Link>
     </Compile>

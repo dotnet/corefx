@@ -854,7 +854,9 @@ namespace System.Net.Security
 
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
-            return SecureStream.ReadAsync(buffer, cancellationToken);
+            CheckThrow(true);
+            SslReadAsync read = new SslReadAsync(this, cancellationToken);
+            return _secureStream.ReadAsyncInternal(read, buffer);
         }
     }
 }
