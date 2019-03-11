@@ -348,14 +348,14 @@ namespace System.Buffers.Text
         private static unsafe void Avx2Decode(ref byte* srcBytes, ref byte* destBytes, byte* srcEnd, int sourceLength, int destLength, byte* srcStart, byte* destStart)
         {
             // The JIT won't hoist these "constants", so help it
-            Vector256<sbyte> lutHi = s_avxDecodeLutHi;
-            Vector256<sbyte> lutLo = s_avxDecodeLutLo;
-            Vector256<sbyte> lutShift = s_avxDecodeLutShift;
+            Vector256<sbyte> lutHi = ReadVector<Vector256<sbyte>>(s_avxDecodeLutHi);
+            Vector256<sbyte> lutLo = ReadVector<Vector256<sbyte>>(s_avxDecodeLutLo);
+            Vector256<sbyte> lutShift = ReadVector<Vector256<sbyte>>(s_avxDecodeLutShift);
             Vector256<sbyte> mask2F = s_avxDecodeMask2F;
             Vector256<sbyte> shuffleConstant0 = Vector256.Create(0x01400140).AsSByte();
             Vector256<short> shuffleConstant1 = Vector256.Create(0x00011000).AsInt16();
-            Vector256<sbyte> shuffleVec = s_avxDecodeShuffleVec;
-            Vector256<int> permuteVec = s_avxDecodePermuteVec;
+            Vector256<sbyte> shuffleVec = ReadVector<Vector256<sbyte>>(s_avxDecodeShuffleVec);
+            Vector256<int> permuteVec = ReadVector<Vector256<sbyte>>(s_avxDecodePermuteVec).AsInt32();
 
             byte* src = srcBytes;
             byte* dest = destBytes;
@@ -401,13 +401,13 @@ namespace System.Buffers.Text
         private static unsafe void Ssse3Decode(ref byte* srcBytes, ref byte* destBytes, byte* srcEnd, int sourceLength, int destLength, byte* srcStart, byte* destStart)
         {
             // The JIT won't hoist these "constants", so help it
-            Vector128<sbyte> lutHi = s_sseDecodeLutHi;
-            Vector128<sbyte> lutLo = s_sseDecodeLutLo;
-            Vector128<sbyte> lutShift = s_sseDecodeLutShift;
+            Vector128<sbyte> lutHi = ReadVector<Vector128<sbyte>>(s_sseDecodeLutHi);
+            Vector128<sbyte> lutLo = ReadVector<Vector128<sbyte>>(s_sseDecodeLutLo);
+            Vector128<sbyte> lutShift = ReadVector<Vector128<sbyte>>(s_sseDecodeLutShift);
             Vector128<sbyte> mask2F = s_sseDecodeMask2F;
             Vector128<sbyte> shuffleConstant0 = Vector128.Create(0x01400140).AsSByte();
             Vector128<short> shuffleConstant1 = Vector128.Create(0x00011000).AsInt16();
-            Vector128<sbyte> shuffleVec = s_sseDecodeShuffleVec;
+            Vector128<sbyte> shuffleVec = ReadVector<Vector128<sbyte>>(s_sseDecodeShuffleVec);
 
             byte* src = srcBytes;
             byte* dest = destBytes;
@@ -499,37 +499,37 @@ namespace System.Buffers.Text
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         };
 
-        private static readonly Vector128<sbyte> s_sseDecodeShuffleVec = Ssse3.IsSupported ? Vector128.Create(
+        private static ReadOnlySpan<sbyte> s_sseDecodeShuffleVec => new sbyte[] {
             2, 1, 0, 6,
             5, 4, 10, 9,
             8, 14, 13, 12,
             -1, -1, -1, -1
-        ) : default;
+        };
 
-        private static readonly Vector128<sbyte> s_sseDecodeLutLo = Sse3.IsSupported ? Vector128.Create(
+        private static ReadOnlySpan<sbyte> s_sseDecodeLutLo => new sbyte[] {
             0x15, 0x11, 0x11, 0x11,
             0x11, 0x11, 0x11, 0x11,
             0x11, 0x11, 0x13, 0x1A,
             0x1B, 0x1B, 0x1B, 0x1A
-        ) : default;
+        };
 
-        private static readonly Vector128<sbyte> s_sseDecodeLutHi = Sse3.IsSupported ? Vector128.Create(
+        private static ReadOnlySpan<sbyte> s_sseDecodeLutHi => new sbyte[] {
             0x10, 0x10, 0x01, 0x02,
             0x04, 0x08, 0x04, 0x08,
             0x10, 0x10, 0x10, 0x10,
             0x10, 0x10, 0x10, 0x10
-        ) : default;
+        };
 
-        private static readonly Vector128<sbyte> s_sseDecodeLutShift = Sse3.IsSupported ? Vector128.Create(
+        private static ReadOnlySpan<sbyte> s_sseDecodeLutShift => new sbyte[] {
             0, 16, 19, 4,
             -65, -65, -71, -71,
             0, 0, 0, 0,
             0, 0, 0, 0
-        ) : default;
+        };
 
         private static readonly Vector128<sbyte> s_sseDecodeMask2F = Sse3.IsSupported ? Vector128.Create((sbyte)0x2F) : default;    // ASCII: /
 
-        private static readonly Vector256<sbyte> s_avxDecodeShuffleVec = Avx2.IsSupported ? Vector256.Create(
+        private static ReadOnlySpan<sbyte> s_avxDecodeShuffleVec => new sbyte[] {
             2, 1, 0, 6,
             5, 4, 10, 9,
             8, 14, 13, 12,
@@ -538,12 +538,22 @@ namespace System.Buffers.Text
             5, 4, 10, 9,
             8, 14, 13, 12,
             -1, -1, -1, -1
-        ) : default;
+        };
 
-        private static readonly Vector256<int> s_avxDecodePermuteVec = Avx2.IsSupported ? Vector256.Create(0, 1, 2, 4, 5, 6, -1, -1) : default;
+        private static ReadOnlySpan<sbyte> s_avxDecodePermuteVec => new sbyte[] {
+            0, 0, 0, 0,
+            1, 0, 0, 0,
+            2, 0, 0, 0,
+            4, 0, 0, 0,
+            5, 0, 0, 0,
+            6, 0, 0, 0,
+            -1, -1, -1, -1,
+            -1, -1, -1, -1
+        };
+
         private static readonly Vector256<sbyte> s_avxDecodeMask2F = Avx2.IsSupported ? Vector256.Create((sbyte)0x2F) : default;        // ASCII: /
 
-        private static readonly Vector256<sbyte> s_avxDecodeLutLo = Avx2.IsSupported ? Vector256.Create(
+        private static ReadOnlySpan<sbyte> s_avxDecodeLutLo => new sbyte[] {
             0x15, 0x11, 0x11, 0x11,
             0x11, 0x11, 0x11, 0x11,
             0x11, 0x11, 0x13, 0x1A,
@@ -552,9 +562,9 @@ namespace System.Buffers.Text
             0x11, 0x11, 0x11, 0x11,
             0x11, 0x11, 0x13, 0x1A,
             0x1B, 0x1B, 0x1B, 0x1A
-        ) : default;
+        };
 
-        private static readonly Vector256<sbyte> s_avxDecodeLutHi = Avx2.IsSupported ? Vector256.Create(
+        private static ReadOnlySpan<sbyte> s_avxDecodeLutHi => new sbyte[] {
             0x10, 0x10, 0x01, 0x02,
             0x04, 0x08, 0x04, 0x08,
             0x10, 0x10, 0x10, 0x10,
@@ -563,9 +573,9 @@ namespace System.Buffers.Text
             0x04, 0x08, 0x04, 0x08,
             0x10, 0x10, 0x10, 0x10,
             0x10, 0x10, 0x10, 0x10
-        ) : default;
+        };
 
-        private static readonly Vector256<sbyte> s_avxDecodeLutShift = Avx2.IsSupported ? Vector256.Create(
+        private static ReadOnlySpan<sbyte> s_avxDecodeLutShift => new sbyte[] {
             0, 16, 19, 4,
             -65, -65, -71, -71,
             0, 0, 0, 0,
@@ -574,6 +584,6 @@ namespace System.Buffers.Text
             -65, -65, -71, -71,
             0, 0, 0, 0,
             0, 0, 0, 0
-        ) : default;
+        };
     }
 }
