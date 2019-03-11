@@ -575,7 +575,7 @@ namespace System.Diagnostics
 
         /* Activity Sampling Support */
         /// <summary>
-        /// If true (set by StartWithSampling) 
+        /// True if something has called SetRecordingDesired in this Activity or a parent activity.  
         /// </summary>
         public bool Recording { get; private set; }
 
@@ -650,9 +650,24 @@ namespace System.Diagnostics
         public static bool IsActivitySamplingEnabled { get { return s_sampling.IsActivitySamplingEnabled; } }
 
         /// <summary>
-        /// Activities support sampling.   Logging systems are strongly encouraged to support sampling 
-        /// by adding the following check before they actually log (the logging system gets to decide 
-        /// what verbosity level does this (we recommend info or more verbose).
+        /// Returns true if the current Activity has the Recording flag set.   
+        /// Note that this also returns true if ActivitySampling is off. 
+        /// </summary>
+        public static bool CurrentActivityIsRecording {
+            get
+            {
+                if (Activity.IsActivitySamplingEnabled)
+                {
+                    var cur = Activity.Current;
+                    if (cur == null || !cur.Recording)
+                        return false;
+                }
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Activities support sampling.  
         /// 
         /// To turn on logging you create a ActivityConfig class (which specifies the degree of filtering)
         /// and call RegisterActivityConfig.  Once registered this config is active until the config object
