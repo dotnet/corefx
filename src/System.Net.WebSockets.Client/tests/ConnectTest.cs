@@ -26,7 +26,7 @@ namespace System.Net.WebSockets.Client.Tests
                 WebSocketException ex = await Assert.ThrowsAsync<WebSocketException>(() =>
                     cws.ConnectAsync(server, cts.Token));
 
-                if (PlatformDetection.IsNetCore) // bug fix in netcoreapp: https://github.com/dotnet/corefx/pull/35960
+                if (PlatformDetection.IsNetCore && !PlatformDetection.IsUap) // bug fix in netcoreapp: https://github.com/dotnet/corefx/pull/35960
                 {
                     Assert.Equal(errorCode, ex.WebSocketErrorCode);
                 }
