@@ -121,6 +121,13 @@ namespace System.Net.Security
         internal ValueTask<int> ReadAsyncInternal<TReadAdapter>(TReadAdapter adapter, Memory<byte> buffer)
             where TReadAdapter : ISslReadAdapter => default;
 
+        internal ValueTask WriteAsyncInternal<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
+            where TWriteAdapter : struct, ISslWriteAdapter => default;
+
+        internal void ValidateParameters(byte[] buffer, int offset, int count)
+        {
+        }
+
         public override bool CanSeek
         {
             get

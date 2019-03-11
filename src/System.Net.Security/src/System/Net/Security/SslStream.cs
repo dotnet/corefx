@@ -829,7 +829,8 @@ namespace System.Net.Security
 
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
         {
-            return SecureStream.BeginWrite(buffer, offset, count, asyncCallback, asyncState);
+            CheckThrow(true);
+            return TaskToApm.Begin(WriteAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
         }
 
         public override void EndWrite(IAsyncResult asyncResult)
@@ -839,12 +840,16 @@ namespace System.Net.Security
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            return SecureStream.WriteAsync(buffer, offset, count, cancellationToken);
+            CheckThrow(true);
+            _secureStream.ValidateParameters(buffer, offset, count);
+            return WriteAsync(new ReadOnlyMemory<byte>(buffer, offset, count), cancellationToken).AsTask();
         }
 
         public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
-            return SecureStream.WriteAsync(buffer, cancellationToken);
+            CheckThrow(true);
+            SslWriteAsync writeAdapter = new SslWriteAsync(this, cancellationToken);
+            return _secureStream.WriteAsyncInternal(writeAdapter, buffer);
         }
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)

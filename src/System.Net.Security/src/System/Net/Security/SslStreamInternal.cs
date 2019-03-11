@@ -154,24 +154,7 @@ namespace System.Net.Security
 
         internal int EndRead(IAsyncResult asyncResult) => TaskToApm.End<int>(asyncResult);
 
-        internal IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
-        {
-            return TaskToApm.Begin(WriteAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
-        }
-
         internal void EndWrite(IAsyncResult asyncResult) => TaskToApm.End(asyncResult);
-
-        internal ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
-        {
-            SslWriteAsync writeAdapter = new SslWriteAsync(_sslState, cancellationToken);
-            return WriteAsyncInternal(writeAdapter, buffer);
-        }
-
-        internal Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-        {
-            ValidateParameters(buffer, offset, count);
-            return WriteAsync(new ReadOnlyMemory<byte>(buffer, offset, count), cancellationToken).AsTask();
-        }
 
         private void ResetReadBuffer()
         {
@@ -331,7 +314,7 @@ namespace System.Net.Security
             }
         }
 
-        private ValueTask WriteAsyncInternal<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
+        internal ValueTask WriteAsyncInternal<TWriteAdapter>(TWriteAdapter writeAdapter, ReadOnlyMemory<byte> buffer)
             where TWriteAdapter : struct, ISslWriteAdapter
         {
             _sslState.CheckThrow(authSuccessCheck: true, shutdownCheck: true);
@@ -344,7 +327,7 @@ namespace System.Net.Security
 
             if (Interlocked.Exchange(ref _nestedWrite, 1) == 1)
             {
-                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, nameof(WriteAsync), "write"));
+                throw new NotSupportedException(SR.Format(SR.net_io_invalidnestedcall, nameof(SslStream.WriteAsync), "write"));
             }
 
             ValueTask t = buffer.Length < _sslState.MaxDataSize ?
