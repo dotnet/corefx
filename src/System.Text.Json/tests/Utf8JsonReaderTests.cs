@@ -1772,7 +1772,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestValueEqualsBasic()
+        public static void TestTextEqualsBasic()
         {
             byte[] connectionId = Encoding.UTF8.GetBytes("connectionId");
             byte[] availableTransports = Encoding.UTF8.GetBytes("availableTransports");
@@ -1787,11 +1787,11 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.PropertyName)
                 {
-                    if (json.ValueEquals(connectionId))
+                    if (json.TextEquals(connectionId))
                     {
                         foundId = true;
                     }
-                    else if (json.ValueEquals(availableTransports))
+                    else if (json.TextEquals(availableTransports))
                     {
                         foundTransports = true;
                     }
@@ -1807,7 +1807,7 @@ namespace System.Text.Json.Tests
         [InlineData("{\"name\": 1234}", "", false)]
         [InlineData("{\"\": 1234}", "name", false)]
         [InlineData("{\"\": 1234}", "", true)]
-        public static void TestValueEquals(string jsonString, string lookUpString, bool expectedFound)
+        public static void TestTextEquals(string jsonString, string lookUpString, bool expectedFound)
         {
             byte[] lookup = Encoding.UTF8.GetBytes(lookUpString);
             byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
@@ -1818,7 +1818,7 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.PropertyName)
                 {
-                    if (json.ValueEquals(lookup))
+                    if (json.TextEquals(lookup))
                     {
                         found = true;
                     }

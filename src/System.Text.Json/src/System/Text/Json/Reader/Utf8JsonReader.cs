@@ -215,7 +215,7 @@ namespace System.Text.Json
             return retVal;
         }
 
-        public bool ValueEquals(ReadOnlySpan<byte> other)
+        public bool TextEquals(ReadOnlySpan<byte> otherUtf8Text)
         {
             if (TokenType != JsonTokenType.PropertyName && TokenType != JsonTokenType.String)
             {
@@ -224,15 +224,25 @@ namespace System.Text.Json
 
             if (HasValueSequence)
             {
-                return CompareToSequence(other);
+                return CompareToSequence(otherUtf8Text);
             }
 
             if (_stringHasEscaping)
             {
-                return UnescapeAndCompare(other);
+                return UnescapeAndCompare(otherUtf8Text);
             }
 
-            return other.SequenceEqual(ValueSpan);
+            return otherUtf8Text.SequenceEqual(ValueSpan);
+        }
+
+        public bool TextEquals(ReadOnlySpan<char> otherText)
+        {
+            if (TokenType != JsonTokenType.PropertyName && TokenType != JsonTokenType.String)
+            {
+                throw new InvalidOperationException();
+            }
+
+            throw new NotImplementedException();
         }
 
         private bool CompareToSequence(ReadOnlySpan<byte> other)
@@ -282,6 +292,27 @@ namespace System.Text.Json
         private bool UnescapeSequenceAndCompare(ReadOnlySpan<byte> other)
         {
             throw new NotImplementedException();
+
+            //Debug.Assert(HasValueSequence);
+
+            //ReadOnlySequence<byte> localSequence = ValueSequence;
+
+            //int matchedSoFar = 0;
+
+            //foreach (ReadOnlyMemory<byte> memory in localSequence)
+            //{
+            //    ReadOnlySpan<byte> span = memory.Span;
+
+            //    if (other.Slice(matchedSoFar).StartsWith(span))
+            //    {
+            //        matchedSoFar += span.Length;
+            //    }
+            //    else
+            //    {
+            //        return false;
+            //    }
+            //}
+            //return other.Length == matchedSoFar;
         }
 
         private void StartObject()

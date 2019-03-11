@@ -184,6 +184,8 @@ namespace System.Text.Json
         [System.CLSCompliantAttribute(false)]
         public ulong GetUInt64() { throw null; }
         public bool Read() { throw null; }
+        public bool TextEquals(ReadOnlySpan<char> otherText) { throw null; }
+        public bool TextEquals(ReadOnlySpan<byte> otherUtf8Text) { throw null; }
         public bool TryGetDecimal(out decimal value) { throw null; }
         public bool TryGetDouble(out double value) { throw null; }
         public bool TryGetInt32(out int value) { throw null; }
@@ -193,7 +195,6 @@ namespace System.Text.Json
         public bool TryGetUInt32(out uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public bool TryGetUInt64(out ulong value) { throw null; }
-        public bool ValueEquals(ReadOnlySpan<byte> other) { throw null; }
     }
     public ref partial struct Utf8JsonWriter
     {
