@@ -2,12 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Internal.Runtime.Augments;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Threading.Tasks;
-
-using Thread = Internal.Runtime.Augments.RuntimeThread;
 
 namespace System.Threading
 {
@@ -446,7 +443,7 @@ namespace System.Threading
             {
                 _executionContext = ExecutionContext.Capture();
             }
-            _associatedTimerQueue = TimerQueue.Instances[RuntimeThread.GetCurrentProcessorId() % TimerQueue.Instances.Length];
+            _associatedTimerQueue = TimerQueue.Instances[Thread.GetCurrentProcessorId() % TimerQueue.Instances.Length];
 
             // After the following statement, the timer may fire.  No more manipulation of timer state outside of
             // the lock is permitted beyond this point!
@@ -477,7 +474,7 @@ namespace System.Threading
                         // Don't emit this event during EventPipeController.  This avoids initializing FrameworkEventSource during start-up which is expensive relative to the rest of start-up.
                         !EventPipeController.Initializing &&
 #endif
-                        FrameworkEventSource.IsInitialized && FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
+                        FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
                         FrameworkEventSource.Log.ThreadTransferSendObj(this, 1, string.Empty, true, (int)dueTime, (int)period);
 
                     success = _associatedTimerQueue.UpdateTimer(this, dueTime, period);
@@ -631,7 +628,7 @@ namespace System.Threading
 
         internal void CallCallback(bool isThreadPool)
         {
-            if (FrameworkEventSource.IsInitialized && FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
+            if (FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
                 FrameworkEventSource.Log.ThreadTransferReceiveObj(this, 1, string.Empty);
 
             // Call directly if EC flow is suppressed

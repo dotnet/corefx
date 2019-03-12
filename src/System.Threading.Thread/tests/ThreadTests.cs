@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Principal;
@@ -339,9 +340,18 @@ namespace System.Threading.Threads.Tests
         {
             CultureInfo culture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
             CultureInfo uiCulture = (CultureInfo)CultureInfo.CurrentCulture.Clone();
+
+            ExceptionDispatchInfo exceptionFromThread = null;
             var t = new Thread(() => {
-                Assert.Same(culture, Thread.CurrentThread.CurrentCulture);
-                Assert.Same(uiCulture, Thread.CurrentThread.CurrentUICulture);
+                try
+                {
+                    Assert.Same(culture, Thread.CurrentThread.CurrentCulture);
+                    Assert.Same(uiCulture, Thread.CurrentThread.CurrentUICulture);
+                }
+                catch (Exception e)
+                {
+                    exceptionFromThread = ExceptionDispatchInfo.Capture(e);
+                }
             });
 
             // We allow setting thread culture of unstarted threads to ease .NET Framework migration. It is pattern used
@@ -361,6 +371,8 @@ namespace System.Threading.Threads.Tests
             Assert.Throws<InvalidOperationException>(() => t.CurrentCulture);
             Assert.Throws<InvalidOperationException>(() => t.CurrentUICulture);
             t.Join();
+
+            exceptionFromThread?.Throw();
         }
 
         [Fact]
@@ -463,6 +475,8 @@ namespace System.Threading.Threads.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void CurrentPrincipalContextFlowTest_NotFlow()
         {
             ThreadTestHelpers.RunTestInBackgroundThread(async () =>
@@ -476,16 +490,7 @@ namespace System.Threading.Threads.Tests
 
                     task = Task.Run(() => 
                     {
-                        // Default PrincipalPolicy for netcoreapp is null
-                        if (PlatformDetection.IsNetCore)
-                        {
-                            Assert.Null(Thread.CurrentPrincipal);
-                        }
-                        else
-                        {
-                            Assert.IsType<GenericPrincipal>(Thread.CurrentPrincipal);
-                        }
-
+                        Assert.Null(Thread.CurrentPrincipal);
                         Assert.False(ExecutionContext.IsFlowSuppressed());
                     });
                 }
@@ -1141,7 +1146,7 @@ namespace System.Threading.Threads.Tests
                 AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
                 Assert.Equal(Environment.UserDomainName + @"\" + Environment.UserName, Thread.CurrentPrincipal.Identity.Name);
             }).Dispose();
-                }
+        }
 
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]

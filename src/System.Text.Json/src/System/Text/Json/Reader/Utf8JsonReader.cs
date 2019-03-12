@@ -23,11 +23,11 @@ namespace System.Text.Json
         private ReadOnlySpan<byte> _buffer;
 
         private bool _isFinalBlock;
+        private bool _isInputSequence;
 
         private long _lineNumber;
         private long _bytePositionInLine;
         private int _consumed;
-        private int _maxDepth;
         private bool _inObject;
         private bool _isNotPrimitive;
         internal char _numberFormat;
@@ -112,10 +112,12 @@ namespace System.Text.Json
         {
             get
             {
-                // TODO: Cannot use Slice even though it would be faster: https://github.com/dotnet/corefx/issues/33291
-                return _currentPosition.GetObject() == null
-                    ? default
-                    : _sequence.GetPosition(BytesConsumed);
+                if (_isInputSequence)
+                {
+                    Debug.Assert(_currentPosition.GetObject() != null);
+                    return _sequence.GetPosition(_consumed, _currentPosition);
+                }
+                return default;
             }
         }
 
@@ -131,7 +133,6 @@ namespace System.Text.Json
             _lineNumber = _lineNumber,
             _bytePositionInLine = _bytePositionInLine,
             _bytesConsumed = BytesConsumed,
-            _maxDepth = _maxDepth,
             _inObject = _inObject,
             _isNotPrimitive = _isNotPrimitive,
             _numberFormat = _numberFormat,
@@ -140,6 +141,7 @@ namespace System.Text.Json
             _previousTokenType = _previousTokenType,
             _readerOptions = _readerOptions,
             _bitStack = _bitStack,
+            _sequencePosition = Position,
         };
 
         /// <summary>
@@ -159,11 +161,11 @@ namespace System.Text.Json
             _buffer = jsonData;
 
             _isFinalBlock = isFinalBlock;
+            _isInputSequence = false;
 
             // Note: We do not retain _bytesConsumed or _sequencePosition as they reset with the new input data
             _lineNumber = state._lineNumber;
             _bytePositionInLine = state._bytePositionInLine;
-            _maxDepth = state._maxDepth == 0 ? JsonReaderState.DefaultMaxDepth : state._maxDepth; // If max depth is not set, revert to the default depth.
             _inObject = state._inObject;
             _isNotPrimitive = state._isNotPrimitive;
             _numberFormat = state._numberFormat;
@@ -171,6 +173,10 @@ namespace System.Text.Json
             _tokenType = state._tokenType;
             _previousTokenType = state._previousTokenType;
             _readerOptions = state._readerOptions;
+            if (_readerOptions.MaxDepth == 0)
+            {
+                _readerOptions.MaxDepth = JsonReaderOptions.DefaultMaxDepth;  // If max depth is not set, revert to the default depth.
+            }
             _bitStack = state._bitStack;
 
             _consumed = 0;
@@ -211,7 +217,7 @@ namespace System.Text.Json
 
         private void StartObject()
         {
-            if (CurrentDepth >= _maxDepth)
+            if (CurrentDepth >= _readerOptions.MaxDepth)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ObjectDepthTooLarge);
 
             _bitStack.PushTrue();
@@ -236,7 +242,7 @@ namespace System.Text.Json
 
         private void StartArray()
         {
-            if (CurrentDepth >= _maxDepth)
+            if (CurrentDepth >= _readerOptions.MaxDepth)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ArrayDepthTooLarge);
 
             _bitStack.PushFalse();
@@ -1706,23 +1712,43 @@ namespace System.Text.Json
 
         private bool SkipSingleLineComment(ReadOnlySpan<byte> localBuffer, out int idx)
         {
-            // TODO: https://github.com/dotnet/corefx/issues/33293
-            idx = localBuffer.IndexOf(JsonConstants.LineFeed);
-            if (idx == -1)
+            idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn);
+            if (idx != -1)
             {
-                if (IsLastSpan)
+                if (localBuffer[idx] == JsonConstants.LineFeed)
                 {
-                    idx = localBuffer.Length;
-                    // Assume everything on this line is a comment and there is no more data.
-                    _bytePositionInLine += 2 + localBuffer.Length;
-                    goto Done;
+                    goto EndOfComment;
                 }
+
+                // If we are here, we have definintely found a \r. So now to check if \n follows.
+                Debug.Assert(localBuffer[idx] == JsonConstants.CarriageReturn);
+
+                if (idx < localBuffer.Length - 1)
+                {
+                    if (localBuffer[idx + 1] == JsonConstants.LineFeed)
+                    {
+                        idx++;
+                    }
+                    goto EndOfComment;
+                }
+            }
+            if (IsLastSpan)
+            {
+                idx = localBuffer.Length;
+                // Assume everything on this line is a comment and there is no more data.
+                _bytePositionInLine += 2 + localBuffer.Length;
+                goto Done;
+            }
+            else
+            {
                 return false;
             }
 
+        EndOfComment:
             idx++;
             _bytePositionInLine = 0;
             _lineNumber++;
+
         Done:
             _consumed += 2 + idx;
             return true;

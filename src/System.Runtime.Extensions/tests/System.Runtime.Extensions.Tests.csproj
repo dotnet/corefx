@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{6C314C9B-3D28-4B05-9B4C-B57A00A9B3B9}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -30,6 +30,7 @@
     <Compile Include="System\IO\PathTests_Unix.cs" />
     <Compile Include="System\IO\PathTests_Join.netcoreapp.cs" />
     <Compile Include="System\Runtime\ProfileOptimization.netcoreapp.cs" />
+    <Compile Include="System\Runtime\CompilerServices\SwitchExpressionExceptionTests.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'!='netstandard'">
     <Compile Include="System\BitConverterSpan.cs" />
@@ -38,6 +39,7 @@
     <Compile Include="System\IO\Path.GetRelativePath.cs" />
     <Compile Include="System\MathTests.netcoreapp.cs" />
     <Compile Include="System\MathF.netcoreapp.cs" />
+    <Compile Include="System\Numerics\BitOperationsTests.cs" />
     <Compile Include="System\StringComparer.netcoreapp.cs" />
     <Compile Include="System\UnloadingAndProcessExitTests.netcoreapp.cs" />
     <Compile Include="System\IO\Path.IsPathFullyQualified.cs" />

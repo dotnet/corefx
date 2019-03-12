@@ -140,29 +140,26 @@ namespace System.Resources
             return returnCulture;
         }
 
-        internal static CultureInfo GetNeutralResourcesLanguage(Assembly a, ref UltimateResourceFallbackLocation fallbackLocation)
+        internal static CultureInfo GetNeutralResourcesLanguage(Assembly a, out UltimateResourceFallbackLocation fallbackLocation)
         {
             Debug.Assert(a != null, "assembly != null");
-            string cultureName = null;
-            short fallback = 0;
-            if (GetNeutralResourcesLanguageAttribute(a, ref cultureName, out fallback))
-            {
-                if ((UltimateResourceFallbackLocation)fallback < UltimateResourceFallbackLocation.MainAssembly || (UltimateResourceFallbackLocation)fallback > UltimateResourceFallbackLocation.Satellite)
-                {
-                    throw new ArgumentException(SR.Format(SR.Arg_InvalidNeutralResourcesLanguage_FallbackLoc, fallback));
-                }
-                fallbackLocation = (UltimateResourceFallbackLocation)fallback;
-            }
-            else
+
+            var attr = a.GetCustomAttribute<NeutralResourcesLanguageAttribute>();
+            if (attr == null)
             {
                 fallbackLocation = UltimateResourceFallbackLocation.MainAssembly;
                 return CultureInfo.InvariantCulture;
             }
 
+            fallbackLocation = attr.Location;
+            if (fallbackLocation < UltimateResourceFallbackLocation.MainAssembly || fallbackLocation > UltimateResourceFallbackLocation.Satellite)
+            {
+                throw new ArgumentException(SR.Format(SR.Arg_InvalidNeutralResourcesLanguage_FallbackLoc, fallbackLocation));
+            }
+
             try
             {
-                CultureInfo c = CultureInfo.GetCultureInfo(cultureName);
-                return c;
+                return CultureInfo.GetCultureInfo(attr.CultureName);
             }
             catch (ArgumentException e)
             { // we should catch ArgumentException only.
@@ -171,11 +168,11 @@ namespace System.Resources
                 // fires, please fix the build process for the BCL directory.
                 if (a == typeof(object).Assembly)
                 {
-                    Debug.Fail(System.CoreLib.Name + "'s NeutralResourcesLanguageAttribute is a malformed culture name! name: \"" + cultureName + "\"  Exception: " + e);
+                    Debug.Fail(System.CoreLib.Name + "'s NeutralResourcesLanguageAttribute is a malformed culture name! name: \"" + attr.CultureName + "\"  Exception: " + e);
                     return CultureInfo.InvariantCulture;
                 }
 
-                throw new ArgumentException(SR.Format(SR.Arg_InvalidNeutralResourcesLanguage_Asm_Culture, a.ToString(), cultureName), e);
+                throw new ArgumentException(SR.Format(SR.Arg_InvalidNeutralResourcesLanguage_Asm_Culture, a, attr.CultureName), e);
             }
         }
 
@@ -240,10 +237,23 @@ namespace System.Resources
                     }
                     else
                     {
-                        Type readerType = Type.GetType(readerTypeName, throwOnError: true);
-                        object[] args = new object[1];
-                        args[0] = store;
-                        IResourceReader reader = (IResourceReader)Activator.CreateInstance(readerType, args);
+                        IResourceReader reader;
+
+                        // Permit deserialization as long as the default ResourceReader is used
+                        if (ResourceManager.IsDefaultType(readerTypeName, ResourceManager.ResReaderTypeName))
+                        {
+                            reader = new ResourceReader(
+                                store,
+                                new Dictionary<string, ResourceLocator>(FastResourceComparer.Default),
+                                permitDeserialization: true);
+                        }
+                        else
+                        {
+                            Type readerType = Type.GetType(readerTypeName, throwOnError: true);
+                            object[] args = new object[1];
+                            args[0] = store;
+                            reader = (IResourceReader)Activator.CreateInstance(readerType, args);
+                        }
 
                         object[] resourceSetArgs = new object[1];
                         resourceSetArgs[0] = reader;

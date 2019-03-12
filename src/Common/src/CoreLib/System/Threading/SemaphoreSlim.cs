@@ -5,8 +5,6 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-using Thread = Internal.Runtime.Augments.RuntimeThread;
-
 namespace System.Threading
 {
     /// <summary>
@@ -76,13 +74,7 @@ namespace System.Threading
         private sealed class TaskNode : Task<bool>
         {
             internal TaskNode Prev, Next;
-            internal TaskNode() : base() { }
-
-            internal override void ExecuteFromThreadPool(Thread threadPoolThread)
-            {
-                bool setSuccessfully = TrySetResult(true);
-                Debug.Assert(setSuccessfully, "Should have been able to complete task");
-            }
+            internal TaskNode() : base((object)null, TaskCreationOptions.RunContinuationsAsynchronously) { }
         }
         #endregion
 
@@ -847,7 +839,7 @@ namespace System.Threading
                         // Get the next async waiter to release and queue it to be completed
                         var waiterTask = m_asyncHead;
                         RemoveAsyncWaiter(waiterTask); // ensures waiterTask.Next/Prev are null
-                        ThreadPool.UnsafeQueueUserWorkItemInternal(waiterTask, preferLocal: true);
+                        waiterTask.TrySetResult(result: true);
                     }
                 }
                 m_currentCount = currentCount;

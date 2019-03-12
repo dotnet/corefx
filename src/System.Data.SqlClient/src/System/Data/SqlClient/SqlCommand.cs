@@ -569,65 +569,69 @@ namespace System.Data.SqlClient
 
 
             SqlStatistics statistics = null;
-            statistics = SqlStatistics.StartTimer(Statistics);
-
-            // only prepare if batch with parameters
-            if (
-                this.IsPrepared && !this.IsDirty
-                || (this.CommandType == CommandType.StoredProcedure)
-                || (
-                        (System.Data.CommandType.Text == this.CommandType)
-                        && (0 == GetParameterCount(_parameters))
-                    )
-
-            )
+            try
             {
-                if (null != Statistics)
-                {
-                    Statistics.SafeIncrement(ref Statistics._prepares);
-                }
-                _hiddenPrepare = false;
-            }
-            else
-            {
-                // Validate the command outside of the try\catch to avoid putting the _stateObj on error
-                ValidateCommand(async: false);
+                statistics = SqlStatistics.StartTimer(Statistics);
 
-                bool processFinallyBlock = true;
-                try
+                // only prepare if batch with parameters
+                if (
+                    this.IsPrepared && !this.IsDirty
+                    || (this.CommandType == CommandType.StoredProcedure)
+                    || (
+                            (System.Data.CommandType.Text == this.CommandType)
+                            && (0 == GetParameterCount(_parameters))
+                        )
+                )
                 {
-                    // NOTE: The state object isn't actually needed for this, but it is still here for back-compat (since it does a bunch of checks)
-                    GetStateObject();
-
-                    // Loop through parameters ensuring that we do not have unspecified types, sizes, scales, or precisions
-                    if (null != _parameters)
+                    if (null != Statistics)
                     {
-                        int count = _parameters.Count;
-                        for (int i = 0; i < count; ++i)
+                        Statistics.SafeIncrement(ref Statistics._prepares);
+                    }
+                    _hiddenPrepare = false;
+                }
+                else
+                {
+                    // Validate the command outside of the try\catch to avoid putting the _stateObj on error
+                    ValidateCommand(async: false);
+
+                    bool processFinallyBlock = true;
+                    try
+                    {
+                        // NOTE: The state object isn't actually needed for this, but it is still here for back-compat (since it does a bunch of checks)
+                        GetStateObject();
+
+                        // Loop through parameters ensuring that we do not have unspecified types, sizes, scales, or precisions
+                        if (null != _parameters)
                         {
-                            _parameters[i].Prepare(this);
+                            int count = _parameters.Count;
+                            for (int i = 0; i < count; ++i)
+                            {
+                                _parameters[i].Prepare(this);
+                            }
+                        }
+
+                        InternalPrepare();
+                    }
+                    catch (Exception e)
+                    {
+                        processFinallyBlock = ADP.IsCatchableExceptionType(e);
+                        throw;
+                    }
+                    finally
+                    {
+                        if (processFinallyBlock)
+                        {
+                            _hiddenPrepare = false; // The command is now officially prepared
+
+                            ReliablePutStateObject();
                         }
                     }
-
-                    InternalPrepare();
-                }
-                catch (Exception e)
-                {
-                    processFinallyBlock = ADP.IsCatchableExceptionType(e);
-                    throw;
-                }
-                finally
-                {
-                    if (processFinallyBlock)
-                    {
-                        _hiddenPrepare = false; // The command is now officially prepared
-
-                        ReliablePutStateObject();
-                    }
                 }
             }
-
-            SqlStatistics.StopTimer(statistics);
+            finally
+            {
+                SqlStatistics.StopTimer(statistics);
+            }
         }
 
         private void InternalPrepare()
@@ -3057,7 +3061,7 @@ namespace System.Data.SqlClient
                 }
                 else
                 {
-                    Debug.Assert(false, "OnReturnStatus: SqlCommand got too many DONEPROC events");
+                    Debug.Fail("OnReturnStatus: SqlCommand got too many DONEPROC events");
                     parameters = null;
                 }
             }
@@ -3198,7 +3202,7 @@ namespace System.Data.SqlClient
                 }
                 else
                 {
-                    Debug.Assert(false, "OnReturnValue: SqlCommand got too many DONEPROC events");
+                    Debug.Fail("OnReturnValue: SqlCommand got too many DONEPROC events");
                     return null;
                 }
             }
@@ -3389,7 +3393,7 @@ namespace System.Data.SqlClient
                     // InputOutput/Output parameters are aways sent
                     return true;
                 default:
-                    Debug.Assert(false, "Invalid ParameterDirection!");
+                    Debug.Fail("Invalid ParameterDirection!");
                     return false;
             }
         }

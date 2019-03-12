@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{845D2B72-D8A4-42E5-9BE9-17639EC4FC1A}</ProjectGuid>
     <AssemblyName>System.Runtime.Extensions</AssemblyName>
@@ -6,15 +6,12 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <IncludeDllSafeSearchPathAttribute>true</IncludeDllSafeSearchPathAttribute>
-    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)'=='uapaot'">true</GenFacadesIgnoreMissingTypes>
+    <GenFacadesIgnoreMissingTypes Condition="'$(TargetsAOT)'=='true' OR '$(TargetGroup)' == 'uap'">true</GenFacadesIgnoreMissingTypes>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreappaot-Windows_NT-Debug;netcoreappaot-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="System\AppDomain.cs" />
-    <Compile Include="System\AppDomainSetup.cs" />
     <Compile Include="System\AppDomainUnloadedException.cs" />
     <Compile Include="System\ApplicationId.cs" />
-    <Compile Include="System\CannotUnloadAppDomainException.cs" />
     <Compile Include="System\CodeDom\Compiler\IndentedTextWriter.cs" />
     <Compile Include="System\Context.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.cs" />
@@ -26,6 +23,7 @@
     <Compile Include="System\IO\InvalidDataException.cs" />
     <Compile Include="System\Net\WebUtility.cs" />
     <Compile Include="System\Reflection\AssemblyNameProxy.cs" />
+    <Compile Include="System\Runtime\CompilerServices\SwitchExpressionException.cs" />
     <Compile Include="System\Runtime\ProfileOptimization.cs" />
     <Compile Include="System\Runtime\Versioning\FrameworkName.cs" />
     <Compile Include="System\Runtime\Versioning\ComponentGuaranteesAttribute.cs" />
@@ -35,18 +33,11 @@
     <Compile Include="System\Runtime\Versioning\ResourceScope.cs" />
     <Compile Include="System\Runtime\Versioning\VersioningHelper.cs" />
     <Compile Include="System\StringNormalizationExtensions.cs" />
-    <Compile Include="System\Collections\ArrayList.cs" />
-    <Compile Include="System\Security\IPermission.cs" />
-    <Compile Include="System\Security\ISecurityEncodable.cs" />
-    <Compile Include="System\Security\IStackWalk.cs" />
-    <Compile Include="System\Security\SecurityElement.cs" />
     <Compile Include="System\Security\Permissions\CodeAccessSecurityAttribute.cs" />
-    <Compile Include="System\Security\Permissions\PermissionState.cs" />
     <Compile Include="System\Security\Permissions\SecurityAction.cs" />
     <Compile Include="System\Security\Permissions\SecurityAttribute.cs" />
     <Compile Include="System\Security\Permissions\SecurityPermissionAttribute.cs" />
     <Compile Include="System\Security\Permissions\SecurityPermissionFlag.cs" />
-    <Compile Include="System\Security\PermissionSet.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\IO\StreamHelpers.CopyValidation.cs">
       <Link>Common\CoreLib\System\IO\StreamHelpers.CopyValidation.cs</Link>
     </Compile>
@@ -76,29 +67,29 @@
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Interop.BOOLEAN.cs">
       <Link>Common\Interop\Windows\Interop.BOOLEAN.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.GetCurrentProcessId.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetCurrentProcessId.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetCurrentProcessId.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.GetCurrentProcessId.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.FormatMessage.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.GetCurrentDirectory.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetCurrentDirectory.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetCurrentDirectory.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.GetCurrentDirectory.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.GetLogicalDrives.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetLogicalDrives.cs">
       <Link>Common\Interop\Windows\Interop.GetLogicalDrives.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.GetSystemDirectoryW.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.GetSystemDirectoryW.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetSystemDirectoryW.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.GetSystemDirectoryW.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.QueryPerformanceCounter.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.QueryPerformanceCounter.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.QueryPerformanceCounter.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.QueryPerformanceCounter.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.QueryPerformanceFrequency.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.QueryPerformanceFrequency.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.QueryPerformanceFrequency.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.QueryPerformanceFrequency.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\kernel32\Interop.SetCurrentDirectory.cs">
-      <Link>Common\Interop\Windows\kernel32\Interop.SetCurrentDirectory.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.SetCurrentDirectory.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.SetCurrentDirectory.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PathHelper.Windows.cs">
       <Link>CoreLib\System\IO\PathHelper.Windows.cs</Link>
@@ -184,10 +175,42 @@
       <Link>Common\System\IO\PersistedFiles.Unix.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetsAOT)'=='true'"> <!-- TODO: Remove once uapaot builds are updated with moved types -->
+    <Compile Include="$(CommonPath)\CoreLib\System\AppDomain.cs">
+      <Link>Common\CoreLib\System\AppDomain.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\AppDomainSetup.cs">
+      <Link>Common\CoreLib\System\AppDomainSetup.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\CannotUnloadAppDomainException.cs">
+      <Link>Common\CoreLib\System\CannotUnloadAppDomainException.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Collections\ArrayList.cs">
+      <Link>Common\CoreLib\System\Collections\ArrayList.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Security\IPermission.cs">
+      <Link>Common\CoreLib\System\Security\IPermission.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Security\ISecurityEncodable.cs">
+      <Link>Common\CoreLib\System\Security\ISecurityEncodable.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Security\IStackWalk.cs">
+      <Link>Common\CoreLib\System\Security\IStackWalk.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Security\SecurityElement.cs">
+      <Link>Common\CoreLib\System\Security\SecurityElement.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Security\Permissions\PermissionState.cs">
+      <Link>Common\CoreLib\System\Security\Permissions\PermissionState.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Security\PermissionSet.cs">
+      <Link>Common\CoreLib\System\Security\PermissionSet.cs</Link>
+    </Compile>
+    <Reference Include="System.Security.Principal" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\System.Private.Uri\src\System.Private.Uri.csproj" />
     <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
-    <ProjectReference Include="..\..\System.Security.Principal\src\System.Security.Principal.csproj" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap'">
