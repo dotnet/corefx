@@ -11,6 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackpressureTests.cs" />
+    <Compile Include="BufferSegmentPoolTest.cs" />
     <Compile Include="PipeReaderCopyToAsyncTests.cs" />
     <Compile Include="FlushAsyncCancellationTests.cs" />
     <Compile Include="FlushAsyncCompletionTests.cs" />
