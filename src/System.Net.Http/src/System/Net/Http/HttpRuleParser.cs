@@ -310,12 +310,12 @@ namespace System.Net.Http
 
         internal static HttpParseResult GetCommentLength(string input, int startIndex, out int length)
         {
-            return GetExpressionLength(input, startIndex, '(', ')', true, 0, out length);
+            return GetExpressionLength(input, startIndex, '(', ')', true, 1, out length);
         }
 
         internal static HttpParseResult GetQuotedStringLength(string input, int startIndex, out int length)
         {
-            return GetExpressionLength(input, startIndex, '"', '"', false, 0, out length);
+            return GetExpressionLength(input, startIndex, '"', '"', false, 1, out length);
         }
 
         // quoted-pair = "\" CHAR
@@ -391,8 +391,6 @@ namespace System.Net.Http
                 // If we support nested expressions and we find an open-char, then parse the nested expressions.
                 if (supportsNesting && (input[current] == openChar))
                 {
-                    nestedCount++;
-
                     // Check if we exceeded the number of nested calls.
                     if (nestedCount > maxNestedCount)
                     {
@@ -401,7 +399,7 @@ namespace System.Net.Http
 
                     int nestedLength = 0;
                     HttpParseResult nestedResult = GetExpressionLength(input, current, openChar, closeChar,
-                        supportsNesting, nestedCount, out nestedLength);
+                        supportsNesting, nestedCount + 1, out nestedLength);
 
                     switch (nestedResult)
                     {
@@ -423,7 +421,6 @@ namespace System.Net.Http
                             Debug.Fail("Unknown enum result: " + nestedResult);
                             break;
                     }
-                    nestedCount--;
 
                     // after nested call we continue with parsing
                     continue;
