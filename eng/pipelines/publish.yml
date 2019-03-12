@@ -66,12 +66,12 @@ jobs:
       #           /p:IncludeSymbolsOnPackagePublish=true
       #   displayName: Push to dotnet feed
 
-      - task: PublishBuildArtifacts@1
-        displayName: Publish assets manifest to artifacts
-        inputs:
-          pathToPublish: $(_manifestsDir)
-          artifactName: BuildAssetsManifest
-          artifactType: container
+      # - task: PublishBuildArtifacts@1
+      #   displayName: Publish assets manifest to artifacts
+      #   inputs:
+      #     pathToPublish: $(_manifestsDir)
+      #     artifactName: BuildAssetsManifest
+      #     artifactType: container
 
       # - script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\sdk-task.ps1
       #           -task PublishBuildAssets -restore -msbuildEngine dotnet
