@@ -41,8 +41,9 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        private static void CheckArgs(int timeout, byte[] buffer, PingOptions options)
+        private void CheckArgs(int timeout, byte[] buffer, PingOptions options)
         {
+            CheckDisposed();
             if (buffer == null)
             {
                 throw new ArgumentNullException(nameof(buffer));
@@ -87,8 +88,6 @@ namespace System.Net.NetworkInformation
 
         private void CheckStart()
         {
-            CheckDisposed();
-
             int currentStatus;
             lock (_lockObject)
             {
@@ -365,7 +364,6 @@ namespace System.Net.NetworkInformation
             }
 
             CheckArgs(timeout, buffer, options);
-            CheckDisposed();
 
             return GetAddressAndSendAsync(hostNameOrAddress, timeout, buffer, options);
         }
@@ -420,7 +418,7 @@ namespace System.Net.NetworkInformation
             }
             finally
             {
-                    Finish();
+                Finish();
             }
         }
 

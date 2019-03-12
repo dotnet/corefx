@@ -33,7 +33,7 @@ namespace System.Net.NetworkInformation
         {
             // Since isAsync == false, DoSendPingCore will execute synchronously and return a completed
             // Task - so no blocking here
-            return DoSendPingCore(address, buffer, timeout, options, isAsync: false).Result;
+            return DoSendPingCore(address, buffer, timeout, options, isAsync: false).GetAwaiter().GetResult();
         }
 
         private Task<PingReply> SendPingAsyncCore(IPAddress address, byte[] buffer, int timeout, PingOptions options)
