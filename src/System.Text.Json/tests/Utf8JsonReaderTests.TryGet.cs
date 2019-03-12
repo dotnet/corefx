@@ -166,7 +166,6 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"1997-07-16T19:20:30.4555555+14 00\"" };
 
             // Proper format but invalid calendar date, time, or time zone designator fields
-            yield return new object[] { "\"9999-12-31T23:59:59.9999999\"" }; // This date spills over to year 10_000.
             yield return new object[] { "\"1997-00-16T19:20:30.4555555\"" };
             yield return new object[] { "\"1997-07-16T25:20:30.4555555\"" };
             yield return new object[] { "\"1997-00-16T19:20:30.4555555Z\"" };
