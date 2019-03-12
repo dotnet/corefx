@@ -828,16 +828,18 @@ namespace System.Tests
 
         public static IEnumerable<object[]> ToBinary_TestData()
         {
-            DateTime local = new DateTime(10, DateTimeKind.Local);
-            TimeSpan offset = TimeZoneInfo.Local.GetUtcOffset(new DateTime(10));
+            const long Ticks = 123456789101112;
+
+            DateTime local = new DateTime(Ticks, DateTimeKind.Local);
+            TimeSpan offset = TimeZoneInfo.Local.GetUtcOffset(local);
             long localTicks = local.Ticks - offset.Ticks;
             if (localTicks < 0)
             {
                 localTicks |= 0x4000000000000000;
             }
 
-            yield return new object[] { new DateTime(10, DateTimeKind.Utc), 10 | ((long)DateTimeKind.Utc << 62) };
-            yield return new object[] { new DateTime(10, DateTimeKind.Unspecified), 10 | (( long)DateTimeKind.Unspecified << 62) };
+            yield return new object[] { new DateTime(Ticks, DateTimeKind.Utc), Ticks | ((long)DateTimeKind.Utc << 62) };
+            yield return new object[] { new DateTime(Ticks, DateTimeKind.Unspecified), Ticks | (( long)DateTimeKind.Unspecified << 62) };
             yield return new object[] { local, localTicks | ((long)DateTimeKind.Local << 62) };
 
             yield return new object[] { DateTime.MaxValue, 3155378975999999999 };
@@ -879,17 +881,23 @@ namespace System.Tests
 
         public static IEnumerable<object[]> ToFileTime_TestData()
         {
-            yield return new object[] { new DateTime(1601, 1, 1) };
-            yield return new object[] { new DateTime(1601, 1, 1).AddTicks(1) };
-            yield return new object[] { new DateTime(2018, 12, 24) };
-            yield return new object[] { new DateTime(2018, 11, 24, 17, 57, 30, 12) };
+            yield return new object[] { new DateTime(1601, 1, 1, 0, 0, 0, DateTimeKind.Utc) };
+            yield return new object[] { new DateTime(1601, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddTicks(1) };
+
+            yield return new object[] { new DateTime(2018, 12, 24, 0, 0, 0, DateTimeKind.Utc) };
+            yield return new object[] { new DateTime(2018, 11, 24, 17, 57, 30, 12, DateTimeKind.Utc) };
+
+            yield return new object[] { new DateTime(2018, 12, 24, 0, 0, 0, DateTimeKind.Local) };
+            yield return new object[] { new DateTime(2018, 11, 24, 17, 57, 30, 12, DateTimeKind.Local) };
         }
 
         [Theory]
         [MemberData(nameof(ToFileTime_TestData))]
         public void ToFileTime_Invoke_ReturnsExpected(DateTime date)
         {
-            Assert.Equal(date, DateTime.FromFileTime(date.ToFileTime()));
+            long fileTime = date.ToFileTime();
+            DateTime fromFileTime = date.Kind == DateTimeKind.Utc ? DateTime.FromFileTimeUtc(fileTime) : DateTime.FromFileTime(fileTime);
+            Assert.Equal(date, fromFileTime);
         }
 
         public static IEnumerable<object[]> ToFileTime_Overflow_TestData()
@@ -1978,61 +1986,77 @@ namespace System.Tests
             //                     rand.NextBytes(bytes);
             //                     long seed = BitConverter.ToInt64(bytes, 0);
             //                     var dt = new DateTime(seed, kind);
-            //                     Console.WriteLine($"yield return new object[] {{ new DateTime({seed}, DateTimeKind.{kind}), \"{format}\", \"{dt.ToString(format)}\" }};");
+            //                     Console.WriteLine($"yield return new object[] {{ new DateTime({seed}, DateTimeKind.{kind}), \"{format}\", null, \"{dt.ToString(format)}\" }};");
             //                     i++;
             //                 }
             //                 catch { }
             //             }
             //         }
             //}
+            yield return new object[] { new DateTime(2688006240964947440, DateTimeKind.Utc), "O", null, "8518-12-15T08:01:36.4947440Z" };
+            yield return new object[] { new DateTime(2461197105169450509, DateTimeKind.Utc), "r", null, "Sun, 23 Mar 7800 18:15:16 GMT" };
+            yield return new object[] { new DateTime(71363981510699949, DateTimeKind.Unspecified), "R", null, "Fri, 23 Feb 0227 04:49:11 GMT" };
+            yield return new object[] { new DateTime(1678426538898407093, DateTimeKind.Unspecified), "R", null, "Fri, 22 Sep 5319 07:24:49 GMT" };
+            yield return new object[] { new DateTime(2689041307785948711, DateTimeKind.Utc), "o", null, "8522-03-27T07:52:58.5948711Z" };
+            yield return new object[] { new DateTime(996610247053299209, DateTimeKind.Unspecified), "r", null, "Thu, 19 Feb 3159 01:58:25 GMT" };
+            yield return new object[] { new DateTime(3105391438361510074, DateTimeKind.Unspecified), "R", null, "Fri, 06 Aug 9841 01:17:16 GMT" };
+            yield return new object[] { new DateTime(946433487657072106, DateTimeKind.Utc), "R", null, "Mon, 17 Feb 3000 03:06:05 GMT" };
+            yield return new object[] { new DateTime(2521748413631767931, DateTimeKind.Unspecified), "R", null, "Sat, 08 Feb 7992 07:02:43 GMT" };
+            yield return new object[] { new DateTime(49349519375012969, DateTimeKind.Utc), "R", null, "Fri, 20 May 0157 11:58:57 GMT" };
+            yield return new object[] { new DateTime(796677276139881359, DateTimeKind.Utc), "o", null, "2525-07-28T04:20:13.9881359Z" };
+            yield return new object[] { new DateTime(3022911536338429542, DateTimeKind.Unspecified), "R", null, "Mon, 24 Mar 9580 04:53:53 GMT" };
+            yield return new object[] { new DateTime(1144652135553351618, DateTimeKind.Utc), "R", null, "Tue, 04 Apr 3628 20:39:15 GMT" };
+            yield return new object[] { new DateTime(2570858096011770291, DateTimeKind.Unspecified), "o", null, "8147-09-23T04:53:21.1770291" };
+            yield return new object[] { new DateTime(15695724649124585, DateTimeKind.Unspecified), "R", null, "Tue, 27 Sep 0050 08:21:04 GMT" };
+            yield return new object[] { new DateTime(1503933934291527034, DateTimeKind.Unspecified), "O", null, "4766-10-12T06:37:09.1527034" };
+            yield return new object[] { new DateTime(2688603665097410101, DateTimeKind.Unspecified), "r", null, "Tue, 05 Nov 8520 19:08:29 GMT" };
+            yield return new object[] { new DateTime(1310336900529542610, DateTimeKind.Unspecified), "r", null, "Tue, 17 Apr 4153 15:14:12 GMT" };
+            yield return new object[] { new DateTime(2313720085584182693, DateTimeKind.Unspecified), "O", null, "7332-11-20T18:22:38.4182693" };
+            yield return new object[] { new DateTime(2291958603891779335, DateTimeKind.Unspecified), "o", null, "7263-12-05T20:46:29.1779335" };
+            yield return new object[] { new DateTime(262036413643976979, DateTimeKind.Unspecified), "o", null, "0831-05-12T21:16:04.3976979" };
+            yield return new object[] { new DateTime(684781207384421044, DateTimeKind.Utc), "O", null, "2170-12-26T20:12:18.4421044Z" };
+            yield return new object[] { new DateTime(1444462249169683325, DateTimeKind.Utc), "r", null, "Mon, 27 Apr 4578 07:21:56 GMT" };
+            yield return new object[] { new DateTime(1155518137384061537, DateTimeKind.Unspecified), "r", null, "Sun, 10 Sep 3662 06:02:18 GMT" };
+            yield return new object[] { new DateTime(2333390479532380569, DateTimeKind.Unspecified), "O", null, "7395-03-22T10:12:33.2380569" };
+            yield return new object[] { new DateTime(2217528014591554502, DateTimeKind.Unspecified), "R", null, "Sat, 26 Jan 7028 08:24:19 GMT" };
+            yield return new object[] { new DateTime(2764551324904480205, DateTimeKind.Utc), "O", null, "8761-07-08T04:21:30.4480205Z" };
+            yield return new object[] { new DateTime(2880903932678729712, DateTimeKind.Utc), "O", null, "9130-03-23T13:14:27.8729712Z" };
+            yield return new object[] { new DateTime(507699902578704433, DateTimeKind.Utc), "O", null, "1609-11-02T15:04:17.8704433Z" };
+            yield return new object[] { new DateTime(2429953022324426129, DateTimeKind.Utc), "O", null, "7701-03-20T15:03:52.4426129Z" };
+            yield return new object[] { new DateTime(603147512164908366, DateTimeKind.Unspecified), "O", null, "1912-04-20T09:33:36.4908366" };
+            yield return new object[] { new DateTime(2900400428644841236, DateTimeKind.Utc), "R", null, "Thu, 02 Jan 9192 22:34:24 GMT" };
+            yield return new object[] { new DateTime(1710845568474490805, DateTimeKind.Utc), "O", null, "5422-06-16T08:00:47.4490805Z" };
+            yield return new object[] { new DateTime(2988999715803714268, DateTimeKind.Utc), "r", null, "Sun, 06 Oct 9472 09:53:00 GMT" };
+            yield return new object[] { new DateTime(1068133489112689365, DateTimeKind.Utc), "r", null, "Wed, 12 Oct 3385 14:41:51 GMT" };
+            yield return new object[] { new DateTime(798784044525059284, DateTimeKind.Unspecified), "R", null, "Mon, 31 Mar 2532 13:40:52 GMT" };
+            yield return new object[] { new DateTime(2561736813034040593, DateTimeKind.Utc), "O", null, "8118-10-28T03:55:03.4040593Z" };
+            yield return new object[] { new DateTime(1677975383149674547, DateTimeKind.Utc), "o", null, "5318-04-18T03:18:34.9674547Z" };
+            yield return new object[] { new DateTime(1101778442151366156, DateTimeKind.Utc), "O", null, "3492-05-25T12:43:35.1366156Z" };
+            yield return new object[] { new DateTime(221550163152616218, DateTimeKind.Utc), "r", null, "Sun, 25 Jan 0703 19:11:55 GMT" };
 
-            yield return new object[] { new DateTime(2688006240964947440, DateTimeKind.Utc), "O", "8518-12-15T08:01:36.4947440Z" };
-            yield return new object[] { new DateTime(2461197105169450509, DateTimeKind.Utc), "r", "Sun, 23 Mar 7800 18:15:16 GMT" };
-            yield return new object[] { new DateTime(71363981510699949, DateTimeKind.Unspecified), "R", "Fri, 23 Feb 0227 04:49:11 GMT" };
-            yield return new object[] { new DateTime(1678426538898407093, DateTimeKind.Unspecified), "R", "Fri, 22 Sep 5319 07:24:49 GMT" };
-            yield return new object[] { new DateTime(2689041307785948711, DateTimeKind.Utc), "o", "8522-03-27T07:52:58.5948711Z" };
-            yield return new object[] { new DateTime(996610247053299209, DateTimeKind.Unspecified), "r", "Thu, 19 Feb 3159 01:58:25 GMT" };
-            yield return new object[] { new DateTime(3105391438361510074, DateTimeKind.Unspecified), "R", "Fri, 06 Aug 9841 01:17:16 GMT" };
-            yield return new object[] { new DateTime(946433487657072106, DateTimeKind.Utc), "R", "Mon, 17 Feb 3000 03:06:05 GMT" };
-            yield return new object[] { new DateTime(2521748413631767931, DateTimeKind.Unspecified), "R", "Sat, 08 Feb 7992 07:02:43 GMT" };
-            yield return new object[] { new DateTime(49349519375012969, DateTimeKind.Utc), "R", "Fri, 20 May 0157 11:58:57 GMT" };
-            yield return new object[] { new DateTime(796677276139881359, DateTimeKind.Utc), "o", "2525-07-28T04:20:13.9881359Z" };
-            yield return new object[] { new DateTime(3022911536338429542, DateTimeKind.Unspecified), "R", "Mon, 24 Mar 9580 04:53:53 GMT" };
-            yield return new object[] { new DateTime(1144652135553351618, DateTimeKind.Utc), "R", "Tue, 04 Apr 3628 20:39:15 GMT" };
-            yield return new object[] { new DateTime(2570858096011770291, DateTimeKind.Unspecified), "o", "8147-09-23T04:53:21.1770291" };
-            yield return new object[] { new DateTime(15695724649124585, DateTimeKind.Unspecified), "R", "Tue, 27 Sep 0050 08:21:04 GMT" };
-            yield return new object[] { new DateTime(1503933934291527034, DateTimeKind.Unspecified), "O", "4766-10-12T06:37:09.1527034" };
-            yield return new object[] { new DateTime(2688603665097410101, DateTimeKind.Unspecified), "r", "Tue, 05 Nov 8520 19:08:29 GMT" };
-            yield return new object[] { new DateTime(1310336900529542610, DateTimeKind.Unspecified), "r", "Tue, 17 Apr 4153 15:14:12 GMT" };
-            yield return new object[] { new DateTime(2313720085584182693, DateTimeKind.Unspecified), "O", "7332-11-20T18:22:38.4182693" };
-            yield return new object[] { new DateTime(2291958603891779335, DateTimeKind.Unspecified), "o", "7263-12-05T20:46:29.1779335" };
-            yield return new object[] { new DateTime(262036413643976979, DateTimeKind.Unspecified), "o", "0831-05-12T21:16:04.3976979" };
-            yield return new object[] { new DateTime(684781207384421044, DateTimeKind.Utc), "O", "2170-12-26T20:12:18.4421044Z" };
-            yield return new object[] { new DateTime(1444462249169683325, DateTimeKind.Utc), "r", "Mon, 27 Apr 4578 07:21:56 GMT" };
-            yield return new object[] { new DateTime(1155518137384061537, DateTimeKind.Unspecified), "r", "Sun, 10 Sep 3662 06:02:18 GMT" };
-            yield return new object[] { new DateTime(2333390479532380569, DateTimeKind.Unspecified), "O", "7395-03-22T10:12:33.2380569" };
-            yield return new object[] { new DateTime(2217528014591554502, DateTimeKind.Unspecified), "R", "Sat, 26 Jan 7028 08:24:19 GMT" };
-            yield return new object[] { new DateTime(2764551324904480205, DateTimeKind.Utc), "O", "8761-07-08T04:21:30.4480205Z" };
-            yield return new object[] { new DateTime(2880903932678729712, DateTimeKind.Utc), "O", "9130-03-23T13:14:27.8729712Z" };
-            yield return new object[] { new DateTime(507699902578704433, DateTimeKind.Utc), "O", "1609-11-02T15:04:17.8704433Z" };
-            yield return new object[] { new DateTime(2429953022324426129, DateTimeKind.Utc), "O", "7701-03-20T15:03:52.4426129Z" };
-            yield return new object[] { new DateTime(603147512164908366, DateTimeKind.Unspecified), "O", "1912-04-20T09:33:36.4908366" };
-            yield return new object[] { new DateTime(2900400428644841236, DateTimeKind.Utc), "R", "Thu, 02 Jan 9192 22:34:24 GMT" };
-            yield return new object[] { new DateTime(1710845568474490805, DateTimeKind.Utc), "O", "5422-06-16T08:00:47.4490805Z" };
-            yield return new object[] { new DateTime(2988999715803714268, DateTimeKind.Utc), "r", "Sun, 06 Oct 9472 09:53:00 GMT" };
-            yield return new object[] { new DateTime(1068133489112689365, DateTimeKind.Utc), "r", "Wed, 12 Oct 3385 14:41:51 GMT" };
-            yield return new object[] { new DateTime(798784044525059284, DateTimeKind.Unspecified), "R", "Mon, 31 Mar 2532 13:40:52 GMT" };
-            yield return new object[] { new DateTime(2561736813034040593, DateTimeKind.Utc), "O", "8118-10-28T03:55:03.4040593Z" };
-            yield return new object[] { new DateTime(1677975383149674547, DateTimeKind.Utc), "o", "5318-04-18T03:18:34.9674547Z" };
-            yield return new object[] { new DateTime(1101778442151366156, DateTimeKind.Utc), "O", "3492-05-25T12:43:35.1366156Z" };
-            yield return new object[] { new DateTime(221550163152616218, DateTimeKind.Utc), "r", "Sun, 25 Jan 0703 19:11:55 GMT" };
+            // Year patterns
+
+            var enUS = new CultureInfo("en-US");
+            var thTH = new CultureInfo("th-TH");
+            yield return new object[] { new DateTime(1234, 5, 6), "yy", enUS, "34" };
+            yield return new object[] { DateTime.MaxValue, "yy", thTH, "42" };
+            for (int i = 3; i < 20; i++)
+            {
+                yield return new object[] { new DateTime(1234, 5, 6), new string('y', i), enUS, 1234.ToString("D" + i) };
+                yield return new object[] { DateTime.MaxValue, new string('y', i), thTH, 10542.ToString("D" + i) };
+            }
         }
 
         [Theory]
         [MemberData(nameof(ToString_MatchesExpected_MemberData))]
-        public void ToString_Invoke_ReturnsExpected(DateTime dateTime, string format, string expected)
+        public void ToString_Invoke_ReturnsExpected(DateTime dateTime, string format, IFormatProvider provider, string expected)
         {
-            Assert.Equal(expected, dateTime.ToString(format));
+            if (provider == null)
+            {
+                Assert.Equal(expected, dateTime.ToString(format));
+            }
+
+            Assert.Equal(expected, dateTime.ToString(format, provider));
         }
 
         [Fact]

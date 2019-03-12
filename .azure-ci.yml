@@ -1,9 +1,18 @@
-# Disable triggers for now. TODO: add right merge triggers.
-trigger: none
+# Setting batch to true, triggers one build at a time.
+# if there is a push while a build in progress, it will wait,
+# until the running build finishes, and produce a build with all the changes
+# that happened during the last build.
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+    - release/3.0
 
 # TODO: add paths to exclude CI when modifying docs or stuff not affecting the build
-# TODO: enable PR triggers when helix SDK issues are fixed
-pr: none
+pr:
+- master
+- release/3.0
 
 resources:
   containers:
@@ -15,6 +24,9 @@ resources:
 
   - container: alpine_36_container
     image: microsoft/dotnet-buildtools-prereqs:alpine-3.6-WithNode-f4d3fe3-20181213005010
+
+  - container: alpine_37_arm64_container
+    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-alpine10fcdcf-20190208200917
 
   - container: ubuntu_1604_arm64_cross_container
     image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180315221921
@@ -47,7 +59,7 @@ jobs:
     - template: /eng/pipelines/redhat6.yml
 
     # FreeBSD leg is only for official builds
-    - template: /eng/pipelines/freebsd.yml
+    # - template: /eng/pipelines/freebsd.yml
 
     # Publish step
     - template: /eng/pipelines/publish.yml
@@ -60,4 +72,4 @@ jobs:
           - LinuxNoTest
           - MacOS
           - RedHat6
-          - FreeBSD
+          # - FreeBSD

@@ -32,6 +32,7 @@ typedef struct
     int64_t BirthTimeNsec; // nanosecond part
     int64_t Dev;       // ID of the device containing the file
     int64_t Ino;       // inode number of the file
+    uint32_t UserFlags; // user defined flags
 } FileStatus;
 
 /* Provide consistent access to nanosecond fields, if they exist. */
@@ -323,6 +324,27 @@ typedef enum
  *
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
+DLLEXPORT int32_t SystemNative_FStat(intptr_t fd, FileStatus* output);
+
+/**
+ * Get file status from a full path. Implemented as shim to stat(2).
+ *
+ * Returns 0 for success, -1 for failure. Sets errno on failure.
+ */
+DLLEXPORT int32_t SystemNative_Stat(const char* path, FileStatus* output);
+
+/**
+ * Get file stats from a full path. Implemented as shim to lstat(2).
+ *
+ * Returns 0 for success, -1 for failure. Sets errno on failure.
+ */
+DLLEXPORT int32_t SystemNative_LStat(const char* path, FileStatus* output);
+
+/**
+ * Get file status from a descriptor. Implemented as shim to fstat(2).
+ *
+ * Returns 0 for success, -1 for failure. Sets errno on failure.
+ */
 DLLEXPORT int32_t SystemNative_FStat2(intptr_t fd, FileStatus* output);
 
 /**
@@ -421,7 +443,7 @@ DLLEXPORT int32_t SystemNative_Pipe(int32_t pipefd[2], // [out] pipefds[0] gets 
  *
  * Returns 0 for success; -1 for failure. Sets errno for failure.
  */
-DLLEXPORT int32_t SystemNative_FcntlSetCloseOnExec(intptr_t fd);
+DLLEXPORT int32_t SystemNative_FcntlSetFD(intptr_t fd, int32_t flags);
 
 /**
  * Determines if the current platform supports getting and setting pipe capacity.

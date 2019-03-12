@@ -245,7 +245,7 @@ namespace System.Globalization
                         }
                         if (str[str.Length - 1] == '.')
                         {
-                            // Old version ignore the trialing dot in the date words. Support this as well.
+                            // Old version ignore the trailing dot in the date words. Support this as well.
                             string strWithoutDot = str.Substring(0, str.Length - 1);
                             if (!m_dateWords.Contains(strWithoutDot))
                             {
@@ -635,7 +635,7 @@ namespace System.Globalization
             // Check each string 
             for (int i = 0; i < array1.Length; i++)
             {
-                if (!array1[i].Equals(array2[i]))
+                if (array1[i] != array2[i])
                 {
                     return false;
                 }

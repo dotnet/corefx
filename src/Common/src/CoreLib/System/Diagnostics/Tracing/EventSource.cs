@@ -171,6 +171,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Numerics;
 using System.Reflection;
 using System.Resources;
 using System.Security;
@@ -181,10 +182,10 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using Microsoft.Win32;
-using Internal.Runtime.Augments;
 
 #if ES_BUILD_STANDALONE
 using EventDescriptor = Microsoft.Diagnostics.Tracing.EventDescriptor;
+using BitOperations = Microsoft.Diagnostics.Tracing.Internal.BitOperations;
 #else
 using System.Threading.Tasks;
 #endif
@@ -403,8 +404,7 @@ namespace System.Diagnostics.Tracing
             {
                 foreach (WeakReference eventSourceRef in EventListener.s_EventSources)
                 {
-                    EventSource eventSource = eventSourceRef.Target as EventSource;
-                    if (eventSource != null && !eventSource.IsDisposed)
+                    if (eventSourceRef.Target is EventSource eventSource && !eventSource.IsDisposed)
                         ret.Add(eventSource);
                 }
             }
@@ -433,39 +433,6 @@ namespace System.Diagnostics.Tracing
 
             eventSource.SendCommand(null, EventProviderType.ETW, 0, 0, command, true, EventLevel.LogAlways, EventKeywords.None, commandArguments);
         }
-
-#if !ES_BUILD_STANDALONE
-        /// <summary>
-        /// This property allows EventSource code to appropriately handle as "different" 
-        /// activities started on different threads that have not had an activity created on them.
-        /// </summary>
-        internal static Guid InternalCurrentThreadActivityId
-        {
-            get
-            {
-                Guid retval = CurrentThreadActivityId;
-                if (retval == Guid.Empty)
-                {
-                    retval = FallbackActivityId;
-                }
-                return retval;
-            }
-        }
-
-        internal static Guid FallbackActivityId
-        {
-            get
-            {
-                int threadID = Win32Native.GetCurrentThreadId();
-
-                // Managed thread IDs are more aggressively re-used than native thread IDs,
-                // so we'll use the latter...
-                return new Guid(unchecked((uint)threadID),
-                                unchecked((ushort)s_currentPid), unchecked((ushort)(s_currentPid >> 16)),
-                                0x94, 0x1b, 0x87, 0xd5, 0xa6, 0x5c, 0x36, 0x64);
-            }
-        }
-#endif // !ES_BUILD_STANDALONE
 
         // Error APIs.  (We don't throw by default, but you can probe for status)
         /// <summary>
@@ -1396,7 +1363,10 @@ namespace System.Diagnostics.Tracing
 #if FEATURE_PERFTRACING
                 // Register the provider with EventPipe
                 var eventPipeProvider = new OverideEventProvider(this, EventProviderType.EventPipe);
-                eventPipeProvider.Register(this);
+                lock (EventListener.EventListenersLock)
+                {
+                    eventPipeProvider.Register(this);
+                }
 #endif
                 // Add the eventSource to the global (weak) list.  
                 // This also sets m_id, which is the index in the list. 
@@ -1580,7 +1550,7 @@ namespace System.Diagnostics.Tracing
             {
                 for (int i = 16; i != 80; i++)
                 {
-                    this.w[i] = Rol1((this.w[i - 3] ^ this.w[i - 8] ^ this.w[i - 14] ^ this.w[i - 16]));
+                    this.w[i] = BitOperations.RotateLeft((this.w[i - 3] ^ this.w[i - 8] ^ this.w[i - 14] ^ this.w[i - 16]), 1);
                 }
 
                 unchecked
@@ -1595,28 +1565,28 @@ namespace System.Diagnostics.Tracing
                     {
                         const uint k = 0x5A827999;
                         uint f = (b & c) | ((~b) & d);
-                        uint temp = Rol5(a) + f + e + k + this.w[i]; e = d; d = c; c = Rol30(b); b = a; a = temp;
+                        uint temp = BitOperations.RotateLeft(a, 5) + f + e + k + this.w[i]; e = d; d = c; c = BitOperations.RotateLeft(b, 30); b = a; a = temp;
                     }
 
                     for (int i = 20; i != 40; i++)
                     {
                         uint f = b ^ c ^ d;
                         const uint k = 0x6ED9EBA1;
-                        uint temp = Rol5(a) + f + e + k + this.w[i]; e = d; d = c; c = Rol30(b); b = a; a = temp;
+                        uint temp = BitOperations.RotateLeft(a, 5) + f + e + k + this.w[i]; e = d; d = c; c = BitOperations.RotateLeft(b, 30); b = a; a = temp;
                     }
 
                     for (int i = 40; i != 60; i++)
                     {
                         uint f = (b & c) | (b & d) | (c & d);
                         const uint k = 0x8F1BBCDC;
-                        uint temp = Rol5(a) + f + e + k + this.w[i]; e = d; d = c; c = Rol30(b); b = a; a = temp;
+                        uint temp = BitOperations.RotateLeft(a, 5) + f + e + k + this.w[i]; e = d; d = c; c = BitOperations.RotateLeft(b, 30); b = a; a = temp;
                     }
 
                     for (int i = 60; i != 80; i++)
                     {
                         uint f = b ^ c ^ d;
                         const uint k = 0xCA62C1D6;
-                        uint temp = Rol5(a) + f + e + k + this.w[i]; e = d; d = c; c = Rol30(b); b = a; a = temp;
+                        uint temp = BitOperations.RotateLeft(a, 5) + f + e + k + this.w[i]; e = d; d = c; c = BitOperations.RotateLeft(b, 30); b = a; a = temp;
                     }
 
                     this.w[80] += a;
@@ -1628,21 +1598,6 @@ namespace System.Diagnostics.Tracing
 
                 this.length += 512; // 64 bytes == 512 bits
                 this.pos = 0;
-            }
-
-            private static uint Rol1(uint input)
-            {
-                return (input << 1) | (input >> 31);
-            }
-
-            private static uint Rol5(uint input)
-            {
-                return (input << 5) | (input >> 27);
-            }
-
-            private static uint Rol30(uint input)
-            {
-                return (input << 30) | (input >> 2);
             }
         }
 
@@ -2715,8 +2670,7 @@ namespace System.Diagnostics.Tracing
                 // TODO Enforce singleton pattern 
                 foreach (WeakReference eventSourceRef in EventListener.s_EventSources)
                 {
-                    EventSource eventSource = eventSourceRef.Target as EventSource;
-                    if (eventSource != null && eventSource.Guid == m_guid && !eventSource.IsDisposed)
+                    if (eventSourceRef.Target is EventSource eventSource && eventSource.Guid == m_guid && !eventSource.IsDisposed)
                     {
                         if (eventSource != this)
                         {
@@ -2744,7 +2698,7 @@ namespace System.Diagnostics.Tracing
                 // for non-BCL EventSource we must assert SecurityPermission
                 new SecurityPermission(PermissionState.Unrestricted).Assert();
 #endif
-                s_currentPid = Win32Native.GetCurrentProcessId();
+                s_currentPid = Interop.GetCurrentProcessId();
             }
         }
 
@@ -2818,11 +2772,7 @@ namespace System.Diagnostics.Tracing
                     // 5 chunks, so only the largest manifests will hit the pause.
                     if ((envelope.ChunkNumber % 5) == 0)
                     {
-#if ES_BUILD_STANDALONE
                         Thread.Sleep(15);
-#else
-                        RuntimeThread.Sleep(15);
-#endif
                     }
                 }
             }
@@ -3876,10 +3826,10 @@ namespace System.Diagnostics.Tracing
         static EventListener()
         {
 #if FEATURE_PERFTRACING
-            // Ensure that RuntimeEventSource is initialized so that EventListeners get an opportunity to subscribe to its events.
-            // This is required because RuntimeEventSource never emit events on its own, and thus will never be initialized
+            // Ensure that NativeRuntimeEventSource is initialized so that EventListeners get an opportunity to subscribe to its events.
+            // This is required because NativeRuntimeEventSource never emit events on its own, and thus will never be initialized
             // in the normal way that EventSources are initialized.
-            GC.KeepAlive(RuntimeEventSource.Log);
+            GC.KeepAlive(NativeRuntimeEventSource.Log);
 #endif // FEATURE_PERFTRACING
         }
 
@@ -3991,7 +3941,7 @@ namespace System.Diagnostics.Tracing
             eventSource.SendCommand(this, EventProviderType.None, 0, 0, EventCommand.Update, true, level, matchAnyKeyword, arguments);
 
 #if FEATURE_PERFTRACING
-            if (eventSource.GetType() == typeof(RuntimeEventSource))
+            if (eventSource.GetType() == typeof(NativeRuntimeEventSource))
             {
                 EventPipeEventDispatcher.Instance.SendCommand(this, EventCommand.Update, true, level, matchAnyKeyword);
             }
@@ -4012,7 +3962,7 @@ namespace System.Diagnostics.Tracing
             eventSource.SendCommand(this, EventProviderType.None, 0, 0, EventCommand.Update, false, EventLevel.LogAlways, EventKeywords.None, null);
 
 #if FEATURE_PERFTRACING
-            if (eventSource.GetType() == typeof(RuntimeEventSource))
+            if (eventSource.GetType() == typeof(NativeRuntimeEventSource))
             {
                 EventPipeEventDispatcher.Instance.SendCommand(this, EventCommand.Update, false, EventLevel.LogAlways, EventKeywords.None);
             }
@@ -4160,8 +4110,7 @@ namespace System.Diagnostics.Tracing
             {
                 foreach (var esRef in s_EventSources)
                 {
-                    EventSource es = esRef.Target as EventSource;
-                    if (es != null)
+                    if (esRef.Target is EventSource es)
                         es.Dispose();
                 }
             }
@@ -4181,8 +4130,7 @@ namespace System.Diagnostics.Tracing
             // Foreach existing EventSource in the appdomain
             foreach (WeakReference eventSourceRef in s_EventSources)
             {
-                EventSource eventSource = eventSourceRef.Target as EventSource;
-                if (eventSource != null)
+                if (eventSourceRef.Target is EventSource eventSource)
                 {
                     // Is the first output dispatcher the dispatcher we are removing?
                     if (eventSource.m_Dispatchers.m_Listener == listenerToRemove)
@@ -4246,8 +4194,7 @@ namespace System.Diagnostics.Tracing
                 foreach (WeakReference eventSourceRef in s_EventSources)
                 {
                     id++;
-                    EventSource eventSource = eventSourceRef.Target as EventSource;
-                    if (eventSource == null)
+                    if (!(eventSourceRef.Target is EventSource eventSource))
                         continue;
                     Debug.Assert(eventSource.m_id == id, "Unexpected event source ID.");
 
@@ -4328,8 +4275,7 @@ namespace System.Diagnostics.Tracing
                         for (int i = 0; i < eventSourcesSnapshot.Length; i++)
                         {
                             WeakReference eventSourceRef = eventSourcesSnapshot[i];
-                            EventSource eventSource = eventSourceRef.Target as EventSource;
-                            if (eventSource != null)
+                            if (eventSourceRef.Target is EventSource eventSource)
                             {
                                 EventSourceCreatedEventArgs args = new EventSourceCreatedEventArgs();
                                 args.EventSource = eventSource;
@@ -4704,7 +4650,11 @@ namespace System.Diagnostics.Tracing
             {
                 if (!m_osThreadId.HasValue)
                 {
-                    m_osThreadId = (long)RuntimeThread.CurrentOSThreadId;
+#if ES_BUILD_STANDALONE
+                    m_osThreadId = (long)Interop.Kernel32.GetCurrentThreadId();
+#else
+                    m_osThreadId = (long)Thread.CurrentOSThreadId;
+#endif
                 }
 
                 return m_osThreadId.Value;
@@ -5183,7 +5133,7 @@ namespace System.Diagnostics.Tracing
             if (dllName != null)
                 sb.Append("\" resourceFileName=\"").Append(dllName).Append("\" messageFileName=\"").Append(dllName);
 
-            var symbolsName = providerName.Replace("-", "").Replace(".", "_");  // Period and - are illegal replace them.
+            var symbolsName = providerName.Replace("-", "").Replace('.', '_');  // Period and - are illegal replace them.
             sb.Append("\" symbol=\"").Append(symbolsName);
             sb.Append("\">").AppendLine();
         }

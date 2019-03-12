@@ -444,6 +444,19 @@ namespace System
             return (value == null || 0u >= (uint)value.Length) ? true : false;
         }
 
+        [System.Runtime.CompilerServices.IndexerName("Chars")]
+        public char this[Index index]
+        {
+            get
+            {
+                int actualIndex = index.GetOffset(Length);
+                return this[actualIndex];
+            }
+        }
+
+        [System.Runtime.CompilerServices.IndexerName("Chars")]
+        public string this[Range range] => Substring(range);
+
         public static bool IsNullOrWhiteSpace(string value)
         {
             if (value == null) return true;
@@ -467,7 +480,7 @@ namespace System
             Debug.Assert(byteLength >= 0);
 
             // Get our string length
-            int stringLength = encoding.GetCharCount(bytes, byteLength, null);
+            int stringLength = encoding.GetCharCount(bytes, byteLength);
             Debug.Assert(stringLength >= 0, "stringLength >= 0");
 
             // They gave us an empty string if they needed one
@@ -478,7 +491,7 @@ namespace System
             string s = FastAllocateString(stringLength);
             fixed (char* pTempChars = &s._firstChar)
             {
-                int doubleCheck = encoding.GetChars(bytes, byteLength, pTempChars, stringLength, null);
+                int doubleCheck = encoding.GetChars(bytes, byteLength, pTempChars, stringLength);
                 Debug.Assert(stringLength == doubleCheck,
                     "Expected encoding.GetChars to return same length as encoding.GetCharCount");
             }
@@ -672,7 +685,7 @@ namespace System
 
         //
         // IConvertible implementation
-        // 
+        //
 
         public TypeCode GetTypeCode()
         {

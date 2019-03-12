@@ -43,8 +43,8 @@ namespace System.Diagnostics.Tracing
         /// the current thread</param>
         public static void SetCurrentThreadActivityId(Guid activityId)
         {
-            if (TplEtwProvider.Log != null)
-                TplEtwProvider.Log.SetActivityId(activityId);
+            if (TplEventSource.Log != null)
+                TplEventSource.Log.SetActivityId(activityId);
 #if FEATURE_MANAGED_ETW
 #if FEATURE_ACTIVITYSAMPLING
             Guid newId = activityId;
@@ -114,8 +114,8 @@ namespace System.Diagnostics.Tracing
 
             // We don't call the activityDying callback here because the caller has declared that
             // it is not dying.  
-            if (TplEtwProvider.Log != null)
-                TplEtwProvider.Log.SetActivityId(activityId);
+            if (TplEventSource.Log != null)
+                TplEventSource.Log.SetActivityId(activityId);
         }
 
         /// <summary>
@@ -243,19 +243,3 @@ namespace System.Diagnostics.Tracing
         }
     }
 }
-
-#if ES_BUILD_STANDALONE
-namespace Internal.Runtime.Augments
-{
-    internal static class RuntimeThread
-    {
-        internal static ulong CurrentOSThreadId
-        {
-            get { return GetCurrentThreadId(); }
-        }
-
-        [DllImport("kernel32.dll")]
-        private static extern uint GetCurrentThreadId();
-    }
-}
-#endif

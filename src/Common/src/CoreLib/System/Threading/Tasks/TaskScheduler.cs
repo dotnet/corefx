@@ -9,8 +9,6 @@
 // This file contains the primary interface and management of tasks and queues.  
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-// Disable the "reference to volatile field not treated as volatile" error.
-#pragma warning disable 0420
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -181,12 +179,11 @@ namespace System.Threading.Tasks
             // Delegate cross-scheduler inlining requests to target scheduler
             if (ets != this && ets != null) return ets.TryRunInline(task, taskWasPreviouslyQueued);
 
-            StackGuard currentStackGuard;
             if ((ets == null) ||
                 (task.m_action == null) ||
                 task.IsDelegateInvoked ||
                 task.IsCanceled ||
-                (currentStackGuard = Task.CurrentStackGuard).TryBeginInliningScope() == false)
+                !RuntimeHelpers.TryEnsureSufficientExecutionStack())
             {
                 return false;
             }
@@ -194,30 +191,19 @@ namespace System.Threading.Tasks
             // Task class will still call into TaskScheduler.TryRunInline rather than TryExecuteTaskInline() so that 
             // 1) we can adjust the return code from TryExecuteTaskInline in case a buggy custom scheduler lies to us
             // 2) we maintain a mechanism for the TLS lookup optimization that we used to have for the ConcRT scheduler (will potentially introduce the same for TP)
-            bool bInlined = false;
-            try
-            {
-#if CORECLR
-                if (TplEtwProvider.Log.IsEnabled())
-                {
-                    task.FireTaskScheduledIfNeeded(this);
-                }
-#endif
-                bInlined = TryExecuteTaskInline(task, taskWasPreviouslyQueued);
-            }
-            finally
-            {
-                currentStackGuard.EndInliningScope();
-            }
+            if (TplEventSource.Log.IsEnabled())
+                task.FireTaskScheduledIfNeeded(this);
+
+            bool inlined = TryExecuteTaskInline(task, taskWasPreviouslyQueued);
 
             // If the custom scheduler returned true, we should either have the TASK_STATE_DELEGATE_INVOKED or TASK_STATE_CANCELED bit set
             // Otherwise the scheduler is buggy
-            if (bInlined && !(task.IsDelegateInvoked || task.IsCanceled))
+            if (inlined && !(task.IsDelegateInvoked || task.IsCanceled))
             {
                 throw new InvalidOperationException(SR.TaskScheduler_InconsistentStateAfterTryExecuteTaskInline);
             }
 
-            return bInlined;
+            return inlined;
         }
 
         /// <summary>
@@ -255,12 +241,8 @@ namespace System.Threading.Tasks
         {
             Debug.Assert(task != null);
 
-#if CORECLR
-            if (TplEtwProvider.Log.IsEnabled())
-            {
+            if (TplEventSource.Log.IsEnabled())
                 task.FireTaskScheduledIfNeeded(this);
-            }
-#endif
 
             this.QueueTask(task);
         }
@@ -500,8 +482,7 @@ namespace System.Threading.Tasks
                 return null;
 
             // If it can be cast to an array, use it directly
-            Task[] activeTasksArray = activeTasksSource as Task[];
-            if (activeTasksArray == null)
+            if (!(activeTasksSource is Task[] activeTasksArray))
             {
                 activeTasksArray = (new List<Task>(activeTasksSource)).ToArray();
             }

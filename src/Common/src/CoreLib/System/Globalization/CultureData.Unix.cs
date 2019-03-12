@@ -29,7 +29,6 @@ namespace System.Globalization
 
             Debug.Assert(!GlobalizationMode.Invariant);
 
-            string alternateSortName = string.Empty;
             string realNameBuffer = _sRealName;
 
             // Basic validation
@@ -39,16 +38,17 @@ namespace System.Globalization
             }
 
             // Replace _ (alternate sort) with @collation= for ICU
+            ReadOnlySpan<char> alternateSortName = default;
             int index = realNameBuffer.IndexOf('_');
             if (index > 0)
             {
                 if (index >= (realNameBuffer.Length - 1) // must have characters after _
-                    || realNameBuffer.Substring(index + 1).Contains('_')) // only one _ allowed
+                    || realNameBuffer.IndexOf('_', index + 1) >= 0) // only one _ allowed
                 {
                     return false; // fail
                 }
-                alternateSortName = realNameBuffer.Substring(index + 1);
-                realNameBuffer = realNameBuffer.Substring(0, index) + ICU_COLLATION_KEYWORD + alternateSortName;
+                alternateSortName = realNameBuffer.AsSpan(index + 1);
+                realNameBuffer = string.Concat(realNameBuffer.AsSpan(0, index), ICU_COLLATION_KEYWORD, alternateSortName);
             }
 
             // Get the locale name from ICU
@@ -61,7 +61,7 @@ namespace System.Globalization
             index = _sWindowsName.IndexOf(ICU_COLLATION_KEYWORD, StringComparison.Ordinal);
             if (index >= 0)
             {
-                _sName = _sWindowsName.Substring(0, index) + "_" + alternateSortName;
+                _sName = string.Concat(_sWindowsName.AsSpan(0, index), "_", alternateSortName);
             }
             else
             {
@@ -69,18 +69,18 @@ namespace System.Globalization
             }
             _sRealName = _sName;
 
-            _iLanguage = this.ILANGUAGE;
+            _iLanguage = LCID;
             if (_iLanguage == 0)
             {
                 _iLanguage = CultureInfo.LOCALE_CUSTOM_UNSPECIFIED;
             }
 
-            _bNeutral = (this.SISO3166CTRYNAME.Length == 0);
+            _bNeutral = TwoLetterISOCountryName.Length == 0;
             
             _sSpecificCulture = _bNeutral ? LocaleData.GetSpecificCultureName(_sRealName) : _sRealName;   
             
             // Remove the sort from sName unless custom culture
-            if (index>0 && !_bNeutral && !IsCustomCultureId(_iLanguage))
+            if (index > 0 && !_bNeutral && !IsCustomCultureId(_iLanguage))
             {
                 _sName = _sWindowsName.Substring(0, index);
             }
@@ -196,10 +196,7 @@ namespace System.Globalization
             return new int[] { primaryGroupingSize, secondaryGroupingSize };
         }
 
-        private string GetTimeFormatString()
-        {
-            return GetTimeFormatString(false);
-        }
+        private string GetTimeFormatString() => GetTimeFormatString(shortFormat: false);
 
         private unsafe string GetTimeFormatString(bool shortFormat)
         {
@@ -219,10 +216,7 @@ namespace System.Globalization
             return ConvertIcuTimeFormatString(span.Slice(0, span.IndexOf('\0')));
         }
 
-        private int GetFirstDayOfWeek()
-        {
-            return this.GetLocaleInfo(LocaleNumberData.FirstDayOfWeek);
-        }
+        private int GetFirstDayOfWeek() => GetLocaleInfo(LocaleNumberData.FirstDayOfWeek);
 
         private string[] GetTimeFormats()
         {
@@ -318,31 +312,31 @@ namespace System.Globalization
         private static int GetAnsiCodePage(string cultureName)
         {
             int ansiCodePage = LocaleData.GetLocaleDataNumericPart(cultureName, LocaleDataParts.AnsiCodePage);
-            return ansiCodePage == -1 ? CultureData.Invariant.IDEFAULTANSICODEPAGE : ansiCodePage; 
+            return ansiCodePage == -1 ? CultureData.Invariant.ANSICodePage : ansiCodePage; 
         }
 
         private static int GetOemCodePage(string cultureName)
         {
             int oemCodePage = LocaleData.GetLocaleDataNumericPart(cultureName, LocaleDataParts.OemCodePage);
-            return oemCodePage == -1 ? CultureData.Invariant.IDEFAULTOEMCODEPAGE : oemCodePage; 
+            return oemCodePage == -1 ? CultureData.Invariant.OEMCodePage : oemCodePage; 
         }
 
         private static int GetMacCodePage(string cultureName)
         {
             int macCodePage = LocaleData.GetLocaleDataNumericPart(cultureName, LocaleDataParts.MacCodePage);
-            return macCodePage == -1 ? CultureData.Invariant.IDEFAULTMACCODEPAGE : macCodePage; 
+            return macCodePage == -1 ? CultureData.Invariant.MacCodePage : macCodePage; 
         }
 
         private static int GetEbcdicCodePage(string cultureName)
         {
             int ebcdicCodePage = LocaleData.GetLocaleDataNumericPart(cultureName, LocaleDataParts.EbcdicCodePage);
-            return ebcdicCodePage == -1 ? CultureData.Invariant.IDEFAULTEBCDICCODEPAGE : ebcdicCodePage; 
+            return ebcdicCodePage == -1 ? CultureData.Invariant.EBCDICCodePage : ebcdicCodePage; 
         }
 
         private static int GetGeoId(string cultureName)
         {
             int geoId = LocaleData.GetLocaleDataNumericPart(cultureName, LocaleDataParts.GeoId);
-            return geoId == -1 ? CultureData.Invariant.IGEOID : geoId; 
+            return geoId == -1 ? CultureData.Invariant.GeoId : geoId; 
         }
         
         private static int GetDigitSubstitution(string cultureName)
@@ -413,19 +407,10 @@ namespace System.Globalization
             return LocaleData.GetConsoleUICulture(cultureName);
         }
         
-        internal bool IsFramework // not applicable on Linux based systems 
-        {
-            get { return false; }
-        }
+        internal bool IsFramework => false;
         
-        internal bool IsWin32Installed // not applicable on Linux based systems
-        {
-            get { return false; }
-        }
+        internal bool IsWin32Installed => false;
         
-        internal bool IsReplacementCulture // not applicable on Linux based systems
-        {
-            get { return false; }
-        }
+        internal bool IsReplacementCulture => false;
     }
 }

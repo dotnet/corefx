@@ -19,21 +19,17 @@ namespace System.IO.Tests
         }
 
         private static bool HasNonZeroNanoseconds(DateTime dt) => dt.Ticks % 10 != 0;
-        
+
         public FileInfo GetNonZeroMilliseconds()
         {
             FileInfo fileinfo = new FileInfo(GetTestFilePath());
-            for (int i = 0; i < 5; i++)
+            fileinfo.Create().Dispose();
+
+            if (fileinfo.LastWriteTime.Millisecond == 0)
             {
-                fileinfo.Create().Dispose();
-                if (fileinfo.LastWriteTime.Millisecond != 0)
-                    break;
-
-                // This case should only happen 1/1000 times, unless the OS/Filesystem does
-                // not support millisecond granularity.
-
-                // If it's 1/1000, or low granularity, this may help:
-                Thread.Sleep(1234);
+                DateTime dt = fileinfo.LastWriteTime;
+                dt = dt.AddMilliseconds(1);
+                fileinfo.LastWriteTime = dt;
             }
 
             Assert.NotEqual(0, fileinfo.LastWriteTime.Millisecond);
@@ -43,20 +39,19 @@ namespace System.IO.Tests
         public FileInfo GetNonZeroNanoseconds()
         {
             FileInfo fileinfo = new FileInfo(GetTestFilePath());
-            for (int i = 0; i < 5; i++)
+            fileinfo.Create().Dispose();
+
+            if (!HasNonZeroNanoseconds(fileinfo.LastWriteTime))
             {
-                fileinfo.Create().Dispose();
-                if (HasNonZeroNanoseconds(fileinfo.LastWriteTime))
-                    break;
+                if (PlatformDetection.IsOSX)
+                    return null;
 
-                // This case should only happen 1/10 times, unless the OS/Filesystem does
-                // not support nanosecond granularity.
-
-                // If it's 1/10, or low granularity, this may help:
-                Thread.Sleep(123);
+                DateTime dt = fileinfo.LastWriteTime;
+                dt = dt.AddTicks(1);
+                fileinfo.LastWriteTime = dt;
             }
-            
-            Assert.True(HasNonZeroNanoseconds(fileinfo.LastWriteTime), "Tests failed to create a file with non-zero nanoseconds.");
+
+            Assert.True(HasNonZeroNanoseconds(fileinfo.LastWriteTime));
             return fileinfo;
         }
 
@@ -127,6 +122,9 @@ namespace System.IO.Tests
         public void CopyToNanosecondsPresent()
         {
             FileInfo input = GetNonZeroNanoseconds();
+            if (input == null)
+                return;
+
             FileInfo output = new FileInfo(Path.Combine(GetTestFilePath(), input.Name));
 
             output.Directory.Create();

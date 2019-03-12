@@ -5,6 +5,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.ExceptionServices;
@@ -41,8 +42,16 @@ namespace System.Tests
         [Fact]
         public void TargetFrameworkTest()
         {
-            // On Uap we use the Microsoft.DotNet.XUnitRunnerUap instead of the RemoteExecutorConsoleApp
-            string targetFrameworkName = PlatformDetection.IsUap ? ".NETCore,Version=v5.0" : "DUMMY-TFA";
+            string targetFrameworkName = "DUMMY-TFA";
+            if (PlatformDetection.IsInAppContainer)
+            {
+                targetFrameworkName = ".NETCore,Version=v5.0";
+            }
+            if (PlatformDetection.IsNetNative)
+            {
+                targetFrameworkName = ".NETCoreApp,Version=v2.0";
+            }
+            
             RemoteInvoke((_targetFrameworkName) => {
                 Assert.Contains(_targetFrameworkName, AppContext.TargetFrameworkName);
             }, targetFrameworkName).Dispose();
@@ -229,7 +238,7 @@ namespace System.Tests
         public void ApplyPolicy()
         {
             AssertExtensions.Throws<ArgumentNullException>("assemblyName", () => { AppDomain.CurrentDomain.ApplyPolicy(null); });
-            AssertExtensions.Throws<ArgumentException>(null, () => { AppDomain.CurrentDomain.ApplyPolicy(""); });
+            AssertExtensions.Throws<ArgumentException>("assemblyName", null, () => { AppDomain.CurrentDomain.ApplyPolicy(""); });
             string entryAssembly = Assembly.GetEntryAssembly()?.FullName ?? Assembly.GetExecutingAssembly().FullName;
             Assert.Equal(AppDomain.CurrentDomain.ApplyPolicy(entryAssembly), entryAssembly);
         }
@@ -526,7 +535,8 @@ namespace System.Tests
                 Assembly[] assemblies1 = AppDomain.CurrentDomain.GetAssemblies();
                 // Another thread could have loaded an assembly hence not checking for equality
                 Assert.True(assemblies1.Length >= assemblies.Length, "Assembly.Load of an already loaded assembly should not cause another load");
-                Assembly.LoadFile(typeof(AppDomain).Assembly.Location);
+                Type someType = typeof(HttpClient);
+                Assembly.LoadFile(someType.Assembly.Location);
                 Assembly[] assemblies2 = AppDomain.CurrentDomain.GetAssemblies();
                 Assert.True(assemblies2.Length > assemblies.Length, "Assembly.LoadFile should cause an increase in GetAssemblies list");
                 int ctr = 0;
@@ -535,7 +545,7 @@ namespace System.Tests
                     // Dynamic assemblies do not support Location property.
                     if (!a.IsDynamic)
                     {
-                        if (a.Location == typeof(AppDomain).Assembly.Location)
+                        if (a.Location == someType.Assembly.Location)
                             ctr++;
                     }
                 }
@@ -543,7 +553,7 @@ namespace System.Tests
                 {
                     if (!a.IsDynamic)
                     {
-                        if (a.Location == typeof(AppDomain).Assembly.Location)
+                        if (a.Location == someType.Assembly.Location)
                             ctr--;
                     }
                 }

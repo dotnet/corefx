@@ -45,7 +45,7 @@ namespace System.Text
         public void EnsureCapacity(int capacity)
         {
             if (capacity > _chars.Length)
-                Grow(capacity - _chars.Length);
+                Grow(capacity - _pos);
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace System.Text
             _pos += length;
         }
 
-        public unsafe void Append(ReadOnlySpan<char> value)
+        public void Append(ReadOnlySpan<char> value)
         {
             int pos = _pos;
             if (pos > _chars.Length - value.Length)
@@ -259,12 +259,21 @@ namespace System.Text
             Append(c);
         }
 
+        /// <summary>
+        /// Resize the internal buffer either by doubling current buffer size or
+        /// by adding <paramref name="additionalCapacityBeyondPos"/> to
+        /// <see cref="_pos"/> whichever is greater.
+        /// </summary>
+        /// <param name="additionalCapacityBeyondPos">
+        /// Number of chars requested beyond current position.
+        /// </param>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void Grow(int requiredAdditionalCapacity)
+        private void Grow(int additionalCapacityBeyondPos)
         {
-            Debug.Assert(requiredAdditionalCapacity > 0);
+            Debug.Assert(additionalCapacityBeyondPos > 0);
+            Debug.Assert(_pos > _chars.Length - additionalCapacityBeyondPos, "Grow called incorrectly, no resize is needed.");
 
-            char[] poolArray = ArrayPool<char>.Shared.Rent(Math.Max(_pos + requiredAdditionalCapacity, _chars.Length * 2));
+            char[] poolArray = ArrayPool<char>.Shared.Rent(Math.Max(_pos + additionalCapacityBeyondPos, _chars.Length * 2));
 
             _chars.CopyTo(poolArray);
 

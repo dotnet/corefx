@@ -17,6 +17,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.DotNet.XUnitExtensions;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,7 +28,7 @@ namespace System.Net.Http.Functional.Tests
 
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
-    public abstract class HttpClientHandlerTest : HttpClientTestBase
+    public abstract class HttpClientHandlerTest : HttpClientHandlerTestBase
     {
         readonly ITestOutputHelper _output;
         private const string ExpectedContent = "Test content";
@@ -38,7 +40,6 @@ namespace System.Net.Http.Functional.Tests
 
         public static readonly object[][] EchoServers = Configuration.Http.EchoServers;
         public static readonly object[][] VerifyUploadServers = Configuration.Http.VerifyUploadServers;
-        public static readonly object[][] CompressedServers = Configuration.Http.CompressedServers;
         public static readonly object[][] Http2Servers = Configuration.Http.Http2Servers;
         public static readonly object[][] Http2NoPushServers = Configuration.Http.Http2NoPushServers;
 
@@ -395,28 +396,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop("Uses external servers")]
-        [Theory, MemberData(nameof(CompressedServers))]
-        public async Task GetAsync_SetAutomaticDecompression_ContentDecompressed(Uri server)
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            using (var client = new HttpClient(handler))
-            {
-                using (HttpResponseMessage response = await client.GetAsync(server))
-                {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    _output.WriteLine(responseContent);
-                    TestHelper.VerifyResponseBody(
-                        responseContent,
-                        response.Content.Headers.ContentMD5,
-                        false,
-                        null);
-                }
-            }
-        }
-
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Theory]
         [InlineData("[::1234]")]
@@ -571,92 +550,6 @@ namespace System.Net.Http.Functional.Tests
             }), options);
 
             Assert.True(connectionAccepted);
-        }
-
-        [OuterLoop("Uses external server")]
-        [Theory, MemberData(nameof(CompressedServers))]
-        public async Task GetAsync_SetAutomaticDecompression_HeadersRemoved(Uri server)
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            using (var client = new HttpClient(handler))
-            using (HttpResponseMessage response = await client.GetAsync(server, HttpCompletionOption.ResponseHeadersRead))
-            {
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-                Assert.False(response.Content.Headers.Contains("Content-Encoding"), "Content-Encoding unexpectedly found");
-                Assert.False(response.Content.Headers.Contains("Content-Length"), "Content-Length unexpectedly found");
-            }
-        }
-
-        [Theory]
-#if netcoreapp
-        [InlineData(DecompressionMethods.Brotli, "br", "")]
-        [InlineData(DecompressionMethods.Brotli, "br", "br")]
-        [InlineData(DecompressionMethods.Brotli, "br", "gzip")]
-        [InlineData(DecompressionMethods.Brotli, "br", "gzip, deflate")]
-#endif
-        [InlineData(DecompressionMethods.GZip, "gzip", "")]
-        [InlineData(DecompressionMethods.Deflate, "deflate", "")]
-        [InlineData(DecompressionMethods.GZip | DecompressionMethods.Deflate, "gzip, deflate", "")]
-        [InlineData(DecompressionMethods.GZip, "gzip", "gzip")]
-        [InlineData(DecompressionMethods.Deflate, "deflate", "deflate")]
-        [InlineData(DecompressionMethods.GZip, "gzip", "deflate")]
-        [InlineData(DecompressionMethods.GZip, "gzip", "br")]
-        [InlineData(DecompressionMethods.Deflate, "deflate", "gzip")]
-        [InlineData(DecompressionMethods.Deflate, "deflate", "br")]
-        [InlineData(DecompressionMethods.GZip | DecompressionMethods.Deflate, "gzip, deflate", "gzip, deflate")]
-        public async Task GetAsync_SetAutomaticDecompression_AcceptEncodingHeaderSentWithNoDuplicates(
-            DecompressionMethods methods,
-            string encodings,
-            string manualAcceptEncodingHeaderValues)
-        {
-            if (IsCurlHandler)
-            {
-                // Skip these tests on CurlHandler, dotnet/corefx #29905.
-                return;
-            }
-
-            if (!UseSocketsHttpHandler &&
-                (encodings.Contains("br") || manualAcceptEncodingHeaderValues.Contains("br")))
-            {
-                // Brotli encoding only supported on SocketsHttpHandler.
-                return;
-            }
-
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
-            {
-                HttpClientHandler handler = CreateHttpClientHandler();
-                handler.AutomaticDecompression = methods;
-
-                using (var client = new HttpClient(handler))
-                {
-                    if (!string.IsNullOrEmpty(manualAcceptEncodingHeaderValues))
-                    {
-                        client.DefaultRequestHeaders.Add("Accept-Encoding", manualAcceptEncodingHeaderValues);
-                    }
-
-                    Task<HttpResponseMessage> clientTask = client.GetAsync(url);
-                    Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
-                    await TaskTimeoutExtensions.WhenAllOrAnyFailed(new Task[] { clientTask, serverTask }); 
-
-                    List<string> requestLines = await serverTask;
-                    string requestLinesString = string.Join("\r\n", requestLines);
-                    _output.WriteLine(requestLinesString);
-
-                    Assert.InRange(Regex.Matches(requestLinesString, "Accept-Encoding").Count, 1, 1);
-                    Assert.InRange(Regex.Matches(requestLinesString, encodings).Count, 1, 1);
-                    if (!string.IsNullOrEmpty(manualAcceptEncodingHeaderValues))
-                    {
-                        Assert.InRange(Regex.Matches(requestLinesString, manualAcceptEncodingHeaderValues).Count, 1, 1);
-                    }
-
-                    using (HttpResponseMessage response = await clientTask)
-                    {
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    }                    
-                }
-            });
         }
 
         [ActiveIssue(32647, TargetFrameworkMonikers.Uap)]
@@ -2104,6 +1997,236 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        public static IEnumerable<object[]> Interim1xxStatusCode()
+        {
+            yield return new object[] { (HttpStatusCode) 100 }; // 100 Continue.
+            // 101 SwitchingProtocols will be treated as a final status code.
+            yield return new object[] { (HttpStatusCode) 102 }; // 102 Processing.
+            yield return new object[] { (HttpStatusCode) 103 }; // 103 EarlyHints.
+            yield return new object[] { (HttpStatusCode) 150 };
+            yield return new object[] { (HttpStatusCode) 180 };
+            yield return new object[] { (HttpStatusCode) 199 };
+        }
+
+        [Theory]
+        [MemberData(nameof(Interim1xxStatusCode))]
+        public async Task SendAsync_1xxResponsesWithHeaders_InterimResponsesHeadersIgnored(HttpStatusCode responseStatusCode)
+        {
+            // Skip test on .NET Framework since it doesn't have the fix.
+            if (PlatformDetection.IsFullFramework && (int)responseStatusCode >= 102) return;
+
+            var clientFinished = new TaskCompletionSource<bool>();
+            const string TestString = "test";
+            const string CookieHeaderExpected = "yummy_cookie=choco";
+            const string SetCookieExpected = "theme=light";
+            const string ContentTypeHeaderExpected = "text/html";
+
+            const string SetCookieIgnored1 = "hello=world";
+            const string SetCookieIgnored2 = "net=core";
+
+            // Set-Cookie header will not be ignored with CurlHandler.
+            int containerCookiesCount = IsCurlHandler ? 3 : 1;
+            string containerCookiesExpected = IsCurlHandler ?
+                SetCookieIgnored1 + "; " + SetCookieIgnored2 + "; " + SetCookieExpected : SetCookieExpected;
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    HttpRequestMessage initialMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+                    initialMessage.Content = new StringContent(TestString);
+                    initialMessage.Headers.ExpectContinue = true;
+                    HttpResponseMessage response = await client.SendAsync(initialMessage);
+
+                    // Verify status code.
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    // Verify Cookie header.
+                    Assert.Equal(1, response.Headers.GetValues("Cookie").Count());
+                    Assert.Equal(CookieHeaderExpected, response.Headers.GetValues("Cookie").First().ToString());
+                    // Verify Set-Cookie header.
+                    Assert.Equal(containerCookiesCount, handler.CookieContainer.Count);
+                    Assert.Equal(containerCookiesExpected, handler.CookieContainer.GetCookieHeader(uri));
+                    // Verify Content-type header.
+                    Assert.Equal(ContentTypeHeaderExpected, response.Content.Headers.ContentType.ToString());
+                    clientFinished.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    // Send 100-Continue responses with additional headers.
+                    await connection.ReadRequestHeaderAndSendResponseAsync(responseStatusCode, additionalHeaders:
+                        "Cookie: ignore_cookie=choco1\r\n" + "Content-type: text/xml\r\n" + $"Set-Cookie: {SetCookieIgnored1}\r\n");
+                    await connection.SendResponseAsync(responseStatusCode, additionalHeaders:
+                        "Cookie: ignore_cookie=choco2\r\n" + "Content-type: text/plain\r\n" + $"Set-Cookie: {SetCookieIgnored2}\r\n");
+
+                    var result = new char[TestString.Length];
+                    await connection.Reader.ReadAsync(result, 0, TestString.Length);
+                    Assert.Equal(TestString, new string(result));
+
+                    // Send final status code.
+                    await connection.SendResponseAsync(HttpStatusCode.OK, additionalHeaders:
+                        $"Cookie: {CookieHeaderExpected}\r\n" + $"Content-type: {ContentTypeHeaderExpected}\r\n" + $"Set-Cookie: {SetCookieExpected}\r\n");
+                    await clientFinished.Task;
+                });
+            });
+        }
+
+        [Theory]
+        [MemberData(nameof(Interim1xxStatusCode))]
+        public async Task SendAsync_Unexpected1xxResponses_DropAllInterimResponses(HttpStatusCode responseStatusCode)
+        {
+            // Skip test on .NET Framework since it doesn't have the fix.
+            if (PlatformDetection.IsFullFramework && (int)responseStatusCode >= 102) return;
+
+            var clientFinished = new TaskCompletionSource<bool>();
+            const string TestString = "test";
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    HttpRequestMessage initialMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+                    initialMessage.Content = new StringContent(TestString);
+                    // No ExpectContinue header.
+                    initialMessage.Headers.ExpectContinue = false;
+                    HttpResponseMessage response = await client.SendAsync(initialMessage);
+
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    clientFinished.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    // Send unexpected 1xx responses.
+                    await connection.ReadRequestHeaderAndSendResponseAsync(responseStatusCode);
+                    await connection.SendResponseAsync(responseStatusCode);
+                    await connection.SendResponseAsync(responseStatusCode);
+
+                    var result = new char[TestString.Length];
+                    await connection.Reader.ReadAsync(result, 0, TestString.Length);
+                    Assert.Equal(TestString, new string(result));
+
+                    // Send final status code.
+                    await connection.SendResponseAsync(HttpStatusCode.OK);
+                    await clientFinished.Task;
+                });
+            });
+        }
+
+        [Fact]
+        public async Task SendAsync_MultipleExpected100Responses_ReceivesCorrectResponse()
+        {
+            var clientFinished = new TaskCompletionSource<bool>();
+            const string TestString = "test";
+            const string Valid100ContinueResponse = "HTTP/1.1 100 Continue\r\n\r\n";
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    HttpRequestMessage initialMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+                    initialMessage.Content = new StringContent(TestString);
+                    initialMessage.Headers.ExpectContinue = true;
+                    HttpResponseMessage response = await client.SendAsync(initialMessage);
+
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    clientFinished.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    // Send multiple 100-Continue responses.
+                    await connection.ReadRequestHeaderAndSendCustomResponseAsync(
+                        string.Concat(Enumerable.Repeat(Valid100ContinueResponse, 3)));
+
+                    var result = new char[TestString.Length];
+                    await connection.Reader.ReadAsync(result, 0, TestString.Length);
+                    Assert.Equal(TestString, new string(result));
+
+                    // Send final status code.
+                    await connection.SendResponseAsync(HttpStatusCode.OK);
+                    await clientFinished.Task;
+                });
+            });
+        }
+
+        [Fact]
+        public async Task SendAsync_No100ContinueReceived_RequestBodySentEventually()
+        {
+            // CurlHandler will not send request body if it doesn't see 100-Continue.
+            // This is not correct. Per RFC 7231: A client that sends a 100-continue expectation is not required
+            // to wait for any specific length of time; such a client MAY proceed to send the message body even
+            // if it has not yet received a response.
+            if (IsCurlHandler) return;
+
+            var clientFinished = new TaskCompletionSource<bool>();
+            const string TestString = "test";
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    HttpRequestMessage initialMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+                    initialMessage.Content = new StringContent(TestString);
+                    initialMessage.Headers.ExpectContinue = true;
+                    HttpResponseMessage response = await client.SendAsync(initialMessage);
+
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    clientFinished.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    // Send final status code 200.
+                    await connection.ReadRequestHeaderAndSendResponseAsync();
+
+                    var result = new char[TestString.Length];
+                    await connection.Reader.ReadAsync(result, 0, TestString.Length);
+                    Assert.Equal(TestString, new string(result));
+
+                    await clientFinished.Task;
+                });
+            });
+        }
+
+        [Fact]
+        public async Task SendAsync_101SwitchingProtocolsResponse_Success()
+        {
+            // WinHttpHandler and CurlHandler will hang, waiting for additional response.
+            // Other handlers will accept 101 as a final response.
+            if (IsWinHttpHandler || IsCurlHandler) return;
+
+            var clientFinished = new TaskCompletionSource<bool>();
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    HttpResponseMessage response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
+                    Assert.Equal(HttpStatusCode.SwitchingProtocols, response.StatusCode);
+                    clientFinished.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    // Send a valid 101 Switching Protocols response.
+                    await connection.ReadRequestHeaderAndSendCustomResponseAsync(
+                        "HTTP/1.1 101 Switching Protocols\r\n" + "Upgrade: websocket\r\n" + "Connection: Upgrade\r\n\r\n");
+                    await clientFinished.Task;
+                });
+            });
+        }
+
         [ActiveIssue(30061, TargetFrameworkMonikers.Uap)]
         [Theory]
         [InlineData(false)]
@@ -2434,23 +2557,16 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(new Version(1, 1), receivedRequestVersion);
         }
 
-        [ActiveIssue(23037, TestPlatforms.AnyUnix)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
         [OuterLoop("Uses external server")]
-        [Theory]
+        [ConditionalTheory]
         [MemberData(nameof(Http2Servers))]
         public async Task SendAsync_RequestVersion20_ResponseVersion20IfHttp2Supported(Uri server)
         {
-            if (PlatformDetection.IsWindows && !PlatformDetection.IsWindows10Version1703OrGreater)
+            if (IsWinHttpHandler && !PlatformDetection.IsWindows10Version1703OrGreater)
             {
                 // Skip this test if running on Windows but on a release prior to Windows 10 Creators Update.
-                _output.WriteLine("Skipping test due to Windows 10 version prior to Version 1703.");
-                return;
-            }
-            if (UseSocketsHttpHandler)
-            {
-                // TODO #23134: SocketsHttpHandler doesn't yet support HTTP/2.
-                return;
+                throw new SkipTestException("Skipping test due to Windows 10 version prior to Version 1703.");
             }
 
             // We don't currently have a good way to test whether HTTP/2 is supported without
@@ -2463,25 +2579,6 @@ namespace System.Net.Http.Functional.Tests
             {
                 // It is generally expected that the test hosts will be trusted, so we don't register a validation
                 // callback in the usual case.
-                // 
-                // However, on our Debian 8 test machines, a combination of a server side TLS chain,
-                // the client chain processor, and the distribution's CA bundle results in an incomplete/untrusted
-                // certificate chain. See https://github.com/dotnet/corefx/issues/9244 for more details.
-                if (PlatformDetection.IsDebian8)
-                {
-                    // Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool>
-                    handler.ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) =>
-                    {
-                        Assert.InRange(chain.ChainStatus.Length, 0, 1);
-
-                        if (chain.ChainStatus.Length > 0)
-                        {
-                            Assert.Equal(X509ChainStatusFlags.PartialChain, chain.ChainStatus[0].Status);
-                        }
-
-                        return true;
-                    };
-                }
 
                 using (HttpResponseMessage response = await client.SendAsync(request))
                 {
@@ -2599,6 +2696,37 @@ namespace System.Net.Http.Functional.Tests
                 }
             });
         }
-#endregion
+        #endregion
+
+        [Fact]
+        public async Task SendAsync_UserAgent_CorrectlyWritten()
+        {
+            string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.18 Safari/537.36";
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var client = CreateHttpClient())
+                {
+                    var message = new HttpRequestMessage(HttpMethod.Get, uri);
+                    message.Headers.TryAddWithoutValidation("User-Agent", userAgent);
+                    (await client.SendAsync(message).ConfigureAwait(false)).Dispose();
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"User-Agent: {userAgent}", headers);
+            }));
+        }
+
+        [Fact]
+        public async Task GetAsync_InvalidUrl_ExpectedExceptionThrown()
+        {
+            string invalidUri = $"http://{Guid.NewGuid().ToString("N")}";
+            using (HttpClient client = CreateHttpClient())
+            {
+                await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(invalidUri));
+                await Assert.ThrowsAsync<HttpRequestException>(() => client.GetStringAsync(invalidUri));
+            }
+        }
     }
 }
