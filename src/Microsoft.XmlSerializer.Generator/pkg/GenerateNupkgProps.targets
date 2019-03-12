@@ -20,6 +20,8 @@
   &lt;ItemGroup&gt;
     &lt;DotNetCliToolReference Include="$(Id)" Version="$(PackageVersion)" /&gt;
   &lt;/ItemGroup&gt;
+  &lt;UsingTask TaskName="SgenParameters" AssemblyFile="..\lib\netstandard2.0\dotnet-Microsoft.XmlSerializer.Generator.dll" /&gt;
+  &lt;UsingTask TaskName="SgenSetEnv" AssemblyFile="..\lib\netstandard2.0\dotnet-Microsoft.XmlSerializer.Generator.dll" /&gt;
 &lt;/Project&gt;
       </PropsFileContents>
     </PropertyGroup>

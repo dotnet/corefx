@@ -42,10 +42,10 @@ namespace Microsoft.XmlSerializer.Generator
 
             AppDomain.CurrentDomain.AssemblyResolve += SgenAssemblyResolver;
 
-            args = ParseResponseFile(args);
-
             try
             {
+                args = ParseResponseFile(args);
+
                 for (int i = 0; i < args.Length; i++)
                 {
                     string arg = args[i];
@@ -625,14 +625,13 @@ namespace Microsoft.XmlSerializer.Generator
             var parsedArgs = new List<string>();
             foreach (string arg in args)
             {
-                if (!arg.StartsWith("@"))
+                if (!arg.EndsWith(".rsp"))
                 {
                     parsedArgs.Add(arg);
                 }
                 else
                 {
-                    string responseFileName = arg.Substring(1);
-                    foreach (string line in ReadResponseFile(responseFileName))
+                    foreach (string line in File.ReadAllLines(arg))
                     { 
                         int i = line.Trim().IndexOf(' ');
                         if (i < 0)
@@ -649,21 +648,6 @@ namespace Microsoft.XmlSerializer.Generator
                 }
             }
             return parsedArgs.ToArray();
-        }
-
-        private string[] ReadResponseFile(string responseFileName)
-        {
-            string[] lines;
-            try
-            {
-                lines = File.ReadAllLines(responseFileName);
-            }
-            catch (Exception e)
-            {
-                WriteError(e, true);
-                throw;
-            }
-            return lines;
         }
     }
 }

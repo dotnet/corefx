@@ -37,5 +37,8 @@
     <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview.19106.1</MicrosoftNETCorePlatformsPackageVersion>
     <!-- Standard dependencies -->
     <NETStandardLibraryPackageVersion>2.1.0-prerelease.19074.3</NETStandardLibraryPackageVersion>
+    <!-- msbuild dependencies - fixed -->
+    <MicrosoftBuildFrameworkPackageVersion>15.7.177</MicrosoftBuildFrameworkPackageVersion>
+    <MicrosoftBuildUtilitiesCorePackageVersion>15.7.177</MicrosoftBuildUtilitiesCorePackageVersion>
   </PropertyGroup>
 </Project>

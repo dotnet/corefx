@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{80958E8B-2FEB-4F95-83F9-825CA1ED26F8}</ProjectGuid>
     <AssemblyName>dotnet-Microsoft.XmlSerializer.Generator</AssemblyName>
@@ -10,6 +10,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Sgen.cs" />
+    <Compile Include="SgenTasks.cs" />
+    <Reference Include="Microsoft.Build.Utilities.Core" />
+    <Reference Include="Microsoft.Build.Framework" />
   </ItemGroup>
   <Import Project=".\GenerateThisAssemblyCs.targets" />
 </Project>

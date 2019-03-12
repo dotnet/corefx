@@ -16,7 +16,7 @@
     <Delete Condition="Exists('$(_SerializerCsIntermediateFolder)') == 'true'"  Files="$(_SerializerCsIntermediateFolder)" ContinueOnError="true"/>
     <Message Text="Running Serialization Tool" Importance="normal" />
     <Exec Condition="!Exists('$(_SgenRspFilePath)')" Command="dotnet Microsoft.XmlSerializer.Generator &quot;$(IntermediateOutputPath)$(AssemblyName)$(TargetExt)&quot; --force --quiet --reference &quot;@(ReferencePath)&quot;" ContinueOnError="true"/>
-    <Exec Condition="Exists('$(_SgenRspFilePath)')" Command="dotnet Microsoft.XmlSerializer.Generator &quot;$(IntermediateOutputPath)$(AssemblyName)$(TargetExt)&quot;  --force --quiet --reference &quot;@(ReferencePath)&quot; @$(_SgenRspFilePath)" ContinueOnError="true"/>
+    <Exec Condition="Exists('$(_SgenRspFilePath)')" Command="dotnet Microsoft.XmlSerializer.Generator &quot;$(IntermediateOutputPath)$(AssemblyName)$(TargetExt)&quot;  --force --quiet --reference &quot;@(ReferencePath)&quot; $(_SgenRspFilePath)" ContinueOnError="true"/>
     <Warning Condition="Exists('$(_SerializerCsIntermediateFolder)') != 'true'" Text="$(_SGenWarningText)" />
     <Csc Condition="Exists('$(_SerializerCsIntermediateFolder)') AND !Exists('$(_CscRspFilePath)')" ContinueOnError="true" OutputAssembly="$(_SerializerDllIntermediateFolder)" References="@(ReferencePath);@(IntermediateAssembly)" EmitDebugInformation="$(DebugSymbols)" Sources="$(_SerializerCsIntermediateFolder)" TargetType="Library" ToolExe="$(CscToolExe)" ToolPath="$(CscToolPath)" DisabledWarnings="$(_SerializationAssemblyDisabledWarnings)"/>
     <Csc Condition="Exists('$(_SerializerCsIntermediateFolder)') AND Exists('$(_CscRspFilePath)')" ContinueOnError="true" OutputAssembly="$(_SerializerDllIntermediateFolder)" References="@(ReferencePath);@(IntermediateAssembly)" EmitDebugInformation="$(DebugSymbols)" Sources="$(_SerializerCsIntermediateFolder)" TargetType="Library" ResponseFiles="$(_CscRspFilePath)"  ToolExe="$(CscToolExe)" ToolPath="$(CscToolPath)" DisabledWarnings="$(_SerializationAssemblyDisabledWarnings)"/>
@@ -24,6 +24,11 @@
     <Copy Condition="Exists('$(_SerializerDllIntermediateFolder)') == 'true'" SourceFiles="$(_SerializerDllIntermediateFolder)" DestinationFolder="$(OutputPath)" />
     <Delete Condition="Exists('$(_SgenRspFilePath)')" Files="$(_SgenRspFilePath)" />
     <Delete Condition="Exists('$(_CscRspFilePath)')" Files="$(_CscRspFilePath)" />
+  </Target>
+  
+   <Target Name="SetEnvironmentVariableForRspFilePath" BeforeTargets="SetSgenParameters">
+    <SgenSetEnv Name="SgenRspFilePath" Value="$(_SgenRspFilePath)" ContinueOnError="true" />
+    <SgenSetEnv Name="SgenCscRspFilePath" Value="$(_CscRspFilePath)" ContinueOnError="true" />
   </Target>
 
   <Target Name="CleanSerializationAssembly" AfterTargets="CoreClean">
@@ -65,82 +70,5 @@
   <Target Name="CopySerializerForReferenceAssemblies" AfterTargets="PrepareForPublish" Condition="@(SerializationAssembly)!=''">
     <Copy Condition="Exists('$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll') == 'true'" SourceFiles="$(OutputPath)%(SerializationAssembly.Identity).XmlSerializers.dll" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="false" />
   </Target>
-
-  <UsingTask
-     TaskName="SgenParameters"
-     TaskFactory="RoslynCodeTaskFactory"
-     AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-    <ParameterGroup>
-      <Types />
-      <References />
-      <UseProxyTypes ParameterType="System.Boolean" />
-      <Verbose ParameterType="System.Boolean" />
-      <KeyFile />
-      <KeyContainer />
-      <DelaySign ParameterType="System.Boolean" />
-    </ParameterGroup>
-    <Task>
-      <Using Namespace="System" />
-      <Using Namespace="System.IO" />
-      <Using Namespace="System.Text" />
-      <Using Namespace="System.Collections.Generic" />
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[     
-        var sgenCommands=new List<string>();
-        if(Types!=null)
-          sgenCommands.Add("--type "+ Types);
-        if(UseProxyTypes)
-          sgenCommands.Add("--proxytypes");
-        if(Verbose)
-          sgenCommands.Add("--verbose");
-        if(References!=null)
-        {
-          sgenCommands.Add("--reference "+References);
-        }
-        
-        var cscCommands=new List<string>();
-        if(KeyFile!=null)
-            cscCommands.Add("-keyfile:"+KeyFile);
-        if(KeyContainer!=null)
-            cscCommands.Add("-keycontainer:"+KeyContainer);
-        if(DelaySign)
-            cscCommands.Add("-delaysign");
-
-        if(sgenCommands.Count>0)
-        {
-            string sgenRspPath= @"$(_SgenRspFilePath)";
-            if (File.Exists(sgenRspPath))
-                File.Delete(sgenRspPath);
-            try
-            {
-                File.WriteAllLines(sgenRspPath, sgenCommands.ToArray(), Encoding.UTF8);
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine(e.Message);
-                throw;
-            }
-         }
-        
-        if(cscCommands.Count>0)
-        {
-            string cscRspPath=@"$(_CscRspFilePath)";
-            if(File.Exists(cscRspPath))
-                File.Delete(cscRspPath);
-            try
-            {
-                File.WriteAllLines(cscRspPath, cscCommands.ToArray(), Encoding.UTF8);
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine(e.Message);
-                throw;
-            }           
-        }
-        
-]]>
-      </Code>
-    </Task>
-  </UsingTask>
 
 </Project>
