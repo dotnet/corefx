@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.Collections;
+using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
@@ -1001,6 +1002,87 @@ namespace System.Text.Json.Tests
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
                 Assert.Throws<InvalidOperationException>(() => root.GetBoolean());
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonDateTimeTestData.ValidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
+        public static void ReadDateTimeAndDateTimeOffset(string jsonString, string expectedString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            using (JsonDocument doc = JsonDocument.Parse(dataUtf8, default))
+            {
+                JsonElement root = doc.RootElement;
+
+                DateTime expectedDateTime = DateTime.Parse(expectedString);
+                DateTimeOffset expectedDateTimeOffset = DateTimeOffset.Parse(expectedString);
+
+                Assert.Equal(JsonValueType.String, root.Type);
+
+                Assert.True(root.TryGetDateTime(out DateTime DateTimeVal));
+                Assert.Equal(expectedDateTime, DateTimeVal);
+
+                Assert.True(root.TryGetDateTimeOffset(out DateTimeOffset DateTimeOffsetVal));
+                Assert.Equal(expectedDateTimeOffset, DateTimeOffsetVal);
+
+                Assert.Equal(expectedDateTime, root.GetDateTime());
+                Assert.Equal(expectedDateTimeOffset, root.GetDateTimeOffset());
+
+                Assert.Throws<InvalidOperationException>(() => root.GetInt32());
+                Assert.Throws<InvalidOperationException>(() => root.GetUInt32());
+                Assert.Throws<InvalidOperationException>(() => root.GetInt64());
+                Assert.Throws<InvalidOperationException>(() => root.GetUInt64());
+                Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
+                Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
+                Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
+                Assert.Throws<InvalidOperationException>(() => root.GetBoolean());
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonDateTimeTestData.ValidISO8601TestsWithUtcOffset), MemberType = typeof(JsonDateTimeTestData))]
+        public static void ReadDateTimeAndDateTimeOffset_WithUtcOffset(string jsonString, string expectedString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            using (JsonDocument doc = JsonDocument.Parse(dataUtf8, default))
+            {
+                JsonElement root = doc.RootElement;
+
+                DateTime expectedDateTime = DateTime.ParseExact(expectedString, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+                DateTimeOffset expectedDateTimeOffset = DateTimeOffset.ParseExact(expectedString, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+
+                Assert.Equal(JsonValueType.String, root.Type);
+
+                Assert.True(root.TryGetDateTime(out DateTime DateTimeVal));
+                Assert.Equal(expectedDateTime, DateTimeVal);
+
+                Assert.True(root.TryGetDateTimeOffset(out DateTimeOffset DateTimeOffsetVal));
+                Assert.Equal(expectedDateTimeOffset, DateTimeOffsetVal);
+
+                Assert.Equal(expectedDateTime, root.GetDateTime());
+                Assert.Equal(expectedDateTimeOffset, root.GetDateTimeOffset());
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonDateTimeTestData.InvalidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
+        public static void ReadDateTimeAndDateTimeOffset_InvalidTests(string jsonString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            using (JsonDocument doc = JsonDocument.Parse(dataUtf8, default))
+            {
+                JsonElement root = doc.RootElement;
+
+                Assert.Equal(JsonValueType.String, root.Type);
+
+                Assert.False(root.TryGetDateTime(out DateTime DateTimeVal));
+                Assert.False(root.TryGetDateTimeOffset(out DateTimeOffset DateTimeOffsetVal));
+
+                Assert.Throws<FormatException>(() => root.GetDateTime());
+                Assert.Throws<FormatException>(() => root.GetDateTimeOffset());
             }
         }
 
