@@ -8,18 +8,18 @@
       <Link>CommonTest\System\IO\WrappedMemoryStream.cs</Link>
     </Compile>
     <Compile Include="ArrayBufferWriter.cs" />
-    <Compile Include="BitStackTests.cs" />
+    <!--<Compile Include="BitStackTests.cs" />-->
     <Compile Include="BufferFactory.cs" />
     <Compile Include="BufferSegment.cs" />
     <Compile Include="FixedSizedBufferWriter.cs" />
     <Compile Include="InvalidBufferWriter.cs" />
-    <Compile Include="JsonDocumentTests.cs" />
+    <!--<Compile Include="JsonDocumentTests.cs" />-->
     <Compile Include="JsonNumberTestData.cs" />
-    <Compile Include="JsonReaderStateAndOptionsTests.cs" />
+    <!--<Compile Include="JsonReaderStateAndOptionsTests.cs" />-->
     <Compile Include="JsonTestHelper.cs" />
-    <Compile Include="JsonWriterStateTests.cs" />
+    <!--<Compile Include="JsonWriterStateTests.cs" />-->
     <Compile Include="ResizableArray.cs" />
-    <Compile Include="Serialization\Array.ReadTests.cs" />
+    <!--<Compile Include="Serialization\Array.ReadTests.cs" />
     <Compile Include="Serialization\Array.WriteTests.cs" />
     <Compile Include="Serialization\CyclicTests.cs" />
     <Compile Include="Serialization\EnumTests.cs" />
@@ -36,12 +36,13 @@
     <Compile Include="Serialization\TestClasses.Polymorphic.cs" />
     <Compile Include="Serialization\TestData.cs" />
     <Compile Include="Serialization\Value.ReadTests.cs" />
-    <Compile Include="Serialization\Value.WriteTests.cs" />
+    <Compile Include="Serialization\Value.WriteTests.cs" />-->
     <Compile Include="TestCaseType.cs" />
-    <Compile Include="Utf8JsonReaderTests.cs" />
-    <Compile Include="Utf8JsonReaderTests.MultiSegment.cs" />
-    <Compile Include="Utf8JsonReaderTests.TryGet.cs" />
-    <Compile Include="Utf8JsonWriterTests.cs" />
+    <!--<Compile Include="Utf8JsonReaderTests.cs" />
+    <Compile Include="Utf8JsonReaderTests.MultiSegment.cs" />-->
+    <Compile Include="Utf8JsonReaderTests.TextEquals.cs" />
+    <!--<Compile Include="Utf8JsonReaderTests.TryGet.cs" />
+    <Compile Include="Utf8JsonWriterTests.cs" />-->
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\src\System\Text\Json\BitStack.cs" Link="BitStack.cs" />

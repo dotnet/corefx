@@ -256,6 +256,8 @@ namespace System.Text.Json
 
             ReadOnlySequence<byte> localSequence = ValueSequence;
 
+            Debug.Assert(!localSequence.IsSingleSegment);
+
             int matchedSoFar = 0;
 
             foreach (ReadOnlyMemory<byte> memory in localSequence)
@@ -291,28 +293,43 @@ namespace System.Text.Json
 
         private bool UnescapeSequenceAndCompare(ReadOnlySpan<byte> other)
         {
-            throw new NotImplementedException();
+            Debug.Assert(HasValueSequence);
 
-            //Debug.Assert(HasValueSequence);
+            ReadOnlySequence<byte> localSequence = ValueSequence;
 
-            //ReadOnlySequence<byte> localSequence = ValueSequence;
+            Debug.Assert(!localSequence.IsSingleSegment);
 
-            //int matchedSoFar = 0;
+            int matchedSoFar = 0;
+            int idx = -1;
 
-            //foreach (ReadOnlyMemory<byte> memory in localSequence)
-            //{
-            //    ReadOnlySpan<byte> span = memory.Span;
+            foreach (ReadOnlyMemory<byte> memory in localSequence)
+            {
+                ReadOnlySpan<byte> span = memory.Span;
 
-            //    if (other.Slice(matchedSoFar).StartsWith(span))
-            //    {
-            //        matchedSoFar += span.Length;
-            //    }
-            //    else
-            //    {
-            //        return false;
-            //    }
-            //}
-            //return other.Length == matchedSoFar;
+                idx = span.IndexOf(JsonConstants.BackSlash);
+
+                if (idx != -1)
+                {
+                    if (!other.Slice(matchedSoFar).StartsWith(span.Slice(0, idx)))
+                    {
+                        return false;
+                    }
+                    matchedSoFar += idx;
+                    return JsonReaderHelper.UnescapeAndCompare(localSequence.Slice(matchedSoFar), other.Slice(matchedSoFar));
+                }
+
+                if (other.Slice(matchedSoFar).StartsWith(span))
+                {
+                    matchedSoFar += span.Length;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            Debug.Fail($"The payload contains an escaped character and hence we must have seen a backslash. Index should never be -1: {idx}");
+            return false;
         }
 
         private void StartObject()

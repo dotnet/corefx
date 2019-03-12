@@ -1771,63 +1771,6 @@ namespace System.Text.Json.Tests
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
         }
 
-        [Fact]
-        public static void TestTextEqualsBasic()
-        {
-            byte[] connectionId = Encoding.UTF8.GetBytes("connectionId");
-            byte[] availableTransports = Encoding.UTF8.GetBytes("availableTransports");
-            bool foundId = false;
-            bool foundTransports = false;
-
-            string jsonString = "{\"conne\\u0063tionId\":\"123\",\"availableTransports\":[]}";
-            byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
-
-            var json = new Utf8JsonReader(utf8Data, isFinalBlock: true, state: default);
-            while (json.Read())
-            {
-                if (json.TokenType == JsonTokenType.PropertyName)
-                {
-                    if (json.TextEquals(connectionId))
-                    {
-                        foundId = true;
-                    }
-                    else if (json.TextEquals(availableTransports))
-                    {
-                        foundTransports = true;
-                    }
-                }
-            }
-
-            Assert.True(foundId);
-            Assert.True(foundTransports);
-        }
-
-        [Theory]
-        [InlineData("{\"name\": 1234}", "name", true)]
-        [InlineData("{\"name\": 1234}", "", false)]
-        [InlineData("{\"\": 1234}", "name", false)]
-        [InlineData("{\"\": 1234}", "", true)]
-        public static void TestTextEquals(string jsonString, string lookUpString, bool expectedFound)
-        {
-            byte[] lookup = Encoding.UTF8.GetBytes(lookUpString);
-            byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
-            bool found = false;
-
-            var json = new Utf8JsonReader(utf8Data, isFinalBlock: true, state: default);
-            while (json.Read())
-            {
-                if (json.TokenType == JsonTokenType.PropertyName)
-                {
-                    if (json.TextEquals(lookup))
-                    {
-                        found = true;
-                    }
-                }
-            }
-
-            Assert.Equal(expectedFound, found);
-        }
-
         private static void VerifyReadLoop(ref Utf8JsonReader json, string expected)
         {
             while (json.Read())

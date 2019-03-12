@@ -911,10 +911,10 @@ namespace System.Text.Json
                                             _totalConsumed += localBuffer.Length;
 
                                             localBuffer = _buffer;
+                                            numberOfHexDigits -= j - idx;
                                             idx = 0;
                                             j = 0;
                                             movedToNext = true;
-                                            numberOfHexDigits -= j - idx;
                                         }
 
                                     DoneWithHex:
