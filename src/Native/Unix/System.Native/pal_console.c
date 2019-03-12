@@ -84,8 +84,8 @@ static bool g_hasCurrentTermios = false;      // tracks whether g_currentTermios
 static struct termios g_currentTermios;       // the latest attributes set
 
 // The terminal can be used by the .NET application via the Console class.
-// It may also be used by child processes that is started via the Process class.
-// The terminal needs to be configured different depending on the user.
+// It may also be used by child processes that are started via the Process class.
+// The terminal needs to be configured differently depending on the user.
 // ConfigureTerminalForXXX are called to change the configuration.
 // When it is ambiguous whether we should configure for Console/a child Process,
 // we prefer configuring for the Console.
@@ -103,11 +103,12 @@ static void ttou_handler(int signo)
     g_receivedSigTtou = true;
 }
 
-static void InstallTTOUHandler(void (*handler)(int))
+static void InstallTTOUHandler(void (*handler)(int), int flags)
 {
     struct sigaction action;
     memset(&action, 0, sizeof(action));
     action.sa_handler = handler;
+    action.sa_flags = flags;
     int rvSigaction = sigaction(SIGTTOU, &action, NULL);
     assert(rvSigaction == 0);
     (void)rvSigaction;
@@ -125,8 +126,12 @@ static bool TcSetAttr(struct termios* termios, bool blockIfBackground)
     {
         // When the process is running in background, changing terminal settings
         // will stop it (default SIGTTOU action).
-        // We change SIGTTOU to to get EINTR instead of blocking.
-        InstallTTOUHandler(ttou_handler);
+        // We change SIGTTOU's disposition to get EINTR instead.
+        // This thread may be used to run a signal handler, which may write to
+        // stdout. We set SA_RESETHAND to avoid that handler's write infinitly looping
+        // on EINTR when the process is running in background and the terminal
+        // configured with TOSTOP.
+        InstallTTOUHandler(ttou_handler, (int)SA_RESETHAND);
 
         g_receivedSigTtou = false;
     }
@@ -143,7 +148,7 @@ static bool TcSetAttr(struct termios* termios, bool blockIfBackground)
         }
 
         // Restore default SIGTTOU handler.
-        InstallTTOUHandler(SIG_DFL);
+        InstallTTOUHandler(SIG_DFL, 0);
     }
 
     // On success, update the cached value.

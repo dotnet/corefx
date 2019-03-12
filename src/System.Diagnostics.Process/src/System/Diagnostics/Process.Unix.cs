@@ -375,6 +375,7 @@ namespace System.Diagnostics
             // Unix applications expect the terminal to be in an echoing state by default.
             // To support processes that interact with the terminal (e.g. 'vi'), we need to configure the
             // terminal to echo. We keep this configuration as long as there are children possibly using the terminal.
+            // We consider the child to be interactively using the terminal when both stdin and stdout are connected.
             bool usesTerminal = !startInfo.RedirectStandardInput && !startInfo.RedirectStandardOutput;
 
             if (startInfo.UseShellExecute)
@@ -477,7 +478,7 @@ namespace System.Diagnostics
             {
                 if (usesTerminal)
                 {
-                    ConfigureTerminalForChildProcesses(+1);
+                    ConfigureTerminalForChildProcesses(1);
                 }
 
                 int childPid;
@@ -522,9 +523,9 @@ namespace System.Diagnostics
             {
                 s_processStartLock.ExitReadLock();
 
-                // We failed to launch a child that could use the terminal.
                 if (_waitStateHolder == null && usesTerminal)
                 {
+                    // We failed to launch a child that could use the terminal.
                     s_processStartLock.EnterWriteLock();
                     ConfigureTerminalForChildProcesses(-1);
                     s_processStartLock.ExitWriteLock();
