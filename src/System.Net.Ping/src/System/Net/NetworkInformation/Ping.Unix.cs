@@ -334,7 +334,7 @@ namespace System.Net.NetworkInformation
                         p.Kill();
                     }
                     catch (Win32Exception) { }
-                    catch (System.InvalidOperationException) { }
+                    catch (InvalidOperationException) { }
                     return CreateTimedOutPingReply();
                 }
                 else
