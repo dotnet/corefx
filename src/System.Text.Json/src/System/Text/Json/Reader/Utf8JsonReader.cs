@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace System.Text.Json
 {
@@ -215,11 +216,29 @@ namespace System.Text.Json
             return retVal;
         }
 
+        /// <summary>
+        /// Compares the UTF-8 encoded text to the unescaped JSON token value in the source and returns true if they match.
+        /// </summary>
+        /// <param name="otherUtf8Text">The UTF-8 encoded text to compare against.</param>
+        /// <returns>True if the JSON token value in the source matches the UTF-8 encoded look up text.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to find a text match on a JSON token that is not a string
+        /// (i.e. other than <see cref="JsonTokenType.String"/> or <see cref="JsonTokenType.PropertyName"/>).
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        /// <remarks>
+        /// If the look up text is invalid UTF-8 text, the method will always return false since you cannot have 
+        /// invalid UTF-8 within the JSON payload.
+        /// </remarks>
+        /// <remarks>
+        /// The comparison of the JSON token value in the source and the look up text is done by first unescaping the JSON value in source,
+        /// if required. The look up text is matched as is, without any modifications to it.
+        /// </remarks>
         public bool TextEquals(ReadOnlySpan<byte> otherUtf8Text)
         {
             if (TokenType != JsonTokenType.PropertyName && TokenType != JsonTokenType.String)
             {
-                throw new InvalidOperationException();
+                throw ThrowHelper.GetInvalidOperationException_ExpectedStringComparison(TokenType);
             }
 
             if (HasValueSequence)
@@ -235,14 +254,72 @@ namespace System.Text.Json
             return otherUtf8Text.SequenceEqual(ValueSpan);
         }
 
+        /// <summary>
+        /// Compares the UTF-16 encoded text to the unescaped JSON token value in the source and returns true if they match.
+        /// </summary>
+        /// <param name="otherText">The UTF-16 encoded text to compare against.</param>
+        /// <returns>True if the JSON token value in the source matches the UTF-16 encoded look up text.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to find a text match on a JSON token that is not a string
+        /// (i.e. other than <see cref="JsonTokenType.String"/> or <see cref="JsonTokenType.PropertyName"/>).
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        /// <remarks>
+        /// If the look up text is invalid or incomplete UTF-16 text (i.e. unpaired surrogates), the method will always return false
+        /// since you cannot have invalid UTF-16 within the JSON payload.
+        /// </remarks>
+        /// <remarks>
+        /// The comparison of the JSON token value in the source and the look up text is done by first unescaping the JSON value in source,
+        /// if required. The look up text is matched as is, without any modifications to it.
+        /// </remarks>
         public bool TextEquals(ReadOnlySpan<char> otherText)
         {
             if (TokenType != JsonTokenType.PropertyName && TokenType != JsonTokenType.String)
             {
-                throw new InvalidOperationException();
+                throw ThrowHelper.GetInvalidOperationException_ExpectedStringComparison(TokenType);
             }
 
-            throw new NotImplementedException();
+            byte[] otherUtf8TextArray = null;
+
+            Span<byte> otherUtf8Text;
+
+            // Transcoding has a max factor of 3, but calling AsBytes increases it by x2
+            int length = checked(otherText.Length * JsonConstants.MaxExpansionFactorWhileEscaping);
+            if (length > JsonConstants.StackallocThreshold)
+            {
+                otherUtf8TextArray = ArrayPool<byte>.Shared.Rent(length);
+                otherUtf8Text = otherUtf8TextArray;
+            }
+            else
+            {
+                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
+                unsafe
+                {
+                    byte* ptr = stackalloc byte[length];
+                    otherUtf8Text = new Span<byte>(ptr, length);
+                }
+            }
+
+            ReadOnlySpan<byte> utf16Text = MemoryMarshal.AsBytes(otherText);
+
+            OperationStatus status = JsonWriterHelper.ToUtf8(utf16Text, otherUtf8Text, out int consumed, out int written);
+            Debug.Assert(status != OperationStatus.DestinationTooSmall);
+            if (status == OperationStatus.NeedMoreData || status == OperationStatus.InvalidData)
+            {
+                return false;
+            }
+            Debug.Assert(status == OperationStatus.Done);
+            Debug.Assert(consumed == utf16Text.Length);
+
+            bool result = TextEquals(otherUtf8Text.Slice(0, written));
+
+            if (otherUtf8TextArray != null)
+            {
+                otherUtf8Text.Clear();
+                ArrayPool<byte>.Shared.Return(otherUtf8TextArray);
+            }
+
+            return result;
         }
 
         private bool CompareToSequence(ReadOnlySpan<byte> other)
