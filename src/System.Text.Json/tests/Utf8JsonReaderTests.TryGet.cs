@@ -1071,6 +1071,10 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(InvalidISO8601Tests))]
         public static void TestingStringsInvalidConversionToDateTime(string jsonString)
         {
+            // Use invariant culture particularly to test datetime 9999-12-31T23:59:59.9999999 for year overflow to 10_000
+            CultureInfo originalCulture = CultureInfo.CurrentUICulture;
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
@@ -1086,12 +1090,18 @@ namespace System.Text.Json.Tests
                 catch (FormatException)
                 { }
             }
+
+            CultureInfo.CurrentCulture = originalCulture;
         }
 
         [Theory]
         [MemberData(nameof(InvalidISO8601Tests))]
         public static void TestingStringsInvalidConversionToDateTimeOffset(string jsonString)
         {
+            // Use invariant culture particularly to test datetime 9999-12-31T23:59:59.9999999 for year overflow to 10_000
+            CultureInfo originalCulture = CultureInfo.CurrentUICulture;
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
@@ -1110,6 +1120,8 @@ namespace System.Text.Json.Tests
                     { }
                 }
             }
+
+            CultureInfo.CurrentCulture = originalCulture;
         }
     }
 }
