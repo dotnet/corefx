@@ -193,7 +193,7 @@ namespace System.Net.Http.HPack
                 if (IntegerEncoder.Encode(value.Length, 7, destination, out int integerLength))
                 {
                     Debug.Assert(integerLength >= 1);
-                    
+
                     destination = destination.Slice(integerLength);
                     if (value.Length <= destination.Length)
                     {
@@ -269,26 +269,27 @@ namespace System.Net.Http.HPack
         public static bool EncodeStringLiterals(string[] values, string separator, Span<byte> destination, out int bytesWritten)
         {
             bytesWritten = 0;
+
+            if (values.Length == 0)
+            {
+                return EncodeStringLiteral("", destination, out bytesWritten);
+            }
+            else if (values.Length == 1)
+            {
+                return EncodeStringLiteral(values[0], destination, out bytesWritten);
+            }
+
             if (destination.Length != 0)
             {
                 int valueLength = 0;
 
-                if (values.Length == 0)
-                {
-                    return EncodeStringLiteral("", destination, out bytesWritten);
-                }
-                else if (values.Length == 1)
-                {
-                    return EncodeStringLiteral(values[0], destination, out bytesWritten);
-                }
-
                 // Calculate length of all parts and separators.
                 foreach (string part in values)
                 {
-                    valueLength += part.Length;
+                    valueLength = checked((int)(valueLength + part.Length));
                 }
 
-                valueLength  += (values.Length - 1) * separator.Length;
+                valueLength = checked((int)(valueLength + (values.Length - 1) * separator.Length));
 
                 if (IntegerEncoder.Encode(valueLength, 7, destination, out int integerLength))
                 {
