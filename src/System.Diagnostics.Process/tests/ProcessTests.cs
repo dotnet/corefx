@@ -1104,7 +1104,7 @@ namespace System.Diagnostics.Tests
                     builder.AppendLine();
                 }
                 
-                builder.AppendFormat("Current process id: {0} Process name: '{1}'", Process.GetCurrentProcess().Id, currentProcess.ProcessName);
+                builder.AppendFormat("Current process id: {0} Process name: '{1}' Id: {2}", Process.GetCurrentProcess().Id, currentProcess.ProcessName, currentProcess.Id);
                 return builder.ToString();
             }
         }
