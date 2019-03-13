@@ -103,7 +103,7 @@ namespace System.Net.Http
                     }
 
                     // Don't wait for completion, which could happen asynchronously.
-                    ValueTask ignored = _connection.SendEndStreamAsync(_streamId);
+                    Task ignored = _connection.SendEndStreamAsync(_streamId);
                 }
             }
 
@@ -332,7 +332,7 @@ namespace System.Net.Http
                 int windowUpdateSize = _pendingWindowUpdate;
                 _pendingWindowUpdate = 0;
 
-                ValueTask ignored = _connection.SendWindowUpdateAsync(_streamId, windowUpdateSize);
+                Task ignored = _connection.SendWindowUpdateAsync(_streamId, windowUpdateSize);
             }
 
             private (bool wait, int bytesRead) TryReadFromBuffer(Span<byte> buffer)

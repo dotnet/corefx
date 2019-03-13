@@ -1127,7 +1127,7 @@ namespace System.Net.Http.Functional.Tests
                 Stopwatch stopwatch = Stopwatch.StartNew();
                 cts.Cancel();
 
-                await Assert.ThrowsAsync<OperationCanceledException>(async () => await sendTask);
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await sendTask);
 
                 // Ensure that the cancellation occurs promptly
                 stopwatch.Stop();
@@ -1184,7 +1184,7 @@ namespace System.Net.Http.Functional.Tests
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 cts.Cancel();
-                await Assert.ThrowsAsync<OperationCanceledException>(async () => await clientTask);
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await clientTask);
 
                 // Ensure that the cancellation occurs promptly
                 stopwatch.Stop();
@@ -1233,7 +1233,7 @@ namespace System.Net.Http.Functional.Tests
                 await Task.Delay(1000);
                 cts.Cancel();
 
-                await Assert.ThrowsAsync<OperationCanceledException>(async () => await clientTask);
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await clientTask);
             }
         }
     }

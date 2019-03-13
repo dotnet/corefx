@@ -68,7 +68,9 @@ namespace System.Net.Http
 
                 _waiters.Enqueue(waiter);
 
-                return new ValueTask<int>(tcs.WaitWithCancellationAsync(cancellationToken));
+                return new ValueTask<int>(cancellationToken.CanBeCanceled ?
+                                          tcs.WaitWithCancellationAsync(cancellationToken) :
+                                          tcs.Task);
             }
         }
 

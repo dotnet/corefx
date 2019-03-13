@@ -23,7 +23,7 @@ namespace System.Net.Http
         public async Task<T> WaitWithCancellationAsync(CancellationToken cancellationToken)
         {
             _cancellationToken = cancellationToken;
-            using (cancellationToken.Register(s => ((TaskCompletionSourceWithCancellation<T>)s).OnCancellation(), this))
+            using (cancellationToken.UnsafeRegister(s => ((TaskCompletionSourceWithCancellation<T>)s).OnCancellation(), this))
             {
                 return await Task.ConfigureAwait(false);
             }
