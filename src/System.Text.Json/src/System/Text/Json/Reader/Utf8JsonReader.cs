@@ -2186,6 +2186,8 @@ namespace System.Text.Json
                 }
                 if (foundIdx != 0 && localBuffer[foundIdx + idx - 1] == JsonConstants.Asterisk)
                 {
+                    // foundIdx points to '*' in the end-of-comment delimiter. Hence increment idx by one position
+                    // less to make it point right before beginning of end-of-comment delimiter i.e. */
                     idx += foundIdx - 1;
                     break;
                 }
@@ -2193,15 +2195,16 @@ namespace System.Text.Json
             }
 
             // Consume the /* and */ characters that are part of the multi-line comment.
-            // Since idx is pointing at right after the final '*' (i.e. before the last '/'), we don't need to count that character.
-            // Hence, we increment consumed by 3 (instead of 4).
+            // idx points right before the final '*' (i.e. before the last '/'). Hence increment _consumed
+            // by 4 to exclude the start/end-of-comment delimiters.
             _consumed += 4 + idx;
 
             (int newLines, int newLineIndex) = JsonReaderHelper.CountNewLines(localBuffer.Slice(0, idx));
             _lineNumber += newLines;
             if (newLineIndex != -1)
             {
-                // Exclude linefeed while resetting position
+                // newLineIndex points at last newline character and byte positions in the new line start
+                // after that. Hence add 1 to skip the newline character.
                 _bytePositionInLine = 2 + idx - (newLineIndex + 1);
             }
             else
@@ -2247,7 +2250,8 @@ namespace System.Text.Json
                 return false;
             }
 
-            // Exclude // at the beginning of the comment
+            // Exclude the // at start of the comment. idx points right before the line separator
+            // at the end of the comment.
             ValueSpan = _buffer.Slice(previousConsumed + 2, idx);
             if (_tokenType != JsonTokenType.Comment)
             {
@@ -2264,7 +2268,8 @@ namespace System.Text.Json
                 return false;
             }
 
-            // Exclude /* and trailing */ in the comment
+            // Exclude the /* at start of the comment. idx already points right before the terminal '*/'
+            // for the end of multiline comment.
             ValueSpan = _buffer.Slice(previousConsumed + 2, idx);
             if (_tokenType != JsonTokenType.Comment)
             {

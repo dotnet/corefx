@@ -2352,11 +2352,12 @@ namespace System.Text.Json
 
         private bool ConsumeCommentMultiSegment()
         {
+            long previousTotalConsumed = _totalConsumed;
+
             // Create local copy to avoid bounds checks.
             ReadOnlySpan<byte> localBuffer = _buffer.Slice(_consumed + 1);
             int leftOver = 2;
 
-            SequencePosition start = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + _consumed);
             if (localBuffer.Length == 0)
             {
                 if (IsLastSpan)
@@ -2380,22 +2381,42 @@ namespace System.Text.Json
             }
 
             byte marker = localBuffer[0];
+            if (marker != JsonConstants.Slash && marker != JsonConstants.Asterisk)
+            {
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterAtStartOfComment, marker);
+            }
 
+            localBuffer = localBuffer.Slice(1);
+            if (localBuffer.Length == 0)
+            {
+                if (IsLastSpan)
+                {
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedComment);
+                }
+                if (!GetNextSpan())
+                {
+                    _totalConsumed = previousTotalConsumed;
+                    return false;
+                }
+                _totalConsumed++;
+                _bytePositionInLine++;
+                localBuffer = _buffer;
+                leftOver = 0;
+            }
+
+            SequencePosition start = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + _consumed + leftOver);
             if (marker == JsonConstants.Slash)
             {
-                return ConsumeSingleLineCommentMultiSegment(localBuffer.Slice(1), leftOver, start, _consumed);
+                return ConsumeSingleLineCommentMultiSegment(localBuffer, leftOver, start);
             }
-
-            if (marker != JsonConstants.Asterisk)
-            {
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
-            }
-
-            return ConsumeMultiLineCommentMultiSegment(localBuffer.Slice(1), leftOver, start, _consumed);
+            return ConsumeMultiLineCommentMultiSegment(localBuffer, leftOver, start);
         }
 
-        private bool ConsumeSingleLineCommentMultiSegment(ReadOnlySpan<byte> localBuffer, int leftOver, SequencePosition start, int previousConsumed)
+        private bool ConsumeSingleLineCommentMultiSegment(ReadOnlySpan<byte> localBuffer, int leftOver, SequencePosition start)
         {
+            SequencePosition end = start;
+            SequencePosition previousEnd = end;
+
             long prevTotalConsumed = _totalConsumed;
             int idx = -1;
             bool expectLF = false;
@@ -2407,12 +2428,15 @@ namespace System.Text.Json
                     {
                         idx++;
                     }
-                    HasValueSequence = true;
                     break;
                 }
                 idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn);
                 if (idx != -1)
                 {
+                    if (idx > 0)
+                    {
+                        end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + _consumed + leftOver + idx);
+                    }
                     if (localBuffer[idx] == JsonConstants.LineFeed)
                     {
                         break;
@@ -2439,13 +2463,16 @@ namespace System.Text.Json
                     goto Done;
                 }
 
+                if (idx == -1)
+                {
+                    end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + localBuffer.Length);
+                }
                 if (!GetNextSpan())
                 {
                     _totalConsumed = prevTotalConsumed;
                     return false;
                 }
-                HasValueSequence = true;
-                _totalConsumed += localBuffer.Length + leftOver;
+                _totalConsumed += localBuffer.Length;
                 leftOver = 0;
                 localBuffer = _buffer;
                 idx = -1;
@@ -2456,25 +2483,16 @@ namespace System.Text.Json
             _lineNumber++;
 
         Done:
-            if (HasValueSequence)
+            ReadOnlySequence<byte> commentSequence = _sequence.Slice(start, end);
+            if (commentSequence.IsSingleSegment)
             {
-                SequencePosition end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger());
-                ReadOnlySequence<byte> commentSequence = _sequence.Slice(start, end);
-                commentSequence = commentSequence.Slice(2, commentSequence.Length - 2 - (expectLF ? 1 : 0));
-                if (commentSequence.IsSingleSegment)
-                {
-                    ValueSpan = commentSequence.First.Span;
-                    HasValueSequence = false;
-                }
-                else
-                {
-                    ValueSequence = commentSequence;
-                }
+                ValueSpan = commentSequence.First.Span;
+                HasValueSequence = false;
             }
             else
             {
-                // Exclude the // at start of the comment
-                ValueSpan = _buffer.Slice(previousConsumed + 2, idx);
+                ValueSequence = commentSequence;
+                HasValueSequence = true;
             }
 
             if (_tokenType != JsonTokenType.Comment)
@@ -2486,8 +2504,9 @@ namespace System.Text.Json
             return true;
         }
 
-        private bool ConsumeMultiLineCommentMultiSegment(ReadOnlySpan<byte> localBuffer, int leftOver, SequencePosition start, int previousConsumed)
+        private bool ConsumeMultiLineCommentMultiSegment(ReadOnlySpan<byte> localBuffer, int leftOver, SequencePosition start)
         {
+            SequencePosition end = start;
             long prevTotalConsumed = _totalConsumed;
             int i;
             int lastLineFeedIndex;
@@ -2507,6 +2526,7 @@ namespace System.Text.Json
 
                     if (nextByte == JsonConstants.Asterisk)
                     {
+                        end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + _consumed + leftOver + i);
                         i++;
                         lastAsterisk = true;
                         if (i < localBuffer.Length)
@@ -2523,7 +2543,6 @@ namespace System.Text.Json
                                 _totalConsumed = prevTotalConsumed;
                                 return false;
                             }
-                            HasValueSequence = true;
                             _totalConsumed += localBuffer.Length + leftOver;
 
                             if (lastLineFeedIndex == -1)
@@ -2564,7 +2583,6 @@ namespace System.Text.Json
                         _totalConsumed = prevTotalConsumed;
                         return false;
                     }
-                    HasValueSequence = true;
                     _totalConsumed += localBuffer.Length + leftOver;
                     if (lastLineFeedIndex == -1)
                     {
@@ -2581,26 +2599,16 @@ namespace System.Text.Json
             }
 
         Done:
-            if (HasValueSequence)
+            ReadOnlySequence<byte> commentSequence = _sequence.Slice(start, end);
+            if (commentSequence.IsSingleSegment)
             {
-                SequencePosition end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + i);
-                ReadOnlySequence<byte> commentSequence = _sequence.Slice(start, end);
-                // Exclude the /* and the trailing *
-                commentSequence = commentSequence.Slice(2, commentSequence.Length - 3);
-                if (commentSequence.IsSingleSegment)
-                {
-                    ValueSpan = commentSequence.First.Span;
-                    HasValueSequence = false;
-                }
-                else
-                {
-                    ValueSequence = commentSequence;
-                }
+                ValueSpan = commentSequence.First.Span;
+                HasValueSequence = false;
             }
             else
             {
-                // Exclude the /* and the trailing *
-                ValueSpan = _buffer.Slice(previousConsumed + 2, i - 1);
+                ValueSequence = commentSequence;
+                HasValueSequence = true;
             }
 
             if (_tokenType != JsonTokenType.Comment)

@@ -454,20 +454,19 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        //[InlineData("[123, 456]", "123456", "123456")]
+        [InlineData("[123, 456]", "123456", "123456")]
         [InlineData("/*a*/[{\"testA\":[{\"testB\":[{\"testC\":123}]}]}]", "testAtestBtestC123", "atestAtestBtestC123")]
-        //    [InlineData("{\"testA\":[1/*hi*//*bye*/, 2, 3], \"testB\": 4}", "testA123testB4", "testA1hibye23testB4")]
-        //    [InlineData("{\"test\":[[[123,456]]]}", "test123456", "test123456")]
-        //    [InlineData("/*a*//*z*/[/*b*//*z*/123/*c*//*z*/,/*d*//*z*/456/*e*//*z*/]/*f*//*z*/", "123456", "azbz123czdz456ezfz")]
-        //    [InlineData("[123,/*hi*/456/*bye*/]", "123456", "123hi456bye")]
-        //    [InlineData("[123,//hi\n456//bye\n]", "123456", "123hi456bye")]
-        //    [InlineData("[123,//hi\r456//bye\r]", "123456", "123hi456bye")]
-        //    [InlineData("[123,//hi\r\n456]", "123456", "123hi456")]
-        //    [InlineData("/*a*//*z*/{/*b*//*z*/\"test\":/*c*//*z*/[/*d*//*z*/[/*e*//*z*/[/*f*//*z*/123/*g*//*z*/,/*h*//*z*/456/*i*//*z*/]/*j*//*z*/]/*k*//*z*/]/*l*//*z*/}/*m*//*z*/",
-        //"test123456", "azbztestczdzezfz123gzhz456izjzkzlzmz")]
-        //    [InlineData("//a\n//z\n{//b\n//z\n\"test\"://c\n//z\n[//d\n//z\n[//e\n//z\n[//f\n//z\n123//g\n//z\n,//h\n//z\n456//i\n//z\n]//j\n//z\n]//k\n//z\n]//l\n//z\n}//m\n//z\n",
-        //"test123456", "azbztestczdzezfz123gzhz456izjzkzlzmz")]
-        [Trait("totest", "thisone")]
+        [InlineData("{\"testA\":[1/*hi*//*bye*/, 2, 3], \"testB\": 4}", "testA123testB4", "testA1hibye23testB4")]
+        [InlineData("{\"test\":[[[123,456]]]}", "test123456", "test123456")]
+        [InlineData("/*a*//*z*/[/*b*//*z*/123/*c*//*z*/,/*d*//*z*/456/*e*//*z*/]/*f*//*z*/", "123456", "azbz123czdz456ezfz")]
+        [InlineData("[123,/*hi*/456/*bye*/]", "123456", "123hi456bye")]
+        [InlineData("[123,//hi\n456//bye\n]", "123456", "123hi456bye")]
+        [InlineData("[123,//hi\r456//bye\r]", "123456", "123hi456bye")]
+        [InlineData("[123,//hi\r\n456]", "123456", "123hi456")]
+        [InlineData("/*a*//*z*/{/*b*//*z*/\"test\":/*c*//*z*/[/*d*//*z*/[/*e*//*z*/[/*f*//*z*/123/*g*//*z*/,/*h*//*z*/456/*i*//*z*/]/*j*//*z*/]/*k*//*z*/]/*l*//*z*/}/*m*//*z*/",
+        "test123456", "azbztestczdzezfz123gzhz456izjzkzlzmz")]
+        [InlineData("//a\n//z\n{//b\n//z\n\"test\"://c\n//z\n[//d\n//z\n[//e\n//z\n[//f\n//z\n123//g\n//z\n,//h\n//z\n456//i\n//z\n]//j\n//z\n]//k\n//z\n]//l\n//z\n}//m\n//z\n",
+        "test123456", "azbztestczdzezfz123gzhz456izjzkzlzmz")]
         public static void AllowCommentStackMismatchMultiSegment(string jsonString, string expectedWithoutComments, string expectedWithComments)
         {
             byte[] data = Encoding.UTF8.GetBytes(jsonString);
