@@ -28,7 +28,7 @@ namespace System.Diagnostics
         /// </summary>
         void IDisposable.Dispose()
         {
-            foreach ((Assembly cacheKey, MetadataReaderProvider provider) in _metadataCache)
+            foreach ((Assembly _, MetadataReaderProvider provider) in _metadataCache)
             {
                 provider?.Dispose();
             }
@@ -122,25 +122,14 @@ namespace System.Diagnostics
                 return null;
             }
 
-            MetadataReaderProvider provider;
-            while (!_metadataCache.TryGetValue(assembly, out provider))
+            // The ConditionalWeakTable's GetValue + callback will atomically create the cache entry for us
+            // so we are protected from multiple threads racing to get/create the same MetadataReaderProvider
+            MetadataReaderProvider provider = _metadataCache.GetValue(assembly, (assembly) =>
             {
-                provider = (inMemoryPdbAddress != IntPtr.Zero) ?
+                return (inMemoryPdbAddress != IntPtr.Zero) ?
                             TryOpenReaderForInMemoryPdb(inMemoryPdbAddress, inMemoryPdbSize) :
                             TryOpenReaderFromAssemblyFile(assemblyPath, loadedPeAddress, loadedPeSize);
-
-                // If the add loses the race with another thread, then the dispose the provider just 
-                // created and return the provider already in the cache.
-                try
-                {
-                    _metadataCache.Add(assembly, provider);
-                    break;
-                }
-                catch (ArgumentNullException)
-                {
-                    provider?.Dispose();
-                }
-            }
+            });
 
             // The reader has already been open, so this doesn't throw.
             return provider?.GetMetadataReader();
