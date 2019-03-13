@@ -283,8 +283,9 @@ namespace System.Text.Json
 
             Span<byte> otherUtf8Text;
 
-            // Transcoding has a max factor of 3, but calling AsBytes increases it by x2
-            int length = checked(otherText.Length * JsonConstants.MaxExpansionFactorWhileEscaping);
+            ReadOnlySpan<byte> utf16Text = MemoryMarshal.AsBytes(otherText);
+
+            int length = checked(utf16Text.Length * JsonConstants.MaxExpansionFactorWhileTranscoding);
             if (length > JsonConstants.StackallocThreshold)
             {
                 otherUtf8TextArray = ArrayPool<byte>.Shared.Rent(length);
@@ -300,8 +301,6 @@ namespace System.Text.Json
                 }
             }
 
-            ReadOnlySpan<byte> utf16Text = MemoryMarshal.AsBytes(otherText);
-
             OperationStatus status = JsonWriterHelper.ToUtf8(utf16Text, otherUtf8Text, out int consumed, out int written);
             Debug.Assert(status != OperationStatus.DestinationTooSmall);
             if (status == OperationStatus.NeedMoreData || status == OperationStatus.InvalidData)
@@ -315,7 +314,7 @@ namespace System.Text.Json
 
             if (otherUtf8TextArray != null)
             {
-                otherUtf8Text.Clear();
+                otherUtf8Text.Slice(0, written).Clear();
                 ArrayPool<byte>.Shared.Return(otherUtf8TextArray);
             }
 
@@ -392,7 +391,15 @@ namespace System.Text.Json
                         return false;
                     }
                     matchedSoFar += idx;
-                    return JsonReaderHelper.UnescapeAndCompare(localSequence.Slice(matchedSoFar), other.Slice(matchedSoFar));
+
+                    other = other.Slice(matchedSoFar);
+                    localSequence = localSequence.Slice(matchedSoFar);
+
+                    if (localSequence.IsSingleSegment)
+                    {
+                        return JsonReaderHelper.UnescapeAndCompare(localSequence.First.Span, other);
+                    }
+                    return JsonReaderHelper.UnescapeAndCompare(localSequence, other);
                 }
 
                 if (other.Slice(matchedSoFar).StartsWith(span))

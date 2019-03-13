@@ -83,6 +83,7 @@ namespace System.Text.Json.Tests
                     if (json.TextEquals(lookup) && json.TextEquals(lookUpString.AsSpan()))
                     {
                         found = true;
+                        break;
                     }
                 }
             }
@@ -100,6 +101,7 @@ namespace System.Text.Json.Tests
                     if (json.TextEquals(lookup) && json.TextEquals(lookUpString.AsSpan()))
                     {
                         found = true;
+                        break;
                     }
                 }
             }
@@ -133,6 +135,7 @@ namespace System.Text.Json.Tests
                     if (json.TextEquals(lookup) && json.TextEquals(lookUpString.AsSpan()))
                     {
                         found = true;
+                        break;
                     }
                 }
             }
@@ -150,6 +153,7 @@ namespace System.Text.Json.Tests
                     if (json.TextEquals(lookup) && json.TextEquals(lookUpString.AsSpan()))
                     {
                         found = true;
+                        break;
                     }
                 }
             }
@@ -163,17 +167,20 @@ namespace System.Text.Json.Tests
             var jsonChars = new char[320];  // Some value larger than 256 (stack threshold)
             jsonChars.AsSpan().Fill('a');
             byte[] lookup = Encoding.UTF8.GetBytes(jsonChars);
-            ReadOnlySpan<byte> lookupSpan = lookup.AsSpan(0, lookup.Length - 5);   // remove extra characters that were replaced by escaped bytes
+
+            ReadOnlySpan<char> escapedA = new char[6] { '\\', 'u', '0', '0', '6', '1' };
+
+            ReadOnlySpan<byte> lookupSpan = lookup.AsSpan(0, lookup.Length - escapedA.Length + 1);   // remove extra characters that were replaced by escaped bytes
             Span<char> lookupChars = new char[jsonChars.Length];
             jsonChars.CopyTo(lookupChars);
-            lookupChars = lookupChars.Slice(0, lookupChars.Length - 5);
+            lookupChars = lookupChars.Slice(0, lookupChars.Length - escapedA.Length + 1);
 
-            ReadOnlySpan<char> unEscapedA = new char[6] { '\\', 'u', '0', '0', '6', '1' };
-
-            for (int i = 0; i < jsonChars.Length - 5; i++)
+            // Replacing 'a' with '\u0061', so a net change of 5.
+            // escapedA.Length - 1 = 6 - 1 = 5
+            for (int i = 0; i < jsonChars.Length - escapedA.Length + 1; i++)
             {
                 jsonChars.AsSpan().Fill('a');
-                unEscapedA.CopyTo(jsonChars.AsSpan(i));
+                escapedA.CopyTo(jsonChars.AsSpan(i));
                 string jsonString = "\"" + new string(jsonChars) + "\"";
                 byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
 
@@ -187,6 +194,7 @@ namespace System.Text.Json.Tests
                         if (json.TextEquals(lookupSpan) && json.TextEquals(lookupChars))
                         {
                             found = true;
+                            break;
                         }
                     }
                 }
@@ -204,6 +212,7 @@ namespace System.Text.Json.Tests
                         if (json.TextEquals(lookupSpan) && json.TextEquals(lookupChars))
                         {
                             found = true;
+                            break;
                         }
                     }
                 }
@@ -217,7 +226,7 @@ namespace System.Text.Json.Tests
         {
             var jsonChars = new char[320];  // Some value larger than 256 (stack threshold)
             jsonChars.AsSpan().Fill('a');
-            ReadOnlySpan<char> unEscapedA = new char[6] { '\\', 'u', '0', '0', '6', '1' };
+            ReadOnlySpan<char> escapedA = new char[6] { '\\', 'u', '0', '0', '6', '1' };
 
             byte[] originalLookup = Encoding.UTF8.GetBytes(jsonChars);
 
@@ -227,7 +236,7 @@ namespace System.Text.Json.Tests
             for (int i = 1; i < jsonChars.Length - 6; i++)
             {
                 jsonChars.AsSpan().Fill('a');
-                unEscapedA.CopyTo(jsonChars.AsSpan(i));
+                escapedA.CopyTo(jsonChars.AsSpan(i));
                 string jsonString = "\"" + new string(jsonChars) + "\"";
                 byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
 
@@ -235,11 +244,11 @@ namespace System.Text.Json.Tests
                 {
                     Span<byte> lookup = new byte[originalLookup.Length];
                     originalLookup.CopyTo(lookup);
-                    lookup = lookup.Slice(0, lookup.Length - 5);    // remove extra characters that were replaced by escaped bytes
+                    lookup = lookup.Slice(0, lookup.Length - escapedA.Length + 1);    // remove extra characters that were replaced by escaped bytes
 
                     Span<char> lookupChars = new char[originalLookupChars.Length];
                     originalLookupChars.CopyTo(lookupChars);
-                    lookupChars = lookupChars.Slice(0, lookupChars.Length - 5);    // remove extra characters that were replaced by escaped bytes
+                    lookupChars = lookupChars.Slice(0, lookupChars.Length - escapedA.Length + 1);    // remove extra characters that were replaced by escaped bytes
 
                     switch (j)
                     {
@@ -267,6 +276,7 @@ namespace System.Text.Json.Tests
                             if (json.TextEquals(lookup) || json.TextEquals(lookupChars))
                             {
                                 found = true;
+                                break;
                             }
                         }
                     }
@@ -284,6 +294,7 @@ namespace System.Text.Json.Tests
                             if (json.TextEquals(lookup) || json.TextEquals(lookupChars))
                             {
                                 found = true;
+                                break;
                             }
                         }
                     }
@@ -313,6 +324,7 @@ namespace System.Text.Json.Tests
                     if (json.TextEquals(lookup) || json.TextEquals("Hello, \"Ahson\"".AsSpan()))
                     {
                         found = true;
+                        break;
                     }
                 }
             }
@@ -336,6 +348,7 @@ namespace System.Text.Json.Tests
                     if (json.TextEquals(lookup))
                     {
                         found = true;
+                        break;
                     }
                 }
             }
@@ -390,6 +403,7 @@ namespace System.Text.Json.Tests
                     if (json.TextEquals(lookup))
                     {
                         found = true;
+                        break;
                     }
                 }
             }

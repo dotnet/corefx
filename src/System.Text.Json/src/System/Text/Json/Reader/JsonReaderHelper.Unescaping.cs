@@ -66,6 +66,8 @@ namespace System.Text.Json
 
         public static bool UnescapeAndCompare(ReadOnlySequence<byte> utf8Source, ReadOnlySpan<byte> other)
         {
+            Debug.Assert(!utf8Source.IsSingleSegment);
+
             byte[] escapedArray = null;
             byte[] unescapedArray = null;
 
