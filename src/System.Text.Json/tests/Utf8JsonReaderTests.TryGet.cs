@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -166,7 +167,6 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"1997-07-16T19:20:30.4555555+14 00\"" };
 
             // Proper format but invalid calendar date, time, or time zone designator fields
-            yield return new object[] { "\"9999-12-31T23:59:59.9999999\"" }; // This date spills over to year 10_000.
             yield return new object[] { "\"1997-00-16T19:20:30.4555555\"" };
             yield return new object[] { "\"1997-07-16T25:20:30.4555555\"" };
             yield return new object[] { "\"1997-00-16T19:20:30.4555555Z\"" };
@@ -1071,10 +1071,6 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(InvalidISO8601Tests))]
         public static void TestingStringsInvalidConversionToDateTime(string jsonString)
         {
-            // Use invariant culture particularly to test datetime 9999-12-31T23:59:59.9999999 for year overflow to 10_000
-            CultureInfo originalCulture = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
@@ -1090,18 +1086,12 @@ namespace System.Text.Json.Tests
                 catch (FormatException)
                 { }
             }
-
-            CultureInfo.CurrentCulture = originalCulture;
         }
 
         [Theory]
         [MemberData(nameof(InvalidISO8601Tests))]
         public static void TestingStringsInvalidConversionToDateTimeOffset(string jsonString)
         {
-            // Use invariant culture particularly to test datetime 9999-12-31T23:59:59.9999999 for year overflow to 10_000
-            CultureInfo originalCulture = CultureInfo.CurrentUICulture;
-            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
@@ -1120,8 +1110,65 @@ namespace System.Text.Json.Tests
                     { }
                 }
             }
+        }
 
-            CultureInfo.CurrentCulture = originalCulture;
+        [Fact]
+        public static void TestingStringsInvalidConversionToDateTime_YearOverFlow()
+        {
+            DateTime now = DateTime.Now;
+            DateTime utcNow = now.ToUniversalTime();
+
+            // If current timezone is behind UTC
+            if ((now - utcNow).Hours < 0)
+            {
+                // Test datetime 9999-12-31T23:59:59.9999999 for year overflow to 10_000
+                byte[] dataUtf8 = Encoding.UTF8.GetBytes("\"9999-12-31T23:59:59.9999999\"");
+
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+                while (json.Read())
+                {
+                    Assert.False(json.TryGetDateTime(out DateTime actualDateTime));
+
+                    try
+                    {
+                        DateTime value = json.GetDateTime();
+                        Assert.True(false, "Expected GetDateTime to throw FormatException due to invalid ISO 8601 input.");
+                    }
+                    catch (FormatException)
+                    { }
+                }
+            }
+        }
+
+        [Fact]
+        public static void TestingStringsInvalidConversionToDateTimeOffset_YearOverFlow()
+        {
+            DateTime now = DateTime.Now;
+            DateTime utcNow = now.ToUniversalTime();
+
+            // If current timezone is behind UTC
+            if ((now - utcNow).Hours < 0)
+            {
+                // Test datetime 9999-12-31T23:59:59.9999999 for year overflow to 10_000
+                byte[] dataUtf8 = Encoding.UTF8.GetBytes("\"9999-12-31T23:59:59.9999999\"");
+
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+                while (json.Read())
+                {
+                    if (json.TokenType == JsonTokenType.String)
+                    {
+                        Assert.False(json.TryGetDateTimeOffset(out DateTimeOffset actualDateTime));
+
+                        try
+                        {
+                            DateTimeOffset value = json.GetDateTimeOffset();
+                            Assert.True(false, "Expected GetDateTimeOffset to throw FormatException due to invalid ISO 8601 input.");
+                        }
+                        catch (FormatException)
+                        { }
+                    }
+                }
+            }
         }
     }
 }
