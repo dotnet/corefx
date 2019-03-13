@@ -7,6 +7,7 @@
     <Compile Include="AsyncReaderLateInitTests.cs" />
     <Compile Include="DisposeTests.cs" />
     <Compile Include="BaseUriTests.cs" />
+	<Compile Include="ReaderEncodingTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Threading\TrackingSynchronizationContext.cs">
       <Link>Common\System\Threading\TrackingSynchronizationContext.cs</Link>
     </Compile>
