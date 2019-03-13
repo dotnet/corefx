@@ -175,23 +175,6 @@ namespace System.Globalization.Tests
         }
 
         private static readonly string [] s_cultureNames = new string[] { "", "en-US", "fr", "fr-FR" };
-        
-        // ToLower_TestData_net46 has the data which is specific to the full framework 
-        public static IEnumerable<object[]> ToLower_TestData_net46()
-        {
-            foreach (string cultureName in s_cultureNames)
-            {
-                if (PlatformDetection.IsWindows7)
-                {
-                    // on Windows 7, Desktop framework is using its own sorting DLL and not calling the OS except with Invariant culture
-                    yield return new object[] { cultureName, "\U00010400", cultureName == "" ? "\U00010400" : "\U00010428" };
-                }
-                else 
-                {
-                    yield return new object[] { cultureName, "\U00010400", "\U00010428" };
-                }
-            }
-        }
 
         // ToLower_TestData_netcore has the data which is specific to netcore framework 
         public static IEnumerable<object[]> ToLower_TestData_netcore()
@@ -287,14 +270,6 @@ namespace System.Globalization.Tests
         {
             TestToLower(name, str, expected);
         }
-
-        [Theory]
-        [MemberData(nameof(ToLower_TestData_net46))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap)]
-        public void ToLower_net46(string name, string str, string expected)
-        {
-            TestToLower(name, str, expected);
-        }
         
         [Fact]
         public void ToLower_InvalidSurrogates()
@@ -324,23 +299,6 @@ namespace System.Globalization.Tests
             {
                 // DESERT SMALL LETTER LONG I has an upper case variant (but not on Windows 7).
                 yield return new object[] { cultureName, "\U00010428", PlatformDetection.IsWindows7 ? "\U00010428" : "\U00010400" };
-            }
-        }
-
-        // ToUpper_TestData_net46 has the data which is specific to the full framework 
-        public static IEnumerable<object[]> ToUpper_TestData_net46()
-        {
-            foreach (string cultureName in s_cultureNames)
-            {
-                if (PlatformDetection.IsWindows7)
-                {
-                    // on Windows 7, Desktop framework is using its own sorting DLL and not calling the OS except with Invariant culture
-                    yield return new object[] { cultureName, "\U00010428", cultureName == "" ? "\U00010428" : "\U00010400" };
-                }
-                else 
-                {
-                    yield return new object[] { cultureName, "\U00010428", "\U00010400" };
-                }
             }
         }
         
@@ -433,14 +391,6 @@ namespace System.Globalization.Tests
         [MemberData(nameof(ToUpper_TestData_netcore))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void ToUpper_netcore(string name, string str, string expected)
-        {
-            TestToUpper(name, str, expected);
-        }
-
-        [Theory]
-        [MemberData(nameof(ToUpper_TestData_net46))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp | TargetFrameworkMonikers.Uap)]
-        public void ToUpper_net46(string name, string str, string expected)
         {
             TestToUpper(name, str, expected);
         }
