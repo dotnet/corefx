@@ -10,12 +10,12 @@ namespace System
     public readonly partial struct Char8 : IComparable<Char8>, IEquatable<Char8>
     {
         private readonly int _dummy;
-        public static bool operator ==(Char8 a, Char8 b) => throw null;
-        public static bool operator !=(Char8 a, Char8 b) => throw null;
-        public static bool operator <(Char8 a, Char8 b) => throw null;
-        public static bool operator <=(Char8 a, Char8 b) => throw null;
-        public static bool operator >(Char8 a, Char8 b) => throw null;
-        public static bool operator >=(Char8 a, Char8 b) => throw null;
+        public static bool operator ==(Char8 left, Char8 right) => throw null;
+        public static bool operator !=(Char8 left, Char8 right) => throw null;
+        public static bool operator <(Char8 left, Char8 right) => throw null;
+        public static bool operator <=(Char8 left, Char8 right) => throw null;
+        public static bool operator >(Char8 left, Char8 right) => throw null;
+        public static bool operator >=(Char8 left, Char8 right) => throw null;
         public static implicit operator byte(Char8 value) => throw null;
         [CLSCompliant(false)]
         public static explicit operator sbyte(Char8 value) => throw null;
@@ -82,15 +82,15 @@ namespace System
         public Utf8String(string value) { }
         public static explicit operator ReadOnlySpan<byte>(Utf8String value) => throw null;
         public static implicit operator ReadOnlySpan<Char8>(Utf8String value) => throw null;
-        public static bool operator ==(Utf8String a, Utf8String b) => throw null;
-        public static bool operator !=(Utf8String a, Utf8String b) => throw null;
+        public static bool operator ==(Utf8String left, Utf8String right) => throw null;
+        public static bool operator !=(Utf8String left, Utf8String right) => throw null;
         public Char8 this[Index index] => throw null;
         public Char8 this[int index] => throw null;
         public Utf8String this[Range range] => throw null;
         public int Length => throw null;
         public override bool Equals(object obj) => throw null;
         public bool Equals(Utf8String value) => throw null;
-        public static bool Equals(Utf8String a, Utf8String b) => throw null;
+        public static bool Equals(Utf8String left, Utf8String right) => throw null;
         public override int GetHashCode() => throw null;
         [ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)] // for compiler use only
         public ref readonly byte GetPinnableReference() => throw null;
