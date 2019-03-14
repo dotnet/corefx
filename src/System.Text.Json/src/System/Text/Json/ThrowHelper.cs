@@ -150,7 +150,7 @@ namespace System.Text.Json
             }
             else
             {
-                return new InvalidOperationException(SR.Format(SR.EmptyJsonIsInvalid));
+                return new InvalidOperationException(SR.EmptyJsonIsInvalid);
             }
         }
 
@@ -350,7 +350,7 @@ namespace System.Text.Json
                 builder.Append("...");
             }
 
-            throw new ArgumentException(SR.Format(SR.CannotWriteInvalidUTF8, builder.ToString()));
+            throw new ArgumentException(SR.Format(SR.CannotWriteInvalidUTF8, builder));
         }
 
         public static void ThrowArgumentException_InvalidUTF16(int charAsInt)
@@ -450,6 +450,26 @@ namespace System.Text.Json
             }
             return new FormatException(message);
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static FormatException GetFormatException(DateType dateType)
+        {
+            string message = "";
+
+            switch (dateType)
+            {
+                case DateType.DateTime:
+                    message = SR.FormatDateTime;
+                    break;
+                case DateType.DateTimeOffset:
+                    message = SR.FormatDateTimeOffset;
+                    break;
+                default:
+                    Debug.Fail($"The DateType enum value: {dateType} is not part of the switch. Add the appropriate case and exception message.");
+                    break;
+            }
+            return new FormatException(message);
+        }
     }
 
     internal enum ExceptionResource
@@ -499,5 +519,11 @@ namespace System.Text.Json
         Single,
         Double,
         Decimal
+    }
+
+    internal enum DateType
+    {
+        DateTime,
+        DateTimeOffset
     }
 }
