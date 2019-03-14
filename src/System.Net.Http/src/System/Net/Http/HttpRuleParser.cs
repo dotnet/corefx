@@ -12,7 +12,7 @@ namespace System.Net.Http
     internal static class HttpRuleParser
     {
         private static readonly bool[] s_tokenChars = CreateTokenChars();
-        private const int maxNestedCount = 5;
+        private const int MaxNestedCount = 5;
 
         internal const char CR = (char)13;
         internal const char LF = (char)10;
@@ -392,7 +392,7 @@ namespace System.Net.Http
                 if (supportsNesting && (input[current] == openChar))
                 {
                     // Check if we exceeded the number of nested calls.
-                    if (nestedCount > maxNestedCount)
+                    if (nestedCount > MaxNestedCount)
                     {
                         return HttpParseResult.InvalidFormat;
                     }
