@@ -104,7 +104,7 @@ namespace System.Net.Http.Functional.Tests
                         Stream stream = await response.Content.ReadAsStreamAsync();
                         Byte[] data = new Byte[100];
                         // Read some data, preferably whole body.
-                        await stream.ReadAsync(data, start, 0);
+                        await stream.ReadAsync(data, 0, 4);
 
                         // Intermediate test - haven't reached stream EOF yet.
                         Assert.Empty(response.TrailingHeaders);
