@@ -307,3 +307,10 @@
     <value>Cannot compare the value of a token type '{0}' to text.</value>
   </data>
 </root>
+  <data name="FormatDateTime" xml:space="preserve">
+    <value>The JSON value is of unsupported format for a DateTime.</value>
+  </data>
+  <data name="FormatDateTimeOffset" xml:space="preserve">
+    <value>The JSON value is of unsupported format for a DateTimeOffset.</value>
+  </data>
+</root>
