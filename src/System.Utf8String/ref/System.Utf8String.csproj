@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ProjectGuid>{7AF57E6B-2CED-45C9-8BCA-5BBA60D018E0}</ProjectGuid>
@@ -8,7 +8,9 @@
     <Compile Include="System.Utf8String.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
-    <ProjectReference Include="..\..\System.Runtime.InteropServices\ref\System.Runtime.InteropServices.csproj" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Primitives" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.InteropServices" />
   </ItemGroup>
 </Project>
