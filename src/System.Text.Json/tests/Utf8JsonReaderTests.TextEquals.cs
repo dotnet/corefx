@@ -305,6 +305,50 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestTextEqualsTooSmallToMatch()
+        {
+            ReadOnlySpan<char> escapedA = new char[6] { '\\', 'u', '0', '0', '6', '1' };
+
+            string jsonString = "\"" + escapedA.ToString() + escapedA.ToString() + "\"";
+            byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
+
+            bool found = false;
+
+            var json = new Utf8JsonReader(utf8Data, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    if (json.TextEquals(new byte[] { (byte)'a' }) || json.TextEquals(new char[] { 'a' }))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            Assert.False(found);
+
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8Data, 1);
+            found = false;
+
+            json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    if (json.TextEquals(new byte[] { (byte)'a' }) || json.TextEquals(new char[] { 'a' }))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            Assert.False(found);
+        }
+
+        [Fact]
         public static void TestTextEqualsMismatchMultiSegment()
         {
             string jsonString = "\"Hi, \\\"Ahson\\\"!\"";

@@ -43,6 +43,13 @@ namespace System.Text.Json
         {
             byte[] unescapedArray = null;
 
+            // The JSON token value will at most shrink by 6 when unescaping.
+            // If it is still larger than the lookup string, there is no value in unescaping and doing the comparison.
+            if (utf8Source.Length / JsonConstants.MaxExpansionFactorWhileEscaping > other.Length)
+            {
+                return false;
+            }
+
             Span<byte> utf8Unescaped = utf8Source.Length <= JsonConstants.StackallocThreshold ?
                 stackalloc byte[utf8Source.Length] :
                 (unescapedArray = ArrayPool<byte>.Shared.Rent(utf8Source.Length));
@@ -71,7 +78,16 @@ namespace System.Text.Json
             byte[] escapedArray = null;
             byte[] unescapedArray = null;
 
-            int length = checked((int)utf8Source.Length);
+            long sequenceLength = utf8Source.Length;
+
+            // The JSON token value will at most shrink by 6 when unescaping.
+            // If it is still larger than the lookup string, there is no value in unescaping and doing the comparison.
+            if (sequenceLength / JsonConstants.MaxExpansionFactorWhileEscaping > other.Length)
+            {
+                return false;
+            }
+
+            int length = checked((int)sequenceLength);
 
             Span<byte> utf8Unescaped = length <= JsonConstants.StackallocThreshold ?
                 stackalloc byte[length] :
