@@ -14,6 +14,7 @@
   <ItemGroup>
     <Compile Include="System\Char8Tests.cs" />
     <Compile Include="System\MemoryTests.cs" />
+    <Compile Include="System\Net\Http\Utf8StringContentTests.cs" />
     <Compile Include="System\ReflectionTests.cs" />
     <Compile Include="System\Utf8ExtensionsTests.cs" />
     <Compile Include="System\Utf8StringTests.cs" />
