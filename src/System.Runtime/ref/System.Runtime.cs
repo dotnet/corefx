@@ -7693,6 +7693,8 @@ namespace System.Text
         public static System.Buffers.OperationStatus DecodeUtf16FromEnd(System.ReadOnlySpan<char> utf16Source, out System.Text.Rune result, out int charsConsumed) { throw null; }
         public static System.Buffers.OperationStatus DecodeUtf8(System.ReadOnlySpan<byte> utf8Source, out System.Text.Rune result, out int bytesConsumed) { throw null; }
         public static System.Buffers.OperationStatus DecodeUtf8FromEnd(System.ReadOnlySpan<byte> utf8Source, out System.Text.Rune result, out int bytesConsumed) { throw null; }
+        public int Encode(System.Span<char> destination) { throw null; }
+        public int EncodeAsUtf8(System.Span<byte> destination) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Text.Rune other) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -7734,6 +7736,8 @@ namespace System.Text
         [System.CLSCompliantAttribute(false)]
         public static bool TryCreate(uint value, out System.Text.Rune result) { throw null; }
         public bool TryEncode(System.Span<char> destination, out int charsWritten) { throw null; }
+        public bool TryEncodeAsUtf8(System.Span<byte> destination, out int bytesWritten) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)] // this method will be removed shortly
         public bool TryEncodeToUtf8Bytes(System.Span<byte> destination, out int bytesWritten) { throw null; }
         public static bool TryGetRuneAt(string input, int index, out System.Text.Rune value) { throw null; }
     }

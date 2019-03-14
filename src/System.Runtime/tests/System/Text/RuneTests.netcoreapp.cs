@@ -4,7 +4,6 @@
 
 using System.Buffers;
 using System.Globalization;
-using System.Reflection;
 using Xunit;
 
 namespace System.Text.Tests
@@ -542,12 +541,22 @@ namespace System.Text.Tests
             Assert.False(success);
             Assert.Equal(0, charsWritten);
 
+            Assert.Throws<ArgumentException>(() =>
+            {
+                Span<char> utf16Buffer = stackalloc char[rune.Utf16SequenceLength - 1];
+                rune.Encode(utf16Buffer);
+            });
+
             // Then, try with a buffer that's appropriately sized
 
             utf16Buffer = stackalloc char[rune.Utf16SequenceLength];
             success = rune.TryEncode(utf16Buffer, out charsWritten);
             Assert.True(success);
             Assert.Equal(testData.Utf16Sequence.Length, charsWritten);
+            Assert.True(utf16Buffer.SequenceEqual(testData.Utf16Sequence));
+
+            utf16Buffer.Clear();
+            Assert.Equal(testData.Utf16Sequence.Length, rune.Encode(utf16Buffer));
             Assert.True(utf16Buffer.SequenceEqual(testData.Utf16Sequence));
 
             // Finally, try with a buffer that's too long (should succeed)
@@ -557,10 +566,12 @@ namespace System.Text.Tests
             Assert.True(success);
             Assert.Equal(testData.Utf16Sequence.Length, charsWritten);
             Assert.True(utf16Buffer.Slice(0, testData.Utf16Sequence.Length).SequenceEqual(testData.Utf16Sequence));
+
+            utf16Buffer.Clear();
+            Assert.Equal(testData.Utf16Sequence.Length, rune.Encode(utf16Buffer));
+            Assert.True(utf16Buffer.Slice(0, testData.Utf16Sequence.Length).SequenceEqual(testData.Utf16Sequence));
         }
 
-        // This test needs use private reflection into Rune at the moment because the
-        // TryEncode method which writes as UTF-8 isn't yet public.
         [Theory]
         [MemberData(nameof(GeneralTestData_BmpCodePoints_NoSurrogates))]
         [MemberData(nameof(GeneralTestData_SupplementaryCodePoints_ValidOnly))]
@@ -572,9 +583,15 @@ namespace System.Text.Tests
             // First, try with a buffer that's too short
 
             Span<byte> utf8Buffer = stackalloc byte[rune.Utf8SequenceLength - 1];
-            bool success = rune.TryEncodeToUtf8Bytes(utf8Buffer, out int bytesWritten);
+            bool success = rune.TryEncodeAsUtf8(utf8Buffer, out int bytesWritten);
             Assert.False(success);
             Assert.Equal(0, bytesWritten);
+
+            Assert.Throws<ArgumentException>(() =>
+            {
+                Span<byte> utf8Buffer = stackalloc byte[rune.Utf8SequenceLength - 1];
+                rune.EncodeAsUtf8(utf8Buffer);
+            });
 
             // Then, try with a buffer that's appropriately sized
 
@@ -584,12 +601,20 @@ namespace System.Text.Tests
             Assert.Equal(testData.Utf8Sequence.Length, bytesWritten);
             Assert.True(utf8Buffer.SequenceEqual(testData.Utf8Sequence));
 
+            utf8Buffer.Clear();
+            Assert.Equal(testData.Utf8Sequence.Length, rune.EncodeAsUtf8(utf8Buffer));
+            Assert.True(utf8Buffer.SequenceEqual(testData.Utf8Sequence));
+
             // Finally, try with a buffer that's too long (should succeed)
 
             utf8Buffer = stackalloc byte[rune.Utf8SequenceLength + 1];
             success = rune.TryEncodeToUtf8Bytes(utf8Buffer, out bytesWritten);
             Assert.True(success);
             Assert.Equal(testData.Utf8Sequence.Length, bytesWritten);
+            Assert.True(utf8Buffer.Slice(0, testData.Utf8Sequence.Length).SequenceEqual(testData.Utf8Sequence));
+
+            utf8Buffer.Clear();
+            Assert.Equal(testData.Utf8Sequence.Length, rune.EncodeAsUtf8(utf8Buffer));
             Assert.True(utf8Buffer.Slice(0, testData.Utf8Sequence.Length).SequenceEqual(testData.Utf8Sequence));
         }
     }
