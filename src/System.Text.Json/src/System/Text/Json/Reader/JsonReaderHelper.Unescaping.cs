@@ -41,14 +41,9 @@ namespace System.Text.Json
 
         public static bool UnescapeAndCompare(ReadOnlySpan<byte> utf8Source, ReadOnlySpan<byte> other)
         {
-            byte[] unescapedArray = null;
+            Debug.Assert(utf8Source.Length >= other.Length && utf8Source.Length / JsonConstants.MaxExpansionFactorWhileEscaping <= other.Length);
 
-            // The JSON token value will at most shrink by 6 when unescaping.
-            // If it is still larger than the lookup string, there is no value in unescaping and doing the comparison.
-            if (utf8Source.Length / JsonConstants.MaxExpansionFactorWhileEscaping > other.Length)
-            {
-                return false;
-            }
+            byte[] unescapedArray = null;
 
             Span<byte> utf8Unescaped = utf8Source.Length <= JsonConstants.StackallocThreshold ?
                 stackalloc byte[utf8Source.Length] :
@@ -74,20 +69,12 @@ namespace System.Text.Json
         public static bool UnescapeAndCompare(ReadOnlySequence<byte> utf8Source, ReadOnlySpan<byte> other)
         {
             Debug.Assert(!utf8Source.IsSingleSegment);
+            Debug.Assert(utf8Source.Length >= other.Length && utf8Source.Length / JsonConstants.MaxExpansionFactorWhileEscaping <= other.Length);
 
             byte[] escapedArray = null;
             byte[] unescapedArray = null;
 
-            long sequenceLength = utf8Source.Length;
-
-            // The JSON token value will at most shrink by 6 when unescaping.
-            // If it is still larger than the lookup string, there is no value in unescaping and doing the comparison.
-            if (sequenceLength / JsonConstants.MaxExpansionFactorWhileEscaping > other.Length)
-            {
-                return false;
-            }
-
-            int length = checked((int)sequenceLength);
+            int length = checked((int)utf8Source.Length);
 
             Span<byte> utf8Unescaped = length <= JsonConstants.StackallocThreshold ?
                 stackalloc byte[length] :
