@@ -391,11 +391,9 @@ namespace System.Text.Json
         private bool UnescapeSequenceAndCompare(ReadOnlySpan<byte> other)
         {
             Debug.Assert(HasValueSequence);
+            Debug.Assert(!ValueSequence.IsSingleSegment);
 
             ReadOnlySequence<byte> localSequence = ValueSequence;
-
-            Debug.Assert(!localSequence.IsSingleSegment);
-
             long sequenceLength = localSequence.Length;
 
             // The JSON token value will at most shrink by 6 when unescaping.
@@ -406,19 +404,20 @@ namespace System.Text.Json
             }
 
             int matchedSoFar = 0;
-            int idx = -1;
+
+            bool result = false;
 
             foreach (ReadOnlyMemory<byte> memory in localSequence)
             {
                 ReadOnlySpan<byte> span = memory.Span;
 
-                idx = span.IndexOf(JsonConstants.BackSlash);
+                int idx = span.IndexOf(JsonConstants.BackSlash);
 
                 if (idx != -1)
                 {
                     if (!other.Slice(matchedSoFar).StartsWith(span.Slice(0, idx)))
                     {
-                        return false;
+                        break;
                     }
                     matchedSoFar += idx;
 
@@ -427,23 +426,23 @@ namespace System.Text.Json
 
                     if (localSequence.IsSingleSegment)
                     {
-                        return JsonReaderHelper.UnescapeAndCompare(localSequence.First.Span, other);
+                        result = JsonReaderHelper.UnescapeAndCompare(localSequence.First.Span, other);
                     }
-                    return JsonReaderHelper.UnescapeAndCompare(localSequence, other);
+                    else
+                    {
+                        result = JsonReaderHelper.UnescapeAndCompare(localSequence, other);
+                    }
+                    break;
                 }
 
-                if (other.Slice(matchedSoFar).StartsWith(span))
+                if (!other.Slice(matchedSoFar).StartsWith(span))
                 {
-                    matchedSoFar += span.Length;
+                    break;
                 }
-                else
-                {
-                    return false;
-                }
+                matchedSoFar += span.Length;
             }
 
-            Debug.Fail($"The payload contains an escaped character and hence we must have seen a backslash. Index should never be -1: {idx}");
-            return false;
+            return result;
         }
 
         // Returns true if the TokenType is a primitive string "value", i.e. PropertyName or String

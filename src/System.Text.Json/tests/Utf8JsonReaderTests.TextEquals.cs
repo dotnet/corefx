@@ -304,12 +304,11 @@ namespace System.Text.Json.Tests
             }
         }
 
-        [Fact]
-        public static void TestTextEqualsTooSmallToMatch()
+        [Theory]
+        [InlineData("\"\\u0061\\u0061\"")]
+        [InlineData("\"aaaaaaaaaaaa\"")]
+        public static void TestTextEqualsTooSmallToMatch(string jsonString)
         {
-            ReadOnlySpan<char> escapedA = new char[6] { '\\', 'u', '0', '0', '6', '1' };
-
-            string jsonString = "\"" + escapedA.ToString() + escapedA.ToString() + "\"";
             byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
 
             bool found = false;
@@ -346,6 +345,137 @@ namespace System.Text.Json.Tests
             }
 
             Assert.False(found);
+        }
+
+        [Theory]
+        [InlineData("\"\\u0061\\u0061\"")]
+        [InlineData("\"aaaaaaaaaaaa\"")]
+        public static void TestTextEqualsTooLargeToMatch(string jsonString)
+        {
+            byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
+
+            var lookupString = new string('a', 13);
+
+            bool found = false;
+
+            var json = new Utf8JsonReader(utf8Data, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            Assert.False(found);
+
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8Data, 1);
+            found = false;
+
+            json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            Assert.False(found);
+        }
+
+        [Theory]
+        [InlineData("\"aaabbb\"", "aaaaaa")]
+        [InlineData("\"bbbaaa\"", "aaaaaa")]
+        public static void TextMismatchSameLength(string jsonString, string lookupString)
+        {
+            byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
+
+            bool found = false;
+
+            var json = new Utf8JsonReader(utf8Data, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            Assert.False(found);
+
+            ReadOnlySequence<byte> sequence = JsonTestHelper.CreateSegments(utf8Data);
+            found = false;
+
+            json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            Assert.False(found);
+        }
+
+        [Fact]
+        public static void TextEqualsEscapedCharAtTheLastSegment()
+        {
+            string jsonString = "\"aaaaaa\\u0061\"";
+            string lookupString = "aaaaaaa";
+            byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
+
+            bool found = false;
+
+            var json = new Utf8JsonReader(utf8Data, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            Assert.True(found);
+
+            ReadOnlySequence<byte> sequence = JsonTestHelper.CreateSegments(utf8Data);
+            found = false;
+
+            json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            Assert.True(found);
         }
 
         [Fact]
