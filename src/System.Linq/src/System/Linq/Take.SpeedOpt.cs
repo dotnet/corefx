@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace System.Linq
 {
@@ -12,5 +13,41 @@ namespace System.Linq
             source is IPartition<TSource> partition ? partition.Take(count) :
             source is IList<TSource> sourceList ? (IEnumerable<TSource>)new ListPartition<TSource>(sourceList, 0, count - 1) :
             new EnumerablePartition<TSource>(source, 0, count - 1);
+
+        private static IEnumerable<TSource> TakeLastIterator<TSource>(IEnumerable<TSource> source, int count)
+        {
+            Debug.Assert(source != null);
+            Debug.Assert(count > 0);
+
+            if (source is IPartition<TSource> partition)
+            {
+                int length = partition.GetCount(true);
+                if (length >= 0)
+                {
+                    if (length > count)
+                    {
+                        return partition.Skip(length - count);
+                    }
+                    else
+                    {
+                        return partition;
+                    }
+                }
+            }
+
+            if (source is IList<TSource> sourceList)
+            {
+                if (sourceList.Count > count)
+                {
+                    return new ListPartition<TSource>(sourceList, sourceList.Count - count, sourceList.Count);
+                }
+                else
+                {
+                    return sourceList;
+                }
+            }
+
+            return TakeLastRegularIterator<TSource>(source, count);
+        }
     }
 }

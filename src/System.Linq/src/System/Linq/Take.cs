@@ -95,7 +95,7 @@ namespace System.Linq
                 TakeLastIterator(source, count);
         }
 
-        private static IEnumerable<TSource> TakeLastIterator<TSource>(IEnumerable<TSource> source, int count)
+        private static IEnumerable<TSource> TakeLastRegularIterator<TSource>(IEnumerable<TSource> source, int count)
         {
             Debug.Assert(source != null);
             Debug.Assert(count > 0);
@@ -106,7 +106,7 @@ namespace System.Linq
             {
                 if (!e.MoveNext())
                 {
-                    yield break;
+                    return Empty<TSource>();
                 }
 
                 queue = new Queue<TSource>();
@@ -132,11 +132,8 @@ namespace System.Linq
             }
 
             Debug.Assert(queue.Count <= count);
-            do
-            {
-                yield return queue.Dequeue();
-            }
-            while (queue.Count > 0);
+
+            return queue;
         }
     }
 }
