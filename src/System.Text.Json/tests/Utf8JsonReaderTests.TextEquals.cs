@@ -363,7 +363,7 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString))
+                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString.AsSpan()))
                     {
                         found = true;
                         break;
@@ -381,7 +381,7 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString))
+                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString.AsSpan()))
                     {
                         found = true;
                         break;
@@ -406,7 +406,7 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString))
+                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString.AsSpan()))
                     {
                         found = true;
                         break;
@@ -424,7 +424,7 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString))
+                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString.AsSpan()))
                     {
                         found = true;
                         break;
@@ -449,7 +449,7 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString))
+                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString.AsSpan()))
                     {
                         found = true;
                         break;
@@ -467,7 +467,7 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.String)
                 {
-                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString))
+                    if (json.TextEquals(Encoding.UTF8.GetBytes(lookupString)) || json.TextEquals(lookupString.AsSpan()))
                     {
                         found = true;
                         break;
