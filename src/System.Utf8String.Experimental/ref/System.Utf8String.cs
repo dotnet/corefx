@@ -88,13 +88,21 @@ namespace System
         public Char8 this[int index] => throw null;
         public Utf8String this[Range range] => throw null;
         public int Length => throw null;
+        public bool Contains(char value) => throw null;
+        public bool Contains(System.Text.Rune value) => throw null;
+        public bool EndsWith(char value) => throw null;
+        public bool EndsWith(System.Text.Rune value) => throw null;
         public override bool Equals(object obj) => throw null;
         public bool Equals(Utf8String value) => throw null;
         public static bool Equals(Utf8String left, Utf8String right) => throw null;
         public override int GetHashCode() => throw null;
         [ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)] // for compiler use only
         public ref readonly byte GetPinnableReference() => throw null;
+        public int IndexOf(char value) => throw null;
+        public int IndexOf(System.Text.Rune value) => throw null;
         public static bool IsNullOrEmpty(Utf8String value) => throw null;
+        public bool StartsWith(char value) => throw null;
+        public bool StartsWith(System.Text.Rune value) => throw null;
         public Utf8String Substring(Index startIndex) => throw null;
         public Utf8String Substring(int startIndex) => throw null;
         public Utf8String Substring(int startIndex, int length) => throw null;
