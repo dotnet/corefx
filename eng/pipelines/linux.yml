@@ -39,6 +39,15 @@ jobs:
             _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
             _buildExtraArguments: -warnAsError false
 
+          arm_Release:
+            _BuildConfig: Release
+            _architecture: arm
+            _framework: netcoreapp
+            _helixQueues: $(linuxArmQueues)
+            _dockerContainer: ubuntu_1604_arm_cross_container
+            _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm '
+            _buildExtraArguments: -warnAsError false
+
           ${{ if eq(parameters.isOuterloopBuild, 'true') }}:
             x64_Debug:
               _BuildConfig: Debug
@@ -56,6 +65,15 @@ jobs:
               _helixQueues: $(linuxArm64Queues)
               _dockerContainer: ubuntu_1604_arm64_cross_container
               _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
+              _buildExtraArguments: --warnAsError false
+
+            arm_Debug:
+              _BuildConfig: Debug
+              _architecture: arm64
+              _framework: netcoreapp
+              _helixQueues: $(linuxArmQueues)
+              _dockerContainer: ubuntu_1604_arm_cross_container
+              _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm '
               _buildExtraArguments: --warnAsError false
           
           ${{ if eq(parameters.isOfficialBuild, 'true') }}:
@@ -89,6 +107,7 @@ jobs:
         - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
           - linuxDefaultQueues: Centos.7.Amd64+RedHat.7.Amd64+Debian.8.Amd64+Debian.9.Amd64+Ubuntu.1604.Amd64+Ubuntu.1804.Amd64+Ubuntu.1810.Amd64+OpenSuse.42.Amd64+SLES.12.Amd64+SLES.15.Amd64+Fedora.27.Amd64+Fedora.28.Amd64
           - linuxArm64Queues: Ubuntu.1604.Arm64
+          - linuxArmQueues: (Debian.9-arm32)Ubuntu.1604.Arm32@mcr.microsoft.com/dotnet-buildtools/prereqs:debian-9-helix-arm32v7-0a0ebdd-20190312215452
           - alpineQueues: Alpine.36.Amd64+Alpine.38.Amd64
 
     # Legs without helix testing
@@ -114,14 +133,6 @@ jobs:
               _dockerContainer: alpine_37_arm64_container
               _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
               _buildExtraArguments: -warnAsError false /p:BuildNativeClang=--clang5.0 /p:RuntimeOS=linux-musl
-
-            arm_Release:
-              _BuildConfig: Release
-              _architecture: arm
-              _framework: netcoreapp
-              _buildExtraArguments: /p:RuntimeOS=ubuntu.16.04 -warnAsError false
-              _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm '
-              _dockerContainer: ubuntu_1604_arm_cross_container
 
         pool:
           name: Hosted Ubuntu 1604
