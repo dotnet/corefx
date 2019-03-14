@@ -98,21 +98,22 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Contains("MyCoolTrailerHeader", response.Headers.GetValues("Trailer"));
 
                         // Pending read on the response content.
-                        Assert.Empty(response.TrailingHeaders);
+                        var trailingHeaders = response.TrailingHeaders;
+                        Assert.Empty(trailingHeaders);
 
                         Stream stream = await response.Content.ReadAsStreamAsync();
                         Byte[] data = new Byte[100];
-                        int start = 0;
-                        await stream.ReadAsync(data, start, 4);
-                        start = 4;
+                        // Read some data, preferably whole body.
+                        await stream.ReadAsync(data, start, 0);
 
-                        // Intermedia test - haven't reached stream EOF yet.
+                        // Intermediate test - haven't reached stream EOF yet.
                         Assert.Empty(response.TrailingHeaders);
                         Assert.Contains("data", System.Text.Encoding.Default.GetString(data));
 
                         // Read data until EOF is reached
                         while (stream.Read(data, 0, data.Length) != 0);
 
+                        Assert.Same(trailingHeaders, response.TrailingHeaders);
                         Assert.Contains("amazingtrailer", response.TrailingHeaders.GetValues("MyCoolTrailerHeader"));
                         Assert.Contains("World", response.TrailingHeaders.GetValues("Hello"));
                     }
