@@ -17,7 +17,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public async Task GetAsyncDeafultCompletionOption_TrailingHeaders_Available(bool includeTrailerHeader)
+        public async Task GetAsyncDefaultCompletionOption_TrailingHeaders_Available(bool includeTrailerHeader)
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
@@ -110,15 +110,8 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Empty(response.TrailingHeaders);
                         Assert.Contains("data", System.Text.Encoding.Default.GetString(data));
 
-                        bool streamEOFReached = false;
-                        while (!streamEOFReached)
-                        {
-                            if (stream.Read(data, start, 10) == 0)
-                            {
-                                streamEOFReached = true;
-                            }
-                            start += 10;
-                        }
+                        // Read data until EOF is reached
+                        while (stream.Read(data, 0, data.Length) != 0);
 
                         Assert.Contains("amazingtrailer", response.TrailingHeaders.GetValues("MyCoolTrailerHeader"));
                         Assert.Contains("World", response.TrailingHeaders.GetValues("Hello"));
@@ -217,6 +210,7 @@ namespace System.Net.Http.Functional.Tests
 
                         Assert.NotNull(response.TrailingHeaders);
                         Assert.Equal(0, response.TrailingHeaders.Count());
+                        Assert.Same(response.TrailingHeaders, response.TrailingHeaders);
                     }
                 }
             });

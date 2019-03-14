@@ -310,10 +310,10 @@ namespace System.Net.Http
 
                                     break;
                                 }
-                                // Parse the trailers.
+                                // Parse the trailer.
                                 else if (!IsDisposed)
                                 {
-                                    // Make sure that we don't inadvertently consuming trailing headers
+                                    // Make sure that we don't inadvertently consume trailing headers
                                     // while draining a connection that's being returned back to the pool.
                                     HttpConnection.ParseHeaderNameValue(currentLine, _response, isFromTrailer : true);
                                 }

@@ -956,7 +956,7 @@ namespace System.Net.Http
             // if the header can't be added, we silently drop it.
             if (isFromTrailer)
             {
-                response.TrailingHeaders.TryAddWithoutValidation(descriptor, headerValue);
+                response.TrailingHeaders.TryAddWithoutValidation(descriptor.HeaderType == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue);
             }
             else if (descriptor.HeaderType == HttpHeaderType.Content)
             {
