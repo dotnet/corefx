@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.IO;
 using System.Xml;
 using Microsoft.Xunit.Performance;
 
@@ -55,6 +56,68 @@ namespace XmlDocumentTests.XmlDocumentTests
                         element = doc.DocumentElement; element = doc.DocumentElement; element = doc.DocumentElement;
                         element = doc.DocumentElement; element = doc.DocumentElement; element = doc.DocumentElement;
                         element = doc.DocumentElement; element = doc.DocumentElement; element = doc.DocumentElement;
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        public void CreateReaderWithInvalidChar()
+        {
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < innerIterations; i++)
+                    {
+                        XmlReader.Create(new MemoryStream(new byte[] { 60, 0, 0, 0, 65, 0, 0, 0, 62, 100, 60, 47, 97, 62, 10 }));
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        public void CreateReaderWithSurrogateChar()
+        {
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < innerIterations; i++)
+                    {
+                        XmlReader.Create(new MemoryStream(new byte[] { 60, 0, 0, 0, 0, 34, 1, 0, 65, 0, 0, 0, 97, 0, 0, 0 }));
+                        XmlReader.Create(new MemoryStream(new byte[] { 60, 0, 0, 0, 97, 0, 0, 0, 62, 0, 0, 0, 0, 34, 1, 0, 60, 0, 0, 0, 47, 0, 0, 0, 97, 0, 0, 0, 62, 0, 0, 0 }));
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        public void CreateReaderWithoutSurrogateChar()
+        {
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < innerIterations; i++)
+                    { 
+                        XmlReader.Create(new MemoryStream(new byte[] { 60, 0, 0, 0, 97, 0, 0, 0, 65, 0, 0, 0, 97, 62, 10 }));
+                    }
+                }
+            }
+        }
+
+        [Benchmark]
+        public void CreateReaderWithSurogateCharAndInvalidChar()
+        {
+            foreach (var iteration in Benchmark.Iterations)
+            {
+                using (iteration.StartMeasurement())
+                {
+                    for (int i = 0; i < innerIterations; i++)
+                    {
+                        XmlReader.Create(new MemoryStream(new byte[] { 60, 0, 0, 0, 0, 34, 1, 0, 62, 100, 60, 47, 97, 62, 10 }));
+                        XmlReader.Create(new MemoryStream(new byte[] { 60, 0, 0, 0, 97, 0, 0, 0, 62, 0, 0, 0, 0, 34, 1, 0, 62, 100, 60, 47, 60, 0, 0, 0, 47, 0, 0, 0, 97, 0, 0, 0, 62, 0, 0, 0 }));
                     }
                 }
             }
