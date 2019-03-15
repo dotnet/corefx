@@ -953,8 +953,8 @@ namespace System.Net.Http
 
             string headerValue = descriptor.GetHeaderValue(line.Slice(pos));
 
-            // Note we ignore the return value from TryAddWithoutValidation; 
-            // if the header can't be added, we silently drop it.
+            // Note we ignore the return value from TryAddWithoutValidation. If the header can't be added, we silently drop it.
+            // Request headers returned on the response must be treated as custom headers.
             if (isFromTrailer)
             {
                 response.TrailingHeaders.TryAddWithoutValidation(descriptor.HeaderType == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue);
@@ -965,7 +965,6 @@ namespace System.Net.Http
             }
             else
             {
-                // Request headers returned on the response must be treated as custom headers
                 response.Headers.TryAddWithoutValidation(descriptor.HeaderType == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue);
             }
         }

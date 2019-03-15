@@ -184,41 +184,6 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public async Task GetAsync_MissingTrailer_TrailingHeadersAccepted()
-        {
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
-            {
-                using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
-                {
-                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
-                    await TestHelper.WhenAllCompletedOrAnyFailed(
-                        getResponseTask,
-                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
-                            "HTTP/1.1 200 OK\r\n" +
-                            "Connection: close\r\n" +
-                            "Transfer-Encoding: chunked\r\n" +
-                            "\r\n" +
-                            "4\r\n" +
-                            "data\r\n" +
-                            "0\r\n" +
-                            "MyCoolTrailerHeader: amazingtrailer\r\n" +
-                            "Hello: World\r\n" +
-                            "\r\n"));
-
-                    using (HttpResponseMessage response = await getResponseTask)
-                    {
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        Assert.Contains("chunked", response.Headers.GetValues("Transfer-Encoding"));
-
-                        Assert.Contains("amazingtrailer", response.TrailingHeaders.GetValues("MyCoolTrailerHeader"));
-                        Assert.Contains("World", response.TrailingHeaders.GetValues("Hello"));
-                    }
-                }
-            });
-        }
-
-        [Fact]
         public async Task GetAsync_NoTrailingHeaders_EmptyCollection()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
