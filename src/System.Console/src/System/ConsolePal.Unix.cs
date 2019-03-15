@@ -1321,8 +1321,8 @@ namespace System
                     }
                 }
 
-                SetCachedCursorPosition(left, top);
-
+                // We pass cursorVersion because it may have have changed since our earlier check by calling Window{Width/Height}.
+                SetCachedCursorPosition(left, top, cursorVersion);
 
                 void IncrementY()
                 {
