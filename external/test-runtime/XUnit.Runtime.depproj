@@ -194,7 +194,7 @@
           BeforeTargets="ResolveReferences">
 
     <PropertyGroup>
-      <TestSdkTFM Condition="'$(TargetsNetFx)' == 'true'">net45</TestSdkTFM>
+      <TestSdkTFM Condition="'$(TargetsNetFx)' == 'true'">net40</TestSdkTFM>
       <TestSdkTFM Condition="'$(TargetsUap)' == 'true'">uap10.0</TestSdkTFM>
       <TestSdkTFM Condition="'$(TestSdkTFM)' == ''">netcoreapp1.0</TestSdkTFM>
     </PropertyGroup>
