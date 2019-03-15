@@ -380,6 +380,7 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
+        [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceActivityLogging_InvalidBaggage()
         {
@@ -420,7 +421,7 @@ namespace System.Net.Http.Functional.Tests
                 });
 
                 using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
-                { 
+                {
                     diagnosticListenerObserver.Enable(s => s.Contains("HttpRequestOut"));
                     using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString))
                     {
