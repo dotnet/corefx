@@ -1281,8 +1281,7 @@ namespace System
                     return;
                 }
 
-                int width = WindowWidth;
-                int height = WindowHeight;
+                GetWindowSize(out int width, out int height);
 
                 for (int i = 0; i < count; i++)
                 {
