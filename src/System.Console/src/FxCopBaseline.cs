@@ -20,3 +20,6 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.ConsolePal.#WriteStdoutAnsiString(System.String,System.Boolean)")]
 [assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.ConsolePal.#ForegroundColor")]
 [assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.ConsolePal.#BackgroundColor")]
+[assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.ConsolePal.#SetCursorPosition(System.Int32,System.Int32)")]
+[assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.ConsolePal.#GetWindowSize(System.Int32&,System.Int32&)")]
+[assembly: SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity", Scope = "member", Target = "System.ConsolePal.#UpdatedCachedCursorPosition(System.Byte*,System.Int32,System.Int32)")]

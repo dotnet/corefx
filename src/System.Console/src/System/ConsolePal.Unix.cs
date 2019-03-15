@@ -21,13 +21,20 @@ namespace System
     //       to also change the test class.
     internal static class ConsolePal
     {
-        private static readonly object s_cursorGate = new object();
-        private static int s_cursorVersion;     // Gets incremented each time the cursor position changed.
-                                                // Used to synchronize between s_cursorGate locked blocks.
-        private static int s_cursorLeft = -1;   // Cached CursorLeft, -1 when invalid.
-        private static int s_cursorTop;         // Cached CursorTop, invalid when s_cursorLeft == -1.
-        private static int s_windowWidth = -1;  // Cached WindowWidth, -1 when invalid.
-        private static int s_windowHeight;      // Cached WindowHeight, invalid when s_windowWidth == -1.
+        // For performance we cache Cursor{Left,Top} and Window{Width,Height}.
+        // These values must be read/written under lock (Console.Out).
+        // We also need to invalidate these values when certain signals occur.
+        // We don't want to take the lock in the signal handling thread for this.
+        // Instead, we set a flag. Before reading a cached value, a call to CheckTerminalSettingsInvalidated
+        // will invalidate the cached values if a signal had occured. After updating the cached values,
+        // a call to the same method ensures we invalidate the values if a signal occured in the meanwhile.
+        private static int s_cursorVersion; // Gets incremented each time the cursor position changed.
+                                            // Used to synchronize between lock (Console.Out) blocks.
+        private static int s_cursorLeft;    // Cached CursorLeft, -1 when invalid.
+        private static int s_cursorTop;     // Cached CursorTop, invalid when s_cursorLeft == -1.
+        private static int s_windowWidth;   // Cached WindowWidth, -1 when invalid.
+        private static int s_windowHeight;  // Cached WindowHeight, invalid when s_windowWidth == -1.
+        private static int s_invalidateCachedSettings = 1; // Tracks whether we should invalidate the cached settings.
 
         private static readonly Interop.Sys.TerminalInvalidationCallback s_invalidateTerminalSettings = InvalidateTerminalSettings;
 
@@ -223,9 +230,11 @@ namespace System
             if (Console.IsOutputRedirected)
                 return;
 
-            lock (s_cursorGate)
+            lock (Console.Out)
             {
-                if (s_cursorLeft == left && s_cursorTop == top)
+                if (TryGetCachedCursorPosition(out int leftCurrent, out int topCurrent) &&
+                    left == leftCurrent &&
+                    top == topCurrent)
                 {
                     return;
                 }
@@ -241,12 +250,25 @@ namespace System
             }
         }
 
-        private static void SetCachedCursorPosition(int left, int top)
+        private static void SetCachedCursorPosition(int left, int top, int? version = null)
         {
             Debug.Assert(left >= 0);
-            s_cursorLeft = left;
-            s_cursorTop = top;
-            s_cursorVersion++;
+
+            bool setPosition = version == null || version == s_cursorVersion;
+
+            if (setPosition)
+            {
+                s_cursorLeft = left;
+                s_cursorTop = top;
+                s_cursorVersion++;
+            }
+            else
+            {
+                InvalidateCachedCursorPosition();
+            }
+
+            // Invalidate after writing cached values.
+            CheckTerminalSettingsInvalidated();
         }
 
         private static void InvalidateCachedCursorPosition()
@@ -257,6 +279,9 @@ namespace System
 
         private static bool TryGetCachedCursorPosition(out int left, out int top)
         {
+            // Invalidate before reading cached values.
+            CheckTerminalSettingsInvalidated();
+
             bool hasCachedCursorPosition = s_cursorLeft >= 0;
             if (hasCachedCursorPosition)
             {
@@ -332,8 +357,11 @@ namespace System
 
         private static void GetWindowSize(out int width, out int height)
         {
-            lock (s_cursorGate)
+            lock (Console.Out)
             {
+                // Invalidate before reading cached values.
+                CheckTerminalSettingsInvalidated();
+
                 if (s_windowWidth == -1)
                 {
                     Interop.Sys.WinSize winsize;
@@ -350,6 +378,9 @@ namespace System
                 }
                 width = s_windowWidth;
                 height = s_windowHeight;
+
+                // Invalidate after writing cached values.
+                CheckTerminalSettingsInvalidated();
             }
         }
 
@@ -423,228 +454,220 @@ namespace System
                 return;
             }
 
-            while (true)
+            int cursorVersion;
+            lock (Console.Out)
             {
-                int cursorVersion;
-                lock (s_cursorGate)
+                if (TryGetCachedCursorPosition(out left, out top))
                 {
-                    if (TryGetCachedCursorPosition(out left, out top))
+                    return;
+                }
+
+                cursorVersion = s_cursorVersion;
+            }
+
+            // Create a buffer to read the response into.  We start with stack memory and grow
+            // into the heap only if we need to, and we choose a limit that should be large
+            // enough for the vast, vast majority of use cases, such that when we do grow, we
+            // just allocate, rather than employing any complicated pooling strategy.
+            int readBytesPos = 0;
+            Span<byte> readBytes = stackalloc byte[256];
+
+            // Synchronize with all other stdin readers.  We need to do this in case multiple threads are
+            // trying to read/write concurrently, and to minimize the chances of resulting conflicts.
+            // This does mean that Console.get_CursorLeft/Top can't be used concurrently with Console.Read*, etc.;
+            // attempting to do so will block one of them until the other completes, but in doing so we prevent
+            // one thread's get_CursorLeft/Top from providing input to the other's Console.Read*.
+            lock (StdInReader) 
+            {
+                // Because the CPR request/response protocol involves blocking until we get a certain
+                // response from the terminal, we want to avoid doing so if we don't know the terminal
+                // will definitely respond.  As such, we start with minChars == 0, which causes the
+                // terminal's read timer to start immediately.  Once we've received a response for
+                // a request such that we know the terminal supports the protocol, we then specify
+                // minChars == 1.  With that, the timer won't start until the first character is
+                // received.  This makes the mechanism more reliable when there are high latencies
+                // involved in reading/writing, such as when accessing a remote system. We also extend
+                // the timeout on the very first request to 15 seconds, to account for potential latency
+                // before we know if we will receive a response.
+                Interop.Sys.InitializeConsoleBeforeRead(minChars: (byte)(s_everReceivedCursorPositionResponse ? 1 : 0), decisecondsTimeout: (byte)(s_firstCursorPositionRequest ? 100 : 10));
+                try
+                {
+                    // Write out the cursor position report request.
+                    Debug.Assert(!string.IsNullOrEmpty(TerminalFormatStrings.CursorPositionReport));
+                    WriteStdoutAnsiString(TerminalFormatStrings.CursorPositionReport, mayChangeCursorPosition: false);
+
+                    // Read the cursor position report (CPR), of the form \ESC[row;colR. This is not
+                    // as easy it it sounds.  Prior to the CPR having been supplied to stdin, other
+                    // user input could have come in and be available to read first from stdin.  Plus,
+                    // that user input could include escape sequences, and those escape sequences could
+                    // have a prefix very similar to that of the CPR (e.g. other escape sequences start
+                    // with \ESC + '['.  It's also possible that some terminal implementations may not
+                    // write the CPR to stdin atomically, such that the CPR could have other user input
+                    // in the middle of it, and that user input could have escape sequences!  Handling
+                    // that last case is very challenging, and rare, so we don't try, but we do need to
+                    // handle the rest.  The min bar here is doing something reasonable, which may include
+                    // giving up and just returning default top and left values.
+
+                    // Consume from stdin until we find all of the key markers for the CPR:
+                    // \ESC, '[', ';', and 'R'.  For everything before the \ESC, it's definitely
+                    // not part of the CPR sequence, so we just immediately move any such bytes
+                    // over to the StdInReader's extra buffer.  From there until the end, we buffer
+                    // everything into readBytes for subsequent parsing.
+                    const byte Esc = 0x1B;
+                    StdInReader r = StdInReader.Inner;
+                    int escPos, bracketPos, semiPos, rPos;
+                    if (!AppendToStdInReaderUntil(Esc, r, readBytes, ref readBytesPos, out escPos) ||
+                        !BufferUntil((byte)'[', r, ref readBytes, ref readBytesPos, out bracketPos) ||
+                        !BufferUntil((byte)';', r, ref readBytes, ref readBytesPos, out semiPos) ||
+                        !BufferUntil((byte)'R', r, ref readBytes, ref readBytesPos, out rPos))
                     {
+                        // We were unable to read everything from stdin, e.g. a timeout ocurred.
+                        // Since we couldn't get the complete CPR, transfer any bytes we did read
+                        // back to the StdInReader's extra buffer, treating it all as user input,
+                        // and exit having not computed a valid cursor position.
+                        TransferBytes(readBytes.Slice(readBytesPos), r);
                         return;
                     }
 
-                    cursorVersion = s_cursorVersion;
+                    // At this point, readBytes starts with \ESC and ends with 'R'.
+                    Debug.Assert(readBytesPos > 0 && readBytesPos <= readBytes.Length);
+                    Debug.Assert(escPos == 0 && bracketPos > escPos && semiPos > bracketPos && rPos > semiPos);
+                    Debug.Assert(readBytes[escPos] == Esc);
+                    Debug.Assert(readBytes[bracketPos] == '[');
+                    Debug.Assert(readBytes[semiPos] == ';');
+                    Debug.Assert(readBytes[rPos] == 'R');
+
+                    // There are other sequences that begin with \ESC + '[' and that might be in our sequence before
+                    // the CPR, so we don't immediately trust escPos and bracketPos.  Instead, as a heuristic we trust
+                    // semiPos (which we only tracked after seeing a '[' after seeing an \ESC) and search backwards from
+                    // there looking for '[' and then \ESC.
+                    bracketPos = readBytes.Slice(0, semiPos).LastIndexOf((byte)'[');
+                    escPos = readBytes.Slice(0, bracketPos).LastIndexOf(Esc);
+
+                    // Everything before the \ESC is transferred back to the StdInReader. As is everything
+                    // between the \ESC and the '['; there really shouldn't be anything there, but we're
+                    // defensive in case the CPR wasn't written atomically and something crept in.
+                    TransferBytes(readBytes.Slice(0, escPos), r);
+                    TransferBytes(readBytes.Slice(escPos + 1, bracketPos - (escPos + 1)), r);
+
+                    // Now loop through all characters between the '[' and the ';' to compute the row,
+                    // and then between the ';' and the 'R' to compute the column. We incorporate any
+                    // digits we find, and while we shouldn't find anything else, we defensively put anything
+                    // else back into the StdInReader.
+                    ReadRowOrCol(bracketPos, semiPos, r, readBytes, ref top);
+                    ReadRowOrCol(semiPos, rPos, r, readBytes, ref left);
+
+                    // Mark that we've successfully received a CPR response at least once.
+                    s_everReceivedCursorPositionResponse = true;
+                }
+                finally
+                {
+                    Interop.Sys.UninitializeConsoleAfterRead();
+                    s_firstCursorPositionRequest = false;
                 }
 
-                // Create a buffer to read the response into.  We start with stack memory and grow
-                // into the heap only if we need to, and we choose a limit that should be large
-                // enough for the vast, vast majority of use cases, such that when we do grow, we
-                // just allocate, rather than employing any complicated pooling strategy.
-                int readBytesPos = 0;
-                Span<byte> readBytes = stackalloc byte[256];
 
-                // Synchronize with all other stdin readers.  We need to do this in case multiple threads are
-                // trying to read/write concurrently, and to minimize the chances of resulting conflicts.
-                // This does mean that Console.get_CursorLeft/Top can't be used concurrently with Console.Read*, etc.;
-                // attempting to do so will block one of them until the other completes, but in doing so we prevent
-                // one thread's get_CursorLeft/Top from providing input to the other's Console.Read*.
-                lock (StdInReader) 
+                bool BufferUntil(byte toFind, StdInReader src, ref Span<byte> dst, ref int dstPos, out int foundPos)
                 {
-                    // Because the CPR request/response protocol involves blocking until we get a certain
-                    // response from the terminal, we want to avoid doing so if we don't know the terminal
-                    // will definitely respond.  As such, we start with minChars == 0, which causes the
-                    // terminal's read timer to start immediately.  Once we've received a response for
-                    // a request such that we know the terminal supports the protocol, we then specify
-                    // minChars == 1.  With that, the timer won't start until the first character is
-                    // received.  This makes the mechanism more reliable when there are high latencies
-                    // involved in reading/writing, such as when accessing a remote system. We also extend
-                    // the timeout on the very first request to 15 seconds, to account for potential latency
-                    // before we know if we will receive a response.
-                    Interop.Sys.InitializeConsoleBeforeRead(minChars: (byte)(s_everReceivedCursorPositionResponse ? 1 : 0), decisecondsTimeout: (byte)(s_firstCursorPositionRequest ? 100 : 10));
-                    try
+                    // Loop until we find the target byte.
+                    while (true)
                     {
-                        // Write out the cursor position report request.
-                        Debug.Assert(!string.IsNullOrEmpty(TerminalFormatStrings.CursorPositionReport));
-                        WriteStdoutAnsiString(TerminalFormatStrings.CursorPositionReport, mayChangeCursorPosition: false);
-
-                        // Read the cursor position report (CPR), of the form \ESC[row;colR. This is not
-                        // as easy it it sounds.  Prior to the CPR having been supplied to stdin, other
-                        // user input could have come in and be available to read first from stdin.  Plus,
-                        // that user input could include escape sequences, and those escape sequences could
-                        // have a prefix very similar to that of the CPR (e.g. other escape sequences start
-                        // with \ESC + '['.  It's also possible that some terminal implementations may not
-                        // write the CPR to stdin atomically, such that the CPR could have other user input
-                        // in the middle of it, and that user input could have escape sequences!  Handling
-                        // that last case is very challenging, and rare, so we don't try, but we do need to
-                        // handle the rest.  The min bar here is doing something reasonable, which may include
-                        // giving up and just returning default top and left values.
-
-                        // Consume from stdin until we find all of the key markers for the CPR:
-                        // \ESC, '[', ';', and 'R'.  For everything before the \ESC, it's definitely
-                        // not part of the CPR sequence, so we just immediately move any such bytes
-                        // over to the StdInReader's extra buffer.  From there until the end, we buffer
-                        // everything into readBytes for subsequent parsing.
-                        const byte Esc = 0x1B;
-                        StdInReader r = StdInReader.Inner;
-                        int escPos, bracketPos, semiPos, rPos;
-                        if (!AppendToStdInReaderUntil(Esc, r, readBytes, ref readBytesPos, out escPos) ||
-                            !BufferUntil((byte)'[', r, ref readBytes, ref readBytesPos, out bracketPos) ||
-                            !BufferUntil((byte)';', r, ref readBytes, ref readBytesPos, out semiPos) ||
-                            !BufferUntil((byte)'R', r, ref readBytes, ref readBytesPos, out rPos))
+                        // Read the next byte from stdin.
+                        byte b;
+                        if (src.ReadStdin(&b, 1) != 1)
                         {
-                            // We were unable to read everything from stdin, e.g. a timeout ocurred.
-                            // Since we couldn't get the complete CPR, transfer any bytes we did read
-                            // back to the StdInReader's extra buffer, treating it all as user input,
-                            // and exit having not computed a valid cursor position.
-                            TransferBytes(readBytes.Slice(readBytesPos), r);
-                            return;
+                            foundPos = -1;
+                            return false;
                         }
 
-                        // At this point, readBytes starts with \ESC and ends with 'R'.
-                        Debug.Assert(readBytesPos > 0 && readBytesPos <= readBytes.Length);
-                        Debug.Assert(escPos == 0 && bracketPos > escPos && semiPos > bracketPos && rPos > semiPos);
-                        Debug.Assert(readBytes[escPos] == Esc);
-                        Debug.Assert(readBytes[bracketPos] == '[');
-                        Debug.Assert(readBytes[semiPos] == ';');
-                        Debug.Assert(readBytes[rPos] == 'R');
-
-                        // There are other sequences that begin with \ESC + '[' and that might be in our sequence before
-                        // the CPR, so we don't immediately trust escPos and bracketPos.  Instead, as a heuristic we trust
-                        // semiPos (which we only tracked after seeing a '[' after seeing an \ESC) and search backwards from
-                        // there looking for '[' and then \ESC.
-                        bracketPos = readBytes.Slice(0, semiPos).LastIndexOf((byte)'[');
-                        escPos = readBytes.Slice(0, bracketPos).LastIndexOf(Esc);
-
-                        // Everything before the \ESC is transferred back to the StdInReader. As is everything
-                        // between the \ESC and the '['; there really shouldn't be anything there, but we're
-                        // defensive in case the CPR wasn't written atomically and something crept in.
-                        TransferBytes(readBytes.Slice(0, escPos), r);
-                        TransferBytes(readBytes.Slice(escPos + 1, bracketPos - (escPos + 1)), r);
-
-                        // Now loop through all characters between the '[' and the ';' to compute the row,
-                        // and then between the ';' and the 'R' to compute the column. We incorporate any
-                        // digits we find, and while we shouldn't find anything else, we defensively put anything
-                        // else back into the StdInReader.
-                        ReadRowOrCol(bracketPos, semiPos, r, readBytes, ref top);
-                        ReadRowOrCol(semiPos, rPos, r, readBytes, ref left);
-
-                        // Mark that we've successfully received a CPR response at least once.
-                        s_everReceivedCursorPositionResponse = true;
-                    }
-                    finally
-                    {
-                        Interop.Sys.UninitializeConsoleAfterRead();
-                        s_firstCursorPositionRequest = false;
-                    }
-
-
-                    bool BufferUntil(byte toFind, StdInReader src, ref Span<byte> dst, ref int dstPos, out int foundPos)
-                    {
-                        // Loop until we find the target byte.
-                        while (true)
+                        // Make sure we have enough room to store the byte.
+                        if (dstPos == dst.Length)
                         {
-                            // Read the next byte from stdin.
-                            byte b;
-                            if (src.ReadStdin(&b, 1) != 1)
-                            {
-                                foundPos = -1;
-                                return false;
-                            }
+                            var tmpReadBytes = new byte[dst.Length * 2];
+                            dst.CopyTo(tmpReadBytes);
+                            dst = tmpReadBytes;
+                        }
 
-                            // Make sure we have enough room to store the byte.
-                            if (dstPos == dst.Length)
-                            {
-                                var tmpReadBytes = new byte[dst.Length * 2];
-                                dst.CopyTo(tmpReadBytes);
-                                dst = tmpReadBytes;
-                            }
+                        // Store the byte.
+                        dst[dstPos++] = b;
 
-                            // Store the byte.
-                            dst[dstPos++] = b;
-
-                            // If this is the target, we're done.
-                            if (b == toFind)
-                            {
-                                foundPos = dstPos - 1;
-                                return true;
-                            }
+                        // If this is the target, we're done.
+                        if (b == toFind)
+                        {
+                            foundPos = dstPos - 1;
+                            return true;
                         }
                     }
+                }
 
-                    unsafe bool AppendToStdInReaderUntil(
-                        byte toFind, StdInReader reader, Span<byte> foundByteDst, ref int foundByteDstPos, out int foundPos)
+                unsafe bool AppendToStdInReaderUntil(
+                    byte toFind, StdInReader reader, Span<byte> foundByteDst, ref int foundByteDstPos, out int foundPos)
+                {
+                    // Loop until we find the target byte.
+                    while (true)
                     {
-                        // Loop until we find the target byte.
-                        while (true)
+                        // Read the next byte from stdin.
+                        byte b;
+                        if (reader.ReadStdin(&b, 1) != 1)
                         {
-                            // Read the next byte from stdin.
-                            byte b;
-                            if (reader.ReadStdin(&b, 1) != 1)
-                            {
-                                foundPos = -1;
-                                return false;
-                            }
+                            foundPos = -1;
+                            return false;
+                        }
 
-                            // If it's the target byte, store it and exit.
-                            if (b == toFind)
-                            {
-                                Debug.Assert(foundByteDstPos < foundByteDst.Length, "Should only be called when there's room for at least one byte.");
-                                foundPos = foundByteDstPos;
-                                foundByteDst[foundByteDstPos++] = b;
-                                return true;
-                            }
+                        // If it's the target byte, store it and exit.
+                        if (b == toFind)
+                        {
+                            Debug.Assert(foundByteDstPos < foundByteDst.Length, "Should only be called when there's room for at least one byte.");
+                            foundPos = foundByteDstPos;
+                            foundByteDst[foundByteDstPos++] = b;
+                            return true;
+                        }
 
-                            // Otherwise, push it back into the reader's extra buffer.
+                        // Otherwise, push it back into the reader's extra buffer.
+                        reader.AppendExtraBuffer(&b, 1);
+                    }
+                }
+
+                void ReadRowOrCol(int startExclusive, int endExclusive, StdInReader reader, ReadOnlySpan<byte> source, ref int result)
+                {
+                    int row = 0;
+
+                    for (int i = startExclusive + 1; i < endExclusive; i++)
+                    {
+                        byte b = source[i];
+                        if (IsDigit(b))
+                        {
+                            try
+                            {
+                                row = checked((row * 10) + (b - '0'));
+                            }
+                            catch (OverflowException) { }
+                        }
+                        else
+                        {
                             reader.AppendExtraBuffer(&b, 1);
                         }
                     }
 
-                    void ReadRowOrCol(int startExclusive, int endExclusive, StdInReader reader, ReadOnlySpan<byte> source, ref int result)
+                    if (row >= 1)
                     {
-                        int row = 0;
-
-                        for (int i = startExclusive + 1; i < endExclusive; i++)
-                        {
-                            byte b = source[i];
-                            if (IsDigit(b))
-                            {
-                                try
-                                {
-                                    row = checked((row * 10) + (b - '0'));
-                                }
-                                catch (OverflowException) { }
-                            }
-                            else
-                            {
-                                reader.AppendExtraBuffer(&b, 1);
-                            }
-                        }
-
-                        if (row >= 1)
-                        {
-                            result = row - 1;
-                        }
-                    }
-
-                    void TransferBytes(ReadOnlySpan<byte> src, StdInReader dst)
-                    {
-                        for (int i = 0; i < src.Length; i++)
-                        {
-                            byte b = src[i];
-                            dst.AppendExtraBuffer(&b, 1);
-                        }
+                        result = row - 1;
                     }
                 }
 
-                lock (s_cursorGate)
+                void TransferBytes(ReadOnlySpan<byte> src, StdInReader dst)
                 {
-                    // Use the position we read, when no operation changed the cursor in the meanwhile.
-                    if (s_cursorVersion == cursorVersion)
+                    for (int i = 0; i < src.Length; i++)
                     {
-                        SetCachedCursorPosition(left, top);
-                        return;
+                        byte b = src[i];
+                        dst.AppendExtraBuffer(&b, 1);
                     }
                 }
+            }
+
+            lock (Console.Out)
+            {
+                SetCachedCursorPosition(left, top, cursorVersion);
             }
         }
 
@@ -1254,7 +1277,7 @@ namespace System
 
         private static unsafe void UpdatedCachedCursorPosition(byte* bufPtr, int count, int cursorVersion)
         {
-            lock (s_cursorGate)
+            lock (Console.Out)
             {
                 int left, top;
                 if (cursorVersion != s_cursorVersion               ||  // the cursor was changed during the write by another operation
@@ -1322,13 +1345,19 @@ namespace System
             }
         }
 
-        private static void InvalidateTerminalSettings()
+        private static void CheckTerminalSettingsInvalidated()
         {
-            lock (s_cursorGate)
+            bool invalidateSettings = Interlocked.CompareExchange(ref s_invalidateCachedSettings, 0, 1) == 1;
+            if (invalidateSettings)
             {
                 InvalidateCachedCursorPosition();
                 s_windowWidth = -1;
             }
+        }
+
+        private static void InvalidateTerminalSettings()
+        {
+            Volatile.Write(ref s_invalidateCachedSettings, 1);
         }
 
         /// <summary>Writes a terminfo-based ANSI escape string to stdout.</summary>
