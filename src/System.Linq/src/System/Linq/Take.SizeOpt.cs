@@ -24,19 +24,6 @@ namespace System.Linq
         {
             Debug.Assert(count > 0);
 
-            if (source is IPartition<TSource> partition)
-            {
-                int length = partition.GetCount(true);
-                if (length > 0)
-                {
-                    return length - count > 0 ? partition.Skip(length - count) : partition;
-                }
-                else if (length == 0)
-                {
-                    return partition;
-                }
-            }
-
             if (source is IList<TSource> sourceList)
             {
                 if (sourceList.Count > count)
