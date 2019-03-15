@@ -607,12 +607,14 @@ namespace System.Diagnostics
                 {
                     // do not inject header if it was injected already 
                     // perhaps tracing systems wants to override it
-                    if (request.Headers[TraceParentHeaderName] == null)
+                    if (request.Headers.Get(TraceParentHeaderName) == null)
                     {
                         request.Headers.Add(TraceParentHeaderName, activity.Id);
-                        if (activity.TraceStateString != null)
+
+                        var traceState = activity.TraceStateString;
+                        if (traceState != null)
                         {
-                            request.Headers.Add(TraceStateHeaderName, activity.TraceStateString);
+                            request.Headers.Add(TraceStateHeaderName, traceState);
                         }
                     }
                 }
@@ -620,13 +622,13 @@ namespace System.Diagnostics
                 {
                     // do not inject header if it was injected already 
                     // perhaps tracing systems wants to override it
-                    if (request.Headers[RequestIdHeaderName] == null)
+                    if (request.Headers.Get(RequestIdHeaderName) == null)
                     {
                         request.Headers.Add(RequestIdHeaderName, activity.Id);
                     }
                 }
 
-                if (request.Headers[CorrelationContextHeaderName] == null)
+                if (request.Headers.Get(CorrelationContextHeaderName) == null)
                 {
                     // we expect baggage to be empty or contain a few items
                     using (IEnumerator<KeyValuePair<string, string>> e = activity.Baggage.GetEnumerator())
@@ -656,7 +658,7 @@ namespace System.Diagnostics
             // Response event could be received several times for the same request in case it was redirected
             // IsLastResponse checks if response is the last one (no more redirects will happen)
             // based on response StatusCode and number or redirects done so far
-            if (request.Headers[RequestIdHeaderName] != null && IsLastResponse(request, response.StatusCode))
+            if (request.Headers.Get(RequestIdHeaderName) != null && IsLastResponse(request, response.StatusCode))
             {
                 // only send Stop if request was instrumented
                 this.Write(RequestStopName, new { Request = request, Response = response });
@@ -668,7 +670,7 @@ namespace System.Diagnostics
             // Response event could be received several times for the same request in case it was redirected
             // IsLastResponse checks if response is the last one (no more redirects will happen)
             // based on response StatusCode and number or redirects done so far
-            if (request.Headers[RequestIdHeaderName] != null && IsLastResponse(request, statusCode))
+            if (request.Headers.Get(RequestIdHeaderName) != null && IsLastResponse(request, statusCode))
             {
                 this.Write(RequestStopExName, new { Request = request, StatusCode = statusCode, Headers = headers });
             }
