@@ -105,11 +105,15 @@ namespace System.Net.Http.Functional.Tests
                         Stream stream = await response.Content.ReadAsStreamAsync();
                         Byte[] data = new Byte[100];
                         // Read some data, preferably whole body.
-                        await stream.ReadAsync(data, 0, 4);
+                        int readBytes = await stream.ReadAsync(data, 0, 4);
 
                         // Intermediate test - haven't reached stream EOF yet.
                         Assert.Empty(response.TrailingHeaders);
-                        Assert.Contains("data", System.Text.Encoding.Default.GetString(data));
+                        if (readBytes == 4)
+                        {
+                            // If we consumed whole content, check content.
+                            Assert.Contains("data", System.Text.Encoding.Default.GetString(data));
+                        }
 
                         // Read data until EOF is reached
                         while (stream.Read(data, 0, data.Length) != 0);
