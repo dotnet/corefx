@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace System.Linq
 {
@@ -10,14 +11,49 @@ namespace System.Linq
     {
         private static IEnumerable<TSource> TakeIterator<TSource>(IEnumerable<TSource> source, int count)
         {
-            if (count > 0)
+            Debug.Assert(count > 0);
+            
+            foreach (TSource element in source)
             {
-                foreach (TSource element in source)
+                yield return element;
+                if (--count == 0) break;
+            }
+        }
+
+        private static IEnumerable<TSource> TakeLastIterator<TSource>(IEnumerable<TSource> source, int count)
+        {
+            Debug.Assert(count > 0);
+
+            if (source is IPartition<TSource> partition)
+            {
+                int length = partition.GetCount(true);
+                if (length > 0)
                 {
-                    yield return element;
-                    if (--count == 0) break;
+                    return length - count > 0 ? partition.Skip(length - count) : partition;
+                }
+                else if (length == 0)
+                {
+                    return partition;
                 }
             }
+
+            if (source is IList<TSource> sourceList)
+            {
+                if (sourceList.Count > count)
+                {
+                    return sourceList.Skip(sourceList.Count - count);
+                }
+                else if (sourceList.Count > 0)
+                {
+                    return TakeIterator<TSource>(sourceList, sourceList.Count);
+                }
+                else
+                {
+                    return Empty<TSource>();
+                }
+            }
+
+            return TakeLastRegularIterator<TSource>(source, count);
         }
     }
 }

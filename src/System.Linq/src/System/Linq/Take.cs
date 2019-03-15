@@ -101,12 +101,12 @@ namespace System.Linq
             Debug.Assert(count > 0);
 
             Queue<TSource> queue;
-
+            
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
                 {
-                    return Empty<TSource>();
+                    yield break;
                 }
 
                 queue = new Queue<TSource>();
@@ -133,7 +133,11 @@ namespace System.Linq
 
             Debug.Assert(queue.Count <= count);
 
-            return queue;
+            do
+            {
+                yield return queue.Dequeue();
+            }
+            while (queue.Count > 0);
         }
     }
 }

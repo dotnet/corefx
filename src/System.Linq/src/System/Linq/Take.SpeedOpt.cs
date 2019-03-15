@@ -16,22 +16,18 @@ namespace System.Linq
 
         private static IEnumerable<TSource> TakeLastIterator<TSource>(IEnumerable<TSource> source, int count)
         {
-            Debug.Assert(source != null);
             Debug.Assert(count > 0);
 
             if (source is IPartition<TSource> partition)
             {
                 int length = partition.GetCount(true);
-                if (length >= 0)
+                if (length > 0)
                 {
-                    if (length > count)
-                    {
-                        return partition.Skip(length - count);
-                    }
-                    else
-                    {
-                        return partition;
-                    }
+                    return length - count > 0 ? partition.Skip(length - count) : partition;
+                }
+                else if (length == 0)
+                {
+                    return partition;
                 }
             }
 
@@ -43,7 +39,7 @@ namespace System.Linq
                 }
                 else
                 {
-                    return sourceList;
+                    return new ListPartition<TSource>(sourceList, 0, sourceList.Count);
                 }
             }
 
