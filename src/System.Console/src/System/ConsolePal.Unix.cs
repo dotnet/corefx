@@ -26,8 +26,7 @@ namespace System
         // We also need to invalidate these values when certain signals occur.
         // We don't want to take the lock in the signal handling thread for this.
         // Instead, we set a flag. Before reading a cached value, a call to CheckTerminalSettingsInvalidated
-        // will invalidate the cached values if a signal had occured. After updating the cached values,
-        // a call to the same method ensures we invalidate the values if a signal occured in the meanwhile.
+        // will invalidate the cached values if a signal has occured.
         private static int s_cursorVersion; // Gets incremented each time the cursor position changed.
                                             // Used to synchronize between lock (Console.Out) blocks.
         private static int s_cursorLeft;    // Cached CursorLeft, -1 when invalid.
@@ -266,9 +265,6 @@ namespace System
             {
                 InvalidateCachedCursorPosition();
             }
-
-            // Invalidate after writing cached values.
-            CheckTerminalSettingsInvalidated();
         }
 
         private static void InvalidateCachedCursorPosition()
@@ -378,9 +374,6 @@ namespace System
                 }
                 width = s_windowWidth;
                 height = s_windowHeight;
-
-                // Invalidate after writing cached values.
-                CheckTerminalSettingsInvalidated();
             }
         }
 
