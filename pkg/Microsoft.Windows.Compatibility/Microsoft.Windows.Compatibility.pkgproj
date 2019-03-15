@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <HarvestStablePackage>false</HarvestStablePackage>
-    <PackageVersion>2.1.0</PackageVersion>
+    <PackageVersion>2.1.1</PackageVersion>
     <ServiceModelVersion>4.5.3</ServiceModelVersion>
   </PropertyGroup>
 
