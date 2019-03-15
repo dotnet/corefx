@@ -29,14 +29,15 @@ namespace System.Diagnostics
         // to ticks. 
         private static readonly double s_tickFrequency;
 
-        static Stopwatch()
+        static unsafe Stopwatch()
         {
-            bool succeeded = QueryPerformanceFrequency(out Frequency);
+            long frequency;
+            int succeeded = QueryPerformanceFrequency(&frequency);
 
-            if (!succeeded)
+            if (succeeded == 0)
             {
                 IsHighResolution = false;
-                Frequency = TicksPerSecond;
+                frequency = TicksPerSecond;
                 s_tickFrequency = 1;
             }
             else
@@ -45,6 +46,7 @@ namespace System.Diagnostics
                 s_tickFrequency = TicksPerSecond;
                 s_tickFrequency /= Frequency;
             }
+            Frequency = frequency;
         }
 
         public Stopwatch()
@@ -127,12 +129,12 @@ namespace System.Diagnostics
             get { return GetRawElapsedTicks(); }
         }
 
-        public static long GetTimestamp()
+        public static unsafe long GetTimestamp()
         {
             if (IsHighResolution)
             {
-                long timestamp = 0;
-                QueryPerformanceCounter(out timestamp);
+                long timestamp;
+                QueryPerformanceCounter(&timestamp);
                 return timestamp;
             }
             else

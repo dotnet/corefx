@@ -2,18 +2,22 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
+
 namespace System.Diagnostics
 {
     public partial class Stopwatch
     {
-        private static bool QueryPerformanceFrequency(out long value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe int QueryPerformanceFrequency(long* resolution)
         {
-            return Interop.Sys.GetTimestampResolution(out value);
+            return Interop.Sys.GetTimestampResolution(resolution);
         }
 
-        private static bool QueryPerformanceCounter(out long value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe int QueryPerformanceCounter(long* timestamp)
         {
-            return Interop.Sys.GetTimestamp(out value);
+            return Interop.Sys.GetTimestamp(timestamp);
         }
     }
 }
