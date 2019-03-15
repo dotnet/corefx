@@ -27,7 +27,7 @@ namespace System
         private static int s_cursorLeft = -1;   // Cached CursorLeft, -1 when invalid.
         private static int s_cursorTop;         // Cached CursorTop, invalid when s_cursorLeft == -1.
         private static int s_windowWidth = -1;  // Cached WindowWidth, -1 when invalid.
-        private static int s_windowHeight = -1; // Cached WindowHeight, invalid when s_windowWidth == -1.
+        private static int s_windowHeight;      // Cached WindowHeight, invalid when s_windowWidth == -1.
 
         private static readonly Interop.Sys.TerminalInvalidationCallback s_invalidateTerminalSettings = InvalidateTerminalSettings;
 
@@ -192,7 +192,7 @@ namespace System
                 if (!string.IsNullOrEmpty(titleFormat))
                 {
                     string ansiStr = TermInfo.ParameterizedStrings.Evaluate(titleFormat, value);
-                    WriteStdoutAnsiString(ansiStr, noCursorChange: true);
+                    WriteStdoutAnsiString(ansiStr, mayChangeCursorPosition: false);
                 }
             }
         }
@@ -201,7 +201,7 @@ namespace System
         {
             if (!Console.IsOutputRedirected)
             {
-                WriteStdoutAnsiString(TerminalFormatStrings.Instance.Bell, noCursorChange: true);
+                WriteStdoutAnsiString(TerminalFormatStrings.Instance.Bell, mayChangeCursorPosition: false);
             }
         }
 
@@ -225,7 +225,7 @@ namespace System
 
             lock (s_cursorGate)
             {
-                if ((s_cursorLeft == left && s_cursorTop == top))
+                if (s_cursorLeft == left && s_cursorTop == top)
                 {
                     return;
                 }
@@ -255,8 +255,21 @@ namespace System
             s_cursorVersion++;
         }
 
-        private static bool HasCachedCursorPosition()
-            => s_cursorLeft >= 0;
+        private static bool TryGetCachedCursorPosition(out int left, out int top)
+        {
+            bool hasCachedCursorPosition = s_cursorLeft >= 0;
+            if (hasCachedCursorPosition)
+            {
+                left = s_cursorLeft;
+                top = s_cursorTop;
+            }
+            else
+            {
+                left = 0;
+                top = 0;
+            }
+            return hasCachedCursorPosition;
+        }
 
         public static int BufferWidth
         {
@@ -415,10 +428,8 @@ namespace System
                 int cursorVersion;
                 lock (s_cursorGate)
                 {
-                    if (HasCachedCursorPosition())
+                    if (TryGetCachedCursorPosition(out left, out top))
                     {
-                        left = s_cursorLeft;
-                        top = s_cursorTop;
                         return;
                     }
 
@@ -454,7 +465,7 @@ namespace System
                     {
                         // Write out the cursor position report request.
                         Debug.Assert(!string.IsNullOrEmpty(TerminalFormatStrings.CursorPositionReport));
-                        WriteStdoutAnsiString(TerminalFormatStrings.CursorPositionReport, noCursorChange: true);
+                        WriteStdoutAnsiString(TerminalFormatStrings.CursorPositionReport, mayChangeCursorPosition: false);
 
                         // Read the cursor position report (CPR), of the form \ESC[row;colR. This is not
                         // as easy it it sounds.  Prior to the CPR having been supplied to stdin, other
@@ -1186,20 +1197,20 @@ namespace System
         /// <param name="buffer">The buffer from which to write data.</param>
         /// <param name="offset">The offset at which the data to write starts in the buffer.</param>
         /// <param name="count">The number of bytes to write.</param>
-        /// <param name="noCursorChange">Writing this buffer doesn't change the cursor position.</param>
-        private static unsafe void Write(SafeFileHandle fd, byte[] buffer, int offset, int count, bool noCursorChange = false)
+        /// <param name="mayChangeCursorPosition">Writing this buffer may change the cursor position.</param>
+        private static unsafe void Write(SafeFileHandle fd, byte[] buffer, int offset, int count, bool mayChangeCursorPosition = true)
         {
             fixed (byte* bufPtr = buffer)
             {
-                Write(fd, bufPtr + offset, count, noCursorChange);
+                Write(fd, bufPtr + offset, count, mayChangeCursorPosition);
             }
         }
 
-        private static unsafe void Write(SafeFileHandle fd, byte* bufPtr, int count, bool noCursorChange = false)
+        private static unsafe void Write(SafeFileHandle fd, byte* bufPtr, int count, bool mayChangeCursorPosition = true)
         {
             while (count > 0)
             {
-                int cursorVersion = noCursorChange ? -1 : Volatile.Read(ref s_cursorVersion);
+                int cursorVersion = mayChangeCursorPosition ? Volatile.Read(ref s_cursorVersion) : -1;
 
                 int bytesWritten = Interop.Sys.Write(fd, bufPtr, count);
                 if (bytesWritten < 0)
@@ -1230,7 +1241,7 @@ namespace System
                 }
                 else
                 {
-                    if (!noCursorChange)
+                    if (mayChangeCursorPosition)
                     {
                         UpdatedCachedCursorPosition(bufPtr, bytesWritten, cursorVersion);
                     }
@@ -1245,9 +1256,10 @@ namespace System
         {
             lock (s_cursorGate)
             {
-                if (cursorVersion != s_cursorVersion  ||  // the cursor was changed during the write by another operation
-                    !HasCachedCursorPosition()        ||  // we don't have a cursor position
-                    count > DefaultConsoleBufferSize)     // limit the amount of bytes we are willing to inspect
+                int left, top;
+                if (cursorVersion != s_cursorVersion               ||  // the cursor was changed during the write by another operation
+                    !TryGetCachedCursorPosition(out left, out top) ||  // we don't have a cursor position
+                    count > DefaultConsoleBufferSize)                  // limit the amount of bytes we are willing to inspect
                 {
                     InvalidateCachedCursorPosition();
                     return;
@@ -1255,8 +1267,6 @@ namespace System
 
                 int width = WindowWidth;
                 int height = WindowHeight;
-                int left = s_cursorLeft;
-                int top = s_cursorTop;
 
                 for (int i = 0; i < count; i++)
                 {
@@ -1323,8 +1333,8 @@ namespace System
 
         /// <summary>Writes a terminfo-based ANSI escape string to stdout.</summary>
         /// <param name="value">The string to write.</param>
-        /// <param name="noCursorChange">Writing this value doesn't change the cursor position.</param>
-        private static unsafe void WriteStdoutAnsiString(string value, bool noCursorChange = false)
+        /// <param name="mayChangeCursorPosition">Writing this value may change the cursor position.</param>
+        private static unsafe void WriteStdoutAnsiString(string value, bool mayChangeCursorPosition = true)
         {
             if (string.IsNullOrEmpty(value))
                 return;
@@ -1342,7 +1352,7 @@ namespace System
 
                     lock (Console.Out) // synchronize with other writers
                     {
-                        Write(Interop.Sys.FileDescriptors.STDOUT_FILENO, data, bytesToWrite, noCursorChange);
+                        Write(Interop.Sys.FileDescriptors.STDOUT_FILENO, data, bytesToWrite, mayChangeCursorPosition);
                     }
                 }
             }
@@ -1351,7 +1361,7 @@ namespace System
                 byte[] data = Encoding.UTF8.GetBytes(value);
                 lock (Console.Out) // synchronize with other writers
                 {
-                    Write(Interop.Sys.FileDescriptors.STDOUT_FILENO, data, 0, data.Length, noCursorChange);
+                    Write(Interop.Sys.FileDescriptors.STDOUT_FILENO, data, 0, data.Length, mayChangeCursorPosition);
                 }
             }
         }
