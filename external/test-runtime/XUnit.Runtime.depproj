@@ -200,12 +200,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ReferenceCopyLocalPaths Include="$(PackagesDir)$(MicrosoftNetTestSdkPackageName)\$(MicrosoftNETTestSdkPackageVersion)\build\$(TestSdkTFM)\*.*">
+      <_copyLocalPaths Include="$(PackagesDir)$(MicrosoftNetTestSdkPackageName)\$(MicrosoftNETTestSdkPackageVersion)\build\$(TestSdkTFM)\*.*" />
+      <ReferenceCopyLocalPaths Include="@(_copyLocalPaths)">
         <Private>false</Private>
         <NuGetPackageId>$(MicrosoftNetTestSdkPackageName)</NuGetPackageId>
         <NuGetPackageVersion>$(MicrosoftNETTestSdkPackageVersion)</NuGetPackageVersion>
       </ReferenceCopyLocalPaths>
     </ItemGroup>
+
+    <Error Condition="'@(_copyLocalPaths)' != ''"
+           Text="Error: looks like no assets were found under: $(PackagesDir)$(MicrosoftNetTestSdkPackageName)\$(MicrosoftNETTestSdkPackageVersion)\build\$(TestSdkTFM)\*.*" />
 
   </Target>
 
