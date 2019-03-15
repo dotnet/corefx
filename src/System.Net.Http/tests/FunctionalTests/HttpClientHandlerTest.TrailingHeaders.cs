@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Test.Common;
@@ -121,29 +122,60 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        [Fact]
-        public async Task GetAsync_ForbiddenTrailingHeaders_Throws()
+        [Theory]
+        [InlineData("Age", "1")]
+        [InlineData("Authorization", "Basic YWxhZGRpbjpvcGVuc2VzYW1l")]
+        [InlineData("Cache-Control", "no-cache")]
+        [InlineData("Content-Encoding", "gzip")]
+        [InlineData("Content-Length", "22")]
+        [InlineData("Content-type", "foo/bar")]
+        [InlineData("Content-Range", "bytes 200-1000/67589")]
+        [InlineData("Date", "Wed, 21 Oct 2015 07:28:00 GMT")]
+        [InlineData("Expect", "100-continue")]
+        [InlineData("Expires", "Wed, 21 Oct 2015 07:28:00 GMT")]
+        [InlineData("Host", "foo")]
+        [InlineData("If-Match", "Wed, 21 Oct 2015 07:28:00 GMT")]
+        [InlineData("If-Modified-Since", "Wed, 21 Oct 2015 07:28:00 GMT")]
+        [InlineData("If-None-Match", "*")]
+        [InlineData("If-Range", "Wed, 21 Oct 2015 07:28:00 GMT")]
+        [InlineData("If-Unmodified-Since", "Wed, 21 Oct 2015 07:28:00 GMT")]
+        [InlineData("Location", "/index.html")]
+        [InlineData("Max-Forwards","2")]
+        [InlineData("Pragma", "no-cache")]
+        [InlineData("Range", "5/10")]
+        [InlineData("Retry-After", "20")]
+        [InlineData("Set-Cookie", "foo=bar")]
+        [InlineData("TE", "boo")]
+        [InlineData("Transfer-Encoding", "chunked")]
+        [InlineData("Transfer-Encoding", "gzip")]
+        [InlineData("Vary", "*")]
+        [InlineData("Warning", "300 - \"Be Warned!\"")]
+        public async Task GetAsync_ForbiddenTrailingHeaders_Ignores(string name, string value)
         {
             await LoopbackServer.CreateClientAndServerAsync(async url =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
                 using (var client = new HttpClient(handler))
                 {
-                    await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
+                    HttpResponseMessage response = await client.GetAsync(url);
+                    Assert.Contains("amazingtrailer", response.TrailingHeaders.GetValues("MyCoolTrailerHeader"));
+                    Assert.False(response.TrailingHeaders.TryGetValues(name, out IEnumerable<string> values));
+                    Assert.Contains("Loopback", response.TrailingHeaders.GetValues("Server"));
                 }
             }, server => server.AcceptConnectionSendCustomResponseAndCloseAsync(
                 "HTTP/1.1 200 OK\r\n" +
                 "Connection: close\r\n" +
                 "Transfer-Encoding: chunked\r\n" +
-                "Trailer: Set-Cookie, MyCoolTrailerHeader, Hello, Content-Type\r\n" +
+                $"Trailer: Set-Cookie, MyCoolTrailerHeader, {name}, Hello\r\n" +
                 "\r\n" +
                 "4\r\n" +
                 "data\r\n" +
                 "0\r\n" +
                 "Set-Cookie: yummy\r\n" +
                 "MyCoolTrailerHeader: amazingtrailer\r\n" +
-                "Hello: World\r\n" +
-                "Content-Type: text\r\n" +
+                $"{name}: {value}\r\n" +
+                "Server: Loopback\r\n" +
+                $"{name}: {value}\r\n" +
                 "\r\n"));
         }
 

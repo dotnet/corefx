@@ -42,7 +42,7 @@ namespace System.Net.Http
         private static readonly byte[] s_http1DotBytes = Encoding.ASCII.GetBytes("HTTP/1.");
         private static readonly ulong s_http10Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.0"));
         private static readonly ulong s_http11Bytes = BitConverter.ToUInt64(Encoding.ASCII.GetBytes("HTTP/1.1"));
-        private static readonly HashSet<KnownHeader> s_disallowedTrailers = new HashSet<KnownHeader>
+        private static readonly HashSet<KnownHeader> s_disallowedTrailers = new HashSet<KnownHeader>    // rfc7230 4.1.2.
         {
             // Message framing headers.
             KnownHeaders.TransferEncoding, KnownHeaders.ContentLength,
@@ -53,6 +53,7 @@ namespace System.Net.Http
             // Request modifiers: controls and conditionals.
             // rfc7231#section-5.1: Controls.
             KnownHeaders.CacheControl, KnownHeaders.Expect, KnownHeaders.MaxForwards, KnownHeaders.Pragma, KnownHeaders.Range, KnownHeaders.TE,
+
             // rfc7231#section-5.2: Conditionals.
             KnownHeaders.IfMatch, KnownHeaders.IfNoneMatch, KnownHeaders.IfModifiedSince, KnownHeaders.IfUnmodifiedSince, KnownHeaders.IfRange,
 
@@ -924,7 +925,7 @@ namespace System.Net.Http
             {
                 // Disallowed trailer fields.
                 // A recipient MUST ignore fields that are forbidden to be sent in a trailer.
-                ThrowInvalidHttpResponse();
+                return;
             }
 
             // Eat any trailing whitespace
