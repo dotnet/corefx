@@ -12,7 +12,10 @@ namespace System.Net.Security
     {
         private void ValidateCreateContext(SslClientAuthenticationOptions sslClientAuthenticationOptions, RemoteCertValidationCallback remoteCallback, LocalCertSelectionCallback localCallback)
         {
-            if(_shutdown == true && _nestedWrite == 0)
+            // Without setting (or using) these members you will get a build exception in the unit test project.
+            // The code that normally uses these in the main solution is in the implementation of SslStream.
+
+            if(_nestedWrite == 0)
             {
 
             }
