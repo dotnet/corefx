@@ -314,6 +314,12 @@ namespace System.Net.Security.Tests
         [Fact]
         public async Task SslStream_StreamToStream_WriteAsync_ReadAsync_Pending_Success()
         {
+            if (this is SslStreamStreamToStreamTest_Sync)
+            {
+                // This test assumes operations complete asynchronously.
+                return;
+            }
+
             VirtualNetwork network = new VirtualNetwork();
 
             using (var clientStream = new VirtualNetworkStream(network, isServer: false))
@@ -401,6 +407,12 @@ namespace System.Net.Security.Tests
         [Fact]
         public async Task SslStream_StreamToStream_Dispose_Throws()
         {
+            if (this is SslStreamStreamToStreamTest_Sync)
+            {
+                // This test assumes operations complete asynchronously.
+                return;
+            }
+
             VirtualNetwork network = new VirtualNetwork()
             {
                 DisableConnectionBreaking = true
@@ -430,10 +442,9 @@ namespace System.Net.Security.Tests
                 await WriteAsync(clientSslStream, new byte[] { 2 }, 0, 1);
 
                 // We're inconsistent as to whether the ObjectDisposedException is thrown directly
-                // or wrapped in an IOException.  For sync operations, it's never wrapped.  For
-                // Begin/End, it's always wrapped,  And for Async, it's only wrapped on netfx.
-                if (this is SslStreamStreamToStreamTest_BeginEnd ||
-                    (this is SslStreamStreamToStreamTest_Async && PlatformDetection.IsFullFramework))
+                // or wrapped in an IOException.  For Begin/End, it's always wrapped; for Async,
+                // it's only wrapped on netfx.
+                if (this is SslStreamStreamToStreamTest_BeginEnd || PlatformDetection.IsFullFramework)
                 {
                     await Assert.ThrowsAsync<ObjectDisposedException>(() => serverReadTask);
                 }
@@ -697,11 +708,39 @@ namespace System.Net.Security.Tests
             }
         }
 
-        protected override Task<int> ReadAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default(CancellationToken)) =>
-            Task.Run(() => stream.Read(buffer, offset, count), cancellationToken);
+        protected override Task<int> ReadAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled<int>(cancellationToken);
+            }
 
-        protected override Task WriteAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default(CancellationToken)) =>
-            Task.Run(() => stream.Write(buffer, offset, count), cancellationToken);
+            try
+            {
+                return Task.FromResult<int>(stream.Read(buffer, offset, count));
+            }
+            catch (Exception e)
+            {
+                return Task.FromException<int>(e);
+            }
+        }
 
+        protected override Task WriteAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled<int>(cancellationToken);
+            }
+
+            try
+            {
+                stream.Write(buffer, offset, count);
+                return Task.CompletedTask;
+            }
+            catch (Exception e)
+            {
+                return Task.FromException<int>(e);
+            }
+        }
     }
 }
