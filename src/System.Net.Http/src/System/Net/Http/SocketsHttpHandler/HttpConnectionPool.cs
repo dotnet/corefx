@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -55,9 +56,11 @@ namespace System.Net.Http
         private const int DefaultHttpPort = 80;
         private const int DefaultHttpsPort = 443;
 
+        private readonly HttpRequestHeaders _headers;
+
         /// <summary>Initializes the pool.</summary>
         /// <param name="maxConnections">The maximum number of connections allowed to be associated with the pool at any given time.</param>
-        public HttpConnectionPool(HttpConnectionPoolManager poolManager, HttpConnectionKind kind, string host, int port, string sslHostName, Uri proxyUri, int maxConnections)
+        public HttpConnectionPool(HttpConnectionPoolManager poolManager, HttpConnectionKind kind, string host, int port, string sslHostName, Uri proxyUri, int maxConnections, HttpRequestHeaders headers)
         {
             _poolManager = poolManager;
             _kind = kind;
@@ -65,6 +68,7 @@ namespace System.Net.Http
             _port = port;
             _proxyUri = proxyUri;
             _maxConnections = maxConnections;
+            _headers = headers;
 
             _http2Enabled = (_poolManager.Settings._maxHttpVersion == HttpVersion.Version20);
 
@@ -632,6 +636,7 @@ namespace System.Net.Http
             // Send a CONNECT request to the proxy server to establish a tunnel.
             HttpRequestMessage tunnelRequest = new HttpRequestMessage(HttpMethod.Connect, _proxyUri);
             tunnelRequest.Headers.Host = $"{_host}:{_port}";    // This specifies destination host/port to connect to
+            tunnelRequest.Headers.Add(HttpKnownHeaderNames.UserAgent, _headers.UserAgent.ToString());
 
             HttpResponseMessage tunnelResponse = await _poolManager.SendProxyConnectAsync(tunnelRequest, _proxyUri, cancellationToken).ConfigureAwait(false);
 
