@@ -527,7 +527,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                return InternalLocalCertificate;
+                return _context.IsServer ? _context.LocalServerCertificate : _context.LocalClientCertificate;
             }
         }
 

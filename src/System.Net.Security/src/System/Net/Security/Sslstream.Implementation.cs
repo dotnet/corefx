@@ -151,11 +151,7 @@ namespace System.Net.Security
 
         private object SyncLock => _context;
 
-        private X509Certificate InternalLocalCertificate => _context.IsServer ? _context.LocalServerCertificate : _context.LocalClientCertificate;
-
         private bool IsShutdown => _shutdown;
-
-        private Stream InternalInnerStream => _innerStream;
 
         private int MaxDataSize => _context.MaxDataSize;
 
@@ -195,7 +191,28 @@ namespace System.Net.Security
         {
             _exception = s_disposedSentinel;
             _context?.Close();
-            InternalDispose();
+
+            // Ensure a Read operation is not in progress,
+            // block potential reads since SslStream is disposing.
+            // This leaves the _nestedRead = 1, but that's ok, since
+            // subsequent Reads first check if the context is still available.
+            if (Interlocked.CompareExchange(ref _nestedRead, 1, 0) == 0)
+            {
+                byte[] buffer = _internalBuffer;
+                if (buffer != null)
+                {
+                    _internalBuffer = null;
+                    _internalBufferCount = 0;
+                    _internalOffset = 0;
+                    ArrayPool<byte>.Shared.Return(buffer);
+                }
+            }
+
+            if (_internalBuffer == null)
+            {
+                // Suppress finalizer if the read buffer was returned.
+                GC.SuppressFinalize(this);
+            }
         }
 
         private SecurityStatusPal EncryptData(ReadOnlyMemory<byte> buffer, ref byte[] outBuffer, out int outSize)
@@ -1296,31 +1313,6 @@ namespace System.Net.Security
         ~SslStream()
         {
             Dispose(disposing: false);
-        }
-
-        private void InternalDispose()
-        {
-            // Ensure a Read operation is not in progress,
-            // block potential reads since SslStream is disposing.
-            // This leaves the _nestedRead = 1, but that's ok, since
-            // subsequent Reads first check if the context is still available.
-            if (Interlocked.CompareExchange(ref _nestedRead, 1, 0) == 0)
-            {
-                byte[] buffer = _internalBuffer;
-                if (buffer != null)
-                {
-                    _internalBuffer = null;
-                    _internalBufferCount = 0;
-                    _internalOffset = 0;
-                    ArrayPool<byte>.Shared.Return(buffer);
-                }
-            }
-
-            if (_internalBuffer == null)
-            {
-                // Suppress finalizer if the read buffer was returned.
-                GC.SuppressFinalize(this);
-            }
         }
 
         //We will only free the read buffer if it
