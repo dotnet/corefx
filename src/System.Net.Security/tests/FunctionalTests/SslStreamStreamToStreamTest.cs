@@ -103,7 +103,7 @@ namespace System.Net.Security.Tests
                 clientStream.ExceptionToThrow = null;
 
                 // Validate that the SslStream continues to be usable
-                for (byte b = 42; b < 52; b++)
+                for (byte b = 42; b < 52; b++) // arbitrary test values
                 {
                     await WriteAsync(serverSslStream, new byte[1] { b }, 0, 1);
                     byte[] buffer = new byte[1];
