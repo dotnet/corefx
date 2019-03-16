@@ -55,6 +55,7 @@ namespace System.Net.Security
 
         private ExceptionDispatchInfo _exception;
         private bool _shutdown;
+        private bool _handshakeCompleted;
 
         // Never updated directly, special properties are used.  This is the read buffer.
         internal byte[] _internalBuffer;
@@ -447,7 +448,7 @@ namespace System.Net.Security
                 this);
         #endregion
 
-        public override bool IsAuthenticated => _context != null && _context.IsValidContext && _exception == null && HandshakeCompleted;
+        public override bool IsAuthenticated => _context != null && _context.IsValidContext && _exception == null && _handshakeCompleted;
 
         public override bool IsMutuallyAuthenticated
         {
@@ -638,7 +639,7 @@ namespace System.Net.Security
 
         public override bool CanTimeout => InnerStream.CanTimeout;
 
-        public override bool CanWrite => IsAuthenticated && InnerStream.CanWrite && !IsShutdown;
+        public override bool CanWrite => IsAuthenticated && InnerStream.CanWrite && !_shutdown;
 
         public override int ReadTimeout
         {

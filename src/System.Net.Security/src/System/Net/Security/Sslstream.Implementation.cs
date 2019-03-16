@@ -27,8 +27,6 @@ namespace System.Net.Security
 
         private int _nestedAuth;
         
-        private bool _handshakeCompleted;
-        
         private SecurityStatusPal _securityStatus;
 
         private enum CachedSessionStatus : byte
@@ -151,8 +149,6 @@ namespace System.Net.Security
 
         private object SyncLock => _context;
 
-        private bool IsShutdown => _shutdown;
-
         private int MaxDataSize => _context.MaxDataSize;
 
         private void SetException(Exception e)
@@ -166,8 +162,6 @@ namespace System.Net.Security
 
             _context?.Close();
         }
-
-        private bool HandshakeCompleted => _handshakeCompleted;
 
         private void CheckThrow(bool authSuccessCheck, bool shutdownCheck = false)
         {

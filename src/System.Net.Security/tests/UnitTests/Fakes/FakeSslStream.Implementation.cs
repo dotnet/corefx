@@ -22,6 +22,7 @@ namespace System.Net.Security
             _internalBufferCount = 0;
             _internalOffset = 0;
             _nestedWrite = 0;
+            _handshakeCompleted = false;
         }
 
         private void ValidateParameters(byte[] buffer, int offset, int count)
@@ -48,12 +49,6 @@ namespace System.Net.Security
         private int CheckEnqueueRead(Memory<byte> buffer) => default;
 
         private bool RemoteCertRequired => default;
-
-        private X509Certificate InternalLocalCertificate => default;
-
-        private bool HandshakeCompleted => default;
-
-        private bool IsShutdown { get; set; }
 
         private void CheckThrow(bool authSuccessCheck, bool shutdownCheck = false)
         {
