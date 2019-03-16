@@ -85,7 +85,10 @@ namespace System.Drawing.Tests
             Assert.Null(SystemFonts.GetFontByName(systemFontName));
         }
 
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("kernel32.dll", SetLastError = false, CharSet = CharSet.Auto)]
         public static extern int GetSystemDefaultLCID();
+
+        [DllImport("kernel32.dll", SetLastError = false, CharSet = CharSet.Auto)]
+        public static extern int GetUserDefaultLCID();
     }
 }
