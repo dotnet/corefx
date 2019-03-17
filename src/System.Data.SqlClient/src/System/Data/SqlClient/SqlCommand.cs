@@ -75,17 +75,19 @@ namespace System.Data.SqlClient
             }
         }
 
+        private static readonly Action<Task<object>, object> s_continueWithAsyncCallback = ContinueWithAsyncCallback;
+        private static readonly DiagnosticListener _diagnosticListener = new DiagnosticListener(SqlClientDiagnosticListenerExtensions.DiagnosticListenerName);
+        private static readonly object s_cachedInvalidPrepareHandle = (object)-1;
+
         private static Func<Task<int>, object, Task<int>> s_registerForConnectionCloseCallback_Int32;
+
+        internal SqlDependency _sqlDep;
 
         private string _commandText;
         private CommandType _commandType;
         private int _commandTimeout = ADP.DefaultCommandTimeout;
         private UpdateRowSource _updatedRowSource = UpdateRowSource.Both;
         private bool _designTimeInvisible;
-
-        internal SqlDependency _sqlDep;
-
-        private static readonly DiagnosticListener _diagnosticListener = new DiagnosticListener(SqlClientDiagnosticListenerExtensions.DiagnosticListenerName);
         private bool _parentOperationStarted = false;
 
         // Prepare
@@ -108,7 +110,7 @@ namespace System.Data.SqlClient
         // The OnReturnValue function will test this flag to determine whether the returned value is a _prepareHandle or something else.
         //
         // _prepareHandle - the handle of a prepared command. Apparently there can be multiple prepared commands at a time - a feature that we do not support yet.
-        private static readonly object s_cachedInvalidPrepareHandle = (object)-1;
+
         private bool _inPrepare = false;
         private object _prepareHandle = s_cachedInvalidPrepareHandle; // this is an int which is used in the object typed SqlParameter.Value field, avoid repeated boxing by storing in a box
         private bool _hiddenPrepare = false;
@@ -1011,7 +1013,7 @@ namespace System.Data.SqlClient
                 if (callback != null)
                 {
                     completion.Task.ContinueWith(
-                        (task,state) => ((AsyncCallback)state)(task),
+                        s_continueWithAsyncCallback,
                         state: callback
                     );
                 }
@@ -1357,7 +1359,7 @@ namespace System.Data.SqlClient
                 if (callback != null)
                 {
                     completion.Task.ContinueWith(
-                        (task,state) => ((AsyncCallback)state)(task),
+                        s_continueWithAsyncCallback,
                         state: callback
                     );
                 }
@@ -1644,7 +1646,7 @@ namespace System.Data.SqlClient
                 if (callback != null)
                 {
                     completion.Task.ContinueWith(
-                        (task,state) => ((AsyncCallback)state)(task),
+                        s_continueWithAsyncCallback,
                         state: callback
                     );
                 }
@@ -1760,6 +1762,11 @@ namespace System.Data.SqlClient
         {
             SqlCommand command = (SqlCommand)state;
             command.CancelIgnoreFailure();
+        }
+
+        private static void ContinueWithAsyncCallback(Task<object> task,object state)
+        {
+            ((AsyncCallback)state)(task);
         }
 
         protected override Task<DbDataReader> ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
