@@ -636,7 +636,11 @@ namespace System.Net.Http
             // Send a CONNECT request to the proxy server to establish a tunnel.
             HttpRequestMessage tunnelRequest = new HttpRequestMessage(HttpMethod.Connect, _proxyUri);
             tunnelRequest.Headers.Host = $"{_host}:{_port}";    // This specifies destination host/port to connect to
-            tunnelRequest.Headers.Add(HttpKnownHeaderNames.UserAgent, _headers.UserAgent.ToString());
+
+            if(!string.IsNullOrEmpty(_headers.UserAgent.ToString()))
+            {
+                tunnelRequest.Headers.TryAddWithoutValidation(HttpKnownHeaderNames.UserAgent, _headers.UserAgent.ToString());
+            }
 
             HttpResponseMessage tunnelResponse = await _poolManager.SendProxyConnectAsync(tunnelRequest, _proxyUri, cancellationToken).ConfigureAwait(false);
 
