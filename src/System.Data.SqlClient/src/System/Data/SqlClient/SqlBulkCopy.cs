@@ -172,6 +172,8 @@ namespace System.Data.SqlClient
 
         private const int DefaultCommandTimeout = 30;
 
+        private static readonly Func<Task<object>, object, Task<object>> s_registerForConnectionCloseCallback = SqlConnection.RegisterForConnectionCloseNotificationContinuation;
+
         private bool _enableStreaming = false;
         private int _batchSize;
         private bool _ownConnection;
@@ -2097,7 +2099,7 @@ namespace System.Data.SqlClient
             return writeTask;
         }
 
-        private void RegisterForConnectionCloseNotification<T>(ref Task<T> outerTask)
+        private void RegisterForConnectionCloseNotification(ref Task<object> outerTask)
         {
             SqlConnection connection = _connection;
             if (connection == null)
@@ -2106,7 +2108,7 @@ namespace System.Data.SqlClient
                 throw ADP.ClosedConnectionError();
             }
 
-            connection.RegisterForConnectionCloseNotification<T>(ref outerTask, this, SqlReferenceCollection.BulkCopyTag);
+            connection.RegisterForConnectionCloseNotification(ref outerTask, this, SqlReferenceCollection.BulkCopyTag, s_registerForConnectionCloseCallback);
         }
 
         // Runs a loop to copy all columns of a single row.

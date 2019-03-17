@@ -1522,16 +1522,24 @@ namespace System.Data.SqlClient
         // this only happens once per connection
         // SxS: using named file mapping APIs
 
-        internal void RegisterForConnectionCloseNotification<T>(ref Task<T> outerTask, object value, int tag)
+        internal void RegisterForConnectionCloseNotification<T>(ref Task<T> outerTask, object value, int tag,Func<Task<T>,object,Task<T>> callback)
         {
             // Connection exists,  schedule removal, will be added to ref collection after calling ValidateAndReconnect
-            outerTask = outerTask.ContinueWith(task =>
-            {
-                RemoveWeakReference(value);
-                return task;
-            }, TaskScheduler.Default).Unwrap();
+            outerTask = outerTask.ContinueWith(
+                callback,
+                Tuple.Create(this, value),
+                TaskScheduler.Default
+            ).Unwrap();
         }
 
+        internal static Task<T> RegisterForConnectionCloseNotificationContinuation<T>(Task<T> task, object context)
+        {
+            Tuple<SqlConnection, object> parameters = (Tuple<SqlConnection, object>)context;
+            SqlConnection connection = parameters.Item1;
+            object value = parameters.Item2;
+            connection.RemoveWeakReference(parameters.Item2);
+            return task;
+        }
 
         public void ResetStatistics()
         {

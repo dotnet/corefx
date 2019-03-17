@@ -20,6 +20,63 @@ namespace System.Data.SqlClient
 {
     public sealed partial class SqlCommand : DbCommand, ICloneable
     {
+        private sealed class ExecuteNonQueryAsyncContext
+        {
+            public SqlCommand Command;
+            public Guid OperationId;
+            public TaskCompletionSource<int> Source;
+            public CancellationTokenRegistration Registration;
+
+            public void Setup(SqlCommand command, Guid operationId, TaskCompletionSource<int> source, CancellationTokenRegistration registration)
+            {
+                Command = command;
+                OperationId = operationId;
+                Source = source;
+                Registration = registration;
+            }
+
+            public void Clear()
+            {
+                Command = null;
+                OperationId = Guid.Empty;
+                Source = null;
+                Registration = default;
+            }
+        }
+
+        private sealed class ExecuteAsyncHelper<T,TContext> 
+            where TContext: class, new()
+        {
+            private static readonly Action<object> s_cancel = SqlCommand.CancelExecuteNonQueryAsync;
+
+            public readonly Func<AsyncCallback, object, IAsyncResult> Begin;
+            public readonly Func<IAsyncResult, T> End;
+            public readonly Action<Task<T>,object> Continuation;
+
+            private TContext _cachedContext;
+
+            public ExecuteAsyncHelper(Func<AsyncCallback, object, IAsyncResult> begin, Func<IAsyncResult, T> end, Action<Task<T>, object> continuation)
+            {
+                Begin = begin;
+                End = end;
+                Continuation = continuation;
+            }
+
+            public Action<object> Cancel => s_cancel;
+
+            public TContext RentContext()
+            {
+                return Interlocked.Exchange<TContext>(ref _cachedContext, null) ?? new TContext();
+            }
+
+            public void ReturnContext(TContext context)
+            {
+                Interlocked.CompareExchange<TContext>(ref _cachedContext, context, null);
+            }
+        }
+
+        private static Func<Task<int>, object, Task<int>> s_registerForConnectionCloseCallback_Int32;
+
         private string _commandText;
         private CommandType _commandType;
         private int _commandTimeout = ADP.DefaultCommandTimeout;
@@ -67,6 +124,8 @@ namespace System.Data.SqlClient
         // cut down on object creation and cache all these
         // cached metadata
         private _SqlMetaDataSet _cachedMetaData;
+
+        private ExecuteAsyncHelper<int, ExecuteNonQueryAsyncContext> _executeNonQueryHelper;
 
         // Last TaskCompletionSource for reconnect task - use for cancellation only
         private TaskCompletionSource<object> _reconnectionCompletionSource = null;
@@ -1635,7 +1694,10 @@ namespace System.Data.SqlClient
             Guid operationId = _diagnosticListener.WriteCommandBefore(this);
 
             TaskCompletionSource<int> source = new TaskCompletionSource<int>();
-
+            if (_executeNonQueryHelper is null)
+            {
+                _executeNonQueryHelper = new ExecuteAsyncHelper<int,ExecuteNonQueryAsyncContext>(BeginExecuteNonQuery, EndExecuteNonQuery, ContinueExecuteNonQuery);
+            }
             CancellationTokenRegistration registration = new CancellationTokenRegistration();
             if (cancellationToken.CanBeCanceled)
             {
@@ -1644,36 +1706,19 @@ namespace System.Data.SqlClient
                     source.SetCanceled();
                     return source.Task;
                 }
-                registration = cancellationToken.Register(s => ((SqlCommand)s).CancelIgnoreFailure(), this);
+                registration = cancellationToken.Register(_executeNonQueryHelper.Cancel, this);
             }
 
             Task<int> returnedTask = source.Task;
+            ExecuteNonQueryAsyncContext context = _executeNonQueryHelper.RentContext();
+            context.Setup(this, operationId, source, registration);
             try
             {
                 RegisterForConnectionCloseNotification(ref returnedTask);
 
-                Task<int>.Factory.FromAsync(BeginExecuteNonQuery, EndExecuteNonQuery, null).ContinueWith((t) =>
-                {
-                    registration.Dispose();
-                    if (t.IsFaulted)
-                    {
-                        Exception e = t.Exception.InnerException;
-                        _diagnosticListener.WriteCommandError(operationId, this, e);
-                        source.SetException(e);
-                    }
-                    else
-                    {
-                        if (t.IsCanceled)
-                        {
-                            source.SetCanceled();
-                        }
-                        else
-                        {
-                            source.SetResult(t.Result);
-                        }
-                        _diagnosticListener.WriteCommandAfter(operationId, this);
-                    }
-                }, TaskScheduler.Default);
+                Task<int>.Factory
+                    .FromAsync(_executeNonQueryHelper.Begin, _executeNonQueryHelper.End, null)
+                    .ContinueWith(_executeNonQueryHelper.Continuation, context, TaskScheduler.Default);
             }
             catch (Exception e)
             {
@@ -1682,6 +1727,39 @@ namespace System.Data.SqlClient
             }
 
             return returnedTask;
+        }
+
+        private static void ContinueExecuteNonQuery(Task<int> t,object context)
+        {
+            ExecuteNonQueryAsyncContext queryContext = (ExecuteNonQueryAsyncContext)context;
+            queryContext.Registration.Dispose();
+            SqlCommand command = queryContext.Command;
+            if (t.IsFaulted)
+            {
+                Exception e = t.Exception.InnerException;
+                _diagnosticListener.WriteCommandError(queryContext.OperationId, command, e);
+                queryContext.Source.SetException(e);
+            }
+            else
+            {
+                if (t.IsCanceled)
+                {
+                    queryContext.Source.SetCanceled();
+                }
+                else
+                {
+                    queryContext.Source.SetResult(t.Result);
+                }
+                _diagnosticListener.WriteCommandAfter(queryContext.OperationId, command);
+            }
+            queryContext.Clear();
+            command._executeNonQueryHelper?.ReturnContext(queryContext);
+        }
+
+        private static void CancelExecuteNonQueryAsync(object state)
+        {
+            SqlCommand command = (SqlCommand)state;
+            command.CancelIgnoreFailure();
         }
 
         protected override Task<DbDataReader> ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
@@ -2876,8 +2954,16 @@ namespace System.Data.SqlClient
                 // No connection
                 throw ADP.ClosedConnectionError();
             }
-
-            connection.RegisterForConnectionCloseNotification<T>(ref outerTask, this, SqlReferenceCollection.CommandTag);
+            if (typeof(T) == typeof(int))
+            {
+                // use a static cached callback delegate to avoid allocating on each call
+                s_registerForConnectionCloseCallback_Int32 = s_registerForConnectionCloseCallback_Int32 ?? SqlConnection.RegisterForConnectionCloseNotificationContinuation;
+                connection.RegisterForConnectionCloseNotification<T>(ref outerTask, this, SqlReferenceCollection.CommandTag, (Func<Task<T>, object, Task<T>>)(object)s_registerForConnectionCloseCallback_Int32);
+            }
+            else
+            {
+                connection.RegisterForConnectionCloseNotification<T>(ref outerTask, this, SqlReferenceCollection.CommandTag, SqlConnection.RegisterForConnectionCloseNotificationContinuation);
+            }
         }
 
         // validates that a command has commandText and a non-busy open connection
