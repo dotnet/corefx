@@ -8,14 +8,49 @@
 
 using System.Diagnostics;
 using System.Data.ProviderBase;
+using System.Threading;
 
 namespace System.Data.SqlClient
 {
     sealed internal class SqlReferenceCollection : DbReferenceCollection
     {
+        private sealed class FindLiveCommandContext
+        {
+            public readonly Func<SqlCommand, bool> Func;
+
+            private TdsParserStateObject stateObj;
+
+            public FindLiveCommandContext() => Func = Predicate;
+
+            public void Setup(TdsParserStateObject state) => stateObj = state;
+
+            public void Clear() => stateObj = null;
+
+            private bool Predicate(SqlCommand command) => ReferenceEquals(command, stateObj);
+        }
+
+        private sealed class FindLiveReaderContext
+        {
+            public readonly Func<SqlDataReader, bool> Func;
+
+            private SqlCommand command;
+
+            public FindLiveReaderContext() => Func = Predicate;
+
+            public void Setup(SqlCommand command) => this.command = command;
+
+            public void Clear() => command = null;
+
+            private bool Predicate(SqlDataReader reader) => (!reader.IsClosed) && (command == reader.Command);
+        }
+
         internal const int DataReaderTag = 1;
         internal const int CommandTag = 2;
         internal const int BulkCopyTag = 3;
+
+        private readonly static Func<SqlDataReader, bool> s_hasOpenReaderFunc = HasOpenReaderPredicate;
+        private static FindLiveCommandContext cachedFindLiveCommandContext;
+        private static FindLiveReaderContext cachedFindLiveReaderContext;
 
         override public void Add(object value, int tag)
         {
@@ -34,22 +69,32 @@ namespace System.Data.SqlClient
 
         internal SqlDataReader FindLiveReader(SqlCommand command)
         {
-            if (command == null)
+            if (command is null)
             {
                 // if null == command, will find first live datareader
-                return FindItem<SqlDataReader>(DataReaderTag, (dataReader) => (!dataReader.IsClosed));
+                return FindItem<SqlDataReader>(DataReaderTag, s_hasOpenReaderFunc);
             }
             else
             {
                 // else will find live datareader associated with the command
-                return FindItem<SqlDataReader>(DataReaderTag, (dataReader) => ((!dataReader.IsClosed) && (command == dataReader.Command)));
+                FindLiveReaderContext context = Interlocked.Exchange(ref cachedFindLiveReaderContext, null) ?? new FindLiveReaderContext();
+                context.Setup(command);
+                SqlDataReader retval = FindItem(DataReaderTag, context.Func);
+                context.Clear();
+                Interlocked.CompareExchange(ref cachedFindLiveReaderContext, context, null);
+                return retval;
             }
         }
 
         // Finds a SqlCommand associated with the given StateObject
         internal SqlCommand FindLiveCommand(TdsParserStateObject stateObj)
         {
-            return FindItem<SqlCommand>(CommandTag, (command) => (command.StateObject == stateObj));
+            FindLiveCommandContext context = Interlocked.Exchange(ref cachedFindLiveCommandContext, null) ?? new FindLiveCommandContext();
+            context.Setup(stateObj);
+            SqlCommand retval = FindItem(CommandTag, context.Func);
+            context.Clear();
+            Interlocked.CompareExchange(ref cachedFindLiveCommandContext, context, null);
+            return retval;
         }
 
         override protected void NotifyItem(int message, int tag, object value)
@@ -84,5 +129,12 @@ namespace System.Data.SqlClient
 
             base.RemoveItem(value);
         }
+
+        private static bool HasOpenReaderPredicate(SqlDataReader reader)
+        {
+            return !reader.IsClosed;
+        }
+
+
     }
 }
