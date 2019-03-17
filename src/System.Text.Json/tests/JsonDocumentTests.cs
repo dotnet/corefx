@@ -809,6 +809,8 @@ namespace System.Text.Json.Tests
                 }
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
                 Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
@@ -892,6 +894,8 @@ namespace System.Text.Json.Tests
                 }
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
                 Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
@@ -945,6 +949,8 @@ namespace System.Text.Json.Tests
                 Assert.Equal(value, root.GetUInt64());
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
                 Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
@@ -998,6 +1004,8 @@ namespace System.Text.Json.Tests
                 Assert.Throws<FormatException>(() => root.GetUInt64());
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
                 Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
@@ -1134,6 +1142,8 @@ namespace System.Text.Json.Tests
                 Assert.Throws<FormatException>(() => root.GetUInt64());
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
                 Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
@@ -1198,6 +1208,8 @@ namespace System.Text.Json.Tests
                 Assert.Throws<FormatException>(() => root.GetUInt64());
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
                 Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
@@ -1246,6 +1258,8 @@ namespace System.Text.Json.Tests
                 Assert.Throws<InvalidOperationException>(() => root.GetUInt64());
                 Assert.Throws<InvalidOperationException>(() => root.TryGetUInt64(out ulong _));
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
                 Assert.Throws<InvalidOperationException>(() => root.GetBoolean());
             }
@@ -1296,6 +1310,8 @@ namespace System.Text.Json.Tests
             Assert.Throws<InvalidOperationException>(() => root.GetUInt64());
             Assert.Throws<InvalidOperationException>(() => root.TryGetUInt64(out ulong _));
             Assert.Throws<InvalidOperationException>(() => root.GetString());
+            Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+            Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
             Assert.Throws<InvalidOperationException>(() => root.GetBoolean());
             Assert.Throws<InvalidOperationException>(() => root.GetRawText());
         }

@@ -741,7 +741,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Attempts to represent the current JSON number as a <see cref="DateTime"/>.
+        ///   Attempts to represent the current JSON string as a <see cref="DateTime"/>.
         /// </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
@@ -789,7 +789,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Attempts to represent the current JSON number as a <see cref="DateTimeOffset"/>.
+        ///   Attempts to represent the current JSON string as a <see cref="DateTimeOffset"/>.
         /// </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
