@@ -143,6 +143,53 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
+        public async Task Read_InvokedSynchronously()
+        {
+            var network = new VirtualNetwork();
+            var clientStream = new PreReadWriteActionDelegatingStream(new VirtualNetworkStream(network, isServer: false));
+            using (var clientSslStream = new SslStream(clientStream, false, AllowAnyServerCertificate))
+            using (var serverSslStream = new SslStream(new VirtualNetworkStream(network, isServer: true)))
+            {
+                await DoHandshake(clientSslStream, serverSslStream);
+
+                // Validate that the read call to the underlying stream is made as part of the
+                // synchronous call to the read method on SslStream, even if the method is async.
+                using (var tl = new ThreadLocal<int>())
+                {
+                    await WriteAsync(serverSslStream, new byte[1], 0, 1);
+                    tl.Value = 42;
+                    clientStream.PreReadWriteAction = () => Assert.Equal(42, tl.Value);
+                    Task t = ReadAsync(clientSslStream, new byte[1], 0, 1);
+                    tl.Value = 0;
+                    await t;
+                }
+            }
+        }
+
+        [Fact]
+        public async Task Write_InvokedSynchronously()
+        {
+            var network = new VirtualNetwork();
+            var clientStream = new PreReadWriteActionDelegatingStream(new VirtualNetworkStream(network, isServer: false));
+            using (var clientSslStream = new SslStream(clientStream, false, AllowAnyServerCertificate))
+            using (var serverSslStream = new SslStream(new VirtualNetworkStream(network, isServer: true)))
+            {
+                await DoHandshake(clientSslStream, serverSslStream);
+
+                // Validate that the write call to the underlying stream is made as part of the
+                // synchronous call to the write method on SslStream, even if the method is async.
+                using (var tl = new ThreadLocal<int>())
+                {
+                    tl.Value = 42;
+                    clientStream.PreReadWriteAction = () => Assert.Equal(42, tl.Value);
+                    Task t = WriteAsync(clientSslStream, new byte[1], 0, 1);
+                    tl.Value = 0;
+                    await t;
+                }
+            }
+        }
+
+        [Fact]
         public async Task SslStream_StreamToStream_Successive_ClientWrite_WithZeroBytes_Success()
         {
             byte[] recvBuf = new byte[_sampleMsg.Length];
@@ -586,11 +633,13 @@ namespace System.Net.Security.Tests
             }
         }
 
-        private sealed class ThrowingDelegatingStream : Stream
+        private class PreReadWriteActionDelegatingStream : Stream
         {
             private readonly Stream _stream;
 
-            public ThrowingDelegatingStream(Stream stream) => _stream = stream;
+            public PreReadWriteActionDelegatingStream(Stream stream) => _stream = stream;
+
+            public Action PreReadWriteAction { get; set; }
 
             public override bool CanRead => _stream.CanRead;
             public override bool CanWrite => _stream.CanWrite;
@@ -602,17 +651,15 @@ namespace System.Net.Security.Tests
             public override long Seek(long offset, SeekOrigin origin) => _stream.Seek(offset, origin);
             public override void SetLength(long value) => _stream.SetLength(value);
 
-            public Exception ExceptionToThrow { get; set; }
-
             public override int Read(byte[] buffer, int offset, int count)
             {
-                ThrowIfNecessary();
+                PreReadWriteAction?.Invoke();
                 return _stream.Read(buffer, offset, count);
             }
 
             public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
             {
-                ThrowIfNecessary();
+                PreReadWriteAction?.Invoke();
                 return _stream.BeginRead(buffer, offset, count, callback, state);
             }
 
@@ -620,19 +667,19 @@ namespace System.Net.Security.Tests
 
             public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
-                ThrowIfNecessary();
+                PreReadWriteAction?.Invoke();
                 return _stream.ReadAsync(buffer, offset, count, cancellationToken);
             }
 
             public override void Write(byte[] buffer, int offset, int count)
             {
-                ThrowIfNecessary();
+                PreReadWriteAction?.Invoke();
                 _stream.Write(buffer, offset, count);
             }
 
             public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
             {
-                ThrowIfNecessary();
+                PreReadWriteAction?.Invoke();
                 return _stream.BeginWrite(buffer, offset, count, callback, state);
             }
 
@@ -640,17 +687,25 @@ namespace System.Net.Security.Tests
 
             public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
-                ThrowIfNecessary();
+                PreReadWriteAction?.Invoke();
                 return _stream.WriteAsync(buffer, offset, count, cancellationToken);
             }
+        }
 
-            private void ThrowIfNecessary()
+        private sealed class ThrowingDelegatingStream : PreReadWriteActionDelegatingStream
+        {
+            public ThrowingDelegatingStream(Stream stream) : base(stream)
             {
-                if (ExceptionToThrow != null)
+                PreReadWriteAction = () =>
                 {
-                    throw ExceptionToThrow;
-                }
+                    if (ExceptionToThrow != null)
+                    {
+                        throw ExceptionToThrow;
+                    }
+                };
             }
+
+            public Exception ExceptionToThrow { get; set; }
         }
     }
 
