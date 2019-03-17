@@ -135,9 +135,6 @@ namespace System.Drawing.Tests
         }
 
         [DllImport("kernel32.dll", SetLastError = false, CharSet = CharSet.Auto)]
-        public static extern int GetSystemDefaultLCID();
-
-        [DllImport("kernel32.dll", SetLastError = false, CharSet = CharSet.Auto)]
         public static extern int GetUserDefaultLCID();
 
         //Do not test DefaultFont and DialogFont, as we can't reliably determine from LCID
