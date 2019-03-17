@@ -181,6 +181,7 @@ namespace System.Text.Json
         public DateTimeOffset GetDateTimeOffset() { throw null; }
         public decimal GetDecimal() { throw null; }
         public double GetDouble() { throw null; }
+        public Guid GetGuid() { throw null; }
         public int GetInt32() { throw null; }
         public long GetInt64() { throw null; }
         public float GetSingle() { throw null; }
@@ -196,6 +197,7 @@ namespace System.Text.Json
         public bool TryGetDateTimeOffset(out DateTimeOffset value) { throw null; }
         public bool TryGetDecimal(out decimal value) { throw null; }
         public bool TryGetDouble(out double value) { throw null; }
+        public bool TryGetGuid(out Guid value) { throw null; }
         public bool TryGetInt32(out int value) { throw null; }
         public bool TryGetInt64(out long value) { throw null; }
         public bool TryGetSingle(out float value) { throw null; }

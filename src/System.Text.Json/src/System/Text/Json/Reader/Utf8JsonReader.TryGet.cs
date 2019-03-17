@@ -281,6 +281,29 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        /// Reads the next JSON token value from the source and parses it to a <see cref="Guid"/>.
+        /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="Guid"/>
+        /// value.
+        /// Throws exceptions otherwise.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.String"/>.
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        /// <exception cref="FormatException">
+        /// Thrown if the JSON token value is of an unsupported format for a Guid.
+        /// </exception>
+        public Guid GetGuid()
+        {
+            if (!TryGetGuid(out Guid value))
+            {
+                throw new FormatException(SR.FormatGuid);
+            }
+
+            return value;
+        }
+
+        /// <summary>
         /// Reads the next JSON token value from the source and parses it to an <see cref="int"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to an <see cref="int"/> value.
@@ -469,6 +492,57 @@ namespace System.Text.Json
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
             return JsonHelpers.TryParseAsISO(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+        }
+
+        /// <summary>
+        /// Reads the next JSON token value from the source and parses it to a <see cref="Guid"/>.
+        /// Returns true if the entire UTF-8 encoded token value can be successfully
+        /// parsed to a <see cref="Guid"/> value.
+        /// Returns false otherwise.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.String"/>.
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        public bool TryGetGuid(out Guid value)
+        {
+            if (TokenType != JsonTokenType.String)
+            {
+                throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
+            }
+
+            ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
+            int bytesConsumed = 0;
+
+            switch (span.Length)
+            {
+                case 36:
+                    // Format D (default): nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
+                    return Utf8Parser.TryParse(span, out value, out bytesConsumed, 'D') && span.Length == bytesConsumed;
+                case 38:
+                    byte firstToken = span[0];
+
+                    if (firstToken == (byte)'{')
+                    {
+                        // Format B: {nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn}
+                        return Utf8Parser.TryParse(span, out value, out bytesConsumed, 'B') && span.Length == bytesConsumed;
+                    }
+                    else if (firstToken == (byte)'(')
+                    {
+                        // Format P: (nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn)
+                        return Utf8Parser.TryParse(span, out value, out bytesConsumed, 'P') && span.Length == bytesConsumed;
+                    }
+                    else
+                    {
+                        goto default;
+                    }
+                case 32:
+                    // Format N: nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+                    return Utf8Parser.TryParse(span, out value, out bytesConsumed, 'N') && span.Length == bytesConsumed;
+                default:
+                    value = default;
+                    return false;
+            }
         }
     }
 }

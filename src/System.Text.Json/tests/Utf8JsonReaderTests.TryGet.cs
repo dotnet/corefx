@@ -522,6 +522,22 @@ namespace System.Text.Json.Tests
                     }
                     catch (InvalidOperationException)
                     { }
+
+                    try
+                    {
+                        Guid value = json.GetGuid();
+                        Assert.True(false, "Expected GetGuid to throw InvalidOperationException due to mismatched token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetGuid(out Guid value);
+                        Assert.True(false, "Expected TryGetGuid to throw InvalidOperationException due to mismatched token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
                 }
 
                 if (json.TokenType != JsonTokenType.True && json.TokenType != JsonTokenType.False)
@@ -932,6 +948,54 @@ namespace System.Text.Json.Tests
                     {
                         DateTimeOffset value = json.GetDateTimeOffset();
                         Assert.True(false, "Expected GetDateTimeOffset to throw FormatException due to invalid ISO 8601 input.");
+                    }
+                    catch (FormatException)
+                    { }
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonGuidTestData.ValidGuidTests), MemberType = typeof(JsonGuidTestData))]
+        public static void TestingStringsConversionToGuid(string testString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    Guid expected = new Guid(testString);
+
+                    Assert.True(json.TryGetGuid(out Guid actual));
+                    Assert.Equal(expected, actual);
+
+                    Assert.Equal(expected, json.GetGuid());
+                }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonGuidTestData.InvalidGuidTests), MemberType = typeof(JsonGuidTestData))]
+        public static void TestingStringsInvalidConversionToGuid(string testString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    Assert.False(json.TryGetGuid(out Guid actual));
+
+                    try
+                    {
+                        Guid value = json.GetGuid();
+                        Assert.True(false, "Expected GetGuid to throw FormatException due to invalid Guid input.");
                     }
                     catch (FormatException)
                     { }
