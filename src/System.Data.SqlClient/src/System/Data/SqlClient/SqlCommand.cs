@@ -42,12 +42,20 @@ namespace System.Data.SqlClient
                 Source = null;
                 Registration = default;
             }
+
+            public void Deconstruct(out SqlCommand command,out Guid operationId, out TaskCompletionSource<int> source, out CancellationTokenRegistration registration)
+            {
+                command = Command;
+                operationId = OperationId;
+                source = Source;
+                registration = Registration;
+            }
         }
 
         private sealed class ExecuteAsyncHelper<T,TContext> 
             where TContext: class, new()
         {
-            private static readonly Action<object> s_cancel = SqlCommand.CancelExecuteNonQueryAsync;
+            private static readonly Action<object> s_cancel = SqlCommand.ExecuteNonQueryAsyncCancel;
 
             public readonly Func<AsyncCallback, object, IAsyncResult> Begin;
             public readonly Func<IAsyncResult, T> End;
@@ -1698,7 +1706,7 @@ namespace System.Data.SqlClient
             TaskCompletionSource<int> source = new TaskCompletionSource<int>();
             if (_executeNonQueryHelper is null)
             {
-                _executeNonQueryHelper = new ExecuteAsyncHelper<int,ExecuteNonQueryAsyncContext>(BeginExecuteNonQuery, EndExecuteNonQuery, ContinueExecuteNonQuery);
+                _executeNonQueryHelper = new ExecuteAsyncHelper<int,ExecuteNonQueryAsyncContext>(BeginExecuteNonQuery, EndExecuteNonQuery, ExecuteNonQueryAsyncContinue);
             }
             CancellationTokenRegistration registration = new CancellationTokenRegistration();
             if (cancellationToken.CanBeCanceled)
@@ -1731,34 +1739,35 @@ namespace System.Data.SqlClient
             return returnedTask;
         }
 
-        private static void ContinueExecuteNonQuery(Task<int> t,object context)
+        private static void ExecuteNonQueryAsyncContinue(Task<int> t,object context)
         {
             ExecuteNonQueryAsyncContext queryContext = (ExecuteNonQueryAsyncContext)context;
-            queryContext.Registration.Dispose();
-            SqlCommand command = queryContext.Command;
+            (SqlCommand command, Guid operationId, TaskCompletionSource<int> source, CancellationTokenRegistration registration) = queryContext;
+            queryContext.Clear();
+            command._executeNonQueryHelper?.ReturnContext(queryContext);
+
+            registration.Dispose();
             if (t.IsFaulted)
             {
                 Exception e = t.Exception.InnerException;
-                _diagnosticListener.WriteCommandError(queryContext.OperationId, command, e);
-                queryContext.Source.SetException(e);
+                _diagnosticListener.WriteCommandError(operationId, command, e);
+                source.SetException(e);
             }
             else
             {
                 if (t.IsCanceled)
                 {
-                    queryContext.Source.SetCanceled();
+                    source.SetCanceled();
                 }
                 else
                 {
-                    queryContext.Source.SetResult(t.Result);
+                    source.SetResult(t.Result);
                 }
-                _diagnosticListener.WriteCommandAfter(queryContext.OperationId, command);
+                _diagnosticListener.WriteCommandAfter(operationId, command);
             }
-            queryContext.Clear();
-            command._executeNonQueryHelper?.ReturnContext(queryContext);
         }
 
-        private static void CancelExecuteNonQueryAsync(object state)
+        private static void ExecuteNonQueryAsyncCancel(object state)
         {
             SqlCommand command = (SqlCommand)state;
             command.CancelIgnoreFailure();
