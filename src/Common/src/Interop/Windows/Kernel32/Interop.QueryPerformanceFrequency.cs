@@ -13,11 +13,10 @@ internal partial class Interop
         //          _Out_ LARGE_INTEGER* lpFrequency
         //      );
         //
-        // We return an int (rather than a bool) to avoid the marshalling overhead.
         // We take a long* (rather than a out long) to avoid the pinning overhead.
         // We don't set last error since we don't need the extended error info.
 
-        [DllImport(Libraries.Kernel32, BestFitMapping = false, CallingConvention = CallingConvention.Winapi, EntryPoint = "QueryPerformanceFrequency", ExactSpelling = true, PreserveSig = true, SetLastError = false)]
-        internal static extern unsafe int QueryPerformanceFrequency(long* lpFrequency);
+        [DllImport(Libraries.Kernel32, BestFitMapping = false, ExactSpelling = true)]
+        internal static extern unsafe BOOL QueryPerformanceFrequency(long* lpFrequency);
     }
 }

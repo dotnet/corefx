@@ -32,9 +32,9 @@ namespace System.Diagnostics
         static unsafe Stopwatch()
         {
             long frequency;
-            int succeeded = QueryPerformanceFrequency(&frequency);
+            Interop.BOOL result = QueryPerformanceFrequency(&frequency);
 
-            if (succeeded == 0)
+            if (result == Interop.BOOL.FALSE)
             {
                 IsHighResolution = false;
                 frequency = TicksPerSecond;
