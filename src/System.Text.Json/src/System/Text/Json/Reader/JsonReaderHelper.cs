@@ -7,10 +7,6 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-#if BUILDING_INBOX_LIBRARY
-using Internal.Runtime.CompilerServices;
-#endif
-
 namespace System.Text.Json
 {
     internal static partial class JsonReaderHelper
@@ -51,10 +47,6 @@ namespace System.Text.Json
                     return JsonValueType.Undefined;
             }
         }
-
-        // A digit is valid if it is in the range: [0..9]
-        // Otherwise, return false.
-        public static bool IsDigit(byte nextByte) => (uint)(nextByte - '0') <= '9' - '0';
 
         // Returns true if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
         // Otherwise, return false.

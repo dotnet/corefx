@@ -6,6 +6,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_compile_options(-Wno-cast-align)
 add_compile_options(-Wno-reserved-id-macro)
 add_compile_options(-Wno-documentation)
+add_compile_options(-Wno-used-but-marked-unused)
 
 add_definitions(-DPIC=1 -DOPENSSL_API_COMPAT=0x10100000L)
 
@@ -35,6 +36,7 @@ set(NATIVECRYPTO_SOURCES
     pal_evp_pkey_rsa.c
     pal_evp_cipher.c
     pal_hmac.c
+    pal_ocsp.c
     pal_pkcs12.c
     pal_pkcs7.c
     pal_rsa.c

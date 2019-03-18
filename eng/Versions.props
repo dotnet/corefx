@@ -1,6 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0">
+<Project>
   <PropertyGroup>
+    <!-- The .NET Core product branding version -->
+    <ProductVersion>3.0.0</ProductVersion>
     <!-- We need to move to 4.7 as part of our versioning change when we switch to arcade to avoid downgrading versions -->
     <MajorVersion>4</MajorVersion>
     <MinorVersion>7</MinorVersion>
@@ -9,12 +10,14 @@
     <PreReleaseVersionLabel>preview3</PreReleaseVersionLabel>
     <!-- Opt-in repo features -->
     <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers>
+    <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
     <!-- Opt-out repo features -->
     <UsingToolXliff>false</UsingToolXliff>
   </PropertyGroup>
   <!-- Package names if they are used in more then one location in the repo -->
   <PropertyGroup>
     <MicrosoftDotNetXUnitExtensionsPackage>Microsoft.DotNet.XUnitExtensions</MicrosoftDotNetXUnitExtensionsPackage>
+    <NETStandardLibraryPackageId>NETStandard.Library</NETStandardLibraryPackageId>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Arcade dependencies -->
@@ -31,15 +34,17 @@
     <MicrosoftNetCompilersVersion>3.0.0-beta2-final</MicrosoftNetCompilersVersion>
     <MicrosoftNETCoreCompilersVersion>$(MicrosoftNetCompilersVersion)</MicrosoftNETCoreCompilersVersion>
     <!-- Core-setup dependencies -->
-    <MicrosoftNETCoreAppPackageVersion>3.0.0-preview4-27413-11</MicrosoftNETCoreAppPackageVersion>
-    <MicrosoftNETCoreDotNetHostPackageVersion>3.0.0-preview4-27413-11</MicrosoftNETCoreDotNetHostPackageVersion>
-    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>3.0.0-preview4-27413-11</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>3.0.0-preview4-27516-06</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreDotNetHostPackageVersion>3.0.0-preview4-27516-06</MicrosoftNETCoreDotNetHostPackageVersion>
+    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>3.0.0-preview4-27516-06</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
     <!-- Coreclr dependencies -->
-    <MicrosoftNETCoreILAsmPackageVersion>3.0.0-preview3-27422-72</MicrosoftNETCoreILAsmPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview3-27422-72</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCoreILAsmPackageVersion>3.0.0-preview4-27516-72</MicrosoftNETCoreILAsmPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview4-27516-72</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <!-- Corefx dependencies -->
-    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview4.19118.6</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview4.19164.7</MicrosoftNETCorePlatformsPackageVersion>
     <!-- Standard dependencies -->
-    <NETStandardLibraryPackageVersion>2.1.0-prerelease.19126.1</NETStandardLibraryPackageVersion>
+    <NETStandardLibraryPackageVersion>2.1.0-prerelease.19158.1</NETStandardLibraryPackageVersion>
+    <!-- dotnet-optimization dependencies -->
+    <optimizationwindows_ntx64IBCCoreFxPackageVersion>99.99.99-master-20190308.5</optimizationwindows_ntx64IBCCoreFxPackageVersion>
   </PropertyGroup>
 </Project>
