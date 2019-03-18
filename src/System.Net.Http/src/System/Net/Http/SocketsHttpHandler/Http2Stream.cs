@@ -22,6 +22,7 @@ namespace System.Net.Http
             {
                 ExpectingHeaders,
                 ExpectingData,
+                ExpectingMoreData,
                 ExpectingTrailingHeaders,
                 Complete,
                 Aborted
@@ -130,6 +131,13 @@ namespace System.Net.Http
 
                     if (name.SequenceEqual(s_statusHeaderName))
                     {
+                        if (_state == StreamState.ExpectingTrailingHeaders)
+                        {
+                            // Pseudo-headers not allowed in trailers.
+                            if (NetEventSource.IsEnabled) _connection.Trace("Pseudo-header in trailer headers.");
+                            throw new HttpRequestException(SR.net_http_invalid_response);
+                        }
+
                         if (value.Length != 3)
                             throw new Exception("Invalid status code");
 
@@ -174,7 +182,7 @@ namespace System.Net.Http
             {
                 lock (SyncObject)
                 {
-                    if (_state == StreamState.ExpectingData)
+                    if (_state == StreamState.ExpectingMoreData)
                     {
                         _state = StreamState.ExpectingTrailingHeaders;
                     }
@@ -220,7 +228,7 @@ namespace System.Net.Http
                         return;
                     }
 
-                    if (_state != StreamState.ExpectingData)
+                    if (_state != StreamState.ExpectingData && _state != StreamState.ExpectingMoreData)
                     {
                         throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                     }
@@ -238,6 +246,10 @@ namespace System.Net.Http
                     if (endStream)
                     {
                         _state = StreamState.Complete;
+                    }
+                    else if (_state == StreamState.ExpectingData)
+                    {
+                        _state = StreamState.ExpectingMoreData;
                     }
 
                     signalWaiter = _hasWaiter;
@@ -297,7 +309,7 @@ namespace System.Net.Http
                         _waitSource.Reset();
                         return (true, false);
                     }
-                    else if (_state == StreamState.ExpectingData || _state == StreamState.ExpectingTrailingHeaders)
+                    else if (_state == StreamState.ExpectingData || _state == StreamState.ExpectingMoreData || _state == StreamState.ExpectingTrailingHeaders)
                     {
                         return (false, false);
                     }
@@ -337,7 +349,7 @@ namespace System.Net.Http
                 Debug.Assert(amount > 0);
                 Debug.Assert(_pendingWindowUpdate < StreamWindowThreshold);
 
-                if (_state != StreamState.ExpectingData)
+                if (_state != StreamState.ExpectingData && _state != StreamState.ExpectingMoreData)
                 {
                     // We are not expecting any more data (because we've either completed or aborted).
                     // So no need to send any more WINDOW_UPDATEs.
@@ -383,7 +395,8 @@ namespace System.Net.Http
                     {
                         throw new IOException(SR.net_http_invalid_response);
                     }
-                    Debug.Assert(_state == StreamState.ExpectingData);
+
+                    Debug.Assert(_state == StreamState.ExpectingData || _state == StreamState.ExpectingMoreData || _state == StreamState.ExpectingTrailingHeaders);
 
                     Debug.Assert(!_hasWaiter);
                     _hasWaiter = true;
