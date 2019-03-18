@@ -588,8 +588,9 @@ namespace System.Text.Json.Tests
                 action(json);
                 Assert.False(true, "Expected exception: " + typeof(E).GetType());
             }
-            catch (E)
+            catch (E ex)
             {
+                Assert.IsType<E>(ex);
             }
             catch (Exception wrongException)
             {

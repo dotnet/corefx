@@ -35,9 +35,9 @@ namespace System.Text.Json.Tests
             Assert.False(json.Read());
 
             json = default;
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TextEquals(""));
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TextEquals(default(ReadOnlySpan<char>)));
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TextEquals(default(ReadOnlySpan<byte>)));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TextEquals("".AsSpan()));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TextEquals(default(ReadOnlySpan<char>)));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TextEquals(default(ReadOnlySpan<byte>)));
 
             TestGetMethodsOnDefault();
         }
@@ -45,46 +45,46 @@ namespace System.Text.Json.Tests
         private static void TestGetMethodsOnDefault()
         {
             Utf8JsonReader json = default;
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetDateTime(out _));
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetDateTime());
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetDateTime(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetDateTime());
 
             json = default;
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetDateTimeOffset(out _));
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetDateTimeOffset());
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetDateTimeOffset(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetDateTimeOffset());
 
             json = default;
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetDecimal(out _));
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetDecimal());
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetDecimal(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetDecimal());
 
             json = default;
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetDouble(out _));
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetDouble());
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetDouble(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetDouble());
 
             json = default;
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetInt32(out _));
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetInt32());
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetInt32(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetInt32());
 
             json = default;
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetInt64(out _));
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetInt64());
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetInt64(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetInt64());
 
             json = default;
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetSingle(out _));
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetSingle());
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetSingle(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetSingle());
 
             json = default;
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetUInt32(out _));
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetUInt32());
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetUInt32(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetUInt32());
 
             json = default;
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetUInt64(out _));
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetUInt64());
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetUInt64(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetUInt64());
 
             json = default;
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetString());
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetString());
 
             json = default;
-            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetBoolean());
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetBoolean());
         }
 
         // TestCaseType is only used to give the json strings a descriptive name.
