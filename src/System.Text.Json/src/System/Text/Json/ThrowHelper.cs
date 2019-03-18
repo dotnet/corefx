@@ -183,10 +183,21 @@ namespace System.Text.Json
             return GetInvalidOperationException("string", tokenType);
         }
 
+        public static InvalidOperationException GetInvalidOperationException_ExpectedStringComparison(JsonTokenType tokenType)
+        {
+            return GetInvalidOperationException(tokenType);
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static InvalidOperationException GetInvalidOperationException(string message, JsonTokenType tokenType)
         {
             return new InvalidOperationException(SR.Format(SR.InvalidCast, tokenType, message));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static InvalidOperationException GetInvalidOperationException(JsonTokenType tokenType)
+        {
+            return new InvalidOperationException(SR.Format(SR.InvalidComparison, tokenType));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -450,6 +461,26 @@ namespace System.Text.Json
             }
             return new FormatException(message);
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static FormatException GetFormatException(DateType dateType)
+        {
+            string message = "";
+
+            switch (dateType)
+            {
+                case DateType.DateTime:
+                    message = SR.FormatDateTime;
+                    break;
+                case DateType.DateTimeOffset:
+                    message = SR.FormatDateTimeOffset;
+                    break;
+                default:
+                    Debug.Fail($"The DateType enum value: {dateType} is not part of the switch. Add the appropriate case and exception message.");
+                    break;
+            }
+            return new FormatException(message);
+        }
     }
 
     internal enum ExceptionResource
@@ -499,5 +530,11 @@ namespace System.Text.Json
         Single,
         Double,
         Decimal
+    }
+
+    internal enum DateType
+    {
+        DateTime,
+        DateTimeOffset
     }
 }
