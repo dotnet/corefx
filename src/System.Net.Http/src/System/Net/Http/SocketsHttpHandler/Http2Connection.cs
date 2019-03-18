@@ -195,6 +195,7 @@ namespace System.Net.Http
                 while (true)
                 {
                     frameHeader = await ReadFrameAsync().ConfigureAwait(false);
+
                     switch (frameHeader.Type)
                     {
                         case FrameType.Headers:

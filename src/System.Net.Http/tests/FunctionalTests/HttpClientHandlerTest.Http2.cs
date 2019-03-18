@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
-using System.IO;
 using System.Net.Test.Common;
 using System.Threading.Tasks;
 
@@ -17,9 +15,6 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseHttp2LoopbackServer => true;
 
         public static bool SupportsAlpn => PlatformDetection.SupportsAlpn;
-
-        private static IList<HttpHeaderData> TrailingHeaders = new HttpHeaderData[] {
-            new HttpHeaderData("MyCoolTrailerHeader", "amazingtrailer"), new HttpHeaderData("Hello", "World") };
 
         [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2_ClientPreface_Sent()
