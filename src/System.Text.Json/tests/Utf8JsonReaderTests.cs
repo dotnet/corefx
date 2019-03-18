@@ -14,6 +14,79 @@ namespace System.Text.Json.Tests
 {
     public static partial class Utf8JsonReaderTests
     {
+        [Fact]
+        public static void DefaultUtf8JsonReader()
+        {
+            Utf8JsonReader json = default;
+
+            Assert.Equal(0, json.BytesConsumed);
+            Assert.Equal(0, json.CurrentDepth);
+            Assert.Equal(JsonTokenType.None, json.TokenType);
+            Assert.Equal(default, json.Position);
+            Assert.True(json.ValueSpan.SequenceEqual(default));
+            Assert.False(json.HasValueSequence);
+            Assert.True(json.ValueSequence.IsEmpty);
+
+            Assert.Equal(0, json.CurrentState.BytesConsumed);
+            Assert.Equal(default, json.CurrentState.Position);
+            Assert.Equal(0, json.CurrentState.Options.MaxDepth);
+            Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
+
+            Assert.False(json.Read());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TextEquals(""));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TextEquals(default(ReadOnlySpan<char>)));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TextEquals(default(ReadOnlySpan<byte>)));
+
+            TestGetMethodsOnDefault();
+        }
+
+        private static void TestGetMethodsOnDefault()
+        {
+            Utf8JsonReader json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetDateTime(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetDateTime());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetDateTimeOffset(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetDateTimeOffset());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetDecimal(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetDecimal());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetDouble(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetDouble());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetInt32(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetInt32());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetInt64(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetInt64());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetSingle(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetSingle());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetUInt32(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetUInt32());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.TryGetUInt64(out _));
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetUInt64());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetString());
+
+            json = default;
+            JsonTestHelper.AssertThrows<InvalidOperationException>(json, (_json) => _json.GetBoolean());
+        }
+
         // TestCaseType is only used to give the json strings a descriptive name.
         [Theory]
         [MemberData(nameof(TestCases))]

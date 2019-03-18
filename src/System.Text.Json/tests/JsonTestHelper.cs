@@ -577,5 +577,24 @@ namespace System.Text.Json.Tests
                 }
             }
         }
+
+        public delegate void AssertThrowsActionUt8fJsonReader(Utf8JsonReader json);
+
+        // Cannot use standard Assert.Throws() when testing Utf8JsonReader - ref structs and closures don't get along.
+        public static void AssertThrows<E>(Utf8JsonReader json, AssertThrowsActionUt8fJsonReader action) where E : Exception
+        {
+            try
+            {
+                action(json);
+                Assert.False(true, "Expected exception: " + typeof(E).GetType());
+            }
+            catch (E)
+            {
+            }
+            catch (Exception wrongException)
+            {
+                Assert.False(true, "Wrong exception thrown: Expected " + typeof(E).GetType() + ": Actual: " + wrongException.GetType());
+            }
+        }
     }
 }
