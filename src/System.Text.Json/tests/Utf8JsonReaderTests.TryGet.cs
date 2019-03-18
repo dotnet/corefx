@@ -814,6 +814,66 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
+        [MemberData(nameof(GetCommentTestData))]
+        public static void TestingGetComment(string jsonData, string expected)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            var reader = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+            bool commentFound = false;
+            bool startObjectFound = false;
+            bool endObjectFound = false;
+            while (reader.Read())
+            {
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.StartObject:
+                        startObjectFound = true;
+                        break;
+                    case JsonTokenType.EndObject:
+                        endObjectFound = true;
+                        break;
+                    case JsonTokenType.Comment:
+                        commentFound = true;
+                        Assert.Equal(expected, reader.GetComment());
+                        break;
+                    default:
+                        Assert.True(false);
+                        break;
+                }
+            }
+            Assert.True(startObjectFound);
+            Assert.True(commentFound);
+            Assert.True(endObjectFound);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetCommentUnescapeData))]
+        public static void TestGetCommentUnescape(string jsonData, string expected)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            var reader = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+            bool commentFound = false;
+            while (reader.Read())
+            {
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.Comment:
+                        commentFound = true;
+                        string comment = reader.GetComment();
+                        Assert.Equal(expected, comment);
+                        Assert.NotEqual(Regex.Unescape(expected), comment);
+                        break;
+                    default:
+                        Assert.True(false);
+                        break;
+                }
+            }
+            Assert.True(commentFound);
+        }
+
+        [Theory]
         [MemberData(nameof(JsonDateTimeTestData.ValidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
         public static void TestingStringsConversionToDateTime(string jsonString, string expectedString)
         {
