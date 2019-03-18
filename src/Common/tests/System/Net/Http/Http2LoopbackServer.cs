@@ -614,11 +614,11 @@ namespace System.Net.Test.Common
 
             if (content == null)
             {
-                await SendResponseHeadersAsync(streamId, true, statusCode, headers);
+                await SendResponseHeadersAsync(streamId, true, statusCode, true, headers);
             }
             else
             {
-                await SendResponseHeadersAsync(streamId, false, statusCode, headers);
+                await SendResponseHeadersAsync(streamId, false, statusCode, true, headers);
                 await SendResponseBodyAsync(streamId, Encoding.ASCII.GetBytes(content));
             }
 

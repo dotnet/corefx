@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
@@ -13,7 +14,7 @@ using System.Threading.Tasks.Sources;
 
 namespace System.Net.Http
 {
-    internal sealed partial class Http2Connection 
+    internal sealed partial class Http2Connection
     {
         private sealed class Http2Stream : IValueTaskSource, IDisposable
         {
@@ -21,6 +22,7 @@ namespace System.Net.Http
             {
                 ExpectingHeaders,
                 ExpectingData,
+                ExpectingTrailingHeaders,
                 Complete,
                 Aborted
             }
@@ -121,7 +123,7 @@ namespace System.Net.Http
 
                 lock (SyncObject)
                 {
-                    if (_state != StreamState.ExpectingHeaders)
+                    if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingTrailingHeaders)
                     {
                         throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                     }
@@ -150,9 +152,13 @@ namespace System.Net.Http
 
                         string headerValue = descriptor.GetHeaderValue(value);
 
-                        // Note we ignore the return value from TryAddWithoutValidation; 
+                        // Note we ignore the return value from TryAddWithoutValidation;
                         // if the header can't be added, we silently drop it.
-                        if (descriptor.HeaderType == HttpHeaderType.Content)
+                        if (_state == StreamState.ExpectingTrailingHeaders)
+                        {
+                            _response.TrailingHeaders.TryAddWithoutValidation(descriptor, headerValue);
+                        }
+                        else if (descriptor.HeaderType == HttpHeaderType.Content)
                         {
                             _response.Content.Headers.TryAddWithoutValidation(descriptor, headerValue);
                         }
@@ -164,17 +170,35 @@ namespace System.Net.Http
                 }
             }
 
+            public void OnResponseHeadersStart()
+            {
+                lock (SyncObject)
+                {
+                    if (_state == StreamState.ExpectingData)
+                    {
+                        _state = StreamState.ExpectingTrailingHeaders;
+                    }
+                }
+            }
+
             public void OnResponseHeadersComplete(bool endStream)
             {
                 bool signalWaiter;
                 lock (SyncObject)
                 {
-                    if (_state != StreamState.ExpectingHeaders)
+                    if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingTrailingHeaders)
                     {
                         throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                     }
 
-                    _state = endStream ? StreamState.Complete : StreamState.ExpectingData;
+                    if (_state == StreamState.ExpectingTrailingHeaders || endStream)
+                    {
+                        _state = StreamState.Complete;
+                    }
+                    else
+                    {
+                        _state = StreamState.ExpectingData;
+                    }
 
                     signalWaiter = _hasWaiter;
                     _hasWaiter = false;
@@ -273,7 +297,7 @@ namespace System.Net.Http
                         _waitSource.Reset();
                         return (true, false);
                     }
-                    else if (_state == StreamState.ExpectingData)
+                    else if (_state == StreamState.ExpectingData || _state == StreamState.ExpectingTrailingHeaders)
                     {
                         return (false, false);
                     }
@@ -359,7 +383,6 @@ namespace System.Net.Http
                     {
                         throw new IOException(SR.net_http_invalid_response);
                     }
-
                     Debug.Assert(_state == StreamState.ExpectingData);
 
                     Debug.Assert(!_hasWaiter);

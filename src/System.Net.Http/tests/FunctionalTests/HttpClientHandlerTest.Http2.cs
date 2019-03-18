@@ -1117,7 +1117,6 @@ namespace System.Net.Http.Functional.Tests
                 HttpResponseMessage response = await sendTask;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.NotNull(response.TrailingHeaders);
-                Assert.Equal(0, response.TrailingHeaders.Count());
             }
         }
 
@@ -1143,10 +1142,10 @@ namespace System.Net.Http.Functional.Tests
                 await server.SendDefaultResponseHeadersAsync(streamId);
 
                 // Response data, missing Trailers.
-                await server.WriteFrameAsync(MakeSimpleDataFrame(streamId, endStream: true));
+                await server.WriteFrameAsync(MakeSimpleDataFrame(streamId, endStream: false));
 
                 // Additional trailing header frame.
-                await server.SendResponseHeadersAsync(streamId, hasStatusCode:false, headers: TrailingHeaders);
+                await server.SendResponseHeadersAsync(streamId, hasStatusCode:false, headers: TrailingHeaders, endStream : true);
 
                 HttpResponseMessage response = await sendTask;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -1177,12 +1176,12 @@ namespace System.Net.Http.Functional.Tests
                 await server.SendDefaultResponseHeadersAsync(streamId);
 
                 // Response data, missing Trailers.
-                await server.WriteFrameAsync(MakeSimpleDataFrame(streamId, endStream: true));
+                await server.WriteFrameAsync(MakeSimpleDataFrame(streamId, endStream: false));
 
                 // Additional trailing header frame.
                 var containsForbiddenTrailingHeaders = new HttpHeaderData[] {
                     new HttpHeaderData("Set-Cookie", "yummy"), new HttpHeaderData("Hello", "World") };
-                await server.SendResponseHeadersAsync(streamId, hasStatusCode:false, headers: containsForbiddenTrailingHeaders);
+                await server.SendResponseHeadersAsync(streamId, hasStatusCode:false, headers: containsForbiddenTrailingHeaders, endStream : true);
 
                 await Assert.ThrowsAsync<HttpRequestException>(() => sendTask);
             }
@@ -1210,10 +1209,10 @@ namespace System.Net.Http.Functional.Tests
                 await server.SendDefaultResponseHeadersAsync(streamId);
 
                 // Response data, missing Trailers.
-                await server.WriteFrameAsync(MakeSimpleDataFrame(streamId, endStream: true));
+                await server.WriteFrameAsync(MakeSimpleDataFrame(streamId, endStream: false));
 
                 // Additional trailing header frame.
-                await server.SendResponseHeadersAsync(streamId, hasStatusCode:false, headers: TrailingHeaders);
+                await server.SendResponseHeadersAsync(streamId, hasStatusCode:false, headers: TrailingHeaders, endStream : true);
 
                 HttpResponseMessage response = await sendTask;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
