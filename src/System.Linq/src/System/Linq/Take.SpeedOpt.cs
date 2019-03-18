@@ -30,8 +30,7 @@ namespace System.Linq
                     return partition;
                 }
             }
-
-            if (source is IList<TSource> sourceList)
+            else if (source is IList<TSource> sourceList)
             {
                 if (sourceList.Count > count)
                 {
