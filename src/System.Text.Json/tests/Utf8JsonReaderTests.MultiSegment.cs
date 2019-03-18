@@ -666,11 +666,11 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(JsonTokenWithExtraValue))]
         public static void ReadJsonTokenWithExtraValueMultiSegment(string jsonString)
         {
+            byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
-                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
-
                 TestReadTokenWithExtra(sequence, commentHandling, isFinalBlock: false);
                 TestReadTokenWithExtra(sequence, commentHandling, isFinalBlock: true);
             }
@@ -680,15 +680,15 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(JsonTokenWithExtraValueAndComments))]
         public static void ReadJsonTokenWithExtraValueAndCommentsMultiSegment(string jsonString)
         {
+            byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
                 if (commentHandling == JsonCommentHandling.Disallow)
                 {
                     continue;
                 }
-
-                byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
-                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
 
                 TestReadTokenWithExtra(sequence, commentHandling, isFinalBlock: false);
                 TestReadTokenWithExtra(sequence, commentHandling, isFinalBlock: true);
@@ -723,31 +723,27 @@ namespace System.Text.Json.Tests
             if (commentsAppended && commentHandling == JsonCommentHandling.Allow)
             {
                 Assert.True(reader.Read());
-                Assert.True(reader.TokenType == JsonTokenType.Comment);
+                Assert.Equal(JsonTokenType.Comment, reader.TokenType);
                 Assert.True(reader.Read());
-                Assert.True(reader.TokenType == JsonTokenType.Comment);
+                Assert.Equal(JsonTokenType.Comment, reader.TokenType);
             }
 
             Assert.True(reader.Read());
             if (reader.TokenType == JsonTokenType.StartArray || reader.TokenType == JsonTokenType.StartObject)
             {
                 Assert.True(reader.Read());
-                Assert.True(reader.TokenType == JsonTokenType.EndArray || reader.TokenType == JsonTokenType.EndObject);
+                Assert.Contains(reader.TokenType, new[] { JsonTokenType.EndArray, JsonTokenType.EndObject });
             }
 
-            try
+            JsonTestHelper.AssertThrows<JsonReaderException>(reader, (jsonReader) =>
             {
-                reader.Read();
-                if (commentHandling == JsonCommentHandling.Allow && reader.TokenType == JsonTokenType.Comment)
+                jsonReader.Read();
+                if (commentHandling == JsonCommentHandling.Allow && jsonReader.TokenType == JsonTokenType.Comment)
                 {
-                    reader.Read();
+                    jsonReader.Read();
                 }
                 Assert.True(false, $"Expected json.Read to throw JsonReaderException beyond a single vaid JSON payload.");
-            }
-            catch (JsonReaderException ex)
-            {
-                Assert.True(ex.Message.Contains("is invalid after a single JSON value. Expected end of data."), ex.Message);
-            }
+            });
         }
     }
 }
