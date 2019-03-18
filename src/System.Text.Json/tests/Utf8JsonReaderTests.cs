@@ -3343,7 +3343,7 @@ namespace System.Text.Json.Tests
                 {
                     // NOTE: Leading and trailing spaces in the comments are significant.
                     var singleLineComment = " Single Line Comment ";
-                    dataList.Add(new object[] { $"{{{singleLineComment}{delim}}}", singleLineComment });
+                    dataList.Add(new object[] { $"{{//{singleLineComment}{delim}}}", singleLineComment });
 
                     var multilineComment = $" Multiline {delim} Comment ";
                     dataList.Add(new object[] { $"{{/*{multilineComment}*/{delim}}}", multilineComment });
@@ -3360,7 +3360,9 @@ namespace System.Text.Json.Tests
 
                 var rawComments = new string[]
                 {
-                    "A string \\t with {0}tab",
+                    "A string with {0}valid UTF8 \\t tab",
+                    "A string with {0}invalid UTF8 \\xc3\\x28",
+                    "A string with {0}valid UTF16 \\u92e म",
                     "A string with {0}invalid UTF16 \\uDD1E"
                 };
 

@@ -2166,7 +2166,7 @@ namespace System.Text.Json
             _lineNumber++;
 
         Done:
-            _consumed += 2 + toConsume;
+            _consumed += 2 + idx;
             return true;
         }
 
@@ -2194,12 +2194,14 @@ namespace System.Text.Json
                 idx += foundIdx + 1;
             }
 
+            Debug.Assert(idx >= 1);
+
             // Consume the /* and */ characters that are part of the multi-line comment.
             // idx points right before the final '*' (which is right before the last '/'). Hence increment _consumed
             // by 4 to exclude the start/end-of-comment delimiters.
-            _consumed += 4 + idx;
+            _consumed += 4 + idx - 1;
 
-            (int newLines, int newLineIndex) = JsonReaderHelper.CountNewLines(localBuffer.Slice(0, idx));
+            (int newLines, int newLineIndex) = JsonReaderHelper.CountNewLines(localBuffer.Slice(0, idx - 1));
             _lineNumber += newLines;
             if (newLineIndex != -1)
             {
@@ -2209,7 +2211,7 @@ namespace System.Text.Json
             }
             else
             {
-                _bytePositionInLine += 4 + idx;
+                _bytePositionInLine += 4 + idx - 1;
             }
             return true;
         }
@@ -2268,6 +2270,9 @@ namespace System.Text.Json
                 return false;
             }
 
+            // Exclude the /* at start of the comment
+            ValueSpan = _buffer.Slice(previousConsumed + 2, idx );
+            ValueSpan = _buffer.Slice(previousConsumed, idx + 3); // Include the slash/asterisk and final slash at the end of the comment as part of it.
             if (_tokenType != JsonTokenType.Comment)
             {
                 _previousTokenType = _tokenType;
