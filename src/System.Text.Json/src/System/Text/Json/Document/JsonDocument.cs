@@ -28,6 +28,23 @@ namespace System.Text.Json
         private (int, string) _lastIndexAndString = (-1, null);
 
         /// <summary>
+        ///   Whether or not this JsonDocument is detached from memory provided during a call to Parse.
+        /// </summary>
+        public bool IsDetached { get; }
+
+        /// <summary>
+        ///   Whether or not this JsonDocument should be disposed when no longer needed.
+        /// </summary>
+        /// <remarks>
+        ///   The default behavior for JsonDocument is to utilize pooled arrays for its data, and
+        ///   <see cref="Dispose"/> returns those arrays to their respective pools. A call to
+        ///   <see cref="Detach"/> can indicate whether the utilized memory comes from the array
+        ///   pools, or new arrays held by this type. When new arrays are used, Dispose has no effect
+        ///   and therefore no longer needs to be called.
+        /// </remarks>
+        public bool IsDisposable { get; }
+
+        /// <summary>
         ///   The <see cref="JsonElement"/> representing the value of the document.
         /// </summary>
         public JsonElement RootElement => new JsonElement(this, 0);
@@ -39,12 +56,34 @@ namespace System.Text.Json
             _utf8Json = utf8Json;
             _parsedData = parsedData;
             _extraRentedBytes = extraRentedBytes;
+
+            IsDetached = (extraRentedBytes != null);
+            IsDisposable = true;
+        }
+
+        private JsonDocument(JsonDocument source, bool useArrayPools)
+        {
+            if (useArrayPools)
+            {
+                byte[] newJson = ArrayPool<byte>.Shared.Rent(source._utf8Json.Length);
+                source._utf8Json.Span.CopyTo(newJson);
+                _utf8Json = newJson;
+                _extraRentedBytes = newJson;
+            }
+            else
+            {
+                _utf8Json = source._utf8Json.ToArray();
+            }
+
+            _parsedData = new MetadataDb(source._parsedData, useArrayPools);
+            IsDetached = true;
+            IsDisposable = useArrayPools;
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
-            if (_utf8Json.IsEmpty)
+            if (_utf8Json.IsEmpty || !IsDisposable)
             {
                 return;
             }
@@ -61,6 +100,49 @@ namespace System.Text.Json
                 ArrayPool<byte>.Shared.Return(_extraRentedBytes);
                 _extraRentedBytes = null;
             }
+        }
+
+        /// <summary>
+        ///   Get a JsonDocument representing the same contents as the current object,
+        ///   but which does not depend on the data provided to
+        ///   <see cref="Parse(ReadOnlyMemory{byte},JsonReaderOptions)"/> (or another overload)
+        ///   remaining unchanged.
+        /// </summary>
+        /// <param name="useArrayPools">
+        ///   <see langword="true"/> to use pooled arrays where possible, <see langword="false"/> to
+        ///   use newly created arrays for simpler lifetime management.
+        ///   (Defaults to <see langword="false"/>.)
+        /// </param>
+        /// <remarks>
+        ///   <para>
+        ///     This method returns <see langword="this"/> when doing so is only detectable via
+        ///     a reference equality test. If the current instance is already detached (
+        ///     <see cref="IsDetached"/> == <see langword="true"/>) and has GC lifetime semantics
+        ///     instead of IDisposable lifetime (<see cref="IsDisposable"/> == <see langword="false"/>)
+        ///     then no functional side effects can be observed by multiple callers acting on the
+        ///     same instance.
+        ///   </para>
+        ///   <para>
+        ///     When invoking this method with <paramref name="useArrayPools"/> == <see langword="true"/>,
+        ///     the caller is responsible for managing the lifetime of the returned object (as an
+        ///     <see cref="IDisposable"/>). When <paramref name="useArrayPools"/> == <see langword="false"/>,
+        ///     <see cref="Dispose"/> has no effect and therefore the caller has no lifetime management
+        ///     responsibilities.
+        ///   </para>
+        /// </remarks>
+        /// <returns>
+        ///   A JsonDocument instance representing the same contents, but with memory independent
+        ///   of what was provided to <see cref="Parse(ReadOnlyMemory{byte},JsonReaderOptions)"/> (or
+        ///   another overload).
+        /// </returns>
+        public JsonDocument Detach(bool useArrayPools=false)
+        {
+            if (IsDetached && !IsDisposable)
+            {
+                return this;
+            }
+
+            return new JsonDocument(this, useArrayPools);
         }
 
         /// <summary>

@@ -111,6 +111,21 @@ namespace System.Text.Json
                 Length = 0;
             }
 
+            internal MetadataDb(MetadataDb source, bool useArrayPools)
+            {
+                Length = source.Length;
+
+                if (useArrayPools)
+                {
+                    _rentedBuffer = ArrayPool<byte>.Shared.Rent(Length);
+                    source._rentedBuffer.AsSpan(0, Length).CopyTo(_rentedBuffer);
+                }
+                else
+                {
+                    _rentedBuffer = source._rentedBuffer.AsSpan(0, Length).ToArray();
+                }
+            }
+
             public void Dispose()
             {
                 if (_rentedBuffer == null)

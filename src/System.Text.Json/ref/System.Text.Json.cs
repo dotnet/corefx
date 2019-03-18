@@ -16,7 +16,10 @@ namespace System.Text.Json
     public sealed partial class JsonDocument : System.IDisposable
     {
         internal JsonDocument() { }
+        public bool IsDetached { get { throw null; } }
+        public bool IsDisposable { get { throw null; } }
         public System.Text.Json.JsonElement RootElement { get { throw null; } }
+        public System.Text.Json.JsonDocument Detach(bool useArrayPools = false) { throw null; }
         public void Dispose() { }
         public static System.Text.Json.JsonDocument Parse(System.Buffers.ReadOnlySequence<byte> utf8Json, System.Text.Json.JsonReaderOptions readerOptions = default(System.Text.Json.JsonReaderOptions)) { throw null; }
         public static System.Text.Json.JsonDocument Parse(System.IO.Stream utf8Json, System.Text.Json.JsonReaderOptions readerOptions = default(System.Text.Json.JsonReaderOptions)) { throw null; }

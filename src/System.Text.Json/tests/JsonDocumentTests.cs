@@ -215,6 +215,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
+                startsDetached: false,
                 null,
                 bytes => JsonDocument.Parse(bytes.AsMemory()));
         }
@@ -227,6 +228,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
+                startsDetached: true,
                 str => JsonDocument.Parse(str),
                 null);
         }
@@ -239,6 +241,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
+                startsDetached: true,
                 null,
                 bytes => JsonDocument.Parse(new MemoryStream(bytes)));
         }
@@ -251,6 +254,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
+                startsDetached: true,
                 null,
                 bytes => JsonDocument.ParseAsync(new MemoryStream(bytes)).GetAwaiter().GetResult());
         }
@@ -263,6 +267,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
+                startsDetached: true,
                 null,
                 bytes => JsonDocument.Parse(
                     new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, bytes)));
@@ -276,6 +281,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
+                startsDetached: true,
                 null,
                 bytes => JsonDocument.ParseAsync(
                     new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, bytes)).
@@ -345,6 +351,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
+                startsDetached: true,
                 null,
                 bytes => JsonDocument.Parse(new MemoryStream(Utf8Bom.Concat(bytes).ToArray())));
         }
@@ -357,6 +364,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
+                startsDetached: true,
                 null,
                 bytes => JsonDocument.ParseAsync(new MemoryStream(Utf8Bom.Concat(bytes).ToArray())).GetAwaiter().GetResult());
         }
@@ -369,6 +377,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
+                startsDetached: true,
                 null,
                 bytes => JsonDocument.Parse(
                     new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, Utf8Bom.Concat(bytes).ToArray())));
@@ -382,6 +391,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
+                startsDetached: true,
                 null,
                 bytes => JsonDocument.ParseAsync(
                         new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, Utf8Bom.Concat(bytes).ToArray())).
@@ -434,6 +444,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
+                startsDetached: false,
                 null,
                 bytes => JsonDocument.Parse(new ReadOnlySequence<byte>(bytes)));
         }
@@ -446,6 +457,7 @@ namespace System.Text.Json.Tests
                 compactData,
                 type,
                 jsonString,
+                startsDetached: true,
                 null,
                 bytes => JsonDocument.Parse(JsonTestHelper.SegmentInto(bytes, 31)));
         }
@@ -454,6 +466,7 @@ namespace System.Text.Json.Tests
             bool compactData,
             TestCaseType type,
             string jsonString,
+            bool startsDetached,
             Func<string, JsonDocument> stringDocBuilder,
             Func<byte[], JsonDocument> bytesDocBuilder)
         {
@@ -471,6 +484,18 @@ namespace System.Text.Json.Tests
 
             using (JsonDocument doc = stringDocBuilder?.Invoke(jsonString) ?? bytesDocBuilder?.Invoke(dataUtf8))
             {
+                Assert.NotNull(doc);
+                Assert.True(doc.IsDisposable, "doc.IsDisposable");
+
+                if (startsDetached)
+                {
+                    Assert.True(doc.IsDetached, "doc.IsDetached");
+                }
+                else
+                {
+                    Assert.False(doc.IsDetached, "doc.IsDetached");
+                }
+
                 JsonElement rootElement = doc.RootElement;
 
                 Func<JToken, string> expectedFunc = null;

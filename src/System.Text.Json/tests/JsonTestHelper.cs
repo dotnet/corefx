@@ -14,6 +14,10 @@ namespace System.Text.Json.Tests
 {
     internal static class JsonTestHelper
     {
+        public static ReadOnlySpan<byte> TrueValue => new byte[] { (byte)'t', (byte)'r', (byte)'u', (byte)'e' };
+        public static ReadOnlySpan<byte> FalseValue => new byte[] { (byte)'f', (byte)'a', (byte)'l', (byte)'s', (byte)'e' };
+        public static ReadOnlySpan<byte> NullValue => new byte[] { (byte)'n', (byte)'u', (byte)'l', (byte)'l' };
+
         public static string NewtonsoftReturnStringHelper(TextReader reader)
         {
             var sb = new StringBuilder();
