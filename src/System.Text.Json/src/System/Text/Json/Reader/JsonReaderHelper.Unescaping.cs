@@ -39,6 +39,24 @@ namespace System.Text.Json
             return utf8String;
         }
 
+        // TODO: Similar to escaping, replace the unescaping logic with publicly shipping APIs from https://github.com/dotnet/corefx/issues/33509
+        public static byte[] GetUnescapedBytes(ReadOnlySpan<byte> utf8Source, int idx)
+        {
+            byte[] unescapedArray = null;
+
+            Span<byte> utf8Unescaped = utf8Source.Length <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[utf8Source.Length] :
+                (unescapedArray = ArrayPool<byte>.Shared.Rent(utf8Source.Length));
+
+            Unescape(utf8Source, utf8Unescaped, idx, out int written);
+            Debug.Assert(written > 0);
+
+            utf8Unescaped = utf8Unescaped.Slice(0, written);
+            Debug.Assert(!utf8Unescaped.IsEmpty);
+
+            return utf8Unescaped.ToArray();
+        }
+
         public static bool UnescapeAndCompare(ReadOnlySpan<byte> utf8Source, ReadOnlySpan<byte> other)
         {
             Debug.Assert(utf8Source.Length >= other.Length && utf8Source.Length / JsonConstants.MaxExpansionFactorWhileEscaping <= other.Length);

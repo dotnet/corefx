@@ -496,9 +496,9 @@ namespace System.Text.Json
 
         /// <summary>
         /// Reads the next JSON token value from the source and parses it to a <see cref="Guid"/>.
-        /// Returns true if the entire UTF-8 encoded token value can be successfully
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
         /// parsed to a <see cref="Guid"/> value.
-        /// Returns false otherwise.
+        /// Returns <see langword="false"/> otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.String"/>.
@@ -512,37 +512,24 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            int bytesConsumed = 0;
 
-            switch (span.Length)
+            if (_stringHasEscaping)
             {
-                case 36:
-                    // Format D (default): nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
-                    return Utf8Parser.TryParse(span, out value, out bytesConsumed, 'D') && span.Length == bytesConsumed;
-                case 38:
-                    byte firstToken = span[0];
-
-                    if (firstToken == (byte)'{')
-                    {
-                        // Format B: {nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn}
-                        return Utf8Parser.TryParse(span, out value, out bytesConsumed, 'B') && span.Length == bytesConsumed;
-                    }
-                    else if (firstToken == (byte)'(')
-                    {
-                        // Format P: (nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn)
-                        return Utf8Parser.TryParse(span, out value, out bytesConsumed, 'P') && span.Length == bytesConsumed;
-                    }
-                    else
-                    {
-                        goto default;
-                    }
-                case 32:
-                    // Format N: nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
-                    return Utf8Parser.TryParse(span, out value, out bytesConsumed, 'N') && span.Length == bytesConsumed;
-                default:
-                    value = default;
-                    return false;
+                int idx = span.IndexOf(JsonConstants.BackSlash);
+                Debug.Assert(idx != -1);
+                span = JsonReaderHelper.GetUnescapedBytes(span, idx);
             }
+
+            if (span.Length != 36 /* Valid Format D Guid length */)
+            {
+                value = default;
+                return false;
+            }
+
+            Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
+
+            // Format D (default): nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
+            return Utf8Parser.TryParse(span, out value, out int bytesConsumed, 'D') && span.Length == bytesConsumed;
         }
     }
 }
