@@ -26,7 +26,7 @@ namespace System.Data.SqlClient
 
             public void Clear() => stateObj = null;
 
-            private bool Predicate(SqlCommand command) => ReferenceEquals(command, stateObj);
+            private bool Predicate(SqlCommand command) => command.StateObject == stateObj;
         }
 
         private sealed class FindLiveReaderContext
