@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ArrayDepthTooLarge" xml:space="preserve">
-    <value>Depth has exceeded the maximum configured depth of {0}. Cannot read next JSON array.</value>
+    <value>The maximum configured depth of {0} has been exceeded. Cannot read next JSON array.</value>
   </data>
   <data name="CallFlushToAvoidDataLoss" xml:space="preserve">
     <value>The JSON writer needs to be flushed before getting the current state. There are {0} bytes that have not been committed to the output.</value>
@@ -238,7 +238,7 @@
     <value>'{0}' is invalid without a matching open.</value>
   </data>
   <data name="ObjectDepthTooLarge" xml:space="preserve">
-    <value>Depth has exceeded the maximum configured depth of {0}. Cannot read next JSON object.</value>
+    <value>The maximum configured depth of {0} has been exceeded. Cannot read next JSON object.</value>
   </data>
   <data name="PropertyNameTooLarge" xml:space="preserve">
     <value>The JSON property name of length {0} is too large and not supported by the JSON writer.</value>
