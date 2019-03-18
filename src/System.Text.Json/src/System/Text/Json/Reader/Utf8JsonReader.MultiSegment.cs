@@ -323,7 +323,7 @@ namespace System.Text.Json
             }
             else
             {
-                if (JsonReaderHelper.IsDigit(first) || first == '-')
+                if (JsonHelpers.IsDigit(first) || first == '-')
                 {
                     if (!TryGetNumberMultiSegment(_buffer.Slice(_consumed), out int numberOfBytes))
                     {
@@ -422,7 +422,7 @@ namespace System.Text.Json
                 {
                     StartArray();
                 }
-                else if (JsonReaderHelper.IsDigit(marker) || marker == '-')
+                else if (JsonHelpers.IsDigit(marker) || marker == '-')
                 {
                     return ConsumeNumberMultiSegment();
                 }
@@ -905,16 +905,17 @@ namespace System.Text.Json
                                                 // We found less than 4 hex digits.
                                                 _lineNumber = prevLineNumber;
                                                 _bytePositionInLine = prevPosition;
+                                                _totalConsumed = prevTotalConsumed;
                                                 return false;
                                             }
 
                                             _totalConsumed += localBuffer.Length;
 
                                             localBuffer = _buffer;
+                                            numberOfHexDigits -= j - idx;
                                             idx = 0;
                                             j = 0;
                                             movedToNext = true;
-                                            numberOfHexDigits -= j - idx;
                                         }
 
                                     DoneWithHex:
@@ -940,6 +941,7 @@ namespace System.Text.Json
                                 }
                                 _lineNumber = prevLineNumber;
                                 _bytePositionInLine = prevPosition;
+                                _totalConsumed = prevTotalConsumed;
                                 return false;
                             }
 
@@ -1080,11 +1082,11 @@ namespace System.Text.Json
                                 }
 
                                 data = _buffer;
+                                numberOfHexDigits -= j - idx;
                                 idx = 0;
                                 j = 0;
                                 HasValueSequence = true;
                                 movedToNext = true;
-                                numberOfHexDigits -= j - idx;
                             }
 
                         DoneWithHex:
@@ -1331,7 +1333,7 @@ namespace System.Text.Json
                 }
 
                 nextByte = data[i];
-                if (!JsonReaderHelper.IsDigit(nextByte))
+                if (!JsonHelpers.IsDigit(nextByte))
                 {
                     ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundAfterSign, nextByte);
                 }
@@ -1398,7 +1400,7 @@ namespace System.Text.Json
             for (; i < data.Length; i++)
             {
                 nextByte = data[i];
-                if (!JsonReaderHelper.IsDigit(nextByte))
+                if (!JsonHelpers.IsDigit(nextByte))
                 {
                     break;
                 }
@@ -1436,7 +1438,7 @@ namespace System.Text.Json
                     for (; i < data.Length; i++)
                     {
                         nextByte = data[i];
-                        if (!JsonReaderHelper.IsDigit(nextByte))
+                        if (!JsonHelpers.IsDigit(nextByte))
                         {
                             break;
                         }
@@ -1491,7 +1493,7 @@ namespace System.Text.Json
                 data = _buffer;
             }
             byte nextByte = data[i];
-            if (!JsonReaderHelper.IsDigit(nextByte))
+            if (!JsonHelpers.IsDigit(nextByte))
             {
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundAfterDecimal, nextByte);
             }
@@ -1550,7 +1552,7 @@ namespace System.Text.Json
                 nextByte = data[i];
             }
 
-            if (!JsonReaderHelper.IsDigit(nextByte))
+            if (!JsonHelpers.IsDigit(nextByte))
             {
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundAfterSign, nextByte);
             }
