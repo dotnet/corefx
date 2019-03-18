@@ -4,7 +4,6 @@
 
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Numerics;
 using System.Reflection.Internal;
 
 namespace System.Reflection.Metadata.Ecma335
@@ -423,10 +422,10 @@ namespace System.Reflection.Metadata.Ecma335
         internal int CalculateStandalonePdbStreamSize()
         {
             int result =
-                PdbIdSize +                                               // PDB ID
-                sizeof(int) +                                             // EntryPoint
-                sizeof(long) +                                            // ReferencedTypeSystemTables
-                BitOperations.PopCount(ExternalTablesMask) * sizeof(int); // External row counts
+                PdbIdSize +                                                         // PDB ID
+                sizeof(int) +                                                       // EntryPoint
+                sizeof(long) +                                                      // ReferencedTypeSystemTables
+                BitArithmetic.CountBits(ExternalTablesMask) * sizeof(int); // External row counts
 
             Debug.Assert(result % StreamAlignment == 0);
             return result;

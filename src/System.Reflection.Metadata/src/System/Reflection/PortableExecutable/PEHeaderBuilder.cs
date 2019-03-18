@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Numerics;
 using System.Reflection.Internal;
 
 namespace System.Reflection.PortableExecutable
@@ -66,12 +65,12 @@ namespace System.Reflection.PortableExecutable
             ulong sizeOfHeapReserve = 0x00100000,
             ulong sizeOfHeapCommit = 0x1000)
         {
-            if (fileAlignment < 512 || fileAlignment > 64 * 1024 || BitOperations.PopCount(unchecked((uint)fileAlignment)) != 1)
+            if (fileAlignment < 512 || fileAlignment > 64 * 1024 || BitArithmetic.CountBits(fileAlignment) != 1)
             {
                 Throw.ArgumentOutOfRange(nameof(fileAlignment));
             }
 
-            if (sectionAlignment < fileAlignment || BitOperations.PopCount(unchecked((uint)sectionAlignment)) != 1)
+            if (sectionAlignment < fileAlignment || BitArithmetic.CountBits(sectionAlignment) != 1)
             {
                 Throw.ArgumentOutOfRange(nameof(sectionAlignment));
             }
