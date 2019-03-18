@@ -76,19 +76,5 @@ namespace System.Globalization.Tests
         {
             Assert.Throws<InvalidOperationException>(() => DateTimeFormatInfo.InvariantInfo.AbbreviatedDayNames = new string[] { "1", "2", "3", "4", "5", "6", "7" });
         }
-
-        [Fact]
-        public void AbbreviatedDayNames_FormatWithNull_ThrowsNullReferenceException()
-        {
-            var value = new string[] { "1", "2", "3", "4", "5", "6", "7" };
-            var format = new DateTimeFormatInfo
-            {
-                AbbreviatedDayNames = value
-            };
-            value[0] = null;
-
-            var dateTime = new DateTime(2014, 5, 28);
-            Assert.Throws<NullReferenceException>(() => dateTime.ToString("ddd MMM yy", format));
-        }
     }
 }
