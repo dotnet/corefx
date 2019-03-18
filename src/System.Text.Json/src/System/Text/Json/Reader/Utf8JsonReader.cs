@@ -76,7 +76,7 @@ namespace System.Text.Json
         {
             get
             {
-                int readerDepth = ReaderDepth;
+                int readerDepth = _bitStack.CurrentDepth;
                 if (TokenType == JsonTokenType.StartArray || TokenType == JsonTokenType.StartObject)
                 {
                     Debug.Assert(readerDepth >= 1);
@@ -85,8 +85,6 @@ namespace System.Text.Json
                 return readerDepth;
             }
         }
-
-        internal int ReaderDepth => _bitStack.CurrentDepth;
 
         internal bool IsInArray => !_inObject;
 
@@ -510,7 +508,7 @@ namespace System.Text.Json
 
         private void StartObject()
         {
-            if (ReaderDepth >= _readerOptions.MaxDepth)
+            if (_bitStack.CurrentDepth >= _readerOptions.MaxDepth)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ObjectDepthTooLarge);
 
             _bitStack.PushTrue();
@@ -524,7 +522,7 @@ namespace System.Text.Json
 
         private void EndObject()
         {
-            if (!_inObject || ReaderDepth <= 0)
+            if (!_inObject || _bitStack.CurrentDepth <= 0)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBrace);
 
             _tokenType = JsonTokenType.EndObject;
@@ -535,7 +533,7 @@ namespace System.Text.Json
 
         private void StartArray()
         {
-            if (ReaderDepth >= _readerOptions.MaxDepth)
+            if (_bitStack.CurrentDepth >= _readerOptions.MaxDepth)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ArrayDepthTooLarge);
 
             _bitStack.PushFalse();
@@ -549,7 +547,7 @@ namespace System.Text.Json
 
         private void EndArray()
         {
-            if (_inObject || ReaderDepth <= 0)
+            if (_inObject || _bitStack.CurrentDepth <= 0)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBracket);
 
             _tokenType = JsonTokenType.EndArray;
@@ -671,7 +669,7 @@ namespace System.Text.Json
             {
                 if (_isNotPrimitive && IsLastSpan)
                 {
-                    if (ReaderDepth != 0)
+                    if (_bitStack.CurrentDepth != 0)
                     {
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ZeroDepthAtEnd);
                     }
