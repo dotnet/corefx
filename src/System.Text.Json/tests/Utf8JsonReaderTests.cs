@@ -2042,7 +2042,6 @@ namespace System.Text.Json.Tests
                 {
                     jsonReader.Read();
                 }
-                Assert.True(false, $"Expected json.Read to throw JsonReaderException beyond a single vaid JSON payload.");
             });
         }
 
