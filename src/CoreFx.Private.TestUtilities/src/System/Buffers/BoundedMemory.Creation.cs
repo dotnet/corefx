@@ -35,7 +35,7 @@ namespace System.Buffers
             }
 
             var retVal = AllocateWithoutDataPopulation<T>(elementCount, placement);
-            new Random().NextBytes(MemoryMarshal.AsBytes(retVal.Span)); // doesn't need to be cryptographically strong
+            FillRandom(MemoryMarshal.AsBytes(retVal.Span));
             return retVal;
         }
 
@@ -62,6 +62,19 @@ namespace System.Buffers
         public static BoundedMemory<T> AllocateFromExistingData<T>(T[] data, PoisonPagePlacement placement = PoisonPagePlacement.After) where T : unmanaged
         {
             return AllocateFromExistingData(new ReadOnlySpan<T>(data), placement);
+        }
+
+        private static void FillRandom(Span<byte> buffer)
+        {
+            // Loop over a Random instance manually since Random.NextBytes(Span<byte>) doesn't
+            // exist on all platforms we target.
+
+            Random random = new Random(); // doesn't need to be cryptographically strong
+
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = (byte)random.Next();
+            }
         }
     }
 }
