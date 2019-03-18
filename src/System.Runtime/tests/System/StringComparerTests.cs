@@ -5,6 +5,8 @@
 using System.Globalization;
 using Xunit;
 
+#pragma warning disable 0618 // String.Copy is now obsolete
+
 namespace System.Tests
 {
     public partial class StringComparerTests

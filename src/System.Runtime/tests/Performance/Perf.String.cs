@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using Xunit;
 using Microsoft.Xunit.Performance;
 
+#pragma warning disable 0618 // String.Copy is now obsolete
+
 namespace System.Tests
 {
     public partial class Perf_String

@@ -13,6 +13,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
+#pragma warning disable 0618 // String.Copy is now obsolete
+
 namespace System.Tests
 {
     //When add new tests make sure to add checks for both string and span APIs where relevant.
