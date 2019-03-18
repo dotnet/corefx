@@ -69,7 +69,7 @@ jobs:
 
             arm_Debug:
               _BuildConfig: Debug
-              _architecture: arm64
+              _architecture: arm
               _framework: netcoreapp
               _helixQueues: $(linuxArmQueues)
               _dockerContainer: ubuntu_1604_arm_cross_container
