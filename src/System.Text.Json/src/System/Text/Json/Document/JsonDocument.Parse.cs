@@ -256,6 +256,238 @@ namespace System.Text.Json
             return Parse(json.AsMemory(), readerOptions);
         }
 
+        /// <summary>
+        ///   Parses one JSON value (including objects or arrays) from the provided reader.
+        /// </summary>
+        /// <param name="reader">The reader to read.</param>
+        /// <returns>
+        ///   A JsonDocument representing the value (and nested values) read from the reader.
+        /// </returns>
+        /// <remarks>
+        ///   <para>
+        ///     Upon completion of this method <paramref name="reader"/> will positioned at the
+        ///     final token in the JSON value.  If an exception is thrown the reader is reset to
+        ///     the state it was in when the method was called.
+        ///   </para>
+        ///
+        ///   <para>
+        ///     This method makes a copy of the data the reader acted on, there is no caller
+        ///     requirement to maintain data integrity beyond the return of this method.
+        ///   </para>
+        /// </remarks>
+        /// <exception cref="ArgumentException">
+        ///   <paramref name="reader"/> is using unsupported options.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   The current <paramref name="reader"/> token does not start or represent a value.
+        /// </exception>
+        /// <exception cref="JsonReaderException">
+        ///   A value could not be read from <paramref name="reader"/>.
+        /// </exception>
+        public static JsonDocument Parse(ref Utf8JsonReader reader)
+        {
+            JsonReaderState state = reader.CurrentState;
+            CheckSupportedOptions(state.Options, nameof(reader));
+
+            // Value copy to overwrite the ref on an exception and undo the destructive reads.
+            Utf8JsonReader restore = reader;
+
+            // Only used for StartArray or StartObject,
+            // the beginning of the token is one byte earlier.
+            long startingOffset = state.BytesConsumed;
+
+            ReadOnlySpan<byte> valueSpan = default;
+            ReadOnlySequence<byte> valueSequence = default;
+
+            try
+            {
+                switch (reader.TokenType)
+                {
+                    // A new reader was created and has never been read.
+                    // Or a reader has terminated and we're about to throw.
+                    case JsonTokenType.None:
+                    // Using a reader loop the caller has identified a property they wish to
+                    // hydrate into a JsonDocument. Move to the value first.
+                    case JsonTokenType.PropertyName:
+                    {
+                        if (!reader.Read())
+                        {
+                            ThrowHelper.ThrowJsonReaderException(ref reader, ExceptionResource.ExpectedJsonTokens);
+                        }
+
+                        // Reset the starting position since we moved.
+                        startingOffset = reader.BytesConsumed;
+                        break;
+                    }
+                }
+
+                switch (reader.TokenType)
+                {
+                    // Any of the "value start" states are acceptable.
+                    case JsonTokenType.StartObject:
+                    case JsonTokenType.StartArray:
+                    {
+                        // Placeholder until reader.Skip() is written
+                        {
+                            int depth = reader.CurrentDepth;
+
+                            // CurrentDepth rises early and falls fast,
+                            // a payload of "[ 1, 2, 3, 4 ]" will report post-Read()
+                            // CurrentDepth values of { 1, 1, 1, 1, 1, 0 },
+                            // thus >= is correct, vs just >
+                            while (reader.CurrentDepth >= depth)
+                            {
+                                if (!reader.Read())
+                                {
+                                    ThrowHelper.ThrowJsonReaderException(
+                                        ref reader,
+                                        ExceptionResource.ExpectedJsonTokens);
+
+                                    Debug.Fail("Unreachable code");
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Back up to be at the beginning of the { or [, vs the end.
+                        startingOffset--;
+                        long totalLength = reader.BytesConsumed - startingOffset;
+                        ReadOnlySequence<byte> sequence = reader.OriginalSequence;
+
+                        if (sequence.IsEmpty)
+                        {
+                            valueSpan = reader.OriginalSpan.Slice(
+                                checked((int)startingOffset),
+                                checked((int)totalLength));
+                        }
+                        else
+                        {
+                            valueSequence = sequence.Slice(startingOffset, totalLength);
+                        }
+
+                        Debug.Assert(
+                            reader.TokenType == JsonTokenType.EndObject ||
+                            reader.TokenType == JsonTokenType.EndArray);
+
+                        break;
+                    }
+
+                    // Single-token values
+                    case JsonTokenType.Number:
+                    case JsonTokenType.True:
+                    case JsonTokenType.False:
+                    case JsonTokenType.Null:
+                    {
+                        if (reader.HasValueSequence)
+                        {
+                            valueSequence = reader.ValueSequence;
+                        }
+                        else
+                        {
+                            valueSpan = reader.ValueSpan;
+                        }
+
+                        break;
+                    }
+                    // String's ValueSequence/ValueSpan omits the quotes, we need them back.
+                    case JsonTokenType.String:
+                    {
+                        ReadOnlySequence<byte> sequence = reader.OriginalSequence;
+
+                        if (sequence.IsEmpty)
+                        {
+                            int payloadLength = reader.ValueSpan.Length + 2;
+                            int openQuote = checked((int)startingOffset) - payloadLength;
+                            ReadOnlySpan<byte> readerSpan = reader.OriginalSpan;
+
+                            Debug.Assert(
+                                readerSpan[openQuote] == (byte)'"',
+                                $"Calculated span starts with {readerSpan[openQuote]}");
+
+                            Debug.Assert(
+                                readerSpan[(int)startingOffset - 1] == (byte)'"',
+                                $"Calculated span ends with {readerSpan[(int)startingOffset - 1]}");
+
+                            valueSpan = readerSpan.Slice(openQuote, payloadLength);
+                        }
+                        else
+                        {
+                            long payloadLength = 2;
+
+                            if (reader.HasValueSequence)
+                            {
+                                payloadLength += reader.ValueSequence.Length;
+                            }
+                            else
+                            {
+                                payloadLength += reader.ValueSpan.Length;
+                            }
+
+                            valueSequence = sequence.Slice(startingOffset - payloadLength, payloadLength);
+                            Debug.Assert(
+                                valueSequence.First.Span[0] == (byte)'"',
+                                $"Calculated sequence starts with {valueSequence.First.Span[0]}");
+                        }
+
+                        break;
+                    }
+                    default:
+                    {
+                        byte displayByte;
+
+                        if (reader.HasValueSequence)
+                        {
+                            displayByte = reader.ValueSequence.First.Span[0];
+                        }
+                        else
+                        {
+                            displayByte = reader.ValueSpan[0];
+                        }
+
+                        ThrowHelper.ThrowJsonReaderException(
+                            ref reader,
+                            ExceptionResource.ExpectedStartOfValueNotFound,
+                            displayByte);
+
+                        Debug.Fail("Unreachable code");
+                        break;
+                    }
+                }
+            }
+            catch
+            {
+                reader = restore;
+                throw;
+            }
+
+            int length = valueSpan.IsEmpty ? checked((int)valueSequence.Length) : valueSpan.Length;
+            byte[] rented = ArrayPool<byte>.Shared.Rent(length);
+            Span<byte> rentedSpan = rented.AsSpan(0, length);
+
+            try
+            {
+                if (valueSpan.IsEmpty)
+                {
+                    valueSequence.CopyTo(rentedSpan);
+                }
+                else
+                {
+                    valueSpan.CopyTo(rentedSpan);
+                }
+
+                return Parse(rented.AsMemory(0, length), state.Options, rented);
+            }
+            catch
+            {
+                // This really shouldn't happen since the document was already checked
+                // for consistency by Skip.  But if data mutations happened just after
+                // the calls to Read then the copy may not be valid.
+                rentedSpan.Clear();
+                ArrayPool<byte>.Shared.Return(rented);
+                throw;
+            }
+        }
+
         private static JsonDocument Parse(
             ReadOnlyMemory<byte> utf8Json,
             JsonReaderOptions readerOptions,
