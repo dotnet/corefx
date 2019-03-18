@@ -7856,8 +7856,8 @@ namespace System.Text.Unicode
 {
     public static partial class Utf8
     {
-        public static System.Buffers.OperationStatus FromUtf16(ReadOnlySpan<char> source, Span<byte> destination, out int numCharsRead, out int numBytesWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
-        public static System.Buffers.OperationStatus ToUtf16(ReadOnlySpan<byte> source, Span<char> destination, out int numBytesRead, out int numCharsWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
+        public static System.Buffers.OperationStatus FromUtf16(ReadOnlySpan<char> source, Span<byte> destination, out int charsRead, out int bytesWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
+        public static System.Buffers.OperationStatus ToUtf16(ReadOnlySpan<byte> source, Span<char> destination, out int bytesRead, out int charsWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
     }
 }
 namespace System.Threading
