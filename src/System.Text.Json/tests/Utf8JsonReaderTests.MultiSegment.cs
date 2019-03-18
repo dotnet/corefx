@@ -661,5 +661,93 @@ namespace System.Text.Json.Tests
                 VerifyReadLoop(ref json, null);
             }
         }
+
+        [Theory]
+        [MemberData(nameof(JsonTokenWithExtraValue))]
+        public static void ReadJsonTokenWithExtraValueMultiSegment(string jsonString)
+        {
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+
+                TestReadTokenWithExtra(sequence, commentHandling, isFinalBlock: false);
+                TestReadTokenWithExtra(sequence, commentHandling, isFinalBlock: true);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonTokenWithExtraValueAndComments))]
+        public static void ReadJsonTokenWithExtraValueAndCommentsMultiSegment(string jsonString)
+        {
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                if (commentHandling == JsonCommentHandling.Disallow)
+                {
+                    continue;
+                }
+
+                byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+
+                TestReadTokenWithExtra(sequence, commentHandling, isFinalBlock: false);
+                TestReadTokenWithExtra(sequence, commentHandling, isFinalBlock: true);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonTokenWithExtraValueAndComments))]
+        public static void ReadJsonTokenWithExtraValueAndCommentsAppendedMultiSegment(string jsonString)
+        {
+            jsonString = "  /* comment */  /* comment */  " + jsonString;
+            byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                if (commentHandling == JsonCommentHandling.Disallow)
+                {
+                    continue;
+                }
+
+                TestReadTokenWithExtra(sequence, commentHandling, isFinalBlock: false, commentsAppended: true);
+                TestReadTokenWithExtra(sequence, commentHandling, isFinalBlock: true, commentsAppended: true);
+            }
+        }
+
+        private static void TestReadTokenWithExtra(ReadOnlySequence<byte> sequence, JsonCommentHandling commentHandling, bool isFinalBlock, bool commentsAppended = false)
+        {
+            JsonReaderState state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+            Utf8JsonReader reader = new Utf8JsonReader(sequence, isFinalBlock, state);
+
+            if (commentsAppended && commentHandling == JsonCommentHandling.Allow)
+            {
+                Assert.True(reader.Read());
+                Assert.True(reader.TokenType == JsonTokenType.Comment);
+                Assert.True(reader.Read());
+                Assert.True(reader.TokenType == JsonTokenType.Comment);
+            }
+
+            Assert.True(reader.Read());
+            if (reader.TokenType == JsonTokenType.StartArray || reader.TokenType == JsonTokenType.StartObject)
+            {
+                Assert.True(reader.Read());
+                Assert.True(reader.TokenType == JsonTokenType.EndArray || reader.TokenType == JsonTokenType.EndObject);
+            }
+
+            try
+            {
+                reader.Read();
+                if (commentHandling == JsonCommentHandling.Allow && reader.TokenType == JsonTokenType.Comment)
+                {
+                    reader.Read();
+                }
+                Assert.True(false, $"Expected json.Read to throw JsonReaderException beyond a single vaid JSON payload.");
+            }
+            catch (JsonReaderException ex)
+            {
+                Assert.True(ex.Message.Contains("is invalid after a single JSON value. Expected end of data."), ex.Message);
+            }
+        }
     }
 }
