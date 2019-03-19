@@ -363,8 +363,8 @@ namespace System
                     Interop.Sys.WinSize winsize;
                     if (Interop.Sys.GetWindowSize(out winsize) == 0)
                     {
-                        s_windowWidth = winsize.Row;
-                        s_windowHeight = winsize.Col;
+                        s_windowWidth = winsize.Col;
+                        s_windowHeight = winsize.Row;
                     }
                     else
                     {
