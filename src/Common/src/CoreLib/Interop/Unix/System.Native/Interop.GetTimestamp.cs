@@ -8,10 +8,10 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetTimestampResolution", BestFitMapping = false, ExactSpelling = true)]
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetTimestampResolution", ExactSpelling = true)]
         internal static extern unsafe long GetTimestampResolution();
 
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetTimestamp", BestFitMapping = false, ExactSpelling = true)]
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetTimestamp", ExactSpelling = true)]
         internal static extern unsafe long GetTimestamp();
     }
 }
