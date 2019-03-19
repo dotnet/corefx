@@ -126,7 +126,10 @@ namespace System
                 keyInfo = new ConsoleKeyInfo('\r', keyInfo.Key, shift, alt, control);
             }
 
-            if (!intercept && !previouslyProcessed) Console.Write(keyInfo.KeyChar);
+            if (!intercept && !previouslyProcessed && keyInfo.KeyChar != '\0')
+            {
+                Console.Write(keyInfo.KeyChar);
+            }
             return keyInfo;
         }
 
