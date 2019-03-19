@@ -28,7 +28,7 @@ namespace System.Text.Json.Serialization
             }
             else
             {
-                genericPropertyType = typeof(JsonPropertyInfo<,>).MakeGenericType(classType, propertyType);
+                genericPropertyType = typeof(JsonPropertyInfoNotNullable<,>).MakeGenericType(classType, propertyType);
             }
             
             JsonPropertyInfo jsonInfo = (JsonPropertyInfo)Activator.CreateInstance(

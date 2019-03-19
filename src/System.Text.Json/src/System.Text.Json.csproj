@@ -45,6 +45,7 @@
     <Compile Include="System\Text\Json\Serialization\ClassType.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultArrayConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultConverters.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\DefaultConvertersOfTValue.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterBoolean.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterByte.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterChar.cs" />
@@ -65,8 +66,9 @@
     <Compile Include="System\Text\Json\Serialization\JsonClassInfo.AddProperty.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonEnumerableConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonPropertyInfo.cs" />
-    <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoOfTClassTProperty.cs" />
-    <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoOfTClassTPropertyNullable.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoNotNullable.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoNullable.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoOfTClassTPropertyTUnderlying.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Read.HandleArray.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Read.Stream.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Read.HandleValue.cs" />

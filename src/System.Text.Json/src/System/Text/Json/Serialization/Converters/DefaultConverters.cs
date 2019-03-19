@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
-using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json.Serialization.Converters
 {
@@ -19,10 +18,6 @@ namespace System.Text.Json.Serialization.Converters
                     binder: null,
                     new object[] { false },
                     culture: null);
-            }
-            else if (type == typeof(Enum))
-            {
-                return new JsonValueConverterEnum(false);
             }
             TypeCode typeCode = Type.GetTypeCode(type);
             switch (typeCode)
@@ -60,10 +55,5 @@ namespace System.Text.Json.Serialization.Converters
             }
             return null;
         }
-    }
-
-    internal static class DefaultConverters<TValue>
-    {
-        internal static readonly JsonValueConverter<TValue> s_converter = (JsonValueConverter<TValue>)DefaultConverters.Create(typeof(TValue));
     }
 }
