@@ -52,47 +52,6 @@ namespace System.Reflection.Tests
             AssertExtensions.Throws<ArgumentNullException>("keyPairFile", () => new StrongNameKeyPair((FileStream)null));
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData("keyPairContainer")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Constructor is not supported in .NET Core")]
-        public void Ctor_String_ThrowsPlatformNotSupportedException(string keyPairContainer)
-        {
-            Assert.Throws<PlatformNotSupportedException>(() => new StrongNameKeyPair(keyPairContainer));
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Constructor is not supported in .NET Core")]
-        public void Ctor_SerializationInfo_StreamingContext_ThrowsPlatformNotSupportedException()
-        {
-            Assert.Throws<PlatformNotSupportedException>(() => new SubStrongNameKeyPair(null, new StreamingContext()));
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "PublicKey is not supported in .NET Core")]
-        public void PublicKey_Get_ThrowsPlatformNotSupportedException()
-        {
-            var keyPair = new StrongNameKeyPair(new byte[0]);
-            Assert.Throws<PlatformNotSupportedException>(() => keyPair.PublicKey);
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "OnDeserialization is not supported in .NET Core")]
-        public void GetObjectData_Invoke_ThrowsPlatformNotSupportedException()
-        {
-            ISerializable keyPair = new StrongNameKeyPair(new byte[0]);
-            Assert.Throws<PlatformNotSupportedException>(() => keyPair.GetObjectData(null, new StreamingContext()));
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "OnDeserialization is not supported in .NET Core")]
-        public void OnDeserialization_Invoke_ThrowsPlatformNotSupportedException()
-        {
-            IDeserializationCallback keyPair = new StrongNameKeyPair(new byte[0]);
-            Assert.Throws<PlatformNotSupportedException>(() => keyPair.OnDeserialization(null));
-        }
-
         private class SubStrongNameKeyPair : StrongNameKeyPair
         {
             public SubStrongNameKeyPair(SerializationInfo info, StreamingContext context) : base(info, context)
