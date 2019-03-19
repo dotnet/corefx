@@ -208,7 +208,7 @@
       </ReferenceCopyLocalPaths>
     </ItemGroup>
 
-    <Error Condition="'@(_microsoftNetTestSdkAssets)' != ''"
+    <Error Condition="'@(_microsoftNetTestSdkAssets)' == ''"
            Text="Error: no assets for test sdk package where found under: $(PackagesDir)$(MicrosoftNetTestSdkPackageName)\$(MicrosoftNETTestSdkPackageVersion)\build\$(TestSdkTFM)\*.*" />
 
   </Target>
