@@ -6,14 +6,14 @@ namespace System.Diagnostics
 {
     public partial class Stopwatch
     {
-        private static unsafe Interop.BOOL QueryPerformanceFrequency(long* resolution)
+        private static unsafe long QueryPerformanceFrequency()
         {
-            return Interop.Sys.GetTimestampResolution(resolution);
+            return Interop.Sys.GetTimestampResolution();
         }
 
-        private static unsafe Interop.BOOL QueryPerformanceCounter(long* timestamp)
+        private static unsafe long QueryPerformanceCounter()
         {
-            return Interop.Sys.GetTimestamp(timestamp);
+            return Interop.Sys.GetTimestamp();
         }
     }
 }

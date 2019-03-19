@@ -31,22 +31,11 @@ namespace System.Diagnostics
 
         static unsafe Stopwatch()
         {
-            long frequency;
-            Interop.BOOL result = QueryPerformanceFrequency(&frequency);
+            Frequency = QueryPerformanceFrequency();
+            IsHighResolution = true;
 
-            if (result == Interop.BOOL.FALSE)
-            {
-                IsHighResolution = false;
-                frequency = TicksPerSecond;
-                s_tickFrequency = 1;
-            }
-            else
-            {
-                IsHighResolution = true;
-                s_tickFrequency = TicksPerSecond;
-                s_tickFrequency /= Frequency;
-            }
-            Frequency = frequency;
+            s_tickFrequency = TicksPerSecond;
+            s_tickFrequency /= Frequency;
         }
 
         public Stopwatch()
@@ -131,16 +120,8 @@ namespace System.Diagnostics
 
         public static unsafe long GetTimestamp()
         {
-            if (IsHighResolution)
-            {
-                long timestamp;
-                QueryPerformanceCounter(&timestamp);
-                return timestamp;
-            }
-            else
-            {
-                return DateTime.UtcNow.Ticks;
-            }
+            Debug.Assert(IsHighResolution);
+            return QueryPerformanceCounter();
         }
 
         // Get the elapsed ticks.        
@@ -162,18 +143,12 @@ namespace System.Diagnostics
         // Get the elapsed ticks.        
         private long GetElapsedDateTimeTicks()
         {
-            long rawTicks = GetRawElapsedTicks();
-            if (IsHighResolution)
-            {
-                // convert high resolution perf counter to DateTime ticks
-                double dticks = rawTicks;
-                dticks *= s_tickFrequency;
-                return unchecked((long)dticks);
-            }
-            else
-            {
-                return rawTicks;
-            }
+            Debug.Assert(IsHighResolution);
+
+            // convert high resolution perf counter to DateTime ticks
+            double ticks = GetRawElapsedTicks();
+            ticks *= s_tickFrequency;
+            return unchecked((long)ticks);
         }
     }
 }

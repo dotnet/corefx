@@ -6,14 +6,24 @@ namespace System.Diagnostics
 {
     public partial class Stopwatch
     {
-        private static unsafe Interop.BOOL QueryPerformanceFrequency(long* lpFrequency)
+        private static unsafe long QueryPerformanceFrequency()
         {
-            return Interop.Kernel32.QueryPerformanceFrequency(lpFrequency);
+            long resolution;
+
+            Interop.BOOL result = Interop.Kernel32.QueryPerformanceFrequency(&resolution);
+            Debug.Assert(result != Interop.BOOL.FALSE);
+
+            return resolution;
         }
 
-        private static unsafe Interop.BOOL QueryPerformanceCounter(long* lpPerformanceCount)
+        private static unsafe long QueryPerformanceCounter(long* lpPerformanceCount)
         {
-            return Interop.Kernel32.QueryPerformanceCounter(lpPerformanceCount);
+            long timestamp;
+
+            Interop.BOOL result = Interop.Kernel32.QueryPerformanceCounter(&timestamp);
+            Debug.Assert(result != Interop.BOOL.FALSE);
+
+            return timestamp;
         }
     }
 }
