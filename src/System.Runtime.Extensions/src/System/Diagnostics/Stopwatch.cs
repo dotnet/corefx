@@ -29,7 +29,7 @@ namespace System.Diagnostics
         // to ticks. 
         private static readonly double s_tickFrequency;
 
-        static unsafe Stopwatch()
+        static Stopwatch()
         {
             Frequency = QueryPerformanceFrequency();
             IsHighResolution = true;
@@ -118,7 +118,7 @@ namespace System.Diagnostics
             get { return GetRawElapsedTicks(); }
         }
 
-        public static unsafe long GetTimestamp()
+        public static long GetTimestamp()
         {
             Debug.Assert(IsHighResolution);
             return QueryPerformanceCounter();
