@@ -64,33 +64,13 @@ namespace System.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(IsSimpleActiveCodePage))]
         public static unsafe void Ctor_SBytePtr_DoesNotAccessInvalidPage()
         {
             // Allocates a buffer of all ' ' followed by a null terminator,
             // then attempts to create a string instance from this at various offsets.
             // We use U+0020 SPACE instead of any other character because it lives
             // at offset 0x20 across every supported code page.
-
-            IntPtr pAnsiStr = IntPtr.Zero;
-            try
-            {
-                pAnsiStr = Marshal.StringToHGlobalAnsi(" ");
-                if (((char*)pAnsiStr)[0] != ' ' || ((char*)pAnsiStr)[1] != '\0')
-                {
-                    // Current code page doesn't encode U+0020 SPACE as a single byte 0x20.
-                    // We don't know how to handle this in our unit test so we'll
-                    // just bail now and pretend we succeeded.
-                    return;
-                }
-            }
-            finally
-            {
-                if (pAnsiStr != IntPtr.Zero)
-                {
-                    Marshal.FreeHGlobal(pAnsiStr);
-                }
-            }
 
             const int MaxByteCount = 128;
             using BoundedMemory<sbyte> boundedMemory = BoundedMemory.Allocate<sbyte>(MaxByteCount);
@@ -1175,6 +1155,29 @@ namespace System.Tests
 
             range = new Range(Index.FromEnd(s.Length + 1), Index.FromEnd(0));
             Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s.Substring(range));
+        }
+
+        /// <summary>
+        /// Returns true only if U+0020 SPACE is represented as the single byte 0x20 in the active code page.
+        /// </summary>
+        public unsafe static bool IsSimpleActiveCodePage
+        {
+            get
+            {
+                IntPtr pAnsiStr = IntPtr.Zero;
+                try
+                {
+                    pAnsiStr = Marshal.StringToHGlobalAnsi(" ");
+                    return ((byte*)pAnsiStr)[0] == (byte)' ' && ((byte*)pAnsiStr)[1] == (byte)'\0';
+                }
+                finally
+                {
+                    if (pAnsiStr != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(pAnsiStr);
+                    }
+                }
+            }
         }
     }
 }
