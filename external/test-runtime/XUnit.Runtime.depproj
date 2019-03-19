@@ -209,7 +209,7 @@
     </ItemGroup>
 
     <Error Condition="'@(_microsoftNetTestSdkAssets)' == ''"
-           Text="Error: no assets for test sdk package where found under: $(PackagesDir)$(MicrosoftNetTestSdkPackageName)\$(MicrosoftNETTestSdkPackageVersion)\build\$(TestSdkTFM)\*.*" />
+           Text="Error: no assets for test sdk package were found under: $(PackagesDir)$(MicrosoftNetTestSdkPackageName)\$(MicrosoftNETTestSdkPackageVersion)\build\$(TestSdkTFM)\*.*" />
 
   </Target>
 
