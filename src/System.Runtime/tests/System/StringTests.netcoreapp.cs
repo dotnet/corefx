@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -39,6 +40,72 @@ namespace System.Tests
         {
             var span = new ReadOnlySpan<char>(valueArray, startIndex, length);
             Assert.Equal(expected, new string(span));
+        }
+
+        [Fact]
+        public static unsafe void Ctor_CharPtr_DoesNotAccessInvalidPage()
+        {
+            // Allocates a buffer of all 'x' followed by a null terminator,
+            // then attempts to create a string instance from this at various offsets.
+
+            const int MaxCharCount = 128;
+            using BoundedMemory<char> boundedMemory = BoundedMemory.Allocate<char>(MaxCharCount);
+            boundedMemory.Span.Fill('x');
+            boundedMemory.Span[MaxCharCount - 1] = '\0';
+            boundedMemory.MakeReadonly();
+
+            using MemoryHandle memoryHandle = boundedMemory.Memory.Pin();
+
+            for (int i = 0; i < MaxCharCount; i++)
+            {
+                string expectedString = new string('x', MaxCharCount - i - 1);
+                string actualString = new string((char*)memoryHandle.Pointer + i);
+                Assert.Equal(expectedString, actualString);
+            }
+        }
+
+        [Fact]
+        public static unsafe void Ctor_SBytePtr_DoesNotAccessInvalidPage()
+        {
+            // Allocates a buffer of all ' ' followed by a null terminator,
+            // then attempts to create a string instance from this at various offsets.
+            // We use U+0020 SPACE instead of any other character because it lives
+            // at offset 0x20 across every supported code page.
+
+            IntPtr pAnsiStr = IntPtr.Zero;
+            try
+            {
+                pAnsiStr = Marshal.StringToHGlobalAnsi(" ");
+                if (((char*)pAnsiStr)[0] != ' ' || ((char*)pAnsiStr)[1] != '\0')
+                {
+                    // Current code page doesn't encode U+0020 SPACE as a single byte 0x20.
+                    // We don't know how to handle this in our unit test so we'll
+                    // just bail now and pretend we succeeded.
+                    return;
+                }
+            }
+            finally
+            {
+                if (pAnsiStr != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(pAnsiStr);
+                }
+            }
+
+            const int MaxByteCount = 128;
+            using BoundedMemory<sbyte> boundedMemory = BoundedMemory.Allocate<sbyte>(MaxByteCount);
+            boundedMemory.Span.Fill((sbyte)' ');
+            boundedMemory.Span[MaxByteCount - 1] = (sbyte)'\0';
+            boundedMemory.MakeReadonly();
+
+            using MemoryHandle memoryHandle = boundedMemory.Memory.Pin();
+
+            for (int i = 0; i < MaxByteCount; i++)
+            {
+                string expectedString = new string(' ', MaxByteCount - i - 1);
+                string actualString = new string((sbyte*)memoryHandle.Pointer + i);
+                Assert.Equal(expectedString, actualString);
+            }
         }
 
         [Fact]
