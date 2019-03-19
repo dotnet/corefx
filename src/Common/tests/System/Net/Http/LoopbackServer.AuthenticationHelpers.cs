@@ -157,7 +157,6 @@ namespace System.Net.Test.Common
                 else if (trimmedValue.StartsWith(nameof(cnonce)))
                 {
                     // CNonce is a quoted string.
-
                     int startIndex = trimmedValue.IndexOf('"');
                     if (startIndex != -1)
                     {
