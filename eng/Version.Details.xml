@@ -14,15 +14,15 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview4-27514-01">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview4-27520-07">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>f2dcd7d71339b54a8c8fcf98ad1b75519c588ea7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHost" Version="3.0.0-preview4-27514-01">
+    <Dependency Name="Microsoft.NETCore.DotNetHost" Version="3.0.0-preview4-27520-07">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>f2dcd7d71339b54a8c8fcf98ad1b75519c588ea7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostPolicy" Version="3.0.0-preview4-27514-01">
+    <Dependency Name="Microsoft.NETCore.DotNetHostPolicy" Version="3.0.0-preview4-27520-07">
       <Uri>https://github.com/dotnet/core-setup</Uri>
       <Sha>f2dcd7d71339b54a8c8fcf98ad1b75519c588ea7</Sha>
     </Dependency>
