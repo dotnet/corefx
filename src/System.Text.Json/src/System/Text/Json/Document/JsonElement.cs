@@ -32,6 +32,13 @@ namespace System.Text.Json
         private JsonTokenType TokenType => _parent?.GetJsonTokenType(_idx) ?? JsonTokenType.None;
 
         /// <summary>
+        ///   Whether or not this JsonElement is part from a <see cref="JsonDocument"/> that has
+        ///   been detached from the input memory.
+        /// </summary>
+        // Boolean reduction of (_parent == null ? true : _parent.IsDetached && !_parent.IsDisposable)
+        public bool IsDetached => _parent == null || _parent.IsDetached && !_parent.IsDisposable;
+
+        /// <summary>
         ///   The <see cref="JsonValueType"/> that the value is.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
@@ -982,6 +989,31 @@ namespace System.Text.Json
                     Debug.Fail($"No handler for {nameof(JsonTokenType)}.{TokenType}");
                     return string.Empty;
             }
+        }
+
+        /// <summary>
+        ///   Get a JsonElement which can be safely stored beyond the lifetime of the
+        ///   original JsonDocument.
+        /// </summary>
+        /// <returns>
+        ///   A JsonElement which can be safely stored beyond the lifetime of the
+        ///   original JsonDocument.
+        /// </returns>
+        /// <remarks>
+        ///   If this JsonElement is already detached (<see cref="IsDetached"/> ==
+        ///   <see langword="true"/>) and it is the root element of the
+        ///   <see cref="JsonDocument"/>, no work is done. Otherwise, a new
+        /// </remarks>
+        public JsonElement Detach()
+        {
+            CheckValidInstance();
+
+            if (IsDetached && _idx == 0)
+            {
+                return this;
+            }
+
+            return _parent.DetachElement(_idx);
         }
 
         private void CheckValidInstance()

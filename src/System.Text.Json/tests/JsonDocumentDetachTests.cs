@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Reflection;
 using Xunit;
 
 namespace System.Text.Json.Tests
@@ -120,6 +121,224 @@ namespace System.Text.Json.Tests
                 Assert.Equal(originalJson, detachPoolGC.RootElement.GetRawText());
                 Assert.Equal(originalJson, detachPoolPool.RootElement.GetRawText());
             }
+        }
+
+        [Fact]
+        public static void DetachRootElementFromLiveDocument()
+        {
+            string json = "[[]]";
+            JsonElement detached;
+
+            using (JsonDocument doc = JsonDocument.Parse(json))
+            {
+                JsonElement root = doc.RootElement;
+                detached = root.Detach();
+
+                Assert.False(root.IsDetached, "root.IsDetached");
+                Assert.True(detached.IsDetached, "detached.IsDetached");
+
+                Assert.Equal(json, detached.GetRawText());
+                Assert.NotSame(doc, detached.SniffDocument());
+            }
+
+            // After document Dispose
+            Assert.Equal(json, detached.GetRawText());
+        }
+
+        [Fact]
+        public static void DetachRootElementFromIsolatedDocument()
+        {
+            string json = "[[]]";
+            JsonElement detached;
+
+            using (JsonDocument doc = JsonDocument.Parse(json))
+            using (JsonDocument isolated = doc.Detach())
+            {
+                JsonElement root = isolated.RootElement;
+                detached = root.Detach();
+
+                Assert.True(root.IsDetached, "root.IsDetached");
+                Assert.True(detached.IsDetached, "detached.IsDetached");
+
+                Assert.Equal(json, detached.GetRawText());
+                Assert.Same(isolated, detached.SniffDocument());
+            }
+
+            // After document Dispose
+            Assert.Equal(json, detached.GetRawText());
+        }
+
+        [Fact]
+        public static void DetachInnerElementFromLiveDocument()
+        {
+            JsonElement detached;
+
+            using (JsonDocument doc = JsonDocument.Parse("[[]]"))
+            {
+                JsonElement inner = doc.RootElement[0];
+                detached = inner.Detach();
+
+                Assert.False(inner.IsDetached, "inner.IsDetached");
+                Assert.True(detached.IsDetached, "detached.IsDetached");
+
+                Assert.Equal(inner.GetRawText(), detached.GetRawText());
+                Assert.NotSame(doc, detached.SniffDocument());
+            }
+
+            // After document Dispose
+            Assert.Equal("[]", detached.GetRawText());
+        }
+
+        [Fact]
+        public static void DetachInnerElementFromIsolatedDocument()
+        {
+            JsonElement detached;
+
+            using (JsonDocument doc = JsonDocument.Parse("[[]]"))
+            using (JsonDocument isolated = doc.Detach())
+            {
+                JsonElement inner = isolated.RootElement[0];
+                detached = inner.Detach();
+
+                Assert.True(inner.IsDetached, "inner.IsDetached");
+                Assert.True(detached.IsDetached, "detached.IsDetached");
+
+                Assert.Equal(inner.GetRawText(), detached.GetRawText());
+                Assert.NotSame(doc, detached.SniffDocument());
+            }
+
+            // After document Dispose
+            Assert.Equal("[]", detached.GetRawText());
+        }
+
+        [Fact]
+        public static void DetachInnerElementFromDetachedElement()
+        {
+            JsonElement detached;
+
+            using (JsonDocument doc = JsonDocument.Parse("[[[]]]"))
+            {
+                JsonElement middle = doc.RootElement[0].Detach();
+                JsonElement inner = middle[0];
+                detached = inner.Detach();
+
+                Assert.Equal(inner.GetRawText(), detached.GetRawText());
+                Assert.NotSame(doc, detached.SniffDocument());
+                Assert.NotSame(middle.SniffDocument(), detached.SniffDocument());
+                Assert.NotSame(inner.SniffDocument(), detached.SniffDocument());
+            }
+
+            // After document Dispose
+            Assert.Equal("[]", detached.GetRawText());
+        }
+
+        [Fact]
+        public static void DetachAtInnerNumber()
+        {
+            DetachAtInner("1.21e9", JsonValueType.Number);
+        }
+
+        [Fact]
+        public static void DetachAtInnerString()
+        {
+            DetachAtInner("\"  this  string  has  \\u0039 spaces\"", JsonValueType.String);
+        }
+
+        [Fact]
+        public static void DetachAtInnerTrue()
+        {
+            DetachAtInner("true", JsonValueType.True);
+        }
+
+        [Fact]
+        public static void DetachAtInnerFalse()
+        {
+            DetachAtInner("false", JsonValueType.False);
+        }
+
+        [Fact]
+        public static void DetachAtInnerNull()
+        {
+            DetachAtInner("null", JsonValueType.Null);
+        }
+
+        [Fact]
+        public static void DetachAtInnerObject()
+        {
+            DetachAtInner(
+                @"{
+  ""this"":
+  [
+    {
+      ""object"": 0,
+
+
+
+
+      ""has"": [ ""whitespace"" ]
+    }
+  ]
+}",
+                JsonValueType.Object);
+        }
+
+        [Fact]
+        public static void DetachAtInnerArray()
+        {
+            DetachAtInner(
+                @"[
+{
+  ""this"":
+  [
+    {
+      ""object"": 0,
+
+
+
+
+      ""has"": [ ""whitespace"" ]
+    }
+  ]
+},
+
+5
+
+,
+
+
+
+false,
+
+
+
+null
+]",
+                JsonValueType.Array);
+        }
+
+        private static void DetachAtInner(string innerJson, JsonValueType valueType)
+        {
+            string json = $"{{ \"obj\": [ {{ \"not target\": true, \"target\": {innerJson} }}, 5 ] }}";
+
+            JsonElement detached;
+
+            using (JsonDocument doc = JsonDocument.Parse(json))
+            {
+                JsonElement target = doc.RootElement.GetProperty("obj")[0].GetProperty("target");
+                Assert.Equal(valueType, target.Type);
+                Assert.False(target.IsDetached, "target.IsDetached");
+                detached = target.Detach();
+                Assert.True(detached.IsDetached, "detached.IsDetached");
+            }
+
+            Assert.Equal(innerJson, detached.GetRawText());
+        }
+
+        private static JsonDocument SniffDocument(this JsonElement element)
+        {
+            return (JsonDocument)typeof(JsonElement).
+                GetField("_parent", BindingFlags.Instance|BindingFlags.NonPublic).
+                GetValue(element);
         }
     }
 }

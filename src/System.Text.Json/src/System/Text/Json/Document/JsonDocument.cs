@@ -49,7 +49,11 @@ namespace System.Text.Json
         /// </summary>
         public JsonElement RootElement => new JsonElement(this, 0);
 
-        private JsonDocument(ReadOnlyMemory<byte> utf8Json, MetadataDb parsedData, byte[] extraRentedBytes)
+        private JsonDocument(
+            ReadOnlyMemory<byte> utf8Json,
+            MetadataDb parsedData,
+            byte[] extraRentedBytes,
+            bool isDisposable=true)
         {
             Debug.Assert(!utf8Json.IsEmpty);
 
@@ -58,7 +62,13 @@ namespace System.Text.Json
             _extraRentedBytes = extraRentedBytes;
 
             IsDetached = (extraRentedBytes != null);
-            IsDisposable = true;
+            IsDisposable = isDisposable;
+
+            if (!isDisposable)
+            {
+                Debug.Assert(extraRentedBytes == null);
+                IsDetached = true;
+            }
         }
 
         private JsonDocument(JsonDocument source, bool useArrayPools)
@@ -599,6 +609,21 @@ namespace System.Text.Json
         {
             ReadOnlyMemory<byte> segment = GetPropertyRawValue(valueIndex);
             return JsonReaderHelper.TranscodeHelper(segment.Span);
+        }
+
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
+        internal JsonElement DetachElement(int index)
+        {
+            int endIndex = GetEndIndex(index, true);
+            MetadataDb newDb = _parsedData.CopySegment(index, endIndex);
+            ReadOnlyMemory<byte> segmentCopy = GetRawValue(index, includeQuotes: true).ToArray();
+
+            JsonDocument newDocument =
+                new JsonDocument(segmentCopy, newDb, extraRentedBytes: null, isDisposable: false);
+
+            return newDocument.RootElement;
         }
 
         private static void Parse(

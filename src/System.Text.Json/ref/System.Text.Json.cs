@@ -32,8 +32,10 @@ namespace System.Text.Json
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
+        public bool IsDetached { get { throw null; } }
         public System.Text.Json.JsonElement this[int index] { get { throw null; } }
         public System.Text.Json.JsonValueType Type { get { throw null; } }
+        public System.Text.Json.JsonElement Detach() { throw null; }
         public System.Text.Json.JsonElement.ArrayEnumerator EnumerateArray() { throw null; }
         public System.Text.Json.JsonElement.ObjectEnumerator EnumerateObject() { throw null; }
         public int GetArrayLength() { throw null; }
