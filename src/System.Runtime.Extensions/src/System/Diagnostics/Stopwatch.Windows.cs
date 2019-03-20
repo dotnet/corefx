@@ -11,16 +11,18 @@ namespace System.Diagnostics
             long resolution;
 
             Interop.BOOL result = Interop.Kernel32.QueryPerformanceFrequency(&resolution);
+            // The P/Invoke is documented to never fail on Windows XP or later
             Debug.Assert(result != Interop.BOOL.FALSE);
 
             return resolution;
         }
 
-        private static unsafe long QueryPerformanceCounter(long* lpPerformanceCount)
+        private static unsafe long QueryPerformanceCounter()
         {
             long timestamp;
 
             Interop.BOOL result = Interop.Kernel32.QueryPerformanceCounter(&timestamp);
+            // The P/Invoke is documented to never fail on Windows XP or later
             Debug.Assert(result != Interop.BOOL.FALSE);
 
             return timestamp;

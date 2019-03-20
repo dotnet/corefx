@@ -53,23 +53,21 @@ uint64_t SystemNative_GetTimestampResolution()
 #if HAVE_MACH_ABSOLUTE_TIME
     mach_timebase_info_data_t mtid;
 
-    kern_return_t result = mach_timebase_info(&mtid);
-    assert(result == KERN_SUCCESS);
-    (void)result; // suppress unused parameter warning in release builds
+    if (mach_timebase_info(&mtid) != KERN_SUCCESS)
+    {
+        return 0;
+    }
 
     return SecondsToNanoSeconds * ((uint64_t)(mtid.denom) / (uint64_t)(mtid.numer));
 #else
-    // Make sure we can call clock_gettime with MONOTONIC.  Stopwatch invokes
-    // GetTimestampResolution as the very first thing, and by calling this here
-    // to verify we can successfully, we don't have to branch in GetTimestamp.
-
     struct timespec ts;
 
-    int result = clock_gettime(CLOCK_MONOTONIC, &ts);
-    assert(result == 0);
-    (void)result; // suppress unused parameter warning in release builds
-    
-    return SecondsToNanoSeconds;
+    if (clock_getres(CLOCK_MONOTONIC, &ts) != 0)
+    {
+        return 0;
+    }
+
+    return ((uint64_t)(ts.tv_sec) * SecondsToNanoSeconds) + (uint64_t)(ts.tv_nsec);
 #endif
 }
 

@@ -33,9 +33,7 @@ namespace System.Diagnostics
         {
             Frequency = QueryPerformanceFrequency();
             IsHighResolution = true;
-
-            s_tickFrequency = TicksPerSecond;
-            s_tickFrequency /= Frequency;
+            s_tickFrequency = (double)TicksPerSecond / Frequency;
         }
 
         public Stopwatch()
@@ -144,11 +142,8 @@ namespace System.Diagnostics
         private long GetElapsedDateTimeTicks()
         {
             Debug.Assert(IsHighResolution);
-
             // convert high resolution perf counter to DateTime ticks
-            double ticks = GetRawElapsedTicks();
-            ticks *= s_tickFrequency;
-            return unchecked((long)ticks);
+            return unchecked((long)(GetRawElapsedTicks() * s_tickFrequency));
         }
     }
 }
