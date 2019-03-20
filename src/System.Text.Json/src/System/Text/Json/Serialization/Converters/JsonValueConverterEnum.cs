@@ -29,13 +29,8 @@ namespace System.Text.Json.Serialization.Converters
                     return false;
                 }
 
-#if !BUILDING_INBOX_LIBRARY 
-                // todo: add code here to handle NS2.0
-                throw new NotImplementedException(SR.EnumConverterNotImplemented);
-#else
                 string enumString = reader.GetString();
                 return Enum.TryParse(enumString, out value);
-#endif
             }
 
             if (reader.TokenType != JsonTokenType.Number ||
