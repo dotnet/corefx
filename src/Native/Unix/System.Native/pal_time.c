@@ -159,13 +159,8 @@ int32_t SystemNative_GetCpuUtilization(ProcessCpuInformation* previousCpuInfo)
             ((uint64_t)(resUsage.ru_utime.tv_usec) * MicroSecondsToNanoSeconds);
     }
 
-    uint64_t timestamp;
-    uint64_t resolution;
-
-    if (!SystemNative_GetTimestamp(&timestamp) || !SystemNative_GetTimestampResolution(&resolution))
-    {
-        return 0;
-    }
+    uint64_t resolution = SystemNative_GetTimestampResolution();
+    uint64_t timestamp = SystemNative_GetTimestamp();
 
     uint64_t currentTime = timestamp * SecondsToNanoSeconds / resolution;
 
