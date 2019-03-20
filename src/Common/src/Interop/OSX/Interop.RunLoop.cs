@@ -35,6 +35,12 @@ internal static partial class Interop
         internal extern static void CFRunLoopRun();
 
         /// <summary>
+        /// Starts the current thread's RunLoop. If the RunLoop is already running, creates a new, nested, RunLoop in the same stack.
+        /// </summary>
+        [DllImport(Interop.Libraries.CoreFoundationLibrary)]
+        internal extern static int CFRunLoopRunInMode(CFStringRef mode, double seconds, int returnAfterSourceHandled);
+
+        /// <summary>
         /// Notifies a RunLoop to stop and return control to the execution context that called CFRunLoopRun
         /// </summary>
         /// <param name="rl">The RunLoop to notify to stop</param>
