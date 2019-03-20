@@ -224,15 +224,18 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-        public void Kill_EntireProcessTree_True_CalledOnExitedProcess_ThrowsInvalidOperationException()
+        public void Kill_ExitedChildProcess_DoesNotThrow(bool killTree)
         {
             Process process = CreateProcess();
             process.Start();
+
             process.WaitForExit();
 
-            Assert.Throws<InvalidOperationException>(() => process.Kill(entireProcessTree: true));
+            process.Kill(killTree);
         }
 
         [Fact]
