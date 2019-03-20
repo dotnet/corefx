@@ -92,10 +92,7 @@ namespace System
         public static int ToLowerInvariant(this System.ReadOnlySpan<char> source, System.Span<char> destination) { throw null; }
         public static int ToUpper(this System.ReadOnlySpan<char> source, System.Span<char> destination, System.Globalization.CultureInfo culture) { throw null; }
         public static int ToUpperInvariant(this System.ReadOnlySpan<char> source, System.Span<char> destination) { throw null; }
-        public static System.Memory<char> Trim(this System.Memory<char> span) { throw null; }
-        public static System.ReadOnlyMemory<char> Trim(this System.ReadOnlyMemory<char> span) { throw null; }
         public static System.ReadOnlySpan<char> Trim(this System.ReadOnlySpan<char> span) { throw null; }
-        public static System.Span<char> Trim(this System.Span<char> span) { throw null; }
         public static System.ReadOnlySpan<char> Trim(this System.ReadOnlySpan<char> span, char trimChar) { throw null; }
         public static System.ReadOnlySpan<char> Trim(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> trimChars) { throw null; }
         public static System.ReadOnlySpan<char> TrimEnd(this System.ReadOnlySpan<char> span) { throw null; }
