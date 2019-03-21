@@ -76,7 +76,7 @@ namespace System.Net.Http
                 IntPtr modeHandle = mode.DangerousGetHandle();
                 CFRunLoopAddSource(runLoop, loopSource, modeHandle);
                 int resultz = CFRunLoopRunInMode(modeHandle, double.MaxValue, 0);
-                CFRunLoopRemoveSource(runLoop, loopSource, modeHandle);
+                CFRunLoopSourceInvalidate(loopSource);
             }
 
             return result;
