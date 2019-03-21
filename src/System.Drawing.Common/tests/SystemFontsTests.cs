@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Xunit;
 
 namespace System.Drawing.Tests
@@ -162,12 +163,12 @@ namespace System.Drawing.Tests
             {
                 return new []
                 {
-                new object[] {(Func<Font>)(() => SystemFonts.CaptionFont), "CaptionFont", CaptionFont},
-                new object[] {(Func<Font>)(() => SystemFonts.IconTitleFont), "IconTitleFont", IconTitleFont},
-                new object[] {(Func<Font>)(() => SystemFonts.MenuFont), "MenuFont", MenuFont},
-                new object[] {(Func<Font>)(() => SystemFonts.MessageBoxFont), "MessageBoxFont", MessageBoxFont},
-                new object[] {(Func<Font>)(() => SystemFonts.SmallCaptionFont), "SmallCaptionFont", SmallCaptionFont},
-                new object[] {(Func<Font>)(() => SystemFonts.StatusFont), "StatusFont", StatusFont}
+                new object[] {(Func<Font>)(() => SystemFonts.CaptionFont), nameof(CaptionFont), CaptionFont},
+                new object[] {(Func<Font>)(() => SystemFonts.IconTitleFont), nameof(IconTitleFont), IconTitleFont},
+                new object[] {(Func<Font>)(() => SystemFonts.MenuFont), nameof(MenuFont), MenuFont},
+                new object[] {(Func<Font>)(() => SystemFonts.MessageBoxFont), nameof(MessageBoxFont), MessageBoxFont},
+                new object[] {(Func<Font>)(() => SystemFonts.SmallCaptionFont), nameof(SmallCaptionFont), SmallCaptionFont},
+                new object[] {(Func<Font>)(() => SystemFonts.StatusFont), nameof(StatusFont), StatusFont}
                 };
             }
         }
