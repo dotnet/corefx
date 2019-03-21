@@ -1,0 +1,79 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{D909B69D-8F3B-4551-A355-8FFF6A308CF6}</ProjectGuid>
+    <RootNamespace>System.Data.Oledb</RootNamespace>
+    <AssemblyName>System.Data.Oledb</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);CS1573</NoWarn>
+    <DefineConstants>$(DefineConstants);</DefineConstants>
+    <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
+    <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(OSGroup)' == 'AnyOS' AND '$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_Oledb</GeneratePlatformNotSupportedAssemblyMessage>
+    <Configurations>net461-Windows_NT-Debug;net461-Windows_NT-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\Common\FieldNameLookup.cs">
+      <Link>Common\System\Data\ProviderBase\FieldNameLookup.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\Common\BasicFieldNameLookup.cs">
+      <Link>Common\System\Data\ProviderBase\BasicFieldNameLookup.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionClosed.cs">
+      <Link>System\Data\ProviderBase\DbConnectionClosed.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionInternal.cs">
+      <Link>System\Data\ProviderBase\DbConnectionInternal.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionFactory.cs">
+      <Link>System\Data\ProviderBase\DbConnectionFactory.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolGroup.cs">
+      <Link>System\Data\ProviderBase\DbConnectionPoolGroup.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbReferenceCollection.cs">
+      <Link>System\Data\ProviderBase\DbReferenceCollection.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\Common\NameValuePair.cs">
+      <Link>Common\System\Data\Common\NameValuePair.cs</Link>
+    </Compile>
+    <Compile Include="*.cs"/>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
+    <Reference Include="mscorlib" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
+    <Reference Include="Microsoft.Win32.Registry" />
+    <Reference Include="System.Buffers" />
+    <Reference Include="System.Collections" />
+    <Reference Include="System.Collections.Concurrent" />
+    <Reference Include="System.Collections.Specialized" />
+    <Reference Include="System.ComponentModel.Primitives" />
+    <Reference Include="System.ComponentModel.TypeConverter" />
+    <Reference Include="System.Configuration.ConfigurationManager" />
+    <Reference Include="System.Data.Common" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Diagnostics.TraceSource" />
+    <Reference Include="System.Memory" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.ObjectModel" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Security.AccessControl" />
+    <Reference Include="System.Security.Principal.Windows" />
+    <Reference Include="System.Text.Encoding.Extensions" />
+    <Reference Include="System.Text.RegularExpressions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Transactions.Local" />
+    <Reference Include="System.Threading.Thread" />
+    <Reference Include="System.Threading.Timer" />
+    <Reference Include="System.Xml.ReaderWriter" />
+  </ItemGroup>
+</Project>
