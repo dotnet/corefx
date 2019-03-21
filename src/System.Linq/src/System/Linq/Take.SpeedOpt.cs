@@ -41,6 +41,28 @@ namespace System.Linq
                     return new ListPartition<TSource>(sourceList, 0, sourceList.Count);
                 }
             }
+            else if (source is ICollection<TSource> collection)
+            {
+                if (collection.Count > count)
+                {
+                    return new EnumerablePartition<TSource>(collection.Skip(collection.Count - count), 0, count);
+                }
+                else
+                {
+                    return new EnumerablePartition<TSource>(collection, 0, collection.Count);
+                }
+            }
+            else if (source is IReadOnlyCollection<TSource> roCollection)
+            {
+                if (roCollection.Count > count)
+                {
+                    return new EnumerablePartition<TSource>(roCollection.Skip(roCollection.Count - count), 0, count);
+                }
+                else
+                {
+                    return new EnumerablePartition<TSource>(roCollection, 0, roCollection.Count);
+                }
+            }
 
             return TakeLastRegularIterator<TSource>(source, count);
         }

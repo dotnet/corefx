@@ -12,7 +12,7 @@ namespace System.Linq
         private static IEnumerable<TSource> TakeIterator<TSource>(IEnumerable<TSource> source, int count)
         {
             Debug.Assert(count > 0);
-            
+
             foreach (TSource element in source)
             {
                 yield return element;
@@ -24,15 +24,30 @@ namespace System.Linq
         {
             Debug.Assert(count > 0);
 
-            if (source is IList<TSource> sourceList)
+            if (source is ICollection<TSource> collection)
             {
-                if (sourceList.Count > count)
+                if (collection.Count > count)
                 {
-                    return sourceList.Skip(sourceList.Count - count);
+                    return collection.Skip(collection.Count - count);
                 }
-                else if (sourceList.Count > 0)
+                else if (collection.Count > 0)
                 {
-                    return TakeIterator<TSource>(sourceList, sourceList.Count);
+                    return TakeIterator<TSource>(collection, collection.Count);
+                }
+                else
+                {
+                    return Empty<TSource>();
+                }
+            }
+            else if (source is IReadOnlyCollection<TSource> roCollection)
+            {
+                if (roCollection.Count > count)
+                {
+                    return roCollection.Skip(roCollection.Count - count);
+                }
+                else if (roCollection.Count > 0)
+                {
+                    return TakeIterator<TSource>(roCollection, roCollection.Count);
                 }
                 else
                 {
