@@ -85,7 +85,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
     [WindowsRuntimeImport]
     internal interface INotifyCollectionChangedEventArgsFactory
     {
-        IntPtr CreateInstanceWithAllParameters(int action, IntPtr newItems, IntPtr oldItems, int newIndex, int oldIndex, IntPtr outer, ref IntPtr inner);
+        IntPtr CreateInstanceWithAllParameters(int action, IList newItems, IList oldItems, int newIndex, int oldIndex, object outer, ref object inner);
     }
 
     // Local definition of Windows.UI.Xaml.Data.INotifyCollectionChangedEventArgsFactory
@@ -114,41 +114,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (managedArgs == null)
                 return IntPtr.Zero;
 
-            IntPtr newItemsIP = IntPtr.Zero;
-            IntPtr oldItemsIP = IntPtr.Zero;
-            try
-            {
-                if (managedArgs.NewItems != null)
-                {
-                    IntPtr unkPtr = Marshal.GetIUnknownForObject(managedArgs.NewItems);
-                    int hr = Marshal.QueryInterface(unkPtr, ref IID_IBindableVector, out newItemsIP);
-                    Marshal.Release(unkPtr);
-                    if (hr < 0)
-                        throw Marshal.GetExceptionForHR(hr);
-
-                }
-                if (managedArgs.OldItems != null)
-                {
-                    IntPtr unkPtr = Marshal.GetIUnknownForObject(managedArgs.OldItems);
-                    int hr = Marshal.QueryInterface(unkPtr, ref IID_IBindableVector, out oldItemsIP);
-                    Marshal.Release(unkPtr);
-                    if (hr < 0)
-                        throw Marshal.GetExceptionForHR(hr);
-                }
-
-                return CreateNativeNCCEventArgsInstanceHelper((int)managedArgs.Action, newItemsIP, oldItemsIP, managedArgs.NewStartingIndex, managedArgs.OldStartingIndex);
-            }
-            finally
-            {
-                if (oldItemsIP != IntPtr.Zero)
-                    Marshal.Release(oldItemsIP);
-                if (newItemsIP != IntPtr.Zero)
-                    Marshal.Release(newItemsIP);
-            }
-        }
-
-        private static IntPtr CreateNativeNCCEventArgsInstanceHelper(int action, IntPtr newItem, IntPtr oldItem, int newIndex, int oldIndex)
-        {
             if (s_EventArgsFactory == null)
             {
                 object factory = null;
@@ -160,8 +125,8 @@ namespace System.Runtime.InteropServices.WindowsRuntime
                 s_EventArgsFactory = (INotifyCollectionChangedEventArgsFactory)factory;
             }
 
-            IntPtr inner = IntPtr.Zero;
-            return s_EventArgsFactory.CreateInstanceWithAllParameters(action, newItem, oldItem, newIndex, oldIndex, IntPtr.Zero, ref inner);
+            object inner = null;
+            return s_EventArgsFactory.CreateInstanceWithAllParameters((int)managedArgs.Action, managedArgs.NewItems, managedArgs.OldItems, managedArgs.NewStartingIndex, managedArgs.OldStartingIndex, null, ref inner);
         }
 
         // Extracts properties from a WinRT NotifyCollectionChangedEventArgs and creates a new
