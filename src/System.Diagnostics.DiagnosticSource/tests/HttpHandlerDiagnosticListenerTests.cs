@@ -237,7 +237,7 @@ namespace System.Diagnostics.Tests
         public async Task TestCanceledRequest()
         {
             CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            using (var eventRecords = new EventObserverAndRecorder( _ => { cts.Cancel();}))
+            using (var eventRecords = new EventObserverAndRecorder(_ => { cts.Cancel(); }))
             {
                 using (var client = new HttpClient())
                 {
@@ -278,6 +278,37 @@ namespace System.Diagnostics.Tests
 
                 Assert.NotNull(correlationContext);
                 Assert.True(correlationContext == "k1=v1,k2=v2" || correlationContext == "k2=v2,k1=v1");
+            }
+            parentActivity.Stop();
+        }
+
+
+        [OuterLoop]
+        [Fact]
+        public async Task TestInvalidBaggage()
+        {
+            var parentActivity = new Activity("parent")
+                .AddBaggage("key", "value")
+                .AddBaggage("bad/key", "value")
+                .AddBaggage("goodkey", "bad/value")
+                .Start();
+            using (var eventRecords = new EventObserverAndRecorder())
+            {
+                using (var client = new HttpClient())
+                {
+                    (await client.GetAsync(Configuration.Http.RemoteEchoServer)).Dispose();
+                }
+
+                Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Start")));
+                Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Stop")));
+
+                WebRequest thisRequest = ReadPublicProperty<WebRequest>(eventRecords.Records.First().Value, "Request");
+                var correlationContext = thisRequest.Headers["Correlation-Context"].Split(',');
+
+                Assert.Equal(3, correlationContext.Count());
+                Assert.True(correlationContext.Contains("key=value"));
+                Assert.True(correlationContext.Contains("bad%2Fkey=value"));
+                Assert.True(correlationContext.Contains("goodkey=bad%2Fvalue"));
             }
             parentActivity.Stop();
         }

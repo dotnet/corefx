@@ -87,7 +87,7 @@ namespace System.Diagnostics
             }
         }
 
-#region private helper classes
+        #region private helper classes
 
         private class HashtableWrapper : Hashtable, IEnumerable
         {
@@ -613,7 +613,7 @@ namespace System.Diagnostics
                         do
                         {
                             KeyValuePair<string, string> item = e.Current;
-                            baggage.Append(item.Key).Append('=').Append(item.Value).Append(',');
+                            baggage.Append(WebUtility.UrlEncode(item.Key)).Append('=').Append(WebUtility.UrlEncode(item.Value)).Append(',');
                         }
                         while (e.MoveNext());
                         baggage.Remove(baggage.Length - 1, 1);
@@ -653,10 +653,10 @@ namespace System.Diagnostics
         {
             if (request.AllowAutoRedirect)
             {
-                if (statusCode == HttpStatusCode.Ambiguous        ||  // 300
-                    statusCode == HttpStatusCode.Moved            ||  // 301
-                    statusCode == HttpStatusCode.Redirect         ||  // 302
-                    statusCode == HttpStatusCode.RedirectMethod   ||  // 303
+                if (statusCode == HttpStatusCode.Ambiguous ||  // 300
+                    statusCode == HttpStatusCode.Moved ||  // 301
+                    statusCode == HttpStatusCode.Redirect ||  // 302
+                    statusCode == HttpStatusCode.RedirectMethod ||  // 303
                     statusCode == HttpStatusCode.RedirectKeepVerb ||  // 307
                     (int)statusCode == 308) // 308 Permanent Redirect is not in netfx yet, and so has to be specified this way.
                 {
@@ -696,7 +696,7 @@ namespace System.Diagnostics
                 s_connectionType == null ||
                 s_writeListField == null ||
                 s_httpResponseAccessor == null ||
-                s_autoRedirectsAccessor == null || 
+                s_autoRedirectsAccessor == null ||
                 s_coreResponseDataType == null ||
                 s_coreStatusCodeAccessor == null ||
                 s_coreHeadersAccessor == null)
@@ -727,7 +727,7 @@ namespace System.Diagnostics
             if (field != null)
             {
                 string methodName = field.ReflectedType.FullName + ".get_" + field.Name;
-                DynamicMethod getterMethod = new DynamicMethod(methodName, typeof(TField), new [] { typeof(TClass) }, true);
+                DynamicMethod getterMethod = new DynamicMethod(methodName, typeof(TField), new[] { typeof(TClass) }, true);
                 ILGenerator generator = getterMethod.GetILGenerator();
                 generator.Emit(OpCodes.Ldarg_0);
                 generator.Emit(OpCodes.Ldfld, field);
@@ -749,7 +749,7 @@ namespace System.Diagnostics
             if (field != null)
             {
                 string methodName = classType.FullName + ".get_" + field.Name;
-                DynamicMethod getterMethod = new DynamicMethod(methodName, typeof(TField), new [] { typeof(object) }, true);
+                DynamicMethod getterMethod = new DynamicMethod(methodName, typeof(TField), new[] { typeof(object) }, true);
                 ILGenerator generator = getterMethod.GetILGenerator();
                 generator.Emit(OpCodes.Ldarg_0);
                 generator.Emit(OpCodes.Castclass, classType);
@@ -766,7 +766,7 @@ namespace System.Diagnostics
 
         internal static HttpHandlerDiagnosticListener s_instance = new HttpHandlerDiagnosticListener();
 
-#region private fields
+        #region private fields
         private const string DiagnosticListenerName = "System.Net.Http.Desktop";
         private const string ActivityName = "System.Net.Http.Desktop.HttpRequestOut";
         private const string RequestStartName = "System.Net.Http.Desktop.HttpRequestOut.Start";
