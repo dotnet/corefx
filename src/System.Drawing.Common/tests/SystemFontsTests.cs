@@ -49,7 +49,7 @@ namespace System.Drawing.Tests
                     fonts = new SystemFontList("Gadugi");
                     break;
                 case 0x12: //ko-KR (Korean)
-                    fonts = new SystemFontList("맑은 고딕");
+                    fonts = new SystemFontList("\ub9d1\uc740\x20\uace0\ub515");
                     break;
                 case 0x4: //zh-TW (Traditional Chinese, Taiwan) or zh-CN (Simplified Chinese, PRC)
                     //Although the primary language ID is the same, the fonts are different
