@@ -9,7 +9,6 @@
   <ItemGroup>
     <Compile Include="NotifyReadVirtualNetworkStream.cs" />
     <Compile Include="DummyTcpServer.cs" />
-    <Compile Include="SslStreamNegotiatedCipherSuiteTest.cs" />
     <Compile Include="TestConfiguration.cs" />
     <!-- SslStream Tests -->
     <Compile Include="CertificateValidationClientServer.cs" />
@@ -95,6 +94,7 @@
     <Compile Include="SslStreamDisposeTest.cs" />
     <Compile Include="SslStreamSniTest.cs" />
     <Compile Include="SslStreamEKUTest.cs" />
+    <Compile Include="SslStreamNegotiatedCipherSuiteTest.cs" />
     <Compile Include="SslStreamSchSendAuxRecordTest.cs" />
     <Compile Include="SslStreamCredentialCacheTest.cs" />
     <Compile Include="SslStreamSystemDefaultsTest.cs" />
