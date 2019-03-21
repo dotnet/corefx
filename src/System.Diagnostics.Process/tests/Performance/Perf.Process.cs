@@ -66,8 +66,7 @@ namespace System.Diagnostics.Tests
             // Cleanup
             foreach (Process proc in processes)
             {
-                if (!proc.HasExited)
-                    proc.Kill();
+                proc.Kill();
                 proc.WaitForExit();
                 proc.Dispose();
             }
@@ -94,8 +93,7 @@ namespace System.Diagnostics.Tests
 
                 foreach (Process proc in processes)
                 {
-                    if (!proc.HasExited)
-                        proc.Kill();
+                    proc.Kill();
                     proc.WaitForExit();
                     proc.Dispose();
                 }
@@ -122,8 +120,7 @@ namespace System.Diagnostics.Tests
                 // Cleanup the processes
                 foreach (Process proc in processes)
                 {
-                    if (!proc.HasExited)
-                        proc.Kill();
+                    proc.Kill();
                     proc.WaitForExit();
                     proc.Dispose();
                 }
@@ -152,8 +149,7 @@ namespace System.Diagnostics.Tests
                 // Cleanup the processes
                 foreach (Process proc in processes)
                 {
-                    if (!proc.HasExited)
-                        proc.Kill();
+                    proc.Kill();
                     proc.WaitForExit();
                     proc.Dispose();
                 }
@@ -210,8 +206,7 @@ namespace System.Diagnostics.Tests
                 // Cleanup the processes
                 foreach (Process proc in processes)
                 {
-                    if (!proc.HasExited)
-                        proc.Kill();
+                    proc.Kill();
                     proc.WaitForExit();
                     proc.Dispose();
                 }
@@ -249,8 +244,7 @@ namespace System.Diagnostics.Tests
                 // Cleanup the processes
                 foreach (Process proc in processes)
                 {
-                    if (!proc.HasExited)
-                        proc.Kill();
+                    proc.Kill();
                     proc.WaitForExit();
                     proc.Dispose();
                 }

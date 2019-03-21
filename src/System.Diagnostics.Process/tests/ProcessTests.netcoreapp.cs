@@ -62,8 +62,7 @@ namespace System.Diagnostics.Tests
             }
             finally
             {
-                if (!testProcess.HasExited)
-                    testProcess.Kill();
+                testProcess.Kill();
 
                 Assert.True(testProcess.WaitForExit(WaitInMS));
             }
@@ -91,13 +90,11 @@ namespace System.Diagnostics.Tests
             }
             finally
             {
-                if (!testProcess.HasExited)
-                    testProcess.Kill();
+                testProcess.Kill();
 
                 Assert.True(testProcess.WaitForExit(WaitInMS));
 
-                if (!secondTestProcess.HasExited)
-                    secondTestProcess.Kill();
+                secondTestProcess.Kill();
 
                 Assert.True(testProcess.WaitForExit(WaitInMS));
             }
