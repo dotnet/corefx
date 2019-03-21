@@ -798,7 +798,7 @@ namespace System.Diagnostics.Tests
                 Assert.Equal(0, rv);
 
                 // Wait until the process is reaped.
-                for (int i = 0; i < 100 && rv == 0; i++)
+                while (rv == 0)
                 {
                     rv = kill(nonChildProcess.Id, 0);
                     if (rv == 0)
@@ -807,7 +807,6 @@ namespace System.Diagnostics.Tests
                         await Task.Delay(100);
                     }
                 }
-                Assert.NotEqual(0, rv);
 
                 // Call Process.Kill.
                 nonChildProcess.Kill(killTree);
@@ -817,19 +816,22 @@ namespace System.Diagnostics.Tests
             {
                 // Create a process that isn't a direct child.
                 int nonChildPid = -1;
-                RemoteInvokeHandle createNonChildProcess = RemoteInvoke(() =>
+                RemoteInvokeHandle createNonChildProcess = RemoteInvoke(arg =>
                 {
-                    using (RemoteInvokeHandle sleepProcess = RemoteInvoke(RemotelyInvokable.Sleep, RemotelyInvokable.WaitInMS.ToString(),
+                    RemoteInvokeHandle nonChildProcess = RemoteInvoke(
+                        // Process that lives as long as the test process.
+                        testProcessPid => Process.GetProcessById(int.Parse(testProcessPid)).WaitForExit(), arg,
                         // Don't pass our standard out to the sleepProcess or the ReadToEnd below won't return.
-                        new RemoteInvokeOptions { StartInfo = new ProcessStartInfo() { RedirectStandardOutput = true }
-                        }))
-                    {
-                        Console.WriteLine(sleepProcess.Process.Id);
+                        new RemoteInvokeOptions { StartInfo = new ProcessStartInfo() { RedirectStandardOutput = true } });
 
-                        // Don't wait for the sleepProcess to exit.
-                        sleepProcess.Process = null;
+                    using (nonChildProcess)
+                    {
+                        Console.WriteLine(nonChildProcess.Process.Id);
+
+                        // Don't wait for the process to exit.
+                        nonChildProcess.Process = null;
                     }
-                }, new RemoteInvokeOptions { StartInfo = new ProcessStartInfo() { RedirectStandardOutput = true } });
+                }, Process.GetCurrentProcess().Id.ToString(), new RemoteInvokeOptions { StartInfo = new ProcessStartInfo() { RedirectStandardOutput = true } });
                 using (createNonChildProcess)
                 {
                     nonChildPid = int.Parse(createNonChildProcess.Process.StandardOutput.ReadToEnd());
