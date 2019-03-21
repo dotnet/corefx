@@ -88,7 +88,7 @@ namespace System.Diagnostics
         /// <summary>Terminates the associated process immediately.</summary>
         public void Kill()
         {
-            using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_TERMINATE, throwIfExited: false))
+            using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_TERMINATE | Interop.Advapi32.ProcessOptions.PROCESS_QUERY_LIMITED_INFORMATION, throwIfExited: false))
             {
                 // If the process has exited, the handle is invalid.
                 if (handle.IsInvalid)
@@ -101,7 +101,7 @@ namespace System.Diagnostics
 
                     // Don't throw if the process has exited.
                     if (exception.NativeErrorCode == Interop.Errors.ERROR_ACCESS_DENIED &&
-                        HasExited)
+                        Interop.Kernel32.GetExitCodeProcess(handle, out int localExitCode) && localExitCode != Interop.Kernel32.HandleOptions.STILL_ACTIVE)
                     {
                         return;
                     }

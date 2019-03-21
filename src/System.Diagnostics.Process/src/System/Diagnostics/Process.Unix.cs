@@ -59,8 +59,9 @@ namespace System.Diagnostics
         {
             EnsureState(State.HaveId);
 
-            // Don't do anything if we know the process has exited.
-            // This also protects us from killing another process with a recycled PID.
+            // Check if we know the process has exited. This avoids us targetting another
+            // process that has a recycled PID. This only checks our internal state, the Kill call below
+            // activly checks if the process is still alive.
             if (GetHasExited(refresh: false))
             {
                 return;
@@ -70,11 +71,14 @@ namespace System.Diagnostics
             if (killResult != 0)
             {
                 Interop.Error error = Interop.Sys.GetLastError();
+
                 // Don't throw if the process has exited.
                 if (error != Interop.Error.ESRCH)
                 {
-                    throw new Win32Exception();
+                    return;
                 }
+
+                throw new Win32Exception(); // same exception as on Windows
             }
         }
 
