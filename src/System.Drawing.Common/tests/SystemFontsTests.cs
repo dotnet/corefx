@@ -42,59 +42,59 @@ namespace System.Drawing.Tests
 
             switch (userLangId & 0x3ff)
             {
-                case 0x11: //ja-JP (Japanese)
+                case 0x11: // ja-JP (Japanese)
                     fonts = new SystemFontList("Yu Gothic UI");
                     break;
-                case 0x5C: //chr-Cher-US (Cherokee)
+                case 0x5C: // chr-Cher-US (Cherokee)
                     fonts = new SystemFontList("Gadugi");
                     break;
-                case 0x12: //ko-KR (Korean)
+                case 0x12: // ko-KR (Korean)
                     fonts = new SystemFontList("\ub9d1\uc740\x20\uace0\ub515");
                     break;
-                case 0x4: //zh-TW (Traditional Chinese, Taiwan) or zh-CN (Simplified Chinese, PRC)
-                    //Although the primary language ID is the same, the fonts are different
-                    //So we have to determine by the full language ID
-                    //https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/70feba9f-294e-491e-b6eb-56532684c37f
-                    //Assuming this doc is correct AND the font only differs by whether it's traditional or not it should work
+                case 0x4: // zh-TW (Traditional Chinese, Taiwan) or zh-CN (Simplified Chinese, PRC)
+                    // Although the primary language ID is the same, the fonts are different
+                    // So we have to determine by the full language ID
+                    // https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/70feba9f-294e-491e-b6eb-56532684c37f
+                    // Assuming this doc is correct AND the font only differs by whether it's traditional or not it should work
                     switch (userLangId & 0xFFFF)
                     {
-                        case 0x0004: //zh-Hans
-                        case 0x7804: //zh
-                        case 0x0804: //zh-CN
-                        case 0x1004: //zh-SG
+                        case 0x0004: // zh-Hans
+                        case 0x7804: // zh
+                        case 0x0804: // zh-CN
+                        case 0x1004: // zh-SG
                             fonts = new SystemFontList("Microsoft JhengHei UI");
                             break;
-                        case 0x7C04: //zh-Hant
-                        case 0x0C04: //zh-HK
-                        case 0x1404: //zh-MO
-                        case 0x0404: //zh-TW
+                        case 0x7C04: // zh-Hant
+                        case 0x0C04: // zh-HK
+                        case 0x1404: // zh-MO
+                        case 0x0404: // zh-TW
                             fonts = new SystemFontList("Microsoft YaHei UI");
                             break;
                         default:
                             throw new InvalidOperationException("Cannot determine system fonts");
                     }
                     break;
-                case 0x1E: //th-TH
-                case 0x54: //lo-LA
-                case 0x53: //km-KH 
+                case 0x1E: // th-TH
+                case 0x54: // lo-LA
+                case 0x53: // km-KH 
                     fonts = new SystemFontList("Leelawadee UI");
                     break;
-                case 0x4A: //te-IN
-                case 0x49: //ta-IN
-                case 0x5B: //si-LK
-                case 0x48: //or-IN
-                case 0x4E: //mr-IN
-                case 0x4C: //ml-IN
-                case 0x57: //kok-IN
-                case 0x45: //bn-BD
-                case 0x4D: //as-IN
+                case 0x4A: // te-IN
+                case 0x49: // ta-IN
+                case 0x5B: // si-LK
+                case 0x48: // or-IN
+                case 0x4E: // mr-IN
+                case 0x4C: // ml-IN
+                case 0x57: // kok-IN
+                case 0x45: // bn-BD
+                case 0x4D: // as-IN
                     fonts = new SystemFontList("Nirmala UI");
                     break;
-                case 0x5E: //am-ET
+                case 0x5E: // am-ET
                     fonts = new SystemFontList("Ebrima");
                     break;
-                default: //For now we assume everything else uses Segoe UI
-                    //If there's other failure reported we can add it
+                default: // For now we assume everything else uses Segoe UI
+                    // If there's other failure reported we can add it
                     fonts = new SystemFontList("Segoe UI");
                     break;
             }
@@ -137,8 +137,8 @@ namespace System.Drawing.Tests
         [DllImport("kernel32.dll", SetLastError = false, CharSet = CharSet.Auto)]
         public static extern int GetUserDefaultLCID();
 
-        //Do not test DefaultFont and DialogFont, as we can't reliably determine from LCID
-        //https://github.com/dotnet/corefx/issues/35664#issuecomment-473556522
+        // Do not test DefaultFont and DialogFont, as we can't reliably determine from LCID
+        // https://github.com/dotnet/corefx/issues/35664#issuecomment-473556522
         class SystemFontList
         {
             public SystemFontList(string c_it_m_mb_scFonts)
