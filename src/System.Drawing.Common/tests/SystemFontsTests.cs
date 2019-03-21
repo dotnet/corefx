@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using Xunit;
 
 namespace System.Drawing.Tests
