@@ -303,9 +303,9 @@ namespace System.Diagnostics.Tests
                 Assert.Equal(1, eventRecords.Records.Count(rec => rec.Key.EndsWith("Stop")));
 
                 WebRequest thisRequest = ReadPublicProperty<WebRequest>(eventRecords.Records.First().Value, "Request");
-                var correlationContext = thisRequest.Headers["Correlation-Context"].Split(',');
+                string[] correlationContext = thisRequest.Headers["Correlation-Context"].Split(',');
 
-                Assert.Equal(3, correlationContext.Count());
+                Assert.Equal(3, correlationContext.Length);
                 Assert.True(correlationContext.Contains("key=value"));
                 Assert.True(correlationContext.Contains("bad%2Fkey=value"));
                 Assert.True(correlationContext.Contains("goodkey=bad%2Fvalue"));
