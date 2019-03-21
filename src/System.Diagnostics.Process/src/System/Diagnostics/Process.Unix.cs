@@ -73,7 +73,7 @@ namespace System.Diagnostics
                 Interop.Error error = Interop.Sys.GetLastError();
 
                 // Don't throw if the process has exited.
-                if (error != Interop.Error.ESRCH)
+                if (error == Interop.Error.ESRCH)
                 {
                     return;
                 }
