@@ -90,31 +90,7 @@ namespace System.Net.Http
                         do
                         {
                             KeyValuePair<string, string> item = e.Current;
-                            try
-                            {
-                                baggage.Add(new NameValueHeaderValue(item.Key, item.Value).ToString());
-                            }
-                            catch (FormatException)
-                            {
-                                // invalid Http token in baggage.
-                                // Baggage contains arbitrary context that flows with the request
-                                // across process boundaries.
-                                // Baggage could have been added by upstream component and propagated
-                                // (not necessarily over HTTP). In this case baggage could be added by the framework/library
-                                // and user has no control over it. User could have added invalid token themselves through
-                                // Activity.AddBaggage API.
-                                //
-                                // Activity.AddBaggage does not do any validation because it does not know 
-                                // which protocol will propagate the context and does not know protocol limitations.
-                                //
-                                // So it may happen that if any of the applications that processed the transaction so far
-                                // added invalid HTTP token and we just discovered it now. Throwing here will break the
-                                // application logic. 
-                                //
-                                // So we are ignoring this token. The best way to discover it is through first chance exception.
-                                // This is typical approach in the Activity as we do not want to break the app
-                                // when diagnostics is invalid.
-                            }
+                            baggage.Add(new NameValueHeaderValue(WebUtility.UrlEncode(item.Key), WebUtility.UrlEncode(item.Value)).ToString());
                         }
                         while (e.MoveNext());
                         request.Headers.Add(DiagnosticsHandlerLoggingStrings.CorrelationContextHeaderName, baggage);

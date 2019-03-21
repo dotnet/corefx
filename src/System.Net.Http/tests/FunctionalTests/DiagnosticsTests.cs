@@ -391,7 +391,7 @@ namespace System.Net.Http.Functional.Tests
 
                 Activity parentActivity = new Activity("parent");
                 parentActivity.AddBaggage("bad/key", "value");
-                parentActivity.AddBaggage("good_key", "bad/value");
+                parentActivity.AddBaggage("goodkey", "bad/value");
                 parentActivity.AddBaggage("key", "value");
                 parentActivity.Start();
 
@@ -406,8 +406,10 @@ namespace System.Net.Http.Functional.Tests
                         var request = GetPropertyValueFromAnonymousTypeInstance<HttpRequestMessage>(kvp.Value, "Request");
                         Assert.True(request.Headers.TryGetValues("Request-Id", out var requestId));
                         Assert.True(request.Headers.TryGetValues("Correlation-Context", out var correlationContext));
-                        Assert.Single(correlationContext);
-                        Assert.Equal("key=value", correlationContext.Single());
+                        Assert.Equal(3, correlationContext.Count());
+                        Assert.True(correlationContext.Contains("key=value"));
+                        Assert.True(correlationContext.Contains("bad%2Fkey=value"));
+                        Assert.True(correlationContext.Contains("goodkey=bad%2Fvalue"));
 
                         var requestStatus = GetPropertyValueFromAnonymousTypeInstance<TaskStatus>(kvp.Value, "RequestTaskStatus");
                         Assert.Equal(TaskStatus.RanToCompletion, requestStatus);
