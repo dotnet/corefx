@@ -12,6 +12,16 @@ namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
+        /// <summary>
+        /// Read from a UTF-8 encoded <see cref="System.IO.Stream"/> and return the converted value.
+        /// </summary>
+        /// <returns>The converted value.</returns>
+        /// <param name="utf8Json">The UTF-8 encoded <see cref="System.IO.Stream"/>.</param>
+        /// <param name="options">The <see cref="JsonSerializerOptions"/> used to read and convert the JSON.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> which may be used to cancel the read operation.</param>
+        /// <exception cref="JsonReaderException">
+        /// Thrown when the JSON is invalid or when <typeparamref name="TValue"/> is not compatible with the JSON.
+        /// </exception>
         public static ValueTask<TValue> ReadAsync<TValue>(Stream utf8Json, JsonSerializerOptions options = null, CancellationToken cancellationToken = default)
         {
             if (utf8Json == null)
@@ -20,6 +30,20 @@ namespace System.Text.Json.Serialization
             return ReadAsync<TValue>(utf8Json, typeof(TValue), options, cancellationToken);
         }
 
+        /// <summary>
+        /// Read from a UTF-8 encoded <see cref="System.IO.Stream"/> and return the converted value.
+        /// </summary>
+        /// <returns>The converted value.</returns>
+        /// <param name="utf8Json">The UTF-8 encoded <see cref="System.IO.Stream"/>.</param>
+        /// <param name="returnType">The type of the object to convert to and return.</param>
+        /// <param name="options">The <see cref="JsonSerializerOptions"/> used to read and convert the JSON.</param>
+        /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> which may be used to cancel the read operation.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown if <paramref name="utf8Json"/> or <paramref name="returnType"/> is null.
+        /// </exception>
+        /// <exception cref="JsonReaderException">
+        /// Thrown when the JSON is invalid or when <paramref name="returnType"/> is not compatible with the JSON.
+        /// </exception>
         public static ValueTask<object> ReadAsync(Stream utf8Json, Type returnType, JsonSerializerOptions options = null, CancellationToken cancellationToken = default)
         {
             if (utf8Json == null)
@@ -46,7 +70,7 @@ namespace System.Text.Json.Serialization
             var readerState = new JsonReaderState(options.ReaderOptions);
 
             // todo: switch to ArrayBuffer implementation to handle and simplify the allocs?
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(options.EffectiveBufferSize);
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(options.DefaultBufferSize);
             int bytesInBuffer = 0;
             long totalBytesRead = 0;
             int clearMax = 0;

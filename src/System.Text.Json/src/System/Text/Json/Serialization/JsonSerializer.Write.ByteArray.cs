@@ -6,13 +6,24 @@ namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
-        // Name \ feature is pending closure on API review
+        /// <summary>
+        /// Convert the value and return as a <see cref="System.Byte"/> array.
+        /// </summary>
+        /// <returns>The converted value.</returns>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="options">The options used to convert the value.</param>
         public static byte[] ToBytes<TValue>(TValue value, JsonSerializerOptions options = null)
         {
             return WriteCoreBytes(value, typeof(TValue), options);
         }
 
-        // Name \ feature is pending closure on API review
+        /// <summary>
+        /// Convert the value and return as a <see cref="System.Byte"/> array.
+        /// </summary>
+        /// <returns>The converted value.</returns>
+        /// <param name="value">The value to convert.</param>
+        /// <param name="type">The type of the <paramref name="value"/> to convert.</param>
+        /// <param name="options">The options used to convert the value.</param>
         public static byte[] ToBytes(object value, Type type, JsonSerializerOptions options = null)
         {
             VerifyValueAndType(value, type);

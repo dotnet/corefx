@@ -6,16 +6,21 @@ using System.Collections.Concurrent;
 
 namespace System.Text.Json.Serialization
 {
+    /// <summary>
+    /// Provides options to be used with <see cref="JsonSerializer"/>.
+    /// </summary>
     public sealed class JsonSerializerOptions
     {
-        internal const int BufferSizeUnspecified = -1;
         internal const int BufferSizeDefault = 16 * 1024;
 
         private ClassMaterializer _classMaterializerStrategy;
-        private int _defaultBufferSize = BufferSizeUnspecified;
+        private int _defaultBufferSize = BufferSizeDefault;
 
         private static readonly ConcurrentDictionary<Type, JsonClassInfo> s_classes = new ConcurrentDictionary<Type, JsonClassInfo>();
 
+        /// <summary>
+        /// Constructs a new <see cref="JsonSerializerOptions"/> instance.
+        /// </summary>
         public JsonSerializerOptions() { }
 
         internal JsonClassInfo GetOrAddClass(Type classType)
@@ -30,9 +35,20 @@ namespace System.Text.Json.Serialization
             return result;
         }
 
+        /// <summary>
+        /// The <see cref="JsonReaderOptions"/> used when deserializing an object or value type.
+        /// </summary>
         public JsonReaderOptions ReaderOptions { get; set; }
+
+        /// <summary>
+        /// The <see cref="JsonWriterOptions"/> used when serializing an object or value type.
+        /// </summary>
         public JsonWriterOptions WriterOptions { get; set; }
 
+        /// <summary>
+        /// The default buffer size used when creating temporary buffers while serializing or deserializing.
+        /// </summary>
+        /// <exception cref="System.ArgumentException">Thrown when the buffer size is less than 1.</exception>
         public int DefaultBufferSize
         {
             get
@@ -41,29 +57,24 @@ namespace System.Text.Json.Serialization
             }
             set
             {
-                if (value == 0 || value < BufferSizeUnspecified)
+                if (value < 1)
                 {
                     throw new ArgumentException(SR.SerializationInvalidBufferSize);
                 }
 
                 _defaultBufferSize = value;
-
-                if (_defaultBufferSize == BufferSizeUnspecified)
-                {
-                    EffectiveBufferSize = BufferSizeDefault;
-                }
-                else
-                {
-                    EffectiveBufferSize = _defaultBufferSize;
-                }
             }
         }
 
+        /// <summary>
+        /// Determines whether null properties are included when serializing.
+        /// </summary>
         public bool IgnoreNullPropertyValueOnWrite { get; set; }
-        public bool IgnoreNullPropertyValueOnRead { get; set; }
 
-        // Used internally for performance to avoid checking BufferSizeUnspecified.
-        internal int EffectiveBufferSize { get; private set; } = BufferSizeDefault;
+        /// <summary>
+        /// Determines whether null properties are applied to object's properties when deserializing.
+        /// </summary>
+        public bool IgnoreNullPropertyValueOnRead { get; set; }
 
         internal ClassMaterializer ClassMaterializerStrategy
         {

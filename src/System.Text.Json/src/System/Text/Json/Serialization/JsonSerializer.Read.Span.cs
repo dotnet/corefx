@@ -6,18 +6,37 @@ namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
+        /// <summary>
+        /// Read the UTF-8 encoded JSON and return the converted value.
+        /// </summary>
+        /// <returns>The converted value.</returns>
+        /// <param name="utf8Json">The UTF-8 encoded JSON"/>.</param>
+        /// <param name="options">The <see cref="JsonSerializerOptions"/> used to read and convert the JSON.</param>
+        /// <exception cref="JsonReaderException">
+        /// Thrown when the JSON is invalid or when <typeparamref name="TValue"/> is not compatible with the JSON.
+        /// </exception>
         public static TValue Parse<TValue>(ReadOnlySpan<byte> utf8Json, JsonSerializerOptions options = null)
         {
-            if (utf8Json == null)
-                throw new ArgumentNullException(nameof(utf8Json));
-
             return (TValue)ParseCore(utf8Json, typeof(TValue), options);
         }
 
+        /// <summary>
+        /// Read the UTF-8 encoded JSON and return the converted value.
+        /// </summary>
+        /// <returns>The converted value.</returns>
+        /// <param name="utf8Json">The UTF-8 encoded JSON.</param>
+        /// <param name="returnType">The type of the object to convert to and return.</param>
+        /// <param name="options">The <see cref="JsonSerializerOptions"/> used to read and convert the JSON.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown if <paramref name="returnType"/> is null.
+        /// </exception>
+        /// <exception cref="JsonReaderException">
+        /// Thrown when the JSON is invalid or when <paramref name="returnType"/> is not compatible with the JSON.
+        /// </exception>
         public static object Parse(ReadOnlySpan<byte> utf8Json, Type returnType, JsonSerializerOptions options = null)
         {
-            if (utf8Json == null)
-                throw new ArgumentNullException(nameof(utf8Json));
+            if (returnType == null)
+                throw new ArgumentNullException(nameof(returnType));
 
             return ParseCore(utf8Json, returnType, options);
         }
