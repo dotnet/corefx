@@ -12,7 +12,6 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ToStringNullArgumentFail()
         {
-            Assert.Throws<ArgumentNullException>(() => JsonSerializer.ToString(null, (Type)null));
             Assert.Throws<ArgumentNullException>(() => JsonSerializer.ToString("", (Type)null));
         }
 

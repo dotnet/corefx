@@ -36,18 +36,19 @@ namespace System.Text.Json.Serialization
         }
 
         /// <summary>
-        /// The <see cref="JsonReaderOptions"/> used when deserializing an object or value type.
+        /// Options to control the <see cref="Utf8JsonReader"/>.
         /// </summary>
         public JsonReaderOptions ReaderOptions { get; set; }
 
         /// <summary>
-        /// The <see cref="JsonWriterOptions"/> used when serializing an object or value type.
+        /// Options to control the <see cref="Utf8JsonWriter"/>.
         /// </summary>
         public JsonWriterOptions WriterOptions { get; set; }
 
         /// <summary>
-        /// The default buffer size used when creating temporary buffers while serializing or deserializing.
+        /// The default buffer size in bytes used when creating temporary buffers.
         /// </summary>
+        /// <remarks>The default size is 16K.</remarks>
         /// <exception cref="System.ArgumentException">Thrown when the buffer size is less than 1.</exception>
         public int DefaultBufferSize
         {
@@ -67,12 +68,12 @@ namespace System.Text.Json.Serialization
         }
 
         /// <summary>
-        /// Determines whether null properties are included when serializing.
+        /// Determines whether null values of properties are ignored or whether they are written to the JSON.
         /// </summary>
         public bool IgnoreNullPropertyValueOnWrite { get; set; }
 
         /// <summary>
-        /// Determines whether null properties are applied to object's properties when deserializing.
+        /// Determines whether null values in the JSON are ignored or whether they are set on properties.
         /// </summary>
         public bool IgnoreNullPropertyValueOnRead { get; set; }
 
