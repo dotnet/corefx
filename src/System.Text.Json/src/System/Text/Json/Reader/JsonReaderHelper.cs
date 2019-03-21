@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
+using System.Buffers.Text;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -246,5 +248,43 @@ namespace System.Text.Json
                                                0x03ul << 32 |
                                                0x02ul << 40 |
                                                0x01ul << 48) + 1;
+
+        public static bool TryGetGuid(ReadOnlySpan<byte> span, bool stringHasEscaping, out Guid value)
+        {
+            Debug.Assert(span.Length <= JsonConstants.MaximumEscapedGuidLength);
+
+            int bytesConsumed = 0;
+
+            value = default;
+
+            if (stringHasEscaping)
+            {
+                int idx = span.IndexOf(JsonConstants.BackSlash);
+                Debug.Assert(idx != -1);
+
+                Span<byte> utf8Unescaped = stackalloc byte[span.Length];
+
+                Unescape(span, utf8Unescaped, idx, out int written);
+                Debug.Assert(written > 0);
+
+                utf8Unescaped = utf8Unescaped.Slice(0, written);
+                Debug.Assert(!utf8Unescaped.IsEmpty);
+
+                if (utf8Unescaped.Length != JsonConstants.MaximumFormatGuidLength)
+                {
+                    return false;
+                }
+
+                return Utf8Parser.TryParse(utf8Unescaped, out value, out bytesConsumed, 'D') && utf8Unescaped.Length == bytesConsumed;
+            }
+
+            if (span.Length != JsonConstants.MaximumFormatGuidLength)
+            {
+                return false;
+            }
+
+            Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
+            return Utf8Parser.TryParse(span, out value, out bytesConsumed, 'D') && span.Length == bytesConsumed;
+        }
     }
 }

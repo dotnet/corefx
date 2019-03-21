@@ -27,7 +27,7 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\\u0030\\u0038\\u0033\\u0031\\u0034\\u0046\\u0041\\u0032\\u002d\\u0042\\u0031\\u0046\\u0045\\u002d\\u0034\\u0037\\u0039\\u0032\\u002d\\u0042\\u0043\\u0044\\u0031\\u002d\\u0036\\u0045\\u0036\\u0032\\u0033\\u0033\\u0038\\u0041\\u0043\\u0037\\u0046\\u0033", s_guidStr };
             // Lowercase hex
             yield return new object[] { "\\u0030\\u0038\\u0033\\u0031\\u0034\\u0066\\u0061\\u0032\\u002d\\u0062\\u0031\\u0066\\u0065\\u002d\\u0034\\u0037\\u0039\\u0032\\u002d\\u0062\\u0063\\u0064\\u0031\\u002d\\u0036\\u0065\\u0036\\u0032\\u0033\\u0033\\u0038\\u0061\\u0063\\u0037\\u0066\\u0033", s_guidStr };
-            // Mixed case hex
+            // A mix of upper and lower case hex
             yield return new object[] { "\\u0030\\u0038\\u0033\\u0031\\u0034\\u0046\\u0061\\u0032\\u002d\\u0062\\u0031\\u0066\\u0065\\u002d\\u0034\\u0037\\u0039\\u0032\\u002d\\u0062\\u0063\\u0064\\u0031\\u002d\\u0036\\u0065\\u0036\\u0032\\u0033\\u0033\\u0038\\u0041\\u0043\\u0037\\u0066\\u0033", s_guidStr };
             // Combine hex and plain string
             yield return new object[] { "\\u00308314Fa2-B1Fe-4792-\\u0062CD1-6e62338aC7F\\u0033", s_guidStr };

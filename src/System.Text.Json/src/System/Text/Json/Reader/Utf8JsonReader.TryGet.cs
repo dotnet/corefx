@@ -497,7 +497,8 @@ namespace System.Text.Json
         /// <summary>
         /// Reads the next JSON token value from the source and parses it to a <see cref="Guid"/>.
         /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
-        /// parsed to a <see cref="Guid"/> value.
+        /// parsed to a <see cref="Guid"/> value. Only supports <see cref="Guid"/> values with hyphens
+        /// and without any surrounding decorations.
         /// Returns <see langword="false"/> otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
@@ -511,25 +512,22 @@ namespace System.Text.Json
                 throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
             }
 
-            ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-
-            if (_stringHasEscaping)
+            if (HasValueSequence && (ValueSequence.Length <= JsonConstants.MaximumEscapedGuidLength))
             {
-                int idx = span.IndexOf(JsonConstants.BackSlash);
-                Debug.Assert(idx != -1);
-                span = JsonReaderHelper.GetUnescapedBytes(span, idx);
-            }
+                Span<byte> span = stackalloc byte[(int)ValueSequence.Length];
+                ValueSequence.CopyTo(span);
 
-            if (span.Length != 36 /* Valid Format D Guid length */)
+                return JsonReaderHelper.TryGetGuid(span, _stringHasEscaping, out value);
+            }
+            else if (ValueSpan.Length <= JsonConstants.MaximumEscapedGuidLength)
+            {
+                return JsonReaderHelper.TryGetGuid(ValueSpan, _stringHasEscaping, out value);
+            }
+            else
             {
                 value = default;
                 return false;
             }
-
-            Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
-
-            // Format D (default): nnnnnnnn-nnnn-nnnn-nnnn-nnnnnnnnnnnn
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed, 'D') && span.Length == bytesConsumed;
         }
     }
 }
