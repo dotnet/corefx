@@ -101,7 +101,6 @@ namespace System.Linq
             Debug.Assert(count > 0);
 
             Queue<TSource> queue;
-            
             using (IEnumerator<TSource> e = source.GetEnumerator())
             {
                 if (!e.MoveNext())
@@ -132,7 +131,6 @@ namespace System.Linq
             }
 
             Debug.Assert(queue.Count <= count);
-
             do
             {
                 yield return queue.Dequeue();
