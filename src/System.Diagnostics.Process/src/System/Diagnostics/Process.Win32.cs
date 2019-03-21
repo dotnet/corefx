@@ -387,7 +387,7 @@ namespace System.Diagnostics
             {
                 // If the process has exited, the handle is invalid.
                 if (handle.IsInvalid)
-                    return;
+                    return Enumerable.Empty<Exception>();
 
                 return KillTree(handle);
             }
