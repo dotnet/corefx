@@ -603,25 +603,52 @@ namespace System.Diagnostics
                     activity.Start();
                 }
 
-                request.Headers.Add(RequestIdHeaderName, activity.Id);
-                // we expect baggage to be empty or contain a few items
-                using (IEnumerator<KeyValuePair<string, string>> e = activity.Baggage.GetEnumerator())
+                if (activity.IdFormat == ActivityIdFormat.W3C)
                 {
-                    if (e.MoveNext())
+                    // do not inject header if it was injected already 
+                    // perhaps tracing systems wants to override it
+                    if (request.Headers.Get(TraceParentHeaderName) == null)
                     {
-                        StringBuilder baggage = new StringBuilder();
-                        do
+                        request.Headers.Add(TraceParentHeaderName, activity.Id);
+
+                        var traceState = activity.TraceStateString;
+                        if (traceState != null)
                         {
-                            KeyValuePair<string, string> item = e.Current;
-                            baggage.Append(WebUtility.UrlEncode(item.Key)).Append('=').Append(WebUtility.UrlEncode(item.Value)).Append(',');
+                            request.Headers.Add(TraceStateHeaderName, traceState);
                         }
-                        while (e.MoveNext());
-                        baggage.Remove(baggage.Length - 1, 1);
-                        request.Headers.Add(CorrelationContextHeaderName, baggage.ToString());
+                    }
+                }
+                else
+                {
+                    // do not inject header if it was injected already 
+                    // perhaps tracing systems wants to override it
+                    if (request.Headers.Get(RequestIdHeaderName) == null)
+                    {
+                        request.Headers.Add(RequestIdHeaderName, activity.Id);
                     }
                 }
 
-                // There is no gurantee that Activity.Current will flow to the Response, so let's stop it here
+                if (request.Headers.Get(CorrelationContextHeaderName) == null)
+                {
+                    // we expect baggage to be empty or contain a few items
+                    using (IEnumerator<KeyValuePair<string, string>> e = activity.Baggage.GetEnumerator())
+                    {
+                        if (e.MoveNext())
+                        {
+                            StringBuilder baggage = new StringBuilder();
+                            do
+                            {
+                                KeyValuePair<string, string> item = e.Current;
+                                baggage.Append(WebUtility.UrlEncode(item.Key)).Append('=').Append(WebUtility.UrlEncode(item.Value)).Append(',');
+                            }
+                            while (e.MoveNext());
+                            baggage.Remove(baggage.Length - 1, 1);
+                            request.Headers.Add(CorrelationContextHeaderName, baggage.ToString());
+                        }
+                    }
+                }
+
+                // There is no guarantee that Activity.Current will flow to the Response, so let's stop it here
                 activity.Stop();
             }
         }
@@ -631,7 +658,7 @@ namespace System.Diagnostics
             // Response event could be received several times for the same request in case it was redirected
             // IsLastResponse checks if response is the last one (no more redirects will happen)
             // based on response StatusCode and number or redirects done so far
-            if (request.Headers[RequestIdHeaderName] != null && IsLastResponse(request, response.StatusCode))
+            if (request.Headers.Get(RequestIdHeaderName) != null && IsLastResponse(request, response.StatusCode))
             {
                 // only send Stop if request was instrumented
                 this.Write(RequestStopName, new { Request = request, Response = response });
@@ -643,7 +670,7 @@ namespace System.Diagnostics
             // Response event could be received several times for the same request in case it was redirected
             // IsLastResponse checks if response is the last one (no more redirects will happen)
             // based on response StatusCode and number or redirects done so far
-            if (request.Headers[RequestIdHeaderName] != null && IsLastResponse(request, statusCode))
+            if (request.Headers.Get(RequestIdHeaderName) != null && IsLastResponse(request, statusCode))
             {
                 this.Write(RequestStopExName, new { Request = request, StatusCode = statusCode, Headers = headers });
             }
@@ -775,6 +802,8 @@ namespace System.Diagnostics
         private const string InitializationFailed = "System.Net.Http.InitializationFailed";
         private const string RequestIdHeaderName = "Request-Id";
         private const string CorrelationContextHeaderName = "Correlation-Context";
+        private const string TraceParentHeaderName = "traceparent";
+        private const string TraceStateHeaderName = "tracestate";
 
         // Fields for controlling initialization of the HttpHandlerDiagnosticListener singleton
         private bool initialized = false;
