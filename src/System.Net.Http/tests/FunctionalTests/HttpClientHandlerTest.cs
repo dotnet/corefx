@@ -2269,12 +2269,15 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpClient client = CreateHttpClient())
                 using (HttpResponseMessage response = await client.PostAsync(redirectUri, new StreamContent(fs)))
                 {
-                    if (response.StatusCode != HttpStatusCode.OK)
+                    try
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    }
+                    catch
                     {
                         _output.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase}");
+                        throw;
                     }
-
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
                     if (expectRedirectToPost)
                     {
