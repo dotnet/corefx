@@ -92,10 +92,10 @@ namespace System.Linq
 
             return count <= 0 ?
                 Empty<TSource>() :
-                TakeLastIterator(source, count);
+                TakeLastEnumerableFactory(source, count);
         }
 
-        private static IEnumerable<TSource> TakeLastRegularIterator<TSource>(IEnumerable<TSource> source, int count)
+        private static IEnumerable<TSource> TakeLastIterator<TSource>(IEnumerable<TSource> source, int count)
         {
             Debug.Assert(source != null);
             Debug.Assert(count > 0);

@@ -14,57 +14,34 @@ namespace System.Linq
             source is IList<TSource> sourceList ? (IEnumerable<TSource>)new ListPartition<TSource>(sourceList, 0, count - 1) :
             new EnumerablePartition<TSource>(source, 0, count - 1);
 
-        private static IEnumerable<TSource> TakeLastIterator<TSource>(IEnumerable<TSource> source, int count)
+        private static IEnumerable<TSource> TakeLastEnumerableFactory<TSource>(IEnumerable<TSource> source, int count)
         {
             Debug.Assert(count > 0);
 
             if (source is IPartition<TSource> partition)
             {
                 int length = partition.GetCount(true);
-                if (length > 0)
+
+                if (length >= 0)
                 {
                     return length - count > 0 ? partition.Skip(length - count) : partition;
-                }
-                else if (length == 0)
-                {
-                    return partition;
                 }
             }
             else if (source is IList<TSource> sourceList)
             {
-                if (sourceList.Count > count)
+                int sourceCount = sourceList.Count;
+
+                if (sourceCount > count)
                 {
-                    return new ListPartition<TSource>(sourceList, sourceList.Count - count, sourceList.Count);
+                    return new ListPartition<TSource>(sourceList, sourceCount - count, sourceCount);
                 }
                 else
                 {
-                    return new ListPartition<TSource>(sourceList, 0, sourceList.Count);
-                }
-            }
-            else if (source is ICollection<TSource> collection)
-            {
-                if (collection.Count > count)
-                {
-                    return new EnumerablePartition<TSource>(collection.Skip(collection.Count - count), 0, count);
-                }
-                else
-                {
-                    return new EnumerablePartition<TSource>(collection, 0, collection.Count);
-                }
-            }
-            else if (source is IReadOnlyCollection<TSource> roCollection)
-            {
-                if (roCollection.Count > count)
-                {
-                    return new EnumerablePartition<TSource>(roCollection.Skip(roCollection.Count - count), 0, count);
-                }
-                else
-                {
-                    return new EnumerablePartition<TSource>(roCollection, 0, roCollection.Count);
+                    return new ListPartition<TSource>(sourceList, 0, sourceCount);
                 }
             }
 
-            return TakeLastRegularIterator<TSource>(source, count);
+            return TakeLastIterator<TSource>(source, count);
         }
     }
 }

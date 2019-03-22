@@ -20,42 +20,7 @@ namespace System.Linq
             }
         }
 
-        private static IEnumerable<TSource> TakeLastIterator<TSource>(IEnumerable<TSource> source, int count)
-        {
-            Debug.Assert(count > 0);
-
-            if (source is ICollection<TSource> collection)
-            {
-                if (collection.Count > count)
-                {
-                    return collection.Skip(collection.Count - count);
-                }
-                else if (collection.Count > 0)
-                {
-                    return TakeIterator<TSource>(collection, collection.Count);
-                }
-                else
-                {
-                    return Empty<TSource>();
-                }
-            }
-            else if (source is IReadOnlyCollection<TSource> roCollection)
-            {
-                if (roCollection.Count > count)
-                {
-                    return roCollection.Skip(roCollection.Count - count);
-                }
-                else if (roCollection.Count > 0)
-                {
-                    return TakeIterator<TSource>(roCollection, roCollection.Count);
-                }
-                else
-                {
-                    return Empty<TSource>();
-                }
-            }
-
-            return TakeLastRegularIterator<TSource>(source, count);
-        }
+        private static IEnumerable<TSource> TakeLastEnumerableFactory<TSource>(IEnumerable<TSource> source, int count) =>
+            TakeLastIterator<TSource>(source, count);
     }
 }
