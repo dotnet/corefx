@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.MemoryTests;
 using System.Text;
 using Xunit;
 
@@ -126,6 +127,7 @@ namespace System.Memory.Tests
                 for (int i = 100; i > 0; i--)
                 {
                     Assert.Equal(i, buffer.First.Length);
+                    Assert.Equal(i, buffer.FirstSpan.Length);
                     buffer = buffer.Slice(1);
                     length--;
                     Assert.Equal(length, buffer.Length);
@@ -137,6 +139,7 @@ namespace System.Memory.Tests
             for (int i = 200; i > 0; i--)
             {
                 Assert.Equal(i, buffer.First.Length);
+                Assert.Equal(i, buffer.FirstSpan.Length);
                 buffer = buffer.Slice(1);
                 length--;
                 Assert.Equal(length, buffer.Length);
@@ -144,6 +147,38 @@ namespace System.Memory.Tests
 
             Assert.Equal(0, buffer.Length);
             Assert.Equal(0, buffer.First.Length);
+            Assert.Equal(0, buffer.FirstSpan.Length);
+        }
+
+        [Fact]
+        public void AsString_CanGetFirst()
+        {
+            const string SampleString = "12345";
+            ReadOnlySequence<char> buffer = new ReadOnlySequence<char>(SampleString.AsMemory());
+            Assert.Equal(SampleString.Length, buffer.First.Length);
+            Assert.Equal(SampleString.Length, buffer.FirstSpan.Length);
+        }
+
+        private readonly int[] _sampleIntArray = { 1, 2, 3, 4, 5 };
+
+        [Fact]
+        public void AsArray_CanGetFirst()
+        {
+            ReadOnlyMemory<int> memory = new ReadOnlyMemory<int>(_sampleIntArray);
+            ReadOnlySequence<int> buffer = new ReadOnlySequence<int>(memory);
+            Assert.Equal(_sampleIntArray.Length, buffer.First.Length);
+            Assert.Equal(_sampleIntArray.Length, buffer.FirstSpan.Length);
+        }
+
+        [Fact]
+        public void AsMemoryManager_CanGetFirst()
+        {
+            MemoryManager<int> manager = new CustomMemoryForTest<int>(_sampleIntArray);
+            ReadOnlyMemory<int> memoryFromManager = ((ReadOnlyMemory<int>)manager.Memory);
+
+            ReadOnlySequence<int> buffer = new ReadOnlySequence<int>(memoryFromManager);
+            Assert.Equal(_sampleIntArray.Length, buffer.First.Length);
+            Assert.Equal(_sampleIntArray.Length, buffer.FirstSpan.Length);
         }
 
         #endregion
