@@ -260,6 +260,11 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTime?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTime?>(unexpectedString));
 
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTimeOffset>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTimeOffset>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTimeOffset?>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTimeOffset?>(unexpectedString));
+
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<string>("1"));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<string>("1"));
 
