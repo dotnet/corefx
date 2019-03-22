@@ -68,12 +68,12 @@ namespace System.Diagnostics
             IDisposable subscription;
             if (isEnabled == null)
             {
-                subscription = SubscribeInternal(observer, null, null);
+                subscription = SubscribeInternal(observer, null, null, null, null);
             }
             else
             {
                 Predicate<string> localIsEnabled = isEnabled;
-                subscription = SubscribeInternal(observer, isEnabled, (name, arg1, arg2) => localIsEnabled(name));
+                subscription = SubscribeInternal(observer, isEnabled, (name, arg1, arg2) => localIsEnabled(name), null, null);
             }
 
             return subscription;
@@ -110,8 +110,23 @@ namespace System.Diagnostics
         public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Func<string, object, object, bool> isEnabled)
         {
             return isEnabled == null ?
-             SubscribeInternal(observer, null, null) :
-             SubscribeInternal(observer, name => IsEnabled(name, null, null), isEnabled);
+             SubscribeInternal(observer, null, null, null, null) :
+             SubscribeInternal(observer, name => IsEnabled(name, null, null), isEnabled, null, null);
+        }
+
+        /// <summary>
+        /// Add a subscriber (Observer).  If the isEnabled parameter is non-null indicates that some events are 
+        /// uninteresting can be skipped for efficiency.  You can also supply an 'onActivityImport' and 'onActivityExport'
+        /// methods that should be called when providers are 'importing' or 'exporting' activities from outside the
+        /// process (e.g. from Http Requests).   These are called right after importing (exporting) the activity and
+        /// can be used to modifyt the activity (or outgoing request) to add policy.   
+        /// </summary>
+        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Func<string, object, object, bool> isEnabled, 
+            Action<Activity, object> onActivityImport = null, Action<Activity, object> onActivityExport = null)
+        {
+            return isEnabled == null ?
+             SubscribeInternal(observer, null, null, onActivityImport, onActivityExport) :
+             SubscribeInternal(observer, name => IsEnabled(name, null, null), isEnabled, onActivityImport, onActivityExport);
         }
 
         /// <summary>
@@ -119,7 +134,7 @@ namespace System.Diagnostics
         /// </summary>
         public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer)
         {
-            return SubscribeInternal(observer, null, null);
+            return SubscribeInternal(observer, null, null, null, null);
         }
 
         /// <summary>
@@ -262,6 +277,18 @@ namespace System.Diagnostics
                 curSubscription.Observer.OnNext(new KeyValuePair<string, object>(name, value));
         }
 
+        public override void  OnActivityImport(Activity activity, object payloadObj)
+        {
+            for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
+                curSubscription.OnActivityImport?.Invoke(activity, payloadObj);
+        }
+
+        public override void OnActivityExport(Activity activity, object payloadObj)
+        {
+            for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
+                curSubscription.OnActivityExport?.Invoke(activity, payloadObj);
+        }
+
         // Note that Subscriptions are READ ONLY.   This means you never update any fields (even on removal!)
         private class DiagnosticSubscription : IDisposable
         {
@@ -280,6 +307,8 @@ namespace System.Diagnostics
             // Argument number mismatch between producer/consumer adds extra cost of adding or omitting context parameters 
             internal Predicate<string> IsEnabled1Arg;
             internal Func<string, object, object, bool> IsEnabled3Arg;
+            internal Action<Activity, object> OnActivityImport;
+            internal Action<Activity, object> OnActivityExport;
 
             internal DiagnosticListener Owner;          // The DiagnosticListener this is a subscription for.  
             internal DiagnosticSubscription Next;                // Linked list of subscribers
@@ -427,7 +456,9 @@ namespace System.Diagnostics
         }
         #endregion
 
-        private IDisposable SubscribeInternal(IObserver<KeyValuePair<string, object>> observer, Predicate<string> isEnabled1Arg, Func<string, object, object, bool> isEnabled3Arg)
+        private IDisposable SubscribeInternal(IObserver<KeyValuePair<string, object>> observer, 
+            Predicate<string> isEnabled1Arg, Func<string, object, object, bool> isEnabled3Arg, 
+            Action<Activity, object> onActivityImport, Action<Activity, object> onActivityExport)
         {
             // If we have been disposed, we silently ignore any subscriptions.  
             if (_disposed)
@@ -439,6 +470,8 @@ namespace System.Diagnostics
                 Observer = observer,
                 IsEnabled1Arg = isEnabled1Arg,
                 IsEnabled3Arg = isEnabled3Arg,
+                OnActivityImport = onActivityImport,
+                OnActivityExport = onActivityExport,
                 Owner = this,
                 Next = _subscriptions
             };

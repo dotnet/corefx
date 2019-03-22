@@ -64,7 +64,13 @@ namespace System.Diagnostics
                 // if we represented it as a traceId-spanId, convert it to a string.  
                 // We can do this concatenation with a stackalloced Span<char> if we actually used Id a lot.  
                 if (_id == null && _spanIdSet)
-                    _id = "00-" + _traceId.ToHexString() + "-" + _spanId.ToHexString() + "-00";
+                {
+                    // Convert flags to binary.  
+                    Span<char> flagsChars = stackalloc char[2];
+                    ActivityTraceId.ByteToHexDigits(flagsChars, _w3CIdFlags);
+                    _id = "00-" + _traceId.ToHexString() + "-" + _spanId.ToHexString() + "-" + flagsChars.ToString();
+
+                }
                 return _id;
             }
         }
@@ -259,7 +265,7 @@ namespace System.Diagnostics
         /// Set the parent ID using the W3C convention using a TraceId and a SpanId.   This
         /// constructor has the advantage that no string manipulation is needed to set the ID.  
         /// </summary>
-        public Activity SetParentId(in ActivityTraceId traceId, in ActivitySpanId spanId)
+        public Activity SetParentId(in ActivityTraceId traceId, in ActivitySpanId spanId, byte w3CFlags)
         {
             if (Parent != null)
             {
@@ -275,6 +281,8 @@ namespace System.Diagnostics
                 _traceIdSet = true;
                 _parentSpanId = spanId;
                 _parentSpanIdSet = true;
+                _w3CIdFlags = w3CFlags;
+                _w3CIdFlagsSet = true;
             }
             return this;
         }
@@ -500,6 +508,36 @@ namespace System.Diagnostics
                 }
 
                 return ref _traceId;
+            }
+        }
+
+        public bool Recording { get => (W3CIdFlags & W3CIdFlags.Recording) != 0; }
+
+        byte _w3CIdFlags;
+        bool _w3CIdFlagsSet;
+
+        public W3CIdFlags W3CIdFlags
+        {
+            get
+            {
+                if (!_w3CIdFlagsSet)
+                {
+                    if (Parent != null)
+                    {
+                        W3CIdFlags = Parent.W3CIdFlags;
+                    }
+                    else if (_parentId != null && IsW3CId(_parentId))
+                    {
+                        _w3CIdFlags = ActivityTraceId.HexByteFromChars(_parentId[53], _parentId[54]);
+                        _w3CIdFlagsSet = true;
+                    }
+                }
+                return (W3CIdFlags) _w3CIdFlags;
+            }
+            set
+            {
+                _w3CIdFlagsSet = true;
+                _w3CIdFlags = (byte)value;
             }
         }
 
@@ -806,6 +844,12 @@ namespace System.Diagnostics
         #endregion // private
     }
 
+    [Flags]
+    public enum W3CIdFlags
+    {
+        Recording = 1
+    }
+
     /// <summary>
     /// The possibilities for the format of the ID
     /// </summary>
@@ -959,7 +1003,7 @@ namespace System.Diagnostics
         /// </summary>
         internal static string SpanToHexString(ReadOnlySpan<byte> bytes)
         {
-            Debug.Assert(bytes.Length <= 16);   // We want it to not be very bing
+            Debug.Assert(bytes.Length <= 16);   // We want it to not be very big
             Span<char> result = stackalloc char[bytes.Length * 2];
             int pos = 0;
             foreach (byte b in bytes)
@@ -980,7 +1024,7 @@ namespace System.Diagnostics
             for (int i = 0; i < outBytes.Length; i++)
                 outBytes[i] = HexByteFromChars(charData[i * 2], charData[i * 2 + 1]);
         }
-        private static byte HexByteFromChars(char char1, char char2)
+        internal static byte HexByteFromChars(char char1, char char2)
         {
             return (byte)(HexDigitToBinary(char1) * 16 + HexDigitToBinary(char2));
         }
@@ -999,6 +1043,14 @@ namespace System.Diagnostics
                 return (char)('0' + val);
             return (char)(('a' - 10) + val);
         }
+
+        internal static void ByteToHexDigits(Span<char> outChars, byte val)
+        {
+            Debug.Assert(outChars.Length == 2);
+            outChars[0] = BinaryToHexDigit((val >> 4) & 0xF);
+            outChars[1] = BinaryToHexDigit(val & 0xF);
+        }
+
         #endregion
 
         readonly ulong _id1;
