@@ -263,7 +263,8 @@ namespace System.Text.Json
             utf8Unescaped = utf8Unescaped.Slice(0, written);
             Debug.Assert(!utf8Unescaped.IsEmpty);
 
-            return Utf8Parser.TryParse(utf8Unescaped, out value, out int bytesConsumed, 'D') && utf8Unescaped.Length == bytesConsumed;
+            value = default;
+            return (utf8Unescaped.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(utf8Unescaped, out value, out _, 'D');
         }
     }
 }

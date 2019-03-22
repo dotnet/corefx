@@ -524,7 +524,9 @@ namespace System.Text.Json
                 }
 
                 Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
-                return Utf8Parser.TryParse(span, out value, out int bytesConsumed, 'D') && span.Length == bytesConsumed;
+
+                value = default;
+                return (span.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(span, out value, out _, 'D');
             }
             else if (ValueSpan.Length <= JsonConstants.MaximumEscapedGuidLength)
             {
@@ -534,7 +536,9 @@ namespace System.Text.Json
                 }
 
                 Debug.Assert(ValueSpan.IndexOf(JsonConstants.BackSlash) == -1);
-                return Utf8Parser.TryParse(ValueSpan, out value, out int bytesConsumed, 'D') && ValueSpan.Length == bytesConsumed;
+
+                value = default;
+                return (ValueSpan.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(ValueSpan, out value, out _, 'D');
             }
             else
             {
