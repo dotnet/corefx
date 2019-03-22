@@ -313,7 +313,7 @@ namespace System.Net.Security.Tests
             public NegotiatedParams(SslStream serverStream, SslStream clientStream)
             {
                 _failure = null;
-                CipherSuite = serverStream.NegotiatedCipherSuite;
+                CipherSuite = serverStream.NegotiatedCipherSuite.Value;
                 Protocol = serverStream.SslProtocol;
 
                 Assert.Equal(CipherSuite, clientStream.NegotiatedCipherSuite);

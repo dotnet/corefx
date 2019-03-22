@@ -543,14 +543,14 @@ namespace System.Net.Security
         }
 
         [CLSCompliant(false)]
-        public virtual TlsCipherSuite NegotiatedCipherSuite
+        public virtual TlsCipherSuite? NegotiatedCipherSuite
         {
             get
             {
                 CheckThrow(true);
                 SslConnectionInfo info = _context.ConnectionInfo;
 
-                return info == null ? default(TlsCipherSuite) : info.TlsCipherSuite;
+                return info == null ? (TlsCipherSuite?)null : info.TlsCipherSuite;
             }
         }
 
