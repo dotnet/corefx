@@ -332,7 +332,7 @@ namespace System.Text.Json
             return message;
         }
 
-        public static void ThrowInvalidOperationException(ExceptionResource resource, int currentDepth = default, byte token = default, JsonTokenType tokenType = default)
+        public static void ThrowInvalidOperationException(ExceptionResource resource, int currentDepth, byte token, JsonTokenType tokenType)
         {
             throw GetInvalidOperationException(resource, currentDepth, token, tokenType);
         }
