@@ -684,14 +684,14 @@ namespace System.Text.Json
         private void ValidateEnd(byte token)
         {
             if (_bitStack.CurrentDepth <= 0)
-                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, token);
+                ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, token: token);
 
             if (token == JsonConstants.CloseBracket)
             {
                 if (_inObject)
                 {
                     Debug.Assert(_tokenType != JsonTokenType.None);
-                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, token);
+                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, token: token);
                 }
             }
             else
@@ -700,7 +700,7 @@ namespace System.Text.Json
 
                 if (!_inObject)
                 {
-                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, token);
+                    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.MismatchedObjectArray, token: token);
                 }
             }
 
