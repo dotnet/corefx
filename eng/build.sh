@@ -14,20 +14,35 @@ scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
 
 usage()
 {
-  echo "Default if no actions are passed in: --restore --build"
+  echo "Common settings:"
+  echo "  --framework                Build framework: netcoreapp, netfx, uap or uapaot (short: -f)"
+  echo "  --configuration <value>    Build configuration: Debug or Release (short: -c)"
+  echo "  --verbosity <value>        MSBuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic] (short: -v)"
+  echo "  --binaryLog                Output binary log (short: -bl)"
+  echo "  --help                     Print help and exit (short: -h)"
   echo ""
-  echo "CoreFx specific actions:"
-  echo "  --buildtests             Build test projects in the solution"
-  echo "  --clean                  Clean the solution"
+
+  echo "Actions (defaults to --restore --build):"
+  echo "  --restore                  Restore dependencies (short: -r)"
+  echo "  --build                    Build all source projects (short: -b)"
+  echo "  --buildtests               Build all test projects"
+  echo "  --rebuild                  Rebuild all source projects"
+  echo "  --test                     Run all unit tests (short: -t)"
+  echo "  --pack                     Package build outputs into NuGet packages"
+  echo "  --sign                     Sign build outputs"
+  echo "  --publish                  Publish artifacts (e.g. symbols)"
+  echo "  --clean                    Clean the solution"
   echo ""
-  echo "CoreFx specific options:"
-  echo "  --framework              The target group assemblies are built for (short: -f)"
-  echo "  --os                     The operating system assemblies are built for"
-  echo "  --allconfigurations      Build packages for all build configurations"
+
+  echo "Advanced settings:"
   echo "  --coverage               Collect code coverage when testing"
   echo "  --outerloop              Include tests which are marked as OuterLoop"
-  echo "  --arch                   The architecture group (x86, x64, arm, etc.)"
+  echo "  --allconfigurations      Build packages for all build configurations"
+  echo "  --os                     Build operating system: Windows_NT or Unix"
+  echo "  --arch                   Build platform: x86, x64, arm or arm64"
   echo ""
+  echo "Command line arguments starting with '/p:' are passed through to MSBuild."
+  echo "Arguments can also be passed in with a single hyphen."
 }
 
 arguments=''
@@ -35,7 +50,7 @@ extraargs=''
 checkedPossibleDirectoryToBuild=false
 
 # Check if an action is passed in
-declare -a actions=("r" "restore" "b" "build" "rebuild" "deploy" "deployDeps" "test" "integrationTest" "performanceTest" "sign" "publish" "buildtests")
+declare -a actions=("r" "restore" "b" "build" "rebuild" "deploy" "deployDeps" "test" "integrationTest" "sign" "publish" "buildtests")
 actInt=($(comm -12 <(printf '%s\n' "${actions[@]/#/-}" | sort) <(printf '%s\n' "${@/#--/-}" | sort)))
 if [ ${#actInt[@]} -eq 0 ]; then
     arguments="-restore -build"
@@ -46,7 +61,6 @@ while [[ $# > 0 ]]; do
   case "$opt" in
      -help|-h)
       usage
-      "$scriptroot/common/build.sh" --help
       exit 0
       ;;
      -clean)

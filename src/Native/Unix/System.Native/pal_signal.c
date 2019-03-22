@@ -20,7 +20,9 @@
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static struct sigaction g_origSigIntHandler, g_origSigQuitHandler; // saved signal handlers for ctrl handling
 static struct sigaction g_origSigContHandler, g_origSigChldHandler; // saved signal handlers for reinitialization
+static struct sigaction g_origSigWinchHandler; // saved signal handlers for SIGWINCH
 static volatile CtrlCallback g_ctrlCallback = NULL; // Callback invoked for SIGINT/SIGQUIT
+static volatile TerminalInvalidationCallback g_terminalInvalidationCallback = NULL; // Callback invoked for SIGCHLD/SIGCONT/SIGWINCH
 static volatile SigChldCallback g_sigChldCallback = NULL; // Callback invoked for SIGCHLD
 static int g_signalPipe[2] = {-1, -1}; // Pipe used between signal handler and worker
 
@@ -32,6 +34,7 @@ static struct sigaction* OrigActionFor(int sig)
         case SIGQUIT: return &g_origSigQuitHandler;
         case SIGCONT: return &g_origSigContHandler;
         case SIGCHLD: return &g_origSigChldHandler;
+        case SIGWINCH: return &g_origSigWinchHandler;
     }
 
     assert(false);
@@ -53,7 +56,7 @@ static void SignalHandler(int sig, siginfo_t* siginfo, void* context)
 
     // Delegate to any saved handler we may have
     // We assume the original SIGCHLD handler will not reap our children.
-    if (sig == SIGCONT || sig == SIGCHLD)
+    if (sig == SIGCONT || sig == SIGCHLD || sig == SIGWINCH)
     {
         struct sigaction* origHandler = OrigActionFor(sig);
         if (origHandler->sa_sigaction != NULL &&
@@ -93,6 +96,15 @@ static void* SignalHandlerLoop(void* arg)
             // end of the pipe and exit.
             close(pipeFd);
             return NULL;
+        }
+
+        if (signalCode == SIGCHLD || signalCode == SIGCONT || signalCode == SIGWINCH)
+        {
+            TerminalInvalidationCallback callback = g_terminalInvalidationCallback;
+            if (callback != NULL)
+            {
+                callback();
+            }
         }
 
         if (signalCode == SIGQUIT || signalCode == SIGINT)
@@ -145,7 +157,7 @@ static void* SignalHandlerLoop(void* arg)
         {
             ReinitializeTerminal();
         }
-        else
+        else if (signalCode != SIGWINCH)
         {
             assert_msg(false, "invalid signalCode", (int)signalCode);
         }
@@ -181,6 +193,13 @@ void SystemNative_RestoreAndHandleCtrl(CtrlCode ctrlCode)
     UninitializeTerminal();
     sigaction(signalCode, OrigActionFor(signalCode), NULL);
     kill(getpid(), signalCode);
+}
+
+void SystemNative_SetTerminalInvalidationHandler(TerminalInvalidationCallback callback)
+{
+    assert(callback != NULL);
+    assert(g_terminalInvalidationCallback == NULL);
+    g_terminalInvalidationCallback = callback;
 }
 
 void SystemNative_RegisterForSigChld(SigChldCallback callback)
@@ -261,6 +280,7 @@ int32_t InitializeSignalHandlingCore()
     InstallSignalHandler(SIGQUIT, /* skipWhenSigIgn */ true);
     InstallSignalHandler(SIGCONT, /* skipWhenSigIgn */ false);
     InstallSignalHandler(SIGCHLD, /* skipWhenSigIgn */ false);
+    InstallSignalHandler(SIGWINCH, /* skipWhenSigIgn */ false);
 
     return 1;
 }
