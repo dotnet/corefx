@@ -12,7 +12,9 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Threading;
+using Microsoft.Win32.SafeHandles;
 using Xunit;
+using Xunit.Sdk;
 
 namespace System.Diagnostics.Tests
 {
@@ -945,6 +947,24 @@ namespace System.Diagnostics.Tests
             Assert.False(_process.SafeHandle.IsInvalid);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void Handle_CreateEvent_BlocksUntilProcessCompleted(bool useSafeHandle)
+        {
+            using (RemoteInvokeHandle h = RemoteInvoke(() => Console.ReadLine(), new RemoteInvokeOptions { StartInfo = new ProcessStartInfo() { RedirectStandardInput = true } }))
+            using (var mre = new ManualResetEvent(false))
+            {
+                mre.SetSafeWaitHandle(new SafeWaitHandle(useSafeHandle ? h.Process.SafeHandle.DangerousGetHandle() : h.Process.Handle, ownsHandle: false));
+
+                Assert.False(mre.WaitOne(millisecondsTimeout: 0), "Event should not yet have been set.");
+
+                h.Process.StandardInput.WriteLine(); // allow child to complete
+
+                Assert.True(mre.WaitOne(FailWaitTimeoutMilliseconds), "Event should have been set.");
+            }
+        }
+
         [Fact]
         public void SafeHandle_GetNotStarted_ThrowsInvalidOperationException()
         {
@@ -1069,10 +1089,43 @@ namespace System.Diagnostics.Tests
         {
             // Get the current process using its name
             Process currentProcess = Process.GetCurrentProcess();
+            Assert.NotNull(currentProcess.ProcessName);
+            Assert.NotEmpty(currentProcess.ProcessName);
 
             Process[] processes = Process.GetProcessesByName(currentProcess.ProcessName);
-            Assert.NotEmpty(processes);
+            try
+            {
+                Assert.NotEmpty(processes);
+            }
+            catch (NotEmptyException)
+            {
+                throw new TrueException(PrintProcesses(currentProcess), false);
+            }
+
             Assert.All(processes, process => Assert.Equal(".", process.MachineName));
+            return;
+
+            // Outputs a list of active processes in case of failure: https://github.com/dotnet/corefx/issues/35783
+            string PrintProcesses(Process currentProcess)
+            {
+                StringBuilder builder = new StringBuilder();
+                foreach (Process process in Process.GetProcesses())
+                {
+                    builder.AppendFormat("Pid: '{0}' Name: '{1}'", process.Id, process.ProcessName);
+                    try
+                    {
+                        builder.AppendFormat(" Main module: '{0}'", process.MainModule.FileName);
+                    }
+                    catch
+                    {
+                        // We cannot obtain main module of all processes
+                    }
+                    builder.AppendLine();
+                }
+                
+                builder.AppendFormat("Current process id: {0} Process name: '{1}'", currentProcess.Id, currentProcess.ProcessName);
+                return builder.ToString();
+            }
         }
 
         public static IEnumerable<object[]> MachineName_TestData()

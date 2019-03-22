@@ -7,9 +7,13 @@ using System.Diagnostics;
 
 namespace System.Text.Json.Serialization
 {
+    /// <summary>
+    /// Provides functionality to serialize objects or value types to JSON and
+    /// deserialize JSON into objects or value types.
+    /// </summary>
     public static partial class JsonSerializer
     {
-        internal static readonly JsonPropertyInfo s_missingProperty = new JsonPropertyInfo<object, object>();
+        internal static readonly JsonPropertyInfo s_missingProperty = new JsonPropertyInfoNotNullable<object, object>();
         private static readonly JsonSerializerOptions s_defaultSettings = new JsonSerializerOptions();
 
         private static object ReadCore(
