@@ -119,6 +119,7 @@ namespace System.Collections.Immutable
         public System.Collections.Immutable.ImmutableArray<T> AddRange(System.Collections.Generic.IEnumerable<T> items) { throw null; }
         public System.Collections.Immutable.ImmutableArray<T> AddRange(System.Collections.Immutable.ImmutableArray<T> items) { throw null; }
         public System.Collections.Immutable.ImmutableArray<TOther> As<TOther>() where TOther : class { throw null; }
+        public System.ReadOnlySpan<T> AsSpan() { throw null; }
         public System.Collections.Immutable.ImmutableArray<TOther> CastArray<TOther>() where TOther : class { throw null; }
         public static System.Collections.Immutable.ImmutableArray<T> CastUp<TDerived>(System.Collections.Immutable.ImmutableArray<TDerived> items) where TDerived : class, T { throw null; }
         public System.Collections.Immutable.ImmutableArray<T> Clear() { throw null; }

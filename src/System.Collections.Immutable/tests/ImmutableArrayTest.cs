@@ -47,6 +47,19 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        public void AsSpanInt()
+        {
+            Assert.Equal(0, s_emptyDefault.AsSpan().Length);
+            Assert.Equal(0, s_empty.AsSpan().Length);
+            var s = s_manyElements.AsSpan();
+            Assert.Equal(s_manyElements.Length, s.Length);
+            for (int i = 0; i < s.Length; i++)
+            {
+                Assert.Equal(s_manyElements[i], s[i]);
+            }
+        }
+
+        [Fact]
         public void CreateEnumerableElementType()
         {
             // Create should not have the same semantics as CreateRange, except for arrays.
