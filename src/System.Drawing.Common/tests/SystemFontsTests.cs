@@ -71,7 +71,8 @@ namespace System.Drawing.Tests
                             fonts = new SystemFontList("Microsoft YaHei UI");
                             break;
                         default:
-                            throw new InvalidOperationException("Cannot determine system fonts");
+                            throw new InvalidOperationException("The primary language ID is Chinese, however it was not able to" +
+                                                                $" determine the user locale from the LCID with value: {userLangId & 0xFFFF:X4}.");
                     }
                     break;
                 case 0x1E: // th-TH
