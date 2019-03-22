@@ -512,39 +512,48 @@ namespace System.Text.Json
                 throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
             }
 
-            long sequenceLength;
-            if (HasValueSequence && ((sequenceLength = ValueSequence.Length)  <= JsonConstants.MaximumEscapedGuidLength))
-            {
-                Span<byte> span = stackalloc byte[(int)sequenceLength];
-                ValueSequence.CopyTo(span);
+            ReadOnlySpan<byte> span = ValueSpan;
+            Span<byte> stackSpan;
 
-                if (_stringHasEscaping)
+            if (HasValueSequence)
+            {
+                long sequenceLength = ValueSequence.Length;
+                if (sequenceLength > JsonConstants.MaximumEscapedGuidLength)
                 {
-                    return JsonReaderHelper.TryGetEscapedGuid(span, out value);
+                    value = default;
+                    return false;
                 }
 
-                Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
-
-                value = default;
-                return (span.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(span, out value, out _, 'D');
-            }
-            else if (ValueSpan.Length <= JsonConstants.MaximumEscapedGuidLength)
-            {
-                if (_stringHasEscaping)
+                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
+                unsafe
                 {
-                    return JsonReaderHelper.TryGetEscapedGuid(ValueSpan, out value);
+                    byte* ptr = stackalloc byte[(int)sequenceLength];
+                    stackSpan = new Span<byte>(ptr, (int)sequenceLength);
                 }
-
-                Debug.Assert(ValueSpan.IndexOf(JsonConstants.BackSlash) == -1);
-
-                value = default;
-                return (ValueSpan.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(ValueSpan, out value, out _, 'D');
+                ValueSequence.CopyTo(stackSpan);
+                span = stackSpan;
             }
-            else
+
+            if (span.Length > JsonConstants.MaximumEscapedGuidLength)
             {
                 value = default;
                 return false;
             }
+
+            if (_stringHasEscaping)
+            {
+                return JsonReaderHelper.TryGetEscapedGuid(span, out value);
+            }
+
+            Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
+
+            if (span.Length != JsonConstants.MaximumFormatGuidLength)
+            {
+                value = default;
+                return false;
+            }
+
+            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
         }
     }
 }
