@@ -145,6 +145,24 @@ namespace System.Net.Security.Tests
             yield return TlsCipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA;
             yield return TlsCipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA;
             yield return TlsCipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA;
+
+            // rfc5289 values (OSX)
+            yield return TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256;
+            yield return TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384;
+            yield return TlsCipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256;
+            yield return TlsCipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384;
+            yield return TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256;
+            yield return TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384;
+            yield return TlsCipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256;
+            yield return TlsCipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384;
+            yield return TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256;
+            yield return TlsCipherSuite.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384;
+            yield return TlsCipherSuite.TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256;
+            yield return TlsCipherSuite.TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384;
+            yield return TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256;
+            yield return TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384;
+            yield return TlsCipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256;
+            yield return TlsCipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384;
         }
 
         private static async Task<Exception> WaitForSecureConnection(VirtualNetwork connection, Func<Task> server, Func<Task> client)
