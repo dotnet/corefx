@@ -18,8 +18,6 @@ namespace System.Data.Common {
 
     internal static class UnsafeNativeMethods {
 
-
-
         //
         // Oleaut32
         //
@@ -207,8 +205,6 @@ namespace System.Data.Common {
 
         typedef ULONGLONG           DB_URESERVE;
 */
-
-
 
         [ComImport, Guid("0C733A8C-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), SuppressUnmanagedCodeSecurity]
         internal interface IAccessor {

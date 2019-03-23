@@ -320,8 +320,6 @@ namespace System.Data.Common {
         }
     }
 
-
-
          internal static class DbConnectionStringDefaults {
         // all
 //        internal const string NamedConnection           = "";

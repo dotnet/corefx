@@ -27,8 +27,6 @@ namespace System.Data.OleDb{
             internal readonly Guid    _schemaRowset;
         }
 
-
-
         private const string _collectionName = "CollectionName";
         private const string _populationMechanism = "PopulationMechanism";
         private const string _prepareCollection = "PrepareCollection";
@@ -75,8 +73,6 @@ namespace System.Data.OleDb{
             // 1) it is populated using prepare collection
             // 2) it is in the collection to schema rowset mapping above
             // 3) the provider does not support the necessary schema rowset
-
-
 
             DataColumn populationMechanism = metaDataCollectionsTable.Columns[_populationMechanism];
             if ((null == populationMechanism) || (typeof(System.String) != populationMechanism.DataType)) {
@@ -172,8 +168,6 @@ namespace System.Data.OleDb{
 
             return regularExpression.ToString();
         }
-
-
 
         private DataTable GetDataSourceInformationTable(OleDbConnection connection, OleDbConnectionInternal internalConnection){
 
@@ -467,8 +461,6 @@ namespace System.Data.OleDb{
 
             return  reservedWordsTable;
         }
-
-
 
         protected override DataTable PrepareCollection(String collectionName, String[] restrictions, DbConnection connection){
 

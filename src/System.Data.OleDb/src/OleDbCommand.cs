@@ -477,8 +477,6 @@ namespace System.Data.OleDb {
             this.commandBehavior = CommandBehavior.Default;
             _isPrepared = false;
 
-            
-
             UnsafeNativeMethods.ICommandText ict = Interlocked.Exchange<UnsafeNativeMethods.ICommandText>(ref _icommandText, null);
             if (null != ict) {
                 lock(ict) {

@@ -358,8 +358,6 @@ internal static partial class Bid
             NativeMethods.Trace (modID, UIntPtr.Zero, UIntPtr.Zero, fmtPrintfW, a1,a2,a3,a4,a5,a6,a7);
     }
 
-
-
     [BidMethod]
     internal static void ScopeEnter(
             out IntPtr hScp, 
