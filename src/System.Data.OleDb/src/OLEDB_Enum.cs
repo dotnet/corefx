@@ -2,15 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Data.Common;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.ComponentModel;
-    using System.Data.Common;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Runtime.InteropServices;
-
     internal enum DBStatus { // from 4214.0
         S_OK                 = 0,
         E_BADACCESSOR        = 1,

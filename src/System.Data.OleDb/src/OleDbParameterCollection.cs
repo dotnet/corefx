@@ -2,16 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
+using System.Data.Common;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.Collections;
-    using System.ComponentModel;
-    using System.Data;
-    using System.Data.Common;
-    using System.Data.ProviderBase;
-    using System.Diagnostics;
-
     [
     //Editor("Microsoft.VSDesigner.Data.Design.DBParametersEditor, " + AssemblyRef.MicrosoftVSDesigner, "System.Drawing.Design.UITypeEditor, " + AssemblyRef.SystemDrawing),
     ListBindable(false)
@@ -61,8 +55,8 @@ namespace System.Data.OleDb {
             return value;
         }
 
-        [ EditorBrowsableAttribute(EditorBrowsableState.Never) ]
-        [ ObsoleteAttribute("Add(String parameterName, Object value) has been deprecated.  Use AddWithValue(String parameterName, Object value).  http://go.microsoft.com/fwlink/?linkid=14202", false) ] // 79027
+        [ EditorBrowsable(EditorBrowsableState.Never) ]
+        [ Obsolete("Add(String parameterName, Object value) has been deprecated.  Use AddWithValue(String parameterName, Object value).  http://go.microsoft.com/fwlink/?linkid=14202", false) ] // 79027
         public OleDbParameter Add(string parameterName, object value) { // MDAC 59206
             return Add(new OleDbParameter(parameterName, value));
         }

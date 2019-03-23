@@ -4,8 +4,6 @@
 
 namespace System.Data.OleDb
 {
-    using System.Data.ProviderBase;
-
     internal sealed class OleDbConnectionPoolGroupProviderInfo : DbConnectionPoolGroupProviderInfo {
         private bool _hasQuoteFix;
         private string _quotePrefix, _quoteSuffix;

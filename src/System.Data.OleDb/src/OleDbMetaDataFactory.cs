@@ -2,20 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Data.Common;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Text;
+
 namespace System.Data.OleDb{
-
-    using System;
-    using System.Data;
-    using System.IO;
-    using System.Collections;
-    using System.Data.ProviderBase;
-    using System.Data.Common;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Text;
-    using System.Xml;
-    using System.Xml.Schema;
-
     internal sealed class OleDbMetaDataFactory : DbMetaDataFactory{ // V1.2.3300
 
         private struct SchemaRowsetName {

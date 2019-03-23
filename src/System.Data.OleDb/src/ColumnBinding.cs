@@ -2,16 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Data.Common;
+using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.Diagnostics;
-    using System.Data;
-    using System.Data.Common;
-    using System.Globalization;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-
     sealed internal class ColumnBinding {
 
         // shared with other ColumnBindings

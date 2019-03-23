@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 
 namespace System.Data.Common {
 
@@ -21,7 +19,7 @@ namespace System.Data.Common {
                 [Out, MarshalAs(UnmanagedType.Interface)] out object ppRowset);
         }
 
-        [Guid("0C733A5E-2A1C-11CE-ADE5-00AA0044773D"), InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown), ComImport]
+        [Guid("0C733A5E-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport]
         internal interface ITransactionJoin {
             [ Obsolete("not used", true)] [PreserveSig] int GetOptionsObject(
                 /*deleted parameter signature*/);

@@ -2,22 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data.Common;
+using System.Data.ProviderBase;
+using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Data;
-    using System.Data.Common;
-    using System.Data.ProviderBase;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.IO;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-    using System.Text;
-
     public sealed class OleDbDataReader : DbDataReader {
 
         private CommandBehavior     _commandBehavior;
@@ -840,12 +835,12 @@ namespace System.Data.OleDb {
             return charCount;
         }
 
-        [ EditorBrowsableAttribute(EditorBrowsableState.Never) ] // MDAC 69508
+        [ EditorBrowsable(EditorBrowsableState.Never) ] // MDAC 69508
         override public Char GetChar(int ordinal) {
             throw ADP.NotSupported();
         }
 
-        [ EditorBrowsableAttribute(EditorBrowsableState.Advanced) ]
+        [ EditorBrowsable(EditorBrowsableState.Advanced) ]
         new public OleDbDataReader GetData(int ordinal) {
             ColumnBinding binding = GetColumnBinding(ordinal);
             return binding.ValueChapter();

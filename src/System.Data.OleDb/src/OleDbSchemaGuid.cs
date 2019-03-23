@@ -2,11 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.Globalization;
-
     public sealed class OleDbSchemaGuid { // MDAC 61846
 
         // V1 shipped with default ctor which is public

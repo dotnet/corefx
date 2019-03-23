@@ -2,23 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Data;
-    using System.Data.Common;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Runtime.Serialization;
-    using System.Security.Permissions;
-    using System.Text;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Globalization;
+using System.Text;
 
 namespace System.Data.OleDb {
 
     [DefaultProperty("Provider")]
-    [RefreshPropertiesAttribute(RefreshProperties.All)]
-    [System.ComponentModel.TypeConverterAttribute(typeof(OleDbConnectionStringBuilder.OleDbConnectionStringBuilderConverter))]
+    [RefreshProperties(RefreshProperties.All)]
+    [TypeConverter(typeof(OleDbConnectionStringBuilder.OleDbConnectionStringBuilderConverter))]
     public sealed class OleDbConnectionStringBuilder : DbConnectionStringBuilder {
 
         private enum Keywords { // specific ordering for ConnectionString output construction
@@ -126,7 +122,7 @@ namespace System.Data.OleDb {
 
         [DisplayName(DbConnectionStringKeywords.DataSource)]
         //[ResCategoryAttribute(SR.DataCategory_Source)]
-        [RefreshPropertiesAttribute(RefreshProperties.All)]
+        [RefreshProperties(RefreshProperties.All)]
         // TODO: hand off to editor VS, if SQL - do database names, if Jet do file picker
         public string DataSource {
             get { return _dataSource; }
@@ -138,7 +134,7 @@ namespace System.Data.OleDb {
 
         [DisplayName(DbConnectionStringKeywords.FileName)]
         ////[ResCategoryAttribute(SR.DataCategory_NamedConnectionString)]
-        [RefreshPropertiesAttribute(RefreshProperties.All)]
+        [RefreshProperties(RefreshProperties.All)]
         // TODO: hand off to VS, they derive from FileNameEditor and set the OpenDialogFilter to *.UDL
         //[Editor("System.Windows.Forms.Design.FileNameEditor, " + AssemblyRef.SystemDesign, "System.Drawing.Design.UITypeEditor, " + AssemblyRef.SystemDrawing)]
         public string FileName {
@@ -164,7 +160,7 @@ namespace System.Data.OleDb {
 */
         [DisplayName(DbConnectionStringKeywords.OleDbServices)]
         //[ResCategoryAttribute(SR.DataCategory_Pooling)]
-        [RefreshPropertiesAttribute(RefreshProperties.All)]
+        [RefreshProperties(RefreshProperties.All)]
         [TypeConverter(typeof(OleDbConnectionStringBuilder.OleDbServicesConverter))]
         public int OleDbServices {
             get { return _oleDbServices; }
@@ -176,7 +172,7 @@ namespace System.Data.OleDb {
 
         [DisplayName(DbConnectionStringKeywords.PersistSecurityInfo)]
         //[ResCategoryAttribute(SR.DataCategory_Security)]
-        [RefreshPropertiesAttribute(RefreshProperties.All)]
+        [RefreshProperties(RefreshProperties.All)]
         public bool PersistSecurityInfo {
             get { return _persistSecurityInfo; }
             set {
@@ -187,7 +183,7 @@ namespace System.Data.OleDb {
 
         [DisplayName(DbConnectionStringKeywords.Provider)]
         //[ResCategoryAttribute(SR.DataCategory_Source)]
-        [RefreshPropertiesAttribute(RefreshProperties.All)]
+        [RefreshProperties(RefreshProperties.All)]
         [TypeConverter(typeof(OleDbConnectionStringBuilder.OleDbProviderConverter))]
         public string Provider {
             get { return _provider; }

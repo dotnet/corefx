@@ -2,16 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Data.Common;
+using System.Data.ProviderBase;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.Data.Common;
-    using System.Data.ProviderBase;
-    using System.Diagnostics;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.ConstrainedExecution;
-    using System.Runtime.InteropServices;
-
     // SafeHandle wrapper around 'DataLinks' object which pools the native OLE DB providers.
     // expect 1 per app-domain
     sealed internal class OleDbServicesWrapper : WrappedIUnknown {

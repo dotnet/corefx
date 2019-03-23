@@ -2,20 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Data.Common;
+using System.Data.ProviderBase;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.Data.Common;
-    using System.Data.ProviderBase;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-    using System.Security;
-    using System.Security.Permissions;
-    using System.Threading;
-    using System.Runtime.ConstrainedExecution;
-
     internal sealed class DualCoTaskMem : SafeHandle {
 
         private IntPtr handle2;   // this must be protected so derived classes can use out params.

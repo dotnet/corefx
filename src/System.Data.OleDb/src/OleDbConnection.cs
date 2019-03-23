@@ -2,24 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Data.OleDb {
+using System.ComponentModel;
+using System.Data.Common;
+using System.Data.ProviderBase;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Text;
 
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Data;
-    using System.Data.Common;
-    using System.Data.ProviderBase;
-    using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
-    using System.IO;
-    using System.Runtime.InteropServices;
-    using System.Security;
-    using System.Security.Permissions;
-    using System.Text;
-    using System.Threading;
-    using SysTx = System.Transactions;
+namespace System.Data.OleDb {
+    using SysTx = Transactions;
 
     // wraps the OLEDB IDBInitialize interface which represents a connection
     // Notes about connection pooling
@@ -45,7 +38,7 @@ namespace System.Data.OleDb {
 #pragma warning disable 618 // ignore obsolete warning about RecommendedAsConfigurable to use SettingsBindableAttribute
         RecommendedAsConfigurable(true),
 #pragma warning restore 618
-        SettingsBindableAttribute(true),
+        SettingsBindable(true),
         RefreshProperties(RefreshProperties.All),
         //ResCategoryAttribute(SR.DataCategory_Data),
         //Editor("Microsoft.VSDesigner.Data.ADO.Design.OleDbConnectionStringEditor, " + AssemblyRef.MicrosoftVSDesigner, "System.Drawing.Design.UITypeEditor, " + AssemblyRef.SystemDrawing),
@@ -210,7 +203,7 @@ namespace System.Data.OleDb {
         }
 
         [
-        EditorBrowsableAttribute(EditorBrowsableState.Advanced),
+        EditorBrowsable(EditorBrowsableState.Advanced),
         ]
         public void ResetState() { // MDAC 58606
             IntPtr hscp;

@@ -2,18 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.Serialization;
+using System.Text;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Data.Common;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Runtime.InteropServices;
-    using System.Runtime.Serialization;
-    using System.Text;
-
     [Serializable] 
     public sealed class OleDbException : System.Data.Common.DbException {
         private OleDbErrorCollection oledbErrors;
@@ -48,7 +45,7 @@ namespace System.Data.OleDb {
         }
 
         [
-        TypeConverterAttribute(typeof(ErrorCodeConverter))
+        TypeConverter(typeof(ErrorCodeConverter))
         ]
         override public int ErrorCode {
             get {

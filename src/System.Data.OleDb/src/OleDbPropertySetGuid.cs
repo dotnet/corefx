@@ -3,15 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 namespace System.Data.OleDb {
-
-    using System;
-    using System.ComponentModel;
-    using System.ComponentModel.Design.Serialization;
-    using System.Data.Common;
-    using System.Globalization;
-    using System.Reflection;
-
-
     sealed internal class OleDbPropertySetGuid {
 
         private OleDbPropertySetGuid() {

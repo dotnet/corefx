@@ -2,14 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Runtime.CompilerServices;
-using System.Security;
-using System.Security.Permissions;
-using System.Text;
 using System.Runtime.ConstrainedExecution;
-using System.Runtime.Versioning;
 using System.Runtime.InteropServices;
+using System.Security;
 
 #pragma warning disable 0618 // ComInterfaceType.InterfaceIsDual is obsolete
 
@@ -738,14 +733,14 @@ namespace System.Data.Common {
 
 
         // dangerous delegate around IUnknown::QueryInterface (0th vtable entry)
-        [System.Security.SuppressUnmanagedCodeSecurityAttribute()]
+        [SuppressUnmanagedCodeSecurity()]
         internal delegate int IUnknownQueryInterface(
                 IntPtr pThis,
                 ref Guid riid,
                 ref IntPtr ppInterface);
 
         // dangerous delegate around IDataInitialize::GetDataSource (4th vtable entry)
-        [System.Security.SuppressUnmanagedCodeSecurityAttribute()]
+        [SuppressUnmanagedCodeSecurity()]
         internal delegate System.Data.OleDb.OleDbHResult IDataInitializeGetDataSource(
                 IntPtr pThis, // first parameter is always the 'this' value, must use use result from QI
                 IntPtr pUnkOuter,
@@ -755,12 +750,12 @@ namespace System.Data.Common {
                 ref System.Data.OleDb.DataSourceWrapper ppDataSource);
 
         // dangerous wrapper around IDBInitialize::Initialize (4th vtable entry)
-        [System.Security.SuppressUnmanagedCodeSecurityAttribute()]
+        [SuppressUnmanagedCodeSecurity()]
         internal delegate System.Data.OleDb.OleDbHResult IDBInitializeInitialize(
                 IntPtr pThis); // first parameter is always the 'this' value, must use use result from QI
 
         // dangerous wrapper around IDBCreateSession::CreateSession (4th vtable entry)
-        [System.Security.SuppressUnmanagedCodeSecurityAttribute()]
+        [SuppressUnmanagedCodeSecurity()]
         internal delegate System.Data.OleDb.OleDbHResult IDBCreateSessionCreateSession(
                 IntPtr pThis, // first parameter is always the 'this' value, must use use result from QI
                 IntPtr pUnkOuter,
@@ -768,7 +763,7 @@ namespace System.Data.Common {
                 ref System.Data.OleDb.SessionWrapper ppDBSession);
 
         // dangerous wrapper around IDBCreateCommand::CreateCommand (4th vtable entry)
-        [System.Security.SuppressUnmanagedCodeSecurityAttribute()]
+        [SuppressUnmanagedCodeSecurity()]
         internal delegate System.Data.OleDb.OleDbHResult IDBCreateCommandCreateCommand(
                 IntPtr pThis, // first parameter is always the 'this' value, must use use result from QI
                 IntPtr pUnkOuter,

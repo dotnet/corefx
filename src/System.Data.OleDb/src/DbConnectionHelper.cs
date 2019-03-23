@@ -2,20 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Data.OleDb {
+using System.Data.Common;
+using System.Data.ProviderBase;
+using System.Diagnostics;
+using System.Runtime.ConstrainedExecution;
+using System.Threading;
 
-    using System;
-    using System.ComponentModel;
-    using System.Data;
-    using System.Data.Common;
-    using System.Data.ProviderBase;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Runtime.ConstrainedExecution;
-    using System.Runtime.InteropServices;
-    using System.Threading;
-    using SysTx = System.Transactions;
-    using System.Diagnostics.CodeAnalysis;
+namespace System.Data.OleDb {
+    using SysTx = Transactions;
 
     public sealed partial class OleDbConnection : DbConnection {
         private static readonly DbConnectionFactory     _connectionFactory = OleDbConnectionFactory.SingletonInstance;

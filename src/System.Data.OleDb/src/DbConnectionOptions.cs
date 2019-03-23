@@ -2,19 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.Versioning;
+using System.Text;
+using System.Text.RegularExpressions;
+
 namespace System.Data.Common {
-
-    using System;
-    using System.Collections;
-    using System.Data;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Runtime.Serialization;
-    using System.Security.Permissions;
-    using System.Text;
-    using System.Text.RegularExpressions;
-    using System.Runtime.Versioning;
-
     internal class DbConnectionOptions {
         // instances of this class are intended to be immutable, i.e readonly
         // used by pooling classes so it is much easier to verify correctness

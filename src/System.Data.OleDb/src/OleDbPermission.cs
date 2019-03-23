@@ -3,16 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 namespace System.Data.OleDb {
-
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Data.Common;
-    using System.Globalization;
-    using System.Runtime.Serialization;
-    using System.Security;
-    using System.Security.Permissions;
-
-
     // TOOD move to System.Security.Permissions
     //
     //[Serializable] 

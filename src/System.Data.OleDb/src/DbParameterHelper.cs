@@ -2,14 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
+using System.Data.Common;
+
 namespace System.Data.OleDb
 {
-    using System;
-    using System.ComponentModel;
-    using System.Data;
-    using System.Data.Common;
-    using System.Globalization;
-
     public sealed partial class OleDbParameter : DbParameter { // V1.2.3300
         private object _value;
 

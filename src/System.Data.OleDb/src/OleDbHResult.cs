@@ -3,9 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 namespace System.Data.OleDb {
-
-    using System;
-
     internal enum OleDbHResult { // OLEDB Error codes
         CO_E_CLASSSTRING = unchecked((int)0x800401f3),
         REGDB_E_CLASSNOTREG = unchecked((int)0x80040154),

@@ -2,24 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Data.OleDb {
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Data.ProviderBase;
+using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Threading;
 
-    using System;
-    using System.Collections.Generic;
-    using System.Data;
-    using System.Data.Common;
-    using System.Data.ProviderBase;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.IO;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-    using System.Security;
-    using System.Security.Permissions;
-    using System.Text;
-    using System.Threading;
-//    using SysES = System.EnterpriseServices;
-    using SysTx = System.Transactions;
+namespace System.Data.OleDb {
+    //    using SysES = System.EnterpriseServices;
+    using SysTx = Transactions;
 
     sealed internal class OleDbConnectionInternal : DbConnectionInternal, IDisposable {
 

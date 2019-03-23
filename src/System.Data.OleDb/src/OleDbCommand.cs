@@ -2,23 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.ComponentModel;
-    using System.Data;
-    using System.Data.Common;
-    using System.Data.ProviderBase;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
-    using System.Security;
-    using System.Security.Permissions;
-    using System.Threading;
-    using System.Text;
-
-
     public sealed class OleDbCommand : DbCommand, ICloneable, IDbCommand {
 
         // command data
@@ -240,7 +232,7 @@ namespace System.Data.OleDb {
         DefaultValue(true),
         DesignOnly(true),
         Browsable(false),
-        EditorBrowsableAttribute(EditorBrowsableState.Never),
+        EditorBrowsable(EditorBrowsableState.Never),
         ]
         public override bool DesignTimeVisible { // V1.2.3300, XXXCommand V1.0.5000
             get {

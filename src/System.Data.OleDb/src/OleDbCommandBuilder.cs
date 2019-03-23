@@ -2,17 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Globalization;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.ComponentModel;
-    using System.Data;
-    using System.Data.Common;
-    using System.Data.ProviderBase;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Text;
-
     public sealed class OleDbCommandBuilder : DbCommandBuilder {
 
         public OleDbCommandBuilder() : base() {

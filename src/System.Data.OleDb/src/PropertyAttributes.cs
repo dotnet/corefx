@@ -2,17 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Data {
-    
-    using System;
-    using System.ComponentModel;
+using System.ComponentModel;
 
+namespace System.Data {
     // We can't remove this enum, since we already shipped it in v1.0
     
     [
     Flags(),
-    ObsoleteAttribute("PropertyAttributes has been deprecated.  http://go.microsoft.com/fwlink/?linkid=14202"),
-    EditorBrowsableAttribute(EditorBrowsableState.Never),
+    Obsolete("PropertyAttributes has been deprecated.  http://go.microsoft.com/fwlink/?linkid=14202"),
+    EditorBrowsable(EditorBrowsableState.Never),
     ]
     public enum PropertyAttributes {
         NotSupported = 0,    // Indicates that the property is not supported by the provider. 

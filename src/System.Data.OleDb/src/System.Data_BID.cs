@@ -3,10 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Text;
-using System.Security;
-using System.Reflection;
-using System.Security.Permissions;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;

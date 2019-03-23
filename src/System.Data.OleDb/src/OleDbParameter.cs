@@ -2,18 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Globalization;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.ComponentModel;
-    using System.Data;
-    using System.Data.Common;
-    using System.Data.ProviderBase;
-    using System.Diagnostics;
-    using System.Globalization;
-
     [
-    System.ComponentModel.TypeConverterAttribute(typeof(System.Data.OleDb.OleDbParameter.OleDbParameterConverter))
+    TypeConverter(typeof(System.Data.OleDb.OleDbParameter.OleDbParameterConverter))
     ]
     public sealed partial class OleDbParameter : DbParameter, ICloneable, IDbDataParameter {
         private NativeDBType _metaType;
@@ -55,7 +51,7 @@ namespace System.Data.OleDb {
             SourceColumn = srcColumn;
         }
 
-        [ EditorBrowsableAttribute(EditorBrowsableState.Advanced) ] // MDAC 69508
+        [ EditorBrowsable(EditorBrowsableState.Advanced) ] // MDAC 69508
         public OleDbParameter(string parameterName,
                               OleDbType dbType, int size,
                               ParameterDirection direction, Boolean isNullable,
@@ -74,7 +70,7 @@ namespace System.Data.OleDb {
             Value = value;
         }
 
-        [ EditorBrowsableAttribute(EditorBrowsableState.Advanced) ] // MDAC 69508
+        [ EditorBrowsable(EditorBrowsableState.Advanced) ] // MDAC 69508
         public OleDbParameter(string parameterName,
                               OleDbType dbType, int size,
                               ParameterDirection direction,
@@ -120,7 +116,7 @@ namespace System.Data.OleDb {
         RefreshProperties(RefreshProperties.All),
          // ResCategoryAttribute(SR.DataCategory_Data),
         // ResDescriptionAttribute(SR.OleDbParameter_OleDbType),
-        System.Data.Common.DbProviderSpecificTypePropertyAttribute(true),
+        DbProviderSpecificTypeProperty(true),
         ]
         public OleDbType OleDbType {
             get {
@@ -482,7 +478,7 @@ namespace System.Data.OleDb {
         RefreshProperties(RefreshProperties.All),
          // ResCategoryAttribute(SR.DataCategory_Data),
         // ResDescriptionAttribute(SR.DbParameter_Value),
-        TypeConverterAttribute(typeof(StringConverter)),
+        TypeConverter(typeof(StringConverter)),
         ]
         override public object Value { // V1.2.3300, XXXParameter V1.0.3300
             get {

@@ -2,23 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Text;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Collections.Specialized;
-    using System.Data;
-    using System.Data.Common;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.IO;
-    using System.Security;
-    using System.Security.Permissions;
-    using System.Text;
-    using Microsoft.Win32;
-    using System.Runtime.Versioning;
-
     internal struct SchemaSupport {
         internal Guid _schemaRowset;
         internal int  _restrictions;

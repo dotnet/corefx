@@ -2,15 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Data.Common;
+using System.Globalization;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.ComponentModel;
-    using System.Data.Common;
-    using System.Globalization;
-    using System.Security;
-    using System.Security.Permissions;
-
     public sealed class OleDbEnumerator  {
 
         public OleDbEnumerator() {

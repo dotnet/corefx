@@ -2,17 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
 namespace System.Data.ProviderBase {
-
-    using System;
-    using System.Data.Common;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.ConstrainedExecution;
-    using System.Runtime.InteropServices;
-    using System.Security;
-    using System.Security.Permissions;
-    using System.Threading;
-
     // We wrap the interface as a native IUnknown IntPtr so that every
     // thread that creates a connection will fake the correct context when
     // in transactions, otherwise everything is marshalled.  We do this

@@ -318,7 +318,7 @@ namespace System.Data.OleDb
         public System.Data.OleDb.OleDbParameter Add(string parameterName, System.Data.OleDb.OleDbType oleDbType) { throw null; }
         public System.Data.OleDb.OleDbParameter Add(string parameterName, System.Data.OleDb.OleDbType oleDbType, int size) { throw null; }
         public System.Data.OleDb.OleDbParameter Add(string parameterName, System.Data.OleDb.OleDbType oleDbType, int size, string sourceColumn) { throw null; }
-        [System.ObsoleteAttribute("Add(String parameterName, Object value) has been deprecated.  Use AddWithValue(String parameterName, Object value).  http://go.microsoft.com/fwlink/?linkid=14202", false)]
+        [Obsolete("Add(String parameterName, Object value) has been deprecated.  Use AddWithValue(String parameterName, Object value).  http://go.microsoft.com/fwlink/?linkid=14202", false)]
         public System.Data.OleDb.OleDbParameter Add(string parameterName, object value) { throw null; }
         public override void AddRange(System.Array values) { }
         public void AddRange(System.Data.OleDb.OleDbParameter[] values) { }

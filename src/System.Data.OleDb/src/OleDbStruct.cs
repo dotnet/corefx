@@ -2,15 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Data.OleDb {
+using System.Runtime.InteropServices;
 
-    using System;
-    using System.Runtime.InteropServices;
-    
+namespace System.Data.OleDb {
 #if DEBUG
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Text;
+    using Globalization;
+    using Text;
 #endif
 
     internal enum DBBindStatus {
@@ -37,7 +34,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else    
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     internal struct tagDBPARAMBINDINFO {
         internal IntPtr pwszDataSourceType;
@@ -86,7 +83,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     internal sealed class tagDBBINDING {
 
@@ -147,7 +144,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     internal struct tagDBCOLUMNACCESS {
 
@@ -181,7 +178,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     internal struct tagDBIDX {
         internal Guid uGuid;
@@ -192,7 +189,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     internal sealed class tagDBID {
         internal Guid uGuid;
@@ -213,7 +210,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     sealed internal class tagDBLITERALINFO {
 
@@ -246,7 +243,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     sealed internal class tagDBPROPSET {
         internal IntPtr rgProperties;
@@ -274,7 +271,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     sealed internal class tagDBPROP {
         internal Int32 dwPropertyID;
@@ -306,7 +303,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     sealed internal class tagDBPARAMS {
         internal IntPtr pData;
@@ -333,7 +330,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     sealed internal class tagDBCOLUMNINFO {
 
@@ -385,7 +382,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     sealed internal class tagDBPROPINFOSET {
 
@@ -409,7 +406,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     sealed internal class tagDBPROPINFO {
 
@@ -436,7 +433,7 @@ namespace System.Data.OleDb {
 #if (WIN32 && !ARCH_arm)
     [StructLayoutAttribute(LayoutKind.Sequential, Pack = 2)]
 #else
-    [StructLayoutAttribute(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
 #endif
     internal struct tagDBPROPIDSET {
         internal IntPtr rgPropertyIDs;

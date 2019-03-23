@@ -6,8 +6,6 @@
 // This reduces size and disables private reflection on those APIs. 
 // The attribute can also be applied to individual public APIs to similarly block them.
 
-using System;
-
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.All)]

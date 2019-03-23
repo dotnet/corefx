@@ -2,18 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Data.Common;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
 namespace System.Data.ProviderBase
 {
-    using System;
-    using System.Data.Common;
-    using System.Diagnostics;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.ConstrainedExecution;
-    using System.Runtime.InteropServices;
-    using System.Security;
-    using System.Security.Permissions;
-    using System.Threading;
-
     // DbBuffer is abstract to require derived class to exist
     // so that when debugging, we can tell the difference between one DbBuffer and another
     internal abstract class DbBuffer : SafeHandle {
@@ -674,7 +669,7 @@ namespace System.Data.ProviderBase
             WriteBytes(offset, buffer, 1, 19);
         }
 
-        [ConditionalAttribute("DEBUG")]
+        [Conditional("DEBUG")]
         protected void ValidateCheck(int offset, int count) {
             Validate(offset, count);
         }

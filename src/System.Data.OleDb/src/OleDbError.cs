@@ -2,14 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Data.Common;
+using System.Runtime.InteropServices;
+
 namespace System.Data.OleDb {
-
-    using System;
-    using System.Data.Common;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Runtime.InteropServices;
-
     [Serializable]
     public sealed class OleDbError {
         readonly private string message;
