@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 // This file has been auto-generated. Do not edit by hand.
-// Instead open Developer Command prompt and run: TextTransform TlsCipherSuite.tt
+// Instead open Developer Command prompt and run: TextTransform FileName.tt
 // Or set AllowTlsCipherSuiteGeneration=true and open VS and edit there directly
 
 // This line is needed so that file compiles both as a T4 template and C# file
