@@ -8,12 +8,12 @@ using System.ComponentModel;
 
 namespace System.Xml
 {
-    [Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+    [Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", false)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public interface IApplicationResourceStreamResolver
     {
         // Methods
-        [Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
+        [Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         Stream GetApplicationResourceStream(Uri relativeUri);
     }

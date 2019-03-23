@@ -30,6 +30,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="netstandard" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ReferencePath
       Include="$(_RuntimePath)System.*.dll;$(_RuntimePath)Microsoft.Win32.*.dll"
       Exclude="$(_RuntimePath)System.dll;$(_RuntimePath)System.Data.dll" />
