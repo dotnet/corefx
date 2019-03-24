@@ -356,13 +356,6 @@ namespace System.Data.Common {
             return null;
         }
 
-        internal void DemandPermission() {
-            if (null == _permissionset) {
-                _permissionset = CreatePermissionSet();
-            }
-            _permissionset.Demand();
-        }
-
         protected internal virtual string Expand() {
             return _usersConnectionString;
         }

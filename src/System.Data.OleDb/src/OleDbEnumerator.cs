@@ -26,7 +26,6 @@ namespace System.Data.OleDb {
         }
         
         static internal OleDbDataReader GetEnumeratorFromType(Type type) { // WebData 99005
-            // will demand security appropriately
             object value = Activator.CreateInstance(type, System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.Instance, null, null, CultureInfo.InvariantCulture, null);
             return GetEnumeratorReader(value);
         }

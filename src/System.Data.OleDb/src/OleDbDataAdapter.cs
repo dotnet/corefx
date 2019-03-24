@@ -140,8 +140,6 @@ namespace System.Data.OleDb {
                 if (null == ADODBRecordSet) {
                     throw ADP.ArgumentNull("adodb");
                 }
-                // user was required to have UnmanagedCode Permission just to create ADODB
-                // (new SecurityPermission(SecurityPermissionFlag.UnmanagedCode)).Demand();
                 return FillFromADODB((object)dataTable, ADODBRecordSet, null, false); // MDAC 59249
             }
             finally {
@@ -162,8 +160,6 @@ namespace System.Data.OleDb {
                 if (ADP.IsEmpty(srcTable)) {
                     throw ADP.FillRequiresSourceTableName("srcTable");
                 }
-                // user was required to have UnmanagedCode Permission just to create ADODB
-                // (new SecurityPermission(SecurityPermissionFlag.UnmanagedCode)).Demand();
                 return FillFromADODB((object)dataSet, ADODBRecordSet, srcTable, true);
             }
             finally {

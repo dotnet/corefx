@@ -1680,7 +1680,6 @@ internal sealed class SignatureGenerator
             "using System.Text;\r\n" +
             "using System.Security;\r\n" +
             "using System.Reflection;\r\n" +
-            "using System.Security.Permissions;\r\n" +
             "using System.Runtime.InteropServices;\r\n" +
             "\r\n" +
             "internal static partial class Bid\r\n" +

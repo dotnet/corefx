@@ -279,21 +279,6 @@ namespace System.Data.OleDb {
             InnerConnection.NotifyWeakReference(message);
         }
 
-        internal void PermissionDemand() {
-            Debug.Assert(DbConnectionClosedConnecting.SingletonInstance == _innerConnection, "not connecting");
-
-            System.Data.ProviderBase.DbConnectionPoolGroup poolGroup = PoolGroup;
-            DbConnectionOptions connectionOptions = ((null != poolGroup) ? poolGroup.ConnectionOptions : null);
-            if ((null == connectionOptions) || connectionOptions.IsEmpty) {
-                throw ADP.NoConnectionString();
-            }
-
-            DbConnectionOptions userConnectionOptions = UserConnectionOptions;
-            Debug.Assert(null != userConnectionOptions, "null UserConnectionOptions");
-
-            userConnectionOptions.DemandPermission();
-        }
-
         internal void RemoveWeakReference(object value) {
             InnerConnection.RemoveWeakReference(value);
         }
@@ -328,9 +313,6 @@ namespace System.Data.OleDb {
                 }
             }
         }
-
-        // this method is used to securely change state with the resource being
-        // the open connection protected by the connectionstring via a permission demand
 
         // Closed->Connecting: prevent set_ConnectionString during Open
         // Open->OpenBusy: guarantee internal connection is returned to correct pool

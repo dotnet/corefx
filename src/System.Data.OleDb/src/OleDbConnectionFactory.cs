@@ -129,13 +129,6 @@ namespace System.Data.OleDb
             return 0;
         }
 
-        //override internal void PermissionDemand(DbConnection outerConnection) {
-        //    OleDbConnection c = (outerConnection as OleDbConnection);
-        //    if (null != c) {
-        //        c.PermissionDemand();
-        //    }
-        //}
-
         override internal void SetConnectionPoolGroup(DbConnection outerConnection, DbConnectionPoolGroup poolGroup) {
             OleDbConnection c = (outerConnection as OleDbConnection);
             if (null != c) {

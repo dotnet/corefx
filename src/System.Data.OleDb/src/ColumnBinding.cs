@@ -912,7 +912,6 @@ namespace System.Data.OleDb {
         }
         private void Value_IDISPATCH(object value) {
             // UNDONE: OLE DB will IUnknown.Release input storage parameter values
-            (new System.Security.NamedPermissionSet("FullTrust")).Demand(); // MDAC 80727
             Debug.Assert(NativeDBType.IDISPATCH == DbType, "Value_IDISPATCH");
             LengthValue(0);
             StatusValue(DBStatus.S_OK);
@@ -941,7 +940,6 @@ namespace System.Data.OleDb {
         }
         private void Value_IUNKNOWN(object value) {
             // UNDONE: OLE DB will IUnknown.Release input storage parameter values
-            (new System.Security.NamedPermissionSet("FullTrust")).Demand(); // MDAC 80727
             Debug.Assert(NativeDBType.IUNKNOWN == DbType, "Value_IUNKNOWN");
             LengthValue(0);
             StatusValue(DBStatus.S_OK);
