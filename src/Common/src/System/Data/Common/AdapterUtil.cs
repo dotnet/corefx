@@ -35,6 +35,11 @@ namespace System.Data.Common
             TraceException("<comm.ADP.TraceException|ERR|THROW> '{0}'", e);
         }
 
+        static internal void TraceExceptionForCapture(Exception e) {
+            Debug.Assert(ADP.IsCatchableExceptionType(e), "Invalid exception type, should have been re-thrown!");
+            TraceException("<comm.ADP.TraceException|ERR|CATCH> '%ls'\n", e);
+        }
+
         internal static void TraceExceptionWithoutRethrow(Exception e)
         {
             Debug.Assert(ADP.IsCatchableExceptionType(e), "Invalid exception type, should have been re-thrown!");
@@ -331,6 +336,12 @@ namespace System.Data.Common
         //
         // DbConnection
         //
+        static internal NotImplementedException MethodNotImplemented() {
+            NotImplementedException e = new NotImplementedException();
+            TraceExceptionAsReturnValue(e);
+            return e;
+        }
+
         private static string ConnectionStateMsg(ConnectionState state)
         {
             switch (state)
@@ -402,6 +413,20 @@ namespace System.Data.Common
             return Argument(SR.Format(SR.ADP_CollectionIsNotParent, parameterType.Name, collection.GetType().Name));
         }
 
+        static internal Exception ConnectionAlreadyOpen(ConnectionState state) {
+            return InvalidOperation(SR.Format(SR.ADP_ConnectionAlreadyOpen, ADP.ConnectionStateMsg(state)));
+        }
+
+        internal enum ConnectionError {
+            BeginGetConnectionReturnsNull,
+            GetConnectionReturnsNull,
+            ConnectionOptionsMissing,
+            CouldNotSwitchToClosedPreviouslyOpenedState,
+        }
+
+        static internal Exception InternalConnectionError(ConnectionError internalError) {
+            return InvalidOperation(SR.Format(SR.ADP_InternalConnectionError, (int)internalError));
+        }
 
         internal enum InternalErrorCode
         {

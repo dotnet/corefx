@@ -414,8 +414,6 @@ namespace System.Data.ProviderBase
 
         abstract internal DbConnectionInternal GetInnerConnection(DbConnection connection);
 
-        abstract internal void PermissionDemand(DbConnection outerConnection);
-
         abstract internal void SetConnectionPoolGroup(DbConnection outerConnection, DbConnectionPoolGroup poolGroup);
 
         abstract internal void SetInnerConnectionEvent(DbConnection owningObject, DbConnectionInternal to);

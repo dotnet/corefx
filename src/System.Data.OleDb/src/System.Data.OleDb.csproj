@@ -14,6 +14,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Data\Common\AdapterUtil.cs">
+      <Link>System\Data\Common\AdapterUtil.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Data\Common\FieldNameLookup.cs">
       <Link>Common\System\Data\ProviderBase\FieldNameLookup.cs</Link>
     </Compile>
@@ -69,6 +72,7 @@
     <Reference Include="System.Configuration.ConfigurationManager" />
     <Reference Include="System.Data.Common" />
     <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.PerformanceCounter" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.TraceSource" />
     <Reference Include="System.Memory" />
@@ -83,6 +87,7 @@
     <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Threading.ThreadPool" />
     <Reference Include="System.Transactions.Local" />
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Threading.Timer" />
