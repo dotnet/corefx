@@ -20,7 +20,17 @@ namespace System.ComponentModel.Tests
 
         public override IEnumerable<ConvertTest> ConvertFromTestData()
         {
+            yield return ConvertTest.Valid("1", (short)1);
+            yield return ConvertTest.Valid("-1  ", (short)-1);
+            yield return ConvertTest.Valid("#2", (short)2);
+            yield return ConvertTest.Valid("+7", (short)7);
+
             yield return ConvertTest.Throws<ArgumentException, Exception>("8.0");
+            yield return ConvertTest.Throws<ArgumentException, Exception>("");
+            yield return ConvertTest.Throws<ArgumentException, Exception>("bad");
+
+            yield return ConvertTest.Throws<ArgumentException, Exception>("32768");
+            yield return ConvertTest.Throws<ArgumentException, Exception>("-32769");
 
             yield return ConvertTest.CantConvert(new object());
         }
