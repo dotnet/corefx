@@ -56,6 +56,29 @@
     <Compile Include="*.cs"/>
     <!-- TODO move to common -->
     <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\PoolBlockingPeriod.cs"/>
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIError.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIHandle.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNILoadHandle.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIMarsConnection.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIMarsHandle.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIMarsQueuedPacket.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNINpHandle.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIPacket.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIProxy.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNITcpHandle.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SslOverTdsStream.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNICommon.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SspiClientContextStatus.cs" />
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SSRP.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' and '$(IsUAPAssembly)' != 'true'">
+    <Compile Include="..\..\System.Data.SqlClient\src\Interop\SNINativeMethodWrapper.Windows.cs" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsWindows)' != 'true'">
+    <Compile Include="..\..\System.Data.SqlClient\src\Interop\SNINativeMethodWrapper.Unix.cs" />
+    <Compile Include="$(CommonPath)\System\Net\Security\Unix\SafeFreeCredentials.cs">
+      <Link>Common\System\Net\Security\Unix\SafeFreeCredentials.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\System.Data.OleDb.OleDbMetaData.xml">
@@ -82,16 +105,21 @@
     <Reference Include="System.Diagnostics.PerformanceCounter" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.TraceSource" />
+    <Reference Include="System.IO.Pipes" />
     <Reference Include="System.Memory" />
-    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Net.Primitives" />
+    <Reference Include="System.Net.Security" />
+    <Reference Include="System.Net.Sockets" />
     <Reference Include="System.ObjectModel" />
+    <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Security.AccessControl" />
     <Reference Include="System.Security.Claims" />
-    <Reference Include="System.Security.Principal.Windows" />
     <Reference Include="System.Text.Encoding.Extensions" />
+    <Reference Include="System.Security.Cryptography.X509Certificates" />
+    <Reference Include="System.Security.Principal.Windows" />
     <Reference Include="System.Text.RegularExpressions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />

@@ -5,6 +5,7 @@
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.Runtime.InteropServices;
+using System.Data.SqlClient.SNI;
 
 namespace System.Data.SqlClient
 {
