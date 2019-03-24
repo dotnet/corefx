@@ -534,7 +534,7 @@ namespace System.ComponentModel.Composition.Hosting
                 default:
                     {
                         // All other states are invalid and for recomposition. 
-                        return new CompositionResult(ErrorBuilder.InvalidStateForRecompposition(partManager.Part));
+                        return new CompositionResult(ErrorBuilder.InvalidStateForRecomposition(partManager.Part));
                     }
             }
 

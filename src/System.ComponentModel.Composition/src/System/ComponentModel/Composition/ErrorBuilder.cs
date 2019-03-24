@@ -17,7 +17,7 @@ namespace System.ComponentModel.Composition
                 part.ToElement().DisplayName);
         }
 
-        public static CompositionError InvalidStateForRecompposition(ComposablePart part)
+        public static CompositionError InvalidStateForRecomposition(ComposablePart part)
         {
             return CompositionError.Create(
                 CompositionErrorId.ImportEngine_InvalidStateForRecomposition,
