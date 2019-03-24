@@ -32,6 +32,9 @@
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolGroup.cs">
       <Link>System\Data\ProviderBase\DbConnectionPoolGroup.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolGroupProviderInfo.cs">
+      <Link>System\Data\ProviderBase\DbConnectionPoolGroupProviderInfo.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Data\Common\DbConnectionPoolKey.cs">
       <Link>System\Data\Common\DbConnectionPoolKey.cs</Link>
     </Compile>
