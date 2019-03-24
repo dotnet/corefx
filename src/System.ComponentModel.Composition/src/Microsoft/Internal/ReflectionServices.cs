@@ -105,7 +105,7 @@ namespace Microsoft.Internal
             {
                 // Purposefully not using FullName here because it results in a significantly
                 //  more expensive implementation of GetInterface, this does mean that we're
-                //  takign the chance that there aren't too many types which implement multiple
+                //  taking the chance that there aren't too many types which implement multiple
                 //  interfaces by the same name...
                 Type targetInterface = instanceType.GetInterface(targetOpenInterfaceType.Name, false);
                 if (targetInterface != null &&
