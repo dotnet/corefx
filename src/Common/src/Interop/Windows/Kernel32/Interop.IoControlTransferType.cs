@@ -10,7 +10,7 @@ internal partial class Interop
     internal partial class Kernel32
     {
         /// <summary>
-        /// <a href="https://docs.microsoft.com/en-us/windows-hardware/drivers/kernel/buffer-descriptions-for-i-o-control-codes">TransferType</a>.
+        /// <a href="https://docs.microsoft.com/windows-hardware/drivers/kernel/buffer-descriptions-for-i-o-control-codes">TransferType</a>.
         /// Indicates how the system will pass data between the caller of DeviceIoControl (or IoBuildDeviceIoControlRequest) and the driver that handles the IRP.
         /// </summary>
         public enum IoControlTransferType

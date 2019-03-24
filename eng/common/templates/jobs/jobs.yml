@@ -30,7 +30,7 @@ parameters:
   # if enabled then the 'helixRepo' parameter should also be specified
   enableTelemetry: false
 
-  # Required: A collection of jobs to run - https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=vsts&tabs=schema#job
+  # Required: A collection of jobs to run - https://docs.microsoft.com/azure/devops/pipelines/yaml-schema?view=vsts&tabs=schema#job
   jobs: []
 
   # Optional: define the helix repo for telemetry (example: 'dotnet/arcade')

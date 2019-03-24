@@ -623,7 +623,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             // Prepare result data
             TDSRowToken rowToken = new TDSRowToken(metadataToken);
 
-            // Per https://docs.microsoft.com/en-us/sql/t-sql/functions/serverproperty-transact-sql
+            // Per https://docs.microsoft.com/sql/t-sql/functions/serverproperty-transact-sql
             // 4 = Express (This is returned for Express, Express with Advanced Services, and Windows Embedded SQL.)
             rowToken.Data.Add(4);
 

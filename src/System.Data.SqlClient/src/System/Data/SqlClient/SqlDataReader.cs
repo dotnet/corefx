@@ -1378,7 +1378,7 @@ namespace System.Data.SqlClient
 
         virtual public XmlReader GetXmlReader(int i)
         {
-            // NOTE: sql_variant can not contain a XML data type: https://docs.microsoft.com/en-us/sql/t-sql/data-types/sql-variant-transact-sql
+            // NOTE: sql_variant can not contain a XML data type: https://docs.microsoft.com/sql/t-sql/data-types/sql-variant-transact-sql
             // If this ever changes, the following code should be changed to be like GetStream\GetTextReader
             CheckDataIsReady(columnIndex: i);
 

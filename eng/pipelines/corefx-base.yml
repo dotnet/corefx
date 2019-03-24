@@ -7,7 +7,7 @@ parameters:
   # - FreeBSD
   targetOS: ''
 
-  # Required: A collection of jobs to run - https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=vsts&tabs=schema#job
+  # Required: A collection of jobs to run - https://docs.microsoft.com/azure/devops/pipelines/yaml-schema?view=vsts&tabs=schema#job
   jobs: []
 
   # Required: value to specify if the job is comming from an official build to run extra steps and sign binaries

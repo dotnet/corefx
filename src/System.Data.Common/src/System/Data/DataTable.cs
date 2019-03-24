@@ -1328,7 +1328,7 @@ namespace System.Data
             get
             {
                 // used for Formating/Parsing
-                // https://docs.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo.isneutralculture
+                // https://docs.microsoft.com/dotnet/api/system.globalization.cultureinfo.isneutralculture
                 if (null == _formatProvider)
                 {
                     CultureInfo culture = Locale;

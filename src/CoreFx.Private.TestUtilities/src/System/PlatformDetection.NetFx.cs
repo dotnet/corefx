@@ -27,7 +27,7 @@ namespace System
         public static bool IsNetfx472OrNewer => GetFrameworkVersion() >= new Version(4, 7, 2);
 
         // To get the framework version we can do it throught the registry key and getting the Release value under the .NET Framework key.
-        // the mapping to each version can be found in: https://docs.microsoft.com/en-us/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
+        // the mapping to each version can be found in: https://docs.microsoft.com/dotnet/framework/migration-guide/how-to-determine-which-versions-are-installed
         // everytime we ship a new version this method should be updated to include the new framework version.
         private static Version GetFrameworkVersion()
         {

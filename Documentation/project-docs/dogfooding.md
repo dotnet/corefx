@@ -51,7 +51,7 @@ To install additional .NET Core runtimes or SDKs:
     ...
 </packageSources>    
 ```
-(Documentation for configuring feeds is [here](https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior).)
+(Documentation for configuring feeds is [here](https://docs.microsoft.com/nuget/consume-packages/configuring-nuget-behavior).)
 
 ## Setup the project
 

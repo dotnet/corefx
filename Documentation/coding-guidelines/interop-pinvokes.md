@@ -137,9 +137,9 @@ The following types, being pointers, do follow the width of the platform. Use `I
 
 A Windows `PVOID` which is a C `void*` can be marshaled as either `IntPtr` or `UIntPtr` but we would prefer `void*`.
 
-[Windows Data Types](https://docs.microsoft.com/en-us/windows/desktop/WinProg/windows-data-types)
+[Windows Data Types](https://docs.microsoft.com/windows/desktop/WinProg/windows-data-types)
 
-[Data Type Ranges](https://docs.microsoft.com/en-us/cpp/cpp/data-type-ranges?view=vs-2017)
+[Data Type Ranges](https://docs.microsoft.com/cpp/cpp/data-type-ranges?view=vs-2017)
 
 Blittable Types
 ---------------
