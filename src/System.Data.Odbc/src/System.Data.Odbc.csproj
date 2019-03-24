@@ -62,10 +62,14 @@
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionFactory.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionInternal.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionPool.cs" />
-    <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolGroupProviderInfo.cs" />
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolGroupProviderInfo.cs">
+      <Link>System\Data\ProviderBase\DbConnectionPoolGroupProviderInfo.cs</Link>
+    </Compile>
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolIdentity.cs" />
     <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolOptions.cs" />
-    <Compile Include="Common\System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs" />
+    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs">
+      <Link>System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs</Link>
+    </Compile>
     <Compile Include="System\Data\Odbc\DbDataRecord.cs" />
     <Compile Include="System\Data\Odbc\Odbc32.cs" />
     <Compile Include="System\Data\Odbc\OdbcCommand.cs">
