@@ -17,6 +17,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.DotNet.XUnitExtensions;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -1103,56 +1105,6 @@ namespace System.Net.Http.Functional.Tests
                 $"X-XSS-Protection:{fold} 1; mode=block{newline}" +
                 $"{newline}"),
                 dribble ? new LoopbackServer.Options { StreamWrapper = s => new DribbleStream(s) } : null);
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task GetAsync_TrailingHeaders_Ignored(bool includeTrailerHeader)
-        {
-            if (IsCurlHandler)
-            {
-                // ActiveIssue #17174: CurlHandler has a problem here
-                // https://github.com/curl/curl/issues/1354
-                return;
-            }
-
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
-            {
-                using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
-                {
-                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
-                    await TestHelper.WhenAllCompletedOrAnyFailed(
-                        getResponseTask,
-                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
-                            "HTTP/1.1 200 OK\r\n" +
-                            "Connection: close\r\n" +
-                            "Transfer-Encoding: chunked\r\n" +
-                            (includeTrailerHeader ? "Trailer: MyCoolTrailerHeader\r\n" : "") +
-                            "\r\n" +
-                            "4\r\n" +
-                            "data\r\n" +
-                            "0\r\n" +
-                            "MyCoolTrailerHeader: amazingtrailer\r\n" +
-                            "\r\n"));
-
-                    using (HttpResponseMessage response = await getResponseTask)
-                    {
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        if (includeTrailerHeader)
-                        {
-                            Assert.Contains("MyCoolTrailerHeader", response.Headers.GetValues("Trailer"));
-                        }
-                        Assert.False(response.Headers.Contains("MyCoolTrailerHeader"), "Trailer should have been ignored");
-
-                        string data = await response.Content.ReadAsStringAsync();
-                        Assert.Contains("data", data);
-                        Assert.DoesNotContain("MyCoolTrailerHeader", data);
-                        Assert.DoesNotContain("amazingtrailer", data);
-                    }
-                }
-            });
         }
 
         [Fact]
@@ -2353,7 +2305,16 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpClient client = CreateHttpClient())
                 using (HttpResponseMessage response = await client.PostAsync(redirectUri, new StreamContent(fs)))
                 {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    try
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    }
+                    catch
+                    {
+                        _output.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase}");
+                        throw;
+                    }
+
                     if (expectRedirectToPost)
                     {
                         Assert.InRange(response.Content.Headers.ContentLength.GetValueOrDefault(), contentBytes.Length, int.MaxValue);
@@ -2383,23 +2344,21 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop("Uses external server")]
         [Theory]
         [InlineData(HttpStatusCode.MethodNotAllowed, "Custom description")]
         [InlineData(HttpStatusCode.MethodNotAllowed, "")]
         public async Task GetAsync_CallMethod_ExpectedStatusLine(HttpStatusCode statusCode, string reasonPhrase)
         {
-            using (HttpClient client = CreateHttpClient())
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.StatusCodeUri(
-                    false,
-                    (int)statusCode,
-                    reasonPhrase)))
+                using (HttpClient client = CreateHttpClient())
+                using (HttpResponseMessage response = await client.GetAsync(uri))
                 {
                     Assert.Equal(statusCode, response.StatusCode);
                     Assert.Equal(reasonPhrase, response.ReasonPhrase);
                 }
-            }
+            }, server => server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                $"HTTP/1.1 {(int)statusCode} {reasonPhrase}\r\nContent-Length: 0\r\n\r\n"));
         }
 
 #endregion
@@ -2591,23 +2550,16 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(new Version(1, 1), receivedRequestVersion);
         }
 
-        [ActiveIssue(23037, TestPlatforms.AnyUnix)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
         [OuterLoop("Uses external server")]
-        [Theory]
+        [ConditionalTheory]
         [MemberData(nameof(Http2Servers))]
         public async Task SendAsync_RequestVersion20_ResponseVersion20IfHttp2Supported(Uri server)
         {
-            if (PlatformDetection.IsWindows && !PlatformDetection.IsWindows10Version1703OrGreater)
+            if (IsWinHttpHandler && !PlatformDetection.IsWindows10Version1703OrGreater)
             {
                 // Skip this test if running on Windows but on a release prior to Windows 10 Creators Update.
-                _output.WriteLine("Skipping test due to Windows 10 version prior to Version 1703.");
-                return;
-            }
-            if (UseSocketsHttpHandler)
-            {
-                // TODO #23134: SocketsHttpHandler doesn't yet support HTTP/2.
-                return;
+                throw new SkipTestException("Skipping test due to Windows 10 version prior to Version 1703.");
             }
 
             // We don't currently have a good way to test whether HTTP/2 is supported without
@@ -2620,25 +2572,6 @@ namespace System.Net.Http.Functional.Tests
             {
                 // It is generally expected that the test hosts will be trusted, so we don't register a validation
                 // callback in the usual case.
-                // 
-                // However, on our Debian 8 test machines, a combination of a server side TLS chain,
-                // the client chain processor, and the distribution's CA bundle results in an incomplete/untrusted
-                // certificate chain. See https://github.com/dotnet/corefx/issues/9244 for more details.
-                if (PlatformDetection.IsDebian8)
-                {
-                    // Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool>
-                    handler.ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) =>
-                    {
-                        Assert.InRange(chain.ChainStatus.Length, 0, 1);
-
-                        if (chain.ChainStatus.Length > 0)
-                        {
-                            Assert.Equal(X509ChainStatusFlags.PartialChain, chain.ChainStatus[0].Status);
-                        }
-
-                        return true;
-                    };
-                }
 
                 using (HttpResponseMessage response = await client.SendAsync(request))
                 {
@@ -2778,7 +2711,7 @@ namespace System.Net.Http.Functional.Tests
             }));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         public async Task GetAsync_InvalidUrl_ExpectedExceptionThrown()
         {
             string invalidUri = $"http://{Guid.NewGuid().ToString("N")}";

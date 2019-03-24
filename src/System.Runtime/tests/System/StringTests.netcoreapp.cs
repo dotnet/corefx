@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -39,6 +40,52 @@ namespace System.Tests
         {
             var span = new ReadOnlySpan<char>(valueArray, startIndex, length);
             Assert.Equal(expected, new string(span));
+        }
+
+        [Fact]
+        public static unsafe void Ctor_CharPtr_DoesNotAccessInvalidPage()
+        {
+            // Allocates a buffer of all 'x' followed by a null terminator,
+            // then attempts to create a string instance from this at various offsets.
+
+            const int MaxCharCount = 128;
+            using BoundedMemory<char> boundedMemory = BoundedMemory.Allocate<char>(MaxCharCount);
+            boundedMemory.Span.Fill('x');
+            boundedMemory.Span[MaxCharCount - 1] = '\0';
+            boundedMemory.MakeReadonly();
+
+            using MemoryHandle memoryHandle = boundedMemory.Memory.Pin();
+
+            for (int i = 0; i < MaxCharCount; i++)
+            {
+                string expectedString = new string('x', MaxCharCount - i - 1);
+                string actualString = new string((char*)memoryHandle.Pointer + i);
+                Assert.Equal(expectedString, actualString);
+            }
+        }
+
+        [ConditionalFact(nameof(IsSimpleActiveCodePage))]
+        public static unsafe void Ctor_SBytePtr_DoesNotAccessInvalidPage()
+        {
+            // Allocates a buffer of all ' ' followed by a null terminator,
+            // then attempts to create a string instance from this at various offsets.
+            // We use U+0020 SPACE instead of any other character because it lives
+            // at offset 0x20 across every supported code page.
+
+            const int MaxByteCount = 128;
+            using BoundedMemory<sbyte> boundedMemory = BoundedMemory.Allocate<sbyte>(MaxByteCount);
+            boundedMemory.Span.Fill((sbyte)' ');
+            boundedMemory.Span[MaxByteCount - 1] = (sbyte)'\0';
+            boundedMemory.MakeReadonly();
+
+            using MemoryHandle memoryHandle = boundedMemory.Memory.Pin();
+
+            for (int i = 0; i < MaxByteCount; i++)
+            {
+                string expectedString = new string(' ', MaxByteCount - i - 1);
+                string actualString = new string((sbyte*)memoryHandle.Pointer + i);
+                Assert.Equal(expectedString, actualString);
+            }
         }
 
         [Fact]
@@ -644,7 +691,7 @@ namespace System.Tests
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCultureIgnoreCase));
 
                 return SuccessExitCode;
-            }, src).Dispose();                            
+            }, src).Dispose();
         }
 
         public static IEnumerable<object[]> Replace_StringComparisonCulture_TestData()
@@ -1021,6 +1068,116 @@ namespace System.Tests
             }
 
             Assert.Equal(expected, result);
+        }
+
+        // [Fact]
+        // public static void IndexerUsingIndexTest()
+        // {
+        //     Index index;
+        //     string s = "0123456789ABCDEF";
+
+        //     for (int i = 0; i < s.Length; i++)
+        //     {
+        //         index = Index.FromStart(i);
+        //         Assert.Equal(s[i], s[index]);
+
+        //         index = Index.FromEnd(i + 1);
+        //         Assert.Equal(s[s.Length - i - 1], s[index]);
+        //     }
+
+        //     index = Index.FromStart(s.Length + 1);
+        //     char c;
+        //     Assert.Throws<IndexOutOfRangeException>(() => c = s[index]);
+
+        //     index = Index.FromEnd(s.Length + 1);
+        //     Assert.Throws<IndexOutOfRangeException>(() => c = s[index]);
+        // }
+
+        // [Fact]
+        // public static void IndexerUsingRangeTest()
+        // {
+        //     Range range;
+        //     string s = "0123456789ABCDEF";
+
+        //     for (int i = 0; i < s.Length; i++)
+        //     {
+        //         range = new Range(Index.FromStart(0), Index.FromStart(i));
+        //         Assert.Equal(s.Substring(0, i), s[range]);
+
+        //         range = new Range(Index.FromEnd(s.Length), Index.FromEnd(i));
+        //         Assert.Equal(s.Substring(0, s.Length - i), s[range]);
+        //     }
+
+        //     range = new Range(Index.FromStart(s.Length - 2), Index.FromStart(s.Length + 1));
+        //     string s1;
+        //     Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s[range]);
+
+        //     range = new Range(Index.FromEnd(s.Length + 1), Index.FromEnd(0));
+        //     Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s[range]);
+        // }
+
+        [Fact]
+        public static void SubstringUsingIndexTest()
+        {
+            string s = "0123456789ABCDEF";
+
+            for (int i = 0; i < s.Length; i++)
+            {
+                Assert.Equal(s.Substring(i), s.Substring(Index.FromStart(i)));
+                Assert.Equal(s.Substring(s.Length - i - 1), s.Substring(Index.FromEnd(i + 1)));
+            }
+
+            // String.Substring allows the string length as a valid input.
+            Assert.Equal(s.Substring(s.Length), s.Substring(Index.FromStart(s.Length)));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => s.Substring(Index.FromStart(s.Length + 1)));
+            Assert.Throws<ArgumentOutOfRangeException>(() => s.Substring(Index.FromEnd(s.Length + 1)));
+        }
+
+        [Fact]
+        public static void SubstringUsingRangeTest()
+        {
+            string s = "0123456789ABCDEF";
+            Range range;
+
+            for (int i = 0; i < s.Length; i++)
+            {
+                range = new Range(Index.FromStart(0), Index.FromStart(i));
+                Assert.Equal(s.Substring(0, i), s.Substring(range));
+
+                range = new Range(Index.FromEnd(s.Length), Index.FromEnd(i));
+                Assert.Equal(s.Substring(0, s.Length - i), s.Substring(range));
+            }
+
+            range = new Range(Index.FromStart(s.Length - 2), Index.FromStart(s.Length + 1));
+            string s1;
+            Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s.Substring(range));
+
+            range = new Range(Index.FromEnd(s.Length + 1), Index.FromEnd(0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s.Substring(range));
+        }
+
+        /// <summary>
+        /// Returns true only if U+0020 SPACE is represented as the single byte 0x20 in the active code page.
+        /// </summary>
+        public unsafe static bool IsSimpleActiveCodePage
+        {
+            get
+            {
+                IntPtr pAnsiStr = IntPtr.Zero;
+                try
+                {
+                    pAnsiStr = Marshal.StringToHGlobalAnsi(" ");
+                    return ((byte*)pAnsiStr)[0] == (byte)' ' && ((byte*)pAnsiStr)[1] == (byte)'\0';
+                }
+                finally
+                {
+                    if (pAnsiStr != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(pAnsiStr);
+                    }
+                }
+            }
         }
     }
 }

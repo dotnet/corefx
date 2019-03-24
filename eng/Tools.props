@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Licensed to the .NET Foundation under one or more agreements. The .NET Foundation licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
 <Project>
   <PropertyGroup>
     <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
@@ -22,7 +20,7 @@
   <Import Project="$(MSBuildThisFileDirectory)dependencies.props" />
 
   <ItemGroup>
-    <PackageReference Include="$(BuildToolsPackage)" Version="$(BuildToolsPackageVersion)" />
+    <PackageReference Include="$(BuildToolsPackage)" Version="$(BuildToolsPackageVersion)" GeneratePathProperty="true" />
     <PackageReference Include="$(PublishSymbolsPackage)" Version="$(PublishSymbolsPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.ApiCompat" Version="$(MicrosoftDotNetApiCompatPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.SourceRewriter" Version="$(MicrosoftDotNetSourceRewriterPackageVersion)" />
@@ -45,6 +43,10 @@
     <PackageReference Include="System.Runtime.Analyzers" Version="1.1.0" />
     <PackageReference Include="System.Runtime.InteropServices.Analyzers" Version="1.1.0" />
     <PackageReference Include="System.Security.Cryptography.Hashing.Algorithms.Analyzers" Version="1.1.0" />
+
+    <!-- Include the Roslyn Compilers -->
+    <PackageReference Include="Microsoft.Net.Compilers" Version="$(MicrosoftNetCompilersVersion)" PrivateAssets="all" ExcludeAssets="Build" GeneratePathProperty="true" IsImplicitlyDefined="true" />
+    <PackageReference Include="Microsoft.NETCore.Compilers" Version="$(MicrosoftNETCoreCompilersVersion)" PrivateAssets="all" ExcludeAssets="Build" GeneratePathProperty="true" IsImplicitlyDefined="true" />
   </ItemGroup>
 
   <ItemGroup>
@@ -52,23 +54,21 @@
     <RepoTool Include="dotnet-reportgenerator-globaltool" Version="$(DotNetReportGeneratorGlobalToolPackageVersion)" />
   </ItemGroup>
 
-  <Target Name="InitTools" AfterTargets="Restore">
+  <!--
+    Temporarily opt-in as dotnet restore interactive doesn't seem to work.
+    https://github.com/NuGet/Home/issues/7812. Use nuget restore meanwhile.
+  -->
+  <Target Name="InitOptionalTools"
+          Condition="'$(RestoreInternalTools)' == 'true'"
+          AfterTargets="Restore">
 
     <PropertyGroup>
-      <ToolsDir Condition="'$(ToolsDir)' == ''">$(RepoRoot)Tools</ToolsDir>
-      <BuildToolsSemaphore>$([MSBuild]::NormalizePath('$(ToolsDir)', '$(BuildToolsPackageVersion).init-tools.completed'))</BuildToolsSemaphore>
-      <PackagesDir>$(NuGetPackageRoot)</PackagesDir>
-      <BuildToolsPackageDir Condition="'$(BuildToolsPackageDir)' == ''">$([MSBuild]::NormalizeDirectory('$(PackagesDir)', '$(BuildToolsPackage)', '$(BuildToolsPackageVersion)', 'lib'))</BuildToolsPackageDir>
-      <CmdExt>cmd</CmdExt>
-      <CmdExt Condition="'$(OS)' != 'Windows_NT'">sh</CmdExt>
-      <InitToolsCmdLine>"$(BuildToolsPackageDir)init-tools.$(CmdExt)" "$(RepoRoot)" $(DotNetCmd) "$(ToolsDir)" "$(PackagesDir.TrimEnd('\'))"</InitToolsCmdLine>
+      <OptionalToolDir>$([MSBuild]::NormalizeDirectory('$(RepositoryEngineeringDir)', 'common', 'internal'))</OptionalToolDir>
+      <OptionalToolProjectPath>$(OptionalToolDir)Tools.csproj</OptionalToolProjectPath>
     </PropertyGroup>
 
-    <Exec Condition="!Exists('$(BuildToolsSemaphore)')"
-          Command="$(InitToolsCmdLine) &gt; &quot;$(RepoRoot)init-tools.log&quot;" />
-    <Touch Files="$(BuildToolsSemaphore)" 
-           AlwaysCreate="true" />
-    <OnError ExecuteTargets="DumpInitToolsLog" />
+    <Exec Command="$(DotNetCmd) restore &quot;$(OptionalToolProjectPath)&quot; --interactive --ignore-failed-sources /p:TargetGroup=$(TargetGroup)"
+          WorkingDirectory="$(RepoRoot)" />
 
   </Target>
 
@@ -101,13 +101,13 @@
           Command="$(DotNetCmd) tool install --tool-path &quot;$(GlobalToolsDir)&quot; %(RepoTool.Identity) --version %(RepoTool.Version) --add-source https:%2F%2Fapi.nuget.org/v3/index.json"
           WorkingDirectory="$(RepoRoot)"
           ContinueOnError="WarnAndContinue" />
-    
+
   </Target>
 
   <Target Name="DumpInitToolsLog">
 
     <Message Text="Init-tools failed dumping log file $(RepoRoot)init-tools.log" />
-    <Message Condition="Exists('$(RepoRoot)init-tools.log')" 
+    <Message Condition="Exists('$(RepoRoot)init-tools.log')"
              Text="$([System.IO.File]::ReadAllText('$(RepoRoot)init-tools.log'))" />
 
   </Target>

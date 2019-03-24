@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{03D84CBD-896D-4B2F-9A22-07034F51E73D}</ProjectGuid>
     <AssemblyName>System.Security.Cryptography.Pkcs</AssemblyName>
@@ -10,7 +10,8 @@
     <NoWarn>$(NoWarn);CS1574;CS3016</NoWarn>
     <Configurations>net461-Windows_NT-Debug;net461-Windows_NT-Release;netcoreapp-Debug;netcoreapp-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <Import Project="$(CommonPath)\System\Security\Cryptography\Asn1\AsnXml.targets" />
+  <Import Project="$(CommonPath)\System\Security\Cryptography\Asn1\AsnXml.targets" Condition="'$(IsPartialFacadeAssembly)' != 'true'" />
+  <Import Project="$(CommonPath)\System\Security\Cryptography\Asn1Reader\System.Security.Cryptography.Asn1Reader.Shared.projitems" Condition="'$(IsPartialFacadeAssembly)' != 'true'" />
   <!-- Don't delete these clauses even if they look useless. They tell the VS IDE that "Windows_Debug", etc., are
        valid configuration for this project and stop it from trying to "fix up" the .sln file -->
   <!-- API types (platform independent) -->
@@ -143,29 +144,29 @@
   </ItemGroup>
   <!-- Interop types (platform: Windows) -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(IsPartialFacadeAssembly)' != 'true'">
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.CryptAcquireContext.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.CryptAcquireContext.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptAcquireContext.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptAcquireContext.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.CryptDestroyHash.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.CryptDestroyHash.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptDestroyHash.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptDestroyHash.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.CryptDestroyKey.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.CryptDestroyKey.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptDestroyKey.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptDestroyKey.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.CryptGetProvParam.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.CryptGetProvParam.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptGetProvParam.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptGetProvParam.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\Interop.CryptReleaseContext.cs">
-      <Link>Common\Interop\Windows\advapi32\Interop.CryptReleaseContext.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptReleaseContext.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptReleaseContext.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\SafeHashHandle.cs">
-      <Link>Common\Interop\Windows\advapi32\SafeHashHandle.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\SafeHashHandle.cs">
+      <Link>Common\Interop\Windows\Advapi32\SafeHashHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\SafeKeyHandle.cs">
-      <Link>Common\Interop\Windows\advapi32\SafeKeyHandle.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\SafeKeyHandle.cs">
+      <Link>Common\Interop\Windows\Advapi32\SafeKeyHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\advapi32\SafeProvHandle.cs">
-      <Link>Common\Interop\Windows\advapi32\SafeProvHandle.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\SafeProvHandle.cs">
+      <Link>Common\Interop\Windows\Advapi32\SafeProvHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Crypt32\Interop.CERT_CONTEXT.cs">
       <Link>Common\Interop\Windows\Crypt32\Interop.CERT_CONTEXT.cs</Link>
@@ -347,6 +348,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\NCrypt\Interop.ErrorCode.cs">
       <Link>Common\Interop\Windows\NCrypt\Interop.ErrorCode.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\NCrypt\Interop.Properties.cs">
+      <Link>Common\Interop\Windows\NCrypt\Interop.Properties.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\NCrypt\Interop.NCryptFreeObject.cs">
       <Link>Common\Interop\Windows\NCrypt\Interop.NCryptFreeObject.cs</Link>
     </Compile>
@@ -400,15 +404,6 @@
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
     <Compile Include="$(CommonPath)\System\Memory\PointerMemoryManager.cs">
       <Link>Common\System\Memory\PointerMemoryManager.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\Asn1V2.cs">
-      <Link>Common\System\Security\Cryptography\Asn1V2.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnReader.cs">
-      <Link>Common\System\Security\Cryptography\AsnReader.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Security\Cryptography\AsnWriter.cs">
-      <Link>Common\System\Security\Cryptography\AsnWriter.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Security\Cryptography\Oids.cs">
       <Link>Common\System\Security\Cryptography\Oids.cs</Link>
@@ -703,6 +698,6 @@
     <Compile Include="System\Security\Cryptography\Pkcs\Rfc3161TimestampTokenInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="@(AsnXml)" /> 
+    <None Include="@(AsnXml)" />
   </ItemGroup>
 </Project>

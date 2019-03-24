@@ -277,6 +277,19 @@ namespace System.Resources.Tests
             Assert.Equal(GetImageData(expectedValue), GetImageData(manager.GetObject(key, new CultureInfo("en-US"))));
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
+        [MemberData(nameof(EnglishImageResourceData))]
+        public static void GetObject_Images_ResourceSet(string key, object expectedValue)
+        {
+            var manager = new ResourceManager(
+                "System.Resources.Tests.Resources.TestResx.netstandard17",
+                typeof(ResourceManagerTests).GetTypeInfo().Assembly,
+                typeof(ResourceSet));
+            Assert.Equal(GetImageData(expectedValue), GetImageData(manager.GetObject(key)));
+            Assert.Equal(GetImageData(expectedValue), GetImageData(manager.GetObject(key, new CultureInfo("en-US"))));
+        }
+
         [Theory]
         [MemberData(nameof(EnglishResourceData))]
         public static void GetResourceSet_Strings(string key, string expectedValue)
@@ -362,6 +375,19 @@ namespace System.Resources.Tests
                     Assert.Equal(b, stream.ReadByte());
                 }
             }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "UwpAot currently allows custom assembly in ResourceManager constructor")]
+        public static void ConstructorNonRuntimeAssembly()
+        {
+            MockAssembly assembly = new MockAssembly();
+            Assert.Throws<ArgumentException>(() => new ResourceManager("name", assembly));
+            Assert.Throws<ArgumentException>(() => new ResourceManager("name", assembly, null));
+        }
+
+        private class MockAssembly : Assembly
+        {
         }
     }
 }

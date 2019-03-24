@@ -47,7 +47,7 @@ internal static partial class Interop
         internal static extern void SslSetAcceptState(SafeSslHandle ssl);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslGetVersion")]
-        private static extern IntPtr SslGetVersion(SafeSslHandle ssl);
+        internal static extern IntPtr SslGetVersion(SafeSslHandle ssl);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SslSetTlsExtHostName")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -68,11 +68,6 @@ internal static partial class Interop
             byte[] result = new byte[len];
             Marshal.Copy(protocol, result, 0, len);
             return result;
-        }
-
-        internal static string GetProtocolVersion(SafeSslHandle ssl)
-        {
-            return Marshal.PtrToStringAnsi(SslGetVersion(ssl));
         }
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_GetSslConnectionInfo")]
@@ -155,7 +150,11 @@ internal static partial class Interop
             Debug.Assert(chain != null, "X509Chain should not be null");
             Debug.Assert(chain.ChainElements.Count > 0, "chain.Build should have already been called");
 
-            for (int i = chain.ChainElements.Count - 2; i > 0; i--)
+            // Don't count the last item (the root)
+            int stop = chain.ChainElements.Count - 1;
+
+            // Don't include the first item (the cert whose private key we have)
+            for (int i = 1; i < stop; i++)
             {
                 SafeX509Handle dupCertHandle = Crypto.X509UpRef(chain.ChainElements[i].Certificate.Handle);
                 Crypto.CheckValidOpenSslHandle(dupCertHandle);

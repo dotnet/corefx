@@ -569,65 +569,69 @@ namespace System.Data.SqlClient
 
 
             SqlStatistics statistics = null;
-            statistics = SqlStatistics.StartTimer(Statistics);
-
-            // only prepare if batch with parameters
-            if (
-                this.IsPrepared && !this.IsDirty
-                || (this.CommandType == CommandType.StoredProcedure)
-                || (
-                        (System.Data.CommandType.Text == this.CommandType)
-                        && (0 == GetParameterCount(_parameters))
-                    )
-
-            )
+            try
             {
-                if (null != Statistics)
-                {
-                    Statistics.SafeIncrement(ref Statistics._prepares);
-                }
-                _hiddenPrepare = false;
-            }
-            else
-            {
-                // Validate the command outside of the try\catch to avoid putting the _stateObj on error
-                ValidateCommand(async: false);
+                statistics = SqlStatistics.StartTimer(Statistics);
 
-                bool processFinallyBlock = true;
-                try
+                // only prepare if batch with parameters
+                if (
+                    this.IsPrepared && !this.IsDirty
+                    || (this.CommandType == CommandType.StoredProcedure)
+                    || (
+                            (System.Data.CommandType.Text == this.CommandType)
+                            && (0 == GetParameterCount(_parameters))
+                        )
+                )
                 {
-                    // NOTE: The state object isn't actually needed for this, but it is still here for back-compat (since it does a bunch of checks)
-                    GetStateObject();
-
-                    // Loop through parameters ensuring that we do not have unspecified types, sizes, scales, or precisions
-                    if (null != _parameters)
+                    if (null != Statistics)
                     {
-                        int count = _parameters.Count;
-                        for (int i = 0; i < count; ++i)
+                        Statistics.SafeIncrement(ref Statistics._prepares);
+                    }
+                    _hiddenPrepare = false;
+                }
+                else
+                {
+                    // Validate the command outside of the try\catch to avoid putting the _stateObj on error
+                    ValidateCommand(async: false);
+
+                    bool processFinallyBlock = true;
+                    try
+                    {
+                        // NOTE: The state object isn't actually needed for this, but it is still here for back-compat (since it does a bunch of checks)
+                        GetStateObject();
+
+                        // Loop through parameters ensuring that we do not have unspecified types, sizes, scales, or precisions
+                        if (null != _parameters)
                         {
-                            _parameters[i].Prepare(this);
+                            int count = _parameters.Count;
+                            for (int i = 0; i < count; ++i)
+                            {
+                                _parameters[i].Prepare(this);
+                            }
+                        }
+
+                        InternalPrepare();
+                    }
+                    catch (Exception e)
+                    {
+                        processFinallyBlock = ADP.IsCatchableExceptionType(e);
+                        throw;
+                    }
+                    finally
+                    {
+                        if (processFinallyBlock)
+                        {
+                            _hiddenPrepare = false; // The command is now officially prepared
+
+                            ReliablePutStateObject();
                         }
                     }
-
-                    InternalPrepare();
-                }
-                catch (Exception e)
-                {
-                    processFinallyBlock = ADP.IsCatchableExceptionType(e);
-                    throw;
-                }
-                finally
-                {
-                    if (processFinallyBlock)
-                    {
-                        _hiddenPrepare = false; // The command is now officially prepared
-
-                        ReliablePutStateObject();
-                    }
                 }
             }
-
-            SqlStatistics.StopTimer(statistics);
+            finally
+            {
+                SqlStatistics.StopTimer(statistics);
+            }
         }
 
         private void InternalPrepare()
@@ -2218,6 +2222,13 @@ namespace System.Data.SqlClient
                         p.TypeName = r[colNames[(int)ProcParamsColIndex.TypeCatalogName]] + "." +
                             r[colNames[(int)ProcParamsColIndex.TypeSchemaName]] + "." +
                             r[colNames[(int)ProcParamsColIndex.TypeName]];
+
+                        // the constructed type name above is incorrectly formatted, it should be a 2 part name not 3
+                        // for compatibility we can't change this because the bug has existed for a long time and been 
+                        // worked around by users, so identify that it is present and catch it later in the execution
+                        // process once users can no longer interact with with the parameter type name
+                        p.IsDerivedParameterTypeName = true;
+
                     }
 
                     // XmlSchema name for Xml types
@@ -3057,7 +3068,7 @@ namespace System.Data.SqlClient
                 }
                 else
                 {
-                    Debug.Assert(false, "OnReturnStatus: SqlCommand got too many DONEPROC events");
+                    Debug.Fail("OnReturnStatus: SqlCommand got too many DONEPROC events");
                     parameters = null;
                 }
             }
@@ -3198,7 +3209,7 @@ namespace System.Data.SqlClient
                 }
                 else
                 {
-                    Debug.Assert(false, "OnReturnValue: SqlCommand got too many DONEPROC events");
+                    Debug.Fail("OnReturnValue: SqlCommand got too many DONEPROC events");
                     return null;
                 }
             }
@@ -3317,6 +3328,23 @@ namespace System.Data.SqlClient
                     // set default value bit
                     if (parameter.Direction != ParameterDirection.Output)
                     {
+                        // detect incorrectly derived type names unchanged by the caller and fix them
+                        if (parameter.IsDerivedParameterTypeName)
+                        {
+                            string[] parts = MultipartIdentifier.ParseMultipartIdentifier(parameter.TypeName, "[\"", "]\"", SR.SQL_TDSParserTableName, false);
+                            if (parts != null && parts.Length==4) // will always return int[4] right justified
+                            {
+                                if (
+                                    parts[3] != null && // name must not be null
+                                    parts[2] != null && // schema must not be null
+                                    parts[1] != null // server should not be null or we don't need to remove it
+                                )
+                                {
+                                    parameter.TypeName = QuoteIdentifier(parts.AsSpan(2,2));
+                                }
+                            }
+                        }
+
                         // remember that null == Convert.IsEmpty, DBNull.Value is a database null!
 
                         // Don't assume a default value exists for parameters in the case when
@@ -3389,7 +3417,7 @@ namespace System.Data.SqlClient
                     // InputOutput/Output parameters are aways sent
                     return true;
                 default:
-                    Debug.Assert(false, "Invalid ParameterDirection!");
+                    Debug.Fail("Invalid ParameterDirection!");
                     return false;
             }
         }
@@ -3661,9 +3689,14 @@ namespace System.Data.SqlClient
 
         // Adds quotes to each part of a SQL identifier that may be multi-part, while leaving
         //  the result as a single composite name.
-        private string ParseAndQuoteIdentifier(string identifier, bool isUdtTypeName)
+        private static string ParseAndQuoteIdentifier(string identifier, bool isUdtTypeName)
         {
             string[] strings = SqlParameter.ParseTypeName(identifier, isUdtTypeName);
+            return QuoteIdentifier(strings);
+        }
+
+        private static string QuoteIdentifier(ReadOnlySpan<string> strings)
+        {
             StringBuilder bld = new StringBuilder();
 
             // Stitching back together is a little tricky. Assume we want to build a full multi-part name
@@ -3678,7 +3711,7 @@ namespace System.Data.SqlClient
                 }
                 if (null != strings[i] && 0 != strings[i].Length)
                 {
-                    bld.Append(ADP.BuildQuotedString("[", "]", strings[i]));
+                    ADP.AppendQuotedString(bld, "[", "]", strings[i]);
                 }
             }
 

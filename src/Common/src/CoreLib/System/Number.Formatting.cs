@@ -250,6 +250,15 @@ namespace System
         private const int SinglePrecision = 9;
         private const int DoublePrecision = 17;
 
+        // SinglePrecisionCustomFormat and DoublePrecisionCustomFormat are used to ensure that
+        // custom format strings return the same string as in previous releases when the format
+        // would return x digits or less (where x is the value of the corresponding constant).
+        // In order to support more digits, we would need to update ParseFormatSpecifier to pre-parse
+        // the format and determine exactly how many digits are being requested and whether they
+        // represent "significant digits" or "digits after the decimal point".
+        private const int SinglePrecisionCustomFormat = 6;
+        private const int DoublePrecisionCustomFormat = 15;
+
         private const int DefaultPrecisionExponentialFormat = 6;
 
         private const int ScaleNAN = unchecked((int)0x80000000);
@@ -525,6 +534,13 @@ namespace System
             char fmt = ParseFormatSpecifier(format, out int precision);
             byte* pDigits = stackalloc byte[DoubleNumberBufferLength];
 
+            if (fmt == '\0')
+            {
+                // For back-compat we currently specially treat the precision for custom
+                // format specifiers. The constant has more details as to why.
+                precision = DoublePrecisionCustomFormat;
+            }
+
             NumberBuffer number = new NumberBuffer(NumberBufferKind.FloatingPoint, pDigits, DoubleNumberBufferLength);
             number.IsNegative = double.IsNegative(value);
 
@@ -563,6 +579,7 @@ namespace System
             }
             else
             {
+                Debug.Assert(precision == DoublePrecisionCustomFormat);
                 NumberToStringFormat(ref sb, ref number, format, info);
             }
             return null;
@@ -605,6 +622,13 @@ namespace System
             char fmt = ParseFormatSpecifier(format, out int precision);
             byte* pDigits = stackalloc byte[SingleNumberBufferLength];
 
+            if (fmt == '\0')
+            {
+                // For back-compat we currently specially treat the precision for custom
+                // format specifiers. The constant has more details as to why.
+                precision = SinglePrecisionCustomFormat;
+            }
+
             NumberBuffer number = new NumberBuffer(NumberBufferKind.FloatingPoint, pDigits, SingleNumberBufferLength);
             number.IsNegative = float.IsNegative(value);
 
@@ -643,6 +667,7 @@ namespace System
             }
             else
             {
+                Debug.Assert(precision == SinglePrecisionCustomFormat);
                 NumberToStringFormat(ref sb, ref number, format, info);
             }
             return null;
@@ -1698,6 +1723,11 @@ namespace System
                 case 'R':
                 case 'r':
                 {
+                    if (number.Kind != NumberBufferKind.FloatingPoint)
+                    {
+                        goto default;
+                    }
+
                     format = (char)(format - ('R' - 'G'));
                     Debug.Assert((format == 'G') || (format == 'g'));
                     goto case 'G';
@@ -1878,7 +1908,7 @@ namespace System
                     // The max is not bound since you can have formatting strings of the form "000,000..", and this
                     // should handle that case too.
 
-                    int[] groupDigits = info.numberGroupSizes;
+                    int[] groupDigits = info._numberGroupSizes;
 
                     int groupSizeIndex = 0;     // Index into the groupDigits array.
                     int groupTotalSizeCount = 0;
@@ -2086,7 +2116,7 @@ namespace System
                 switch (ch)
                 {
                     case '#':
-                        FormatFixed(ref sb, ref number, nMaxDigits, info, info.currencyGroupSizes, info.CurrencyDecimalSeparator, info.CurrencyGroupSeparator);
+                        FormatFixed(ref sb, ref number, nMaxDigits, info, info._currencyGroupSizes, info.CurrencyDecimalSeparator, info.CurrencyGroupSeparator);
                         break;
                     case '-':
                         sb.Append(info.NegativeSign);
@@ -2214,7 +2244,7 @@ namespace System
                 switch (ch)
                 {
                     case '#':
-                        FormatFixed(ref sb, ref number, nMaxDigits, info, info.numberGroupSizes, info.NumberDecimalSeparator, info.NumberGroupSeparator);
+                        FormatFixed(ref sb, ref number, nMaxDigits, info, info._numberGroupSizes, info.NumberDecimalSeparator, info.NumberGroupSeparator);
                         break;
                     case '-':
                         sb.Append(info.NegativeSign);
@@ -2321,7 +2351,7 @@ namespace System
                 switch (ch)
                 {
                     case '#':
-                        FormatFixed(ref sb, ref number, nMaxDigits, info, info.percentGroupSizes, info.PercentDecimalSeparator, info.PercentGroupSeparator);
+                        FormatFixed(ref sb, ref number, nMaxDigits, info, info._percentGroupSizes, info.PercentDecimalSeparator, info.PercentGroupSeparator);
                         break;
                     case '-':
                         sb.Append(info.NegativeSign);

@@ -119,7 +119,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.Associated);
-                return OpenProcessHandle();
+                return GetOrOpenProcessHandle();
             }
         }
 
@@ -657,7 +657,7 @@ namespace System.Diagnostics
                     {
                         if (value)
                         {
-                            OpenProcessHandle();
+                            GetOrOpenProcessHandle();
                             EnsureWatchingForExit();
                         }
                         else
@@ -861,7 +861,8 @@ namespace System.Diagnostics
                     {
                         if (_outputStreamReadMode == StreamReadMode.AsyncMode)
                         {
-                            _output.CancelOperation();
+                            _output?.CancelOperation();
+                            _output?.Dispose();
                         }
                         _standardOutput.Close();
                     }
@@ -870,7 +871,8 @@ namespace System.Diagnostics
                     {
                         if (_errorStreamReadMode == StreamReadMode.AsyncMode)
                         {
-                            _error.CancelOperation();
+                            _error?.CancelOperation();
+                            _error?.Dispose();
                         }
                         _standardError.Close();
                     }
@@ -997,7 +999,7 @@ namespace System.Diagnostics
         {
             if (!ProcessManager.IsProcessRunning(processId, machineName))
             {
-                throw new ArgumentException(SR.Format(SR.MissingProccess, processId.ToString(CultureInfo.CurrentCulture)));
+                throw new ArgumentException(SR.Format(SR.MissingProccess, processId.ToString()));
             }
 
             return new Process(machineName, ProcessManager.IsRemoteMachine(machineName), processId, null);
@@ -1128,7 +1130,7 @@ namespace System.Diagnostics
         /// Opens a long-term handle to the process, with all access.  If a handle exists,
         /// then it is reused.  If the process has exited, it throws an exception.
         /// </summary>
-        private SafeProcessHandle OpenProcessHandle()
+        private SafeProcessHandle GetOrOpenProcessHandle()
         {
             if (!_haveProcessHandle)
             {

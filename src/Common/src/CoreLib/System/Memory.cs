@@ -6,6 +6,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 
@@ -30,7 +31,7 @@ namespace System
         private readonly object _object;
         private readonly int _index;
         private readonly int _length;
-        
+
         /// <summary>
         /// Creates a new memory over the entirety of the target array.
         /// </summary>
@@ -164,7 +165,13 @@ namespace System
             // No validation performed in release builds; caller must provide any necessary validation.
 
             // 'obj is T[]' below also handles things like int[] <-> uint[] being convertible
-            Debug.Assert((obj == null) || (typeof(T) == typeof(char) && obj is string) || (obj is T[]) || (obj is MemoryManager<T>));
+            Debug.Assert((obj == null)
+                || (typeof(T) == typeof(char) && obj is string)
+#if FEATURE_UTF8STRING
+                || ((typeof(T) == typeof(byte) || typeof(T) == typeof(Char8)) && obj is Utf8String)
+#endif // FEATURE_UTF8STRING
+                || (obj is T[])
+                || (obj is MemoryManager<T>));
 
             _object = obj;
             _index = start;
@@ -212,6 +219,14 @@ namespace System
             {
                 return (_object is string str) ? str.Substring(_index, _length) : Span.ToString();
             }
+#if FEATURE_UTF8STRING
+            else if (typeof(T) == typeof(Char8))
+            {
+                // TODO_UTF8STRING: Call into optimized transcoding routine when it's available.
+                Span<T> span = Span;
+                return Encoding.UTF8.GetString(new ReadOnlySpan<byte>(ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(span)), span.Length));
+            }
+#endif // FEATURE_UTF8STRING
             return string.Format("System.Memory<{0}>[{1}]", typeof(T).Name, _length);
         }
 
@@ -259,6 +274,35 @@ namespace System
         }
 
         /// <summary>
+        /// Forms a slice out of the given memory, beginning at 'startIndex'
+        /// </summary>
+        /// <param name="startIndex">The index at which to begin this slice.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Memory<T> Slice(Index startIndex)
+        {
+            int actualIndex = startIndex.GetOffset(_length);
+            return Slice(actualIndex);
+        }
+
+        /// <summary>
+        /// Forms a slice out of the given memory using the range start and end indexes.
+        /// </summary>
+        /// <param name="range">The range used to slice the memory using its start and end indexes.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Memory<T> Slice(Range range)
+        {
+            (int start, int length) = range.GetOffsetAndLength(_length);
+            // It is expected for _index + start to be negative if the memory is already pre-pinned.
+            return new Memory<T>(_object, _index + start, length);
+        }
+
+        /// <summary>
+        /// Forms a slice out of the given memory using the range start and end indexes.
+        /// </summary>
+        /// <param name="range">The range used to slice the memory using its start and end indexes.</param>
+        public Memory<T> this[Range range] => Slice(range);
+
+        /// <summary>
         /// Returns a span from the memory.
         /// </summary>
         public unsafe Span<T> Span
@@ -288,6 +332,13 @@ namespace System
                         refToReturn = ref Unsafe.As<char, T>(ref Unsafe.As<string>(tmpObject).GetRawStringData());
                         lengthOfUnderlyingSpan = Unsafe.As<string>(tmpObject).Length;
                     }
+#if FEATURE_UTF8STRING
+                    else if ((typeof(T) == typeof(byte) || typeof(T) == typeof(Char8)) && tmpObject.GetType() == typeof(Utf8String))
+                    {
+                        refToReturn = ref Unsafe.As<byte, T>(ref Unsafe.As<Utf8String>(tmpObject).DangerousGetMutableReference());
+                        lengthOfUnderlyingSpan = Unsafe.As<Utf8String>(tmpObject).Length;
+                    }
+#endif // FEATURE_UTF8STRING
                     else if (RuntimeHelpers.ObjectHasComponentSize(tmpObject))
                     {
                         // We know the object is not null, it's not a string, and it is variable-length. The only
@@ -336,7 +387,7 @@ namespace System
                         ThrowHelper.ThrowArgumentOutOfRangeException();
                     }
 #endif
-                    
+
                     refToReturn = ref Unsafe.Add(ref refToReturn, desiredStartIndex);
                     lengthOfUnderlyingSpan = desiredLength;
                 }
@@ -398,6 +449,14 @@ namespace System
                     ref char stringData = ref Unsafe.Add(ref s.GetRawStringData(), _index);
                     return new MemoryHandle(Unsafe.AsPointer(ref stringData), handle);
                 }
+#if FEATURE_UTF8STRING
+                else if ((typeof(T) == typeof(byte) || typeof(T) == typeof(Char8)) && tmpObject is Utf8String utf8String)
+                {
+                    GCHandle handle = GCHandle.Alloc(tmpObject, GCHandleType.Pinned);
+                    ref byte stringData = ref utf8String.DangerousGetMutableReference(_index);
+                    return new MemoryHandle(Unsafe.AsPointer(ref stringData), handle);
+                }
+#endif // FEATURE_UTF8STRING
                 else if (RuntimeHelpers.ObjectHasComponentSize(tmpObject))
                 {
                     // 'tmpObject is T[]' below also handles things like int[] <-> uint[] being convertible
