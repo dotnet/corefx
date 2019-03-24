@@ -170,9 +170,7 @@ namespace System.Data.ProviderBase {
             string instanceName = null;
 
             if (!ADP.IsEmpty(categoryName)) {
-                if (ADP.IsPlatformNT5) {
-                    instanceName = GetInstanceName();
-                }
+                instanceName = GetInstanceName();
             }
             
             // level 0-3: hard connects/disconnects, plus basic pool/pool entry statistics

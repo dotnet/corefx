@@ -363,6 +363,25 @@ namespace System.Data.Common
         }
 
         //
+        // IDbCommand
+        //
+
+        static internal InvalidOperationException CommandAsyncOperationCompleted() {
+            return InvalidOperation(Res.GetString(Res.SQL_AsyncOperationCompleted));
+        }
+
+        static internal Exception CommandTextRequired(string method) {
+            return InvalidOperation(Res.GetString(Res.ADP_CommandTextRequired, method));
+        }
+
+        static internal InvalidOperationException ConnectionRequired(string method) {
+            return InvalidOperation(Res.GetString(Res.ADP_ConnectionRequired, method));
+        }
+        static internal InvalidOperationException OpenConnectionRequired(string method, ConnectionState state) {
+            return InvalidOperation(Res.GetString(Res.ADP_OpenConnectionRequired, method, ADP.ConnectionStateMsg(state)));
+        }
+
+        //
         // : Stream
         //
         internal static Exception StreamClosed([CallerMemberName] string method = "")
