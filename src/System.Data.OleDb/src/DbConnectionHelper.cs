@@ -179,28 +179,28 @@ namespace System.Data.OleDb {
 
         partial void RepairInnerConnection();
 
-        // NOTE: This is just a private helper because OracleClient V1.1 shipped
-        // with a different argument name and it's a breaking change to not use
-        // the same argument names in V2.0 (VB Named Parameter Binding--Ick)
-        private void EnlistDistributedTransactionHelper(System.EnterpriseServices.ITransaction transaction) {
-            SysTx.Transaction indigoTransaction = null;
+        //// NOTE: This is just a private helper because OracleClient V1.1 shipped
+        //// with a different argument name and it's a breaking change to not use
+        //// the same argument names in V2.0 (VB Named Parameter Binding--Ick)
+        //private void EnlistDistributedTransactionHelper(System.EnterpriseServices.ITransaction transaction) {
+        //    SysTx.Transaction indigoTransaction = null;
 
-            if (null != transaction) {
-                indigoTransaction = SysTx.TransactionInterop.GetTransactionFromDtcTransaction((SysTx.IDtcTransaction)transaction);
-            }
+        //    if (null != transaction) {
+        //        indigoTransaction = SysTx.TransactionInterop.GetTransactionFromDtcTransaction((SysTx.IDtcTransaction)transaction);
+        //    }
 
-            RepairInnerConnection();
-            // NOTE: since transaction enlistment involves round trips to the
-            // server, we don't want to lock here, we'll handle the race conditions
-            // elsewhere.
-            InnerConnection.EnlistTransaction(indigoTransaction);
+        //    RepairInnerConnection();
+        //    // NOTE: since transaction enlistment involves round trips to the
+        //    // server, we don't want to lock here, we'll handle the race conditions
+        //    // elsewhere.
+        //    InnerConnection.EnlistTransaction(indigoTransaction);
 
-            // NOTE: If this outer connection were to be GC'd while we're
-            // enlisting, the pooler would attempt to reclaim the inner connection
-            // while we're attempting to enlist; not sure how likely that is but
-            // we should consider a GC.KeepAlive(this) here.
-            GC.KeepAlive(this);
-        }
+        //    // NOTE: If this outer connection were to be GC'd while we're
+        //    // enlisting, the pooler would attempt to reclaim the inner connection
+        //    // while we're attempting to enlist; not sure how likely that is but
+        //    // we should consider a GC.KeepAlive(this) here.
+        //    GC.KeepAlive(this);
+        //}
 
         override public void EnlistTransaction(SysTx.Transaction transaction) {
 

@@ -327,7 +327,7 @@ namespace System.Data.Common {
         internal const int    OleDbServices             = ~(/*DBPROPVAL_OS_AGR_AFTERSESSION*/0x00000008 | /*DBPROPVAL_OS_CLIENTCURSOR*/0x00000004); // -13
         internal const string Provider                  = "";
 
-
+        internal const int ConnectTimeout = 15;
     }
 
     internal static class DbConnectionOptionKeywords {
@@ -363,7 +363,8 @@ namespace System.Data.Common {
         internal const string OleDbServices             = "OLE DB Services";
         internal const string Provider                  = "Provider";
 
-     
+        internal const string DataSource = "Data Source";
+        internal const string PersistSecurityInfo = "Persist Security Info";
     }
 
     internal static class DbConnectionStringSynonyms {

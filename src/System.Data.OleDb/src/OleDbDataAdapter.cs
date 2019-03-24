@@ -131,40 +131,27 @@ namespace System.Data.OleDb {
         }
 
         public int Fill(DataTable dataTable, object ADODBRecordSet) {
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbDataAdapter.Fill|API> %d#, dataTable, ADODBRecordSet\n", ObjectID);
-            try {
-                if (null == dataTable) {
-                    throw ADP.ArgumentNull("dataTable");
-                }
-                if (null == ADODBRecordSet) {
-                    throw ADP.ArgumentNull("adodb");
-                }
-                return FillFromADODB((object)dataTable, ADODBRecordSet, null, false); // MDAC 59249
+            if (null == dataTable) {
+                throw ADP.ArgumentNull("dataTable");
             }
-            finally {
-                Bid.ScopeLeave(ref hscp);
+            if (null == ADODBRecordSet) {
+                throw ADP.ArgumentNull("adodb");
             }
+            return FillFromADODB((object)dataTable, ADODBRecordSet, null, false); // MDAC 59249
         }
 
         public int Fill(DataSet dataSet, object ADODBRecordSet, string srcTable) {
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbDataAdapter.Fill|API> %d#, dataSet, ADODBRecordSet, srcTable='%ls'\n", ObjectID, srcTable);
-            try {
-                if (null == dataSet) {
-                    throw ADP.ArgumentNull("dataSet");
-                }
-                if (null == ADODBRecordSet) {
-                    throw ADP.ArgumentNull("adodb");
-                }
-                if (ADP.IsEmpty(srcTable)) {
-                    throw ADP.FillRequiresSourceTableName("srcTable");
-                }
-                return FillFromADODB((object)dataSet, ADODBRecordSet, srcTable, true);
+
+            if (null == dataSet) {
+                throw ADP.ArgumentNull("dataSet");
             }
-            finally {
-                Bid.ScopeLeave(ref hscp);
+            if (null == ADODBRecordSet) {
+                throw ADP.ArgumentNull("adodb");
             }
+            if (ADP.IsEmpty(srcTable)) {
+                throw ADP.FillRequiresSourceTableName("srcTable");
+            }
+            return FillFromADODB((object)dataSet, ADODBRecordSet, srcTable, true);
         }
 
         private int FillFromADODB(Object data, object adodb, string srcTable, bool multipleResults) {

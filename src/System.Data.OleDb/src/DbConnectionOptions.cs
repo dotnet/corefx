@@ -118,8 +118,6 @@ namespace System.Data.Common {
         //     strip quotes from value
         internal readonly bool UseOdbcRules;
 
-        private System.Security.PermissionSet _permissionset;
-
         // called by derived classes that may cache based on connectionString
         public DbConnectionOptions(string connectionString)
             : this(connectionString, null, false) {

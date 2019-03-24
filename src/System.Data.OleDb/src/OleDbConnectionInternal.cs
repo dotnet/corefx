@@ -212,9 +212,9 @@ namespace System.Data.OleDb {
             return (UnsafeNativeMethods.ICommandText)icommandText;
         }
 
-        override protected void Activate(SysTx.Transaction transaction) {
-            throw ADP.NotSupported();
-        }
+        //override protected void Activate(SysTx.Transaction transaction) {
+        //    throw ADP.NotSupported();
+        //}
 
         override public DbTransaction BeginTransaction(IsolationLevel isolationLevel) {
 
@@ -276,22 +276,19 @@ namespace System.Data.OleDb {
             base.Dispose();
         }
 
-        override public void EnlistTransaction(SysTx.Transaction transaction) { // MDAC 78997
+        //override public void EnlistTransaction(SysTx.Transaction transaction) { // MDAC 78997
 
-            OleDbConnection outerConnection = Connection;
-            if (null != LocalTransaction) {
-                throw ADP.LocalTransactionPresent();
-            }
-            EnlistTransactionInternal(transaction);
-        }
+        //    OleDbConnection outerConnection = Connection;
+        //    if (null != LocalTransaction) {
+        //        throw ADP.LocalTransactionPresent();
+        //    }
+        //    EnlistTransactionInternal(transaction);
+        //}
 
         internal void EnlistTransactionInternal(SysTx.Transaction transaction) {
 
             SysTx.IDtcTransaction oleTxTransaction = ADP.GetOletxTransaction(transaction);
 
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.ITransactionJoin.JoinTransaction|API|OLEDB> %d#\n", ObjectID);
-            try {
                 using(ITransactionJoinWrapper transactionJoin = ITransactionJoin()) {
                     if (null == transactionJoin.Value) {
                         throw ODB.TransactionsNotSupported(Provider, (Exception)null);
@@ -299,10 +296,7 @@ namespace System.Data.OleDb {
                     transactionJoin.Value.JoinTransaction(oleTxTransaction, (int) IsolationLevel.Unspecified, 0, IntPtr.Zero);
                     _unEnlistDuringDeactivate = (null != transaction);
                 }
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
+
             EnlistedTransaction = transaction;
         }
 
@@ -533,9 +527,7 @@ namespace System.Data.OleDb {
         }
 
         internal DataTable GetSchemaRowset(Guid schema, object[] restrictions) {
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbConnectionInternal.GetSchemaRowset|INFO> %d#, schema=%ls, restrictions\n", ObjectID, schema);
-            try {
+
                 if (null == restrictions) { // MDAC 62243
                     restrictions = new object[0];
                 }
@@ -568,10 +560,6 @@ namespace System.Data.OleDb {
                     }
                     return dataTable;
                 }
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
         }
 
         // returns true if there is an active data reader on the specified command

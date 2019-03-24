@@ -370,7 +370,6 @@ namespace System.Data.OleDb {
         }
 
         override public void Cancel() {
-            IntPtr hscp;
             unchecked { _changeID++; }
 
             UnsafeNativeMethods.ICommandText icmdtxt = _icommandText;

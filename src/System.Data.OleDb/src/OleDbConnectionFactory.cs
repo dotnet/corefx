@@ -121,14 +121,6 @@ namespace System.Data.OleDb
             return null;
         }
 
-        override protected int GetObjectId(DbConnection connection) {
-            OleDbConnection c = (connection as OleDbConnection);
-            if (null != c) {
-                return c.ObjectID;
-            }
-            return 0;
-        }
-
         override internal void SetConnectionPoolGroup(DbConnection outerConnection, DbConnectionPoolGroup poolGroup) {
             OleDbConnection c = (outerConnection as OleDbConnection);
             if (null != c) {

@@ -79,8 +79,6 @@ namespace System.Data.OleDb {
                             propertyInfo._lowercase = propinfo.pwszDescription.ToLower(CultureInfo.InvariantCulture);
                             propertyInfo._type = PropertyInfoSet.FromVtType(propinfo.vtType);
 
-                            if (Bid.AdvancedOn) {
-                            }
                             propertyLookup[propertyInfo._lowercase] = propertyInfo;
                         }
                     }

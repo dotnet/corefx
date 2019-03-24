@@ -63,57 +63,43 @@ namespace System.Data.OleDb {
         ]
         override public int ConnectionTimeout {
             get {
-                IntPtr hscp;
-                Bid.ScopeEnter(out hscp, "<oledb.OleDbConnection.get_ConnectionTimeout|API> %d#\n", ObjectID);
-                try {
-                    object value = null;
-                    if (IsOpen) {
-                        value = GetDataSourceValue(OleDbPropertySetGuid.DBInit, ODB.DBPROP_INIT_TIMEOUT);
-                    }
-                    else {
-                        OleDbConnectionString constr = this.OleDbConnectionStringValue;
-                        value = (null != constr) ? constr.ConnectTimeout : ADP.DefaultConnectionTimeout;
-                    }
-                    if (null != value) {
-                        return Convert.ToInt32(value, CultureInfo.InvariantCulture);
-                    }
-                    else {
-                        return ADP.DefaultConnectionTimeout;
-                    }
+                object value = null;
+                if (IsOpen) {
+                    value = GetDataSourceValue(OleDbPropertySetGuid.DBInit, ODB.DBPROP_INIT_TIMEOUT);
                 }
-                finally {
-                    Bid.ScopeLeave(ref hscp);
+                else {
+                    OleDbConnectionString constr = this.OleDbConnectionStringValue;
+                    value = (null != constr) ? constr.ConnectTimeout : ADP.DefaultConnectionTimeout;
+                }
+                if (null != value) {
+                    return Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                }
+                else {
+                    return ADP.DefaultConnectionTimeout;
                 }
             }
         }
 
         override public string Database {
             get {
-                IntPtr hscp;
-                Bid.ScopeEnter(out hscp, "<oledb.OleDbConnection.get_Database|API> %d#\n", ObjectID);
-                try {
-                    OleDbConnectionString constr = (OleDbConnectionString)UserConnectionOptions;
-                    object value = (null != constr) ? constr.InitialCatalog : ADP.StrEmpty;
-                    if ((null != value) && !((string)value).StartsWith(DbConnectionOptions.DataDirectory, StringComparison.OrdinalIgnoreCase)) {
-                        OleDbConnectionInternal connection = GetOpenConnection();
-                        if (null != connection) {
-                            if (connection.HasSession) {
-                                value = GetDataSourceValue(OleDbPropertySetGuid.DataSource, ODB.DBPROP_CURRENTCATALOG);
-                            }
-                            else {
-                                value = GetDataSourceValue(OleDbPropertySetGuid.DBInit, ODB.DBPROP_INIT_CATALOG);
-                            }
+                OleDbConnectionString constr = (OleDbConnectionString)UserConnectionOptions;
+                object value = (null != constr) ? constr.InitialCatalog : ADP.StrEmpty;
+                if ((null != value) && !((string)value).StartsWith(DbConnectionOptions.DataDirectory, StringComparison.OrdinalIgnoreCase)) {
+                    OleDbConnectionInternal connection = GetOpenConnection();
+                    if (null != connection) {
+                        if (connection.HasSession) {
+                            value = GetDataSourceValue(OleDbPropertySetGuid.DataSource, ODB.DBPROP_CURRENTCATALOG);
                         }
                         else {
-                            constr = this.OleDbConnectionStringValue;
-                            value = (null != constr) ? constr.InitialCatalog : ADP.StrEmpty;
+                            value = GetDataSourceValue(OleDbPropertySetGuid.DBInit, ODB.DBPROP_INIT_CATALOG);
                         }
                     }
-                    return Convert.ToString(value, CultureInfo.InvariantCulture);
+                    else {
+                        constr = this.OleDbConnectionStringValue;
+                        value = (null != constr) ? constr.InitialCatalog : ADP.StrEmpty;
+                    }
                 }
-                finally {
-                    Bid.ScopeLeave(ref hscp);
-                }
+                return Convert.ToString(value, CultureInfo.InvariantCulture);
             }
         }
 
@@ -122,9 +108,6 @@ namespace System.Data.OleDb {
         ]
         override public string DataSource {
             get {
-                IntPtr hscp;
-                Bid.ScopeEnter(out hscp, "<oledb.OleDbConnection.get_DataSource|API> %d#\n", ObjectID);
-                try {
                     OleDbConnectionString constr = (OleDbConnectionString)UserConnectionOptions;
                     object value = (null != constr) ? constr.DataSource : ADP.StrEmpty;
                     if ((null != value) && !((string)value).StartsWith(DbConnectionOptions.DataDirectory, StringComparison.OrdinalIgnoreCase)) {
@@ -140,10 +123,6 @@ namespace System.Data.OleDb {
                         }
                     }
                     return Convert.ToString(value, CultureInfo.InvariantCulture);
-                }
-                finally {
-                    Bid.ScopeLeave(ref hscp);
-                }
             }
         }
 
@@ -205,9 +184,6 @@ namespace System.Data.OleDb {
         EditorBrowsable(EditorBrowsableState.Advanced),
         ]
         public void ResetState() { // MDAC 58606
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbCommand.ResetState|API> %d#\n", ObjectID);
-            try {
                 if (IsOpen) {
                     object value = GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_CONNECTIONSTATUS);
                     if (value is Int32) {
@@ -229,10 +205,6 @@ namespace System.Data.OleDb {
                         }
                     }
                 }
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
         }
 
         public event OleDbInfoMessageEventHandler InfoMessage {
@@ -297,19 +269,11 @@ namespace System.Data.OleDb {
         }
 
         override public void ChangeDatabase(string value) {
-
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbConnection.ChangeDatabase|API> %d#, value='%ls'\n", ObjectID, value);
-            try {
-                CheckStateOpen(ADP.ChangeDatabase);
-                if ((null == value) || (0 == value.Trim().Length)) { // MDAC 62679
-                    throw ADP.EmptyDatabaseName();
-                }
-                SetDataSourcePropertyValue(OleDbPropertySetGuid.DataSource, ODB.DBPROP_CURRENTCATALOG, ODB.Current_Catalog, true, value);
+            CheckStateOpen(ADP.ChangeDatabase);
+            if ((null == value) || (0 == value.Trim().Length)) { // MDAC 62679
+                throw ADP.EmptyDatabaseName();
             }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
+            SetDataSourcePropertyValue(OleDbPropertySetGuid.DataSource, ODB.DBPROP_CURRENTCATALOG, ODB.Current_Catalog, true, value);
         }
 
         internal void CheckStateOpen(string method) {
@@ -347,10 +311,6 @@ namespace System.Data.OleDb {
         // suppress this message - we cannot use SafeHandle here. Also, see notes in the code (VSTFDEVDIV# 560355)
         [SuppressMessage("Microsoft.Reliability", "CA2004:RemoveCallsToGCKeepAlive")]
         override protected DbTransaction BeginDbTransaction(IsolationLevel isolationLevel) {
-            IntPtr hscp;
-
-            Bid.ScopeEnter(out hscp, "<prov.OleDbConnection.BeginDbTransaction|API> %d#, isolationLevel=%d{ds.IsolationLevel}", ObjectID, (int)isolationLevel);
-            try {
 
                 DbTransaction transaction = InnerConnection.BeginTransaction(isolationLevel);
 
@@ -361,15 +321,11 @@ namespace System.Data.OleDb {
                 GC.KeepAlive(this);
 
                 return transaction;
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
         }
 
-        public void EnlistDistributedTransaction(System.EnterpriseServices.ITransaction transaction) {
-            EnlistDistributedTransactionHelper(transaction);
-        }
+        //public void EnlistDistributedTransaction(System.EnterpriseServices.ITransaction transaction) {
+        //    EnlistDistributedTransactionHelper(transaction);
+        //}
 
         internal object GetDataSourcePropertyValue(Guid propertySet, int propertyID) {
             OleDbConnectionInternal connection = GetOpenConnection();
@@ -412,9 +368,6 @@ namespace System.Data.OleDb {
 
         public DataTable GetOleDbSchemaTable(Guid schema, object[] restrictions) { // MDAC 61846
             
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbConnection.GetOleDbSchemaTable|API> %d#, schema=%ls, restrictions\n", ObjectID, schema);
-            try {
                 CheckStateOpen(ADP.GetOleDbSchemaTable);
                 OleDbConnectionInternal connection = GetOpenConnection();
 
@@ -448,10 +401,6 @@ namespace System.Data.OleDb {
                     }
                     throw ODB.NotSupportedSchemaTable(schema, this); // MDAC 63279
                 }
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
         }
 
         internal DataTable GetSchemaRowset(Guid schema, object[] restrictions) {
@@ -475,8 +424,7 @@ namespace System.Data.OleDb {
                 try {
                     OleDbException exception = OleDbException.CreateException(errorInfo, errorCode, null);
                     OleDbInfoMessageEventArgs e = new OleDbInfoMessageEventArgs(exception);
-                    if (Bid.TraceOn) {
-                    }
+
                     handler(this, e);
                 }
                 catch (Exception e) { // eat the exception
@@ -596,16 +544,11 @@ namespace System.Data.OleDb {
 
         // @devnote: should be multithread safe
         static public void ReleaseObjectPool() {
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbConnection.ReleaseObjectPool|API>\n");
-            try {
-                OleDbConnectionString.ReleaseObjectPool();
-                OleDbConnectionInternal.ReleaseObjectPool();
-                OleDbConnectionFactory.SingletonInstance.ClearAllPools();
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
+
+            OleDbConnectionString.ReleaseObjectPool();
+            OleDbConnectionInternal.ReleaseObjectPool();
+            OleDbConnectionFactory.SingletonInstance.ClearAllPools();
+
         }
 
         static private void ResetState(OleDbConnection connection) {

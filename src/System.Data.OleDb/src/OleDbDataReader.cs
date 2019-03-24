@@ -223,9 +223,6 @@ namespace System.Data.OleDb {
         }
 
         override public DataTable GetSchemaTable() {
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbDataReader.GetSchemaTable|API> %d#\n", ObjectID);
-            try {
                 DataTable schemaTable = _dbSchemaTable;
                 if (null == schemaTable) {
                     MetaData[] metadata = MetaData;
@@ -242,10 +239,6 @@ namespace System.Data.OleDb {
                     //throw ADP.DataReaderNoData();
                 }
                 return schemaTable;
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
         }
 
         internal void BuildMetaInfo() {
@@ -569,9 +562,7 @@ namespace System.Data.OleDb {
         }
 
         override public void Close() {
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbDataReader.Close|API> %d#\n", ObjectID);
-            try {
+
                 OleDbConnection con = _connection;
                 OleDbCommand cmd = _command;
                 Bindings bindings = _parameterBindings;
@@ -640,10 +631,6 @@ namespace System.Data.OleDb {
                 if (null != rowHandleNativeBuffer) {
                     rowHandleNativeBuffer.Dispose();
                 }
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
         }
 
         internal void CloseReaderFromConnection(bool canceling) {
@@ -1139,9 +1126,6 @@ namespace System.Data.OleDb {
         }
 
         override public bool NextResult() {
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbDataReader.NextResult|API> %d#\n", ObjectID);
-            try {
                 bool retflag = false;
                 if (IsClosed) {
                     throw ADP.DataReaderClosed("NextResult");
@@ -1193,16 +1177,9 @@ namespace System.Data.OleDb {
                     _hasRows = false; // MDAC 85850
                 }
                 return retflag;
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
         }
 
         override public bool Read() {
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbDataReader.Read|API> %d#\n", ObjectID);
-            try {
                 bool retflag = false;
                 OleDbCommand command = _command;
                 if ((null != command) && command.canceling) { // MDAC 69986
@@ -1227,10 +1204,6 @@ namespace System.Data.OleDb {
                     throw ADP.DataReaderClosed("Read");
                 }
                 return retflag;
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
         }
 
         private bool ReadRow() {
@@ -1467,9 +1440,6 @@ namespace System.Data.OleDb {
               //bindings.MemOwner     = /*DBMEMOWNER_CLIENTOWNED*/0;
               //bindings.ParamIO      = ODB.DBPARAMIO_NOTPARAM;
               //bindings.Flags        = 0;
-
-                if (Bid.AdvancedOn) {
-                }
             }
 
             int count = 0, indexStart = 0;

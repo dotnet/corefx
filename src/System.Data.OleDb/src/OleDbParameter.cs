@@ -388,8 +388,6 @@ namespace System.Data.OleDb {
           //bindings.ParameterChangeID = changeID; // bind until something changes
             Debug.Assert(_changeID == changeID, "parameter has unexpectedly changed");
 
-            if (Bid.AdvancedOn) {
-            }
             return IsParameterComputed();
         }
 

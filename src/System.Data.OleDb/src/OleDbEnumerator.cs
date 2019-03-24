@@ -61,19 +61,11 @@ namespace System.Data.OleDb {
         }
         
         static public OleDbDataReader GetRootEnumerator() {
-
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbEnumerator.GetRootEnumerator|API>\n");
-            try {
-                //readonly Guid CLSID_MSDAENUM = new Guid(0xc8b522d0,0x5cf3,0x11ce,0xad,0xe5,0x00,0xaa,0x00,0x44,0x77,0x3d);
-                //Type msdaenum = Type.GetTypeFromCLSID(CLSID_MSDAENUM, true);
-                const string PROGID_MSDAENUM = "MSDAENUM";
-                Type msdaenum = Type.GetTypeFromProgID(PROGID_MSDAENUM, true);
-                return GetEnumeratorFromType(msdaenum);
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
+            //readonly Guid CLSID_MSDAENUM = new Guid(0xc8b522d0,0x5cf3,0x11ce,0xad,0xe5,0x00,0xaa,0x00,0x44,0x77,0x3d);
+            //Type msdaenum = Type.GetTypeFromCLSID(CLSID_MSDAENUM, true);
+            const string PROGID_MSDAENUM = "MSDAENUM";
+            Type msdaenum = Type.GetTypeFromProgID(PROGID_MSDAENUM, true);
+            return GetEnumeratorFromType(msdaenum);
         }
     }
 }

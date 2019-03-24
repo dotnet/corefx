@@ -151,9 +151,6 @@ namespace System.Data.OleDb {
 
         public OleDbTransaction Begin(IsolationLevel isolevel) {
 
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbTransaction.Begin|API> %d#, isolevel=%d{IsolationLevel}", ObjectID, (int)isolevel);
-            try {
                 if (null == _transaction) {
                     throw ADP.TransactionZombied(this);
                 }
@@ -176,10 +173,6 @@ namespace System.Data.OleDb {
                     }
                 }
                 return transaction;
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
         }
 
         public OleDbTransaction Begin() {
@@ -198,17 +191,10 @@ namespace System.Data.OleDb {
 
         override public void Commit() {
 
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbTransaction.Commit|API> %d#", ObjectID);
-            try {
-                if (null == _transaction) {
-                    throw ADP.TransactionZombied(this);
-                }
-                CommitInternal();
+            if (null == _transaction) {
+                throw ADP.TransactionZombied(this);
             }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
+            CommitInternal();
         }
 
         private void CommitInternal() {
@@ -270,18 +256,11 @@ namespace System.Data.OleDb {
         }
 
         override public void Rollback() {
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbTransaction.Rollback|API> %d#", ObjectID);
-            try {
                 if (null == _transaction) {
                     throw ADP.TransactionZombied(this);
                 }
                 DisposeManaged();
                 RollbackInternal(true); // no recover if this throws an exception
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
         }
 
         /*protected virtual*/internal OleDbHResult RollbackInternal(bool exceptionHandling) {
