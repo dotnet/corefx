@@ -181,7 +181,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
                     ' it can occur with user-defined conversions.  If the two param types widen to each other
                     ' (necessarily by using user-defined conversions), and the argument type is known and
                     ' is identical to one of the parameter types, then that parameter wins.  Otherwise,
-                    ' if the arugment type is not specified, we can't make a decision and both lose.
+                    ' if the argument type is not specified, we can't make a decision and both lose.
 
                     If argumentType IsNot Nothing AndAlso argumentType Is leftType Then
                         leftWins = True
