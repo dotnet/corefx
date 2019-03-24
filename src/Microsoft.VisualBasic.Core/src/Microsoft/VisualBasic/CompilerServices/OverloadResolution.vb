@@ -1363,7 +1363,7 @@ RetryInference:
                 End If
             End If
 
-            'Peform the conversion to the parameter type and return the result.
+            'Perform the conversion to the parameter type and return the result.
             Return Conversions.ChangeType(argument, parameterType)
         End Function
 
