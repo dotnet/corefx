@@ -81,7 +81,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
         End Function
 
         Private Enum ComparisonType
-            ParameterSpecificty
+            ParameterSpecificity
             GenericSpecificityBasedOnMethodGenericParams
             GenericSpecificityBasedOnTypeGenericParams
         End Enum
@@ -2181,7 +2181,7 @@ skipargument:
                             rightWinsAtLeastOnce,
                             bothLose)
 
-                    Case ComparisonType.ParameterSpecificty
+                    Case ComparisonType.ParameterSpecificity
                         ' Compare ParameterSpecificity
                         CompareParameterSpecificity(
                                 argumentType,
@@ -2252,7 +2252,7 @@ skipargument:
                             rightWinsAtLeastOnce,
                             bothLose)
 
-                    Case ComparisonType.ParameterSpecificty
+                    Case ComparisonType.ParameterSpecificity
                         ' Compare ParameterSpecificity
                         CompareParameterSpecificity(
                             argumentType,
@@ -2315,7 +2315,7 @@ skipargument:
                             contender,
                             arguments,
                             argumentNames,
-                            ComparisonType.ParameterSpecificty,
+                            ComparisonType.ParameterSpecificity,
                             continueWhenBothLose:=True)
 
                     If bestOfTheTwo Is currentCandidate Then
