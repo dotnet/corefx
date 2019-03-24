@@ -46,7 +46,7 @@ namespace System.CodeDom.Compiler
         /// For compilers that only implicitly reference the "core" or "standard" assembly by default, this option can be used on its own.
         /// For compilers that implicitly reference more assemblies on top of the "core" / "standard" assembly, using this option may require
         /// specifying additional entries in the <code>System.CodeDom.Compiler.<bold>ReferencedAssemblies</bold></code> collection.<br />
-        /// Note: An <code>ICodeCompiler</code> / <code>CoodeDomProvider</code> implementation may choose to ignore this property.
+        /// Note: An <code>ICodeCompiler</code> / <code>CodeDomProvider</code> implementation may choose to ignore this property.
         /// </summary>
         public string CoreAssemblyFileName { get; set; } = string.Empty;
 
