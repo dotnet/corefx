@@ -509,7 +509,7 @@ namespace System.ComponentModel.Composition.Hosting
                         _partsToDispose.Add(disposableNewPart);
                     }
 
-                    // indicate the part has been added
+                    // indicates the part has been added
                     newPart = null;
                     disposableNewPart = null;
                 }
