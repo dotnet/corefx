@@ -54,6 +54,13 @@
       <Link>Common\System\Data\Common\NameValuePair.cs</Link>
     </Compile>
     <Compile Include="*.cs"/>
+    <!-- TODO move to common -->
+    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\PoolBlockingPeriod.cs"/>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\System.Data.OleDb.OleDbMetaData.xml">
+      <LogicalName>System.Data.OleDb.OleDbMetaData.xml</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
 

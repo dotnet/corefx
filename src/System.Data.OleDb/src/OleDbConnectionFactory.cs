@@ -51,40 +51,8 @@ namespace System.Data.OleDb
             OleDbConnection oleDbOuterConnection = oleDbInternalConnection.Connection;
             Debug.Assert(oleDbOuterConnection != null,"outer connection may not be null.");
 
-            NameValueCollection settings = (NameValueCollection)PrivilegedConfigurationManager.GetSection("system.data.oledb");
-            Stream XMLStream =null;
-            String providerFileName =  oleDbOuterConnection.GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo,ODB.DBPROP_PROVIDERFILENAME) as string;
-
-            if (settings != null){
-
-                string [] values = null;
-                string metaDataXML = null;
-                // first try to get the provider specific xml
-
-                // if providerfilename is not supported we can't build the settings key needed to
-                // get the provider specific XML path
-                if (providerFileName != null){
-                    metaDataXML =  providerFileName + _metaDataXml;
-                    values = settings.GetValues(metaDataXML);
-                }
-
-                // if we did not find provider specific xml see if there is new default xml
-                if (values == null) {
-                    metaDataXML =_defaultMetaDataXml;
-                    values = settings.GetValues(metaDataXML);
-                }
-
-                // If there is new XML get it
-                if (values != null) {
-                    XMLStream = ADP.GetXmlStreamFromValues(values,metaDataXML);
-                }
-            }
-
-            // if the xml was not obtained from machine.config use the embedded XML resource
-            if (XMLStream == null) {
-                XMLStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("System.Data.OleDb.OleDbMetaData.xml");
-                cacheMetaDataFactory = true;
-            }
+            XMLStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("System.Data.OleDb.OleDbMetaData.xml");
+            cacheMetaDataFactory = true;
             
             Debug.Assert (XMLStream != null,"XMLstream may not be null.");
 
