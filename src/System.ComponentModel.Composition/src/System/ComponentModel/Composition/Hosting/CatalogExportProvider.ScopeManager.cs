@@ -45,7 +45,7 @@ namespace System.ComponentModel.Composition.Hosting
                     foreach (var partDefinitionAndExportDefinition in childCatalog.GetExportsFromPublicSurface(queryImport))
                     {
                         // We found a match in the child catalog. Now we need to check that it doesn't get rejected. 
-                        // if the rejetecion is enabled and atomic composition is present, we will actually have to do the work, if not - we just use what we have
+                        // if the rejection is enabled and atomic composition is present, we will actually have to do the work, if not - we just use what we have
                         bool isChildPartRejected = false;
 
                         if (_catalogExportProvider.EnsureRejection(atomicComposition))
@@ -91,8 +91,8 @@ namespace System.ComponentModel.Composition.Hosting
                 }
 
                 // Now we need to make sure that the creation policy is handled correctly
-                // We will always create a new child CatalogEP to satsify the request, so from the perspecitive of the caller, the policy should 
-                // always be NonShared (or Any). From teh perspective of the callee, it's the otehr way around.
+                // We will always create a new child CatalogEP to satisfy the request, so from the perspective of the caller, the policy should 
+                // always be NonShared (or Any). From the perspective of the callee, it's the other way around.
                 ContractBasedImportDefinition productImportDefinition = factoryDefinition.ProductImportDefinition;
                 ImportDefinition result = null;
 
@@ -101,7 +101,7 @@ namespace System.ComponentModel.Composition.Hosting
                     case CreationPolicy.NonShared:
                         {
                             // we need to recreate the import definition with the policy "Any", so that we can
-                            // pull singletons from the inner CatalogEP. teh "non-sharedness" is achieved through 
+                            // pull singletons from the inner CatalogEP. the "non-sharedness" is achieved through 
                             // the creation of the new EPs already.
                             result = new ContractBasedImportDefinition(
                                 productImportDefinition.ContractName,
