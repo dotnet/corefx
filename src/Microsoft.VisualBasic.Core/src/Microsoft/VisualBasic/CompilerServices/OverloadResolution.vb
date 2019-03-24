@@ -504,7 +504,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 ' Need to complete type argument inference for generic methods when no type arguments
                 ' have been supplied and when type arguments are supplied, the generic method needs to
                 ' to be instantiated. Need to complete this so early in the overload process so that
-                ' hid-by-sig, paramarray disambiguation etc. are done using the substitued signature.
+                ' hid-by-sig, paramarray disambiguation etc. are done using the substituted signature.
                 '
                 If newCandidate.MemberType = MemberTypes.Method AndAlso IsRawGeneric(newCandidateMethod) Then
 
