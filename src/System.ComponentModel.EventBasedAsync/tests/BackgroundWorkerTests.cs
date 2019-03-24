@@ -19,7 +19,7 @@ namespace System.ComponentModel.EventBasedAsync.Tests
         [Fact]
         public void TestBackgroundWorkerBasic()
         {
-            var orignal = SynchronizationContext.Current;
+            var original = SynchronizationContext.Current;
             try
             {
                 SynchronizationContext.SetSynchronizationContext(null);
@@ -67,7 +67,7 @@ namespace System.ComponentModel.EventBasedAsync.Tests
             }
             finally
             {
-                SynchronizationContext.SetSynchronizationContext(orignal);
+                SynchronizationContext.SetSynchronizationContext(original);
             }
         }
 

@@ -685,7 +685,7 @@ namespace System.ComponentModel
             // successive phases to recompute their results as well. "Results" is
             // always a collection, and the various stages of the pipeline may
             // replace or modify this collection (depending on if it's a
-            // read-only IList or not). It is possible for the orignal
+            // read-only IList or not). It is possible for the original
             // descriptor or attribute collection to pass through the entire
             // pipeline without modification.
             // 
@@ -1068,7 +1068,7 @@ namespace System.ComponentModel
             // successive phases to recompute their results as well. "Results" is
             // always a collection, and the various stages of the pipeline may
             // replace or modify this collection (depending on if it's a
-            // read-only IList or not). It is possible for the orignal
+            // read-only IList or not). It is possible for the original
             // descriptor or attribute collection to pass through the entire
             // pipeline without modification.
             // 
@@ -1298,7 +1298,7 @@ namespace System.ComponentModel
             // successive phases to recompute their results as well. "Results" is
             // always a collection, and the various stages of the pipeline may
             // replace or modify this collection (depending on if it's a
-            // read-only IList or not). It is possible for the orignal
+            // read-only IList or not). It is possible for the original
             // descriptor or attribute collection to pass through the entire
             // pipeline without modification.
             // 

@@ -36,7 +36,7 @@ namespace Tests.Integration
         }
 
         [Fact]
-        public void PartTypeLoadedLazilyEagerDependeciesLoadEagerly()
+        public void PartTypeLoadedLazilyEagerDependenciesLoadEagerly()
         {
             var catalog = new TypeLoadNotifyingCatalog(typeof(ExportingPart), typeof(PartImportingEagerly));
             var container = new CompositionContainer(catalog);
@@ -57,7 +57,7 @@ namespace Tests.Integration
         }
 
         [Fact]
-        public void PartTypeLoadedLazilyLazyDependeciesLoadLazily()
+        public void PartTypeLoadedLazilyLazyDependenciesLoadLazily()
         {
             var catalog = new TypeLoadNotifyingCatalog(typeof(ExportingPart), typeof(PartImportingLazily));
             var container = new CompositionContainer(catalog);
@@ -78,7 +78,7 @@ namespace Tests.Integration
         }
 
         [Fact]
-        public void PartTypeLoadedLazilyEagerCollectionDependeciesLoadEagerly()
+        public void PartTypeLoadedLazilyEagerCollectionDependenciesLoadEagerly()
         {
             var catalog = new TypeLoadNotifyingCatalog(typeof(ExportingPart), typeof(PartImportingCollectionEagerly));
             var container = new CompositionContainer(catalog);
@@ -99,7 +99,7 @@ namespace Tests.Integration
         }
 
         [Fact]
-        public void PartTypeLoadedLazilyLazyCollectionDependeciesLoadLazily()
+        public void PartTypeLoadedLazilyLazyCollectionDependenciesLoadLazily()
         {
             var catalog = new TypeLoadNotifyingCatalog(typeof(ExportingPart), typeof(PartImportingCollectionLazily));
             var container = new CompositionContainer(catalog);
