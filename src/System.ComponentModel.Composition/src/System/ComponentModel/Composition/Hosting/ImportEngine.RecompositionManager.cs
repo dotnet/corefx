@@ -12,7 +12,7 @@ namespace System.ComponentModel.Composition.Hosting
     public partial class ImportEngine
     {
         /// <summary>
-        ///     Used by the <see cref="ImportEngine"/> to effiecently store and retrieve the list of parts
+        ///     Used by the <see cref="ImportEngine"/> to efficiently store and retrieve the list of parts
         ///     that will be affected by changes to exports. This allows the <see cref="ImportEngine"/> to properly
         ///     block breaking changes and also recompose imports as appropriate.
         /// </summary>
