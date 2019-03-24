@@ -2592,7 +2592,7 @@ namespace System.Xml.Xsl
                 // This assert was removed because it would fire on VERY rare occasions. Not
                 // repro on all machines and very hard to repro even on machines that could repro it.
                 // The numbers (dblLowPrec and dbl) were different in their two least sig bits only
-                // which is _probably_ within expected errror. I did not take the time to fully
+                // which is _probably_ within expected error. I did not take the time to fully
                 // investigate whether this really does meet the ECMA spec...
                 //
                 Debug.Assert(double.IsNaN(dblLowPrec) || dblLowPrec == dbl);

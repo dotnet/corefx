@@ -564,7 +564,7 @@ namespace System.IO.Ports.Tests
 
             if (expectedIndex < expectedBytes.Length)
             {
-                Fail("ERRROR: Did not enumerate all of the expected bytes index={0} length={1}", expectedIndex, expectedBytes.Length);
+                Fail("ERROR: Did not enumerate all of the expected bytes index={0} length={1}", expectedIndex, expectedBytes.Length);
             }
         }
 
