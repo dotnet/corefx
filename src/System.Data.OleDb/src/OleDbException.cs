@@ -76,10 +76,8 @@ namespace System.Data.OleDb {
 
             if (null != errorInfo) {
                 hr = errorInfo.GetDescription(out message);
-                Bid.Trace("<oledb.IErrorInfo.GetDescription|API|OS|RET> %08X{HRESULT}, Description='%ls'\n", hr, message);
 
                 hr = errorInfo.GetSource(out source);
-                Bid.Trace("<oledb.IErrorInfo.GetSource|API|OS|RET> %08X{HRESULT}, Source='%ls'\n", hr, source);
             }
 
             int count = errors.Count;

@@ -227,8 +227,6 @@ namespace System.Data.OleDb {
             OleDbTransaction transaction;
             try {
                 transaction = new OleDbTransaction(outerConnection, null, isolationLevel);
-
-                Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|session> %d#, ITransactionLocal\n", ObjectID);
                 Debug.Assert(null != _datasrcwrp, "ITransactionLocal: null datasource");
                 Debug.Assert(null != _sessionwrp, "ITransactionLocal: null session");
                 unknown = _sessionwrp.ComWrapper();
@@ -419,10 +417,7 @@ namespace System.Data.OleDb {
 
                 OleDbHResult hr;
                 string keywords;
-
-                Bid.Trace("<oledb.IDBInfo.GetKeywords|API|OLEDB> %d#\n", ObjectID);
                 hr = dbInfo.GetKeywords(out keywords);
-                Bid.Trace("<oledb.IDBInfo.GetKeywords|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
                 if (hr < 0) { // ignore infomsg
                     ProcessResults(hr);
@@ -553,10 +548,7 @@ namespace System.Data.OleDb {
 
                     UnsafeNativeMethods.IRowset rowset = null;
                     OleDbHResult hr;
-
-                    Bid.Trace("<oledb.IDBSchemaRowset.GetRowset|API|OLEDB> %d#\n", ObjectID);
                     hr = dbSchemaRowset.GetRowset(ADP.PtrZero, ref schema, restrictions.Length, restrictions, ref ODB.IID_IRowset, 0, ADP.PtrZero, out rowset);
-                    Bid.Trace("<oledb.IDBSchemaRowset.GetRowset|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
                     if (hr < 0) { // ignore infomsg
                         ProcessResults(hr);

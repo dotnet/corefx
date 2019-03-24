@@ -187,7 +187,6 @@ namespace System.Data.OleDb {
             */
 
             bool closeRecordset = multipleResults; // MDAC 60332, 66668
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|ADODB> ADORecordsetConstruction\n");
             UnsafeNativeMethods.ADORecordsetConstruction recordset = (adodb as UnsafeNativeMethods.ADORecordsetConstruction);
             UnsafeNativeMethods.ADORecordConstruction record = null;
 
@@ -195,8 +194,6 @@ namespace System.Data.OleDb {
                 if (multipleResults) {
                     // The NextRecordset method is not available on a disconnected Recordset object, where ActiveConnection has been set to NULL
                     object activeConnection;
-
-                    Bid.Trace("<oledb.Recordset15.get_ActiveConnection|API|ADODB>\n");
                     activeConnection = ((UnsafeNativeMethods.Recordset15)adodb).get_ActiveConnection();
                     
                     if (null == activeConnection) {
@@ -205,7 +202,6 @@ namespace System.Data.OleDb {
                 }
             }
             else {
-                Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|ADODB> ADORecordConstruction\n");
                 record = (adodb as UnsafeNativeMethods.ADORecordConstruction);
                 
                 if (null != record) { // MDAC 78415
@@ -232,10 +228,7 @@ namespace System.Data.OleDb {
 
                         object recordsAffected;
                         object nextresult;
-
-                        Bid.Trace("<oledb.Recordset15.NextRecordset|API|ADODB>\n");
                         OleDbHResult hr = ((UnsafeNativeMethods.Recordset15)adodb).NextRecordset(out recordsAffected, out nextresult); // MDAC 78415
-                        Bid.Trace("<oledb.Recordset15.NextRecordset|API|ADODB|RET> %08X{HRESULT}\n", hr);
 
                         if (0 > hr) {
                             // Current provider does not support returning multiple recordsets from a single execution.
@@ -253,7 +246,6 @@ namespace System.Data.OleDb {
                         }
                         adodb = nextresult;
                         if (null != adodb) {
-                            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|ADODB> ADORecordsetConstruction\n");
                             recordset = (UnsafeNativeMethods.ADORecordsetConstruction) adodb;
 
                             if (incrementResultCount) {
@@ -291,13 +283,8 @@ namespace System.Data.OleDb {
             IntPtr chapter; /*ODB.DB_NULL_HCHAPTER*/
             object result = null;
             try {
-                Bid.Trace("<oledb.ADORecordsetConstruction.get_Rowset|API|ADODB>\n");
                 result = recordset.get_Rowset(); // MDAC 83342
-                Bid.Trace("<oledb.ADORecordsetConstruction.get_Rowset|API|ADODB|RET> %08X{HRESULT}\n", 0);
-
-                Bid.Trace("<oledb.ADORecordsetConstruction.get_Chapter|API|ADODB>\n");
                 chapter = recordset.get_Chapter(); // MDAC 83342
-                Bid.Trace("<oledb.ADORecordsetConstruction.get_Chapter|API|ADODB|RET> %08X{HRESULT}\n", 0);
             }
             catch (Exception e) {
                 // UNDONE - should not be catching all exceptions!!!
@@ -343,9 +330,7 @@ namespace System.Data.OleDb {
         private int FillFromRecord(Object data, UnsafeNativeMethods.ADORecordConstruction record, string srcTable) {
             object result = null;
             try {
-                Bid.Trace("<oledb.ADORecordConstruction.get_Row|API|ADODB>\n");
                 result = record.get_Row(); // MDAC 83342
-                Bid.Trace("<oledb.ADORecordConstruction.get_Row|API|ADODB|RET> %08X{HRESULT}\n", 0);
             }
             catch(Exception e) {
                 // UNDONE - should not be catching all exceptions!!!
@@ -385,14 +370,10 @@ namespace System.Data.OleDb {
         private void FillClose(bool isrecordset, object value) {
             OleDbHResult hr;
             if (isrecordset) {
-                Bid.Trace("<oledb.Recordset15.Close|API|ADODB>\n");
                 hr = ((UnsafeNativeMethods.Recordset15)value).Close(); // MDAC 78415
-                Bid.Trace("<oledb.Recordset15.Close|API|ADODB|RET> %08X{HRESULT}\n", hr);
             }
             else {
-                Bid.Trace("<oledb._ADORecord.Close|API|ADODB>\n");
                 hr = ((UnsafeNativeMethods._ADORecord)value).Close(); // MDAC 78415
-                Bid.Trace("<oledb._ADORecord.Close|API|ADODB|RET> %08X{HRESULT}\n", hr);
             }
             if ((0 < (int)hr) && (ODB.ADODB_AlreadyClosedError != (int)hr)) {
                 UnsafeNativeMethods.IErrorInfo errorInfo = null;

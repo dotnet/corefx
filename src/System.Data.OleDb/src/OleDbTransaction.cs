@@ -28,7 +28,6 @@ namespace System.Data.OleDb {
 
             internal WrappedTransaction(UnsafeNativeMethods.ITransactionLocal transaction, int isolevel, out OleDbHResult hr) : base(transaction) {
                 int transactionLevel = 0;
-                Bid.Trace("<oledb.ITransactionLocal.StartTransaction|API|OLEDB>\n");
                 RuntimeHelpers.PrepareConstrainedRegions();
                 try { } finally {
                     hr = transaction.StartTransaction(isolevel, 0, IntPtr.Zero, out transactionLevel);
@@ -36,7 +35,6 @@ namespace System.Data.OleDb {
                         _mustComplete = true;
                     }
                 }
-                Bid.Trace("<oledb.ITransactionLocal.StartTransaction|API|OLEDB|RET> %08X{HRESULT}\n", hr);
             }
 
             internal bool MustComplete {
@@ -50,14 +48,11 @@ namespace System.Data.OleDb {
                 RuntimeHelpers.PrepareConstrainedRegions();
                 try {
                     DangerousAddRef(ref mustRelease);
-
-                    Bid.Trace("<oledb.ITransactionLocal.Abort|API|OLEDB> handle=%p\n", base.handle);
                     RuntimeHelpers.PrepareConstrainedRegions();
                     try { } finally {
                         hr = (OleDbHResult)NativeOledbWrapper.ITransactionAbort(DangerousGetHandle());
                         _mustComplete = false;
                     }
-                    Bid.Trace("<oledb.ITransactionLocal.Abort|API|OLEDB|RET> %08X{HRESULT}\n", hr);
                 }
                 finally {
                     if (mustRelease) {
@@ -74,8 +69,6 @@ namespace System.Data.OleDb {
                 RuntimeHelpers.PrepareConstrainedRegions();
                 try {
                     DangerousAddRef(ref mustRelease);
-
-                    Bid.Trace("<oledb.ITransactionLocal.Commit|API|OLEDB> handle=%p\n", base.handle);
                     RuntimeHelpers.PrepareConstrainedRegions();
                     try { } finally {
                         hr = (OleDbHResult)NativeOledbWrapper.ITransactionCommit(DangerousGetHandle());
@@ -83,7 +76,6 @@ namespace System.Data.OleDb {
                             _mustComplete = false;
                         }
                     }
-                    Bid.Trace("<oledb.ITransactionLocal.Commit|API|OLEDB|RET> %08X{HRESULT}\n", hr);
                 }
                 finally {
                     if (mustRelease) {
@@ -95,10 +87,8 @@ namespace System.Data.OleDb {
 
             override protected bool ReleaseHandle() {
                 if (_mustComplete && (IntPtr.Zero != base.handle)) {
-                    Bid.Trace("<oledb.ITransactionLocal.Abort|API|OLEDB|INFO> handle=%p\n", base.handle);
                     OleDbHResult hr = (OleDbHResult)NativeOledbWrapper.ITransactionAbort(base.handle);
                     _mustComplete = false;
-                    Bid.Trace("<oledb.ITransactionLocal.Abort|API|OLEDB|INFO|RET> %08X{HRESULT}\n", hr);
                 }
                 return base.ReleaseHandle();
             }

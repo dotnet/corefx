@@ -20,34 +20,25 @@ namespace System.Data.OleDb {
         // IDBInfo.GetLiteralInfo
         internal DualCoTaskMem(UnsafeNativeMethods.IDBInfo dbInfo, int[] literals, out int literalCount, out IntPtr literalInfo, out OleDbHResult hr) : this() {
             int count = (null != literals) ? literals.Length : 0;
-
-            Bid.Trace("<oledb.IDBInfo.GetLiteralInfo|API|OLEDB>\n");
             hr = dbInfo.GetLiteralInfo(count, literals, out literalCount, out base.handle, out this.handle2);
             literalInfo = base.handle;
-            Bid.Trace("<oledb.IDBInfo.GetLiteralInfo|API|OLEDB|RET> %08X{HRESULT}\n", hr);
         }
 
         // IColumnsInfo.GetColumnInfo
         internal DualCoTaskMem(UnsafeNativeMethods.IColumnsInfo columnsInfo, out IntPtr columnCount, out IntPtr columnInfos, out OleDbHResult hr) : this() {
-            Bid.Trace("<oledb.IColumnsInfo.GetColumnInfo|API|OLEDB>\n");
             hr = columnsInfo.GetColumnInfo(out columnCount, out base.handle, out this.handle2);
             columnInfos = base.handle;
-            Bid.Trace("<oledb.IColumnsInfo.GetColumnInfo|API|OLEDB|RET> %08X{HRESULT}\n", hr);
         }
 
         // IDBSchemaRowset.GetSchemas
         internal DualCoTaskMem(UnsafeNativeMethods.IDBSchemaRowset dbSchemaRowset, out int schemaCount, out IntPtr schemaGuids, out IntPtr schemaRestrictions, out OleDbHResult hr) : this() {
-            Bid.Trace("<oledb.IDBSchemaRowset.GetSchemas|API|OLEDB>\n");
             hr = dbSchemaRowset.GetSchemas(out schemaCount, out base.handle, out this.handle2);
             schemaGuids = base.handle;
             schemaRestrictions = this.handle2;
-            Bid.Trace("<oledb.IDBSchemaRowset.GetSchemas|API|OLEDB|RET> %08X{HRESULT}\n", hr);
         }
 
         internal DualCoTaskMem(UnsafeNativeMethods.IColumnsRowset icolumnsRowset, out IntPtr cOptColumns, out OleDbHResult hr) : base(IntPtr.Zero, true) {
-            Bid.Trace("<oledb.IColumnsRowset.GetAvailableColumns|API|OLEDB>\n");
             hr = icolumnsRowset.GetAvailableColumns(out cOptColumns, out base.handle);
-            Bid.Trace("<oledb.IColumnsRowset.GetAvailableColumns|API|OLEDB|RET> %08X{HRESULT}\n", hr);
         }
 
 
@@ -141,9 +132,7 @@ namespace System.Data.OleDb {
             _chapterHandle = IntPtr.Zero;
 
             if ((IntPtr.Zero != base.handle) && (IntPtr.Zero != chapter)) {
-                Bid.Trace("<oledb.IChapteredRowset.ReleaseChapter|API|OLEDB> Chapter=%Id\n", chapter);
                 OleDbHResult hr = (OleDbHResult)NativeOledbWrapper.IChapteredRowsetReleaseChapter(base.handle, chapter);
-                Bid.Trace("<oledb.IChapteredRowset.ReleaseChapter|API|OLEDB|RET> %08X{HRESULT}\n", hr);
             }
             return base.ReleaseHandle();
         }

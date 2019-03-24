@@ -43,9 +43,7 @@ namespace System.Data.OleDb {
             if (null != propidset) {
                 propidsetcount = propidset.Count;
             }
-            Bid.Trace("<oledb.IDBProperties.GetProperties|API|OLEDB>\n");
             hr = properties.GetProperties(propidsetcount, propidset, out this.propertySetCount, out base.handle);
-            Bid.Trace("<oledb.IDBProperties.GetProperties|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
             if (hr < 0) {
                 // VSDD 621427: remember the last HRESULT. Note we do not want to raise exception now to avoid breaking change from Orcas RTM/SP1
@@ -60,9 +58,7 @@ namespace System.Data.OleDb {
             if (null != propidset) {
                 propidsetcount = propidset.Count;
             }
-            Bid.Trace("<oledb.IRowsetInfo.GetProperties|API|OLEDB>\n");
             hr = properties.GetProperties(propidsetcount, propidset, out this.propertySetCount, out base.handle);
-            Bid.Trace("<oledb.IRowsetInfo.GetProperties|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
             if (hr < 0) {
                 // VSDD 621427: remember the last HRESULT. Note we do not want to raise exception now to avoid breaking change from Orcas RTM/SP1
@@ -77,9 +73,7 @@ namespace System.Data.OleDb {
             if (null != propidset) {
                 propidsetcount = propidset.Count;
             }
-            Bid.Trace("<oledb.ICommandProperties.GetProperties|API|OLEDB>\n");
             hr = properties.GetProperties(propidsetcount, propidset, out this.propertySetCount, out base.handle);
-            Bid.Trace("<oledb.ICommandProperties.GetProperties|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
             if (hr < 0) {
                 // VSDD 621427: remember the last HRESULT. Note we do not want to raise exception now to avoid breaking change from Orcas RTM/SP1

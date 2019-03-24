@@ -46,10 +46,7 @@ namespace System.Data.OleDb {
 
             int propCount = 0;
             IntPtr propSets = ADP.PtrZero;
-
-            Bid.Trace("<oledb.ISourcesRowset.GetSourcesRowset|API|OLEDB> IID_IRowset\n");
             OleDbHResult hr = srcrowset.GetSourcesRowset(ADP.PtrZero, ODB.IID_IRowset, propCount, propSets, out value);
-            Bid.Trace("<oledb.ISourcesRowset.GetSourcesRowset|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
             Exception f = OleDbConnection.ProcessResults(hr, null, null);
             if (null != f) {

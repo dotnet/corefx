@@ -13,13 +13,10 @@ namespace System.Data.OleDb {
 
         internal OleDbErrorCollection(UnsafeNativeMethods.IErrorInfo errorInfo) {
             ArrayList items = new ArrayList();
-
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OS> IErrorRecords\n");
             UnsafeNativeMethods.IErrorRecords errorRecords = (errorInfo as UnsafeNativeMethods.IErrorRecords);
             if (null != errorRecords) {
 
                 int recordCount = errorRecords.GetRecordCount();
-                Bid.Trace("<oledb.IErrorRecords.GetRecordCount|API|OS|RET> RecordCount=%d\n", recordCount);
 
                 for (int i = 0; i < recordCount; ++i) {
                     OleDbError error = new OleDbError(errorRecords, i);

@@ -24,8 +24,6 @@ namespace System.Data.ProviderBase {
             ShuttingDown,
         }
 
-        internal const Bid.ApiGroup PoolerTracePoints = Bid.ApiGroup.Pooling;
-
         // This class is a way to stash our cloned Tx key for later disposal when it's no longer needed.
         // We can't get at the key in the dictionary without enumerating entries, so we stash an extra
         // copy as part of the value.
@@ -70,8 +68,6 @@ namespace System.Data.ProviderBase {
 
                 _pool = pool;
                 _transactedCxns = new Dictionary<SysTx.Transaction, TransactedConnectionList> ();
-                
-                Bid.PoolerTrace("<prov.DbConnectionPool.TransactedConnectionPool.TransactedConnectionPool|RES|CPOOL> %d#, Constructed for connection pool %d#\n", ObjectID, _pool.ObjectID);
             }
 
             internal int ObjectID {
@@ -125,7 +121,6 @@ namespace System.Data.ProviderBase {
                 }
 
                 if (null != transactedObject) {
-                    Bid.PoolerTrace("<prov.DbConnectionPool.TransactedConnectionPool.GetTransactedObject|RES|CPOOL> %d#, Transaction %d#, Connection %d#, Popped.\n", ObjectID, transaction.GetHashCode(), transactedObject.ObjectID);
                 }
                 return transactedObject;
             }
@@ -151,7 +146,6 @@ namespace System.Data.ProviderBase {
                         lock ( connections ) 
                         {
                             Debug.Assert(0 > connections.IndexOf(transactedObject), "adding to pool a second time?");
-                            Bid.PoolerTrace("<prov.DbConnectionPool.TransactedConnectionPool.PutTransactedObject|RES|CPOOL> %d#, Transaction %d#, Connection %d#, Pushing.\n", ObjectID, transaction.GetHashCode(), transactedObject.ObjectID);
 
                             connections.Add(transactedObject);
                         }
@@ -187,14 +181,12 @@ namespace System.Data.ProviderBase {
                                 lock ( connections ) 
                                 {
                                     Debug.Assert(0 > connections.IndexOf(transactedObject), "adding to pool a second time?");
-                                    Bid.PoolerTrace("<prov.DbConnectionPool.TransactedConnectionPool.PutTransactedObject|RES|CPOOL> %d#, Transaction %d#, Connection %d#, Pushing.\n", ObjectID, transaction.GetHashCode(), transactedObject.ObjectID);
 
                                     connections.Add(transactedObject);
                                 }
                             }
                             else
                             {
-                                Bid.PoolerTrace("<prov.DbConnectionPool.TransactedConnectionPool.PutTransactedObject|RES|CPOOL> %d#, Transaction %d#, Connection %d#, Adding List to transacted pool.\n", ObjectID, transaction.GetHashCode(), transactedObject.ObjectID);
 
                                 // add the connection/transacted object to the list
                                 newConnections.Add ( transactedObject );
@@ -222,7 +214,6 @@ namespace System.Data.ProviderBase {
                             }
                         }
                     }
-                    Bid.PoolerTrace("<prov.DbConnectionPool.TransactedConnectionPool.PutTransactedObject|RES|CPOOL> %d#, Transaction %d#, Connection %d#, Added.\n", ObjectID, transaction.GetHashCode(), transactedObject.ObjectID );
                 }
 
                 Pool.PerformanceCounters.NumberOfFreeConnections.Increment();
@@ -231,7 +222,6 @@ namespace System.Data.ProviderBase {
 
             internal void TransactionEnded(SysTx.Transaction transaction, DbConnectionInternal transactedObject) 
             {
-                Bid.PoolerTrace("<prov.DbConnectionPool.TransactedConnectionPool.TransactionEnded|RES|CPOOL> %d#, Transaction %d#, Connection %d#, Transaction Completed\n", ObjectID, transaction.GetHashCode(), transactedObject.ObjectID);
 
                 TransactedConnectionList connections;
                 int entry = -1;
@@ -266,7 +256,6 @@ namespace System.Data.ProviderBase {
                             // safely remove the list from the transacted pool.
                             if (0 >= connections.Count)
                             {
-                                Bid.PoolerTrace("<prov.DbConnectionPool.TransactedConnectionPool.TransactionEnded|RES|CPOOL> %d#, Transaction %d#, Removing List from transacted pool.\n", ObjectID, transaction.GetHashCode());
                                 _transactedCxns.Remove(transaction);
 
                                 // we really need to dispose our connection list; it may have 
@@ -282,7 +271,6 @@ namespace System.Data.ProviderBase {
                     else
                     {
                         //Debug.Assert ( false, "TransactionCompletedEvent fired before PutTransactedObject put the connection in the transacted pool." );
-                        Bid.PoolerTrace("<prov.DbConnectionPool.TransactedConnectionPool.TransactionEnded|RES|CPOOL> %d#, Transaction %d#, Connection %d#, Transacted pool not yet created prior to transaction completing. Connection may be leaked.\n", ObjectID, transaction.GetHashCode(), transactedObject.ObjectID );
                     }
                 }
                 
@@ -487,8 +475,6 @@ namespace System.Data.ProviderBase {
             _poolCreateRequest = new WaitCallback(PoolCreateRequest); // used by CleanupCallback
             _state = State.Running;
 
-            Bid.PoolerTrace("<prov.DbConnectionPool.DbConnectionPool|RES|CPOOL> %d#, Constructed.\n", ObjectID);
-
             //_cleanupTimer & QueuePoolCreateRequest is delayed until DbConnectionPoolGroup calls
             // StartBackgroundCallbacks after pool is actually in the collection
         }
@@ -615,8 +601,6 @@ namespace System.Data.ProviderBase {
             // With this logic, objects are pruned from the pool if unused for
             // at least one period but not more than two periods.
 
-            Bid.PoolerTrace("<prov.DbConnectionPool.CleanupCallback|RES|INFO|CPOOL> %d#\n", ObjectID);
-
             // Destroy free objects that put us above MinPoolSize from old stack.
             while(Count > MinPoolSize) { // While above MinPoolSize...
 
@@ -679,8 +663,6 @@ namespace System.Data.ProviderBase {
 
                     Debug.Assert(obj != null, "null connection is not expected");
 
-                    Bid.PoolerTrace("<prov.DbConnectionPool.CleanupCallback|RES|INFO|CPOOL> %d#, ChangeStacks=%d#\n", ObjectID, obj.ObjectID);
-
                     Debug.Assert(!obj.IsEmancipated, "pooled object not in pool");
                     Debug.Assert(obj.CanBePooled,     "pooled object is not poolable");
 
@@ -694,7 +676,6 @@ namespace System.Data.ProviderBase {
         }
 
         internal void Clear() {
-            Bid.PoolerTrace("<prov.DbConnectionPool.Clear|RES|CPOOL> %d#, Clearing.\n", ObjectID);
 
             DbConnectionInternal obj;
 
@@ -726,8 +707,6 @@ namespace System.Data.ProviderBase {
             // Finally, reclaim everything that's emancipated (which, because
             // it's been doomed, will cause it to be disposed of as well)
             ReclaimEmancipatedObjects();
-
-            Bid.PoolerTrace("<prov.DbConnectionPool.Clear|RES|CPOOL> %d#, Cleared.\n", ObjectID);
         }
 
         private Timer CreateCleanupTimer() {
@@ -807,7 +786,6 @@ namespace System.Data.ProviderBase {
                         }
                     }
                 }
-                Bid.PoolerTrace("<prov.DbConnectionPool.CreateObject|RES|CPOOL> %d#, Connection %d#, Added to pool.\n", ObjectID, newObj.ObjectID);
 
                 // Reset the error wait:
                 _errorWait = ERROR_WAIT_DEFAULT;
@@ -861,7 +839,6 @@ namespace System.Data.ProviderBase {
 
         private void DeactivateObject(DbConnectionInternal obj) 
         {
-            Bid.PoolerTrace("<prov.DbConnectionPool.DeactivateObject|RES|CPOOL> %d#, Connection %d#, Deactivating.\n", ObjectID, obj.ObjectID);
 
             obj.DeactivateConnection(); // we presume this operation is safe outside of a lock...
             
@@ -1000,10 +977,8 @@ namespace System.Data.ProviderBase {
             // come back through PutObjectFromTransactedPool, which will call us
             // again.
             if (obj.IsTxRootWaitingForTxEnd) {
-                Bid.PoolerTrace("<prov.DbConnectionPool.DestroyObject|RES|CPOOL> %d#, Connection %d#, Has Delegated Transaction, waiting to Dispose.\n", ObjectID, obj.ObjectID);
             }
             else {
-                Bid.PoolerTrace("<prov.DbConnectionPool.DestroyObject|RES|CPOOL> %d#, Connection %d#, Removing from pool.\n", ObjectID, obj.ObjectID);
 
                 bool removed = false;
                 lock (_objectList) {
@@ -1013,18 +988,14 @@ namespace System.Data.ProviderBase {
                 }
 
                 if (removed) {
-                    Bid.PoolerTrace("<prov.DbConnectionPool.DestroyObject|RES|CPOOL> %d#, Connection %d#, Removed from pool.\n", ObjectID, obj.ObjectID);
                     PerformanceCounters.NumberOfPooledConnections.Decrement();
                 }
                 obj.Dispose();
-
-                Bid.PoolerTrace("<prov.DbConnectionPool.DestroyObject|RES|CPOOL> %d#, Connection %d#, Disposed.\n", ObjectID, obj.ObjectID);
                 PerformanceCounters.HardDisconnectsPerSecond.Increment();
             }
         }
 
         private void ErrorCallback(Object state) {
-            Bid.PoolerTrace("<prov.DbConnectionPool.ErrorCallback|RES|CPOOL> %d#, Resetting Error handling.\n", ObjectID);
 
             _errorOccurred = false;
             _waitHandles.ErrorEvent.Reset();
@@ -1169,7 +1140,6 @@ namespace System.Data.ProviderBase {
             }
 
             if (_state != State.Running) {
-                Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, DbConnectionInternal State != Running.\n", ObjectID);
                 connection = null;
                 return true;
             }
@@ -1210,8 +1180,6 @@ namespace System.Data.ProviderBase {
             SysTx.Transaction transaction = null;
 
             PerformanceCounters.SoftConnectsPerSecond.Increment();
-
-            Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, Getting connection.\n", ObjectID);
 
             // If automatic transaction enlistment is required, then we try to
             // get the connection from the transacted connection pool first.
@@ -1256,19 +1224,16 @@ namespace System.Data.ProviderBase {
 
                         switch (waitResult) {
                         case WAIT_TIMEOUT:
-                            Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, Wait timed out.\n", ObjectID);
                             Interlocked.Decrement(ref _waitCount);
                             connection = null;
                             return false;
 
                         case ERROR_HANDLE:
                             // Throw the error that PoolCreateRequest stashed.
-                            Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, Errors are set.\n", ObjectID);
                             Interlocked.Decrement(ref _waitCount);
                             throw TryCloneCachedException();                                            
 
                         case CREATION_HANDLE:
-                            Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, Creating new connection.\n", ObjectID);
 
                             try {
                                 obj = UserCreateRequest(owningObject, userOptions);
@@ -1313,7 +1278,6 @@ namespace System.Data.ProviderBase {
                             obj = GetFromGeneralPool();
 
                             if ((obj != null) && (!obj.IsConnectionAlive())) {
-                                Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, Connection %d#, found dead and removed.\n", ObjectID, obj.ObjectID);
                                 DestroyObject(obj);
                                 obj = null;     // Setting to null in case creating a new object fails
 
@@ -1321,7 +1285,6 @@ namespace System.Data.ProviderBase {
                                     if (_waitHandles.CreationSemaphore.WaitOne(unchecked((int)waitForMultipleObjectsTimeout))) {
                                         RuntimeHelpers.PrepareConstrainedRegions();
                                         try {
-                                            Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, Creating new connection.\n", ObjectID);
                                             obj = UserCreateRequest(owningObject, userOptions);
                                         }
                                         finally {
@@ -1330,7 +1293,6 @@ namespace System.Data.ProviderBase {
                                     }
                                     else {
                                         // Timeout waiting for creation semaphore - return null
-                                        Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, Wait timed out.\n", ObjectID);
                                         connection = null;
                                         return false;
                                     }
@@ -1340,24 +1302,19 @@ namespace System.Data.ProviderBase {
                             
                         case WAIT_FAILED:
                             Debug.Assert(waitForMultipleObjectsExHR != 0, "WaitForMultipleObjectsEx failed but waitForMultipleObjectsExHR remained 0");
-                            Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, Wait failed.\n", ObjectID);
                             Interlocked.Decrement(ref _waitCount);
                             Marshal.ThrowExceptionForHR(waitForMultipleObjectsExHR);
                             goto default; // if ThrowExceptionForHR didn't throw for some reason
                         case (WAIT_ABANDONED+SEMAPHORE_HANDLE):
-                            Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, Semaphore handle abandonded.\n", ObjectID);
                             Interlocked.Decrement(ref _waitCount);
                             throw new AbandonedMutexException(SEMAPHORE_HANDLE,_waitHandles.PoolSemaphore);
                         case (WAIT_ABANDONED+ERROR_HANDLE):
-                            Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, Error handle abandonded.\n", ObjectID);
                             Interlocked.Decrement(ref _waitCount);
                             throw new AbandonedMutexException(ERROR_HANDLE,_waitHandles.ErrorEvent);
                         case (WAIT_ABANDONED+CREATION_HANDLE):
-                            Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, Creation handle abandoned.\n", ObjectID);
                             Interlocked.Decrement(ref _waitCount);
                             throw new AbandonedMutexException(CREATION_HANDLE,_waitHandles.CreationSemaphore);
                         default:
-                            Bid.PoolerTrace("<prov.DbConnectionPool.GetConnection|RES|CPOOL> %d#, WaitForMultipleObjects=%d\n", ObjectID, waitResult);
                             Interlocked.Decrement(ref _waitCount);
                             throw ADP.InternalError(ADP.InternalErrorCode.UnexpectedWaitAnyResult);
                         }
@@ -1415,7 +1372,6 @@ namespace System.Data.ProviderBase {
         /// <returns>A new inner connection that is attached to the <paramref name="owningObject"/></returns>
         internal DbConnectionInternal ReplaceConnection(DbConnection owningObject, DbConnectionOptions userOptions, DbConnectionInternal oldConnection) {
             PerformanceCounters.SoftConnectsPerSecond.Increment();
-            Bid.PoolerTrace("<prov.DbConnectionPool.ReplaceConnection|RES|CPOOL> %d#, replacing connection.\n", ObjectID);
 
             DbConnectionInternal newConnection = UserCreateRequest(owningObject, userOptions, oldConnection);
             
@@ -1451,7 +1407,6 @@ namespace System.Data.ProviderBase {
             //Debug.Assert(obj != null, "GetFromGeneralPool called with nothing in the pool!");
 
             if (null != obj) {
-                Bid.PoolerTrace("<prov.DbConnectionPool.GetFromGeneralPool|RES|CPOOL> %d#, Connection %d#, Popped from general pool.\n", ObjectID, obj.ObjectID);
                 PerformanceCounters.NumberOfFreeConnections.Decrement();
             }
             return(obj);
@@ -1465,7 +1420,6 @@ namespace System.Data.ProviderBase {
                 obj = _transactedConnectionPool.GetTransactedObject(transaction);
 
                 if (null != obj) {
-                    Bid.PoolerTrace("<prov.DbConnectionPool.GetFromTransactedPool|RES|CPOOL> %d#, Connection %d#, Popped from transacted pool.\n", ObjectID, obj.ObjectID);
                     PerformanceCounters.NumberOfFreeConnections.Decrement();
 
                     if (obj.IsTransactionRoot) {
@@ -1473,13 +1427,11 @@ namespace System.Data.ProviderBase {
                             obj.IsConnectionAlive(true);
                         }
                         catch {
-                            Bid.PoolerTrace("<prov.DbConnectionPool.GetFromTransactedPool|RES|CPOOL> %d#, Connection %d#, found dead and removed.\n", ObjectID, obj.ObjectID);
                             DestroyObject(obj);
                             throw;
                         }
                     }
                     else if (!obj.IsConnectionAlive()) {
-                        Bid.PoolerTrace("<prov.DbConnectionPool.GetFromTransactedPool|RES|CPOOL> %d#, Connection %d#, found dead and removed.\n", ObjectID, obj.ObjectID);
                         DestroyObject(obj);
                         obj = null;
                     }
@@ -1494,106 +1446,95 @@ namespace System.Data.ProviderBase {
             // called by pooler to ensure pool requests are currently being satisfied -
             // creation mutex has not been obtained
 
-            IntPtr hscp;
+            if (State.Running == _state) {
 
-            Bid.PoolerScopeEnter(out hscp, "<prov.DbConnectionPool.PoolCreateRequest|RES|INFO|CPOOL> %d#\n", ObjectID);
+                // in case WaitForPendingOpen ever failed with no subsequent OpenAsync calls,
+                // start it back up again
+                if (!_pendingOpens.IsEmpty && _pendingOpensWaiting == 0) {
+                    Thread waitOpenThread = new Thread(WaitForPendingOpen);
+                    waitOpenThread.IsBackground = true;
+                    waitOpenThread.Start();
+                }
 
-            try {
-                if (State.Running == _state) {
+                // Before creating any new objects, reclaim any released objects that were
+                // not closed.
+                ReclaimEmancipatedObjects();
 
-                    // in case WaitForPendingOpen ever failed with no subsequent OpenAsync calls,
-                    // start it back up again
-                    if (!_pendingOpens.IsEmpty && _pendingOpensWaiting == 0) {
-                        Thread waitOpenThread = new Thread(WaitForPendingOpen);
-                        waitOpenThread.IsBackground = true;
-                        waitOpenThread.Start();
-                    }
+                if (!ErrorOccurred) {
+                    if (NeedToReplenish) {
+                        // Check to see if pool was created using integrated security and if so, make
+                        // sure the identity of current user matches that of user that created pool.
+                        // If it doesn't match, do not create any objects on the ThreadPool thread,
+                        // since either Open will fail or we will open a object for this pool that does
+                        // not belong in this pool.  The side effect of this is that if using integrated
+                        // security min pool size cannot be guaranteed.
+                        if (UsingIntegrateSecurity && !_identity.Equals(DbConnectionPoolIdentity.GetCurrent())) {
+                            return;
+                        }
+                        bool mustRelease = false;
+                        int waitResult = BOGUS_HANDLE;
+                        uint timeout = (uint)CreationTimeout;
 
-                    // Before creating any new objects, reclaim any released objects that were
-                    // not closed.
-                    ReclaimEmancipatedObjects();
-
-                    if (!ErrorOccurred) {
-                        if (NeedToReplenish) {
-                            // Check to see if pool was created using integrated security and if so, make
-                            // sure the identity of current user matches that of user that created pool.
-                            // If it doesn't match, do not create any objects on the ThreadPool thread,
-                            // since either Open will fail or we will open a object for this pool that does
-                            // not belong in this pool.  The side effect of this is that if using integrated
-                            // security min pool size cannot be guaranteed.
-                            if (UsingIntegrateSecurity && !_identity.Equals(DbConnectionPoolIdentity.GetCurrent())) {
-                                return;
-                            }
-                            bool mustRelease = false;
-                            int waitResult = BOGUS_HANDLE;
-                            uint timeout = (uint)CreationTimeout;
-
+                        RuntimeHelpers.PrepareConstrainedRegions();
+                        try {
+                            _waitHandles.DangerousAddRef(ref mustRelease);
+                            
+                            // Obtain creation mutex so we're the only one creating objects
+                            // and we must have the wait result
                             RuntimeHelpers.PrepareConstrainedRegions();
-                            try {
-                                _waitHandles.DangerousAddRef(ref mustRelease);
-                                
-                                // Obtain creation mutex so we're the only one creating objects
-                                // and we must have the wait result
-                                RuntimeHelpers.PrepareConstrainedRegions();
-                                try { } finally {
-                                    waitResult = SafeNativeMethods.WaitForSingleObjectEx(_waitHandles.CreationHandle.DangerousGetHandle(), timeout, false);
-                                }
-                                if (WAIT_OBJECT_0 == waitResult) {
-                                    DbConnectionInternal newObj;
+                            try { } finally {
+                                waitResult = SafeNativeMethods.WaitForSingleObjectEx(_waitHandles.CreationHandle.DangerousGetHandle(), timeout, false);
+                            }
+                            if (WAIT_OBJECT_0 == waitResult) {
+                                DbConnectionInternal newObj;
 
-                                    // Check ErrorOccurred again after obtaining mutex
-                                    if (!ErrorOccurred) {
-                                        while (NeedToReplenish) {
-                                            // Don't specify any user options because there is no outer connection associated with the new connection
-                                            newObj = CreateObject(owningObject: null, userOptions: null, oldConnection: null);
+                                // Check ErrorOccurred again after obtaining mutex
+                                if (!ErrorOccurred) {
+                                    while (NeedToReplenish) {
+                                        // Don't specify any user options because there is no outer connection associated with the new connection
+                                        newObj = CreateObject(owningObject: null, userOptions: null, oldConnection: null);
 
-                                            // We do not need to check error flag here, since we know if
-                                            // CreateObject returned null, we are in error case.
-                                            if (null != newObj) {
-                                                PutNewObject(newObj);
-                                            }
-                                            else {
-                                                break;
-                                            }
+                                        // We do not need to check error flag here, since we know if
+                                        // CreateObject returned null, we are in error case.
+                                        if (null != newObj) {
+                                            PutNewObject(newObj);
+                                        }
+                                        else {
+                                            break;
                                         }
                                     }
                                 }
-                                else if (WAIT_TIMEOUT == waitResult) {
-                                    // do not wait forever and potential block this worker thread
-                                    // instead wait for a period of time and just requeue to try again
-                                    QueuePoolCreateRequest();
-                                }
-                                else {
-                                    // trace waitResult and ignore the failure
-                                    Bid.PoolerTrace("<prov.DbConnectionPool.PoolCreateRequest|RES|CPOOL> %d#, PoolCreateRequest called WaitForSingleObject failed %d", ObjectID, waitResult);
-                                }
                             }
-                            catch (Exception e) {
-                                // UNDONE - should not be catching all exceptions!!!
-                                if (!ADP.IsCatchableExceptionType(e)) {
-                                    throw;
-                                }
+                            else if (WAIT_TIMEOUT == waitResult) {
+                                // do not wait forever and potential block this worker thread
+                                // instead wait for a period of time and just requeue to try again
+                                QueuePoolCreateRequest();
+                            }
+                            else {
+                                // trace waitResult and ignore the failure
+                            }
+                        }
+                        catch (Exception e) {
+                            // UNDONE - should not be catching all exceptions!!!
+                            if (!ADP.IsCatchableExceptionType(e)) {
+                                throw;
+                            }
 
-                                // Now that CreateObject can throw, we need to catch the exception and discard it.
-                                // There is no further action we can take beyond tracing.  The error will be 
-                                // thrown to the user the next time they request a connection.
-                                Bid.PoolerTrace("<prov.DbConnectionPool.PoolCreateRequest|RES|CPOOL> %d#, PoolCreateRequest called CreateConnection which threw an exception: %ls", ObjectID, e);
+                            // Now that CreateObject can throw, we need to catch the exception and discard it.
+                            // There is no further action we can take beyond tracing.  The error will be 
+                            // thrown to the user the next time they request a connection.
+                        }
+                        finally {
+                            if (WAIT_OBJECT_0 == waitResult) {
+                                // reuse waitResult and ignore its value
+                                waitResult = SafeNativeMethods.ReleaseSemaphore(_waitHandles.CreationHandle.DangerousGetHandle(), 1, IntPtr.Zero);
                             }
-                            finally {
-                                if (WAIT_OBJECT_0 == waitResult) {
-                                    // reuse waitResult and ignore its value
-                                    waitResult = SafeNativeMethods.ReleaseSemaphore(_waitHandles.CreationHandle.DangerousGetHandle(), 1, IntPtr.Zero);
-                                }
-                                if (mustRelease) {
-                                    _waitHandles.DangerousRelease();
-                                }
+                            if (mustRelease) {
+                                _waitHandles.DangerousRelease();
                             }
                         }
                     }
                 }
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
             }
         }
 
@@ -1605,8 +1546,6 @@ namespace System.Data.ProviderBase {
             // causes the following assert to fire, which really mucks up stress
             // against checked bits.
             // Debug.Assert(obj.CanBePooled,    "non-poolable object in pool");
-
-            Bid.PoolerTrace("<prov.DbConnectionPool.PutNewObject|RES|CPOOL> %d#, Connection %d#, Pushing to general pool.\n", ObjectID, obj.ObjectID);
 
             _stackNew.Push(obj);
             _waitHandles.PoolSemaphore.Release(1);
@@ -1653,8 +1592,6 @@ namespace System.Data.ProviderBase {
             // that is using the connection, and that all pre-push logic has been
             // done and all transactions are ended.
 
-            Bid.PoolerTrace("<prov.DbConnectionPool.PutObjectFromTransactedPool|RES|CPOOL> %d#, Connection %d#, Transaction has ended.\n", ObjectID, obj.ObjectID);
-
             if (_state == State.Running && obj.CanBePooled) {
                 PutNewObject(obj);
             }
@@ -1673,8 +1610,6 @@ namespace System.Data.ProviderBase {
 
         private bool ReclaimEmancipatedObjects() {
             bool emancipatedObjectFound = false;
-
-            Bid.PoolerTrace("<prov.DbConnectionPool.ReclaimEmancipatedObjects|RES|CPOOL> %d#\n", ObjectID);
 
             List<DbConnectionInternal> reclaimedObjects = new List<DbConnectionInternal>();
             int count;
@@ -1719,8 +1654,6 @@ namespace System.Data.ProviderBase {
 
             for (int i = 0; i < count; ++i) {
                 DbConnectionInternal obj = reclaimedObjects[i];
-
-                Bid.PoolerTrace("<prov.DbConnectionPool.ReclaimEmancipatedObjects|RES|CPOOL> %d#, Connection %d#, Reclaiming.\n", ObjectID, obj.ObjectID);
                 PerformanceCounters.NumberOfReclaimedConnections.Increment();
 
                 emancipatedObjectFound = true;
@@ -1732,7 +1665,6 @@ namespace System.Data.ProviderBase {
         }
 
         internal void Startup() {
-            Bid.PoolerTrace("<prov.DbConnectionPool.Startup|RES|INFO|CPOOL> %d#, CleanupWait=%d\n", ObjectID, _cleanupWait);
 
             _cleanupTimer = CreateCleanupTimer();
             if (NeedToReplenish) {
@@ -1741,7 +1673,6 @@ namespace System.Data.ProviderBase {
         }
 
         internal void Shutdown() {
-            Bid.PoolerTrace("<prov.DbConnectionPool.Shutdown|RES|INFO|CPOOL> %d#\n", ObjectID);
 
             _state = State.ShuttingDown;
 
@@ -1761,8 +1692,6 @@ namespace System.Data.ProviderBase {
             Debug.Assert(null != transaction, "null transaction?");
             Debug.Assert(null != transactedObject, "null transactedObject?");
             // Note: connection may still be associated with transaction due to Explicit Unbinding requirement.
-
-            Bid.PoolerTrace("<prov.DbConnectionPool.TransactionEnded|RES|CPOOL> %d#, Transaction %d#, Connection %d#, Transaction Completed\n", ObjectID, transaction.GetHashCode(), transactedObject.ObjectID);
 
             // called by the internal connection when it get's told that the
             // transaction is completed.  We tell the transacted pool to remove

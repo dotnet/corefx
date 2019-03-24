@@ -87,10 +87,7 @@ namespace System.Data.OleDb {
             int[] rowBindStatus = new int[BindingCount()];
 
             _iaccessor = iaccessor;
-
-            Bid.Trace("<oledb.IAccessor.CreateAccessor|API|OLEDB>\n");
             hr = iaccessor.CreateAccessor(flags, (IntPtr)rowBindStatus.Length, this, (IntPtr)_dataLength, out _accessorHandle, rowBindStatus); // MDAC 69530
-            Bid.Trace("<oledb.IAccessor.CreateAccessor|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
             for (int k = 0; k < rowBindStatus.Length; ++k) {
                 if (DBBindStatus.OK != (DBBindStatus)rowBindStatus[k]) {
@@ -417,9 +414,7 @@ namespace System.Data.OleDb {
             IntPtr chapter = SafeNativeMethods.InterlockedExchangePointer(ADP.IntPtrOffset(buffer, valueOffset), ADP.PtrZero);
             if (ODB.DB_NULL_HCHAPTER != chapter) {
                 int refCount;
-                Bid.Trace("<oledb.IChapteredRowset.ReleaseChapter|API|OLEDB> Chapter=%Id\n", chapter);
                 OleDbHResult hr = chapteredRowset.ReleaseChapter(chapter, out refCount);
-                Bid.Trace("<oledb.IChapteredRowset.ReleaseChapter|API|OLEDB|RET> %08X{HRESULT}, RefCount=%d\n", hr, refCount);
             }
         }
 

@@ -182,11 +182,9 @@ namespace System.Data.OleDb {
         }
 
         internal IDBInfoWrapper IDBInfo(OleDbConnectionInternal connection) {
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|datasource> %d#, IDBInfo\n", connection.ObjectID);
             return new IDBInfoWrapper(ComWrapper());
         }
         internal IDBPropertiesWrapper IDBProperties(OleDbConnectionInternal connection) {
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|datasource> %d#, IDBProperties\n", connection.ObjectID);
             return new IDBPropertiesWrapper(ComWrapper());
         }
     }
@@ -309,17 +307,14 @@ namespace System.Data.OleDb {
         }
 
         internal IDBSchemaRowsetWrapper IDBSchemaRowset(OleDbConnectionInternal connection) {
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|session> %d#, IDBSchemaRowset\n", connection.ObjectID);
             return new IDBSchemaRowsetWrapper(ComWrapper());
         }
 
         internal IOpenRowsetWrapper IOpenRowset(OleDbConnectionInternal connection) {
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|session> %d#, IOpenRowset\n", connection.ObjectID);
             return new IOpenRowsetWrapper(ComWrapper());
         }
 
         internal ITransactionJoinWrapper ITransactionJoin(OleDbConnectionInternal connection) {
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|session> %d#, ITransactionJoin\n", connection.ObjectID);
             return new ITransactionJoinWrapper(ComWrapper());
         }
     }

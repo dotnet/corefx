@@ -389,8 +389,6 @@ namespace System.Data.OleDb {
             Debug.Assert(_changeID == changeID, "parameter has unexpectedly changed");
 
             if (Bid.AdvancedOn) {
-                Bid.Trace("<oledb.struct.tagDBPARAMBINDINFO|INFO|ADV> index=%d, parameterName='%ls'\n", index, ParameterName);//, bindings.BindInfo[index]);
-                Bid.Trace("<oledb.struct.tagDBBINDING|INFO|ADV>\n");//, bindings.DBBinding[index]);
             }
             return IsParameterComputed();
         }

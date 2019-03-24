@@ -71,7 +71,6 @@ namespace System.Data.OleDb {
         }
 
         private string ConnectionString_Get() {
-            Bid.Trace( "<prov.DbConnectionHelper.ConnectionString_Get|API> %d#\n", ObjectID);
             bool hidePassword = InnerConnection.ShouldHidePassword;
             DbConnectionOptions connectionOptions = UserConnectionOptions;
             return ((null != connectionOptions) ? connectionOptions.UsersConnectionString(hidePassword) : "");
@@ -108,10 +107,6 @@ namespace System.Data.OleDb {
             }
             if (!flag) {
                 throw ADP.OpenConnectionPropertySet(ADP.ConnectionString, connectionInternal.State);
-            }
-            if (Bid.TraceOn) {
-                string cstr = ((null != connectionOptions) ? connectionOptions.UsersConnectionStringForTrace() : "");
-                Bid.Trace("<prov.DbConnectionHelper.ConnectionString_Set|API> %d#, '%ls'\n", ObjectID, cstr);
             }
         }
 
@@ -152,10 +147,8 @@ namespace System.Data.OleDb {
             // the Bid.Trace, for that matter) have no reliability contract and
             // will end the reliable try...
             if (e is OutOfMemoryException) {
-                Bid.Trace("<prov.DbConnectionHelper.Abort|RES|INFO|CPOOL> %d#, Aborting operation due to asynchronous exception: %ls\n", ObjectID, "OutOfMemory");
             }
             else {
-                Bid.Trace("<prov.DbConnectionHelper.Abort|RES|INFO|CPOOL> %d#, Aborting operation due to asynchronous exception: %ls\n", ObjectID, e.ToString());
             }
         }
 
@@ -166,16 +159,10 @@ namespace System.Data.OleDb {
 
         override protected DbCommand CreateDbCommand() {
             DbCommand command = null;
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<prov.DbConnectionHelper.CreateDbCommand|API> %d#\n", ObjectID);
-            try {
-                DbProviderFactory providerFactory = ConnectionFactory.ProviderFactory;
-                command = providerFactory.CreateCommand();
-                command.Connection = this;
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
+
+            DbProviderFactory providerFactory = ConnectionFactory.ProviderFactory;
+            command = providerFactory.CreateCommand();
+            command.Connection = this;
             return command;
         }
 
@@ -196,8 +183,6 @@ namespace System.Data.OleDb {
         // with a different argument name and it's a breaking change to not use
         // the same argument names in V2.0 (VB Named Parameter Binding--Ick)
         private void EnlistDistributedTransactionHelper(System.EnterpriseServices.ITransaction transaction) {
-
-            Bid.Trace( "<prov.DbConnectionHelper.EnlistDistributedTransactionHelper|RES|TRAN> %d#, Connection enlisting in a transaction.\n", ObjectID);
             SysTx.Transaction indigoTransaction = null;
 
             if (null != transaction) {
@@ -218,8 +203,6 @@ namespace System.Data.OleDb {
         }
 
         override public void EnlistTransaction(SysTx.Transaction transaction) {
-
-            Bid.Trace( "<prov.DbConnectionHelper.EnlistTransaction|RES|TRAN> %d#, Connection enlisting in a transaction.\n", ObjectID);
 
             // If we're currently enlisted in a transaction and we were called
             // on the EnlistTransaction method (Whidbey) we're not allowed to

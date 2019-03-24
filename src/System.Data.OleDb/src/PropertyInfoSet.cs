@@ -32,12 +32,10 @@ namespace System.Data.OleDb {
         internal PropertyInfoSet(UnsafeNativeMethods.IDBProperties idbProperties, PropertyIDSet propIDSet) : base(IntPtr.Zero, true) {
             OleDbHResult hr;
             int propIDSetCount = propIDSet.Count; // avoid need for ReliabilityContract on get_Count
-            Bid.Trace("<oledb.IDBProperties.GetPropertyInfo|API|OLEDB>\n");
             RuntimeHelpers.PrepareConstrainedRegions();
             try {} finally {
                 hr = idbProperties.GetPropertyInfo(propIDSetCount, propIDSet, out this.setCount, out base.handle, out this.descBuffer);
             }
-            Bid.Trace("<oledb.IDBProperties.GetPropertyInfo|API|OLEDB|RET> %08X{HRESULT}\n", hr);
             if ((0 <= hr) && (ADP.PtrZero != handle)) {
                 SafeNativeMethods.Wrapper.ClearErrorInfo();
             }
@@ -82,7 +80,6 @@ namespace System.Data.OleDb {
                             propertyInfo._type = PropertyInfoSet.FromVtType(propinfo.vtType);
 
                             if (Bid.AdvancedOn) {
-                                Bid.Trace("<oledb.struct.OleDbPropertyInfo|INFO|ADV> \n");//, propertyInfo);
                             }
                             propertyLookup[propertyInfo._lowercase] = propertyInfo;
                         }

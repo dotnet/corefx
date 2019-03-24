@@ -169,7 +169,6 @@ namespace System.Data.OleDb {
         ]
         public String Provider {
             get {
-                Bid.Trace("<oledb.OleDbConnection.get_Provider|API> %d#\n", ObjectID);
                 OleDbConnectionString constr = this.OleDbConnectionStringValue;
                 string value = ((null != constr) ? constr.ConvertValueToString(ODB.Provider, null) : null);
                 return ((null != value) ? value : ADP.StrEmpty);
@@ -322,7 +321,6 @@ namespace System.Data.OleDb {
 
         object ICloneable.Clone() {
             OleDbConnection clone = new OleDbConnection(this);
-            Bid.Trace("<oledb.OleDbConnection.Clone|API> %d#, clone=%d#\n", ObjectID, clone.ObjectID);
             return clone;
         }
 
@@ -478,7 +476,6 @@ namespace System.Data.OleDb {
                     OleDbException exception = OleDbException.CreateException(errorInfo, errorCode, null);
                     OleDbInfoMessageEventArgs e = new OleDbInfoMessageEventArgs(exception);
                     if (Bid.TraceOn) {
-                        Bid.Trace("<oledb.OledbConnection.OnInfoMessage|API|INFO> %d#, Message='%ls'\n", ObjectID, e.Message);
                     }
                     handler(this, e);
                 }
@@ -494,7 +491,6 @@ namespace System.Data.OleDb {
 #if DEBUG
             else {
                 OleDbException exception = OleDbException.CreateException(errorInfo, errorCode, null);
-                Bid.Trace("<oledb.OledbConnection.OnInfoMessage|API|INFO> %d#, Message='%ls'\n", ObjectID, exception.Message);
             }
 #endif
         }
@@ -515,10 +511,7 @@ namespace System.Data.OleDb {
             OleDbHResult hr;
             using(IDBPropertiesWrapper idbProperties = IDBProperties()) {
                 using(DBPropSet propSet = DBPropSet.CreateProperty(propertySet, propertyID, required, value)) {
-                    
-                    Bid.Trace("<oledb.IDBProperties.SetProperties|API|OLEDB> %d#\n", ObjectID);
                     hr = idbProperties.Value.SetProperties(propSet.PropertySetCount, propSet);
-                    Bid.Trace("<oledb.IDBProperties.SetProperties|API|OLEDB|RET> %08X{HRESULT}\n", hr);
                     
                     if (hr < 0) {
                         Exception e = OleDbConnection.ProcessResults(hr, null, this);
@@ -584,13 +577,11 @@ namespace System.Data.OleDb {
                     connection.OnInfoMessage(errorInfo, hresult);
                 }
                 else {
-                    Bid.Trace("<oledb.OledbConnection|WARN|INFO> ErrorInfo available, but not connection %08X{HRESULT}\n", hresult);
                 }
                 Marshal.ReleaseComObject(errorInfo);
             }
             else if (0 < hresult) {
                 // @devnote: OnInfoMessage with no ErrorInfo
-                Bid.Trace("<oledb.OledbConnection|ERR|INFO> ErrorInfo not available %08X{HRESULT}\n", hresult);
             }
             else if ((int)hresult < 0) {
                 e = ODB.NoErrorInformation((null != connection) ? connection.Provider : null, hresult, null); // OleDbException

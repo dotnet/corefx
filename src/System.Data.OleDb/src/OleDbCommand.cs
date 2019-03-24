@@ -102,11 +102,6 @@ namespace System.Data.OleDb {
                 return ((null != value) ? value : ADP.StrEmpty);
             }
             set {
-                if (Bid.TraceOn) {
-                    Bid.Trace("<oledb.OleDbCommand.set_CommandText|API> %d#, '", ObjectID);
-                    Bid.PutStr(value); // Use PutStr to write out entire string
-                    Bid.Trace("'\n");
-                }
                 if (0 != ADP.SrcCompare(_commandText, value)) {
                     PropertyChanging();
                     _commandText = value;
@@ -119,7 +114,6 @@ namespace System.Data.OleDb {
                 return _commandTimeout;
             }
             set {
-                Bid.Trace("<oledb.OleDbCommand.set_CommandTimeout|API> %d#, %d\n", ObjectID, value);
                 if (value < 0) {
                     throw ADP.InvalidCommandTimeout(value);
                 }
@@ -178,7 +172,6 @@ namespace System.Data.OleDb {
                     ResetConnection();
 
                     _connection = value;
-                    Bid.Trace("<oledb.OleDbCommand.set_Connection|API> %d#\n", ObjectID);
 
                     if (null != value) {
                         _transaction = OleDbTransaction.TransactionUpdate(_transaction); // MDAC 63226
@@ -281,7 +274,6 @@ namespace System.Data.OleDb {
             }
             set {
                 _transaction = value;
-                Bid.Trace("<oledb.OleDbCommand.set_Transaction|API> %d#\n", ObjectID);
             }
         }
 
@@ -308,28 +300,24 @@ namespace System.Data.OleDb {
 
         // required interface, safe cast
         private UnsafeNativeMethods.IAccessor IAccessor() {
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|command> %d#, IAccessor\n", ObjectID);
             Debug.Assert(null != _icommandText, "IAccessor: null ICommandText");
             return (UnsafeNativeMethods.IAccessor) _icommandText;
         }
 
         // required interface, safe cast
         internal UnsafeNativeMethods.ICommandProperties ICommandProperties() {
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|command> %d#, ICommandProperties\n", ObjectID);
             Debug.Assert(null != _icommandText, "ICommandProperties: null ICommandText");
             return (UnsafeNativeMethods.ICommandProperties) _icommandText;
         }
 
         // optional interface, unsafe cast
         private UnsafeNativeMethods.ICommandPrepare ICommandPrepare() {
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|command> %d#, ICommandPrepare\n", ObjectID);
             Debug.Assert(null != _icommandText, "ICommandPrepare: null ICommandText");
             return (_icommandText as UnsafeNativeMethods.ICommandPrepare);
         }
 
         // optional interface, unsafe cast
         private UnsafeNativeMethods.ICommandWithParameters ICommandWithParameters() {
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|command> %d#, ICommandWithParameters\n", ObjectID);
             Debug.Assert(null != _icommandText, "ICommandWithParameters: null ICommandText");
             UnsafeNativeMethods.ICommandWithParameters value = (_icommandText as UnsafeNativeMethods.ICommandWithParameters);
             if (null == value) {
@@ -374,10 +362,7 @@ namespace System.Data.OleDb {
             for (int i = 0; i < ordinals.Length; ++i) {
                 ordinals[i] = (IntPtr)(i+1);
             }
-
-            Bid.Trace("<oledb.ICommandWithParameters.SetParameterInfo|API|OLEDB> %d#\n", ObjectID);
             OleDbHResult hr = commandWithParameters.SetParameterInfo((IntPtr)bindInfo.Length, ordinals, bindInfo);
-            Bid.Trace("<oledb.ICommandWithParameters.SetParameterInfo|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
             if (hr < 0) {
                 ProcessResults(hr);
@@ -386,45 +371,36 @@ namespace System.Data.OleDb {
 
         override public void Cancel() {
             IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbCommand.Cancel|API> %d#\n", ObjectID);
-            try {
-                unchecked { _changeID++; }
+            unchecked { _changeID++; }
 
-                UnsafeNativeMethods.ICommandText icmdtxt = _icommandText;
-                if (null != icmdtxt) {
-                    OleDbHResult hr = OleDbHResult.S_OK;
+            UnsafeNativeMethods.ICommandText icmdtxt = _icommandText;
+            if (null != icmdtxt) {
+                OleDbHResult hr = OleDbHResult.S_OK;
 
-                    lock(icmdtxt) {
-                        // lock the object to avoid race conditions between using the object and releasing the object
-                        // after we acquire the lock, if the class has moved on don't actually call Cancel
-                        if (icmdtxt == _icommandText) {
-                            Bid.Trace("<oledb.ICommandText.Cancel|API|OLEDB> %d#\n", ObjectID);
-                            hr = icmdtxt.Cancel();
-                            Bid.Trace("<oledb.ICommandText.Cancel|API|OLEDB|RET> %08X{HRESULT}\n", hr);
-                        }
+                lock(icmdtxt) {
+                    // lock the object to avoid race conditions between using the object and releasing the object
+                    // after we acquire the lock, if the class has moved on don't actually call Cancel
+                    if (icmdtxt == _icommandText) {
+                        hr = icmdtxt.Cancel();
                     }
-                    if (OleDbHResult.DB_E_CANTCANCEL != hr) {
-                        // if the provider can't cancel the command - don't cancel the DataReader
-                        this.canceling = true;
-                    }
-
-                    // since cancel is allowed to occur at anytime we can't check the connection status
-                    // since if it returns as closed then the connection will close causing the reader to close
-                    // and that would introduce the possilbility of one thread reading and one thread closing at the same time
-                    ProcessResultsNoReset(hr); // MDAC 72667
                 }
-                else {
+                if (OleDbHResult.DB_E_CANTCANCEL != hr) {
+                    // if the provider can't cancel the command - don't cancel the DataReader
                     this.canceling = true;
                 }
+
+                // since cancel is allowed to occur at anytime we can't check the connection status
+                // since if it returns as closed then the connection will close causing the reader to close
+                // and that would introduce the possilbility of one thread reading and one thread closing at the same time
+                ProcessResultsNoReset(hr); // MDAC 72667
             }
-            finally {
-                Bid.ScopeLeave(ref hscp);
+            else {
+                this.canceling = true;
             }
         }
 
         public OleDbCommand Clone() {
             OleDbCommand clone = new OleDbCommand(this);
-            Bid.Trace("<oledb.OleDbCommand.Clone|API> %d#, clone=%d#\n", ObjectID, clone.ObjectID);
             return clone;
         }
 
@@ -523,15 +499,8 @@ namespace System.Data.OleDb {
 
         new public OleDbDataReader ExecuteReader(CommandBehavior behavior) {
 
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbCommand.ExecuteReader|API> %d#, behavior=%d{ds.CommandBehavior}\n", ObjectID, (int)behavior);
-            try {
-                _executeQuery = true;
-                return ExecuteReaderInternal(behavior, ADP.ExecuteReader);
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
+            _executeQuery = true;
+            return ExecuteReaderInternal(behavior, ADP.ExecuteReader);
         }
 
         IDataReader IDbCommand.ExecuteReader(CommandBehavior behavior) {
@@ -735,10 +704,7 @@ namespace System.Data.OleDb {
         private int ExecuteCommandTextForMultpleResults(tagDBPARAMS dbParams, out object executeResult) {
             Debug.Assert(0 == (CommandBehavior.SingleRow & this.commandBehavior), "SingleRow implies SingleResult");
             OleDbHResult hr;
-
-            Bid.Trace("<oledb.ICommandText.Execute|API|OLEDB> %d#, IID_IMultipleResults\n", ObjectID);
             hr = _icommandText.Execute(ADP.PtrZero, ref ODB.IID_IMultipleResults, dbParams, out _recordsAffected, out executeResult);
-            Bid.Trace("<oledb.ICommandText.Execute|API|OLEDB|RET> %08X{HRESULT}, RecordsAffected=%Id\n", hr, _recordsAffected);
 
             if (OleDbHResult.E_NOINTERFACE != hr) {
                 ExecuteCommandTextErrorHandling(hr);
@@ -753,14 +719,10 @@ namespace System.Data.OleDb {
 
             // MDAC 64465 (Microsoft.Jet.OLEDB.4.0 returns 0 for recordsAffected instead of -1)
             if (_executeQuery) {
-                Bid.Trace("<oledb.ICommandText.Execute|API|OLEDB> %d#, IID_IRowset\n", ObjectID);
                 hr = _icommandText.Execute(ADP.PtrZero, ref ODB.IID_IRowset, dbParams, out _recordsAffected, out executeResult);
-                Bid.Trace("<oledb.ICommandText.Execute|API|OLEDB|RET> %08X{HRESULT}, RecordsAffected=%Id\n", hr, _recordsAffected);
             }
             else {
-                Bid.Trace("<oledb.ICommandText.Execute|API|OLEDB> %d#, IID_NULL\n", ObjectID);
                 hr = _icommandText.Execute(ADP.PtrZero, ref ODB.IID_NULL, dbParams, out _recordsAffected, out executeResult);
-                Bid.Trace("<oledb.ICommandText.Execute|API|OLEDB|RET> %08X{HRESULT}, RecordsAffected=%Id\n", hr, _recordsAffected);
             }
             ExecuteCommandTextErrorHandling(hr);
             return ODB.ExecutedIRowset;
@@ -771,10 +733,7 @@ namespace System.Data.OleDb {
 
             if (_connection.SupportIRow(this)) {
                 OleDbHResult hr;
-
-                Bid.Trace("<oledb.ICommandText.Execute|API|OLEDB> %d#, IID_IRow\n", ObjectID);
                 hr = _icommandText.Execute(ADP.PtrZero, ref ODB.IID_IRow, dbParams, out _recordsAffected, out executeResult);
-                Bid.Trace("<oledb.ICommandText.Execute|API|OLEDB|RET> %08X{HRESULT}, RecordsAffected=%Id\n", hr, _recordsAffected);
 
                 if (OleDbHResult.DB_E_NOTFOUND == hr) { // MDAC 76110
                     SafeNativeMethods.Wrapper.ClearErrorInfo();
@@ -815,35 +774,21 @@ namespace System.Data.OleDb {
 
         override public int ExecuteNonQuery() {
 
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbCommand.ExecuteNonQuery|API> %d#\n", ObjectID);
-            try {
-                _executeQuery = false;
-                ExecuteReaderInternal(CommandBehavior.Default, ADP.ExecuteNonQuery);
-                return ADP.IntPtrToInt32(_recordsAffected);
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
+            _executeQuery = false;
+            ExecuteReaderInternal(CommandBehavior.Default, ADP.ExecuteNonQuery);
+            return ADP.IntPtrToInt32(_recordsAffected);
         }
 
         override public object ExecuteScalar() {
 
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbCommand.ExecuteScalar|API> %d#\n", ObjectID);
-            try {
-                object value = null;
-                _executeQuery = true;
-                using(OleDbDataReader reader = ExecuteReaderInternal(CommandBehavior.Default, ADP.ExecuteScalar)) {
-                    if (reader.Read() && (0 < reader.FieldCount)) {
-                        value = reader.GetValue(0);
-                    }
+            object value = null;
+            _executeQuery = true;
+            using(OleDbDataReader reader = ExecuteReaderInternal(CommandBehavior.Default, ADP.ExecuteScalar)) {
+                if (reader.Read() && (0 < reader.FieldCount)) {
+                    value = reader.GetValue(0);
                 }
-                return value;
             }
-            finally {
-                Bid.ScopeLeave(ref hscp);
-            }
+            return value;
         }
 
         private int ExecuteTableDirect(CommandBehavior behavior, out object executeResult) {
@@ -872,7 +817,6 @@ namespace System.Data.OleDb {
                             if (null != propSet) {
 
                                 // MDAC 65279
-                                Bid.Trace("<oledb.IOpenRowset.OpenRowset|API|OLEDB> %d#, IID_IRowset\n", ObjectID);
                                 bool mustRelease = false;
                                 RuntimeHelpers.PrepareConstrainedRegions();
                                 try {
@@ -884,19 +828,13 @@ namespace System.Data.OleDb {
                                         propSet.DangerousRelease();
                                     }
                                 }
-                                    
-                                Bid.Trace("<oledb.IOpenRowset.OpenRowset|API|OLEDB|RET> %08X{HRESULT}", hr);
 
                                 if (OleDbHResult.DB_E_ERRORSOCCURRED == hr) {
-                                    Bid.Trace("<oledb.IOpenRowset.OpenRowset|API|OLEDB> %d#, IID_IRowset\n", ObjectID);
                                     hr = iopenRowset.Value.OpenRowset(ADP.PtrZero, tableID, ADP.PtrZero, ref ODB.IID_IRowset, 0, IntPtr.Zero, out executeResult);
-                                    Bid.Trace("<oledb.IOpenRowset.OpenRowset|API|OLEDB|RET> %08X{HRESULT}", hr);
                                 }
                             }
                             else {
-                                Bid.Trace("<oledb.IOpenRowset.OpenRowset|API|OLEDB> %d#, IID_IRowset\n", ObjectID);
                                 hr = iopenRowset.Value.OpenRowset(ADP.PtrZero, tableID, ADP.PtrZero, ref ODB.IID_IRowset, 0, IntPtr.Zero, out executeResult);
-                                Bid.Trace("<oledb.IOpenRowset.OpenRowset|API|OLEDB|RET> %08X{HRESULT}", hr);
                             }
                         }
                     }
@@ -1034,13 +972,7 @@ namespace System.Data.OleDb {
 
                 String commandText = ExpandCommandText();
 
-                if (Bid.TraceOn) {
-                    Bid.Trace("<oledb.ICommandText.SetCommandText|API|OLEDB> %d#, DBGUID_DEFAULT, CommandText='", ObjectID);
-                    Bid.PutStr(commandText); // Use PutStr to write out entire string
-                    Bid.Trace("'\n");
-                }
                 hr = _icommandText.SetCommandText(ref ODB.DBGUID_DEFAULT, commandText);
-                Bid.Trace("<oledb.ICommandText.SetCommandText|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
                 if (hr < 0) {
                     ProcessResults(hr);
@@ -1058,21 +990,14 @@ namespace System.Data.OleDb {
 
         override public void Prepare() {
 
-            IntPtr hscp;
-            Bid.ScopeEnter(out hscp, "<oledb.OleDbCommand.Prepare|API> %d#\n", ObjectID);
-            try {
-                if (CommandType.TableDirect != CommandType) { // MDAC 70946, 71194
-                    ValidateConnectionAndTransaction(ADP.Prepare);
+            if (CommandType.TableDirect != CommandType) { // MDAC 70946, 71194
+                ValidateConnectionAndTransaction(ADP.Prepare);
 
-                    _isPrepared = false;
-                    if (CommandType.TableDirect != CommandType) {
-                        InitializeCommand(0, true);
-                        PrepareCommandText(1);
-                    }
+                _isPrepared = false;
+                if (CommandType.TableDirect != CommandType) {
+                    InitializeCommand(0, true);
+                    PrepareCommandText(1);
                 }
-            }
-            finally {
-                Bid.ScopeLeave(ref hscp);
             }
         }
 
@@ -1091,10 +1016,7 @@ namespace System.Data.OleDb {
             UnsafeNativeMethods.ICommandPrepare icommandPrepare = ICommandPrepare();
             if (null != icommandPrepare) {
                 OleDbHResult hr;
-
-                Bid.Trace("<oledb.ICommandPrepare.Prepare|API|OLEDB> %d#, expectedExecutionCount=%d\n", ObjectID, expectedExecutionCount);
                 hr = icommandPrepare.Prepare(expectedExecutionCount);
-                Bid.Trace("<oledb.ICommandPrepare.Prepare|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
                 ProcessResults(hr);
 
@@ -1164,10 +1086,7 @@ namespace System.Data.OleDb {
             using(DBPropSet propSet = CommandPropertySets()) {
                 if (null != propSet) {
                     UnsafeNativeMethods.ICommandProperties icommandProperties = ICommandProperties();
-
-                    Bid.Trace("<oledb.ICommandProperties.SetProperties|API|OLEDB> %d#\n", ObjectID);
                     OleDbHResult hr = icommandProperties.SetProperties(propSet.PropertySetCount, propSet);
-                    Bid.Trace("<oledb.ICommandProperties.SetProperties|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
                     if (hr < 0) {
                         SafeNativeMethods.Wrapper.ClearErrorInfo();

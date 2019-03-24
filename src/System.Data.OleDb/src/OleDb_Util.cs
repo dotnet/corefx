@@ -273,9 +273,7 @@ namespace System.Data.OleDb {
         }
 
         static internal OleDbHResult GetErrorDescription(UnsafeNativeMethods.IErrorInfo errorInfo, OleDbHResult hresult, out string message) {
-            Bid.Trace("<oledb.IErrorInfo.GetDescription|API|OS>\n");
             OleDbHResult hr = errorInfo.GetDescription(out message);
-            Bid.Trace("<oledb.IErrorInfo.GetDescription|API|OS|RET> %08X{HRESULT}, Message='%ls'\n", hr, message);
             if (((int)hr < 0) && ADP.IsEmpty(message)) {
                 message = FailedGetDescription(hr) + Environment.NewLine + ODB.ELookup(hresult);
             }

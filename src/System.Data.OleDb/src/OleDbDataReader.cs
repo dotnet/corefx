@@ -125,7 +125,6 @@ namespace System.Data.OleDb {
 
         override public int Depth {
             get {
-                Bid.Trace("<oledb.OleDbDataReader.get_Depth|API> %d#\n", ObjectID);
                 if (IsClosed) { // MDAC 63669
                     throw ADP.DataReaderClosed("Depth");
                 }
@@ -135,7 +134,6 @@ namespace System.Data.OleDb {
 
         override public Int32 FieldCount {
             get {
-                Bid.Trace("<oledb.OleDbDataReader.get_FieldCount|API> %d#\n", ObjectID);
                 if (IsClosed) { // MDAC 63669
                     throw ADP.DataReaderClosed("FieldCount");
                 }
@@ -146,7 +144,6 @@ namespace System.Data.OleDb {
 
         override public bool HasRows { // MDAC 78405
             get {
-                Bid.Trace("<oledb.OleDbDataReader.get_HasRows|API> %d#\n", ObjectID);
                 if (IsClosed) { // MDAC 63669
                     throw ADP.DataReaderClosed("HasRows");
                 }
@@ -156,7 +153,6 @@ namespace System.Data.OleDb {
 
         override public Boolean IsClosed {
             get { // if we have a rowset or multipleresults, we may have more to read
-                Bid.Trace("<oledb.OleDbDataReader.get_IsClosed|API> %d#\n", ObjectID);
                 Debug.Assert((_singleRow && !_isClosed && !_isRead && (null == _irow) && (null == _irowset)) ||
                              _isClosed == ((null == _irow) && (null == _irowset) && (null == _imultipleResults)
                                            && (null == _dbSchemaTable) && (null == _connection) && (null == _command)), // MDAC 59536
@@ -171,7 +167,6 @@ namespace System.Data.OleDb {
 
         override public int RecordsAffected {
             get {
-                Bid.Trace("<oledb.OleDbDataReader.get_RecordsAffected|API> %d#\n", ObjectID);
                 return ADP.IntPtrToInt32(_recordsAffected);
             }
         }
@@ -201,13 +196,11 @@ namespace System.Data.OleDb {
 
         // required interface, safe cast
         private UnsafeNativeMethods.IAccessor IAccessor() {
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|rowset> %d#, IAccessor\n", ObjectID);
             return (UnsafeNativeMethods.IAccessor) IRowset();
         }
 
         // required interface, safe cast
         private UnsafeNativeMethods.IRowsetInfo IRowsetInfo() {
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|rowset> %d#, IRowsetInfo\n", ObjectID);
             return (UnsafeNativeMethods.IRowsetInfo) IRowset();
         }
 
@@ -410,11 +403,8 @@ namespace System.Data.OleDb {
             Debug.Assert(null == _dbSchemaTable, "non-null SchemaTable");
             Debug.Assert(null == _metadata, "non-null metadata");
             Debug.Assert(null != handle, "unexpected null rowset");
-
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|rowset_row> %d#, IColumnsInfo\n", ObjectID);
             UnsafeNativeMethods.IColumnsInfo icolumnsInfo = (handle as UnsafeNativeMethods.IColumnsInfo);
             if (null == icolumnsInfo) {
-                 Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|RET> %08X{HRESULT}\n", OleDbHResult.E_NOINTERFACE);
                 _dbSchemaTable = null;
 #if DEBUG
                 if (handle is UnsafeNativeMethods.IRow) {
@@ -548,8 +538,6 @@ namespace System.Data.OleDb {
         private void BuildSchemaTableRowset(object handle) {
             Debug.Assert(null == _dbSchemaTable, "BuildSchemaTableRowset - non-null SchemaTable");
             Debug.Assert(null != handle, "BuildSchemaTableRowset(object) - unexpected null handle");
-
-            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|rowset_row> %d, IColumnsRowset\n", ObjectID);
             UnsafeNativeMethods.IColumnsRowset icolumnsRowset = (handle as UnsafeNativeMethods.IColumnsRowset);
 
             if (null != icolumnsRowset) {
@@ -559,10 +547,7 @@ namespace System.Data.OleDb {
 
                 using(DualCoTaskMem prgOptColumns = new DualCoTaskMem(icolumnsRowset, out cOptColumns, out hr)) {
                     Debug.Assert((0 == hr) || prgOptColumns.IsInvalid, "GetAvailableCOlumns: unexpected return");
-
-                    Bid.Trace("<oledb.IColumnsRowset.GetColumnsRowset|API|OLEDB> %d#, IID_IRowset\n", ObjectID);
                     hr = icolumnsRowset.GetColumnsRowset(ADP.PtrZero, cOptColumns, prgOptColumns, ref ODB.IID_IRowset, 0, ADP.PtrZero, out rowset);
-                    Bid.Trace("<oledb.IColumnsRowset.GetColumnsRowset|API|OLEDB|RET> %08X{HRESULT}\n", hr);
                 }
 
                 Debug.Assert((0 <= hr) || (null == rowset), "if GetColumnsRowset failed, rowset should be null");
@@ -578,7 +563,6 @@ namespace System.Data.OleDb {
                 }
             }
             else {
-                Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|RET> %08X{HRESULT}\n", OleDbHResult.E_NOINTERFACE);
                 _useIColumnsRowset = false; // MDAC 72653
                 BuildSchemaTableInfo(handle, false, false);
             }
@@ -858,10 +842,7 @@ namespace System.Data.OleDb {
             UnsafeNativeMethods.IRowsetInfo rowsetInfo = IRowsetInfo();
             UnsafeNativeMethods.IRowset result;
             OleDbHResult hr;
-
-            Bid.Trace("<oledb.IRowsetInfo.GetReferencedRowset|API|OLEDB> %d#, ColumnOrdinal=%Id\n", ObjectID, ordinal);
             hr = rowsetInfo.GetReferencedRowset((IntPtr)ordinal, ref ODB.IID_IRowset, out result);
-            Bid.Trace("<oledb.IRowsetInfo.GetReferencedRowset|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
             ProcessResults(hr);
 
@@ -1076,7 +1057,6 @@ namespace System.Data.OleDb {
 
         override public int VisibleFieldCount {
             get {
-                Bid.Trace("<oledb.OleDbDataReader.get_VisibleFieldCount|API> %d#\n", ObjectID);
                 if (IsClosed) {
                     throw ADP.DataReaderClosed("VisibleFieldCount");
                 }
@@ -1107,10 +1087,7 @@ namespace System.Data.OleDb {
                     if ((null != command) && command.canceling) { // MDAC 68964
                         break;
                     }
-
-                    Bid.Trace("<oledb.IMultipleResults.GetResult|API|OLEDB> DBRESULTFLAG_DEFAULT, IID_NULL\n");
                     hr = imultipleResults.GetResult(ADP.PtrZero, ODB.DBRESULTFLAG_DEFAULT, ref ODB.IID_NULL, out affected, out result);
-                    Bid.Trace("<oledb.IMultipleResults.GetResult|API|OLEDB|RET> %08X{HRESULT}, RecordAffected=%Id\n", hr, affected);
 
                     // If a provider doesn't support IID_NULL and returns E_NOINTERFACE we want to break out
                     // of the loop without throwing an exception.  Our behavior will match ADODB in that scenario
@@ -1156,7 +1133,6 @@ namespace System.Data.OleDb {
         }
 
         static private void NextResultsInfinite() { // MDAC 72738
-            Bid.Trace("<oledb.OleDbDataReader.NextResultsInfinite|INFO> System.Data.OleDb.OleDbDataReader: 2000 IMultipleResult.GetResult(NULL, DBRESULTFLAG_DEFAULT, IID_NULL, NULL, NULL) iterations with 0 records affected. Stopping suspect infinite loop. To work-around try using ExecuteReader() and iterating through results with NextResult().\n");
 
             // edtriou's suggestion is that we debug assert so that users will learn of MSOLAP's misbehavior and not call ExecuteNonQuery
             Debug.Assert(false, "<oledb.OleDbDataReader.NextResultsInfinite|INFO> System.Data.OleDb.OleDbDataReader: 2000 IMultipleResult.GetResult(NULL, DBRESULTFLAG_DEFAULT, IID_NULL, NULL, NULL) iterations with 0 records affected. Stopping suspect infinite loop. To work-around try using ExecuteReader() and iterating through results with NextResult().\n");
@@ -1190,13 +1166,9 @@ namespace System.Data.OleDb {
                             Close();
                             break;
                         }
-
-                        Bid.Trace("<oledb.IMultipleResults.GetResult|API|OLEDB> %d#, IID_IRowset\n", ObjectID);
                         hr = imultipleResults.GetResult(ADP.PtrZero, ODB.DBRESULTFLAG_DEFAULT, ref ODB.IID_IRowset, out affected, out result);
-                        Bid.Trace("<oledb.IMultipleResults.GetResult|API|OLEDB|RET> %08X{HRESULT}, RecordAffected=%Id\n", hr, affected);
 
                         if ((0 <= hr) && (null != result)) {
-                            Bid.Trace("<oledb.IUnknown.QueryInterface|API|OLEDB|RowSet> %d#, IRowset\n", ObjectID);
                             _irowset = (UnsafeNativeMethods.IRowset) result;
                         }
                         _recordsAffected = AddRecordsAffected(_recordsAffected, affected);
@@ -1497,7 +1469,6 @@ namespace System.Data.OleDb {
               //bindings.Flags        = 0;
 
                 if (Bid.AdvancedOn) {
-                    Bid.Trace("<oledb.struct.tagDBBINDING|INFO|ADV> index=%d, columnName='%ls'\n", index, info.columnName);//, bindings.bindings[index]);
                 }
             }
 
@@ -1534,9 +1505,7 @@ namespace System.Data.OleDb {
                 IntPtr rowHandlesPtr = rowHandleBuffer.DangerousGetHandle();
                 UnsafeNativeMethods.IRowset irowset = IRowset();
                 try {
-                    Bid.Trace("<oledb.IRowset.GetNextRows|API|OLEDB> %d#, Chapter=%Id, RowsRequested=%Id\n", ObjectID, _chapterHandle.HChapter, _rowHandleFetchCount);
                     hr = irowset.GetNextRows(_chapterHandle.HChapter, /*skipCount*/IntPtr.Zero, _rowHandleFetchCount, out _rowFetchedCount, ref rowHandlesPtr);
-                    Bid.Trace("<oledb.IRowset.GetNextRows|API|OLEDB|RET> %08X{HRESULT}, RowsObtained=%Id\n", hr, _rowFetchedCount);
                     Debug.Assert(rowHandleBuffer.DangerousGetHandle() == rowHandlesPtr, "rowhandlebuffer changed");
                 }
                 catch(System.InvalidCastException e) { // MDAC 64320
@@ -1583,10 +1552,7 @@ namespace System.Data.OleDb {
                 rowBinding.StartDataBlock();
                 
                 IntPtr dataPtr = rowBinding.DangerousGetDataPtr();
-
-                Bid.Trace("<oledb.IRowset.GetData|API|OLEDB> %d#, RowHandle=%Id, AccessorHandle=%Id\n", ObjectID, rowHandle, accessorHandle);
                 hr = irowset.GetData(rowHandle, accessorHandle, dataPtr);
-                Bid.Trace("<oledb.IRowset.GetData|API|OLEDB|RET> %08X{HRESULT}\n", hr);
             }
             finally {
                 if (mustRelease) {
@@ -1613,10 +1579,7 @@ namespace System.Data.OleDb {
 
             OleDbHResult hr;
             UnsafeNativeMethods.IRowset irowset = IRowset();
-
-            Bid.Trace("<oledb.IRowset.ReleaseRows|API|OLEDB> %d#, Request=%Id\n", ObjectID, _rowFetchedCount);
             hr = irowset.ReleaseRows(_rowFetchedCount, _rowHandleNativeBuffer, ADP.PtrZero, ADP.PtrZero, ADP.PtrZero);
-            Bid.Trace("<oledb.IRowset.ReleaseRows|API|OLEDB|RET> %08X{HRESULT}\n", hr);
 
             if (hr < 0) {
                 //ProcessFailure(hr);
@@ -1698,10 +1661,7 @@ namespace System.Data.OleDb {
                 rowBinding.StartDataBlock();                
 
                 UnsafeNativeMethods.IRow irow = IRow();
-
-                Bid.Trace("<oledb.IRow.GetColumns|API|OLEDB> %d#\n", ObjectID);                
                 hr = irow.GetColumns((IntPtr)access.Length, access);
-                Bid.Trace("<oledb.IRow.GetColumns|API|OLEDB|RET> %08X{HRESULT}\n", hr);
             }
             finally {
                 if (mustReleaseBinding) {

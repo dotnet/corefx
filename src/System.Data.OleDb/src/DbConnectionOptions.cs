@@ -523,24 +523,18 @@ namespace System.Data.Common {
             return builder.ToString();
         }
 
-#if DEBUG
         [System.Diagnostics.Conditional("DEBUG")]
         private static void DebugTraceKeyValuePair(string keyname, string keyvalue, Hashtable synonyms) {
-            if (Bid.AdvancedOn) {
-                Debug.Assert(keyname == keyname.ToLower(CultureInfo.InvariantCulture), "missing ToLower");
+            Debug.Assert(keyname == keyname.ToLower(CultureInfo.InvariantCulture), "missing ToLower");
 
-                string realkeyname = ((null != synonyms) ? (string)synonyms[keyname] : keyname);
-                if ((KEY.Password != realkeyname) && (SYNONYM.Pwd != realkeyname)) { // don't trace passwords ever!
-                    if (null != keyvalue) {
-                        Bid.Trace("<comm.DbConnectionOptions|INFO|ADV> KeyName='%ls', KeyValue='%ls'\n", keyname, keyvalue);
-                    }
-                    else {
-                        Bid.Trace("<comm.DbConnectionOptions|INFO|ADV> KeyName='%ls'\n", keyname);
-                    }
+            string realkeyname = ((null != synonyms) ? (string)synonyms[keyname] : keyname);
+            if ((KEY.Password != realkeyname) && (SYNONYM.Pwd != realkeyname)) { // don't trace passwords ever!
+                if (null != keyvalue) {
+                }
+                else {
                 }
             }
         }
-#endif
 
         static private string GetKeyName(StringBuilder buffer) {
             int count = buffer.Length;
