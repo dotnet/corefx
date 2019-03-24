@@ -32,7 +32,7 @@ namespace System.IO.Tests
         /// Watches the Changed WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Changed event is thrown by the watcher.
         /// </summary>
-        public static (AutoResetEvent EventOccured, FileSystemEventHandler Handler) WatchChanged(FileSystemWatcher watcher, string[] expectedPaths = null)
+        public static (AutoResetEvent EventOccurred, FileSystemEventHandler Handler) WatchChanged(FileSystemWatcher watcher, string[] expectedPaths = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
@@ -54,7 +54,7 @@ namespace System.IO.Tests
         /// Watches the Created WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Created event is thrown by the watcher.
         /// </summary>
-        public static (AutoResetEvent EventOccured, FileSystemEventHandler Handler) WatchCreated(FileSystemWatcher watcher, string[] expectedPaths = null)
+        public static (AutoResetEvent EventOccurred, FileSystemEventHandler Handler) WatchCreated(FileSystemWatcher watcher, string[] expectedPaths = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
@@ -76,7 +76,7 @@ namespace System.IO.Tests
         /// Watches the Renamed WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Renamed event is thrown by the watcher.
         /// </summary>
-        public static (AutoResetEvent EventOccured, FileSystemEventHandler Handler) WatchDeleted(FileSystemWatcher watcher, string[] expectedPaths = null)
+        public static (AutoResetEvent EventOccurred, FileSystemEventHandler Handler) WatchDeleted(FileSystemWatcher watcher, string[] expectedPaths = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
             FileSystemEventHandler handler = (o, e) =>
@@ -97,7 +97,7 @@ namespace System.IO.Tests
         /// Watches the Renamed WatcherChangeType and unblocks the returned AutoResetEvent when a
         /// Renamed event is thrown by the watcher.
         /// </summary>
-        public static (AutoResetEvent EventOccured, RenamedEventHandler Handler) WatchRenamed(FileSystemWatcher watcher, string[] expectedPaths = null)
+        public static (AutoResetEvent EventOccurred, RenamedEventHandler Handler) WatchRenamed(FileSystemWatcher watcher, string[] expectedPaths = null)
         {
             AutoResetEvent eventOccurred = new AutoResetEvent(false);
 
@@ -217,7 +217,7 @@ namespace System.IO.Tests
         public static void ExpectNoEvent(FileSystemWatcher watcher, WatcherChangeTypes unExpectedEvents, Action action, Action cleanup = null, string expectedPath = null, int timeout = WaitForExpectedEventTimeout)
         {
             bool result = ExecuteAndVerifyEvents(watcher, unExpectedEvents, action, false, new string[] { expectedPath }, timeout);
-            Assert.False(result, "Expected Event occured");
+            Assert.False(result, "Expected Event Occurred");
 
             if (cleanup != null)
                 cleanup();
@@ -235,8 +235,8 @@ namespace System.IO.Tests
         public static bool ExecuteAndVerifyEvents(FileSystemWatcher watcher, WatcherChangeTypes expectedEvents, Action action, bool assertExpected, string[] expectedPaths, int timeout)
         {
             bool result = true, verifyChanged = true, verifyCreated = true, verifyDeleted = true, verifyRenamed = true;
-            (AutoResetEvent EventOccured, FileSystemEventHandler Handler) changed = default, created = default, deleted = default;
-            (AutoResetEvent EventOccured, RenamedEventHandler Handler) renamed = default;
+            (AutoResetEvent EventOccurred, FileSystemEventHandler Handler) changed = default, created = default, deleted = default;
+            (AutoResetEvent EventOccurred, RenamedEventHandler Handler) renamed = default;
 
             if (verifyChanged = ((expectedEvents & WatcherChangeTypes.Changed) > 0))
                 changed = WatchChanged(watcher, expectedPaths);
@@ -254,7 +254,7 @@ namespace System.IO.Tests
             if (verifyChanged)
             {
                 bool Changed_expected = ((expectedEvents & WatcherChangeTypes.Changed) > 0);
-                bool Changed_actual = changed.EventOccured.WaitOne(timeout);
+                bool Changed_actual = changed.EventOccurred.WaitOne(timeout);
                 watcher.Changed -= changed.Handler;
                 result = Changed_expected == Changed_actual;
                 if (assertExpected)
@@ -265,7 +265,7 @@ namespace System.IO.Tests
             if (verifyCreated)
             {
                 bool Created_expected = ((expectedEvents & WatcherChangeTypes.Created) > 0);
-                bool Created_actual = created.EventOccured.WaitOne(verifyChanged ? SubsequentExpectedWait : timeout);
+                bool Created_actual = created.EventOccurred.WaitOne(verifyChanged ? SubsequentExpectedWait : timeout);
                 watcher.Created -= created.Handler;
                 result = result && Created_expected == Created_actual;
                 if (assertExpected)
@@ -276,7 +276,7 @@ namespace System.IO.Tests
             if (verifyDeleted)
             {
                 bool Deleted_expected = ((expectedEvents & WatcherChangeTypes.Deleted) > 0);
-                bool Deleted_actual = deleted.EventOccured.WaitOne(verifyChanged || verifyCreated ? SubsequentExpectedWait : timeout);
+                bool Deleted_actual = deleted.EventOccurred.WaitOne(verifyChanged || verifyCreated ? SubsequentExpectedWait : timeout);
                 watcher.Deleted -= deleted.Handler;
                 result = result && Deleted_expected == Deleted_actual;
                 if (assertExpected)
@@ -287,7 +287,7 @@ namespace System.IO.Tests
             if (verifyRenamed)
             {
                 bool Renamed_expected = ((expectedEvents & WatcherChangeTypes.Renamed) > 0);
-                bool Renamed_actual = renamed.EventOccured.WaitOne(verifyChanged || verifyCreated || verifyDeleted ? SubsequentExpectedWait : timeout);
+                bool Renamed_actual = renamed.EventOccurred.WaitOne(verifyChanged || verifyCreated || verifyDeleted ? SubsequentExpectedWait : timeout);
                 watcher.Renamed -= renamed.Handler;
                 result = result && Renamed_expected == Renamed_actual;
                 if (assertExpected)

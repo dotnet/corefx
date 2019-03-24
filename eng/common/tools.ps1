@@ -78,7 +78,7 @@ function Exec-Process([string]$command, [string]$commandArgs) {
     return $global:LASTEXITCODE = $process.ExitCode
   }
   finally {
-    # If we didn't finish then an error occured or the user hit ctrl-c.  Either
+    # If we didn't finish then an error occurred or the user hit ctrl-c.  Either
     # way kill the process
     if (-not $finished) {
       $process.Kill()
