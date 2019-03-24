@@ -761,7 +761,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
                     If leftType.IsSubclassOf(rightType) Then Return -1
 
                     'Necessary to return 1 only for RightType.IsSubclassOf(LeftType)?  If no inheritance
-                    'relationhip exists, which is possible when members come from IReflect, returning 1
+                    'relationship exists, which is possible when members come from IReflect, returning 1
                     'is still okay. Returning 1 in this IReflect case will not cause qsort to never terminate.
                     Return 1
                 End Function
@@ -1181,7 +1181,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
                     Throw New RankException
                 End If
 
-                'To ensure order of evaulation, we must evaluate the Value argument after
+                'To ensure order of evaluation, we must evaluate the Value argument after
                 'evaluating each index argument.
                 Dim value As Object = arguments(arguments.Length - 1)
                 Dim elementType As Type = _type.GetElementType
@@ -1440,12 +1440,12 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 'This function instantiates a generic method with the type arguments supplied or inferred
                 'for this method.
                 '
-                ' Constructing the generic binding using Reflection peforms
+                ' Constructing the generic binding using Reflection performs
                 ' constraint checking. This is bad if the binding will be used
                 ' to resolve overloaded calls since constraints should not participate
                 ' in the selection process. Instead, constraints should be checked
                 ' after overload resolution has selected a method. For now, there is
-                ' nothing reasonble we can do since Reflection does not allow the 
+                ' nothing reasonable we can do since Reflection does not allow the 
                 ' instantiation of generic methods with arguments that violate the
                 ' constraints. If a violation occurs, catch the exception and return
                 ' false signifying that the binding failed.
