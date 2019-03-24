@@ -492,9 +492,7 @@ namespace System.Net.Http.Functional.Tests
         [OuterLoop("Uses external server")]
         public async Task ProxyTunnelRequest_PortSpecified_NotStrippedOffInUri()
         {
-            // Https proxy request will use CONNECT tunnel, even the default 443 port is specified, it will not be stripped off.
-            string requestTarget = $"{Configuration.Http.SecureHost}:443";
-            string addressUri = $"https://{requestTarget}/";
+            string addressUri = $"https://{Configuration.Http.SecureHost}/";
             bool connectionAccepted = false;
 
             await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
@@ -510,7 +508,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 connectionAccepted = true;
                 List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
-                Assert.Contains($"CONNECT {requestTarget} HTTP/1.1", headers);
+                Assert.Contains($"CONNECT {Configuration.Http.SecureHost} HTTP/1.1", headers);
             }));
 
             Assert.True(connectionAccepted);
