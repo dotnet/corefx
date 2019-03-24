@@ -273,7 +273,7 @@ namespace System.Xml.Xsl.Xslt
             {
                 FillModeFlags(sheet.ModeFlags, import);
             }
-            // My parrent depend on my my templates and templates imported
+            // My parrent depend on my templates and templates imported
             // 1. Copy ModeFlags of my imports to my parent
             foreach (KeyValuePair<QilName, XslFlags> modeFlag in sheet.ModeFlags)
             {
