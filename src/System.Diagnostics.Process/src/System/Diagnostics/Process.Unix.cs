@@ -181,26 +181,33 @@ namespace System.Diagnostics
                 {
                     if (!_watchingForExit)
                     {
-                        Debug.Assert(_waitHandle == null);
                         Debug.Assert(_registeredWaitHandle == null);
                         Debug.Assert(Associated, "Process.EnsureWatchingForExit called with no associated process");
                         _watchingForExit = true;
                         try
                         {
-                            _waitHandle = new ProcessWaitHandle(GetWaitState());
-                            _registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(_waitHandle,
-                                new WaitOrTimerCallback(CompletionCallback), _waitHandle, -1, true);
+                            _completionCallbackContext = new object();
+                            WaitHandle waitHandle = GetOrCreateProcessWaitHandle();
+                            _registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(waitHandle,
+                                new WaitOrTimerCallback(CompletionCallback), _completionCallbackContext, -1, true);
                         }
                         catch
                         {
-                            _waitHandle?.Dispose();
-                            _waitHandle = null;
                             _watchingForExit = false;
                             throw;
                         }
                     }
                 }
             }
+        }
+
+        private ProcessWaitHandle GetOrCreateProcessWaitHandle()
+        {
+            if (_waitHandle == null)
+            {
+                _waitHandle = new ProcessWaitHandle(GetWaitState());
+            }
+            return (ProcessWaitHandle)_waitHandle;
         }
 
         /// <summary>
@@ -357,8 +364,7 @@ namespace System.Diagnostics
             }
 
             EnsureState(State.HaveNonExitedId | State.IsLocal);
-            EnsureWatchingForExit();
-            return new SafeProcessHandle(_processId, _waitHandle.SafeWaitHandle);
+            return new SafeProcessHandle(_processId, GetOrCreateProcessWaitHandle().SafeWaitHandle);
         }
 
         /// <summary>
@@ -515,7 +521,7 @@ namespace System.Diagnostics
                     // Store the child's information into this Process object.
                     Debug.Assert(childPid >= 0);
                     SetProcessId(childPid);
-                    SetProcessHandle(GetProcessHandle());
+                    SetProcessHandle(new SafeProcessHandle(_processId, GetOrCreateProcessWaitHandle().SafeWaitHandle));
 
                     return true;
                 }

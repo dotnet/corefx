@@ -141,8 +141,9 @@ namespace System.Diagnostics
                         try
                         {
                             _waitHandle = new Interop.Kernel32.ProcessWaitHandle(_processHandle);
+                            _completionCallbackContext = _waitHandle;
                             _registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(_waitHandle,
-                                new WaitOrTimerCallback(CompletionCallback), _waitHandle, -1, true);
+                                new WaitOrTimerCallback(CompletionCallback), _completionCallbackContext, -1, true);
                         }
                         catch
                         {
