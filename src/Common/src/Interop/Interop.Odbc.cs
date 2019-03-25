@@ -381,7 +381,7 @@ internal static partial class Interop
             /*SQLCHAR* */string SchemaName,
             /*SQLSMALLINT*/short NameLen2,
             [In]
-            /*SQLCHAR* */IntPtr TableName, // IntPtr because is mutated
+            /*SQLCHAR* */IntPtr TableName, // IntPtr instead of string because callee may mutate contents
             /*SQLSMALLINT*/short NameLen3,
             /*SQLUSMALLINT*/short Unique,
             /*SQLUSMALLINT*/short Reserved);
