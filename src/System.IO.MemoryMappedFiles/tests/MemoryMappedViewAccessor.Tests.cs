@@ -81,7 +81,8 @@ namespace System.IO.MemoryMappedFiles.Tests
             AssertExtensions.ThrowsIf<IOException>(PlatformDetection.IsUap && mapAccess == MemoryMappedFileAccess.ReadWriteExecute && viewAccess == MemoryMappedFileAccess.ReadWriteExecute,
             () =>
             {
-                try {
+                try
+                {
                     using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
                     using (MemoryMappedViewAccessor acc = mmf.CreateViewAccessor(0, Capacity, viewAccess))
                     {
