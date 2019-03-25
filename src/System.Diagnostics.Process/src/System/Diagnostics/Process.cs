@@ -58,7 +58,6 @@ namespace System.Diagnostics
 
         private bool _raisedOnExited;
         private RegisteredWaitHandle _registeredWaitHandle;
-        private object _completionCallbackContext;
         private WaitHandle _waitHandle;
         private StreamReader _standardOutput;
         private StreamWriter _standardInput;
@@ -781,7 +780,7 @@ namespace System.Diagnostics
             {
                 // Check the exited event that we get from the threadpool
                 // matches the event we are waiting for.
-                if (waitHandleContext != _completionCallbackContext)
+                if (waitHandleContext != _waitHandle)
                 {
                     return;
                 }
@@ -840,7 +839,7 @@ namespace System.Diagnostics
                 // raise the Exited event a second time for the same process.
                 lock (this)
                 {
-                    // This sets _completionCallbackContext to null which causes CompletionCallback to not emit events.
+                    // This sets _waitHandle to null which causes CompletionCallback to not emit events.
                     StopWatchingForExit();
                 }
                 if (_haveProcessHandle)
@@ -849,8 +848,6 @@ namespace System.Diagnostics
                     _processHandle = null;
                     _haveProcessHandle = false;
                 }
-                _waitHandle?.Dispose();
-                _waitHandle = null;
                 _haveProcessId = false;
                 _isRemoteMachine = false;
                 _machineName = ".";
@@ -1274,6 +1271,7 @@ namespace System.Diagnostics
             if (_watchingForExit)
             {
                 RegisteredWaitHandle rwh = null;
+                WaitHandle wh = null;
 
                 lock (this)
                 {
@@ -1281,15 +1279,22 @@ namespace System.Diagnostics
                     {
                         _watchingForExit = false;
 
+                        wh = _waitHandle;
+                        _waitHandle = null;
+
                         rwh = _registeredWaitHandle;
                         _registeredWaitHandle = null;
-                        _completionCallbackContext = null;
                     }
                 }
 
                 if (rwh != null)
                 {
                     rwh.Unregister(null);
+                }
+
+                if (wh != null)
+                {
+                    wh.Dispose();
                 }
             }
         }
