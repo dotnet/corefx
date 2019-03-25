@@ -1288,6 +1288,24 @@ namespace System.Text.Json.Tests
                 Assert.Throws<ObjectDisposedException>(() => root.GetString());
                 Assert.Throws<ObjectDisposedException>(() => root.GetBoolean());
                 Assert.Throws<ObjectDisposedException>(() => root.GetRawText());
+
+                Assert.Throws<ObjectDisposedException>(() =>
+                {
+                    Utf8JsonWriter writer = default;
+                    root.WriteValueTo(ref writer);
+                });
+
+                Assert.Throws<ObjectDisposedException>(() =>
+                {
+                    Utf8JsonWriter writer = default;
+                    root.WriteTo(ref writer, ReadOnlySpan<char>.Empty);
+                });
+
+                Assert.Throws<ObjectDisposedException>(() =>
+                {
+                    Utf8JsonWriter writer = default;
+                    root.WriteTo(ref writer, ReadOnlySpan<byte>.Empty);
+                });
             }
         }
 
@@ -1314,6 +1332,24 @@ namespace System.Text.Json.Tests
             Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
             Assert.Throws<InvalidOperationException>(() => root.GetBoolean());
             Assert.Throws<InvalidOperationException>(() => root.GetRawText());
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                Utf8JsonWriter writer = default;
+                root.WriteValueTo(ref writer);
+            });
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                Utf8JsonWriter writer = default;
+                root.WriteTo(ref writer, ReadOnlySpan<char>.Empty);
+            });
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                Utf8JsonWriter writer = default;
+                root.WriteTo(ref writer, ReadOnlySpan<byte>.Empty);
+            });
         }
 
         [Fact]

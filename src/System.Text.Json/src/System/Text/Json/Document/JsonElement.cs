@@ -873,6 +873,61 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        ///   Write the element into the provider writer as a named object property.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        /// <param name="propertyName">The name for this value within the JSON object.</param>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public void WriteTo(ref Utf8JsonWriter writer, ReadOnlySpan<char> propertyName)
+        {
+            CheckValidInstance();
+
+            _parent.WriteElementTo(_idx, ref writer, propertyName);
+        }
+
+        /// <summary>
+        ///   Write the element into the provider writer as a named object property.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        /// <param name="utf8PropertyName">
+        ///   The name for this value within the JSON object, as UTF-8 text.
+        /// </param>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public void WriteTo(ref Utf8JsonWriter writer, ReadOnlySpan<byte> utf8PropertyName)
+        {
+            CheckValidInstance();
+
+            _parent.WriteElementTo(_idx, ref writer, utf8PropertyName);
+        }
+
+        /// <summary>
+        ///   Write the element into the provider writer as a value.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public void WriteValueTo(ref Utf8JsonWriter writer)
+        {
+            CheckValidInstance();
+
+            _parent.WriteElementTo(_idx, ref writer);
+        }
+
+        /// <summary>
         ///   Get an enumerator to enumerate the values in the JSON array represented by this JsonElement.
         /// </summary>
         /// <returns>
