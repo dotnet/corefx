@@ -629,7 +629,6 @@ namespace System.Diagnostics.Tests
             }
         }
 
-
         [Fact]
         public void ActivityImportExport()
         {

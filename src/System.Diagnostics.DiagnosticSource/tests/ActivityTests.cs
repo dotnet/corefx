@@ -739,7 +739,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(childActivity, Activity.Current);
 
             Assert.Equal("0123456789abcdef0123456789abcdef", childActivity.TraceId.ToHexString());
-            Assert.Equal(activity.SpanId.ToHexString(), childActivity.SpanId.ToHexString());
+            Assert.NotEqual(activity.SpanId.ToHexString(), childActivity.SpanId.ToHexString());
             Assert.True(IdIsW3CFormat(childActivity.Id));
             Assert.Equal(W3CIdFlags.Recording, childActivity.W3CIdFlags);
             Assert.True(childActivity.Recording);
