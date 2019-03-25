@@ -841,6 +841,7 @@ namespace System.Diagnostics
                     // This sets _waitHandle to null which causes CompletionCallback to not emit events.
                     StopWatchingForExit();
                 }
+
                 if (_haveProcessHandle)
                 {
                     _processHandle.Dispose();
