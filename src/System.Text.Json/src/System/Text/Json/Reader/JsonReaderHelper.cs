@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
 using System.Numerics;
@@ -248,27 +249,20 @@ namespace System.Text.Json
                                                0x02ul << 40 |
                                                0x01ul << 48) + 1;
 
-        public static bool TryGetEscapedGuid(ReadOnlySpan<byte> span, out Guid value)
+        public static void GetValueSequenceAsSpan(ReadOnlySequence<byte> valueSequence, out ReadOnlySpan<byte> span)
         {
-            Debug.Assert(span.Length <= JsonConstants.MaximumEscapedGuidLength);
+            Span<byte> stackSpan;
 
-            int idx = span.IndexOf(JsonConstants.BackSlash);
-            Debug.Assert(idx != -1);
-
-            Span<byte> utf8Unescaped = stackalloc byte[span.Length];
-
-            Unescape(span, utf8Unescaped, idx, out int written);
-            Debug.Assert(written > 0);
-
-            utf8Unescaped = utf8Unescaped.Slice(0, written);
-            Debug.Assert(!utf8Unescaped.IsEmpty);
-
-            if (utf8Unescaped.Length != JsonConstants.MaximumFormatGuidLength)
+            // Cannot create a span directly since it gets passed to instance methods on a ref struct.
+            unsafe
             {
-                value = default;
-                return false;
+                int sequenceLength = (int)valueSequence.Length;
+                byte* ptr = stackalloc byte[sequenceLength];
+                stackSpan = new Span<byte>(ptr, sequenceLength);
             }
-            return Utf8Parser.TryParse(utf8Unescaped, out value, out int bytesConsumed, 'D') && utf8Unescaped.Length == bytesConsumed;
+
+            valueSequence.CopyTo(stackSpan);
+            span = stackSpan;
         }
     }
 }

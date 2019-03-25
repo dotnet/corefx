@@ -81,6 +81,12 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"1997-07-16T19:20:30.4555555-14\"", "1997-07-16T19:20:30.4555555-14:00" };
             // Test February 29 on a leap year
             yield return new object[] { "\"2020-02-29T19:20:30.4555555+10:00\"", "2020-02-29T19:20:30.4555555+10:00" };
+
+            // Hex string
+            yield return new object[] { "\"\\u0031\\u0039\\u0039\\u0037\\u002d\\u0030\\u0037\\u002d\\u0031\\u0036\\u0054\\u0031\\u0039\\u003a\\u0032\\u0030\\u003a\\u0033\\u0030\\u002e\\u0034\\u0035\\u0035\\u0035\\u0035\\u0035\\u0035\"", "1997-07-16T19:20:30.4555555" };
+
+            // Mix of hex and plain string
+            yield return new object[] { "\"1997\\u002d07\\u002d16T19:20:30\\u002e4555\\u003555+14\"", "1997-07-16T19:20:30.4555555+14:00" };
         }
 
         // UTC TZD tests are separate because `DateTime.Parse` for strings with `Z` TZD will return
@@ -93,6 +99,8 @@ namespace System.Text.Json.Tests
         {
             yield return new object[] { "\"1997-07-16T19:20Z\"", "1997-07-16T19:20:00.0000000Z" };
             yield return new object[] { "\"1997-07-16T19:20:30Z\"", "1997-07-16T19:20:30.0000000Z" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555Z\"", "1997-07-16T19:20:30.4555555Z" };
+            // Hex string
             yield return new object[] { "\"1997-07-16T19:20:30.4555555Z\"", "1997-07-16T19:20:30.4555555Z" };
         }
 
@@ -179,6 +187,19 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"0000-07-16T19:20:30.4555555+10:00\"" };
             yield return new object[] { "\"2019-02-29T19:20:30.4555555+10:00\"" };
             yield return new object[] { "\"9999-12-31T23:59:59.9999999-01:00\"" }; // This date spills over to year 10_000.
+
+            // Hex strings
+
+            // Invalid YYYY-MM-DD 0997-07-16
+            yield return new object[] { "\"0997\\u002007-16\"" };
+            // Invalid YYYY-MM-DDThh:mm:ss 1997-07-16T19:20:3045
+            yield return new object[] { "\"\\u0031\\u0039\\u0039\\u0037\\u002d\\u0030\\u0037\\u002d\\u0031\\u0036\\u0054\\u0031\\u0039\\u003a\\u0032\\u0030\\u003a\\u0033\\u0030\\u0034\\u0035\"" };
+            // Invalid fraction 1997-07-16T19:20:30,45
+            yield return new object[] { "\"1997-07-16T19:20:30\\u002c45\"" };
+            // Invalid TZD 1997-07-16T19:20:30.4555555+-Z
+            yield return new object[] { "\"199\\u0037-07\\u002d16T1\\u0039:20:30.4555555+\\u002dZ\"" };
+            // Proper format but invalid calendar date, time, or time zone designator fields 1997-00-16
+            yield return new object[] { "\"\\u0031\\u0039\\u0039\\u0037\\u002d\\u0030\\u0030\\u002d\\u0031\\u0036\"" };
         }
     }
 }

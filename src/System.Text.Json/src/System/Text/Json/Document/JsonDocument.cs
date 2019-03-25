@@ -465,8 +465,33 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            if (JsonHelpers.TryParseAsISO(segment, out DateTime tmp, out int bytesConsumed) &&
-                segment.Length == bytesConsumed)
+            DateTime tmp;
+            int bytesConsumed;
+
+            if (row.HasComplexChildren)
+            {
+                int backslash = segment.IndexOf(JsonConstants.BackSlash);
+                Debug.Assert(backslash != -1);
+
+                Span<byte> segmentUnescaped = stackalloc byte[segment.Length];
+
+                JsonReaderHelper.Unescape(segment, segmentUnescaped, backslash, out int written);
+                Debug.Assert(written > 0);
+
+                segmentUnescaped = segmentUnescaped.Slice(0, written);
+                Debug.Assert(!segmentUnescaped.IsEmpty);
+
+                if (JsonHelpers.TryParseAsISO(segmentUnescaped, out tmp, out bytesConsumed) && segmentUnescaped.Length == bytesConsumed)
+                {
+                    value = tmp;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (JsonHelpers.TryParseAsISO(segment, out tmp, out bytesConsumed) && segment.Length == bytesConsumed)
             {
                 value = tmp;
                 return true;
@@ -490,8 +515,33 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            if (JsonHelpers.TryParseAsISO(segment, out DateTimeOffset tmp, out int bytesConsumed) &&
-                segment.Length == bytesConsumed)
+            DateTimeOffset tmp;
+            int bytesConsumed;
+
+            if (row.HasComplexChildren)
+            {
+                int backslash = segment.IndexOf(JsonConstants.BackSlash);
+                Debug.Assert(backslash != -1);
+
+                Span<byte> segmentUnescaped = stackalloc byte[segment.Length];
+
+                JsonReaderHelper.Unescape(segment, segmentUnescaped, backslash, out int written);
+                Debug.Assert(written > 0);
+
+                segmentUnescaped = segmentUnescaped.Slice(0, written);
+                Debug.Assert(!segmentUnescaped.IsEmpty);
+
+                if (JsonHelpers.TryParseAsISO(segmentUnescaped, out tmp, out bytesConsumed) && segmentUnescaped.Length == bytesConsumed)
+                {
+                    value = tmp;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (JsonHelpers.TryParseAsISO(segment, out tmp, out bytesConsumed) && segment.Length == bytesConsumed)
             {
                 value = tmp;
                 return true;
