@@ -657,7 +657,6 @@ namespace System.Diagnostics
                     {
                         if (value)
                         {
-                            GetOrOpenProcessHandle();
                             EnsureWatchingForExit();
                         }
                         else
