@@ -237,18 +237,7 @@ uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
                                                 retFlags,
                                                 NULL);
 
-    if (isNtlm)
-    {
-        *isNtlmUsed = 1;
-    }
-    else if (majorStatus == GSS_S_COMPLETE && gss_oid_equal(outmech, krbMech) != 0)
-    {
-        *isNtlmUsed = 0;
-    }
-    else
-    {
-        *isNtlmUsed = 1;
-    }
+    *isNtlmUsed = (isNtlm || majorStatus != GSS_S_COMPLETE || gss_oid_equal(outmech, krbMech) == 0) ? 1 : 0;
 
     NetSecurityNative_MoveBuffer(&gssBuffer, outBuffer);
     return majorStatus;
