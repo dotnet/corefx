@@ -12,7 +12,7 @@
     <NoWarn>$(NoWarn);414</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <IgnoreMissingTypesList Include="System.IO.Enumeration.FileSystemEntry" />
+    <GenFacadesIgnoreMissingType Include="System.IO.Enumeration.FileSystemEntry" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System\IO\Enumeration\FileSystemEntry.cs" />

@@ -4,6 +4,9 @@
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <GenFacadesOmitType Include="System.Void" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="mscorlib.forwards.cs" />
   </ItemGroup>
   <ItemGroup>
