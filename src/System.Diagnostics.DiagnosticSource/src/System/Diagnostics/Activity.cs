@@ -510,8 +510,7 @@ namespace System.Diagnostics
                         }
                         catch
                         {
-                            // ActivityTraceId.CreateFromString(_parentId.AsSpan(3, 32) 
-                            // throws if parent is invalid W3C Id
+                            // ActivityTraceId.CreateFromString throws if parent is invalid W3C Id
                         }
                     }
                 }
