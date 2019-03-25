@@ -265,7 +265,7 @@ namespace System.Diagnostics
         /// Set the parent ID using the W3C convention using a TraceId and a SpanId.   This
         /// constructor has the advantage that no string manipulation is needed to set the ID.  
         /// </summary>
-        public Activity SetParentId(in ActivityTraceId traceId, in ActivitySpanId spanId, byte w3CFlags)
+        public Activity SetParentId(in ActivityTraceId traceId, in ActivitySpanId spanId, W3CIdFlags w3CFlags = W3CIdFlags.None)
         {
             if (Parent != null)
             {
@@ -281,7 +281,7 @@ namespace System.Diagnostics
                 _traceIdSet = true;
                 _parentSpanId = spanId;
                 _parentSpanIdSet = true;
-                _w3CIdFlags = w3CFlags;
+                _w3CIdFlags = (byte) w3CFlags;
                 _w3CIdFlagsSet = true;
             }
             return this;
@@ -847,6 +847,7 @@ namespace System.Diagnostics
     [Flags]
     public enum W3CIdFlags
     {
+        None = 0,
         Recording = 1
     }
 
