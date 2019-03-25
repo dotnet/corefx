@@ -48,6 +48,10 @@ int32_t SystemNative_UTimensat(const char* path, TimeSpec* times)
     return result;
 }
 
+// Gets the number of "ticks per second" of the underlying monotonic timer.
+//
+// On most Unix platforms, the methods that query the resolution return a value
+// that is "nanoseconds per tick" in which case we need to scale before returning.
 uint64_t SystemNative_GetTimestampResolution()
 {
 #if HAVE_MACH_ABSOLUTE_TIME
@@ -58,7 +62,8 @@ uint64_t SystemNative_GetTimestampResolution()
         return 0;
     }
 
-    return SecondsToNanoSeconds * ((uint64_t)(mtid.denom) / (uint64_t)(mtid.numer));
+    uint64_t nanosecondsPerTick = ((uint64_t)(mtid.denom) / (uint64_t)(mtid.numer));
+    return SecondsToNanoSeconds * nanosecondsPerTick;
 #else
     struct timespec ts;
 
@@ -67,7 +72,8 @@ uint64_t SystemNative_GetTimestampResolution()
         return 0;
     }
 
-    return ((uint64_t)(ts.tv_sec) * SecondsToNanoSeconds) + (uint64_t)(ts.tv_nsec);
+    uint64_t nanosecondsPerTick = ((uint64_t)(ts.tv_sec) * SecondsToNanoSeconds) + (uint64_t)(ts.tv_nsec);
+    return SecondsToNanoSeconds * nanosecondsPerTick;
 #endif
 }
 
