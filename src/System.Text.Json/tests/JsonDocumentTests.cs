@@ -1365,7 +1365,16 @@ namespace System.Text.Json.Tests
                 {
                     JsonReaderState state = new JsonReaderState(options);
                     Utf8JsonReader reader = new Utf8JsonReader(utf8, false, state);
-                    JsonDocument.Parse(ref reader);
+                    JsonDocument.ReadFrom(ref reader);
+                });
+
+            AssertExtensions.Throws<ArgumentException>(
+                "reader",
+                () =>
+                {
+                    JsonReaderState state = new JsonReaderState(options);
+                    Utf8JsonReader reader = new Utf8JsonReader(utf8, false, state);
+                    JsonDocument.TryReadFrom(ref reader, out _);
                 });
 
             stream.Seek(0, SeekOrigin.Begin);
@@ -1994,8 +2003,14 @@ namespace System.Text.Json.Tests
             Assert.Throws<JsonReaderException>(() =>
             {
                 Utf8JsonReader reader = default;
-                JsonDocument.Parse(ref reader);
+                JsonDocument.ReadFrom(ref reader);
             });
+
+            {
+                Utf8JsonReader reader = default;
+                Assert.False(JsonDocument.TryReadFrom(ref reader, out JsonDocument document));
+                Assert.Null(document);
+            }
         }
 
         [Theory]
@@ -2111,7 +2126,7 @@ namespace System.Text.Json.Tests
                 Assert.True(reader.Read(), "Move to first token");
             }
 
-            using (JsonDocument document = JsonDocument.Parse(ref reader))
+            using (JsonDocument document = JsonDocument.ReadFrom(ref reader))
             {
                 Assert.Equal(valueJson, document.RootElement.GetRawText());
             }
@@ -2167,7 +2182,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(tokenType, reader.TokenType);
             long currentPosition = reader.BytesConsumed;
 
-            using (JsonDocument document = JsonDocument.Parse(ref reader))
+            using (JsonDocument document = JsonDocument.ReadFrom(ref reader))
             {
                 Assert.Equal(valueJson, document.RootElement.GetRawText());
             }
@@ -2233,7 +2248,7 @@ namespace System.Text.Json.Tests
 
             long currentPosition = reader.BytesConsumed;
 
-            using (JsonDocument document = JsonDocument.Parse(ref reader))
+            using (JsonDocument document = JsonDocument.ReadFrom(ref reader))
             {
                 Assert.Equal(valueJson, document.RootElement.GetRawText());
             }
@@ -2309,7 +2324,7 @@ namespace System.Text.Json.Tests
 
             try
             {
-                using (JsonDocument.Parse(ref reader))
+                using (JsonDocument.ReadFrom(ref reader))
                 {
                 }
 
@@ -2323,6 +2338,10 @@ namespace System.Text.Json.Tests
             Assert.NotNull(ex);
             Assert.IsType<JsonReaderException>(ex);
 
+            Assert.Equal(initialPosition, reader.BytesConsumed);
+
+            Assert.False(JsonDocument.TryReadFrom(ref reader, out JsonDocument doc));
+            Assert.Null(doc);
             Assert.Equal(initialPosition, reader.BytesConsumed);
         }
 
@@ -2349,7 +2368,7 @@ namespace System.Text.Json.Tests
 
             try
             {
-                using (JsonDocument.Parse(ref reader))
+                using (JsonDocument.ReadFrom(ref reader))
                 {
                 }
 
@@ -2362,6 +2381,25 @@ namespace System.Text.Json.Tests
 
             Assert.NotNull(ex);
             Assert.IsType<JsonReaderException>(ex);
+
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.Equal(startPosition, reader.BytesConsumed);
+
+            JsonDocument doc = null;
+
+            try
+            {
+                JsonDocument.TryReadFrom(ref reader, out doc);
+                ex = null;
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            Assert.NotNull(ex);
+            Assert.IsType<JsonReaderException>(ex);
+            Assert.Null(doc);
 
             Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
             Assert.Equal(startPosition, reader.BytesConsumed);
@@ -2390,7 +2428,7 @@ namespace System.Text.Json.Tests
 
             try
             {
-                using (JsonDocument.Parse(ref reader))
+                using (JsonDocument.ReadFrom(ref reader))
                 {
                 }
 
@@ -2403,6 +2441,12 @@ namespace System.Text.Json.Tests
 
             Assert.NotNull(ex);
             Assert.IsType<JsonReaderException>(ex);
+
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.Equal(startPosition, reader.BytesConsumed);
+
+            Assert.False(JsonDocument.TryReadFrom(ref reader, out JsonDocument doc));
+            Assert.Null(doc);
 
             Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
             Assert.Equal(startPosition, reader.BytesConsumed);
@@ -2431,7 +2475,7 @@ namespace System.Text.Json.Tests
 
             try
             {
-                using (JsonDocument.Parse(ref reader))
+                using (JsonDocument.ReadFrom(ref reader))
                 {
                 }
 
@@ -2444,6 +2488,12 @@ namespace System.Text.Json.Tests
 
             Assert.NotNull(ex);
             Assert.IsType<JsonReaderException>(ex);
+
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.Equal(startPosition, reader.BytesConsumed);
+
+            Assert.False(JsonDocument.TryReadFrom(ref reader, out JsonDocument doc));
+            Assert.Null(doc);
 
             Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
             Assert.Equal(startPosition, reader.BytesConsumed);

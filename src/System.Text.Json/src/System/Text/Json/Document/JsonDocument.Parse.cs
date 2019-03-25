@@ -257,6 +257,42 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        ///   Attempts to parse one JSON value (including objects or arrays) from the provided reader.
+        /// </summary>
+        /// <param name="reader">The reader to read.</param>
+        /// <param name="document">Receives the parsed document.</param>
+        /// <returns>
+        ///   <see langword="true"/> if a value was read and parsed into a JsonDocument,
+        ///   <see langword="false"/> if the reader ran out of data while parsing.
+        ///   All other situations result in an exception being thrown.
+        /// </returns>
+        /// <remarks>
+        ///   <para>
+        ///     Upon completion of this method <paramref name="reader"/> will positioned at the
+        ///     final token in the JSON value.  If an exception is thrown, or <see langword="false"/>
+        ///     is returned, the reader is reset to the state it was in when the method was called.
+        ///   </para>
+        ///
+        ///   <para>
+        ///     This method makes a copy of the data the reader acted on, there is no caller
+        ///     requirement to maintain data integrity beyond the return of this method.
+        ///   </para>
+        /// </remarks>
+        /// <exception cref="ArgumentException">
+        ///   <paramref name="reader"/> is using unsupported options.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///   The current <paramref name="reader"/> token does not start or represent a value.
+        /// </exception>
+        /// <exception cref="JsonReaderException">
+        ///   A value could not be read from <paramref name="reader"/>.
+        /// </exception>
+        public static bool TryReadFrom(ref Utf8JsonReader reader, out JsonDocument document)
+        {
+            return TryReadFrom(ref reader, out document, shouldThrow: false);
+        }
+
+        /// <summary>
         ///   Parses one JSON value (including objects or arrays) from the provided reader.
         /// </summary>
         /// <param name="reader">The reader to read.</param>
@@ -284,7 +320,14 @@ namespace System.Text.Json
         /// <exception cref="JsonReaderException">
         ///   A value could not be read from <paramref name="reader"/>.
         /// </exception>
-        public static JsonDocument Parse(ref Utf8JsonReader reader)
+        public static JsonDocument ReadFrom(ref Utf8JsonReader reader)
+        {
+            bool ret = TryReadFrom(ref reader, out JsonDocument document, shouldThrow: true);
+            Debug.Assert(ret, "TryReadFrom returned false with shouldThrow: true.");
+            return document;
+        }
+
+        private static bool TryReadFrom(ref Utf8JsonReader reader, out JsonDocument document, bool shouldThrow)
         {
             JsonReaderState state = reader.CurrentState;
             CheckSupportedOptions(state.Options, nameof(reader));
@@ -312,7 +355,16 @@ namespace System.Text.Json
                     {
                         if (!reader.Read())
                         {
-                            ThrowHelper.ThrowJsonReaderException(ref reader, ExceptionResource.ExpectedJsonTokens);
+                            if (shouldThrow)
+                            {
+                                ThrowHelper.ThrowJsonReaderException(
+                                    ref reader,
+                                    ExceptionResource.ExpectedJsonTokens);
+                            }
+
+                            reader = restore;
+                            document = null;
+                            return false;
                         }
 
                         // Reset the starting position since we moved.
@@ -339,12 +391,16 @@ namespace System.Text.Json
                             {
                                 if (!reader.Read())
                                 {
-                                    ThrowHelper.ThrowJsonReaderException(
-                                        ref reader,
-                                        ExceptionResource.ExpectedJsonTokens);
+                                    if (shouldThrow)
+                                    {
+                                        ThrowHelper.ThrowJsonReaderException(
+                                            ref reader,
+                                            ExceptionResource.ExpectedJsonTokens);
+                                    }
 
-                                    Debug.Fail("Unreachable code");
-                                    break;
+                                    reader = restore;
+                                    document = null;
+                                    return false;
                                 }
                             }
                         }
@@ -433,24 +489,28 @@ namespace System.Text.Json
                     }
                     default:
                     {
-                        byte displayByte;
-
-                        if (reader.HasValueSequence)
+                        if (shouldThrow)
                         {
-                            displayByte = reader.ValueSequence.First.Span[0];
-                        }
-                        else
-                        {
-                            displayByte = reader.ValueSpan[0];
+                            byte displayByte;
+
+                            if (reader.HasValueSequence)
+                            {
+                                displayByte = reader.ValueSequence.First.Span[0];
+                            }
+                            else
+                            {
+                                displayByte = reader.ValueSpan[0];
+                            }
+
+                            ThrowHelper.ThrowJsonReaderException(
+                                ref reader,
+                                ExceptionResource.ExpectedStartOfValueNotFound,
+                                displayByte);
                         }
 
-                        ThrowHelper.ThrowJsonReaderException(
-                            ref reader,
-                            ExceptionResource.ExpectedStartOfValueNotFound,
-                            displayByte);
-
-                        Debug.Fail("Unreachable code");
-                        break;
+                        reader = restore;
+                        document = null;
+                        return false;
                     }
                 }
             }
@@ -475,7 +535,8 @@ namespace System.Text.Json
                     valueSpan.CopyTo(rentedSpan);
                 }
 
-                return Parse(rented.AsMemory(0, length), state.Options, rented);
+                document = Parse(rented.AsMemory(0, length), state.Options, rented);
+                return true;
             }
             catch
             {
