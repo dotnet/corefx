@@ -8,12 +8,12 @@ namespace System.Diagnostics
     {
         private static long QueryPerformanceFrequency()
         {
-            return Interop.Sys.GetTimestampResolution();
+            return (long)Interop.Sys.GetTimestampResolution();
         }
 
         private static long QueryPerformanceCounter()
         {
-            return Interop.Sys.GetTimestamp();
+            return (long)Interop.Sys.GetTimestamp();
         }
     }
 }
