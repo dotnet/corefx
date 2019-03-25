@@ -1,4 +1,35 @@
 {
+  "aix": [
+    "aix",
+    "unix",
+    "any",
+    "base"
+  ],
+  "aix-ppc64": [
+    "aix-ppc64",
+    "aix",
+    "unix-ppc64",
+    "unix",
+    "any",
+    "base"
+  ],
+  "aix.7.2": [
+    "aix.7.2",
+    "aix",
+    "unix",
+    "any",
+    "base"
+  ],
+  "aix.7.2-ppc64": [
+    "aix.7.2-ppc64",
+    "aix.7.2",
+    "aix-ppc64",
+    "aix",
+    "unix-ppc64",
+    "unix",
+    "any",
+    "base"
+  ],
   "alpine": [
     "alpine",
     "linux-musl",
@@ -303,6 +334,36 @@
     "any",
     "base"
   ],
+  "debian-ppc64el": [
+    "debian-ppc64el",
+    "debian",
+    "linux-ppc64el",
+    "linux",
+    "unix-ppc64el",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian-s390x": [
+    "debian-s390x",
+    "debian",
+    "linux-s390x",
+    "linux",
+    "unix-s390x",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian-mipsel": [
+    "debian-mipsel",
+    "debian",
+    "linux-mipsel",
+    "linux",
+    "unix-mipsel",
+    "unix",
+    "any",
+    "base"
+  ],
   "debian.8": [
     "debian.8",
     "debian",
@@ -371,6 +432,42 @@
     "any",
     "base"
   ],
+  "debian.8-ppc64el": [
+    "debian.8-ppc64el",
+    "debian.8",
+    "debian-ppc64el",
+    "debian",
+    "linux-ppc64el",
+    "linux",
+    "unix-ppc64el",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.8-s390x": [
+    "debian.8-s390x",
+    "debian.8",
+    "debian-s390x",
+    "debian",
+    "linux-s390x",
+    "linux",
+    "unix-s390x",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.8-mipsel": [
+    "debian.8-mipsel",
+    "debian.8",
+    "debian-mipsel",
+    "debian",
+    "linux-mipsel",
+    "linux",
+    "unix-mipsel",
+    "unix",
+    "any",
+    "base"
+  ],
   "debian.9": [
     "debian.9",
     "debian",
@@ -435,6 +532,146 @@
     "linux-x86",
     "linux",
     "unix-x86",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.9-ppc64el": [
+    "debian.9-ppc64el",
+    "debian.9",
+    "debian-ppc64el",
+    "debian",
+    "linux-ppc64el",
+    "linux",
+    "unix-ppc64el",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.9-s390x": [
+    "debian.9-s390x",
+    "debian.9",
+    "debian-s390x",
+    "debian",
+    "linux-s390x",
+    "linux",
+    "unix-s390x",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.9-mipsel": [
+    "debian.9-mipsel",
+    "debian.9",
+    "debian-mipsel",
+    "debian",
+    "linux-mipsel",
+    "linux",
+    "unix-mipsel",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.10": [
+    "debian.10",
+    "debian",
+    "linux",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.10-arm": [
+    "debian.10-arm",
+    "debian.10",
+    "debian-arm",
+    "debian",
+    "linux-arm",
+    "linux",
+    "unix-arm",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.10-arm64": [
+    "debian.10-arm64",
+    "debian.10",
+    "debian-arm64",
+    "debian",
+    "linux-arm64",
+    "linux",
+    "unix-arm64",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.10-armel": [
+    "debian.10-armel",
+    "debian.10",
+    "debian-armel",
+    "debian",
+    "linux-armel",
+    "linux",
+    "unix-armel",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.10-x64": [
+    "debian.10-x64",
+    "debian.10",
+    "debian-x64",
+    "debian",
+    "linux-x64",
+    "linux",
+    "unix-x64",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.10-x86": [
+    "debian.10-x86",
+    "debian.10",
+    "debian-x86",
+    "debian",
+    "linux-x86",
+    "linux",
+    "unix-x86",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.10-ppc64el": [
+    "debian.10-ppc64el",
+    "debian.10",
+    "debian-ppc64el",
+    "debian",
+    "linux-ppc64el",
+    "linux",
+    "unix-ppc64el",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.10-s390x": [
+    "debian.10-s390x",
+    "debian.10",
+    "debian-s390x",
+    "debian",
+    "linux-s390x",
+    "linux",
+    "unix-s390x",
+    "unix",
+    "any",
+    "base"
+  ],
+  "debian.10-mipsel": [
+    "debian.10-mipsel",
+    "debian.10",
+    "debian-mipsel",
+    "debian",
+    "linux-mipsel",
+    "linux",
+    "unix-mipsel",
     "unix",
     "any",
     "base"
@@ -812,6 +1049,38 @@
     "linux-x86",
     "linux",
     "unix-x86",
+    "unix",
+    "any",
+    "base"
+  ],
+  "linux-ppc64": [
+    "linux-ppc64",
+    "linux",
+    "unix-ppc64",
+    "unix",
+    "any",
+    "base"
+  ],
+  "linux-ppc64el": [
+    "linux-ppc64el",
+    "linux",
+    "unix-ppc64el",
+    "unix",
+    "any",
+    "base"
+  ],
+  "linux-s390x": [
+    "linux-s390x",
+    "linux",
+    "unix-s390x",
+    "unix",
+    "any",
+    "base"
+  ],
+  "linux-mipsel": [
+    "linux-mipsel",
+    "linux",
+    "unix-mipsel",
     "unix",
     "any",
     "base"
@@ -1724,6 +1993,104 @@
     "osx-x64",
     "osx",
     "unix-x64",
+    "unix",
+    "any",
+    "base"
+  ],
+  "raspbian": [
+    "raspbian",
+    "debian",
+    "linux",
+    "unix",
+    "any",
+    "base"
+  ],
+  "raspbian-arm": [
+    "raspbian-arm",
+    "raspbian",
+    "debian-arm",
+    "debian",
+    "linux-arm",
+    "linux",
+    "unix-arm",
+    "unix",
+    "any",
+    "base"
+  ],
+  "raspbian.8": [
+    "raspbian.8",
+    "raspbian",
+    "debian.8",
+    "debian",
+    "linux",
+    "unix",
+    "any",
+    "base"
+  ],
+  "raspbian.8-arm": [
+    "raspbian.8-arm",
+    "raspbian.8",
+    "raspbian-arm",
+    "raspbian",
+    "debian.8-arm",
+    "debian.8",
+    "debian-arm",
+    "debian",
+    "linux-arm",
+    "linux",
+    "unix-arm",
+    "unix",
+    "any",
+    "base"
+  ],
+  "raspbian.9": [
+    "raspbian.9",
+    "raspbian",
+    "debian.9",
+    "debian",
+    "linux",
+    "unix",
+    "any",
+    "base"
+  ],
+  "raspbian.9-arm": [
+    "raspbian.9-arm",
+    "raspbian.9",
+    "raspbian-arm",
+    "raspbian",
+    "debian.9-arm",
+    "debian.9",
+    "debian-arm",
+    "debian",
+    "linux-arm",
+    "linux",
+    "unix-arm",
+    "unix",
+    "any",
+    "base"
+  ],
+  "raspbian.10": [
+    "raspbian.10",
+    "raspbian",
+    "debian.10",
+    "debian",
+    "linux",
+    "unix",
+    "any",
+    "base"
+  ],
+  "raspbian.10-arm": [
+    "raspbian.10-arm",
+    "raspbian.10",
+    "raspbian-arm",
+    "raspbian",
+    "debian.10-arm",
+    "debian.10",
+    "debian-arm",
+    "debian",
+    "linux-arm",
+    "linux",
+    "unix-arm",
     "unix",
     "any",
     "base"
@@ -2976,6 +3343,30 @@
   ],
   "unix-x86": [
     "unix-x86",
+    "unix",
+    "any",
+    "base"
+  ],
+  "unix-ppc64": [
+    "unix-ppc64",
+    "unix",
+    "any",
+    "base"
+  ],
+  "unix-ppc64el": [
+    "unix-ppc64el",
+    "unix",
+    "any",
+    "base"
+  ],
+  "unix-s390x": [
+    "unix-s390x",
+    "unix",
+    "any",
+    "base"
+  ],
+  "unix-mipsel": [
+    "unix-mipsel",
     "unix",
     "any",
     "base"

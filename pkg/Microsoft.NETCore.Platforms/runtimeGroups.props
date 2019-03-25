@@ -2,15 +2,21 @@
   <ItemGroup>
     <RuntimeGroup Include="unix">
       <Parent>any</Parent>
-      <Architectures>x64;x86;arm;armel;arm64</Architectures>
+      <Architectures>x64;x86;arm;armel;arm64;ppc64;ppc64el;s390x;mipsel</Architectures>
     </RuntimeGroup>
     <RuntimeGroup Include="linux">
       <Parent>unix</Parent>
-      <Architectures>x64;x86;arm;armel;arm64</Architectures>
+      <Architectures>x64;x86;arm;armel;arm64;ppc64;ppc64el;s390x;mipsel</Architectures>
     </RuntimeGroup>
     <RuntimeGroup Include="linux-musl">
       <Parent>linux</Parent>
       <Architectures>x64;x86;arm;armel;arm64</Architectures>
+    </RuntimeGroup>
+
+    <RuntimeGroup Include="aix">
+      <Parent>unix</Parent>
+      <Architectures>ppc64</Architectures>
+      <Versions>7.2</Versions>
     </RuntimeGroup>
 
     <RuntimeGroup Include="alpine">
@@ -34,8 +40,8 @@
 
     <RuntimeGroup Include="debian">
       <Parent>linux</Parent>
-      <Architectures>x64;x86;arm;armel;arm64</Architectures>
-      <Versions>8;9</Versions>
+      <Architectures>x64;x86;arm;armel;arm64;ppc64el;s390x;mipsel</Architectures>
+      <Versions>8;9;10</Versions>
       <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
@@ -93,6 +99,14 @@
       <Parent>unix</Parent>
       <Architectures>x64</Architectures>
       <Versions>11;11.0;11.1;11.2</Versions>
+    </RuntimeGroup>
+
+    <!-- raspbian is Debian, built for Pi CPU. It is NOT Debian compatible on Pi 1 & Zero silicon -->
+    <RuntimeGroup Include="raspbian">
+      <Parent>debian</Parent>
+      <Architectures>arm</Architectures>
+      <Versions>8;9;10</Versions>
+      <TreatVersionsAsCompatible>false</TreatVersionsAsCompatible>
     </RuntimeGroup>
 
     <!-- rhel 6 is independent -->

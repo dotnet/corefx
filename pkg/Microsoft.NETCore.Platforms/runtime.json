@@ -1,5 +1,27 @@
 {
   "runtimes": {
+    "aix": {
+      "#import": [
+        "unix"
+      ]
+    },
+    "aix-ppc64": {
+      "#import": [
+        "unix-ppc64",
+        "unix"
+      ]
+    },
+    "aix.7.2": {
+      "#import": [
+        "aix"
+      ]
+    },
+    "aix.7.2-ppc64": {
+      "#import": [
+        "aix.7.2",
+        "aix-ppc64"
+      ]
+    },
     "alpine": {
       "#import": [
         "linux-musl"
@@ -161,6 +183,24 @@
         "linux-x86"
       ]
     },
+    "debian-ppc64el": {
+      "#import": [
+        "debian",
+        "linux-ppc64el"
+      ]
+    },
+    "debian-s390x": {
+      "#import": [
+        "debian",
+        "linux-s390x"
+      ]
+    },
+    "debian-mipsel": {
+      "#import": [
+        "debian",
+        "linux-mipsel"
+      ]
+    },
     "debian.8": {
       "#import": [
         "debian"
@@ -196,6 +236,24 @@
         "debian-x86"
       ]
     },
+    "debian.8-ppc64el": {
+      "#import": [
+        "debian.8",
+        "debian-ppc64el"
+      ]
+    },
+    "debian.8-s390x": {
+      "#import": [
+        "debian.8",
+        "debian-s390x"
+      ]
+    },
+    "debian.8-mipsel": {
+      "#import": [
+        "debian.8",
+        "debian-mipsel"
+      ]
+    },
     "debian.9": {
       "#import": [
         "debian"
@@ -229,6 +287,77 @@
       "#import": [
         "debian.9",
         "debian-x86"
+      ]
+    },
+    "debian.9-ppc64el": {
+      "#import": [
+        "debian.9",
+        "debian-ppc64el"
+      ]
+    },
+    "debian.9-s390x": {
+      "#import": [
+        "debian.9",
+        "debian-s390x"
+      ]
+    },
+    "debian.9-mipsel": {
+      "#import": [
+        "debian.9",
+        "debian-mipsel"
+      ]
+    },
+    "debian.10": {
+      "#import": [
+        "debian"
+      ]
+    },
+    "debian.10-arm": {
+      "#import": [
+        "debian.10",
+        "debian-arm"
+      ]
+    },
+    "debian.10-arm64": {
+      "#import": [
+        "debian.10",
+        "debian-arm64"
+      ]
+    },
+    "debian.10-armel": {
+      "#import": [
+        "debian.10",
+        "debian-armel"
+      ]
+    },
+    "debian.10-x64": {
+      "#import": [
+        "debian.10",
+        "debian-x64"
+      ]
+    },
+    "debian.10-x86": {
+      "#import": [
+        "debian.10",
+        "debian-x86"
+      ]
+    },
+    "debian.10-ppc64el": {
+      "#import": [
+        "debian.10",
+        "debian-ppc64el"
+      ]
+    },
+    "debian.10-s390x": {
+      "#import": [
+        "debian.10",
+        "debian-s390x"
+      ]
+    },
+    "debian.10-mipsel": {
+      "#import": [
+        "debian.10",
+        "debian-mipsel"
       ]
     },
     "fedora": {
@@ -453,6 +582,30 @@
       "#import": [
         "linux",
         "unix-x86"
+      ]
+    },
+    "linux-ppc64": {
+      "#import": [
+        "linux",
+        "unix-ppc64"
+      ]
+    },
+    "linux-ppc64el": {
+      "#import": [
+        "linux",
+        "unix-ppc64el"
+      ]
+    },
+    "linux-s390x": {
+      "#import": [
+        "linux",
+        "unix-s390x"
+      ]
+    },
+    "linux-mipsel": {
+      "#import": [
+        "linux",
+        "unix-mipsel"
       ]
     },
     "linuxmint.17": {
@@ -799,6 +952,50 @@
       "#import": [
         "osx.10.14",
         "osx.10.13-x64"
+      ]
+    },
+    "raspbian": {
+      "#import": [
+        "debian"
+      ]
+    },
+    "raspbian-arm": {
+      "#import": [
+        "raspbian",
+        "linux-arm"
+      ]
+    },
+    "raspbian.8": {
+      "#import": [
+        "debian.8"
+      ]
+    },
+    "raspbian.8-arm": {
+      "#import": [
+        "raspbian.8",
+        "raspbian-arm"
+      ]
+    },
+    "raspbian.9": {
+      "#import": [
+        "debian.9"
+      ]
+    },
+    "raspbian.9-arm": {
+      "#import": [
+        "raspbian.9",
+        "raspbian-arm"
+      ]
+    },
+    "raspbian.10": {
+      "#import": [
+        "debian.10"
+      ]
+    },
+    "raspbian.10-arm": {
+      "#import": [
+        "raspbian.10",
+        "raspbian-arm"
       ]
     },
     "rhel": {
@@ -1371,6 +1568,26 @@
       ]
     },
     "unix-x86": {
+      "#import": [
+        "unix"
+      ]
+    },
+    "unix-ppc64": {
+      "#import": [
+        "unix"
+      ]
+    },
+    "unix-ppc64el": {
+      "#import": [
+        "unix"
+      ]
+    },
+    "unix-s390x": {
+      "#import": [
+        "unix"
+      ]
+    },
+    "unix-mipsel": {
       "#import": [
         "unix"
       ]
