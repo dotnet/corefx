@@ -501,6 +501,19 @@ namespace System.Diagnostics
                         _traceId = ActivityTraceId.CreateFromString(_id.AsSpan(3, 32));
                         _traceIdSet = true;
                     }
+                    else if (_parentId != null && IsW3CId(_parentId))
+                    {
+                        try
+                        {
+                            _traceId = ActivityTraceId.CreateFromString(_parentId.AsSpan(3, 32));
+                            _traceIdSet = true;
+                        }
+                        catch
+                        {
+                            // ActivityTraceId.CreateFromString(_parentId.AsSpan(3, 32) 
+                            // throws if parent is invalid W3C Id
+                        }
+                    }
                 }
                 return ref _traceId;
             }
