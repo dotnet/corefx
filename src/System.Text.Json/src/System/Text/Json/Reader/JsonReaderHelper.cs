@@ -248,5 +248,51 @@ namespace System.Text.Json
                                                0x03ul << 32 |
                                                0x02ul << 40 |
                                                0x01ul << 48) + 1;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsValidDateTimeParsingLength(int length)
+        {
+            return (length >= JsonConstants.MinimumDateTimeParseLength) && (length <= JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
+        }
+
+        public static bool TryGetEscapedDateTime(ReadOnlySpan<byte> source, out DateTime value)
+        {
+            int backslash = source.IndexOf(JsonConstants.BackSlash);
+            Debug.Assert(backslash != -1);
+
+            Debug.Assert(source.Length <= JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
+            Span<byte> sourceUnescaped = stackalloc byte[source.Length];
+
+            Unescape(source, sourceUnescaped, backslash, out int written);
+            Debug.Assert(written > 0);
+
+            sourceUnescaped = sourceUnescaped.Slice(0, written);
+            Debug.Assert(!sourceUnescaped.IsEmpty);
+
+            value = default;
+            return (sourceUnescaped.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
+                && JsonHelpers.TryParseAsISO(sourceUnescaped, out value, out int bytesConsumed)
+                && sourceUnescaped.Length == bytesConsumed;
+        }
+
+        public static bool TryGetEscapedDateTimeOffset(ReadOnlySpan<byte> source, out DateTimeOffset value)
+        {
+            int backslash = source.IndexOf(JsonConstants.BackSlash);
+            Debug.Assert(backslash != -1);
+
+            Debug.Assert(source.Length <= JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
+            Span<byte> sourceUnescaped = stackalloc byte[source.Length];
+
+            Unescape(source, sourceUnescaped, backslash, out int written);
+            Debug.Assert(written > 0);
+
+            sourceUnescaped = sourceUnescaped.Slice(0, written);
+            Debug.Assert(!sourceUnescaped.IsEmpty);
+
+            value = default;
+            return (sourceUnescaped.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
+                && JsonHelpers.TryParseAsISO(sourceUnescaped, out value, out int bytesConsumed)
+                && sourceUnescaped.Length == bytesConsumed;
+        }
     }
 }

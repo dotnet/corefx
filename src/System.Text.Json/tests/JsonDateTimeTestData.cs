@@ -45,16 +45,16 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"1997-07-16T19:20:30.6666660\"", "1997-07-16T19:20:30.666666" };
 
             // Test fraction truncation.
-            yield return new object[] { "\"1997-07-16T19:20:30.0000000000000\"", "1997-07-16T19:20:30" };
+            yield return new object[] { "\"1997-07-16T19:20:30.0000000\"", "1997-07-16T19:20:30" };
             yield return new object[] { "\"1997-07-16T19:20:30.00000001\"", "1997-07-16T19:20:30" };
-            yield return new object[] { "\"1997-07-16T19:20:30.00000000000001\"", "1997-07-16T19:20:30" };
+            yield return new object[] { "\"1997-07-16T19:20:30.000000001\"", "1997-07-16T19:20:30" };
             yield return new object[] { "\"1997-07-16T19:20:30.77777770\"", "1997-07-16T19:20:30.7777777" };
             yield return new object[] { "\"1997-07-16T19:20:30.777777700\"", "1997-07-16T19:20:30.7777777" };
             yield return new object[] { "\"1997-07-16T19:20:30.45555554\"", "1997-07-16T19:20:30.45555554" };
             // We expect the parser to truncate. `DateTime(Offset).Parse` will round up to 7dp in these cases,
             // so we pass a string representing the Datetime(Offset) we expect to the `Parse` method.
             yield return new object[] { "\"1997-07-16T19:20:30.45555555\"", "1997-07-16T19:20:30.4555555" };
-            yield return new object[] { "\"1997-07-16T19:20:30.4555555555555555555\"", "1997-07-16T19:20:30.4555555" };
+            yield return new object[] { "\"1997-07-16T19:20:30.455555555\"", "1997-07-16T19:20:30.4555555" };
 
             // Test Non-UTC timezone designator (TZD).
             yield return new object[] { "\"1997-07-16T19:20+01:00\"", "1997-07-16T19:20+01:00" };
@@ -100,8 +100,9 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"1997-07-16T19:20Z\"", "1997-07-16T19:20:00.0000000Z" };
             yield return new object[] { "\"1997-07-16T19:20:30Z\"", "1997-07-16T19:20:30.0000000Z" };
             yield return new object[] { "\"1997-07-16T19:20:30.4555555Z\"", "1997-07-16T19:20:30.4555555Z" };
+            yield return new object[] { "\"1997-07-16T19:20:30.455555555Z\"", "1997-07-16T19:20:30.4555555Z" };
             // Hex string
-            yield return new object[] { "\"1997-07-16T19:20:30.4555555Z\"", "1997-07-16T19:20:30.4555555Z" };
+            yield return new object[] { "\"1\\u003997-07-16T19:2\\u0030:30.4555555Z\"", "1997-07-16T19:20:30.4555555Z" };
         }
 
         public static IEnumerable<object[]> InvalidISO8601Tests()
@@ -187,6 +188,14 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"0000-07-16T19:20:30.4555555+10:00\"" };
             yield return new object[] { "\"2019-02-29T19:20:30.4555555+10:00\"" };
             yield return new object[] { "\"9999-12-31T23:59:59.9999999-01:00\"" }; // This date spills over to year 10_000.
+
+            // Too long
+            yield return new object[] { "\"1997-07-16T19:20:30.0000000000000\"" };
+            yield return new object[] { "\"1997-07-16T19:20:30.00000000000001\"" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555555\"" };
+            yield return new object[] { "\"1997-07-16T19:20:30.45555555555\"" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555555Z\"" };
+            yield return new object[] { "\"1997-07-16T19:20:30.4555555555555555555\"" };
 
             // Hex strings
 

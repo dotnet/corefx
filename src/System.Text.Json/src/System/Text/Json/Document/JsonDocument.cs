@@ -465,43 +465,24 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            DateTime tmp;
-            int bytesConsumed;
-
-            // Segment needs to be unescaped
-            if (row.HasComplexChildren)
+            if (!JsonReaderHelper.IsValidDateTimeParsingLength(segment.Length))
             {
-                int backslash = segment.IndexOf(JsonConstants.BackSlash);
-                Debug.Assert(backslash != -1);
-
-                Span<byte> segmentUnescaped = (segment.Length <= JsonConstants.StackallocThreshold)
-                    ? stackalloc byte[segment.Length]
-                    : new byte[segment.Length];
-
-                JsonReaderHelper.Unescape(segment, segmentUnescaped, backslash, out int written);
-                Debug.Assert(written > 0);
-
-                segmentUnescaped = segmentUnescaped.Slice(0, written);
-                Debug.Assert(!segmentUnescaped.IsEmpty);
-
-                if (JsonHelpers.TryParseAsISO(segmentUnescaped, out tmp, out bytesConsumed) && segmentUnescaped.Length == bytesConsumed)
-                {
-                    value = tmp;
-                    return true;
-                }
-
                 value = default;
                 return false;
             }
 
-            if (JsonHelpers.TryParseAsISO(segment, out tmp, out bytesConsumed) && segment.Length == bytesConsumed)
+            // Segment needs to be unescaped
+            if (row.HasComplexChildren)
             {
-                value = tmp;
-                return true;
+                return JsonReaderHelper.TryGetEscapedDateTime(segment, out value);
             }
 
+            Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
+
             value = default;
-            return false;
+            return (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
+                && JsonHelpers.TryParseAsISO(segment, out value, out int bytesConsumed)
+                && segment.Length == bytesConsumed;
         }
 
         /// <summary>
@@ -518,43 +499,24 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            DateTimeOffset tmp;
-            int bytesConsumed;
-
-            // Segment needs to be unescaped
-            if (row.HasComplexChildren)
+            if (!JsonReaderHelper.IsValidDateTimeParsingLength(segment.Length))
             {
-                int backslash = segment.IndexOf(JsonConstants.BackSlash);
-                Debug.Assert(backslash != -1);
-
-                Span<byte> segmentUnescaped = (segment.Length <= JsonConstants.StackallocThreshold)
-                    ? stackalloc byte[segment.Length]
-                    : new byte[segment.Length];
-
-                JsonReaderHelper.Unescape(segment, segmentUnescaped, backslash, out int written);
-                Debug.Assert(written > 0);
-
-                segmentUnescaped = segmentUnescaped.Slice(0, written);
-                Debug.Assert(!segmentUnescaped.IsEmpty);
-
-                if (JsonHelpers.TryParseAsISO(segmentUnescaped, out tmp, out bytesConsumed) && segmentUnescaped.Length == bytesConsumed)
-                {
-                    value = tmp;
-                    return true;
-                }
-
                 value = default;
                 return false;
             }
 
-            if (JsonHelpers.TryParseAsISO(segment, out tmp, out bytesConsumed) && segment.Length == bytesConsumed)
+            // Segment needs to be unescaped
+            if (row.HasComplexChildren)
             {
-                value = tmp;
-                return true;
+                return JsonReaderHelper.TryGetEscapedDateTimeOffset(segment, out value);
             }
 
+            Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
+
             value = default;
-            return false;
+            return (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
+                && JsonHelpers.TryParseAsISO(segment, out value, out int bytesConsumed)
+                && segment.Length == bytesConsumed;
         }
 
         /// <summary>

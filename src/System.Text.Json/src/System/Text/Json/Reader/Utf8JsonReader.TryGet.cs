@@ -473,49 +473,44 @@ namespace System.Text.Json
 
             if (HasValueSequence)
             {
-                Span<byte> stackSpan;
-
                 int sequenceLength = (int)ValueSequence.Length;
-                if (sequenceLength <= JsonConstants.StackallocThreshold)
+
+                if (!JsonReaderHelper.IsValidDateTimeParsingLength(sequenceLength))
                 {
-                    // Cannot create a span directly since it gets passed to instance methods on a ref struct.
-                    unsafe
-                    {
-                        byte* ptr = stackalloc byte[sequenceLength];
-                        stackSpan = new Span<byte>(ptr, sequenceLength);
-                    }
+                    value = default;
+                    return false;
                 }
-                else
+
+                Debug.Assert(sequenceLength <= JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
+                Span<byte> stackSpan;
+                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
+                unsafe
                 {
-                    stackSpan = new byte[sequenceLength];
+                    byte* ptr = stackalloc byte[sequenceLength];
+                    stackSpan = new Span<byte>(ptr, sequenceLength);
                 }
 
                 ValueSequence.CopyTo(stackSpan);
                 span = stackSpan;
             }
 
-            int bytesConsumed;
+            if (!JsonReaderHelper.IsValidDateTimeParsingLength(span.Length))
+            {
+                value = default;
+                return false;
+            }
 
             if (_stringHasEscaping)
             {
-                int idx = span.IndexOf(JsonConstants.BackSlash);
-                Debug.Assert(idx != -1);
-
-                Span<byte> utf8Unescaped = (span.Length <= JsonConstants.StackallocThreshold)
-                    ? stackalloc byte[span.Length]
-                    : new byte[span.Length];
-
-                JsonReaderHelper.Unescape(span, utf8Unescaped, idx, out int written);
-                Debug.Assert(written > 0);
-
-                utf8Unescaped = utf8Unescaped.Slice(0, written);
-                Debug.Assert(!utf8Unescaped.IsEmpty);
-
-                return JsonHelpers.TryParseAsISO(utf8Unescaped, out value, out bytesConsumed) && utf8Unescaped.Length == bytesConsumed;
+                return JsonReaderHelper.TryGetEscapedDateTime(span, out value);
             }
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
-            return JsonHelpers.TryParseAsISO(span, out value, out bytesConsumed) && span.Length == bytesConsumed;
+
+            value = default;
+            return (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
+                && JsonHelpers.TryParseAsISO(span, out value, out int bytesConsumed)
+                && span.Length == bytesConsumed;
         }
 
         /// <summary>
@@ -539,49 +534,44 @@ namespace System.Text.Json
 
             if (HasValueSequence)
             {
-                Span<byte> stackSpan;
-
                 int sequenceLength = (int)ValueSequence.Length;
-                if (sequenceLength <= JsonConstants.StackallocThreshold)
+
+                if (!JsonReaderHelper.IsValidDateTimeParsingLength(sequenceLength))
                 {
-                    // Cannot create a span directly since it gets passed to instance methods on a ref struct.
-                    unsafe
-                    {
-                        byte* ptr = stackalloc byte[sequenceLength];
-                        stackSpan = new Span<byte>(ptr, sequenceLength);
-                    }
+                    value = default;
+                    return false;
                 }
-                else
+
+                Debug.Assert(sequenceLength <= JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
+                Span<byte> stackSpan;
+                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
+                unsafe
                 {
-                    stackSpan = new byte[sequenceLength];
+                    byte* ptr = stackalloc byte[sequenceLength];
+                    stackSpan = new Span<byte>(ptr, sequenceLength);
                 }
 
                 ValueSequence.CopyTo(stackSpan);
                 span = stackSpan;
             }
 
-            int bytesConsumed;
+            if (!JsonReaderHelper.IsValidDateTimeParsingLength(span.Length))
+            {
+                value = default;
+                return false;
+            }
 
             if (_stringHasEscaping)
             {
-                int idx = span.IndexOf(JsonConstants.BackSlash);
-                Debug.Assert(idx != -1);
-
-                Span<byte> utf8Unescaped = (span.Length <= JsonConstants.StackallocThreshold)
-                    ? stackalloc byte[span.Length]
-                    : new byte[span.Length];
-
-                JsonReaderHelper.Unescape(span, utf8Unescaped, idx, out int written);
-                Debug.Assert(written > 0);
-
-                utf8Unescaped = utf8Unescaped.Slice(0, written);
-                Debug.Assert(!utf8Unescaped.IsEmpty);
-
-                return JsonHelpers.TryParseAsISO(utf8Unescaped, out value, out bytesConsumed) && utf8Unescaped.Length == bytesConsumed;
+                return JsonReaderHelper.TryGetEscapedDateTimeOffset(span, out value);
             }
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
-            return JsonHelpers.TryParseAsISO(span, out value, out bytesConsumed) && span.Length == bytesConsumed;
+
+            value = default;
+            return (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
+                && JsonHelpers.TryParseAsISO(span, out value, out int bytesConsumed)
+                && span.Length == bytesConsumed;
         }
 
         /// <summary>
@@ -632,6 +622,8 @@ namespace System.Text.Json
 
             if (_stringHasEscaping)
             {
+                Debug.Assert(span.Length <= JsonConstants.MaximumEscapedGuidLength);
+
                 int idx = span.IndexOf(JsonConstants.BackSlash);
                 Debug.Assert(idx != -1);
 

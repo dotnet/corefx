@@ -226,14 +226,13 @@ namespace System.Text.Json
             // Parse fraction
             {
                 int numDigitsRead = 0;
+                int fractionEnd = Math.Min(sourceIndex + JsonConstants.DateTimeParseNumFractionDigits, source.Length);
 
-                while (sourceIndex < source.Length && IsDigit(curByte = source[sourceIndex]))
+                while (sourceIndex < fractionEnd && IsDigit(curByte = source[sourceIndex]))
                 {
-                    int prevFractionTimesTen = fraction * 10;
-
-                    if ((prevFractionTimesTen + (int)(curByte - (uint)'0') <= JsonConstants.MaxDateTimeFraction) && (numDigitsRead < JsonConstants.DateTimeNumFractionDigits))
+                    if (numDigitsRead < JsonConstants.DateTimeNumFractionDigits)
                     {
-                        fraction = prevFractionTimesTen + (int)(curByte - (uint)'0');
+                        fraction = (fraction * 10) + (int)(curByte - (uint)'0');
                         numDigitsRead++;
                     }
 
@@ -258,6 +257,8 @@ namespace System.Text.Json
                 goto FinishedParsing;
             }
 
+            curByte = source[sourceIndex];
+
             if (curByte == JsonConstants.UtcOffsetToken)
             {
                 bytesConsumed++;
@@ -268,6 +269,10 @@ namespace System.Text.Json
             {
                 offsetToken = source[sourceIndex++];
                 goto ParseOffset;
+            }
+            else if (IsDigit(curByte))
+            {
+                goto ReturnFalse;
             }
 
             goto FinishedParsing;

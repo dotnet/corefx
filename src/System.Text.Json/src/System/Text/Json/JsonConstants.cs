@@ -69,9 +69,13 @@ namespace System.Text.Json
         public const int MaximumEscapedGuidLength = MaxExpansionFactorWhileEscaping * MaximumFormatGuidLength;
         public const int MaximumFormatDateTimeLength = 27;    // StandardFormat 'O', e.g. 2017-06-12T05:30:45.7680000
         public const int MaximumFormatDateTimeOffsetLength = 33;  // StandardFormat 'O', e.g. 2017-06-12T05:30:45.7680000-07:00
+        public const int MaximumDateTimeOffsetParseLength = MaximumFormatDateTimeOffsetLength + 2; // Like StandardFormat 'O' for DateTimeOffset, but allowing two additional (up to 9) fraction digits.
+        public const int MinimumDateTimeParseLength = 10; // YYYY-MM-DD
+        public const int MaximumEscapedDateTimeOffsetParseLength = MaxExpansionFactorWhileEscaping * MaximumDateTimeOffsetParseLength;
         public const int MaxDateTimeUtcOffsetHours = 14; // The UTC offset portion of a TimeSpan or DateTime can be no more than 14 hours and no less than -14 hours.
         public const int DateTimeNumFractionDigits = 7;  // TimeSpan and DateTime formats allow exactly up to many digits for specifying the fraction after the seconds.
         public const int MaxDateTimeFraction = 9_999_999;  // The largest fraction expressible by TimeSpan and DateTime formats
+        public const int DateTimeParseNumFractionDigits = 9; // The maximum number of fraction digits the Json DateTime parser allows
 
         internal const char ScientificNotationFormat = 'e';
 
