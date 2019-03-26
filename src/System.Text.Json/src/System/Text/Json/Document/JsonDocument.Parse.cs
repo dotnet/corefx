@@ -383,11 +383,12 @@ namespace System.Text.Json
                         {
                             int depth = reader.CurrentDepth;
 
-                            // CurrentDepth rises early and falls fast,
+                            // CurrentDepth rises late and falls fast,
                             // a payload of "[ 1, 2, 3, 4 ]" will report post-Read()
-                            // CurrentDepth values of { 1, 1, 1, 1, 1, 0 },
-                            // thus >= is correct, vs just >
-                            while (reader.CurrentDepth >= depth)
+                            // CurrentDepth values of { 0, 1, 1, 1, 1, 0 },
+                            // Since we're logically at 0 ([), Read() once and keep
+                            // reading until we've come back down to 0 (]).
+                            do
                             {
                                 if (!reader.Read())
                                 {
@@ -402,7 +403,7 @@ namespace System.Text.Json
                                     document = null;
                                     return false;
                                 }
-                            }
+                            } while (reader.CurrentDepth > depth);
                         }
 
                         // Back up to be at the beginning of the { or [, vs the end.

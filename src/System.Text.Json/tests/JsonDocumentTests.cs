@@ -2257,7 +2257,6 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        [ActiveIssue(36074)]
         public static void ParseDefaultReader()
         {
             Assert.Throws<JsonReaderException>(() =>
@@ -2372,12 +2371,6 @@ namespace System.Text.Json.Tests
             string json = $"      {valueJson}   5";
             byte[] utf8 = Encoding.UTF8.GetBytes(json);
             JsonReaderState state = default;
-
-            if (tokenType != JsonTokenType.StartArray && tokenType != JsonTokenType.EndArray)
-            {
-                // TODO (#36087)
-                return;
-            }
 
             BuildSegmentedReader(out Utf8JsonReader reader, utf8, segmentCount, state);
 
