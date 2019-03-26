@@ -631,10 +631,21 @@ namespace System.Diagnostics.Tests
 
                 Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
 
+                // from in-proc parent
+                Activity parent = new Activity("parent");
+                parent.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-01");
+                parent.Start();
+
+                activity = new Activity("child");
+                activity.Start();
+                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+                parent.Stop();
+                activity.Stop();
+
+                // no parent
                 Activity.DefaultIdFormat = ActivityIdFormat.W3C;
                 Activity.ForceDefaultIdFormat = true;
 
-                // no parent
                 activity = new Activity("activity3");
                 Assert.Equal("00000000000000000000000000000000", activity.TraceId.ToHexString());
 

@@ -496,24 +496,9 @@ namespace System.Diagnostics
             {
                 if (!_traceIdSet)
                 {
-                    if (_id != null && IdFormat == ActivityIdFormat.W3C)
-                    {
-                        _traceId = ActivityTraceId.CreateFromString(_id.AsSpan(3, 32));
-                        _traceIdSet = true;
-                    }
-                    else if (_parentId != null && IsW3CId(_parentId))
-                    {
-                        try
-                        {
-                            _traceId = ActivityTraceId.CreateFromString(_parentId.AsSpan(3, 32));
-                            _traceIdSet = true;
-                        }
-                        catch
-                        {
-                            // ActivityTraceId.CreateFromString throws if parent is invalid W3C Id
-                        }
-                    }
+                    TrySetTraceIdFromParent();
                 }
+
                 return ref _traceId;
             }
         }
@@ -617,27 +602,11 @@ namespace System.Diagnostics
             // Get the TraceId from the parent or make a new one.  
             if (!_traceIdSet)
             {
-                if (Parent != null && Parent.IdFormat == ActivityIdFormat.W3C)
-                {
-                    _traceId = Parent.TraceId;
-                }
-                else if (_parentId != null && IsW3CId(_parentId))
-                {
-                    try
-                    {
-                        _traceId = ActivityTraceId.CreateFromString(_parentId.AsSpan(3, 32));
-                    }
-                    catch
-                    {
-                        _traceId = ActivityTraceId.CreateRandom();
-                    }
-                }
-                else
+                if (!TrySetTraceIdFromParent())
                 {
                     _traceId = ActivityTraceId.CreateRandom();
+                    _traceIdSet = true;
                 }
-
-                _traceIdSet = true;
             }
             // Create a new SpanID. 
             _spanId = ActivitySpanId.CreateRandom();
@@ -765,6 +734,30 @@ namespace System.Diagnostics
             }
 
             return canSet;
+        }
+
+        private bool TrySetTraceIdFromParent()
+        {
+            Debug.Assert(!_traceIdSet);
+
+            if (Parent != null && Parent.IdFormat == ActivityIdFormat.W3C)
+            {
+                _traceId = Parent.TraceId;
+                _traceIdSet = true;
+            }
+            else if (_parentId != null && IsW3CId(_parentId))
+            {
+                try
+                {
+                    _traceId = ActivityTraceId.CreateFromString(_parentId.AsSpan(3, 32));
+                    _traceIdSet = true;
+                }
+                catch
+                {
+                }
+            }
+
+            return _traceIdSet;
         }
 
         private string _rootId;
