@@ -686,7 +686,9 @@ namespace System.Text.Json
             }
         }
 
-        private static void CheckSupportedOptions(JsonReaderOptions readerOptions, string paramName=null)
+        private static void CheckSupportedOptions(
+            JsonReaderOptions readerOptions,
+            string paramName = null)
         {
             if (readerOptions.CommentHandling == JsonCommentHandling.Allow)
             {

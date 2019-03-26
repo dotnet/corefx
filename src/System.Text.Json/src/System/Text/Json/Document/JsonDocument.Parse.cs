@@ -268,13 +268,13 @@ namespace System.Text.Json
         /// </returns>
         /// <remarks>
         ///   <para>
-        ///     Upon completion of this method <paramref name="reader"/> will positioned at the
+        ///     Upon completion of this method <paramref name="reader"/> will be positioned at the
         ///     final token in the JSON value.  If an exception is thrown, or <see langword="false"/>
         ///     is returned, the reader is reset to the state it was in when the method was called.
         ///   </para>
         ///
         ///   <para>
-        ///     This method makes a copy of the data the reader acted on, there is no caller
+        ///     This method makes a copy of the data the reader acted on, so there is no caller
         ///     requirement to maintain data integrity beyond the return of this method.
         ///   </para>
         /// </remarks>
@@ -285,7 +285,7 @@ namespace System.Text.Json
         ///   The current <paramref name="reader"/> token does not start or represent a value.
         /// </exception>
         /// <exception cref="JsonReaderException">
-        ///   A value could not be read from <paramref name="reader"/>.
+        ///   A value could not be read from the reader.
         /// </exception>
         public static bool TryReadFrom(ref Utf8JsonReader reader, out JsonDocument document)
         {
@@ -301,13 +301,13 @@ namespace System.Text.Json
         /// </returns>
         /// <remarks>
         ///   <para>
-        ///     Upon completion of this method <paramref name="reader"/> will positioned at the
+        ///     Upon completion of this method <paramref name="reader"/> will be positioned at the
         ///     final token in the JSON value.  If an exception is thrown the reader is reset to
         ///     the state it was in when the method was called.
         ///   </para>
         ///
         ///   <para>
-        ///     This method makes a copy of the data the reader acted on, there is no caller
+        ///     This method makes a copy of the data the reader acted on, so there is no caller
         ///     requirement to maintain data integrity beyond the return of this method.
         ///   </para>
         /// </remarks>
@@ -318,7 +318,7 @@ namespace System.Text.Json
         ///   The current <paramref name="reader"/> token does not start or represent a value.
         /// </exception>
         /// <exception cref="JsonReaderException">
-        ///   A value could not be read from <paramref name="reader"/>.
+        ///   A value could not be read from the reader.
         /// </exception>
         public static JsonDocument ReadFrom(ref Utf8JsonReader reader)
         {
@@ -346,8 +346,9 @@ namespace System.Text.Json
             {
                 switch (reader.TokenType)
                 {
-                    // A new reader was created and has never been read.
-                    // Or a reader has terminated and we're about to throw.
+                    // A new reader was created and has never been read,
+                    // so we need to move to the first token.
+                    // (or a reader has terminated and we're about to throw)
                     case JsonTokenType.None:
                     // Using a reader loop the caller has identified a property they wish to
                     // hydrate into a JsonDocument. Move to the value first.
@@ -379,7 +380,7 @@ namespace System.Text.Json
                     case JsonTokenType.StartObject:
                     case JsonTokenType.StartArray:
                     {
-                        // Placeholder until reader.Skip() is written
+                        // Placeholder until reader.Skip() is written (#33295)
                         {
                             int depth = reader.CurrentDepth;
 
@@ -453,7 +454,11 @@ namespace System.Text.Json
 
                         if (sequence.IsEmpty)
                         {
+                            // Since the quoted string fit in a ReadOnlySpan originally
+                            // the contents length plus the two quotes can't overflow.
                             int payloadLength = reader.ValueSpan.Length + 2;
+                            Debug.Assert(payloadLength > 1);
+
                             int openQuote = checked((int)startingOffset) - payloadLength;
                             ReadOnlySpan<byte> readerSpan = reader.OriginalSpan;
 

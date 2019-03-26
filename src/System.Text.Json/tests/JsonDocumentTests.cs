@@ -1624,7 +1624,7 @@ namespace System.Text.Json.Tests
                 () =>
                 {
                     JsonReaderState state = new JsonReaderState(options);
-                    Utf8JsonReader reader = new Utf8JsonReader(utf8, false, state);
+                    Utf8JsonReader reader = new Utf8JsonReader(utf8, isFinalBlock: false, state);
                     JsonDocument.ReadFrom(ref reader);
                 });
 
@@ -1633,7 +1633,7 @@ namespace System.Text.Json.Tests
                 () =>
                 {
                     JsonReaderState state = new JsonReaderState(options);
-                    Utf8JsonReader reader = new Utf8JsonReader(utf8, false, state);
+                    Utf8JsonReader reader = new Utf8JsonReader(utf8, isFinalBlock: false, state);
                     JsonDocument.TryReadFrom(ref reader, out _);
                 });
 
