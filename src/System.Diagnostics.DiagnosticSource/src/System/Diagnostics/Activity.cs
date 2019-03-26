@@ -41,6 +41,9 @@ namespace System.Diagnostics
         /// </summary>
         public string OperationName { get; }
 
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+        [SecuritySafeCritical]
+#endif
         /// <summary>
         /// This is an ID that is specific to a particular request.   Filtering
         /// to a particular ID insures that you get only one request that matches.  
