@@ -26,7 +26,7 @@ namespace System.Diagnostics
         public System.TimeSpan Duration { get { throw null; } }
         public static bool ForceDefaultIdFormat { get { throw null; } set { } }
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
+        [System.Security.SecuritySafeCriticalAttribute]
 #endif
         public string Id { get { throw null; } }
         public System.Diagnostics.ActivityIdFormat IdFormat { get { throw null; } }

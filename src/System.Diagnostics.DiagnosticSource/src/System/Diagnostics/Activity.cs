@@ -7,9 +7,6 @@ using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-#if ALLOW_PARTIALLY_TRUSTED_CALLERS
-    using System.Security;
-#endif
 using System.Threading;
 
 namespace System.Diagnostics
@@ -42,7 +39,7 @@ namespace System.Diagnostics
         public string OperationName { get; }
 
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
+        [System.Security.SecuritySafeCriticalAttribute]
 #endif
         /// <summary>
         /// This is an ID that is specific to a particular request.   Filtering
@@ -636,7 +633,7 @@ namespace System.Diagnostics
         /// traceId from the parent if possible 
         /// </summary>
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
+        [System.Security.SecuritySafeCriticalAttribute]
 #endif
         private void GenerateW3CId()
         {
@@ -757,7 +754,7 @@ namespace System.Diagnostics
             return '|' + Interlocked.Increment(ref s_currentRootId).ToString("x") + s_uniqSuffix;
         }
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
+        [System.Security.SecuritySafeCriticalAttribute]
 #endif
         private static unsafe long GetRandomNumber()
         {
@@ -874,7 +871,7 @@ namespace System.Diagnostics
     /// It is mostly useful as an exchange type.  
     /// </summary>
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
+        [System.Security.SecuritySafeCriticalAttribute]
 #endif
     public unsafe readonly struct ActivityTraceId : IEquatable<ActivityTraceId>
     {
@@ -1073,7 +1070,7 @@ namespace System.Diagnostics
     /// It is mostly useful as an exchange type.  
     /// </summary>
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
+        [System.Security.SecuritySafeCriticalAttribute]
 #endif
     public unsafe readonly struct ActivitySpanId : IEquatable<ActivitySpanId>
     {
