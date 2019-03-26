@@ -822,6 +822,118 @@ null,
             }
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WritePropertyOutsideObject(bool skipValidation)
+        {
+            using (ArrayBufferWriter buffer = new ArrayBufferWriter(1024))
+            using (var doc = JsonDocument.Parse("[ null, false, true, \"hi\", 5, {}, [] ]", s_readerOptions))
+            {
+                JsonElement root = doc.RootElement;
+                JsonWriterState state = new JsonWriterState(
+                    new JsonWriterOptions
+                    {
+                        SkipValidation = skipValidation,
+                    });
+
+                const string CharLabel = "char";
+                byte[] byteUtf8 = Encoding.UTF8.GetBytes("byte");
+                Utf8JsonWriter writer = new Utf8JsonWriter(buffer, state);
+
+                if (skipValidation)
+                {
+                    foreach (JsonElement val in root.EnumerateArray())
+                    {
+                        val.WriteTo(ref writer, CharLabel);
+                        val.WriteTo(ref writer, byteUtf8);
+                    }
+
+                    writer.Flush();
+
+                    AssertContents(
+                        "\"char\":null,\"byte\":null," +
+                            "\"char\":false,\"byte\":false," +
+                            "\"char\":true,\"byte\":true," +
+                            "\"char\":\"hi\",\"byte\":\"hi\"," +
+                            "\"char\":5,\"byte\":5," +
+                            "\"char\":{},\"byte\":{}," +
+                            "\"char\":[],\"byte\":[]",
+                        buffer);
+                }
+                else
+                {
+                    foreach (JsonElement val in root.EnumerateArray())
+                    {
+                        JsonTestHelper.AssertThrows<InvalidOperationException>(
+                            ref writer,
+                            (ref Utf8JsonWriter w) => val.WriteTo(ref w, CharLabel));
+
+                        JsonTestHelper.AssertThrows<InvalidOperationException>(
+                            ref writer,
+                            (ref Utf8JsonWriter w) => val.WriteTo(ref w, byteUtf8));
+                    }
+
+                    JsonTestHelper.AssertThrows<InvalidOperationException>(
+                        ref writer,
+                        (ref Utf8JsonWriter w) => w.Flush());
+
+                    writer.Flush(isFinalBlock: false);
+
+                    AssertContents("", buffer);
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteValueInsideObject(bool skipValidation)
+        {
+            using (ArrayBufferWriter buffer = new ArrayBufferWriter(1024))
+            using (var doc = JsonDocument.Parse("[ null, false, true, \"hi\", 5, {}, [] ]", s_readerOptions))
+            {
+                JsonElement root = doc.RootElement;
+                JsonWriterState state = new JsonWriterState(
+                    new JsonWriterOptions
+                    {
+                        SkipValidation = skipValidation,
+                    });
+
+                Utf8JsonWriter writer = new Utf8JsonWriter(buffer, state);
+                writer.WriteStartObject();
+
+                if (skipValidation)
+                {
+                    foreach (JsonElement val in root.EnumerateArray())
+                    {
+                        val.WriteValueTo(ref writer);
+                    }
+
+                    writer.WriteEndObject();
+                    writer.Flush();
+
+                    AssertContents(
+                        "{null,false,true,\"hi\",5,{},[]}",
+                        buffer);
+                }
+                else
+                {
+                    foreach (JsonElement val in root.EnumerateArray())
+                    {
+                        JsonTestHelper.AssertThrows<InvalidOperationException>(
+                            ref writer,
+                            (ref Utf8JsonWriter w) => val.WriteValueTo(ref w));
+                    }
+
+                    writer.WriteEndObject();
+                    writer.Flush();
+
+                    AssertContents("{}", buffer);
+                }
+            }
+        }
+
         private static void WriteSimpleValue(bool indented, string jsonIn, string jsonOut = null)
         {
             using (ArrayBufferWriter buffer = new ArrayBufferWriter(1024))
