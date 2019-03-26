@@ -109,6 +109,7 @@ namespace System.Diagnostics
     {
         public override void OnActivityExport(System.Diagnostics.Activity activity, object payloadObj) { }
         public override void OnActivityImport(System.Diagnostics.Activity activity, object payloadObj) { }
+        public virtual System.IDisposable Subscribe(System.IObserver<System.Collections.Generic.KeyValuePair<string, object>> observer, System.Func<string, object, object, bool> isEnabled, System.Action<System.Diagnostics.Activity, object> onActivityImport = null, System.Action<System.Diagnostics.Activity, object> onActivityExport = null) { throw null; }
     }
     public abstract partial class DiagnosticSource
     {
