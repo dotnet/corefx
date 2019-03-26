@@ -262,6 +262,14 @@ namespace System.Diagnostics
                 curSubscription.Observer.OnNext(new KeyValuePair<string, object>(name, value));
         }
 
+        /// <summary>
+        /// We don't have Activities in NetStanard1.1. but it is a pain to ifdef out all references to the Activity type 
+        /// in DiagnosticSubscription so we just define a private type for it here just so things compile.   
+        /// </summary>
+#if NETSTANDARD1_1
+        private class Activity {}
+#endif
+
         // Note that Subscriptions are READ ONLY.   This means you never update any fields (even on removal!)
         private class DiagnosticSubscription : IDisposable
         {
@@ -289,7 +297,7 @@ namespace System.Diagnostics
             public void Dispose()
             {
                 // TO keep this lock free and easy to analyze, the linked list is READ ONLY.   Thus we copy
-                for (;;)
+                for (; ; )
                 {
                     DiagnosticSubscription subscriptions = Owner._subscriptions;
                     DiagnosticSubscription newSubscriptions = Remove(subscriptions, this);    // Make a new list, with myself removed.  
@@ -319,7 +327,7 @@ namespace System.Diagnostics
                     return null;
                 }
 
-                if (subscriptions.Observer == subscription.Observer && 
+                if (subscriptions.Observer == subscription.Observer &&
                     subscriptions.IsEnabled1Arg == subscription.IsEnabled1Arg &&
                     subscriptions.IsEnabled3Arg == subscription.IsEnabled3Arg)
                     return subscriptions.Next;
@@ -429,8 +437,8 @@ namespace System.Diagnostics
         }
         #endregion
 
-        private IDisposable SubscribeInternal(IObserver<KeyValuePair<string, object>> observer, 
-            Predicate<string> isEnabled1Arg, Func<string, object, object, bool> isEnabled3Arg, 
+        private IDisposable SubscribeInternal(IObserver<KeyValuePair<string, object>> observer,
+            Predicate<string> isEnabled1Arg, Func<string, object, object, bool> isEnabled3Arg,
             Action<Activity, object> onActivityImport, Action<Activity, object> onActivityExport)
         {
             // If we have been disposed, we silently ignore any subscriptions.  
