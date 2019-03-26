@@ -706,7 +706,7 @@ namespace System.Text.Json
                                     propertyName,
                                     _utf8Json.Slice(propertyValue.Location, propertyValue.SizeOrLength).Span);
                                     continue;
-                                case JsonTokenType.True:
+                            case JsonTokenType.True:
                                 writer.WriteBoolean(propertyName, value: true);
                                 continue;
                             case JsonTokenType.False:
@@ -778,7 +778,6 @@ namespace System.Text.Json
             finally
             {
                 ClearAndReturn(rented);
-
             }
         }
 

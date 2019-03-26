@@ -166,6 +166,30 @@ namespace System.Text.Json.Tests
         {
             WriteComplexValue(
                 indented,
+                "{     }",
+                "{}",
+                "{}");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteEmptyCommentedArray(bool indented)
+        {
+            WriteComplexValue(
+                indented,
+                "[ /* \"No values here\" */    ]",
+                "[]",
+                "[]");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteEmptyCommentedObject(bool indented)
+        {
+            WriteComplexValue(
+                indented,
                 "{ /* Technically empty */ }",
                 "{}",
                 "{}");
@@ -232,7 +256,7 @@ null,
 // More comments, more problems?
  ""Some th\u0069ngs get lost in the " + "m\u00EAl\u00E9e" + @""",
 // Array with an array (primes)
-[ 1, 3, 5, 7, /*9,*/ 11],
+[ 2, 3, 5, 7, /*9,*/ 11],
 { ""obj"": [ 21, { ""deep obj"": [
         ""Once upon a midnight dreary"",
         42, /* Yep */ 1e400,
@@ -258,7 +282,7 @@ null,
   ""Escaping is not required"",
   ""Some things get lost in the m\u00eal\u00e9e"",
   [
-    1,
+    2,
     3,
     5,
     7,
@@ -288,7 +312,7 @@ null,
 ]",
                 "[\"Once upon a midnight dreary\",42,1e400,3.141592653589793238462643383279," +
                     "false,true,null,\"Escaping is not required\"," +
-                    "\"Some things get lost in the m\\u00eal\\u00e9e\",[1,3,5,7,11]," +
+                    "\"Some things get lost in the m\\u00eal\\u00e9e\",[2,3,5,7,11]," +
                     "{\"obj\":[21,{\"deep obj\":[\"Once upon a midnight dreary\",42,1e400," +
                     "3.141592653589793238462643383279,false,true,null,\"Escaping is not required\"," +
                     "\"Some things get lost in the m\\u00eal\\u00e9e\"],\"more deep\":false},12]," +
@@ -538,6 +562,36 @@ null,
             WritePropertyValueBothForms(
                 indented,
                 "obj",
+                "{       }",
+                @"{
+  ""obj"": {}
+}",
+                "{\"obj\":{}}");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteEmptyCommentedArrayAsProperty(bool indented)
+        {
+            WritePropertyValueBothForms(
+                indented,
+                "arr",
+                "[   /* 5 */     ]",
+                @"{
+  ""arr"": []
+}",
+                "{\"arr\":[]}");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteEmptyCommentedObjectAsProperty(bool indented)
+        {
+            WritePropertyValueBothForms(
+                indented,
+                "obj",
                 "{ /* Technically empty */ }",
                 @"{
   ""obj"": {}
@@ -609,7 +663,7 @@ null,
 // More comments, more problems?
  ""Some th\u0069ngs get lost in the " + "m\u00EAl\u00E9e" + @""",
 // Array with an array (primes)
-[ 1, 3, 5, 7, /*9,*/ 11],
+[ 2, 3, 5, 7, /*9,*/ 11],
 { ""obj"": [ 21, { ""deep obj"": [
         ""Once upon a midnight dreary"",
         42, /* Yep */ 1e400,
@@ -636,7 +690,7 @@ null,
     ""Escaping is not required"",
     ""Some things get lost in the m\u00eal\u00e9e"",
     [
-      1,
+      2,
       3,
       5,
       7,
@@ -668,7 +722,7 @@ null,
 
                 "{\"data\":[\"Once upon a midnight dreary\",42,1e400,3.141592653589793238462643383279," +
                     "false,true,null,\"Escaping is not required\"," +
-                    "\"Some things get lost in the m\\u00eal\\u00e9e\",[1,3,5,7,11]," +
+                    "\"Some things get lost in the m\\u00eal\\u00e9e\",[2,3,5,7,11]," +
                     "{\"obj\":[21,{\"deep obj\":[\"Once upon a midnight dreary\",42,1e400," +
                     "3.141592653589793238462643383279,false,true,null,\"Escaping is not required\"," +
                     "\"Some things get lost in the m\\u00eal\\u00e9e\"],\"more deep\":false},12]," +
