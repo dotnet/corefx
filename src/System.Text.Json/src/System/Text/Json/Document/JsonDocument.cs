@@ -468,12 +468,15 @@ namespace System.Text.Json
             DateTime tmp;
             int bytesConsumed;
 
+            // Segment needs to be unescaped
             if (row.HasComplexChildren)
             {
                 int backslash = segment.IndexOf(JsonConstants.BackSlash);
                 Debug.Assert(backslash != -1);
 
-                Span<byte> segmentUnescaped = stackalloc byte[segment.Length];
+                Span<byte> segmentUnescaped = (segment.Length <= JsonConstants.StackallocThreshold)
+                    ? stackalloc byte[segment.Length]
+                    : new byte[segment.Length];
 
                 JsonReaderHelper.Unescape(segment, segmentUnescaped, backslash, out int written);
                 Debug.Assert(written > 0);
@@ -518,12 +521,15 @@ namespace System.Text.Json
             DateTimeOffset tmp;
             int bytesConsumed;
 
+            // Segment needs to be unescaped
             if (row.HasComplexChildren)
             {
                 int backslash = segment.IndexOf(JsonConstants.BackSlash);
                 Debug.Assert(backslash != -1);
 
-                Span<byte> segmentUnescaped = stackalloc byte[segment.Length];
+                Span<byte> segmentUnescaped = (segment.Length <= JsonConstants.StackallocThreshold)
+                    ? stackalloc byte[segment.Length]
+                    : new byte[segment.Length];
 
                 JsonReaderHelper.Unescape(segment, segmentUnescaped, backslash, out int written);
                 Debug.Assert(written > 0);

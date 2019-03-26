@@ -473,7 +473,25 @@ namespace System.Text.Json
 
             if (HasValueSequence)
             {
-                JsonReaderHelper.GetValueSequenceAsSpan(ValueSequence, out span);
+                Span<byte> stackSpan;
+
+                int sequenceLength = (int)ValueSequence.Length;
+                if (sequenceLength <= JsonConstants.StackallocThreshold)
+                {
+                    // Cannot create a span directly since it gets passed to instance methods on a ref struct.
+                    unsafe
+                    {
+                        byte* ptr = stackalloc byte[sequenceLength];
+                        stackSpan = new Span<byte>(ptr, sequenceLength);
+                    }
+                }
+                else
+                {
+                    stackSpan = new byte[sequenceLength];
+                }
+
+                ValueSequence.CopyTo(stackSpan);
+                span = stackSpan;
             }
 
             int bytesConsumed;
@@ -483,7 +501,9 @@ namespace System.Text.Json
                 int idx = span.IndexOf(JsonConstants.BackSlash);
                 Debug.Assert(idx != -1);
 
-                Span<byte> utf8Unescaped = stackalloc byte[span.Length];
+                Span<byte> utf8Unescaped = (span.Length <= JsonConstants.StackallocThreshold)
+                    ? stackalloc byte[span.Length]
+                    : new byte[span.Length];
 
                 JsonReaderHelper.Unescape(span, utf8Unescaped, idx, out int written);
                 Debug.Assert(written > 0);
@@ -519,7 +539,25 @@ namespace System.Text.Json
 
             if (HasValueSequence)
             {
-                JsonReaderHelper.GetValueSequenceAsSpan(ValueSequence, out span);
+                Span<byte> stackSpan;
+
+                int sequenceLength = (int)ValueSequence.Length;
+                if (sequenceLength <= JsonConstants.StackallocThreshold)
+                {
+                    // Cannot create a span directly since it gets passed to instance methods on a ref struct.
+                    unsafe
+                    {
+                        byte* ptr = stackalloc byte[sequenceLength];
+                        stackSpan = new Span<byte>(ptr, sequenceLength);
+                    }
+                }
+                else
+                {
+                    stackSpan = new byte[sequenceLength];
+                }
+
+                ValueSequence.CopyTo(stackSpan);
+                span = stackSpan;
             }
 
             int bytesConsumed;
@@ -529,7 +567,9 @@ namespace System.Text.Json
                 int idx = span.IndexOf(JsonConstants.BackSlash);
                 Debug.Assert(idx != -1);
 
-                Span<byte> utf8Unescaped = stackalloc byte[span.Length];
+                Span<byte> utf8Unescaped = (span.Length <= JsonConstants.StackallocThreshold)
+                    ? stackalloc byte[span.Length]
+                    : new byte[span.Length];
 
                 JsonReaderHelper.Unescape(span, utf8Unescaped, idx, out int written);
                 Debug.Assert(written > 0);
@@ -563,7 +603,6 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = ValueSpan;
-            Span<byte> stackSpan;
 
             if (HasValueSequence)
             {
@@ -574,6 +613,7 @@ namespace System.Text.Json
                     return false;
                 }
 
+                Span<byte> stackSpan;
                 // Cannot create a span directly since it gets passed to instance methods on a ref struct.
                 unsafe
                 {
@@ -592,8 +632,6 @@ namespace System.Text.Json
 
             if (_stringHasEscaping)
             {
-                Debug.Assert(span.Length <= JsonConstants.MaximumEscapedGuidLength);
-
                 int idx = span.IndexOf(JsonConstants.BackSlash);
                 Debug.Assert(idx != -1);
 
@@ -610,12 +648,6 @@ namespace System.Text.Json
             }
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
-
-            if (span.Length != JsonConstants.MaximumFormatGuidLength)
-            {
-                value = default;
-                return false;
-            }
 
             value = default;
             return (span.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(span, out value, out _, 'D');

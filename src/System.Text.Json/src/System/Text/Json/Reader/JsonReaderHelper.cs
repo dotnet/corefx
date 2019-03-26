@@ -248,21 +248,5 @@ namespace System.Text.Json
                                                0x03ul << 32 |
                                                0x02ul << 40 |
                                                0x01ul << 48) + 1;
-
-        public static void GetValueSequenceAsSpan(ReadOnlySequence<byte> valueSequence, out ReadOnlySpan<byte> span)
-        {
-            Span<byte> stackSpan;
-
-            // Cannot create a span directly since it gets passed to instance methods on a ref struct.
-            unsafe
-            {
-                int sequenceLength = (int)valueSequence.Length;
-                byte* ptr = stackalloc byte[sequenceLength];
-                stackSpan = new Span<byte>(ptr, sequenceLength);
-            }
-
-            valueSequence.CopyTo(stackSpan);
-            span = stackSpan;
-        }
     }
 }
