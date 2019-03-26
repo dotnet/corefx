@@ -497,9 +497,6 @@ namespace System.Diagnostics
         /// </summary>
         public ref readonly ActivityTraceId TraceId
         {
-#if ALLOW_PARTIALLY_TRUSTED_CALLERS
-            [System.Security.SecuritySafeCriticalAttribute]
-#endif
             get
             {
                 if (!_traceIdSet)
@@ -632,9 +629,6 @@ namespace System.Diagnostics
         /// Set the ID (lazily, avoiding strings if possible) to a W3C ID (using the
         /// traceId from the parent if possible 
         /// </summary>
-#if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [System.Security.SecuritySafeCriticalAttribute]
-#endif
         private void GenerateW3CId()
         {
             // Get the TraceId from the parent or make a new one.  
@@ -775,7 +769,7 @@ namespace System.Diagnostics
         }
 
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
+        [System.Security.SecuritySafeCriticalAttribute]
 #endif
         private bool TrySetTraceIdFromParent()
         {
