@@ -217,6 +217,11 @@ jobs:
                 _architecture: arm
                 _framework: netcoreapp
 
+              UAP_arm_Release:
+                _BuildConfig: Release
+                _architecture: arm
+                _framework: uap
+
               UAPAOT_arm_Release:
                 _BuildConfig: Release
                 _architecture: arm
