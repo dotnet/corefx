@@ -38,9 +38,6 @@ namespace System.Diagnostics
         /// </summary>
         public string OperationName { get; }
 
-#if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [System.Security.SecuritySafeCriticalAttribute]
-#endif
         /// <summary>
         /// This is an ID that is specific to a particular request.   Filtering
         /// to a particular ID insures that you get only one request that matches.  
@@ -59,6 +56,9 @@ namespace System.Diagnostics
         /// </example>
         public string Id
         {
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+        [System.Security.SecuritySafeCriticalAttribute]
+#endif
             get
             {
                 // if we represented it as a traceId-spanId, convert it to a string.  
