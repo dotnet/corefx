@@ -124,7 +124,7 @@ namespace System.Diagnostics
         /// uninteresting can be skipped for efficiency.  You can also supply an 'onActivityImport' and 'onActivityExport'
         /// methods that should be called when providers are 'importing' or 'exporting' activities from outside the
         /// process (e.g. from Http Requests).   These are called right after importing (exporting) the activity and
-        /// can be used to modifyt the activity (or outgoing request) to add policy.   
+        /// can be used to modify the activity (or outgoing request) to add policy.   
         /// </summary>
         public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Func<string, object, object, bool> isEnabled,
             Action<Activity, object> onActivityImport = null, Action<Activity, object> onActivityExport = null)
