@@ -778,7 +778,7 @@ namespace System.Net.Http.Functional.Tests
                 // System.InvalidCastException: "Unable to cast object of type 'System.Object[]' to type 'System.Net.Http.WinHttpRequestState'"
                 // This appears to be due to adding the Expect: 100-continue header, which causes winhttp
                 // to fail with a "The parameter is incorrect" error, which in turn causes the request to
-                // be torn down, and in doing so, we this this during disposal of the SafeWinHttpHandle.
+                // be torn down, and in doing so, we handle this during disposal of the SafeWinHttpHandle.
                 return;
             }
 
@@ -1069,56 +1069,6 @@ namespace System.Net.Http.Functional.Tests
                 $"X-XSS-Protection:{fold} 1; mode=block{newline}" +
                 $"{newline}"),
                 dribble ? new LoopbackServer.Options { StreamWrapper = s => new DribbleStream(s) } : null);
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task GetAsync_TrailingHeaders_Ignored(bool includeTrailerHeader)
-        {
-            if (IsCurlHandler)
-            {
-                // ActiveIssue #17174: CurlHandler has a problem here
-                // https://github.com/curl/curl/issues/1354
-                return;
-            }
-
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
-            {
-                using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
-                {
-                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
-                    await TestHelper.WhenAllCompletedOrAnyFailed(
-                        getResponseTask,
-                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
-                            "HTTP/1.1 200 OK\r\n" +
-                            "Connection: close\r\n" +
-                            "Transfer-Encoding: chunked\r\n" +
-                            (includeTrailerHeader ? "Trailer: MyCoolTrailerHeader\r\n" : "") +
-                            "\r\n" +
-                            "4\r\n" +
-                            "data\r\n" +
-                            "0\r\n" +
-                            "MyCoolTrailerHeader: amazingtrailer\r\n" +
-                            "\r\n"));
-
-                    using (HttpResponseMessage response = await getResponseTask)
-                    {
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        if (includeTrailerHeader)
-                        {
-                            Assert.Contains("MyCoolTrailerHeader", response.Headers.GetValues("Trailer"));
-                        }
-                        Assert.False(response.Headers.Contains("MyCoolTrailerHeader"), "Trailer should have been ignored");
-
-                        string data = await response.Content.ReadAsStringAsync();
-                        Assert.Contains("data", data);
-                        Assert.DoesNotContain("MyCoolTrailerHeader", data);
-                        Assert.DoesNotContain("amazingtrailer", data);
-                    }
-                }
-            });
         }
 
         [Fact]
@@ -2319,7 +2269,16 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpClient client = CreateHttpClient())
                 using (HttpResponseMessage response = await client.PostAsync(redirectUri, new StreamContent(fs)))
                 {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    try
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    }
+                    catch
+                    {
+                        _output.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase}");
+                        throw;
+                    }
+
                     if (expectRedirectToPost)
                     {
                         Assert.InRange(response.Content.Headers.ContentLength.GetValueOrDefault(), contentBytes.Length, int.MaxValue);
@@ -2349,23 +2308,21 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop("Uses external server")]
         [Theory]
         [InlineData(HttpStatusCode.MethodNotAllowed, "Custom description")]
         [InlineData(HttpStatusCode.MethodNotAllowed, "")]
         public async Task GetAsync_CallMethod_ExpectedStatusLine(HttpStatusCode statusCode, string reasonPhrase)
         {
-            using (HttpClient client = CreateHttpClient())
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.StatusCodeUri(
-                    false,
-                    (int)statusCode,
-                    reasonPhrase)))
+                using (HttpClient client = CreateHttpClient())
+                using (HttpResponseMessage response = await client.GetAsync(uri))
                 {
                     Assert.Equal(statusCode, response.StatusCode);
                     Assert.Equal(reasonPhrase, response.ReasonPhrase);
                 }
-            }
+            }, server => server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                $"HTTP/1.1 {(int)statusCode} {reasonPhrase}\r\nContent-Length: 0\r\n\r\n"));
         }
 
 #endregion
@@ -2718,7 +2675,7 @@ namespace System.Net.Http.Functional.Tests
             }));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         public async Task GetAsync_InvalidUrl_ExpectedExceptionThrown()
         {
             string invalidUri = $"http://{Guid.NewGuid().ToString("N")}";

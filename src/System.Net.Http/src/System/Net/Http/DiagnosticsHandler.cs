@@ -36,7 +36,7 @@ namespace System.Net.Http
             //HttpClientHandler is responsible to call DiagnosticsHandler.IsEnabled() before forwarding request here.
             //This code will not be reached if no one listens to 'HttpHandlerDiagnosticListener', unless consumer unsubscribes
             //from DiagnosticListener right after the check. So some requests happening right after subscription starts
-            //might not be instrumented. Similarly, when consumer unsubscribes, extra requests might be instumented
+            //might not be instrumented. Similarly, when consumer unsubscribes, extra requests might be instrumented
 
             if (request == null)
             {
@@ -78,9 +78,27 @@ namespace System.Net.Http
             // If we are on at all, we propagate any activity information
             // unless tracing system or user injected Request-Id for backward compatibility reasons.
             Activity currentActivity = Activity.Current;
-            if (currentActivity != null && !request.Headers.Contains(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName))
+            if (currentActivity != null)
             {
-                request.Headers.Add(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName, currentActivity.Id);
+                if (currentActivity.IdFormat == ActivityIdFormat.W3C)
+                {
+                    if (!request.Headers.Contains(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName))
+                    {
+                        request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName, currentActivity.Id);
+                        if (currentActivity.TraceStateString != null)
+                        {
+                            request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceStateHeaderName, currentActivity.TraceStateString);
+                        }
+                    }
+                }
+                else
+                {
+                    if (!request.Headers.Contains(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName))
+                    {
+                        request.Headers.Add(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName, currentActivity.Id);
+                    }
+                }
+
                 //we expect baggage to be empty or contain a few items
                 using (IEnumerator<KeyValuePair<string, string>> e = currentActivity.Baggage.GetEnumerator())
                 {
@@ -90,7 +108,7 @@ namespace System.Net.Http
                         do
                         {
                             KeyValuePair<string, string> item = e.Current;
-                            baggage.Add(new NameValueHeaderValue(item.Key, item.Value).ToString());
+                            baggage.Add(new NameValueHeaderValue(WebUtility.UrlEncode(item.Key), WebUtility.UrlEncode(item.Value)).ToString());
                         }
                         while (e.MoveNext());
                         request.Headers.Add(DiagnosticsHandlerLoggingStrings.CorrelationContextHeaderName, baggage);
@@ -114,7 +132,7 @@ namespace System.Net.Http
             {
                 if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ExceptionEventName))
                 {
-                    //If request was initialy instrumented, Activity.Current has all necessary context for logging
+                    //If request was initially instrumented, Activity.Current has all necessary context for logging
                     //Request is passed to provide some context if instrumentation was disabled and to avoid
                     //extensive Activity.Tags usage to tunnel request properties
                     s_diagnosticListener.Write(DiagnosticsHandlerLoggingStrings.ExceptionEventName, new { Exception = ex, Request = request });
@@ -129,7 +147,7 @@ namespace System.Net.Http
                     s_diagnosticListener.StopActivity(activity, new
                     {
                         Response = responseTask?.Status == TaskStatus.RanToCompletion ? responseTask.Result : null,
-                        //If request is failed or cancelled, there is no reponse, therefore no information about request;
+                        //If request is failed or cancelled, there is no response, therefore no information about request;
                         //pass the request in the payload, so consumers can have it in Stop for failed/canceled requests
                         //and not retain all requests in Start 
                         Request = request,

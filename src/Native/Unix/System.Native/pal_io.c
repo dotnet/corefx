@@ -120,16 +120,6 @@ c_static_assert(PAL_SEEK_SET == SEEK_SET);
 c_static_assert(PAL_SEEK_CUR == SEEK_CUR);
 c_static_assert(PAL_SEEK_END == SEEK_END);
 
-// Validate our FileAdvice enum values are correct for the platform
-#if HAVE_POSIX_ADVISE
-c_static_assert(PAL_POSIX_FADV_NORMAL == POSIX_FADV_NORMAL);
-c_static_assert(PAL_POSIX_FADV_RANDOM == POSIX_FADV_RANDOM);
-c_static_assert(PAL_POSIX_FADV_SEQUENTIAL == POSIX_FADV_SEQUENTIAL);
-c_static_assert(PAL_POSIX_FADV_WILLNEED == POSIX_FADV_WILLNEED);
-c_static_assert(PAL_POSIX_FADV_DONTNEED == POSIX_FADV_DONTNEED);
-c_static_assert(PAL_POSIX_FADV_NOREUSE == POSIX_FADV_NOREUSE);
-#endif
-
 // Validate our NotifyEvents enum values are correct for the platform
 #if HAVE_INOTIFY
 c_static_assert(PAL_IN_ACCESS == IN_ACCESS);
@@ -217,22 +207,6 @@ int32_t SystemNative_LStat(const char* path, FileStatus* output)
     }
 
     return ret;
-}
-
-// These "2" suffix functions are pending removal
-int32_t SystemNative_Stat2(const char* path, FileStatus* output)
-{
-    return SystemNative_Stat(path, output);
-}
-
-int32_t SystemNative_FStat2(intptr_t fd, FileStatus* output)
-{
-    return SystemNative_FStat(fd, output);
-}
-
-int32_t SystemNative_LStat2(const char* path, FileStatus* output)
-{
-    return SystemNative_LStat(path, output);
 }
 
 static int32_t ConvertOpenFlags(int32_t flags)
@@ -1033,6 +1007,18 @@ int32_t SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, int32_t mi
 int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_t length, int32_t advice)
 {
 #if HAVE_POSIX_ADVISE
+    // POSIX_FADV_* may be different on each platform. Convert the values from PAL to the system's.
+    int32_t actualAdvice;
+    switch (advice)
+    {
+        case PAL_POSIX_FADV_NORMAL:     actualAdvice = POSIX_FADV_NORMAL;     break;
+        case PAL_POSIX_FADV_RANDOM:     actualAdvice = POSIX_FADV_RANDOM;     break;
+        case PAL_POSIX_FADV_SEQUENTIAL: actualAdvice = POSIX_FADV_SEQUENTIAL; break;
+        case PAL_POSIX_FADV_WILLNEED:   actualAdvice = POSIX_FADV_WILLNEED;   break;
+        case PAL_POSIX_FADV_DONTNEED:   actualAdvice = POSIX_FADV_DONTNEED;   break;
+        case PAL_POSIX_FADV_NOREUSE:    actualAdvice = POSIX_FADV_NOREUSE;    break;
+        default: return EINVAL; // According to the man page
+    }
     int32_t result;
     while ((
         result =
@@ -1044,7 +1030,7 @@ int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_t length, i
                 ToFileDescriptor(fd),
                 (off_t)offset,
                 (off_t)length,
-                advice)) < 0 && errno == EINTR);
+                actualAdvice)) < 0 && errno == EINTR);
     return result;
 #else
     // Not supported on this platform. Caller can ignore this failure since it's just a hint.
