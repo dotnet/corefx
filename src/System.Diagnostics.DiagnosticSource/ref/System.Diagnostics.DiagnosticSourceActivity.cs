@@ -118,6 +118,4 @@ namespace System.Diagnostics
         public System.Diagnostics.Activity StartActivity(System.Diagnostics.Activity activity, object args) { throw null; }
         public void StopActivity(System.Diagnostics.Activity activity, object args) { }
     }
-
-
 }
