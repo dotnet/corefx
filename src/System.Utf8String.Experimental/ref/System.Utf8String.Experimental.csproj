@@ -8,9 +8,9 @@
     <Compile Include="System.Utf8String.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Primitives" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.InteropServices" />
+    <ProjectReference Include="..\..\System.Net.Http\ref\System.Net.Http.csproj" />
+    <ProjectReference Include="..\..\System.Net.Primitives\ref\System.Net.Primitives.csproj" />
+    <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Runtime.InteropServices\ref\System.Runtime.InteropServices.csproj" />
   </ItemGroup>
 </Project>
