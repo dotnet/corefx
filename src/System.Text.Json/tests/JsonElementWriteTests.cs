@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Security.Cryptography;
 using Xunit;
 
 namespace System.Text.Json.Tests
@@ -920,7 +919,14 @@ null,
 
         private static void AssertContents(string expectedValue, ArrayBufferWriter buffer)
         {
-            Assert.Equal(expectedValue, Encoding.UTF8.GetString(buffer.Formatted));
+            Assert.Equal(
+                expectedValue,
+                Encoding.UTF8.GetString(
+                    buffer.Formatted
+#if netstandard
+                        .AsSpan().ToArray()
+#endif
+                    ));
         }
     }
 }
