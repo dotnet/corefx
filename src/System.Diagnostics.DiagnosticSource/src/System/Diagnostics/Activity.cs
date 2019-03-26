@@ -736,6 +736,9 @@ namespace System.Diagnostics
             return canSet;
         }
 
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+        [SecuritySafeCritical]
+#endif
         private bool TrySetTraceIdFromParent()
         {
             Debug.Assert(!_traceIdSet);
