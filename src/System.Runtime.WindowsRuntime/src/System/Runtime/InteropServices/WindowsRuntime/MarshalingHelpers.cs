@@ -143,7 +143,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (nativeArgsIP == IntPtr.Zero)
                 return null;
 
-            object obj = Marshal.GetUniqueObjectForIUnknownIgnoreWinRT(nativeArgsIP);
+            object obj = WindowsRuntimeMarshal.GetUniqueObjectForIUnknownWithoutUnboxing(nativeArgsIP);
             INotifyCollectionChangedEventArgs nativeArgs = (INotifyCollectionChangedEventArgs)obj;
 
             return CreateNotifyCollectionChangedEventArgs(
@@ -216,7 +216,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (nativeArgsIP == IntPtr.Zero)
                 return null;
 
-            object obj = Marshal.GetUniqueObjectForIUnknownIgnoreWinRT(nativeArgsIP);
+            object obj = WindowsRuntimeMarshal.GetUniqueObjectForIUnknownWithoutUnboxing(nativeArgsIP);
             IPropertyChangedEventArgs nativeArgs = (IPropertyChangedEventArgs)obj;
 
             return new PropertyChangedEventArgs(nativeArgs.PropertyName);
