@@ -496,7 +496,7 @@ namespace System
                     WriteStdoutAnsiString(TerminalFormatStrings.CursorPositionReport, mayChangeCursorPosition: false);
 
                     // Read the cursor position report (CPR), of the form \ESC[row;colR. This is not
-                    // as easy it it sounds.  Prior to the CPR having been supplied to stdin, other
+                    // as easy as it sounds.  Prior to the CPR having been supplied to stdin, other
                     // user input could have come in and be available to read first from stdin.  Plus,
                     // that user input could include escape sequences, and those escape sequences could
                     // have a prefix very similar to that of the CPR (e.g. other escape sequences start
@@ -1319,7 +1319,7 @@ namespace System
                     }
                 }
 
-                // We pass cursorVersion because it may have have changed the earlier check by calling GetWindowSize.
+                // We pass cursorVersion because it may have changed the earlier check by calling GetWindowSize.
                 SetCachedCursorPosition(left, top, cursorVersion);
 
                 void IncrementY()
