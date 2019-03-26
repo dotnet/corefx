@@ -37,6 +37,8 @@ namespace System.Text.Json
         public System.Text.Json.JsonElement.ObjectEnumerator EnumerateObject() { throw null; }
         public int GetArrayLength() { throw null; }
         public bool GetBoolean() { throw null; }
+        public System.DateTime GetDateTime() { throw null; }
+        public System.DateTimeOffset GetDateTimeOffset() { throw null; }
         public decimal GetDecimal() { throw null; }
         public double GetDouble() { throw null; }
         public int GetInt32() { throw null; }
@@ -52,6 +54,8 @@ namespace System.Text.Json
         [System.CLSCompliantAttribute(false)]
         public ulong GetUInt64() { throw null; }
         public override string ToString() { throw null; }
+        public bool TryGetDateTime(out System.DateTime value) { throw null; }
+        public bool TryGetDateTimeOffset(out System.DateTimeOffset value) { throw null; }
         public bool TryGetDecimal(out decimal value) { throw null; }
         public bool TryGetDouble(out double value) { throw null; }
         public bool TryGetInt32(out int value) { throw null; }
@@ -176,8 +180,11 @@ namespace System.Text.Json
         public System.Buffers.ReadOnlySequence<byte> ValueSequence { get { throw null; } }
         public System.ReadOnlySpan<byte> ValueSpan { get { throw null; } }
         public bool GetBoolean() { throw null; }
+        public System.DateTime GetDateTime() { throw null; }
+        public System.DateTimeOffset GetDateTimeOffset() { throw null; }
         public decimal GetDecimal() { throw null; }
         public double GetDouble() { throw null; }
+        public System.Guid GetGuid() { throw null; }
         public int GetInt32() { throw null; }
         public long GetInt64() { throw null; }
         public float GetSingle() { throw null; }
@@ -187,8 +194,13 @@ namespace System.Text.Json
         [System.CLSCompliantAttribute(false)]
         public ulong GetUInt64() { throw null; }
         public bool Read() { throw null; }
+        public bool TextEquals(System.ReadOnlySpan<byte> otherUtf8Text) { throw null; }
+        public bool TextEquals(System.ReadOnlySpan<char> otherText) { throw null; }
+        public bool TryGetDateTime(out System.DateTime value) { throw null; }
+        public bool TryGetDateTimeOffset(out System.DateTimeOffset value) { throw null; }
         public bool TryGetDecimal(out decimal value) { throw null; }
         public bool TryGetDouble(out double value) { throw null; }
+        public bool TryGetGuid(out System.Guid value) { throw null; }
         public bool TryGetInt32(out int value) { throw null; }
         public bool TryGetInt64(out long value) { throw null; }
         public bool TryGetSingle(out float value) { throw null; }

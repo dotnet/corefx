@@ -1159,7 +1159,7 @@ namespace System.ComponentModel
                     name = ci.ToString(CultureInfo.InvariantCulture);
                 }
 
-                suffix = string.Format(CultureInfo.InvariantCulture, "_{0}", name);
+                suffix = "_" + name;
             }
 
             return suffix;
@@ -1849,7 +1849,7 @@ namespace System.ComponentModel
                     break;
             }
 
-            // See if we can re-use the IList were were passed. If we can,
+            // See if we can re-use the IList that was passed. If we can,
             // it is more efficient to re-use its slots than to generate new ones.
             if (list == null || list.IsReadOnly)
             {
