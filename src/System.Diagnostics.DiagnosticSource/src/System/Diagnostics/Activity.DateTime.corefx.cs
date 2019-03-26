@@ -4,7 +4,7 @@
 
 namespace System.Diagnostics
 {
-    public partial class Activity
+    partial class Activity
     {
         /// <summary>
         /// Returns high resolution (~1 usec) current UTC DateTime.
