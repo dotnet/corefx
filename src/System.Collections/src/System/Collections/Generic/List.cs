@@ -1009,7 +1009,6 @@ namespace System.Collections.Generic
 
             if (count > 0)
             {
-                int i = _size;
                 _size -= count;
                 if (index < _size)
                 {
