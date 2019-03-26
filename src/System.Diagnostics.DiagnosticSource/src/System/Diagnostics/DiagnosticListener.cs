@@ -26,7 +26,7 @@ namespace System.Diagnostics
     /// https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/DiagnosticSourceUsersGuide.md
     /// for instructions on its use.  
     /// </summary>
-    public class DiagnosticListener : DiagnosticSource, IObservable<KeyValuePair<string, object>>, IDisposable
+    public partial class DiagnosticListener : DiagnosticSource, IObservable<KeyValuePair<string, object>>, IDisposable
     {
         /// <summary>
         /// When you subscribe to this you get callbacks for all NotificationListeners in the appdomain
@@ -112,21 +112,6 @@ namespace System.Diagnostics
             return isEnabled == null ?
              SubscribeInternal(observer, null, null, null, null) :
              SubscribeInternal(observer, name => IsEnabled(name, null, null), isEnabled, null, null);
-        }
-
-        /// <summary>
-        /// Add a subscriber (Observer).  If the isEnabled parameter is non-null indicates that some events are 
-        /// uninteresting can be skipped for efficiency.  You can also supply an 'onActivityImport' and 'onActivityExport'
-        /// methods that should be called when providers are 'importing' or 'exporting' activities from outside the
-        /// process (e.g. from Http Requests).   These are called right after importing (exporting) the activity and
-        /// can be used to modifyt the activity (or outgoing request) to add policy.   
-        /// </summary>
-        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Func<string, object, object, bool> isEnabled, 
-            Action<Activity, object> onActivityImport = null, Action<Activity, object> onActivityExport = null)
-        {
-            return isEnabled == null ?
-             SubscribeInternal(observer, null, null, onActivityImport, onActivityExport) :
-             SubscribeInternal(observer, name => IsEnabled(name, null, null), isEnabled, onActivityImport, onActivityExport);
         }
 
         /// <summary>
@@ -275,18 +260,6 @@ namespace System.Diagnostics
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
                 curSubscription.Observer.OnNext(new KeyValuePair<string, object>(name, value));
-        }
-
-        public override void  OnActivityImport(Activity activity, object payloadObj)
-        {
-            for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
-                curSubscription.OnActivityImport?.Invoke(activity, payloadObj);
-        }
-
-        public override void OnActivityExport(Activity activity, object payloadObj)
-        {
-            for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
-                curSubscription.OnActivityExport?.Invoke(activity, payloadObj);
         }
 
         // Note that Subscriptions are READ ONLY.   This means you never update any fields (even on removal!)
