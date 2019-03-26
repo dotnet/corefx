@@ -25,10 +25,11 @@ namespace System.Diagnostics
         public static System.Diagnostics.ActivityIdFormat DefaultIdFormat { get { throw null; } set { } }
         public System.TimeSpan Duration { get { throw null; } }
         public static bool ForceDefaultIdFormat { get { throw null; } set { } }
+        public string Id {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
         [System.Security.SecuritySafeCriticalAttribute]
 #endif
-        public string Id { get { throw null; } }
+            get { throw null; } }
         public System.Diagnostics.ActivityIdFormat IdFormat { get { throw null; } }
         public string OperationName { get { throw null; } }
         public System.Diagnostics.Activity Parent { get { throw null; } }
