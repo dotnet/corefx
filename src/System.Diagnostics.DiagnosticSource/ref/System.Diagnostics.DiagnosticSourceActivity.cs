@@ -105,9 +105,18 @@ namespace System.Diagnostics
         None = 0,
         Recording = 1,
     }
+    public partial class DiagnosticListener
+    {
+        public override void OnActivityExport(System.Diagnostics.Activity activity, object payloadObj) { }
+        public override void OnActivityImport(System.Diagnostics.Activity activity, object payloadObj) { }
+    }
     public abstract partial class DiagnosticSource
     {
+        public virtual void OnActivityExport(System.Diagnostics.Activity activity, object payloadObj) { }
+        public virtual void OnActivityImport(System.Diagnostics.Activity activity, object payloadObj) { }
         public System.Diagnostics.Activity StartActivity(System.Diagnostics.Activity activity, object args) { throw null; }
         public void StopActivity(System.Diagnostics.Activity activity, object args) { }
     }
+
+
 }

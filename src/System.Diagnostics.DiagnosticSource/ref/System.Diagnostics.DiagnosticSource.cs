@@ -16,8 +16,6 @@ namespace System.Diagnostics
         public bool IsEnabled() { throw null; }
         public override bool IsEnabled(string name) { throw null; }
         public override bool IsEnabled(string name, object arg1, object arg2 = null) { throw null; }
-        public override void OnActivityExport(System.Diagnostics.Activity activity, object payloadObj) { }
-        public override void OnActivityImport(System.Diagnostics.Activity activity, object payloadObj) { }
         public virtual System.IDisposable Subscribe(System.IObserver<System.Collections.Generic.KeyValuePair<string, object>> observer) { throw null; }
         public virtual System.IDisposable Subscribe(System.IObserver<System.Collections.Generic.KeyValuePair<string, object>> observer, System.Func<string, object, object, bool> isEnabled) { throw null; }
         public virtual System.IDisposable Subscribe(System.IObserver<System.Collections.Generic.KeyValuePair<string, object>> observer, System.Func<string, object, object, bool> isEnabled, System.Action<System.Diagnostics.Activity, object> onActivityImport = null, System.Action<System.Diagnostics.Activity, object> onActivityExport = null) { throw null; }
@@ -30,8 +28,6 @@ namespace System.Diagnostics
         protected DiagnosticSource() { }
         public abstract bool IsEnabled(string name);
         public virtual bool IsEnabled(string name, object arg1, object arg2 = null) { throw null; }
-        public virtual void OnActivityExport(System.Diagnostics.Activity activity, object payloadObj) { }
-        public virtual void OnActivityImport(System.Diagnostics.Activity activity, object payloadObj) { }
         public abstract void Write(string name, object value);
     }
 }
