@@ -38,7 +38,7 @@ namespace Microsoft.Win32.SafeHandles
 {
     internal sealed class SafeCFArrayHandle : SafeHandle
     {
-        internal SafeCFArrayHandle()
+        private SafeCFArrayHandle()
             : base(IntPtr.Zero, ownsHandle: true)
         {
         }

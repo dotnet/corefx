@@ -11,6 +11,7 @@ using static Interop.CoreFoundation;
 using static Interop.RunLoop;
 
 using CFRunLoopRef = System.IntPtr;
+using CFRunLoopSourceRef = System.IntPtr;
 
 namespace System.Net.Http
 {
@@ -22,9 +23,9 @@ namespace System.Net.Http
             set => throw new NotSupportedException();
         }
 
-        static Uri GetProxyUri(string scheme, CFProxy proxy)
+        private static Uri GetProxyUri(string scheme, CFProxy proxy)
         {
-            var uriBuilder = new UriBuilder(
+            UriBuilder uriBuilder = new UriBuilder(
                 scheme,
                 proxy.HostName,
                 proxy.PortNumber);
@@ -65,19 +66,21 @@ namespace System.Net.Http
                 CFRunLoopStop(runLoop);
             };
 
-            var clientContext = new CFStreamClientContext();
-            var loopSource =
+            CFStreamClientContext clientContext = new CFStreamClientContext();
+            CFRunLoopSourceRef loopSource =
                 proxy.ProxyType == CFProxy.kCFProxyTypeAutoConfigurationURL ?
                 CFNetworkExecuteProxyAutoConfigurationURL(proxy.AutoConfigurationURL, cfurl, cb, ref clientContext) :
                 CFNetworkExecuteProxyAutoConfigurationScript(proxy.AutoConfigurationJavaScript, cfurl, cb, ref clientContext);
 
-            using (var mode = CFStringCreateWithCString("System.Net.Http.MacProxy"))
+            using (var mode = CFStringCreateWithCString(typeof(MacProxy).FullName))
             {
                 IntPtr modeHandle = mode.DangerousGetHandle();
                 CFRunLoopAddSource(runLoop, loopSource, modeHandle);
-                int resultz = CFRunLoopRunInMode(modeHandle, double.MaxValue, 0);
+                CFRunLoopRunInMode(modeHandle, double.MaxValue, 0);
                 CFRunLoopSourceInvalidate(loopSource);
             }
+
+            GC.KeepAlive(cb);
 
             return result;
         }
@@ -116,7 +119,7 @@ namespace System.Net.Http
         public bool IsBypassed(Uri targetUri)
         {
             if (targetUri == null)
-                throw new ArgumentNullException ("targetUri");
+                throw new ArgumentNullException(nameof(targetUri));
 
             Uri proxyUri = GetProxy(targetUri);
             return Equals(proxyUri, targetUri) || proxyUri == null;

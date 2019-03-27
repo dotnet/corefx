@@ -67,7 +67,7 @@ internal static partial class Interop
 
             static CFProxy()
             {
-                IntPtr lib = Interop.Libdl.dlopen(Interop.Libraries.CFNetworkLibrary, Interop.Libdl.RTLD_LAZY);
+                IntPtr lib = NativeLibrary.Load(Interop.Libraries.CFNetworkLibrary);
                 if (lib != IntPtr.Zero)
                 {
                     kCFProxyTypeAutoConfigurationURL = LoadCFStringSymbol(lib, "kCFProxyTypeAutoConfigurationURL");
@@ -94,7 +94,7 @@ internal static partial class Interop
 
             private static IntPtr LoadSymbol(IntPtr lib, string name)
             {
-                IntPtr indirect = Interop.Libdl.dlsym(lib, name);
+                IntPtr indirect = NativeLibrary.GetExport(lib, name);
                 return indirect == IntPtr.Zero ? IntPtr.Zero : Marshal.ReadIntPtr(indirect);
             }
 
