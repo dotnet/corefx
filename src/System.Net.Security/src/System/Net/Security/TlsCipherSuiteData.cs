@@ -36,7 +36,7 @@ namespace System.Net.Security
         }
 #endif
 
-        public static TlsCipherSuiteData? GetCipherSuiteData(TlsCipherSuite cipherSuite)
+        public static TlsCipherSuiteData GetCipherSuiteData(TlsCipherSuite cipherSuite)
         {
             if (s_tlsLookup.TryGetValue(cipherSuite, out TlsCipherSuiteData mapping))
             {
@@ -44,7 +44,7 @@ namespace System.Net.Security
             }
 
             Debug.Fail($"No mapping found for cipherSuite {cipherSuite}");
-            return null;
+            return default(TlsCipherSuiteData);
         }
 
         private static int GetHashSize(HashAlgorithmType hash)

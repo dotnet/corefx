@@ -14,7 +14,7 @@ namespace System.Net.Security
         {
             TlsCipherSuite = cipherSuite;
 
-            TlsCipherSuiteData data = TlsCipherSuiteData.GetCipherSuiteData(cipherSuite) ?? default(TlsCipherSuiteData);
+            TlsCipherSuiteData data = TlsCipherSuiteData.GetCipherSuiteData(cipherSuite);
             KeyExchangeAlg = (int)data.KeyExchangeAlgorithm;
             KeyExchKeySize = 0;
             DataCipherAlg = (int)data.CipherAlgorithm;

@@ -548,9 +548,7 @@ namespace System.Net.Security
             get
             {
                 CheckThrow(true);
-                SslConnectionInfo info = _context.ConnectionInfo;
-
-                return info == null ? default(TlsCipherSuite) : info.TlsCipherSuite;
+                return _context.ConnectionInfo?.TlsCipherSuite ?? default(TlsCipherSuite);
             }
         }
 
