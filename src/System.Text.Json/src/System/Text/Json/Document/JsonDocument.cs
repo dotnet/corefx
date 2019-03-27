@@ -53,7 +53,7 @@ namespace System.Text.Json
             ReadOnlyMemory<byte> utf8Json,
             MetadataDb parsedData,
             byte[] extraRentedBytes,
-            bool isDisposable=true)
+            bool isDisposable = true)
         {
             Debug.Assert(!utf8Json.IsEmpty);
 
@@ -71,9 +71,9 @@ namespace System.Text.Json
             }
         }
 
-        private JsonDocument(JsonDocument source, bool useArrayPools)
+        private JsonDocument(JsonDocument source, bool poolArrays)
         {
-            if (useArrayPools)
+            if (poolArrays)
             {
                 byte[] newJson = ArrayPool<byte>.Shared.Rent(source._utf8Json.Length);
                 source._utf8Json.Span.CopyTo(newJson);
@@ -85,9 +85,9 @@ namespace System.Text.Json
                 _utf8Json = source._utf8Json.ToArray();
             }
 
-            _parsedData = new MetadataDb(source._parsedData, useArrayPools);
+            _parsedData = new MetadataDb(source._parsedData, poolArrays);
             IsDetached = true;
-            IsDisposable = useArrayPools;
+            IsDisposable = poolArrays;
         }
 
         /// <inheritdoc />
@@ -118,7 +118,7 @@ namespace System.Text.Json
         ///   <see cref="Parse(ReadOnlyMemory{byte},JsonReaderOptions)"/> (or another overload)
         ///   remaining unchanged.
         /// </summary>
-        /// <param name="useArrayPools">
+        /// <param name="poolArrays">
         ///   <see langword="true"/> to use pooled arrays where possible, <see langword="false"/> to
         ///   use newly created arrays for simpler lifetime management.
         ///   (Defaults to <see langword="false"/>.)
@@ -133,9 +133,9 @@ namespace System.Text.Json
         ///     same instance.
         ///   </para>
         ///   <para>
-        ///     When invoking this method with <paramref name="useArrayPools"/> == <see langword="true"/>,
+        ///     When invoking this method with <paramref name="poolArrays"/> == <see langword="true"/>,
         ///     the caller is responsible for managing the lifetime of the returned object (as an
-        ///     <see cref="IDisposable"/>). When <paramref name="useArrayPools"/> == <see langword="false"/>,
+        ///     <see cref="IDisposable"/>). When <paramref name="poolArrays"/> == <see langword="false"/>,
         ///     <see cref="Dispose"/> has no effect and therefore the caller has no lifetime management
         ///     responsibilities.
         ///   </para>
@@ -145,14 +145,14 @@ namespace System.Text.Json
         ///   of what was provided to <see cref="Parse(ReadOnlyMemory{byte},JsonReaderOptions)"/> (or
         ///   another overload).
         /// </returns>
-        public JsonDocument Detach(bool useArrayPools=false)
+        public JsonDocument Detach(bool poolArrays = false)
         {
             if (IsDetached && !IsDisposable)
             {
                 return this;
             }
 
-            return new JsonDocument(this, useArrayPools);
+            return new JsonDocument(this, poolArrays);
         }
 
         /// <summary>

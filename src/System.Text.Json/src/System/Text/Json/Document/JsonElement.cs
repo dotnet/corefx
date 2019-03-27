@@ -1002,7 +1002,9 @@ namespace System.Text.Json
         /// <remarks>
         ///   If this JsonElement is already detached (<see cref="IsDetached"/> ==
         ///   <see langword="true"/>) and it is the root element of the
-        ///   <see cref="JsonDocument"/>, no work is done. Otherwise, a new
+        ///   <see cref="JsonDocument"/>, no work is done. Otherwise, a copy of
+        ///   the JSON value is made into a new <see cref="JsonDocument"/> and the
+        ///   resulting <see cref="JsonDocument.RootElement"/> value is returned.
         /// </remarks>
         public JsonElement Detach()
         {

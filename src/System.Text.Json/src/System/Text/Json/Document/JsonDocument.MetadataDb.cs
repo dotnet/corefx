@@ -4,7 +4,6 @@
 
 using System.Buffers;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace System.Text.Json
@@ -86,14 +85,14 @@ namespace System.Text.Json
             private const int NumberOfRowsOffset = 8;
 
             internal int Length { get; private set; }
-            private byte[] _rentedBuffer;
+            private byte[] _data;
 #if DEBUG
             private bool _isLocked;
 #endif
 
             internal MetadataDb(byte[] completeDb)
             {
-                _rentedBuffer = completeDb;
+                _data = completeDb;
                 Length = completeDb.Length;
 
 #if DEBUG
@@ -121,7 +120,7 @@ namespace System.Text.Json
                     initialSize = OneMegabyte;
                 }
 
-                _rentedBuffer = ArrayPool<byte>.Shared.Rent(initialSize);
+                _data = ArrayPool<byte>.Shared.Rent(initialSize);
                 Length = 0;
 #if DEBUG
                 _isLocked = false;
@@ -138,18 +137,18 @@ namespace System.Text.Json
 
                 if (useArrayPools)
                 {
-                    _rentedBuffer = ArrayPool<byte>.Shared.Rent(Length);
-                    source._rentedBuffer.AsSpan(0, Length).CopyTo(_rentedBuffer);
+                    _data = ArrayPool<byte>.Shared.Rent(Length);
+                    source._data.AsSpan(0, Length).CopyTo(_data);
                 }
                 else
                 {
-                    _rentedBuffer = source._rentedBuffer.AsSpan(0, Length).ToArray();
+                    _data = source._data.AsSpan(0, Length).ToArray();
                 }
             }
 
             public void Dispose()
             {
-                if (_rentedBuffer == null)
+                if (_data == null)
                 {
                     return;
                 }
@@ -161,8 +160,8 @@ namespace System.Text.Json
                 // The data in this rented buffer only conveys the positions and
                 // lengths of tokens in a document, but no content; so it does not
                 // need to be cleared.
-                ArrayPool<byte>.Shared.Return(_rentedBuffer);
-                _rentedBuffer = null;
+                ArrayPool<byte>.Shared.Return(_data);
+                _data = null;
                 Length = 0;
             }
 
@@ -172,16 +171,16 @@ namespace System.Text.Json
                 // amount of usage (particularly if Enlarge ever got called); and there's
                 // the small copy-cost associated with trimming anyways. "Is half-empty" is
                 // just a rough metric for "is trimming worth it?".
-                if (Length <= _rentedBuffer.Length / 2)
+                if (Length <= _data.Length / 2)
                 {
                     byte[] newRent = ArrayPool<byte>.Shared.Rent(Length);
                     byte[] returnBuf = newRent;
 
-                    if (newRent.Length < _rentedBuffer.Length)
+                    if (newRent.Length < _data.Length)
                     {
-                        Buffer.BlockCopy(_rentedBuffer, 0, newRent, 0, Length);
-                        returnBuf = _rentedBuffer;
-                        _rentedBuffer = newRent;
+                        Buffer.BlockCopy(_data, 0, newRent, 0, Length);
+                        returnBuf = _data;
+                        _data = newRent;
                     }
 
                     // The data in this rented buffer only conveys the positions and
@@ -202,21 +201,21 @@ namespace System.Text.Json
                 Debug.Assert(!_isLocked, "Appending to a locked database");
 #endif
 
-                if (Length >= _rentedBuffer.Length - DbRow.Size)
+                if (Length >= _data.Length - DbRow.Size)
                 {
                     Enlarge();
                 }
 
                 DbRow row = new DbRow(tokenType, startLocation, length);
-                MemoryMarshal.Write(_rentedBuffer.AsSpan(Length), ref row);
+                MemoryMarshal.Write(_data.AsSpan(Length), ref row);
                 Length += DbRow.Size;
             }
 
             private void Enlarge()
             {
-                byte[] toReturn = _rentedBuffer;
-                _rentedBuffer = ArrayPool<byte>.Shared.Rent(toReturn.Length * 2);
-                Buffer.BlockCopy(toReturn, 0, _rentedBuffer, 0, toReturn.Length);
+                byte[] toReturn = _data;
+                _data = ArrayPool<byte>.Shared.Rent(toReturn.Length * 2);
+                Buffer.BlockCopy(toReturn, 0, _data, 0, toReturn.Length);
 
                 // The data in this rented buffer only conveys the positions and
                 // lengths of tokens in a document, but no content; so it does not
@@ -236,7 +235,7 @@ namespace System.Text.Json
             {
                 AssertValidIndex(index);
                 Debug.Assert(length >= 0);
-                Span<byte> destination = _rentedBuffer.AsSpan(index + SizeOrLengthOffset);
+                Span<byte> destination = _data.AsSpan(index + SizeOrLengthOffset);
                 MemoryMarshal.Write(destination, ref length);
             }
 
@@ -245,7 +244,7 @@ namespace System.Text.Json
                 AssertValidIndex(index);
                 Debug.Assert(numberOfRows >= 1 && numberOfRows <= 0x0FFFFFFF);
 
-                Span<byte> dataPos = _rentedBuffer.AsSpan(index + NumberOfRowsOffset);
+                Span<byte> dataPos = _data.AsSpan(index + NumberOfRowsOffset);
                 int current = MemoryMarshal.Read<int>(dataPos);
 
                 // Persist the most significant nybble
@@ -258,7 +257,7 @@ namespace System.Text.Json
                 AssertValidIndex(index);
 
                 // The HasComplexChildren bit is the most significant bit of "SizeOrLength"
-                Span<byte> dataPos = _rentedBuffer.AsSpan(index + SizeOrLengthOffset);
+                Span<byte> dataPos = _data.AsSpan(index + SizeOrLengthOffset);
                 int current = MemoryMarshal.Read<int>(dataPos);
 
                 int value = current | unchecked((int)0x80000000);
@@ -273,7 +272,7 @@ namespace System.Text.Json
 
             private int FindOpenElement(JsonTokenType lookupType)
             {
-                Span<byte> data = _rentedBuffer.AsSpan(0, Length);
+                Span<byte> data = _data.AsSpan(0, Length);
 
                 for (int i = Length - DbRow.Size; i >= 0; i -= DbRow.Size)
                 {
@@ -293,13 +292,13 @@ namespace System.Text.Json
             internal DbRow Get(int index)
             {
                 AssertValidIndex(index);
-                return MemoryMarshal.Read<DbRow>(_rentedBuffer.AsSpan(index));
+                return MemoryMarshal.Read<DbRow>(_data.AsSpan(index));
             }
 
             internal JsonTokenType GetJsonTokenType(int index)
             {
                 AssertValidIndex(index);
-                uint union = MemoryMarshal.Read<uint>(_rentedBuffer.AsSpan(index + NumberOfRowsOffset));
+                uint union = MemoryMarshal.Read<uint>(_data.AsSpan(index + NumberOfRowsOffset));
 
                 return (JsonTokenType)(union >> 28);
             }
@@ -340,7 +339,7 @@ namespace System.Text.Json
                 int length = endIndex - startIndex;
 
                 byte[] newDatabase = new byte[length];
-                _rentedBuffer.AsSpan(startIndex, length).CopyTo(newDatabase);
+                _data.AsSpan(startIndex, length).CopyTo(newDatabase);
 
                 Span<int> newDbInts = MemoryMarshal.Cast<byte, int>(newDatabase);
                 int locationOffset = newDbInts[0];

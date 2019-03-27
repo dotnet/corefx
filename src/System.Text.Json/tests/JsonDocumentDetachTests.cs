@@ -19,6 +19,8 @@ namespace System.Text.Json.Tests
             using (JsonDocument original = JsonDocument.Parse(json))
             using (JsonDocument clone = original.Detach(useArrayPools))
             {
+                Assert.NotSame(original, clone);
+
                 JsonElement originalRoot = original.RootElement;
                 JsonElement cloneRoot = clone.RootElement;
 
@@ -61,11 +63,11 @@ namespace System.Text.Json.Tests
             using (JsonDocument original = JsonDocument.Parse(json))
             using (JsonDocument detachGC = original.Detach())
             using (JsonDocument detachGC2 = original.Detach())
-            using (JsonDocument detachPool = original.Detach(useArrayPools: true))
+            using (JsonDocument detachPool = original.Detach(poolArrays: true))
             using (JsonDocument detachGCGC = detachGC.Detach())
-            using (JsonDocument detachGCPool = detachGC.Detach(useArrayPools: true))
+            using (JsonDocument detachGCPool = detachGC.Detach(poolArrays: true))
             using (JsonDocument detachPoolGC = detachPool.Detach())
-            using (JsonDocument detachPoolPool = detachPool.Detach(useArrayPools: true))
+            using (JsonDocument detachPoolPool = detachPool.Detach(poolArrays: true))
             {
                 Assert.False(original.IsDetached, "original.IsDetached");
                 Assert.True(original.IsDisposable, "original.IsDisposable");
