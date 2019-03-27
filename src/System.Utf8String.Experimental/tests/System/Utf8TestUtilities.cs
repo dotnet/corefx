@@ -48,7 +48,7 @@ namespace System.Tests
             int index = 0;
             while (index < str.Length)
             {
-                if (Rune.TryGetRuneAt(str, index, out Rune value) && value.TryEncodeToUtf8Bytes(utf8Bytes, out int bytesWritten))
+                if (Rune.TryGetRuneAt(str, index, out Rune value) && value.TryEncodeToUtf8(utf8Bytes, out int bytesWritten))
                 {
                     memStream.Write(utf8Bytes.Slice(0, bytesWritten));
                     index += value.Utf16SequenceLength;
