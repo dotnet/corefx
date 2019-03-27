@@ -21,17 +21,17 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Arcade dependencies -->
-    <MicrosoftDotNetApiCompatPackageVersion>1.0.0-beta.19171.6</MicrosoftDotNetApiCompatPackageVersion>
-    <MicrosoftDotNetSourceRewriterPackageVersion>1.0.0-beta.19171.6</MicrosoftDotNetSourceRewriterPackageVersion>
-    <MicrosoftDotNetCodeAnalysisPackageVersion>1.0.0-beta.19171.6</MicrosoftDotNetCodeAnalysisPackageVersion>
-    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19171.6</MicrosoftDotNetGenAPIPackageVersion>
-    <MicrosoftDotNetGenFacadesPackageVersion>1.0.0-beta.19171.6</MicrosoftDotNetGenFacadesPackageVersion>
-    <MicrosoftDotNetXUnitExtensionsPackageVersion>2.4.0-beta.19171.6</MicrosoftDotNetXUnitExtensionsPackageVersion>
-    <MicrosoftDotNetBuildTasksPackagingPackageVersion>1.0.0-beta.19171.6</MicrosoftDotNetBuildTasksPackagingPackageVersion>
-    <MicrosoftDotNetCoreFxTestingPackageVersion>1.0.0-beta.19171.6</MicrosoftDotNetCoreFxTestingPackageVersion>
-    <MicrosoftDotNetBuildTasksConfigurationPackageVersion>1.0.0-beta.19171.6</MicrosoftDotNetBuildTasksConfigurationPackageVersion>
-    <MicrosoftDotNetBuildTasksFeedPackageVersion>2.2.0-beta.19171.6</MicrosoftDotNetBuildTasksFeedPackageVersion>
-    <MicrosoftDotNetVersionToolsTasksPackageVersion>1.0.0-beta.19171.6</MicrosoftDotNetVersionToolsTasksPackageVersion>
+    <MicrosoftDotNetApiCompatPackageVersion>1.0.0-beta.19176.14</MicrosoftDotNetApiCompatPackageVersion>
+    <MicrosoftDotNetSourceRewriterPackageVersion>1.0.0-beta.19176.14</MicrosoftDotNetSourceRewriterPackageVersion>
+    <MicrosoftDotNetCodeAnalysisPackageVersion>1.0.0-beta.19176.14</MicrosoftDotNetCodeAnalysisPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19176.14</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenFacadesPackageVersion>1.0.0-beta.19176.14</MicrosoftDotNetGenFacadesPackageVersion>
+    <MicrosoftDotNetXUnitExtensionsPackageVersion>2.4.0-beta.19176.14</MicrosoftDotNetXUnitExtensionsPackageVersion>
+    <MicrosoftDotNetBuildTasksPackagingPackageVersion>1.0.0-beta.19176.14</MicrosoftDotNetBuildTasksPackagingPackageVersion>
+    <MicrosoftDotNetCoreFxTestingPackageVersion>1.0.0-beta.19176.14</MicrosoftDotNetCoreFxTestingPackageVersion>
+    <MicrosoftDotNetBuildTasksConfigurationPackageVersion>1.0.0-beta.19176.14</MicrosoftDotNetBuildTasksConfigurationPackageVersion>
+    <MicrosoftDotNetBuildTasksFeedPackageVersion>2.2.0-beta.19176.14</MicrosoftDotNetBuildTasksFeedPackageVersion>
+    <MicrosoftDotNetVersionToolsTasksPackageVersion>1.0.0-beta.19176.14</MicrosoftDotNetVersionToolsTasksPackageVersion>
     <MicrosoftNetCompilersVersion>3.0.0-beta4-final</MicrosoftNetCompilersVersion>
     <MicrosoftNETCoreCompilersVersion>$(MicrosoftNetCompilersVersion)</MicrosoftNETCoreCompilersVersion>
     <!-- Core-setup dependencies -->
