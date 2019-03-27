@@ -469,7 +469,7 @@ namespace System.Text.Json
                 throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
             }
 
-            ReadOnlySpan<byte> span = ValueSpan;
+            ReadOnlySpan<byte> span = stackalloc byte[0];
 
             if (HasValueSequence)
             {
@@ -482,16 +482,14 @@ namespace System.Text.Json
                 }
 
                 Debug.Assert(sequenceLength <= JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
-                Span<byte> stackSpan;
-                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
-                unsafe
-                {
-                    byte* ptr = stackalloc byte[sequenceLength];
-                    stackSpan = new Span<byte>(ptr, sequenceLength);
-                }
+                Span<byte> stackSpan = stackalloc byte[sequenceLength];
 
                 ValueSequence.CopyTo(stackSpan);
                 span = stackSpan;
+            }
+            else
+            {
+                span = ValueSpan;
             }
 
             if (!JsonReaderHelper.IsValidDateTimeParsingLength(span.Length))
@@ -530,7 +528,7 @@ namespace System.Text.Json
                 throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
             }
 
-            ReadOnlySpan<byte> span = ValueSpan;
+            ReadOnlySpan<byte> span = stackalloc byte[0];
 
             if (HasValueSequence)
             {
@@ -543,16 +541,14 @@ namespace System.Text.Json
                 }
 
                 Debug.Assert(sequenceLength <= JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
-                Span<byte> stackSpan;
-                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
-                unsafe
-                {
-                    byte* ptr = stackalloc byte[sequenceLength];
-                    stackSpan = new Span<byte>(ptr, sequenceLength);
-                }
+                Span<byte> stackSpan = stackalloc byte[sequenceLength];
 
                 ValueSequence.CopyTo(stackSpan);
                 span = stackSpan;
+            }
+            else
+            {
+                span = ValueSpan;
             }
 
             if (!JsonReaderHelper.IsValidDateTimeParsingLength(span.Length))
@@ -592,7 +588,7 @@ namespace System.Text.Json
                 throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
             }
 
-            ReadOnlySpan<byte> span = ValueSpan;
+            ReadOnlySpan<byte> span = stackalloc byte[0];
 
             if (HasValueSequence)
             {
@@ -603,15 +599,15 @@ namespace System.Text.Json
                     return false;
                 }
 
-                Span<byte> stackSpan;
-                // Cannot create a span directly since it gets passed to instance methods on a ref struct.
-                unsafe
-                {
-                    byte* ptr = stackalloc byte[(int)sequenceLength];
-                    stackSpan = new Span<byte>(ptr, (int)sequenceLength);
-                }
+                Debug.Assert(sequenceLength <= JsonConstants.MaximumEscapedGuidLength);
+                Span<byte> stackSpan = stackalloc byte[(int)sequenceLength];
+
                 ValueSequence.CopyTo(stackSpan);
                 span = stackSpan;
+            }
+            else
+            {
+                span = ValueSpan;
             }
 
             if (span.Length > JsonConstants.MaximumEscapedGuidLength)
