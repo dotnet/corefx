@@ -508,6 +508,9 @@ namespace System.Diagnostics
             }
         }
 
+        /// <summary>
+        /// True if the W3CIdFlags.Recording flag is set.   
+        /// </summary>
         public bool Recording { get => (W3CIdFlags & W3CIdFlags.Recording) != 0; }
 
         byte _w3CIdFlags;
