@@ -873,7 +873,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Write the element into the provider writer as a named object property.
+        ///   Write the element into the provided writer as a named object property.
         /// </summary>
         /// <param name="writer">The writer.</param>
         /// <param name="propertyName">The name for this value within the JSON object.</param>
@@ -891,7 +891,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Write the element into the provider writer as a named object property.
+        ///   Write the element into the provided writer as a named object property.
         /// </summary>
         /// <param name="writer">The writer.</param>
         /// <param name="utf8PropertyName">
@@ -911,7 +911,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Write the element into the provider writer as a value.
+        ///   Write the element into the provided writer as a value.
         /// </summary>
         /// <param name="writer">The writer.</param>
         /// <exception cref="InvalidOperationException">
