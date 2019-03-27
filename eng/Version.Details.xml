@@ -1,16 +1,16 @@
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview4-27524-72">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-preview4-27526-72">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>2f4a7564beb6f8c1f4929504ee2221953d25fc39</Sha>
+      <Sha>2520798548b0c414f513aaaf708399f8ef5a4f6c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.0.0-preview4-27524-72">
+    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.0.0-preview4-27526-72">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>2f4a7564beb6f8c1f4929504ee2221953d25fc39</Sha>
+      <Sha>2520798548b0c414f513aaaf708399f8ef5a4f6c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.0.0-preview4-27524-72">
+    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.0.0-preview4-27526-72">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>2f4a7564beb6f8c1f4929504ee2221953d25fc39</Sha>
+      <Sha>2520798548b0c414f513aaaf708399f8ef5a4f6c</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
@@ -34,9 +34,9 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>2eb45ff0eed6f86f1071b16b11a447cadeeeec59</Sha>
     </Dependency>
-    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19172.1">
+    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19176.1">
       <Uri>https://github.com/dotnet/standard</Uri>
-      <Sha>27346e62d48fc1ed62a341b65b7cb4f28dc021c3</Sha>
+      <Sha>813621b47bbc905cb539fbe669c4e7b96c1838e5</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="2.0.0-beta.19171.6">
       <Uri>https://github.com/dotnet/arcade</Uri>
@@ -79,6 +79,10 @@
       <Sha>2eb45ff0eed6f86f1071b16b11a447cadeeeec59</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Build.Tasks.Feed" Version="2.2.0-beta.19171.6">
+      <Uri>https://github.com/dotnet/arcade</Uri>
+      <Sha>2eb45ff0eed6f86f1071b16b11a447cadeeeec59</Sha>
+    </Dependency>
+    <Dependency Name="Microsoft.DotNet.VersionTools.Tasks" Version="1.0.0-beta.19171.6">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>2eb45ff0eed6f86f1071b16b11a447cadeeeec59</Sha>
     </Dependency>
