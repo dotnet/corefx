@@ -845,7 +845,7 @@ null,
                 {
                     foreach (JsonElement val in root.EnumerateArray())
                     {
-                        val.WriteTo(ref writer, CharLabel);
+                        val.WriteTo(ref writer, CharLabel.AsSpan());
                         val.WriteTo(ref writer, byteUtf8);
                     }
 
@@ -867,7 +867,7 @@ null,
                     {
                         JsonTestHelper.AssertThrows<InvalidOperationException>(
                             ref writer,
-                            (ref Utf8JsonWriter w) => val.WriteTo(ref w, CharLabel));
+                            (ref Utf8JsonWriter w) => val.WriteTo(ref w, CharLabel.AsSpan()));
 
                         JsonTestHelper.AssertThrows<InvalidOperationException>(
                             ref writer,
