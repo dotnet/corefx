@@ -424,6 +424,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(RSA_verify) \
     REQUIRED_FUNCTION(SSL_CIPHER_description) \
     REQUIRED_FUNCTION(SSL_CIPHER_get_bits) \
+    REQUIRED_FUNCTION(SSL_CIPHER_get_id) \
     REQUIRED_FUNCTION(SSL_ctrl) \
     REQUIRED_FUNCTION(SSL_set_quiet_shutdown) \
     REQUIRED_FUNCTION(SSL_CTX_check_private_key) \
@@ -446,7 +447,6 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(SSL_free) \
     REQUIRED_FUNCTION(SSL_get_client_CA_list) \
     REQUIRED_FUNCTION(SSL_get_current_cipher) \
-    REQUIRED_FUNCTION(SSL_CIPHER_get_id) \
     REQUIRED_FUNCTION(SSL_get_error) \
     REQUIRED_FUNCTION(SSL_get_finished) \
     REQUIRED_FUNCTION(SSL_get_peer_cert_chain) \
@@ -811,6 +811,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define sk_value OPENSSL_sk_value_ptr
 #define SSL_CIPHER_get_bits SSL_CIPHER_get_bits_ptr
 #define SSL_CIPHER_description SSL_CIPHER_description_ptr
+#define SSL_CIPHER_get_id SSL_CIPHER_get_id_ptr
 #define SSL_ctrl SSL_ctrl_ptr
 #define SSL_set_quiet_shutdown SSL_set_quiet_shutdown_ptr
 #define SSL_CTX_check_private_key SSL_CTX_check_private_key_ptr
@@ -832,7 +833,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define SSL_free SSL_free_ptr
 #define SSL_get_client_CA_list SSL_get_client_CA_list_ptr
 #define SSL_get_current_cipher SSL_get_current_cipher_ptr
-#define SSL_CIPHER_get_id SSL_CIPHER_get_id_ptr
 #define SSL_get_error SSL_get_error_ptr
 #define SSL_get_finished SSL_get_finished_ptr
 #define SSL_get_peer_cert_chain SSL_get_peer_cert_chain_ptr

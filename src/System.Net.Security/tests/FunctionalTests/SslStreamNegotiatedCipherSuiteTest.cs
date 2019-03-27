@@ -33,14 +33,14 @@ namespace System.Net.Security.Tests
         };
 
         [ConditionalFact(nameof(IsKnownPlatformSupportingTls13))]
-        public void Tls13IsSupportedFlagWorksCorrectly()
+        public void Tls13IsSupported_GetValue_ReturnsTrue()
         {
             // Validate that flag used in this file works correctly
             Assert.True(Tls13Supported);
         }
 
         [ConditionalFact(nameof(Tls13Supported))]
-        public void NegotiatedCipherSuiteForTls13ShouldBeTls13()
+        public void NegotiatedCipherSuite_SslProtocolIsTls13_ShouldBeTls13()
         {
             var p = new ConnectionParams()
             {
@@ -59,7 +59,7 @@ namespace System.Net.Security.Tests
         [InlineData(SslProtocols.Tls)]
         [InlineData(SslProtocols.Tls11)]
         [InlineData(SslProtocols.Tls12)]
-        public void NegotiatedCipherSuiteShouldMatchTheProtocol(SslProtocols protocol)
+        public void NegotiatedCipherSuite_SslProtocolIsLowerThanTls13_ShouldMatchTheProtocol(SslProtocols protocol)
         {
             var p = new ConnectionParams()
             {
@@ -75,7 +75,7 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        public void NegotiatedCipherSuiteShouldThrowBeforeNegotiationStarted()
+        public void NegotiatedCipherSuite_BeforeNegotiationStarted_ShouldThrow()
         {
             using (var ms = new MemoryStream())
             using (var server = new SslStream(ms, leaveInnerStreamOpen: false))

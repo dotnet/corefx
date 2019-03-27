@@ -7,23 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Net.Security.cs" />
-  </ItemGroup>
-  <!-- This file depends on IANA registry. We do not want anyone's build to break after the update-->
-  <!-- or if they don't have internet connection -->
-  <ItemGroup Condition="'$(AllowTlsCipherSuiteGeneration)' == 'true'">
-    <Compile Include="TlsCipherSuite.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>TlsCipherSuite.tt</DependentUpon>
-    </Compile>
-    <None Include="TlsCipherSuite.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TlsCipherSuite.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup Condition="'$(AllowTlsCipherSuiteGeneration)' != 'true'">
     <Compile Include="TlsCipherSuite.cs" />
-    <None Include="TlsCipherSuite.tt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\System.Collections.NonGeneric\ref\System.Collections.NonGeneric.csproj" />

@@ -685,6 +685,8 @@ int32_t CryptoNative_SslGetCurrentCipherId(SSL* ssl, int32_t* cipherId)
         return 0;
     }
 
+    // OpenSSL uses its own identifier
+    // lower 2 bytes of that ID contain IANA value
     *cipherId = SSL_CIPHER_get_id(cipher) & 0xFFFF;
 
     return 1;

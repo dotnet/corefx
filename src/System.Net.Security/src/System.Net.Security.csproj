@@ -5,7 +5,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
     <!-- This is needed so that code for TlsCipherSuite will have no namespace (causes compile errors) when used within T4 template  -->
-    <DefineConstants>PRODUCT</DefineConstants>
+    <DefineConstants>$(DefineConstants);PRODUCT</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsOSX)' == 'true' ">
     <DefineConstants>$(DefineConstants);SYSNETSECURITY_NO_OPENSSL</DefineConstants>
@@ -100,9 +100,24 @@
     <Compile Include="$(CommonPath)\System\Net\SecurityStatusPal.cs">
       <Link>Common\System\Net\SecurityStatusPal.cs</Link>
     </Compile>
-    <Compile Include="..\ref\TlsCipherSuite.cs">
-      <Link>System\Net\Security\TlsCipherSuite.cs</Link>
+  </ItemGroup>
+  <!-- This file depends on IANA registry. We do not want anyone's build to break after the update -->
+  <!-- or if they don't have internet connection - explicit opt-in required -->
+  <!-- To expose newly generated APIs, generated file have to be deliberately copied -->
+  <ItemGroup Condition="'$(AllowTlsCipherSuiteGeneration)' == 'true'">
+    <Compile Include="System\Net\Security\TlsCipherSuite.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>System\Net\Security\TlsCipherSuite.tt</DependentUpon>
     </Compile>
+    <None Include="System\Net\Security\TlsCipherSuite.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TlsCipherSuite.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition="'$(AllowTlsCipherSuiteGeneration)' != 'true'">
+    <Compile Include="System\Net\Security\TlsCipherSuite.cs" />
+    <None Include="System\Net\Security\TlsCipherSuite.tt" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
     <Compile Include="System\Net\CertificateValidationPal.Windows.cs" />
