@@ -194,6 +194,11 @@ namespace System.Text.Json
             return new InvalidOperationException(SR.Format(SR.InvalidCast, tokenType, message));
         }
 
+        public static InvalidOperationException GetInvalidOperationException_CannotSkipOnPartial()
+        {
+            return new InvalidOperationException(SR.CannotSkip);
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static InvalidOperationException GetInvalidOperationException(JsonTokenType tokenType)
         {

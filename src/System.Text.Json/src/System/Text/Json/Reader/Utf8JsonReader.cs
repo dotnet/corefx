@@ -506,6 +506,122 @@ namespace System.Text.Json
             return false;
         }
 
+        public void Skip()
+        {
+            if (!_isFinalBlock)
+            {
+                throw ThrowHelper.GetInvalidOperationException_CannotSkipOnPartial();
+            }
+
+            if (TokenType == JsonTokenType.PropertyName)
+            {
+                Read();
+            }
+
+            if (TokenType == JsonTokenType.StartObject || TokenType == JsonTokenType.StartArray)
+            {
+                int depth = CurrentDepth;
+                while (depth <= CurrentDepth)
+                {
+                    bool result = Read();
+                    Debug.Assert(result);
+                }
+            }
+        }
+
+        public bool TrySkip()
+        {
+            Utf8JsonReaderFields fieldsCopy = default;
+            bool createdCopy = false;
+            bool result = true;
+
+            if (TokenType == JsonTokenType.PropertyName)
+            {
+                fieldsCopy = CreateFieldsCopy();
+                createdCopy = true;
+                result = Read();
+            }
+
+            if (result && (TokenType == JsonTokenType.StartObject || TokenType == JsonTokenType.StartArray))
+            {
+                if (!createdCopy)
+                {
+                    fieldsCopy = CreateFieldsCopy();
+                    createdCopy = true;
+                }
+
+                int depth = CurrentDepth;
+                do
+                {
+                    result = Read();
+                }
+                while (result && depth <= CurrentDepth);
+            }
+
+            if (!result)
+            {
+                Debug.Assert(createdCopy);
+                Debug.Assert(!_isFinalBlock);
+                Recover(fieldsCopy);
+            }
+            return result;
+        }
+
+        private struct Utf8JsonReaderFields
+        {
+            public long _lineNumber;
+            public long _bytePositionInLine;
+            public int _consumed;
+            public long _totalConsumed;
+            public bool _inObject;
+            public bool _isNotPrimitive;
+            public char _numberFormat;
+            public bool _stringHasEscaping;
+            public JsonTokenType _tokenType;
+            public JsonTokenType _previousTokenType;
+            public BitStack _bitStack;
+            public SequencePosition _currentPosition;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private Utf8JsonReaderFields CreateFieldsCopy()
+        {
+            return new Utf8JsonReaderFields
+            {
+                _lineNumber = _lineNumber,
+                _bytePositionInLine = _bytePositionInLine,
+                _consumed = _consumed,
+                _totalConsumed = _totalConsumed,
+                _inObject = _inObject,
+                _isNotPrimitive = _isNotPrimitive,
+                _numberFormat = _numberFormat,
+                _stringHasEscaping = _stringHasEscaping,
+                _tokenType = _tokenType,
+                _previousTokenType = _previousTokenType,
+                _bitStack = _bitStack,
+                _currentPosition = _currentPosition,
+            };
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void Recover(Utf8JsonReaderFields fieldsCopy)
+        {
+            _lineNumber = fieldsCopy._lineNumber;
+            _bytePositionInLine = fieldsCopy._bytePositionInLine;
+            _consumed = fieldsCopy._consumed;
+            _totalConsumed = fieldsCopy._totalConsumed;
+            _inObject = fieldsCopy._inObject;
+            _isNotPrimitive = fieldsCopy._isNotPrimitive;
+            _numberFormat = fieldsCopy._numberFormat;
+            _stringHasEscaping = fieldsCopy._stringHasEscaping;
+            _tokenType = fieldsCopy._tokenType;
+            _previousTokenType = fieldsCopy._previousTokenType;
+            _bitStack = fieldsCopy._bitStack;
+            _currentPosition = fieldsCopy._currentPosition;
+        }
+
+        //public bool TrySkipToDepth(int targetDepth) { throw null; }
+
         private void StartObject()
         {
             if (_bitStack.CurrentDepth >= _readerOptions.MaxDepth)

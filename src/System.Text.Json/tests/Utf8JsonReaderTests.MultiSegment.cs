@@ -169,6 +169,143 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
+        [MemberData(nameof(TrySkipValues))]
+        public static void TestTrySkipMultiSegment(string jsonString, JsonTokenType lastToken)
+        {
+            List<JsonTokenType> expectedTokenTypes = JsonTestHelper.GetTokenTypes(jsonString);
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            ReadOnlySequence<byte> sequence = JsonTestHelper.CreateSegments(dataUtf8);
+            TrySkipHelper(sequence, lastToken, expectedTokenTypes, JsonCommentHandling.Disallow);
+            TrySkipHelper(sequence, lastToken, expectedTokenTypes, JsonCommentHandling.Skip);
+            TrySkipHelper(sequence, lastToken, expectedTokenTypes, JsonCommentHandling.Allow);
+
+            sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
+            TrySkipHelper(sequence, lastToken, expectedTokenTypes, JsonCommentHandling.Disallow);
+            TrySkipHelper(sequence, lastToken, expectedTokenTypes, JsonCommentHandling.Skip);
+            TrySkipHelper(sequence, lastToken, expectedTokenTypes, JsonCommentHandling.Allow);
+        }
+
+        [Theory]
+        [MemberData(nameof(TrySkipValues))]
+        public static void TestTrySkipWithCommentsMultiSegment(string jsonString, JsonTokenType lastToken)
+        {
+            List<JsonTokenType> expectedTokenTypesWithoutComments = JsonTestHelper.GetTokenTypes(jsonString);
+
+            jsonString = JsonTestHelper.InsertCommentsEverywhere(jsonString);
+
+            List<JsonTokenType> expectedTokenTypes = JsonTestHelper.GetTokenTypes(jsonString);
+
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            ReadOnlySequence<byte> sequence = JsonTestHelper.CreateSegments(dataUtf8);
+            TrySkipHelper(sequence, JsonTokenType.Comment, expectedTokenTypes, JsonCommentHandling.Allow);
+            TrySkipHelper(sequence, lastToken, expectedTokenTypesWithoutComments, JsonCommentHandling.Skip);
+
+            sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
+            TrySkipHelper(sequence, JsonTokenType.Comment, expectedTokenTypes, JsonCommentHandling.Allow);
+            TrySkipHelper(sequence, lastToken, expectedTokenTypesWithoutComments, JsonCommentHandling.Skip);
+        }
+
+        private static void TrySkipHelper(ReadOnlySequence<byte> dataUtf8, JsonTokenType lastToken, List<JsonTokenType> expectedTokenTypes, JsonCommentHandling commentHandling)
+        {
+            var state = new JsonReaderState(new JsonReaderOptions { CommentHandling = commentHandling });
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+            JsonReaderState previous = json.CurrentState;
+            Assert.Equal(JsonTokenType.None, json.TokenType);
+            Assert.Equal(0, json.CurrentDepth);
+            Assert.Equal(0, json.BytesConsumed);
+            Assert.Equal(false, json.HasValueSequence);
+            Assert.True(json.ValueSpan.SequenceEqual(default));
+            Assert.True(json.ValueSequence.IsEmpty);
+
+            Assert.True(json.TrySkip());
+
+            JsonReaderState current = json.CurrentState;
+            Assert.Equal(JsonTokenType.None, json.TokenType);
+            Assert.Equal(previous, current);
+            Assert.Equal(0, json.CurrentDepth);
+            Assert.Equal(0, json.BytesConsumed);
+            Assert.Equal(false, json.HasValueSequence);
+            Assert.True(json.ValueSpan.SequenceEqual(default));
+            Assert.True(json.ValueSequence.IsEmpty);
+
+            json.Skip();
+
+            current = json.CurrentState;
+            Assert.Equal(JsonTokenType.None, json.TokenType);
+            Assert.Equal(previous, current);
+            Assert.Equal(0, json.CurrentDepth);
+            Assert.Equal(0, json.BytesConsumed);
+            Assert.Equal(false, json.HasValueSequence);
+            Assert.True(json.ValueSpan.SequenceEqual(default));
+            Assert.True(json.ValueSequence.IsEmpty);
+
+            int totalReads = 0;
+            while (json.Read())
+            {
+                totalReads++;
+            }
+
+            Assert.Equal(expectedTokenTypes.Count, totalReads);
+
+            previous = json.CurrentState;
+            Assert.Equal(lastToken, json.TokenType);
+            Assert.Equal(0, json.CurrentDepth);
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(false, json.HasValueSequence);
+            Assert.True(json.ValueSpan.SequenceEqual(default));
+            Assert.True(json.ValueSequence.IsEmpty);
+
+            Assert.True(json.TrySkip());
+
+            current = json.CurrentState;
+            Assert.Equal(previous, current);
+            Assert.Equal(lastToken, json.TokenType);
+            Assert.Equal(0, json.CurrentDepth);
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(false, json.HasValueSequence);
+            Assert.True(json.ValueSpan.SequenceEqual(default));
+            Assert.True(json.ValueSequence.IsEmpty);
+
+            json.Skip();
+
+            current = json.CurrentState;
+            Assert.Equal(previous, current);
+            Assert.Equal(lastToken, json.TokenType);
+            Assert.Equal(0, json.CurrentDepth);
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(false, json.HasValueSequence);
+            Assert.True(json.ValueSpan.SequenceEqual(default));
+            Assert.True(json.ValueSequence.IsEmpty);
+
+            for (int i = 0; i < totalReads; i++)
+            {
+                state = new JsonReaderState(new JsonReaderOptions { CommentHandling = commentHandling });
+                json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+                for (int j = 0; j < i; j++)
+                {
+                    Assert.True(json.Read());
+                }
+                Assert.True(json.TrySkip());
+                Assert.True(expectedTokenTypes[i] == json.TokenType, $"Expected: {expectedTokenTypes[i]}, Actual: {json.TokenType}, , Index: {i}, BytesConsumed: {json.BytesConsumed}");
+            }
+
+            for (int i = 0; i < totalReads; i++)
+            {
+                state = new JsonReaderState(new JsonReaderOptions { CommentHandling = commentHandling });
+                json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+                for (int j = 0; j < i; j++)
+                {
+                    Assert.True(json.Read());
+                }
+                json.Skip();
+                Assert.True(expectedTokenTypes[i] == json.TokenType, $"Expected: {expectedTokenTypes[i]}, Actual: {json.TokenType}, , Index: {i}, BytesConsumed: {json.BytesConsumed}");
+            }
+        }
+
+        [Theory]
         [MemberData(nameof(InvalidJsonStrings))]
         public static void InvalidJsonMultiSegmentWithEmptyFirst(string jsonString, int expectedlineNumber, int expectedBytePosition, int maxDepth = 64)
         {
@@ -513,7 +650,7 @@ namespace System.Text.Json.Tests
                     buffers[4] = dataUtf8.AsSpan(93, 1).ToArray();
                     buffers[5] = dataUtf8.AsSpan(94, 1).ToArray();
                     sequence = BufferFactory.Create(buffers);
-                    expectedHasValueSequence = new bool [] {false, true, false, false, true, false, true, false, false, false, false, false };
+                    expectedHasValueSequence = new bool[] { false, true, false, false, true, false, true, false, false, false, false, false };
                     break;
                 case 1:
                     Debug.Assert(dataUtf8.Length == 97);
@@ -537,7 +674,7 @@ namespace System.Text.Json.Tests
                     buffers[3] = dataUtf8.AsSpan(79, 9).ToArray();
                     buffers[4] = dataUtf8.AsSpan(88, 2).ToArray();
                     sequence = BufferFactory.Create(buffers);
-                    expectedHasValueSequenceSkip = new bool[] { false, false, false, true,  false, false };
+                    expectedHasValueSequenceSkip = new bool[] { false, false, false, true, false, false };
                     expectedHasValueSequenceAllow = new bool[] { false, false, false, true, true, true, false, false };
                     break;
                 default:

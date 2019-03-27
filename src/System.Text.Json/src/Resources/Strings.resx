@@ -312,4 +312,7 @@
   <data name="FormatGuid" xml:space="preserve">
     <value>The JSON value is not in a supported Guid format.</value>
   </data>
+  <data name="CannotSkip" xml:space="preserve">
+    <value>Cannot Skip on partial JSON payload. Either get the whole payload and set _isFinalBlock to true or call TrySkip.</value>
+  </data>
 </root>
