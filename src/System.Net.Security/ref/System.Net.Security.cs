@@ -199,7 +199,6 @@ namespace System.Net.Security
         public virtual void EndAuthenticateAsServer(System.IAsyncResult asyncResult) { }
         public override int EndRead(System.IAsyncResult asyncResult) { throw null; }
         public override void EndWrite(System.IAsyncResult asyncResult) { }
-        ~SslStream() { }
         public override void Flush() { }
         public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         public override int Read(byte[] buffer, int offset, int count) { throw null; }
@@ -212,7 +211,7 @@ namespace System.Net.Security
         public void Write(byte[] buffer) { }
         public override void Write(byte[] buffer, int offset, int count) { }
         public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
-        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> buffer, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
     }
     [System.CLSCompliantAttribute(false)]
     public enum TlsCipherSuite : ushort
