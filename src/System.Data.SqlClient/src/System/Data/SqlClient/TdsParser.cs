@@ -4807,14 +4807,12 @@ namespace System.Data.SqlClient
                 case TdsEnums.SQLUNIQUEID:
                     {
                         Debug.Assert(length == 16, "invalid length for SqlGuid type!");
-
-                        byte[] b = new byte[length];
-
+                        Span<byte> b = stackalloc byte[16];
                         if (!stateObj.TryReadByteArray(b, length))
                         {
                             return false;
                         }
-                        value.SqlGuid = SqlTypeWorkarounds.SqlGuidCtor(b, true);
+                        value.Guid = ConstructGuid(b);
                         break;
                     }
 
@@ -6537,7 +6535,7 @@ namespace System.Data.SqlClient
                 if (ADP.IsCatchableExceptionType(e))
                 {
                     // be sure to wipe out our buffer if we started sending stuff
-                    _physicalStateObj._outputPacketNumber = 1;  // end of message - reset to 1 - per ramas
+                    _physicalStateObj.ResetPacketCounters();
                     _physicalStateObj.ResetBuffer();
                 }
 
@@ -6914,7 +6912,7 @@ namespace System.Data.SqlClient
 
             // be sure to wipe out our buffer if we started sending stuff
             stateObj.ResetBuffer();
-            stateObj._outputPacketNumber = 1;  // end of message - reset to 1 - per ramas
+            stateObj.ResetPacketCounters();
 
             if (old_outputPacketNumber != 1 && _state == TdsParserState.OpenLoggedIn)
             {
@@ -8299,7 +8297,7 @@ namespace System.Data.SqlClient
                             ccb = (isSqlType) ? ((SqlBinary)value).Length : ((byte[])value).Length;
                             break;
                         case TdsEnums.SQLUNIQUEID:
-                            ccb = GUID_SIZE;   // that's a constant for guid
+                            ccb = GUID_SIZE;
                             break;
                         case TdsEnums.SQLBIGCHAR:
                         case TdsEnums.SQLBIGVARCHAR:
