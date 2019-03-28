@@ -191,12 +191,12 @@ namespace System.Buffers
             }
             else
             {
-                return GetFirstSpanFast(startObject, isMultiSegment);
+                return GetFirstSpanSlow(startObject, isMultiSegment);
             }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private ReadOnlySpan<T> GetFirstSpanFast(object startObject, bool isMultiSegment)
+        private ReadOnlySpan<T> GetFirstSpanSlow(object startObject, bool isMultiSegment)
         {
             if (isMultiSegment)
                 ThrowHelper.ThrowInvalidOperationException_EndPositionNotReached();
