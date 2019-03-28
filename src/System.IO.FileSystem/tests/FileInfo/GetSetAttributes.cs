@@ -35,8 +35,8 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.OSX)]
         public void HiddenAttributeSetCorrectly_OSX(string filePrefix, bool hidden)
         {
-            var testFilePath = Path.Combine(TestDirectory, $"{filePrefix}{GetTestFileName()}");
-            var fileInfo = new FileInfo(testFilePath);
+            string testFilePath = Path.Combine(TestDirectory, $"{filePrefix}{GetTestFileName()}");
+            FileInfo fileInfo = new FileInfo(testFilePath);
             fileInfo.Create().Dispose();
             
             Assert.Equal(hidden, (fileInfo.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden);

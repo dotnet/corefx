@@ -1397,7 +1397,7 @@ int32_t SystemNative_LChflags(const char* path, uint32_t flags)
 {
 #if HAVE_LCHFLAGS
     int32_t result;
-    while ((result = lchflags(path, flags)) < 0);
+    while ((result = lchflags(path, flags)) < 0 && errno == EINTR);
     return result;
 #else
     (void)path, (void)flags;
