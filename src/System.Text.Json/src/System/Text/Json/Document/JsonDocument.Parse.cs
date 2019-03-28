@@ -268,6 +268,13 @@ namespace System.Text.Json
         /// </returns>
         /// <remarks>
         ///   <para>
+        ///     If the <see cref="Utf8JsonReader.TokenType"/> property of <paramref name="reader"/>
+        ///     is <see cref="JsonTokenType.PropertyName"/> or <see cref="JsonTokenType.None"/>, the
+        ///     reader will be advanced by one call to <see cref="Utf8JsonReader.Read"/> to determine
+        ///     the start of the value.
+        ///   </para>
+        ///
+        ///   <para>
         ///     Upon completion of this method <paramref name="reader"/> will be positioned at the
         ///     final token in the JSON value.  If an exception is thrown, or <see langword="false"/>
         ///     is returned, the reader is reset to the state it was in when the method was called.
@@ -287,9 +294,9 @@ namespace System.Text.Json
         /// <exception cref="JsonReaderException">
         ///   A value could not be read from the reader.
         /// </exception>
-        public static bool TryReadFrom(ref Utf8JsonReader reader, out JsonDocument document)
+        public static bool TryParseValue(ref Utf8JsonReader reader, out JsonDocument document)
         {
-            return TryReadFrom(ref reader, out document, shouldThrow: false);
+            return TryParseValue(ref reader, out document, shouldThrow: false);
         }
 
         /// <summary>
@@ -300,6 +307,13 @@ namespace System.Text.Json
         ///   A JsonDocument representing the value (and nested values) read from the reader.
         /// </returns>
         /// <remarks>
+        ///   <para>
+        ///     If the <see cref="Utf8JsonReader.TokenType"/> property of <paramref name="reader"/>
+        ///     is <see cref="JsonTokenType.PropertyName"/> or <see cref="JsonTokenType.None"/>, the
+        ///     reader will be advanced by one call to <see cref="Utf8JsonReader.Read"/> to determine
+        ///     the start of the value.
+        ///   </para>
+        /// 
         ///   <para>
         ///     Upon completion of this method <paramref name="reader"/> will be positioned at the
         ///     final token in the JSON value.  If an exception is thrown the reader is reset to
@@ -320,14 +334,14 @@ namespace System.Text.Json
         /// <exception cref="JsonReaderException">
         ///   A value could not be read from the reader.
         /// </exception>
-        public static JsonDocument ReadFrom(ref Utf8JsonReader reader)
+        public static JsonDocument ParseValue(ref Utf8JsonReader reader)
         {
-            bool ret = TryReadFrom(ref reader, out JsonDocument document, shouldThrow: true);
+            bool ret = TryParseValue(ref reader, out JsonDocument document, shouldThrow: true);
             Debug.Assert(ret, "TryReadFrom returned false with shouldThrow: true.");
             return document;
         }
 
-        private static bool TryReadFrom(ref Utf8JsonReader reader, out JsonDocument document, bool shouldThrow)
+        private static bool TryParseValue(ref Utf8JsonReader reader, out JsonDocument document, bool shouldThrow)
         {
             JsonReaderState state = reader.CurrentState;
             CheckSupportedOptions(state.Options, nameof(reader));
