@@ -618,21 +618,7 @@ namespace System.Text.Json
 
             if (_stringHasEscaping)
             {
-                Debug.Assert(span.Length <= JsonConstants.MaximumEscapedGuidLength);
-
-                int idx = span.IndexOf(JsonConstants.BackSlash);
-                Debug.Assert(idx != -1);
-
-                Span<byte> utf8Unescaped = stackalloc byte[span.Length];
-
-                JsonReaderHelper.Unescape(span, utf8Unescaped, idx, out int written);
-                Debug.Assert(written > 0);
-
-                utf8Unescaped = utf8Unescaped.Slice(0, written);
-                Debug.Assert(!utf8Unescaped.IsEmpty);
-
-                value = default;
-                return (utf8Unescaped.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(utf8Unescaped, out value, out _, 'D');
+                return JsonReaderHelper.TryGetEscapedGuid(span, out value);
             }
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);

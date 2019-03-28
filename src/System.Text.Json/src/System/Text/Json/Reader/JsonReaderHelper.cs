@@ -294,5 +294,24 @@ namespace System.Text.Json
                 && JsonHelpers.TryParseAsISO(sourceUnescaped, out value, out int bytesConsumed)
                 && sourceUnescaped.Length == bytesConsumed;
         }
+
+        public static bool TryGetEscapedGuid(ReadOnlySpan<byte> source, out Guid value)
+        {
+            Debug.Assert(source.Length <= JsonConstants.MaximumEscapedGuidLength);
+
+            int idx = source.IndexOf(JsonConstants.BackSlash);
+            Debug.Assert(idx != -1);
+
+            Span<byte> utf8Unescaped = stackalloc byte[source.Length];
+
+            JsonReaderHelper.Unescape(source, utf8Unescaped, idx, out int written);
+            Debug.Assert(written > 0);
+
+            utf8Unescaped = utf8Unescaped.Slice(0, written);
+            Debug.Assert(!utf8Unescaped.IsEmpty);
+
+            value = default;
+            return (utf8Unescaped.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(utf8Unescaped, out value, out _, 'D');
+        }
     }
 }
