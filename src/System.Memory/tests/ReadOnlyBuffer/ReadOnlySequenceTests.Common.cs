@@ -109,8 +109,26 @@ namespace System.Memory.Tests
 
         #region First
 
+        private readonly T[] _sampleArray = Enumerable.Repeat(default(T), 5).ToArray();
+
         [Fact]
-        public void CanGetFirst()
+        public void AsArray_CanGetFirst()
+        {
+            ReadOnlyMemory<T> memory = new ReadOnlyMemory<T>(_sampleArray);
+            VerifyCanGetFirst(new ReadOnlySequence<T>(memory), expectedSize: _sampleArray.Length);
+        }
+
+        [Fact]
+        public void AsMemoryManager_CanGetFirst()
+        {
+            MemoryManager<T> manager = new CustomMemoryForTest<T>(_sampleArray);
+            ReadOnlyMemory<T> memoryFromManager = ((ReadOnlyMemory<T>)manager.Memory);
+
+            VerifyCanGetFirst(new ReadOnlySequence<T>(memoryFromManager), expectedSize: _sampleArray.Length);
+        }
+
+        [Fact]
+        public void AsMultiSegment_CanGetFirst()
         {
             var bufferSegment1 = new BufferSegment<T>(new T[100]);
             BufferSegment<T> bufferSegment2 = bufferSegment1.Append(new T[100]);
@@ -118,10 +136,9 @@ namespace System.Memory.Tests
             BufferSegment<T> bufferSegment4 = bufferSegment3.Append(new T[200]);
 
             var buffer = new ReadOnlySequence<T>(bufferSegment1, 0, bufferSegment4, 200);
-
+            // Verify first 3 segments
             Assert.Equal(500, buffer.Length);
             int length = 500;
-
             for (int s = 0; s < 3; s++)
             {
                 for (int i = 100; i > 0; i--)
@@ -133,10 +150,16 @@ namespace System.Memory.Tests
                     Assert.Equal(length, buffer.Length);
                 }
             }
+            // Verify last segment
+            VerifyCanGetFirst(buffer, expectedSize: 200);
+        }
+        
+        protected void VerifyCanGetFirst(ReadOnlySequence<T> buffer, int expectedSize)
+        {
+            Assert.Equal(expectedSize, buffer.Length);
+            int length = expectedSize;
 
-            Assert.Equal(200, buffer.Length);
-
-            for (int i = 200; i > 0; i--)
+            for (int i = length; i > 0; i--)
             {
                 Assert.Equal(i, buffer.First.Length);
                 Assert.Equal(i, buffer.FirstSpan.Length);
@@ -148,37 +171,6 @@ namespace System.Memory.Tests
             Assert.Equal(0, buffer.Length);
             Assert.Equal(0, buffer.First.Length);
             Assert.Equal(0, buffer.FirstSpan.Length);
-        }
-
-        [Fact]
-        public void AsString_CanGetFirst()
-        {
-            const string SampleString = "12345";
-            ReadOnlySequence<char> buffer = new ReadOnlySequence<char>(SampleString.AsMemory());
-            Assert.Equal(SampleString.Length, buffer.First.Length);
-            Assert.Equal(SampleString.Length, buffer.FirstSpan.Length);
-        }
-
-        private readonly int[] _sampleIntArray = { 1, 2, 3, 4, 5 };
-
-        [Fact]
-        public void AsArray_CanGetFirst()
-        {
-            ReadOnlyMemory<int> memory = new ReadOnlyMemory<int>(_sampleIntArray);
-            ReadOnlySequence<int> buffer = new ReadOnlySequence<int>(memory);
-            Assert.Equal(_sampleIntArray.Length, buffer.First.Length);
-            Assert.Equal(_sampleIntArray.Length, buffer.FirstSpan.Length);
-        }
-
-        [Fact]
-        public void AsMemoryManager_CanGetFirst()
-        {
-            MemoryManager<int> manager = new CustomMemoryForTest<int>(_sampleIntArray);
-            ReadOnlyMemory<int> memoryFromManager = ((ReadOnlyMemory<int>)manager.Memory);
-
-            ReadOnlySequence<int> buffer = new ReadOnlySequence<int>(memoryFromManager);
-            Assert.Equal(_sampleIntArray.Length, buffer.First.Length);
-            Assert.Equal(_sampleIntArray.Length, buffer.FirstSpan.Length);
         }
 
         #endregion
