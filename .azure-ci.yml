@@ -36,10 +36,6 @@ resources:
 
 jobs:
   # Windows legs
-  - template: /eng/pipelines/windows.yml
-    ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
-      parameters:
-        isOfficialBuild: true
 
   # Linux legs
   - template: /eng/pipelines/linux.yml
@@ -48,10 +44,6 @@ jobs:
         isOfficialBuild: true
 
   # MacOS legs
-  - template: /eng/pipelines/macos.yml
-    ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
-      parameters:
-        isOfficialBuild: true
 
   # Only run in official builds
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
@@ -65,11 +57,7 @@ jobs:
     - template: /eng/pipelines/publish.yml
       parameters:
         dependsOn:
-          - WindowsTest
-          - WindowsNoTest
-          - AllConfigurations
           - LinuxTest
           - LinuxNoTest
-          - MacOS
           - RedHat6
           # - FreeBSD
