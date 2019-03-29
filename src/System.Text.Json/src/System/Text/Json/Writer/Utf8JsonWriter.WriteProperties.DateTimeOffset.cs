@@ -276,17 +276,14 @@ namespace System.Text.Json
             bool result = Utf8Formatter.TryFormat(value, tempSpan, out int bytesWritten, s_dateTimeStandardFormat);
             Debug.Assert(result);
 
-            JsonWriterHelper.TrimDateTimeOffsetString(tempSpan.Slice(0, bytesWritten), out bytesWritten);
+            JsonWriterHelper.TrimDateTimeOffset(tempSpan.Slice(0, bytesWritten), out bytesWritten);
 
             if (_buffer.Slice(idx).Length < bytesWritten)
             {
                 AdvanceAndGrow(ref idx, bytesWritten);
-                tempSpan.Slice(0, bytesWritten).CopyTo(_buffer);
             }
-            else
-            {
-                tempSpan.Slice(0, bytesWritten).CopyTo(_buffer.Slice(idx));
-            }
+
+            tempSpan.Slice(0, bytesWritten).CopyTo(_buffer.Slice(idx));
 
             idx += bytesWritten;
         }

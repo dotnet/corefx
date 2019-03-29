@@ -22,12 +22,6 @@ namespace System.Text.Json
         public const byte BackSpace = (byte)'\b';
         public const byte FormFeed = (byte)'\f';
         public const byte Asterisk = (byte)'*';
-        public const byte Colon = (byte)':';
-        public const byte Period = (byte)'.';
-        public const byte Plus = (byte)'+';
-        public const byte Hyphen = (byte)'-';
-        public const byte UtcOffsetToken = (byte)'Z';
-        public const byte TimePrefix = (byte)'T';
 
         public static ReadOnlySpan<byte> TrueValue => new byte[] { (byte)'t', (byte)'r', (byte)'u', (byte)'e' };
         public static ReadOnlySpan<byte> FalseValue => new byte[] { (byte)'f', (byte)'a', (byte)'l', (byte)'s', (byte)'e' };

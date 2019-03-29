@@ -8,6 +8,16 @@ namespace System.Text.Json
 {
     internal static partial class JsonWriterHelper
     {
+        public static void TrimDateTime(Span<byte> buffer, out int bytesWritten)
+        {
+            Trim(buffer, out bytesWritten);
+        }
+
+        public static void TrimDateTimeOffset(Span<byte> buffer, out int bytesWritten)
+        {
+            Trim(buffer, out bytesWritten);
+        }
+
         //
         // Trims roundtrippable DateTime(Offset) input.
         // If the milliseconds part of the date is zero, we omit the fraction part of the date,
@@ -18,35 +28,40 @@ namespace System.Text.Json
         //   2017-06-12T05:30:45.768-07:00
         //   2017-06-12T05:30:45.00768Z           (Z is short for "+00:00" but also distinguishes DateTimeKind.Utc from DateTimeKind.Local)
         //   2017-06-12T05:30:45                  (interpreted as local time wrt to current time zone)
-        public static void TrimDateTimeOffsetString(Span<byte> buffer, out int bytesWritten)
+        private static void Trim(Span<byte> buffer, out int bytesWritten)
         {
+            // Assert buffer is the right length for:
+            // YYYY-MM-DDThh:mm:ss.fffffff (JsonConstants.MaximumFormatDateTimeLength)
+            // YYYY-MM-DDThh:mm:ss.fffffffZ (JsonConstants.MaximumFormatDateTimeLength + 1)
+            // YYYY-MM-DDThh:mm:ss.fffffff(+|-)hh:mm (JsonConstants.MaximumFormatDateTimeOffsetLength)
             Debug.Assert(buffer.Length == JsonConstants.MaximumFormatDateTimeLength ||
                 buffer.Length == (JsonConstants.MaximumFormatDateTimeLength + 1) ||
                 buffer.Length == JsonConstants.MaximumFormatDateTimeOffsetLength);
 
-            uint digit1 = buffer[20] - (uint)'0';
-            uint digit2 = buffer[21] - (uint)'0';
-            uint digit3 = buffer[22] - (uint)'0';
-            uint digit4 = buffer[23] - (uint)'0';
-            uint digit5 = buffer[24] - (uint)'0';
-            uint digit6 = buffer[25] - (uint)'0';
             uint digit7 = buffer[26] - (uint)'0';
+            uint digit6 = buffer[25] - (uint)'0';
+            uint digit5 = buffer[24] - (uint)'0';
+            uint digit4 = buffer[23] - (uint)'0';
+            uint digit3 = buffer[22] - (uint)'0';
+            uint digit2 = buffer[21] - (uint)'0';
+            uint digit1 = buffer[20] - (uint)'0';
             uint fraction = (digit1 * 1_000_000) + (digit2 * 100_000) + (digit3 * 10_000) + (digit4 * 1_000) + (digit5 * 100) + (digit6 * 10) + digit7;
 
+            // The period's index
             int curIndex = 19;
 
             if (fraction > 0)
             {
+                int numFractionDigits = 7;
                 // Remove trailing zeros
                 while (fraction % 10 == 0)
                 {
                     fraction /= 10;
+                    numFractionDigits -= 1;
                 }
 
-                buffer[curIndex++] = (byte)'.';
-
-                // The last fraction digit's index will be the current index + (the number of fraction digits minus one)
-                int fractionEnd = curIndex + ((int)Math.Floor(Math.Log10(fraction) + 1) - 1);
+                // The last fraction digit's index will be (the period's index plus one) + (the number of fraction digits minus one)
+                int fractionEnd = 19 + numFractionDigits;
 
                 // Write fraction
                 for (int i = fractionEnd; i >= curIndex; i--)
@@ -58,22 +73,29 @@ namespace System.Text.Json
                 curIndex = fractionEnd + 1;
             }
 
+            bytesWritten = curIndex;
+
             if (buffer.Length > JsonConstants.MaximumFormatDateTimeLength)
             {
                 // Write offset
-                buffer[curIndex++] = buffer[27];
+
+                buffer[curIndex] = buffer[27];
+
+                bytesWritten = curIndex + 1;
 
                 if (buffer.Length == JsonConstants.MaximumFormatDateTimeOffsetLength)
                 {
-                    buffer[curIndex++] = buffer[28];
-                    buffer[curIndex++] = buffer[29];
-                    buffer[curIndex++] = buffer[30];
-                    buffer[curIndex++] = buffer[31];
-                    buffer[curIndex++] = buffer[32];
+                    int bufferEnd = curIndex + 5;
+
+                    buffer[bufferEnd] = buffer[32];
+                    buffer[bufferEnd - 1] = buffer[31];
+                    buffer[bufferEnd - 2] = buffer[30];
+                    buffer[bufferEnd - 3] = buffer[29];
+                    buffer[bufferEnd - 4] = buffer[28];
+
+                    bytesWritten = bufferEnd + 1;
                 }
             }
-
-            bytesWritten = curIndex;
         }
     }
 }
