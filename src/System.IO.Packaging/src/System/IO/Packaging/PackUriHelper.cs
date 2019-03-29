@@ -493,7 +493,16 @@ namespace System.IO.Packaging
         }
 
         #endregion Internal Methods
-        
+
+        #region Private Constructor
+
+        static PackUriHelper()
+        {
+            EnsurePackSchemeRegistered();
+        }
+
+        #endregion Private Constructor
+
         #region Private Methods
 
         private static readonly char[] HexUpperChars = {
@@ -519,9 +528,6 @@ namespace System.IO.Packaging
         /// <exception cref="ArgumentException">If fragment parameter is empty or does not start with a "#"</exception>
         private static Uri Create(Uri packageUri, Uri partUri, string fragment)
         {
-            // Step 0 - Ensure the pack scheme is registered so that we can create one
-            EnsurePackSchemeRegistered();
-
             // Step 1 - Validate input parameters
             packageUri = ValidatePackageUri(packageUri);
 
