@@ -115,16 +115,16 @@ namespace System.Diagnostics
                 reusableReader = new ReusableTextReader();
             }
 
-            Interop.procfs.ParsedStat stat;
-            return Interop.procfs.TryReadStatFile(pid, out stat, reusableReader) ?
-                CreateProcessInfo(stat, reusableReader) :
-                null;
+            return Interop.procfs.TryReadStatFile(pid, out Interop.procfs.ParsedStat stat, reusableReader)
+                     && Interop.procfs.TryReadStatusFile(pid, out Interop.procfs.ParsedStatus status, reusableReader) ?
+                    CreateProcessInfo(stat, status, reusableReader) :
+                    null;
         }
 
         /// <summary>
         /// Creates a ProcessInfo from the data parsed from a /proc/pid/stat file and the associated tasks directory.
         /// </summary>
-        internal static ProcessInfo CreateProcessInfo(Interop.procfs.ParsedStat procFsStat, ReusableTextReader reusableReader)
+        internal static ProcessInfo CreateProcessInfo(Interop.procfs.ParsedStat procFsStat, Interop.procfs.ParsedStatus procFsStatus, ReusableTextReader reusableReader)
         {
             int pid = procFsStat.pid;
 
@@ -133,9 +133,16 @@ namespace System.Diagnostics
                 ProcessId = pid,
                 ProcessName = procFsStat.comm,
                 BasePriority = (int)procFsStat.nice,
-                VirtualBytes = (long)procFsStat.vsize,
-                WorkingSet = procFsStat.rss * Environment.SystemPageSize,
                 SessionId = procFsStat.session,
+                PoolPagedBytes = (long)procFsStatus.vmswap,
+                VirtualBytes = (long)procFsStatus.vmsize,
+                VirtualBytesPeak = (long)procFsStatus.vmpeak,
+                WorkingSetPeak = (long)procFsStatus.vmhwm,
+                WorkingSet = (long)procFsStatus.vmrss,
+                PageFileBytes = (long)procFsStatus.vmswap,
+                PrivateBytes = (long)procFsStatus.vmdata,
+                // PoolNonPagedBytes
+                // PageFileBytesPeak
 
                 // We don't currently fill in the other values.
                 // A few of these could probably be filled in from getrusage,

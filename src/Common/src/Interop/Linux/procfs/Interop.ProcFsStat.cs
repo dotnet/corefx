@@ -16,12 +16,15 @@ internal static partial class Interop
         internal const string RootPath = "/proc/";
         private const string ExeFileName = "/exe";
         private const string StatFileName = "/stat";
+        private const string StatusFileName = "/status";
         private const string MapsFileName = "/maps";
         private const string FileDescriptorDirectoryName = "/fd/";
         private const string TaskDirectoryName = "/task/";
 
         internal const string SelfExeFilePath = RootPath + "self" + ExeFileName;
         internal const string ProcStatFilePath = RootPath + "stat";
+
+        private static readonly char[] Splits = new [] {':', ' ', '\t'};
 
         internal struct ParsedStat
         {
@@ -76,6 +79,17 @@ internal static partial class Interop
             //internal long cguest_time;
         }
 
+        internal struct ParsedStatus
+        {
+            internal int pid;
+            internal ulong vmhwm;
+            internal ulong vmrss;
+            internal ulong vmdata;
+            internal ulong vmswap;
+            internal ulong vmsize;
+            internal ulong vmpeak;
+        }
+
         internal struct ParsedMapsModule
         {
             internal string FileName;
@@ -90,6 +104,11 @@ internal static partial class Interop
         internal static string GetStatFilePathForProcess(int pid)
         {
             return RootPath + pid.ToString(CultureInfo.InvariantCulture) + StatFileName;
+        }
+
+        internal static string GetStatusFilePathForProcess(int pid)
+        {
+            return RootPath + pid.ToString(CultureInfo.InvariantCulture) + StatusFileName;
         }
 
         internal static string GetMapsFilePathForProcess(int pid)
@@ -181,6 +200,23 @@ internal static partial class Interop
             }
         }
 
+        private static bool TryReadFile (string filePath, ReusableTextReader reusableReader, out string fileContents)
+        {
+            try
+            {
+                using (var source = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1, useAsync: false))
+                {
+                    fileContents = reusableReader.ReadAllText(source);
+                    return true;
+                }
+            }
+            catch (IOException)
+            {
+                fileContents = null;
+                return false;
+            }
+        }
+
         private static string GetStatFilePathForThread(int pid, int tid)
         {
             // Perf note: Calling GetTaskDirectoryPathForProcess will allocate a string,
@@ -211,15 +247,7 @@ internal static partial class Interop
 
         internal static bool TryParseStatFile(string statFilePath, out ParsedStat result, ReusableTextReader reusableReader)
         {
-            string statFileContents;
-            try
-            {
-                using (var source = new FileStream(statFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1, useAsync: false))
-                {
-                    statFileContents = reusableReader.ReadAllText(source);
-                }
-            }
-            catch (IOException)
+            if (!TryReadFile(statFilePath, reusableReader, out string statFileContents))
             {
                 // Between the time that we get an ID and the time that we try to read the associated stat
                 // file(s), the process could be gone.
@@ -281,6 +309,64 @@ internal static partial class Interop
             //parser.MoveNextOrFail(); // delayacct_blkio_ticks
             //parser.MoveNextOrFail(); // guest_time
             //parser.MoveNextOrFail(); // cguest_time
+
+            result = results;
+            return true;
+        }
+
+        internal static bool TryReadStatusFile(int pid, out ParsedStatus result, ReusableTextReader reusableReader)
+        {
+            bool b = TryParseStatusFile(GetStatusFilePathForProcess(pid), out result, reusableReader);
+            Debug.Assert(!b || result.pid == pid, "Expected process ID from status file to match supplied pid");
+            return b;
+        }
+
+        internal static bool TryParseStatusFile(string statusFilePath, out ParsedStatus result, ReusableTextReader reusableReader)
+        {
+            if (!TryReadFile(statusFilePath, reusableReader, out string statusFileContents))
+            {
+                // Between the time that we get an ID and the time that we try to read the associated stat
+                // file(s), the process could be gone.
+                result = default(ParsedStatus);
+                return false;
+            }
+
+            var parser = new StringParser(statusFileContents, '\n');
+            var results = default(ParsedStatus);
+
+            while (parser.MoveNext())
+            {
+                string[] elements = parser.ExtractCurrent().Split (Splits, 3, StringSplitOptions.RemoveEmptyEntries);
+                if (elements.Length < 2)
+                {
+                    continue;
+                }
+
+                switch (elements [0])
+                {
+                    case "Pid":
+                        results.pid = int.Parse (elements[1]);
+                        break;
+                    case "VmHWM":
+                        results.vmhwm = ulong.Parse (elements[1]) * 1024;
+                        break;
+                    case "VmRSS":
+                        results.vmrss = ulong.Parse (elements[1]) * 1024;
+                        break;
+                    case "VmData":
+                        results.vmdata = ulong.Parse (elements[1]) * 1024;
+                        break;
+                    case "VmSwap":
+                        results.vmswap = ulong.Parse (elements[1]) * 1024;
+                        break;
+                    case "VmSize":
+                        results.vmsize = ulong.Parse (elements[1]) * 1024;
+                        break;
+                    case "VmPeak":
+                        results.vmpeak = ulong.Parse (elements[1]) * 1024;
+                        break;
+                }
+            }
 
             result = results;
             return true;
