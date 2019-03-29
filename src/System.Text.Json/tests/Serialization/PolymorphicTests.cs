@@ -28,7 +28,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ArrayAsRootObject()
         {
-            const string ExpectedJson = @"[1,true,{""City"":""MyCity""},{},""foo""]";
+            const string ExpectedJson = @"[1,true,{""City"":""MyCity""},null,""foo""]";
 
             Address address = new Address();
             address.Initialize();
@@ -82,12 +82,12 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(typeof(object), typeof(ObjectWithObjectProperties).GetProperty("NullableInt").PropertyType);
             Assert.Equal(typeof(object), typeof(ObjectWithObjectProperties).GetProperty("NullableIntArray").PropertyType);
 
-            var person = new ObjectWithObjectProperties();
+            var obj = new ObjectWithObjectProperties();
 
-            string json = JsonSerializer.ToString(person);
+            string json = JsonSerializer.ToString(obj);
             Assert.Equal(ObjectWithObjectProperties.ExpectedJson, json);
 
-            json = JsonSerializer.ToString<object>(person);
+            json = JsonSerializer.ToString<object>(obj);
             Assert.Equal(ObjectWithObjectProperties.ExpectedJson, json);
         }
 
@@ -95,15 +95,15 @@ namespace System.Text.Json.Serialization.Tests
         public static void NestedObjectAsRootObjectIgnoreNullable()
         {
             // Ensure that null properties are properly written and support ignore.
-            var person = new ObjectWithObjectProperties();
-            person.NullableInt = null;
+            var obj = new ObjectWithObjectProperties();
+            obj.NullableInt = null;
 
-            string json = JsonSerializer.ToString(person);
+            string json = JsonSerializer.ToString(obj);
             Assert.Equal(ObjectWithObjectProperties.ExpectedJsonNullInt, json);
 
             JsonSerializerOptions options = new JsonSerializerOptions();
             options.IgnoreNullPropertyValueOnWrite = true;
-            json = JsonSerializer.ToString(person, options);
+            json = JsonSerializer.ToString(obj, options);
             Assert.Equal(ObjectWithObjectProperties.ExpectedJsonNullIntIgnoreNulls, json);
         }
 

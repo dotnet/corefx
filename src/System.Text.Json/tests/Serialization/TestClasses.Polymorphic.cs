@@ -113,6 +113,8 @@ namespace System.Text.Json.Serialization.Tests
             @"{""Address"":{""City"":""MyCity""},""List"":[""Hello"",""World""],""Array"":[""Hello"",""Again""],""NullableInt"":null,""NullableIntArray"":[null,42,null]}";
         public const string ExpectedJsonNullIntIgnoreNulls = 
             @"{""Address"":{""City"":""MyCity""},""List"":[""Hello"",""World""],""Array"":[""Hello"",""Again""],""NullableIntArray"":[null,42,null]}";
+        public const string ExpectedJsonAllNulls =
+            @"{""Address"":null,""List"":null,""Array"":null,""NullableInt"":null,""NullableIntArray"":null}";
 
         public object /*Address*/ Address { get; set; }
         public object /*List<string>*/ List { get; set; }

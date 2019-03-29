@@ -68,9 +68,14 @@ namespace System.Text.Json.Serialization
                 {
                     elementClassInfo.GetPolicyProperty().WriteEnumerable(options, ref state.Current, ref writer);
                 }
+                else if (state.Current.Enumerator.Current == null)
+                {
+                    // Write a null object or enumerable.
+                    writer.WriteNullValue();
+                }
                 else
                 {
-                    // An object or another enumerator requires a new stack frame
+                    // An object or another enumerator requires a new stack frame.
                     object nextValue = state.Current.Enumerator.Current;
                     state.Push(elementClassInfo, nextValue);
                 }
