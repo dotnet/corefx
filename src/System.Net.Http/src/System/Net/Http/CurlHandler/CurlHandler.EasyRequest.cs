@@ -273,13 +273,15 @@ namespace System.Net.Http
                     // Uri.AbsoluteUri doesn't include the ScopeId/ZoneID, so if it is link-local,
                     // we separately pass the scope to libcurl.
                     EventSourceTrace("ScopeId: {0}", scopeId);
-                    try {
+                    try
+                    {
                         SetCurlOption(CURLoption.CURLOPT_ADDRESS_SCOPE, scopeId);
                     }
                     catch (CurlException)
                     {
-                        // If CURLOPT_ADDRESS_SCOPE becasue of curl bug, insert scopeId to url.
-                        // https://github.com/curl/curl/issues/3713 
+                        // libCurl has a bug regarding long scope-ids:
+                        //     https://github.com/curl/curl/issues/3713
+                        // Workaround the problem by percent-encoding the scope separator ('%')
                         url = new UriBuilder(requestUri) { Host = requestUri.IdnHost}.ToString().Replace("%", "%25");
                         SetCurlOption(CURLoption.CURLOPT_URL, url);
                         return;
