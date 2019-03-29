@@ -1292,19 +1292,19 @@ namespace System.Text.Json.Tests
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
                     Utf8JsonWriter writer = default;
-                    root.WriteValueTo(ref writer);
+                    root.WriteAsValue(ref writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
                     Utf8JsonWriter writer = default;
-                    root.WriteTo(ref writer, ReadOnlySpan<char>.Empty);
+                    root.WriteAsProperty(ReadOnlySpan<char>.Empty, ref writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
                     Utf8JsonWriter writer = default;
-                    root.WriteTo(ref writer, ReadOnlySpan<byte>.Empty);
+                    root.WriteAsProperty(ReadOnlySpan<byte>.Empty, ref writer);
                 });
             }
         }
@@ -1336,19 +1336,19 @@ namespace System.Text.Json.Tests
             Assert.Throws<InvalidOperationException>(() =>
             {
                 Utf8JsonWriter writer = default;
-                root.WriteValueTo(ref writer);
+                root.WriteAsValue(ref writer);
             });
 
             Assert.Throws<InvalidOperationException>(() =>
             {
                 Utf8JsonWriter writer = default;
-                root.WriteTo(ref writer, ReadOnlySpan<char>.Empty);
+                root.WriteAsProperty(ReadOnlySpan<char>.Empty, ref writer);
             });
 
             Assert.Throws<InvalidOperationException>(() =>
             {
                 Utf8JsonWriter writer = default;
-                root.WriteTo(ref writer, ReadOnlySpan<byte>.Empty);
+                root.WriteAsProperty(ReadOnlySpan<byte>.Empty, ref writer);
             });
         }
 

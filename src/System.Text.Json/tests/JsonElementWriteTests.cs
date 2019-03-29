@@ -810,7 +810,7 @@ null,
             using (JsonDocument doc = JsonDocument.Parse(jsonIn, optionsCopy))
             {
                 var writer = new Utf8JsonWriter(buffer);
-                doc.RootElement.WriteValueTo(ref writer);
+                doc.RootElement.WriteAsValue(ref writer);
                 writer.Flush();
 
                 ArraySegment<byte> formattedSegment = buffer.Formatted;
@@ -845,8 +845,8 @@ null,
                 {
                     foreach (JsonElement val in root.EnumerateArray())
                     {
-                        val.WriteTo(ref writer, CharLabel.AsSpan());
-                        val.WriteTo(ref writer, byteUtf8);
+                        val.WriteAsProperty(CharLabel.AsSpan(), ref writer);
+                        val.WriteAsProperty(byteUtf8, ref writer);
                     }
 
                     writer.Flush();
@@ -867,11 +867,11 @@ null,
                     {
                         JsonTestHelper.AssertThrows<InvalidOperationException>(
                             ref writer,
-                            (ref Utf8JsonWriter w) => val.WriteTo(ref w, CharLabel.AsSpan()));
+                            (ref Utf8JsonWriter w) => val.WriteAsProperty(CharLabel.AsSpan(), ref w));
 
                         JsonTestHelper.AssertThrows<InvalidOperationException>(
                             ref writer,
-                            (ref Utf8JsonWriter w) => val.WriteTo(ref w, byteUtf8));
+                            (ref Utf8JsonWriter w) => val.WriteAsProperty(byteUtf8, ref w));
                     }
 
                     JsonTestHelper.AssertThrows<InvalidOperationException>(
@@ -907,7 +907,7 @@ null,
                 {
                     foreach (JsonElement val in root.EnumerateArray())
                     {
-                        val.WriteValueTo(ref writer);
+                        val.WriteAsValue(ref writer);
                     }
 
                     writer.WriteEndObject();
@@ -923,7 +923,7 @@ null,
                     {
                         JsonTestHelper.AssertThrows<InvalidOperationException>(
                             ref writer,
-                            (ref Utf8JsonWriter w) => val.WriteValueTo(ref w));
+                            (ref Utf8JsonWriter w) => val.WriteAsValue(ref w));
                     }
 
                     writer.WriteEndObject();
@@ -949,7 +949,7 @@ null,
 
                 var writer = new Utf8JsonWriter(buffer, state);
 
-                target.WriteValueTo(ref writer);
+                target.WriteAsValue(ref writer);
                 writer.Flush();
 
                 AssertContents(jsonOut ?? jsonIn, buffer);
@@ -975,7 +975,7 @@ null,
 
                 var writer = new Utf8JsonWriter(buffer, state);
 
-                target.WriteValueTo(ref writer);
+                target.WriteAsValue(ref writer);
                 writer.Flush();
 
                 if (indented && s_replaceNewlines)
@@ -1032,7 +1032,7 @@ null,
                 var writer = new Utf8JsonWriter(buffer, state);
 
                 writer.WriteStartObject();
-                target.WriteTo(ref writer, propertyName);
+                target.WriteAsProperty(propertyName, ref writer);
                 writer.WriteEndObject();
                 writer.Flush();
 
@@ -1068,7 +1068,7 @@ null,
                 var writer = new Utf8JsonWriter(buffer, state);
 
                 writer.WriteStartObject();
-                target.WriteTo(ref writer, propertyName);
+                target.WriteAsProperty(propertyName, ref writer);
                 writer.WriteEndObject();
                 writer.Flush();
 

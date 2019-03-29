@@ -875,15 +875,15 @@ namespace System.Text.Json
         /// <summary>
         ///   Write the element into the provided writer as a named object property.
         /// </summary>
-        /// <param name="writer">The writer.</param>
         /// <param name="propertyName">The name for this value within the JSON object.</param>
+        /// <param name="writer">The writer.</param>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteTo(ref Utf8JsonWriter writer, ReadOnlySpan<char> propertyName)
+        public void WriteAsProperty(ReadOnlySpan<char> propertyName, ref Utf8JsonWriter writer)
         {
             CheckValidInstance();
 
@@ -893,17 +893,17 @@ namespace System.Text.Json
         /// <summary>
         ///   Write the element into the provided writer as a named object property.
         /// </summary>
-        /// <param name="writer">The writer.</param>
         /// <param name="utf8PropertyName">
         ///   The name for this value within the JSON object, as UTF-8 text.
         /// </param>
+        /// <param name="writer">The writer.</param>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteTo(ref Utf8JsonWriter writer, ReadOnlySpan<byte> utf8PropertyName)
+        public void WriteAsProperty(ReadOnlySpan<byte> utf8PropertyName, ref Utf8JsonWriter writer)
         {
             CheckValidInstance();
 
@@ -920,7 +920,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteValueTo(ref Utf8JsonWriter writer)
+        public void WriteAsValue(ref Utf8JsonWriter writer)
         {
             CheckValidInstance();
 
