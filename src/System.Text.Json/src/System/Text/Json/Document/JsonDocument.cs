@@ -465,7 +465,7 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            if (!JsonReaderHelper.IsValidDateTimeParsingLength(segment.Length))
+            if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(segment.Length))
             {
                 value = default;
                 return false;
@@ -499,7 +499,7 @@ namespace System.Text.Json
             ReadOnlySpan<byte> data = _utf8Json.Span;
             ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
 
-            if (!JsonReaderHelper.IsValidDateTimeParsingLength(segment.Length))
+            if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(segment.Length))
             {
                 value = default;
                 return false;

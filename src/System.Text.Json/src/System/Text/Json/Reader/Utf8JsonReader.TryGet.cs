@@ -475,7 +475,7 @@ namespace System.Text.Json
             {
                 int sequenceLength = (int)ValueSequence.Length;
 
-                if (!JsonReaderHelper.IsValidDateTimeParsingLength(sequenceLength))
+                if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(sequenceLength))
                 {
                     value = default;
                     return false;
@@ -489,13 +489,13 @@ namespace System.Text.Json
             }
             else
             {
-                span = ValueSpan;
-            }
+                if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(ValueSpan.Length))
+                {
+                    value = default;
+                    return false;
+                }
 
-            if (!JsonReaderHelper.IsValidDateTimeParsingLength(span.Length))
-            {
-                value = default;
-                return false;
+                span = ValueSpan;
             }
 
             if (_stringHasEscaping)
@@ -534,7 +534,7 @@ namespace System.Text.Json
             {
                 int sequenceLength = (int)ValueSequence.Length;
 
-                if (!JsonReaderHelper.IsValidDateTimeParsingLength(sequenceLength))
+                if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(sequenceLength))
                 {
                     value = default;
                     return false;
@@ -548,13 +548,13 @@ namespace System.Text.Json
             }
             else
             {
-                span = ValueSpan;
-            }
+                if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(ValueSpan.Length))
+                {
+                    value = default;
+                    return false;
+                }
 
-            if (!JsonReaderHelper.IsValidDateTimeParsingLength(span.Length))
-            {
-                value = default;
-                return false;
+                span = ValueSpan;
             }
 
             if (_stringHasEscaping)
@@ -607,13 +607,13 @@ namespace System.Text.Json
             }
             else
             {
-                span = ValueSpan;
-            }
+                if (ValueSpan.Length > JsonConstants.MaximumEscapedGuidLength)
+                {
+                    value = default;
+                    return false;
+                }
 
-            if (span.Length > JsonConstants.MaximumEscapedGuidLength)
-            {
-                value = default;
-                return false;
+                span = ValueSpan;
             }
 
             if (_stringHasEscaping)
