@@ -540,13 +540,13 @@ namespace System.Net.Test.Common
             await WriteFrameAsync(headersFrame).ConfigureAwait(false);
         }
 
-        public async Task SendResponseHeadersAsync(int streamId, bool endStream = true, HttpStatusCode statusCode = HttpStatusCode.OK, bool hasStatusCode = true, IList<HttpHeaderData> headers = null)
+        public async Task SendResponseHeadersAsync(int streamId, bool endStream = true, HttpStatusCode statusCode = HttpStatusCode.OK, bool isTrailingHeader = false, IList<HttpHeaderData> headers = null)
         {
             // For now, only support headers that fit in a single frame
             byte[] headerBlock = new byte[Frame.MaxFrameLength];
             int bytesGenerated = 0;
 
-            if (hasStatusCode)
+            if (!isTrailingHeader)
             {
                 string statusCodeString = ((int)statusCode).ToString();
                 bytesGenerated += EncodeHeader(new HttpHeaderData(":status", statusCodeString), headerBlock.AsSpan());
@@ -614,11 +614,11 @@ namespace System.Net.Test.Common
 
             if (content == null)
             {
-                await SendResponseHeadersAsync(streamId, true, statusCode, true, headers);
+                await SendResponseHeadersAsync(streamId, true, statusCode, false, headers);
             }
             else
             {
-                await SendResponseHeadersAsync(streamId, false, statusCode, true, headers);
+                await SendResponseHeadersAsync(streamId, false, statusCode, false, headers);
                 await SendResponseBodyAsync(streamId, Encoding.ASCII.GetBytes(content));
             }
 

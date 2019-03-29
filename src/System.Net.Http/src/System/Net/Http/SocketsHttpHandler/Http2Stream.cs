@@ -22,7 +22,6 @@ namespace System.Net.Http
             {
                 ExpectingHeaders,
                 ExpectingData,
-                ExpectingMoreData,
                 ExpectingTrailingHeaders,
                 Complete,
                 Aborted
@@ -182,7 +181,7 @@ namespace System.Net.Http
             {
                 lock (SyncObject)
                 {
-                    if (_state == StreamState.ExpectingMoreData)
+                    if (_state == StreamState.ExpectingData)
                     {
                         _state = StreamState.ExpectingTrailingHeaders;
                     }
@@ -228,7 +227,7 @@ namespace System.Net.Http
                         return;
                     }
 
-                    if (_state != StreamState.ExpectingData && _state != StreamState.ExpectingMoreData)
+                    if (_state != StreamState.ExpectingData)
                     {
                         throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                     }
@@ -246,10 +245,6 @@ namespace System.Net.Http
                     if (endStream)
                     {
                         _state = StreamState.Complete;
-                    }
-                    else if (_state == StreamState.ExpectingData)
-                    {
-                        _state = StreamState.ExpectingMoreData;
                     }
 
                     signalWaiter = _hasWaiter;
@@ -309,7 +304,7 @@ namespace System.Net.Http
                         _waitSource.Reset();
                         return (true, false);
                     }
-                    else if (_state == StreamState.ExpectingData || _state == StreamState.ExpectingMoreData || _state == StreamState.ExpectingTrailingHeaders)
+                    else if (_state == StreamState.ExpectingData || _state == StreamState.ExpectingTrailingHeaders)
                     {
                         return (false, false);
                     }
@@ -349,7 +344,7 @@ namespace System.Net.Http
                 Debug.Assert(amount > 0);
                 Debug.Assert(_pendingWindowUpdate < StreamWindowThreshold);
 
-                if (_state != StreamState.ExpectingData && _state != StreamState.ExpectingMoreData)
+                if (_state != StreamState.ExpectingData)
                 {
                     // We are not expecting any more data (because we've either completed or aborted).
                     // So no need to send any more WINDOW_UPDATEs.
@@ -396,7 +391,7 @@ namespace System.Net.Http
                         throw new IOException(SR.net_http_invalid_response);
                     }
 
-                    Debug.Assert(_state == StreamState.ExpectingData || _state == StreamState.ExpectingMoreData || _state == StreamState.ExpectingTrailingHeaders);
+                    Debug.Assert(_state == StreamState.ExpectingData || _state == StreamState.ExpectingTrailingHeaders);
 
                     Debug.Assert(!_hasWaiter);
                     _hasWaiter = true;
