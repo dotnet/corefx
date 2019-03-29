@@ -337,7 +337,7 @@ namespace System.Text.Json
         public static JsonDocument ParseValue(ref Utf8JsonReader reader)
         {
             bool ret = TryParseValue(ref reader, out JsonDocument document, shouldThrow: true);
-            Debug.Assert(ret, "TryReadFrom returned false with shouldThrow: true.");
+            Debug.Assert(ret, "TryParseValue returned false with shouldThrow: true.");
             return document;
         }
 
