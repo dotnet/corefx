@@ -10,7 +10,7 @@ jobs:
       jobs:
       - job: PublishPackages
         displayName: Publish Packages
-        timeoutInMinutes: 120
+        timeoutInMinutes: 160
 
         ${{ if ne(parameters.dependsOn, '') }}:
           dependsOn: ${{ parameters.dependsOn }}
@@ -55,6 +55,7 @@ jobs:
           - script: build.cmd
                     -restore
                     -sign
+                    -ci
                     /p:DotNetSignType=$(_SignType)
                     /p:OfficialBuildId=$(Build.BuildNumber)
             displayName: Sign packages
@@ -94,12 +95,12 @@ jobs:
                     /p:Configuration=${{ parameters.buildConfiguration }}
             displayName: Publish to Build Assets Registry
 
-          - script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 eng\publish.proj
-                    -warnaserror:0 -ci
-                    /t:NuGetPush
-                    /p:NuGetSource=$(_mygetFeedUrl)
-                    /p:NuGetApiKey=$(dotnet-myget-org-api-key)
-            displayName: Push to myget.org
+          # - script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 eng\publish.proj
+          #           -warnaserror:0 -ci
+          #           /t:NuGetPush
+          #           /p:NuGetSource=$(_mygetFeedUrl)
+          #           /p:NuGetApiKey=$(dotnet-myget-org-api-key)
+          #   displayName: Push to myget.org
 
           - script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 build.proj
                     -warnaserror:0 -ci
@@ -140,7 +141,7 @@ jobs:
               artifactName: packages
               downloadPath: ${{ parameters.artifactsDir }}
 
-          - script: build.cmd -restore
+          - script: build.cmd -restore -ci
             displayName: Restore Tools
 
           - script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 eng\publish.proj
