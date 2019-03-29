@@ -108,7 +108,7 @@
     <Compile Include="System\Net\Security\TlsCipherSuite.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>System\Net\Security\TlsCipherSuite.tt</DependentUpon>
+      <DependentUpon>TlsCipherSuite.tt</DependentUpon>
     </Compile>
     <None Include="System\Net\Security\TlsCipherSuite.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

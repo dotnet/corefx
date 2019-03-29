@@ -7,7 +7,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
 <#@ include file="TlsCipherSuiteNameParser.ttinclude" #><#@
-    include file="..\..\..\..\ref\TlsCipherSuite.cs" #>
+    include file="TlsCipherSuite.cs" #>
 <# Array enumValues = typeof(TlsCipherSuite).GetEnumValues(); #>
 
 using System.Collections.Generic;
