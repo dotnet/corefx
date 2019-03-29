@@ -109,22 +109,20 @@ namespace System.Memory.Tests
 
         #region First
 
-        private readonly T[] _sampleArray = Enumerable.Repeat(default(T), 5).ToArray();
-
         [Fact]
         public void AsArray_CanGetFirst()
         {
-            ReadOnlyMemory<T> memory = new ReadOnlyMemory<T>(_sampleArray);
-            VerifyCanGetFirst(new ReadOnlySequence<T>(memory), expectedSize: _sampleArray.Length);
+            var memory = new ReadOnlyMemory<T>(new T[5]);
+            VerifyCanGetFirst(new ReadOnlySequence<T>(memory), expectedSize: 5);
         }
 
         [Fact]
         public void AsMemoryManager_CanGetFirst()
         {
-            MemoryManager<T> manager = new CustomMemoryForTest<T>(_sampleArray);
+            MemoryManager<T> manager = new CustomMemoryForTest<T>(new T[5]);
             ReadOnlyMemory<T> memoryFromManager = ((ReadOnlyMemory<T>)manager.Memory);
 
-            VerifyCanGetFirst(new ReadOnlySequence<T>(memoryFromManager), expectedSize: _sampleArray.Length);
+            VerifyCanGetFirst(new ReadOnlySequence<T>(memoryFromManager), expectedSize: 5);
         }
 
         [Fact]
