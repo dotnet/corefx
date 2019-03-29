@@ -31,7 +31,7 @@ namespace System.IO.Packaging.Tests
         {
             return new FileInfo($"{GetTestFilePath(null, memberName, lineNumber)}.{extension}");
         }
-
+        
         [Fact]
         public void WriteRelationsTwice()
         {
@@ -3773,6 +3773,93 @@ namespace System.IO.Packaging.Tests
 
             // Validate we get the same object back if we call GetPart again
             Assert.Same(part, mockPackage.GetPart(partUri));
+        }
+        
+        [Fact]
+        public void ComparePackUriSamePackSamePart()
+        {
+            Uri partUri = new Uri("/idontexist.xml", UriKind.Relative);
+            Uri packageUri = new Uri("application://");
+
+            Uri combinedUri = PackUriHelper.Create(packageUri, partUri);
+            Assert.Equal(combinedUri.ToString(), "pack://application:,,,/idontexist.xml");
+
+            Uri sameCombinedUri = PackUriHelper.Create(packageUri, partUri);
+            Assert.Equal(combinedUri.ToString(), "pack://application:,,,/idontexist.xml");
+
+            Assert.Equal(combinedUri, sameCombinedUri);
+
+            Uri returnedPackageUri = PackUriHelper.GetPackageUri(combinedUri);
+            Uri returnedSamePackageUri = PackUriHelper.GetPackageUri(sameCombinedUri);
+
+            // Validate the PackageUri returned from PackUriHelper.GetPackageHelper matches what was given to PackUriHelper.Create
+            Assert.Equal(packageUri, returnedPackageUri);
+            Assert.Equal(packageUri, returnedSamePackageUri);
+
+            // Validate PackUriHelper.ComparePackUri correctly validates identical pack uri's.
+            Assert.True(PackUriHelper.ComparePackUri(combinedUri, sameCombinedUri) == 0);
+        }
+
+        [Fact]
+        public void ComparePackUriSamePackDifferentPart()
+        {
+            Uri partUri = new Uri("/idontexist.xml", UriKind.Relative);
+            Uri differentPartUri = new Uri("/idontexist2.xml", UriKind.Relative);
+            Uri packageUri = new Uri("application://");
+
+            Uri combinedUriWithPart = PackUriHelper.Create(packageUri, partUri);
+            Assert.Equal(combinedUriWithPart.ToString(), "pack://application:,,,/idontexist.xml");
+
+            Uri combinedUriWithDifferentPart = PackUriHelper.Create(packageUri, differentPartUri);
+            Assert.Equal(combinedUriWithDifferentPart.ToString(), "pack://application:,,,/idontexist2.xml");
+
+            Uri combinedUriNoPart = PackUriHelper.Create(packageUri);
+            Assert.Equal(combinedUriNoPart.ToString(), "pack://application:,,,/");
+
+            Uri returnedPackageUri = PackUriHelper.GetPackageUri(combinedUriWithPart);
+            Uri returnedPackageUriNoPart = PackUriHelper.GetPackageUri(combinedUriNoPart);
+            Uri returnedPackageUriDifferentPart = PackUriHelper.GetPackageUri(combinedUriWithDifferentPart);
+
+            // Validate the PackageUri returned from PackUriHelper.GetPackageHelper matches what was given to PackUriHelper.Create
+            Assert.Equal(packageUri, returnedPackageUri);
+            Assert.Equal(packageUri, returnedPackageUriNoPart);
+            Assert.Equal(packageUri, returnedPackageUriDifferentPart);
+
+            // Validate PackUriHelper.ComparePackUri correctly compares pack uri's with different parts. These are not
+            // considered equal because the parts are different.
+            Assert.False(PackUriHelper.ComparePackUri(combinedUriWithPart, combinedUriWithDifferentPart) == 0);
+            Assert.False(PackUriHelper.ComparePackUri(combinedUriWithPart, combinedUriNoPart) == 0);
+            Assert.False(PackUriHelper.ComparePackUri(combinedUriNoPart, combinedUriWithDifferentPart) == 0);
+        }
+
+        [Fact]
+        public void ComparePackUriDifferentPack()
+        {
+            Uri partUri = new Uri("/idontexist.xml", UriKind.Relative);
+            Uri packageUri = new Uri("application://");
+            Uri differentPackageUri = new Uri("siteoforigin://");
+
+            Uri packageUriWithPart = PackUriHelper.Create(packageUri, partUri);
+            Assert.Equal(packageUriWithPart.ToString(), "pack://application:,,,/idontexist.xml");
+
+            Uri samePackageNoPart = PackUriHelper.Create(packageUri);
+            Assert.Equal(samePackageNoPart.ToString(), "pack://application:,,,/");
+
+            Uri differentPackageSamePart = PackUriHelper.Create(differentPackageUri, partUri);
+            Assert.Equal(differentPackageSamePart.ToString(), "pack://siteoforigin:,,,/idontexist.xml");
+
+            Uri returnedPackageUri = PackUriHelper.GetPackageUri(packageUriWithPart);
+            Uri returnedSamePackageUri = PackUriHelper.GetPackageUri(samePackageNoPart);
+            Uri returnedDifferentPackageUri = PackUriHelper.GetPackageUri(differentPackageSamePart);
+
+            // Validate the PackageUri returned from PackUriHelper.GetPackageHelper matches what was given to PackUriHelper.Create
+            Assert.Equal(packageUri, returnedPackageUri);
+            Assert.Equal(packageUri, returnedSamePackageUri);
+            Assert.Equal(differentPackageUri, returnedDifferentPackageUri);
+
+            // Validate PackUriHelper.ComparePackUri correctly compares pack uri's with different packages.
+            Assert.False(PackUriHelper.ComparePackUri(packageUriWithPart, differentPackageSamePart) == 0);
+            Assert.False(PackUriHelper.ComparePackUri(samePackageNoPart, differentPackageSamePart) == 0);
         }
 
         private const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";

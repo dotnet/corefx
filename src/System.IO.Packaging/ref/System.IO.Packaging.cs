@@ -152,7 +152,11 @@ namespace System.IO.Packaging
     public static partial class PackUriHelper
     {
         public static readonly string UriSchemePack;
+        public static Uri GetPackageUri(System.Uri packUri) { throw null; }
+        public static int ComparePackUri(Uri firstPackUri, Uri secondPackUri) { throw null; }
         public static int ComparePartUri(System.Uri firstPartUri, System.Uri secondPartUri) { throw null; }
+        public static System.Uri Create(System.Uri packageUri) { throw null;}
+        public static System.Uri Create(System.Uri packageUri, System.Uri partUri) { throw null; }
         public static System.Uri CreatePartUri(System.Uri partUri) { throw null; }
         public static System.Uri GetNormalizedPartUri(System.Uri partUri) { throw null; }
         public static System.Uri GetRelationshipPartUri(System.Uri partUri) { throw null; }
