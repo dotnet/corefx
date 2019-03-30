@@ -1555,6 +1555,11 @@ namespace System.ComponentModel
             {
                 Type type = instance.GetType();
 
+                if (type.IsCOMObject)
+                {
+                    type = ComObjectType;
+                }
+
                 if (createDelegator)
                 {
                     node = new TypeDescriptionNode(new DelegatingTypeDescriptionProvider(type));
@@ -2889,8 +2894,26 @@ namespace System.ComponentModel
             }
         }
 
+        [TypeDescriptionProvider(typeof(ComNativeDescriptorProxy))]
         private sealed class TypeDescriptorComObject
         {
+        }
+
+        private sealed class ComNativeDescriptorProxy : TypeDescriptionProvider
+        {
+            private readonly TypeDescriptionProvider _comNativeDescriptor;
+
+            public ComNativeDescriptorProxy()
+            {
+                Assembly assembly = Assembly.Load("System.Windows.Forms");
+                Type realComNativeDescriptor = assembly.GetType("System.Windows.Forms.ComponentModel.Com2Interop.ComNativeDescriptor");
+                _comNativeDescriptor = (TypeDescriptionProvider)Activator.CreateInstance(realComNativeDescriptor);
+            }
+
+            public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance)
+            {
+                return _comNativeDescriptor.GetTypeDescriptor(objectType, instance);
+            }
         }
 
         /// <summary>
