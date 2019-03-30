@@ -33,7 +33,6 @@ namespace System.Collections.Generic
         private int _version;
 
         private const int MinimumGrow = 4;
-        private const int GrowFactor = 200;  // double each time
 
         // Creates a queue with room for capacity objects. The default initial
         // capacity and grow factor are used.
@@ -181,17 +180,18 @@ namespace System.Collections.Generic
         }
 
         // Adds item to the tail of the queue.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Enqueue(T item)
         {
+            int tail = _tail;
             int size = _size;
             T[] array = _array;
 
-            if ((uint)size < (uint)array.Length)
+            if ((uint)size < (uint)array.Length && (uint)tail < (uint)array.Length)
             {
-                _array[_tail] = item;
-                MoveNext(ref _tail);
-                _size++;
+                array[tail] = item;
+                MoveNext(ref tail, array);
+                _tail = tail;
+                _size = size + 1;
                 _version++;
             }
             else
@@ -203,12 +203,8 @@ namespace System.Collections.Generic
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void EnqueueWithResize(T item)
         {
-            int newCapacity = _array.Length * 2;
-
-            if (newCapacity < _array.Length + MinimumGrow)
-            {
-                newCapacity = _array.Length + MinimumGrow;
-            }
+            int length = _array.Length;
+            int newCapacity = Math.Max(length * 2, length + MinimumGrow);
 
             SetCapacity(newCapacity);
 
@@ -376,15 +372,16 @@ namespace System.Collections.Generic
             _tail = (_size == capacity) ? 0 : _size;
             _version++;
         }
+        private void MoveNext(ref int index) => MoveNext(ref index, _array);
 
         // Increments the index wrapping it if necessary.
-        private void MoveNext(ref int index)
+        private void MoveNext(ref int index, T[] array)
         {
             // It is tempting to use the remainder operator here but it is actually much slower
             // than a simple comparison and a rarely taken branch.
             // JIT produces better code than with ternary operator ?:
             int tmp = index + 1;
-            if (tmp == _array.Length)
+            if (tmp == array.Length)
             {
                 tmp = 0;
             }
