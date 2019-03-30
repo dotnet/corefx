@@ -262,6 +262,7 @@ namespace System.Collections.Generic
         }
 
         // Pushes an item to the top of the stack.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Push(T item)
         {
             int size = _size;

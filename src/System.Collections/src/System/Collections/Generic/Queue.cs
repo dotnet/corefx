@@ -181,17 +181,36 @@ namespace System.Collections.Generic
         }
 
         // Adds item to the tail of the queue.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Enqueue(T item)
         {
-            if (_size == _array.Length)
+            int size = _size;
+            T[] array = _array;
+
+            if ((uint)size < (uint)array.Length)
             {
-                int newcapacity = (int)((long)_array.Length * (long)GrowFactor / 100);
-                if (newcapacity < _array.Length + MinimumGrow)
-                {
-                    newcapacity = _array.Length + MinimumGrow;
-                }
-                SetCapacity(newcapacity);
+                _array[_tail] = item;
+                MoveNext(ref _tail);
+                _size++;
+                _version++;
             }
+            else
+            {
+                EnqueueWithResize(item);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void EnqueueWithResize(T item)
+        {
+            int newCapacity = _array.Length * 2;
+
+            if (newCapacity < _array.Length + MinimumGrow)
+            {
+                newCapacity = _array.Length + MinimumGrow;
+            }
+
+            SetCapacity(newCapacity);
 
             _array[_tail] = item;
             MoveNext(ref _tail);
