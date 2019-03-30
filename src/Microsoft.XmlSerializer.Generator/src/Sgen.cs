@@ -631,19 +631,26 @@ namespace Microsoft.XmlSerializer.Generator
                 }
                 else
                 {
-                    foreach (string line in File.ReadAllLines(arg))
+                    try
                     {
-                        int i = line.Trim().IndexOf(' ');
-                        if (i < 0)
+                        foreach (string line in File.ReadAllLines(arg))
                         {
-                            parsedArgs.Add(line);
-                        }
-                        else
-                        {
-                            parsedArgs.Add(line.Substring(0, i));
-                            parsedArgs.Add(line.Substring(i + 1));
+                            int i = line.Trim().IndexOf(' ');
+                            if (i < 0)
+                            {
+                                parsedArgs.Add(line);
+                            }
+                            else
+                            {
+                                parsedArgs.Add(line.Substring(0, i));
+                                parsedArgs.Add(line.Substring(i + 1));
+                            }
                         }
                     }
+                    //If for any reasons the rsp file is not generated, this argument will be ignored and serializer will be generated with default settings
+                    catch (FileNotFoundException)
+                    { }
+                    
                 }
             }
             return parsedArgs.ToArray();
