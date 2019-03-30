@@ -134,16 +134,11 @@ namespace System.Net.Sockets
                 Next = this;
             }
 
-            public bool TryComplete(SocketAsyncContext context, bool dispatch)
+            public bool TryComplete(SocketAsyncContext context)
             {
-                TraceWithContext(context, $"Enter, dispatch={dispatch}");
+                TraceWithContext(context, $"Enter");
 
                 bool result = DoTryComplete(context);
-
-                if (result && dispatch)
-                {
-                    Dispatch();
-                }
 
                 TraceWithContext(context, $"Exit, result={result}");
 
@@ -652,7 +647,7 @@ namespace System.Net.Sockets
                         }
 
                         // Retry the operation.
-                        if (operation.TryComplete(context, dispatch: false))
+                        if (operation.TryComplete(context))
                         {
                             Trace(context, $"Leave, retry succeeded");
                             return false;
@@ -664,35 +659,46 @@ namespace System.Net.Sockets
             // Called on the epoll thread whenever we receive an epoll notification.
             public void HandleEvent(SocketAsyncContext context)
             {
-                using (Lock())
+                bool emptyQueue;
+                do
                 {
-                    Trace(context, $"Enter");
-
-                    _sequenceNumber++;
-
-                    AsyncOperation op = _tail?.Next;
-                    while (op != null)
+                    AsyncOperation op;
+                    using (Lock())
                     {
-                        AsyncOperation next = op.Next;
-                        if (!op.TryComplete(context, dispatch: true))
+                        Trace(context, $"Enter");
+
+                        _sequenceNumber++;
+
+                        op = _tail?.Next;
+
+                        if (op != null)
                         {
-                            Trace(context, $"Exit (wait for event)");
-                            return;
+                            if (!op.TryComplete(context))
+                            {
+                                Trace(context, $"Exit (wait for event)");
+                                return;
+                            }
+
+                            // Remove from queue
+                            // We're the head of the queue
+                            if (op == _tail)
+                            {
+                                // No more operations
+                                _tail = null;
+                            }
+                            else
+                            {
+                                // Pop current operation and advance to next
+                                _tail.Next = op.Next;
+                            }
                         }
 
-                        // We're the head of the queue
-                        if (op == _tail)
-                        {
-                            // No more operations 
-                            op = _tail = null;
-                        }
-                        else
-                        {
-                            // Pop current operation and advance to next
-                            op = _tail.Next = next;
-                        }
+                        emptyQueue = _tail == null;
                     }
-                }
+
+                    // Dispatch outside Lock to avoid contention with Socket operations started on Callback
+                    op?.Dispatch();
+                } while (!emptyQueue);
 
                 Trace(context, $"Exit (queue empty)");
             }
