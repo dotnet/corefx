@@ -34,9 +34,9 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>2eb45ff0eed6f86f1071b16b11a447cadeeeec59</Sha>
     </Dependency>
-    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19178.1">
+    <Dependency Name="NETStandard.Library" Version="2.1.0-prerelease.19179.1">
       <Uri>https://github.com/dotnet/standard</Uri>
-      <Sha>c8e24b1df4c4f51663c009e190d639adf22c5e79</Sha>
+      <Sha>f8238897464cb3fe09480ea56153436ef24ca9ce</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="2.0.0-beta.19171.6">
       <Uri>https://github.com/dotnet/arcade</Uri>
