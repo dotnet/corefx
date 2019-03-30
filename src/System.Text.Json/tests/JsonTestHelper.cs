@@ -9,6 +9,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using Xunit.Sdk;
 
 namespace System.Text.Json.Tests
 {
@@ -575,6 +576,64 @@ namespace System.Text.Json.Tests
                     jtoken.WriteTo(jsonWriter);
                     return stringWriter.ToString();
                 }
+            }
+        }
+
+        public delegate void AssertThrowsActionUtf8JsonReader(Utf8JsonReader json);
+
+        // Cannot use standard Assert.Throws() when testing Utf8JsonReader - ref structs and closures don't get along.
+        public static void AssertThrows<E>(Utf8JsonReader json, AssertThrowsActionUtf8JsonReader action) where E : Exception
+        {
+            Exception ex;
+
+            try
+            {
+                action(json);
+                ex = null;
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            if (ex == null)
+            {
+                throw new ThrowsException(typeof(E));
+            }
+
+            if (ex.GetType() != typeof(E))
+            {
+                throw new ThrowsException(typeof(E), ex);
+            }
+        }
+
+        public delegate void AssertThrowsActionUtf8JsonWriter(ref Utf8JsonWriter writer);
+
+        public static void AssertThrows<E>(
+            ref Utf8JsonWriter writer,
+            AssertThrowsActionUtf8JsonWriter action)
+            where E : Exception
+        {
+            Exception ex;
+
+            try
+            {
+                action(ref writer);
+                ex = null;
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            if (ex == null)
+            {
+                throw new ThrowsException(typeof(E));
+            }
+
+            if (ex.GetType() != typeof(E))
+            {
+                throw new ThrowsException(typeof(E), ex);
             }
         }
     }

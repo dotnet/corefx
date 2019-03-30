@@ -35,6 +35,8 @@ namespace System.Text.Json
         public System.Text.Json.JsonElement.ObjectEnumerator EnumerateObject() { throw null; }
         public int GetArrayLength() { throw null; }
         public bool GetBoolean() { throw null; }
+        public System.DateTime GetDateTime() { throw null; }
+        public System.DateTimeOffset GetDateTimeOffset() { throw null; }
         public decimal GetDecimal() { throw null; }
         public double GetDouble() { throw null; }
         public int GetInt32() { throw null; }
@@ -50,6 +52,8 @@ namespace System.Text.Json
         [System.CLSCompliantAttribute(false)]
         public ulong GetUInt64() { throw null; }
         public override string ToString() { throw null; }
+        public bool TryGetDateTime(out System.DateTime value) { throw null; }
+        public bool TryGetDateTimeOffset(out System.DateTimeOffset value) { throw null; }
         public bool TryGetDecimal(out decimal value) { throw null; }
         public bool TryGetDouble(out double value) { throw null; }
         public bool TryGetInt32(out int value) { throw null; }
@@ -62,6 +66,9 @@ namespace System.Text.Json
         public bool TryGetUInt32(out uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public bool TryGetUInt64(out ulong value) { throw null; }
+        public void WriteAsProperty(ReadOnlySpan<byte> utf8PropertyName, ref Utf8JsonWriter writer) { }
+        public void WriteAsProperty(ReadOnlySpan<char> propertyName, ref Utf8JsonWriter writer) { }
+        public void WriteAsValue(ref System.Text.Json.Utf8JsonWriter writer) { }
         public partial struct ArrayEnumerator : System.Collections.Generic.IEnumerable<System.Text.Json.JsonElement>, System.Collections.Generic.IEnumerator<System.Text.Json.JsonElement>, System.Collections.IEnumerable, System.Collections.IEnumerator, System.IDisposable
         {
             private object _dummy;
@@ -112,6 +119,7 @@ namespace System.Text.Json
     public partial struct JsonReaderState
     {
         private object _dummy;
+        private int _dummyPrimitive;
         public JsonReaderState(System.Text.Json.JsonReaderOptions options = default(System.Text.Json.JsonReaderOptions)) { throw null; }
         public long BytesConsumed { get { throw null; } }
         public System.Text.Json.JsonReaderOptions Options { get { throw null; } }
@@ -173,10 +181,11 @@ namespace System.Text.Json
         public System.Buffers.ReadOnlySequence<byte> ValueSequence { get { throw null; } }
         public System.ReadOnlySpan<byte> ValueSpan { get { throw null; } }
         public bool GetBoolean() { throw null; }
-        public DateTime GetDateTime() { throw null; }
-        public DateTimeOffset GetDateTimeOffset() { throw null; }
+        public System.DateTime GetDateTime() { throw null; }
+        public System.DateTimeOffset GetDateTimeOffset() { throw null; }
         public decimal GetDecimal() { throw null; }
         public double GetDouble() { throw null; }
+        public System.Guid GetGuid() { throw null; }
         public int GetInt32() { throw null; }
         public long GetInt64() { throw null; }
         public float GetSingle() { throw null; }
@@ -186,12 +195,13 @@ namespace System.Text.Json
         [System.CLSCompliantAttribute(false)]
         public ulong GetUInt64() { throw null; }
         public bool Read() { throw null; }
-        public bool TextEquals(ReadOnlySpan<char> otherText) { throw null; }
-        public bool TextEquals(ReadOnlySpan<byte> otherUtf8Text) { throw null; }
-        public bool TryGetDateTime(out DateTime value) { throw null; }
-        public bool TryGetDateTimeOffset(out DateTimeOffset value) { throw null; }
+        public bool TextEquals(System.ReadOnlySpan<byte> otherUtf8Text) { throw null; }
+        public bool TextEquals(System.ReadOnlySpan<char> otherText) { throw null; }
+        public bool TryGetDateTime(out System.DateTime value) { throw null; }
+        public bool TryGetDateTimeOffset(out System.DateTimeOffset value) { throw null; }
         public bool TryGetDecimal(out decimal value) { throw null; }
         public bool TryGetDouble(out double value) { throw null; }
+        public bool TryGetGuid(out System.Guid value) { throw null; }
         public bool TryGetInt32(out int value) { throw null; }
         public bool TryGetInt64(out long value) { throw null; }
         public bool TryGetSingle(out float value) { throw null; }

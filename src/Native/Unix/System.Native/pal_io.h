@@ -152,6 +152,14 @@ enum
 };
 
 /**
+ * Constants for interpreting FileStatus.UserFlags.
+ */
+enum
+{
+    PAL_UF_HIDDEN = 0x8000
+};
+
+/**
  * Constants from dirent.h for the inode type returned from readdir variants
  */
 typedef enum
@@ -339,27 +347,6 @@ DLLEXPORT int32_t SystemNative_Stat(const char* path, FileStatus* output);
  * Returns 0 for success, -1 for failure. Sets errno on failure.
  */
 DLLEXPORT int32_t SystemNative_LStat(const char* path, FileStatus* output);
-
-/**
- * Get file status from a descriptor. Implemented as shim to fstat(2).
- *
- * Returns 0 for success, -1 for failure. Sets errno on failure.
- */
-DLLEXPORT int32_t SystemNative_FStat2(intptr_t fd, FileStatus* output);
-
-/**
- * Get file status from a full path. Implemented as shim to stat(2).
- *
- * Returns 0 for success, -1 for failure. Sets errno on failure.
- */
-DLLEXPORT int32_t SystemNative_Stat2(const char* path, FileStatus* output);
-
-/**
- * Get file stats from a full path. Implemented as shim to lstat(2).
- *
- * Returns 0 for success, -1 for failure. Sets errno on failure.
- */
-DLLEXPORT int32_t SystemNative_LStat2(const char* path, FileStatus* output);
 
 /**
  * Open or create a file or device. Implemented as shim to open(2).
@@ -726,3 +713,17 @@ DLLEXPORT int32_t SystemNative_GetPeerID(intptr_t socket, uid_t* euid);
 * Returns 0 on success, or -1 if an error occurred (in which case, errno is set appropriately).
 */
 DLLEXPORT int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int64_t length, int16_t lockType);
+
+/**
+* Changes the file flags of the file whose location is specified in path
+*
+* Returns 0 for success, -1 for failure. Sets errno for failure.
+*/
+DLLEXPORT int32_t SystemNative_LChflags(const char* path, uint32_t flags);
+
+/**
+ * Determines if the current platform supports setting UF_HIDDEN (0x8000) flag
+ *
+ * Returns true (non-zero) if supported, false (zero) if not.
+ */
+DLLEXPORT int32_t SystemNative_LChflagsCanSetHiddenFlag(void);
