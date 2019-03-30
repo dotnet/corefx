@@ -84,6 +84,58 @@ namespace System.MemoryTests
             Assert.True(right.Equals(left));
         }
 
+        [Fact]
+        public static void EqualityThroughInterface_True()
+        {
+            int[] array = { 42, 43, 44, 45, 46 };
+            IEquatable<ReadOnlyMemory<int>> left = new ReadOnlyMemory<int>(array, 2, 3);
+            IEquatable<ReadOnlyMemory<int>> right = new ReadOnlyMemory<int>(array, 2, 3);
+
+            Assert.True(left.Equals(right));
+            Assert.True(right.Equals(left));
+        }
+
+        [Fact]
+        public static void EqualityThroughInterface_Reflexivity()
+        {
+            int[] array = { 42, 43, 44, 45, 46 };
+            IEquatable<ReadOnlyMemory<int>> left = new ReadOnlyMemory<int>(array, 2, 3);
+
+            Assert.True(left.Equals(left));
+        }
+
+        [Fact]
+        public static void EqualityThroughInterface_IncludesLength()
+        {
+            int[] array = { 42, 43, 44, 45, 46 };
+            IEquatable<ReadOnlyMemory<int>> left = new ReadOnlyMemory<int>(array, 2, 3);
+            IEquatable<ReadOnlyMemory<int>> right = new ReadOnlyMemory<int>(array, 2, 2);
+
+            Assert.False(left.Equals(right));
+            Assert.False(right.Equals(left));
+        }
+
+        [Fact]
+        public static void EqualityThroughInterface_IncludesBase()
+        {
+            int[] array = { 42, 43, 44, 45, 46 };
+            IEquatable<ReadOnlyMemory<int>> left = new ReadOnlyMemory<int>(array, 1, 3);
+            IEquatable<ReadOnlyMemory<int>> right = new ReadOnlyMemory<int>(array, 2, 3);
+
+            Assert.False(left.Equals(right));
+            Assert.False(right.Equals(left));
+        }
+
+        [Fact]
+        public static void EqualityThroughInterface_ComparesRangeNotContent()
+        {
+            IEquatable<ReadOnlyMemory<int>> left = new ReadOnlyMemory<int>(new int[] { 0, 1, 2 }, 1, 1);
+            IEquatable<ReadOnlyMemory<int>> right = new ReadOnlyMemory<int>(new int[] { 0, 1, 2 }, 1, 1);
+
+            Assert.False(left.Equals(right));
+            Assert.False(right.Equals(left));
+        }
+
         [Theory]
         [MemberData(nameof(ValidArraySegments))]
         public static void MemoryReferencingSameMemoryAreEqualInEveryAspect(byte[] bytes, int start, int length)
