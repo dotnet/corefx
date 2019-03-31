@@ -101,8 +101,8 @@ namespace System.MemoryTests
         public static void EqualityThroughInterface_Reflexivity()
         {
             int[] array = { 42, 43, 44, 45, 46 };
-            IEquatable<Memory<int>> left = new Memory<int>(array, 2, 3);
-            IEquatable<Memory<int>> leftAsEquatable = left;
+            ReadOnlyMemory<int> left = new ReadOnlyMemory<int>(array, 2, 3);
+            IEquatable<ReadOnlyMemory<int>> leftAsEquatable = left;
 
             Assert.True(leftAsEquatable.Equals(left));
         }
