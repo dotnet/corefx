@@ -14,15 +14,29 @@ namespace System.Text.Json.Serialization.Tests
         {
             string json = JsonSerializer.ToString<object>(1);
             Assert.Equal("1", json);
-
             json = JsonSerializer.ToString(1, typeof(object));
             Assert.Equal("1", json);
 
             json = JsonSerializer.ToString<object>("foo");
             Assert.Equal(@"""foo""", json);
-
             json = JsonSerializer.ToString("foo", typeof(object));
             Assert.Equal(@"""foo""", json);
+
+            json = JsonSerializer.ToString<object>(true);
+            Assert.Equal(@"true", json);
+            json = JsonSerializer.ToString(true, typeof(object));
+            Assert.Equal(@"true", json);
+
+            json = JsonSerializer.ToString<object>(null);
+            Assert.Equal(@"null", json);
+            json = JsonSerializer.ToString(null, typeof(object));
+            Assert.Equal(@"null", json);
+
+            Decimal pi = 3.1415926535897932384626433833m;
+            json = JsonSerializer.ToString<object>(pi);
+            Assert.Equal(@"3.1415926535897932384626433833", json);
+            json = JsonSerializer.ToString(pi, typeof(object));
+            Assert.Equal(@"3.1415926535897932384626433833", json);
         }
 
         [Fact]
