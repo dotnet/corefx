@@ -1,12 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{1F827C19-6023-48D3-909F-9F43AB42FAF0}</ProjectGuid>
     <RootNamespace>System.IO.Packaging</RootNamespace>
     <AssemblyName>System.IO.Packaging</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='netfx' OR '$(TargetGroup)'=='net46'">true</IsPartialFacadeAssembly>
-    <DefineConstants Condition="'$(TargetGroup)' != 'netstandard1.3'">$(DefineConstants);FEATURE_SERIALIZATION</DefineConstants>
-    <Configurations>net46-Debug;net46-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard1.3-Debug;netstandard1.3-Release</Configurations>
+    <DefineConstants>$(DefineConstants);FEATURE_SERIALIZATION</DefineConstants>
+    <Configurations>net46-Debug;net46-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netstandard1.3'">
     <Reference Include="System.Collections" />
