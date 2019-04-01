@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
 {
@@ -42,11 +43,17 @@ namespace System.Text.Json
 
             if (fraction > 0)
             {
-                // Remove trailing zeros
                 int numFractionDigits = 7;
-                while (fraction % 10 == 0)
+
+                // Remove trailing zeros
+                while (true)
                 {
-                    fraction /= 10;
+                    uint quotient = DivMod(fraction, 10, out uint remainder);
+                    if (remainder != 0)
+                    {
+                        break;
+                    }
+                    fraction = quotient;
                     numFractionDigits--;
                 }
 
@@ -92,6 +99,16 @@ namespace System.Text.Json
                     bytesWritten = bufferEnd + 1;
                 }
             }
+        }
+
+        // We don't have access to System.Buffers.Text.FormattingHelpers.DivMod,
+        // so this is a copy of the implementation.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static uint DivMod(uint numerator, uint denominator, out uint modulo)
+        {
+            uint div = numerator / denominator;
+            modulo = numerator - (div * denominator);
+            return div;
         }
     }
 }

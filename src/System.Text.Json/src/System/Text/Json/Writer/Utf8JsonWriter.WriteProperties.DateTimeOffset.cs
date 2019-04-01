@@ -278,7 +278,7 @@ namespace System.Text.Json
 
             JsonWriterHelper.TrimDateTimeOffset(tempSpan.Slice(0, bytesWritten), out bytesWritten);
 
-            if (_buffer.Length < bytesWritten)
+            if (_buffer.Length - idx < bytesWritten)
             {
                 AdvanceAndGrow(ref idx, bytesWritten);
             }
