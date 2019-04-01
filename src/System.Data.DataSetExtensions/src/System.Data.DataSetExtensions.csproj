@@ -15,18 +15,34 @@
     <Reference Include="System.Linq" />
     <Reference Include="System.ComponentModel.TypeConverter" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNETStandard)' == 'true'">
+    <Compile Include="$(CommonPath)\System\Data\DataTableExtensions.cs">
+      <Link>System\Data\DataTableExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\EnumerableRowCollection.cs">
+      <Link>System\Data\EnumerableRowCollection.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\EnumerableRowCollectionExtensions.cs">
+      <Link>System\Data\EnumerableRowCollectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\OrderedEnumerableRowCollection.cs">
+      <Link>System\Data\OrderedEnumerableRowCollection.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\SortExpressionBuilder.cs">
+      <Link>System\Data\SortExpressionBuilder.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\TypedTableBase.cs">
+      <Link>System\Data\SortExpressionBuilder.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\TypedTableBaseExtensions.cs">
+      <Link>System\Data\SortExpressionBuilder.cs</Link>
+    </Compile>
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="System\Data\DataRowComparer.cs" />
     <Compile Include="System\Data\DataRowExtensions.cs" />
-    <Compile Include="System\Data\DataSetUtil.cs" />
-    <Compile Include="System\Data\DataTableExtensions.cs" />
-    <Compile Include="System\Data\EnumerableRowCollection.cs" />
-    <Compile Include="System\Data\EnumerableRowCollectionExtensions.cs" />
-    <Compile Include="System\Data\OrderedEnumerableRowCollection.cs" />
-    <Compile Include="System\Data\SortExpressionBuilder.cs" />
-    <Compile Include="System\Data\TypedTableBase.cs">
-      <SubType>Component</SubType>
+    <Compile Include="$(CommonPath)\System\Data\DataSetUtil.cs">
+      <Link>System\Data\DataSetUtil.cs</Link>
     </Compile>
-    <Compile Include="System\Data\TypedTableBaseExtensions.cs" />
   </ItemGroup>
 </Project>
