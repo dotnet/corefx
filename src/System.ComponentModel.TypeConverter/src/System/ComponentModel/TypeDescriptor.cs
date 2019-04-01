@@ -2899,6 +2899,9 @@ namespace System.ComponentModel
         {
         }
 
+        // This class is being used to aid in diagnosability. The alternative to having this proxy would be
+        // to set the fully qualified type name in the TypeDescriptionProvider attribute. The issue with the
+        // string method is the failure is silent during type load making diagnosing the issue difficult.
         private sealed class ComNativeDescriptorProxy : TypeDescriptionProvider
         {
             private readonly TypeDescriptionProvider _comNativeDescriptor;
@@ -2906,7 +2909,7 @@ namespace System.ComponentModel
             public ComNativeDescriptorProxy()
             {
                 Assembly assembly = Assembly.Load("System.Windows.Forms");
-                Type realComNativeDescriptor = assembly.GetType("System.Windows.Forms.ComponentModel.Com2Interop.ComNativeDescriptor");
+                Type realComNativeDescriptor = assembly.GetType("System.Windows.Forms.ComponentModel.Com2Interop.ComNativeDescriptor", throwOnError: true);
                 _comNativeDescriptor = (TypeDescriptionProvider)Activator.CreateInstance(realComNativeDescriptor);
             }
 
