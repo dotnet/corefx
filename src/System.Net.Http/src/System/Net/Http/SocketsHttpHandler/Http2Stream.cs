@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
@@ -181,6 +180,11 @@ namespace System.Net.Http
             {
                 lock (SyncObject)
                 {
+                    if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingData)
+                    {
+                        throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                    }
+
                     if (_state == StreamState.ExpectingData)
                     {
                         _state = StreamState.ExpectingTrailingHeaders;
