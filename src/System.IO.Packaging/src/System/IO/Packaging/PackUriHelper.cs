@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Text;
+using System.Linq;
 
 namespace System.IO.Packaging
 {
@@ -58,11 +59,9 @@ namespace System.IO.Packaging
         /// <exception cref="ArgumentException">If inner packageUri extracted from the packUri has a fragment component</exception>
         public static Uri GetPackageUri(Uri packUri)
         {
-            Uri packageUri;
-            Uri partUri;
 
             //Parameter Validation is done in the follwoing method
-            ValidateAndGetPackUriComponents(packUri, out packageUri, out partUri);            
+            ValidateAndGetPackUriComponents(packUri, out Uri packageUri, out _);
 
             return packageUri;
         }
@@ -364,19 +363,15 @@ namespace System.IO.Packaging
         {
             //If any of the operands are null then we simply call System.Uri compare to return the correct value
             if (firstPackUri == null || secondPackUri == null)
+            {
                 return CompareUsingSystemUri(firstPackUri, secondPackUri);
+            }
             else
             {
                 int compareResult;
 
-                Uri firstPackageUri;
-                Uri secondPackageUri;
-                Uri firstPartUri;
-                Uri secondPartUri;
-
-                ValidateAndGetPackUriComponents(firstPackUri, out firstPackageUri, out firstPartUri);
-                ValidateAndGetPackUriComponents(secondPackUri, out secondPackageUri, out secondPartUri);
-
+                ValidateAndGetPackUriComponents(firstPackUri, out Uri firstPackageUri, out Uri firstPartUri);
+                ValidateAndGetPackUriComponents(secondPackUri, out Uri secondPackageUri, out Uri secondPartUri);
 
                 if (firstPackageUri.Scheme == PackUriHelper.UriSchemePack && secondPackageUri.Scheme == PackUriHelper.UriSchemePack)
                 {
@@ -535,9 +530,9 @@ namespace System.IO.Packaging
                 partUri = ValidatePartUri(partUri);
 
             if (fragment != null)
-            {
-                if (fragment == String.Empty || fragment[0] != '#')
-                    throw new ArgumentException(SR.FragmentMustStartWithHash);
+            {   
+                if (fragment == string.Empty || fragment[0] != '#')
+                    throw new ArgumentException(SR.Format(SR.FragmentMustStartWithHash, nameof(fragment)));
             }
 
             // Step 2 - Remove fragment identifier from the package URI, if it is present
@@ -597,7 +592,7 @@ namespace System.IO.Packaging
                 throw new ArgumentNullException(nameof(packageUri));
 
             if (!packageUri.IsAbsoluteUri)
-                throw new ArgumentException(SR.UriShouldBeAbsolute);
+                throw new ArgumentException(SR.UriShouldBeAbsolute, nameof(packageUri));
 
             return packageUri;
         }
@@ -609,10 +604,10 @@ namespace System.IO.Packaging
                 throw new ArgumentNullException(nameof(packUri));
 
             if (!packUri.IsAbsoluteUri)
-                throw new ArgumentException(SR.UriShouldBeAbsolute);
+                throw new ArgumentException(SR.UriShouldBeAbsolute, nameof(packUri));
 
             if (packUri.Scheme != PackUriHelper.UriSchemePack)
-                throw new ArgumentException(SR.UriShouldBePackScheme);
+                throw new ArgumentException(SR.UriShouldBePackScheme, nameof(packUri));
 
             return packUri;
         }
@@ -625,16 +620,15 @@ namespace System.IO.Packaging
         /// <returns></returns>
         private static string EscapeSpecialCharacters(string path)
         {            
-            string characterString;
-
             // Escaping for the following - '%'; '@'; ',' and '?'
             // !!Important!! - The order is important - The '%' sign should be escaped first.
-            // This is currently enforced by the order of characters in the _specialCharacters array
+            // This is currently enforced by the order of characters in the s_specialCharacterChars array
             foreach (char c in s_specialCharacterChars)
             {
-                characterString = c.ToString();
-                if (path.Contains(characterString))
-                    path = path.Replace(characterString, Uri.HexEscape(c));
+                if (path.Contains(c))
+                {
+                    path = path.Replace(c.ToString(), Uri.HexEscape(c));
+                }
             }
 
             return path;

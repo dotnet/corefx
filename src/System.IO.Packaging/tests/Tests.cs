@@ -3782,10 +3782,10 @@ namespace System.IO.Packaging.Tests
             Uri packageUri = new Uri("application://");
 
             Uri combinedUri = PackUriHelper.Create(packageUri, partUri);
-            Assert.Equal(combinedUri.ToString(), "pack://application:,,,/idontexist.xml");
+            Assert.Equal("pack://application:,,,/idontexist.xml", combinedUri.ToString());
 
             Uri sameCombinedUri = PackUriHelper.Create(packageUri, partUri);
-            Assert.Equal(combinedUri.ToString(), "pack://application:,,,/idontexist.xml");
+            Assert.Equal("pack://application:,,,/idontexist.xml", combinedUri.ToString());
 
             Assert.Equal(combinedUri, sameCombinedUri);
 
@@ -3797,7 +3797,7 @@ namespace System.IO.Packaging.Tests
             Assert.Equal(packageUri, returnedSamePackageUri);
 
             // Validate PackUriHelper.ComparePackUri correctly validates identical pack uri's.
-            Assert.True(PackUriHelper.ComparePackUri(combinedUri, sameCombinedUri) == 0);
+            Assert.Equal(0, PackUriHelper.ComparePackUri(combinedUri, sameCombinedUri));
         }
 
         [Fact]
@@ -3808,13 +3808,13 @@ namespace System.IO.Packaging.Tests
             Uri packageUri = new Uri("application://");
 
             Uri combinedUriWithPart = PackUriHelper.Create(packageUri, partUri);
-            Assert.Equal(combinedUriWithPart.ToString(), "pack://application:,,,/idontexist.xml");
+            Assert.Equal("pack://application:,,,/idontexist.xml", combinedUriWithPart.ToString());
 
             Uri combinedUriWithDifferentPart = PackUriHelper.Create(packageUri, differentPartUri);
-            Assert.Equal(combinedUriWithDifferentPart.ToString(), "pack://application:,,,/idontexist2.xml");
+            Assert.Equal("pack://application:,,,/idontexist2.xml", combinedUriWithDifferentPart.ToString());
 
             Uri combinedUriNoPart = PackUriHelper.Create(packageUri);
-            Assert.Equal(combinedUriNoPart.ToString(), "pack://application:,,,/");
+            Assert.Equal("pack://application:,,,/", combinedUriNoPart.ToString());
 
             Uri returnedPackageUri = PackUriHelper.GetPackageUri(combinedUriWithPart);
             Uri returnedPackageUriNoPart = PackUriHelper.GetPackageUri(combinedUriNoPart);
@@ -3827,9 +3827,9 @@ namespace System.IO.Packaging.Tests
 
             // Validate PackUriHelper.ComparePackUri correctly compares pack uri's with different parts. These are not
             // considered equal because the parts are different.
-            Assert.False(PackUriHelper.ComparePackUri(combinedUriWithPart, combinedUriWithDifferentPart) == 0);
-            Assert.False(PackUriHelper.ComparePackUri(combinedUriWithPart, combinedUriNoPart) == 0);
-            Assert.False(PackUriHelper.ComparePackUri(combinedUriNoPart, combinedUriWithDifferentPart) == 0);
+            Assert.NotEqual(0, PackUriHelper.ComparePackUri(combinedUriWithPart, combinedUriWithDifferentPart));
+            Assert.NotEqual(0, PackUriHelper.ComparePackUri(combinedUriWithPart, combinedUriNoPart));
+            Assert.NotEqual(0, PackUriHelper.ComparePackUri(combinedUriNoPart, combinedUriWithDifferentPart));
         }
 
         [Fact]
@@ -3840,13 +3840,13 @@ namespace System.IO.Packaging.Tests
             Uri differentPackageUri = new Uri("siteoforigin://");
 
             Uri packageUriWithPart = PackUriHelper.Create(packageUri, partUri);
-            Assert.Equal(packageUriWithPart.ToString(), "pack://application:,,,/idontexist.xml");
+            Assert.Equal("pack://application:,,,/idontexist.xml", packageUriWithPart.ToString());
 
             Uri samePackageNoPart = PackUriHelper.Create(packageUri);
-            Assert.Equal(samePackageNoPart.ToString(), "pack://application:,,,/");
+            Assert.Equal("pack://application:,,,/", samePackageNoPart.ToString());
 
             Uri differentPackageSamePart = PackUriHelper.Create(differentPackageUri, partUri);
-            Assert.Equal(differentPackageSamePart.ToString(), "pack://siteoforigin:,,,/idontexist.xml");
+            Assert.Equal("pack://siteoforigin:,,,/idontexist.xml", differentPackageSamePart.ToString());
 
             Uri returnedPackageUri = PackUriHelper.GetPackageUri(packageUriWithPart);
             Uri returnedSamePackageUri = PackUriHelper.GetPackageUri(samePackageNoPart);
@@ -3858,8 +3858,8 @@ namespace System.IO.Packaging.Tests
             Assert.Equal(differentPackageUri, returnedDifferentPackageUri);
 
             // Validate PackUriHelper.ComparePackUri correctly compares pack uri's with different packages.
-            Assert.False(PackUriHelper.ComparePackUri(packageUriWithPart, differentPackageSamePart) == 0);
-            Assert.False(PackUriHelper.ComparePackUri(samePackageNoPart, differentPackageSamePart) == 0);
+            Assert.NotEqual(0, PackUriHelper.ComparePackUri(packageUriWithPart, differentPackageSamePart));
+            Assert.NotEqual(0, PackUriHelper.ComparePackUri(samePackageNoPart, differentPackageSamePart));
         }
 
         private const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
