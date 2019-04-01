@@ -473,7 +473,7 @@ namespace System.Text.Json
 
             if (HasValueSequence)
             {
-                int sequenceLength = (int)ValueSequence.Length;
+                long sequenceLength = ValueSequence.Length;
 
                 if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(sequenceLength))
                 {
@@ -482,7 +482,7 @@ namespace System.Text.Json
                 }
 
                 Debug.Assert(sequenceLength <= JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
-                Span<byte> stackSpan = stackalloc byte[sequenceLength];
+                Span<byte> stackSpan = stackalloc byte[(int)sequenceLength];
 
                 ValueSequence.CopyTo(stackSpan);
                 span = stackSpan;
@@ -532,7 +532,7 @@ namespace System.Text.Json
 
             if (HasValueSequence)
             {
-                int sequenceLength = (int)ValueSequence.Length;
+                long sequenceLength = ValueSequence.Length;
 
                 if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(sequenceLength))
                 {
@@ -541,7 +541,7 @@ namespace System.Text.Json
                 }
 
                 Debug.Assert(sequenceLength <= JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
-                Span<byte> stackSpan = stackalloc byte[sequenceLength];
+                Span<byte> stackSpan = stackalloc byte[(int)sequenceLength];
 
                 ValueSequence.CopyTo(stackSpan);
                 span = stackSpan;

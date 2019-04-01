@@ -250,7 +250,7 @@ namespace System.Text.Json
                                                0x01ul << 48) + 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsValidDateTimeOffsetParseLength(int length)
+        public static bool IsValidDateTimeOffsetParseLength(long length)
         {
             return JsonHelpers.IsInRangeInclusive(length, JsonConstants.MinimumDateTimeParseLength, JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
         }
@@ -304,7 +304,7 @@ namespace System.Text.Json
 
             Span<byte> utf8Unescaped = stackalloc byte[source.Length];
 
-            JsonReaderHelper.Unescape(source, utf8Unescaped, idx, out int written);
+            Unescape(source, utf8Unescaped, idx, out int written);
             Debug.Assert(written > 0);
 
             utf8Unescaped = utf8Unescaped.Slice(0, written);

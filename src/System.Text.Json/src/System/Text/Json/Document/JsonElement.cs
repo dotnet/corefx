@@ -775,7 +775,7 @@ namespace System.Text.Json
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   The value cannot be represented as an <see cref="DateTime"/>.
+        ///   The value cannot be represented as a <see cref="DateTime"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -826,7 +826,7 @@ namespace System.Text.Json
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   The value cannot be represented as an <see cref="DateTimeOffset"/>.
+        ///   The value cannot be represented as a <see cref="DateTimeOffset"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -877,7 +877,7 @@ namespace System.Text.Json
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   The value cannot be represented as an <see cref="Guid"/>.
+        ///   The value cannot be represented as a <see cref="Guid"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
