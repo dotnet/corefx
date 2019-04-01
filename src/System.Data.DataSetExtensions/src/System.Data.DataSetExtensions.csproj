@@ -4,6 +4,7 @@
     <AssemblyName>System.Data.DataSetExtensions</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <IsPartialFacadeAssembly Condition="'$(TargetsNETStandard)' != 'true'">true</IsPartialFacadeAssembly>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Collections" />

@@ -31,7 +31,7 @@ namespace System.Data
     /// <summary>
     /// This class provides a wrapper for DataTables to allow for querying via LINQ.
     /// </summary>
-    public class EnumerableRowCollection<TRow> : EnumerableRowCollection, IEnumerable<TRow>
+    public partial class EnumerableRowCollection<TRow> : EnumerableRowCollection, IEnumerable<TRow>
     {
         private readonly DataTable _table;
         private readonly IEnumerable<TRow> _enumerableRows;

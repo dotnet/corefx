@@ -12,7 +12,7 @@ namespace System.Data
     /// <summary>
     /// This static class defines the DataTable extension methods.
     /// </summary>
-    public static class DataTableExtensions
+    public static partial class DataTableExtensions
     {
         /// <summary>
         /// This method returns a IEnumerable of Datarows.
