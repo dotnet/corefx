@@ -364,7 +364,7 @@
     <value>Package URI obtained from the pack URI cannot contain a Fragment.</value>
   </data>
   <data name="FragmentMustStartWithHash" xml:space="preserve">
-    <value>The 'fragment' parameter must start with a number sign.</value>
+    <value>The '{0}' parameter must start with '#'.</value>
   </data>
   <data name="UriShouldBePackScheme" xml:space="preserve">
     <value>URI must contain pack:// scheme.</value>
