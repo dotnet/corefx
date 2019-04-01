@@ -8,16 +8,6 @@ namespace System.Text.Json
 {
     internal static partial class JsonWriterHelper
     {
-        public static void TrimDateTime(Span<byte> buffer, out int bytesWritten)
-        {
-            Trim(buffer, out bytesWritten);
-        }
-
-        public static void TrimDateTimeOffset(Span<byte> buffer, out int bytesWritten)
-        {
-            Trim(buffer, out bytesWritten);
-        }
-
         //
         // Trims roundtrippable DateTime(Offset) input.
         // If the milliseconds part of the date is zero, we omit the fraction part of the date,
@@ -28,7 +18,7 @@ namespace System.Text.Json
         //   2017-06-12T05:30:45.768-07:00
         //   2017-06-12T05:30:45.00768Z           (Z is short for "+00:00" but also distinguishes DateTimeKind.Utc from DateTimeKind.Local)
         //   2017-06-12T05:30:45                  (interpreted as local time wrt to current time zone)
-        private static void Trim(Span<byte> buffer, out int bytesWritten)
+        public static void TrimDateTimeOffset(Span<byte> buffer, out int bytesWritten)
         {
             // Assert buffer is the right length for:
             // YYYY-MM-DDThh:mm:ss.fffffff (JsonConstants.MaximumFormatDateTimeLength)
@@ -52,12 +42,12 @@ namespace System.Text.Json
 
             if (fraction > 0)
             {
-                int numFractionDigits = 7;
                 // Remove trailing zeros
+                int numFractionDigits = 7;
                 while (fraction % 10 == 0)
                 {
                     fraction /= 10;
-                    numFractionDigits -= 1;
+                    numFractionDigits--;
                 }
 
                 // The last fraction digit's index will be (the period's index plus one) + (the number of fraction digits minus one)
@@ -75,16 +65,21 @@ namespace System.Text.Json
 
             bytesWritten = curIndex;
 
+            // We are either trimming a DateTimeOffset, or a DateTime with
+            // DateTimeKind.Local or DateTimeKind.Utc
             if (buffer.Length > JsonConstants.MaximumFormatDateTimeLength)
             {
                 // Write offset
 
                 buffer[curIndex] = buffer[27];
 
+                // curIndex is at one of 'Z', '+', or '-'
                 bytesWritten = curIndex + 1;
 
+                // We have a Non-UTC offset i.e. (+|-)hh:mm
                 if (buffer.Length == JsonConstants.MaximumFormatDateTimeOffsetLength)
                 {
+                    // Last index of the offset
                     int bufferEnd = curIndex + 5;
 
                     buffer[bufferEnd] = buffer[32];
@@ -93,6 +88,7 @@ namespace System.Text.Json
                     buffer[bufferEnd - 3] = buffer[29];
                     buffer[bufferEnd - 4] = buffer[28];
 
+                    // bytes written is the last index of the offset + 1
                     bytesWritten = bufferEnd + 1;
                 }
             }

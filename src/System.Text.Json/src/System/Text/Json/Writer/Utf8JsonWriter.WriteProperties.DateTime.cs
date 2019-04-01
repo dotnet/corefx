@@ -276,9 +276,9 @@ namespace System.Text.Json
             bool result = Utf8Formatter.TryFormat(value, tempSpan, out int bytesWritten, s_dateTimeStandardFormat);
             Debug.Assert(result);
 
-            JsonWriterHelper.TrimDateTime(tempSpan.Slice(0, bytesWritten), out bytesWritten);
+            JsonWriterHelper.TrimDateTimeOffset(tempSpan.Slice(0, bytesWritten), out bytesWritten);
 
-            if (_buffer.Slice(idx).Length < bytesWritten)
+            if (_buffer.Length < bytesWritten)
             {
                 AdvanceAndGrow(ref idx, bytesWritten);
             }
