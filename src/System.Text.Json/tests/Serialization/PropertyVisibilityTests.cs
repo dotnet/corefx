@@ -21,6 +21,18 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void IgnoreReadOnlyProperties()
+        {
+            var options = new JsonSerializerOptions();
+            options.IgnoreReadOnlyProperties = true;
+
+            var obj = new ClassWithNoSetter();
+
+            string json = JsonSerializer.ToString(obj, options);
+            Assert.Equal(@"{}", json);
+        }
+
+        [Fact]
         public static void NoGetter()
         {
             var objNoSetter = new ClassWithNoSetter();
@@ -51,7 +63,37 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Null(objCopy.GetMyString());
         }
 
+        [Fact]
+        public static void JsonIgnoreAttribute()
+        {
+            var obj = new ClassWithIgnoreAttributeProperty();
+            Assert.Equal(@"DefaultValue", obj.MyString);
+
+            // Verify serialize.
+            string json = JsonSerializer.ToString(obj);
+            Assert.Equal(@"{}", json);
+
+            // Verify deserialize is also ignored.
+            obj = JsonSerializer.Parse<ClassWithIgnoreAttributeProperty>(@"{""MyString"":""Hello""}");
+            Assert.Equal(@"DefaultValue", obj.MyString);
+        }
+
         // Todo: add tests with missing object property and missing collection property.
+
+        public class ClassWithPrivateSetterAndGetter
+        {
+            private string MyString { get; set; }
+
+            public string GetMyString()
+            {
+                return MyString;
+            }
+
+            public void SetMyString(string value)
+            {
+                MyString = value;
+            }
+        }
 
         public class ClassWithNoSetter
         {
@@ -81,19 +123,15 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
-        public class ClassWithPrivateSetterAndGetter
+        public class ClassWithIgnoreAttributeProperty
         {
-            private string MyString { get; set; }
-
-            public string GetMyString()
+            public ClassWithIgnoreAttributeProperty()
             {
-                return MyString;
+                MyString = "DefaultValue";
             }
 
-            public void SetMyString(string value)
-            {
-                MyString = value;
-            }
+            [JsonIgnore]
+            public string MyString { get; set; }
         }
     }
 }

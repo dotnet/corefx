@@ -38,10 +38,10 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void OverrideReadOnOption()
+        public static void IgnoreNullValuesOnOptionsWithRead()
         {
             var options = new JsonSerializerOptions();
-            options.IgnoreNullPropertyValueOnRead = true;
+            options.IgnoreNullValues = true;
 
             TestClassWithNullButInitialized obj = JsonSerializer.Parse<TestClassWithNullButInitialized>(TestClassWithNullButInitialized.s_json, options);
             Assert.Equal("Hello", obj.MyString);

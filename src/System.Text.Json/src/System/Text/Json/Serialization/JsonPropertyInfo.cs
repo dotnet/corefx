@@ -16,10 +16,12 @@ namespace System.Text.Json.Serialization
         internal byte[] _name = default;
         internal byte[] _escapedName = default;
 
-        internal bool HasGetter { get; set; }
-        internal bool HasSetter { get; set; }
+        protected bool HasGetter { get; set; }
+        protected bool HasSetter { get; set; }
+        protected bool UseGetter { get; private set; }
+        protected bool UseSetter { get; private set; }
+        internal bool IgnoreNullValues { get; private set; }
 
-        public ReadOnlySpan<byte> EscapedName => _escapedName;
         public ReadOnlySpan<byte> Name => _name;
 
         // todo: to minimize hashtable lookups, cache JsonClassInfo:
@@ -79,18 +81,20 @@ namespace System.Text.Json.Serialization
                     EnumerableConverter = new DefaultEnumerableConverter();
                 }
             }
+
+            bool hasIgnoreAttribute = (GetAttribute<JsonIgnoreAttribute>() != null);
+
+            UseGetter = HasGetter && !hasIgnoreAttribute && (HasSetter || !options.IgnoreReadOnlyProperties);
+            UseSetter = HasSetter && !hasIgnoreAttribute;
+
+            IgnoreNullValues = options.IgnoreNullValues;
         }
 
         internal abstract object GetValueAsObject(object obj, JsonSerializerOptions options);
 
-        internal bool IgnoreNullPropertyValueOnRead(JsonSerializerOptions options)
+        internal TAttribute GetAttribute<TAttribute>() where TAttribute : Attribute
         {
-            return options.IgnoreNullPropertyValueOnRead;
-        }
-
-        internal bool IgnoreNullPropertyValueOnWrite(JsonSerializerOptions options)
-        {
-            return options.IgnoreNullPropertyValueOnWrite;
+            return (TAttribute)PropertyInfo?.GetCustomAttribute(typeof(TAttribute), inherit: false);
         }
 
         internal abstract void Read(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader);

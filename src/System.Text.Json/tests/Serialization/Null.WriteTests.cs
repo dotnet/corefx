@@ -17,10 +17,10 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void OverrideWriteOnOption()
+        public static void IgnoreNullValuesOnOptionsWithWrite()
         {
             JsonSerializerOptions options = new JsonSerializerOptions();
-            options.IgnoreNullPropertyValueOnWrite = true;
+            options.IgnoreNullValues = true;
 
             var input = new TestClassWithNull();
             string json = JsonSerializer.ToString(input, options);
