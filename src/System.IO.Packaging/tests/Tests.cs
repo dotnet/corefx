@@ -3862,6 +3862,22 @@ namespace System.IO.Packaging.Tests
             Assert.NotEqual(0, PackUriHelper.ComparePackUri(samePackageNoPart, differentPackageSamePart));
         }
 
+        [Fact]
+        void CreatePackUriWithFragment()
+        {
+            Uri partUri = new Uri("/idontexist.xml", UriKind.Relative);
+            Uri packageUri = new Uri("application://");
+            string fragment = "#abc";
+            Uri packageUriWithPart = PackUriHelper.Create(packageUri, partUri, fragment);
+            Assert.Equal("pack://application:,,,/idontexist.xml#abc", packageUriWithPart.ToString());
+
+            Assert.Throws<ArgumentException>(() => {
+                string badFragment = "abc";
+                PackUriHelper.Create(packageUri, partUri, badFragment);
+            });
+
+        }
+
         private const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
     }
 

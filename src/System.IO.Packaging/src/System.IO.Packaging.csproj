@@ -5,10 +5,10 @@
     <AssemblyName>System.IO.Packaging</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)'=='netfx' OR '$(TargetGroup)'=='net46'">true</IsPartialFacadeAssembly>
-    <DefineConstants>$(DefineConstants);FEATURE_SERIALIZATION</DefineConstants>
-    <Configurations>net46-Debug;net46-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;</Configurations>
+    <DefineConstants Condition="'$(TargetGroup)' != 'netstandard1.3'">$(DefineConstants);FEATURE_SERIALIZATION</DefineConstants>
+    <Configurations>net46-Debug;net46-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard1.3-Debug;netstandard1.3-Release</Configurations>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netstandard2.0'">
+  <ItemGroup Condition="'$(TargetGroup)'=='netstandard1.3'">
     <Reference Include="System.Collections" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Globalization" />
@@ -50,6 +50,7 @@
     <Compile Include="System\IO\Packaging\ZipPackagePart.cs" />
     <Compile Include="System\IO\Packaging\ZipStreamManager.cs" />
     <Compile Include="System\IO\Packaging\ZipWrappingStream.cs" />
+    <Compile Condition="'$(TargetGroup)'!='netstandard1.3'" Include="System\IO\Packaging\PackUriHelper.PackUriScheme.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netfx' OR '$(TargetGroup)' == 'net46' ">
     <Reference Include="mscorlib" />
