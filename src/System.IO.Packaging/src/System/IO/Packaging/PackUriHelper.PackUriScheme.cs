@@ -126,8 +126,7 @@ namespace System.IO.Packaging
         /// <exception cref="ArgumentException">If inner packageUri extracted from the packUri has a fragment component</exception>
         public static Uri GetPackageUri(Uri packUri)
         {
-
-            //Parameter Validation is done in the follwoing method
+            //Parameter Validation is done in the following method
             ValidateAndGetPackUriComponents(packUri, out Uri packageUri, out _);
 
             return packageUri;
