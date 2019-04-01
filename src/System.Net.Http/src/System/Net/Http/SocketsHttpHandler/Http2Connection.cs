@@ -787,7 +787,7 @@ namespace System.Net.Http
                         if (header.Key.KnownHeader == KnownHeaders.TE)
                         {
                             // HTTP/2 allows only 'trailers' TE header. rfc7540 8.1.2.2
-                            foreach (string value  in header.Value)
+                            foreach (string value in header.Value)
                             {
                                 if (string.Equals(value, "trailers", StringComparison.OrdinalIgnoreCase))
                                 {
