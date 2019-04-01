@@ -7,7 +7,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
+using Xunit.Sdk;
 
 namespace System.Text.Json.Tests
 {
@@ -115,7 +117,7 @@ namespace System.Text.Json.Tests
 
         public static byte[] ReturnBytesHelper(byte[] data, out int length, JsonCommentHandling commentHandling = JsonCommentHandling.Disallow, int maxDepth = 64)
         {
-            var state = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
+            var state = new JsonReaderState(new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = maxDepth });
             var reader = new Utf8JsonReader(data, true, state);
             return ReaderLoop(data.Length, out length, ref reader);
         }
@@ -123,7 +125,7 @@ namespace System.Text.Json.Tests
         public static byte[] SequenceReturnBytesHelper(byte[] data, out int length, JsonCommentHandling commentHandling = JsonCommentHandling.Disallow, int maxDepth = 64)
         {
             ReadOnlySequence<byte> sequence = CreateSegments(data);
-            var state = new JsonReaderState(maxDepth: maxDepth, options: new JsonReaderOptions { CommentHandling = commentHandling });
+            var state = new JsonReaderState(new JsonReaderOptions { CommentHandling = commentHandling, MaxDepth = maxDepth });
             var reader = new Utf8JsonReader(sequence, true, state);
             return ReaderLoop(data.Length, out length, ref reader);
         }
@@ -155,6 +157,24 @@ namespace System.Text.Json.Tests
             Array.Copy(_dataUtf8, _dataUtf8.Length - remaining, buffers[numberOfSegments - 1], 0, remaining);
 
             return BufferFactory.Create(buffers);
+        }
+
+        public static List<ReadOnlySequence<byte>> GetSequences(ReadOnlyMemory<byte> dataMemory)
+        {
+            var sequences = new List<ReadOnlySequence<byte>>
+            {
+                new ReadOnlySequence<byte>(dataMemory)
+            };
+
+            for (int i = 0; i < dataMemory.Length; i++)
+            {
+                var firstSegment = new BufferSegment<byte>(dataMemory.Slice(0, i));
+                ReadOnlyMemory<byte> secondMem = dataMemory.Slice(i);
+                BufferSegment<byte> secondSegment = firstSegment.Append(secondMem);
+                var sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, secondMem.Length);
+                sequences.Add(sequence);
+            }
+            return sequences;
         }
 
         internal static ReadOnlySequence<byte> SegmentInto(ReadOnlyMemory<byte> data, int segmentCount)
@@ -542,6 +562,79 @@ namespace System.Text.Json.Tests
         {
             double value = random.NextDouble() * (maxValue - minValue) + minValue;
             return (decimal)value;
+        }
+
+        public static string GetCompactString(string jsonString)
+        {
+            using (JsonTextReader jsonReader = new JsonTextReader(new StringReader(jsonString)))
+            {
+                jsonReader.FloatParseHandling = FloatParseHandling.Decimal;
+                JToken jtoken = JToken.ReadFrom(jsonReader);
+                var stringWriter = new StringWriter();
+                using (JsonTextWriter jsonWriter = new JsonTextWriter(stringWriter))
+                {
+                    jtoken.WriteTo(jsonWriter);
+                    return stringWriter.ToString();
+                }
+            }
+        }
+
+        public delegate void AssertThrowsActionUtf8JsonReader(Utf8JsonReader json);
+
+        // Cannot use standard Assert.Throws() when testing Utf8JsonReader - ref structs and closures don't get along.
+        public static void AssertThrows<E>(Utf8JsonReader json, AssertThrowsActionUtf8JsonReader action) where E : Exception
+        {
+            Exception ex;
+
+            try
+            {
+                action(json);
+                ex = null;
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            if (ex == null)
+            {
+                throw new ThrowsException(typeof(E));
+            }
+
+            if (ex.GetType() != typeof(E))
+            {
+                throw new ThrowsException(typeof(E), ex);
+            }
+        }
+
+        public delegate void AssertThrowsActionUtf8JsonWriter(ref Utf8JsonWriter writer);
+
+        public static void AssertThrows<E>(
+            ref Utf8JsonWriter writer,
+            AssertThrowsActionUtf8JsonWriter action)
+            where E : Exception
+        {
+            Exception ex;
+
+            try
+            {
+                action(ref writer);
+                ex = null;
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            if (ex == null)
+            {
+                throw new ThrowsException(typeof(E));
+            }
+
+            if (ex.GetType() != typeof(E))
+            {
+                throw new ThrowsException(typeof(E), ex);
+            }
         }
     }
 }

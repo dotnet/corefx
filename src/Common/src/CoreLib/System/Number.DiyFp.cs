@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
+using System.Numerics;
 
 namespace System
 {
@@ -111,7 +113,7 @@ namespace System
                 // and subtract once.
 
                 Debug.Assert(f != 0);
-                int lzcnt = BitOps.LeadingZeroCount(f);
+                int lzcnt = BitOperations.LeadingZeroCount(f);
                 return new DiyFp((f << lzcnt), (e - lzcnt));
             }
 

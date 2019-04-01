@@ -1,9 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
   <PropertyGroup>
     <!-- Enable targeting netcoreapp3.0 even in an older CLI -->
     <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
     <!-- use the most recent MS.NETCore.App we have from upstack -->
     <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
   </PropertyGroup>
+  <!-- Unix CoreLib contains EventRegistrationToken but no other
+       types from System.Runtime.InteropServices.WindowsRuntime.
+       https://github.com/dotnet/corefx/issues/35792 -->
+  <ItemGroup Condition="'$(RuntimeIdentifier)' != '' AND !$(RuntimeIdentifier.StartsWith('win'))">
+    <IgnoredTypes Include="System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- https://github.com/dotnet/corefx/issues/36483 -->
+    <IgnoredTypes Include="System.Runtime.Intrinsics.Arm.Arm64.Aes" />
+    <IgnoredTypes Include="System.Runtime.Intrinsics.Arm.Arm64.Base" />
+    <IgnoredTypes Include="System.Runtime.Intrinsics.Arm.Arm64.Sha1" />
+    <IgnoredTypes Include="System.Runtime.Intrinsics.Arm.Arm64.Sha256" />
+    <IgnoredTypes Include="System.Runtime.Intrinsics.Arm.Arm64.Simd" />
+  </ItemGroup>
 </Project>

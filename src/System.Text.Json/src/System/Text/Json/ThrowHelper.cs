@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
 {
-    internal static class ThrowHelper
+    internal static partial class ThrowHelper
     {
         public static ArgumentException GetArgumentException_MaxDepthMustBePositive()
         {
@@ -150,7 +150,7 @@ namespace System.Text.Json
             }
             else
             {
-                return new InvalidOperationException(SR.Format(SR.EmptyJsonIsInvalid));
+                return new InvalidOperationException(SR.EmptyJsonIsInvalid);
             }
         }
 
@@ -183,10 +183,21 @@ namespace System.Text.Json
             return GetInvalidOperationException("string", tokenType);
         }
 
+        public static InvalidOperationException GetInvalidOperationException_ExpectedStringComparison(JsonTokenType tokenType)
+        {
+            return GetInvalidOperationException(tokenType);
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static InvalidOperationException GetInvalidOperationException(string message, JsonTokenType tokenType)
         {
             return new InvalidOperationException(SR.Format(SR.InvalidCast, tokenType, message));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static InvalidOperationException GetInvalidOperationException(JsonTokenType tokenType)
+        {
+            return new InvalidOperationException(SR.Format(SR.InvalidComparison, tokenType));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -226,17 +237,23 @@ namespace System.Text.Json
 
         private static bool IsPrintable(byte value) => value >= 0x20 && value < 0x7F;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string GetPrintableString(byte value)
+        {
+            return IsPrintable(value) ? ((char)value).ToString() : $"0x{value:X2}";
+        }
+
         // This function will convert an ExceptionResource enum value to the resource string.
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static string GetResourceString(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte, string characters)
         {
-            string character = IsPrintable(nextByte) ? ((char)nextByte).ToString() : $"0x{nextByte:X2}";
+            string character = GetPrintableString(nextByte);
 
             string message = "";
             switch (resource)
             {
                 case ExceptionResource.ArrayDepthTooLarge:
-                    message = SR.Format(SR.ArrayDepthTooLarge, json.CurrentDepth + 1, json.CurrentState.MaxDepth);
+                    message = SR.Format(SR.ArrayDepthTooLarge, json.CurrentState.Options.MaxDepth);
                     break;
                 case ExceptionResource.MismatchedObjectArray:
                     message = SR.Format(SR.MismatchedObjectArray, character);
@@ -284,7 +301,7 @@ namespace System.Text.Json
                     message = SR.Format(SR.InvalidEndOfJsonNonPrimitive, json.TokenType);
                     break;
                 case ExceptionResource.ObjectDepthTooLarge:
-                    message = SR.Format(SR.ObjectDepthTooLarge, json.CurrentDepth + 1, json.CurrentState.MaxDepth);
+                    message = SR.Format(SR.ObjectDepthTooLarge, json.CurrentState.Options.MaxDepth);
                     break;
                 case ExceptionResource.ExpectedFalse:
                     message = SR.Format(SR.ExpectedFalse, characters);
@@ -308,7 +325,7 @@ namespace System.Text.Json
                     message = SR.EndOfCommentNotFound;
                     break;
                 case ExceptionResource.ZeroDepthAtEnd:
-                    message = SR.Format(SR.ZeroDepthAtEnd, json.CurrentDepth);
+                    message = SR.Format(SR.ZeroDepthAtEnd);
                     break;
                 case ExceptionResource.ExpectedJsonTokens:
                     message = SR.ExpectedJsonTokens;
@@ -321,7 +338,7 @@ namespace System.Text.Json
             return message;
         }
 
-        public static void ThrowInvalidOperationException(ExceptionResource resource, int currentDepth = default, byte token = default, JsonTokenType tokenType = default)
+        public static void ThrowInvalidOperationException(ExceptionResource resource, int currentDepth, byte token, JsonTokenType tokenType)
         {
             throw GetInvalidOperationException(resource, currentDepth, token, tokenType);
         }
@@ -350,7 +367,7 @@ namespace System.Text.Json
                 builder.Append("...");
             }
 
-            throw new ArgumentException(SR.Format(SR.CannotWriteInvalidUTF8, builder.ToString()));
+            throw new ArgumentException(SR.Format(SR.CannotWriteInvalidUTF8, builder));
         }
 
         public static void ThrowArgumentException_InvalidUTF16(int charAsInt)
@@ -388,7 +405,8 @@ namespace System.Text.Json
             switch (resource)
             {
                 case ExceptionResource.MismatchedObjectArray:
-                    message = SR.Format(SR.MismatchedObjectArray, token);
+                    Debug.Assert(token == JsonConstants.CloseBracket || token == JsonConstants.CloseBrace);
+                    message = SR.Format(SR.MismatchedObjectArray, (char)token);
                     break;
                 case ExceptionResource.DepthTooLarge:
                     message = SR.Format(SR.DepthTooLarge, currentDepth & JsonConstants.RemoveFlagsBitMask, JsonConstants.MaxWriterDepth);
@@ -450,6 +468,26 @@ namespace System.Text.Json
             }
             return new FormatException(message);
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static FormatException GetFormatException(DateType dateType)
+        {
+            string message = "";
+
+            switch (dateType)
+            {
+                case DateType.DateTime:
+                    message = SR.FormatDateTime;
+                    break;
+                case DateType.DateTimeOffset:
+                    message = SR.FormatDateTimeOffset;
+                    break;
+                default:
+                    Debug.Fail($"The DateType enum value: {dateType} is not part of the switch. Add the appropriate case and exception message.");
+                    break;
+            }
+            return new FormatException(message);
+        }
     }
 
     internal enum ExceptionResource
@@ -499,5 +537,11 @@ namespace System.Text.Json
         Single,
         Double,
         Decimal
+    }
+
+    internal enum DateType
+    {
+        DateTime,
+        DateTimeOffset
     }
 }

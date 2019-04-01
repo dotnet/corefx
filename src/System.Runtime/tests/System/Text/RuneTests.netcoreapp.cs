@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Globalization;
-using System.Reflection;
 using Xunit;
 
 namespace System.Text.Tests
@@ -129,6 +129,21 @@ namespace System.Text.Tests
         }
 
         [Theory]
+        [MemberData(nameof(SurrogatePairTestData_ValidOnly))]
+        public static void Ctor_SurrogatePair_Valid(char highSurrogate, char lowSurrogate, int expectedValue)
+        {
+            Assert.Equal(expectedValue, new Rune(highSurrogate, lowSurrogate).Value);
+        }
+
+        [Theory]
+        [MemberData(nameof(SurrogatePairTestData_InvalidOnly))]
+        public static void Ctor_SurrogatePair_Valid(char highSurrogate, char lowSurrogate)
+        {
+            string expectedParamName = !char.IsHighSurrogate(highSurrogate) ? nameof(highSurrogate) : nameof(lowSurrogate);
+            Assert.Throws<ArgumentOutOfRangeException>(expectedParamName, () => new Rune(highSurrogate, lowSurrogate));
+        }
+
+        [Theory]
         [InlineData('A', 'a', -1)]
         [InlineData('A', 'A', 0)]
         [InlineData('a', 'A', 1)]
@@ -147,6 +162,92 @@ namespace System.Text.Tests
             Assert.Equal(expectedSign >= 0, a >= b);
         }
 
+        [Theory]
+        [InlineData(new char[0], OperationStatus.NeedMoreData, 0xFFFD, 0)] // empty buffer
+        [InlineData(new char[] { '\u1234' }, OperationStatus.Done, 0x1234, 1)] // BMP char
+        [InlineData(new char[] { '\u1234', '\ud800' }, OperationStatus.Done, 0x1234, 1)] // BMP char
+        [InlineData(new char[] { '\ud83d', '\ude32' }, OperationStatus.Done, 0x1F632, 2)] // supplementary value (U+1F632 ASTONISHED FACE)
+        [InlineData(new char[] { '\udc00' }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone low surrogate
+        [InlineData(new char[] { '\udc00', '\udc00' }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone low surrogate
+        [InlineData(new char[] { '\udc00', '\udc00' }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone low surrogate
+        [InlineData(new char[] { '\ud800' }, OperationStatus.NeedMoreData, 0xFFFD, 1)] // high surrogate at end of buffer
+        [InlineData(new char[] { '\ud800', '\ud800' }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone high surrogate
+        [InlineData(new char[] { '\ud800', '\u1234' }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone high surrogate
+        public static void DecodeFromUtf16(char[] data, OperationStatus expectedOperationStatus, int expectedRuneValue, int expectedCharsConsumed)
+        {
+            Assert.Equal(expectedOperationStatus, Rune.DecodeFromUtf16(data, out Rune actualRune, out int actualCharsConsumed));
+            Assert.Equal(expectedRuneValue, actualRune.Value);
+            Assert.Equal(expectedCharsConsumed, actualCharsConsumed);
+        }
+
+        [Theory]
+        [InlineData(new char[0], OperationStatus.NeedMoreData, 0xFFFD, 0)] // empty buffer
+        [InlineData(new char[] { '\u1234', '\u5678' }, OperationStatus.Done, 0x5678, 1)] // BMP char
+        [InlineData(new char[] { '\udc00', '\ud800' }, OperationStatus.NeedMoreData, 0xFFFD, 1)] // high surrogate at end of buffer
+        [InlineData(new char[] { '\ud83d', '\ude32' }, OperationStatus.Done, 0x1F632, 2)] // supplementary value (U+1F632 ASTONISHED FACE)
+        [InlineData(new char[] { '\u1234', '\udc00' }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone low surrogate
+        [InlineData(new char[] { '\udc00' }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone low surrogate
+        public static void DecodeLastFromUtf16(char[] data, OperationStatus expectedOperationStatus, int expectedRuneValue, int expectedCharsConsumed)
+        {
+            Assert.Equal(expectedOperationStatus, Rune.DecodeLastFromUtf16(data, out Rune actualRune, out int actualCharsConsumed));
+            Assert.Equal(expectedRuneValue, actualRune.Value);
+            Assert.Equal(expectedCharsConsumed, actualCharsConsumed);
+        }
+
+        [Theory]
+        [InlineData(new byte[0], OperationStatus.NeedMoreData, 0xFFFD, 0)] // empty buffer
+        [InlineData(new byte[] { 0x30 }, OperationStatus.Done, 0x0030, 1)] // ASCII byte
+        [InlineData(new byte[] { 0x30, 0x40, 0x50 }, OperationStatus.Done, 0x0030, 1)] // ASCII byte
+        [InlineData(new byte[] { 0x80 }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone continuation byte
+        [InlineData(new byte[] { 0x80, 0x80, 0x80 }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone continuation byte
+        [InlineData(new byte[] { 0xC1 }, OperationStatus.InvalidData, 0xFFFD, 1)] // C1 is never a valid UTF-8 byte
+        [InlineData(new byte[] { 0xF5 }, OperationStatus.InvalidData, 0xFFFD, 1)] // F5 is never a valid UTF-8 byte
+        [InlineData(new byte[] { 0xC2 }, OperationStatus.NeedMoreData, 0xFFFD, 1)] // C2 is a valid byte; expecting it to be followed by a continuation byte
+        [InlineData(new byte[] { 0xED }, OperationStatus.NeedMoreData, 0xFFFD, 1)] // ED is a valid byte; expecting it to be followed by a continuation byte
+        [InlineData(new byte[] { 0xF4 }, OperationStatus.NeedMoreData, 0xFFFD, 1)] // F4 is a valid byte; expecting it to be followed by a continuation byte
+        [InlineData(new byte[] { 0xC2, 0xC2 }, OperationStatus.InvalidData, 0xFFFD, 1)] // C2 not followed by continuation byte
+        [InlineData(new byte[] { 0xC3, 0x90 }, OperationStatus.Done, 0x00D0, 2)] // [ C3 90 ] is U+00D0 LATIN CAPITAL LETTER ETH
+        [InlineData(new byte[] { 0xC1, 0xBF }, OperationStatus.InvalidData, 0xFFFD, 1)] // [ C1 BF ] is overlong 2-byte sequence, all overlong sequences have maximal invalid subsequence length 1
+        [InlineData(new byte[] { 0xE0, 0x9F }, OperationStatus.InvalidData, 0xFFFD, 1)] // [ E0 9F ] is overlong 3-byte sequence, all overlong sequences have maximal invalid subsequence length 1
+        [InlineData(new byte[] { 0xE0, 0xA0 }, OperationStatus.NeedMoreData, 0xFFFD, 2)] // [ E0 A0 ] is valid 2-byte start of 3-byte sequence
+        [InlineData(new byte[] { 0xED, 0x9F }, OperationStatus.NeedMoreData, 0xFFFD, 2)] // [ ED 9F ] is valid 2-byte start of 3-byte sequence
+        [InlineData(new byte[] { 0xED, 0xBF }, OperationStatus.InvalidData, 0xFFFD, 1)] // [ ED BF ] would place us in UTF-16 surrogate range, all surrogate sequences have maximal invalid subsequence length 1
+        [InlineData(new byte[] { 0xEE, 0x80 }, OperationStatus.NeedMoreData, 0xFFFD, 2)] // [ EE 80 ] is valid 2-byte start of 3-byte sequence
+        [InlineData(new byte[] { 0xF0, 0x8F }, OperationStatus.InvalidData, 0xFFFD, 1)] // [ F0 8F ] is overlong 4-byte sequence, all overlong sequences have maximal invalid subsequence length 1
+        [InlineData(new byte[] { 0xF0, 0x90 }, OperationStatus.NeedMoreData, 0xFFFD, 2)] // [ F0 90 ] is valid 2-byte start of 4-byte sequence
+        [InlineData(new byte[] { 0xF4, 0x90 }, OperationStatus.InvalidData, 0xFFFD, 1)] // [ F4 90 ] would place us beyond U+10FFFF, all such sequences have maximal invalid subsequence length 1
+        [InlineData(new byte[] { 0xE2, 0x88, 0xB4 }, OperationStatus.Done, 0x2234, 3)] // [ E2 88 B4 ] is U+2234 THEREFORE
+        [InlineData(new byte[] { 0xE2, 0x88, 0xC0 }, OperationStatus.InvalidData, 0xFFFD, 2)] // [ E2 88 ] followed by non-continuation byte, maximal invalid subsequence length 2
+        [InlineData(new byte[] { 0xF0, 0x9F, 0x98 }, OperationStatus.NeedMoreData, 0xFFFD, 3)] // [ F0 9F 98 ] is valid 3-byte start of 4-byte sequence
+        [InlineData(new byte[] { 0xF0, 0x9F, 0x98, 0x20 }, OperationStatus.InvalidData, 0xFFFD, 3)] // [ F0 9F 98 ] followed by non-continuation byte, maximal invalid subsequence length 3
+        [InlineData(new byte[] { 0xF0, 0x9F, 0x98, 0xB2 }, OperationStatus.Done, 0x1F632, 4)] // [ F0 9F 98 B2 ] is U+1F632 ASTONISHED FACE
+        public static void DecodeFromUtf8(byte[] data, OperationStatus expectedOperationStatus, int expectedRuneValue, int expectedBytesConsumed)
+        {
+            Assert.Equal(expectedOperationStatus, Rune.DecodeFromUtf8(data, out Rune actualRune, out int actualBytesConsumed));
+            Assert.Equal(expectedRuneValue, actualRune.Value);
+            Assert.Equal(expectedBytesConsumed, actualBytesConsumed);
+        }
+
+        [Theory]
+        [InlineData(new byte[0], OperationStatus.NeedMoreData, 0xFFFD, 0)] // empty buffer
+        [InlineData(new byte[] { 0x30 }, OperationStatus.Done, 0x0030, 1)] // ASCII byte
+        [InlineData(new byte[] { 0x30, 0x40, 0x50 }, OperationStatus.Done, 0x0050, 1)] // ASCII byte
+        [InlineData(new byte[] { 0x80 }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone continuation byte
+        [InlineData(new byte[] { 0x80, 0x80, 0x80 }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone continuation byte
+        [InlineData(new byte[] { 0x80, 0x80, 0x80, 0x80 }, OperationStatus.InvalidData, 0xFFFD, 1)] // standalone continuation byte
+        [InlineData(new byte[] { 0x80, 0x80, 0x80, 0xC2 }, OperationStatus.NeedMoreData, 0xFFFD, 1)] // [ C2 ] at end of buffer, valid 1-byte start of 2-byte sequence
+        [InlineData(new byte[] { 0xC1 }, OperationStatus.InvalidData, 0xFFFD, 1)] // [ C1 ] is never a valid byte
+        [InlineData(new byte[] { 0x80, 0xE2, 0x88, 0xB4 }, OperationStatus.Done, 0x2234, 3)] // [ E2 88 B4 ] is U+2234 THEREFORE
+        [InlineData(new byte[] { 0xF0, 0x9F, 0x98, 0xB2 }, OperationStatus.Done, 0x1F632, 4)] // [ F0 9F 98 B2 ] is U+1F632 ASTONISHED FACE
+        [InlineData(new byte[] { 0xE2, 0x88, 0xB4, 0xB2 }, OperationStatus.InvalidData, 0xFFFD, 1)] // [ B2 ] is standalone continuation byte
+        [InlineData(new byte[] { 0x80, 0x62, 0x80, 0x80 }, OperationStatus.InvalidData, 0xFFFD, 1)] // [ 80 ] is standalone continuation byte
+        [InlineData(new byte[] { 0xF0, 0x9F, 0x98, }, OperationStatus.NeedMoreData, 0xFFFD, 3)] // [ F0 9F 98 ] is valid 3-byte start of 4-byte sequence
+        public static void DecodeLastFromUtf8(byte[] data, OperationStatus expectedOperationStatus, int expectedRuneValue, int expectedBytesConsumed)
+        {
+            Assert.Equal(expectedOperationStatus, Rune.DecodeLastFromUtf8(data, out Rune actualRune, out int actualBytesConsumed));
+            Assert.Equal(expectedRuneValue, actualRune.Value);
+            Assert.Equal(expectedBytesConsumed, actualBytesConsumed);
+        }
 
         [Theory]
         [InlineData(0, 0, true)]
@@ -366,6 +467,22 @@ namespace System.Text.Tests
         }
 
         [Theory]
+        [MemberData(nameof(SurrogatePairTestData_InvalidOnly))]
+        public static void TryCreate_SurrogateChars_Invalid(char highSurrogate, char lowSurrogate)
+        {
+            Assert.False(Rune.TryCreate(highSurrogate, lowSurrogate, out Rune result));
+            Assert.Equal(0, result.Value);
+        }
+
+        [Theory]
+        [MemberData(nameof(SurrogatePairTestData_ValidOnly))]
+        public static void TryCreate_SurrogateChars_Valid(char highSurrogate, char lowSurrogate, int expectedValue)
+        {
+            Assert.True(Rune.TryCreate(highSurrogate, lowSurrogate, out Rune result));
+            Assert.Equal(expectedValue, result.Value);
+        }
+
+        [Theory]
         [MemberData(nameof(GeneralTestData_BmpCodePoints_NoSurrogates))]
         [MemberData(nameof(GeneralTestData_SupplementaryCodePoints_ValidOnly))]
         public static void TryCreate_Int32_Valid(GeneralTestData testData)
@@ -412,7 +529,7 @@ namespace System.Text.Tests
         [Theory]
         [MemberData(nameof(GeneralTestData_BmpCodePoints_NoSurrogates))]
         [MemberData(nameof(GeneralTestData_SupplementaryCodePoints_ValidOnly))]
-        public static void TryEncode_AsUtf16(GeneralTestData testData)
+        public static void TryEncodeToUtf16(GeneralTestData testData)
         {
             Rune rune = new Rune(testData.ScalarValue);
             Assert.Equal(testData.Utf16Sequence.Length, rune.Utf16SequenceLength);
@@ -420,33 +537,41 @@ namespace System.Text.Tests
             // First, try with a buffer that's too short
 
             Span<char> utf16Buffer = stackalloc char[rune.Utf16SequenceLength - 1];
-            bool success = rune.TryEncode(utf16Buffer, out int charsWritten);
+            bool success = rune.TryEncodeToUtf16(utf16Buffer, out int charsWritten);
             Assert.False(success);
             Assert.Equal(0, charsWritten);
+
+            Assert.Throws<ArgumentException>("destination", () => rune.EncodeToUtf16(new char[rune.Utf16SequenceLength - 1]));
 
             // Then, try with a buffer that's appropriately sized
 
             utf16Buffer = stackalloc char[rune.Utf16SequenceLength];
-            success = rune.TryEncode(utf16Buffer, out charsWritten);
+            success = rune.TryEncodeToUtf16(utf16Buffer, out charsWritten);
             Assert.True(success);
             Assert.Equal(testData.Utf16Sequence.Length, charsWritten);
+            Assert.True(utf16Buffer.SequenceEqual(testData.Utf16Sequence));
+
+            utf16Buffer.Clear();
+            Assert.Equal(testData.Utf16Sequence.Length, rune.EncodeToUtf16(utf16Buffer));
             Assert.True(utf16Buffer.SequenceEqual(testData.Utf16Sequence));
 
             // Finally, try with a buffer that's too long (should succeed)
 
             utf16Buffer = stackalloc char[rune.Utf16SequenceLength + 1];
-            success = rune.TryEncode(utf16Buffer, out charsWritten);
+            success = rune.TryEncodeToUtf16(utf16Buffer, out charsWritten);
             Assert.True(success);
             Assert.Equal(testData.Utf16Sequence.Length, charsWritten);
             Assert.True(utf16Buffer.Slice(0, testData.Utf16Sequence.Length).SequenceEqual(testData.Utf16Sequence));
+
+            utf16Buffer.Clear();
+            Assert.Equal(testData.Utf16Sequence.Length, rune.EncodeToUtf16(utf16Buffer));
+            Assert.True(utf16Buffer.Slice(0, testData.Utf16Sequence.Length).SequenceEqual(testData.Utf16Sequence));
         }
 
-        // This test needs use private reflection into Rune at the moment because the
-        // TryEncode method which writes as UTF-8 isn't yet public.
         [Theory]
         [MemberData(nameof(GeneralTestData_BmpCodePoints_NoSurrogates))]
         [MemberData(nameof(GeneralTestData_SupplementaryCodePoints_ValidOnly))]
-        public static void TryEncode_AsUtf8(GeneralTestData testData)
+        public static void TryEncodeToUtf8(GeneralTestData testData)
         {
             Rune rune = new Rune(testData.ScalarValue);
             Assert.Equal(testData.Utf8Sequence.Length, actual: rune.Utf8SequenceLength);
@@ -454,34 +579,35 @@ namespace System.Text.Tests
             // First, try with a buffer that's too short
 
             Span<byte> utf8Buffer = stackalloc byte[rune.Utf8SequenceLength - 1];
-            bool success = TryEncodeToUtf8Bytes_Fn(ref rune, utf8Buffer, out int bytesWritten);
+            bool success = rune.TryEncodeToUtf8(utf8Buffer, out int bytesWritten);
             Assert.False(success);
             Assert.Equal(0, bytesWritten);
+
+            Assert.Throws<ArgumentException>("destination", () => rune.EncodeToUtf8(new byte[rune.Utf8SequenceLength - 1]));
 
             // Then, try with a buffer that's appropriately sized
 
             utf8Buffer = stackalloc byte[rune.Utf8SequenceLength];
-            success = TryEncodeToUtf8Bytes_Fn(ref rune, utf8Buffer, out bytesWritten);
+            success = rune.TryEncodeToUtf8(utf8Buffer, out bytesWritten);
             Assert.True(success);
             Assert.Equal(testData.Utf8Sequence.Length, bytesWritten);
+            Assert.True(utf8Buffer.SequenceEqual(testData.Utf8Sequence));
+
+            utf8Buffer.Clear();
+            Assert.Equal(testData.Utf8Sequence.Length, rune.EncodeToUtf8(utf8Buffer));
             Assert.True(utf8Buffer.SequenceEqual(testData.Utf8Sequence));
 
             // Finally, try with a buffer that's too long (should succeed)
 
             utf8Buffer = stackalloc byte[rune.Utf8SequenceLength + 1];
-            success = TryEncodeToUtf8Bytes_Fn(ref rune, utf8Buffer, out bytesWritten);
+            success = rune.TryEncodeToUtf8(utf8Buffer, out bytesWritten);
             Assert.True(success);
             Assert.Equal(testData.Utf8Sequence.Length, bytesWritten);
             Assert.True(utf8Buffer.Slice(0, testData.Utf8Sequence.Length).SequenceEqual(testData.Utf8Sequence));
-        }
 
-        private delegate bool TryEncodeToUtf8Bytes_Del(ref Rune rune, Span<byte> destination, out int bytesWritten);
-        private static readonly TryEncodeToUtf8Bytes_Del TryEncodeToUtf8Bytes_Fn = CreateTryEncodeToUtf8BytesDelegate();
-
-        private static TryEncodeToUtf8Bytes_Del CreateTryEncodeToUtf8BytesDelegate()
-        {
-            var methodInfo = typeof(Rune).GetMethod("TryEncodeToUtf8Bytes", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            return (TryEncodeToUtf8Bytes_Del)methodInfo.CreateDelegate(typeof(TryEncodeToUtf8Bytes_Del));
+            utf8Buffer.Clear();
+            Assert.Equal(testData.Utf8Sequence.Length, rune.EncodeToUtf8(utf8Buffer));
+            Assert.True(utf8Buffer.Slice(0, testData.Utf8Sequence.Length).SequenceEqual(testData.Utf8Sequence));
         }
     }
 }

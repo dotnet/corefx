@@ -6,14 +6,20 @@ using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-#if BUILDING_INBOX_LIBRARY
-using Internal.Runtime.CompilerServices;
-#else
 using System.Runtime.CompilerServices;
-#endif
 
 namespace System.Text.Json
 {
+    /// <summary>
+    ///   Provides a mechanism for examining the structural content of a JSON value without
+    ///   automatically instantiating data values.
+    /// </summary>
+    /// <remarks>
+    ///   This class utilizes resources from pooled memory to minimize the garbage collector (GC)
+    ///   impact in high-usage scenarios. Failure to properly Dispose this object will result in
+    ///   the memory not being returned to the pool, which will cause an increase in GC impact across
+    ///   various parts of the framework.
+    /// </remarks>
     public sealed partial class JsonDocument : IDisposable
     {
         private ReadOnlyMemory<byte> _utf8Json;
@@ -21,6 +27,9 @@ namespace System.Text.Json
         private byte[] _extraRentedBytes;
         private (int, string) _lastIndexAndString = (-1, null);
 
+        /// <summary>
+        ///   The <see cref="JsonElement"/> representing the value of the document.
+        /// </summary>
         public JsonElement RootElement => new JsonElement(this, 0);
 
         private JsonDocument(ReadOnlyMemory<byte> utf8Json, MetadataDb parsedData, byte[] extraRentedBytes)
@@ -32,6 +41,7 @@ namespace System.Text.Json
             _extraRentedBytes = extraRentedBytes;
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             if (_utf8Json.IsEmpty)
@@ -53,6 +63,9 @@ namespace System.Text.Json
             }
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal JsonTokenType GetJsonTokenType(int index)
         {
             CheckNotDisposed();
@@ -60,6 +73,9 @@ namespace System.Text.Json
             return _parsedData.GetJsonTokenType(index);
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal int GetArrayLength(int index)
         {
             CheckNotDisposed();
@@ -71,6 +87,9 @@ namespace System.Text.Json
             return row.SizeOrLength;
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal JsonElement GetArrayIndexElement(int currentIndex, int arrayIndex)
         {
             CheckNotDisposed();
@@ -119,6 +138,9 @@ namespace System.Text.Json
             throw new IndexOutOfRangeException();
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal int GetEndIndex(int index, bool includeEndElement)
         {
             CheckNotDisposed();
@@ -197,6 +219,9 @@ namespace System.Text.Json
             return _utf8Json.Slice(start, end - start);
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal string GetString(int index, JsonTokenType expectedType)
         {
             CheckNotDisposed();
@@ -236,12 +261,18 @@ namespace System.Text.Json
             return lastString;
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal string GetNameOfPropertyValue(int index)
         {
             // The property name is one row before the property value
             return GetString(index - DbRow.Size, JsonTokenType.PropertyName);
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal bool TryGetValue(int index, out int value)
         {
             CheckNotDisposed();
@@ -264,6 +295,9 @@ namespace System.Text.Json
             return false;
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal bool TryGetValue(int index, out uint value)
         {
             CheckNotDisposed();
@@ -286,6 +320,9 @@ namespace System.Text.Json
             return false;
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal bool TryGetValue(int index, out long value)
         {
             CheckNotDisposed();
@@ -308,6 +345,9 @@ namespace System.Text.Json
             return false;
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal bool TryGetValue(int index, out ulong value)
         {
             CheckNotDisposed();
@@ -330,6 +370,9 @@ namespace System.Text.Json
             return false;
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal bool TryGetValue(int index, out double value)
         {
             CheckNotDisposed();
@@ -354,6 +397,9 @@ namespace System.Text.Json
             return false;
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal bool TryGetValue(int index, out float value)
         {
             CheckNotDisposed();
@@ -378,6 +424,9 @@ namespace System.Text.Json
             return false;
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal bool TryGetValue(int index, out decimal value)
         {
             CheckNotDisposed();
@@ -402,16 +451,366 @@ namespace System.Text.Json
             return false;
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
+        internal bool TryGetValue(int index, out DateTime value)
+        {
+            CheckNotDisposed();
+
+            DbRow row = _parsedData.Get(index);
+
+            CheckExpectedType(JsonTokenType.String, row.TokenType);
+
+            ReadOnlySpan<byte> data = _utf8Json.Span;
+            ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
+
+            if (JsonHelpers.TryParseAsISO(segment, out DateTime tmp, out int bytesConsumed) &&
+                segment.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
+        internal bool TryGetValue(int index, out DateTimeOffset value)
+        {
+            CheckNotDisposed();
+
+            DbRow row = _parsedData.Get(index);
+
+            CheckExpectedType(JsonTokenType.String, row.TokenType);
+
+            ReadOnlySpan<byte> data = _utf8Json.Span;
+            ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
+
+            if (JsonHelpers.TryParseAsISO(segment, out DateTimeOffset tmp, out int bytesConsumed) &&
+                segment.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal string GetRawValueAsString(int index)
         {
             ReadOnlyMemory<byte> segment = GetRawValue(index, includeQuotes: true);
             return JsonReaderHelper.TranscodeHelper(segment.Span);
         }
 
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
         internal string GetPropertyRawValueAsString(int valueIndex)
         {
             ReadOnlyMemory<byte> segment = GetPropertyRawValue(valueIndex);
             return JsonReaderHelper.TranscodeHelper(segment.Span);
+        }
+
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
+        internal void WriteElementTo(
+            int index,
+            ref Utf8JsonWriter writer,
+            ReadOnlySpan<char> propertyName)
+        {
+            CheckNotDisposed();
+
+            DbRow row = _parsedData.Get(index);
+
+            switch (row.TokenType)
+            {
+                case JsonTokenType.StartObject:
+                    writer.WriteStartObject(propertyName);
+                    WriteComplexElement(index, ref writer);
+                    return;
+                case JsonTokenType.StartArray:
+                    writer.WriteStartArray(propertyName);
+                    WriteComplexElement(index, ref writer);
+                    return;
+                case JsonTokenType.String:
+                    WriteString(propertyName, row, ref writer);
+                    return;
+                case JsonTokenType.True:
+                    writer.WriteBoolean(propertyName, value: true);
+                    return;
+                case JsonTokenType.False:
+                    writer.WriteBoolean(propertyName, value: false);
+                    return;
+                case JsonTokenType.Null:
+                    writer.WriteNull(propertyName);
+                    return;
+                case JsonTokenType.Number:
+                    writer.WriteNumber(
+                        propertyName,
+                        _utf8Json.Slice(row.Location, row.SizeOrLength).Span);
+                    return;
+            }
+
+            Debug.Fail($"Unexpected encounter with JsonTokenType {row.TokenType}");
+        }
+
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
+        internal void WriteElementTo(
+            int index,
+            ref Utf8JsonWriter writer,
+            ReadOnlySpan<byte> propertyName)
+        {
+            CheckNotDisposed();
+
+            DbRow row = _parsedData.Get(index);
+
+            switch (row.TokenType)
+            {
+                case JsonTokenType.StartObject:
+                    writer.WriteStartObject(propertyName);
+                    WriteComplexElement(index, ref writer);
+                    return;
+                case JsonTokenType.StartArray:
+                    writer.WriteStartArray(propertyName);
+                    WriteComplexElement(index, ref writer);
+                    return;
+                case JsonTokenType.String:
+                    WriteString(propertyName, row, ref writer);
+                    return;
+                case JsonTokenType.True:
+                    writer.WriteBoolean(propertyName, value: true);
+                    return;
+                case JsonTokenType.False:
+                    writer.WriteBoolean(propertyName, value: false);
+                    return;
+                case JsonTokenType.Null:
+                    writer.WriteNull(propertyName);
+                    return;
+                case JsonTokenType.Number:
+                    writer.WriteNumber(
+                        propertyName,
+                        _utf8Json.Slice(row.Location, row.SizeOrLength).Span);
+                    return;
+            }
+
+            Debug.Fail($"Unexpected encounter with JsonTokenType {row.TokenType}");
+        }
+
+        /// <summary>
+        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
+        /// </summary>
+        internal void WriteElementTo(
+            int index,
+            ref Utf8JsonWriter writer)
+        {
+            CheckNotDisposed();
+
+            DbRow row = _parsedData.Get(index);
+
+            switch (row.TokenType)
+            {
+                case JsonTokenType.StartObject:
+                    writer.WriteStartObject();
+                    WriteComplexElement(index, ref writer);
+                    return;
+                case JsonTokenType.StartArray:
+                    writer.WriteStartArray();
+                    WriteComplexElement(index, ref writer);
+                    return;
+                case JsonTokenType.String:
+                    WriteString(row, ref writer);
+                    return;
+                case JsonTokenType.Number:
+                    writer.WriteNumberValue(_utf8Json.Slice(row.Location, row.SizeOrLength).Span);
+                    return;
+                case JsonTokenType.True:
+                    writer.WriteBooleanValue(value: true);
+                    return;
+                case JsonTokenType.False:
+                    writer.WriteBooleanValue(value: false);
+                    return;
+                case JsonTokenType.Null:
+                    writer.WriteNullValue();
+                    return;
+            }
+
+            Debug.Fail($"Unexpected encounter with JsonTokenType {row.TokenType}");
+        }
+
+        private void WriteComplexElement(int index, ref Utf8JsonWriter writer)
+        {
+            int endIndex = GetEndIndex(index, true);
+
+            for (int i = index + DbRow.Size; i < endIndex; i += DbRow.Size)
+            {
+                DbRow row = _parsedData.Get(i);
+
+                // All of the types which don't need the value span
+                switch (row.TokenType)
+                {
+                    case JsonTokenType.String:
+                        WriteString(row, ref writer);
+                        continue;
+                    case JsonTokenType.Number:
+                        writer.WriteNumberValue(_utf8Json.Slice(row.Location, row.SizeOrLength).Span);
+                        continue;
+                    case JsonTokenType.True:
+                        writer.WriteBooleanValue(value: true);
+                        continue;
+                    case JsonTokenType.False:
+                        writer.WriteBooleanValue(value: false);
+                        continue;
+                    case JsonTokenType.Null:
+                        writer.WriteNullValue();
+                        continue;
+                    case JsonTokenType.StartObject:
+                        writer.WriteStartObject();
+                        continue;
+                    case JsonTokenType.EndObject:
+                        writer.WriteEndObject();
+                        continue;
+                    case JsonTokenType.StartArray:
+                        writer.WriteStartArray();
+                        continue;
+                    case JsonTokenType.EndArray:
+                        writer.WriteEndArray();
+                        continue;
+                    case JsonTokenType.PropertyName:
+                    {
+                        DbRow propertyValue = _parsedData.Get(i + DbRow.Size);
+
+                        ReadOnlySpan<byte> propertyName =
+                            _utf8Json.Slice(row.Location, row.SizeOrLength).Span;
+
+                        // "Move" to the value.
+                        i += DbRow.Size;
+
+                        switch (propertyValue.TokenType)
+                        {
+                            case JsonTokenType.String:
+                                WriteString(propertyName, propertyValue, ref writer);
+                                continue;
+                            case JsonTokenType.Number:
+                                writer.WriteNumber(
+                                    propertyName,
+                                    _utf8Json.Slice(propertyValue.Location, propertyValue.SizeOrLength).Span);
+                                    continue;
+                            case JsonTokenType.True:
+                                writer.WriteBoolean(propertyName, value: true);
+                                continue;
+                            case JsonTokenType.False:
+                                writer.WriteBoolean(propertyName, value: false);
+                                continue;
+                            case JsonTokenType.Null:
+                                writer.WriteNull(propertyName);
+                                continue;
+                            case JsonTokenType.StartObject:
+                                writer.WriteStartObject(propertyName);
+                                continue;
+                            case JsonTokenType.StartArray:
+                                writer.WriteStartArray(propertyName);
+                                continue;
+                        }
+
+                        Debug.Fail($"Unexpected encounter with JsonTokenType {row.TokenType}");
+                        break;
+                    }
+                }
+
+                Debug.Fail($"Unexpected encounter with JsonTokenType {row.TokenType}");
+            }
+        }
+
+        private ReadOnlySpan<byte> UnescapeString(in DbRow row, out ArraySegment<byte> rented)
+        {
+            Debug.Assert(row.TokenType == JsonTokenType.String);
+            int loc = row.Location;
+            int length = row.SizeOrLength;
+            ReadOnlySpan<byte> text = _utf8Json.Slice(loc, length).Span;
+
+            if (!row.HasComplexChildren)
+            {
+                rented = default;
+                return text;
+            }
+
+            int idx = text.IndexOf(JsonConstants.BackSlash);
+            Debug.Assert(idx >= 0);
+
+            byte[] rent = ArrayPool<byte>.Shared.Rent(length);
+            text.Slice(0, idx).CopyTo(rent);
+
+            JsonReaderHelper.Unescape(text, rent, idx, out int written);
+            rented = new ArraySegment<byte>(rent, 0, written);
+            return rented.AsSpan();
+        }
+
+        private static void ClearAndReturn(ArraySegment<byte> rented)
+        {
+            if (rented.Array != null)
+            {
+                rented.AsSpan().Clear();
+                ArrayPool<byte>.Shared.Return(rented.Array);
+            }
+        }
+
+        private void WriteString(ReadOnlySpan<byte> propertyName, in DbRow row, ref Utf8JsonWriter writer)
+        {
+            ArraySegment<byte> rented = default;
+
+            try
+            {
+                writer.WriteString(
+                    propertyName,
+                    UnescapeString(row, out rented));
+            }
+            finally
+            {
+                ClearAndReturn(rented);
+            }
+        }
+
+        private void WriteString(ReadOnlySpan<char> propertyName, in DbRow row, ref Utf8JsonWriter writer)
+        {
+            ArraySegment<byte> rented = default;
+
+            try
+            {
+                writer.WriteString(
+                    propertyName,
+                    UnescapeString(row, out rented));
+            }
+            finally
+            {
+                ClearAndReturn(rented);
+
+            }
+        }
+
+        private void WriteString(in DbRow row, ref Utf8JsonWriter writer)
+        {
+            ArraySegment<byte> rented = default;
+
+            try
+            {
+                writer.WriteStringValue(UnescapeString(row, out rented));
+            }
+            finally
+            {
+                ClearAndReturn(rented);
+
+            }
         }
 
         private static void Parse(
@@ -581,13 +980,15 @@ namespace System.Text.Json
             }
         }
 
-        private static void CheckSupportedOptions(JsonReaderOptions readerOptions)
+        private static void CheckSupportedOptions(
+            JsonReaderOptions readerOptions,
+            string paramName = null)
         {
             if (readerOptions.CommentHandling == JsonCommentHandling.Allow)
             {
                 throw new ArgumentException(
                     SR.JsonDocumentDoesNotSupportComments,
-                    nameof(readerOptions));
+                    paramName ?? nameof(readerOptions));
             }
         }
     }

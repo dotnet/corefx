@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" TreatAsLocalProperty="ExcludeRestorePackageImports">
+﻿<Project TreatAsLocalProperty="ExcludeRestorePackageImports">
   <!-- Base repo layout properties -->
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
@@ -103,27 +102,21 @@
 
   <!-- Common repo directories -->
   <PropertyGroup>
-    <!-- Properties to remove with buildtools removal -->
-    <ProjectDir>$(RepoRoot)</ProjectDir>
-    <BinDir>$(ProjectDir)artifacts\bin\</BinDir>
-    <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
-    <BuildToolsTaskDir Condition="'$(MSBuildRuntimeType)' != 'core'">$(ToolsDir)net46/</BuildToolsTaskDir>
-    <BuildToolsTaskDir Condition="'$(MSBuildRuntimeType)' == 'core'">$(ToolsDir)</BuildToolsTaskDir>
+    <ArtifactsBinDir>$(RepoRoot)artifacts\bin\</ArtifactsBinDir>
     
     <!-- Need to try and keep the same logic as the native builds as we need this for packaging -->
-    <NativeBinDir>$(BinDir)native/$(BuildConfiguration)</NativeBinDir>
+    <NativeBinDir>$(ArtifactsBinDir)native/$(BuildConfiguration)</NativeBinDir>
 
     <!-- Use msbuild path functions as that property is used in bash scripts. -->
-    <SourceDir>$([MSBuild]::NormalizeDirectory('$(ProjectDir)', 'src'))</SourceDir>
+    <SourceDir>$([MSBuild]::NormalizeDirectory('$(RepoRoot)', 'src'))</SourceDir>
 
     <!-- Input Directories -->
     <PackagesDir>$(DotNetRestorePackagesPath)</PackagesDir>
     <PackagesDir Condition="'$(PackagesDir)'=='' AND '$(NuGetPackageRoot)' != ''">$([MSBuild]::EnsureTrailingSlash('$(NuGetPackageRoot)'))</PackagesDir>
-    <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir).packages/</PackagesDir>
-    <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>
+    <PackagesDir Condition="'$(PackagesDir)'==''">$(RepoRoot).packages/</PackagesDir>
     <!-- Respect environment variable for the .NET install directory if set; otherwise, use the current default location -->
     <DotNetRoot Condition="'$(DotNetRoot)' == ''">$(DOTNET_INSTALL_DIR)</DotNetRoot>
-    <DotNetRoot Condition="'$(DotNetRoot)' == ''">$(ProjectDir).dotnet\</DotNetRoot>
+    <DotNetRoot Condition="'$(DotNetRoot)' == ''">$(RepoRoot).dotnet\</DotNetRoot>
     <DotNetRoot Condition="!HasTrailingSlash('$(DotNetRoot)')">$(DotNetRoot)\</DotNetRoot>
     <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(DotNetRoot)</DotnetCliPath>
     <ToolHostCmd Condition="'$(ToolHostCmd)'==''">"$(DotNetRoot)dotnet"</ToolHostCmd>
@@ -147,11 +140,6 @@
     <WithoutCategories>IgnoreForCI</WithoutCategories>
     <EnableDumpling>false</EnableDumpling>
     <CrashDumpFolder Condition="'$(OS)' == 'Windows_NT'">%TMP%\CoreRunCrashDumps</CrashDumpFolder>
-  </PropertyGroup>
-  <!-- Disable VS support files on CI and official builds. -->
-  <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true' or '$(OfficialBuildId)' != ''">
-    <EnableLaunchSettings>false</EnableLaunchSettings>
-    <EnableVSTestReferences>false</EnableVSTestReferences>
   </PropertyGroup>
 
   <!-- list of nuget package sources passed to nuget restore -->
@@ -199,10 +187,11 @@
     <_runtimeOS Condition="'$(_runtimeOS)' == 'tizen.5.0.0'">linux</_runtimeOS>
     <_runtimeOS Condition="'$(PortableBuild)' == 'true'">$(_portableOS)</_runtimeOS>
     <ToolRuntimeRID>$(_runtimeOS)-x64</ToolRuntimeRID>
+    <!-- We build linux-musl-arm on a ubuntu container, so we can't use the toolset build for alpine runtime. We need to use portable linux RID for our toolset in order to be able to use it. -->
+    <ToolRuntimeRID Condition="'$(_runtimeOS)' == 'linux-musl' AND $(ArchGroup.StartsWith('arm')) AND !$(HostArch.StartsWith('Arm'))">linux-x64</ToolRuntimeRID>
 
     <!-- There are no WebAssembly tools, so treat them as Windows -->
     <ToolRuntimeRID Condition="'$(RuntimeOS)' == 'WebAssembly'">win-x64</ToolRuntimeRID>
-    <MicrosoftNetCoreIlasmPackageRuntimeId Condition="'$(MicrosoftNetCoreIlasmPackageRuntimeId)' == ''">$(ToolRuntimeRID)</MicrosoftNetCoreIlasmPackageRuntimeId>
 
     <!-- support cross-targeting by choosing a RID to restore when running on a different machine that what we're build for -->
     <_portableOS Condition="'$(OSGroup)' == 'Unix' AND '$(_runtimeOSFamily)' != 'osx' AND '$(_runtimeOSFamily)' != 'FreeBSD' AND '$(_runtimeOS)' != 'linux-musl'">linux</_portableOS>
@@ -224,9 +213,6 @@
     <TargetsNetFx Condition="$(TargetGroup.StartsWith('net4')) OR '$(TargetGroup)' == 'netfx'">true</TargetsNetFx>
   </PropertyGroup>
 
-  <!-- Import packaging props -->
-  <Import Project="$(RepositoryEngineeringDir)Packaging.props"/>
-
   <!-- set properties for each vertical -->
   <PropertyGroup>
     <BuildingNETCoreAppVertical Condition="'$(BuildingNETCoreAppVertical)' == '' AND ('$(_bc_TargetGroup)'=='netcoreapp' OR '$(_bc_TargetGroup)'=='netcoreappaot' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETCoreAppVertical>
@@ -246,11 +232,20 @@
       OutputPath setup
   -->
   <PropertyGroup>
-    <ImportNetSdkFromRepoToolset>false</ImportNetSdkFromRepoToolset>
     <DisableArcadeTestFramework>true</DisableArcadeTestFramework>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+  
+  <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
+    <Copyright>$(CopyrightNetFoundation)</Copyright>
+    <!-- Temporarily disable PackageLicenseExpression until we can workaround 
+         https://github.com/NuGet/Home/issues/7894 -->
+    <!-- PackageLicenseExpression>MIT</PackageLicenseExpression -->
+  </PropertyGroup>
+
+  <!-- Import packaging props -->
+  <Import Project="$(RepositoryEngineeringDir)Packaging.props"/>
 
   <!-- Set the kind of PDB to Portable and turn on SourceLink (fetching source from GitHub) -->
   <PropertyGroup>
@@ -262,10 +257,15 @@
 
     <!-- Rhel 6 and FreeBSD doesn't support the source control git package so disable SourceLink -->
     <EnableSourceLink Condition="$(RuntimeOS.StartsWith('rhel.6')) OR '$(_runtimeOSFamily)' == 'FreeBSD'">false</EnableSourceLink>
-    <!-- is is not supported on ARM platforms either. -->
+    <!-- is not supported on ARM platforms either. -->
     <EnableSourceLink Condition="'$(HostArch)' == 'Arm' OR '$(HostArch)' == 'Arm64'">false</EnableSourceLink>
     <!-- Disable source link on local builds. -->
     <EnableSourceLink Condition="'$(ContinuousIntegrationBuild)' != 'true' and '$(OfficialBuildId)' == ''">false</EnableSourceLink>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <!-- Embed IBC data on Windows release builds, if IBCMerge isn't available this will just log the commandline -->
+    <EnablePartialNgenOptimization Condition="'$(EnablePartialNgenOptimization)' == '' and '$(OS)' == 'Windows_NT' and '$(ConfigurationGroup)' == 'Release'">true</EnablePartialNgenOptimization>
   </PropertyGroup>
 
   <!-- Set up Default symbol and optimization for Configuration -->
@@ -303,7 +303,7 @@
   <PropertyGroup>
     <!-- default to allowing all language features -->
     <LangVersion>latest</LangVersion>
-    <LangVersion Condition="'$(Language)' == 'C#'">8.0</LangVersion>
+    <LangVersion Condition="'$(Language)' == 'C#'">preview</LangVersion>
     <!-- Enables Strict mode for Roslyn compiler -->
     <Features>strict</Features>
     <WarningLevel>4</WarningLevel>
@@ -321,6 +321,9 @@
     <CLSCompliant Condition="'$(CLSCompliant)'=='' and '$(IsTestProject)'=='true'">false</CLSCompliant>
     <CLSCompliant Condition="'$(CLSCompliant)'==''">true</CLSCompliant>
     <GenFacadesIgnoreBuildAndRevisionMismatch>true</GenFacadesIgnoreBuildAndRevisionMismatch>
+    
+    <!-- Warnings -->
+    <NoWarn>$(NoWarn);BCL0020</NoWarn> <!-- TODO: Remove BCL0020 once https://github.com/dotnet/arcade/pull/2158 is consumed. -->
   </PropertyGroup>
 
   <!-- Set up some common paths -->
@@ -339,11 +342,11 @@
 
     <TargetOutputRelPath Condition="'$(TargetGroup)'!=''">$(TargetGroup)/</TargetOutputRelPath>
 
-    <RuntimePath Condition="'$(RuntimePath)' == ''">$(BinDir)runtime/$(BuildConfiguration)/</RuntimePath>
-    <ShimsTargetRuntimeRoot>$(BinDir)shimsTargetRuntime/</ShimsTargetRuntimeRoot>
+    <RuntimePath Condition="'$(RuntimePath)' == ''">$(ArtifactsBinDir)runtime/$(BuildConfiguration)/</RuntimePath>
+    <ShimsTargetRuntimeRoot>$(ArtifactsBinDir)shimsTargetRuntime/</ShimsTargetRuntimeRoot>
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(ArtifactsBinDir)tests/</TestWorkingDir>
     <TestPath Condition="'$(TestPath)' == ''">$(TestWorkingDir)$(MSBuildProjectName)/$(BuildConfiguration)/</TestPath>
-    <RefRootPath>$(BinDir)ref/</RefRootPath>
+    <RefRootPath>$(ArtifactsBinDir)ref/</RefRootPath>
     <BuildConfigurationRefPath>$(RefRootPath)$(_bc_TargetGroup)/</BuildConfigurationRefPath>
     <BuildConfigurationRefPath Condition="$(_bc_TargetGroup.EndsWith('aot'))">$(RefRootPath)$(_bc_TargetGroup.TrimEnd('aot'))/</BuildConfigurationRefPath>
     <RefPath>$(RefRootPath)$(TargetGroup)/</RefPath>
@@ -352,6 +355,9 @@
     <NetStandard21RefPath>$(RefRootPath)netstandard2.1/</NetStandard21RefPath>
     <NetFxRefPath>$(RefRootPath)netfx/</NetFxRefPath>
     <GlobalToolsDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'tools'))</GlobalToolsDir>
+    <IbcOptimizationDataDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'ibc'))</IbcOptimizationDataDir>
+    <ILAsmToolPath>$([MSBuild]::NormalizeDirectory('$(ArtifactsToolsetDir)', 'ilasm'))</ILAsmToolPath>
+    <ILLinkDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsToolsetDir)', 'ILLink'))</ILLinkDir>
 
     <!-- Helix properties -->
     <OSPlatformConfig>$(OSGroup).$(Platform).$(ConfigurationGroup)</OSPlatformConfig>
@@ -363,18 +369,18 @@
     <TestArchiveRuntimeRoot>$(TestArchiveRoot)runtime/</TestArchiveRuntimeRoot>
 
     <!-- project file to use when resolving ReferenceFromRuntime items -->
-    <RuntimeProjectFile Condition="'$(RuntimeProjectFile)' == ''">$(ProjectDir)\external\runtime\runtime.depproj</RuntimeProjectFile>
+    <RuntimeProjectFile Condition="'$(RuntimeProjectFile)' == ''">$(RepoRoot)\external\runtime\runtime.depproj</RuntimeProjectFile>
 
     <!-- Paths to binplace package content -->
-    <NETCoreAppPackageRefPath>$(BinDir)pkg\netcoreapp\ref</NETCoreAppPackageRefPath>
-    <NETCoreAppPackageRuntimePath>$(BinDir)pkg\netcoreapp\lib</NETCoreAppPackageRuntimePath>
-    <NETCoreAppAotPackageRuntimePath>$(BinDir)pkg\netcoreappaot\lib</NETCoreAppAotPackageRuntimePath>
-    <UAPPackageRefPath>$(BinDir)pkg\uap\ref</UAPPackageRefPath>
-    <UAPPackageRuntimePath>$(BinDir)pkg\uap\lib</UAPPackageRuntimePath>
-    <UAPAOTPackageRuntimePath>$(BinDir)pkg\uapaot\lib</UAPAOTPackageRuntimePath>
-    <NetFxPackageRefPath>$(BinDir)pkg\netfx\ref</NetFxPackageRefPath>
-    <NetFxPackageRuntimePath>$(BinDir)pkg\netfx\lib</NetFxPackageRuntimePath>
-    <NETStandardTestSuiteOutputPath>$(BinDir)NetStandardTestSuite\</NETStandardTestSuiteOutputPath>
+    <NETCoreAppPackageRefPath>$(ArtifactsBinDir)pkg\netcoreapp\ref</NETCoreAppPackageRefPath>
+    <NETCoreAppPackageRuntimePath>$(ArtifactsBinDir)pkg\netcoreapp\lib</NETCoreAppPackageRuntimePath>
+    <NETCoreAppAotPackageRuntimePath>$(ArtifactsBinDir)pkg\netcoreappaot\lib</NETCoreAppAotPackageRuntimePath>
+    <UAPPackageRefPath>$(ArtifactsBinDir)pkg\uap\ref</UAPPackageRefPath>
+    <UAPPackageRuntimePath>$(ArtifactsBinDir)pkg\uap\lib</UAPPackageRuntimePath>
+    <UAPAOTPackageRuntimePath>$(ArtifactsBinDir)pkg\uapaot\lib</UAPAOTPackageRuntimePath>
+    <NetFxPackageRefPath>$(ArtifactsBinDir)pkg\netfx\ref</NetFxPackageRefPath>
+    <NetFxPackageRuntimePath>$(ArtifactsBinDir)pkg\netfx\lib</NetFxPackageRuntimePath>
+    <NETStandardTestSuiteOutputPath>$(ArtifactsBinDir)NetStandardTestSuite\</NETStandardTestSuiteOutputPath>
 
     <!-- We add extra binplacing for the test shared framework until we can get hardlinking with the runtime directory working on all platforms -->
     <BinPlaceTestSharedFramework Condition="'$(_bc_TargetGroup)' == 'netcoreapp' AND '$(BuildTests)'!='false'">true</BinPlaceTestSharedFramework>
@@ -383,7 +389,7 @@
     <BinPlaceNETFXRuntime Condition="'$(_bc_TargetGroup)' == 'netfx'">true</BinPlaceNETFXRuntime>
 
     <NETCoreAppTestSharedFxVersion>9.9.9</NETCoreAppTestSharedFxVersion>
-    <TestHostRootPath>$(BinDir)testhost/$(BuildConfiguration)/</TestHostRootPath>
+    <TestHostRootPath>$(ArtifactsBinDir)testhost/$(BuildConfiguration)/</TestHostRootPath>
     <NETCoreAppTestHostFxrPath>$(TestHostRootPath)host/fxr/$(NETCoreAppTestSharedFxVersion)/</NETCoreAppTestHostFxrPath>
     <NETCoreAppTestSharedFrameworkPath>$(TestHostRootPath)shared/Microsoft.NETCore.App/$(NETCoreAppTestSharedFxVersion)/</NETCoreAppTestSharedFrameworkPath>
     <ILCFXInputFolder>$(TestHostRootPath)ILCInputFolder</ILCFXInputFolder>
@@ -433,7 +439,7 @@
     <SkipTests Condition="'$(SkipTests)' == '' and ('$(OsEnvironment)'=='Windows_NT' and '$(TargetsWindows)'!='true' and '$(OSGroup)'!='AnyOS')">true</SkipTests>
 
     <!-- F5 and debugging support for netcoreapp and netfx inside VS. -->
-    <EnableLaunchSettings Condition="'$(EnableLaunchSettings)' == ''">true</EnableLaunchSettings>
+    <EnableLaunchSettings Condition="'$(EnableLaunchSettings)' == ''AND '$(DotNetBuildFromSource)' != 'true'">true</EnableLaunchSettings>
 
     <!-- Disable VS Test SDK references if the .NET Native toolchain is used. -->
     <EnableVSTestReferences Condition="'$(UseDotNetNativeToolchain)' == 'true'">false</EnableVSTestReferences>
@@ -443,11 +449,9 @@
   <!-- Test properties for full build. -->
   <PropertyGroup Condition="'$(BuildAllProjects)' == 'true'">
     <GenerateFullCoverageReport Condition="'$(GenerateFullCoverageReport)' == ''">true</GenerateFullCoverageReport>
-    <Performance Condition="'$(Performance)' == ''">false</Performance>
   </PropertyGroup>
 
-  <!-- TODO: Fix VB test project reference to Test SDK. -->
-  <Import Condition="'$(IsTestProject)' == 'true' AND '$(IsTestSupportProject)' != 'true' AND '$(EnableVSTestReferences)' == 'true' AND '$(Language)' != 'VB'" Project="$(RuntimePath)Microsoft.Net.Test.Sdk.props" />
+  <Import Condition="'$(IsTestProject)' == 'true' AND '$(IsTestSupportProject)' != 'true' AND '$(EnableVSTestReferences)' == 'true'" Project="$(RuntimePath)Microsoft.NET.Test.Sdk.props" />
 
   <ItemDefinitionGroup Condition="'$(IsTestProject)' != 'true'"> 
     <!-- Project references for non-test assemblies should never be copied to the output. -->
@@ -469,9 +473,5 @@
     <!-- Clear the init locals flag on all src projects, except those in VB, where we can't use spans. -->
     <ILLinkClearInitLocals Condition="'$(IsSourceProject)' == 'true' AND '$(Language)' != 'VB'">true</ILLinkClearInitLocals>
   </PropertyGroup>
-
-  <!-- Import the Roslyn Compiler Toolset props -->
-  <Import Project="$(PkgMicrosoft_Net_Compilers)/build/Microsoft.Net.Compilers.props" Condition="'$(MSBuildRuntimeType)' != 'Core'" />
-  <Import Project="$(PkgMicrosoft_NETCore_Compilers)/build/Microsoft.NETCore.Compilers.props" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
 
 </Project>

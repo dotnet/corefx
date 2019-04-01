@@ -54,12 +54,21 @@ jobs:
               _architecture: x64
               _framework: netcoreapp
               _helixQueues: $(netcoreappWindowsQueues)+$(nanoQueues)
+              _publishTests: true
 
             x86_Release:
               _BuildConfig: Release
               _architecture: x86
               _framework: netcoreapp
               _helixQueues: $(netcoreappWindowsQueues)
+              _publishTests: true
+
+            arm64_Release:
+              _BuildConfig: Release
+              _architecture: arm64
+              _framework: netcoreapp
+              _helixQueues: $(windowsArmQueue)
+              _publishTests: true
 
             NETFX_x86_Release:
               _BuildConfig: Release
@@ -87,25 +96,17 @@ jobs:
               _framework: uap
               _helixQueues: $(uapNetfxQueues)
 
-            UAP_arm_Release:
-              _BuildConfig: Release
-              _architecture: arm
-              _framework: uap
-              _helixQueues: $(windowsArmQueue)
-
             UAPAOT_x86_Release:
               _BuildConfig: Release
               _architecture: x86
               _framework: uapaot
               _helixQueues: $(uapNetfxQueues)
-              _restoreInternalTools: true
 
             UAPAOT_x64_Release:
               _BuildConfig: Release
               _architecture: x64
               _framework: uapaot
               _helixQueues: $(uapNetfxQueues)
-              _restoreInternalTools: true
 
       pool:
         ${{ if eq(parameters.isOfficialBuild, 'true') }}:
@@ -114,7 +115,6 @@ jobs:
           name: Hosted VS2017
 
       submitToHelix: true
-      enableMicrobuild: ${{ parameters.isOfficialBuild }}
       buildExtraArguments: /p:RuntimeOS=win10
 
       variables:
@@ -127,7 +127,7 @@ jobs:
           - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.ES.Open
           - nanoQueues: Windows.10.Nano.Amd64.Open
           - uapNetfxQueues: Windows.10.Amd64.ClientRS5.Open
-        
+
         - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
           - netcoreappWindowsQueues: Windows.7.Amd64+Windows.81.Amd64+Windows.10.Amd64.Core+Windows.10.Amd64.ClientRS4
           - nanoQueues: Windows.10.Nano.Amd64
@@ -166,41 +166,37 @@ jobs:
         submitToHelix: true
         # azure pipelines reporter only supports xunit results based tests.
         enableAzurePipelinesReporter: false
-        enableMicrobuild: ${{ parameters.isOfficialBuild }}
 
         variables:
           - _outerloop: false
           - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-            - allConfigurationsQueues: Windows.10.Amd64.ClientRS4.Open
+            - allConfigurationsQueues: Windows.10.Amd64.ClientRS5.Open
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            - allConfigurationsQueues: Windows.10.Amd64.ClientRS4
+            - allConfigurationsQueues: Windows.10.Amd64.ClientRS5
 
         customBuildSteps:
           - script: build.cmd
+                    -restore
+                    -build
+                    -configuration $(_BuildConfig)
                     -ci
-                    -$(_framework)
-                    /p:ArchGroup=$(_architecture)
-                    /p:ConfigurationGroup=$(_BuildConfig)
+                    -buildtests
+                    -allconfigurations
+                    -arch $(_architecture)
                     /p:RuntimeOS=win10
+                    /p:ArchiveTests=Packages
                     $(_windowsOfficialBuildArguments)
                     $(_msbuildCommonParameters)
-            displayName: Build Packages
-          - script: build.cmd
-                    -ci
-                    -test
-                    -$(_framework)
-                    /p:ArchGroup=$(_architecture)
-                    /p:ConfigurationGroup=$(_BuildConfig)
-                    /p:ArchiveTests=true
-            displayName: Build test projects
+            displayName: Build Packages and Tests
           - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
             - script: build.cmd
+                      -restore
+                      -build
+                      -configuration $(_BuildConfig)
                       -ci
-                      -test
-                      /p:TargetGroup=netstandard
-                      /p:ArchGroup=$(_architecture)
-                      /p:ConfigurationGroup=$(_BuildConfig)
-                      /p:SkipTests=true
+                      -buildtests
+                      -framework netstandard
+                      -arch $(_architecture)
               displayName: Build Netstandard Test Suite
 
       # TODO: UAPAOT official builds should send to helix using continuation runner.
@@ -214,7 +210,6 @@ jobs:
                 _BuildConfig: Release
                 _architecture: x86
                 _framework: uapaot
-                _restoreInternalTools: true
 
             ${{ if eq(parameters.isOfficialBuild, 'true') }}:
               arm_Release:
@@ -222,22 +217,20 @@ jobs:
                 _architecture: arm
                 _framework: netcoreapp
 
-              arm64_Release:
+              UAP_arm_Release:
                 _BuildConfig: Release
-                _architecture: arm64
-                _framework: netcoreapp
+                _architecture: arm
+                _framework: uap
 
               UAPAOT_arm_Release:
                 _BuildConfig: Release
                 _architecture: arm
                 _framework: uapaot
-                _restoreInternalTools: true
 
               UAPAOT_arm64_Release:
                 _BuildConfig: Release
                 _architecture: arm64
                 _framework: uapaot
-                _restoreInternalTools: true
 
         pool:
           ${{ if eq(parameters.isOfficialBuild, 'true') }}:
@@ -246,7 +239,6 @@ jobs:
             name: Hosted VS2017
 
         submitToHelix: false
-        enableMicrobuild: ${{ parameters.isOfficialBuild }}
         buildExtraArguments: /p:RuntimeOS=win10
 
         variables:

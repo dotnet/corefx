@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
 
 namespace System.Globalization
@@ -303,7 +304,7 @@ namespace System.Globalization
                 throw new ArgumentOutOfRangeException(
                     "time",
                     ticks,
-                    string.Format(
+                    SR.Format(
                         CultureInfo.InvariantCulture,
                         SR.ArgumentOutOfRange_CalendarRange,
                         s_minDate,
@@ -519,7 +520,7 @@ namespace System.Globalization
             return UmAlQuraEra;
         }
 
-        public override int[] Eras => new int[] { UmAlQuraEra };
+        public override int[]? Eras => new int[] { UmAlQuraEra };
 
         public override int GetMonth(DateTime time)
         {

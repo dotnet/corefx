@@ -9,7 +9,6 @@
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 using System.Diagnostics;
-using Internal.Runtime.Augments;
 
 namespace System.Threading
 {
@@ -195,18 +194,18 @@ namespace System.Threading
 
                 if (_count >= sleep1Threshold && sleep1Threshold >= 0)
                 {
-                    RuntimeThread.Sleep(1);
+                    Thread.Sleep(1);
                 }
                 else
                 {
                     int yieldsSoFar = _count >= YieldThreshold ? (_count - YieldThreshold) / 2 : _count;
                     if ((yieldsSoFar % Sleep0EveryHowManyYields) == (Sleep0EveryHowManyYields - 1))
                     {
-                        RuntimeThread.Sleep(0);
+                        Thread.Sleep(0);
                     }
                     else
                     {
-                        RuntimeThread.Yield();
+                        Thread.Yield();
                     }
                 }
             }
@@ -224,19 +223,19 @@ namespace System.Threading
                 // since we expect most callers will eventually block anyway.
                 //
                 // Also, cap the maximum spin count to a value such that many thousands of CPU cycles would not be wasted doing
-                // the equivalent of YieldProcessor(), as that that point SwitchToThread/Sleep(0) are more likely to be able to
+                // the equivalent of YieldProcessor(), as at that point SwitchToThread/Sleep(0) are more likely to be able to
                 // allow other useful work to run. Long YieldProcessor() loops can help to reduce contention, but Sleep(1) is
                 // usually better for that.
                 //
-                // RuntimeThread.OptimalMaxSpinWaitsPerSpinIteration:
+                // Thread.OptimalMaxSpinWaitsPerSpinIteration:
                 //   - See Thread::InitializeYieldProcessorNormalized(), which describes and calculates this value.
                 //
-                int n = RuntimeThread.OptimalMaxSpinWaitsPerSpinIteration;
+                int n = Thread.OptimalMaxSpinWaitsPerSpinIteration;
                 if (_count <= 30 && (1 << _count) < n)
                 {
                     n = 1 << _count;
                 }
-                RuntimeThread.SpinWait(n);
+                Thread.SpinWait(n);
             }
 
             // Finally, increment our spin counter.

@@ -19,10 +19,11 @@ namespace System.Diagnostics
     {
         private static readonly UTF8Encoding s_utf8NoBom =
             new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-        private static volatile bool s_sigchildHandlerRegistered = false;
-        private static readonly object s_sigchildGate = new object();
+        private static volatile bool s_initialized = false;
+        private static readonly object s_initializedGate = new object();
         private static readonly Interop.Sys.SigChldCallback s_sigChildHandler = OnSigChild;
         private static readonly ReaderWriterLockSlim s_processStartLock = new ReaderWriterLockSlim();
+        private static int s_childrenUsingTerminalCount;
 
         /// <summary>
         /// Puts a Process component in state to interact with operating system processes that run in a 
@@ -57,12 +58,33 @@ namespace System.Diagnostics
         /// <summary>Terminates the associated process immediately.</summary>
         public void Kill()
         {
-            EnsureState(State.HaveNonExitedId);
-            if (Interop.Sys.Kill(_processId, Interop.Sys.Signals.SIGKILL) != 0)
+            EnsureState(State.HaveId);
+
+            // Check if we know the process has exited. This avoids us targetting another
+            // process that has a recycled PID. This only checks our internal state, the Kill call below
+            // activly checks if the process is still alive.
+            if (GetHasExited(refresh: false))
             {
+                return;
+            }
+
+            int killResult = Interop.Sys.Kill(_processId, Interop.Sys.Signals.SIGKILL);
+            if (killResult != 0)
+            {
+                Interop.Error error = Interop.Sys.GetLastError();
+
+                // Don't throw if the process has exited.
+                if (error == Interop.Error.ESRCH)
+                {
+                    return;
+                }
+
                 throw new Win32Exception(); // same exception as on Windows
             }
         }
+
+        private bool GetHasExited(bool refresh)
+            => GetWaitState().GetExited(out _, refresh);
 
         private IEnumerable<Exception> KillTree()
         {
@@ -74,7 +96,8 @@ namespace System.Diagnostics
         private void KillTree(ref List<Exception> exceptions)
         {
             // If the process has exited, we can no longer determine its children.
-            if (HasExited)
+            // If we know the process has exited, stop already.
+            if (GetHasExited(refresh: false))
             {
                 return;
             }
@@ -159,7 +182,8 @@ namespace System.Diagnostics
                 {
                     if (!_watchingForExit)
                     {
-                        Debug.Assert(_haveProcessHandle, "Process.EnsureWatchingForExit called with no process handle");
+                        Debug.Assert(_waitHandle == null);
+                        Debug.Assert(_registeredWaitHandle == null);
                         Debug.Assert(Associated, "Process.EnsureWatchingForExit called with no associated process");
                         _watchingForExit = true;
                         try
@@ -314,7 +338,7 @@ namespace System.Diagnostics
                 return;
             }
 
-            if (GetWaitState().GetExited(out _, refresh))
+            if (GetHasExited(refresh))
             {
                 throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString()));
             }
@@ -334,7 +358,7 @@ namespace System.Diagnostics
             }
 
             EnsureState(State.HaveNonExitedId | State.IsLocal);
-            return new SafeProcessHandle(_processId);
+            return new SafeProcessHandle(_processId, GetSafeWaitHandle());
         }
 
         /// <summary>
@@ -344,7 +368,7 @@ namespace System.Diagnostics
         /// <param name="startInfo">The start info with which to start the process.</param>
         private bool StartCore(ProcessStartInfo startInfo)
         {
-            EnsureSigChildHandler();
+            EnsureInitialized();
 
             string filename;
             string[] argv;
@@ -364,10 +388,18 @@ namespace System.Diagnostics
             bool setCredentials = !string.IsNullOrEmpty(startInfo.UserName);
             uint userId = 0;
             uint groupId = 0;
+            uint[] groups = null;
             if (setCredentials)
             {
-                (userId, groupId) = GetUserAndGroupIds(startInfo);
+                (userId, groupId, groups) = GetUserAndGroupIds(startInfo);
             }
+
+            // .NET applications don't echo characters unless there is a Console.Read operation.
+            // Unix applications expect the terminal to be in an echoing state by default.
+            // To support processes that interact with the terminal (e.g. 'vi'), we need to configure the
+            // terminal to echo. We keep this configuration as long as there are children possibly using the terminal.
+            // We consider the child to be interactively using the terminal when both stdin and stdout are connected.
+            bool usesTerminal = !startInfo.RedirectStandardInput && !startInfo.RedirectStandardOutput;
 
             if (startInfo.UseShellExecute)
             {
@@ -391,8 +423,8 @@ namespace System.Diagnostics
 
                     isExecuting = ForkAndExecProcess(filename, argv, envp, cwd,
                         startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
-                        setCredentials, userId, groupId,
-                        out stdinFd, out stdoutFd, out stderrFd,
+                        setCredentials, userId, groupId, groups,
+                        out stdinFd, out stdoutFd, out stderrFd, usesTerminal,
                         throwOnNoExec: false); // return false instead of throwing on ENOEXEC
                 }
 
@@ -404,8 +436,8 @@ namespace System.Diagnostics
 
                     ForkAndExecProcess(filename, argv, envp, cwd,
                         startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
-                        setCredentials, userId, groupId,
-                        out stdinFd, out stdoutFd, out stderrFd);
+                        setCredentials, userId, groupId, groups,
+                        out stdinFd, out stdoutFd, out stderrFd, usesTerminal);
                 }
             }
             else
@@ -419,8 +451,8 @@ namespace System.Diagnostics
 
                 ForkAndExecProcess(filename, argv, envp, cwd,
                     startInfo.RedirectStandardInput, startInfo.RedirectStandardOutput, startInfo.RedirectStandardError,
-                    setCredentials, userId, groupId,
-                    out stdinFd, out stdoutFd, out stderrFd);
+                    setCredentials, userId, groupId, groups,
+                    out stdinFd, out stdoutFd, out stderrFd, usesTerminal);
             }
 
             // Configure the parent's ends of the redirection streams.
@@ -453,9 +485,9 @@ namespace System.Diagnostics
         private bool ForkAndExecProcess(
             string filename, string[] argv, string[] envp, string cwd,
             bool redirectStdin, bool redirectStdout, bool redirectStderr,
-            bool setCredentials, uint userId, uint groupId,
+            bool setCredentials, uint userId, uint groupId, uint[] groups,
             out int stdinFd, out int stdoutFd, out int stderrFd,
-            bool throwOnNoExec = true)
+            bool usesTerminal, bool throwOnNoExec = true)
         {
             if (string.IsNullOrEmpty(filename))
             {
@@ -467,6 +499,11 @@ namespace System.Diagnostics
             s_processStartLock.EnterReadLock();
             try
             {
+                if (usesTerminal)
+                {
+                    ConfigureTerminalForChildProcesses(1);
+                }
+
                 int childPid;
 
                 // Invoke the shim fork/execve routine.  It will create pipes for all requested
@@ -477,7 +514,7 @@ namespace System.Diagnostics
                 int errno = Interop.Sys.ForkAndExecProcess(
                     filename, argv, envp, cwd,
                     redirectStdin, redirectStdout, redirectStderr,
-                    setCredentials, userId, groupId,
+                    setCredentials, userId, groupId, groups,
                     out childPid,
                     out stdinFd, out stdoutFd, out stderrFd);
 
@@ -485,12 +522,12 @@ namespace System.Diagnostics
                 {
                     // Ensure we'll reap this process.
                     // note: SetProcessId will set this if we don't set it first.
-                    _waitStateHolder = new ProcessWaitState.Holder(childPid, isNewChild: true);
+                    _waitStateHolder = new ProcessWaitState.Holder(childPid, isNewChild: true, usesTerminal);
 
                     // Store the child's information into this Process object.
                     Debug.Assert(childPid >= 0);
                     SetProcessId(childPid);
-                    SetProcessHandle(new SafeProcessHandle(childPid));
+                    SetProcessHandle(new SafeProcessHandle(_processId, GetSafeWaitHandle()));
 
                     return true;
                 }
@@ -508,6 +545,14 @@ namespace System.Diagnostics
             finally
             {
                 s_processStartLock.ExitReadLock();
+
+                if (_waitStateHolder == null && usesTerminal)
+                {
+                    // We failed to launch a child that could use the terminal.
+                    s_processStartLock.EnterWriteLock();
+                    ConfigureTerminalForChildProcesses(-1);
+                    s_processStartLock.ExitWriteLock();
+                }
             }
         }
 
@@ -842,7 +887,10 @@ namespace System.Diagnostics
             return _waitStateHolder._state;
         }
 
-        private static (uint userId, uint groupId) GetUserAndGroupIds(ProcessStartInfo startInfo)
+        private SafeWaitHandle GetSafeWaitHandle()
+            => GetWaitState().EnsureExitedEvent().GetSafeWaitHandle();
+
+        private static (uint userId, uint groupId, uint[] groups) GetUserAndGroupIds(ProcessStartInfo startInfo)
         {
             Debug.Assert(!string.IsNullOrEmpty(startInfo.UserName));
 
@@ -854,7 +902,13 @@ namespace System.Diagnostics
                 throw new Win32Exception(SR.Format(SR.UserDoesNotExist, startInfo.UserName));
             }
 
-            return (userId.Value, groupId.Value);
+            uint[] groups = Interop.Sys.GetGroupList(startInfo.UserName, groupId.Value);
+            if (groups == null)
+            {
+                throw new Win32Exception(SR.Format(SR.UserGroupsCannotBeDetermined, startInfo.UserName));
+            }
+
+            return (userId.Value, groupId.Value, groups);
         }
 
         private unsafe static (uint? userId, uint? groupId) GetUserAndGroupIds(string userName)
@@ -940,24 +994,26 @@ namespace System.Diagnostics
 
         private bool WaitForInputIdleCore(int milliseconds) => throw new InvalidOperationException(SR.InputIdleUnkownError);
 
-        private static void EnsureSigChildHandler()
+        private static void EnsureInitialized()
         {
-            if (s_sigchildHandlerRegistered)
+            if (s_initialized)
             {
                 return;
             }
 
-            lock (s_sigchildGate)
+            lock (s_initializedGate)
             {
-                if (!s_sigchildHandlerRegistered)
+                if (!s_initialized)
                 {
-                    // Ensure signal handling is setup and register our callback.
-                    if (!Interop.Sys.RegisterForSigChld(s_sigChildHandler))
+                    if (!Interop.Sys.InitializeTerminalAndSignalHandling())
                     {
                         throw new Win32Exception();
                     }
 
-                    s_sigchildHandlerRegistered = true;
+                    // Register our callback.
+                    Interop.Sys.RegisterForSigChld(s_sigChildHandler);
+
+                    s_initialized = true;
                 }
             }
         }
@@ -973,6 +1029,34 @@ namespace System.Diagnostics
             finally
             {
                 s_processStartLock.ExitWriteLock();
+            }
+        }
+
+        /// <summary>
+        /// This method is called when the number of child processes that are using the terminal changes.
+        /// It updates the terminal configuration if necessary.
+        /// </summary>
+        internal static void ConfigureTerminalForChildProcesses(int increment)
+        {
+            Debug.Assert(increment != 0);
+
+            int childrenUsingTerminalRemaining = Interlocked.Add(ref s_childrenUsingTerminalCount, increment);
+            if (increment > 0)
+            {
+                Debug.Assert(s_processStartLock.IsReadLockHeld);
+
+                // At least one child is using the terminal.
+                Interop.Sys.ConfigureTerminalForChildProcess(childUsesTerminal: true);
+            }
+            else
+            {
+                Debug.Assert(s_processStartLock.IsWriteLockHeld);
+
+                if (childrenUsingTerminalRemaining == 0)
+                {
+                    // No more children are using the terminal.
+                    Interop.Sys.ConfigureTerminalForChildProcess(childUsesTerminal: false);
+                }
             }
         }
     }

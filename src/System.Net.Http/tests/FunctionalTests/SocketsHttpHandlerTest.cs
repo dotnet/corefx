@@ -460,6 +460,12 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseSocketsHttpHandler => true;
     }
 
+    public sealed class SocketsHttpHandler_HttpClientHandler_TrailingHeaders_Test : HttpClientHandlerTest_TrailingHeaders_Test
+    {
+        // PlatformHandlers don't support trailers.
+        protected override bool UseSocketsHttpHandler => true;
+    }
+
     public sealed class SocketsHttpHandler_SchSendAuxRecordHttpTest : SchSendAuxRecordHttpTest
     {
         public SocketsHttpHandler_SchSendAuxRecordHttpTest(ITestOutputHelper output) : base(output) { }
@@ -703,7 +709,7 @@ namespace System.Net.Http.Functional.Tests
         public static IEnumerable<object[]> Authentication_SocketsHttpHandler_TestData()
         {
             // These test cases successfully authenticate on SocketsHttpHandler but fail on the other handlers.
-            // These are legal as per the the RFC, so authenticating is the expected behavior. See #28521 for details.
+            // These are legal as per the RFC, so authenticating is the expected behavior. See #28521 for details.
             yield return new object[] { "Basic realm=\"testrealm1\" basic realm=\"testrealm1\"", true };
             yield return new object[] { "Basic something digest something", true };
             yield return new object[] { "Digest realm=\"api@example.org\", qop=\"auth\", algorithm=MD5-sess, nonce=\"5TsQWLVdgBdmrQ0XsxbDODV+57QdFR34I9HAbC/RVvkK\", " +

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
 
 namespace System.Globalization
@@ -353,7 +354,7 @@ namespace System.Globalization
                     "time",
                     ticks,
                     // Print out the date in Gregorian using InvariantCulture since the DateTime is based on GreograinCalendar.
-                    string.Format(
+                    SR.Format(
                         CultureInfo.InvariantCulture,
                         SR.ArgumentOutOfRange_CalendarRange,
                         s_calendarMinValue,
@@ -457,7 +458,7 @@ namespace System.Globalization
 
             DateBuffer lunarDate = new DateBuffer();    // lunar month and day for Jan 1
 
-            // From the table looking-up value of HebrewTable[index] (stored in lunarDate.day), we get the the
+            // From the table looking-up value of HebrewTable[index] (stored in lunarDate.day), we get the
             // lunar month and lunar day where the Gregorian date 1/1 falls.
             lunarDate.year = gregorianYear + HebrewYearOf1AD;
             hebrewYearType = GetLunarMonthDay(gregorianYear, lunarDate);
@@ -695,7 +696,7 @@ namespace System.Globalization
 
         public override int GetEra(DateTime time) => HebrewEra;
 
-        public override int[] Eras => new int[] { HebrewEra };
+        public override int[]? Eras => new int[] { HebrewEra };
 
         public override int GetMonth(DateTime time)
         {

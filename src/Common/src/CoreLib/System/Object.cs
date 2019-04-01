@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 namespace System
@@ -13,6 +15,8 @@ namespace System
     // operations.
     //
     [Serializable]
+    [ClassInterface(ClassInterfaceType.AutoDispatch)]
+    [ComVisible(true)]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public partial class Object
     {
@@ -41,12 +45,12 @@ namespace System
         // Equal to this.  Equality is defined as object equality for reference
         // types and bitwise equality for value types using a loader trick to
         // replace Equals with EqualsValue for value types).
-        public virtual bool Equals(object obj)
+        public virtual bool Equals(object? obj)
         {
             return RuntimeHelpers.Equals(this, obj);
         }
 
-        public static bool Equals(object objA, object objB)
+        public static bool Equals(object? objA, object? objB)
         {
             if (objA == objB)
             {
@@ -60,7 +64,7 @@ namespace System
         }
 
         [NonVersionable]
-        public static bool ReferenceEquals(object objA, object objB)
+        public static bool ReferenceEquals(object? objA, object? objB)
         {
             return objA == objB;
         }
