@@ -225,7 +225,7 @@ namespace System.Net.Http.HPack
                         throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
                     }
 
-                    destination[i] = (byte)((uint)(c));
+                    destination[i] = (byte)c;
                 }
 
                 bytesWritten = value.Length;

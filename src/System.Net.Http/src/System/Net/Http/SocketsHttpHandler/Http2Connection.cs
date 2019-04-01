@@ -788,7 +788,7 @@ namespace System.Net.Http
                             // HTTP/2 allows only 'trailers' TE header. rfc7540 8.1.2.2
                             foreach (string value  in header.Value)
                             {
-                                if (value == "trailers")
+                                if (string.Equals(value, "trailers", StringComparison.OrdinalIgnoreCase))
                                 {
                                     WriteBytes(knownHeader.Http2EncodedName);
                                     WriteLiteralHeaderValue(value);
