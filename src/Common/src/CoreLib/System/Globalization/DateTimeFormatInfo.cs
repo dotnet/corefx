@@ -253,8 +253,10 @@ namespace System.Globalization
         // Invariant DateTimeFormatInfo doesn't have user-overriden values
         // Default calendar is gregorian
         public DateTimeFormatInfo()
-            : this(CultureInfo.InvariantCulture._cultureData, GregorianCalendar.GetDefaultInstance())
         {
+            _cultureData = CultureInfo.InvariantCulture._cultureData;
+            calendar = GregorianCalendar.GetDefaultInstance();
+            InitializeOverridableProperties(_cultureData, calendar.ID);
         }
 
         internal DateTimeFormatInfo(CultureData cultureData, Calendar cal)
@@ -414,6 +416,10 @@ namespace System.Globalization
             }
             set
             {
+                if (GlobalizationMode.Invariant)
+                {
+                    throw new PlatformNotSupportedException();
+                }
                 if (IsReadOnly)
                 {
                     throw new InvalidOperationException(SR.InvalidOperation_ReadOnly);
@@ -1773,7 +1779,13 @@ namespace System.Globalization
             return newInfo;
         }
 
-        public bool IsReadOnly => _isReadOnly;
+        public bool IsReadOnly
+        {
+            get
+            {
+                return GlobalizationMode.Invariant || (_isReadOnly);
+            }
+        }
 
         /// <summary>
         /// Return the native name for the calendar in DTFI.Calendar.  The native name is referred to
@@ -2151,7 +2163,7 @@ namespace System.Globalization
         internal static DateTimeFormatInfo GetJapaneseCalendarDTFI()
         {
             DateTimeFormatInfo temp = s_jajpDTFI;
-            if (temp == null)
+            if (temp == null && !GlobalizationMode.Invariant)
             {
                 temp = new CultureInfo("ja-JP", false).DateTimeFormat;
                 temp.Calendar = JapaneseCalendar.GetDefaultInstance();
@@ -2169,7 +2181,7 @@ namespace System.Globalization
         internal static DateTimeFormatInfo GetTaiwanCalendarDTFI()
         {
             DateTimeFormatInfo temp = s_zhtwDTFI;
-            if (temp == null)
+            if (temp == null && !GlobalizationMode.Invariant)
             {
                 temp = new CultureInfo("zh-TW", false).DateTimeFormat;
                 temp.Calendar = TaiwanCalendar.GetDefaultInstance();
@@ -2194,13 +2206,13 @@ namespace System.Globalization
             {
                 temp = new TokenHashValue[TOKEN_HASH_SIZE];
 
-                bool koreanLanguage = LanguageName.Equals(KoreanLangName);
+                bool koreanLanguage = !GlobalizationMode.Invariant && LanguageName.Equals(KoreanLangName);
 
                 string sep = TimeSeparator.Trim();
                 if (IgnorableComma != sep) InsertHash(temp, IgnorableComma, TokenType.IgnorableSymbol, 0);
                 if (IgnorablePeriod != sep) InsertHash(temp, IgnorablePeriod, TokenType.IgnorableSymbol, 0);
 
-                if (KoreanHourSuff != sep && CJKHourSuff != sep && ChineseHourSuff != sep)
+                if (!GlobalizationMode.Invariant && KoreanHourSuff != sep && CJKHourSuff != sep && ChineseHourSuff != sep)
                 {
                     //
                     // On the Macintosh, the default TimeSeparator is identical to the KoreanHourSuff, CJKHourSuff, or ChineseHourSuff for some cultures like
@@ -2214,45 +2226,49 @@ namespace System.Globalization
                 InsertHash(temp, AMDesignator, TokenType.SEP_Am | TokenType.Am, 0);
                 InsertHash(temp, PMDesignator, TokenType.SEP_Pm | TokenType.Pm, 1);
 
-                if (LanguageName.Equals("sq"))
+                // TODO: This ignores similar custom cultures
+                if (!GlobalizationMode.Invariant && LanguageName.Equals("sq"))
                 {
                     // Albanian allows time formats like "12:00.PD"
                     InsertHash(temp, IgnorablePeriod + AMDesignator, TokenType.SEP_Am | TokenType.Am, 0);
                     InsertHash(temp, IgnorablePeriod + PMDesignator, TokenType.SEP_Pm | TokenType.Pm, 1);
                 }
 
-                // CJK suffix
-                InsertHash(temp, CJKYearSuff, TokenType.SEP_YearSuff, 0);
-                InsertHash(temp, KoreanYearSuff, TokenType.SEP_YearSuff, 0);
-                InsertHash(temp, CJKMonthSuff, TokenType.SEP_MonthSuff, 0);
-                InsertHash(temp, KoreanMonthSuff, TokenType.SEP_MonthSuff, 0);
-                InsertHash(temp, CJKDaySuff, TokenType.SEP_DaySuff, 0);
-                InsertHash(temp, KoreanDaySuff, TokenType.SEP_DaySuff, 0);
-
-                InsertHash(temp, CJKHourSuff, TokenType.SEP_HourSuff, 0);
-                InsertHash(temp, ChineseHourSuff, TokenType.SEP_HourSuff, 0);
-                InsertHash(temp, CJKMinuteSuff, TokenType.SEP_MinuteSuff, 0);
-                InsertHash(temp, CJKSecondSuff, TokenType.SEP_SecondSuff, 0);
-
-                if (!LocalAppContextSwitches.EnforceLegacyJapaneseDateParsing && Calendar.ID == CalendarId.JAPAN)
+                if (!GlobalizationMode.Invariant)
                 {
-                    // We need to support parsing the dates has the start of era symbol which means it is year 1 in the era.
-                    // The start of era symbol has to be followed by the year symbol suffix, otherwise it would be invalid date.
-                    InsertHash(temp, JapaneseEraStart, TokenType.YearNumberToken, 1);
-                    InsertHash(temp, "(", TokenType.IgnorableSymbol, 0);
-                    InsertHash(temp, ")", TokenType.IgnorableSymbol, 0);
+                    // CJK suffix
+                    InsertHash(temp, CJKYearSuff, TokenType.SEP_YearSuff, 0);
+                    InsertHash(temp, KoreanYearSuff, TokenType.SEP_YearSuff, 0);
+                    InsertHash(temp, CJKMonthSuff, TokenType.SEP_MonthSuff, 0);
+                    InsertHash(temp, KoreanMonthSuff, TokenType.SEP_MonthSuff, 0);
+                    InsertHash(temp, CJKDaySuff, TokenType.SEP_DaySuff, 0);
+                    InsertHash(temp, KoreanDaySuff, TokenType.SEP_DaySuff, 0);
+
+                    InsertHash(temp, CJKHourSuff, TokenType.SEP_HourSuff, 0);
+                    InsertHash(temp, ChineseHourSuff, TokenType.SEP_HourSuff, 0);
+                    InsertHash(temp, CJKMinuteSuff, TokenType.SEP_MinuteSuff, 0);
+                    InsertHash(temp, CJKSecondSuff, TokenType.SEP_SecondSuff, 0);
+
+                    if (!AppContextSwitches.EnforceLegacyJapaneseDateParsing && Calendar.ID == (int)CalendarId.JAPAN)
+                    {
+                        // We need to support parsing the dates has the start of era symbol which means it is year 1 in the era.
+                        // The start of era symbol has to be followed by the year symbol suffix, otherwise it would be invalid date.
+                        InsertHash(temp, JapaneseEraStart, TokenType.YearNumberToken, 1);
+                        InsertHash(temp, "(", TokenType.IgnorableSymbol, 0);
+                        InsertHash(temp, ")", TokenType.IgnorableSymbol, 0);
+                    }
+
+                    // TODO: This ignores other custom cultures that might want to do something similar
+                    if (koreanLanguage)
+                    {
+                        // Korean suffix
+                        InsertHash(temp, KoreanHourSuff, TokenType.SEP_HourSuff, 0);
+                        InsertHash(temp, KoreanMinuteSuff, TokenType.SEP_MinuteSuff, 0);
+                        InsertHash(temp, KoreanSecondSuff, TokenType.SEP_SecondSuff, 0);
+                    }
                 }
 
-                // TODO: This ignores other custom cultures that might want to do something similar
-                if (koreanLanguage)
-                {
-                    // Korean suffix
-                    InsertHash(temp, KoreanHourSuff, TokenType.SEP_HourSuff, 0);
-                    InsertHash(temp, KoreanMinuteSuff, TokenType.SEP_MinuteSuff, 0);
-                    InsertHash(temp, KoreanSecondSuff, TokenType.SEP_SecondSuff, 0);
-                }
-
-                if (LanguageName.Equals("ky"))
+                if (!GlobalizationMode.Invariant && LanguageName.Equals("ky"))
                 {
                     // For some cultures, the date separator works more like a comma, being allowed before or after any date part
                     InsertHash(temp, dateSeparatorOrTimeZoneOffset, TokenType.IgnorableSymbol, 0);
@@ -2262,9 +2278,16 @@ namespace System.Globalization
                     InsertHash(temp, dateSeparatorOrTimeZoneOffset, TokenType.SEP_DateOrOffset, 0);
                 }
 
-                // We need to rescan the date words since we're always synthetic
-                DateTimeFormatInfoScanner scanner = new DateTimeFormatInfoScanner();
-                string[]? dateWords = scanner.GetDateWordsOfDTFI(this);
+                String[] dateWords = null;
+                DateTimeFormatInfoScanner scanner = null;
+
+                if (!GlobalizationMode.Invariant)
+                {
+                    // We need to rescan the date words since we're always synthetic
+                    scanner = new DateTimeFormatInfoScanner();
+                    dateWords = scanner.GetDateWordsOfDTFI(this);
+                }
+
                 // Ensure the formatflags is initialized.
                 DateTimeFormatFlags flag = FormatFlags;
 
@@ -2273,7 +2296,8 @@ namespace System.Globalization
                 // This is determined in DateTimeFormatInfoScanner.  Use this flag to determine if we should treat date separator as ignorable symbol.
                 bool useDateSepAsIgnorableSymbol = false;
 
-                if (dateWords != null)
+                String monthPostfix = null;
+                if (!GlobalizationMode.Invariant && dateWords != null)
                 {
                     // There are DateWords.  It could be a real date word (such as "de"), or a monthPostfix.
                     // The monthPostfix starts with '\xfffe' (MonthPostfixChar), followed by the real monthPostfix.
@@ -2363,7 +2387,8 @@ namespace System.Globalization
                     InsertHash(temp, GetAbbreviatedEraName(i), TokenType.EraToken, i);
                 }
 
-                if (LanguageName.Equals(JapaneseLangName))
+                // TODO: This ignores other cultures that might want to do something similar
+                if (!GlobalizationMode.Invariant && LanguageName.Equals(JapaneseLangName))
                 {
                     // Japanese allows day of week forms like: "(Tue)"
                     for (int i = 0; i < 7; i++)
@@ -2386,7 +2411,7 @@ namespace System.Globalization
                     }
                 }
                 // TODO: This prohibits similar custom cultures, but we hard coded the name
-                else if (CultureName.Equals("zh-TW"))
+                else if (!GlobalizationMode.Invariant && CultureName.Equals("zh-TW"))
                 {
                     DateTimeFormatInfo twDtfi = GetTaiwanCalendarDTFI();
                     for (int i = 1; i <= twDtfi.Calendar.Eras.Length; i++)
@@ -2564,8 +2589,8 @@ namespace System.Globalization
             bool isLetter = char.IsLetter(ch);
             if (isLetter)
             {
-                ch = Culture.TextInfo.ToLower(ch);
-                if (IsHebrewChar(ch) && TokenMask == TokenType.RegularTokenMask)
+                ch = this.Culture.TextInfo.ToLower(ch);
+                if (!GlobalizationMode.Invariant && IsHebrewChar(ch) && TokenMask == TokenType.RegularTokenMask)
                 {
                     bool badFormat;
                     if (TryParseHebrewNumber(ref str, out badFormat, out tokenValue))

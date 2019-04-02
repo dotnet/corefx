@@ -583,9 +583,12 @@ namespace System.Tests
             yield return new object[] { "23:00:00", null, new TimeSpan(23, 0, 0) };
             yield return new object[] { "24:00:00", null, new TimeSpan(24, 0, 0, 0) };
 
-            // Croatia uses ',' in place of '.'
-            CultureInfo croatianCulture = new CultureInfo("hr-HR");
-            yield return new object[] { "6:12:14:45,348", croatianCulture, new TimeSpan(6, 12, 14, 45, 348) };
+            if (!GlobalizationMode.Invariant)
+            {
+                // Croatia uses ',' in place of '.'
+                CultureInfo croatianCulture = new CultureInfo("hr-HR");
+                yield return new object[] { "6:12:14:45,348", croatianCulture, new TimeSpan(6, 12, 14, 45, 348) };
+            }
         }
 
         [Theory]
@@ -630,7 +633,11 @@ namespace System.Tests
             yield return new object[] { "00:00::00", null, typeof(FormatException) }; // duplicated separator
             yield return new object[] { "00:00:00:", null, typeof(FormatException) }; // extra separator at end
             yield return new object[] { "00:00:00:00:00:00:00:00", null, typeof(FormatException) }; // too many components
-            yield return new object[] { "6:12:14:45.3448", new CultureInfo("hr-HR"), typeof(FormatException) }; // culture that uses ',' rather than '.'
+
+            if (!GlobalizationMode.Invariant)
+            {
+                yield return new object[] { "6:12:14:45.3448", new CultureInfo("hr-HR"), typeof(FormatException) }; // culture that uses ',' rather than '.'
+            }
 
             // OverflowExceptions
             yield return new object[] { "1:1:1.99999999", null, typeof(OverflowException) }; // overflowing fraction

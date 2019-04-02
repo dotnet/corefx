@@ -1713,13 +1713,16 @@ namespace System.Tests
             yield return new object[] { "2 2 2Z", CultureInfo.InvariantCulture, TimeZoneInfo.ConvertTimeFromUtc(new DateTime(2002, 2, 2, 0, 0, 0, DateTimeKind.Utc), TimeZoneInfo.Local) };
             yield return new object[] { "#10/10/2095#\0", CultureInfo.InvariantCulture, new DateTime(2095, 10, 10, 0, 0, 0) };
 
-            DateTime today = DateTime.Today;
-            var hebrewCulture = new CultureInfo("he-IL");
-            hebrewCulture.DateTimeFormat.Calendar = new HebrewCalendar();
-            yield return new object[] { today.ToString(hebrewCulture), hebrewCulture, today };
+            if (!GlobalizationMode.Invariant)
+            {
+                DateTime today = DateTime.Today;
+                var hebrewCulture = new CultureInfo("he-IL");
+                hebrewCulture.DateTimeFormat.Calendar = new HebrewCalendar();
+                yield return new object[] { today.ToString(hebrewCulture), hebrewCulture, today };
 
-            var mongolianCulture = new CultureInfo("mn-MN");
-            yield return new object[] { today.ToString(mongolianCulture), mongolianCulture, today };
+                var mongolianCulture = new CultureInfo("mn-MN");
+                yield return new object[] { today.ToString(mongolianCulture), mongolianCulture, today };
+            }
         }
 
         [Theory]
@@ -1833,6 +1836,11 @@ namespace System.Tests
             yield return new object[] { "9/8/2017 10 : 11 : 12 AM", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
             yield return new object[] { " 9 / 8 / 2017    10 : 11 : 12 AM", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
             yield return new object[] { "   9   /   8   /   2017    10  :   11  :   12  AM", "M/d/yyyy HH':'mm':'ss tt\'  \'", CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, new DateTime(2017, 9, 8, 10, 11, 12) };
+
+            if (GlobalizationMode.Invariant)
+            {
+                yield break;
+            }
 
             var hebrewCulture = new CultureInfo("he-IL");
             hebrewCulture.DateTimeFormat.Calendar = new HebrewCalendar();

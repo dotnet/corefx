@@ -458,8 +458,8 @@ namespace System
             }
 
             // This is a flag to indicate if we are format the dates using Hebrew calendar.
-            bool isHebrewCalendar = (cal.ID == CalendarId.HEBREW);
-            bool isJapaneseCalendar = (cal.ID == CalendarId.JAPAN);
+            bool isHebrewCalendar = !GlobalizationMode.Invariant && ((CalendarId)cal.ID == CalendarId.HEBREW);
+            bool isJapaneseCalendar = !GlobalizationMode.Invariant && ((CalendarId)cal.ID == CalendarId.JAPAN);
             // This is a flag to indicate if we are formating hour/minute/second only.
             bool bTimeOnly = true;
 
@@ -666,7 +666,7 @@ namespace System
                         {
                             FormatDigits(result, year, tokenLen <= 2 ? tokenLen : 2);
                         }
-                        else if (cal.ID == CalendarId.HEBREW)
+                        else if (isHebrewCalendar)
                         {
                             HebrewFormatDigits(result, year);
                         }

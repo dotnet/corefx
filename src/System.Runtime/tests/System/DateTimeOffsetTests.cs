@@ -1238,7 +1238,10 @@ namespace System.Tests
         [MemberData(nameof(ToString_WithCulture_MatchesExpected_MemberData))]
         public static void ToString_WithCulture_MatchesExpected(DateTimeOffset dateTimeOffset, string format, CultureInfo culture, string expected)
         {
-            Assert.Equal(expected, dateTimeOffset.ToString(format, culture));
+            if (!GlobalizationMode.Invariant)
+            {
+                Assert.Equal(expected, dateTimeOffset.ToString(format, culture));
+            }
         }
     }
 }
