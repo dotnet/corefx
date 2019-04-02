@@ -5,6 +5,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netstandard-Debug;netstandard-Release</Configurations>
     <IsPartialFacadeAssembly Condition="'$(TargetsNETStandard)' != 'true'">true</IsPartialFacadeAssembly>
+    <OmitResources Condition="'$(IsPartialFacadeAssembly)' == 'true'">true</OmitResources>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Collections" />
@@ -17,6 +18,15 @@
     <Reference Include="System.ComponentModel.TypeConverter" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNETStandard)' == 'true'">
+    <Compile Include="$(CommonPath)\System\Data\DataRowComparer.cs">
+      <Link>System\Data\DataRowComparer.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\DataRowExtensions.cs">
+      <Link>System\Data\DataRowExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Data\DataSetUtil.cs">
+      <Link>System\Data\DataSetUtil.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\System\Data\DataTableExtensions.cs">
       <Link>System\Data\DataTableExtensions.cs</Link>
     </Compile>
@@ -37,13 +47,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Data\TypedTableBaseExtensions.cs">
       <Link>System\Data\SortExpressionBuilder.cs</Link>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="System\Data\DataRowComparer.cs" />
-    <Compile Include="System\Data\DataRowExtensions.cs" />
-    <Compile Include="$(CommonPath)\System\Data\DataSetUtil.cs">
-      <Link>System\Data\DataSetUtil.cs</Link>
     </Compile>
   </ItemGroup>
 </Project>

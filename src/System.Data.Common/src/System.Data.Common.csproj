@@ -63,7 +63,13 @@
     <Compile Include="System\Data\DataRowChangeEvent.cs" />
     <Compile Include="System\Data\DataRowChangeEventHandler.cs" />
     <Compile Include="System\Data\DataRowCollection.cs" />
+    <Compile Include="$(CommonPath)\System\Data\DataRowComparer.cs">
+      <Link>System\Data\DataRowComparer.cs</Link>
+    </Compile>
     <Compile Include="System\Data\DataRowCreatedEventHandler.cs" />
+    <Compile Include="$(CommonPath)\System\Data\DataRowExtensions.cs">
+      <Link>System\Data\DataRowExtensions.cs</Link>
+    </Compile>
     <Compile Include="System\Data\DataRowState.cs" />
     <Compile Include="System\Data\DataRowVersion.cs" />
     <Compile Include="System\Data\DataRowView.cs" />
