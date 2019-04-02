@@ -2491,14 +2491,16 @@
       "StableVersions": [
         "4.5.0",
         "4.5.1",
-        "4.5.2"
+        "4.5.2",
+        "4.5.3"
       ],
       "InboxOn": {
         "netcoreapp2.1": "4.1.0.0"
       },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.4.0",
-        "4.0.1.0": "4.5.1"
+        "4.0.1.0": "4.5.1",
+        "4.0.1.1": "4.5.3"
       }
     },
     "System.Messaging": {
