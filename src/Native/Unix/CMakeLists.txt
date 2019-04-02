@@ -6,7 +6,7 @@ set(CMAKE_INSTALL_PREFIX $ENV{__CMakeBinDir})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99")
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
-set(VERSION_FILE_PATH "${CMAKE_BINARY_DIR}/../../../../artifacts/obj/_version.c")
+set(VERSION_FILE_PATH "${CMAKE_BINARY_DIR}/../../_version.c")
 
 # We mark the function which needs exporting with DLLEXPORT
 add_compile_options(-fvisibility=hidden)
@@ -22,7 +22,10 @@ add_compile_options(-fPIC)
 add_compile_options(-I${CMAKE_CURRENT_SOURCE_DIR}/Common)
 add_compile_options(-I${CMAKE_CURRENT_BINARY_DIR}/Common)
 add_compile_options(-g)
-add_compile_options(-Wthread-safety)
+if(CMAKE_C_COMPILER_ID STREQUAL Clang)
+    add_compile_options(-Wthread-safety)
+    add_compile_options(-Wno-thread-safety-analysis)
+endif()
 add_compile_options(-Werror)
 
 if(CMAKE_SYSTEM_NAME STREQUAL Emscripten)
@@ -119,6 +122,8 @@ endif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
 if(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
     set(CLR_CMAKE_PLATFORM_UNIX 1)
     add_definitions(-D_BSD_SOURCE) # required for getline
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=lld -Xlinker --build-id=sha1")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}  -fuse-ld=lld -Xlinker --build-id=sha1")
 endif(CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
 
 if(CMAKE_SYSTEM_NAME STREQUAL OpenBSD)
@@ -247,7 +252,9 @@ if (NOT CLR_CMAKE_PLATFORM_WASM)
 	add_subdirectory(System.IO.Ports.Native)
 endif()
 
-add_compile_options(-Weverything)
+if(CMAKE_C_COMPILER_ID STREQUAL Clang)
+    add_compile_options(-Weverything)
+endif()
 
 add_subdirectory(System.Native)
 

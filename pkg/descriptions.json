@@ -169,7 +169,7 @@
     "CommonTypes": []
   },
   {
-    "Name": "Microsoft.VisualBasic",
+    "Name": "Microsoft.VisualBasic.Core",
     "Description": "Provides types that support the Visual Basic runtime",
     "CommonTypes": [
       "Microsoft.VisualBasic.Strings",
@@ -739,19 +739,6 @@
     ]
   },
   {
-    "Name": "System.Drawing.Design.Primitives",
-    "Description": "Contains classes that extend design-time user interface (UI) logic and drawing.",
-    "CommonTypes": [
-      "System.Drawing.Design.IPropertyValueUIService",
-      "System.Drawing.Design.PropertyValueUIHandler",
-      "System.Drawing.Design.PropertyValueUIItem",
-      "System.Drawing.Design.PropertyValueUIItemInvokeHandler",
-      "System.Drawing.Design.PaintValueEventArgs",
-      "System.Drawing.Design.UITypeEditor"
-      "System.Drawing.Design.UITypeEditorEditStyle"
-    ]
-  },
-  {
     "Name": "System.Dynamic.Runtime",
     "Description": "Provides classes and interfaces that support the Dynamic Language Runtime (DLR).",
     "CommonTypes": [
@@ -1050,6 +1037,7 @@
         "System.ReadOnlyMemory",
         "System.Buffers.MemoryPool",
         "System.Buffers.ReadOnlySequence",
+        "System.Buffers.SequenceReader",
         "System.Buffers.Text.Utf8Parser",
         "System.Buffers.Text.Utf8Formatter"
     ]
@@ -1248,6 +1236,16 @@
     ]
   },
   {
+    "Name": "System.Numerics.Tensors",
+    "Description": "Tensor class which represents and extends multi-dimensional arrays.",
+    "CommonTypes": [
+      "System.Numerics.Tensors.Tensor<T>",
+      "System.Numerics.Tensors.CompressedSparseTensor<T>",
+      "System.Numerics.Tensors.DenseTensor<T>",
+      "System.Numerics.Tensors.SparseTensor<T>"
+    ]
+  },
+  {
     "Name": "System.Numerics.Vectors",
     "Description": "Provides hardware-accelerated numeric types, suitable for high-performance processing and graphics applications.",
     "CommonTypes": [
@@ -1390,6 +1388,14 @@
     ]
   },
   {
+    "Name": "System.Reflection.MetadataLoadContext",
+    "Description": "Provides read-only reflection on assemblies in an isolated context with support for assemblies that have different architectures and runtimes.",
+    "CommonTypes": [
+        "System.Reflection.MetadataLoadContext",
+        "System.Reflection.MetadataAssemblyResolver"
+    ]
+  },
+  {
     "Name": "System.Reflection.Primitives",
     "Description": "Provides common enumerations for reflection-based libraries.",
     "CommonTypes": [
@@ -1516,6 +1522,13 @@
       "System.Runtime.Versioning.FrameworkName",
       "System.StringComparer",
       "System.IO.Path"
+    ]
+  },
+  {
+    "Name": "System.Runtime.Intrinsics.Experimental",
+    "Description": "Provides APIs for accessing processor specific instructions.",
+    "CommonTypes": [
+        "System.Runtime.Intrinsics.Arm.Arm64"
     ]
   },
   {
@@ -1963,6 +1976,24 @@
     ]
   },
   {
+    "Name": "System.Text.Json",
+    "Description": "Provides a fast, non-cached, forward-only way to read UTF-8 encoded JavaScript Object Notation (JSON) text.",
+    "CommonTypes": [
+      "System.Text.Json.Utf8JsonReader",
+      "System.Text.Json.Utf8JsonWriter",
+      "System.Text.Json.JsonDocument"
+    ]
+  },
+  {
+    "Name": "Microsoft.Bcl.Json.Sources",
+    "Description": "Provides the source code implementation of System.Text.Json as internal types. This package is only required for projects targeting .NET Framework 4.6.1+ or .NET Core 2.x; and is not for projects that can target .NET Core 3.0 and higher. For guidance on consuming the source pacakge, visit: https://aka.ms/json-source-package-guide.",
+    "CommonTypes": [
+      "System.Text.Json.Utf8JsonReader",
+      "System.Text.Json.Utf8JsonWriter",
+      "System.Text.Json.JsonDocument"
+    ]
+  },
+  {
     "Name": "System.Text.RegularExpressions",
     "Description": "Provides the System.Text.RegularExpressions.Regex class, an implementation of a regular expression engine.",
     "CommonTypes": [
@@ -2105,6 +2136,14 @@
     "CommonTypes": [
       "System.Transactions.Transaction",
       "System.Transactions.TransactionScope"
+    ]
+  },
+  {
+    "Name": "System.Utf8String.Experimental",
+    "Description": "Provides types for representation of UTF-8 string data.",
+    "CommonTypes": [
+        "System.Char8",
+        "System.Utf8String"
     ]
   },
   {

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -50,7 +49,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <exception cref="PathTooLongException">
         ///     The specified path, file name, or both exceed the system-defined maximum length. 
         /// </exception>
-        /// <exception cref="SecurityException">
+        /// <exception cref="System.Security.SecurityException">
         ///     The caller does not have path discovery permission. 
         /// </exception>
         /// <exception cref="FileNotFoundException">
@@ -106,7 +105,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <exception cref="PathTooLongException">
         ///     The specified path, file name, or both exceed the system-defined maximum length. 
         /// </exception>
-        /// <exception cref="SecurityException">
+        /// <exception cref="System.Security.SecurityException">
         ///     The caller does not have path discovery permission. 
         /// </exception>
         /// <exception cref="FileNotFoundException">
@@ -163,7 +162,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <exception cref="PathTooLongException">
         ///     The specified path, file name, or both exceed the system-defined maximum length. 
         /// </exception>
-        /// <exception cref="SecurityException">
+        /// <exception cref="System.Security.SecurityException">
         ///     The caller does not have path discovery permission. 
         /// </exception>
         /// <exception cref="FileNotFoundException">
@@ -227,7 +226,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// <exception cref="PathTooLongException">
         ///     The specified path, file name, or both exceed the system-defined maximum length. 
         /// </exception>
-        /// <exception cref="SecurityException">
+        /// <exception cref="System.Security.SecurityException">
         ///     The caller does not have path discovery permission. 
         /// </exception>
         /// <exception cref="FileNotFoundException">
@@ -392,7 +391,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             if (assembly.ReflectionOnly)
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.Argument_AssemblyReflectionOnly, nameof(assembly)), nameof(assembly));
+                throw new ArgumentException(SR.Format(SR.Argument_AssemblyReflectionOnly, nameof(assembly)), nameof(assembly));
             }
             _assembly = assembly;
         }
@@ -468,7 +467,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                Contract.Ensures(Contract.Result<Assembly>() != null);
+                Debug.Assert(_assembly != null);
 
                 return _assembly;
             }

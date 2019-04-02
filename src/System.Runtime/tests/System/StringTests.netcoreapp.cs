@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using Xunit;
 
 namespace System.Tests
@@ -38,6 +40,52 @@ namespace System.Tests
         {
             var span = new ReadOnlySpan<char>(valueArray, startIndex, length);
             Assert.Equal(expected, new string(span));
+        }
+
+        [Fact]
+        public static unsafe void Ctor_CharPtr_DoesNotAccessInvalidPage()
+        {
+            // Allocates a buffer of all 'x' followed by a null terminator,
+            // then attempts to create a string instance from this at various offsets.
+
+            const int MaxCharCount = 128;
+            using BoundedMemory<char> boundedMemory = BoundedMemory.Allocate<char>(MaxCharCount);
+            boundedMemory.Span.Fill('x');
+            boundedMemory.Span[MaxCharCount - 1] = '\0';
+            boundedMemory.MakeReadonly();
+
+            using MemoryHandle memoryHandle = boundedMemory.Memory.Pin();
+
+            for (int i = 0; i < MaxCharCount; i++)
+            {
+                string expectedString = new string('x', MaxCharCount - i - 1);
+                string actualString = new string((char*)memoryHandle.Pointer + i);
+                Assert.Equal(expectedString, actualString);
+            }
+        }
+
+        [ConditionalFact(nameof(IsSimpleActiveCodePage))]
+        public static unsafe void Ctor_SBytePtr_DoesNotAccessInvalidPage()
+        {
+            // Allocates a buffer of all ' ' followed by a null terminator,
+            // then attempts to create a string instance from this at various offsets.
+            // We use U+0020 SPACE instead of any other character because it lives
+            // at offset 0x20 across every supported code page.
+
+            const int MaxByteCount = 128;
+            using BoundedMemory<sbyte> boundedMemory = BoundedMemory.Allocate<sbyte>(MaxByteCount);
+            boundedMemory.Span.Fill((sbyte)' ');
+            boundedMemory.Span[MaxByteCount - 1] = (sbyte)'\0';
+            boundedMemory.MakeReadonly();
+
+            using MemoryHandle memoryHandle = boundedMemory.Memory.Pin();
+
+            for (int i = 0; i < MaxByteCount; i++)
+            {
+                string expectedString = new string(' ', MaxByteCount - i - 1);
+                string actualString = new string((sbyte*)memoryHandle.Pointer + i);
+                Assert.Equal(expectedString, actualString);
+            }
         }
 
         [Fact]
@@ -412,6 +460,38 @@ namespace System.Tests
         }
 
         [Theory]
+        [InlineData(new char[0], new int[0])] // empty
+        [InlineData(new char[] { 'x', 'y', 'z' }, new int[] { 'x', 'y', 'z' })]
+        [InlineData(new char[] { 'x', '\uD86D', '\uDF54', 'y' }, new int[] { 'x', 0x2B754, 'y' })] // valid surrogate pair
+        [InlineData(new char[] { 'x', '\uD86D', 'y' }, new int[] { 'x', 0xFFFD, 'y' })] // standalone high surrogate
+        [InlineData(new char[] { 'x', '\uDF54', 'y' }, new int[] { 'x', 0xFFFD, 'y' })] // standalone low surrogate
+        [InlineData(new char[] { 'x', '\uD86D' }, new int[] { 'x', 0xFFFD })] // standalone high surrogate at end of string
+        [InlineData(new char[] { 'x', '\uDF54' }, new int[] { 'x', 0xFFFD })] // standalone low surrogate at end of string
+        [InlineData(new char[] { 'x', '\uD86D', '\uD86D', 'y' }, new int[] { 'x', 0xFFFD, 0xFFFD, 'y' })] // two high surrogates should be two replacement chars
+        [InlineData(new char[] { 'x', '\uFFFD', 'y' }, new int[] { 'x', 0xFFFD, 'y' })] // literal U+FFFD
+        public static void EnumerateRunes(char[] chars, int[] expected)
+        {
+            // Test data is smuggled as char[] instead of straight-up string since the test framework
+            // doesn't like invalid UTF-16 literals.
+
+            string asString = new string(chars);
+
+            // First, use a straight-up foreach keyword to ensure pattern matching works as expected
+
+            List<int> enumeratedScalarValues = new List<int>();
+            foreach (Rune rune in asString.EnumerateRunes())
+            {
+                enumeratedScalarValues.Add(rune.Value);
+            }
+            Assert.Equal(expected, enumeratedScalarValues.ToArray());
+
+            // Then use LINQ to ensure IEnumerator<...> works as expected
+
+            int[] enumeratedValues = new string(chars).EnumerateRunes().Select(r => r.Value).ToArray();
+            Assert.Equal(expected, enumeratedValues);
+        }
+
+        [Theory]
         [InlineData("Hello", 'H', true)]
         [InlineData("Hello", 'h', false)]
         [InlineData("H", 'H', true)]
@@ -611,7 +691,7 @@ namespace System.Tests
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCultureIgnoreCase));
 
                 return SuccessExitCode;
-            }, src).Dispose();                            
+            }, src).Dispose();
         }
 
         public static IEnumerable<object[]> Replace_StringComparisonCulture_TestData()
@@ -673,6 +753,59 @@ namespace System.Tests
 
         private static readonly StringComparison[] StringComparisons = (StringComparison[])Enum.GetValues(typeof(StringComparison));
 
+        [Fact]
+        public static void GetHashCode_OfSpan_EmbeddedNull_ReturnsDifferentHashCodes()
+        {
+            Assert.NotEqual(string.GetHashCode("\0AAAAAAAAA".AsSpan()), string.GetHashCode("\0BBBBBBBBBBBB".AsSpan()));
+        }
+
+        [Fact]
+        public static void GetHashCode_OfSpan_MatchesOfString()
+        {
+            // parameterless should be ordinal only
+            Assert.Equal("abc".GetHashCode(), string.GetHashCode("abc".AsSpan()));
+            Assert.NotEqual("abc".GetHashCode(), string.GetHashCode("ABC".AsSpan())); // case differences
+        }
+
+        [Fact]
+        public static void GetHashCode_CompareInfo()
+        {
+            // ordinal
+            Assert.Equal("abc".GetHashCode(), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("abc", CompareOptions.Ordinal));
+            Assert.NotEqual("abc".GetHashCode(), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("ABC", CompareOptions.Ordinal));
+
+            // ordinal ignore case
+            Assert.Equal("abc".GetHashCode(StringComparison.OrdinalIgnoreCase), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("abc", CompareOptions.OrdinalIgnoreCase));
+            Assert.Equal("abc".GetHashCode(StringComparison.OrdinalIgnoreCase), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("ABC", CompareOptions.OrdinalIgnoreCase));
+
+            // culture-aware
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.CurrentCulture), CultureInfo.CurrentCulture.CompareInfo.GetHashCode("aeiXXabc", CompareOptions.None));
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.CurrentCultureIgnoreCase), CultureInfo.CurrentCulture.CompareInfo.GetHashCode("aeiXXabc", CompareOptions.IgnoreCase));
+
+            // invariant culture
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.InvariantCulture), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("aeiXXabc", CompareOptions.None));
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.InvariantCultureIgnoreCase), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("aeiXXabc", CompareOptions.IgnoreCase));
+        }
+
+        [Fact]
+        public static void GetHashCode_CompareInfo_OfSpan()
+        {
+            // ordinal
+            Assert.Equal("abc".GetHashCode(), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("abc".AsSpan(), CompareOptions.Ordinal));
+            Assert.NotEqual("abc".GetHashCode(), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("ABC".AsSpan(), CompareOptions.Ordinal));
+
+            // ordinal ignore case
+            Assert.Equal("abc".GetHashCode(StringComparison.OrdinalIgnoreCase), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("abc".AsSpan(), CompareOptions.OrdinalIgnoreCase));
+            Assert.Equal("abc".GetHashCode(StringComparison.OrdinalIgnoreCase), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("ABC".AsSpan(), CompareOptions.OrdinalIgnoreCase));
+
+            // culture-aware
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.CurrentCulture), CultureInfo.CurrentCulture.CompareInfo.GetHashCode("aeiXXabc".AsSpan(), CompareOptions.None));
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.CurrentCultureIgnoreCase), CultureInfo.CurrentCulture.CompareInfo.GetHashCode("aeiXXabc".AsSpan(), CompareOptions.IgnoreCase));
+
+            // invariant culture
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.InvariantCulture), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("aeiXXabc".AsSpan(), CompareOptions.None));
+            Assert.Equal("aeiXXabc".GetHashCode(StringComparison.InvariantCultureIgnoreCase), CultureInfo.InvariantCulture.CompareInfo.GetHashCode("aeiXXabc".AsSpan(), CompareOptions.IgnoreCase));
+        }
 
         public static IEnumerable<object[]> GetHashCode_StringComparison_Data => StringComparisons.Select(value => new object[] { value });
 
@@ -680,9 +813,13 @@ namespace System.Tests
         [MemberData(nameof(GetHashCode_StringComparison_Data))]
         public static void GetHashCode_StringComparison(StringComparison comparisonType)
         {
-            Assert.Equal(StringComparer.FromComparison(comparisonType).GetHashCode("abc"), "abc".GetHashCode(comparisonType));
-        }
+            int hashCodeFromStringComparer = StringComparer.FromComparison(comparisonType).GetHashCode("abc");
+            int hashCodeFromStringGetHashCode = "abc".GetHashCode(comparisonType);
+            int hashCodeFromStringGetHashCodeOfSpan = string.GetHashCode("abc".AsSpan(), comparisonType);
 
+            Assert.Equal(hashCodeFromStringComparer, hashCodeFromStringGetHashCode);
+            Assert.Equal(hashCodeFromStringComparer, hashCodeFromStringGetHashCodeOfSpan);
+        }
 
         public static IEnumerable<object[]> GetHashCode_NoSuchStringComparison_ThrowsArgumentException_Data => new[]
         {
@@ -695,6 +832,7 @@ namespace System.Tests
         public static void GetHashCode_NoSuchStringComparison_ThrowsArgumentException(StringComparison comparisonType)
         {
             AssertExtensions.Throws<ArgumentException>("comparisonType", () => "abc".GetHashCode(comparisonType));
+            AssertExtensions.Throws<ArgumentException>("comparisonType", () => string.GetHashCode("abc".AsSpan(), comparisonType));
         }
 
         [Theory]
@@ -911,6 +1049,135 @@ namespace System.Tests
             // Invalid comparison type
             AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf('o', StringComparison.CurrentCulture - 1));
             AssertExtensions.Throws<ArgumentException>("comparisonType", () => "foo".IndexOf('o', StringComparison.OrdinalIgnoreCase + 1));
+        }
+
+        [Theory]
+        [MemberData(nameof(Concat_Strings_2_3_4_TestData))]
+        public static void Concat_Spans(string[] values, string expected)
+        {
+            Assert.InRange(values.Length, 2, 4);
+
+            string result =
+                values.Length == 2 ? string.Concat(values[0].AsSpan(), values[1].AsSpan()) :
+                values.Length == 3 ? string.Concat(values[0].AsSpan(), values[1].AsSpan(), values[2].AsSpan()) :
+                string.Concat(values[0].AsSpan(), values[1].AsSpan(), values[2].AsSpan(), values[3].AsSpan());
+
+            if (result.Length == 0)
+            {
+                Assert.Same(string.Empty, result);
+            }
+
+            Assert.Equal(expected, result);
+        }
+
+        // [Fact]
+        // public static void IndexerUsingIndexTest()
+        // {
+        //     Index index;
+        //     string s = "0123456789ABCDEF";
+
+        //     for (int i = 0; i < s.Length; i++)
+        //     {
+        //         index = Index.FromStart(i);
+        //         Assert.Equal(s[i], s[index]);
+
+        //         index = Index.FromEnd(i + 1);
+        //         Assert.Equal(s[s.Length - i - 1], s[index]);
+        //     }
+
+        //     index = Index.FromStart(s.Length + 1);
+        //     char c;
+        //     Assert.Throws<IndexOutOfRangeException>(() => c = s[index]);
+
+        //     index = Index.FromEnd(s.Length + 1);
+        //     Assert.Throws<IndexOutOfRangeException>(() => c = s[index]);
+        // }
+
+        // [Fact]
+        // public static void IndexerUsingRangeTest()
+        // {
+        //     Range range;
+        //     string s = "0123456789ABCDEF";
+
+        //     for (int i = 0; i < s.Length; i++)
+        //     {
+        //         range = new Range(Index.FromStart(0), Index.FromStart(i));
+        //         Assert.Equal(s.Substring(0, i), s[range]);
+
+        //         range = new Range(Index.FromEnd(s.Length), Index.FromEnd(i));
+        //         Assert.Equal(s.Substring(0, s.Length - i), s[range]);
+        //     }
+
+        //     range = new Range(Index.FromStart(s.Length - 2), Index.FromStart(s.Length + 1));
+        //     string s1;
+        //     Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s[range]);
+
+        //     range = new Range(Index.FromEnd(s.Length + 1), Index.FromEnd(0));
+        //     Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s[range]);
+        // }
+
+        [Fact]
+        public static void SubstringUsingIndexTest()
+        {
+            string s = "0123456789ABCDEF";
+
+            for (int i = 0; i < s.Length; i++)
+            {
+                Assert.Equal(s.Substring(i), s.Substring(Index.FromStart(i)));
+                Assert.Equal(s.Substring(s.Length - i - 1), s.Substring(Index.FromEnd(i + 1)));
+            }
+
+            // String.Substring allows the string length as a valid input.
+            Assert.Equal(s.Substring(s.Length), s.Substring(Index.FromStart(s.Length)));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => s.Substring(Index.FromStart(s.Length + 1)));
+            Assert.Throws<ArgumentOutOfRangeException>(() => s.Substring(Index.FromEnd(s.Length + 1)));
+        }
+
+        [Fact]
+        public static void SubstringUsingRangeTest()
+        {
+            string s = "0123456789ABCDEF";
+            Range range;
+
+            for (int i = 0; i < s.Length; i++)
+            {
+                range = new Range(Index.FromStart(0), Index.FromStart(i));
+                Assert.Equal(s.Substring(0, i), s.Substring(range));
+
+                range = new Range(Index.FromEnd(s.Length), Index.FromEnd(i));
+                Assert.Equal(s.Substring(0, s.Length - i), s.Substring(range));
+            }
+
+            range = new Range(Index.FromStart(s.Length - 2), Index.FromStart(s.Length + 1));
+            string s1;
+            Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s.Substring(range));
+
+            range = new Range(Index.FromEnd(s.Length + 1), Index.FromEnd(0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s.Substring(range));
+        }
+
+        /// <summary>
+        /// Returns true only if U+0020 SPACE is represented as the single byte 0x20 in the active code page.
+        /// </summary>
+        public unsafe static bool IsSimpleActiveCodePage
+        {
+            get
+            {
+                IntPtr pAnsiStr = IntPtr.Zero;
+                try
+                {
+                    pAnsiStr = Marshal.StringToHGlobalAnsi(" ");
+                    return ((byte*)pAnsiStr)[0] == (byte)' ' && ((byte*)pAnsiStr)[1] == (byte)'\0';
+                }
+                finally
+                {
+                    if (pAnsiStr != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(pAnsiStr);
+                    }
+                }
+            }
         }
     }
 }

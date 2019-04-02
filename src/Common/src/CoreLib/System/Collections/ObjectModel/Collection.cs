@@ -14,8 +14,6 @@ namespace System.Collections.ObjectModel
     public class Collection<T> : IList<T>, IList, IReadOnlyList<T>
     {
         private IList<T> items; // Do not rename (binary serialization)
-        [NonSerialized]
-        private object _syncRoot;
 
         public Collection()
         {
@@ -51,7 +49,7 @@ namespace System.Collections.ObjectModel
                     ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
                 }
 
-                if (index < 0 || index >= items.Count)
+                if ((uint)index >= (uint)items.Count)
                 {
                     ThrowHelper.ThrowArgumentOutOfRange_IndexException();
                 }
@@ -70,6 +68,8 @@ namespace System.Collections.ObjectModel
             int index = items.Count;
             InsertItem(index, item);
         }
+
+        public void AddRange(IEnumerable<T> collection) => InsertItemsRange(items.Count, collection);
 
         public void Clear()
         {
@@ -108,12 +108,32 @@ namespace System.Collections.ObjectModel
                 ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
             }
 
-            if (index < 0 || index > items.Count)
+            if ((uint)index > (uint)items.Count)
             {
-                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index, ExceptionResource.ArgumentOutOfRange_ListInsert);
+                ThrowHelper.ThrowArgumentOutOfRange_IndexException();
             }
 
             InsertItem(index, item);
+        }
+
+        public void InsertRange(int index, IEnumerable<T> collection)
+        {
+            if (items.IsReadOnly)
+            {
+                ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+            }
+
+            if (collection == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
+            }
+
+            if ((uint)index > (uint)items.Count)
+            {
+                ThrowHelper.ThrowArgumentOutOfRange_IndexException();
+            }
+
+            InsertItemsRange(index, collection);
         }
 
         public bool Remove(T item)
@@ -129,6 +149,61 @@ namespace System.Collections.ObjectModel
             return true;
         }
 
+        public void RemoveRange(int index, int count)
+        {
+            if (items.IsReadOnly)
+            {
+                ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+            }
+
+            if ((uint)index > (uint)items.Count)
+            {
+                ThrowHelper.ThrowArgumentOutOfRange_IndexException();
+            }
+
+            if (count < 0)
+            {
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+            }
+
+            if (index > items.Count - count)
+            {
+                ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
+            }
+
+            RemoveItemsRange(index, count);
+        }
+
+        public void ReplaceRange(int index, int count, IEnumerable<T> collection)
+        {
+            if (items.IsReadOnly)
+            {
+                ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
+            }
+
+            if ((uint)index > (uint)items.Count)
+            {
+                ThrowHelper.ThrowArgumentOutOfRange_IndexException();
+            }
+
+            if (count < 0)
+            {
+                ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count, ExceptionResource.ArgumentOutOfRange_NeedNonNegNum);
+            }
+
+            if (index > items.Count - count)
+            {
+                ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidOffLen);
+            }
+
+            if (collection == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.collection);
+            }
+
+            ReplaceItemsRange(index, count, collection);
+        }
+
         public void RemoveAt(int index)
         {
             if (items.IsReadOnly)
@@ -136,7 +211,7 @@ namespace System.Collections.ObjectModel
                 ThrowHelper.ThrowNotSupportedException(ExceptionResource.NotSupported_ReadOnlyCollection);
             }
 
-            if (index < 0 || index >= items.Count)
+            if ((uint)index >= (uint)items.Count)
             {
                 ThrowHelper.ThrowArgumentOutOfRange_IndexException();
             }
@@ -164,6 +239,42 @@ namespace System.Collections.ObjectModel
             items[index] = item;
         }
 
+        protected virtual void InsertItemsRange(int index, IEnumerable<T> collection)
+        {
+            if (GetType() == typeof(Collection<T>) && items is List<T> list)
+            {
+                list.InsertRange(index, collection);
+            }
+            else
+            {
+                foreach (T item in collection)
+                {
+                    InsertItem(index++, item);
+                }
+            }
+        }
+
+        protected virtual void RemoveItemsRange(int index, int count)
+        {
+            if (GetType() == typeof(Collection<T>) && items is List<T> list)
+            {
+                list.RemoveRange(index, count);
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    RemoveItem(index);
+                }
+            }
+        }
+
+        protected virtual void ReplaceItemsRange(int index, int count, IEnumerable<T> collection)
+        {
+            RemoveItemsRange(index, count);
+            InsertItemsRange(index, collection);
+        }
+
         bool ICollection<T>.IsReadOnly
         {
             get
@@ -186,19 +297,7 @@ namespace System.Collections.ObjectModel
         {
             get
             {
-                if (_syncRoot == null)
-                {
-                    ICollection c = items as ICollection;
-                    if (c != null)
-                    {
-                        _syncRoot = c.SyncRoot;
-                    }
-                    else
-                    {
-                        System.Threading.Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
-                    }
-                }
-                return _syncRoot;
+                return (items is ICollection coll) ? coll.SyncRoot : this;
             }
         }
 
@@ -229,8 +328,7 @@ namespace System.Collections.ObjectModel
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
             }
 
-            T[] tArray = array as T[];
-            if (tArray != null)
+            if (array is T[] tArray)
             {
                 items.CopyTo(tArray, index);
             }
@@ -308,8 +406,7 @@ namespace System.Collections.ObjectModel
                 // readonly collections are fixed size, if our internal item 
                 // collection does not implement IList.  Note that Array implements
                 // IList, and therefore T[] and U[] will be fixed-size.
-                IList list = items as IList;
-                if (list != null)
+                if (items is IList list)
                 {
                     return list.IsFixedSize;
                 }

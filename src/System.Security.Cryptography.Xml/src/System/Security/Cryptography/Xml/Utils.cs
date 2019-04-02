@@ -11,7 +11,6 @@ using System.IO;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Permissions;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -513,9 +512,6 @@ namespace System.Security.Cryptography.Xml
 
             CanonicalXmlNodeList namespaces = new CanonicalXmlNodeList();
             XmlNode ancestorNode = elem;
-
-            if (ancestorNode == null) return null;
-
             bool bDefNamespaceToAdd = true;
 
             while (ancestorNode != null)

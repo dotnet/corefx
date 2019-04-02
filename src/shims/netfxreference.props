@@ -1,8 +1,9 @@
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
   <ItemGroup>
     <NetFxReference Include="mscorlib">
       <ExcludeFromRuntime>true</ExcludeFromRuntime>
     </NetFxReference>
+    <NetFxReference Condition="'$(TargetGroup)' != 'netcoreapp2.0'" Include="Microsoft.VisualBasic" />
     <NetFxReference Include="System">
       <ExcludeFromRuntime>true</ExcludeFromRuntime>
     </NetFxReference>

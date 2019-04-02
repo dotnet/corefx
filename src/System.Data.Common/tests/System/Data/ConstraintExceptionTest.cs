@@ -46,25 +46,25 @@ namespace System.Data.Tests
             //Column type = int
             uc = new UniqueConstraint(dtParent.Columns[0]);
             dtParent.Constraints.Add(uc);
-            Assert.Throws<ConstraintException>(() => dtParent.Rows.Add(dtParent.Rows[0].ItemArray)); //add exisiting value - will raise exception
+            Assert.Throws<ConstraintException>(() => dtParent.Rows.Add(dtParent.Rows[0].ItemArray)); //add existing value - will raise exception
 
             //Column type = DateTime
             dtParent.Constraints.Clear();
             uc = new UniqueConstraint(dtParent.Columns["ParentDateTime"]);
             dtParent.Constraints.Add(uc);
-            Assert.Throws<ConstraintException>(() => dtParent.Rows.Add(dtParent.Rows[0].ItemArray)); //add exisiting value - will raise exception
+            Assert.Throws<ConstraintException>(() => dtParent.Rows.Add(dtParent.Rows[0].ItemArray)); //add existing value - will raise exception
 
             //Column type = double
             dtParent.Constraints.Clear();
             uc = new UniqueConstraint(dtParent.Columns["ParentDouble"]);
             dtParent.Constraints.Add(uc);
-            Assert.Throws<ConstraintException>(() => dtParent.Rows.Add(dtParent.Rows[0].ItemArray)); //add exisiting value - will raise exception
+            Assert.Throws<ConstraintException>(() => dtParent.Rows.Add(dtParent.Rows[0].ItemArray)); //add existing value - will raise exception
 
             //Column type = string
             dtParent.Constraints.Clear();
             uc = new UniqueConstraint(dtParent.Columns["String1"]);
             dtParent.Constraints.Add(uc);
-            Assert.Throws<ConstraintException>(() => dtParent.Rows.Add(dtParent.Rows[0].ItemArray)); //add exisiting value - will raise exception
+            Assert.Throws<ConstraintException>(() => dtParent.Rows.Add(dtParent.Rows[0].ItemArray)); //add existing value - will raise exception
 
             //Column type = string, ds.CaseSensitive = false;
             ds.CaseSensitive = false;
@@ -98,6 +98,17 @@ namespace System.Data.Tests
 
             // UniqueConstraint Exception - ds.EnforceConstraints 
             Assert.Throws<ConstraintException>(() => ds.EnforceConstraints = true);
+        }
+
+        [Fact]
+        public void Ctor_ArgumentsRoundtrip()
+        {
+            var innerException = new Exception("inner exception");
+
+            var e = new ConstraintException("test", innerException);
+            Assert.Equal("test", e.Message);
+            Assert.Same(innerException, e.InnerException);
+            Assert.Equal(-2146232022, e.HResult);
         }
     }
 }

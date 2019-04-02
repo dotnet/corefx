@@ -14,6 +14,10 @@ using System.Text;
 namespace System.Drawing
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+#if netcoreapp
+    [TypeConverter("System.Drawing.IconConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+#endif
     public sealed partial class Icon : MarshalByRefObject, ICloneable, IDisposable, ISerializable
     {
 #if FINALIZATION_WATCH
@@ -172,11 +176,6 @@ namespace System.Drawing
                 // It's a relative pathname, get its full path as a file. 
                 filePath = Path.GetFullPath(filePath);
                 uri = new Uri(filePath);
-            }
-
-            if (uri.IsUnc)
-            {
-                throw new ArgumentException(SR.Format(SR.InvalidArgumentValue, nameof(filePath), filePath));
             }
 
             if (!uri.IsFile)

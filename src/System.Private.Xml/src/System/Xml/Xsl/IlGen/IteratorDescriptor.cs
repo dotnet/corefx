@@ -216,7 +216,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// Return the Clr type of an individual item in the storage location (never an IList<> type).
+        /// Return the Clr type of an individual item in the storage location (never an IList{T} type).
         /// </summary>
         public Type ItemStorageType
         {
@@ -519,7 +519,7 @@ namespace System.Xml.Xsl.IlGen
                     break;
 
                 default:
-                    Debug.Assert(false, "Invalid location: " + _storage.Location);
+                    Debug.Fail($"Invalid location: {_storage.Location}");
                     break;
             }
         }
@@ -548,7 +548,7 @@ namespace System.Xml.Xsl.IlGen
                     break;
 
                 default:
-                    Debug.Assert(false, "Invalid location: " + _storage.Location);
+                    Debug.Fail($"Invalid location: {_storage.Location}");
                     break;
             }
 

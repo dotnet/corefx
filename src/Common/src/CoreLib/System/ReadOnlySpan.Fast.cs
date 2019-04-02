@@ -5,6 +5,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
+using System.Text;
 using EditorBrowsableAttribute = System.ComponentModel.EditorBrowsableAttribute;
 using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 using Internal.Runtime.CompilerServices;
@@ -39,7 +40,6 @@ namespace System
         /// </summary>
         /// <param name="array">The target array.</param>
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
-        /// reference (Nothing in Visual Basic).</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan(T[] array)
         {
@@ -61,7 +61,6 @@ namespace System
         /// <param name="start">The index at which to begin the read-only span.</param>
         /// <param name="length">The number of items in the read-only span.</param>
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
-        /// reference (Nothing in Visual Basic).</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=Length).
         /// </exception>
@@ -75,8 +74,14 @@ namespace System
                 this = default;
                 return; // returns default
             }
+#if BIT64
+            // See comment in Span<T>.Slice for how this works.
+            if ((ulong)(uint)start + (ulong)(uint)length > (ulong)(uint)array.Length)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+#else
             if ((uint)start > (uint)array.Length || (uint)length > (uint)(array.Length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException();
+#endif
 
             _pointer = new ByReference<T>(ref Unsafe.Add(ref Unsafe.As<byte, T>(ref array.GetRawSzArrayData()), start));
             _length = length;
@@ -148,6 +153,18 @@ namespace System
 #endif
         }
 
+        public ref readonly T this[Index index]
+        {
+            get
+            {
+                // Evaluate the actual index first because it helps performance
+                int actualIndex = index.GetOffset(_length);
+                return ref this [actualIndex];
+            }
+        }
+
+        public ReadOnlySpan<T> this[Range range] => Slice(range);
+
         /// <summary>
         /// Returns a reference to the 0th element of the Span. If the Span is empty, returns null reference.
         /// It can be used for pinning and is required to support the use of span within a fixed statement.
@@ -188,6 +205,7 @@ namespace System
             }
         }
 
+        /// <summary>
         /// Copies the contents of this read-only span into destination span. If the source
         /// and destinations overlap, this method behaves as if the original values in
         /// a temporary location before the destination is overwritten.
@@ -223,12 +241,15 @@ namespace System
         {
             if (typeof(T) == typeof(char))
             {
-                unsafe
-                {
-                    fixed (char* src = &Unsafe.As<T, char>(ref _pointer.Value))
-                        return new string(src, 0, _length);
-                }
+                return new string(new ReadOnlySpan<char>(ref Unsafe.As<T, char>(ref _pointer.Value), _length));
             }
+#if FEATURE_UTF8STRING
+            else if (typeof(T) == typeof(Char8))
+            {
+                // TODO_UTF8STRING: Call into optimized transcoding routine when it's available.
+                return Encoding.UTF8.GetString(new ReadOnlySpan<byte>(ref Unsafe.As<T, byte>(ref _pointer.Value), _length));
+            }
+#endif // FEATURE_UTF8STRING
             return string.Format("System.ReadOnlySpan<{0}>[{1}]", typeof(T).Name, _length);
         }
 
@@ -259,9 +280,42 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<T> Slice(int start, int length)
         {
+#if BIT64
+            // See comment in Span<T>.Slice for how this works.
+            if ((ulong)(uint)start + (ulong)(uint)length > (ulong)(uint)_length)
+                ThrowHelper.ThrowArgumentOutOfRangeException();
+#else
             if ((uint)start > (uint)_length || (uint)length > (uint)(_length - start))
                 ThrowHelper.ThrowArgumentOutOfRangeException();
+#endif
 
+            return new ReadOnlySpan<T>(ref Unsafe.Add(ref _pointer.Value, start), length);
+        }
+
+        /// <summary>
+        /// Forms a slice out of the given read-only span, beginning at 'startIndex'
+        /// </summary>
+        /// <param name="startIndex">The index at which to begin this slice.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<T> Slice(Index startIndex)
+        {
+            int actualIndex;
+            if (startIndex.IsFromEnd)
+                actualIndex = _length - startIndex.Value;
+            else
+                actualIndex = startIndex.Value;
+
+            return Slice(actualIndex);
+        }
+
+        /// <summary>
+        /// Forms a slice out of the given read-only span, beginning at range start index to the range end
+        /// </summary>
+        /// <param name="range">The range which has the start and end indexes used to slice the span.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ReadOnlySpan<T> Slice(Range range)
+        {
+            (int start, int length) = range.GetOffsetAndLength(_length);
             return new ReadOnlySpan<T>(ref Unsafe.Add(ref _pointer.Value, start), length);
         }
 

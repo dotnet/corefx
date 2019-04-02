@@ -119,7 +119,7 @@ namespace System.Diagnostics
             get
             {
                 EnsureState(State.Associated);
-                return OpenProcessHandle();
+                return GetOrOpenProcessHandle();
             }
         }
 
@@ -544,8 +544,7 @@ namespace System.Diagnostics
 
         /// <devdoc>
         ///    <para>
-        ///       Gets or sets the properties to pass into the <see cref='System.Diagnostics.Process.Start'/> method for the <see cref='System.Diagnostics.Process'/>
-        ///       .
+        ///       Gets or sets the properties to pass into the <see cref='System.Diagnostics.Process.Start(System.Diagnostics.ProcessStartInfo)'/> method for the <see cref='System.Diagnostics.Process'/>.
         ///    </para>
         /// </devdoc>
         public ProcessStartInfo StartInfo
@@ -618,7 +617,6 @@ namespace System.Diagnostics
 
         partial void EnsureHandleCountPopulated();
 
-        [ObsoleteAttribute("This property has been deprecated.  Please use System.Diagnostics.Process.VirtualMemorySize64 instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public long VirtualMemorySize64
         {
             get
@@ -628,6 +626,7 @@ namespace System.Diagnostics
             }
         }
 
+        [ObsoleteAttribute("This property has been deprecated.  Please use System.Diagnostics.Process.VirtualMemorySize64 instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public int VirtualMemorySize
         {
             get
@@ -658,7 +657,6 @@ namespace System.Diagnostics
                     {
                         if (value)
                         {
-                            OpenProcessHandle();
                             EnsureWatchingForExit();
                         }
                         else
@@ -835,16 +833,17 @@ namespace System.Diagnostics
         {
             if (Associated)
             {
+                // We need to lock to ensure we don't run concurrently with CompletionCallback.
+                // Without this lock we could reset _raisedOnExited which causes CompletionCallback to
+                // raise the Exited event a second time for the same process.
+                lock (this)
+                {
+                    // This sets _waitHandle to null which causes CompletionCallback to not emit events.
+                    StopWatchingForExit();
+                }
+
                 if (_haveProcessHandle)
                 {
-                    // We need to lock to ensure we don't run concurrently with CompletionCallback.
-                    // Without this lock we could reset _raisedOnExited which causes CompletionCallback to
-                    // raise the Exited event a second time for the same process.
-                    lock (this)
-                    {
-                        // This sets _waitHandle to null which causes CompletionCallback to not emit events.
-                        StopWatchingForExit();
-                    }
                     _processHandle.Dispose();
                     _processHandle = null;
                     _haveProcessHandle = false;
@@ -856,13 +855,14 @@ namespace System.Diagnostics
 
                 // Only call close on the streams if the user cannot have a reference on them.
                 // If they are referenced it is the user's responsibility to dispose of them.
-                try 
+                try
                 {
                     if (_standardOutput != null && (_outputStreamReadMode == StreamReadMode.AsyncMode || _outputStreamReadMode == StreamReadMode.Undefined))
                     {
                         if (_outputStreamReadMode == StreamReadMode.AsyncMode)
                         {
-                            _output.CancelOperation();
+                            _output?.CancelOperation();
+                            _output?.Dispose();
                         }
                         _standardOutput.Close();
                     }
@@ -871,7 +871,8 @@ namespace System.Diagnostics
                     {
                         if (_errorStreamReadMode == StreamReadMode.AsyncMode)
                         {
-                            _error.CancelOperation();
+                            _error?.CancelOperation();
+                            _error?.Dispose();
                         }
                         _standardError.Close();
                     }
@@ -881,7 +882,7 @@ namespace System.Diagnostics
                         _standardInput.Close();
                     }
                 }
-                finally 
+                finally
                 {
                     _standardOutput = null;
                     _standardInput = null;
@@ -998,7 +999,7 @@ namespace System.Diagnostics
         {
             if (!ProcessManager.IsProcessRunning(processId, machineName))
             {
-                throw new ArgumentException(SR.Format(SR.MissingProccess, processId.ToString(CultureInfo.CurrentCulture)));
+                throw new ArgumentException(SR.Format(SR.MissingProccess, processId.ToString()));
             }
 
             return new Process(machineName, ProcessManager.IsRemoteMachine(machineName), processId, null);
@@ -1129,7 +1130,7 @@ namespace System.Diagnostics
         /// Opens a long-term handle to the process, with all access.  If a handle exists,
         /// then it is reused.  If the process has exited, it throws an exception.
         /// </summary>
-        private SafeProcessHandle OpenProcessHandle()
+        private SafeProcessHandle GetOrOpenProcessHandle()
         {
             if (!_haveProcessHandle)
             {

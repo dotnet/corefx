@@ -1,6 +1,9 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
-
 
 namespace System.Runtime.Intrinsics.Arm.Arm64
 {
@@ -21,7 +24,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
 
         /// <summary>
         /// Vector abs
-        /// Corresponds to vector forms of ARM64 ABS & FABS
+        /// Corresponds to vector forms of ARM64 ABS &amp; FABS
         /// </summary>
         public static Vector64<byte>    Abs(Vector64<sbyte>   value) { throw new PlatformNotSupportedException(); }
         public static Vector64<ushort>  Abs(Vector64<short>   value) { throw new PlatformNotSupportedException(); }
@@ -36,7 +39,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
 
         /// <summary>
         /// Vector add
-        /// Corresponds to vector forms of ARM64 ADD & FADD
+        /// Corresponds to vector forms of ARM64 ADD &amp; FADD
         /// </summary>
         public static Vector64<T>  Add<T>(Vector64<T>  left, Vector64<T>  right) where T : struct { throw new PlatformNotSupportedException(); }
         public static Vector128<T> Add<T>(Vector128<T> left, Vector128<T> right) where T : struct { throw new PlatformNotSupportedException(); }
@@ -58,7 +61,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
         /// <summary>
         /// Vector BitwiseSelect
         /// For each bit in the vector result[bit] = sel[bit] ? left[bit] : right[bit]
-        /// Corresponds to vector forms of ARM64 BSL (Also BIF & BIT)
+        /// Corresponds to vector forms of ARM64 BSL (Also BIF &amp; BIT)
         /// </summary>
         public static Vector64<T>  BitwiseSelect<T>(Vector64<T>  sel, Vector64<T>  left, Vector64<T>  right) where T : struct { throw new PlatformNotSupportedException(); }
         public static Vector128<T> BitwiseSelect<T>(Vector128<T> sel, Vector128<T> left, Vector128<T> right) where T : struct { throw new PlatformNotSupportedException(); }
@@ -66,7 +69,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
         /// <summary>
         /// Vector CompareEqual
         /// For each element result[elem] = (left[elem] == right[elem]) ? ~0 : 0
-        /// Corresponds to vector forms of ARM64 CMEQ & FCMEQ
+        /// Corresponds to vector forms of ARM64 CMEQ &amp; FCMEQ
         /// </summary>
         public static Vector64<T>  CompareEqual<T>(Vector64<T>  left, Vector64<T>  right) where T : struct { throw new PlatformNotSupportedException(); }
         public static Vector128<T> CompareEqual<T>(Vector128<T> left, Vector128<T> right) where T : struct { throw new PlatformNotSupportedException(); }
@@ -74,7 +77,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
         /// <summary>
         /// Vector CompareEqualZero
         /// For each element result[elem] = (left[elem] == 0) ? ~0 : 0
-        /// Corresponds to vector forms of ARM64 CMEQ & FCMEQ
+        /// Corresponds to vector forms of ARM64 CMEQ &amp; FCMEQ
         /// </summary>
         public static Vector64<T>  CompareEqualZero<T>(Vector64<T>  value) where T : struct { throw new PlatformNotSupportedException(); }
         public static Vector128<T> CompareEqualZero<T>(Vector128<T> value) where T : struct { throw new PlatformNotSupportedException(); }
@@ -82,7 +85,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
         /// <summary>
         /// Vector CompareGreaterThan
         /// For each element result[elem] = (left[elem] > right[elem]) ? ~0 : 0
-        /// Corresponds to vector forms of ARM64 CMGT/CMHI & FCMGT
+        /// Corresponds to vector forms of ARM64 CMGT/CMHI &amp; FCMGT
         /// </summary>
         public static Vector64<T>  CompareGreaterThan<T>(Vector64<T>  left, Vector64<T>  right) where T : struct { throw new PlatformNotSupportedException(); }
         public static Vector128<T> CompareGreaterThan<T>(Vector128<T> left, Vector128<T> right) where T : struct { throw new PlatformNotSupportedException(); }
@@ -90,7 +93,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
         /// <summary>
         /// Vector CompareGreaterThanZero
         /// For each element result[elem] = (left[elem] > 0) ? ~0 : 0
-        /// Corresponds to vector forms of ARM64 CMGT & FCMGT
+        /// Corresponds to vector forms of ARM64 CMGT &amp; FCMGT
         /// </summary>
         public static Vector64<T>  CompareGreaterThanZero<T>(Vector64<T>  value) where T : struct { throw new PlatformNotSupportedException(); }
         public static Vector128<T> CompareGreaterThanZero<T>(Vector128<T> value) where T : struct { throw new PlatformNotSupportedException(); }
@@ -98,7 +101,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
         /// <summary>
         /// Vector CompareGreaterThanOrEqual
         /// For each element result[elem] = (left[elem] >= right[elem]) ? ~0 : 0
-        /// Corresponds to vector forms of ARM64 CMGE/CMHS & FCMGE
+        /// Corresponds to vector forms of ARM64 CMGE/CMHS &amp; FCMGE
         /// </summary>
         public static Vector64<T>  CompareGreaterThanOrEqual<T>(Vector64<T>  left, Vector64<T>    right) where T : struct { throw new PlatformNotSupportedException(); }
         public static Vector128<T> CompareGreaterThanOrEqual<T>(Vector128<T> left, Vector128<T>   right) where T : struct { throw new PlatformNotSupportedException(); }
@@ -106,30 +109,30 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
         /// <summary>
         /// Vector CompareGreaterThanOrEqualZero
         /// For each element result[elem] = (left[elem] >= 0) ? ~0 : 0
-        /// Corresponds to vector forms of ARM64 CMGE & FCMGE
+        /// Corresponds to vector forms of ARM64 CMGE &amp; FCMGE
         /// </summary>
         public static Vector64<T>  CompareGreaterThanOrEqualZero<T>(Vector64<T>  value) where T : struct { throw new PlatformNotSupportedException(); }
         public static Vector128<T> CompareGreaterThanOrEqualZero<T>(Vector128<T> value) where T : struct { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// Vector CompareLessThanZero
-        /// For each element result[elem] = (left[elem] < 0) ? ~0 : 0
-        /// Corresponds to vector forms of ARM64 CMGT & FCMGT
+        /// For each element result[elem] = (left[elem] &lt; 0) ? ~0 : 0
+        /// Corresponds to vector forms of ARM64 CMGT &amp; FCMGT
         /// </summary>
         public static Vector64<T>  CompareLessThanZero<T>(Vector64<T>  value) where T : struct { throw new PlatformNotSupportedException(); }
         public static Vector128<T> CompareLessThanZero<T>(Vector128<T> value) where T : struct { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// Vector CompareLessThanOrEqualZero
-        /// For each element result[elem] = (left[elem] < 0) ? ~0 : 0
-        /// Corresponds to vector forms of ARM64 CMGT & FCMGT
+        /// For each element result[elem] = (left[elem] &lt; 0) ? ~0 : 0
+        /// Corresponds to vector forms of ARM64 CMGT &amp; FCMGT
         /// </summary>
         public static Vector64<T>  CompareLessThanOrEqualZero<T>(Vector64<T>  value) where T : struct { throw new PlatformNotSupportedException(); }
         public static Vector128<T> CompareLessThanOrEqualZero<T>(Vector128<T> value) where T : struct { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// Vector CompareTest
-        /// For each element result[elem] = (left[elem] & right[elem]) ? ~0 : 0
+        /// For each element result[elem] = (left[elem] &amp; right[elem]) ? ~0 : 0
         /// Corresponds to vector forms of ARM64 CMTST
         /// </summary>
         public static Vector64<T>  CompareTest<T>(Vector64<T>  left, Vector64<T>  right) where T : struct { throw new PlatformNotSupportedException(); }
@@ -202,7 +205,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
 
         /// <summary>
         /// Vector max
-        /// Corresponds to vector forms of ARM64 SMAX, UMAX & FMAX
+        /// Corresponds to vector forms of ARM64 SMAX, UMAX &amp; FMAX
         /// </summary>
         public static Vector64<byte>    Max(Vector64<byte>    left, Vector64<byte>    right) { throw new PlatformNotSupportedException(); }
         public static Vector64<sbyte>   Max(Vector64<sbyte>   left, Vector64<sbyte>   right) { throw new PlatformNotSupportedException(); }
@@ -222,7 +225,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
 
         /// <summary>
         /// Vector min
-        /// Corresponds to vector forms of ARM64 SMIN, UMIN & FMIN
+        /// Corresponds to vector forms of ARM64 SMIN, UMIN &amp; FMIN
         /// </summary>
         public static Vector64<byte>    Min(Vector64<byte>    left, Vector64<byte>    right) { throw new PlatformNotSupportedException(); }
         public static Vector64<sbyte>   Min(Vector64<sbyte>   left, Vector64<sbyte>   right) { throw new PlatformNotSupportedException(); }
@@ -247,7 +250,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
         ///
         /// For each element result[elem] = left[elem] * right[elem]
         ///
-        /// Corresponds to vector forms of ARM64 MUL & FMUL
+        /// Corresponds to vector forms of ARM64 MUL &amp; FMUL
         /// </summary>
         public static Vector64<byte>    Multiply(Vector64<byte>    left, Vector64<byte>    right) { throw new PlatformNotSupportedException(); }
         public static Vector64<sbyte>   Multiply(Vector64<sbyte>   left, Vector64<sbyte>   right) { throw new PlatformNotSupportedException(); }
@@ -267,7 +270,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
 
         /// <summary>
         /// Vector negate
-        /// Corresponds to vector forms of ARM64 NEG & FNEG
+        /// Corresponds to vector forms of ARM64 NEG &amp; FNEG
         /// </summary>
         public static Vector64<sbyte>   Negate(Vector64<sbyte>   value) { throw new PlatformNotSupportedException(); }
         public static Vector64<short>   Negate(Vector64<short>   value) { throw new PlatformNotSupportedException(); }
@@ -328,7 +331,7 @@ namespace System.Runtime.Intrinsics.Arm.Arm64
 
         /// <summary>
         /// Vector subtract
-        /// Corresponds to vector forms of ARM64 SUB & FSUB
+        /// Corresponds to vector forms of ARM64 SUB &amp; FSUB
         /// </summary>
         public static Vector64<T>  Subtract<T>(Vector64<T>  left, Vector64<T>  right) where T : struct { throw new PlatformNotSupportedException(); }
         public static Vector128<T> Subtract<T>(Vector128<T> left, Vector128<T> right) where T : struct { throw new PlatformNotSupportedException(); }

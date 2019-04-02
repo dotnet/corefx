@@ -100,7 +100,7 @@ namespace System.Drawing
 
                 if (hbm == IntPtr.Zero)
                 {
-                    throw new OutOfMemoryException(SR.Format(SR.GraphicsBufferQueryFail));
+                    throw new OutOfMemoryException(SR.GraphicsBufferQueryFail);
                 }
 
                 pbmi.bmiHeader_biSize = Marshal.SizeOf(typeof(NativeMethods.BITMAPINFOHEADER));
@@ -239,7 +239,7 @@ namespace System.Drawing
         /// <summary>
         /// Create a DIB section with an optimal format w.r.t. the specified hdc.
         ///
-        /// If DIB <= 8bpp, then the DIB color table is initialized based on the
+        /// If DIB &lt;= 8bpp, then the DIB color table is initialized based on the
         /// specified palette. If the palette handle is NULL, then the system
         /// palette is used.
         ///
@@ -272,7 +272,7 @@ namespace System.Drawing
                 case NativeMethods.OBJ_ENHMETADC:
                     break;
                 default:
-                    throw new ArgumentException(SR.Format(SR.DCTypeInvalid));
+                    throw new ArgumentException(SR.DCTypeInvalid);
             }
 
             if (FillBitmapInfo(hdc, hpal, ref pbmi))
@@ -363,7 +363,7 @@ namespace System.Drawing
             {
                 if (oldBusy == BufferBusyPainting)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.GraphicsBufferCurrentlyBusy));
+                    throw new InvalidOperationException(SR.GraphicsBufferCurrentlyBusy);
                 }
 
                 if (_compatGraphics != null)

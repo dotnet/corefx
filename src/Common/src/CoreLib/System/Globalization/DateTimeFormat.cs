@@ -209,7 +209,7 @@ namespace System
 
         private static void HebrewFormatDigits(StringBuilder outputBuffer, int digits)
         {
-            outputBuffer.Append(HebrewNumber.ToString(digits));
+            HebrewNumber.Append(outputBuffer, digits);
         }
 
         internal static int ParseRepeatPattern(ReadOnlySpan<char> format, int pos, char patternChar)
@@ -282,7 +282,7 @@ namespace System
             if (dtfi.Calendar.IsLeapYear(dtfi.Calendar.GetYear(time)))
             {
                 // This month is in a leap year
-                return (dtfi.internalGetMonthName(month, MonthNameStyles.LeapYear, (repeatCount == 3)));
+                return dtfi.InternalGetMonthName(month, MonthNameStyles.LeapYear, (repeatCount == 3));
             }
             // This is in a regular year.
             if (month >= 7)
@@ -346,10 +346,7 @@ namespace System
             if (!foundQuote)
             {
                 // Here we can't find the matching quote.
-                throw new FormatException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            SR.Format_BadQuote, quoteChar));
+                throw new FormatException(SR.Format(SR.Format_BadQuote, quoteChar));
             }
 
             //
@@ -509,7 +506,7 @@ namespace System
                             fraction = fraction / (long)Math.Pow(10, 7 - tokenLen);
                             if (ch == 'f')
                             {
-                                result.Append(((int)fraction).ToString(fixedNumberFormats[tokenLen - 1], CultureInfo.InvariantCulture));
+                                result.AppendSpanFormattable((int)fraction, fixedNumberFormats[tokenLen - 1], CultureInfo.InvariantCulture);
                             }
                             else
                             {
@@ -528,7 +525,7 @@ namespace System
                                 }
                                 if (effectiveDigits > 0)
                                 {
-                                    result.Append(((int)fraction).ToString(fixedNumberFormats[effectiveDigits - 1], CultureInfo.InvariantCulture));
+                                    result.AppendSpanFormattable((int)fraction, fixedNumberFormats[effectiveDigits - 1], CultureInfo.InvariantCulture);
                                 }
                                 else
                                 {
@@ -630,13 +627,13 @@ namespace System
                             }
                             else
                             {
-                                if ((dtfi.FormatFlags & DateTimeFormatFlags.UseGenitiveMonth) != 0 && tokenLen >= 4)
+                                if ((dtfi.FormatFlags & DateTimeFormatFlags.UseGenitiveMonth) != 0)
                                 {
                                     result.Append(
-                                        dtfi.internalGetMonthName(
+                                        dtfi.InternalGetMonthName(
                                             month,
                                             IsUseGenitiveForm(format, i, tokenLen, 'd') ? MonthNameStyles.Genitive : MonthNameStyles.Regular,
-                                            false));
+                                            tokenLen == 3));
                                 }
                                 else
                                 {
@@ -655,11 +652,10 @@ namespace System
                         int year = cal.GetYear(dateTime);
                         tokenLen = ParseRepeatPattern(format, i, ch);
                         if (isJapaneseCalendar &&
-                            !AppContextSwitches.FormatJapaneseFirstYearAsANumber &&
+                            !LocalAppContextSwitches.FormatJapaneseFirstYearAsANumber &&
                             year == 1 &&
-                            i + tokenLen < format.Length - 1 &&
-                            format[i + tokenLen] == '\'' &&
-                            format[i + tokenLen + 1] == DateTimeFormatInfoScanner.CJKYearSuff[0])
+                            ((i + tokenLen < format.Length && format[i + tokenLen] == DateTimeFormatInfoScanner.CJKYearSuff[0]) ||
+                            (i + tokenLen < format.Length - 1 && format[i + tokenLen] == '\'' && format[i + tokenLen + 1] == DateTimeFormatInfoScanner.CJKYearSuff[0])))
                         {
                             // We are formatting a Japanese date with year equals 1 and the year number is followed by the year sign \u5e74
                             // In Japanese dates, the first year in the era is not formatted as a number 1 instead it is formatted as \u5143 which means
@@ -680,10 +676,13 @@ namespace System
                             {
                                 FormatDigits(result, year % 100, tokenLen);
                             }
+                            else if (tokenLen <= 16) // FormatDigits has an implicit 16-digit limit
+                            {
+                                FormatDigits(result, year, tokenLen, overrideLengthLimit: true);
+                            }
                             else
                             {
-                                string fmtPattern = "D" + tokenLen.ToString();
-                                result.Append(year.ToString(fmtPattern, CultureInfo.InvariantCulture));
+                                result.Append(year.ToString("D" + tokenLen.ToString(), CultureInfo.InvariantCulture));
                             }
                         }
                         bTimeOnly = false;
@@ -1372,7 +1371,7 @@ namespace System
                 case 'O':
                 case 's':
                 case 'u':
-                    results = new string[] { Format(dateTime, new string(format, 1), dtfi) };
+                    results = new string[] { Format(dateTime, char.ToString(format), dtfi) };
                     break;
                 default:
                     throw new FormatException(SR.Format_InvalidString);
@@ -1392,9 +1391,8 @@ namespace System
                     results.Add(strings[j]);
                 }
             }
-            string[] value = new string[results.Count];
-            results.CopyTo(0, value, 0, results.Count);
-            return (value);
+
+            return results.ToArray();
         }
 
         // This is a placeholder for an MDA to detect when the user is using a

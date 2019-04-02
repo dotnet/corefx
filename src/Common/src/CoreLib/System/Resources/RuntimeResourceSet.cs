@@ -148,7 +148,7 @@ namespace System.Resources
     // resources, add the hash &amp; location of last byte in the name section
     // to the array of resource hashes and resource name positions (carefully
     // keeping these arrays sorted), add the name to the end of the name &amp; 
-    // offset list, possibly add the type list of types types (and increase 
+    // offset list, possibly add the type list of types (and increase 
     // the number of items in the type table), and add the resource value at 
     // the end of the file.  The other offsets wouldn't need to be updated to 
     // reflect the longer header section.
@@ -195,14 +195,14 @@ namespace System.Resources
         {
             _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
             Stream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-            _defaultReader = new ResourceReader(stream, _resCache);
+            _defaultReader = new ResourceReader(stream, _resCache, false);
             Reader = _defaultReader;
         }
 
-        internal RuntimeResourceSet(Stream stream) : base(false)
+        internal RuntimeResourceSet(Stream stream, bool permitDeserialization = false) : base(false)
         {
             _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
-            _defaultReader = new ResourceReader(stream, _resCache);
+            _defaultReader = new ResourceReader(stream, _resCache, permitDeserialization);
             Reader = _defaultReader;
         }
 

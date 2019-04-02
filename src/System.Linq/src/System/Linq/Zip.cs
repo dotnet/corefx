@@ -10,22 +10,49 @@ namespace System.Linq
     {
         public static IEnumerable<TResult> Zip<TFirst, TSecond, TResult>(this IEnumerable<TFirst> first, IEnumerable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector)
         {
-            if (first == null)
+            if (first is null)
             {
-                throw Error.ArgumentNull(nameof(first));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.first);
             }
 
-            if (second == null)
+            if (second is null)
             {
-                throw Error.ArgumentNull(nameof(second));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.second);
             }
 
-            if (resultSelector == null)
+            if (resultSelector is null)
             {
-                throw Error.ArgumentNull(nameof(resultSelector));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.resultSelector);
             }
 
             return ZipIterator(first, second, resultSelector);
+        }
+
+        public static IEnumerable<(TFirst First, TSecond Second)> Zip<TFirst, TSecond>(this IEnumerable<TFirst> first, IEnumerable<TSecond> second)
+        {
+            if (first is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.first);
+            }
+
+            if (second is null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.second);
+            }
+
+            return ZipIterator(first, second);
+        }
+
+        private static IEnumerable<(TFirst, TSecond)> ZipIterator<TFirst, TSecond>(IEnumerable<TFirst> first, IEnumerable<TSecond> second)
+        {
+            using (IEnumerator<TFirst> e1 = first.GetEnumerator())
+            using (IEnumerator<TSecond> e2 = second.GetEnumerator())
+            {
+                while (e1.MoveNext() && e2.MoveNext())
+                {
+                    yield return (e1.Current, e2.Current);
+                }
+            }
         }
 
         private static IEnumerable<TResult> ZipIterator<TFirst, TSecond, TResult>(IEnumerable<TFirst> first, IEnumerable<TSecond> second, Func<TFirst, TSecond, TResult> resultSelector)

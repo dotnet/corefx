@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Some internal types are needed, so we reference the implementation assembly, rather than the reference assembly. -->
-    <TargetingPackExclusions Include="System.ComponentModel.Composition" />
+    <DefaultReferenceExclusions Include="System.ComponentModel.Composition" />
     <ReferenceFromRuntime Include="System.ComponentModel.Composition" />
   </ItemGroup>
   <ItemGroup>
@@ -182,6 +182,10 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>content</OutputItemType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
+      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
+      <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

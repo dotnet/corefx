@@ -12,6 +12,8 @@ namespace System.Numerics
     /// </summary>
     public struct Quaternion : IEquatable<Quaternion>
     {
+        private const float SlerpEpsilon = 1e-6f;
+
         /// <summary>
         /// Specifies the X-value of the vector component of the Quaternion.
         /// </summary>
@@ -290,8 +292,6 @@ namespace System.Numerics
         /// <returns>The interpolated Quaternion.</returns>
         public static Quaternion Slerp(Quaternion quaternion1, Quaternion quaternion2, float amount)
         {
-            const float epsilon = 1e-6f;
-
             float t = amount;
 
             float cosOmega = quaternion1.X * quaternion2.X + quaternion1.Y * quaternion2.Y +
@@ -307,7 +307,7 @@ namespace System.Numerics
 
             float s1, s2;
 
-            if (cosOmega > (1.0f - epsilon))
+            if (cosOmega > (1.0f - SlerpEpsilon))
             {
                 // Too close, do straight linear interpolation.
                 s1 = 1.0f - t;
@@ -777,9 +777,7 @@ namespace System.Numerics
         /// <returns>The string representation.</returns>
         public override string ToString()
         {
-            CultureInfo ci = CultureInfo.CurrentCulture;
-
-            return string.Format(ci, "{{X:{0} Y:{1} Z:{2} W:{3}}}", X.ToString(ci), Y.ToString(ci), Z.ToString(ci), W.ToString(ci));
+            return string.Format(CultureInfo.CurrentCulture, "{{X:{0} Y:{1} Z:{2} W:{3}}}", X, Y, Z, W);
         }
 
         /// <summary>

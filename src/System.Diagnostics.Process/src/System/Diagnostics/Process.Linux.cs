@@ -100,6 +100,10 @@ namespace System.Diagnostics
             }
         }
 
+        /// <summary>Gets the parent process ID</summary>
+        private int ParentProcessId =>
+            GetStat().ppid;
+
         /// <summary>Gets execution path</summary>
         private string GetPathToOpenFile()
         {
@@ -146,7 +150,7 @@ namespace System.Diagnostics
             if (_processInfo.HandleCount <= 0 && _haveProcessId)
             {
                 // Don't get information for a PID that exited and has possibly been recycled.
-                if (GetWaitState().GetExited(out _, refresh: false))
+                if (GetHasExited(refresh: false))
                 {
                     return;
                 }
@@ -198,7 +202,14 @@ namespace System.Diagnostics
         private void GetWorkingSetLimits(out IntPtr minWorkingSet, out IntPtr maxWorkingSet)
         {
             minWorkingSet = IntPtr.Zero; // no defined limit available
-            ulong rsslim = GetStat().rsslim;
+
+            // For max working set, try to respect container limits by reading
+            // from cgroup, but if it's unavailable, fall back to reading from procfs.
+            EnsureState(State.HaveNonExitedId);
+            if (!Interop.cgroups.TryGetMemoryLimit(out ulong rsslim))
+            {
+                rsslim = GetStat().rsslim;
+            }
 
             // rsslim is a ulong, but maxWorkingSet is an IntPtr, so we need to cap rsslim
             // at the max size of IntPtr.  This often happens when there is no configured

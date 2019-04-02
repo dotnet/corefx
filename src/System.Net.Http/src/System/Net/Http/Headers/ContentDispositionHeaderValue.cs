@@ -301,7 +301,7 @@ namespace System.Net.Http.Headers
             int dispositionTypeLength = GetDispositionTypeExpressionLength(dispositionType, 0, out tempDispositionType);
             if ((dispositionTypeLength == 0) || (tempDispositionType.Length != dispositionType.Length))
             {
-                throw new FormatException(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                throw new FormatException(SR.Format(System.Globalization.CultureInfo.InvariantCulture,
                     SR.net_http_headers_invalid_value, dispositionType));
             }
         }
@@ -318,11 +318,11 @@ namespace System.Net.Http.Headers
             DateTimeOffset date;
             if (dateParameter != null)
             {
-                string dateString = dateParameter.Value;
+                ReadOnlySpan<char> dateString = dateParameter.Value;
                 // Should have quotes, remove them.
                 if (IsQuoted(dateString))
                 {
-                    dateString = dateString.Substring(1, dateString.Length - 2);
+                    dateString = dateString.Slice(1, dateString.Length - 2);
                 }
                 if (HttpDateParser.TryStringToDate(dateString, out date))
                 {
@@ -438,7 +438,7 @@ namespace System.Net.Http.Headers
 
             if (result.IndexOf("\"", 0, StringComparison.Ordinal) >= 0) // Only bounding quotes are allowed.
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,
+                throw new ArgumentException(SR.Format(CultureInfo.InvariantCulture,
                     SR.net_http_headers_invalid_value, input));
             }
             else if (RequiresEncoding(result))
@@ -460,12 +460,12 @@ namespace System.Net.Http.Headers
         }
 
         // Returns true if the value starts and ends with a quote.
-        private bool IsQuoted(string value)
+        private bool IsQuoted(ReadOnlySpan<char> value)
         {
-            Debug.Assert(value != null);
-
-            return value.Length > 1 && value.StartsWith("\"", StringComparison.Ordinal)
-                && value.EndsWith("\"", StringComparison.Ordinal);
+            return
+                value.Length > 1 &&
+                value[0] == '"' &&
+                value[value.Length - 1] == '"';
         }
 
         // tspecials are required to be in a quoted string.  Only non-ascii needs to be encoded.

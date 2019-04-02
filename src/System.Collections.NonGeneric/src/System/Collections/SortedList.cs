@@ -70,8 +70,6 @@ namespace System.Collections
         private IComparer comparer; // Do not rename (binary serialization)
         private KeyList keyList; // Do not rename (binary serialization)
         private ValueList valueList; // Do not rename (binary serialization)
-        [NonSerialized]
-        private object _syncRoot;
 
         private const int _defaultCapacity = 16;
 
@@ -292,17 +290,7 @@ namespace System.Collections
         }
 
         // Synchronization root for this object.
-        public virtual object SyncRoot
-        {
-            get
-            {
-                if (_syncRoot == null)
-                {
-                    System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new object(), null);
-                }
-                return _syncRoot;
-            }
-        }
+        public virtual object SyncRoot => this;
 
         // Removes all entries from this sorted list.
         public virtual void Clear()
@@ -720,7 +708,6 @@ namespace System.Collections
                 }
             }
 
-            [SuppressMessage("Microsoft.Contracts", "CC1055")]  // Skip extra error checking to avoid *potential* AppCompat problems.
             public override object GetByIndex(int index)
             {
                 lock (_root)
@@ -737,7 +724,6 @@ namespace System.Collections
                 }
             }
 
-            [SuppressMessage("Microsoft.Contracts", "CC1055")]  // Skip extra error checking to avoid *potential* AppCompat problems.
             public override object GetKey(int index)
             {
                 lock (_root)
@@ -773,7 +759,6 @@ namespace System.Collections
                 }
             }
 
-            [SuppressMessage("Microsoft.Contracts", "CC1055")]  // Skip extra error checking to avoid *potential* AppCompat problems.
             public override int IndexOfValue(object value)
             {
                 lock (_root)
@@ -782,7 +767,6 @@ namespace System.Collections
                 }
             }
 
-            [SuppressMessage("Microsoft.Contracts", "CC1055")]  // Skip extra error checking to avoid *potential* AppCompat problems.
             public override void RemoveAt(int index)
             {
                 lock (_root)
@@ -799,7 +783,6 @@ namespace System.Collections
                 }
             }
 
-            [SuppressMessage("Microsoft.Contracts", "CC1055")]  // Skip extra error checking to avoid *potential* AppCompat problems.
             public override void SetByIndex(int index, object value)
             {
                 lock (_root)

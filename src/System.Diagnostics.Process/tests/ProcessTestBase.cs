@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -29,11 +30,8 @@ namespace System.Diagnostics.Tests
             {
                 try
                 {
-                    if (!p.HasExited)
-                    {
-                        p.Kill();
-                        Assert.True(p.WaitForExit(WaitInMS));
-                    }
+                    p.Kill();
+                    Assert.True(p.WaitForExit(WaitInMS));
                 }
                 catch (InvalidOperationException) { } // in case it was never started
             }
@@ -61,7 +59,21 @@ namespace System.Diagnostics.Tests
             return p;
         }
 
-        protected Process CreateProcess(Func<string, int> method, string arg)
+        protected Process CreateProcess(Func<string, int> method, string arg, bool autoDispose = true)
+        {
+            Process p = null;
+            using (RemoteInvokeHandle handle = RemoteInvoke(method, arg, new RemoteInvokeOptions { Start = false }))
+            {
+                p = handle.Process;
+                handle.Process = null;
+            }
+            if (autoDispose)
+                AddProcessForDispose(p);
+
+            return p;
+        }
+
+        protected Process CreateProcess(Func<string, Task<int>> method, string arg)
         {
             Process p = null;
             using (RemoteInvokeHandle handle = RemoteInvoke(method, arg, new RemoteInvokeOptions { Start = false }))

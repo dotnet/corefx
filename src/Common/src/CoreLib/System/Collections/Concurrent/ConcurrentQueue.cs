@@ -56,7 +56,7 @@ namespace System.Collections.Concurrent
         /// <summary>The current tail segment.</summary>
         private volatile ConcurrentQueueSegment<T> _tail;
         /// <summary>The current head segment.</summary>
-        private volatile ConcurrentQueueSegment<T> _head;
+        private volatile ConcurrentQueueSegment<T> _head; // SOS's ThreadPool command depends on this name
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentQueue{T}"/> class.
@@ -80,8 +80,7 @@ namespace System.Collections.Concurrent
             // case we round its length up to a power of 2, as all segments must
             // be a power of 2 in length.
             int length = InitialSegmentLength;
-            var c = collection as ICollection<T>;
-            if (c != null)
+            if (collection is ICollection<T> c)
             {
                 int count = c.Count;
                 if (count > length)
@@ -143,8 +142,7 @@ namespace System.Collections.Concurrent
         void ICollection.CopyTo(Array array, int index)
         {
             // Special-case when the Array is actually a T[], taking a faster path
-            T[] szArray = array as T[];
-            if (szArray != null)
+            if (array is T[] szArray)
             {
                 CopyTo(szArray, index);
                 return;

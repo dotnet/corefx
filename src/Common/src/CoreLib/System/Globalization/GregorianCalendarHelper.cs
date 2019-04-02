@@ -153,7 +153,7 @@ namespace System.Globalization
                         {
                             return m_EraInfo[i].yearOffset;
                         }
-                        else if (!AppContextSwitches.EnforceJapaneseEraYearRanges)
+                        else if (!LocalAppContextSwitches.EnforceJapaneseEraYearRanges)
                         {
                             // If we got the year number exceeding the era max year number, this still possible be valid as the date can be created before
                             // introducing new eras after the era we are checking. we'll loop on the eras after the era we have and ensure the year
@@ -182,8 +182,7 @@ namespace System.Globalization
                     {
                         throw new ArgumentOutOfRangeException(
                                     nameof(year),
-                                    string.Format(
-                                        CultureInfo.CurrentCulture,
+                                    SR.Format(
                                         SR.ArgumentOutOfRange_Range,
                                         m_EraInfo[i].minEraYear,
                                         m_EraInfo[i].maxEraYear));
@@ -324,8 +323,7 @@ namespace System.Globalization
                 {
                     throw new ArgumentOutOfRangeException(
                                 nameof(millisecond),
-                                string.Format(
-                                    CultureInfo.CurrentCulture,
+                                SR.Format(
                                     SR.ArgumentOutOfRange_Range,
                                     0,
                                     MillisPerSecond - 1));
@@ -342,7 +340,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             "time",
-                            string.Format(
+                            SR.Format(
                                 CultureInfo.InvariantCulture,
                                 SR.ArgumentOutOfRange_CalendarRange,
                                 m_Cal.MinSupportedDateTime,
@@ -373,8 +371,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             nameof(months),
-                            string.Format(
-                                CultureInfo.CurrentCulture,
+                            SR.Format(
                                 SR.ArgumentOutOfRange_Range,
                                 -120000,
                                 120000));
@@ -571,8 +568,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             nameof(day),
-                            string.Format(
-                                CultureInfo.CurrentCulture,
+                            SR.Format(
                                 SR.ArgumentOutOfRange_Range,
                                 1,
                                 GetDaysInMonth(year, month, era)));
@@ -610,8 +606,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             nameof(month),
-                            string.Format(
-                                CultureInfo.CurrentCulture,
+                            SR.Format(
                                 SR.ArgumentOutOfRange_Range,
                                 1,
                                 12));
@@ -665,9 +660,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             nameof(year),
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                SR.ArgumentOutOfRange_Range, m_minYear, m_maxYear));
+                            SR.Format(SR.ArgumentOutOfRange_Range, m_minYear, m_maxYear));
             }
             // If the year value is above 100, just return the year value.  Don't have to do
             // the TwoDigitYearMax comparison.

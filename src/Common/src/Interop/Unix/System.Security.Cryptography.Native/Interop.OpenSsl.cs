@@ -64,6 +64,27 @@ internal static partial class Interop
                     throw CreateSslException(SR.net_allocate_ssl_context_failed);
                 }
 
+                // TLS 1.3 uses different ciphersuite restrictions than previous versions.
+                // It has no equivalent to a NoEncryption option.
+                if (policy == EncryptionPolicy.NoEncryption)
+                {
+                    if (protocols == SslProtocols.None)
+                    {
+                        protocols = SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
+                    }
+                    else
+                    {
+                        protocols &= ~SslProtocols.Tls13;
+
+                        if (protocols == SslProtocols.None)
+                        {
+                            throw new SslException(
+                                SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
+                        }
+                    }
+                }
+
+
                 // Configure allowed protocols. It's ok to use DangerousGetHandle here without AddRef/Release as we just
                 // create the handle, it's rooted by the using, no one else has a reference to it, etc.
                 Ssl.SetProtocolOptions(innerContext.DangerousGetHandle(), protocols);
@@ -144,10 +165,27 @@ internal static partial class Interop
                             certHandle.DangerousAddRef(ref hasCertReference);
                             using (X509Certificate2 cert = new X509Certificate2(certHandle.DangerousGetHandle()))
                             {
-                                using (X509Chain chain = TLSCertificateExtensions.BuildNewChain(cert, includeClientApplicationPolicy: false))
+                                X509Chain chain = null;
+                                try
                                 {
+                                    chain = TLSCertificateExtensions.BuildNewChain(cert, includeClientApplicationPolicy: false);
                                     if (chain != null && !Ssl.AddExtraChainCertificates(context, chain))
+                                    {
                                         throw CreateSslException(SR.net_ssl_use_cert_failed);
+                                    }
+                                }
+                                finally
+                                {
+                                    if (chain != null)
+                                    {
+                                        int elementsCount = chain.ChainElements.Count;
+                                        for (int i = 0; i < elementsCount; i++)
+                                        {
+                                            chain.ChainElements[i].Certificate.Dispose();
+                                        }
+
+                                        chain.Dispose();
+                                    }
                                 }
                             }
                         }
@@ -178,7 +216,7 @@ internal static partial class Interop
         {
             sendBuf = null;
             sendCount = 0;
-            
+
             if ((recvBuf != null) && (recvCount > 0))
             {
                 if (BioWrite(context.InputBio, recvBuf, recvOffset, recvCount) <= 0)
@@ -382,14 +420,14 @@ internal static partial class Interop
             GCHandle protocolHandle = GCHandle.FromIntPtr(arg);
             if (!(protocolHandle.Target is List<SslApplicationProtocol> protocolList))
             {
-                return Ssl.SSL_TLSEXT_ERR_NOACK;
+                return Ssl.SSL_TLSEXT_ERR_ALERT_FATAL;
             }
 
             try
             {
                 for (int i = 0; i < protocolList.Count; i++)
                 {
-                    Span<byte> clientList = new Span<byte>(inp, (int)inlen);
+                    var clientList = new Span<byte>(inp, (int)inlen);
                     while (clientList.Length > 0)
                     {
                         byte length = clientList[0];
@@ -411,14 +449,14 @@ internal static partial class Interop
                 // It is ok to clear the handle value here, this results in handshake failure, so the SslStream object is disposed.
                 protocolHandle.Target = null;
 
-                return Ssl.SSL_TLSEXT_ERR_NOACK;
+                return Ssl.SSL_TLSEXT_ERR_ALERT_FATAL;
             }
 
             // No common application protocol was negotiated, set the target on the alpnHandle to null.
             // It is ok to clear the handle value here, this results in handshake failure, so the SslStream object is disposed.
             protocolHandle.Target = null;
 
-            return Ssl.SSL_TLSEXT_ERR_NOACK;
+            return Ssl.SSL_TLSEXT_ERR_ALERT_FATAL;
         }
 
         private static int BioRead(SafeBioHandle bio, byte[] buffer, int count)

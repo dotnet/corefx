@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Internal.Runtime.Augments;
 using Internal.Runtime.CompilerServices;
 
 namespace System.Buffers
@@ -230,9 +229,10 @@ namespace System.Buffers
             if (log.IsEnabled())
                 log.BufferTrimPoll(milliseconds, (int)pressure);
 
-            foreach (PerCoreLockedStacks bucket in _buckets)
+            PerCoreLockedStacks[] perCoreBuckets = _buckets;
+            for (int i = 0; i < perCoreBuckets.Length; i++)
             {
-                bucket?.Trim((uint)milliseconds, Id, pressure, _bucketArraySizes);
+                perCoreBuckets[i]?.Trim((uint)milliseconds, Id, pressure, _bucketArraySizes[i]);
             }
 
             if (pressure == MemoryPressure.High)
@@ -345,7 +345,7 @@ namespace System.Buffers
                 // Try to push on to the associated stack first.  If that fails,
                 // round-robin through the other stacks.
                 LockedStack[] stacks = _perCoreStacks;
-                int index = RuntimeThread.GetCurrentProcessorId() % stacks.Length;
+                int index = Thread.GetCurrentProcessorId() % stacks.Length;
                 for (int i = 0; i < stacks.Length; i++)
                 {
                     if (stacks[index].TryPush(array)) return;
@@ -361,7 +361,7 @@ namespace System.Buffers
                 // round-robin through the other stacks.
                 T[] arr;
                 LockedStack[] stacks = _perCoreStacks;
-                int index = RuntimeThread.GetCurrentProcessorId() % stacks.Length;
+                int index = Thread.GetCurrentProcessorId() % stacks.Length;
                 for (int i = 0; i < stacks.Length; i++)
                 {
                     if ((arr = stacks[index].TryPop()) != null) return arr;
@@ -370,14 +370,13 @@ namespace System.Buffers
                 return null;
             }
 
-            public bool Trim(uint tickCount, int id, MemoryPressure pressure, int[] bucketSizes)
+            public void Trim(uint tickCount, int id, MemoryPressure pressure, int bucketSize)
             {
                 LockedStack[] stacks = _perCoreStacks;
                 for (int i = 0; i < stacks.Length; i++)
                 {
-                    stacks[i].Trim(tickCount, id, pressure, bucketSizes[i]);
+                    stacks[i].Trim(tickCount, id, pressure, bucketSize);
                 }
-                return true;
             }
         }
 

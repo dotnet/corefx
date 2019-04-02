@@ -678,7 +678,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                             raw.year = tokenValue;
                             //
                             // If we have number which has 3 or more digits (like "001" or "0001"),
-                            // we assume this number is a year. Save the currnet raw.numCount in
+                            // we assume this number is a year. Save the current raw.numCount in
                             // raw.year.
                             //
                             switch (sep = str.GetSeparatorToken(dtfi, out indexBeforeSeparator, out charBeforeSeparator))
@@ -882,7 +882,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                             raw.year = tokenValue;
                             //
                             // If we have number which has 3 or more digits (like "001" or "0001"),
-                            // we assume this number is a year. Save the currnet raw.numCount in
+                            // we assume this number is a year. Save the current raw.numCount in
                             // raw.year.
                             //
                             switch (sep = str.GetSeparatorToken(dtfi, out indexBeforeSeparator, out charBeforeSeparator))
@@ -3343,7 +3343,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 // Search leap year form.
                 if ((dtfi.FormatFlags & DateTimeFormatFlags.UseLeapYearMonth) != 0)
                 {
-                    int tempResult = str.MatchLongestWords(dtfi.internalGetLeapYearMonthNames(), ref maxMatchStrLen);
+                    int tempResult = str.MatchLongestWords(dtfi.InternalGetLeapYearMonthNames(), ref maxMatchStrLen);
                     // We found a longer match in the leap year month name.  Use this as the result.
                     // The result from MatchLongestWords is 0 ~ length of word array.
                     // So we increment the result by one to become the month value.
@@ -3414,7 +3414,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 // Search leap year form.
                 if ((dtfi.FormatFlags & DateTimeFormatFlags.UseLeapYearMonth) != 0)
                 {
-                    int tempResult = str.MatchLongestWords(dtfi.internalGetLeapYearMonthNames(), ref maxMatchStrLen);
+                    int tempResult = str.MatchLongestWords(dtfi.InternalGetLeapYearMonthNames(), ref maxMatchStrLen);
                     // We found a longer match in the leap year month name.  Use this as the result.
                     // The result from MatchLongestWords is 0 ~ length of word array.
                     // So we increment the result by one to become the month value.
@@ -3690,7 +3690,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 // DateTimeOffset.Parse should allow dates without a year, but only if there is also no time zone marker;
                 // e.g. "May 1 5pm" is OK, but "May 1 5pm -08:30" is not.  This is somewhat pragmatic, since we would
                 // have to rearchitect parsing completely to allow this one case to correctly handle things like leap
-                // years and leap months.  Is is an extremely corner case, and DateTime is basically incorrect in that
+                // years and leap months.  Is an extremely corner case, and DateTime is basically incorrect in that
                 // case today.
                 //
                 // values like "11:00Z" or "11:00 -3:00" are also acceptable
@@ -3836,7 +3836,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             // ParseJapaneseEraStart will be called when parsing the year number. We can have dates which not listing
             // the year as a number and listing it as JapaneseEraStart symbol (which means year 1).
             // This will be legitimate date to recognize.
-            if (AppContextSwitches.EnforceLegacyJapaneseDateParsing || dtfi.Calendar.ID != CalendarId.JAPAN || !str.GetNext())
+            if (LocalAppContextSwitches.EnforceLegacyJapaneseDateParsing || dtfi.Calendar.ID != CalendarId.JAPAN || !str.GetNext())
                 return false;
 
             if (str.m_current != DateTimeFormatInfo.JapaneseEraStart[0])
@@ -5149,9 +5149,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 return;
 
             Trace("DateTimeFormatInfo Properties");
-#if !FEATURE_COREFX_GLOBALIZATION
             Trace($" NativeCalendarName {Hex(dtfi.NativeCalendarName)}");
-#endif
             Trace($"       AMDesignator {Hex(dtfi.AMDesignator)}");
             Trace($"       PMDesignator {Hex(dtfi.PMDesignator)}");
             Trace($"      TimeSeparator {Hex(dtfi.TimeSeparator)}");

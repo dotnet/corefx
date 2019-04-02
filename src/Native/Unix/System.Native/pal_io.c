@@ -120,16 +120,6 @@ c_static_assert(PAL_SEEK_SET == SEEK_SET);
 c_static_assert(PAL_SEEK_CUR == SEEK_CUR);
 c_static_assert(PAL_SEEK_END == SEEK_END);
 
-// Validate our FileAdvice enum values are correct for the platform
-#if HAVE_POSIX_ADVISE
-c_static_assert(PAL_POSIX_FADV_NORMAL == POSIX_FADV_NORMAL);
-c_static_assert(PAL_POSIX_FADV_RANDOM == POSIX_FADV_RANDOM);
-c_static_assert(PAL_POSIX_FADV_SEQUENTIAL == POSIX_FADV_SEQUENTIAL);
-c_static_assert(PAL_POSIX_FADV_WILLNEED == POSIX_FADV_WILLNEED);
-c_static_assert(PAL_POSIX_FADV_DONTNEED == POSIX_FADV_DONTNEED);
-c_static_assert(PAL_POSIX_FADV_NOREUSE == POSIX_FADV_NOREUSE);
-#endif
-
 // Validate our NotifyEvents enum values are correct for the platform
 #if HAVE_INOTIFY
 c_static_assert(PAL_IN_ACCESS == IN_ACCESS);
@@ -176,11 +166,15 @@ static void ConvertFileStatus(const struct stat_* src, FileStatus* dst)
     dst->BirthTime = 0;
     dst->BirthTimeNsec = 0;
 #endif
+
+#if defined(HAVE_STAT_FLAGS) && defined(UF_HIDDEN)
+    dst->UserFlags = ((src->st_flags & UF_HIDDEN) == UF_HIDDEN) ? PAL_UF_HIDDEN : 0;
+#else
+    dst->UserFlags = 0;
+#endif
 }
 
-// CoreCLR expects the "2" suffixes on these: they should be cleaned up in our
-// next coordinated System.Native changes
-int32_t SystemNative_Stat2(const char* path, FileStatus* output)
+int32_t SystemNative_Stat(const char* path, FileStatus* output)
 {
     struct stat_ result;
     int ret;
@@ -194,7 +188,7 @@ int32_t SystemNative_Stat2(const char* path, FileStatus* output)
     return ret;
 }
 
-int32_t SystemNative_FStat2(intptr_t fd, FileStatus* output)
+int32_t SystemNative_FStat(intptr_t fd, FileStatus* output)
 {
     struct stat_ result;
     int ret;
@@ -208,7 +202,7 @@ int32_t SystemNative_FStat2(intptr_t fd, FileStatus* output)
     return ret;
 }
 
-int32_t SystemNative_LStat2(const char* path, FileStatus* output)
+int32_t SystemNative_LStat(const char* path, FileStatus* output)
 {
     struct stat_ result;
     int ret = lstat_(path, &result);
@@ -352,41 +346,10 @@ static void ConvertDirent(const struct dirent* entry, DirectoryEntry* outputEntr
     // location of the start of the string that exists in their own byte buffer.
     outputEntry->Name = entry->d_name;
 #if !defined(DT_UNKNOWN)
-    /* AIX has no d_type, make a substitute */
-    struct stat s;
-    stat(entry->d_name, &s);
-    if (S_ISDIR(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_DIR;
-    }
-    else if (S_ISFIFO(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_FIFO;
-    }
-    else if (S_ISCHR(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_CHR;
-    }
-    else if (S_ISBLK(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_BLK;
-    }
-    else if (S_ISREG(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_REG;
-    }
-    else if (S_ISLNK(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_LNK;
-    }
-    else if (S_ISSOCK(s.st_mode))
-    {
-        outputEntry->InodeType = PAL_DT_SOCK;
-    }
-    else
-    {
-        outputEntry->InodeType = PAL_DT_UNKNOWN;
-    }
+    // AIX has no d_type, and since we can't get the directory that goes with
+    // the filename from ReadDir, we can't stat the file. Return unknown and
+    // hope that managed code can properly stat the file.
+    outputEntry->InodeType = PAL_DT_UNKNOWN;
 #else
     outputEntry->InodeType = (int32_t)entry->d_type;
 #endif
@@ -439,6 +402,23 @@ int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, Dir
     }
 
     struct dirent* result = NULL;
+#ifdef _AIX
+    // AIX returns 0 on success, but bizarrely, it returns 9 for both error and
+    // end-of-directory. result is NULL for both cases. The API returns the
+    // same thing for EOD/error, so disambiguation between the two is nearly
+    // impossible without clobbering errno for yourself and seeing if the API
+    // changed it. See:
+    // https://www.ibm.com/support/knowledgecenter/ssw_aix_71/com.ibm.aix.basetrf2/readdir_r.htm
+
+    errno = 0; // create a success condition for the API to clobber
+    int error = readdir_r(dir, entry, &result);
+
+    if (error == 9)
+    {
+        memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
+        return errno == 0 ? -1 : errno;
+    }
+#else
     int error = readdir_r(dir, entry, &result);
 
     // positive error number returned -> failure
@@ -455,6 +435,7 @@ int32_t SystemNative_ReadDirR(DIR* dir, uint8_t* buffer, int32_t bufferSize, Dir
         memset(outputEntry, 0, sizeof(*outputEntry)); // managed out param must be initialized
         return -1;         // shim convention for end-of-stream
     }
+#endif
 
     // 0 returned with non-null result (guaranteed to be set to entry arg) -> success
     assert(result == entry);
@@ -542,10 +523,10 @@ int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
     return result;
 }
 
-int32_t SystemNative_FcntlSetCloseOnExec(intptr_t fd)
+int32_t SystemNative_FcntlSetFD(intptr_t fd, int32_t flags)
 {
     int result;
-    while ((result = fcntl(ToFileDescriptor(fd), F_SETFD, FD_CLOEXEC)) < 0 && errno == EINTR);
+    while ((result = fcntl(ToFileDescriptor(fd), F_SETFD, ConvertOpenFlags(flags))) < 0 && errno == EINTR);
     return result;
 }
 
@@ -1032,6 +1013,18 @@ int32_t SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, int32_t mi
 int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_t length, int32_t advice)
 {
 #if HAVE_POSIX_ADVISE
+    // POSIX_FADV_* may be different on each platform. Convert the values from PAL to the system's.
+    int32_t actualAdvice;
+    switch (advice)
+    {
+        case PAL_POSIX_FADV_NORMAL:     actualAdvice = POSIX_FADV_NORMAL;     break;
+        case PAL_POSIX_FADV_RANDOM:     actualAdvice = POSIX_FADV_RANDOM;     break;
+        case PAL_POSIX_FADV_SEQUENTIAL: actualAdvice = POSIX_FADV_SEQUENTIAL; break;
+        case PAL_POSIX_FADV_WILLNEED:   actualAdvice = POSIX_FADV_WILLNEED;   break;
+        case PAL_POSIX_FADV_DONTNEED:   actualAdvice = POSIX_FADV_DONTNEED;   break;
+        case PAL_POSIX_FADV_NOREUSE:    actualAdvice = POSIX_FADV_NOREUSE;    break;
+        default: return EINVAL; // According to the man page
+    }
     int32_t result;
     while ((
         result =
@@ -1043,7 +1036,7 @@ int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_t length, i
                 ToFileDescriptor(fd),
                 (off_t)offset,
                 (off_t)length,
-                advice)) < 0 && errno == EINTR);
+                actualAdvice)) < 0 && errno == EINTR);
     return result;
 #else
     // Not supported on this platform. Caller can ignore this failure since it's just a hint.
@@ -1264,22 +1257,21 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
     while ((ret = fstat_(inFd, &sourceStat)) < 0 && errno == EINTR);
     if (ret == 0)
     {
-#if HAVE_FUTIMES
-        struct timeval origTimes[2];
-        origTimes[0].tv_sec = sourceStat.st_atime;
-        origTimes[0].tv_usec = ST_ATIME_NSEC(&sourceStat) / 1000;
-        origTimes[1].tv_sec = sourceStat.st_mtime;
-        origTimes[1].tv_usec = ST_MTIME_NSEC(&sourceStat) / 1000;
-        while ((ret = futimes(outFd, origTimes)) < 0 && errno == EINTR);
-#elif HAVE_FUTIMENS
-        // futimes is not a POSIX function, and not available on Android,
-        // but futimens is
+#if HAVE_FUTIMENS
+        // futimens is prefered because it has a higher resolution.
         struct timespec origTimes[2];
         origTimes[0].tv_sec = (time_t)sourceStat.st_atime;
         origTimes[0].tv_nsec = ST_ATIME_NSEC(&sourceStat);
         origTimes[1].tv_sec = (time_t)sourceStat.st_mtime;
         origTimes[1].tv_nsec = ST_MTIME_NSEC(&sourceStat);
         while ((ret = futimens(outFd, origTimes)) < 0 && errno == EINTR);
+#elif HAVE_FUTIMES
+        struct timeval origTimes[2];
+        origTimes[0].tv_sec = sourceStat.st_atime;
+        origTimes[0].tv_usec = ST_ATIME_NSEC(&sourceStat) / 1000;
+        origTimes[1].tv_sec = sourceStat.st_mtime;
+        origTimes[1].tv_usec = ST_MTIME_NSEC(&sourceStat) / 1000;
+        while ((ret = futimes(outFd, origTimes)) < 0 && errno == EINTR);
 #endif
     }
     if (ret != 0)
@@ -1399,4 +1391,26 @@ int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int64_t length,
     int32_t ret;
     while ((ret = fcntl (ToFileDescriptor(fd), F_SETLK, &lockArgs)) < 0 && errno == EINTR);
     return ret;
+}
+
+int32_t SystemNative_LChflags(const char* path, uint32_t flags)
+{
+#if HAVE_LCHFLAGS
+    int32_t result;
+    while ((result = lchflags(path, flags)) < 0 && errno == EINTR);
+    return result;
+#else
+    (void)path, (void)flags;
+    errno = ENOTSUP;
+    return -1;
+#endif
+}
+
+int32_t SystemNative_LChflagsCanSetHiddenFlag(void)
+{
+#if defined(UF_HIDDEN) && defined(HAVE_STAT_FLAGS) && defined(HAVE_LCHFLAGS)
+    return true;
+#else
+    return false;
+#endif
 }

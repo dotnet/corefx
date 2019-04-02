@@ -696,7 +696,7 @@ namespace System.Data.Tests
             drArrResult = drChild.GetParentRows("Parent-Child", DataRowVersion.Default);
             Assert.Equal(drArrExcepted, drArrResult);
 
-            /* .Net don't work as expected
+            /* .NET don't work as expected
                 //Check DataRowVersion.Proposed
                 // Teting: DataRow.GetParentRows_D_D ,DataRowVersion.Proposed
                 drArrExcepted = dtParent.Select("ParentId=" + drParent["ParentId"],"",DataViewRowState.ModifiedCurrent);
@@ -2400,7 +2400,7 @@ namespace System.Data.Tests
         [Fact]
         public void testMore()
         {
-            DataSet ds = DataProvider.CreateForigenConstraint();
+            DataSet ds = DataProvider.CreateForeignConstraint();
             DataRow drParent = ds.Tables[0].Rows[0];
             //DataRow[] drArray =  ds.Tables[1].Rows[0].GetParentRows(ds.Tables[1].ParentRelations[0]);
             ds.Tables[1].Rows[0].SetParentRow(drParent);
@@ -2439,7 +2439,7 @@ namespace System.Data.Tests
             dtParent.Rows[0].SetParentRow(dtChild.Rows[0]);
         }
 
-        public void checkForLoopsAdvenced()
+        public void checkForLoopsAdvanced()
         {
             //Create tables
             DataTable dtChild = new DataTable();
@@ -2540,7 +2540,7 @@ namespace System.Data.Tests
         {
             Assert.Throws<ConstraintException>(() =>
            {
-               DataSet ds = DataProvider.CreateForigenConstraint();
+               DataSet ds = DataProvider.CreateForeignConstraint();
                ds.Tables[0].BeginLoadData();
                ds.Tables[0].Rows[0][0] = 10;
                ds.Tables[0].EndLoadData(); //Foreign constraint violation
@@ -2782,11 +2782,11 @@ namespace System.Data.Tests
             Assert.Equal(true, dt1.GetErrors()[0].RowError.Length > 10);
             Assert.Equal(true, dt1.GetErrors()[1].RowError.Length > 10);
 
-            DataSet ds = DataProvider.CreateForigenConstraint();
+            DataSet ds = DataProvider.CreateForeignConstraint();
             Assert.Throws<ConstraintException>(() =>
             {
                 ds.Tables[0].BeginLoadData();
-                ds.Tables[0].Rows[0][0] = 10; //Forigen constraint violation
+                ds.Tables[0].Rows[0][0] = 10; //Foreign constraint violation
                                               //ds.Tables[0].AcceptChanges();
                 ds.Tables[0].EndLoadData();
             });

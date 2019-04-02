@@ -17,7 +17,7 @@ namespace System.Xml
     /// data or relational data (DataSet).
     /// </summary>
     [Obsolete("XmlDataDocument class will be removed in a future release.")]
-    internal class XmlDataDocument : XmlDocument
+    public class XmlDataDocument : XmlDocument
     {
         private DataSet _dataSet;
 
@@ -37,7 +37,7 @@ namespace System.Xml
         private bool _optimizeStorage;       // false if we should only have foilated regions.
         private ElementState _autoFoliationState;    // When XmlBoundElement will foliate because of member functions, this will contain the foliation mode: usually this is
                                                      // ElementState.StrongFoliation, however when foliation occurs due to DataDocumentNavigator operations (InsertNode for example),
-                                                     // it it usually ElementState.WeakFoliation
+                                                     // it is usually ElementState.WeakFoliation
         private bool _fAssociateDataRow;     // if true, CreateElement will create and associate data rows w/ the newly created XmlBoundElement.
                                              // If false, then CreateElement will just create the XmlBoundElement nodes. This is usefull for Loading case,
                                              // when CreateElement is called by DOM.
@@ -81,7 +81,7 @@ namespace System.Xml
 #if DEBUG
             object val = _pointers[pointer];
             if (val != (object)pointer)
-                Debug.Assert(false);
+                Debug.Fail("Pointer not present");
 #endif
         }
         // This function attaches the DataSet to XmlDataDocument
@@ -1092,7 +1092,7 @@ namespace System.Xml
                     return true;
 
                 case XmlNodeType.EntityReference:
-                    Debug.Assert(false);
+                    Debug.Fail("Found entity reference");
                     return false;
 
                 default:
@@ -1222,7 +1222,7 @@ namespace System.Xml
             _fAssociateDataRow = false;
 
             DataTable[] orderedTables = OrderTables(ds);
-            // problem is after we add support for Namespace  for DataTable, when infering we do not guarantee that table would be 
+            // problem is after we add support for Namespace  for DataTable, when inferring we do not guarantee that table would be 
             // in the same sequence that they were in XML because of namespace, some would be on different schema, so since they
             // won't be in the same sequence as in XML, we may end up with having a child table, before its parent (which is not doable
             // with XML; and this happend because they are in different namespace)
@@ -1250,12 +1250,10 @@ namespace System.Xml
                                 // Nothing to do (the row already has an associated element as a fragment
                                 break;
                             case DataRowState.Detached:
-                                // We should not get rows in this state
-                                Debug.Assert(false);
+                                Debug.Fail("We should not get rows in this state");
                                 break;
                             default:
-                                // Unknown row state
-                                Debug.Assert(false);
+                                Debug.Fail("Unknown row state");
                                 break;
                         }
                     }
@@ -1939,7 +1937,7 @@ namespace System.Xml
             {
                 // Sync the old region if it is not deleted
                 DataRow row = oldRowElem.Row;
-                // Since the old old region was disconnected, then the row can be only Deleted or Detached
+                // Since the old region was disconnected, then the row can be only Deleted or Detached
                 Debug.Assert(!IsRowLive(row));
                 if (oldRowElem.Row.RowState == DataRowState.Detached)
                     SynchronizeRowFromRowElement(oldRowElem);
@@ -2068,11 +2066,11 @@ namespace System.Xml
                             break;
 
                         case DataRowAction.Delete:
-                            // DataRow is beeing deleted
+                            // DataRow is being deleted
                             //    - state transition from New (AKA PendingInsert) to Detached (AKA Created)
                             //    - state transition from Unchanged to Deleted (AKA PendingDelete)
                             //    - state transition from Modified (AKA PendingChange) to Delete (AKA PendingDelete)
-                            Debug.Assert(false);  // This should have been handled above, irrespective of ignoreDataSetEvents value (true or false)
+                            Debug.Fail("This should have been handled above, irrespective of ignoreDataSetEvents value (true or false)");
                             break;
 
                         case DataRowAction.Rollback:
@@ -2261,7 +2259,7 @@ namespace System.Xml
         private void PromoteInnerRegions(XmlNode parent)
         {
             Debug.Assert(parent != null);
-            Debug.Assert(parent.NodeType != XmlNodeType.Attribute);   // We need to get get the grand-parent region
+            Debug.Assert(parent.NodeType != XmlNodeType.Attribute);   // We need to get the grand-parent region
             Debug.Assert(parent != DocumentElement);                  // We cannot promote children of the DocumentElement
 
             XmlNode prevSibling = parent;
@@ -2420,8 +2418,7 @@ namespace System.Xml
             }
             catch
             {
-                // We should not get any exceptions because we always handle data-type conversion
-                Debug.Assert(false);
+                Debug.Fail("We should not get any exceptions because we always handle data-type conversion");
                 throw;
             }
 #endif
@@ -2434,8 +2431,7 @@ namespace System.Xml
             }
             catch
             {
-                // We should not get any exceptions because DataSet.EnforceConstraints should be always off
-                Debug.Assert(false);
+                Debug.Fail("We should not get any exceptions because DataSet.EnforceConstraints should be always off");
                 throw;
             }
 #endif
@@ -2732,8 +2728,7 @@ namespace System.Xml
                     }
                     catch
                     {
-                        // We should not get any exceptions here
-                        Debug.Assert(false);
+                        Debug.Fail("We should not get any exceptions here");
                         throw;
                     }
 #endif
@@ -2761,15 +2756,13 @@ namespace System.Xml
                     }
                     catch
                     {
-                        // We should not get any exceptions here
-                        Debug.Assert(false);
+                        Debug.Fail("We should not get any exceptions here");
                         throw;
                     }
 #endif
                     break;
                 default:
-                    // Handle your case above
-                    Debug.Assert(false);
+                    Debug.Fail("Handle your case above");
                     break;
             }
             Debug.Assert(IsRowLive(rowElem.Row));
@@ -2796,8 +2789,7 @@ namespace System.Xml
                     }
                     catch
                     {
-                        // We should not get any exceptions here
-                        Debug.Assert(false);
+                        Debug.Fail("We should not get any exceptions here");
                         throw;
                     }
 #endif
@@ -2820,8 +2812,7 @@ namespace System.Xml
                     break;
 
                 default:
-                    // Handle your case above
-                    Debug.Assert(false);
+                    Debug.Fail("Handle your case above");
                     break;
             }
 

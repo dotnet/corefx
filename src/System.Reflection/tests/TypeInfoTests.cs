@@ -151,7 +151,7 @@ namespace System.Reflection.Tests
         [InlineData(typeof(MultipleNestedClass), nameof(MultipleNestedClass.Nest1), true)]
         [InlineData(typeof(MultipleNestedClass.Nest1), nameof(MultipleNestedClass.Nest1.Nest2), true)]
         [InlineData(typeof(MultipleNestedClass.Nest1.Nest2), nameof(MultipleNestedClass.Nest1.Nest2.Nest3), true)]
-        private void DeclaredNestedTypes(Type type, string name, bool exists)
+        public void DeclaredNestedTypes(Type type, string name, bool exists)
         {
             IEnumerable<string> nestedTypes = type.GetTypeInfo().DeclaredNestedTypes.Select(nestedType => nestedType.Name);
 
@@ -809,20 +809,6 @@ namespace System.Reflection.Tests
             {
                 Assert.Equal(length, typeInfo.GetMembers(bindingAttributes).Length);
             }
-        }
-
-        [Theory]
-        [InlineData(nameof(TI_NonGenericInterface1), false, true)]
-        [InlineData(nameof(TI_NonGenericInterface2), false, true)]
-        [InlineData(nameof(TI_NonGenericInterface2), true, true)]
-        public void GetInterface(string name, bool ignoreCase, bool exists)
-        {
-            TypeInfo typeInfo = typeof(MembersClass).GetTypeInfo();
-            if (!ignoreCase)
-            {
-                Assert.Equal(exists, typeInfo.GetInterface(name) != null);
-            }
-            Assert.Equal(exists, typeInfo.GetInterface(name, exists) != null);
         }
 
         [Theory]

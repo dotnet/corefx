@@ -91,6 +91,10 @@ namespace System.IO.Compression
             : this(archive, entryName)
         {
             _compressionLevel = compressionLevel;
+            if (_compressionLevel == CompressionLevel.NoCompression)
+            {
+                CompressionMethod = CompressionMethodValues.Stored;
+            }
         }
 
         // Initializes new entry
@@ -369,8 +373,11 @@ namespace System.IO.Compression
                         }
                     }
 
-                    // if they start modifying it, we should make sure it will get deflated
-                    CompressionMethod = CompressionMethodValues.Deflate;
+                    // if they start modifying it and the compression method is not "store", we should make sure it will get deflated
+                    if (CompressionMethod != CompressionMethodValues.Stored)
+                    {
+                        CompressionMethod = CompressionMethodValues.Deflate;
+                    }
                 }
 
                 return _storedUncompressedData;
@@ -594,16 +601,27 @@ namespace System.IO.Compression
         {
             // stream stack: backingStream -> DeflateStream -> CheckSumWriteStream
 
-            // we should always be compressing with deflate. Stored is used for empty files, but we don't actually
-            // call through this function for that - we just write the stored value in the header
-            Debug.Assert(CompressionMethod == CompressionMethodValues.Deflate);
-
-            Stream compressorStream = _compressionLevel.HasValue ?
-                new DeflateStream(backingStream, _compressionLevel.Value, leaveBackingStreamOpen) :
-                new DeflateStream(backingStream, CompressionMode.Compress, leaveBackingStreamOpen);
+            // By default we compress with deflate, except if compression level is set to NoCompression then stored is used.
+            // Stored is also used for empty files, but we don't actually call through this function for that - we just write the stored value in the header
+            // Deflate64 is not supported on all platforms
+            Debug.Assert(CompressionMethod == CompressionMethodValues.Deflate
+                || CompressionMethod == CompressionMethodValues.Stored);
 
             bool isIntermediateStream = true;
-
+            Stream compressorStream;
+            switch (CompressionMethod)
+            {
+                case CompressionMethodValues.Stored:
+                    compressorStream = backingStream;
+                    isIntermediateStream = false;
+                    break;
+                case CompressionMethodValues.Deflate:
+                case CompressionMethodValues.Deflate64:
+                default:
+                    compressorStream = new DeflateStream(backingStream, _compressionLevel ?? CompressionLevel.Optimal, leaveBackingStreamOpen);
+                    break;
+                
+            }
             bool leaveCompressorStreamOpenOnClose = leaveBackingStreamOpen && !isIntermediateStream;
             var checkSumStream = new CheckSumAndSizeWriteStream(
                 compressorStream,
@@ -933,13 +951,16 @@ namespace System.IO.Compression
 
             // first step is, if we need zip64, but didn't allocate it, pretend we did a stream write, because
             // we can't go back and give ourselves the space that the extra field needs.
-            // we do this by setting the correct property in the bit flag
+            // we do this by setting the correct property in the bit flag to indicate we have a data descriptor
+            // and setting the version to Zip64 to indicate that descriptor contains 64-bit values
             if (pretendStreaming)
             {
+                VersionToExtractAtLeast(ZipVersionNeededValues.Zip64);
                 _generalPurposeBitFlag |= BitFlagValues.DataDescriptor;
 
-                _archive.ArchiveStream.Seek(_offsetOfLocalHeader + ZipLocalFileHeader.OffsetToBitFlagFromHeaderStart,
+                _archive.ArchiveStream.Seek(_offsetOfLocalHeader + ZipLocalFileHeader.OffsetToVersionFromHeaderStart,
                                             SeekOrigin.Begin);
+                writer.Write((ushort)_versionToExtract);
                 writer.Write((ushort)_generalPurposeBitFlag);
             }
 
@@ -973,8 +994,6 @@ namespace System.IO.Compression
                                             SeekOrigin.Begin);
                 writer.Write(_uncompressedSize);
                 writer.Write(_compressedSize);
-
-                _archive.ArchiveStream.Seek(finalPosition, SeekOrigin.Begin);
             }
 
             // now go to the where we were. assume that this is the end of the data

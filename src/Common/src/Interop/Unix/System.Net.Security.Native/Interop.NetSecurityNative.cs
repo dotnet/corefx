@@ -36,8 +36,8 @@ internal static partial class Interop
             int inputNameByteCount,
             out SafeGssNameHandle outputName);
 
-        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_ImportPrincipalName")]
-        internal static extern Status ImportPrincipalName(
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_ImportTargetName")]
+        internal static extern Status ImportTargetName(
             out Status minorStatus,
             string inputName,
             int inputNameByteCount,
@@ -74,13 +74,15 @@ internal static partial class Interop
             SafeGssCredHandle initiatorCredHandle,
             ref SafeGssContextHandle contextHandle,
             bool isNtlmOnly,
+            IntPtr cbt,
+            int cbtSize,
             SafeGssNameHandle targetName,
             uint reqFlags,
             byte[] inputBytes,
             int inputLength,
             ref GssBuffer token,
             out uint retFlags,
-            out int isNtlmUsed);
+            out bool isNtlmUsed);
 
         [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_AcceptSecContext")]
         internal static extern Status AcceptSecContext(
@@ -148,7 +150,8 @@ internal static partial class Interop
         internal enum Status : uint
         {
             GSS_S_COMPLETE = 0,
-            GSS_S_CONTINUE_NEEDED = 1
+            GSS_S_CONTINUE_NEEDED = 1,
+            GSS_S_BAD_MECH = 65536
         }
 
         [Flags]

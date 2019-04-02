@@ -8,8 +8,8 @@ using Xunit;
 namespace System.Reflection.Tests
 {
     public class TypeInfoNetcoreTests
-    { 
-        private static IEnumerable<object[]> SZArrayOrNotTypes()
+    {
+        public static IEnumerable<object[]> SZArrayOrNotTypes()
         {
             yield return new object[] { typeof(int[]), true };
             yield return new object[] { typeof(string[]), true };
@@ -32,12 +32,12 @@ namespace System.Reflection.Tests
             yield return new object[] { typeof(int).MakeArrayType(1), false };
             yield return new object[] { typeof(int).MakeArrayType().MakeArrayType(), true };
             yield return new object[] { typeof(int).MakeArrayType(2), false };
-            yield return new object[] { typeof(Outside<int>.Inside<string>), false };
-            yield return new object[] { typeof(Outside<int>.Inside<string>[]), true };
-            yield return new object[] { typeof(Outside<int>.Inside<string>[,]), false };
+            yield return new object[] { typeof(OutsideTypeInfoNetcoreTests<int>.InsideTypeInfoNetcoreTests<string>), false };
+            yield return new object[] { typeof(OutsideTypeInfoNetcoreTests<int>.InsideTypeInfoNetcoreTests<string>[]), true };
+            yield return new object[] { typeof(OutsideTypeInfoNetcoreTests<int>.InsideTypeInfoNetcoreTests<string>[,]), false };
             if (PlatformDetection.IsNonZeroLowerBoundArraySupported)
             {
-                yield return new object[] { Array.CreateInstance(typeof(Outside<int>.Inside<string>), new[] { 2 }, new[] { -1 }).GetType(), false };
+                yield return new object[] { Array.CreateInstance(typeof(OutsideTypeInfoNetcoreTests<int>.InsideTypeInfoNetcoreTests<string>), new[] { 2 }, new[] { -1 }).GetType(), false };
             }
         }
 
@@ -47,4 +47,14 @@ namespace System.Reflection.Tests
             Assert.Equal(expected, type.GetTypeInfo().IsSZArray);
         }
     }
+
+    public class OutsideTypeInfoNetcoreTests
+    {
+        public class InsideTypeInfoNetcoreTests { }
+    }
+
+    public class OutsideTypeInfoNetcoreTests<T>
+    {
+        public class InsideTypeInfoNetcoreTests<U> { }
+    }    
 }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 
 namespace System.Runtime.Intrinsics.X86
@@ -10,6 +11,7 @@ namespace System.Runtime.Intrinsics.X86
     /// <summary>
     /// This class provides access to Intel AVX2 hardware instructions via intrinsics
     /// </summary>
+    [Intrinsic]
     [CLSCompliant(false)]
     public abstract class Avx2 : Avx
     {
@@ -659,11 +661,6 @@ namespace System.Runtime.Intrinsics.X86
         public static Vector256<long> CompareGreaterThan(Vector256<long> left, Vector256<long> right) => CompareGreaterThan(left, right);
 
         /// <summary>
-        /// double _mm256_cvtsd_f64 (__m256d a)
-        ///   HELPER: MOVSD
-        /// </summary>
-        public static double ConvertToDouble(Vector256<double> value) => ConvertToDouble(value);
-        /// <summary>
         /// int _mm256_cvtsi256_si32 (__m256i a)
         ///   MOVD reg/m32, xmm
         /// </summary>
@@ -740,88 +737,48 @@ namespace System.Runtime.Intrinsics.X86
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
         public new static Vector128<sbyte> ExtractVector128(Vector256<sbyte> value, byte index) => ExtractVector128(value, index);
-        // <summary>
-        /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
-        ///   VEXTRACTI128 m128, ymm, imm8
-        /// </summary>
-        public new static unsafe void ExtractVector128(sbyte* address, Vector256<sbyte> value, byte index) => ExtractVector128(address, value, index);
 
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
         public new static Vector128<byte> ExtractVector128(Vector256<byte> value, byte index) => ExtractVector128(value, index);
-        /// <summary>
-        /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
-        ///   VEXTRACTI128 m128, ymm, imm8
-        /// </summary>
-        public new static unsafe void ExtractVector128(byte* address, Vector256<byte> value, byte index) => ExtractVector128(address, value, index);
 
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
         public new static Vector128<short> ExtractVector128(Vector256<short> value, byte index) => ExtractVector128(value, index);
-        /// <summary>
-        /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
-        ///   VEXTRACTI128 m128, ymm, imm8
-        /// </summary>
-        public new static unsafe void ExtractVector128(short* address, Vector256<short> value, byte index) => ExtractVector128(address, value, index);
 
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
         public new static Vector128<ushort> ExtractVector128(Vector256<ushort> value, byte index) => ExtractVector128(value, index);
-        /// <summary>
-        /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
-        ///   VEXTRACTI128 m128, ymm, imm8
-        /// </summary>
-        public new static unsafe void ExtractVector128(ushort* address, Vector256<ushort> value, byte index) => ExtractVector128(address, value, index);
 
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
         public new static Vector128<int> ExtractVector128(Vector256<int> value, byte index) => ExtractVector128(value, index);
-        /// <summary>
-        /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
-        ///   VEXTRACTI128 m128, ymm, imm8
-        /// </summary>
-        public new static unsafe void ExtractVector128(int* address, Vector256<int> value, byte index) => ExtractVector128(address, value, index);
 
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
         public new static Vector128<uint> ExtractVector128(Vector256<uint> value, byte index) => ExtractVector128(value, index);
-        /// <summary>
-        /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
-        ///   VEXTRACTI128 m128, ymm, imm8
-        /// </summary>
-        public new static unsafe void ExtractVector128(uint* address, Vector256<uint> value, byte index) => ExtractVector128(address, value, index);
 
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
         public new static Vector128<long> ExtractVector128(Vector256<long> value, byte index) => ExtractVector128(value, index);
-        /// <summary>
-        /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
-        ///   VEXTRACTI128 m128, ymm, imm8
-        /// </summary>
-        public new static unsafe void ExtractVector128(long* address, Vector256<long> value, byte index) => ExtractVector128(address, value, index);
 
         /// <summary>
         /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
         ///   VEXTRACTI128 xmm, ymm, imm8
         /// </summary>
         public new static Vector128<ulong> ExtractVector128(Vector256<ulong> value, byte index) => ExtractVector128(value, index);
-        /// <summary>
-        /// __m128i _mm256_extracti128_si256 (__m256i a, const int imm8)
-        ///   VEXTRACTI128 m128, ymm, imm8
-        /// </summary>
-        public new static unsafe void ExtractVector128(ulong* address, Vector256<ulong> value, byte index) => ExtractVector128(address, value, index);
 
         /// <summary>
         /// __m128i _mm_i32gather_epi32 (int const* base_addr, __m128i vindex, const int scale)
@@ -1872,88 +1829,48 @@ namespace System.Runtime.Intrinsics.X86
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
         public new static Vector256<sbyte> InsertVector128(Vector256<sbyte> value, Vector128<sbyte> data, byte index) => InsertVector128(value, data, index);
-        /// <summary>
-        /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
-        ///   VINSERTI128 ymm, ymm, xm128, imm8
-        /// </summary>
-        public new static unsafe Vector256<sbyte> InsertVector128(Vector256<sbyte> value, sbyte* address, byte index) => InsertVector128(value, address, index);
 
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
         public new static Vector256<byte> InsertVector128(Vector256<byte> value, Vector128<byte> data, byte index) => InsertVector128(value, data, index);
-        /// <summary>
-        /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
-        ///   VINSERTI128 ymm, ymm, m128, imm8
-        /// </summary>
-        public new static unsafe Vector256<byte> InsertVector128(Vector256<byte> value, byte* address, byte index) => InsertVector128(value, address, index);
 
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
         public new static Vector256<short> InsertVector128(Vector256<short> value, Vector128<short> data, byte index) => InsertVector128(value, data, index);
-        /// <summary>
-        /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
-        ///   VINSERTI128 ymm, ymm, m128, imm8
-        /// </summary>
-        public new static unsafe Vector256<short> InsertVector128(Vector256<short> value, short* address, byte index) => InsertVector128(value, address, index);
 
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
         public new static Vector256<ushort> InsertVector128(Vector256<ushort> value, Vector128<ushort> data, byte index) => InsertVector128(value, data, index);
-        /// <summary>
-        /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
-        ///   VINSERTI128 ymm, ymm, m128, imm8
-        /// </summary>
-        public new static unsafe Vector256<ushort> InsertVector128(Vector256<ushort> value, ushort* address, byte index) => InsertVector128(value, address, index);
 
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
         public new static Vector256<int> InsertVector128(Vector256<int> value, Vector128<int> data, byte index) => InsertVector128(value, data, index);
-        /// <summary>
-        /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
-        ///   VINSERTI128 ymm, ymm, m128, imm8
-        /// </summary>
-        public new static unsafe Vector256<int> InsertVector128(Vector256<int> value, int* address, byte index) => InsertVector128(value, address, index);
 
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
         public new static Vector256<uint> InsertVector128(Vector256<uint> value, Vector128<uint> data, byte index) => InsertVector128(value, data, index);
-        /// <summary>
-        /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
-        ///   VINSERTI128 ymm, ymm, m128, imm8
-        /// </summary>
-        public new static unsafe Vector256<uint> InsertVector128(Vector256<uint> value, uint* address, byte index) => InsertVector128(value, address, index);
 
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
         public new static Vector256<long> InsertVector128(Vector256<long> value, Vector128<long> data, byte index) => InsertVector128(value, data, index);
-        /// <summary>
-        /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
-        ///   VINSERTI128 ymm, ymm, m128, imm8
-        /// </summary>
-        public new static unsafe Vector256<long> InsertVector128(Vector256<long> value, long* address, byte index) => InsertVector128(value, address, index);
 
         /// <summary>
         /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
         ///   VINSERTI128 ymm, ymm, xmm, imm8
         /// </summary>
         public new static Vector256<ulong> InsertVector128(Vector256<ulong> value, Vector128<ulong> data, byte index) => InsertVector128(value, data, index);
-        /// <summary>
-        /// __m256i _mm256_inserti128_si256 (__m256i a, __m128i b, const int imm8)
-        ///   VINSERTI128 ymm, ymm, m128, imm8
-        /// </summary>
-        public new static unsafe Vector256<ulong> InsertVector128(Vector256<ulong> value, ulong* address, byte index) => InsertVector128(value, address, index);
 
         /// <summary>
         /// __m256i _mm256_stream_load_si256 (__m256i const* mem_addr)

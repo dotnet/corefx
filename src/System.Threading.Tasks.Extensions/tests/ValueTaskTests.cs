@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks.Sources;
+using System.Threading.Tasks.Sources.Tests;
 using Xunit;
 
 namespace System.Threading.Tasks.Tests
@@ -1246,6 +1247,7 @@ namespace System.Threading.Tasks.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "ValueTask _obj is reflection blocked.")]
         public void NonGeneric_TornRead_DoesNotCrashOrHang()
         {
             // Validate that if we incur a torn read, we may get an exception, but we won't crash or hang.
@@ -1281,6 +1283,7 @@ namespace System.Threading.Tasks.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "ValueTask _obj is reflection blocked.")]
         public void Generic_TornRead_DoesNotCrashOrHang()
         {
             // Validate that if we incur a torn read, we may get an exception, but we won't crash or hang.

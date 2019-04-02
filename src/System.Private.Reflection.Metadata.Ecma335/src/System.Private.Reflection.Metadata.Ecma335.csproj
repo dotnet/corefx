@@ -6,7 +6,6 @@
     <FileAlignment>512</FileAlignment>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <NoWarn>1591</NoWarn>
     <CLSCompliant>false</CLSCompliant>
     <NoWarn>$(NoWarn);3021</NoWarn>
     <DefineConstants>$(DefineConstants);CORERT</DefineConstants>
@@ -238,7 +237,6 @@
     <Compile Include="$(SystemReflectionMetadataPath)System\Reflection\System.Reflection.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Shims\Environment.cs" />
     <Compile Include="Shims\Marshal.cs" />
     <Compile Include="Shims\MiniLinq.cs" />
     <Compile Include="Shims\RuntimeReflectionExtensions.cs" />

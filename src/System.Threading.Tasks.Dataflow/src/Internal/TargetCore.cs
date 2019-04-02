@@ -14,7 +14,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace System.Threading.Tasks.Dataflow.Internal
@@ -144,7 +143,6 @@ namespace System.Threading.Tasks.Dataflow.Internal
         {
             Debug.Assert(storeExceptionEvenIfAlreadyCompleting || !revertProcessingState,
                             "Indicating dirty processing state may only come with storeExceptionEvenIfAlreadyCompleting==true.");
-            Contract.EndContractBlock();
 
             // Ensure that no new messages may be added
             lock (IncomingLock)
@@ -155,8 +153,6 @@ namespace System.Threading.Tasks.Dataflow.Internal
                 {
                     Debug.Assert(_numberOfOutstandingOperations > 0 || !storeExceptionEvenIfAlreadyCompleting,
                                 "Calls with storeExceptionEvenIfAlreadyCompleting==true may only be coming from processing task.");
-
-#pragma warning disable 0420
                     Common.AddException(ref _exceptions, exception, unwrapInnerExceptions);
                 }
 
@@ -188,7 +184,6 @@ namespace System.Threading.Tasks.Dataflow.Internal
             // Validate arguments
             if (!messageHeader.IsValid) throw new ArgumentException(SR.Argument_InvalidMessageHeader, nameof(messageHeader));
             if (source == null && consumeToAccept) throw new ArgumentException(SR.Argument_CantConsumeFromANullSource, nameof(consumeToAccept));
-            Contract.EndContractBlock();
 
             lock (IncomingLock)
             {

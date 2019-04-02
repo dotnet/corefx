@@ -16,7 +16,6 @@ namespace System.Xml.Schema
     using System.Threading;
     using System.Globalization;
 
-    /// <include file='doc\XmlSchemaFacet.uex' path='docs/doc[@for="XmlSchemaFacet"]/*' />
     internal abstract class FacetsChecker
     {
         private struct FacetsCompiler
@@ -462,7 +461,7 @@ namespace System.Xml.Schema
                         break;
 
                     default:
-                        Debug.Assert(false);
+                        Debug.Fail($"Unexpected facet type {facet.FacetType}");
                         break;
                 }
             }

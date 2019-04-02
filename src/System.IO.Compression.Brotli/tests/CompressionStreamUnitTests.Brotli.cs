@@ -15,7 +15,13 @@ namespace System.IO.Compression
         public override Stream CreateStream(Stream stream, CompressionLevel level) => new BrotliStream(stream, level);
         public override Stream CreateStream(Stream stream, CompressionLevel level, bool leaveOpen) => new BrotliStream(stream, level, leaveOpen);
         public override Stream BaseStream(Stream stream) => ((BrotliStream)stream).BaseStream;
-        public override int BufferSize { get => 65520; }
+
+        // The tests are relying on an implementation detail of BrotliStream, using knowledge of its internal buffer size
+        // in various test calculations.  Currently the implementation is using the ArrayPool, which will round up to a
+        // power-of-2. If the buffer size employed changes (which could also mean that ArrayPool<byte>.Shared starts giving
+        // out different array sizes), the tests will need to be tweaked.
+        public override int BufferSize => 1 << 16;
+
         protected override string CompressedTestFile(string uncompressedPath) => Path.Combine("BrotliTestData", Path.GetFileName(uncompressedPath) + ".br");
 
         [Fact]
@@ -30,6 +36,27 @@ namespace System.IO.Compression
             using (Stream decompressor = CreateStream(ms, CompressionMode.Decompress, leaveOpen: true))
             {
                 Assert.True(decompressor.ReadAsync(new byte[1], 0, 1, new CancellationToken(true)).IsCanceled);
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task DisposeAsync_Flushes(bool leaveOpen)
+        {
+            var ms = new MemoryStream();
+            var bs = new BrotliStream(ms, CompressionMode.Compress, leaveOpen);
+            bs.WriteByte(1);
+            Assert.Equal(0, ms.Position);
+            await bs.DisposeAsync();
+            Assert.InRange(ms.ToArray().Length, 1, int.MaxValue);
+            if (leaveOpen)
+            {
+                Assert.InRange(ms.Position, 1, int.MaxValue);
+            }
+            else
+            {
+                Assert.Throws<ObjectDisposedException>(() => ms.Position);
             }
         }
 

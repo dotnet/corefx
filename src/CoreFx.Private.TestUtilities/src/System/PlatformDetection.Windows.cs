@@ -16,6 +16,8 @@ namespace System
     {
         public static Version OSXVersion => throw new PlatformNotSupportedException();
         public static Version OpenSslVersion => throw new PlatformNotSupportedException();
+        public static bool IsDrawingSupported => IsNotWindowsNanoServer && IsNotWindowsServerCore;
+        public static bool IsSoundPlaySupported => IsNotWindowsNanoServer;
         public static bool IsSuperUser => throw new PlatformNotSupportedException();
         public static bool IsCentos6 => false;
         public static bool IsOpenSUSE => false;
@@ -29,6 +31,7 @@ namespace System
         public static bool IsUbuntu1710 => false;
         public static bool IsUbuntu1710OrHigher => false;
         public static bool IsUbuntu1804 => false;
+        public static bool IsUbuntu1810OrHigher => false;
         public static bool IsTizen => false;
         public static bool IsNotFedoraOrRedHatFamily => true;
         public static bool IsFedora => false;
@@ -36,19 +39,30 @@ namespace System
         public static bool IsWindowsServerCore => GetInstallationType().Equals("Server Core", StringComparison.OrdinalIgnoreCase);
         public static int WindowsVersion => (int)GetWindowsVersion();
         public static bool IsMacOsHighSierraOrHigher { get; } = false;
+        public static bool IsMacOsMojaveOrHigher { get; } = false;
         public static Version ICUVersion => new Version(0, 0, 0, 0);
         public static bool IsRedHatFamily => false;
         public static bool IsNotRedHatFamily => true;
         public static bool IsRedHatFamily6 => false;
         public static bool IsRedHatFamily7 => false;
         public static bool IsNotRedHatFamily6 => true;
+        public static bool IsInContainer => !String.IsNullOrEmpty(GetContainerType());
 
+        public static bool SupportsSsl3 => GetSsl3Support();
+
+        // >= Windows 10 Anniversary Update
         public static bool IsWindows10Version1607OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
+        
+         // >= Windows 10 Creators Update
         public static bool IsWindows10Version1703OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
+        
+        // >= Windows 10 Fall Creators Update
         public static bool IsWindows10Version1709OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16299;
+        
+        // >= Windows 10 April 2018 Update
         public static bool IsWindows10Version1803OrGreater =>
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 17134;
 
@@ -95,6 +109,7 @@ namespace System
         public static bool IsWindows => true;
         public static bool IsWindows7 => GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
         public static bool IsWindows8x => GetWindowsVersion() == 6 && (GetWindowsMinorVersion() == 2 || GetWindowsMinorVersion() == 3);
+        public static bool IsWindows8xOrLater => new Version((int)GetWindowsVersion(), (int)GetWindowsMinorVersion()) >= new Version(6, 2);
 
         public static string LibcRelease => "glibc_not_found";
         public static string LibcVersion => "glibc_not_found";
@@ -198,10 +213,47 @@ namespace System
             return value;
         }
 
+        private static bool GetSsl3Support()
+        {
+            string clientKey = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Client";
+            string serverKey = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Server";
+            bool enabled = true;
+
+            // This may change in future but for now, missing key means protocol is enabled.
+            try
+            {
+                if ((int)Registry.GetValue(clientKey, "Enabled", 1) == 0 || (int)Registry.GetValue(serverKey, "Enabled", 1) == 0)
+                {
+                    enabled = false;
+                }
+            }
+            catch (Exception e) when (e is SecurityException || e is InvalidCastException || e is NullReferenceException)
+            {
+            }
+
+            return enabled;
+        }
+
         private static int GetWindowsProductType()
         {
             Assert.True(GetProductInfo(Environment.OSVersion.Version.Major, Environment.OSVersion.Version.Minor, 0, 0, out int productType));
             return productType;
+        }
+
+        private static string GetContainerType()
+        {
+            string key = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control";
+            string value = "";
+
+            try
+            {
+                value = (string)Registry.GetValue(key, "ContainerType", defaultValue: "");
+            }
+            catch
+            {
+            }
+
+            return value;
         }
 
         private const int PRODUCT_IOTUAP = 0x0000007B;

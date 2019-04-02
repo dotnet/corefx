@@ -191,7 +191,7 @@ namespace System.Drawing.Printing
         /// <summary>
         /// Checks if a printer has a valid PPD file. Caches the result unless force is true
         /// </summary>
-        /// <param name="force">Does the check disregarding the last cached value if true</param>
+        /// <param name="printer">Printer name</param>
         internal static bool IsPrinterValid(string printer)
         {
             if (!cups_installed || printer == null | printer == string.Empty)
@@ -587,8 +587,6 @@ namespace System.Drawing.Printing
 
         /// <summary>
         /// </summary>
-        /// <param name="load"></param>
-        /// <param name="def_printer"></param>
         private static void LoadPrinters()
         {
             installed_printers.Clear();
@@ -827,21 +825,23 @@ namespace System.Drawing.Printing
             int width = size.Width * 72 / 100;
             int height = size.Height * 72 / 100;
 
-            StringBuilder sb = new StringBuilder();
-            sb.Append(
-                "copies=" + printer_settings.Copies + " " +
-                "Collate=" + printer_settings.Collate + " " +
-                "ColorModel=" + (page_settings.Color ? "Color" : "Black") + " " +
-                "PageSize=" + string.Format("Custom.{0}x{1}", width, height) + " " +
-                "landscape=" + page_settings.Landscape
-            );
+            var sb = new StringBuilder();
+            sb.Append("copies=").Append(printer_settings.Copies).Append(' ')
+                .Append("Collate=").Append(printer_settings.Collate).Append(' ')
+                .Append("ColorModel=").Append(page_settings.Color ? "Color" : "Black").Append(' ')
+                .Append("PageSize=Custom.").Append(width).Append('x').Append(height).Append(' ')
+                .Append("landscape=").Append(page_settings.Landscape);
 
             if (printer_settings.CanDuplex)
             {
                 if (printer_settings.Duplex == Duplex.Simplex)
+                {
                     sb.Append(" Duplex=None");
+                }
                 else
+                {
                     sb.Append(" Duplex=DuplexNoTumble");
+                }
             }
 
             return LibcupsNative.cupsParseOptions(sb.ToString(), 0, ref options);

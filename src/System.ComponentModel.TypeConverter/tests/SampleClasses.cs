@@ -6,6 +6,7 @@ using System.Collections;
 
 namespace System.ComponentModel.Tests
 {
+    [Serializable]
     public class MyTypeDescriptorContext : ITypeDescriptorContext
     {
         public IContainer Container => null;
@@ -59,6 +60,7 @@ namespace System.ComponentModel.Tests
         public const string Token = "Formatted class.";
     }
 
+    [Serializable]
     public class Collection1 : ICollection
     {
         public void CopyTo(Array array, int index)
@@ -98,7 +100,7 @@ namespace System.ComponentModel.Tests
 #if FUNCTIONAL_TESTS
     [TypeConverter("System.ComponentModel.Tests.BaseClassConverter, System.ComponentModel.TypeConverter.Tests, Version=9.9.9.9, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #elif PERFORMANCE_TESTS
-    [TypeConverter("System.ComponentModel.Tests.BaseClassConverter, System.ComponentModel.TypeConverter.Performance.Tests, Version=9.9.9.9, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
+    [TypeConverter("System.ComponentModel.Tests.BaseClassConverter, System.ComponentModel.TypeConverter.PerformanceTests, Version=9.9.9.9, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #else
 #error Define FUNCTIONAL_TESTS or PERFORMANCE_TESTS
 #endif

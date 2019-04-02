@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
+using System.Runtime.Versioning;
 using Internal.Runtime.CompilerServices;
 
 namespace System
@@ -14,15 +14,12 @@ namespace System
     // Represents a Globally Unique Identifier.
     [StructLayout(LayoutKind.Sequential)]
     [Serializable]
-    [Runtime.Versioning.NonVersionable] // This only applies to field layout
+    [NonVersionable] // This only applies to field layout
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public partial struct Guid : IFormattable, IComparable, IComparable<Guid>, IEquatable<Guid>, ISpanFormattable
     {
         public static readonly Guid Empty = new Guid();
 
-        ////////////////////////////////////////////////////////////////////////////////
-        //  Member variables
-        ////////////////////////////////////////////////////////////////////////////////
         private int _a;   // Do not rename (binary serialization)
         private short _b; // Do not rename (binary serialization)
         private short _c; // Do not rename (binary serialization)
@@ -35,10 +32,6 @@ namespace System
         private byte _j;  // Do not rename (binary serialization)
         private byte _k;  // Do not rename (binary serialization)
 
-        ////////////////////////////////////////////////////////////////////////////////
-        //  Constructors
-        ////////////////////////////////////////////////////////////////////////////////
-
         // Creates a new guid from an array of bytes.
         public Guid(byte[] b) :
             this(new ReadOnlySpan<byte>(b ?? throw new ArgumentNullException(nameof(b))))
@@ -49,8 +42,18 @@ namespace System
         public Guid(ReadOnlySpan<byte> b)
         {
             if ((uint)b.Length != 16)
+            {
                 throw new ArgumentException(SR.Format(SR.Arg_GuidArrayCtor, "16"), nameof(b));
+            }
 
+            if (BitConverter.IsLittleEndian)
+            {
+                this = MemoryMarshal.Read<Guid>(b);
+                return;
+            }
+
+            // slower path for BigEndian:
+            _k = b[15];  // hoist bounds checks
             _a = b[3] << 24 | b[2] << 16 | b[1] << 8 | b[0];
             _b = (short)(b[5] << 8 | b[4]);
             _c = (short)(b[7] << 8 | b[6]);
@@ -61,7 +64,6 @@ namespace System
             _h = b[12];
             _i = b[13];
             _j = b[14];
-            _k = b[15];
         }
 
         [CLSCompliant(false)]
@@ -81,18 +83,21 @@ namespace System
         }
 
         // Creates a new GUID initialized to the value represented by the arguments.
-        //
         public Guid(int a, short b, short c, byte[] d)
         {
             if (d == null)
+            {
                 throw new ArgumentNullException(nameof(d));
-            // Check that array is not too big
+            }
             if (d.Length != 8)
+            {
                 throw new ArgumentException(SR.Format(SR.Arg_GuidArrayCtor, "8"), nameof(d));
+            }
 
             _a = a;
             _b = b;
             _c = c;
+            _k = d[7]; // hoist bounds checks
             _d = d[0];
             _e = d[1];
             _f = d[2];
@@ -100,7 +105,6 @@ namespace System
             _h = d[4];
             _i = d[5];
             _j = d[6];
-            _k = d[7];
         }
 
         // Creates a new GUID initialized to the value represented by the
@@ -127,15 +131,11 @@ namespace System
             AllButOverflow = 2
         }
 
-        // This will store the result of the parsing.  And it will eventually be used to construct a Guid instance.
+        // This will store the result of the parsing. And it will eventually be used to construct a Guid instance.
         private struct GuidResult
         {
-            internal readonly GuidParseThrowStyle _throwStyle;
+            private readonly GuidParseThrowStyle _throwStyle;
             internal Guid _parsedGuid;
-
-            private bool _overflow;
-            private string _failureMessageID;
-            private object _failureMessageFormatArgument;
 
             internal GuidResult(GuidParseThrowStyle canThrow) : this()
             {
@@ -144,32 +144,22 @@ namespace System
 
             internal void SetFailure(bool overflow, string failureMessageID)
             {
-                _overflow = overflow;
-                _failureMessageID = failureMessageID;
-                if (_throwStyle != GuidParseThrowStyle.None)
+                if (_throwStyle == GuidParseThrowStyle.None)
                 {
-                    throw CreateGuidParseException();
+                    return;
                 }
-            }
 
-            internal void SetFailure(bool overflow, string failureMessageID, object failureMessageFormatArgument)
-            {
-                _failureMessageFormatArgument = failureMessageFormatArgument;
-                SetFailure(overflow, failureMessageID);
-            }
-
-            internal Exception CreateGuidParseException()
-            {
-                if (_overflow)
+                if (overflow)
                 {
-                    return _throwStyle == GuidParseThrowStyle.All ?
-                        (Exception)new OverflowException(SR.GetResourceString(_failureMessageID)) :
-                        new FormatException(SR.Format_GuidUnrecognized);
+                    if (_throwStyle == GuidParseThrowStyle.All)
+                    {
+                        throw new OverflowException(SR.GetResourceString(failureMessageID));
+                    }
+                    
+                    throw new FormatException(SR.Format_GuidUnrecognized);
                 }
-                else
-                {
-                    return new FormatException(SR.GetResourceString(_failureMessageID));
-                }
+                
+                throw new FormatException(SR.GetResourceString(failureMessageID));
             }
         }
 
@@ -180,7 +170,6 @@ namespace System
         // The string must be of the form dddddddd-dddd-dddd-dddd-dddddddddddd. where
         // d is a hex digit. (That is 8 hex digits, followed by 4, then 4, then 4,
         // then 12) such as: "CA761232-ED42-11CE-BACD-00AA0057B223"
-        //
         public Guid(string g)
         {
             if (g == null)
@@ -189,10 +178,8 @@ namespace System
             }
 
             var result = new GuidResult(GuidParseThrowStyle.All);
-            if (!TryParseGuid(g, ref result))
-            {
-                throw result.CreateGuidParseException();
-            }
+            bool success = TryParseGuid(g, ref result);
+            Debug.Assert(success, "GuidParseThrowStyle.All means throw on all failures");
 
             this = result._parsedGuid;
         }
@@ -203,10 +190,8 @@ namespace System
         public static Guid Parse(ReadOnlySpan<char> input)
         {
             var result = new GuidResult(GuidParseThrowStyle.AllButOverflow);
-            if (!TryParseGuid(input, ref result))
-            {
-                throw result.CreateGuidParseException();
-            }
+            bool success = TryParseGuid(input, ref result);
+            Debug.Assert(success, "GuidParseThrowStyle.AllButOverflow means throw on all failures");
 
             return result._parsedGuid;
         }
@@ -280,11 +265,7 @@ namespace System
                     throw new FormatException(SR.Format_InvalidGuidFormatSpecification);
             }
 
-            if (!success)
-            {
-                throw result.CreateGuidParseException();
-            }
-
+            Debug.Assert(success, "GuidParseThrowStyle.AllButOverflow means throw on all failures");
             return result._parsedGuid;
         }
 
@@ -536,7 +517,7 @@ namespace System
             // Check for '0x'
             if (!IsHexPrefix(guidString, 1))
             {
-                result.SetFailure(overflow: false, nameof(SR.Format_GuidHexPrefix), "{0xdddddddd, etc}");
+                result.SetFailure(overflow: false, nameof(SR.Format_GuidHexPrefix));
                 return false;
             }
 
@@ -559,7 +540,7 @@ namespace System
             // Check for '0x'
             if (!IsHexPrefix(guidString, numStart + numLen + 1))
             {
-                result.SetFailure(overflow: false, nameof(SR.Format_GuidHexPrefix), "{0xdddddddd, 0xdddd, etc}");
+                result.SetFailure(overflow: false, nameof(SR.Format_GuidHexPrefix));
                 return false;
             }
             // +3 to get by ',0x'
@@ -581,7 +562,7 @@ namespace System
             // Check for '0x'
             if (!IsHexPrefix(guidString, numStart + numLen + 1))
             {
-                result.SetFailure(overflow: false, nameof(SR.Format_GuidHexPrefix), "{0xdddddddd, 0xdddd, 0xdddd, etc}");
+                result.SetFailure(overflow: false, nameof(SR.Format_GuidHexPrefix));
                 return false;
             }
             // +3 to get by ',0x'
@@ -614,7 +595,7 @@ namespace System
                 // Check for '0x'
                 if (!IsHexPrefix(guidString, numStart + numLen + 1))
                 {
-                    result.SetFailure(overflow: false, nameof(SR.Format_GuidHexPrefix), "{... { ... 0xdd, ...}}");
+                    result.SetFailure(overflow: false, nameof(SR.Format_GuidHexPrefix));
                     return false;
                 }
 
@@ -709,13 +690,13 @@ namespace System
             for (; i < guidString.Length && guidString[i] == '0'; i++);
 
             int processedDigits = 0;
-            int[] charToHexLookup = Number.s_charToHexLookup;
+            ReadOnlySpan<byte> charToHexLookup = Number.CharToHexLookup;
             uint tmp = 0;
             for (; i < guidString.Length; i++)
             {
                 int numValue;
                 char c = guidString[i];
-                if (c >= charToHexLookup.Length || (numValue = charToHexLookup[c]) == 0xFF)
+                if (c >= (uint)charToHexLookup.Length || (numValue = charToHexLookup[c]) == 0xFF)
                 {
                     if (processedDigits > 8) overflow = true;
                     result = 0;
@@ -768,9 +749,34 @@ namespace System
             str[i] == '0' &&
             (str[i + 1] | 0x20) == 'x';
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void WriteByteHelper(Span<byte> destination)
+        // Returns an unsigned byte array containing the GUID.
+        public byte[] ToByteArray()
         {
+            var g = new byte[16];
+            if (BitConverter.IsLittleEndian)
+            {
+                MemoryMarshal.TryWrite<Guid>(g, ref this);
+            }
+            else
+            {
+                TryWriteBytes(g);
+            }
+            return g;
+        }
+
+        // Returns whether bytes are sucessfully written to given span.
+        public bool TryWriteBytes(Span<byte> destination)
+        {
+            if (BitConverter.IsLittleEndian)
+            {
+                return MemoryMarshal.TryWrite(destination, ref this);
+            }
+
+            // slower path for BigEndian
+            if (destination.Length < 16)
+                return false;
+
+            destination[15] = _k; // hoist bounds checks
             destination[0] = (byte)(_a);
             destination[1] = (byte)(_a >> 8);
             destination[2] = (byte)(_a >> 16);
@@ -786,32 +792,11 @@ namespace System
             destination[12] = _h;
             destination[13] = _i;
             destination[14] = _j;
-            destination[15] = _k;
-        }
-
-        // Returns an unsigned byte array containing the GUID.
-        public byte[] ToByteArray()
-        {
-            var g = new byte[16];
-            WriteByteHelper(g);
-            return g;
-        }
-
-        // Returns whether bytes are sucessfully written to given span.
-        public bool TryWriteBytes(Span<byte> destination)
-        {
-            if (destination.Length < 16)
-                return false;
-
-            WriteByteHelper(destination);
             return true;
         }
 
         // Returns the guid in "registry" format.
-        public override string ToString()
-        {
-            return ToString("D", null);
-        }
+        public override string ToString() => ToString("D", null);
 
         public override int GetHashCode()
         {
@@ -845,14 +830,7 @@ namespace System
                 Unsafe.Add(ref g._a, 3) == Unsafe.Add(ref _a, 3);
         }
 
-        private int GetResult(uint me, uint them)
-        {
-            if (me < them)
-            {
-                return -1;
-            }
-            return 1;
-        }
+        private int GetResult(uint me, uint them) => me < them ? -1 : 1;
 
         public int CompareTo(object value)
         {
@@ -1047,12 +1025,16 @@ namespace System
         // We currently ignore provider
         public string ToString(string format, IFormatProvider provider)
         {
-            if (format == null || format.Length == 0)
+            if (string.IsNullOrEmpty(format))
+            {
                 format = "D";
+            }
 
             // all acceptable format strings are of length 1
             if (format.Length != 1)
+            {
                 throw new FormatException(SR.Format_InvalidGuidFormatSpecification);
+            }
 
             int guidSize;
             switch (format[0])
@@ -1092,11 +1074,14 @@ namespace System
         public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default)
         {
             if (format.Length == 0)
+            {
                 format = "D";
-
+            }
             // all acceptable format strings are of length 1
             if (format.Length != 1) 
+            {
                 throw new FormatException(SR.Format_InvalidGuidFormatSpecification);
+            }
 
             bool dash = true;
             bool hex = false;

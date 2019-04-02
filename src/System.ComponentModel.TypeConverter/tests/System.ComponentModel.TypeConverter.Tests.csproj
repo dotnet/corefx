@@ -14,7 +14,6 @@
     <Compile Include="Drawing\RectangleConverterTests.cs" />
     <Compile Include="Drawing\SizeConverterTests.cs" />
     <Compile Include="Drawing\SizeFConverterTests.cs" />
-    <Compile Include="LicenseManagerInteropTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Design\Serialization\ComponentSerializationServiceTests.cs" />
@@ -36,7 +35,6 @@
     <Compile Include="ListChangedEventArgsTests.cs" />
     <Compile Include="LicenseProviderAttributeTests.cs" />
     <Compile Include="LicenseExceptionTests.cs" />
-    <Compile Include="InvalidAsynchronousStateExceptionTests.cs" />
     <Compile Include="ExtenderProvidedPropertyAttributeTests.cs" />
     <Compile Include="InstanceCreationEditorTests.cs" />
     <Compile Include="InstallerTypeAttributeTests.cs" />
@@ -120,6 +118,7 @@
     <Compile Include="TimeSpanConverterTests.cs" />
     <Compile Include="TypeConverterAttributeTests.cs" />
     <Compile Include="TypeConverterTests.cs" />
+    <Compile Include="TypeConverterTestBase.cs" />
     <Compile Include="TypeDescriptionProviderAttributeTests.cs" />
     <Compile Include="TypeDescriptorTests.cs" />
     <Compile Include="TypeDescriptorTests.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
@@ -156,6 +155,11 @@
       <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
       <Name>RemoteExecutorConsoleApp</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <SupplementalTestData Include="$(PackagesDir)system.componentmodel.typeconverter.testdata\$(TestDataPackageVersion)\content\**\*.*">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </SupplementalTestData>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\TestResx.resx">

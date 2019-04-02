@@ -48,7 +48,7 @@ namespace System.Diagnostics
         [CLSCompliant(false)]
         public static Process Start(string fileName, string userName, SecureString password, string domain)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo(fileName);            
+            ProcessStartInfo startInfo = new ProcessStartInfo(fileName);
             startInfo.UserName = userName;
             startInfo.Password = password;
             startInfo.Domain = domain;
@@ -59,11 +59,11 @@ namespace System.Diagnostics
         [CLSCompliant(false)]
         public static Process Start(string fileName, string arguments, string userName, SecureString password, string domain)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo(fileName, arguments);                        
+            ProcessStartInfo startInfo = new ProcessStartInfo(fileName, arguments);
             startInfo.UserName = userName;
             startInfo.Password = password;
             startInfo.Domain = domain;
-            startInfo.UseShellExecute = false;            
+            startInfo.UseShellExecute = false;
             return Start(startInfo);
         }
 
@@ -85,13 +85,29 @@ namespace System.Diagnostics
             SetPrivilege(Interop.Advapi32.SeDebugPrivilege, 0);
         }
 
-        /// <summary>Stops the associated process immediately.</summary>
+        /// <summary>Terminates the associated process immediately.</summary>
         public void Kill()
         {
-            using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_TERMINATE))
+            using (SafeProcessHandle handle = GetProcessHandle(Interop.Advapi32.ProcessOptions.PROCESS_TERMINATE | Interop.Advapi32.ProcessOptions.PROCESS_QUERY_LIMITED_INFORMATION, throwIfExited: false))
             {
+                // If the process has exited, the handle is invalid.
+                if (handle.IsInvalid)
+                    return;
+
                 if (!Interop.Kernel32.TerminateProcess(handle, -1))
-                    throw new Win32Exception();
+                {
+                    // Capture the exception
+                    var exception = new Win32Exception();
+
+                    // Don't throw if the process has exited.
+                    if (exception.NativeErrorCode == Interop.Errors.ERROR_ACCESS_DENIED &&
+                        Interop.Kernel32.GetExitCodeProcess(handle, out int localExitCode) && localExitCode != Interop.Kernel32.HandleOptions.STILL_ACTIVE)
+                    {
+                        return;
+                    }
+
+                    throw exception;
+                }
             }
         }
 
@@ -119,12 +135,11 @@ namespace System.Diagnostics
                 {
                     if (!_watchingForExit)
                     {
-                        Debug.Assert(_haveProcessHandle, "Process.EnsureWatchingForExit called with no process handle");
                         Debug.Assert(Associated, "Process.EnsureWatchingForExit called with no associated process");
                         _watchingForExit = true;
                         try
                         {
-                            _waitHandle = new Interop.Kernel32.ProcessWaitHandle(_processHandle);
+                            _waitHandle = new Interop.Kernel32.ProcessWaitHandle(GetOrOpenProcessHandle());
                             _registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(_waitHandle,
                                 new WaitOrTimerCallback(CompletionCallback), _waitHandle, -1, true);
                         }
@@ -445,7 +460,7 @@ namespace System.Diagnostics
 
             StringBuilder commandLine = BuildCommandLine(startInfo.FileName, StartInfo.Arguments);
             Process.AppendArguments(commandLine, StartInfo.ArgumentList);
-            
+
             Interop.Kernel32.STARTUPINFO startupInfo = new Interop.Kernel32.STARTUPINFO();
             Interop.Kernel32.PROCESS_INFORMATION processInfo = new Interop.Kernel32.PROCESS_INFORMATION();
             Interop.Kernel32.SECURITY_ATTRIBUTES unused_SecAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES();
@@ -683,7 +698,7 @@ namespace System.Diagnostics
             {
                 if (handle.IsInvalid)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString(CultureInfo.CurrentCulture)));
+                    throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString()));
                 }
 
                 ProcessThreadTimes processTimes = new ProcessThreadTimes();
@@ -762,7 +777,7 @@ namespace System.Diagnostics
                         if (waitHandle.WaitOne(0))
                         {
                             if (_haveProcessId)
-                                throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString(CultureInfo.CurrentCulture)));
+                                throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString()));
                             else
                                 throw new InvalidOperationException(SR.ProcessHasExitedNoId);
                         }
@@ -783,7 +798,7 @@ namespace System.Diagnostics
                 {
                     if (Interop.Kernel32.GetExitCodeProcess(handle, out _exitCode) && _exitCode != Interop.Kernel32.HandleOptions.STILL_ACTIVE)
                     {
-                        throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString(CultureInfo.CurrentCulture)));
+                        throw new InvalidOperationException(SR.Format(SR.ProcessHasExited, _processId.ToString()));
                     }
                 }
                 return handle;

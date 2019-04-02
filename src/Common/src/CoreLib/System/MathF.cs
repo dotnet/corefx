@@ -36,6 +36,76 @@ namespace System
             return Math.Abs(x);
         }
 
+        public static float BitDecrement(float x)
+        {
+            var bits = BitConverter.SingleToInt32Bits(x);
+
+            if ((bits & 0x7F800000) >= 0x7F800000)
+            {
+                // NaN returns NaN
+                // -Infinity returns -Infinity
+                // +Infinity returns float.MaxValue
+                return (bits == 0x7F800000) ? float.MaxValue : x;
+            }
+
+            if (bits == 0x00000000)
+            {
+                // +0.0 returns -float.Epsilon
+                return -float.Epsilon;
+            }
+
+            // Negative values need to be incremented
+            // Positive values need to be decremented
+
+            bits += ((bits < 0) ? +1 : -1);
+            return BitConverter.Int32BitsToSingle(bits);
+        }
+
+        public static float BitIncrement(float x)
+        {
+            var bits = BitConverter.SingleToInt32Bits(x);
+
+            if ((bits & 0x7F800000) >= 0x7F800000)
+            {
+                // NaN returns NaN
+                // -Infinity returns float.MinValue
+                // +Infinity returns +Infinity
+                return (bits == unchecked((int)(0xFF800000))) ? float.MinValue : x;
+            }
+
+            if (bits == unchecked((int)(0x80000000)))
+            {
+                // -0.0 returns float.Epsilon
+                return float.Epsilon;
+            }
+
+            // Negative values need to be decremented
+            // Positive values need to be incremented
+
+            bits += ((bits < 0) ? -1 : +1);
+            return BitConverter.Int32BitsToSingle(bits);
+        }
+
+        public static unsafe float CopySign(float x, float y)
+        {
+            // This method is required to work for all inputs,
+            // including NaN, so we operate on the raw bits.
+
+            var xbits = BitConverter.SingleToInt32Bits(x);
+            var ybits = BitConverter.SingleToInt32Bits(y);
+
+            // If the sign bits of x and y are not the same,
+            // flip the sign bit of x and return the new value;
+            // otherwise, just return x
+
+            if ((xbits ^ ybits) < 0)
+            {
+                return BitConverter.Int32BitsToSingle(xbits ^ int.MinValue);
+            }
+
+            return x;
+        }
+
         public static float IEEERemainder(float x, float y)
         {
             if (float.IsNaN(x))
@@ -118,10 +188,74 @@ namespace System
             return Math.Max(x, y);
         }
 
+        public static float MaxMagnitude(float x, float y)
+        {
+            // When x and y are both finite or infinite, return the larger magnitude
+            //  * We count +0.0 as larger than -0.0 to match MSVC
+            // When x or y, but not both, are NaN return the opposite
+            //  * We return the opposite if either is NaN to match MSVC
+
+            if (float.IsNaN(x))
+            {
+                return y;
+            }
+
+            if (float.IsNaN(y))
+            {
+                return x;
+            }
+
+            // We do this comparison first and separately to handle the -0.0 to +0.0 comparision
+            // * Doing (ax < ay) first could get transformed into (ay >= ax) by the JIT which would
+            //   then return an incorrect value
+
+            float ax = Abs(x);
+            float ay = Abs(y);
+
+            if (ax == ay)
+            {
+                return float.IsNegative(x) ? y : x;
+            }
+
+            return (ax < ay) ? y : x;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Min(float x, float y)
         {
             return Math.Min(x, y);
+        }
+
+        public static float MinMagnitude(float x, float y)
+        {
+            // When x and y are both finite or infinite, return the smaller magnitude
+            //  * We count -0.0 as smaller than -0.0 to match MSVC
+            // When x or y, but not both, are NaN return the opposite
+            //  * We return the opposite if either is NaN to match MSVC
+
+            if (float.IsNaN(x))
+            {
+                return y;
+            }
+
+            if (float.IsNaN(y))
+            {
+                return x;
+            }
+
+            // We do this comparison first and separately to handle the -0.0 to +0.0 comparision
+            // * Doing (ax < ay) first could get transformed into (ay >= ax) by the JIT which would
+            //   then return an incorrect value
+
+            float ax = Abs(x);
+            float ay = Abs(y);
+
+            if (ax == ay)
+            {
+                return float.IsNegative(x) ? x : y;
+            }
+
+            return (ax < ay) ? x : y;
         }
 
         [Intrinsic]
@@ -172,9 +306,9 @@ namespace System
                 throw new ArgumentOutOfRangeException(nameof(digits), SR.ArgumentOutOfRange_RoundingDigits);
             }
 
-            if (mode < MidpointRounding.ToEven || mode > MidpointRounding.AwayFromZero)
+            if (mode < MidpointRounding.ToEven || mode > MidpointRounding.ToPositiveInfinity)
             {
-                throw new ArgumentException(SR.Format(SR.Argument_InvalidEnum, mode, nameof(MidpointRounding)), nameof(mode));
+                throw new ArgumentException(SR.Format(SR.Argument_InvalidEnumValue, mode, nameof(MidpointRounding)), nameof(mode));
             }
 
             if (Abs(x) < singleRoundLimit)
@@ -183,20 +317,52 @@ namespace System
 
                 x *= power10;
 
-                if (mode == MidpointRounding.AwayFromZero)
+                switch (mode)
                 {
-                    var fraction = ModF(x, &x);
-
-                    if (Abs(fraction) >= 0.5f)
+                    // Rounds to the nearest value; if the number falls midway,
+                    // it is rounded to the nearest value with an even least significant digit
+                    case MidpointRounding.ToEven:
                     {
-                        x += Sign(fraction);
+                        x = Round(x);
+                        break;
+                    }
+                    // Rounds to the nearest value; if the number falls midway,
+                    // it is rounded to the nearest value above (for positive numbers) or below (for negative numbers)
+                    case MidpointRounding.AwayFromZero:
+                    {
+                        float fraction = ModF(x, &x);
+
+                        if (Abs(fraction) >= 0.5)
+                        {
+                            x += Sign(fraction);
+                        }
+
+                        break;
+                    }
+                    // Directed rounding: Round to the nearest value, toward to zero
+                    case MidpointRounding.ToZero:
+                    {
+                        x = Truncate(x);
+                        break;
+                    }
+                    // Directed Rounding: Round down to the next value, toward negative infinity
+                    case MidpointRounding.ToNegativeInfinity:
+                    {
+                        x = Floor(x);
+                        break;
+                    }
+                    // Directed rounding: Round up to the next value, toward positive infinity
+                    case MidpointRounding.ToPositiveInfinity:
+                    {  
+                        x = Ceiling(x);
+                        break;
+                    }
+                    default:
+                    {
+                        throw new ArgumentException(SR.Format(SR.Argument_InvalidEnumValue, mode, nameof(MidpointRounding)), nameof(mode));
                     }
                 }
-                else
-                {
-                    x = Round(x);
-                }
-
+                
                 x /= power10;
             }
 
@@ -212,23 +378,6 @@ namespace System
         public static unsafe float Truncate(float x)
         {
             ModF(x, &x);
-            return x;
-        }
-
-        private static unsafe float CopySign(float x, float y)
-        {
-            var xbits = BitConverter.SingleToInt32Bits(x);
-            var ybits = BitConverter.SingleToInt32Bits(y);
-
-            // If the sign bits of x and y are not the same,
-            // flip the sign bit of x and return the new value;
-            // otherwise, just return x
-
-            if (((xbits ^ ybits) >> 31) != 0)
-            {
-                return BitConverter.Int32BitsToSingle(xbits ^ int.MinValue);
-            }
-
             return x;
         }
     }

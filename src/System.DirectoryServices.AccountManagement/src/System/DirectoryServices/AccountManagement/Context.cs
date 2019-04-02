@@ -15,7 +15,6 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Collections;
-using System.Security.Permissions;
 
 namespace System.DirectoryServices.AccountManagement
 {
@@ -499,7 +498,7 @@ namespace System.DirectoryServices.AccountManagement
 
         /// <summary>
         /// Validate the passed credentials against the directory supplied.
-        //   This function will use the best determined method to do the evaluation
+        /// This function will use the best determined method to do the evaluation.
         /// </summary>
 
         public bool ValidateCredentials(string userName, string password)
@@ -522,7 +521,7 @@ namespace System.DirectoryServices.AccountManagement
 
         /// <summary>
         /// Validate the passed credentials against the directory supplied.
-        //   The supplied options will determine the directory method for credential validation.
+        /// The supplied options will determine the directory method for credential validation.
         /// </summary>
         public bool ValidateCredentials(string userName, string password, ContextOptions options)
         {
@@ -690,7 +689,7 @@ namespace System.DirectoryServices.AccountManagement
 
                 if (_serverProperties.contextType != _contextType)
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, SR.PassedContextTypeDoesNotMatchDetectedType, _serverProperties.contextType.ToString()));
+                    throw new ArgumentException(SR.Format(SR.PassedContextTypeDoesNotMatchDetectedType, _serverProperties.contextType.ToString()));
                 }
             }
         }

@@ -21,10 +21,6 @@ namespace System.Threading.Tasks
                                                                                 where TCompletedHandler : class
                                                                                 where TProgressHandler : class
     {
-        // This class uses interlocked operations on volatile fields, and this pragma suppresses the compiler's complaint
-        // that passing a volatile by ref to a function removes the volatility. That's not necessary for interlocked.
-#pragma warning disable 0420
-
         #region Private Types, Statics and Constants
 
         // ! THIS DIAGRAM ILLUSTRATES THE CONSTANTS BELOW. UPDATE THIS IF UPDATING THE CONSTANTS BELOW!:
@@ -132,10 +128,6 @@ namespace System.Threading.Tasks
                             || (null != (taskProvider as Func<IProgress<TProgressInfo>, Task>))
                             || (null != (taskProvider as Func<CancellationToken, IProgress<TProgressInfo>, Task>)));
 
-            Contract.Ensures(!this.CompletedSynchronously);
-
-            Contract.EndContractBlock();
-
             // The IAsyncInfo is reasonably expected to be created/started by the same code that wires up the Completed and Progress handlers.
             // Record the current SynchronizationContext so that we can invoke completion and progress callbacks in it later.
             _startingContext = GetStartingContext();
@@ -179,10 +171,6 @@ namespace System.Threading.Tasks
             if (underlyingTask.Status == TaskStatus.Created)
                 throw new InvalidOperationException(SR.InvalidOperation_UnstartedTaskSpecified);
 
-            Contract.Ensures(!this.CompletedSynchronously);
-
-            Contract.EndContractBlock();
-
             // The IAsyncInfo is reasonably expected to be created/started by the same code that wires up the Completed and Progress handlers.
             // Record the current SynchronizationContext so that we can invoke completion and progress callbacks in it later.
             _startingContext = GetStartingContext();
@@ -213,9 +201,6 @@ namespace System.Threading.Tasks
         /// <param name="synchronousResult">The result of this synchronously completed IAsyncInfo.</param>
         internal TaskToAsyncInfoAdapter(TResult synchronousResult)
         {
-            Contract.Ensures(this.CompletedSynchronously);
-            Contract.Ensures(this.IsInRunToCompletionState);
-
             // We already completed. There will be no progress callback invokations and a potential completed handler invokation will be synchronous.
             // We do not need the starting SynchronizationContext:
             _startingContext = null;
@@ -372,8 +357,6 @@ namespace System.Threading.Tasks
             get
             {
                 EnsureNotClosed();
-                Contract.Ensures(CompletedSynchronously || Contract.Result<Task>() != null);
-                Contract.EndContractBlock();
 
                 if (CompletedSynchronously)
                     return null;
@@ -403,14 +386,14 @@ namespace System.Threading.Tasks
 
         internal virtual void OnCompleted(TCompletedHandler userCompletionHandler, AsyncStatus asyncStatus)
         {
-            Debug.Assert(false, "This (sub-)type of IAsyncInfo does not support completion notifications "
+            Debug.Fail("This (sub-)type of IAsyncInfo does not support completion notifications "
                                  + " (" + this.GetType().ToString() + ")");
         }
 
 
         internal virtual void OnProgress(TProgressHandler userProgressHandler, TProgressInfo progressInfo)
         {
-            Debug.Assert(false, "This (sub-)type of IAsyncInfo does not support progress notifications "
+            Debug.Fail("This (sub-)type of IAsyncInfo does not support progress notifications "
                                  + " (" + this.GetType().ToString() + ")");
         }
 
@@ -625,7 +608,7 @@ namespace System.Threading.Tasks
                     break;
 
                 default:
-                    Debug.Assert(false, "Unexpected task.Status: It should be terminal if TaskCompleted() is called.");
+                    Debug.Fail("Unexpected task.Status: It should be terminal if TaskCompleted() is called.");
                     break;
             }
 
@@ -689,7 +672,7 @@ namespace System.Threading.Tasks
             switch (asyncState)
             {
                 case STATE_NOT_INITIALIZED:
-                    Debug.Assert(false, "STATE_NOT_INITIALIZED should only occur when this object was not"
+                    Debug.Fail("STATE_NOT_INITIALIZED should only occur when this object was not"
                                          + " fully constructed, in which case we should never get here");
                     return AsyncStatus.Error;
 
@@ -707,11 +690,11 @@ namespace System.Threading.Tasks
                     return AsyncStatus.Error;
 
                 case STATE_CLOSED:
-                    Debug.Assert(false, "This method should never be called is this IAsyncInfo is CLOSED");
+                    Debug.Fail("This method should never be called is this IAsyncInfo is CLOSED");
                     return AsyncStatus.Error;
             }
 
-            Debug.Assert(false, "The switch above is missing a case");
+            Debug.Fail("The switch above is missing a case");
             return AsyncStatus.Error;
         }
 
@@ -765,8 +748,6 @@ namespace System.Threading.Tasks
 
         private Task InvokeTaskProvider(Delegate taskProvider)
         {
-            Contract.EndContractBlock();
-
             var funcVoidTask = taskProvider as Func<Task>;
             if (funcVoidTask != null)
             {
@@ -793,7 +774,7 @@ namespace System.Threading.Tasks
                 return funcCTokIPrgrTask(_cancelTokenSource.Token, this);
             }
 
-            Debug.Assert(false, "We should never get here!"
+            Debug.Fail("We should never get here!"
                                  + " Public methods creating instances of this class must be typesafe to ensure that taskProvider"
                                  + " can always be cast to one of the above Func types."
                                  + " The taskProvider is " + (taskProvider == null
@@ -899,7 +880,7 @@ namespace System.Threading.Tasks
 
                 Interlocked.Exchange(ref _progressHandler, value);
 
-                // We we transitioned into CLOSED after the above check, we will need to null out m_progressHandler:
+                // We transitioned into CLOSED after the above check, we will need to null out m_progressHandler:
                 if (IsInClosedState)
                     Interlocked.Exchange(ref _progressHandler, null);
             }
@@ -1023,9 +1004,6 @@ namespace System.Threading.Tasks
             }
         }
         #endregion Implementation of IAsyncInfo
-
-#pragma warning restore 0420
-
     }  // class TaskToAsyncInfoAdapter<TCompletedHandler, TProgressHandler, TResult, TProgressInfo>
 }  // namespace
 

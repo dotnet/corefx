@@ -4,7 +4,6 @@
 
 using System.Buffers;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Text;
@@ -196,13 +195,25 @@ namespace System.Net.Http
             Encoding encoding = null;
             int bomLength = -1;
 
+            string charset = headers.ContentType?.CharSet;
+
             // If we do have encoding information in the 'Content-Type' header, use that information to convert
             // the content to a string.
-            if ((headers.ContentType != null) && (headers.ContentType.CharSet != null))
+            if (charset != null)
             {
                 try
                 {
-                    encoding = Encoding.GetEncoding(headers.ContentType.CharSet);
+                    // Remove at most a single set of quotes.
+                    if (charset.Length > 2 &&
+                        charset[0] == '\"' &&
+                        charset[charset.Length - 1] == '\"')
+                    {
+                        encoding = Encoding.GetEncoding(charset.Substring(1, charset.Length - 2));
+                    }
+                    else
+                    {
+                        encoding = Encoding.GetEncoding(charset);
+                    }
 
                     // Byte-order-mark (BOM) characters may be present even if a charset was specified.
                     bomLength = GetPreambleLength(buffer, encoding);
@@ -379,7 +390,7 @@ namespace System.Net.Http
                 // This should only be hit when called directly; HttpClient/HttpClientHandler
                 // will not exceed this limit.
                 throw new ArgumentOutOfRangeException(nameof(maxBufferSize), maxBufferSize,
-                    string.Format(System.Globalization.CultureInfo.InvariantCulture,
+                    SR.Format(System.Globalization.CultureInfo.InvariantCulture,
                     SR.net_http_content_buffersize_limit, HttpContent.MaxBufferSize));
             }
 
@@ -483,9 +494,6 @@ namespace System.Net.Http
 
         private MemoryStream CreateMemoryStream(long maxBufferSize, out Exception error)
         {
-            Contract.Ensures((Contract.Result<MemoryStream>() != null) ||
-                (Contract.ValueAtReturn<Exception>(out error) != null));
-
             error = null;
 
             // If we have a Content-Length allocate the right amount of buffer up-front. Also check whether the
@@ -498,7 +506,7 @@ namespace System.Net.Http
 
                 if (contentLength > maxBufferSize)
                 {
-                    error = new HttpRequestException(string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_content_buffersize_exceeded, maxBufferSize));
+                    error = new HttpRequestException(SR.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_content_buffersize_exceeded, maxBufferSize));
                     return null;
                 }
 

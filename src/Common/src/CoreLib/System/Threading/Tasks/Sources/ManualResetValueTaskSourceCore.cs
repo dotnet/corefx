@@ -80,7 +80,7 @@ namespace System.Threading.Tasks.Sources
         {
             ValidateToken(token);
             return
-                !_completed ? ValueTaskSourceStatus.Pending :
+                _continuation == null || !_completed ? ValueTaskSourceStatus.Pending :
                 _error == null ? ValueTaskSourceStatus.Succeeded :
                 _error.SourceException is OperationCanceledException ? ValueTaskSourceStatus.Canceled :
                 ValueTaskSourceStatus.Faulted;
@@ -88,12 +88,13 @@ namespace System.Threading.Tasks.Sources
 
         /// <summary>Gets the result of the operation.</summary>
         /// <param name="token">Opaque value that was provided to the <see cref="ValueTask"/>'s constructor.</param>
+        [StackTraceHidden]
         public TResult GetResult(short token)
         {
             ValidateToken(token);
             if (!_completed)
             {
-                ManualResetValueTaskSourceCoreShared.ThrowInvalidOperationException();
+                ThrowHelper.ThrowInvalidOperationException();
             }
 
             _error?.Throw();
@@ -142,17 +143,22 @@ namespace System.Threading.Tasks.Sources
             // awaited twice concurrently), _continuationState might get erroneously overwritten.
             // To minimize the chances of that, we check preemptively whether _continuation
             // is already set to something other than the completion sentinel.
-            object currentContinuation = _continuation;
-            if (currentContinuation != null &&
-                !ReferenceEquals(currentContinuation, ManualResetValueTaskSourceCoreShared.s_sentinel))
-            {
-                ManualResetValueTaskSourceCoreShared.ThrowInvalidOperationException();
-            }
-            _continuationState = state;
 
-            Action<object> oldContinuation = Interlocked.CompareExchange(ref _continuation, continuation, null);
+            object oldContinuation = _continuation;
+            if (oldContinuation == null)
+            {
+                _continuationState = state;
+                oldContinuation = Interlocked.CompareExchange(ref _continuation, continuation, null);
+            }
+
             if (oldContinuation != null)
             {
+                // Operation already completed, so we need to queue the supplied callback.
+                if (!ReferenceEquals(oldContinuation, ManualResetValueTaskSourceCoreShared.s_sentinel))
+                {
+                    ThrowHelper.ThrowInvalidOperationException();
+                }
+
                 switch (_capturedContext)
                 {
                     case null:
@@ -187,20 +193,20 @@ namespace System.Threading.Tasks.Sources
         {
             if (token != _version)
             {
-                ManualResetValueTaskSourceCoreShared.ThrowInvalidOperationException();
+                ThrowHelper.ThrowInvalidOperationException();
             }
         }
 
-        /// <summary>Signals that that the operation has completed.  Invoked after the result or error has been set.</summary>
+        /// <summary>Signals that the operation has completed.  Invoked after the result or error has been set.</summary>
         private void SignalCompletion()
         {
             if (_completed)
             {
-                ManualResetValueTaskSourceCoreShared.ThrowInvalidOperationException();
+                ThrowHelper.ThrowInvalidOperationException();
             }
             _completed = true;
 
-            if (Interlocked.CompareExchange(ref _continuation, ManualResetValueTaskSourceCoreShared.s_sentinel, null) != null)
+            if (_continuation != null || Interlocked.CompareExchange(ref _continuation, ManualResetValueTaskSourceCoreShared.s_sentinel, null) != null)
             {
                 if (_executionContext != null)
                 {
@@ -260,13 +266,11 @@ namespace System.Threading.Tasks.Sources
 
     internal static class ManualResetValueTaskSourceCoreShared // separated out of generic to avoid unnecessary duplication
     {
-        internal static void ThrowInvalidOperationException() => throw new InvalidOperationException();
-
         internal static readonly Action<object> s_sentinel = CompletionSentinel;
         private static void CompletionSentinel(object _) // named method to aid debugging
         {
             Debug.Fail("The sentinel delegate should never be invoked.");
-            ThrowInvalidOperationException();
+            ThrowHelper.ThrowInvalidOperationException();
         }
     }
 }

@@ -5,7 +5,7 @@
 // The worker functions in this file was optimized for performance. If you make changes
 // you should use care to consider all of the interesting cases.
 
-// The code of all worker functions in this file is written twice: Once as as a slow loop, and the
+// The code of all worker functions in this file is written twice: Once as a slow loop, and the
 // second time as a fast loop. The slow loops handles all special cases, throws exceptions, etc.
 // The fast loops attempts to blaze through as fast as possible with optimistic range checks,
 // processing multiple characters at a time, and falling back to the slow loop for all special cases.
@@ -55,14 +55,14 @@ namespace System.Text
         {
             public UTF8EncodingSealed(bool encoderShouldEmitUTF8Identifier) : base(encoderShouldEmitUTF8Identifier) { }
 
-            public override ReadOnlySpan<byte> Preamble => _emitUTF8Identifier ? s_preamble : Array.Empty<byte>();
+            public override ReadOnlySpan<byte> Preamble => _emitUTF8Identifier ? PreambleSpan : default;
         }
 
         // Used by Encoding.UTF8 for lazy initialization
         // The initialization code will not be run until a static member of the class is referenced
         internal static readonly UTF8EncodingSealed s_default = new UTF8EncodingSealed(encoderShouldEmitUTF8Identifier: true);
 
-        internal static readonly byte[] s_preamble = new byte[3] { 0xEF, 0xBB, 0xBF };
+        internal static ReadOnlySpan<byte> PreambleSpan => new byte[3] { 0xEF, 0xBB, 0xBF }; // uses C# compiler's optimization for static byte[] data
 
         // Yes, the idea of emitting U+FEFF as a UTF-8 identifier has made it into
         // the standard.
@@ -2549,14 +2549,13 @@ namespace System.Text
         }
 
         public override ReadOnlySpan<byte> Preamble =>
-            GetType() != typeof(UTF8Encoding) ? GetPreamble() : // in case a derived UTF8Encoding overrode GetPreamble
-            _emitUTF8Identifier ? s_preamble :
-            Array.Empty<byte>();
+            GetType() != typeof(UTF8Encoding) ? new ReadOnlySpan<byte>(GetPreamble()) : // in case a derived UTF8Encoding overrode GetPreamble
+            _emitUTF8Identifier ? PreambleSpan :
+            default;
 
         public override bool Equals(object value)
         {
-            UTF8Encoding that = value as UTF8Encoding;
-            if (that != null)
+            if (value is UTF8Encoding that)
             {
                 return (_emitUTF8Identifier == that._emitUTF8Identifier) &&
                        (EncoderFallback.Equals(that.EncoderFallback)) &&

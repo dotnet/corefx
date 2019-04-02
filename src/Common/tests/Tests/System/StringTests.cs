@@ -207,50 +207,17 @@ namespace System.Tests
             Assert.Equal(expected, s.AsSpan().Length);
         }
 
-        public static IEnumerable<object[]> Concat_Strings_TestData()
+        public static IEnumerable<object[]> Concat_Strings_LessThan2_GreaterThan4_TestData()
         {
+            // 0
             yield return new object[] { new string[0], "" };
 
+            // 1
             yield return new object[] { new string[] { "1" }, "1" };
             yield return new object[] { new string[] { null }, "" };
             yield return new object[] { new string[] { "" }, "" };
 
-            yield return new object[] { new string[] { "1", "2" }, "12" };
-            yield return new object[] { new string[] { null, "1" }, "1" };
-            yield return new object[] { new string[] { "", "1" }, "1" };
-            yield return new object[] { new string[] { "1", null }, "1" };
-            yield return new object[] { new string[] { "1", "" }, "1" };
-            yield return new object[] { new string[] { null, null }, "" };
-            yield return new object[] { new string[] { "", "" }, "" };
-
-            yield return new object[] { new string[] { "1", "2", "3" }, "123" };
-            yield return new object[] { new string[] { null, "1", "2" }, "12" };
-            yield return new object[] { new string[] { "", "1", "2" }, "12" };
-            yield return new object[] { new string[] { "1", null, "2" }, "12" };
-            yield return new object[] { new string[] { "1", "", "2" }, "12" };
-            yield return new object[] { new string[] { "1", "2", null }, "12" };
-            yield return new object[] { new string[] { "1", "2", "" }, "12" };
-            yield return new object[] { new string[] { null, "2", null }, "2" };
-            yield return new object[] { new string[] { "", "2", "" }, "2" };
-            yield return new object[] { new string[] { null, null, null }, "" };
-            yield return new object[] { new string[] { "", "", "" }, "" };
-
-            yield return new object[] { new string[] { "1", "2", "3", "4" }, "1234" };
-            yield return new object[] { new string[] { null, "1", "2", "3" }, "123" };
-            yield return new object[] { new string[] { "", "1", "2", "3" }, "123" };
-            yield return new object[] { new string[] { "1", null, "2", "3" }, "123" };
-            yield return new object[] { new string[] { "1", "", "2", "3" }, "123" };
-            yield return new object[] { new string[] { "1", "2", null, "3" }, "123" };
-            yield return new object[] { new string[] { "1", "2", "", "3" }, "123" };
-            yield return new object[] { new string[] { "1", "2", "3", null }, "123" };
-            yield return new object[] { new string[] { "1", "2", "3", "" }, "123" };
-            yield return new object[] { new string[] { "1", null, null, null }, "1" };
-            yield return new object[] { new string[] { "1", "", "", "" }, "1" };
-            yield return new object[] { new string[] { null, "1", null, "2" }, "12" };
-            yield return new object[] { new string[] { "", "1", "", "2" }, "12" };
-            yield return new object[] { new string[] { null, null, null, null }, "" };
-            yield return new object[] { new string[] { "", "", "", "" }, "" };
-
+            // 5
             yield return new object[] { new string[] { "1", "2", "3", "4", "5" }, "12345" };
             yield return new object[] { new string[] { null, "1", "2", "3", "4" }, "1234" };
             yield return new object[] { new string[] { "", "1", "2", "3", "4" }, "1234" };
@@ -267,11 +234,55 @@ namespace System.Tests
             yield return new object[] { new string[] { null, null, null, null, null }, "" };
             yield return new object[] { new string[] { "", "", "", "", "" }, "" };
 
+            // 7
             yield return new object[] { new string[] { "abcd", "efgh", "ijkl", "mnop", "qrst", "uvwx", "yz" }, "abcdefghijklmnopqrstuvwxyz" };
         }
 
+        public static IEnumerable<object[]> Concat_Strings_2_3_4_TestData()
+        {
+            // 2
+            yield return new object[] { new string[] { "1", "2" }, "12" };
+            yield return new object[] { new string[] { null, "1" }, "1" };
+            yield return new object[] { new string[] { "", "1" }, "1" };
+            yield return new object[] { new string[] { "1", null }, "1" };
+            yield return new object[] { new string[] { "1", "" }, "1" };
+            yield return new object[] { new string[] { null, null }, "" };
+            yield return new object[] { new string[] { "", "" }, "" };
+
+            // 3
+            yield return new object[] { new string[] { "1", "2", "3" }, "123" };
+            yield return new object[] { new string[] { null, "1", "2" }, "12" };
+            yield return new object[] { new string[] { "", "1", "2" }, "12" };
+            yield return new object[] { new string[] { "1", null, "2" }, "12" };
+            yield return new object[] { new string[] { "1", "", "2" }, "12" };
+            yield return new object[] { new string[] { "1", "2", null }, "12" };
+            yield return new object[] { new string[] { "1", "2", "" }, "12" };
+            yield return new object[] { new string[] { null, "2", null }, "2" };
+            yield return new object[] { new string[] { "", "2", "" }, "2" };
+            yield return new object[] { new string[] { null, null, null }, "" };
+            yield return new object[] { new string[] { "", "", "" }, "" };
+
+            // 4
+            yield return new object[] { new string[] { "1", "2", "3", "4" }, "1234" };
+            yield return new object[] { new string[] { null, "1", "2", "3" }, "123" };
+            yield return new object[] { new string[] { "", "1", "2", "3" }, "123" };
+            yield return new object[] { new string[] { "1", null, "2", "3" }, "123" };
+            yield return new object[] { new string[] { "1", "", "2", "3" }, "123" };
+            yield return new object[] { new string[] { "1", "2", null, "3" }, "123" };
+            yield return new object[] { new string[] { "1", "2", "", "3" }, "123" };
+            yield return new object[] { new string[] { "1", "2", "3", null }, "123" };
+            yield return new object[] { new string[] { "1", "2", "3", "" }, "123" };
+            yield return new object[] { new string[] { "1", null, null, null }, "1" };
+            yield return new object[] { new string[] { "1", "", "", "" }, "1" };
+            yield return new object[] { new string[] { null, "1", null, "2" }, "12" };
+            yield return new object[] { new string[] { "", "1", "", "2" }, "12" };
+            yield return new object[] { new string[] { null, null, null, null }, "" };
+            yield return new object[] { new string[] { "", "", "", "" }, "" };
+        }
+
         [Theory]
-        [MemberData(nameof(Concat_Strings_TestData))]
+        [MemberData(nameof(Concat_Strings_2_3_4_TestData))]
+        [MemberData(nameof(Concat_Strings_LessThan2_GreaterThan4_TestData))]
         public static void Concat_String(string[] values, string expected)
         {
             Action<string> validate = result =>
@@ -1721,6 +1732,7 @@ namespace System.Tests
         [Fact]
         public static void EndsWith_StringBoolCultureInfo_Valid()
         {
+#pragma warning disable 0618 // suppress obsolete warning for String.Copy
             // Same string
             string s = "foo";
             Assert.True(s.EndsWith(s, false, null));
@@ -1739,6 +1751,7 @@ namespace System.Tests
             // Different object, same string, current culture
             Assert.True(s.EndsWith(string.Copy(s), false, CultureInfo.InvariantCulture));
             Assert.True(s.EndsWith(string.Copy(s), true, CultureInfo.InvariantCulture));
+#pragma warning restore 0618 // restore warning when accessing obsolete members
         }
 
         [Fact]
@@ -5601,7 +5614,7 @@ namespace System.Tests
             }
         }
 
-        private static IEnumerable<object[]> ToUpper_Culture_TestData()
+        public static IEnumerable<object[]> ToUpper_Culture_TestData()
         {
             yield return new object[] { "h\u0069 world", "H\u0130 WORLD", new CultureInfo("tr-TR") };
             yield return new object[] { "h\u0130 world", "H\u0130 WORLD", new CultureInfo("tr-TR") };
@@ -7296,12 +7309,14 @@ namespace System.Tests
         [Fact]
         public static unsafe void CopyTest()
         {
+#pragma warning disable 0618 // suppress obsolete warning for String.Copy
             AssertExtensions.Throws<ArgumentNullException>("str", () => string.Copy(null));
 
             string s = "some string to copy";
             string copy = string.Copy(s);
             Assert.Equal(s, copy);
             Assert.False(object.ReferenceEquals(s, copy), "copy should return new instance of the string");
+#pragma warning restore 0618 // restore warning when accessing obsolete members
         }
 
         [Fact]
@@ -7326,6 +7341,7 @@ namespace System.Tests
         [Fact]
         public static void InternalTestAotSubset()
         {
+#pragma warning disable 0618 // suppress obsolete warning for String.Copy
             string emptyFromField = string.Empty;
             string emptyFromInternTable = string.IsInterned(emptyFromField);
             Assert.Same(emptyFromInternTable, emptyFromField);
@@ -7337,6 +7353,7 @@ namespace System.Tests
             Assert.Same(sInterned1, sInterned2);
             string sNew = string.Copy(sInterned1);
             Assert.NotSame(sInterned1, sNew);
+#pragma warning restore 0618 // restore warning when accessing obsolete members
         }
 
         [Fact]

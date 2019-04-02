@@ -34,7 +34,7 @@ namespace System.Tests
         [MemberData(nameof(Parse_Invalid_TestData))]
         public static void Parse_Invalid_NetCoreApp11(Type enumType, string value, bool ignoreCase, Type exceptionType)
         {
-            Type typeArgument = enumType == null || !enumType.GetTypeInfo().IsEnum ? typeof(SimpleEnum) : enumType;
+            Type typeArgument = enumType == null || !enumType.IsValueType ? typeof(SimpleEnum) : enumType;
             MethodInfo parseMethod = typeof(EnumTests).GetTypeInfo().GetMethod(nameof(Parse_Generic_Invalid_NetCoreApp11)).MakeGenericMethod(typeArgument);
             parseMethod.Invoke(null, new object[] { enumType, value, ignoreCase, exceptionType });
         }
@@ -95,23 +95,10 @@ namespace System.Tests
         [MemberData(nameof(UnsupportedEnumType_TestData))]
         public static void IsDefined_UnsupportedEnumType_ThrowsInvalidOperationException(Type enumType, object value)
         {
-            // A Contract.Assert(false, "...") is hit for certain unsupported primitives
             Exception ex = Assert.ThrowsAny<Exception>(() => Enum.IsDefined(enumType, value));
             string exName = ex.GetType().Name;
             Assert.True(exName == nameof(InvalidOperationException) || exName == "ContractException");
         }
-
-#if netcoreapp
-        [Fact]
-        public static void ToString_InvalidUnicodeChars()
-        {
-            // TODO: move into ToString_Format_TestData when dotnet/buildtools#1091 is fixed
-            ToString_Format((Enum)Enum.ToObject(s_charEnumType, char.MaxValue), "D", char.MaxValue.ToString());
-            ToString_Format((Enum)Enum.ToObject(s_charEnumType, char.MaxValue), "X", "FFFF");
-            ToString_Format((Enum)Enum.ToObject(s_charEnumType, char.MaxValue), "F", char.MaxValue.ToString());
-            ToString_Format((Enum)Enum.ToObject(s_charEnumType, char.MaxValue), "G", char.MaxValue.ToString());
-        }
-#endif //netcoreapp
 
         public static IEnumerable<object[]> UnsupportedEnum_TestData()
         {
@@ -129,7 +116,6 @@ namespace System.Tests
         [MemberData(nameof(UnsupportedEnum_TestData))]
         public static void ToString_UnsupportedEnumType_ThrowsArgumentException(Enum e)
         {
-            // A Contract.Assert(false, "...") is hit for certain unsupported primitives
             Exception formatXException = Assert.ThrowsAny<Exception>(() => e.ToString("X"));
             string formatXExceptionName = formatXException.GetType().Name;
             Assert.True(formatXExceptionName == nameof(InvalidOperationException) || formatXExceptionName == "ContractException");
@@ -139,7 +125,6 @@ namespace System.Tests
         [MemberData(nameof(UnsupportedEnumType_TestData))]
         public static void Format_UnsupportedEnumType_ThrowsArgumentException(Type enumType, object value)
         {
-            // A Contract.Assert(false, "...") is hit for certain unsupported primitives
             Exception formatGException = Assert.ThrowsAny<Exception>(() => Enum.Format(enumType, value, "G"));
             string formatGExceptionName = formatGException.GetType().Name;
             Assert.True(formatGExceptionName == nameof(InvalidOperationException) || formatGExceptionName == "ContractException");
