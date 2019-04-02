@@ -15,7 +15,7 @@ namespace System.Data
     /// Represents a bindable, queryable DataView of DataRow, that can be created from from LINQ queries over DataTable
     /// and from DataTable. 
     /// </summary>
-    internal class LinqDataView : DataView, IBindingList, IBindingListView
+    internal sealed class LinqDataView : DataView, IBindingList, IBindingListView
     {
         /// <summary>
         /// A Comparer that compares a Key and a Row.
@@ -39,14 +39,10 @@ namespace System.Data
             this.sortExpressionBuilder = sortExpressionBuilder ?? new SortExpressionBuilder<DataRow>();
         }
 
-
-        //I have two forms of predicate because I need to pass in null if predicate is null. Otherwise I need to convert it into delegate and pass it into
-        // data view's constructor. That logic for checking null can't be embedded in the base constructor call.
         /// <summary>
         /// 
         /// </summary>
         /// <param name="table">Table from which to create the view</param>
-        /// <param name="predicate_func">User-provided filter-predicate as a Func&lt;DataRow, bool&gt;</param>
         /// <param name="predicate_system">User-provided predicate but in the form of System.Predicate&lt;DataRow&gt;
         /// Predicates are being replicated in different forms so that nulls can be passed in.
         /// For e.g. when user provides null predicate, base.Predicate should be set to null. I cant do that in the constructor initialization
@@ -57,13 +53,10 @@ namespace System.Data
         /// <param name="sortExpressionBuilder">Combined sort expression build using mutiple sort expressions.</param>
         internal LinqDataView(
                     DataTable table,
-                    Func<DataRow, bool> predicate_func,
                     Predicate<DataRow> predicate_system,
                     Comparison<DataRow> comparison,
                     Func<object, DataRow, int> comparerKeyRow,
                     SortExpressionBuilder<DataRow> sortExpressionBuilder)
-
-                //Parent constructor
             : base(table,
                 predicate_system,
                 comparison,
@@ -80,11 +73,11 @@ namespace System.Data
         {
             get
             {
-                if (base.RowPredicate == null)//using string based filter or no filter
+                if (base.RowPredicate == null)// using string based filter or no filter
                 {
                     return base.RowFilter;
                 }
-                else //using expression based filter
+                else // using expression based filter
                 {
                     return null;
                 }
@@ -95,7 +88,7 @@ namespace System.Data
                 if (value == null) 
                 {
                     base.RowPredicate = null;
-                    base.RowFilter = String.Empty; //INDEX rebuild twice
+                    base.RowFilter = String.Empty; // INDEX rebuild twice
                 }
                 else
                 {
@@ -114,22 +107,20 @@ namespace System.Data
         /// <returns>Index of the first match of input key</returns>
         internal override int FindByKey(object key)
         {
-            /////////////// Preconditions ////////////////
-            //check that both string and expression based sort are never simultaneously set
             Debug.Assert(base.Sort != null);
-            Debug.Assert(!(!String.IsNullOrEmpty(base.Sort) && base.SortComparison != null));
-            /////////////////////////////////////////////
+            Debug.Assert(!(!String.IsNullOrEmpty(base.Sort) && base.SortComparison != null),
+                "string and expression based sort cannot both be set");
 
-            if (!String.IsNullOrEmpty(base.Sort))  //use find for DV's sort string
+            if (!String.IsNullOrEmpty(base.Sort))  // use find for DV's sort string
             {
                 return base.FindByKey(key);
             }
-            else if (base.SortComparison == null) //neither string or expr set
+            else if (base.SortComparison == null) // neither string or expr set
             {
-                //This is the exception message from DataView that we want to use
+                // This is the exception message from DataView that we want to use
                 throw ExceptionBuilder.IndexKeyLength(0, 0);
             }
-            else  //find for expression based sort
+            else  // find for expression based sort
             {
                 if (sortExpressionBuilder.Count !=1)
                     throw DataSetUtil.InvalidOperation(SR.Format(SR.LDV_InvalidNumOfKeys, sortExpressionBuilder.Count));
@@ -152,21 +143,22 @@ namespace System.Data
         /// </summary>
         internal override int FindByKey(object[] key)
         {
-            //---------Checks ----------------
-            //must have string or expression based sort specified
+            // must have string or expression based sort specified
             if (base.SortComparison == null && String.IsNullOrEmpty(base.Sort)) 
             {
-                //This is the exception message from DataView that we want to use
+                // This is the exception message from DataView that we want to use
                 throw ExceptionBuilder.IndexKeyLength(0, 0);
             }
             else if (base.SortComparison != null && key.Length != sortExpressionBuilder.Count)
             {
                 throw DataSetUtil.InvalidOperation(SR.Format(SR.LDV_InvalidNumOfKeys, sortExpressionBuilder.Count));
             }
-            //--------------------------------
 
-            if (base.SortComparison == null)//using string to sort
+            if (base.SortComparison == null)
+            {
+                // using string to sort
                 return base.FindByKey(key);
+            }
             else
             {
                 Index.ComparisonBySelector<object, DataRow> compareDelg =
@@ -175,8 +167,9 @@ namespace System.Data
                 List<object> keyList = new List<object>();
                 foreach (object singleKey in key)
                 {
-                    keyList.Add(singleKey);    
+                    keyList.Add(singleKey);
                 }
+
                 Range range = FindRecords<object, DataRow>(compareDelg, keyList);
                 return (range.Count == 0) ? -1 : range.Min;
             }
@@ -190,20 +183,18 @@ namespace System.Data
         /// </summary>
         internal override DataRowView[] FindRowsByKey(object[] key)
         {
-            //---------Checks ----------------
-            //must have string or expression based sort specified
+            // must have string or expression based sort specified
             if (base.SortComparison == null && String.IsNullOrEmpty(base.Sort))
             {
-                //This is the exception message from DataView that we want to use
+                // This is the exception message from DataView that we want to use
                 throw ExceptionBuilder.IndexKeyLength(0, 0);
             }
             else if (base.SortComparison != null && key.Length != sortExpressionBuilder.Count)
             {
                 throw DataSetUtil.InvalidOperation(SR.Format(SR.LDV_InvalidNumOfKeys, sortExpressionBuilder.Count));
             }
-            //--------------------------------
 
-            if (base.SortComparison == null)//using string to sort
+            if (base.SortComparison == null)// using string to sort
             {
                 return base.FindRowsByKey(key);
             }
@@ -225,7 +216,7 @@ namespace System.Data
         /// </summary>
         internal override void SetIndex(string newSort, DataViewRowState newRowStates, IFilter newRowFilter)
         {
-            //Throw only if expressions (filter or sort) are used and rowstate is not current rows        
+            // Throw only if expressions (filter or sort) are used and rowstate is not current rows        
             if ( (base.SortComparison != null || base.RowPredicate != null)
                     && newRowStates != DataViewRowState.CurrentRows)
             {
@@ -287,7 +278,7 @@ namespace System.Data
         bool IBindingList.IsSorted
         {
             get
-            {   //Sorted if either expression based sort or string based sort is set
+            {   // Sorted if either expression based sort or string based sort is set
                 return !(base.SortComparison == null && base.Sort.Length == 0);
             }
         }

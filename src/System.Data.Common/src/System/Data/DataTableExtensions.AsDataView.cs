@@ -16,7 +16,7 @@ namespace System.Data
         /// <returns>An instance of LinkDataView.</returns>
         public static DataView AsDataView(this DataTable table)
         {
-            DataSetUtil.CheckArgumentNull<DataTable>(table, "table");
+            DataSetUtil.CheckArgumentNull<DataTable>(table, nameof(table));
             return new LinqDataView(table, null);
         }
 
@@ -28,7 +28,7 @@ namespace System.Data
         /// <returns>Generated LinkDataView of type T</returns>
         public static DataView AsDataView<T>(this EnumerableRowCollection<T> source) where T : DataRow
         {
-            DataSetUtil.CheckArgumentNull<EnumerableRowCollection<T>>(source, "source");
+            DataSetUtil.CheckArgumentNull<EnumerableRowCollection<T>>(source, nameof(source));
             return source.GetLinqDataView();
         }
     }

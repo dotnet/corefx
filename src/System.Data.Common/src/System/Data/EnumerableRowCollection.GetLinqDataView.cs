@@ -9,14 +9,14 @@ namespace System.Data
     /// <summary>
     /// This class provides a wrapper for DataTables to allow for querying via LINQ.
     /// </summary>
-    public partial class EnumerableRowCollection<TRow> : EnumerableRowCollection, IEnumerable<TRow>
+    public partial class EnumerableRowCollection<TRow>
     {
         /// <summary>
         /// Evaluates filter and sort if necessary and returns
         /// a LinqDataView representing the LINQ query this class has collected.
         /// </summary>
         /// <returns>LinqDataView repesenting the LINQ query</returns>
-        internal LinqDataView GetLinqDataView() //Called by AsLinqDataView
+        internal LinqDataView GetLinqDataView() // Called by AsLinqDataView
         {
             if ((null == _table) || !typeof(DataRow).IsAssignableFrom(typeof(TRow)))
             {
@@ -27,19 +27,20 @@ namespace System.Data
 
             #region BuildSinglePredicate
 
-            Func<DataRow, bool> finalPredicate = null; //Conjunction of all .Where(..) predicates
+            Func<DataRow, bool> finalPredicate = null; // Conjunction of all .Where(..) predicates
             if ((null != _selector) && (0 < _listOfPredicates.Count))
             {
                 // Hook up all individual predicates into one predicate
-                // This delegate is a conjunction of multiple predicates set by the user
+                // This lambda is a conjunction of multiple predicates set by the user
                 // Note: This is a Short-Circuit Conjunction
                 finalPredicate =
-                    delegate(DataRow row)
+                    (DataRow row) =>
                     {
                         if (!Object.ReferenceEquals(row, _selector((TRow)(object)row)))
                         {
                             throw DataSetUtil.NotSupported(SR.ToLDVUnsupported);
                         }
+
                         foreach (Func<TRow, bool> pred in _listOfPredicates)
                         {
                             if (!pred((TRow)(object)row))
@@ -53,7 +54,7 @@ namespace System.Data
             else if (null != _selector)
             {
                 finalPredicate =
-                    delegate(DataRow row)
+                    (DataRow row) =>
                     {
                         if (!Object.ReferenceEquals(row, _selector((TRow)(object)row)))
                         {
@@ -65,7 +66,7 @@ namespace System.Data
             else if (0 < _listOfPredicates.Count)
             {
                 finalPredicate =
-                    delegate(DataRow row)
+                    (DataRow row) =>
                     {
                         foreach (Func<TRow, bool> pred in _listOfPredicates)
                         {
@@ -80,12 +81,14 @@ namespace System.Data
             #endregion BuildSinglePredicate
 
             #region Evaluate Filter/Sort
-            //  All of this mess below is because we want to create index only once.
-            //
+            //  All of this complexity below is because we want to create index only once.
+            // 
+
             //  If we only have filter, we set _view.Predicate       - 1 index creation
             //  If we only have sort, we set _view.SortExpression()  - 1 index creation
             //  If we have BOTH, we set them through the constructor - 1 index creation
-            //
+            // 
+
 
             // Filter AND Sort
             if ((null != finalPredicate) && (0 < _sortExpression.Count))
@@ -96,56 +99,41 @@ namespace System.Data
 
                 view = new LinqDataView(
                                _table,
-                               finalPredicate,                      //Func() Predicate
-                               delegate(DataRow row)                //System.Predicate
-                               {
-                                   return finalPredicate(row);
-                               },
-                               delegate(DataRow a, DataRow b)       //Comparison for DV for Index creation
-                               {
-                                   return _sortExpression.Compare(
-                                            _sortExpression.Select((TRow)(object)a),
-                                            _sortExpression.Select((TRow)(object)b)
-                                       );
-                               },
-                               delegate(object key, DataRow row)    //Comparison_K_T for DV's Find()
-                               {
-                                   return _sortExpression.Compare(
-                                        (List<object>)key,
-                                        _sortExpression.Select((TRow)(object)row)
-                                      );
-                               },
+                               row => finalPredicate(row),          // System.Predicate
+                               (DataRow a, DataRow b) =>            // Comparison for DV for Index creation
+                                   _sortExpression.Compare(
+                                       _sortExpression.Select((TRow)(object)a),
+                                       _sortExpression.Select((TRow)(object)b)),
+                               (object key, DataRow row) =>         // Comparison_K_T for DV's Find()
+                                   _sortExpression.Compare(
+                                       (List<object>)key,
+                                       _sortExpression.Select((TRow)(object)row)),
                                 _sortExpression.CloneCast<DataRow>());
             }
             else if (null != finalPredicate)
             {
-                //Only Filtering
+                // Only Filtering
                 view = new LinqDataView(
                                     _table,
-                                    finalPredicate,
-                                    delegate(DataRow row)                //System.Predicate
-                                    {
-                                        return finalPredicate(row);
-                                    },
+                                    row => finalPredicate(row),     // System.Predicate
                                     null,
                                     null,
                                     _sortExpression.CloneCast<DataRow>());
             }
             else if (0 < _sortExpression.Count)
             {
-                //Only Sorting
+                // Only Sorting
                 view = new LinqDataView(
                             _table,
                             null,
-                            null,
-                            delegate(DataRow a, DataRow b)
-                            {
-                                return _sortExpression.Compare(_sortExpression.Select((TRow)(object)a), _sortExpression.Select((TRow)(object)b));
-                            },
-                            delegate(object key, DataRow row)
-                            {
-                                return _sortExpression.Compare((List<object>)key, _sortExpression.Select((TRow)(object)row));
-                            },
+                            (DataRow a, DataRow b) => 
+                                _sortExpression.Compare(
+                                    _sortExpression.Select((TRow)(object)a), 
+                                    _sortExpression.Select((TRow)(object)b)),
+                            (object key, DataRow row) =>
+                                _sortExpression.Compare(
+                                    (List<object>)key, 
+                                    _sortExpression.Select((TRow)(object)row)),
                             _sortExpression.CloneCast<DataRow>());
             }
             else
