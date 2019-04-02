@@ -25,8 +25,6 @@ namespace System.Threading
         public static void GetAvailableThreads(out int workerThreads, out int completionPortThreads) { throw null; }
         public static void GetMaxThreads(out int workerThreads, out int completionPortThreads) { throw null; }
         public static void GetMinThreads(out int workerThreads, out int completionPortThreads) { throw null; }
-        public static long PendingLocalWorkItemCount { get { throw null; } }
-        public static long PendingGlobalWorkItemCount { get { throw null; } }
         public static long PendingWorkItemCount { get { throw null; } }
         public static bool QueueUserWorkItem(System.Threading.WaitCallback callBack) { throw null; }
         public static bool QueueUserWorkItem(System.Threading.WaitCallback callBack, object state) { throw null; }
