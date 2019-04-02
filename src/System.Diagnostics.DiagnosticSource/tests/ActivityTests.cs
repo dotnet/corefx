@@ -488,8 +488,8 @@ namespace System.Diagnostics.Tests
                 Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
                 Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
                 Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
-                Assert.Equal(W3CIdFlags.None, activity.W3CIdFlags);
-                Assert.False(activity.Recording);
+                Assert.Equal(ActivityTraceFlags.None, activity.ActivityTraceFlags);
+                Assert.False(activity.Recorded);
                 Assert.True(IdIsW3CFormat(activity.Id));
                 activity.Stop();
 
@@ -500,8 +500,8 @@ namespace System.Diagnostics.Tests
                 activity.Start();
                 Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
                 Assert.Equal(activityTraceId.ToHexString(), activity.TraceId.ToHexString());
-                Assert.Equal(W3CIdFlags.None, activity.W3CIdFlags);
-                Assert.False(activity.Recording);
+                Assert.Equal(ActivityTraceFlags.None, activity.ActivityTraceFlags);
+                Assert.False(activity.Recorded);
                 Assert.True(IdIsW3CFormat(activity.Id));
                 activity.Stop();
 
@@ -675,11 +675,11 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void W3CIdFlagsTests()
+        public void ActivityTraceFlagsTests()
         {
             Activity activity;
 
-            // Set the 'Recording' bit by using SetParentId with a -01 flags.  
+            // Set the 'Recorded' bit by using SetParentId with a -01 flags.  
             activity = new Activity("activity1");
             activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-01");
             activity.Start();
@@ -687,24 +687,24 @@ namespace System.Diagnostics.Tests
             Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
             Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
             Assert.True(IdIsW3CFormat(activity.Id));
-            Assert.Equal(W3CIdFlags.Recording, activity.W3CIdFlags);
-            Assert.True(activity.Recording);
+            Assert.Equal(ActivityTraceFlags.Recorded, activity.ActivityTraceFlags);
+            Assert.True(activity.Recorded);
             activity.Stop();
 
-            // Set the 'Recording' bit by using SetParentId by using the TraceId, SpanId, W3CIdFlags overload 
+            // Set the 'Recorded' bit by using SetParentId by using the TraceId, SpanId, ActivityTraceFlags overload 
             activity = new Activity("activity2");
             ActivityTraceId activityTraceId = ActivityTraceId.CreateRandom();
-            activity.SetParentId(activityTraceId, ActivitySpanId.CreateRandom(), W3CIdFlags.Recording);
+            activity.SetParentId(activityTraceId, ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded);
             activity.Start();
             Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
             Assert.Equal(activityTraceId.ToHexString(), activity.TraceId.ToHexString());
             Assert.True(IdIsW3CFormat(activity.Id));
-            Assert.Equal(W3CIdFlags.Recording, activity.W3CIdFlags);
-            Assert.True(activity.Recording);
+            Assert.Equal(ActivityTraceFlags.Recorded, activity.ActivityTraceFlags);
+            Assert.True(activity.Recorded);
             activity.Stop();
 
             /****************************************************/
-            // Set the 'Recording' bit explicitly after the fact.   
+            // Set the 'Recorded' bit explicitly after the fact.   
             activity = new Activity("activity3");
             activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-00");
             activity.Start();
@@ -712,12 +712,12 @@ namespace System.Diagnostics.Tests
             Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
             Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
             Assert.True(IdIsW3CFormat(activity.Id));
-            Assert.Equal(W3CIdFlags.None, activity.W3CIdFlags);
-            Assert.False(activity.Recording);
+            Assert.Equal(ActivityTraceFlags.None, activity.ActivityTraceFlags);
+            Assert.False(activity.Recorded);
 
-            activity.W3CIdFlags = W3CIdFlags.Recording;
-            Assert.Equal(W3CIdFlags.Recording, activity.W3CIdFlags);
-            Assert.True(activity.Recording);
+            activity.ActivityTraceFlags = ActivityTraceFlags.Recorded;
+            Assert.Equal(ActivityTraceFlags.Recorded, activity.ActivityTraceFlags);
+            Assert.True(activity.Recorded);
             activity.Stop();
 
             /****************************************************/
@@ -730,8 +730,8 @@ namespace System.Diagnostics.Tests
             Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
             Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
             Assert.True(IdIsW3CFormat(activity.Id));
-            Assert.Equal(W3CIdFlags.Recording, activity.W3CIdFlags);
-            Assert.True(activity.Recording);
+            Assert.Equal(ActivityTraceFlags.Recorded, activity.ActivityTraceFlags);
+            Assert.True(activity.Recorded);
 
             // create a child
             var childActivity = new Activity("activity4Child");
@@ -741,8 +741,8 @@ namespace System.Diagnostics.Tests
             Assert.Equal("0123456789abcdef0123456789abcdef", childActivity.TraceId.ToHexString());
             Assert.NotEqual(activity.SpanId.ToHexString(), childActivity.SpanId.ToHexString());
             Assert.True(IdIsW3CFormat(childActivity.Id));
-            Assert.Equal(W3CIdFlags.Recording, childActivity.W3CIdFlags);
-            Assert.True(childActivity.Recording);
+            Assert.Equal(ActivityTraceFlags.Recorded, childActivity.ActivityTraceFlags);
+            Assert.True(childActivity.Recorded);
 
             childActivity.Stop();
             activity.Stop();

@@ -72,11 +72,11 @@ namespace System.Diagnostics
         /// need to be overriden if that default policy is fine.   Thus this is call should 
         /// be used rare (but often important) cases.   
         /// 
-        /// Note that the type of 'payloadObject' is typed as object here, but for any 
+        /// Note that the type of 'payload' is typed as object here, but for any 
         /// particular instrumentation site and the subscriber will know the type of 
         /// the payload and thus cast it and decode it if it needs to. 
         /// </summary>
-        public virtual void OnActivityImport(Activity activity, object payloadObj) { }
+        public virtual void OnActivityImport(Activity activity, object payload) { }
 
         /// <summary>
         /// Optional: If an instumentation site is at a location where activities leave the
@@ -98,25 +98,25 @@ namespace System.Diagnostics
         /// where that is a problem.  Thus this is call should be used very rarely and is
         /// mostly here for symetry with OnActivityImport and future-proofing.  
         /// 
-        /// Note that the type of 'payloadObject' is typed as object here, but for any 
+        /// Note that the type of 'payload' is typed as object here, but for any 
         /// particular instrumentation site and the subscriber should know the type of 
         /// the payload and thus cast it and decode it if it needs to.
         /// </summary>
-        public virtual void OnActivityExport(Activity activity, object payloadObj) { }
+        public virtual void OnActivityExport(Activity activity, object payload) { }
     }
 
     public partial class DiagnosticListener
     {
-        public override void OnActivityImport(Activity activity, object payloadObj)
+        public override void OnActivityImport(Activity activity, object payload)
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
-                curSubscription.OnActivityImport?.Invoke(activity, payloadObj);
+                curSubscription.OnActivityImport?.Invoke(activity, payload);
         }
 
-        public override void OnActivityExport(Activity activity, object payloadObj)
+        public override void OnActivityExport(Activity activity, object payload)
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
-                curSubscription.OnActivityExport?.Invoke(activity, payloadObj);
+                curSubscription.OnActivityExport?.Invoke(activity, payload);
         }
 
         /// <summary>

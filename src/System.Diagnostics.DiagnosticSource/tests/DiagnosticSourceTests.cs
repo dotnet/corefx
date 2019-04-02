@@ -647,10 +647,10 @@ namespace System.Diagnostics.Tests
                 Activity importerActivity = new Activity("activityImporter");
                 object importer = "MyImporterObject";
                 bool seenActivityImport = false;
-                Action<Activity, object> activityImport = delegate (Activity activity, object payloadObj)
+                Action<Activity, object> activityImport = delegate (Activity activity, object payload)
                 {
                     Assert.Equal(activity.GetHashCode(), importerActivity.GetHashCode());
-                    Assert.Equal(importer, payloadObj);
+                    Assert.Equal(importer, payload);
                     seenActivityImport = true;
 
                 };
@@ -658,10 +658,10 @@ namespace System.Diagnostics.Tests
                 Activity exporterActivity = new Activity("activityExporter");
                 object exporter = "MyExporterObject";
                 bool seenActivityExport = false;
-                Action<Activity, object> activityExport = delegate (Activity activity, object payloadObj)
+                Action<Activity, object> activityExport = delegate (Activity activity, object payload)
                 {
                     Assert.Equal(activity.GetHashCode(), exporterActivity.GetHashCode());
-                    Assert.Equal(exporter, payloadObj);
+                    Assert.Equal(exporter, payload);
                     seenActivityExport = true;
                 };
 

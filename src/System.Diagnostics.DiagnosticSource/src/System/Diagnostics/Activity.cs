@@ -265,7 +265,7 @@ namespace System.Diagnostics
         /// Set the parent ID using the W3C convention using a TraceId and a SpanId.   This
         /// constructor has the advantage that no string manipulation is needed to set the ID.  
         /// </summary>
-        public Activity SetParentId(in ActivityTraceId traceId, in ActivitySpanId spanId, W3CIdFlags w3CFlags = W3CIdFlags.None)
+        public Activity SetParentId(in ActivityTraceId traceId, in ActivitySpanId spanId, ActivityTraceFlags activityTraceFlags = ActivityTraceFlags.None)
         {
             if (Parent != null)
             {
@@ -281,7 +281,7 @@ namespace System.Diagnostics
                 _traceIdSet = true;
                 _parentSpanId = spanId;
                 _parentSpanIdSet = true;
-                _w3CIdFlags = (byte) w3CFlags;
+                _w3CIdFlags = (byte) activityTraceFlags;
                 _w3CIdFlagsSet = true;
             }
             return this;
@@ -509,14 +509,17 @@ namespace System.Diagnostics
         }
 
         /// <summary>
-        /// True if the W3CIdFlags.Recording flag is set.   
+        /// True if the W3CIdFlags.Recorded flag is set.   
         /// </summary>
-        public bool Recording { get => (W3CIdFlags & W3CIdFlags.Recording) != 0; }
+        public bool Recorded { get => (ActivityTraceFlags & ActivityTraceFlags.Recorded) != 0; }
 
         byte _w3CIdFlags;
         bool _w3CIdFlagsSet;
 
-        public W3CIdFlags W3CIdFlags
+        /// <summary>
+        /// Return the flags (defined by the W3C ID specification) associated with the activity.  
+        /// </summary>
+        public ActivityTraceFlags ActivityTraceFlags
         {
             get
             {
@@ -524,7 +527,7 @@ namespace System.Diagnostics
                 {
                     if (Parent != null)
                     {
-                        W3CIdFlags = Parent.W3CIdFlags;
+                        ActivityTraceFlags = Parent.ActivityTraceFlags;
                     }
                     else if (_parentId != null && IsW3CId(_parentId))
                     {
@@ -532,7 +535,7 @@ namespace System.Diagnostics
                         _w3CIdFlagsSet = true;
                     }
                 }
-                return (W3CIdFlags) _w3CIdFlags;
+                return (ActivityTraceFlags) _w3CIdFlags;
             }
             set
             {
@@ -841,11 +844,14 @@ namespace System.Diagnostics
         #endregion // private
     }
 
+    /// <summary>
+    /// These flags are defined by the W3C standard along with the ID for the activity. 
+    /// </summary>
     [Flags]
-    public enum W3CIdFlags
+    public enum ActivityTraceFlags
     {
         None = 0,
-        Recording = 1
+        Recorded = 1        // The Activity (or more likley its parents) has been marked as useful to record 
     }
 
     /// <summary>
