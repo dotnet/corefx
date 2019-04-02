@@ -1118,6 +1118,14 @@ namespace System.Net.Sockets
 
         private readonly object _registerLock = new object();
 
+        public static readonly SocketAsyncContext Closed;
+
+        static SocketAsyncContext()
+        {
+            Closed = new SocketAsyncContext(new SafeSocketHandle());
+            Closed.Close();
+        }
+
         public SocketAsyncContext(SafeSocketHandle socket)
         {
             _socket = socket;

@@ -197,9 +197,10 @@ namespace System.Net.Sockets
 
         private void InnerReleaseHandle()
         {
-            if (_asyncContext != null)
+            SocketAsyncContext context = Interlocked.Exchange(ref _asyncContext, SocketAsyncContext.Closed);
+            if (context != SocketAsyncContext.Closed)
             {
-                _asyncContext.Close();
+                context?.Close();
             }
         }
 

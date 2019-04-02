@@ -30,7 +30,7 @@ namespace System.Net.Sockets
             handle = preexistingHandle;
         }
 
-        private SafeSocketHandle() : base(true) { }
+        internal SafeSocketHandle() : base(true) { }
 
         private InnerSafeCloseSocket _innerSocket;
         private volatile bool _released;
