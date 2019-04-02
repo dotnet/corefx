@@ -97,7 +97,6 @@ jobs:
               _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
               _buildExtraArguments: -warnAsError false /p:BuildNativeClang=--clang5.0 /p:RuntimeOS=linux-musl
 
-            arm_Release:
       pool:
         name: Hosted Ubuntu 1604
 
