@@ -13,9 +13,4 @@
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
     <Compile Include="TimerDisposeTests.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="$(CommonTestPath)\System\Threading\ThreadTestHelpers.cs">
-      <Link>CommonTest\System\Threading\ThreadTestHelpers.cs</Link>
-    </Compile>
-  </ItemGroup>
 </Project>
