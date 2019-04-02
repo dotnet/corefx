@@ -108,7 +108,7 @@ namespace System.Text.Json
             int hour = 0;
             int minute = 0;
             int second = 0;
-            int fraction = 0;
+            int fraction = 0; // This value should never be greater than 9_999_999.
             int offsetHours = 0;
             int offsetMinutes = 0;
             byte offsetToken = default;
@@ -215,15 +215,12 @@ namespace System.Text.Json
             // Source does not have enough characters for YYYY-MM-DDThh:mm:ss.s
             if (source.Length < 21)
             {
-                value = default;
-                bytesConsumed = 0;
-                kind = default;
-                return false;
+                goto ReturnFalse;
             }
 
             sourceIndex = 20;
 
-            // Parse fraction
+            // Parse fraction. This value should never be greater than 9_999_999
             {
                 int numDigitsRead = 0;
                 int fractionEnd = Math.Min(sourceIndex + JsonConstants.DateTimeParseNumFractionDigits, source.Length);
