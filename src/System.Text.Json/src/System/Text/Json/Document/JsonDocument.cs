@@ -28,7 +28,7 @@ namespace System.Text.Json
         private (int, string) _lastIndexAndString = (-1, null);
 
         /// <summary>
-        ///   Whether or not this JsonDocument is detached from memory provided during a call to Parse.
+        ///   Whether or not this JsonDocument is detached from memory provided during a call to Parse or ParseValue.
         /// </summary>
         public bool IsDetached { get; }
 
