@@ -389,6 +389,7 @@ namespace System.IO.Pipelines.Tests
                 return ReadAsync(new Memory<byte>(buffer, offset, count)).AsTask();
             }
 
+#if !netstandard
             public override async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
             {
                 if (_throwOnNextCallToRead)
@@ -402,6 +403,7 @@ namespace System.IO.Pipelines.Tests
                 }
                 return bytes;
             }
+#endif
         }
 
         // This pool returns exact buffer sizes
