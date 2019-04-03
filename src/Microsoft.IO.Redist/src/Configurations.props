@@ -1,6 +1,10 @@
 <Project>
   <PropertyGroup>
+    <PackageConfigurations>
+      net472;
+    </PackageConfigurations>
     <BuildConfigurations>
+      $(PackageConfigurations)
       netfx;
     </BuildConfigurations>
   </PropertyGroup>

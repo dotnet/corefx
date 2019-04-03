@@ -2,15 +2,15 @@
   <PropertyGroup>
     <PackageConfigurations>
       netstandard1.0;
-      net45;
       netstandard;
+      net45;
       net46;
     </PackageConfigurations>
     <BuildConfigurations>
+      $(PackageConfigurations)
       netcoreapp;
       uap;
       netfx;
-      $(PackageConfigurations);
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

@@ -12,7 +12,7 @@
       netcoreapp;
       uap-Windows_NT;
       uapaot-Windows_NT;
-	  netfx;
+	    netfx;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

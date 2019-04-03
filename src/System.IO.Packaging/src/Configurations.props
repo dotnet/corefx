@@ -6,8 +6,8 @@
       netstandard;
     </PackageConfigurations>
     <BuildConfigurations>
-      $(PackageConfigurations);
-      netfx-Windows_NT;
+      $(PackageConfigurations)
+      netfx;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>

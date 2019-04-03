@@ -3,14 +3,15 @@
     <PackageConfigurations>
       netcoreapp2.0-Windows_NT;
       netcoreapp2.0-Unix;
-      netcoreapp-Windows_NT;
-      netcoreapp-Unix;
+      netcoreapp3.0-Windows_NT;
+      netcoreapp3.0-Unix;
       net461;
       netstandard;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
       netfx;
+      netcoreapp;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
