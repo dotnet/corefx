@@ -14,6 +14,7 @@ namespace System.Reflection.Emit.Tests
             Label label = new Label();
             Assert.True(label.Equals(label));
             Assert.True(label.Equals((object)label));
+            Assert.True(label.Equals((IEquatable<Label>)label));
         }
 
         [Fact]
@@ -27,6 +28,7 @@ namespace System.Reflection.Emit.Tests
 
             Assert.False(label1.Equals(label2));
             Assert.False(label1.Equals((object)label2));
+            Assert.False(label1.Equals((IEquatable<Label>)label2));
         }
 
         [Theory]
@@ -48,15 +50,6 @@ namespace System.Reflection.Emit.Tests
 
             Assert.True(lb1 == lb2);
             Assert.False(lb1 != lb2);
-        }
-
-        [Fact]
-        public void Equals_IEquatable()
-        {
-            IEquatable<Label> label1 = new Label();
-            Label label2 = new Label();
-
-            Assert.True(label1.Equals(label2));
         }
     }
 }
