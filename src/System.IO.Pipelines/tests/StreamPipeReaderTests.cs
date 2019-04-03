@@ -386,11 +386,16 @@ namespace System.IO.Pipelines.Tests
             private bool _throwOnNextCallToRead;
             public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
             {
-                return ReadAsync(new Memory<byte>(buffer, offset, count)).AsTask();
+                return ReadAsyncInternal(new Memory<byte>(buffer, offset, count)).AsTask();
             }
 
 #if !netstandard
-            public override async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
+            public override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
+            {
+                return ReadAsyncInternal(destination, cancellationToken);
+            }
+#endif
+            public async ValueTask<int> ReadAsyncInternal(Memory<byte> destination, CancellationToken cancellationToken = default)
             {
                 if (_throwOnNextCallToRead)
                 {
@@ -403,7 +408,6 @@ namespace System.IO.Pipelines.Tests
                 }
                 return bytes;
             }
-#endif
         }
 
         // This pool returns exact buffer sizes

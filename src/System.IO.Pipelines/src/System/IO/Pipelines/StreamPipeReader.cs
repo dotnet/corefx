@@ -277,8 +277,6 @@ namespace System.IO.Pipelines
             bool isCancellationRequested = source.IsCancellationRequested;
             if (isCancellationRequested || _bufferedBytes > 0 && (!_examinedEverything || _isStreamCompleted))
             {
-                // If TryRead/ReadAsync are called and cancellation is requested, we need to make sure memory is allocated for the ReadResult,
-                // otherwise if someone calls advance afterward on the ReadResult, it will throw.
                 if (isCancellationRequested)
                 {
                     ClearCancellationToken();

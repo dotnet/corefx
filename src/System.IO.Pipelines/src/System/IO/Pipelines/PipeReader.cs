@@ -76,10 +76,10 @@ namespace System.IO.Pipelines
         public abstract void OnWriterCompleted(Action<Exception, object> callback, object state);
 
         /// <summary>
-        /// 
+        /// Creates a <see cref="PipeReader"/> wrapping the specified <see cref="Stream"/>.
         /// </summary>
-        /// <param name="stream"></param>
-        /// <param name="readerOptions"></param>
+        /// <param name="stream">The stream.</param>
+        /// <param name="readerOptions">The options.</param>
         /// <returns></returns>
         public static PipeReader Create(Stream stream, StreamPipeReaderOptions readerOptions = null)
         {
