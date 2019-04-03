@@ -67,7 +67,7 @@ jobs:
               _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
               _buildExtraArguments: --warnAsError false
 
-             musl_x64_Debug:
+            musl_x64_Debug:
               _BuildConfig: Debug
               _architecture: x64
               _framework: netcoreapp
