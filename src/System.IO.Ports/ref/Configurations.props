@@ -2,8 +2,8 @@
   <PropertyGroup>
     <BuildConfigurations>
       netstandard;
-      netfx-Windows_NT;
-      net461-Windows_NT;
+      netfx;
+      net461;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
