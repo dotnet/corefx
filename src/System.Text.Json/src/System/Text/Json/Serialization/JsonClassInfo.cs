@@ -33,9 +33,43 @@ namespace System.Text.Json.Serialization
         internal void UpdateSortedPropertyCache(ref ReadStackFrame frame)
         {
             // Set the sorted property cache. Overwrite any existing cache which can occur in multi-threaded cases.
+            // Todo: on classes with many properties (about 50) we need to switch to a hashtable.
             if (frame.PropertyRefCache != null)
             {
-                _propertyRefsSorted = frame.PropertyRefCache.ToArray();
+                List<PropertyRef> cache = frame.PropertyRefCache;
+
+                // Add any missing properties. This creates a consistent cache count which is important for
+                // the loop in GetProperty() when there are multiple threads in a race conditions each generating
+                // a cache for a given POCO type but with different property counts in the json.
+                while (cache.Count < _propertyRefs.Count)
+                {
+                    for (int iProperty = 0; iProperty < _propertyRefs.Count; iProperty++)
+                    {
+                        PropertyRef propertyRef = _propertyRefs[iProperty];
+
+                        bool found = false;
+                        int iCacheProperty = 0;
+                        for (; iCacheProperty < cache.Count; iCacheProperty++)
+                        {
+                            if (IsPropertyRefEqual(ref propertyRef, cache[iCacheProperty]))
+                            {
+                                // The property is already cached, skip to the next property.
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (found == false)
+                        {
+                            cache.Add(propertyRef);
+                            break;
+                        }
+                    }
+                }
+
+                Debug.Assert(cache.Count == _propertyRefs.Count);
+                _propertyRefsSorted = cache.ToArray();
+                frame.PropertyRefCache = null;
             }
         }
 
@@ -85,20 +119,21 @@ namespace System.Text.Json.Serialization
             // First try sorted lookup.
             int propertyIndex = frame.PropertyIndex;
 
-            // If we're not trying to build the cache locally and there is an existing cache then use it.
+            // If we're not trying to build the cache locally, and there is an existing cache, then use it.
             bool hasPropertyCache = frame.PropertyRefCache == null && _propertyRefsSorted != null;
             if (hasPropertyCache)
             {
+                // This .Length is consistent no matter what json data intialized _propertyRefsSorted.
                 int count = _propertyRefsSorted.Length;
                 if (count != 0)
                 {
                     int iForward = propertyIndex;
                     int iBackward = propertyIndex - 1;
-                    while (iForward < count || (iBackward >= 0 && iBackward < count))
+                    while (iForward < count || iBackward >= 0)
                     {
                         if (iForward < count)
                         {
-                            if (TryIsPropertyRefEqual(ref _propertyRefsSorted[iForward], propertyName, key, out info))
+                            if (TryIsPropertyRefEqual(ref _propertyRefsSorted[iForward], propertyName, key, ref info))
                             {
                                 return info;
                             }
@@ -107,7 +142,7 @@ namespace System.Text.Json.Serialization
 
                         if (iBackward >= 0)
                         {
-                            if (TryIsPropertyRefEqual(ref _propertyRefsSorted[iBackward], propertyName, key, out info))
+                            if (TryIsPropertyRefEqual(ref _propertyRefsSorted[iBackward], propertyName, key, ref info))
                             {
                                 return info;
                             }
@@ -117,11 +152,13 @@ namespace System.Text.Json.Serialization
                 }
             }
 
-            // Try the main list which has all of the properties.
+            // Try the main list which has all of the properties in a consistent order.
+            // We could get here even when hasPropertyCache==true if there is a race condition with different json
+            // property ordering and _propertyRefsSorted is re-assigned while in the loop above.
             for (int i = 0; i < _propertyRefs.Count; i++)
             {
                 PropertyRef propertyRef = _propertyRefs[i];
-                if (TryIsPropertyRefEqual(ref propertyRef, propertyName, key, out info))
+                if (TryIsPropertyRefEqual(ref propertyRef, propertyName, key, ref info))
                 {
                     break;
                 }
@@ -166,7 +203,7 @@ namespace System.Text.Json.Serialization
             }
         }
 
-        private static bool TryIsPropertyRefEqual(ref PropertyRef propertyRef, ReadOnlySpan<byte> propertyName, ulong key, out JsonPropertyInfo info)
+        private static bool TryIsPropertyRefEqual(ref PropertyRef propertyRef, ReadOnlySpan<byte> propertyName, ulong key, ref JsonPropertyInfo info)
         {
             if (key == propertyRef.Key)
             {
@@ -179,7 +216,20 @@ namespace System.Text.Json.Serialization
                 }
             }
 
-            info = null;
+            return false;
+        }
+
+        private static bool IsPropertyRefEqual(ref PropertyRef propertyRef, PropertyRef other)
+        {
+            if (propertyRef.Key == other.Key)
+            {
+                if (propertyRef.Info.Name.Length <= PropertyNameKeyLength ||
+                    propertyRef.Info.Name.SequenceEqual(other.Info.Name))
+                {
+                    return true;
+                }
+            }
+
             return false;
         }
 
