@@ -78,10 +78,6 @@ namespace System.IO.Pipelines
                     return _internalTokenSource;
                 }
             }
-            set
-            {
-                _internalTokenSource = value;
-            }
         }
 
         /// <inheritdoc />
@@ -89,19 +85,19 @@ namespace System.IO.Pipelines
         {
             ThrowIfCompleted();
 
-            if (_readHead == null || _readTail == null)
-            {
-                // ThrowHelper.ThrowInvalidOperationException_NoDataRead();
-            }
-
             AdvanceTo((BufferSegment)consumed.GetObject(), consumed.GetInteger(), (BufferSegment)examined.GetObject(), examined.GetInteger());
         }
 
         private void AdvanceTo(BufferSegment consumedSegment, int consumedIndex, BufferSegment examinedSegment, int examinedIndex)
         {
-            if (consumedSegment == null)
+            if (consumedSegment == null || examinedSegment == null)
             {
                 return;
+            }
+
+            if (_readHead == null)
+            {
+                ThrowHelper.ThrowInvalidOperationException_AdvanceToInvalidCursor();
             }
 
             BufferSegment returnStart = _readHead;
@@ -285,12 +281,12 @@ namespace System.IO.Pipelines
                 // otherwise if someone calls advance afterward on the ReadResult, it will throw.
                 if (isCancellationRequested)
                 {
-                    AllocateReadTail();
-
                     ClearCancellationToken();
                 }
 
-                result = new ReadResult(GetCurrentReadOnlySequence(), isCancellationRequested, _isStreamCompleted);
+                ReadOnlySequence<byte> buffer = _readHead == null ? default : GetCurrentReadOnlySequence();
+
+                result = new ReadResult(buffer, isCancellationRequested, _isStreamCompleted);
                 return true;
             }
 
