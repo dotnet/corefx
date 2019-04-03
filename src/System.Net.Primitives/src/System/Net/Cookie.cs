@@ -41,7 +41,7 @@ namespace System.Net
         internal const string SpecialAttributeLiteral = "$";
 
         internal static readonly char[] PortSplitDelimiters = new char[] { ' ', ',', '\"' };
-        internal static readonly char[] ReservedToName = new char[] { ' ', '\t', '\r', '\n', '=', ';', ',' };
+        internal static readonly char[] ReservedToName = new char[] { '\t', '\r', '\n', '=', ';', ',' }; // Removed SP to match major web browsers behavior
         internal static readonly char[] ReservedToValue = new char[] { ';', ',' };
 
         private string m_comment = string.Empty; // Do not rename (binary serialization)
