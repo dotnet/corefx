@@ -12,7 +12,7 @@ using Xunit;
 
 namespace System.IO.Pipelines.Tests
 {
-    public partial class PipeWriterCopyToAsyncTests
+    public class PipeWriterCopyToAsyncTests
     {
         [Fact]
         public async Task CopyToAsyncThrowsArgumentNullExceptionForNullSource()

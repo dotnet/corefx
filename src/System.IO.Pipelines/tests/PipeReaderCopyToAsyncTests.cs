@@ -11,7 +11,7 @@ using Xunit;
 
 namespace System.IO.Pipelines.Tests
 {
-    public partial class CopyToAsyncTests
+    public class CopyToAsyncTests
     {
         private static readonly PipeOptions s_testOptions = new PipeOptions(readerScheduler: PipeScheduler.Inline);
 
