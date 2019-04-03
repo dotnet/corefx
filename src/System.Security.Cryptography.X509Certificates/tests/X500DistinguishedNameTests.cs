@@ -183,6 +183,14 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Equal(rname, dn.Decode(X500DistinguishedNameFlags.UseCommas | X500DistinguishedNameFlags.UseNewLines));
         }
 
+        [Fact]
+        public static void TpmIdentifiers()
+        {
+            X500DistinguishedName dn = new X500DistinguishedName("OID.2.23.133.2.3=id:0020065,OID.2.23.133.2.2=,OID.2.23.133.2.1=id:564D5700");
+            X500DistinguishedName dn2 = new X500DistinguishedName(dn.RawData);
+            Assert.Equal("TPMManufacturer=id:564D5700, TPMModel=\"\", TPMVersion=id:0020065", dn2.Decode(X500DistinguishedNameFlags.None));
+        }
+
         public static readonly object[][] WhitespaceBeforeCases =
         {
             // Regular space.
