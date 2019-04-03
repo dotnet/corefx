@@ -307,15 +307,10 @@ namespace System.IO.Pipelines
             }
             else if (_readTail.WritableBytes < _minimumReadThreshold)
             {
-                CreateNewTailSegment();
+                BufferSegment nextSegment = AllocateSegment();
+                _readTail.SetNext(nextSegment);
+                _readTail = nextSegment;
             }
-        }
-
-        private void CreateNewTailSegment()
-        {
-            BufferSegment nextSegment = AllocateSegment();
-            _readTail.SetNext(nextSegment);
-            _readTail = nextSegment;
         }
 
         private BufferSegment AllocateSegment()
