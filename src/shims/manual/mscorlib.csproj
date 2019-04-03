@@ -10,33 +10,33 @@
     <Compile Include="mscorlib.forwards.cs" />
   </ItemGroup>
   <ItemGroup>
-    <SeedTypePreference Include="System.Reflection.Emit.AssemblyBuilder" Aliases="System_Reflection_Emit" />
-    <SeedTypePreference Include="System.Reflection.Emit.AssemblyBuilderAccess" Aliases="System_Reflection_Emit" />
-    <SeedTypePreference Include="System.Reflection.Emit.ConstructorBuilder" Aliases="System_Reflection_Emit" />
-    <SeedTypePreference Include="System.Reflection.Emit.CustomAttributeBuilder" Aliases="System_Reflection_Emit_ILGeneration" />
-    <SeedTypePreference Include="System.Reflection.Emit.DynamicILInfo" Aliases="System_Reflection_Emit_Lightweight" />
-    <SeedTypePreference Include="System.Reflection.Emit.DynamicMethod" Aliases="System_Reflection_Emit_Lightweight" />
-    <SeedTypePreference Include="System.Reflection.Emit.EnumBuilder" Aliases="System_Reflection_Emit" />
-    <SeedTypePreference Include="System.Reflection.Emit.EventBuilder" Aliases="System_Reflection_Emit" />
-    <SeedTypePreference Include="System.Reflection.Emit.FieldBuilder" Aliases="System_Reflection_Emit" />
-    <SeedTypePreference Include="System.Reflection.Emit.GenericTypeParameterBuilder" Aliases="System_Reflection_Emit" />
-    <SeedTypePreference Include="System.Reflection.Emit.ILGenerator" Aliases="System_Reflection_Emit_ILGeneration" />
-    <SeedTypePreference Include="System.Reflection.Emit.Label" Aliases="System_Reflection_Emit_ILGeneration" />
-    <SeedTypePreference Include="System.Reflection.Emit.LocalBuilder" Aliases="System_Reflection_Emit_ILGeneration" />
-    <SeedTypePreference Include="System.Reflection.Emit.MethodBuilder" Aliases="System_Reflection_Emit" />
-    <SeedTypePreference Include="System.Reflection.Emit.ModuleBuilder" Aliases="System_Reflection_Emit" />
-    <SeedTypePreference Include="System.Reflection.Emit.ParameterBuilder" Aliases="System_Reflection_Emit_ILGeneration" />
-    <SeedTypePreference Include="System.Reflection.Emit.PropertyBuilder" Aliases="System_Reflection_Emit" />
-    <SeedTypePreference Include="System.Reflection.Emit.SignatureHelper" Aliases="System_Reflection_Emit_ILGeneration" />
-    <SeedTypePreference Include="System.Reflection.Emit.TypeBuilder" Aliases="System_Reflection_Emit" />
-    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.DefaultInterfaceAttribute" Aliases="System_Runtime_InteropServices_WindowsRuntime" />
-    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken" Aliases="System_Runtime_InteropServices_WindowsRuntime" />
-    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.EventRegistrationTokenTable`1" Aliases="System_Runtime_InteropServices_WindowsRuntime" />
-    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.IActivationFactory" Aliases="System_Runtime_InteropServices_WindowsRuntime" />
-    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.InterfaceImplementedInVersionAttribute" Aliases="System_Runtime_InteropServices_WindowsRuntime" />
-    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute" Aliases="System_Runtime_InteropServices_WindowsRuntime" />
-    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.ReturnValueNameAttribute" Aliases="System_Runtime_InteropServices_WindowsRuntime" />
-    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.WindowsRuntimeMarshal" Aliases="System_Runtime_InteropServices_WindowsRuntime" />
-    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.WriteOnlyArrayAttribute" Aliases="System_Runtime_InteropServices_WindowsRuntime" />
+    <SeedTypePreference Include="System.Reflection.Emit.AssemblyBuilder" />
+    <SeedTypePreference Include="System.Reflection.Emit.AssemblyBuilderAccess" />
+    <SeedTypePreference Include="System.Reflection.Emit.ConstructorBuilder" />
+    <SeedTypePreference Include="System.Reflection.Emit.CustomAttributeBuilder" />
+    <SeedTypePreference Include="System.Reflection.Emit.DynamicILInfo" />
+    <SeedTypePreference Include="System.Reflection.Emit.DynamicMethod" />
+    <SeedTypePreference Include="System.Reflection.Emit.EnumBuilder" />
+    <SeedTypePreference Include="System.Reflection.Emit.EventBuilder" />
+    <SeedTypePreference Include="System.Reflection.Emit.FieldBuilder" />
+    <SeedTypePreference Include="System.Reflection.Emit.GenericTypeParameterBuilder" />
+    <SeedTypePreference Include="System.Reflection.Emit.ILGenerator" />
+    <SeedTypePreference Include="System.Reflection.Emit.Label" />
+    <SeedTypePreference Include="System.Reflection.Emit.LocalBuilder" />
+    <SeedTypePreference Include="System.Reflection.Emit.MethodBuilder" />
+    <SeedTypePreference Include="System.Reflection.Emit.ModuleBuilder" />
+    <SeedTypePreference Include="System.Reflection.Emit.ParameterBuilder" />
+    <SeedTypePreference Include="System.Reflection.Emit.PropertyBuilder" />
+    <SeedTypePreference Include="System.Reflection.Emit.SignatureHelper" />
+    <SeedTypePreference Include="System.Reflection.Emit.TypeBuilder" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.DefaultInterfaceAttribute" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.EventRegistrationTokenTable`1" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.IActivationFactory" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.InterfaceImplementedInVersionAttribute" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.ReturnValueNameAttribute" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.WindowsRuntimeMarshal" />
+    <SeedTypePreference Include="System.Runtime.InteropServices.WindowsRuntime.WriteOnlyArrayAttribute" />
   </ItemGroup>
 </Project>
