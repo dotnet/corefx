@@ -31,7 +31,7 @@ namespace System.IO.Packaging.Tests
         {
             return new FileInfo($"{GetTestFilePath(null, memberName, lineNumber)}.{extension}");
         }
-
+        
         [Fact]
         public void WriteRelationsTwice()
         {
@@ -3756,6 +3756,128 @@ namespace System.IO.Packaging.Tests
             }
         }
 
+        [Fact]
+        public void GetPartCallsGetPartCore()
+        {
+            // Package is an abstract class that others can derive from. Those derived classes can override GetPartsCore and potentially not
+            // return anything. Furthermore, it is not guaranteed that GetPartsCore will have been called if the package wasn't created using
+            // the Package.Open API, which only ensures that ZipPackage's internal data structures are filled in.
+            NonEnumerablePackage mockPackage = new NonEnumerablePackage();
+
+            Uri partUri = new Uri("/idontexist.xml", UriKind.Relative);
+            PackagePart part = mockPackage.GetPart(partUri);
+
+            Assert.NotNull(part);
+            Assert.Equal(part.Uri, partUri);
+            Assert.IsType(typeof(MockPackagePart), part);
+
+            // Validate we get the same object back if we call GetPart again
+            Assert.Same(part, mockPackage.GetPart(partUri));
+        }
+        
+        [Fact]
+        public void ComparePackUriSamePackSamePart()
+        {
+            Uri partUri = new Uri("/idontexist.xml", UriKind.Relative);
+            Uri packageUri = new Uri("application://");
+
+            Uri combinedUri = PackUriHelper.Create(packageUri, partUri);
+            Assert.Equal("pack://application:,,,/idontexist.xml", combinedUri.ToString());
+
+            Uri sameCombinedUri = PackUriHelper.Create(packageUri, partUri);
+            Assert.Equal("pack://application:,,,/idontexist.xml", combinedUri.ToString());
+
+            Assert.Equal(combinedUri, sameCombinedUri);
+
+            Uri returnedPackageUri = PackUriHelper.GetPackageUri(combinedUri);
+            Uri returnedSamePackageUri = PackUriHelper.GetPackageUri(sameCombinedUri);
+
+            // Validate the PackageUri returned from PackUriHelper.GetPackageHelper matches what was given to PackUriHelper.Create
+            Assert.Equal(packageUri, returnedPackageUri);
+            Assert.Equal(packageUri, returnedSamePackageUri);
+
+            // Validate PackUriHelper.ComparePackUri correctly validates identical pack uri's.
+            Assert.Equal(0, PackUriHelper.ComparePackUri(combinedUri, sameCombinedUri));
+        }
+
+        [Fact]
+        public void ComparePackUriSamePackDifferentPart()
+        {
+            Uri partUri = new Uri("/idontexist.xml", UriKind.Relative);
+            Uri differentPartUri = new Uri("/idontexist2.xml", UriKind.Relative);
+            Uri packageUri = new Uri("application://");
+
+            Uri combinedUriWithPart = PackUriHelper.Create(packageUri, partUri);
+            Assert.Equal("pack://application:,,,/idontexist.xml", combinedUriWithPart.ToString());
+
+            Uri combinedUriWithDifferentPart = PackUriHelper.Create(packageUri, differentPartUri);
+            Assert.Equal("pack://application:,,,/idontexist2.xml", combinedUriWithDifferentPart.ToString());
+
+            Uri combinedUriNoPart = PackUriHelper.Create(packageUri);
+            Assert.Equal("pack://application:,,,/", combinedUriNoPart.ToString());
+
+            Uri returnedPackageUri = PackUriHelper.GetPackageUri(combinedUriWithPart);
+            Uri returnedPackageUriNoPart = PackUriHelper.GetPackageUri(combinedUriNoPart);
+            Uri returnedPackageUriDifferentPart = PackUriHelper.GetPackageUri(combinedUriWithDifferentPart);
+
+            // Validate the PackageUri returned from PackUriHelper.GetPackageHelper matches what was given to PackUriHelper.Create
+            Assert.Equal(packageUri, returnedPackageUri);
+            Assert.Equal(packageUri, returnedPackageUriNoPart);
+            Assert.Equal(packageUri, returnedPackageUriDifferentPart);
+
+            // Validate PackUriHelper.ComparePackUri correctly compares pack uri's with different parts. These are not
+            // considered equal because the parts are different.
+            Assert.NotEqual(0, PackUriHelper.ComparePackUri(combinedUriWithPart, combinedUriWithDifferentPart));
+            Assert.NotEqual(0, PackUriHelper.ComparePackUri(combinedUriWithPart, combinedUriNoPart));
+            Assert.NotEqual(0, PackUriHelper.ComparePackUri(combinedUriNoPart, combinedUriWithDifferentPart));
+        }
+
+        [Fact]
+        public void ComparePackUriDifferentPack()
+        {
+            Uri partUri = new Uri("/idontexist.xml", UriKind.Relative);
+            Uri packageUri = new Uri("application://");
+            Uri differentPackageUri = new Uri("siteoforigin://");
+
+            Uri packageUriWithPart = PackUriHelper.Create(packageUri, partUri);
+            Assert.Equal("pack://application:,,,/idontexist.xml", packageUriWithPart.ToString());
+
+            Uri samePackageNoPart = PackUriHelper.Create(packageUri);
+            Assert.Equal("pack://application:,,,/", samePackageNoPart.ToString());
+
+            Uri differentPackageSamePart = PackUriHelper.Create(differentPackageUri, partUri);
+            Assert.Equal("pack://siteoforigin:,,,/idontexist.xml", differentPackageSamePart.ToString());
+
+            Uri returnedPackageUri = PackUriHelper.GetPackageUri(packageUriWithPart);
+            Uri returnedSamePackageUri = PackUriHelper.GetPackageUri(samePackageNoPart);
+            Uri returnedDifferentPackageUri = PackUriHelper.GetPackageUri(differentPackageSamePart);
+
+            // Validate the PackageUri returned from PackUriHelper.GetPackageHelper matches what was given to PackUriHelper.Create
+            Assert.Equal(packageUri, returnedPackageUri);
+            Assert.Equal(packageUri, returnedSamePackageUri);
+            Assert.Equal(differentPackageUri, returnedDifferentPackageUri);
+
+            // Validate PackUriHelper.ComparePackUri correctly compares pack uri's with different packages.
+            Assert.NotEqual(0, PackUriHelper.ComparePackUri(packageUriWithPart, differentPackageSamePart));
+            Assert.NotEqual(0, PackUriHelper.ComparePackUri(samePackageNoPart, differentPackageSamePart));
+        }
+
+        [Fact]
+        void CreatePackUriWithFragment()
+        {
+            Uri partUri = new Uri("/idontexist.xml", UriKind.Relative);
+            Uri packageUri = new Uri("application://");
+            string fragment = "#abc";
+            Uri packageUriWithPart = PackUriHelper.Create(packageUri, partUri, fragment);
+            Assert.Equal("pack://application:,,,/idontexist.xml#abc", packageUriWithPart.ToString());
+
+            Assert.Throws<ArgumentException>(() => {
+                string badFragment = "abc";
+                PackUriHelper.Create(packageUri, partUri, badFragment);
+            });
+
+        }
+
         private const string DocumentRelationshipType = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument";
     }
 
@@ -3770,6 +3892,49 @@ namespace System.IO.Packaging.Tests
             }
             var s = string.Format(format, args) + ", ";
             sb.Append(s);
+        }
+    }
+
+    public class NonEnumerablePackage : Package
+    {
+        public NonEnumerablePackage() : base(FileAccess.Read)
+        {
+        }
+
+        protected override PackagePart CreatePartCore(Uri partUri, string contentType, CompressionOption compressionOption)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void DeletePartCore(Uri partUri)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void FlushCore()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override PackagePart GetPartCore(Uri uri)
+        {
+            return new MockPackagePart(this, uri);
+        }
+        protected override PackagePart[] GetPartsCore()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class MockPackagePart : PackagePart
+    {
+        public MockPackagePart(Package package, Uri uri) : base(package, uri)
+        {
+        }
+
+        protected override Stream GetStreamCore(FileMode mode, FileAccess access)
+        {
+            throw new NotImplementedException();
         }
     }
 }
