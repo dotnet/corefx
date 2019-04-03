@@ -377,11 +377,15 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 0x08, 0x00, 0x00, 0x00,
 
                 // padded version:
+                // [ E1 88 B4 ] -> U+1234
+                // [ ED ] -> invalid (ED cannot be followed by A0) -> U+FFFD
+                // [ A0 ] -> invalid (not ASCII, not valid leading byte) -> U+FFFD
+                // [ 80 ] -> invalid (not ASCII, not valid leading byte) -> U+FFFD
                 0xE1, 0x88, 0xB4, 0xED, 0xA0, 0x80, 0x00, 0x00,
             }, builder.Slice(12, -132));
 
             // the default decoder replaces bad byte sequences by U+FFFD
-            Assert.Equal("\u1234\ufffd\ufffd", ReadVersion(builder));
+            Assert.Equal("\u1234\ufffd\ufffd\ufffd", ReadVersion(builder));
         }
     }
 }

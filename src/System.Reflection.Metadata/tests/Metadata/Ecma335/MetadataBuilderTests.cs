@@ -492,7 +492,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
                 Assert.Equal(@"a/", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n6))));
                 Assert.Equal(@"/", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n7))));
                 Assert.Equal(@"\\", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n8))));
-                Assert.Equal("\uFFFd\uFFFd", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n9))));
+                Assert.Equal("\uFFFD\uFFFD\uFFFD", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n9))));
                 Assert.Equal("\0", mdReader.GetString(MetadataTokens.DocumentNameBlobHandle(MetadataTokens.GetHeapOffset(n10))));
             }
         }
