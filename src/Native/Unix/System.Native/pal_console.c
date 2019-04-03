@@ -445,7 +445,7 @@ static bool InitializeTerminalCore()
 {
     g_haveInitTermios = tcgetattr(STDIN_FILENO, &g_initTermios) >= 0;
 
-    if (!g_haveInitTermios && (errno == ENOTTY || errno == ENODEV))
+    if (!g_haveInitTermios)
     {
         g_noTty = true;
     }
