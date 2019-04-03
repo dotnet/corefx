@@ -4,7 +4,7 @@
       netcoreapp3.0;
       netstandard;
       net461;
-      uap10.0.16300;
+      uap10.0.16299;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
