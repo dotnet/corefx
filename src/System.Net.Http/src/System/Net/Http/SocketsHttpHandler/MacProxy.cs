@@ -25,7 +25,7 @@ namespace System.Net.Http
 
         private static Uri GetProxyUri(string scheme, CFProxy proxy)
         {
-            UriBuilder uriBuilder = new UriBuilder(
+            var uriBuilder = new UriBuilder(
                 scheme,
                 proxy.HostName,
                 proxy.PortNumber);
@@ -66,7 +66,7 @@ namespace System.Net.Http
                 CFRunLoopStop(runLoop);
             };
 
-            CFStreamClientContext clientContext = new CFStreamClientContext();
+            var clientContext = new CFStreamClientContext();
             CFRunLoopSourceRef loopSource =
                 proxy.ProxyType == CFProxy.kCFProxyTypeAutoConfigurationURL ?
                 CFNetworkExecuteProxyAutoConfigurationURL(proxy.AutoConfigurationURL, cfurl, cb, ref clientContext) :
