@@ -781,6 +781,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
         /// </exception>
+        /// <exception cref="FormatException">
+        ///   The value cannot be represented as a <see cref="DateTime"/>.
+        /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
@@ -829,6 +832,9 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
         /// </exception>
+        /// <exception cref="FormatException">
+        ///   The value cannot be represented as a <see cref="DateTimeOffset"/>.
+        /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
@@ -836,6 +842,57 @@ namespace System.Text.Json
         public DateTimeOffset GetDateTimeOffset()
         {
             if (TryGetDateTimeOffset(out DateTimeOffset value))
+            {
+                return value;
+            }
+
+            throw new FormatException();
+        }
+
+        /// <summary>
+        ///   Attempts to represent the current JSON string as a <see cref="Guid"/>.
+        /// </summary>
+        /// <param name="value">Receives the value.</param>
+        /// <remarks>
+        ///   This method does not create a Guid representation of values other than JSON strings.
+        /// </remarks>
+        /// <returns>
+        ///   <see langword="true"/> if the string can be represented as a <see cref="Guid"/>,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public bool TryGetGuid(out Guid value)
+        {
+            CheckValidInstance();
+
+            return _parent.TryGetValue(_idx, out value);
+        }
+
+        /// <summary>
+        ///   Gets the value of the element as a <see cref="Guid"/>.
+        /// </summary>
+        /// <remarks>
+        ///   This method does not create a Guid representation of values other than JSON strings.
+        /// </remarks>
+        /// <returns>The value of the element as a <see cref="Guid"/>.</returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///   The value cannot be represented as a <see cref="Guid"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        /// <seealso cref="ToString"/>
+        public Guid GetGuid()
+        {
+            if (TryGetGuid(out Guid value))
             {
                 return value;
             }
@@ -877,6 +934,61 @@ namespace System.Text.Json
             CheckValidInstance();
 
             return _parent.GetPropertyRawValueAsString(_idx);
+        }
+
+        /// <summary>
+        ///   Write the element into the provided writer as a named object property.
+        /// </summary>
+        /// <param name="propertyName">The name for this value within the JSON object.</param>
+        /// <param name="writer">The writer.</param>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public void WriteAsProperty(ReadOnlySpan<char> propertyName, ref Utf8JsonWriter writer)
+        {
+            CheckValidInstance();
+
+            _parent.WriteElementTo(_idx, ref writer, propertyName);
+        }
+
+        /// <summary>
+        ///   Write the element into the provided writer as a named object property.
+        /// </summary>
+        /// <param name="utf8PropertyName">
+        ///   The name for this value within the JSON object, as UTF-8 text.
+        /// </param>
+        /// <param name="writer">The writer.</param>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public void WriteAsProperty(ReadOnlySpan<byte> utf8PropertyName, ref Utf8JsonWriter writer)
+        {
+            CheckValidInstance();
+
+            _parent.WriteElementTo(_idx, ref writer, utf8PropertyName);
+        }
+
+        /// <summary>
+        ///   Write the element into the provided writer as a value.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public void WriteAsValue(ref Utf8JsonWriter writer)
+        {
+            CheckValidInstance();
+
+            _parent.WriteElementTo(_idx, ref writer);
         }
 
         /// <summary>

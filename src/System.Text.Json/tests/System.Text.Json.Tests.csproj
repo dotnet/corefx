@@ -16,6 +16,7 @@
     <Compile Include="JsonDateTimeTestData.cs" />
     <Compile Include="JsonDocumentDetachTests.cs" />
     <Compile Include="JsonDocumentTests.cs" />
+    <Compile Include="JsonElementWriteTests.cs" />
     <Compile Include="JsonGuidTestData.cs" />
     <Compile Include="JsonNumberTestData.cs" />
     <Compile Include="JsonReaderStateAndOptionsTests.cs" />
