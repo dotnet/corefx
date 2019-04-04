@@ -1549,7 +1549,7 @@ namespace System.Tests
                 char[] first = new char[length];
                 first[0] = ' ';
                 first[length - 1] = ' ';
-                string s1 = new string(a);
+                string s1 = new string(first, 1, length - 2);
 
                 ReadOnlySpan<char> ros = s1.AsSpan();
                 Assert.True(ros.SequenceEqual(ros.Trim()));
