@@ -262,6 +262,8 @@ namespace System.IO.Pipelines.Tests
                 readResult = await reader.ReadAsync();
                 reader.AdvanceTo(readResult.Buffer.End);
             }
+
+            reader.Complete();
         }
 
         [Fact]
@@ -282,6 +284,8 @@ namespace System.IO.Pipelines.Tests
                 readResult = await reader.ReadAsync();
                 Assert.False(readResult.IsCanceled);
             }
+
+            reader.Complete();
         }
 
         [Fact]
@@ -307,51 +311,56 @@ namespace System.IO.Pipelines.Tests
             reader.AdvanceTo(readResult.Buffer.End);
 
             reader.Complete();
+
+            pipe.Writer.Complete();
+            pipe.Reader.Complete();
         }
 
         [Fact]
         public async Task ConsumingSegmentsReturnsMemoryToPool()
         {
-            var pool = new DisposeTrackingBufferPool();
-            var options = new StreamPipeReaderOptions(pool: pool, bufferSize: 4096, minimumReadSize: 1024);
-            // 2 full segments
-            var stream = new MemoryStream(new byte[options.BufferSize * 2]);
-            PipeReader reader = PipeReader.Create(stream, options);
+            using (var pool = new DisposeTrackingBufferPool())
+            {
+                var options = new StreamPipeReaderOptions(pool: pool, bufferSize: 4096, minimumReadSize: 1024);
+                // 2 full segments
+                var stream = new MemoryStream(new byte[options.BufferSize * 2]);
+                PipeReader reader = PipeReader.Create(stream, options);
 
-            ReadResult readResult = await reader.ReadAsync();
-            ReadOnlySequence<byte> buffer = readResult.Buffer;
-            Assert.Equal(1, pool.CurrentlyRentedBlocks);
-            Assert.Equal(options.BufferSize, buffer.Length);
-            reader.AdvanceTo(buffer.Start, buffer.End);
+                ReadResult readResult = await reader.ReadAsync();
+                ReadOnlySequence<byte> buffer = readResult.Buffer;
+                Assert.Equal(1, pool.CurrentlyRentedBlocks);
+                Assert.Equal(options.BufferSize, buffer.Length);
+                reader.AdvanceTo(buffer.Start, buffer.End);
 
-            readResult = await reader.ReadAsync();
-            buffer = readResult.Buffer;
-            Assert.Equal(options.BufferSize * 2, buffer.Length);
-            Assert.Equal(2, pool.CurrentlyRentedBlocks);
-            reader.AdvanceTo(buffer.Start, buffer.End);
+                readResult = await reader.ReadAsync();
+                buffer = readResult.Buffer;
+                Assert.Equal(options.BufferSize * 2, buffer.Length);
+                Assert.Equal(2, pool.CurrentlyRentedBlocks);
+                reader.AdvanceTo(buffer.Start, buffer.End);
 
-            readResult = await reader.ReadAsync();
-            buffer = readResult.Buffer;
-            Assert.Equal(options.BufferSize * 2, buffer.Length);
-            // We end up allocating a 3rd block here since we don't know ahead of time that 
-            // it's the last one
-            Assert.Equal(3, pool.CurrentlyRentedBlocks);
+                readResult = await reader.ReadAsync();
+                buffer = readResult.Buffer;
+                Assert.Equal(options.BufferSize * 2, buffer.Length);
+                // We end up allocating a 3rd block here since we don't know ahead of time that 
+                // it's the last one
+                Assert.Equal(3, pool.CurrentlyRentedBlocks);
 
-            reader.AdvanceTo(buffer.Slice(buffer.Start, 4096).End, buffer.End);
+                reader.AdvanceTo(buffer.Slice(buffer.Start, 4096).End, buffer.End);
 
-            Assert.Equal(2, pool.CurrentlyRentedBlocks);
-            Assert.Equal(1, pool.DisposedBlocks);
+                Assert.Equal(2, pool.CurrentlyRentedBlocks);
+                Assert.Equal(1, pool.DisposedBlocks);
 
-            readResult = await reader.ReadAsync();
-            buffer = readResult.Buffer;
-            Assert.Equal(options.BufferSize, buffer.Length);
-            reader.AdvanceTo(buffer.Slice(buffer.Start, 4096).End, buffer.End);
+                readResult = await reader.ReadAsync();
+                buffer = readResult.Buffer;
+                Assert.Equal(options.BufferSize, buffer.Length);
+                reader.AdvanceTo(buffer.Slice(buffer.Start, 4096).End, buffer.End);
 
-            // All of the blocks get returned here since we hit the first case of emptying the entire list
-            Assert.Equal(0, pool.CurrentlyRentedBlocks);
-            Assert.Equal(3, pool.DisposedBlocks);
+                // All of the blocks get returned here since we hit the first case of emptying the entire list
+                Assert.Equal(0, pool.CurrentlyRentedBlocks);
+                Assert.Equal(3, pool.DisposedBlocks);
 
-            reader.Complete();
+                reader.Complete();
+            }
         }
 
         [Fact]
@@ -361,33 +370,46 @@ namespace System.IO.Pipelines.Tests
             PipeReader reader = PipeReader.Create(stream);
             reader.Complete();
 
-            Assert.True(stream.Disposed);
+            Assert.Equal(1, stream.DisposedCount);
+        }
+
+        [Fact]
+        public void CompletingAlreadyCompletePipeReaderNoopsSecondTime()
+        {
+            var stream = new ObserveDisposeStream();
+            PipeReader reader = PipeReader.Create(stream);
+            reader.Complete();
+            reader.Complete();
+
+            Assert.Equal(1, stream.DisposedCount);
         }
 
         [Fact]
         public async Task CompletingReturnsUnconsumedMemoryToPool()
         {
-            var pool = new DisposeTrackingBufferPool();
-            var options = new StreamPipeReaderOptions(pool: pool, bufferSize: 4096, minimumReadSize: 1024);
-            // 2 full segments
-            var stream = new MemoryStream(new byte[options.BufferSize * 3]);
-            PipeReader reader = PipeReader.Create(stream, options);
-
-            while (true)
+            using (var pool = new DisposeTrackingBufferPool())
             {
-                ReadResult readResult = await reader.ReadAsync();
-                reader.AdvanceTo(readResult.Buffer.Start, readResult.Buffer.End);
+                var options = new StreamPipeReaderOptions(pool: pool, bufferSize: 4096, minimumReadSize: 1024);
+                // 2 full segments
+                var stream = new MemoryStream(new byte[options.BufferSize * 3]);
+                PipeReader reader = PipeReader.Create(stream, options);
 
-                if (readResult.IsCompleted)
+                while (true)
                 {
-                    break;
-                }
-            }
+                    ReadResult readResult = await reader.ReadAsync();
+                    reader.AdvanceTo(readResult.Buffer.Start, readResult.Buffer.End);
 
-            Assert.Equal(4, pool.CurrentlyRentedBlocks);
-            reader.Complete();
-            Assert.Equal(0, pool.CurrentlyRentedBlocks);
-            Assert.Equal(4, pool.DisposedBlocks);
+                    if (readResult.IsCompleted)
+                    {
+                        break;
+                    }
+                }
+
+                Assert.Equal(4, pool.CurrentlyRentedBlocks);
+                reader.Complete();
+                Assert.Equal(0, pool.CurrentlyRentedBlocks);
+                Assert.Equal(4, pool.DisposedBlocks);
+            }
         }
 
         [Fact]
@@ -460,7 +482,7 @@ namespace System.IO.Pipelines.Tests
 
         private class ObserveDisposeStream : ReadOnlyStream
         {
-            public bool Disposed { get; set; }
+            public int DisposedCount { get; set; }
 
             public override int Read(byte[] buffer, int offset, int count)
             {
@@ -469,7 +491,7 @@ namespace System.IO.Pipelines.Tests
 
             protected override void Dispose(bool disposing)
             {
-                Disposed = true;
+                DisposedCount++;
 
                 base.Dispose(disposing);
             }
