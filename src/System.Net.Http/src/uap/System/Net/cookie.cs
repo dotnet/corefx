@@ -65,7 +65,8 @@ namespace System.Net
         internal const string SpecialAttributeLiteral = "$";
 
         internal static readonly char[] PortSplitDelimiters = new char[] { ' ', ',', '\"' };
-        internal static readonly char[] Reserved2Name = new char[] { ' ', '\t', '\r', '\n', '=', ';', ',' };
+        // Space (' ') should be reserved as well per RFCs, but major web browsers support it and some web sites use it - so we support it too
+        internal static readonly char[] Reserved2Name = new char[] { '\t', '\r', '\n', '=', ';', ',' };
         internal static readonly char[] Reserved2Value = new char[] { ';', ',' };
 
         // fields
