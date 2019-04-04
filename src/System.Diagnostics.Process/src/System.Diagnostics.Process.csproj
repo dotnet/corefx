@@ -107,8 +107,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetThreadTimes.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.GetThreadTimes.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetStdHandle.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.GetStdHandle.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetStdHandle.cs">
+      <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.GetStdHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.CreateProcess.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.CreateProcess.cs</Link>
@@ -236,8 +236,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.ThreadOptions.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.ThreadOptions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.HandleTypes.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.HandleTypes.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.HandleTypes.cs">
+      <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.HandleTypes.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.ProcessOptions.cs">
       <Link>Common\Interop\Windows\Advapi32\Interop.ProcessOptions.cs</Link>
@@ -311,6 +311,9 @@
     <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.SysConf.cs">
       <Link>Common\Interop\Unix\Interop.SysConf.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ConfigureTerminalForChildProcess.cs">
+      <Link>Common\Interop\Unix\Interop.ConfigureTerminalForChildProcess.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ForkAndExecProcess.cs">
       <Link>Common\Interop\Unix\Interop.ForkAndExecProcess.cs</Link>
     </Compile>
@@ -334,6 +337,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetUid.cs">
       <Link>Common\Interop\Unix\Interop.GetUid.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.InitializeTerminalAndSignalHandling.cs">
+      <Link>Common\Interop\Unix\Interop.InitializeTerminalAndSignalHandling.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Kill.cs">
       <Link>Common\Interop\Unix\Interop.Kill.cs</Link>
