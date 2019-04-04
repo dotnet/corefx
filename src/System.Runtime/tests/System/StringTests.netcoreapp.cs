@@ -2,11 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Tests
@@ -39,6 +41,52 @@ namespace System.Tests
         {
             var span = new ReadOnlySpan<char>(valueArray, startIndex, length);
             Assert.Equal(expected, new string(span));
+        }
+
+        [Fact]
+        public static unsafe void Ctor_CharPtr_DoesNotAccessInvalidPage()
+        {
+            // Allocates a buffer of all 'x' followed by a null terminator,
+            // then attempts to create a string instance from this at various offsets.
+
+            const int MaxCharCount = 128;
+            using BoundedMemory<char> boundedMemory = BoundedMemory.Allocate<char>(MaxCharCount);
+            boundedMemory.Span.Fill('x');
+            boundedMemory.Span[MaxCharCount - 1] = '\0';
+            boundedMemory.MakeReadonly();
+
+            using MemoryHandle memoryHandle = boundedMemory.Memory.Pin();
+
+            for (int i = 0; i < MaxCharCount; i++)
+            {
+                string expectedString = new string('x', MaxCharCount - i - 1);
+                string actualString = new string((char*)memoryHandle.Pointer + i);
+                Assert.Equal(expectedString, actualString);
+            }
+        }
+
+        [ConditionalFact(nameof(IsSimpleActiveCodePage))]
+        public static unsafe void Ctor_SBytePtr_DoesNotAccessInvalidPage()
+        {
+            // Allocates a buffer of all ' ' followed by a null terminator,
+            // then attempts to create a string instance from this at various offsets.
+            // We use U+0020 SPACE instead of any other character because it lives
+            // at offset 0x20 across every supported code page.
+
+            const int MaxByteCount = 128;
+            using BoundedMemory<sbyte> boundedMemory = BoundedMemory.Allocate<sbyte>(MaxByteCount);
+            boundedMemory.Span.Fill((sbyte)' ');
+            boundedMemory.Span[MaxByteCount - 1] = (sbyte)'\0';
+            boundedMemory.MakeReadonly();
+
+            using MemoryHandle memoryHandle = boundedMemory.Memory.Pin();
+
+            for (int i = 0; i < MaxByteCount; i++)
+            {
+                string expectedString = new string(' ', MaxByteCount - i - 1);
+                string actualString = new string((sbyte*)memoryHandle.Pointer + i);
+                Assert.Equal(expectedString, actualString);
+            }
         }
 
         [Fact]
@@ -232,24 +280,24 @@ namespace System.Tests
         public static void Contains_StringComparison_TurkishI()
         {
             string str = "\u0069\u0130";
-            RemoteInvoke((source) =>
+            RemoteExecutor.Invoke((source) =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
                 Assert.True(source.Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
                 Assert.True(source.AsSpan().Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, str).Dispose();
 
-            RemoteInvoke((source) =>
+            RemoteExecutor.Invoke((source) =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
                 Assert.False(source.Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
                 Assert.False(source.AsSpan().Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, str).Dispose();
         }
 
@@ -618,7 +666,7 @@ namespace System.Tests
         {
             string src = "\u0069\u0130";
 
-            RemoteInvoke((source) =>
+            RemoteExecutor.Invoke((source) =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
@@ -629,10 +677,10 @@ namespace System.Tests
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCulture));
                 Assert.Equal("aa", source.Replace("\u0130", "a", StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, src).Dispose();
 
-            RemoteInvoke((source) =>
+            RemoteExecutor.Invoke((source) =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
@@ -643,7 +691,7 @@ namespace System.Tests
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCulture));
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, src).Dispose();
         }
 
@@ -847,7 +895,7 @@ namespace System.Tests
         [Fact]
         public static void IndexOf_TurkishI_TurkishCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
@@ -876,14 +924,14 @@ namespace System.Tests
                 Assert.Equal(10, span.IndexOf(new char[] { value }, StringComparison.Ordinal));
                 Assert.Equal(10, span.IndexOf(new char[] { value }, StringComparison.OrdinalIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_TurkishI_InvariantCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -898,14 +946,14 @@ namespace System.Tests
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_TurkishI_EnglishUSCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
@@ -920,14 +968,14 @@ namespace System.Tests
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_EquivalentDiacritics_EnglishUSCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 string s = "Exhibit a\u0300\u00C0";
                 char value = '\u00C0';
@@ -939,14 +987,14 @@ namespace System.Tests
                 Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_EquivalentDiacritics_InvariantCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 string s = "Exhibit a\u0300\u00C0";
                 char value = '\u00C0';
@@ -956,14 +1004,14 @@ namespace System.Tests
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_CyrillicE_EnglishUSCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 string s = "Foo\u0400Bar";
                 char value = '\u0400';
@@ -975,14 +1023,14 @@ namespace System.Tests
                 Assert.Equal(3, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_CyrillicE_InvariantCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 string s = "Foo\u0400Bar";
                 char value = '\u0400';
@@ -992,7 +1040,7 @@ namespace System.Tests
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -1108,6 +1156,29 @@ namespace System.Tests
 
             range = new Range(Index.FromEnd(s.Length + 1), Index.FromEnd(0));
             Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s.Substring(range));
+        }
+
+        /// <summary>
+        /// Returns true only if U+0020 SPACE is represented as the single byte 0x20 in the active code page.
+        /// </summary>
+        public unsafe static bool IsSimpleActiveCodePage
+        {
+            get
+            {
+                IntPtr pAnsiStr = IntPtr.Zero;
+                try
+                {
+                    pAnsiStr = Marshal.StringToHGlobalAnsi(" ");
+                    return ((byte*)pAnsiStr)[0] == (byte)' ' && ((byte*)pAnsiStr)[1] == (byte)'\0';
+                }
+                finally
+                {
+                    if (pAnsiStr != IntPtr.Zero)
+                    {
+                        Marshal.FreeHGlobal(pAnsiStr);
+                    }
+                }
+            }
         }
     }
 }

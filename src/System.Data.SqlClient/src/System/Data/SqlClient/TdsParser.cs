@@ -1847,17 +1847,17 @@ namespace System.Data.SqlClient
                             // ENVCHANGE must be processed synchronously (since it can modify the state of many objects)
                             stateObj._syncOverAsync = true;
 
-                            SqlEnvChange[] env;
+                            SqlEnvChange env;
                             if (!TryProcessEnvChange(tokenLength, stateObj, out env))
                             {
                                 return false;
                             }
 
-                            for (int ii = 0; ii < env.Length; ii++)
+                            while (env != null)
                             {
-                                if (env[ii] != null && !this.Connection.IgnoreEnvChange)
+                                if (!this.Connection.IgnoreEnvChange)
                                 {
-                                    switch (env[ii].type)
+                                    switch (env.type)
                                     {
                                         case TdsEnums.ENV_BEGINTRAN:
                                         case TdsEnums.ENV_ENLISTDTC:
@@ -1872,12 +1872,12 @@ namespace System.Data.SqlClient
 
                                             if (null != _currentTransaction)
                                             {
-                                                _currentTransaction.TransactionId = env[ii].newLongValue;   // this is defined as a ULongLong in the server and in the TDS Spec.
+                                                _currentTransaction.TransactionId = env.newLongValue;   // this is defined as a ULongLong in the server and in the TDS Spec.
                                             }
                                             else
                                             {
-                                                TransactionType transactionType = (TdsEnums.ENV_BEGINTRAN == env[ii].type) ? TransactionType.LocalFromTSQL : TransactionType.Distributed;
-                                                _currentTransaction = new SqlInternalTransaction(_connHandler, transactionType, null, env[ii].newLongValue);
+                                                TransactionType transactionType = (TdsEnums.ENV_BEGINTRAN == env.type) ? TransactionType.LocalFromTSQL : TransactionType.Distributed;
+                                                _currentTransaction = new SqlInternalTransaction(_connHandler, transactionType, null, env.newLongValue);
                                             }
                                             if (null != _statistics && !_statisticsIsInTransaction)
                                             {
@@ -1902,22 +1902,22 @@ namespace System.Data.SqlClient
                                                 // Check null for case where Begin and Rollback obtained in the same message.
                                                 if (SqlInternalTransaction.NullTransactionId != _currentTransaction.TransactionId)
                                                 {
-                                                    Debug.Assert(_currentTransaction.TransactionId != env[ii].newLongValue, "transaction id's are not equal!");
+                                                    Debug.Assert(_currentTransaction.TransactionId != env.newLongValue, "transaction id's are not equal!");
                                                 }
 #endif
 
-                                                if (TdsEnums.ENV_COMMITTRAN == env[ii].type)
+                                                if (TdsEnums.ENV_COMMITTRAN == env.type)
                                                 {
                                                     _currentTransaction.Completed(TransactionState.Committed);
                                                 }
-                                                else if (TdsEnums.ENV_ROLLBACKTRAN == env[ii].type)
+                                                else if (TdsEnums.ENV_ROLLBACKTRAN == env.type)
                                                 {
                                                     //  Hold onto transaction id if distributed tran is rolled back.  This must
                                                     //  be sent to the server on subsequent executions even though the transaction
                                                     //  is considered to be rolled back.
                                                     if (_currentTransaction.IsDistributed && _currentTransaction.IsActive)
                                                     {
-                                                        _retainedTransactionId = env[ii].oldLongValue;
+                                                        _retainedTransactionId = env.oldLongValue;
                                                     }
                                                     _currentTransaction.Completed(TransactionState.Aborted);
                                                 }
@@ -1931,10 +1931,14 @@ namespace System.Data.SqlClient
                                             break;
 
                                         default:
-                                            _connHandler.OnEnvChange(env[ii]);
+                                            _connHandler.OnEnvChange(env);
                                             break;
                                     }
                                 }
+                                SqlEnvChange head = env;
+                                env = env.Next;
+                                SqlEnvChangePool.Release(head);
+                                head = null;
                             }
                             break;
                         }
@@ -2171,38 +2175,35 @@ namespace System.Data.SqlClient
         // This is in its own method to avoid always allocating the lambda in TryRun 
         private static void TryRunSetupSpinWaitContinuation(TdsParserStateObject stateObj) => SpinWait.SpinUntil(() => !stateObj._attentionSending);
 
-        private bool TryProcessEnvChange(int tokenLength, TdsParserStateObject stateObj, out SqlEnvChange[] sqlEnvChange)
+        private bool TryProcessEnvChange(int tokenLength, TdsParserStateObject stateObj, out SqlEnvChange sqlEnvChange)
         {
             // There could be multiple environment change messages following this token.
             byte byteLength;
             int processedLength = 0;
-            int nvalues = 0;
-            SqlEnvChange[] envarray = new SqlEnvChange[3];  // Why is this hardcoded to 3?
+            SqlEnvChange head = null;
+            SqlEnvChange tail = null;
 
             sqlEnvChange = null;
 
             while (tokenLength > processedLength)
             {
-                if (nvalues >= envarray.Length)
-                {
-                    // This is a rare path. Most of the time we will have 1 or 2 envchange data streams.
-                    SqlEnvChange[] newenvarray = new SqlEnvChange[envarray.Length + 3];
-
-                    for (int ii = 0; ii < envarray.Length; ii++)
-                        newenvarray[ii] = envarray[ii];
-
-                    envarray = newenvarray;
-                }
-
-                SqlEnvChange env = new SqlEnvChange();
+                SqlEnvChange env = SqlEnvChangePool.Allocate();
 
                 if (!stateObj.TryReadByte(out env.type))
                 {
                     return false;
                 }
 
-                envarray[nvalues] = env;
-                nvalues++;
+                if (head is null)
+                {
+                    head = env;
+                    tail = env;
+                }
+                else
+                {
+                    tail.Next = env;
+                    tail = env;
+                }
 
                 switch (env.type)
                 {
@@ -2474,7 +2475,7 @@ namespace System.Data.SqlClient
                 processedLength += env.length;
             }
 
-            sqlEnvChange = envarray;
+            sqlEnvChange = head;
             return true;
         }
 
@@ -2487,7 +2488,8 @@ namespace System.Data.SqlClient
                 return false;
             }
             env.newLength = byteLength;
-            env.newBinValue = new byte[env.newLength];
+            env.newBinValue = ArrayPool<byte>.Shared.Rent(env.newLength);
+            env.newBinRented = true;
             if (!stateObj.TryReadByteArray(env.newBinValue, env.newLength))
             {
                 return false;
@@ -2497,7 +2499,8 @@ namespace System.Data.SqlClient
                 return false;
             }
             env.oldLength = byteLength;
-            env.oldBinValue = new byte[env.oldLength];
+            env.oldBinValue = ArrayPool<byte>.Shared.Rent(env.oldLength);
+            env.oldBinRented = true;
             if (!stateObj.TryReadByteArray(env.oldBinValue, env.oldLength))
             {
                 return false;
@@ -2895,7 +2898,7 @@ namespace System.Data.SqlClient
                 return false;
             }
 
-            byte[] b = new byte[TdsEnums.VERSION_SIZE];
+            Span<byte> b = stackalloc byte[TdsEnums.VERSION_SIZE];
             if (!stateObj.TryReadByteArray(b, b.Length))
             {
                 return false;
@@ -4807,14 +4810,12 @@ namespace System.Data.SqlClient
                 case TdsEnums.SQLUNIQUEID:
                     {
                         Debug.Assert(length == 16, "invalid length for SqlGuid type!");
-
-                        byte[] b = new byte[length];
-
+                        Span<byte> b = stackalloc byte[16];
                         if (!stateObj.TryReadByteArray(b, length))
                         {
                             return false;
                         }
-                        value.SqlGuid = SqlTypeWorkarounds.SqlGuidCtor(b, true);
+                        value.Guid = ConstructGuid(b);
                         break;
                     }
 
@@ -6537,7 +6538,7 @@ namespace System.Data.SqlClient
                 if (ADP.IsCatchableExceptionType(e))
                 {
                     // be sure to wipe out our buffer if we started sending stuff
-                    _physicalStateObj._outputPacketNumber = 1;  // end of message - reset to 1 - per ramas
+                    _physicalStateObj.ResetPacketCounters();
                     _physicalStateObj.ResetBuffer();
                 }
 
@@ -6595,7 +6596,7 @@ namespace System.Data.SqlClient
             SniContext outerContext = _physicalStateObj.SniContext;
             _physicalStateObj.SniContext = SniContext.Snix_ProcessSspi;
             // allocate received buffer based on length from SSPI message
-            byte[] receivedBuff = new byte[receivedLength];
+            byte[] receivedBuff = ArrayPool<byte>.Shared.Rent(receivedLength);
 
             // read SSPI data received from server
             Debug.Assert(_physicalStateObj._syncOverAsync, "Should not attempt pends in a synchronous call");
@@ -6609,13 +6610,13 @@ namespace System.Data.SqlClient
             uint sendLength = s_maxSSPILength;
 
             // make call for SSPI data
-
             SSPIData(receivedBuff, (uint)receivedLength, ref sendBuff, ref sendLength);
 
             // DO NOT SEND LENGTH - TDS DOC INCORRECT!  JUST SEND SSPI DATA!
             _physicalStateObj.WriteByteArray(sendBuff, (int)sendLength, 0);
 
             ArrayPool<byte>.Shared.Return(rentedSendBuff, clearArray: true);
+            ArrayPool<byte>.Shared.Return(receivedBuff, clearArray: true);
 
             // set message type so server knows its a SSPI response
             _physicalStateObj._outputMessageType = TdsEnums.MT_SSPI;
@@ -6914,7 +6915,7 @@ namespace System.Data.SqlClient
 
             // be sure to wipe out our buffer if we started sending stuff
             stateObj.ResetBuffer();
-            stateObj._outputPacketNumber = 1;  // end of message - reset to 1 - per ramas
+            stateObj.ResetPacketCounters();
 
             if (old_outputPacketNumber != 1 && _state == TdsParserState.OpenLoggedIn)
             {
@@ -8299,7 +8300,7 @@ namespace System.Data.SqlClient
                             ccb = (isSqlType) ? ((SqlBinary)value).Length : ((byte[])value).Length;
                             break;
                         case TdsEnums.SQLUNIQUEID:
-                            ccb = GUID_SIZE;   // that's a constant for guid
+                            ccb = GUID_SIZE;
                             break;
                         case TdsEnums.SQLBIGCHAR:
                         case TdsEnums.SQLBIGVARCHAR:
@@ -8897,7 +8898,7 @@ namespace System.Data.SqlClient
             return null;
         }
 
-        private class TdsOutputStream : Stream
+        private sealed class TdsOutputStream : Stream
         {
             private TdsParser _parser;
             private TdsParserStateObject _stateObj;
@@ -9041,7 +9042,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        private class ConstrainedTextWriter : TextWriter
+        private sealed class ConstrainedTextWriter : TextWriter
         {
             private TextWriter _next;
             private int _size;
@@ -9172,156 +9173,164 @@ namespace System.Data.SqlClient
             {
                 preambleToSkip = encoding.GetPreamble();
             }
-            ConstrainedTextWriter writer = new ConstrainedTextWriter(new StreamWriter(new TdsOutputStream(this, stateObj, preambleToSkip), encoding), size);
-
             XmlWriterSettings writerSettings = new XmlWriterSettings();
-            writerSettings.CloseOutput = false;		// don't close the memory stream
+            writerSettings.CloseOutput = false;     // don't close the memory stream
             writerSettings.ConformanceLevel = ConformanceLevel.Fragment;
             if (_asyncWrite)
             {
                 writerSettings.Async = true;
             }
-            XmlWriter ww = XmlWriter.Create(writer, writerSettings);
-
-            if (feed._source.ReadState == ReadState.Initial)
-            {
-                feed._source.Read();
-            }
-
-            while (!feed._source.EOF && !writer.IsComplete)
-            {
-                // We are copying nodes from a reader to a writer.  This will cause the
-                // XmlDeclaration to be emitted despite ConformanceLevel.Fragment above.
-                // Therefore, we filter out the XmlDeclaration while copying.
-                if (feed._source.NodeType == XmlNodeType.XmlDeclaration)
+            using (ConstrainedTextWriter writer = new ConstrainedTextWriter(new StreamWriter(new TdsOutputStream(this, stateObj, preambleToSkip), encoding), size))
+            using (XmlWriter ww = XmlWriter.Create(writer, writerSettings))
+            { 
+                if (feed._source.ReadState == ReadState.Initial)
                 {
                     feed._source.Read();
-                    continue;
+                }
+
+                while (!feed._source.EOF && !writer.IsComplete)
+                {
+                    // We are copying nodes from a reader to a writer.  This will cause the
+                    // XmlDeclaration to be emitted despite ConformanceLevel.Fragment above.
+                    // Therefore, we filter out the XmlDeclaration while copying.
+                    if (feed._source.NodeType == XmlNodeType.XmlDeclaration)
+                    {
+                        feed._source.Read();
+                        continue;
+                    }
+
+                    if (_asyncWrite)
+                    {
+                        await ww.WriteNodeAsync(feed._source, true).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        ww.WriteNode(feed._source, true);
+                    }
                 }
 
                 if (_asyncWrite)
                 {
-                    await ww.WriteNodeAsync(feed._source, true).ConfigureAwait(false);
+                    await ww.FlushAsync().ConfigureAwait(false);
                 }
                 else
                 {
-                    ww.WriteNode(feed._source, true);
+                    ww.Flush();
                 }
-            }
-
-            if (_asyncWrite)
-            {
-                await ww.FlushAsync().ConfigureAwait(false);
-            }
-            else
-            {
-                ww.Flush();
             }
         }
 
         private async Task WriteTextFeed(TextDataFeed feed, Encoding encoding, bool needBom, TdsParserStateObject stateObj, int size)
         {
             Debug.Assert(encoding == null || !needBom);
-            char[] inBuff = new char[constTextBufferSize];
+            char[] inBuff = ArrayPool<char>.Shared.Rent(constTextBufferSize);
 
-            encoding = encoding ?? new UnicodeEncoding(false, false);
+            encoding = encoding ?? TextDataFeed.DefaultEncoding;
 
-            ConstrainedTextWriter writer = new ConstrainedTextWriter(new StreamWriter(new TdsOutputStream(this, stateObj, null), encoding), size);
-
-            if (needBom)
+            using (ConstrainedTextWriter writer = new ConstrainedTextWriter(new StreamWriter(new TdsOutputStream(this, stateObj, null), encoding), size))
             {
+                if (needBom)
+                {
+                    if (_asyncWrite)
+                    {
+                        await writer.WriteAsync((char)TdsEnums.XMLUNICODEBOM).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        writer.Write((char)TdsEnums.XMLUNICODEBOM);
+                    }
+                }
+
+                int nWritten = 0;
+                do
+                {
+                    int nRead = 0;
+
+                    if (_asyncWrite)
+                    {
+                        nRead = await feed._source.ReadBlockAsync(inBuff, 0, constTextBufferSize).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        nRead = feed._source.ReadBlock(inBuff, 0, constTextBufferSize);
+                    }
+
+                    if (nRead == 0)
+                    {
+                        break;
+                    }
+
+                    if (_asyncWrite)
+                    {
+                        await writer.WriteAsync(inBuff, 0, nRead).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        writer.Write(inBuff, 0, nRead);
+                    }
+
+                    nWritten += nRead;
+                } while (!writer.IsComplete);
+
                 if (_asyncWrite)
                 {
-                    await writer.WriteAsync((char)TdsEnums.XMLUNICODEBOM).ConfigureAwait(false);
+                    await writer.FlushAsync().ConfigureAwait(false);
                 }
                 else
                 {
-                    writer.Write((char)TdsEnums.XMLUNICODEBOM);
+                    writer.Flush();
                 }
             }
 
-            int nWritten = 0;
-            do
-            {
-                int nRead = 0;
-
-                if (_asyncWrite)
-                {
-                    nRead = await feed._source.ReadBlockAsync(inBuff, 0, constTextBufferSize).ConfigureAwait(false);
-                }
-                else
-                {
-                    nRead = feed._source.ReadBlock(inBuff, 0, constTextBufferSize);
-                }
-
-                if (nRead == 0)
-                {
-                    break;
-                }
-
-                if (_asyncWrite)
-                {
-                    await writer.WriteAsync(inBuff, 0, nRead).ConfigureAwait(false);
-                }
-                else
-                {
-                    writer.Write(inBuff, 0, nRead);
-                }
-
-                nWritten += nRead;
-            } while (!writer.IsComplete);
-
-            if (_asyncWrite)
-            {
-                await writer.FlushAsync().ConfigureAwait(false);
-            }
-            else
-            {
-                writer.Flush();
-            }
+            ArrayPool<char>.Shared.Return(inBuff, clearArray: true);
         }
 
         private async Task WriteStreamFeed(StreamDataFeed feed, TdsParserStateObject stateObj, int len)
         {
-            TdsOutputStream output = new TdsOutputStream(this, stateObj, null);
-            byte[] buff = new byte[constBinBufferSize];
-            int nWritten = 0;
-            do
+            byte[] buff = ArrayPool<byte>.Shared.Rent(constBinBufferSize);
+
+            using (TdsOutputStream output = new TdsOutputStream(this, stateObj, null))
             {
-                int nRead = 0;
-                int readSize = constBinBufferSize;
-                if (len > 0 && nWritten + readSize > len)
+                int nWritten = 0;
+                do
                 {
-                    readSize = len - nWritten;
-                }
+                    int nRead = 0;
+                    int readSize = constBinBufferSize;
+                    if (len > 0 && nWritten + readSize > len)
+                    {
+                        readSize = len - nWritten;
+                    }
 
-                Debug.Assert(readSize >= 0);
+                    Debug.Assert(readSize >= 0);
 
-                if (_asyncWrite)
-                {
-                    nRead = await feed._source.ReadAsync(buff, 0, readSize).ConfigureAwait(false);
-                }
-                else
-                {
-                    nRead = feed._source.Read(buff, 0, readSize);
-                }
+                    if (_asyncWrite)
+                    {
+                        nRead = await feed._source.ReadAsync(buff, 0, readSize).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        nRead = feed._source.Read(buff, 0, readSize);
+                    }
 
-                if (nRead == 0)
-                {
-                    return;
-                }
+                    if (nRead == 0)
+                    {
+                        return;
+                    }
 
-                if (_asyncWrite)
-                {
-                    await output.WriteAsync(buff, 0, nRead).ConfigureAwait(false);
-                }
-                else
-                {
-                    output.Write(buff, 0, nRead);
-                }
+                    if (_asyncWrite)
+                    {
+                        await output.WriteAsync(buff, 0, nRead).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        output.Write(buff, 0, nRead);
+                    }
 
-                nWritten += nRead;
-            } while (len <= 0 || nWritten < len);
+                    nWritten += nRead;
+                } while (len <= 0 || nWritten < len);
+            }
+
+            ArrayPool<byte>.Shared.Return(buff, clearArray: true);
         }
 
         private Task NullIfCompletedWriteTask(Task task)

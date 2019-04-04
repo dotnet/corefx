@@ -7,9 +7,6 @@ using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-#if ALLOW_PARTIALLY_TRUSTED_CALLERS
-    using System.Security;
-#endif
 using System.Threading;
 
 namespace System.Diagnostics
@@ -59,12 +56,21 @@ namespace System.Diagnostics
         /// </example>
         public string Id
         {
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+        [System.Security.SecuritySafeCriticalAttribute]
+#endif
             get
             {
                 // if we represented it as a traceId-spanId, convert it to a string.  
                 // We can do this concatenation with a stackalloced Span<char> if we actually used Id a lot.  
                 if (_id == null && _spanIdSet)
-                    _id = "00-" + _traceId.ToHexString() + "-" + _spanId.ToHexString() + "-00";
+                {
+                    // Convert flags to binary.  
+                    Span<char> flagsChars = stackalloc char[2];
+                    ActivityTraceId.ByteToHexDigits(flagsChars, _w3CIdFlags);
+                    _id = "00-" + _traceId.ToHexString() + "-" + _spanId.ToHexString() + "-" + flagsChars.ToString();
+
+                }
                 return _id;
             }
         }
@@ -259,7 +265,7 @@ namespace System.Diagnostics
         /// Set the parent ID using the W3C convention using a TraceId and a SpanId.   This
         /// constructor has the advantage that no string manipulation is needed to set the ID.  
         /// </summary>
-        public Activity SetParentId(in ActivityTraceId traceId, in ActivitySpanId spanId)
+        public Activity SetParentId(in ActivityTraceId traceId, in ActivitySpanId spanId, ActivityTraceFlags activityTraceFlags = ActivityTraceFlags.None)
         {
             if (Parent != null)
             {
@@ -275,6 +281,8 @@ namespace System.Diagnostics
                 _traceIdSet = true;
                 _parentSpanId = spanId;
                 _parentSpanIdSet = true;
+                _w3CIdFlags = (byte) activityTraceFlags;
+                _w3CIdFlagsSet = true;
             }
             return this;
         }
@@ -489,20 +497,50 @@ namespace System.Diagnostics
         /// </summary>
         public ref readonly ActivityTraceId TraceId
         {
-#if ALLOW_PARTIALLY_TRUSTED_CALLERS
-            [System.Security.SecuritySafeCriticalAttribute]
-#endif
             get
             {
                 if (!_traceIdSet)
                 {
-                    if (_id != null && IdFormat == ActivityIdFormat.W3C)
+                    TrySetTraceIdFromParent();
+                }
+
+                return ref _traceId;
+            }
+        }
+
+        /// <summary>
+        /// True if the W3CIdFlags.Recorded flag is set.   
+        /// </summary>
+        public bool Recorded { get => (ActivityTraceFlags & ActivityTraceFlags.Recorded) != 0; }
+
+        byte _w3CIdFlags;
+        bool _w3CIdFlagsSet;
+
+        /// <summary>
+        /// Return the flags (defined by the W3C ID specification) associated with the activity.  
+        /// </summary>
+        public ActivityTraceFlags ActivityTraceFlags
+        {
+            get
+            {
+                if (!_w3CIdFlagsSet)
+                {
+                    if (Parent != null)
                     {
-                        _traceId = ActivityTraceId.CreateFromString(_id.AsSpan(3, 32));
-                        _traceIdSet = true;
+                        ActivityTraceFlags = Parent.ActivityTraceFlags;
+                    }
+                    else if (_parentId != null && IsW3CId(_parentId))
+                    {
+                        _w3CIdFlags = ActivityTraceId.HexByteFromChars(_parentId[53], _parentId[54]);
+                        _w3CIdFlagsSet = true;
                     }
                 }
-                return ref _traceId;
+                return (ActivityTraceFlags) _w3CIdFlags;
+            }
+            set
+            {
+                _w3CIdFlagsSet = true;
+                _w3CIdFlags = (byte)value;
             }
         }
 
@@ -597,35 +635,16 @@ namespace System.Diagnostics
         /// Set the ID (lazily, avoiding strings if possible) to a W3C ID (using the
         /// traceId from the parent if possible 
         /// </summary>
-#if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
-#endif
         private void GenerateW3CId()
         {
             // Get the TraceId from the parent or make a new one.  
             if (!_traceIdSet)
             {
-                if (Parent != null && Parent.IdFormat == ActivityIdFormat.W3C)
-                {
-                    _traceId = Parent.TraceId;
-                }
-                else if (_parentId != null && IsW3CId(_parentId))
-                {
-                    try
-                    {
-                        _traceId = ActivityTraceId.CreateFromString(_parentId.AsSpan(3, 32));
-                    }
-                    catch
-                    {
-                        _traceId = ActivityTraceId.CreateRandom();
-                    }
-                }
-                else
+                if (!TrySetTraceIdFromParent())
                 {
                     _traceId = ActivityTraceId.CreateRandom();
+                    _traceIdSet = true;
                 }
-
-                _traceIdSet = true;
             }
             // Create a new SpanID. 
             _spanId = ActivitySpanId.CreateRandom();
@@ -735,7 +754,7 @@ namespace System.Diagnostics
             return '|' + Interlocked.Increment(ref s_currentRootId).ToString("x") + s_uniqSuffix;
         }
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
+        [System.Security.SecuritySafeCriticalAttribute]
 #endif
         private static unsafe long GetRandomNumber()
         {
@@ -753,6 +772,33 @@ namespace System.Diagnostics
             }
 
             return canSet;
+        }
+
+#if ALLOW_PARTIALLY_TRUSTED_CALLERS
+        [System.Security.SecuritySafeCriticalAttribute]
+#endif
+        private bool TrySetTraceIdFromParent()
+        {
+            Debug.Assert(!_traceIdSet);
+
+            if (Parent != null && Parent.IdFormat == ActivityIdFormat.W3C)
+            {
+                _traceId = Parent.TraceId;
+                _traceIdSet = true;
+            }
+            else if (_parentId != null && IsW3CId(_parentId))
+            {
+                try
+                {
+                    _traceId = ActivityTraceId.CreateFromString(_parentId.AsSpan(3, 32));
+                    _traceIdSet = true;
+                }
+                catch
+                {
+                }
+            }
+
+            return _traceIdSet;
         }
 
         private string _rootId;
@@ -799,6 +845,16 @@ namespace System.Diagnostics
     }
 
     /// <summary>
+    /// These flags are defined by the W3C standard along with the ID for the activity. 
+    /// </summary>
+    [Flags]
+    public enum ActivityTraceFlags
+    {
+        None = 0,
+        Recorded = 1        // The Activity (or more likley its parents) has been marked as useful to record 
+    }
+
+    /// <summary>
     /// The possibilities for the format of the ID
     /// </summary>
     public enum ActivityIdFormat
@@ -818,7 +874,7 @@ namespace System.Diagnostics
     /// It is mostly useful as an exchange type.  
     /// </summary>
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
+        [System.Security.SecuritySafeCriticalAttribute]
 #endif
     public unsafe readonly struct ActivityTraceId : IEquatable<ActivityTraceId>
     {
@@ -951,7 +1007,7 @@ namespace System.Diagnostics
         /// </summary>
         internal static string SpanToHexString(ReadOnlySpan<byte> bytes)
         {
-            Debug.Assert(bytes.Length <= 16);   // We want it to not be very bing
+            Debug.Assert(bytes.Length <= 16);   // We want it to not be very big
             Span<char> result = stackalloc char[bytes.Length * 2];
             int pos = 0;
             foreach (byte b in bytes)
@@ -972,7 +1028,7 @@ namespace System.Diagnostics
             for (int i = 0; i < outBytes.Length; i++)
                 outBytes[i] = HexByteFromChars(charData[i * 2], charData[i * 2 + 1]);
         }
-        private static byte HexByteFromChars(char char1, char char2)
+        internal static byte HexByteFromChars(char char1, char char2)
         {
             return (byte)(HexDigitToBinary(char1) * 16 + HexDigitToBinary(char2));
         }
@@ -991,6 +1047,14 @@ namespace System.Diagnostics
                 return (char)('0' + val);
             return (char)(('a' - 10) + val);
         }
+
+        internal static void ByteToHexDigits(Span<char> outChars, byte val)
+        {
+            Debug.Assert(outChars.Length == 2);
+            outChars[0] = BinaryToHexDigit((val >> 4) & 0xF);
+            outChars[1] = BinaryToHexDigit(val & 0xF);
+        }
+
         #endregion
 
         readonly ulong _id1;
@@ -1009,7 +1073,7 @@ namespace System.Diagnostics
     /// It is mostly useful as an exchange type.  
     /// </summary>
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
-        [SecuritySafeCritical]
+        [System.Security.SecuritySafeCriticalAttribute]
 #endif
     public unsafe readonly struct ActivitySpanId : IEquatable<ActivitySpanId>
     {

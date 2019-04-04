@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics;
 
 namespace System.Text.Json.Serialization
 {
@@ -42,7 +43,7 @@ namespace System.Text.Json.Serialization
 
             byte[] result;
 
-            using (var output = new ArrayBufferWriter<byte>(options.EffectiveBufferSize))
+            using (var output = new ArrayBufferWriter<byte>(options.DefaultBufferSize))
             {
                 WriteCore(output, value, type, options);
                 result = output.WrittenMemory.ToArray();
@@ -58,7 +59,7 @@ namespace System.Text.Json.Serialization
 
             string result;
 
-            using (var output = new ArrayBufferWriter<byte>(options.EffectiveBufferSize))
+            using (var output = new ArrayBufferWriter<byte>(options.DefaultBufferSize))
             {
                 WriteCore(output, value, type, options);
                 result = JsonReaderHelper.TranscodeHelper(output.WrittenMemory.Span);
@@ -69,6 +70,8 @@ namespace System.Text.Json.Serialization
 
         private static void WriteCore(ArrayBufferWriter<byte> output, object value, Type type, JsonSerializerOptions options)
         {
+            Debug.Assert(type != null || value == null);
+
             var writerState = new JsonWriterState(options.WriterOptions);
             var writer = new Utf8JsonWriter(output, writerState);
 
@@ -78,7 +81,8 @@ namespace System.Text.Json.Serialization
             }
             else
             {
-                if (type == null)
+                //  We treat typeof(object) special and allow polymorphic behavior.
+                if (type == typeof(object))
                 {
                     type = value.GetType();
                 }

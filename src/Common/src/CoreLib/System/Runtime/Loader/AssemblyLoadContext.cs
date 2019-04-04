@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace System.Runtime.Loader
 {
-    public abstract partial class AssemblyLoadContext
+    public partial class AssemblyLoadContext
     {
         private enum InternalState
         {
@@ -28,14 +28,13 @@ namespace System.Runtime.Loader
             Unloading
         }
 
-        private static readonly Dictionary<long, WeakReference<AssemblyLoadContext>> s_contextsToUnload = new Dictionary<long, WeakReference<AssemblyLoadContext>>();
+        private static readonly Dictionary<long, WeakReference<AssemblyLoadContext>> s_allContexts = new Dictionary<long, WeakReference<AssemblyLoadContext>>();
         private static long s_nextId;
-        private static bool s_isProcessExiting;
 
         // Indicates the state of this ALC (Alive or in Unloading state)
         private InternalState _state;
 
-        // Id used by s_contextsToUnload
+        // Id used by s_allContexts
         private readonly long _id;
 
         // synchronization primitive to protect against usage of this instance while unloading
@@ -44,18 +43,25 @@ namespace System.Runtime.Loader
         // Contains the reference to VM's representation of the AssemblyLoadContext
         private readonly IntPtr _nativeAssemblyLoadContext;
 
-        protected AssemblyLoadContext() : this(false, false)
+        protected AssemblyLoadContext() : this(false, false, null)
         {
         }
 
-        protected AssemblyLoadContext(bool isCollectible) : this(false, isCollectible)
+        protected AssemblyLoadContext(bool isCollectible) : this(false, isCollectible, null)
         {
         }
 
-        private protected AssemblyLoadContext(bool representsTPALoadContext, bool isCollectible)
+        public AssemblyLoadContext(string name, bool isCollectible = false) : this(false, isCollectible, name)
+        {
+        }
+
+        private protected AssemblyLoadContext(bool representsTPALoadContext, bool isCollectible, string name)
         {
             // Initialize the VM side of AssemblyLoadContext if not already done.
             IsCollectible = isCollectible;
+
+            Name = name;
+
             // The _unloadLock needs to be assigned after the IsCollectible to ensure proper behavior of the finalizer
             // even in case the following allocation fails or the thread is aborted between these two lines.
             _unloadLock = new object();
@@ -67,21 +73,16 @@ namespace System.Runtime.Loader
                 GC.SuppressFinalize(this);
             }
 
+            // If this is a collectible ALC, we are creating a weak handle tracking resurrection otherwise we use a strong handle
+            var thisHandle = GCHandle.Alloc(this, IsCollectible ? GCHandleType.WeakTrackResurrection : GCHandleType.Normal);
+            var thisHandlePtr = GCHandle.ToIntPtr(thisHandle);
+            _nativeAssemblyLoadContext = InitializeAssemblyLoadContext(thisHandlePtr, representsTPALoadContext, isCollectible);
+
             // Add this instance to the list of alive ALC
-            lock (s_contextsToUnload)
+            lock (s_allContexts)
             {
-                if (s_isProcessExiting)
-                {
-                    throw new InvalidOperationException(SR.AssemblyLoadContext_Constructor_CannotInstantiateWhileUnloading);
-                }
-
-                // If this is a collectible ALC, we are creating a weak handle tracking resurrection otherwise we use a strong handle
-                var thisHandle = GCHandle.Alloc(this, IsCollectible ? GCHandleType.WeakTrackResurrection : GCHandleType.Normal);
-                var thisHandlePtr = GCHandle.ToIntPtr(thisHandle);
-                _nativeAssemblyLoadContext = InitializeAssemblyLoadContext(thisHandlePtr, representsTPALoadContext, isCollectible);
-
                 _id = s_nextId++;
-                s_contextsToUnload.Add(_id, new WeakReference<AssemblyLoadContext>(this, true));
+                s_allContexts.Add(_id, new WeakReference<AssemblyLoadContext>(this, true));
             }
         }
 
@@ -99,35 +100,49 @@ namespace System.Runtime.Loader
             }
         }
 
+        private void RaiseUnloadEvent()
+        {
+            // Ensure that we raise the Unload event only once
+            Interlocked.Exchange(ref Unloading, null)?.Invoke(this);
+        }
+
         private void InitiateUnload()
         {
-            var unloading = Unloading;
-            Unloading = null;
-            unloading?.Invoke(this);
+            RaiseUnloadEvent();
 
             // When in Unloading state, we are not supposed to be called on the finalizer
             // as the native side is holding a strong reference after calling Unload
             lock (_unloadLock)
             {
-                if (!s_isProcessExiting)
-                {
-                    Debug.Assert(_state == InternalState.Alive);
+                Debug.Assert(_state == InternalState.Alive);
 
-                    var thisStrongHandle = GCHandle.Alloc(this, GCHandleType.Normal);
-                    var thisStrongHandlePtr = GCHandle.ToIntPtr(thisStrongHandle);
-                    // The underlying code will transform the original weak handle
-                    // created by InitializeLoadContext to a strong handle
-                    PrepareForAssemblyLoadContextRelease(_nativeAssemblyLoadContext, thisStrongHandlePtr);
-                }
+                var thisStrongHandle = GCHandle.Alloc(this, GCHandleType.Normal);
+                var thisStrongHandlePtr = GCHandle.ToIntPtr(thisStrongHandle);
+                // The underlying code will transform the original weak handle
+                // created by InitializeLoadContext to a strong handle
+                PrepareForAssemblyLoadContextRelease(_nativeAssemblyLoadContext, thisStrongHandlePtr);
 
                 _state = InternalState.Unloading;
             }
 
-            if (!s_isProcessExiting)
+            lock (s_allContexts)
             {
-                lock (s_contextsToUnload)
+                s_allContexts.Remove(_id);
+            }
+        }
+
+        public IEnumerable<Assembly> Assemblies
+        {
+            get
+            {
+                foreach (Assembly a in GetLoadedAssemblies())
                 {
-                    s_contextsToUnload.Remove(_id);
+                    AssemblyLoadContext alc = GetLoadContext(a);
+
+                    if (alc == this)
+                    {
+                        yield return a;
+                    }
                 }
             }
         }
@@ -167,6 +182,37 @@ namespace System.Runtime.Loader
 
         public bool IsCollectible { get; }
 
+        public string Name { get; }
+
+        public override string ToString() => "\"" + Name + "\" " + GetType().ToString() + " #" + _id;
+
+        public static IEnumerable<AssemblyLoadContext> All
+        {
+            get
+            {
+                AssemblyLoadContext d = AssemblyLoadContext.Default; // Ensure default is initialized
+
+                List<WeakReference<AssemblyLoadContext>> alcList = null;
+                lock (s_allContexts)
+                {
+                    // To make this thread safe we need a quick snapshot while locked
+                    alcList = new List<WeakReference<AssemblyLoadContext>>(s_allContexts.Values);
+                }
+
+                foreach (WeakReference<AssemblyLoadContext> weakAlc in alcList)
+                {
+                    AssemblyLoadContext alc = null;
+
+                    weakAlc.TryGetTarget(out alc);
+
+                    if (alc != null)
+                    {
+                        yield return alc;
+                    }
+                }
+            }
+        }
+
         // Helper to return AssemblyName corresponding to the path of an IL assembly
         public static AssemblyName GetAssemblyName(string assemblyPath)
         {
@@ -181,7 +227,10 @@ namespace System.Runtime.Loader
         // Custom AssemblyLoadContext implementations can override this
         // method to perform custom processing and use one of the protected
         // helpers above to load the assembly.
-        protected abstract Assembly Load(AssemblyName assemblyName);
+        protected virtual Assembly Load(AssemblyName assemblyName)
+        {
+            return null;
+        }
 
         [System.Security.DynamicSecurityMethod] // Methods containing StackCrawlMark local var has to be marked DynamicSecurityMethod
         public Assembly LoadFromAssemblyName(AssemblyName assemblyName)
@@ -328,18 +377,15 @@ namespace System.Runtime.Loader
 
         internal static void OnProcessExit()
         {
-            lock (s_contextsToUnload)
+            lock (s_allContexts)
             {
-                s_isProcessExiting = true;
-                foreach (var alcAlive in s_contextsToUnload)
+                foreach (var alcAlive in s_allContexts)
                 {
                     if (alcAlive.Value.TryGetTarget(out AssemblyLoadContext alc))
                     {
-                        // Should we use a try/catch?
-                        alc.InitiateUnload();
+                        alc.RaiseUnloadEvent();
                     }
                 }
-                s_contextsToUnload.Clear();
             }
         }        
 
@@ -356,27 +402,15 @@ namespace System.Runtime.Loader
     {
         internal static readonly AssemblyLoadContext s_loadContext = new DefaultAssemblyLoadContext();
 
-        internal DefaultAssemblyLoadContext() : base(true, false)
+        internal DefaultAssemblyLoadContext() : base(true, false, "Default")
         {
-        }
-
-        protected override Assembly Load(AssemblyName assemblyName)
-        {
-            // We were loading an assembly into TPA ALC that was not found on TPA list. As a result we are here.
-            // Returning null will result in the AssemblyResolve event subscribers to be invoked to help resolve the assembly.
-            return null;
         }
     }
 
     internal sealed class IndividualAssemblyLoadContext : AssemblyLoadContext
     {
-        internal IndividualAssemblyLoadContext() : base(false, false)
+        internal IndividualAssemblyLoadContext(string name) : base(false, false, name)
         {
-        }
-
-        protected override Assembly Load(AssemblyName assemblyName)
-        {
-            return null;
         }
     }
 }

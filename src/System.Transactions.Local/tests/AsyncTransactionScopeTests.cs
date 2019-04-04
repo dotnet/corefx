@@ -9,12 +9,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace System.Transactions.Tests
 {
-    public class AsyncTransactionScopeTests : RemoteExecutorTestBase
+    public class AsyncTransactionScopeTests
     {
         // Number of threads to create
         private const int iterations = 5;
@@ -31,10 +32,9 @@ namespace System.Transactions.Tests
             Transaction.Current = null;
         }
 
-        protected override void Dispose(bool disposing)
+        protected void Dispose(bool disposing)
         {
             Transaction.Current = null;
-            base.Dispose(disposing);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace System.Transactions.Tests
         [ActiveIssue(31913, TargetFrameworkMonikers.Uap)]
         public void AsyncTSTest(int variation)
         {
-            RemoteInvoke(variationString =>
+            RemoteExecutor.Invoke(variationString =>
             {
                 using (var listener = new TestEventListener(new Guid("8ac2d80a-1f1a-431b-ace4-bff8824aef0b"), System.Diagnostics.Tracing.EventLevel.Verbose))
                 {
@@ -460,7 +460,7 @@ namespace System.Transactions.Tests
                 {
                     try
                     {
-                        // Since we use BlockCommitUntilComplete dependent transaction to syncronize the root TransactionScope, the ambient Tx may not be available and will be be disposed and block on Commit.
+                        // Since we use BlockCommitUntilComplete dependent transaction to syncronize the root TransactionScope, the ambient Tx may not be available and will be disposed and block on Commit.
                         // The flag will ensure we explicitly syncronize before disposing the root TransactionScope and the ambient transaction will still be available in the Task.
                         if (syncronizeScope)
                         {
