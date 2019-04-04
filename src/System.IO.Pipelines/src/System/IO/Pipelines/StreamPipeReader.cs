@@ -43,11 +43,6 @@ namespace System.IO.Pipelines
                 throw new ArgumentNullException(nameof(options));
             }
 
-            if (options.MinimumReadSize <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(options.MinimumReadSize));
-            }
-
             _bufferSegmentPool = new BufferSegmentStack(InitialSegmentPoolSize);
             _minimumReadThreshold = Math.Min(options.MinimumReadSize, options.BufferSize);
             _pool = options.Pool == MemoryPool<byte>.Shared ? null : options.Pool;

@@ -15,7 +15,19 @@ namespace System.IO.Pipelines
         public StreamPipeReaderOptions(MemoryPool<byte> pool = null, int bufferSize = DefaultBufferSize, int minimumReadSize = DefaultMinimumReadSize)
         {
             Pool = pool ?? MemoryPool<byte>.Shared;
+
+            if (bufferSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(bufferSize));
+            }
+
             BufferSize = bufferSize;
+
+            if (minimumReadSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(minimumReadSize));
+            }
+
             MinimumReadSize = minimumReadSize;
         }
 

@@ -480,6 +480,45 @@ namespace System.IO.Pipelines.Tests
             reader.Complete();
         }
 
+        [Fact]
+        public async Task InvalidCursorThrows()
+        {
+            var pipe = new Pipe();
+            pipe.Writer.WriteEmpty(10);
+            await pipe.Writer.FlushAsync();
+
+            ReadResult readResult = await pipe.Reader.ReadAsync();
+            ReadOnlySequence<byte> buffer = readResult.Buffer;
+
+            PipeReader reader = PipeReader.Create(Stream.Null);
+            Assert.Throws<InvalidOperationException>(() => reader.AdvanceTo(buffer.Start, buffer.End));
+
+            pipe.Reader.Complete();
+            pipe.Writer.Complete();
+
+            reader.Complete();
+        }
+        
+        [Fact]
+        public void NullStreamThrows()
+        {
+            Assert.Throws<ArgumentNullException>(() => PipeReader.Create(null));
+        }
+
+        [Fact]
+        public void InvalidBufferSizeThrows()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(bufferSize: -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(bufferSize: 0));
+        }
+
+        [Fact]
+        public void InvalidMinimumReadSizeThrows()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(minimumReadSize: -1));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(minimumReadSize: 0));
+        }
+
         private static async Task<string> ReadFromPipeAsString(PipeReader reader)
         {
             ReadResult readResult = await reader.ReadAsync();
