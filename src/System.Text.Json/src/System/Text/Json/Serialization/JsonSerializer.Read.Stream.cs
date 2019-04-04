@@ -81,12 +81,7 @@ namespace System.Text.Json.Serialization
             options ??= s_defaultSettings;
 
             ReadStack state = default;
-            JsonClassInfo classInfo = options.GetOrAddClass(returnType);
-            state.Current.JsonClassInfo = classInfo;
-            if (classInfo.ClassType != ClassType.Object)
-            {
-                state.Current.JsonPropertyInfo = classInfo.GetPolicyProperty();
-            }
+            state.Current.Initialize(returnType, options);
 
             var readerState = new JsonReaderState(options.ReaderOptions);
 
@@ -186,6 +181,8 @@ namespace System.Text.Json.Serialization
                     SR.Format(SR.DeserializeDataRemaining, totalBytesRead, bytesInBuffer),
                     readerState);
             }
+
+            VerifyReturnValue(returnType, ref state);
 
             return (TValue)state.Current.ReturnValue;
         }

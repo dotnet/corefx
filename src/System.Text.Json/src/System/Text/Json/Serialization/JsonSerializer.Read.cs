@@ -25,16 +25,27 @@ namespace System.Text.Json.Serialization
                 options = s_defaultSettings;
 
             ReadStack state = default;
-            JsonClassInfo classInfo = options.GetOrAddClass(returnType);
-            state.Current.JsonClassInfo = classInfo;
-            if (classInfo.ClassType != ClassType.Object)
-            {
-                state.Current.JsonPropertyInfo = classInfo.GetPolicyProperty();
-            }
+            state.Current.Initialize(returnType, options);
 
             ReadCore(options, ref reader, ref state);
 
+            VerifyReturnValue(returnType, ref state);
+
             return state.Current.ReturnValue;
+        }
+
+        private static void VerifyReturnValue(
+            Type returnType,
+            ref ReadStack state)
+        {
+            object value = state.Current.ReturnValue;
+            if (value != null)
+            {
+                if (!returnType.IsAssignableFrom(value.GetType()))
+                {
+                    ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(returnType, state);
+                }
+            }
         }
 
         // todo: for readability, refactor this method to split by ClassType(Enumerable, Object, or Value) like Write()

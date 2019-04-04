@@ -40,6 +40,45 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ReadPrimitivesFail()
+        {
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>(@""));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>(@"a"));
+        }
+
+        [Fact]
+        public static void ParseUntyped()
+        {
+            // Not supported until we are able to deserialize into JsonElement.
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<object>(@"""hello"""));
+        }
+
+        [Fact]
+        public static void ReadBoolAsPrimitive()
+        {
+            {
+                object json = JsonSerializer.Parse<object>("true");
+                Assert.IsType<bool>(json);
+                Assert.True((bool)json);
+            }
+
+            {
+                object json = JsonSerializer.Parse<object>("false");
+                Assert.IsType<bool>(json);
+                Assert.False((bool)json);
+            }
+        }
+
+        [Fact]
+        public static void ReadBoolAsObjectProperty()
+        {
+            // Only booleans and nulls can currently be parsed when the type if typeof(object).
+            ObjectWithObjectProperties obj = JsonSerializer.Parse<ObjectWithObjectProperties>(ObjectWithObjectProperties.ExpectedJsonAllNulls);
+            Assert.IsType<bool>(obj.Bool);
+            Assert.True((bool)obj.Bool);
+        }
+
+        [Fact]
         public static void ArrayAsRootObject()
         {
             const string ExpectedJson = @"[1,true,{""City"":""MyCity""},null,""foo""]";

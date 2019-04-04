@@ -58,6 +58,11 @@ namespace System.Text.Json.Serialization.Converters
             {
                 return new JsonValueConverterDateTimeOffset();
             }
+            
+            if (type == typeof(object))
+            {
+                return new JsonValueConverterObject();
+            }
 
             return null;
         }
