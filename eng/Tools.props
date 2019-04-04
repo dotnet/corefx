@@ -65,7 +65,7 @@
           AfterTargets="Restore">
 
     <PropertyGroup>
-      <ToolsDir>$([MSBuild]::NormalizeDirectory('$(RepoRoot)', '.tools'))</ToolsDir>
+      <ToolsDir>$([MSBuild]::NormalizeDirectory('$(RepoRoot)', '.tools', 'CredentialsProvider'))</ToolsDir>
       <CredentialsProviderScriptUrl Condition="'$(OS)' == 'Windows_NT'">https://raw.githubusercontent.com/Microsoft/artifacts-credprovider/master/helpers/installcredprovider.ps1</CredentialsProviderScriptUrl>
       <CredentialsProviderScriptUrl Condition="'$(OS)' != 'Windows_NT'">https://raw.githubusercontent.com/Microsoft/artifacts-credprovider/master/helpers/installcredprovider.sh</CredentialsProviderScriptUrl>
     </PropertyGroup>
