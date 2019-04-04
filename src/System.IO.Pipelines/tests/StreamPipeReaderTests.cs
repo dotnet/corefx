@@ -310,6 +310,51 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
+        public async Task ConsumingSegmentsReturnsMemoryToPool()
+        {
+            var pool = new DisposeTrackingBufferPool();
+            var options = new StreamPipeReaderOptions(pool: pool, bufferSize: 4096, minimumReadSize: 1024);
+            // 2 full segments
+            var stream = new MemoryStream(new byte[options.BufferSize * 2]);
+            PipeReader reader = PipeReader.Create(stream, options);
+
+            ReadResult readResult = await reader.ReadAsync();
+            ReadOnlySequence<byte> buffer = readResult.Buffer;
+            Assert.Equal(1, pool.CurrentlyRentedBlocks);
+            Assert.Equal(options.BufferSize, buffer.Length);
+            reader.AdvanceTo(buffer.Start, buffer.End);
+
+            readResult = await reader.ReadAsync();
+            buffer = readResult.Buffer;
+            Assert.Equal(options.BufferSize * 2, buffer.Length);
+            Assert.Equal(2, pool.CurrentlyRentedBlocks);
+            reader.AdvanceTo(buffer.Start, buffer.End);
+
+            readResult = await reader.ReadAsync();
+            buffer = readResult.Buffer;
+            Assert.Equal(options.BufferSize * 2, buffer.Length);
+            // We end up allocating a 3rd block here since we don't know ahead of time that 
+            // it's the last one
+            Assert.Equal(3, pool.CurrentlyRentedBlocks);
+
+            reader.AdvanceTo(buffer.Slice(buffer.Start, 4096).End, buffer.End);
+
+            Assert.Equal(2, pool.CurrentlyRentedBlocks);
+            Assert.Equal(1, pool.DisposedBlocks);
+
+            readResult = await reader.ReadAsync();
+            buffer = readResult.Buffer;
+            Assert.Equal(options.BufferSize, buffer.Length);
+            reader.AdvanceTo(buffer.Slice(buffer.Start, 4096).End, buffer.End);
+
+            // All of the blocks get returned here since we hit the first case of emptying the entire list
+            Assert.Equal(0, pool.CurrentlyRentedBlocks);
+            Assert.Equal(3, pool.DisposedBlocks);
+
+            reader.Complete();
+        }
+
+        [Fact]
         public void CompletingTheReadingDisposesStream()
         {
             var stream = new ObserveDisposeStream();
@@ -317,6 +362,65 @@ namespace System.IO.Pipelines.Tests
             reader.Complete();
 
             Assert.True(stream.Disposed);
+        }
+
+        [Fact]
+        public async Task CompletingReturnsUnconsumedMemoryToPool()
+        {
+            var pool = new DisposeTrackingBufferPool();
+            var options = new StreamPipeReaderOptions(pool: pool, bufferSize: 4096, minimumReadSize: 1024);
+            // 2 full segments
+            var stream = new MemoryStream(new byte[options.BufferSize * 3]);
+            PipeReader reader = PipeReader.Create(stream, options);
+
+            while (true)
+            {
+                ReadResult readResult = await reader.ReadAsync();
+                reader.AdvanceTo(readResult.Buffer.Start, readResult.Buffer.End);
+
+                if (readResult.IsCompleted)
+                {
+                    break;
+                }
+            }
+
+            Assert.Equal(4, pool.CurrentlyRentedBlocks);
+            reader.Complete();
+            Assert.Equal(0, pool.CurrentlyRentedBlocks);
+            Assert.Equal(4, pool.DisposedBlocks);
+        }
+
+        [Fact]
+        public async Task NewSegmentsAllocatedWhenBufferReachesMinimumReadSize()
+        {
+            // We're using the pipe here as a way to pump bytes into the reader asynchronously
+            var pipe = new Pipe();
+            var options = new StreamPipeReaderOptions(pool: new CustomPool(), bufferSize: 10, minimumReadSize: 5);
+            PipeReader reader = PipeReader.Create(pipe.Reader.AsStream(), options);
+
+            pipe.Writer.WriteEmpty(6);
+            await pipe.Writer.FlushAsync();
+
+            ReadResult readResult = await reader.ReadAsync();
+            Assert.Equal(6, readResult.Buffer.Length);
+            Assert.True(readResult.Buffer.IsSingleSegment);
+            reader.AdvanceTo(readResult.Buffer.Start, readResult.Buffer.End);
+
+            pipe.Writer.WriteEmpty(4);
+            await pipe.Writer.FlushAsync();
+
+            readResult = await reader.ReadAsync();
+            Assert.Equal(10, readResult.Buffer.Length);
+            Assert.False(readResult.Buffer.IsSingleSegment);
+            var segments = 0;
+            foreach (ReadOnlyMemory<byte> segment in readResult.Buffer)
+            {
+                segments++;
+            }
+            Assert.Equal(2, segments);
+            reader.AdvanceTo(readResult.Buffer.End);
+
+            reader.Complete();
         }
 
         [Fact]

@@ -10,6 +10,7 @@
     <ReferenceFromRuntime Include="System.IO.Pipelines" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Infrastructure\DisposeTrackingBufferPool.cs" />
     <Compile Include="Infrastructure\ReadOnlyStream.cs" />
     <Compile Include="Infrastructure\WriteOnlyStream.cs" />
     <Compile Include="Infrastructure\CancelledWritesStream.cs" />
@@ -33,7 +34,7 @@
     <Compile Include="ReadResultTests.cs" />
     <Compile Include="SchedulerFacts.cs" />
     <Compile Include="StreamPipeReaderTests.cs" />
-    <Compile Include="TestMemoryPool.cs" />
+    <Compile Include="Infrastructure\TestMemoryPool.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
     <Compile Include="PipeLengthTests.cs" />

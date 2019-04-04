@@ -148,9 +148,10 @@ namespace System.IO.Pipelines
             // Remove all blocks that are freed (except the last one)
             while (returnStart != returnEnd)
             {
+                BufferSegment next = returnStart.NextSegment;
                 returnStart.ResetMemory();
                 ReturnSegmentUnsynchronized(returnStart);
-                returnStart = returnStart.NextSegment;
+                returnStart = next;
             }
         }
 
@@ -173,8 +174,10 @@ namespace System.IO.Pipelines
             BufferSegment segment = _readHead;
             while (segment != null)
             {
-                segment.ResetMemory();
+                BufferSegment returnSegment = segment;
                 segment = segment.NextSegment;
+
+                returnSegment.ResetMemory();
             }
 
             // REVIEW: Do we need a way to avoid this (leaveOpen?)
