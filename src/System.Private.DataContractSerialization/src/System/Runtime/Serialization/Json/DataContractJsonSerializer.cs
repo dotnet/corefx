@@ -38,6 +38,7 @@ namespace System.Runtime.Serialization.Json
         private bool _useSimpleDictionaryFormat;
 
         private DataContractJsonSerializerImpl _serializer;
+        private bool _ignoreExtensionDataObject;
 
         public DataContractJsonSerializer(Type type)
         {
@@ -72,6 +73,11 @@ namespace System.Runtime.Serialization.Json
         public DataContractJsonSerializer(Type type, DataContractJsonSerializerSettings settings)
         {
             _serializer = new DataContractJsonSerializerImpl(type, settings);
+        }
+
+        public bool IgnoreExtensionDataObject
+        {
+            get { return _ignoreExtensionDataObject; }
         }
 
         public ReadOnlyCollection<Type> KnownTypes
@@ -488,6 +494,7 @@ namespace System.Runtime.Serialization.Json
         internal IList<Type> knownTypeList;
         internal DataContractDictionary knownDataContracts;
         private EmitTypeInformation _emitTypeInformation;
+        private bool _ignoreExtensionDataObject;
         private ReadOnlyCollection<Type> _knownTypeCollection;
         private int _maxItemsInObjectGraph;
         private DataContract _rootContract; // post-surrogate
@@ -969,6 +976,7 @@ namespace System.Runtime.Serialization.Json
                 throw new ArgumentOutOfRangeException(nameof(maxItemsInObjectGraph), SR.ValueMustBeNonNegative);
             }
             _maxItemsInObjectGraph = maxItemsInObjectGraph;
+            _ignoreExtensionDataObject = ignoreExtensionDataObject;
             _emitTypeInformation = emitTypeInformation;
             _serializeReadOnlyTypes = serializeReadOnlyTypes;
             _dateTimeFormat = dateTimeFormat;

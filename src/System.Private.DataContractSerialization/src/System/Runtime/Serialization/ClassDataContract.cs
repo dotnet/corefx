@@ -760,6 +760,10 @@ namespace System.Runtime.Serialization
             public XmlDictionaryString[] MemberNames;
             public XmlDictionaryString[] MemberNamespaces;
 
+            internal ClassDataContractCriticalHelper() : base()
+            {
+            }
+
             internal ClassDataContractCriticalHelper(Type type) : base(type)
             {
                 XmlQualifiedName stableName = GetStableNameAndSetHasDataContract(type);
