@@ -8,7 +8,6 @@ using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Tests
@@ -1178,6 +1177,495 @@ namespace System.Tests
                         Marshal.FreeHGlobal(pAnsiStr);
                     }
                 }
+            }
+        }
+
+        [Theory]
+        [InlineData("  Hello  ", new char[] { ' ' }, "Hello")]
+        [InlineData(".  Hello  ..", new char[] { '.' }, "  Hello  ")]
+        [InlineData(".  Hello  ..", new char[] { '.', ' ' }, "Hello")]
+        [InlineData("123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "Hello")]
+        [InlineData("  Hello  ", null, "Hello")]
+        [InlineData("  Hello  ", new char[0], "Hello")]
+        [InlineData("      \t      ", null, "")]
+        [InlineData("", null, "")]
+        [InlineData("      ", new char[] { ' ' }, "")]
+        [InlineData("aaaaa", new char[] { 'a' }, "")]
+        [InlineData("abaabaa", new char[] { 'b', 'a' }, "")]
+        public static void Trim_Memory(string s, char[] trimChars, string expected)
+        {
+            if (trimChars == null || trimChars.Length == 0 || (trimChars.Length == 1 && trimChars[0] == ' '))
+            {
+                Assert.Equal(expected, s.Trim());
+                Assert.Equal(expected, s.AsSpan().Trim().ToString()); // ReadOnlySpan
+                Assert.Equal(expected, new Span<char>(s.ToCharArray()).Trim().ToString());
+                Assert.Equal(expected, new Memory<char>(s.ToCharArray()).Trim().ToString());
+                Assert.Equal(expected, s.AsMemory().Trim().ToString()); // ReadOnlyMemory
+            }
+
+            if (trimChars?.Length == 1)
+            {
+                Assert.Equal(expected, s.Trim(trimChars[0]));
+                Assert.Equal(expected, s.AsSpan().Trim(trimChars[0]).ToString());
+            }
+
+            Assert.Equal(expected, s.Trim(trimChars));
+            Assert.Equal(expected, s.AsSpan().Trim(trimChars).ToString());
+        }
+
+        [Theory]
+        [InlineData("  Hello  ", new char[] { ' ' }, "  Hello")]
+        [InlineData(".  Hello  ..", new char[] { '.' }, ".  Hello  ")]
+        [InlineData(".  Hello  ..", new char[] { '.', ' ' }, ".  Hello")]
+        [InlineData("123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "123abcHello")]
+        [InlineData("  Hello  ", null, "  Hello")]
+        [InlineData("  Hello  ", new char[0], "  Hello")]
+        [InlineData("      \t      ", null, "")]
+        [InlineData("", null, "")]
+        [InlineData("      ", new char[] { ' ' }, "")]
+        [InlineData("aaaaa", new char[] { 'a' }, "")]
+        [InlineData("abaabaa", new char[] { 'b', 'a' }, "")]
+        public static void TrimEnd_Memory(string s, char[] trimChars, string expected)
+        {
+            if (trimChars == null || trimChars.Length == 0 || (trimChars.Length == 1 && trimChars[0] == ' '))
+            {
+                Assert.Equal(expected, s.TrimEnd());
+                Assert.Equal(expected, s.AsSpan().TrimEnd().ToString()); // ReadOnlySpan
+                Assert.Equal(expected, new Span<char>(s.ToCharArray()).TrimEnd().ToString());
+                Assert.Equal(expected, new Memory<char>(s.ToCharArray()).TrimEnd().ToString());
+                Assert.Equal(expected, s.AsMemory().TrimEnd().ToString()); // ReadOnlyMemory
+            }
+
+            if (trimChars?.Length == 1)
+            {
+                Assert.Equal(expected, s.TrimEnd(trimChars[0]));
+                Assert.Equal(expected, s.AsSpan().TrimEnd(trimChars[0]).ToString());
+            }
+
+            Assert.Equal(expected, s.TrimEnd(trimChars));
+            Assert.Equal(expected, s.AsSpan().TrimEnd(trimChars).ToString());
+        }
+
+        [Theory]
+        [InlineData("  Hello  ", new char[] { ' ' }, "Hello  ")]
+        [InlineData(".  Hello  ..", new char[] { '.' }, "  Hello  ..")]
+        [InlineData(".  Hello  ..", new char[] { '.', ' ' }, "Hello  ..")]
+        [InlineData("123abcHello123abc", new char[] { '1', '2', '3', 'a', 'b', 'c' }, "Hello123abc")]
+        [InlineData("  Hello  ", null, "Hello  ")]
+        [InlineData("  Hello  ", new char[0], "Hello  ")]
+        [InlineData("      \t      ", null, "")]
+        [InlineData("", null, "")]
+        [InlineData("      ", new char[] { ' ' }, "")]
+        [InlineData("aaaaa", new char[] { 'a' }, "")]
+        [InlineData("abaabaa", new char[] { 'b', 'a' }, "")]
+        public static void TrimStart_Memory(string s, char[] trimChars, string expected)
+        {
+            if (trimChars == null || trimChars.Length == 0 || (trimChars.Length == 1 && trimChars[0] == ' '))
+            {
+                Assert.Equal(expected, s.TrimStart());
+                Assert.Equal(expected, s.AsSpan().TrimStart().ToString()); // ReadOnlySpan
+                Assert.Equal(expected, new Span<char>(s.ToCharArray()).TrimStart().ToString());
+                Assert.Equal(expected, new Memory<char>(s.ToCharArray()).TrimStart().ToString());
+                Assert.Equal(expected, s.AsMemory().TrimStart().ToString()); // ReadOnlyMemory
+            }
+
+            if (trimChars?.Length == 1)
+            {
+                Assert.Equal(expected, s.TrimStart(trimChars[0]));
+                Assert.Equal(expected, s.AsSpan().TrimStart(trimChars[0]).ToString());
+            }
+
+            Assert.Equal(expected, s.TrimStart(trimChars));
+            Assert.Equal(expected, s.AsSpan().TrimStart(trimChars).ToString());
+        }
+
+        [Fact]
+        public static void ZeroLengthTrim_Memory()
+        {
+            string s1 = string.Empty;
+            Assert.True(s1.SequenceEqual(s1.Trim()));
+            Assert.True(s1.SequenceEqual(s1.TrimStart()));
+            Assert.True(s1.SequenceEqual(s1.TrimEnd()));
+
+            ReadOnlySpan<char> span = s1.AsSpan();
+            Assert.True(span.SequenceEqual(span.Trim()));
+            Assert.True(span.SequenceEqual(span.TrimStart()));
+            Assert.True(span.SequenceEqual(span.TrimEnd()));
+
+            Span<char> writableSpan = new Span<char>(s1.ToCharArray());
+            Assert.True(writableSpan.SequenceEqual(writableSpan.Trim()));
+            Assert.True(writableSpan.SequenceEqual(writableSpan.TrimStart()));
+            Assert.True(writableSpan.SequenceEqual(writableSpan.TrimEnd()));
+
+            Memory<char> mem = new Memory<char>(s1.ToCharArray());
+            Assert.True(mem.Span.SequenceEqual(mem.Trim().Span));
+            Assert.True(mem.Span.SequenceEqual(mem.TrimStart().Span));
+            Assert.True(mem.Span.SequenceEqual(mem.TrimEnd().Span));
+
+            ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(s1.ToCharArray());
+            Assert.True(rom.Span.SequenceEqual(rom.Trim().Span));
+            Assert.True(rom.Span.SequenceEqual(rom.TrimStart().Span));
+            Assert.True(rom.Span.SequenceEqual(rom.TrimEnd().Span));
+        }
+
+        [Fact]
+        public static void NoWhiteSpaceTrim_Memory()
+        {
+            for (int length = 0; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = 'a';
+                }
+
+                string s1 = new string(a);
+                Assert.True(s1.SequenceEqual(s1.Trim()));
+                Assert.True(s1.SequenceEqual(s1.TrimStart()));
+                Assert.True(s1.SequenceEqual(s1.TrimEnd()));
+
+                ReadOnlySpan<char> span = s1.AsSpan();
+                Assert.True(span.SequenceEqual(span.Trim()));
+                Assert.True(span.SequenceEqual(span.TrimStart()));
+                Assert.True(span.SequenceEqual(span.TrimEnd()));
+
+                Span<char> writableSpan = new Span<char>(a);
+                Assert.True(writableSpan.SequenceEqual(writableSpan.Trim()));
+                Assert.True(writableSpan.SequenceEqual(writableSpan.TrimStart()));
+                Assert.True(writableSpan.SequenceEqual(writableSpan.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(a);
+                Assert.True(mem.Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                Assert.True(rom.Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimEnd().Span));
+            }
+        }
+
+        [Fact]
+        public static void OnlyWhiteSpaceTrim_Memory()
+        {
+            for (int length = 0; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = ' ';
+                }
+
+                string s1 = new string(a);
+                Assert.True(string.Empty.SequenceEqual(s1.Trim()));
+                Assert.True(string.Empty.SequenceEqual(s1.TrimStart()));
+                Assert.True(string.Empty.SequenceEqual(s1.TrimEnd()));
+
+                ReadOnlySpan<char> span = new ReadOnlySpan<char>(a);
+                Assert.True(ReadOnlySpan<char>.Empty.SequenceEqual(span.Trim()));
+                Assert.True(ReadOnlySpan<char>.Empty.SequenceEqual(span.TrimStart()));
+                Assert.True(ReadOnlySpan<char>.Empty.SequenceEqual(span.TrimEnd()));
+
+                Span<char> writableSpan = new Span<char>(a);
+                Assert.True(Span<char>.Empty.SequenceEqual(writableSpan.Trim()));
+                Assert.True(Span<char>.Empty.SequenceEqual(writableSpan.TrimStart()));
+                Assert.True(Span<char>.Empty.SequenceEqual(writableSpan.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(a);
+                Assert.True(Memory<char>.Empty.Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(Memory<char>.Empty.Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(Memory<char>.Empty.Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                Assert.True(ReadOnlyMemory<char>.Empty.Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(ReadOnlyMemory<char>.Empty.Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(ReadOnlyMemory<char>.Empty.Span.SequenceEqual(rom.TrimEnd().Span));
+            }
+        }
+
+        [Fact]
+        public static void WhiteSpaceAtStartTrim_Memory()
+        {
+            for (int length = 2; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = 'a';
+                }
+                a[0] = ' ';
+
+                string s1 = new string(a);
+                Assert.True(s1.Substring(1).SequenceEqual(s1.Trim()));
+                Assert.True(s1.Substring(1).SequenceEqual(s1.TrimStart()));
+                Assert.True(s1.SequenceEqual(s1.TrimEnd()));
+
+                ReadOnlySpan<char> span = s1.AsSpan();
+                Assert.True(span.Slice(1).SequenceEqual(span.Trim()));
+                Assert.True(span.Slice(1).SequenceEqual(span.TrimStart()));
+                Assert.True(span.SequenceEqual(span.TrimEnd()));
+
+                Span<char> writableSpan = new Span<char>(a);
+                Assert.True(writableSpan.Slice(1).SequenceEqual(writableSpan.Trim()));
+                Assert.True(writableSpan.Slice(1).SequenceEqual(writableSpan.TrimStart()));
+                Assert.True(writableSpan.SequenceEqual(writableSpan.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(a);
+                Assert.True(mem.Slice(1).Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Slice(1).Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                Assert.True(rom.Slice(1).Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Slice(1).Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimEnd().Span));
+            }
+        }
+
+        [Fact]
+        public static void WhiteSpaceAtEndTrim_Memory()
+        {
+            for (int length = 2; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = 'a';
+                }
+                a[length - 1] = ' ';
+
+                string s1 = new string(a);
+                Assert.True(s1.Substring(0, length - 1).SequenceEqual(s1.Trim()));
+                Assert.True(s1.SequenceEqual(s1.TrimStart()));
+                Assert.True(s1.Substring(0, length - 1).SequenceEqual(s1.TrimEnd()));
+
+                ReadOnlySpan<char> span = s1.AsSpan();
+                Assert.True(span.Slice(0, length - 1).SequenceEqual(span.Trim()));
+                Assert.True(span.SequenceEqual(span.TrimStart()));
+                Assert.True(span.Slice(0, length - 1).SequenceEqual(span.TrimEnd()));
+
+                Span<char> writableSpan = new Span<char>(a);
+                Assert.True(writableSpan.Slice(0, length - 1).SequenceEqual(writableSpan.Trim()));
+                Assert.True(writableSpan.SequenceEqual(writableSpan.TrimStart()));
+                Assert.True(writableSpan.Slice(0, length - 1).SequenceEqual(writableSpan.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(a);
+                Assert.True(mem.Slice(0, length - 1).Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Slice(0, length - 1).Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                Assert.True(rom.Slice(0, length - 1).Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Slice(0, length - 1).Span.SequenceEqual(rom.TrimEnd().Span));
+            }
+        }
+
+        [Fact]
+        public static void WhiteSpaceAtStartAndEndTrim_Memory()
+        {
+            for (int length = 3; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = 'a';
+                }
+                a[0] = ' ';
+                a[length - 1] = ' ';
+
+                string s1 = new string(a);
+                Assert.True(s1.Substring(1, length - 2).SequenceEqual(s1.Trim()));
+                Assert.True(s1.Substring(1).SequenceEqual(s1.TrimStart()));
+                Assert.True(s1.Substring(0, length - 1).SequenceEqual(s1.TrimEnd()));
+
+                ReadOnlySpan<char> span = s1.AsSpan();
+                Assert.True(span.Slice(1, length - 2).SequenceEqual(span.Trim()));
+                Assert.True(span.Slice(1).SequenceEqual(span.TrimStart()));
+                Assert.True(span.Slice(0, length - 1).SequenceEqual(span.TrimEnd()));
+
+                Span<char> writableSpan = new Span<char>(a);
+                Assert.True(writableSpan.Slice(1, length - 2).SequenceEqual(writableSpan.Trim()));
+                Assert.True(writableSpan.Slice(1).SequenceEqual(writableSpan.TrimStart()));
+                Assert.True(writableSpan.Slice(0, length - 1).SequenceEqual(writableSpan.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(a);
+                Assert.True(mem.Slice(1, length - 2).Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Slice(1).Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Slice(0, length - 1).Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                Assert.True(rom.Slice(1, length - 2).Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Slice(1).Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Slice(0, length - 1).Span.SequenceEqual(rom.TrimEnd().Span));
+            }
+        }
+
+        [Fact]
+        public static void WhiteSpaceInMiddleTrim_Memory()
+        {
+            for (int length = 3; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = 'a';
+                }
+                a[1] = ' ';
+
+                string s1 = new string(a);
+                Assert.True(s1.SequenceEqual(s1.Trim()));
+                Assert.True(s1.SequenceEqual(s1.TrimStart()));
+                Assert.True(s1.SequenceEqual(s1.TrimEnd()));
+
+                ReadOnlySpan<char> span = s1.AsSpan();
+                Assert.True(span.SequenceEqual(span.Trim()));
+                Assert.True(span.SequenceEqual(span.TrimStart()));
+                Assert.True(span.SequenceEqual(span.TrimEnd()));
+
+                Span<char> writableSpan = new Span<char>(a);
+                Assert.True(writableSpan.SequenceEqual(writableSpan.Trim()));
+                Assert.True(writableSpan.SequenceEqual(writableSpan.TrimStart()));
+                Assert.True(writableSpan.SequenceEqual(writableSpan.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(a);
+                Assert.True(mem.Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                Assert.True(rom.Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimEnd().Span));
+            }
+        }
+
+        [Fact]
+        public static void TrimWhiteSpaceMultipleTimes_Memory()
+        {
+            for (int length = 3; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = 'a';
+                }
+                a[0] = ' ';
+                a[length - 1] = ' ';
+
+                string s1 = new string(a);
+                string trimResultString = s1.Trim();
+                string trimStartResultString = s1.TrimStart();
+                string trimEndResultString = s1.TrimEnd();
+                Assert.True(s1.Substring(1, length - 2).SequenceEqual(trimResultString));
+                Assert.True(s1.Substring(1).SequenceEqual(trimStartResultString));
+                Assert.True(s1.Substring(0, length - 1).SequenceEqual(trimEndResultString));
+
+                // 2nd attempt should do nothing
+                Assert.True(trimResultString.SequenceEqual(trimResultString.Trim()));
+                Assert.True(trimStartResultString.SequenceEqual(trimStartResultString.TrimStart()));
+                Assert.True(trimEndResultString.SequenceEqual(trimEndResultString.TrimEnd()));
+
+                // ReadOnlySpan
+                {
+                    ReadOnlySpan<char> span = s1.AsSpan();
+                    ReadOnlySpan<char> trimResult = span.Trim();
+                    ReadOnlySpan<char> trimStartResult = span.TrimStart();
+                    ReadOnlySpan<char> trimEndResult = span.TrimEnd();
+                    Assert.True(span.Slice(1, length - 2).SequenceEqual(trimResult));
+                    Assert.True(span.Slice(1).SequenceEqual(trimStartResult));
+                    Assert.True(span.Slice(0, length - 1).SequenceEqual(trimEndResult));
+
+                    // 2nd attempt should do nothing
+                    Assert.True(trimResult.SequenceEqual(trimResult.Trim()));
+                    Assert.True(trimStartResult.SequenceEqual(trimStartResult.TrimStart()));
+                    Assert.True(trimEndResult.SequenceEqual(trimEndResult.TrimEnd()));
+                }
+
+                // Span
+                {
+                    Span<char> span = new Span<char>(a);
+                    Span<char> trimResult = span.Trim();
+                    Span<char> trimStartResult = span.TrimStart();
+                    Span<char> trimEndResult = span.TrimEnd();
+                    Assert.True(span.Slice(1, length - 2).SequenceEqual(trimResult));
+                    Assert.True(span.Slice(1).SequenceEqual(trimStartResult));
+                    Assert.True(span.Slice(0, length - 1).SequenceEqual(trimEndResult));
+
+                    // 2nd attempt should do nothing
+                    Assert.True(trimResult.SequenceEqual(trimResult.Trim()));
+                    Assert.True(trimStartResult.SequenceEqual(trimStartResult.TrimStart()));
+                    Assert.True(trimEndResult.SequenceEqual(trimEndResult.TrimEnd()));
+                }
+
+                // Memory
+                {
+                    Memory<char> mem = new Memory<char>(a);
+                    Memory<char> trimResult = mem.Trim();
+                    Memory<char> trimStartResult = mem.TrimStart();
+                    Memory<char> trimEndResult = mem.TrimEnd();
+                    Assert.True(mem.Slice(1, length - 2).Span.SequenceEqual(trimResult.Span));
+                    Assert.True(mem.Slice(1).Span.SequenceEqual(trimStartResult.Span));
+                    Assert.True(mem.Slice(0, length - 1).Span.SequenceEqual(trimEndResult.Span));
+
+                    // 2nd attempt should do nothing
+                    Assert.True(trimResult.Span.SequenceEqual(trimResult.Trim().Span));
+                    Assert.True(trimStartResult.Span.SequenceEqual(trimStartResult.TrimStart().Span));
+                    Assert.True(trimEndResult.Span.SequenceEqual(trimEndResult.TrimEnd().Span));
+                }
+
+                // ReadOnlyMemory
+                {
+                    ReadOnlyMemory<char> mem = new ReadOnlyMemory<char>(a);
+                    ReadOnlyMemory<char> trimResult = mem.Trim();
+                    ReadOnlyMemory<char> trimStartResult = mem.TrimStart();
+                    ReadOnlyMemory<char> trimEndResult = mem.TrimEnd();
+                    Assert.True(mem.Slice(1, length - 2).Span.SequenceEqual(trimResult.Span));
+                    Assert.True(mem.Slice(1).Span.SequenceEqual(trimStartResult.Span));
+                    Assert.True(mem.Slice(0, length - 1).Span.SequenceEqual(trimEndResult.Span));
+
+                    // 2nd attempt should do nothing
+                    Assert.True(trimResult.Span.SequenceEqual(trimResult.Trim().Span));
+                    Assert.True(trimStartResult.Span.SequenceEqual(trimStartResult.TrimStart().Span));
+                    Assert.True(trimEndResult.Span.SequenceEqual(trimEndResult.TrimEnd().Span));
+                }
+            }
+        }
+
+        [Fact]
+        public static void MakeSureNoTrimChecksGoOutOfRange_Memory()
+        {
+            for (int length = 3; length < 64; length++)
+            {
+                char[] first = new char[length];
+                first[0] = ' ';
+                first[length - 1] = ' ';
+
+                string s1 = new string(first, 1, length - 2);
+                Assert.True(s1.SequenceEqual(s1.Trim()));
+                Assert.True(s1.SequenceEqual(s1.TrimStart()));
+                Assert.True(s1.SequenceEqual(s1.TrimEnd()));
+
+                ReadOnlySpan<char> span = s1.AsSpan();
+                Assert.True(span.SequenceEqual(span.Trim()));
+                Assert.True(span.SequenceEqual(span.TrimStart()));
+                Assert.True(span.SequenceEqual(span.TrimEnd()));
+
+                Span<char> writableSpan = new Span<char>(s1.ToCharArray());
+                Assert.True(writableSpan.SequenceEqual(writableSpan.Trim()));
+                Assert.True(writableSpan.SequenceEqual(writableSpan.TrimStart()));
+                Assert.True(writableSpan.SequenceEqual(writableSpan.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(s1.ToCharArray());
+                Assert.True(mem.Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(s1.ToCharArray());
+                Assert.True(rom.Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimEnd().Span));
             }
         }
     }
