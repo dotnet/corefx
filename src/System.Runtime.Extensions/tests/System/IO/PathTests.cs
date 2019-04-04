@@ -286,5 +286,19 @@ namespace System.IO.Tests
             PathAssert.Equal(expected, trimmed);
             PathAssert.Equal(trimmed, Path.TrimEndingDirectorySeparator(trimmed));
         }
+
+        [Theory]
+        [MemberData(nameof(TestData_EndsInDirectorySeparator))]
+        public void EndsInDirectorySeparator_String_CoreTests(string path, bool expected)
+        {
+            Assert.Equal(expected, Path.EndsInDirectorySeparator(path));
+        }
+
+        [Theory]
+        [MemberData(nameof(TestData_EndsInDirectorySeparator))]
+        public void EndsInDirectorySeparator_ReadOnlySpan_CoreTests(string path, bool expected)
+        {
+            Assert.Equal(expected, Path.EndsInDirectorySeparator(path.AsSpan()));
+        }
     }
 }
