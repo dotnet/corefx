@@ -400,7 +400,7 @@ namespace System.Net
             }
 
             //Check the name
-            if (string.IsNullOrEmpty(m_name) || m_name[0] == '$' || m_name.IndexOfAny(Reserved2Name) != -1 || m_name.Trim() != m_name)
+            if (m_name == null || m_name.Length == 0 || m_name[0] == '$' || m_name.IndexOfAny(Reserved2Name) != -1 || m_name.Trim() != m_name)
             {
                 if (isThrow)
                 {

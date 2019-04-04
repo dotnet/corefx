@@ -256,7 +256,7 @@ namespace System.Net
 #endif
         bool InternalSetName(string value)
         {
-            if (string.IsNullOrEmpty(value) || value[0] == '$' || value.IndexOfAny(ReservedToName) != -1 || value.Trim() != value)
+            if (m_name == null || m_name.Length == 0 || value[0] == '$' || value.IndexOfAny(ReservedToName) != -1 || value.Trim() != value)
             {
                 m_name = string.Empty;
                 return false;
