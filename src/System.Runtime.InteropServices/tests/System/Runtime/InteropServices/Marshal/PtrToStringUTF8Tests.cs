@@ -43,12 +43,14 @@ namespace System.Runtime.InteropServices.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void PtrToStringUTF8_ZeroPointer_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("ptr", () => Marshal.PtrToStringUTF8(IntPtr.Zero, 123));
         }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void PtrToStringUTF8_NegativeLength_ThrowsArgumentExeption()
         {
             AssertExtensions.Throws<ArgumentException>("byteLen", null, () => Marshal.PtrToStringUTF8(new IntPtr(123), -77));

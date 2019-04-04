@@ -51,7 +51,7 @@ namespace System.Runtime.InteropServices.Tests
         [Fact]
         public void PtrToStringAnsi_NegativeLength_ThrowsArgumentOutOfRangeExeption()
         {
-            AssertExtensions.Throws<ArgumentOutOfRangeException>("len", null, () => Marshal.PtrToStringAnsi(new IntPtr(123), -77));
+            AssertExtensions.Throws<ArgumentOutOfRangeException, ArgumentException>("len", null, () => Marshal.PtrToStringAnsi(new IntPtr(123), -77));
         }
     }
 }
