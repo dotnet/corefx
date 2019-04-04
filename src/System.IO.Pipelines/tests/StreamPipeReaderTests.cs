@@ -67,29 +67,49 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public async Task CanReadMultipleTimes()
         {
-            var options = new StreamPipeReaderOptions();
-            var stream = new MemoryStream(Encoding.ASCII.GetBytes(new string('a', 10000)));
-            PipeReader reader = PipeReader.Create(stream, options);
+            static async Task DoAsyncRead(PipeReader reader, int[] bufferSizes)
+            {
+                var index = 0;
+                while (true)
+                {
+                    ReadResult readResult = await reader.ReadAsync();
 
-            ReadResult readResult = await reader.ReadAsync();
+                    if (readResult.IsCompleted)
+                    {
+                        break;
+                    }
 
-            Assert.Equal(options.BufferSize, readResult.Buffer.Length);
-            Assert.True(readResult.Buffer.IsSingleSegment);
+                    Assert.Equal(bufferSizes[index], readResult.Buffer.Length);
+                    reader.AdvanceTo(readResult.Buffer.End);
+                    index++;
+                }
 
-            reader.AdvanceTo(readResult.Buffer.Start, readResult.Buffer.End);
+                reader.Complete();
+            }
 
-            readResult = await reader.ReadAsync();
-            Assert.Equal(options.BufferSize * 2, readResult.Buffer.Length);
-            Assert.False(readResult.Buffer.IsSingleSegment);
+            static async Task DoAsyncWrites(PipeWriter writer, int[] bufferSizes)
+            {
+                for (int i = 0; i < bufferSizes.Length; i++)
+                {
+                    writer.WriteEmpty(bufferSizes[i]);
+                    await writer.FlushAsync();
+                }
 
-            reader.AdvanceTo(readResult.Buffer.Start, readResult.Buffer.End);
+                writer.Complete();
+            }
 
-            readResult = await reader.ReadAsync();
-            Assert.Equal(10000, readResult.Buffer.Length);
-            Assert.False(readResult.Buffer.IsSingleSegment);
+            // We're using the pipe here as a way to pump bytes into the reader asynchronously
+            var pipe = new Pipe(new PipeOptions(readerScheduler: PipeScheduler.Inline));
+            var options = new StreamPipeReaderOptions(bufferSize: 4096);
+            PipeReader reader = PipeReader.Create(pipe.Reader.AsStream(), options);
 
-            reader.AdvanceTo(readResult.Buffer.End);
-            reader.Complete();
+            var writes = new[] { 4096, 1024, 123, 4096, 100 };
+
+            Task readingTask = DoAsyncRead(reader, writes);
+            Task writingTask = DoAsyncWrites(pipe.Writer, writes);
+
+            await readingTask;
+            await writingTask;
         }
 
         [Theory]
@@ -129,6 +149,7 @@ namespace System.IO.Pipelines.Tests
             Assert.True(readResult.Buffer.IsEmpty);
             Assert.True(readResult.IsCompleted);
             reader.AdvanceTo(readResult.Buffer.End);
+            reader.Complete();
         }
 
         [Fact]
@@ -151,6 +172,7 @@ namespace System.IO.Pipelines.Tests
 
             var value = await ReadFromPipeAsString(reader);
             Assert.Equal("Hello World", value);
+            reader.Complete();
         }
 
         [Fact]
@@ -169,6 +191,7 @@ namespace System.IO.Pipelines.Tests
 
             readResult = await task;
             reader.AdvanceTo(readResult.Buffer.End);
+            reader.Complete();
         }
 
         [Fact]
@@ -209,16 +232,17 @@ namespace System.IO.Pipelines.Tests
             Assert.True(reader.TryRead(out ReadResult result));
             Assert.True(result.IsCanceled);
             reader.AdvanceTo(result.Buffer.End);
+            reader.Complete();
         }
 
         [Fact]
         public async Task ReadCanBeCancelledViaProvidedCancellationToken()
         {
             var stream = new CancelledReadsStream();
-            PipeReader pipeReader = PipeReader.Create(stream);
+            PipeReader reader = PipeReader.Create(stream);
             var cts = new CancellationTokenSource();
 
-            ValueTask<ReadResult> task = pipeReader.ReadAsync(cts.Token);
+            ValueTask<ReadResult> task = reader.ReadAsync(cts.Token);
 
             Assert.False(task.IsCompleted);
 
@@ -227,22 +251,24 @@ namespace System.IO.Pipelines.Tests
             stream.WaitForReadTask.TrySetResult(null);
 
             await Assert.ThrowsAsync<OperationCanceledException>(async () => await task);
+            reader.Complete();
         }
 
         [Fact]
         public async Task ReadCanBeCanceledViaCancelPendingReadWhenReadIsAsync()
         {
             var stream = new CancelledReadsStream();
-            PipeReader pipeReader = PipeReader.Create(stream);
+            PipeReader reader = PipeReader.Create(stream);
 
-            ValueTask<ReadResult> task = pipeReader.ReadAsync();
+            ValueTask<ReadResult> task = reader.ReadAsync();
 
-            pipeReader.CancelPendingRead();
+            reader.CancelPendingRead();
 
             stream.WaitForReadTask.TrySetResult(null);
 
             ReadResult readResult = await task;
             Assert.True(readResult.IsCanceled);
+            reader.Complete();
         }
 
         [Fact]
@@ -451,6 +477,7 @@ namespace System.IO.Pipelines.Tests
             PipeReader reader = PipeReader.Create(Stream.Null);
 
             Assert.Throws<NotSupportedException>(() => reader.OnWriterCompleted((_, __) => { }, null));
+            reader.Complete();
         }
 
         private static async Task<string> ReadFromPipeAsString(PipeReader reader)
