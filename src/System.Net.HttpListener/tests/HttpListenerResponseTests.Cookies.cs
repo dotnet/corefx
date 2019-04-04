@@ -58,22 +58,13 @@ namespace System.Net.Tests
             };
 
             yield return new object[]
-{
-                new CookieCollection()
-                {
-                    new Cookie("name ", "value")
-                },
-                145, "Set-Cookie: name =value", null
-            };
-
-            yield return new object[]
-{
+            {
                 new CookieCollection()
                 {
                     new Cookie("foo bar", "value")
                 },
                 147, "Set-Cookie: foo bar=value", null
-};
+            };
 
             yield return new object[]
             {

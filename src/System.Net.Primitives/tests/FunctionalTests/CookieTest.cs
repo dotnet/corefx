@@ -159,6 +159,8 @@ namespace System.Net.Primitives.Functional.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("$hello")]
+        [InlineData("hello ")]
+        [InlineData(" hello")]
         [InlineData("hello\t")]
         [InlineData("hello\r")]
         [InlineData("hello\n")]
