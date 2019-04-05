@@ -211,7 +211,7 @@ namespace System.IO.Pipelines
             var reg = new CancellationTokenRegistration();
             if (cancellationToken.CanBeCanceled)
             {
-                reg = cancellationToken.Register(state => ((StreamPipeReader)state).Cancel(), this);
+                reg = cancellationToken.UnsafeRegister(state => ((StreamPipeReader)state).Cancel(), this);
             }
 
             using (reg)
