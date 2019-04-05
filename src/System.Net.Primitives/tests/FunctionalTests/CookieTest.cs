@@ -150,9 +150,12 @@ namespace System.Net.Primitives.Functional.Tests
             c1.Name = "hello";
             Assert.Equal("hello", c1.Name);
 
-            Cookie c2 = new Cookie();
-            c2.Name = "hello world";
-            Assert.Equal("hello world", c2.Name);
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Cookie c2 = new Cookie();
+                c2.Name = "hello world";
+                Assert.Equal("hello world", c2.Name);
+            }
         }
 
         [Theory]

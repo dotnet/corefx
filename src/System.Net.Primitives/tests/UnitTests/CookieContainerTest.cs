@@ -332,15 +332,18 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Empty header followed by another empty header at the end
 
-            yield return new object[]
+            if (!PlatformDetection.IsFullFramework)
             {
-                uSecure,
-                "hello world=value",
-                new Cookie[]
+                yield return new object[]
                 {
-                    new Cookie("hello world", "value"),
-                }
-            }; // Name with space in it
+                    uSecure,
+                    "hello world=value",
+                    new Cookie[]
+                    {
+                        new Cookie("hello world", "value"),
+                    }
+                }; // Name with space in it
+            }
         }
 
         [Theory]
