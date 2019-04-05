@@ -36,13 +36,27 @@ namespace System.Runtime.Serialization.Formatters.Tests
         [Fact]
         void BlockReflectionDodging()
         {
-            MemoryStream ms = new MemoryStream();
-            BinaryFormatter writer = new BinaryFormatter();
-            writer.Serialize(ms, new ReflectionDodger());
-            ms.Position = 0;
+            // Ensure that the deserialization tracker cannot be called by reflection.
+            MethodInfo trackerMethod = typeof(Thread).GetMethod(
+                "GetThreadDeserializationTracker",
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
-            BinaryFormatter reader = new BinaryFormatter();
-            Assert.Throws<TargetInvocationException>(() => reader.Deserialize(ms));
+            Assert.NotNull(trackerMethod);
+
+            Assert.Equal(1, trackerMethod.GetParameters().Length);
+            object[] args = new object[1];
+            args[0] = Enum.ToObject(typeof(Thread).Assembly.GetType("System.Threading.StackCrawlMark"), 0);
+
+            try
+            {
+                object tracker = trackerMethod.Invoke(null, args);
+                throw new InvalidOperationException(tracker?.ToString() ?? "(null tracker returned)");
+            }
+            catch (TargetInvocationException ex)
+            {
+                Exception baseEx = ex.GetBaseException();
+                AssertExtensions.Throws<ArgumentException>("stackMark", () => throw baseEx);
+            }
         }
 
         [Fact]
@@ -103,45 +117,6 @@ namespace System.Runtime.Serialization.Formatters.Tests
             string tempPath = Path.GetTempFileName();
             File.WriteAllText(tempPath, "This better not be written...");
             throw new InvalidOperationException("Unreachable code (SerializationGuard should have kicked in)");
-        }
-        
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-        }
-    }
-
-    [Serializable]
-    class ReflectionDodger : ISerializable
-    {
-        public ReflectionDodger() { }
-
-        private ReflectionDodger(SerializationInfo info, StreamingContext context)
-        {
-            object tracker = null;
-            Type threadType = typeof(object).Assembly.GetType("System.Threading.Thread");
-            MethodInfo trackerMethod = null;
-            if (threadType != null)
-            {
-                trackerMethod = threadType.GetMethod("GetThreadDeserializationTracker", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                if (trackerMethod != null)
-                {
-                    object[] args = new object[trackerMethod.GetParameters().Length];
-                    try
-                    {
-                        tracker = trackerMethod.Invoke(null, args);
-                    }
-                    catch (TargetInvocationException ex)
-                    {
-                        throw ex.GetBaseException();
-                    }
-                }
-            }
-            if (trackerMethod == null) // Expected in AoT
-            {
-                trackerMethod = typeof(SerializationInfo).GetMethod("GetThreadDeserializationTracker", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                Assert.Null(trackerMethod);
-                throw new TargetInvocationException(null); // Throw the CoreCLR exception to make the case pass
-            }
         }
         
         public void GetObjectData(SerializationInfo info, StreamingContext context)
