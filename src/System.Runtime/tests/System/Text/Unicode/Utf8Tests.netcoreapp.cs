@@ -59,7 +59,7 @@ namespace System.Text.Unicode.Tests
          * COMMON UTILITIES FOR UNIT TESTS
          */
 
-        private static byte[] DecodeHex(ReadOnlySpan<char> inputHex)
+        public static byte[] DecodeHex(ReadOnlySpan<char> inputHex)
         {
             Assert.True(Regex.IsMatch(inputHex.ToString(), "^([0-9a-fA-F]{2})*$"), "Input must be an even number of hex characters.");
 
@@ -74,7 +74,7 @@ namespace System.Text.Unicode.Tests
         // !! IMPORTANT !!
         // Don't delete this implementation, as we use it as a reference to make sure the framework's
         // transcoding logic is correct.
-        private static byte[] ToUtf8(Rune rune)
+        public static byte[] ToUtf8(Rune rune)
         {
             Assert.True(Rune.IsValid(rune.Value), $"Rune with value U+{(uint)rune.Value:X4} is not well-formed.");
 
