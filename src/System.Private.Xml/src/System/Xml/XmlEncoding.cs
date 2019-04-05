@@ -422,13 +422,12 @@ namespace System.Xml
             return (count + lastBytesCount) / 4;
         }
 
-        internal abstract int GetFullChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex, out int surrogateCount);
+        internal abstract int GetFullChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex);
 
         public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
         {
             // finish a character from the bytes that were cached last time
             int i = lastBytesCount;
-            int surrogateCount;
             if (lastBytesCount > 0)
             {
                 // copy remaining bytes into the cache
@@ -444,8 +443,8 @@ namespace System.Xml
                     return 0;
                 }
                 // decode 1 character from the byte cache
-                i = GetFullChars(lastBytes, 0, 4, chars, charIndex, out surrogateCount);
-                Debug.Assert(i == 1 + surrogateCount);
+                i = GetFullChars(lastBytes, 0, 4, chars, charIndex);
+                Debug.Assert(i == 1);
                 charIndex += i;
                 lastBytesCount = 0;
             }
@@ -455,7 +454,7 @@ namespace System.Xml
             }
 
             // decode block of byte quadruplets
-            i = GetFullChars(bytes, byteIndex, byteCount, chars, charIndex, out surrogateCount) + i;
+            i = GetFullChars(bytes, byteIndex, byteCount, chars, charIndex) + i;
 
             // cache remaining bytes that does not make up a character
             int bytesLeft = (byteCount & 0x3);
@@ -475,7 +474,7 @@ namespace System.Xml
             bytesUsed = 0;
             charsUsed = 0;
             // finish a character from the bytes that were cached last time
-            int i = 0, surrogateCount;
+            int i = 0;
             int lbc = lastBytesCount;
             if (lbc > 0)
             {
@@ -495,20 +494,13 @@ namespace System.Xml
                     return;
                 }
                 // decode 1 character from the byte cache
-                i = GetFullChars(lastBytes, 0, 4, chars, charIndex, out surrogateCount);
-                Debug.Assert(i == 1 + surrogateCount);
+                i = GetFullChars(lastBytes, 0, 4, chars, charIndex);
+
                 charIndex += i;
                 charCount -= i;
                 charsUsed = i;
 
                 lastBytesCount = 0;
-
-                // if that's all that was requested -> return
-                if (charCount + surrogateCount == 0)
-                {
-                    completed = (byteCount == 0);
-                    return;
-                }
             }
             else
             {
@@ -528,7 +520,7 @@ namespace System.Xml
             bytesUsed += byteCount;
 
             // decode block of byte quadruplets
-            charsUsed = GetFullChars(bytes, byteIndex, byteCount, chars, charIndex, out surrogateCount) + i;
+            charsUsed = GetFullChars(bytes, byteIndex, byteCount, chars, charIndex) + i;
 
             // cache remaining bytes that does not make up a character
             int bytesLeft = (byteCount & 0x3);
@@ -551,12 +543,11 @@ namespace System.Xml
 
     internal class Ucs4Decoder4321 : Ucs4Decoder
     {
-        internal override int GetFullChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex, out int surrogateCount)
+        internal override int GetFullChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
         {
             uint code;
             int i, j;
 
-            surrogateCount = 0;
             byteCount += byteIndex;
 
             for (i = byteIndex, j = charIndex; i + 3 < byteCount;)
@@ -570,7 +561,6 @@ namespace System.Xml
                 {
                     Ucs4ToUTF16(code, chars, j);
                     j++;
-                    surrogateCount++;
                 }
                 else
                 {
@@ -592,12 +582,11 @@ namespace System.Xml
 
     internal class Ucs4Decoder1234 : Ucs4Decoder
     {
-        internal override int GetFullChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex, out int surrogateCount)
+        internal override int GetFullChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
         {
             uint code;
             int i, j;
 
-            surrogateCount = 0;
             byteCount += byteIndex;
 
             for (i = byteIndex, j = charIndex; i + 3 < byteCount;)
@@ -611,7 +600,6 @@ namespace System.Xml
                 {
                     Ucs4ToUTF16(code, chars, j);
                     j++;
-                    surrogateCount++;
                 }
                 else
                 {
@@ -634,12 +622,11 @@ namespace System.Xml
 
     internal class Ucs4Decoder2143 : Ucs4Decoder
     {
-        internal override int GetFullChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex, out int surrogateCount)
+        internal override int GetFullChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
         {
             uint code;
             int i, j;
 
-            surrogateCount = 0;
             byteCount += byteIndex;
 
             for (i = byteIndex, j = charIndex; i + 3 < byteCount;)
@@ -653,7 +640,6 @@ namespace System.Xml
                 {
                     Ucs4ToUTF16(code, chars, j);
                     j++;
-                    surrogateCount++;
                 }
                 else
                 {
@@ -676,12 +662,11 @@ namespace System.Xml
 
     internal class Ucs4Decoder3412 : Ucs4Decoder
     {
-        internal override int GetFullChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex, out int surrogateCount)
+        internal override int GetFullChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
         {
             uint code;
             int i, j;
 
-            surrogateCount = 0;
             byteCount += byteIndex;
 
             for (i = byteIndex, j = charIndex; i + 3 < byteCount;)
@@ -695,7 +680,6 @@ namespace System.Xml
                 {
                     Ucs4ToUTF16(code, chars, j);
                     j++;
-                    surrogateCount++;
                 }
                 else
                 {
