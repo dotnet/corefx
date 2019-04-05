@@ -18,19 +18,43 @@ namespace System.Net.Security.Tests
 
     public class NegotiatedCipherSuiteTest
     {
+#pragma warning disable CS0618 // Ssl2 and Ssl3 are obsolete
+        private const SslProtocols AllProtocols =
+            SslProtocols.Ssl2 | SslProtocols.Ssl3 |
+            SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls13;
+#pragma warning restore CS0618
+
+        private const SslProtocols NonTls13Protocols = AllProtocols & (~SslProtocols.Tls13);
+
         private static bool IsKnownPlatformSupportingTls13 => PlatformDetection.IsUbuntu1810OrHigher;
+        private static bool CipherSuitesPolicySupported => s_cipherSuitePolicySupported.Value;
         private static bool Tls13Supported { get; set; } = ProtocolsSupported(SslProtocols.Tls13);
+        private static bool CipherSuitesPolicyAndTls13Supported => Tls13Supported && CipherSuitesPolicySupported;
 
         private static HashSet<TlsCipherSuite> s_tls13CipherSuiteLookup = new HashSet<TlsCipherSuite>(GetTls13CipherSuites());
         private static HashSet<TlsCipherSuite> s_tls12CipherSuiteLookup = new HashSet<TlsCipherSuite>(GetTls12CipherSuites());
         private static HashSet<TlsCipherSuite> s_tls10And11CipherSuiteLookup = new HashSet<TlsCipherSuite>(GetTls10And11CipherSuites());
 
-        private static Dictionary<SslProtocols, HashSet<TlsCipherSuite>> _protocolCipherSuiteLookup = new Dictionary<SslProtocols, HashSet<TlsCipherSuite>>()
+        private static Dictionary<SslProtocols, HashSet<TlsCipherSuite>> s_protocolCipherSuiteLookup = new Dictionary<SslProtocols, HashSet<TlsCipherSuite>>()
         {
             { SslProtocols.Tls12, s_tls12CipherSuiteLookup },
             { SslProtocols.Tls11, s_tls10And11CipherSuiteLookup },
             { SslProtocols.Tls, s_tls10And11CipherSuiteLookup },
         };
+
+        private static Lazy<bool> s_cipherSuitePolicySupported = new Lazy<bool>(() =>
+        {
+            try
+            {
+                new CipherSuitesPolicy(new TlsCipherSuite[0]);
+                return true;
+            }
+            catch (PlatformNotSupportedException) { }
+
+            return false;
+        });
+
+        private static IReadOnlyList<TlsCipherSuite> SupportedNonTls13CipherSuites = GetSupportedNonTls13CipherSuites();
 
         [ConditionalFact(nameof(IsKnownPlatformSupportingTls13))]
         public void Tls13IsSupported_GetValue_ReturnsTrue()
@@ -70,7 +94,7 @@ namespace System.Net.Security.Tests
             ret.Succeeded();
 
             Assert.True(
-                _protocolCipherSuiteLookup[protocol].Contains(ret.CipherSuite),
+                s_protocolCipherSuiteLookup[protocol].Contains(ret.CipherSuite),
                 $"`{ret.CipherSuite}` is not recognized as {protocol} cipher suite");
         }
 
@@ -81,6 +105,289 @@ namespace System.Net.Security.Tests
             using (var server = new SslStream(ms, leaveInnerStreamOpen: false))
             {
                 Assert.Throws<InvalidOperationException>(() => server.NegotiatedCipherSuite);
+            }
+        }
+
+        [ConditionalFact(nameof(CipherSuitesPolicySupported))]
+        public void CipherSuitesPolicy_AllowSomeCipherSuitesWithNoEncryptionOption_Fails()
+        {
+            var p = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(TlsCipherSuite.TLS_AES_128_GCM_SHA256,
+                                                 SupportedNonTls13CipherSuites[0]),
+                EncryptionPolicy = EncryptionPolicy.NoEncryption,
+            };
+
+            NegotiatedParams ret = ConnectAndGetNegotiatedParams(p, p);
+            ret.Failed();
+        }
+
+        [ConditionalFact(nameof(CipherSuitesPolicySupported))]
+        public void CipherSuitesPolicy_NothingAllowed_Fails()
+        {
+            CipherSuitesPolicy csp = BuildPolicy();
+
+            var sp = new ConnectionParams();
+            sp.CipherSuitesPolicy = csp;
+
+            var cp = new ConnectionParams();
+            cp.CipherSuitesPolicy = csp;
+
+            NegotiatedParams ret = ConnectAndGetNegotiatedParams(sp, cp);
+            ret.Failed();
+        }
+
+        [ConditionalFact(nameof(CipherSuitesPolicyAndTls13Supported))]
+        public void CipherSuitesPolicy_AllowOneOnOneSideTls13_Success()
+        {
+            bool hasSucceededAtLeastOnce = false;
+            AllowOneOnOneSide(GetTls13CipherSuites(),
+                              RequiredByTls13Spec,
+                              (cs) => hasSucceededAtLeastOnce = true);
+            Assert.True(hasSucceededAtLeastOnce);
+        }
+
+        [ConditionalFact(nameof(CipherSuitesPolicySupported))]
+        public void CipherSuitesPolicy_AllowTwoOnBothSidesWithSingleOverlapNonTls13_Success()
+        {
+            var a = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0],
+                                                 SupportedNonTls13CipherSuites[1])
+            };
+            var b = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[1],
+                                                 SupportedNonTls13CipherSuites[2])
+            };
+
+            for (int i = 0; i < 2; i++)
+            {
+                NegotiatedParams ret = i == 0 ?
+                    ConnectAndGetNegotiatedParams(a, b) :
+                    ConnectAndGetNegotiatedParams(b, a);
+
+                ret.Succeeded();
+                ret.CheckCipherSuite(SupportedNonTls13CipherSuites[1]);
+            }
+        }
+
+        [ConditionalFact(nameof(CipherSuitesPolicySupported))]
+        public void CipherSuitesPolicy_AllowTwoOnBothSidesWithNoOverlapNonTls13_Fails()
+        {
+            var a = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0],
+                                                 SupportedNonTls13CipherSuites[1])
+            };
+            var b = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[2],
+                                                 SupportedNonTls13CipherSuites[3])
+            };
+
+            for (int i = 0; i < 2; i++)
+            {
+                NegotiatedParams ret = i == 0 ?
+                    ConnectAndGetNegotiatedParams(a, b) :
+                    ConnectAndGetNegotiatedParams(b, a);
+
+                ret.Failed();
+            }
+        }
+
+        [ConditionalFact(nameof(CipherSuitesPolicySupported))]
+        public void CipherSuitesPolicy_AllowSameTwoOnBothSidesLessPreferredIsTls13_Success()
+        {
+            // If both sides can speak TLS 1.3 they should speak it
+            var p = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0],
+                                                 TlsCipherSuite.TLS_AES_128_GCM_SHA256)
+            };
+
+            NegotiatedParams ret = ConnectAndGetNegotiatedParams(p, p);
+            ret.Succeeded();
+            ret.CheckCipherSuite(TlsCipherSuite.TLS_AES_128_GCM_SHA256);
+        }
+
+        [ConditionalFact(nameof(CipherSuitesPolicySupported))]
+        public void CipherSuitesPolicy_ClientOrderingWinsOverServerOrderingTwoCipherSuitesWithAllOverlapping_Success()
+        {
+            var a = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0],
+                                                 SupportedNonTls13CipherSuites[1])
+            };
+            var b = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[1],
+                                                 SupportedNonTls13CipherSuites[0])
+            };
+
+            for (int i = 0; i < 2; i++)
+            {
+                bool isAClient = i == 0;
+                NegotiatedParams ret = isAClient ?
+                    ConnectAndGetNegotiatedParams(b, a) :
+                    ConnectAndGetNegotiatedParams(a, b);
+
+                ret.Succeeded();
+                ret.CheckCipherSuite(SupportedNonTls13CipherSuites[isAClient ? 0 : 1]);
+            }
+        }
+
+        [ConditionalFact(nameof(CipherSuitesPolicySupported))]
+        public void CipherSuitesPolicy_ClientOrderingWinsOverServerOrderingThreeCipherSuitesWithTwoOverlapping_Success()
+        {
+            var a = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0],
+                                                 SupportedNonTls13CipherSuites[1],
+                                                 SupportedNonTls13CipherSuites[2])
+            };
+            var b = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[3],
+                                                 SupportedNonTls13CipherSuites[2],
+                                                 SupportedNonTls13CipherSuites[1])
+            };
+
+            for (int i = 0; i < 2; i++)
+            {
+                bool isAClient = i == 0;
+                NegotiatedParams ret = isAClient ?
+                    ConnectAndGetNegotiatedParams(b, a) :
+                    ConnectAndGetNegotiatedParams(a, b);
+
+                ret.Succeeded();
+                ret.CheckCipherSuite(SupportedNonTls13CipherSuites[isAClient ? 1 : 2]);
+            }
+        }
+
+        [ConditionalFact(nameof(CipherSuitesPolicyAndTls13Supported))]
+        public void CipherSuitesPolicy_OnlyTls13CipherSuiteAllowedButChosenProtocolsDoesNotAllowIt_Fails()
+        {
+            var a = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(TlsCipherSuite.TLS_AES_128_GCM_SHA256),
+                SslProtocols = NonTls13Protocols,
+            };
+
+            var b = new ConnectionParams();
+
+            for (int i = 0; i < 2; i++)
+            {
+                NegotiatedParams ret = i == 0 ?
+                    ConnectAndGetNegotiatedParams(a, b) :
+                    ConnectAndGetNegotiatedParams(b, a);
+                ret.Failed();
+            }
+        }
+
+        [ConditionalFact(nameof(CipherSuitesPolicyAndTls13Supported))]
+        public void CipherSuitesPolicy_OnlyTls13CipherSuiteAllowedOtherSideDoesNotAllowTls13_Fails()
+        {
+            var a = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(TlsCipherSuite.TLS_AES_128_GCM_SHA256)
+            };
+
+            var b = new ConnectionParams()
+            {
+                SslProtocols = NonTls13Protocols
+            };
+
+            for (int i = 0; i < 2; i++)
+            {
+                NegotiatedParams ret = i == 0 ?
+                    ConnectAndGetNegotiatedParams(a, b) :
+                    ConnectAndGetNegotiatedParams(b, a);
+                ret.Failed();
+            }
+        }
+
+        [ConditionalFact(nameof(CipherSuitesPolicySupported))]
+        public void CipherSuitesPolicy_OnlyNonTls13CipherSuitesAllowedButChosenProtocolDoesNotAllowIt_Fails()
+        {
+            var a = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0]),
+                SslProtocols = SslProtocols.Tls13,
+            };
+
+            var b = new ConnectionParams();
+
+            for (int i = 0; i < 2; i++)
+            {
+                NegotiatedParams ret = i == 0 ?
+                    ConnectAndGetNegotiatedParams(a, b) :
+                    ConnectAndGetNegotiatedParams(b, a);
+                ret.Failed();
+            }
+        }
+
+        [ConditionalFact(nameof(CipherSuitesPolicySupported))]
+        public void CipherSuitesPolicy_OnlyNonTls13CipherSuiteAllowedButOtherSideDoesNotAllowIt_Fails()
+        {
+            var a = new ConnectionParams()
+            {
+                CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0])
+            };
+
+            var b = new ConnectionParams()
+            {
+                SslProtocols = SslProtocols.Tls13
+            };
+
+            for (int i = 0; i < 2; i++)
+            {
+                NegotiatedParams ret = i == 0 ?
+                    ConnectAndGetNegotiatedParams(a, b) :
+                    ConnectAndGetNegotiatedParams(b, a);
+                ret.Failed();
+            }
+        }
+
+        private static void AllowOneOnOneSide(IEnumerable<TlsCipherSuite> cipherSuites,
+                                       Predicate<TlsCipherSuite> mustSucceed,
+                                       Action<TlsCipherSuite> cipherSuitePicked = null)
+        {
+            foreach (TlsCipherSuite cs in cipherSuites)
+            {
+                CipherSuitesPolicy csp = BuildPolicy(cs);
+
+                var paramsA = new ConnectionParams()
+                {
+                    CipherSuitesPolicy = csp,
+                };
+
+                var paramsB = new ConnectionParams();
+                int score = 0; // 1 for success 0 for fail. Sum should be even
+
+                for (int i = 0; i < 2; i++)
+                {
+                    NegotiatedParams ret = i == 0 ?
+                        ConnectAndGetNegotiatedParams(paramsA, paramsB) :
+                        ConnectAndGetNegotiatedParams(paramsB, paramsA);
+
+                    score += ret.HasSucceeded ? 1 : 0;
+                    if (mustSucceed(cs) || ret.HasSucceeded)
+                    {
+                        // we do not always guarantee success but if it succeeds it
+                        // must use the picked cipher suite
+                        ret.Succeeded();
+                        ret.CheckCipherSuite(cs);
+
+                        if (cipherSuitePicked != null && i == 0)
+                        {
+                            cipherSuitePicked(cs);
+                        }
+                    }
+                }
+
+                // we should either get 2 successes or 2 failures
+                Assert.True(score % 2 == 0);
             }
         }
 
@@ -163,6 +470,46 @@ namespace System.Net.Security.Tests
             yield return TlsCipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384;
             yield return TlsCipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256;
             yield return TlsCipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384;
+        }
+
+        private static IEnumerable<TlsCipherSuite> GetNonTls13CipherSuites()
+        {
+            var tls13cs = new HashSet<TlsCipherSuite>(GetTls13CipherSuites());
+            foreach (TlsCipherSuite cs in typeof(TlsCipherSuite).GetEnumValues())
+            {
+                if (!tls13cs.Contains(cs))
+                {
+                    yield return cs;
+                }
+            }
+        }
+
+        private static IReadOnlyList<TlsCipherSuite> GetSupportedNonTls13CipherSuites()
+        {
+            // This function is used to initialize static property.
+            // We do not want skipped tests to fail because of that.
+            if (!CipherSuitesPolicySupported)
+                return null;
+
+            var ret = new List<TlsCipherSuite>();
+            AllowOneOnOneSide(GetNonTls13CipherSuites(), (cs) => false, (cs) => ret.Add(cs));
+
+            // We can't do any interesting testing
+            // Fail because this is likely bug elsewhere (currently all platforms support more than 4 non TLS1.3 cipher suites)
+            Assert.True(ret.Count >= 4);
+
+            return ret;
+        }
+
+        private static bool RequiredByTls13Spec(TlsCipherSuite cs)
+        {
+            // per spec only one MUST be implemented
+            return cs == TlsCipherSuite.TLS_AES_128_GCM_SHA256;
+        }
+
+        private static CipherSuitesPolicy BuildPolicy(params TlsCipherSuite[] cipherSuites)
+        {
+            return new CipherSuitesPolicy(cipherSuites);
         }
 
         private static async Task<Exception> WaitForSecureConnection(VirtualNetwork connection, Func<Task> server, Func<Task> client)
@@ -253,10 +600,12 @@ namespace System.Net.Security.Tests
                 serverOptions.ServerCertificate = Configuration.Certificates.GetSelfSignedServerCertificate();
                 serverOptions.EncryptionPolicy = serverParams.EncryptionPolicy;
                 serverOptions.EnabledSslProtocols = serverParams.SslProtocols;
+                serverOptions.CipherSuitesPolicy = serverParams.CipherSuitesPolicy;
 
                 var clientOptions = new SslClientAuthenticationOptions();
                 clientOptions.EncryptionPolicy = clientParams.EncryptionPolicy;
                 clientOptions.EnabledSslProtocols = clientParams.SslProtocols;
+                clientOptions.CipherSuitesPolicy = clientParams.CipherSuitesPolicy;
                 clientOptions.TargetHost = "test";
                 clientOptions.RemoteCertificateValidationCallback =
                     new RemoteCertificateValidationCallback((object sender,
@@ -293,6 +642,7 @@ namespace System.Net.Security.Tests
 
         private class ConnectionParams
         {
+            public CipherSuitesPolicy CipherSuitesPolicy = null;
             public EncryptionPolicy EncryptionPolicy = EncryptionPolicy.RequireEncryption;
             public SslProtocols SslProtocols = SslProtocols.None;
         }

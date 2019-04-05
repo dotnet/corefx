@@ -64,6 +64,8 @@ namespace System.Net.Security
                 _encryptionPolicy = value;
             }
         }
+
+        public CipherSuitesPolicy CipherSuitesPolicy { get; set; }
     }
 }
 

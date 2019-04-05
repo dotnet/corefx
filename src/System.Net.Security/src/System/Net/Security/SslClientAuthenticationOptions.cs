@@ -65,6 +65,8 @@ namespace System.Net.Security
             get => _enabledSslProtocols;
             set => _enabledSslProtocols = value;
         }
+
+        public CipherSuitesPolicy CipherSuitesPolicy { get; set; }
     }
 }
 
