@@ -223,7 +223,7 @@ namespace System.IO.Pipelines
 
                     Memory<byte> buffer = _readTail.AvailableMemory.Slice(_readTail.End);
 
-                    int length = await InnerStream.ReadAsync(buffer, tokenSource.Token);
+                    int length = await InnerStream.ReadAsync(buffer, tokenSource.Token).ConfigureAwait(false);
 
                     Debug.Assert(length + _readTail.End <= _readTail.AvailableMemory.Length);
 
