@@ -123,6 +123,8 @@ namespace System.IO.Pipelines.Tests
                     reader.AdvanceTo(buffer.End);
                     index++;
                 }
+
+                reader.Complete();
             }
 
             var data = new List<byte[]>
@@ -441,6 +443,7 @@ namespace System.IO.Pipelines.Tests
         {
             PipeWriter writer = PipeWriter.Create(Stream.Null);
             Assert.Throws<NotSupportedException>(() => writer.OnReaderCompleted((_, __) => { }, null));
+            writer.Complete();
         }
 
         private class FlushAsyncAwareStream : WriteOnlyStream

@@ -275,7 +275,7 @@ namespace System.IO.Pipelines
                         BufferSegment returnSegment = segment;
                         segment = segment.NextSegment;
 
-                        await InnerStream.WriteAsync(returnSegment.Memory, localToken);
+                        await InnerStream.WriteAsync(returnSegment.Memory, localToken).ConfigureAwait(false);
 
                         returnSegment.ResetMemory();
                         ReturnSegmentUnsynchronized(returnSegment);
@@ -284,7 +284,7 @@ namespace System.IO.Pipelines
                         _head = segment;
                     }
 
-                    await InnerStream.FlushAsync(localToken);
+                    await InnerStream.FlushAsync(localToken).ConfigureAwait(false);
 
                     // Mark bytes as written *after* flushing
                     _head = null;
