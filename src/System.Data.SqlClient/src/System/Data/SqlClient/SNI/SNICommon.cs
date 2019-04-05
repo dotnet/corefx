@@ -192,7 +192,7 @@ namespace System.Data.SqlClient.SNI
         /// <returns></returns>
         internal static uint ReportSNIError(SNIProviders provider, uint nativeError, uint sniError, string errorMessage)
         {
-            return ReportSNIError(new SNIError(provider, nativeError, sniError, errorMessage));
+            return ReportSNIError(CreateSNIError(provider, nativeError, sniError, errorMessage));
         }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace System.Data.SqlClient.SNI
         /// <returns></returns>
         internal static uint ReportSNIError(SNIProviders provider, uint sniError, Exception sniException)
         {
-            return ReportSNIError(new SNIError(provider, sniError, sniException));
+            return ReportSNIError(CreateSNIError(provider, sniError, sniException));
         }
 
         /// <summary>
@@ -216,6 +216,17 @@ namespace System.Data.SqlClient.SNI
         {
             SNILoadHandle.SingletonInstance.LastError = error;
             return TdsEnums.SNI_ERROR;
+        }
+
+
+        internal static SNIError CreateSNIError(SNIProviders provider, uint nativeError, uint sniError, string errorMessage)
+        {
+            return new SNIError(provider, nativeError, sniError, errorMessage);
+        }
+
+        internal static SNIError CreateSNIError(SNIProviders provider, uint sniError, Exception sniException)
+        {
+            return new SNIError(provider, sniError, sniException);
         }
     }
 }

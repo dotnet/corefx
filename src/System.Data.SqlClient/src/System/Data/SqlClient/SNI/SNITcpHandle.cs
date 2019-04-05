@@ -21,21 +21,26 @@ namespace System.Data.SqlClient.SNI
     /// </summary>
     internal class SNITCPHandle : SNIHandle
     {
+        private static readonly Func<object, Task<SNIError>> s_beginOpenConnectionAsync = BeginOpenConnectionAsync;
+
         private readonly string _targetServer;
         private readonly object _callbackObject;
-        private readonly Socket _socket;
+        private readonly Guid _connectionId;
+
+        private Socket _socket;
         private NetworkStream _tcpStream;
-        
+
         private Stream _stream;
         private SslStream _sslStream;
         private SslOverTdsStream _sslOverTdsStream;
         private SNIAsyncCallback _receiveCallback;
         private SNIAsyncCallback _sendCallback;
 
-        private bool _validateCert = true;
-        private int _bufferSize = TdsEnums.DEFAULT_LOGIN_PACKET_SIZE;
-        private uint _status = TdsEnums.SNI_UNINITIALIZED;
-        private Guid _connectionId = Guid.NewGuid();
+        private bool _validateCert;
+        private int _bufferSize;
+        private uint _status;
+
+        private Task<SNIError> _connectionTask;
 
         private const int MaxParallelIpAddresses = 64;
 
@@ -87,7 +92,7 @@ namespace System.Data.SqlClient.SNI
         {
             get
             {
-                return _status;
+                return ResolveConnectionStatus();
             }
         }
 
@@ -100,86 +105,135 @@ namespace System.Data.SqlClient.SNI
         /// <param name="callbackObject">Callback object</param>
         public SNITCPHandle(string serverName, int port, long timerExpire, object callbackObject, bool parallel)
         {
+            _connectionId = Guid.NewGuid();
             _callbackObject = callbackObject;
             _targetServer = serverName;
+            _validateCert = true;
+            _bufferSize = TdsEnums.DEFAULT_LOGIN_PACKET_SIZE;
+            _status = TdsEnums.SNI_UNINITIALIZED;
+            _connectionTask = Task.Factory.StartNew(
+                function: s_beginOpenConnectionAsync,
+                state: Tuple.Create(this, port, timerExpire, parallel),
+                CancellationToken.None,
+                TaskCreationOptions.DenyChildAttach,
+                TaskScheduler.Default
+            ).Unwrap();
+        }
 
+        private static async Task<SNIError> BeginOpenConnectionAsync(object state)
+        {
+            var parameters = (Tuple<SNITCPHandle, int, long, bool>)state;
+            SNITCPHandle instance = parameters.Item1;
+            int port = parameters.Item2;
+            long timerExpire = parameters.Item3;
+            bool parallel = parameters.Item4;
+
+            SNIError retval = null;
             try
             {
-                TimeSpan ts = default(TimeSpan);
+                TimeSpan timeout = default;
 
                 // In case the Timeout is Infinite, we will receive the max value of Int64 as the tick count
                 // The infinite Timeout is a function of ConnectionString Timeout=0
                 bool isInfiniteTimeOut = long.MaxValue == timerExpire;
                 if (!isInfiniteTimeOut)
                 {
-                    ts = DateTime.FromFileTime(timerExpire) - DateTime.Now;
-                    ts = ts.Ticks < 0 ? TimeSpan.FromTicks(0) : ts;
+                    timeout = DateTime.FromFileTime(timerExpire) - DateTime.Now;
+                    timeout = timeout.Ticks < 0 ? TimeSpan.FromTicks(0) : timeout;
                 }
 
                 Task<Socket> connectTask;
                 if (parallel)
                 {
-                    Task<IPAddress[]> serverAddrTask = Dns.GetHostAddressesAsync(serverName);
-                    serverAddrTask.Wait(ts);
-                    IPAddress[] serverAddresses = serverAddrTask.Result;
+                    IPAddress[] serverAddresses = await Dns.GetHostAddressesAsync(instance._targetServer);
 
                     if (serverAddresses.Length > MaxParallelIpAddresses)
                     {
                         // Fail if above 64 to match legacy behavior
-                        ReportTcpSNIError(0, SNICommon.MultiSubnetFailoverWithMoreThan64IPs, string.Empty);
-                        return;
+                        return CreateTcpSNIError(0, SNICommon.MultiSubnetFailoverWithMoreThan64IPs, string.Empty);
                     }
 
                     connectTask = ParallelConnectAsync(serverAddresses, port);
-
-                    if (!(isInfiniteTimeOut ? connectTask.Wait(-1) : connectTask.Wait(ts)))
+                    if (!connectTask.IsCompleted)
                     {
-                        ReportTcpSNIError(0, SNICommon.ConnOpenFailedError, string.Empty);
-                        return;
+                        CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                        if (!isInfiniteTimeOut)
+                        {
+                            cancellationTokenSource.CancelAfter(timeout);
+                        }
+                        connectTask.Wait(cancellationTokenSource.Token);
                     }
-
-                    _socket = connectTask.Result;
+                    if (connectTask.IsCompletedSuccessfully)
+                    {
+                        instance._socket = await connectTask;
+                    }
+                    else
+                    {
+                        retval = CreateTcpSNIError(0, SNICommon.ConnOpenFailedError, string.Empty);
+                    }
                 }
                 else
                 {
-                    _socket = Connect(serverName, port, ts);
+                    instance._socket = await ConnectAsync(instance._targetServer, port, timeout);
                 }
-                
-                if (_socket == null || !_socket.Connected)
+
+                if (instance._socket == null || !instance._socket.Connected)
                 {
-                    if (_socket != null)
-                    {
-                        _socket.Dispose();
-                        _socket = null;
-                    }
-                    ReportTcpSNIError(0, SNICommon.ConnOpenFailedError, string.Empty);
-                    return;
+                    Socket disposeSocket = Interlocked.Exchange(ref instance._socket, null);
+                    disposeSocket?.Dispose();
+                    return CreateTcpSNIError(0, SNICommon.ConnOpenFailedError, string.Empty);
                 }
 
-                _socket.NoDelay = true;
-                _tcpStream = new NetworkStream(_socket, true);
-
-                _sslOverTdsStream = new SslOverTdsStream(_tcpStream);
-                _sslStream = new SslStream(_sslOverTdsStream, true, new RemoteCertificateValidationCallback(ValidateServerCertificate), null);
+                instance._socket.NoDelay = true;
+                instance._tcpStream = new NetworkStream(instance._socket, true);
+                instance._sslOverTdsStream = new SslOverTdsStream(instance._tcpStream);
+                instance._sslStream = new SslStream(instance._sslOverTdsStream, true, new RemoteCertificateValidationCallback(instance.ValidateServerCertificate), null);
             }
             catch (SocketException se)
             {
-                ReportTcpSNIError(se);
-                return;
+                return CreateTcpSNIError(se);
             }
             catch (Exception e)
             {
-                ReportTcpSNIError(e);
-                return;
+                return CreateTcpSNIError(e);
             }
 
-            _stream = _tcpStream;
-            _status = TdsEnums.SNI_SUCCESS;
+            instance._stream = instance._tcpStream;
+
+            return retval;
         }
 
-        private static Socket Connect(string serverName, int port, TimeSpan timeout)
+        private uint ResolveConnectionStatus()
         {
-            IPAddress[] ipAddresses = Dns.GetHostAddresses(serverName);
+            // multiple callers can reach here but only one can complete the connection task so 
+            // we need to ensure that all calls are serialized as cheaply as possible
+            if (!(_connectionTask is null))
+            {
+                lock (this)
+                {
+                    Task<SNIError> connectionTask = _connectionTask;
+                    if (!(connectionTask is null))
+                    {
+                        _connectionTask = null;
+                        // synchronus wait for an async, can't be async because of the lock
+                        SNIError error = connectionTask.GetAwaiter().GetResult();  
+                        if (error != null)
+                        {
+                            ReportTcpSNIError(error);
+                        }
+                        else
+                        {
+                            _status = TdsEnums.SNI_SUCCESS;
+                        }
+                    }
+                }
+            }
+            return _status;
+        }
+
+        private static async Task<Socket> ConnectAsync(string serverName, int port, TimeSpan timeout)
+        {
+            IPAddress[] ipAddresses = await Dns.GetHostAddressesAsync(serverName);
             IPAddress serverIPv4 = null;
             IPAddress serverIPv6 = null;
             foreach (IPAddress ipAddress in ipAddresses)
@@ -198,24 +252,11 @@ namespace System.Data.SqlClient.SNI
 
             CancellationTokenSource cts = new CancellationTokenSource();
             cts.CancelAfter(timeout);
-            void Cancel()
-            {
-                for (int i = 0; i < sockets.Length; ++i)
-                {
-                    try
-                    {
-                        if (sockets[i] != null && !sockets[i].Connected)
-                        {
-                            sockets[i].Dispose();
-                            sockets[i] = null;
-                        }
-                    }
-                    catch { }
-                }
-            }
+ 
             cts.Token.Register(Cancel);
 
             Socket availableSocket = null;
+
             for (int i = 0; i < sockets.Length; ++i)
             {
                 try
@@ -224,8 +265,8 @@ namespace System.Data.SqlClient.SNI
                     {
                         sockets[i] = new Socket(ipAddresses[i].AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                         // enable keep-alive on socket
-                        SNITcpHandle.SetKeepAliveValues(ref sockets[i]);                      
-                        sockets[i].Connect(ipAddresses[i], port);
+                        SNITcpHandle.SetKeepAliveValues(ref sockets[i]);
+                        await sockets[i].ConnectAsync(ipAddresses[i], port);
                         if (sockets[i] != null) // sockets[i] can be null if cancel callback is executed during connect()
                         {
                             if (sockets[i].Connected)
@@ -245,6 +286,22 @@ namespace System.Data.SqlClient.SNI
             }
 
             return availableSocket;
+
+            void Cancel()
+            {
+                for (int i = 0; i < sockets.Length; ++i)
+                {
+                    try
+                    {
+                        if (sockets[i] != null && !sockets[i].Connected)
+                        {
+                            sockets[i].Dispose();
+                            sockets[i] = null;
+                        }
+                    }
+                    catch { }
+                }
+            }
         }
 
         private static Task<Socket> ParallelConnectAsync(IPAddress[] serverAddresses, int port)
@@ -559,45 +616,58 @@ namespace System.Data.SqlClient.SNI
         /// <returns>SNI error status</returns>
         public override uint CheckConnection()
         {
-            try
+            if (ResolveConnectionStatus() == TdsEnums.SNI_SUCCESS)
             {
-                // _socket.Poll method with argument SelectMode.SelectRead returns 
-                //      True : if Listen has been called and a connection is pending, or
-                //      True : if data is available for reading, or
-                //      True : if the connection has been closed, reset, or terminated, i.e no active connection.
-                //      False : otherwise.
-                // _socket.Available property returns the number of bytes of data available to read.
-                //
-                // Since _socket.Connected alone doesn't guarantee if the connection is still active, we use it in 
-                // combination with _socket.Poll method and _socket.Available == 0 check. When both of them 
-                // return true we can safely determine that the connection is no longer active.
-                if (!_socket.Connected || (_socket.Poll(100, SelectMode.SelectRead) && _socket.Available == 0))
+                try
                 {
-                    return TdsEnums.SNI_ERROR;
+                    // _socket.Poll method with argument SelectMode.SelectRead returns 
+                    //      True : if Listen has been called and a connection is pending, or
+                    //      True : if data is available for reading, or
+                    //      True : if the connection has been closed, reset, or terminated, i.e no active connection.
+                    //      False : otherwise.
+                    // _socket.Available property returns the number of bytes of data available to read.
+                    //
+                    // Since _socket.Connected alone doesn't guarantee if the connection is still active, we use it in 
+                    // combination with _socket.Poll method and _socket.Available == 0 check. When both of them 
+                    // return true we can safely determine that the connection is no longer active.
+                    if (!_socket.Connected || (_socket.Poll(100, SelectMode.SelectRead) && _socket.Available == 0))
+                    {
+                        return TdsEnums.SNI_ERROR;
+                    }
                 }
-            }
-            catch (SocketException se)
-            {
-                return ReportTcpSNIError(se);
-            }
-            catch (ObjectDisposedException ode)
-            {
-                return ReportTcpSNIError(ode);
-            }
+                catch (SocketException se)
+                {
+                    return ReportTcpSNIError(se);
+                }
+                catch (ObjectDisposedException ode)
+                {
+                    return ReportTcpSNIError(ode);
+                }
 
-            return TdsEnums.SNI_SUCCESS;
+                return TdsEnums.SNI_SUCCESS;
+            }
+            else
+            {
+                return _status;
+            }
+        }
+
+        private uint ReportTcpSNIError(SNIError error)
+        {
+            _status = TdsEnums.SNI_ERROR;
+            return SNICommon.ReportSNIError(error);
         }
 
         private uint ReportTcpSNIError(Exception sniException)
         {
             _status = TdsEnums.SNI_ERROR;
-            return SNICommon.ReportSNIError(SNIProviders.TCP_PROV, SNICommon.InternalExceptionError, sniException);
+            return SNICommon.ReportSNIError(CreateTcpSNIError(sniException));
         }
 
         private uint ReportTcpSNIError(uint nativeError, uint sniError, string errorMessage)
         {
             _status = TdsEnums.SNI_ERROR;
-            return SNICommon.ReportSNIError(SNIProviders.TCP_PROV, nativeError, sniError, errorMessage);
+            return SNICommon.ReportSNIError(CreateTcpSNIError(nativeError, sniError, errorMessage));
         }
 
         private uint ReportErrorAndReleasePacket(SNIPacket packet, Exception sniException)
@@ -616,6 +686,16 @@ namespace System.Data.SqlClient.SNI
                 packet.Release();
             }
             return ReportTcpSNIError(nativeError, sniError, errorMessage);
+        }
+
+        private static SNIError CreateTcpSNIError(Exception sniException)
+        {
+            return SNICommon.CreateSNIError(SNIProviders.TCP_PROV, SNICommon.InternalExceptionError, sniException);
+        }
+
+        private static SNIError CreateTcpSNIError(uint nativeError, uint sniError, string errorMessage)
+        {
+            return SNICommon.CreateSNIError(SNIProviders.TCP_PROV, nativeError, sniError, errorMessage);
         }
 
 #if DEBUG
