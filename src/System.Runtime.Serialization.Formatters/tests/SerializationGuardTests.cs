@@ -13,28 +13,28 @@ using Xunit;
 
 namespace System.Runtime.Serialization.Formatters.Tests
 {
-    public class SerializationGuardTests
+    public static class SerializationGuardTests
     {
         [Fact]
-        void BlockAssemblyLoads()
+        public static void BlockAssemblyLoads()
         {
             TryPayload(new AssemblyLoader());
         }
 
         [Fact]
-        void BlockProcessStarts()
+        public static void BlockProcessStarts()
         {
             TryPayload(new ProcessStarter());
         }
 
         [Fact]
-        void BlockFileWrites()
+        public static void BlockFileWrites()
         {
             TryPayload(new FileWriter());
         }
 
         [Fact]
-        void BlockReflectionDodging()
+        public static void BlockReflectionDodging()
         {
             // Ensure that the deserialization tracker cannot be called by reflection.
             MethodInfo trackerMethod = typeof(Thread).GetMethod(
@@ -60,12 +60,12 @@ namespace System.Runtime.Serialization.Formatters.Tests
         }
 
         [Fact]
-        void BlockAsyncDodging()
+        public static void BlockAsyncDodging()
         {
             TryPayload(new AsyncDodger());
         }
 
-        static void TryPayload(object payload)
+        private static void TryPayload(object payload)
         {
             MemoryStream ms = new MemoryStream();
             BinaryFormatter writer = new BinaryFormatter();
@@ -78,7 +78,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
-    class AssemblyLoader : ISerializable
+    internal class AssemblyLoader : ISerializable
     {
         public AssemblyLoader() { }
 
@@ -93,7 +93,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
-    class ProcessStarter : ISerializable
+    internal class ProcessStarter : ISerializable
     {
         public ProcessStarter() { }
 
@@ -108,7 +108,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
-    class FileWriter : ISerializable
+    internal class FileWriter : ISerializable
     {
         public FileWriter() { }
 
@@ -125,7 +125,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
     }
 
     [Serializable]
-    class AsyncDodger : ISerializable
+    internal class AsyncDodger : ISerializable
     {
         public AsyncDodger() { }
 
