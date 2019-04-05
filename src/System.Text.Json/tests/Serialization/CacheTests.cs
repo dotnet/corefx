@@ -10,7 +10,6 @@ namespace System.Text.Json.Serialization.Tests
     public static class CacheTests
     {
         [Fact]
-        [ActiveIssue(36618)]
         public static void MultipleThreads()
         {
             // Ensure no exceptions are thrown due to caching or other issues.
@@ -25,6 +24,7 @@ namespace System.Text.Json.Serialization.Tests
                 if (useEmptyJson)
                 {
                     json = "{}";
+                    SimpleTestClass testObjDeserialized = JsonSerializer.Parse<SimpleTestClass>(json, options);
                 }
                 else
                 {
@@ -33,10 +33,9 @@ namespace System.Text.Json.Serialization.Tests
                     testObj.Verify();
 
                     json = JsonSerializer.ToString(testObj, options);
+                    SimpleTestClass testObjDeserialized = JsonSerializer.Parse<SimpleTestClass>(json, options);
+                    testObjDeserialized.Verify();
                 }
-
-                SimpleTestClass testObjDeserialized = JsonSerializer.Parse<SimpleTestClass>(json, options);
-                testObjDeserialized.Verify();
             };
 
             Task[] tasks = new Task[8];
