@@ -59,7 +59,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             ms.Position = 0;
 
             BinaryFormatter reader = new BinaryFormatter();
-            Assert.Throws<DeserializationBlockedException>(() => reader.Deserialize(ms)); // This should really look for DeserializationBlockedException, but it's not in all of the frameworks this test builds for
+            Assert.Throws<DeserializationBlockedException>(() => reader.Deserialize(ms));
         }
     }
 
@@ -101,7 +101,8 @@ namespace System.Runtime.Serialization.Formatters.Tests
         private FileWriter(SerializationInfo info, StreamingContext context)
         {
             string tempPath = Path.GetTempFileName();
-            File.WriteAllText(tempPath, "foo");
+            File.WriteAllText(tempPath, "This better not be written...");
+            throw new InvalidOperationException("Unreachable code (SerializationGuard should have kicked in)");
         }
         
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -117,7 +118,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
         private ReflectionDodger(SerializationInfo info, StreamingContext context)
         {
             object tracker = null;
-            Type threadType = typeof(object).Assembly.GetType("xSystem.Threading.Thread");
+            Type threadType = typeof(object).Assembly.GetType("System.Threading.Thread");
             MethodInfo trackerMethod = null;
             if (threadType != null)
             {

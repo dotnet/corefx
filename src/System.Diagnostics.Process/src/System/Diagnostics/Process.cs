@@ -1180,7 +1180,8 @@ namespace System.Diagnostics
         partial void ConfigureAfterProcessIdSet();
 
         /// <summary>
-        /// Builds a wrapper delegate for SerializationInfo.ThrowIfDeserializationInProgress(string, ref int)
+        /// Builds a wrapper delegate for SerializationInfo.ThrowIfDeserializationInProgress(string, ref int),
+        /// since it is not exposed via contracts.
         /// </summary>
         private static ThrowIfDeserializationInProgressWithSwitchDel CreateThrowIfDeserializationInProgressWithSwitchDelegate()
         {
