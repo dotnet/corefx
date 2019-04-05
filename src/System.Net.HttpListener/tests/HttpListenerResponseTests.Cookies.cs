@@ -57,7 +57,7 @@ namespace System.Net.Tests
                 144, "Set-Cookie: name=value", null
             };
 
-            if (PlatformDetection.IsFullFramework)
+            if (!PlatformDetection.IsFullFramework)
             {
                 yield return new object[]
                 {
