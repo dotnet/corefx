@@ -314,11 +314,6 @@ namespace System.Net.Security
 
         internal static SafeFreeCredentials AcquireCredentialsHandle(string package, bool isServer, NetworkCredential credential)
         {
-            if (isServer)
-            {
-                throw new PlatformNotSupportedException(SR.net_nego_server_not_supported);
-            }
-
             bool isEmptyCredential = string.IsNullOrWhiteSpace(credential.UserName) ||
                                      string.IsNullOrWhiteSpace(credential.Password);
             bool ntlmOnly = string.Equals(package, NegotiationInfoClass.NTLM, StringComparison.OrdinalIgnoreCase);
