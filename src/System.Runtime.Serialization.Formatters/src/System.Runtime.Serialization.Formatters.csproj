@@ -63,6 +63,7 @@
     <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />
     <ProjectReference Include="..\..\System.Collections.Concurrent\src\System.Collections.Concurrent.csproj" />
     <ProjectReference Include="..\..\System.Collections.NonGeneric\src\System.Collections.NonGeneric.csproj" />
   </ItemGroup>
