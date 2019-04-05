@@ -1182,13 +1182,11 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("  Hello  ", new char[] { ' ' }, "Hello")]
-        [InlineData("  Hello  ", null, "Hello")]
-        [InlineData("  Hello  ", new char[0], "Hello")]
-        [InlineData("      \t      ", null, "")]
-        [InlineData("", null, "")]
-        [InlineData("      ", new char[] { ' ' }, "")]
-        public static void Trim_Memory(string s, char[] trimChars, string expected)
+        [InlineData("  Hello  ", "Hello")]
+        [InlineData("      \t      ", "")]
+        [InlineData("", "")]
+        [InlineData("      ", "")]
+        public static void Trim_Memory(string s, string expected)
         {
             Assert.Equal(expected, s.AsSpan().Trim().ToString()); // ReadOnlySpan
             Assert.Equal(expected, new Span<char>(s.ToCharArray()).Trim().ToString());
@@ -1197,13 +1195,11 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("  Hello  ", new char[] { ' ' }, "  Hello")]
-        [InlineData("  Hello  ", null, "  Hello")]
-        [InlineData("  Hello  ", new char[0], "  Hello")]
-        [InlineData("      \t      ", null, "")]
-        [InlineData("", null, "")]
-        [InlineData("      ", new char[] { ' ' }, "")]
-        public static void TrimEnd_Memory(string s, char[] trimChars, string expected)
+        [InlineData("  Hello  ", "  Hello")]
+        [InlineData("      \t      ", "")]
+        [InlineData("", "")]
+        [InlineData("      ", "")]
+        public static void TrimEnd_Memory(string s, string expected)
         {
             Assert.Equal(expected, s.AsSpan().TrimEnd().ToString()); // ReadOnlySpan
             Assert.Equal(expected, new Span<char>(s.ToCharArray()).TrimEnd().ToString());
@@ -1212,13 +1208,11 @@ namespace System.Tests
         }
 
         [Theory]
-        [InlineData("  Hello  ", new char[] { ' ' }, "  Hello")]
-        [InlineData("  Hello  ", null, "  Hello")]
-        [InlineData("  Hello  ", new char[0], "  Hello")]
-        [InlineData("      \t      ", null, "")]
-        [InlineData("", null, "")]
-        [InlineData("      ", new char[] { ' ' }, "")]
-        public static void TrimStart_Memory(string s, char[] trimChars, string expected)
+        [InlineData("  Hello  ", "Hello  ")]
+        [InlineData("      \t      ", "")]
+        [InlineData("", "")]
+        [InlineData("      ", "")]
+        public static void TrimStart_Memory(string s, string expected)
         {
             Assert.Equal(expected, s.AsSpan().TrimStart().ToString()); // ReadOnlySpan
             Assert.Equal(expected, new Span<char>(s.ToCharArray()).TrimStart().ToString());
