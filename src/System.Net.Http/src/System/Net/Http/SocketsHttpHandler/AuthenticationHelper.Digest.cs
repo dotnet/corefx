@@ -91,9 +91,9 @@ namespace System.Net.Http
             }
             else
             {
-                string usernameStar;
-                if (HeaderUtilities.IsInputEncoded5987(credential.UserName, out usernameStar))
+                if (HeaderUtilities.IsNonAsciiEncodingRequired(credential.UserName))
                 {
+                    string usernameStar = HeaderUtilities.Encode5987(credential.UserName);
                     sb.AppendKeyValue(UsernameStar, usernameStar, includeQuotes: false);
                 }
                 else

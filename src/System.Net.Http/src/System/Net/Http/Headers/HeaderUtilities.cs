@@ -65,21 +65,27 @@ namespace System.Net.Http.Headers
             }
         }
 
+        // tspecials are required to be in a quoted string.  Only non-ascii needs to be encoded.
+        internal static bool IsNonAsciiEncodingRequired(string input)
+        {
+            Debug.Assert(input != null);
+
+            foreach (char c in input)
+            {
+                if ((int)c > 0x7f)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         // Encode a string using RFC 5987 encoding.
         // encoding'lang'PercentEncodedSpecials
         internal static string Encode5987(string input)
         {
-            string output;
-            IsInputEncoded5987(input, out output);
-
-            return output;
-        }
-
-        internal static bool IsInputEncoded5987(string input, out string output)
-        {
             // Encode a string using RFC 5987 encoding.
             // encoding'lang'PercentEncodedSpecials
-            bool wasEncoded = false;
             StringBuilder builder = StringBuilderCache.Acquire();
             builder.Append("utf-8\'\'");
             foreach (char c in input)
@@ -92,14 +98,12 @@ namespace System.Net.Http.Headers
                     foreach (byte b in bytes)
                     {
                         AddHexEscaped((char)b, builder);
-                        wasEncoded = true;
                     }
                 }
                 else if (!HttpRuleParser.IsTokenChar(c) || c == '*' || c == '\'' || c == '%')
                 {
                     // ASCII - Only one encoded byte.
                     AddHexEscaped(c, builder);
-                    wasEncoded = true;
                 }
                 else
                 {
@@ -108,8 +112,7 @@ namespace System.Net.Http.Headers
 
             }
 
-            output = StringBuilderCache.GetStringAndRelease(builder);
-            return wasEncoded;
+            return StringBuilderCache.GetStringAndRelease(builder);
         }
 
         /// <summary>Transforms an ASCII character into its hexadecimal representation, adding the characters to a StringBuilder.</summary>
