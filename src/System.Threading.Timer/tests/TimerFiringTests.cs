@@ -345,7 +345,7 @@ public partial class TimerFiringTests
         int processorCount = Environment.ProcessorCount;
 
         int timerTickCount = 0;
-        TimerCallback timerCallback = data => Interlocked.Increment(ref timerTickCount);
+        TimerCallback timerCallback = _ => Interlocked.Increment(ref timerTickCount);
 
         var threadStarted = new AutoResetEvent(false);
         var createTimers = new ManualResetEvent(false);
