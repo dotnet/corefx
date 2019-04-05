@@ -165,6 +165,45 @@ namespace System.Net.Security
             return status == Interop.NetSecurityNative.Status.GSS_S_COMPLETE;
         }
 
+        private static bool GssAcceptSecurityContext(
+            ref SafeGssContextHandle context,
+            byte[] buffer,
+            out byte[] outputBuffer)
+        {
+            // do we need to initalize this?
+            if (context == null)
+            {
+                context = new SafeGssContextHandle();
+            }
+
+            Interop.NetSecurityNative.GssBuffer token = default(Interop.NetSecurityNative.GssBuffer);
+            Interop.NetSecurityNative.Status status;
+
+            try
+            {
+                Interop.NetSecurityNative.Status minorStatus;
+                status = Interop.NetSecurityNative.AcceptSecContext(out minorStatus,
+                                                          ref context,
+                                                          buffer,
+                                                          buffer?.Length ?? 0,
+                                                          ref token);
+
+                if ((status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE) &&
+                    (status != Interop.NetSecurityNative.Status.GSS_S_CONTINUE_NEEDED))
+                {
+                    throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
+                }
+
+                outputBuffer = token.ToByteArray();
+            }
+            finally
+            {
+                token.Dispose();
+            }
+
+            return status == Interop.NetSecurityNative.Status.GSS_S_COMPLETE;
+        }
+
         private static SecurityStatusPal EstablishSecurityContext(
           SafeFreeNegoCredentials credential,
           ref SafeDeleteContext context,
@@ -293,7 +332,74 @@ namespace System.Net.Security
             ref byte[] resultBlob,
             ref ContextFlagsPal contextFlags)
         {
-            throw new PlatformNotSupportedException(SR.net_nego_server_not_supported);
+            // bool isNtlmOnly = credential.IsNtlmOnly;
+
+            if (securityContext == null)
+            {
+                /*
+                if (NetEventSource.IsEnabled)
+                {
+                    string protocol = isNtlmOnly ? "NTLM" : "SPNEGO";
+                    NetEventSource.Info(null, $"requested protocol = {protocol}, target = {targetName}");
+                }
+                */
+                securityContext = new SafeDeleteNegoContext((SafeFreeNegoCredentials)credentialsHandle);
+            }
+
+            if (credentialsHandle == null)
+            {
+                throw new ArgumentNullException(nameof(credentialsHandle));
+            }
+            if (securityContext == null)
+            {
+                throw new ArgumentNullException(nameof(securityContext));
+            }
+            if (incomingBlob == null)
+            {
+                throw new ArgumentNullException(nameof(incomingBlob));
+            }
+
+            SafeDeleteNegoContext negoContext = (SafeDeleteNegoContext)securityContext;
+            try
+            {
+                SafeGssContextHandle contextHandle = negoContext.GssContext;
+                bool done = GssAcceptSecurityContext(
+                   ref contextHandle,
+                   incomingBlob,
+                   out resultBlob);
+/*
+                if (done)
+                {
+                    if (NetEventSource.IsEnabled)
+                    {
+                        string protocol = isNtlmOnly ? "NTLM" : isNtlmUsed ? "SPNEGO-NTLM" : "SPNEGO-Kerberos";
+                        NetEventSource.Info(null, $"actual protocol = {protocol}");
+                    }
+
+                    // Populate protocol used for authentication
+                    negoContext.SetAuthenticationPackage(isNtlmUsed);
+                }
+*/
+                Debug.Assert(resultBlob != null, "Unexpected null buffer returned by GssApi");
+                Debug.Assert(negoContext.GssContext == null || contextHandle == negoContext.GssContext);
+
+                // Save the inner context handle for further calls to NetSecurity
+                Debug.Assert(negoContext.GssContext == null || contextHandle == negoContext.GssContext);
+                if (null == negoContext.GssContext)
+                {
+                    negoContext.SetGssContext(contextHandle);
+                }
+
+                SecurityStatusPalErrorCode errorCode = done ?
+                    (negoContext.IsNtlmUsed && resultBlob.Length > 0 ? SecurityStatusPalErrorCode.OK : SecurityStatusPalErrorCode.CompleteNeeded) :
+                    SecurityStatusPalErrorCode.ContinueNeeded;
+                return new SecurityStatusPal(errorCode);
+            }
+            catch (Exception ex)
+            {
+                if (NetEventSource.IsEnabled) NetEventSource.Error(null, ex);
+                return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, ex);
+            }
         }
 
         internal static Win32Exception CreateExceptionFromError(SecurityStatusPal statusCode)
