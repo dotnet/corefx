@@ -182,8 +182,6 @@ namespace System.Text.Json.Serialization
                     readerState);
             }
 
-            VerifyReturnValue(returnType, ref state);
-
             return (TValue)state.Current.ReturnValue;
         }
 

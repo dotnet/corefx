@@ -312,7 +312,4 @@
   <data name="FormatGuid" xml:space="preserve">
     <value>The JSON value is not in a supported Guid format.</value>
   </data>
-  <data name="JsonElementConversionNotSupported" xml:space="preserve">
-    <value>Conversion from untyped values to JsonElement is currently not supported.</value>
-  </data>
 </root>

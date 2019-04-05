@@ -39,7 +39,12 @@ namespace System.Text.Json.Serialization.Tests
             obj.Object = null;
 
             string json = JsonSerializer.ToString(obj);
-            Assert.Equal(ObjectWithObjectProperties.ExpectedJsonAllNulls, json);
+            Assert.Contains(@"""Address"":null", json);
+            Assert.Contains(@"""List"":null", json);
+            Assert.Contains(@"""Array"":null", json);
+            Assert.Contains(@"""NullableInt"":null", json);
+            Assert.Contains(@"""Object"":null", json);
+            Assert.Contains(@"""NullableIntArray"":null", json);
         }
 
         [Fact]

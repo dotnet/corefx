@@ -38,11 +38,5 @@ namespace System.Text.Json
         {
             throw new ObjectDisposedException(name);
         }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowJsonElementConversionNotSupported()
-        {
-            throw new NotSupportedException(SR.JsonElementConversionNotSupported);
-        }
     }
 }
