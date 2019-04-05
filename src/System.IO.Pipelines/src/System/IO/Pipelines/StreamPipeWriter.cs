@@ -263,6 +263,7 @@ namespace System.IO.Pipelines
 
             // Update any buffered data
             _tail.End += _tailBytesBuffered;
+            _tailBytesBuffered = 0;
 
             using (reg)
             {
