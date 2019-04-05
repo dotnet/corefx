@@ -60,6 +60,7 @@ namespace System.Net.Http.Tests
         [Theory]
         [InlineData("test", "username=\"test\"")]
         [InlineData("test@example.org", "username=\"test@example.org\"")]
+        [InlineData("test\"example.org", "username=\"test\\\"example.org\"")]
         [InlineData("t\u00E6st", "username*=utf-8''t%C3%A6st")]
         public async void DigestResponse_UserName_Encoding(string username, string encodedUserName)
         {

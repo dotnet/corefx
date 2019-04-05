@@ -415,12 +415,28 @@ namespace System.Net.Http
             if (includeQuotes)
             {
                 sb.Append('"');
-            }
-
-            sb.Append(value);
-            if (includeQuotes)
-            {
+                int lastSpecialIndex = 0, specialIndex;
+                while (true)
+                {
+                    specialIndex = value.IndexOfAny(new[] { '"', '\\' }, lastSpecialIndex);
+                    if (specialIndex >= 0)
+                    {
+                        sb.Append(value, lastSpecialIndex, specialIndex - lastSpecialIndex);
+                        sb.Append('\\');
+                        sb.Append(value[specialIndex]);
+                        lastSpecialIndex = specialIndex + 1;
+                    }
+                    else
+                    {
+                        sb.Append(value, lastSpecialIndex, value.Length - lastSpecialIndex);
+                        break;
+                    }
+                }
                 sb.Append('"');
+            }
+            else
+            {
+                sb.Append(value);
             }
 
             if (includeComma)
