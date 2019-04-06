@@ -1,5 +1,4 @@
 <Project DefaultTargets="Build">
-  <PropertyGroup>
   <Import Project="Directory.Build.props" />
 
   <Target Name="GetGenFacadesInputs">
@@ -41,7 +40,6 @@
       FacadePath="$(GenFacadesOutputPath)"
       ProducePdb="$(ProducePdb)"
       IgnoreMissingTypes="$(GenFacadesIgnoreMissingTypes)"
-      IgnoreBuildAndRevisionMismatch="$(GenFacadesIgnoreBuildAndRevisionMismatch)"
       ForceZeroVersionSeeds="$(GenFacadesForceZeroVersionSeeds)"
       BuildPartialReferenceFacade="$(GenFacadesBuildPartialReferenceFacade)"
     />
