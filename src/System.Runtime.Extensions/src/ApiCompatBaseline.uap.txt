@@ -1,4 +1,0 @@
-MembersMustExist : Member 'System.IO.Path.EndsInDirectorySeparator(System.ReadOnlySpan<System.Char>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.IO.Path.EndsInDirectorySeparator(System.String)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.IO.Path.TrimEndingDirectorySeparator(System.ReadOnlySpan<System.Char>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.IO.Path.TrimEndingDirectorySeparator(System.String)' does not exist in the implementation but it does exist in the contract.
