@@ -12,38 +12,38 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void MultipleThreads()
         {
-            // Ensure no exceptions are thrown due to caching or other issues.
-            void SerializeAndDeserializeObject(bool useEmptyJson)
+            // Use localized caching
+            // Todo: localized caching not implemented yet. When implemented, add a run-time attribute to JsonSerializerOptions as that will create a separate cache held by JsonSerializerOptions.
+            var options = new JsonSerializerOptions();
+
+            void DeserializeObjectFlipped()
             {
-                // Use localized caching
-                // Todo: localized caching not implemented yet. When implemented, add a run-time attribute to JsonSerializerOptions as that will create a separate cache held by JsonSerializerOptions.
-                var options = new JsonSerializerOptions();
-
-                string json;
-
-                if (useEmptyJson)
-                {
-                    json = "{}";
-                    SimpleTestClass testObjDeserialized = JsonSerializer.Parse<SimpleTestClass>(json, options);
-                }
-                else
-                {
-                    SimpleTestClass testObj = new SimpleTestClass();
-                    testObj.Initialize();
-                    testObj.Verify();
-
-                    json = JsonSerializer.ToString(testObj, options);
-                    SimpleTestClass testObjDeserialized = JsonSerializer.Parse<SimpleTestClass>(json, options);
-                    testObjDeserialized.Verify();
-                }
+                SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(SimpleTestClass.s_json_flipped, options);
+                obj.Verify();
             };
 
-            Task[] tasks = new Task[8];
-            bool useEmptyJson = false;
-            for (int i = 0; i < tasks.Length; i++)
+            void DeserializeObjectNormal()
             {
-                tasks[i] = Task.Run(() => SerializeAndDeserializeObject(useEmptyJson));
-                useEmptyJson = !useEmptyJson;
+                SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(SimpleTestClass.s_json, options);
+                obj.Verify();
+            };
+
+            void SerializeObject()
+            {
+                var obj = new SimpleTestClass();
+                obj.Initialize();
+                JsonSerializer.ToString(obj, options);
+            };
+
+            Task[] tasks = new Task[4 * 3];
+            for (int i = 0; i < tasks.Length; i += 3)
+            {
+                // Create race condition to populate the sorted property cache with different json ordering.
+                tasks[i + 0] = Task.Run(() => DeserializeObjectFlipped());
+                tasks[i + 1] = Task.Run(() => DeserializeObjectNormal());
+
+                // Ensure no exceptions on serialization
+                tasks[i + 2] = Task.Run(() => SerializeObject());
             };
 
             Task.WaitAll(tasks);
