@@ -2697,6 +2697,36 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        [Theory]
+        [InlineData("\u05D1\u05F1")]
+        [InlineData("jp\u30A5")]
+        public async Task SendAsync_InvalidHeader_Throw(string value)
+        {
+            await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
+            {
+                HttpClientHandler handler = CreateHttpClientHandler();
+                using (HttpClient client = CreateHttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Get, uri);
+                    Assert.True(request.Headers.TryAddWithoutValidation("bad", value));
+
+                    Task t  = client.SendAsync(request);
+                   // await Assert.ThrowsAsync<HttpRequestException>(() => t).ConfigureAwait(false);
+                   // await Assert.ThrowsAsync<HttpRequestException>(async () => await t.ConfigureAwait(false));
+             //      await t;
+            //       t.GetAwaiter().GetResult();
+           //        return t;
+           //         await t;
+
+                    await Assert.ThrowsAsync<HttpRequestException>(() => t);
+                }
+            },
+            async server =>
+            {
+                HttpRequestData requestData = await server.HandleRequestAsync(HttpStatusCode.OK).ConfigureAwait(false);
+            });
+        }
+
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         public async Task GetAsync_InvalidUrl_ExpectedExceptionThrown()
         {
