@@ -30,17 +30,20 @@ namespace System.ComponentModel.Tests
             yield return ConvertTest.Valid("1", (double)1);
             yield return ConvertTest.Valid(1.1.ToString(), 1.1);
             yield return ConvertTest.Valid(" -1 ", (double)-1);
-            yield return ConvertTest.Valid("&h4", (double)4);
-            yield return ConvertTest.Valid("&H4", (double)4);
-            yield return ConvertTest.Valid(" &H4 ", (double)4);
             yield return ConvertTest.Valid("+5", (double)5);
             yield return ConvertTest.Valid(" +5 ", (double)5);
 
             yield return ConvertTest.Throws<ArgumentException, Exception>("#2");
             yield return ConvertTest.Throws<ArgumentException, Exception>(" #2 ");
             yield return ConvertTest.Throws<ArgumentException, Exception>("0x3");
-            yield return ConvertTest.Throws<ArgumentException, Exception>("0X3");
-            yield return ConvertTest.Throws<ArgumentException, Exception>(" 0X3 ");
+            if (!PlatformDetection.IsFullFramework)
+            {
+                yield return ConvertTest.Throws<ArgumentException>("0X3");
+                yield return ConvertTest.Throws<ArgumentException>(" 0X3 ");
+                yield return ConvertTest.Throws<ArgumentException>("&h4");
+                yield return ConvertTest.Throws<ArgumentException>("&H4");
+                yield return ConvertTest.Throws<ArgumentException>(" &H4 ");
+            }
 
             foreach (ConvertTest test in base.ConvertFromTestData())
             {

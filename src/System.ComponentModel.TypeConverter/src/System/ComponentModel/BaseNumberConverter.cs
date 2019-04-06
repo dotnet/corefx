@@ -65,8 +65,8 @@ namespace System.ComponentModel
                     {
                         return FromString(text.Substring(1), 16);
                     }
-                    else if ((AllowHex && text.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
-                             || text.StartsWith("&h", StringComparison.OrdinalIgnoreCase))
+                    else if (AllowHex && (text.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+                             || text.StartsWith("&h", StringComparison.OrdinalIgnoreCase)))
                     {
                         return FromString(text.Substring(2), 16);
                     }
