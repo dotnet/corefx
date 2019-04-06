@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.IO;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,31 +19,39 @@ namespace System.Data.SqlClient.SNI
         /// <param name="callback">Completion callback</param>
         public void ReadFromStreamAsync(Stream stream, SNIAsyncCallback callback)
         {
-            // Treat local function as a static and pass all params otherwise as async will allocate
-            async Task ReadFromStreamAsync(SNIPacket packet, SNIAsyncCallback cb, Task<int> task)
+            static async Task ReadFromStreamAsync(SNIPacket packet, SNIAsyncCallback cb, Task<int> task)
             {
-                bool error = false;
+                uint errorCode = TdsEnums.SNI_SUCCESS;
                 try
                 {
                     packet._length = await task.ConfigureAwait(false);
                     if (packet._length == 0)
                     {
                         SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, 0, SNICommon.ConnTerminatedError, string.Empty);
-                        error = true;
+                        errorCode = TdsEnums.SNI_WSAECONNRESET;
                     }
+                }
+                catch (IOException ioException) when (
+                    ioException?.InnerException is SocketException socketException &&
+                    socketException != null &&
+                    socketException.SocketErrorCode == SocketError.OperationAborted
+                )
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InternalExceptionError, socketException);
+                    errorCode = TdsEnums.SNI_WSAECONNRESET;
                 }
                 catch (Exception ex)
                 {
                     SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InternalExceptionError, ex);
-                    error = true;
+                    errorCode = TdsEnums.SNI_ERROR;
                 }
 
-                if (error)
+                if (errorCode != TdsEnums.SNI_SUCCESS)
                 {
                     packet.Release();
                 }
 
-                cb(packet, error ? TdsEnums.SNI_ERROR : TdsEnums.SNI_SUCCESS);
+                cb(packet, errorCode);
             }
 
             Task<int> t = stream.ReadAsync(_data, 0, _capacity, CancellationToken.None);

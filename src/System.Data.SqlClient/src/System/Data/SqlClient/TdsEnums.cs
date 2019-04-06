@@ -538,7 +538,7 @@ namespace System.Data.SqlClient
         public const uint SNI_SUCCESS_IO_PENDING = 997;      // Overlapped I/O operation is in progress.
 
         // Windows Sockets Error Codes
-        public const short SNI_WSAECONNRESET = 10054;    // An existing connection was forcibly closed by the remote host.
+        public const uint SNI_WSAECONNRESET = 10054;    // An existing connection was forcibly closed by the remote host.
 
         // SNI internal errors (shouldn't overlap with Win32 / socket errors)
         public const uint SNI_QUEUE_FULL = 1048576;		 // Packet queue is full

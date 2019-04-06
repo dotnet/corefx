@@ -2704,7 +2704,7 @@ namespace System.Data.SqlClient
 
             // The mars physical connection can get a callback
             // with a packet but no result after the connection is closed.
-            if (source == null && _parser._pMarsPhysicalConObj == this)
+            if (source == null)
             {
                 return;
             }

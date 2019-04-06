@@ -44,7 +44,7 @@ namespace System.Data.SqlClient.SNI
             _lowerHandle.SetAsyncCallbacks(HandleReceiveComplete, HandleSendComplete);
         }
 
-        public SNIMarsHandle CreateMarsSession(object callbackObject, bool async)
+        public SNIMarsHandle CreateMarsSession(TdsParserStateObject callbackObject, bool async)
         {
             lock (this)
             {
@@ -126,12 +126,12 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Process a receive error
         /// </summary>
-        public void HandleReceiveError(SNIPacket packet)
+        public void HandleReceiveError(SNIPacket packet, uint sniErrorCode)
         {
             Debug.Assert(Monitor.IsEntered(this), "HandleReceiveError was called without being locked.");
             foreach (SNIMarsHandle handle in _sessions.Values)
             {
-                handle.HandleReceiveError(packet);
+                handle.HandleReceiveError(packet, sniErrorCode);
             }
             packet?.Dispose();
         }
@@ -161,7 +161,7 @@ namespace System.Data.SqlClient.SNI
             {
                 lock (this)
                 {
-                    HandleReceiveError(packet);
+                    HandleReceiveError(packet, sniErrorCode);
                     return;
                 }
             }
@@ -192,7 +192,7 @@ namespace System.Data.SqlClient.SNI
                                     return;
                                 }
 
-                                HandleReceiveError(packet);
+                                HandleReceiveError(packet, sniErrorCode);
                                 return;
                             }
                         }
@@ -223,7 +223,7 @@ namespace System.Data.SqlClient.SNI
                                     return;
                                 }
 
-                                HandleReceiveError(packet);
+                                HandleReceiveError(packet, sniErrorCode);
                                 return;
                             }
                         }
@@ -234,7 +234,7 @@ namespace System.Data.SqlClient.SNI
                     if (!_sessions.ContainsKey(_currentHeader.sessionId))
                     {
                         SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.SMUX_PROV, 0, SNICommon.InvalidParameterError, string.Empty);
-                        HandleReceiveError(packet);
+                        HandleReceiveError(packet, sniErrorCode);
                         _lowerHandle.Dispose();
                         _lowerHandle = null;
                         return;
@@ -280,7 +280,7 @@ namespace System.Data.SqlClient.SNI
                             return;
                         }
 
-                        HandleReceiveError(packet);
+                        HandleReceiveError(packet, sniErrorCode);
                         return;
                     }
                 }

@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.IO;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,31 +19,39 @@ namespace System.Data.SqlClient.SNI
         /// <param name="callback">Completion callback</param>
         public void ReadFromStreamAsync(Stream stream, SNIAsyncCallback callback)
         {
-            // Treat local function as a static and pass all params otherwise as async will allocate
-            async Task ReadFromStreamAsync(SNIPacket packet, SNIAsyncCallback cb, ValueTask<int> valueTask)
+            static async Task ReadFromStreamAsync(SNIPacket packet, SNIAsyncCallback cb, ValueTask<int> valueTask)
             {
-                bool error = false;
+                uint errorCode = TdsEnums.SNI_SUCCESS;
                 try
                 {
                     packet._length = await valueTask.ConfigureAwait(false);
                     if (packet._length == 0)
                     {
                         SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, 0, SNICommon.ConnTerminatedError, string.Empty);
-                        error = true;
+                        errorCode = TdsEnums.SNI_WSAECONNRESET;
                     }
+                }
+                catch (IOException ioException) when ( 
+                    ioException?.InnerException is SocketException socketException && 
+                    socketException!=null && 
+                    socketException.SocketErrorCode==SocketError.OperationAborted
+                )
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InternalExceptionError, socketException);
+                    errorCode = TdsEnums.SNI_WSAECONNRESET;
                 }
                 catch (Exception ex)
                 {
                     SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.TCP_PROV, SNICommon.InternalExceptionError, ex);
-                    error = true;
+                    errorCode = TdsEnums.SNI_ERROR;
                 }
 
-                if (error)
+                if (errorCode != TdsEnums.SNI_SUCCESS)
                 {
                     packet.Release();
                 }
 
-                cb(packet, error ? TdsEnums.SNI_ERROR : TdsEnums.SNI_SUCCESS);
+                cb(packet, errorCode);
             }
 
             ValueTask<int> vt = stream.ReadAsync(new Memory<byte>(_data, 0, _capacity), CancellationToken.None);
@@ -70,8 +79,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="stream">Stream to write to</param>
         public void WriteToStreamAsync(Stream stream, SNIAsyncCallback callback, SNIProviders provider, bool disposeAfterWriteAsync = false)
         {
-            // Treat local function as a static and pass all params otherwise as async will allocate
-            async Task WriteToStreamAsync(SNIPacket packet, SNIAsyncCallback cb, SNIProviders providers, bool disposeAfter, ValueTask valueTask)
+            static async Task WriteToStreamAsync(SNIPacket packet, SNIAsyncCallback cb, SNIProviders providers, bool disposeAfter, ValueTask valueTask)
             {
                 uint status = TdsEnums.SNI_SUCCESS;
                 try
