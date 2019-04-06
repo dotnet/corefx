@@ -104,20 +104,41 @@
   <!-- This file depends on IANA registry. We do not want anyone's build to break after the update -->
   <!-- or if they don't have internet connection - explicit opt-in required -->
   <!-- To expose newly generated APIs, generated file have to be deliberately copied -->
-  <ItemGroup Condition="'$(AllowTlsCipherSuiteGeneration)' == 'true'">
+  <ItemGroup>
     <Compile Include="System\Net\Security\TlsCipherSuite.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TlsCipherSuite.tt</DependentUpon>
     </Compile>
+    <None Include="System\Net\Security\TlsCipherSuiteNameParser.ttinclude" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
+    <Compile Include="System\Net\Security\TlsCipherSuiteData.Lookup.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TlsCipherSuiteData.Lookup.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsUnix)' != 'true' ">
+    <None Include="System\Net\Security\TlsCipherSuiteData.Lookup.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TlsCipherSuiteData.Lookup.tt</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition="'$(AllowTlsCipherSuiteGeneration)' == 'true'">
     <None Include="System\Net\Security\TlsCipherSuite.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TlsCipherSuite.cs</LastGenOutput>
     </None>
+    <None Include="System\Net\Security\TlsCipherSuiteData.Lookup.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>TlsCipherSuiteData.Lookup.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup Condition="'$(AllowTlsCipherSuiteGeneration)' != 'true'">
-    <Compile Include="System\Net\Security\TlsCipherSuite.cs" />
     <None Include="System\Net\Security\TlsCipherSuite.tt" />
+    <None Include="System\Net\Security\TlsCipherSuiteData.Lookup.tt" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
     <Compile Include="System\Net\CertificateValidationPal.Windows.cs" />
@@ -236,32 +257,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SecPkgContext_StreamSizes.cs">
       <Link>Common\Interop\Windows\SspiCli\SecPkgContext_StreamSizes.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="System\Net\Security\TlsCipherSuiteNameParser.ttinclude" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' and '$(AllowTlsCipherSuiteGeneration)' == 'true' ">
-    <Compile Include="System\Net\Security\TlsCipherSuiteData.Lookup.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>System\Net\Security\TlsCipherSuiteData.Lookup.tt</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnix)' != 'true' and '$(AllowTlsCipherSuiteGeneration)' == 'true'">
-    <!-- Needed so that file can be generated on Windows from VS -->
-    <None Include="System\Net\Security\TlsCipherSuiteData.Lookup.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>TlsCipherSuiteData.Lookup.tt</DependentUpon>
-    </None>
-    <None Include="System\Net\Security\TlsCipherSuiteData.Lookup.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TlsCipherSuiteData.Lookup.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsUnix)' == 'true' and '$(AllowTlsCipherSuiteGeneration)' != 'true' ">
-    <Compile Include="System\Net\Security\TlsCipherSuiteData.Lookup.cs" />
-    <None Include="System\Net\Security\TlsCipherSuiteData.Lookup.tt" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">

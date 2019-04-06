@@ -21,15 +21,15 @@ namespace System.Net.Security.Tests
         private static bool IsKnownPlatformSupportingTls13 => PlatformDetection.IsUbuntu1810OrHigher;
         private static bool Tls13Supported { get; set; } = ProtocolsSupported(SslProtocols.Tls13);
 
-        private static HashSet<TlsCipherSuite> _tls13CipherSuiteLookup = new HashSet<TlsCipherSuite>(GetTls13CipherSuites());
-        private static HashSet<TlsCipherSuite> _tls12CipherSuiteLookup = new HashSet<TlsCipherSuite>(GetTls12CipherSuites());
-        private static HashSet<TlsCipherSuite> _tls10And11CipherSuiteLookup = new HashSet<TlsCipherSuite>(GetTls10And11CipherSuites());
+        private static HashSet<TlsCipherSuite> s_tls13CipherSuiteLookup = new HashSet<TlsCipherSuite>(GetTls13CipherSuites());
+        private static HashSet<TlsCipherSuite> s_tls12CipherSuiteLookup = new HashSet<TlsCipherSuite>(GetTls12CipherSuites());
+        private static HashSet<TlsCipherSuite> s_tls10And11CipherSuiteLookup = new HashSet<TlsCipherSuite>(GetTls10And11CipherSuites());
 
         private static Dictionary<SslProtocols, HashSet<TlsCipherSuite>> _protocolCipherSuiteLookup = new Dictionary<SslProtocols, HashSet<TlsCipherSuite>>()
         {
-            { SslProtocols.Tls12, _tls12CipherSuiteLookup },
-            { SslProtocols.Tls11, _tls10And11CipherSuiteLookup },
-            { SslProtocols.Tls, _tls10And11CipherSuiteLookup },
+            { SslProtocols.Tls12, s_tls12CipherSuiteLookup },
+            { SslProtocols.Tls11, s_tls10And11CipherSuiteLookup },
+            { SslProtocols.Tls, s_tls10And11CipherSuiteLookup },
         };
 
         [ConditionalFact(nameof(IsKnownPlatformSupportingTls13))]
@@ -51,7 +51,7 @@ namespace System.Net.Security.Tests
             ret.Succeeded();
 
             Assert.True(
-                _tls13CipherSuiteLookup.Contains(ret.CipherSuite),
+                s_tls13CipherSuiteLookup.Contains(ret.CipherSuite),
                 $"`{ret.CipherSuite}` is not recognized as TLS 1.3 cipher suite");
         }
 

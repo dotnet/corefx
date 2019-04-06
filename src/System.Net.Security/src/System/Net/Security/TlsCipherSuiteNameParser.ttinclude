@@ -92,7 +92,7 @@ internal static class EnumHelpers
             case ExchangeAlgorithmType.Any:
                 return  "None";
             default:
-                throw new Exception($"Value `{val}` does not have framework corresponding name.");
+                throw new Exception($"Value `ExchangeAlgorithmType.{val}` does not have framework corresponding name. See TlsCipherSuiteNameParser.ttinclude: ToFrameworkName.");
         }
     }
 
@@ -129,7 +129,7 @@ internal static class EnumHelpers
             case CipherAlgorithmType.Aria256Gcm:
                 return "None";
             default:
-                throw new Exception($"Value `{val}` does not have framework corresponding name.");
+                throw new Exception($"Value `CipherAlgorithmType.{val}` does not have framework corresponding name. See TlsCipherSuiteNameParser.ttinclude: ToFrameworkName.");
         }
     }
 
