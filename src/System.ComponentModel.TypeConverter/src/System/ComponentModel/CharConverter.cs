@@ -7,8 +7,8 @@ using System.Globalization;
 namespace System.ComponentModel
 {
     /// <summary>
-    /// Provides a type converter to convert Unicode character objects
-    /// to and from various other representations.
+    /// Provides a type converter to convert Unicode character objects to and from various
+    /// other representations.
     /// </summary>
     public class CharConverter : TypeConverter
     {
@@ -18,7 +18,12 @@ namespace System.ComponentModel
         /// </summary>
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
-            return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
+            if (sourceType == typeof(string))
+            {
+                return true;
+            }
+
+            return base.CanConvertFrom(context, sourceType);
         }
 
         /// <summary>
@@ -26,11 +31,11 @@ namespace System.ComponentModel
         /// </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
-            if (destinationType == typeof(string) && value is char)
+            if (destinationType == typeof(string) && value is char charValue)
             {
-                if ((char)value == (char)0)
+                if (charValue == '\0')
                 {
-                    return "";
+                    return string.Empty;
                 }
             }
 
@@ -55,6 +60,7 @@ namespace System.ComponentModel
                     {
                         throw new FormatException(SR.Format(SR.ConvertInvalidPrimitive, text, nameof(Char)));
                     }
+
                     return text[0];
                 }
 
