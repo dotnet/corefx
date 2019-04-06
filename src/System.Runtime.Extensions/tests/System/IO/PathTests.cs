@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
 
@@ -267,38 +265,6 @@ namespace System.IO.Tests
         public void GetFullPath_CoreTests(string path, string expected)
         {
             Assert.Equal(expected, Path.GetFullPath(path));
-        }
-
-        [Theory]
-        [MemberData(nameof(TestData_TrimEndingDirectorySeparator))]
-        public void TrimEndingDirectorySeparator_String_CoreTests(string path, string expected)
-        {
-            string trimmed = Path.TrimEndingDirectorySeparator(path);
-            Assert.Equal(expected, trimmed);
-            Assert.Same(trimmed, Path.TrimEndingDirectorySeparator(trimmed));
-        }
-
-        [Theory]
-        [MemberData(nameof(TestData_TrimEndingDirectorySeparator))]
-        public void TrimEndingDirectorySeparator_ReadOnlySpan_CoreTests(string path, string expected)
-        {
-            ReadOnlySpan<char> trimmed = Path.TrimEndingDirectorySeparator(path.AsSpan());
-            PathAssert.Equal(expected, trimmed);
-            PathAssert.Equal(trimmed, Path.TrimEndingDirectorySeparator(trimmed));
-        }
-
-        [Theory]
-        [MemberData(nameof(TestData_EndsInDirectorySeparator))]
-        public void EndsInDirectorySeparator_String_CoreTests(string path, bool expected)
-        {
-            Assert.Equal(expected, Path.EndsInDirectorySeparator(path));
-        }
-
-        [Theory]
-        [MemberData(nameof(TestData_EndsInDirectorySeparator))]
-        public void EndsInDirectorySeparator_ReadOnlySpan_CoreTests(string path, bool expected)
-        {
-            Assert.Equal(expected, Path.EndsInDirectorySeparator(path.AsSpan()));
         }
     }
 }
