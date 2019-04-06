@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <ReferencePath
-      Include="$(RuntimePath)System.*.dll;$(RuntimePath)Microsoft.Win32.*.dll"
+      Include="$(RuntimePath)System.*.dll;$(RuntimePath)Microsoft.Win32.*.dll;$(RuntimePath)netstandard.dll"
       Exclude="$(RuntimePath)System.dll;$(RuntimePath)System.Data.dll" />
   </ItemGroup>
 </Project>
