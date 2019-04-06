@@ -47,7 +47,7 @@ namespace System.Data.SqlClient.SNI
             _sessionHandle = managedSNIObject.CreateMarsSession(this, async);
         }
 
-        internal SNIMarsHandle CreateMarsSession(object callbackObject, bool async)
+        internal SNIMarsHandle CreateMarsSession(TdsParserStateObject callbackObject, bool async)
         {
             return _marsConnection.CreateMarsSession(callbackObject, async);
         }

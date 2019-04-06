@@ -21,7 +21,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         private const int ConnectionTimeout = 15;
         private const int CompareMargin = 2;
 
-        [ConditionalTheory(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup), /* [ActiveIssue(33930)] */ nameof(DataTestUtility.IsUsingNativeSNI))]
+        [ConditionalTheory(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup))]
         [InlineData("Azure with Default Policy must Disable blocking (*.database.windows.net)", new object[] { AzureEndpointSample })]
         [InlineData("Azure with Default Policy must Disable blocking (*.database.chinacloudapi.cn)", new object[] { AzureChinaEnpointSample })]
         [InlineData("Azure with Default Policy must Disable blocking (*.database.usgovcloudapi.net)", new object[] { AzureUSGovernmentEndpointSample })]
@@ -45,7 +45,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             PoolBlockingPeriodAzureTest(connString, policy);
         }
 
-        [ConditionalTheory(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup), /* [ActiveIssue(33930)] */ nameof(DataTestUtility.IsUsingNativeSNI))]
+        [ConditionalTheory(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup))]
         [InlineData("NonAzure with Default Policy must Enable blocking", new object[] { NonExistentServer })]
         [InlineData("NonAzure with Auto Policy must Enable Blocking", new object[] { NonExistentServer, PoolBlockingPeriod.Auto })]
         [InlineData("NonAzure with Always Policy must Enable Blocking", new object[] { NonExistentServer, PoolBlockingPeriod.AlwaysBlock })]
@@ -66,7 +66,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             PoolBlockingPeriodNonAzureTest(connString, policy);
         }
 
-        [ConditionalTheory(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup), /* [ActiveIssue(33930)] */ nameof(DataTestUtility.IsUsingNativeSNI))]
+        [ConditionalTheory(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup))]
         [InlineData("Test policy with Auto (lowercase)", "auto")]
         [InlineData("Test policy with Auto (PascalCase)", "Auto")]
         [InlineData("Test policy with Always (lowercase)", "alwaysblock")]

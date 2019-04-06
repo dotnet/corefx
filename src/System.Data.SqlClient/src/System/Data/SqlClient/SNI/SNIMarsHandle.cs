@@ -19,7 +19,7 @@ namespace System.Data.SqlClient.SNI
         private readonly uint _status = TdsEnums.SNI_UNINITIALIZED;
         private readonly Queue<SNIPacket> _receivedPacketQueue = new Queue<SNIPacket>();
         private readonly Queue<SNIMarsQueuedPacket> _sendPacketQueue = new Queue<SNIMarsQueuedPacket>();
-        private readonly object _callbackObject;
+        private readonly TdsParserStateObject _callbackObject;
         private readonly Guid _connectionId = Guid.NewGuid();
         private readonly ushort _sessionId;
         private readonly ManualResetEventSlim _packetEvent = new ManualResetEventSlim(false);
@@ -78,7 +78,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="sessionId">MARS session ID</param>
         /// <param name="callbackObject">Callback object</param>
         /// <param name="async">true if connection is asynchronous</param>
-        public SNIMarsHandle(SNIMarsConnection connection, ushort sessionId, object callbackObject, bool async)
+        public SNIMarsHandle(SNIMarsConnection connection, ushort sessionId, TdsParserStateObject callbackObject, bool async)
         {
             _sessionId = sessionId;
             _connection = connection;
@@ -295,15 +295,23 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Handle receive error
         /// </summary>
-        public void HandleReceiveError(SNIPacket packet)
+        public void HandleReceiveError(SNIPacket packet, uint sniErrorCode)
         {
             lock (_receivedPacketQueue)
             {
                 _connectionError = SNILoadHandle.SingletonInstance.LastError;
                 _packetEvent.Set();
             }
-
-            ((TdsParserStateObject)_callbackObject).ReadAsyncCallback(PacketHandle.FromManagedPacket(packet), 1);
+            if (sniErrorCode == TdsEnums.SNI_WSAECONNRESET)
+            {
+                TdsParser parser = _callbackObject.Parser;
+                parser.State = TdsParserState.Broken;
+                parser.Connection.BreakConnection();
+            }
+            else
+            {
+                _callbackObject.ReadAsyncCallback(PacketHandle.FromManagedPacket(packet), sniErrorCode);
+            }
         }
 
         /// <summary>
@@ -317,7 +325,7 @@ namespace System.Data.SqlClient.SNI
             {
                 Debug.Assert(_callbackObject != null);
 
-                ((TdsParserStateObject)_callbackObject).WriteAsyncCallback(PacketHandle.FromManagedPacket(packet), sniErrorCode);
+                _callbackObject.WriteAsyncCallback(PacketHandle.FromManagedPacket(packet), sniErrorCode);
             }
         }
 
