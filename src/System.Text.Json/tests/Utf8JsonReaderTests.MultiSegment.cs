@@ -477,6 +477,9 @@ namespace System.Text.Json.Tests
             sequence = JsonTestHelper.GetSequence(data, 1);
             TestReadingJsonWithComments(data, sequence, expectedWithoutComments, expectedWithComments);
 
+            sequence = JsonTestHelper.GetSequence(data, 6);
+            TestReadingJsonWithComments(data, sequence, expectedWithoutComments, expectedWithComments);
+
             var firstSegment = new BufferSegment<byte>(ReadOnlyMemory<byte>.Empty);
             ReadOnlyMemory<byte> secondMem = data;
             BufferSegment<byte> secondSegment = firstSegment.Append(secondMem);
@@ -583,9 +586,29 @@ namespace System.Text.Json.Tests
             }
         }
 
+        // For first line in each case:
+        //     . represents continugous character in input.
+        //     | represents end of a segment in the sequence. Character below | is last character of particular segment.
+        //     
+        //     Note: \ for escape sequence has neither a . nor a |
+        //
+        // Second line in each case represnts whether the resulting token after parsing has a value sequence or not.
+        //     T(rue) indicates presence of value sequence and F(alse) indicates otherwise. T or F is written above first
+        //       character of partiular token.
+        //     - indicates that token that begins at character right below it has been skipped during parsing and hence there
+        //       is no truth value representation of the same in the expectedValueSequence* in each case.
         [Theory]
+        //              . .........|.... .... ........ ... ........|............... ...............|......................|||
+        //              F T                 F F            T                           F      T           F     F      F   FF
         [InlineData(0, "{\"property name\": [\"value 1\", \"value 2 across sequence\", 12345, 1234567890, true, false, null]}")]
+
+        //              .. .............. .... ........ ... .......|................ .....|.................|......|......|..||
+        //              FF F                 F F            T                           T      F           T     T      T   FFF
         [InlineData(1, "[{\"property name\": [\"value 1\", \"value 2 across sequence\", 12345, 1234567890, true, false, null]}]")]
+
+        //              . .............. .................... | . ...........|............ ..................|...... . |..
+        // Skip:        F F                 F-                    T                         -                           FF
+        // Allow:       F F                 FF                    T                         T                           FF
         [InlineData(2, "{\"property name\": [// comment value\r\n\"value 2 across sequence\"// another comment value\r\n]}")]
         public static void CheckOnlyOneOfValueSpanOrSequenceIsSet(int testCase, string jsonString)
         {
@@ -726,7 +749,7 @@ namespace System.Text.Json.Tests
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData);
             ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
 
-            for (int i = 1; i < jsonData.Length; i++)
+            for (int i = 0; i < jsonData.Length; i++)
             {
                 var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
 

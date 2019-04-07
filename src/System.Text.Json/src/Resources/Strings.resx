@@ -362,5 +362,8 @@
   <data name="InvalidCharacterAtStartOfComment" xml:space="preserve">
     <value>'{0}' is invalid after '/' at the beginning of the comment. Expected either '/' or '*'.</value>
   </data>
+  <data name="UnexpectedEndOfDataWithinStartOfComment" xml:space="preserve">
+    <value>Expected comment delimiter, but instead reached end of data.</value>
+  </data>
 </root>
 
