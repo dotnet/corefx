@@ -336,12 +336,7 @@ void CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
 
 int32_t CryptoNative_SetCiphers(SSL_CTX* ctx, const char* cipherList, const char* cipherSuites)
 {
-/* #if HAVE_OPENSSL_SET_CIPHERSUITES */
-    int32_t ret = cipherList != NULL || cipherSuites != NULL;
-/* #else */
-/*     int32_t ret = cipherList != NULL; */
-/*     (void)cipherSuites; */
-/* #endif */
+    int32_t ret = cipherList != NULL || (CryptoNative_Tls13Supported() && cipherSuites != NULL);
 
     // for < TLS 1.3
     if (cipherList != NULL)
@@ -349,13 +344,11 @@ int32_t CryptoNative_SetCiphers(SSL_CTX* ctx, const char* cipherList, const char
         ret &= SSL_CTX_set_cipher_list(ctx, cipherList);
     }
 
-/* #if HAVE_OPENSSL_SET_CIPHERSUITES */
     // for TLS 1.3
-    if (cipherSuites != NULL)
+    if (CryptoNative_Tls13Supported() && cipherSuites != NULL)
     {
         ret &= SSL_CTX_set_ciphersuites(ctx, cipherSuites);
     }
-/* #endif */
 
     return ret;
 }
