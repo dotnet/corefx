@@ -20,4 +20,3 @@
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.OrdinalComparer))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.UnitySerializationHolder))]
 [assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Diagnostics.Contracts.ContractException))]
-[assembly:System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Runtime.Serialization.DeserializationBlockedException))]
