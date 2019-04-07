@@ -84,6 +84,7 @@ int EC_POINT_set_affine_coordinates_GF2m(
 #undef HAVE_OPENSSL_SET_CIPHERSUITES
 #define HAVE_OPENSSL_SET_CIPHERSUITES 1
 int SSL_CTX_set_ciphersuites(SSL_CTX *ctx, const char *str);
+const SSL_CIPHER* SSL_CIPHER_find(SSL *ssl, const unsigned char *ptr);
 #endif
 #if OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_1_1_0_RTM
 typedef struct stack_st _STACK;
