@@ -287,6 +287,7 @@
     <Compile Include="System\Text\RuneTests.netcoreapp.cs" />
     <Compile Include="System\Text\RuneTests.TestData.netcoreapp.cs" />
     <Compile Include="System\Text\StringBuilderTests.netcoreapp.cs" />
+    <Compile Include="System\Text\Unicode\Utf16UtilityTests.ValidateChars.netcoreapp.cs" />
     <Compile Include="System\Text\Unicode\Utf8Tests.netcoreapp.cs" />
     <Compile Include="System\Text\Unicode\Utf8Tests.ToBytes.netcoreapp.cs" />
     <Compile Include="System\Text\Unicode\Utf8Tests.ToChars.netcoreapp.cs" />
