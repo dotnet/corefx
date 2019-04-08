@@ -984,6 +984,7 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_1_RTM
 
 #define SSL_CTX_set_ciphersuites local_SSL_CTX_set_ciphersuites
+#define SSL_CIPHER_find local_SSL_CIPHER_find
 
 #endif
 
