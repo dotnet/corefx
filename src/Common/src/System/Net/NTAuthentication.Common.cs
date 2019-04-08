@@ -292,7 +292,8 @@ namespace System.Net
             }
 
             // The return value will tell us correctly if the handshake is over or not
-            if (statusCode.ErrorCode == SecurityStatusPalErrorCode.OK)
+            if (statusCode.ErrorCode == SecurityStatusPalErrorCode.OK
+                || statusCode.ErrorCode == SecurityStatusPalErrorCode.CompleteNeeded) // Server only
             {
                 // Success.
                 _isCompleted = true;

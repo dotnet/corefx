@@ -181,9 +181,9 @@ namespace System.Net.Security.Tests
 
         private async Task VerifyLocalServerAuthentication(NetworkCredential credential)
         {
-            string serverName = "CHRROSS-UDESK.CRKERBEROS.COM";// Configuration.Security.NegotiateServer.Host;
+            string serverName = "chrross-udesk.crkerberos.com";// Configuration.Security.NegotiateServer.Host;
             int port = 54321;// Configuration.Security.NegotiateServer.Port;
-            string serverSPN = "host/" + serverName;
+            string serverSPN = "HTTP/" + serverName;
             
             string expectedAuthenticationType = "Kerberos";
             bool mutualAuthenitcated = true;
@@ -212,6 +212,13 @@ namespace System.Net.Security.Tests
 
                     var serverConnection = await acceptTask;
                     var serverStream = serverConnection.GetStream();
+
+            var loop = true;
+            while (loop)
+            {
+                await Task.Delay(1000);
+            }
+
                     using (var serverAuth = new NegotiateStream(serverStream, leaveInnerStreamOpen: false))
                     {
                         var clientStream = client.GetStream();
@@ -221,7 +228,7 @@ namespace System.Net.Security.Tests
                             var clientAuthTask = clientAuth.AuthenticateAsClientAsync(
                                 credential,
                                 serverSPN,
-                                ProtectionLevel.EncryptAndSign,
+                                ProtectionLevel.None,
                                 System.Security.Principal.TokenImpersonationLevel.Identification);
 
                             await serverAuthTask;
