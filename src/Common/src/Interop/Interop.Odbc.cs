@@ -200,7 +200,6 @@ internal static partial class Interop
            /*SQLHANDLE*/   OdbcHandle Handle,
            /*SQLSMALLINT*/ short RecNumber,
            /*SQLSMALLINT*/ short DiagIdentifier,
-           [MarshalAs(UnmanagedType.LPWStr)]
            /*SQLPOINTER*/  [Out] StringBuilder rchState,
            /*SQLSMALLINT*/ short BufferLength,
            /*SQLSMALLINT* */ out short StringLength);
