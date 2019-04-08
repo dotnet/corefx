@@ -62,6 +62,7 @@ namespace System.Net.Http.Tests
         [InlineData("test@example.org", "username=\"test@example.org\"")]
         [InlineData("test\"example.org", "username=\"test\\\"example.org\"")]
         [InlineData("t\u00E6st", "username*=utf-8''t%C3%A6st")]
+        [InlineData("\uD834\uDD1E", "username*=utf-8''%F0%9D%84%9E")]
         public async void DigestResponse_UserName_Encoding(string username, string encodedUserName)
         {
             NetworkCredential credential = new NetworkCredential(username, "bar");

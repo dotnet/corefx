@@ -440,7 +440,7 @@ namespace System.Net.Http.Headers
                 throw new ArgumentException(SR.Format(CultureInfo.InvariantCulture,
                     SR.net_http_headers_invalid_value, input));
             }
-            else if (HeaderUtilities.IsNonAsciiEncodingRequired(result))
+            else if (HeaderUtilities.ContainsNonAscii(result))
             {
                 needsQuotes = true; // Encoded data must always be quoted, the equals signs are invalid in tokens.
                 result = EncodeMime(result); // =?utf-8?B?asdfasdfaesdf?=

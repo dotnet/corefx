@@ -91,7 +91,7 @@ namespace System.Net.Http
             }
             else
             {
-                if (HeaderUtilities.IsNonAsciiEncodingRequired(credential.UserName))
+                if (HeaderUtilities.ContainsNonAscii(credential.UserName))
                 {
                     string usernameStar = HeaderUtilities.Encode5987(credential.UserName);
                     sb.AppendKeyValue(UsernameStar, usernameStar, includeQuotes: false);
@@ -408,6 +408,9 @@ namespace System.Net.Http
 
     internal static class StringBuilderExtensions
     {
+        // Characters that require escaping in quoted string
+        private static readonly char[] SpecialCharacters = new[] { '"', '\\' };
+
         public static void AppendKeyValue(this StringBuilder sb, string key, string value, bool includeQuotes = true, bool includeComma = true)
         {
             sb.Append(key);
@@ -415,10 +418,11 @@ namespace System.Net.Http
             if (includeQuotes)
             {
                 sb.Append('"');
-                int lastSpecialIndex = 0, specialIndex;
+                int lastSpecialIndex = 0;
+                int specialIndex;
                 while (true)
                 {
-                    specialIndex = value.IndexOfAny(new[] { '"', '\\' }, lastSpecialIndex);
+                    specialIndex = value.IndexOfAny(SpecialCharacters, lastSpecialIndex);
                     if (specialIndex >= 0)
                     {
                         sb.Append(value, lastSpecialIndex, specialIndex - lastSpecialIndex);
