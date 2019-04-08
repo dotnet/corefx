@@ -399,6 +399,7 @@ internal static partial class Interop
             /*SQLCHAR* */string TableName,
             /*SQLSMALLINT*/short NameLen3,
             [In]
+            /*SQLCHAR* */string TableType,
             /*SQLSMALLINT*/short NameLen4);
     }
 }
