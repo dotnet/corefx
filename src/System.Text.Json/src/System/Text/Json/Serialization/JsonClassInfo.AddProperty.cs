@@ -43,12 +43,12 @@ namespace System.Text.Json.Serialization
                     ArrayPool<byte>.Shared.Return(tempArray);
                 }
 
-                _property_refs.Add(new PropertyRef(GetKey(propertyNameBytes), jsonInfo));
+                _propertyRefs.Add(new PropertyRef(GetKey(propertyNameBytes), jsonInfo));
             }
             else
             {
                 // A single property or an IEnumerable
-                _property_refs.Add(new PropertyRef(0, jsonInfo));
+                _propertyRefs.Add(new PropertyRef(0, jsonInfo));
             }
         }
 
@@ -88,13 +88,17 @@ namespace System.Text.Json.Serialization
 
         internal JsonPropertyInfo CreatePolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
         {
-            // For now we only support typeof(object) for polymorphism.
-            Debug.Assert(property?.DeclaredPropertyType == typeof(object));
-            Debug.Assert(runtimePropertyType != typeof(object));
+            if (property == null)
+            {
+                // Used with root objects which are not really a property.
+                return CreateProperty(runtimePropertyType, runtimePropertyType, null, runtimePropertyType, options);
+            }
 
             JsonPropertyInfo runtimeProperty = CreateProperty(property.DeclaredPropertyType, runtimePropertyType, property?.PropertyInfo, Type, options);
+
             runtimeProperty._name = property._name;
             runtimeProperty._escapedName = property._escapedName;
+            // Copy other settings here as they are added as features.
 
             return runtimeProperty;
         }
