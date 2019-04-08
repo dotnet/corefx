@@ -9,30 +9,29 @@ namespace System.Text.Json.Serialization.Tests
 {
     public static class CacheTests
     {
+        // Use a new type that is not used in other tests so we can attempt race conditions on cached global state.
+        public class TestClassForCachingTest : SimpleTestClass { }
+
         [Fact]
         public static void MultipleThreads()
         {
-            // Use localized caching
-            // Todo: localized caching not implemented yet. When implemented, add a run-time attribute to JsonSerializerOptions as that will create a separate cache held by JsonSerializerOptions.
-            var options = new JsonSerializerOptions();
-
             void DeserializeObjectFlipped()
             {
-                SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(SimpleTestClass.s_json_flipped, options);
+                TestClassForCachingTest obj = JsonSerializer.Parse<TestClassForCachingTest>(SimpleTestClass.s_json_flipped);
                 obj.Verify();
             };
 
             void DeserializeObjectNormal()
             {
-                SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(SimpleTestClass.s_json, options);
+                TestClassForCachingTest obj = JsonSerializer.Parse<TestClassForCachingTest>(SimpleTestClass.s_json);
                 obj.Verify();
             };
 
             void SerializeObject()
             {
-                var obj = new SimpleTestClass();
+                var obj = new TestClassForCachingTest();
                 obj.Initialize();
-                JsonSerializer.ToString(obj, options);
+                JsonSerializer.ToString(obj);
             };
 
             Task[] tasks = new Task[4 * 3];
