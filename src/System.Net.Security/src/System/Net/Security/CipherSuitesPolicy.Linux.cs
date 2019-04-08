@@ -169,7 +169,7 @@ namespace System.Net.Security
                 case EncryptionPolicy.NoEncryption:
                     return NoEncryptionDefault;
                 default:
-                    Debug.Assert(false, "This should not be possible");
+                    Debug.Fail($"Unknown EncryptionPolicy value ({policy})");
                     return null;
             }
         }
