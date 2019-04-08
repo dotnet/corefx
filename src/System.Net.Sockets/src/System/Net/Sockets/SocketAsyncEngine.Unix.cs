@@ -54,6 +54,7 @@ namespace System.Net.Sockets
 #endif
 
         private static readonly object s_lock = new object();
+        private readonly object _lock = new object();
 
         // In debug builds, force there to be 2 engines. In release builds, use half the number of processors when
         // there are at least 6. The lower bound is to avoid using multiple engines on systems which aren't servers.
@@ -112,19 +113,19 @@ namespace System.Net.Sockets
 
         //
         // The next handle value to be allocated for this event port.
-        // Must be accessed under s_lock.
+        // Must be accessed under _lock.
         //
         private IntPtr _nextHandle;
 
         //
         // Count of handles that have been allocated for this event port, but not yet freed.
-        // Must be accessed under s_lock.
+        // Must be accessed under _lock.
         // 
         private IntPtr _outstandingHandles;
 
         //
         // Maps handle values to SocketAsyncContext instances.
-        // Must be accessed under s_lock.
+        // Must be accessed under _lock.
         //
         private readonly Dictionary<IntPtr, SocketAsyncContext> _handleToContextMap = new Dictionary<IntPtr, SocketAsyncContext>();
 
@@ -151,45 +152,80 @@ namespace System.Net.Sockets
         {
             lock (s_lock)
             {
-                engine = s_currentEngines[s_allocateFromEngine];
+                SocketAsyncEngine[] engines = s_currentEngines;
+                int allocateFromEngine = s_allocateFromEngine;
+
+                engine = engines[allocateFromEngine];
                 if (engine == null)
                 {
                     // We minimize the number of engines on applications that have a low number of concurrent sockets.
-                    for (int i = 0; i < s_allocateFromEngine; i++)
+                    for (int i = 0; i < allocateFromEngine; i++)
                     {
-                        var previousEngine = s_currentEngines[i];
-                        if (previousEngine == null || previousEngine.HasLowNumberOfSockets)
+                        engine = engines[i];
+                        if (engine == null)
                         {
-                            s_allocateFromEngine = i;
-                            engine = previousEngine;
-                            break;
+                            AllocateTokenFromNewEngine(context, engines, allocateFromEngine, out engine, out handle);
+                            s_allocateFromEngine = allocateFromEngine;
+                            return;
+                        }
+
+                        lock (engine._lock)
+                        {
+                            if (engine.HasLowNumberOfSockets)
+                            {
+                                allocateFromEngine = i;
+                                handle = engine.AllocateHandle(context);
+
+                                SetNextEngine(engines, engine, allocateFromEngine);
+                                return;
+                            }
                         }
                     }
-                    if (engine == null)
-                    {
-                        s_currentEngines[s_allocateFromEngine] = engine = new SocketAsyncEngine();
-                    }
+
+                    AllocateTokenFromNewEngine(context, engines, allocateFromEngine, out engine, out handle);
+                    return;
                 }
+
+                lock (engine._lock)
+                {
+                    handle = engine.AllocateHandle(context);
+
+                    SetNextEngine(engines, engine, allocateFromEngine);
+                }
+            }
+
+            void AllocateTokenFromNewEngine(SocketAsyncContext context, SocketAsyncEngine[] engines, int allocateFromEngine, out SocketAsyncEngine engine, out IntPtr handle)
+            {
+                engine = engines[allocateFromEngine] = new SocketAsyncEngine();
 
                 handle = engine.AllocateHandle(context);
 
+                s_allocateFromEngine = allocateFromEngine;
+            }
+
+            void SetNextEngine(SocketAsyncEngine[] engines, SocketAsyncEngine engine, int allocateFromEngine)
+            {
                 if (engine.IsFull)
                 {
                     // We'll need to create a new event port for the next handle.
-                    s_currentEngines[s_allocateFromEngine] = null;
+                    engines[allocateFromEngine] = null;
                 }
 
                 // Round-robin to the next engine once we have sufficient sockets on this one.
                 if (!engine.HasLowNumberOfSockets)
                 {
-                    s_allocateFromEngine = (s_allocateFromEngine + 1) % EngineCount;
+                    s_allocateFromEngine = (allocateFromEngine + 1) % EngineCount;
+                }
+                else
+                {
+                    s_allocateFromEngine = allocateFromEngine;
                 }
             }
         }
 
         private IntPtr AllocateHandle(SocketAsyncContext context)
         {
-            Debug.Assert(Monitor.IsEntered(s_lock), "Expected s_lock to be held");
+            Debug.Assert(Monitor.IsEntered(_lock), "Expected _lock to be held");
             Debug.Assert(!IsFull, "Expected !IsFull");
 
             IntPtr handle = _nextHandle;
@@ -208,7 +244,7 @@ namespace System.Net.Sockets
 
             bool shutdownNeeded = false;
 
-            lock (s_lock)
+            lock (_lock)
             {
                 if (_handleToContextMap.Remove(handle))
                 {
@@ -239,7 +275,7 @@ namespace System.Net.Sockets
         {
             Debug.Assert(handle != ShutdownHandle, $"Expected handle != ShutdownHandle: {handle}");
             Debug.Assert(handle.ToInt64() < MaxHandles.ToInt64(), $"Unexpected values: handle={handle}, MaxHandles={MaxHandles}");
-            lock (s_lock)
+            lock (_lock)
             {
                 SocketAsyncContext context;
                 _handleToContextMap.TryGetValue(handle, out context);
