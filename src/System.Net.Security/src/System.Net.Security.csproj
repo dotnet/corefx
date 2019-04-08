@@ -440,6 +440,7 @@
     <Compile Include="System\Net\Security\SslConnectionInfo.OSX.cs" />
     <Compile Include="System\Net\Security\SslStreamPal.OSX.cs" />
     <Compile Include="System\Net\Security\StreamSizes.OSX.cs" />
+    <Compile Include="System\Net\Security\CipherSuitesPolicy.OSX.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Win32.Primitives" />

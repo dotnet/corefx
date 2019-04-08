@@ -120,7 +120,6 @@ internal static partial class Interop
                         if (!Ssl.SetCiphers(innerContext, cipherListStr, cipherSuitesStr))
                         {
                             Crypto.ErrClearError();
-                            //throw new Exception($"DUPA: Proto: {protocols} Policy: {policy} ```{(cipherSuites == null ? "<null>" : System.Text.Encoding.ASCII.GetString(cipherSuites))}``` [[[{(cipherList == null ? "<null>" : System.Text.Encoding.ASCII.GetString(cipherList))}]]]");
                             throw new PlatformNotSupportedException(SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
                         }
                     }
