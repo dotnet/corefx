@@ -6,6 +6,7 @@ using System.Net.Test.Common;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
@@ -15,6 +16,8 @@ namespace System.Net.Http.Functional.Tests
         protected override bool UseHttp2LoopbackServer => true;
 
         public static bool SupportsAlpn => PlatformDetection.SupportsAlpn;
+
+        public HttpClientHandlerTest_Http2(ITestOutputHelper output) : base(output) { }
 
         [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2_ClientPreface_Sent()
