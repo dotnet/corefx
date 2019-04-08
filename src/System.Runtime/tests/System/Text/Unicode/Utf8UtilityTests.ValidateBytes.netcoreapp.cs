@@ -332,7 +332,20 @@ namespace System.Text.Unicode.Tests
         }
 
         private static void GetIndexOfFirstInvalidUtf8Sequence_Test_Core(string inputHex, int expectedRetVal, int expectedRuneCount, int expectedSurrogatePairCount)
-            => GetIndexOfFirstInvalidUtf8Sequence_Test_Core(Utf8Tests.DecodeHex(inputHex), expectedRetVal, expectedRuneCount, expectedSurrogatePairCount);
+        {
+            byte[] inputBytes = Utf8Tests.DecodeHex(inputHex);
+
+            // Run the test normally
+            GetIndexOfFirstInvalidUtf8Sequence_Test_Core(inputBytes, expectedRetVal, expectedRuneCount, expectedSurrogatePairCount);
+
+            // Then run the test with a bunch of ASCII data at the beginning (to exercise the vectorized code paths)
+            inputBytes = Enumerable.Repeat((byte)'x', 128).Concat(inputBytes).ToArray();
+            GetIndexOfFirstInvalidUtf8Sequence_Test_Core(inputBytes, (expectedRetVal < 0) ? expectedRetVal : (expectedRetVal + 128), expectedRuneCount + 128, expectedSurrogatePairCount);
+
+            // Then put a few more ASCII bytes at the beginning (to test that offsets are properly handled)
+            inputBytes = Enumerable.Repeat((byte)'x', 7).Concat(inputBytes).ToArray();
+            GetIndexOfFirstInvalidUtf8Sequence_Test_Core(inputBytes, (expectedRetVal < 0) ? expectedRetVal : (expectedRetVal + 135), expectedRuneCount + 135, expectedSurrogatePairCount);
+        }
 
         private static unsafe void GetIndexOfFirstInvalidUtf8Sequence_Test_Core(byte[] input, int expectedRetVal, int expectedRuneCount, int expectedSurrogatePairCount)
         {
