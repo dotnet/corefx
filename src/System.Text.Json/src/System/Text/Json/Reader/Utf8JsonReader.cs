@@ -155,6 +155,7 @@ namespace System.Text.Json
             _isNotPrimitive = _isNotPrimitive,
             _numberFormat = _numberFormat,
             _stringHasEscaping = _stringHasEscaping,
+            _trailingCommaBeforeComment = _trailingCommaBeforeComment,
             _tokenType = _tokenType,
             _previousTokenType = _previousTokenType,
             _readerOptions = _readerOptions,
@@ -188,6 +189,7 @@ namespace System.Text.Json
             _isNotPrimitive = state._isNotPrimitive;
             _numberFormat = state._numberFormat;
             _stringHasEscaping = state._stringHasEscaping;
+            _trailingCommaBeforeComment = state._trailingCommaBeforeComment;
             _tokenType = state._tokenType;
             _previousTokenType = state._previousTokenType;
             _readerOptions = state._readerOptions;
@@ -201,7 +203,6 @@ namespace System.Text.Json
             _totalConsumed = 0;
             _isLastSegment = _isFinalBlock;
             _isMultiSegment = false;
-            _trailingCommaBeforeComment = false;
 
             ValueSpan = ReadOnlySpan<byte>.Empty;
 
@@ -1475,6 +1476,7 @@ namespace System.Text.Json
             long prevPosition = _bytePositionInLine;
             long prevLineNumber = _lineNumber;
             JsonTokenType prevTokenType = _tokenType;
+            bool prevTrailingCommaBeforeComment = _trailingCommaBeforeComment;
             ConsumeTokenResult result = ConsumeNextToken(marker);
             if (result == ConsumeTokenResult.Success)
             {
@@ -1486,6 +1488,7 @@ namespace System.Text.Json
                 _tokenType = prevTokenType;
                 _bytePositionInLine = prevPosition;
                 _lineNumber = prevLineNumber;
+                _trailingCommaBeforeComment = prevTrailingCommaBeforeComment;
             }
             return false;
         }

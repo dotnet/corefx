@@ -2122,26 +2122,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("{\"name\": \"value\",}")]
-        [InlineData("{\"name\": [],}")]
-        [InlineData("{\"name\": 1,}")]
-        [InlineData("{\"name\": true,}")]
-        [InlineData("{\"name\": false,}")]
-        [InlineData("{\"name\": null,}")]
-        [InlineData("{\"name\": [{},],}")]
-        [InlineData("{\"first\" : \"value\", \"name\": [{},], \"last\":2 ,}")]
-        [InlineData("{\"prop\":{\"name\": 1,\"last\":2,},}")]
-        [InlineData("{\"prop\":[1,2,],}")]
-        [InlineData("[\"value\",]")]
-        [InlineData("[1,]")]
-        [InlineData("[true,]")]
-        [InlineData("[false,]")]
-        [InlineData("[null,]")]
-        [InlineData("[{},]")]
-        [InlineData("[{\"name\": [],},]")]
-        [InlineData("[1, {\"name\": [],},2 , ]")]
-        [InlineData("[[1,2,],]")]
-        [InlineData("[{\"name\": 1,\"last\":2,},]")]
+        [MemberData(nameof(JsonWithValidTrailingCommas))]
         public static void JsonWithTrailingCommas_Valid(string jsonString)
         {
             byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -2160,31 +2141,15 @@ namespace System.Text.Json.Tests
             {
                 var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
                 TrailingCommasHelper(utf8, state, allow: false, expectThrow: true);
-            }
 
-            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
-            {
                 bool allowTrailingCommas = true;
-                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = allowTrailingCommas });
+                state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = allowTrailingCommas });
                 TrailingCommasHelper(utf8, state, allowTrailingCommas, expectThrow: false);
             }
         }
 
         [Theory]
-        [InlineData(",")]
-        [InlineData("   ,   ")]
-        [InlineData("{},")]
-        [InlineData("[],")]
-        [InlineData("1,")]
-        [InlineData("true,")]
-        [InlineData("false,")]
-        [InlineData("null,")]
-        [InlineData("{,}")]
-        [InlineData("{\"name\": 1,,}")]
-        [InlineData("{\"name\": 1,,\"last\":2,}")]
-        [InlineData("[,]")]
-        [InlineData("[1,,]")]
-        [InlineData("[1,,2,]")]
+        [MemberData(nameof(JsonWithInvalidTrailingCommas))]
         public static void JsonWithTrailingCommas_Invalid(string jsonString)
         {
             byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -2193,86 +2158,55 @@ namespace System.Text.Json.Tests
             {
                 var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
                 TrailingCommasHelper(utf8, state, allow: false, expectThrow: true);
-            }
 
-            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
-            {
                 bool allowTrailingCommas = true;
-                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = allowTrailingCommas });
+                state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = allowTrailingCommas });
                 TrailingCommasHelper(utf8, state, allowTrailingCommas, expectThrow: true);
             }
         }
 
         [Theory]
-        [InlineData("{\"name\": \"value\"/*comment*/,/*comment*/}")]
-        [InlineData("{\"name\": []/*comment*/,/*comment*/}")]
-        [InlineData("{\"name\": 1/*comment*/,/*comment*/}")]
-        [InlineData("{\"name\": true/*comment*/,/*comment*/}")]
-        [InlineData("{\"name\": false/*comment*/,/*comment*/}")]
-        [InlineData("{\"name\": null/*comment*/,/*comment*/}")]
-        [InlineData("{\"name\": [{},]/*comment*/,/*comment*/}")]
-        [InlineData("{\"first\" : \"value\", \"name\": [{},], \"last\":2 /*comment*/,/*comment*/}")]
-        [InlineData("{\"prop\":{\"name\": 1,\"last\":2,}/*comment*/,}")]
-        [InlineData("{\"prop\":[1,2,]/*comment*/,}")]
-        [InlineData("[\"value\"/*comment*/,/*comment*/]")]
-        [InlineData("[1/*comment*/,/*comment*/]")]
-        [InlineData("[true/*comment*/,/*comment*/]")]
-        [InlineData("[false/*comment*/,/*comment*/]")]
-        [InlineData("[null/*comment*/,/*comment*/]")]
-        [InlineData("[{}/*comment*/,/*comment*/]")]
-        [InlineData("[{\"name\": [],}/*comment*/,/*comment*/]")]
-        [InlineData("[1, {\"name\": [],},2 /*comment*/,/*comment*/ ]")]
-        [InlineData("[[1,2,]/*comment*/,]")]
-        [InlineData("[{\"name\": 1,\"last\":2,}/*comment*/,]")]
+        [MemberData(nameof(JsonWithValidTrailingCommasAndComments))]
         public static void JsonWithTrailingCommasAndComments_Valid(string jsonString)
         {
             byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
-            TrailingCommasHelper(utf8, state, allow: false, expectThrow: true);
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                if (commentHandling == JsonCommentHandling.Disallow)
+                {
+                    continue;
+                }
 
-            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
-            TrailingCommasHelper(utf8, state, allow: false, expectThrow: true);
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                TrailingCommasHelper(utf8, state, allow: false, expectThrow: true);
 
-            bool allowTrailingCommas = true;
-            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow, AllowTrailingCommas = allowTrailingCommas });
-            TrailingCommasHelper(utf8, state, allowTrailingCommas, expectThrow: false);
-            
-            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = allowTrailingCommas });
-            TrailingCommasHelper(utf8, state, allowTrailingCommas, expectThrow: false);
+                bool allowTrailingCommas = true;
+                state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = allowTrailingCommas });
+                TrailingCommasHelper(utf8, state, allowTrailingCommas, expectThrow: false);
+            }
         }
 
         [Theory]
-        [InlineData("/*comment*/ ,/*comment*/")]
-        [InlineData("   /*comment*/ ,  /*comment*/ ")]
-        [InlineData("{}/*comment*/,/*comment*/")]
-        [InlineData("[]/*comment*/,/*comment*/")]
-        [InlineData("1/*comment*/,/*comment*/")]
-        [InlineData("true/*comment*/,/*comment*/")]
-        [InlineData("false/*comment*/,/*comment*/")]
-        [InlineData("null/*comment*/,/*comment*/")]
-        [InlineData("{/*comment*/,/*comment*/}")]
-        [InlineData("{\"name\": 1/*comment*/,/*comment*/,/*comment*/}")]
-        [InlineData("{\"name\": 1,/*comment*/,\"last\":2,}")]
-        [InlineData("[/*comment*/,/*comment*/]")]
-        [InlineData("[1/*comment*/,/*comment*/,/*comment*/]")]
-        [InlineData("[1,/*comment*/,2,]")]
+        [MemberData(nameof(JsonWithInvalidTrailingCommasAndComments))]
         public static void JsonWithTrailingCommasAndComments_Invalid(string jsonString)
         {
             byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
-            TrailingCommasHelper(utf8, state, allow: false, expectThrow: true);
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                if (commentHandling == JsonCommentHandling.Disallow)
+                {
+                    continue;
+                }
 
-            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
-            TrailingCommasHelper(utf8, state, allow: false, expectThrow: true);
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                TrailingCommasHelper(utf8, state, allow: false, expectThrow: true);
 
-            bool allowTrailingCommas = true;
-            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow, AllowTrailingCommas = allowTrailingCommas });
-            TrailingCommasHelper(utf8, state, allowTrailingCommas, expectThrow: true);
-
-            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = allowTrailingCommas });
-            TrailingCommasHelper(utf8, state, allowTrailingCommas, expectThrow: true);
+                bool allowTrailingCommas = true;
+                state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = allowTrailingCommas });
+                TrailingCommasHelper(utf8, state, allowTrailingCommas, expectThrow: true);
+            }
         }
 
         private static void TrailingCommasHelper(byte[] utf8, JsonReaderState state, bool allow, bool expectThrow)
@@ -2295,6 +2229,123 @@ namespace System.Text.Json.Tests
                 while (reader.Read())
                     ;
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonWithValidTrailingCommas))]
+        public static void PartialJsonWithTrailingCommas_Valid(string jsonString)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            {
+                JsonReaderState state = default;
+                TrailingCommasHelperPartial(utf8, state, expectThrow: true);
+            }
+
+            {
+                var state = new JsonReaderState(options: default);
+                TrailingCommasHelperPartial(utf8, state, expectThrow: true);
+            }
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = false });
+                TrailingCommasHelperPartial(utf8, state, expectThrow: true);
+
+                state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = true });
+                TrailingCommasHelperPartial(utf8, state, expectThrow: false);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonWithValidTrailingCommasAndComments))]
+        public static void PartialJsonWithTrailingCommasAndComments_Valid(string jsonString)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                if (commentHandling == JsonCommentHandling.Disallow)
+                {
+                    continue;
+                }
+
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = false });
+                TrailingCommasHelperPartial(utf8, state, expectThrow: true);
+
+                state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = true });
+                TrailingCommasHelperPartial(utf8, state, expectThrow: false);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonWithInvalidTrailingCommas))]
+        public static void PartialJsonWithTrailingCommas_Invalid(string jsonString)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = false });
+                TrailingCommasHelperPartial(utf8, state, expectThrow: true);
+
+                state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = true });
+                TrailingCommasHelperPartial(utf8, state, expectThrow: true);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonWithInvalidTrailingCommasAndComments))]
+        public static void PartialJsonWithTrailingCommasAndComments_Invalid(string jsonString)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                if (commentHandling == JsonCommentHandling.Disallow)
+                {
+                    continue;
+                }
+
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = false });
+                TrailingCommasHelperPartial(utf8, state, expectThrow: true);
+
+                state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = true });
+                TrailingCommasHelperPartial(utf8, state, expectThrow: true);
+            }
+        }
+
+        private static void TrailingCommasHelperPartial(byte[] utf8, JsonReaderState state, bool expectThrow)
+        {
+            if (expectThrow)
+            {
+                Assert.Throws<JsonReaderException>(() => PartialReaderLoop(utf8, state));
+            }
+            else
+            {
+                PartialReaderLoop(utf8, state);
+            }
+        }
+
+        private static void PartialReaderLoop(byte[] utf8, JsonReaderState state)
+        {
+            for (int i = 0; i < utf8.Length; i++)
+            {
+                JsonReaderState stateCopy = state;
+                PartialReaderLoop(utf8, stateCopy, i);
+            }
+        }
+
+        private static void PartialReaderLoop(byte[] utf8, JsonReaderState state, int splitLocation)
+        {
+            var reader = new Utf8JsonReader(utf8.AsSpan(0, splitLocation), isFinalBlock: false, state);
+            while (reader.Read())
+                ;
+
+            long consumed = reader.BytesConsumed;
+            reader = new Utf8JsonReader(utf8.AsSpan((int)consumed), isFinalBlock: true, reader.CurrentState);
+            while (reader.Read())
+                ;
         }
 
         public static IEnumerable<object[]> TestCases
@@ -2518,6 +2569,116 @@ namespace System.Text.Json.Tests
                     new object[] {"  { },  /* comment */ true "},
                     new object[] {"  { },  /* comment */ \"hello\" "},
                     new object[] {"  { },  // comment \n \"hello\" "},
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> JsonWithValidTrailingCommas
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] {"{\"name\": \"value\",}"},
+                    new object[] {"{\"name\": [],}"},
+                    new object[] {"{\"name\": 1,}"},
+                    new object[] {"{\"name\": true,}"},
+                    new object[] {"{\"name\": false,}"},
+                    new object[] {"{\"name\": null,}"},
+                    new object[] {"{\"name\": [{},],}"},
+                    new object[] {"{\"first\" : \"value\", \"name\": [{},], \"last\":2 ,}"},
+                    new object[] {"{\"prop\":{\"name\": 1,\"last\":2,},}"},
+                    new object[] {"{\"prop\":[1,2,],}"},
+                    new object[] {"[\"value\",]"},
+                    new object[] {"[1,]"},
+                    new object[] {"[true,]"},
+                    new object[] {"[false,]"},
+                    new object[] {"[null,]"},
+                    new object[] {"[{},]"},
+                    new object[] {"[{\"name\": [],},]"},
+                    new object[] {"[1, {\"name\": [],},2 , ]"},
+                    new object[] {"[[1,2,],]"},
+                    new object[] {"[{\"name\": 1,\"last\":2,},]"},
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> JsonWithValidTrailingCommasAndComments
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] {"{\"name\": \"value\"/*comment*/,/*comment*/}"},
+                    new object[] {"{\"name\": []/*comment*/,/*comment*/}"},
+                    new object[] {"{\"name\": 1/*comment*/,/*comment*/}"},
+                    new object[] {"{\"name\": true/*comment*/,/*comment*/}"},
+                    new object[] {"{\"name\": false/*comment*/,/*comment*/}"},
+                    new object[] {"{\"name\": null/*comment*/,/*comment*/}"},
+                    new object[] {"{\"name\": [{},]/*comment*/,/*comment*/}"},
+                    new object[] {"{\"first\" : \"value\", \"name\": [{},], \"last\":2 /*comment*/,/*comment*/}"},
+                    new object[] {"{\"prop\":{\"name\": 1,\"last\":2,}/*comment*/,}"},
+                    new object[] {"{\"prop\":[1,2,]/*comment*/,}"},
+                    new object[] {"{\"prop\":1,/*comment*/}"},
+                    new object[] {"[\"value\"/*comment*/,/*comment*/]"},
+                    new object[] {"[1/*comment*/,/*comment*/]"},
+                    new object[] {"[true/*comment*/,/*comment*/]"},
+                    new object[] {"[false/*comment*/,/*comment*/]"},
+                    new object[] {"[null/*comment*/,/*comment*/]"},
+                    new object[] {"[{}/*comment*/,/*comment*/]"},
+                    new object[] {"[{\"name\": [],}/*comment*/,/*comment*/]"},
+                    new object[] {"[1, {\"name\": [],},2 /*comment*/,/*comment*/ ]"},
+                    new object[] {"[[1,2,]/*comment*/,]"},
+                    new object[] {"[{\"name\": 1,\"last\":2,}/*comment*/,]"},
+                    new object[] {"[1,/*comment*/]"},
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> JsonWithInvalidTrailingCommas
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] {","},
+                    new object[] {"   ,   "},
+                    new object[] {"{},"},
+                    new object[] {"[],"},
+                    new object[] {"1,"},
+                    new object[] {"true,"},
+                    new object[] {"false,"},
+                    new object[] {"null,"},
+                    new object[] {"{,}"},
+                    new object[] {"{\"name\": 1,,}"},
+                    new object[] {"{\"name\": 1,,\"last\":2,}"},
+                    new object[] {"[,]"},
+                    new object[] {"[1,,]"},
+                    new object[] {"[1,,2,]"},
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> JsonWithInvalidTrailingCommasAndComments
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] {"/*comment*/ ,/*comment*/"},
+                    new object[] {"   /*comment*/ ,  /*comment*/ "},
+                    new object[] {"{}/*comment*/,/*comment*/"},
+                    new object[] {"[]/*comment*/,/*comment*/"},
+                    new object[] {"1/*comment*/,/*comment*/"},
+                    new object[] {"true/*comment*/,/*comment*/"},
+                    new object[] {"false/*comment*/,/*comment*/"},
+                    new object[] {"null/*comment*/,/*comment*/"},
+                    new object[] {"{/*comment*/,/*comment*/}"},
+                    new object[] {"{\"name\": 1/*comment*/,/*comment*/,/*comment*/}"},
+                    new object[] {"{\"name\": 1,/*comment*/,\"last\":2,}"},
+                    new object[] {"[/*comment*/,/*comment*/]"},
+                    new object[] {"[1/*comment*/,/*comment*/,/*comment*/]"},
+                    new object[] {"[1,/*comment*/,2,]"},
                 };
             }
         }
