@@ -53,6 +53,7 @@ namespace System.Text.Json
             _sequence = jsonData;
             HasValueSequence = false;
             ValueSequence = ReadOnlySequence<byte>.Empty;
+            _trailingCommaBeforeComment = false;
 
             if (jsonData.IsSingleSegment)
             {

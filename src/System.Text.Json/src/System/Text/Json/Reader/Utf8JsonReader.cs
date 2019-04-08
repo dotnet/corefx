@@ -41,6 +41,7 @@ namespace System.Text.Json
         private bool _isLastSegment;
         internal bool _stringHasEscaping;
         private readonly bool _isMultiSegment;
+        private bool _trailingCommaBeforeComment;
 
         private SequencePosition _nextPosition;
         private SequencePosition _currentPosition;
@@ -200,6 +201,7 @@ namespace System.Text.Json
             _totalConsumed = 0;
             _isLastSegment = _isFinalBlock;
             _isMultiSegment = false;
+            _trailingCommaBeforeComment = false;
 
             ValueSpan = ReadOnlySpan<byte>.Empty;
 
@@ -529,6 +531,15 @@ namespace System.Text.Json
             if (!_inObject || _bitStack.CurrentDepth <= 0)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBrace);
 
+            if (_trailingCommaBeforeComment)
+            {
+                if (!_readerOptions.AllowTrailingCommas)
+                {
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBrace); //TODO: Fix the message
+                }
+                _trailingCommaBeforeComment = false;
+            }
+
             _tokenType = JsonTokenType.EndObject;
             ValueSpan = _buffer.Slice(_consumed, 1);
 
@@ -553,6 +564,15 @@ namespace System.Text.Json
         {
             if (_inObject || _bitStack.CurrentDepth <= 0)
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBracket);
+
+            if (_trailingCommaBeforeComment)
+            {
+                if (!_readerOptions.AllowTrailingCommas)
+                {
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.MismatchedObjectArray, JsonConstants.CloseBrace); //TODO: Fix the message
+                }
+                _trailingCommaBeforeComment = false;
+            }
 
             _tokenType = JsonTokenType.EndArray;
             ValueSpan = _buffer.Slice(_consumed, 1);
@@ -798,6 +818,9 @@ namespace System.Text.Json
         {
             while (true)
             {
+                Debug.Assert((_trailingCommaBeforeComment && _readerOptions.CommentHandling == JsonCommentHandling.Allow) || !_trailingCommaBeforeComment);
+                Debug.Assert((_trailingCommaBeforeComment && marker != JsonConstants.Slash) || !_trailingCommaBeforeComment);
+                _trailingCommaBeforeComment = false;
                 if (marker == JsonConstants.Quote)
                 {
                     return ConsumeString();
@@ -978,6 +1001,8 @@ namespace System.Text.Json
 
         private bool ConsumePropertyName()
         {
+            _trailingCommaBeforeComment = false;
+
             if (!ConsumeString())
             {
                 return false;
@@ -1526,6 +1551,7 @@ namespace System.Text.Json
 
                 if (_readerOptions.CommentHandling == JsonCommentHandling.Allow && first == JsonConstants.Slash)
                 {
+                    _trailingCommaBeforeComment = true;
                     return ConsumeComment() ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
                 }
 
@@ -1533,12 +1559,22 @@ namespace System.Text.Json
                 {
                     if (first != JsonConstants.Quote)
                     {
+                        if (_readerOptions.AllowTrailingCommas && first == JsonConstants.CloseBrace)
+                        {
+                            EndObject();
+                            return ConsumeTokenResult.Success;
+                        }
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
                     }
                     return ConsumePropertyName() ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
                 }
                 else
                 {
+                    if (_readerOptions.AllowTrailingCommas && first == JsonConstants.CloseBracket)
+                    {
+                        EndArray();
+                        return ConsumeTokenResult.Success;
+                    }
                     return ConsumeValue(first) ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
                 }
             }
@@ -1559,6 +1595,9 @@ namespace System.Text.Json
 
         private ConsumeTokenResult ConsumeNextTokenFromLastNonCommentToken()
         {
+            Debug.Assert(_readerOptions.CommentHandling == JsonCommentHandling.Allow);
+            Debug.Assert(_tokenType == JsonTokenType.Comment);
+
             if (JsonReaderHelper.IsTokenTypePrimitive(_previousTokenType))
             {
                 _tokenType = _inObject ? JsonTokenType.StartObject : JsonTokenType.StartArray;
@@ -1597,6 +1636,12 @@ namespace System.Text.Json
 
             if (first == JsonConstants.ListSeparator)
             {
+                // A comma without some JSON value preceding it is invalid
+                if (_previousTokenType <= JsonTokenType.StartObject || _previousTokenType == JsonTokenType.StartArray || _trailingCommaBeforeComment)
+                {
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
+                }
+
                 _consumed++;
                 _bytePositionInLine++;
 
@@ -1624,10 +1669,29 @@ namespace System.Text.Json
                     first = _buffer[_consumed];
                 }
 
+                if (first == JsonConstants.Slash)
+                {
+                    _trailingCommaBeforeComment = true;
+                    if (ConsumeComment())
+                    {
+                        goto Done;
+                    }
+                    else
+                    {
+                        goto RollBack;
+                    }
+                }
+
                 if (_inObject)
                 {
                     if (first != JsonConstants.Quote)
                     {
+                        if (_readerOptions.AllowTrailingCommas && first == JsonConstants.CloseBrace)
+                        {
+                            EndObject();
+                            goto Done;
+                        }
+                        
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
                     }
                     if (ConsumePropertyName())
@@ -1641,6 +1705,12 @@ namespace System.Text.Json
                 }
                 else
                 {
+                    if (_readerOptions.AllowTrailingCommas && first == JsonConstants.CloseBracket)
+                    {
+                        EndArray();
+                        goto Done;
+                    }
+
                     if (ConsumeValue(first))
                     {
                         goto Done;
@@ -1905,12 +1975,24 @@ namespace System.Text.Json
                 {
                     if (marker != JsonConstants.Quote)
                     {
+                        if (_readerOptions.AllowTrailingCommas && marker == JsonConstants.CloseBrace)
+                        {
+                            EndObject();
+                            goto Done;
+                        }
+
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, marker);
                     }
                     return ConsumePropertyName() ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
                 }
                 else
                 {
+                    if (_readerOptions.AllowTrailingCommas && marker == JsonConstants.CloseBracket)
+                    {
+                        EndArray();
+                        goto Done;
+                    }
+
                     return ConsumeValue(marker) ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
                 }
             }
