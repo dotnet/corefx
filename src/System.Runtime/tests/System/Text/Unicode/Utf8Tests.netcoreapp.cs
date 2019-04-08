@@ -33,7 +33,9 @@ namespace System.Text.Unicode.Tests
 
         private const string GRINNING_FACE_UTF8 = "F09F9880"; // U+1F600 GRINNING FACE, 4 bytes
         private const string GRINNING_FACE_UTF16 = "\U0001F600";
-        
+
+        private const string WOMAN_CARTWHEELING_MEDSKIN_UTF16 = "\U0001F938\U0001F3FD\u200D\u2640\uFE0F"; // U+1F938 U+1F3FD U+200D U+2640 U+FE0F WOMAN CARTWHEELING: MEDIUM SKIN TONE
+
         // All valid scalars [ U+0000 .. U+D7FF ] and [ U+E000 .. U+10FFFF ].
         private static readonly IEnumerable<Rune> s_allValidScalars = Enumerable.Range(0x0000, 0xD800).Concat(Enumerable.Range(0xE000, 0x110000 - 0xE000)).Select(value => new Rune(value));
 

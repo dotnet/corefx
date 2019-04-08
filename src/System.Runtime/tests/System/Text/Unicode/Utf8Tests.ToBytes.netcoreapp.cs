@@ -119,6 +119,34 @@ namespace System.Text.Unicode.Tests
                    expectedNumCharsRead: expectedNumCharsConsumed,
                    expectedUtf8Transcoding: concatenatedUtf8);
             }
+
+            // now throw lots of ASCII data at the beginning so that we exercise the vectorized code paths
+
+            utf16Input = new string('x', 64) + utf16Input;
+            concatenatedUtf8 = utf16Input.EnumerateRunes().SelectMany(ToUtf8).ToArray();
+
+            ToBytes_Test_Core(
+                utf16Input: utf16Input,
+                destinationSize: concatenatedUtf8.Length,
+                replaceInvalidSequences: false,
+                isFinalChunk: true,
+                expectedOperationStatus: OperationStatus.Done,
+                expectedNumCharsRead: utf16Input.Length,
+                expectedUtf8Transcoding: concatenatedUtf8);
+
+            // now throw some non-ASCII data at the beginning so that we *don't* exercise the vectorized code paths
+
+            utf16Input = WOMAN_CARTWHEELING_MEDSKIN_UTF16 + utf16Input[64..];
+            concatenatedUtf8 = utf16Input.EnumerateRunes().SelectMany(ToUtf8).ToArray();
+
+            ToBytes_Test_Core(
+                utf16Input: utf16Input,
+                destinationSize: concatenatedUtf8.Length,
+                replaceInvalidSequences: false,
+                isFinalChunk: true,
+                expectedOperationStatus: OperationStatus.Done,
+                expectedNumCharsRead: utf16Input.Length,
+                expectedUtf8Transcoding: concatenatedUtf8);
         }
 
         [Theory]

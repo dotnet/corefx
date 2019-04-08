@@ -104,7 +104,7 @@ namespace System.Text.Unicode.Tests
         [InlineData(EURO_SYMBOL_UTF16 + EURO_SYMBOL_UTF16 + E_ACUTE_UTF16 + E_ACUTE_UTF16 + E_ACUTE_UTF16 + E_ACUTE_UTF16)] // 2x 3-byte sequences + 4x 2-byte sequences, exercises "consume multiple bytes at a time" logic in 3-byte sequence processing
         [InlineData(GRINNING_FACE_UTF16 + GRINNING_FACE_UTF16)] // 2x 4-byte sequences, exercises 4-byte sequence processing
         [InlineData(GRINNING_FACE_UTF16 + "@AB")] // single 4-byte sequence + 3 ASCII bytes, exercises 4-byte sequence processing and draining logic
-        [InlineData("\U0001F938\U0001F3FD\u200D\u2640\uFE0F")] // U+1F938 U+1F3FD U+200D U+2640 U+FE0F WOMAN CARTWHEELING: MEDIUM SKIN TONE, exercising switching between multiple sequence lengths
+        [InlineData(WOMAN_CARTWHEELING_MEDSKIN_UTF16)] // exercises switching between multiple sequence lengths
         public void ToChars_ValidBuffers(string utf16Input)
         {
             // We're going to run the tests with destination buffer lengths ranging from 0 all the way
@@ -162,6 +162,34 @@ namespace System.Text.Unicode.Tests
                     expectedNumBytesRead: expectedNumBytesConsumed,
                     expectedUtf16Transcoding: concatenatedUtf16);
             }
+
+            // now throw lots of ASCII data at the beginning so that we exercise the vectorized code paths
+
+            utf16Input = new string('x', 64) + utf16Input;
+            utf8Input = utf16Input.EnumerateRunes().SelectMany(ToUtf8).ToArray();
+
+            ToChars_Test_Core(
+                utf8Input: utf8Input,
+                destinationSize: utf16Input.Length,
+                replaceInvalidSequences: false,
+                isFinalChunk: true,
+                expectedOperationStatus: OperationStatus.Done,
+                expectedNumBytesRead: utf8Input.Length,
+                expectedUtf16Transcoding: utf16Input);
+
+            // now throw some non-ASCII data at the beginning so that we *don't* exercise the vectorized code paths
+
+            utf16Input = WOMAN_CARTWHEELING_MEDSKIN_UTF16 + utf16Input[64..];
+            utf8Input = utf16Input.EnumerateRunes().SelectMany(ToUtf8).ToArray();
+
+            ToChars_Test_Core(
+                utf8Input: utf8Input,
+                destinationSize: utf16Input.Length,
+                replaceInvalidSequences: false,
+                isFinalChunk: true,
+                expectedOperationStatus: OperationStatus.Done,
+                expectedNumBytesRead: utf8Input.Length,
+                expectedUtf16Transcoding: utf16Input);
         }
 
         [Theory]
