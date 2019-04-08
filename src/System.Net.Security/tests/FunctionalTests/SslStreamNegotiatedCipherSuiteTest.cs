@@ -47,7 +47,7 @@ namespace System.Net.Security.Tests
         {
             try
             {
-                new CipherSuitesPolicy(new TlsCipherSuite[0]);
+                new CipherSuitesPolicy(Array.Empty<TlsCipherSuite>());
                 return true;
             }
             catch (PlatformNotSupportedException) { }
@@ -204,7 +204,6 @@ namespace System.Net.Security.Tests
         public void CipherSuitesPolicy_AllowSameTwoOnBothSidesLessPreferredIsTls13_Success()
         {
             CheckPrereqsForNonTls13Tests(1);
-            // If both sides can speak TLS 1.3 they should speak it
             var p = new ConnectionParams()
             {
                 CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0],
@@ -213,7 +212,16 @@ namespace System.Net.Security.Tests
 
             NegotiatedParams ret = ConnectAndGetNegotiatedParams(p, p);
             ret.Succeeded();
-            ret.CheckCipherSuite(TlsCipherSuite.TLS_AES_128_GCM_SHA256);
+
+            // If both sides can speak TLS 1.3 they should speak it
+            if (Tls13Supported)
+            {
+                ret.CheckCipherSuite(TlsCipherSuite.TLS_AES_128_GCM_SHA256);
+            }
+            else
+            {
+                ret.CheckCipherSuite(SupportedNonTls13CipherSuites[0]);
+            }
         }
 
         [ConditionalFact(nameof(CipherSuitesPolicySupported))]
@@ -402,9 +410,20 @@ namespace System.Net.Security.Tests
 
         private static void CheckPrereqsForNonTls13Tests(int minCipherSuites)
         {
-            if (PlatformDetection.IsAlpine && SupportedNonTls13CipherSuites.Count < minCipherSuites)
+            if (SupportedNonTls13CipherSuites.Count < minCipherSuites)
             {
-                throw new SkipTestException($"Test requires that at least {minCipherSuites} non TLS 1.3 cipher suites are supported.");
+                // We do not want to accidentally make the tests pass due to the bug in the code
+                // This situation is rather unexpected but can happen on i.e. Alpine
+                // Make sure at least some tests run.
+
+                if (Tls13Supported)
+                {
+                    throw new SkipTestException($"Test requires that at least {minCipherSuites} non TLS 1.3 cipher suites are supported.");
+                }
+                else
+                {
+                    throw new Exception($"Less than {minCipherSuites} cipher suites are supported: {string.Join(", ", SupportedNonTls13CipherSuites)}");
+                }
             }
         }
 

@@ -45,7 +45,7 @@ namespace System.Net.Security
                         throw OpenSsl.CreateSslException(SR.net_allocate_ssl_context_failed);
                     }
 
-                    using (var tls13cipherSuites = new OpenSslStringBuilder())
+                    using (var tls13CipherSuites = new OpenSslStringBuilder())
                     using (var cipherSuites = new OpenSslStringBuilder())
                     {
                         foreach (TlsCipherSuite cs in allowedCipherSuites)
@@ -63,11 +63,11 @@ namespace System.Net.Security
                             }
 
                             _tlsCipherSuites.Add(cs);
-                            (isTls12OrLower ? cipherSuites : tls13cipherSuites).AllowCipherSuite(name);
+                            (isTls12OrLower ? cipherSuites : tls13CipherSuites).AllowCipherSuite(name);
                         }
 
                         _cipherSuites = cipherSuites.GetOpenSslString();
-                        _tls13CipherSuites = tls13cipherSuites.GetOpenSslString();
+                        _tls13CipherSuites = tls13CipherSuites.GetOpenSslString();
                     }
                 }
             }
