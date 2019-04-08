@@ -78,11 +78,6 @@ int EC_POINT_set_affine_coordinates_GF2m(
     const EC_GROUP* group, EC_POINT* p, const BIGNUM* x, const BIGNUM* y, BN_CTX* ctx);
 #endif
 #ifndef HAVE_OPENSSL_SET_CIPHERSUITES
-#define HAVE_OPENSSL_SET_CIPHERSUITES 0
-#endif
-#if !HAVE_OPENSSL_SET_CIPHERSUITES
-#undef HAVE_OPENSSL_SET_CIPHERSUITES
-#define HAVE_OPENSSL_SET_CIPHERSUITES 1
 int SSL_CTX_set_ciphersuites(SSL_CTX *ctx, const char *str);
 const SSL_CIPHER* SSL_CIPHER_find(SSL *ssl, const unsigned char *ptr);
 #endif
