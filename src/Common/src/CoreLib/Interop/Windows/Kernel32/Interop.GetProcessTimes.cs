@@ -10,6 +10,6 @@ internal partial class Interop
     internal partial class Kernel32
     {
         [DllImport(Libraries.Kernel32, SetLastError = true)]
-        internal static extern IntPtr GetStdHandle(int nStdHandle);  // param is NOT a handle, but it returns one!
+        internal extern static bool GetProcessTimes(IntPtr handleProcess, out long creation, out long exit, out long kernel, out long user);
     }
 }
