@@ -4,7 +4,6 @@
 
 using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 
@@ -32,12 +31,7 @@ namespace System.ComponentModel
         /// </summary>
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            if (destinationType == typeof(InstanceDescriptor))
-            {
-                return true;
-            }
-
-            return base.CanConvertTo(context, destinationType);
+            return destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
         }
 
         /// <summary>
@@ -62,7 +56,6 @@ namespace System.ComponentModel
         /// <summary>
         /// Convert the given value to a string using the given radix
         /// </summary>
-        [ExcludeFromCodeCoverage] // Not called as AllowHex is false.
         internal override object FromString(string value, int radix)
         {
             return Convert.ToDecimal(value, CultureInfo.CurrentCulture);

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace System.ComponentModel
@@ -26,7 +25,6 @@ namespace System.ComponentModel
         /// <summary>
         /// Convert the given value to a string using the given radix
         /// </summary>
-        [ExcludeFromCodeCoverage] // Not called as AllowHex is false.
         internal override object FromString(string value, int radix)
         {
             return Convert.ToDouble(value, CultureInfo.CurrentCulture);
