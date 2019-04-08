@@ -27,7 +27,7 @@
     <MicrosoftDotNetSourceRewriterPackageVersion>1.0.0-beta.19205.6</MicrosoftDotNetSourceRewriterPackageVersion>
     <MicrosoftDotNetCodeAnalysisPackageVersion>1.0.0-beta.19205.6</MicrosoftDotNetCodeAnalysisPackageVersion>
     <MicrosoftDotNetGenAPIPackageVersion>1.0.0-beta.19205.6</MicrosoftDotNetGenAPIPackageVersion>
-    <MicrosoftDotNetGenFacadesPackageVersion>1.0.0-beta.19205.6</MicrosoftDotNetGenFacadesPackageVersion>
+    <MicrosoftDotNetGenFacadesPackageVersion>1.0.0-beta.19208.4</MicrosoftDotNetGenFacadesPackageVersion>
     <MicrosoftDotNetXUnitExtensionsPackageVersion>2.4.0-beta.19205.6</MicrosoftDotNetXUnitExtensionsPackageVersion>
     <MicrosoftDotNetXUnitConsoleRunnerPackageVersion>2.5.1-beta.19205.6</MicrosoftDotNetXUnitConsoleRunnerPackageVersion>
     <MicrosoftDotNetBuildTasksPackagingPackageVersion>1.0.0-beta.19205.6</MicrosoftDotNetBuildTasksPackagingPackageVersion>

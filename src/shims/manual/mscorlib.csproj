@@ -4,6 +4,7 @@
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Compiler throws error if you try to use System.Void and instructs you to use void keyword instead. So we have manually added a typeforward for this type. -->
     <GenFacadesOmitType Include="System.Void" />
   </ItemGroup>
   <ItemGroup>

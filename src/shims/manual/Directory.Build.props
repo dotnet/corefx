@@ -4,6 +4,7 @@
       netcoreapp;
       netcoreappaot;
       uap;
+      uapaot;
     </BuildConfigurations>
     <IsNETCoreApp>true</IsNETCoreApp>
     <IsUAP>true</IsUAP>
