@@ -24,12 +24,12 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         /// <summary>
-        /// Returns whether the namespaceTable has been created. If it hasn't, calling a GetXXX method
+        /// Returns whether the rootNamespace has been created. If it hasn't, calling a GetXXX method
         /// on this will probably have a very high amount of overhead.
         /// </summary>
         internal bool CacheIsRealized
         {
-            get { return _namespaceTable != null; }
+            get { return _rootNamespace != null; }
         }
 
         internal string GetFullName(NamespaceDefinitionHandle handle)
@@ -106,7 +106,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             lock (_namespaceTableAndListLock)
             {
-                if (_namespaceTable != null)
+                if (_rootNamespace != null)
                 {
                     return;
                 }
@@ -384,16 +384,17 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         /// <summary>
-        /// If the namespace table doesn't exist, populates it!
+        /// If the rootNamespace doesn't exist, we populate namespaceTable!
         /// </summary>
         private void EnsureNamespaceTableIsPopulated()
         {
             // PERF: Branch will rarely be taken; do work in PopulateNamespaceList() so this can be inlined easily.
-            if (_namespaceTable == null)
+            if (_rootNamespace == null)
             {
                 PopulateNamespaceTable();
             }
             Debug.Assert(_namespaceTable != null);
+            Debug.Assert(_rootNamespace != null);
         }
 
         /// <summary>
