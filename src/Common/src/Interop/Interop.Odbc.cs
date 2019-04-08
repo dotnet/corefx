@@ -283,9 +283,9 @@ internal static partial class Interop
         [DllImport(Interop.Libraries.Odbc32, CharSet = CharSet.Unicode)]
         internal static extern /*SQLRETURN*/ODBC32.RetCode SQLProceduresW(
             /*SQLHSTMT*/OdbcStatementHandle StatementHandle,
-            [In)] /*SQLCHAR* */ string CatalogName,
+            [In] /*SQLCHAR* */ string CatalogName,
             /*SQLSMALLINT*/short NameLen1,
-            [In)] /*SQLCHAR* */ string SchemaName,
+            [In] /*SQLCHAR* */ string SchemaName,
             /*SQLSMALLINT*/short NameLen2,
             [In] /*SQLCHAR* */ string ProcName,
             /*SQLSMALLINT*/short NameLen3);
