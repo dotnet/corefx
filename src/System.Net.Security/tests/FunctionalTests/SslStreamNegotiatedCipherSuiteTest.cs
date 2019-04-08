@@ -10,6 +10,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
 
 namespace System.Net.Security.Tests
@@ -28,7 +29,7 @@ namespace System.Net.Security.Tests
 
         private static bool IsKnownPlatformSupportingTls13 => PlatformDetection.IsUbuntu1810OrHigher;
         private static bool CipherSuitesPolicySupported => s_cipherSuitePolicySupported.Value;
-        private static bool Tls13Supported { get; set; } = ProtocolsSupported(SslProtocols.Tls13);
+        private static bool Tls13Supported { get; set; } = IsKnownPlatformSupportingTls13 || ProtocolsSupported(SslProtocols.Tls13);
         private static bool CipherSuitesPolicyAndTls13Supported => Tls13Supported && CipherSuitesPolicySupported;
 
         private static HashSet<TlsCipherSuite> s_tls13CipherSuiteLookup = new HashSet<TlsCipherSuite>(GetTls13CipherSuites());
@@ -111,6 +112,7 @@ namespace System.Net.Security.Tests
         [ConditionalFact(nameof(CipherSuitesPolicySupported))]
         public void CipherSuitesPolicy_AllowSomeCipherSuitesWithNoEncryptionOption_Fails()
         {
+            CheckPrereqsForNonTls13Tests(1);
             var p = new ConnectionParams()
             {
                 CipherSuitesPolicy = BuildPolicy(TlsCipherSuite.TLS_AES_128_GCM_SHA256,
@@ -150,6 +152,7 @@ namespace System.Net.Security.Tests
         [ConditionalFact(nameof(CipherSuitesPolicySupported))]
         public void CipherSuitesPolicy_AllowTwoOnBothSidesWithSingleOverlapNonTls13_Success()
         {
+            CheckPrereqsForNonTls13Tests(3);
             var a = new ConnectionParams()
             {
                 CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0],
@@ -175,6 +178,7 @@ namespace System.Net.Security.Tests
         [ConditionalFact(nameof(CipherSuitesPolicySupported))]
         public void CipherSuitesPolicy_AllowTwoOnBothSidesWithNoOverlapNonTls13_Fails()
         {
+            CheckPrereqsForNonTls13Tests(4);
             var a = new ConnectionParams()
             {
                 CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0],
@@ -199,6 +203,7 @@ namespace System.Net.Security.Tests
         [ConditionalFact(nameof(CipherSuitesPolicySupported))]
         public void CipherSuitesPolicy_AllowSameTwoOnBothSidesLessPreferredIsTls13_Success()
         {
+            CheckPrereqsForNonTls13Tests(1);
             // If both sides can speak TLS 1.3 they should speak it
             var p = new ConnectionParams()
             {
@@ -214,6 +219,7 @@ namespace System.Net.Security.Tests
         [ConditionalFact(nameof(CipherSuitesPolicySupported))]
         public void CipherSuitesPolicy_ClientOrderingWinsOverServerOrderingTwoCipherSuitesWithAllOverlapping_Success()
         {
+            CheckPrereqsForNonTls13Tests(2);
             var a = new ConnectionParams()
             {
                 CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0],
@@ -240,6 +246,7 @@ namespace System.Net.Security.Tests
         [ConditionalFact(nameof(CipherSuitesPolicySupported))]
         public void CipherSuitesPolicy_ClientOrderingWinsOverServerOrderingThreeCipherSuitesWithTwoOverlapping_Success()
         {
+            CheckPrereqsForNonTls13Tests(4);
             var a = new ConnectionParams()
             {
                 CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0],
@@ -310,6 +317,7 @@ namespace System.Net.Security.Tests
         [ConditionalFact(nameof(CipherSuitesPolicySupported))]
         public void CipherSuitesPolicy_OnlyNonTls13CipherSuitesAllowedButChosenProtocolDoesNotAllowIt_Fails()
         {
+            CheckPrereqsForNonTls13Tests(1);
             var a = new ConnectionParams()
             {
                 CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0]),
@@ -330,6 +338,7 @@ namespace System.Net.Security.Tests
         [ConditionalFact(nameof(CipherSuitesPolicySupported))]
         public void CipherSuitesPolicy_OnlyNonTls13CipherSuiteAllowedButOtherSideDoesNotAllowIt_Fails()
         {
+            CheckPrereqsForNonTls13Tests(1);
             var a = new ConnectionParams()
             {
                 CipherSuitesPolicy = BuildPolicy(SupportedNonTls13CipherSuites[0])
@@ -388,6 +397,14 @@ namespace System.Net.Security.Tests
 
                 // we should either get 2 successes or 2 failures
                 Assert.True(score % 2 == 0);
+            }
+        }
+
+        private static void CheckPrereqsForNonTls13Tests(int minCipherSuites)
+        {
+            if (PlatformDetection.IsAlpine && SupportedNonTls13CipherSuites.Count < minCipherSuites)
+            {
+                throw new SkipTestException($"Test requires that at least {minCipherSuites} non TLS 1.3 cipher suites are supported.");
             }
         }
 
@@ -493,10 +510,6 @@ namespace System.Net.Security.Tests
 
             var ret = new List<TlsCipherSuite>();
             AllowOneOnOneSide(GetNonTls13CipherSuites(), (cs) => false, (cs) => ret.Add(cs));
-
-            // We can't do any interesting testing
-            // Fail because this is likely bug elsewhere (currently all platforms support more than 4 non TLS1.3 cipher suites)
-            Assert.True(ret.Count >= 4);
 
             return ret;
         }
