@@ -2142,7 +2142,7 @@ namespace System.Text.Json.Tests
         [InlineData("[1, {\"name\": [],},2 , ]")]
         [InlineData("[[1,2,],]")]
         [InlineData("[{\"name\": 1,\"last\":2,},]")]
-        public static void JsonWithValidCommas(string jsonString)
+        public static void JsonWithTrailingCommas_Valid(string jsonString)
         {
             byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
 
@@ -2185,7 +2185,7 @@ namespace System.Text.Json.Tests
         [InlineData("[,]")]
         [InlineData("[1,,]")]
         [InlineData("[1,,2,]")]
-        public static void JsonWithInvalidCommas(string jsonString)
+        public static void JsonWithTrailingCommas_Invalid(string jsonString)
         {
             byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
 
@@ -2224,7 +2224,7 @@ namespace System.Text.Json.Tests
         [InlineData("[1, {\"name\": [],},2 /*comment*/,/*comment*/ ]")]
         [InlineData("[[1,2,]/*comment*/,]")]
         [InlineData("[{\"name\": 1,\"last\":2,}/*comment*/,]")]
-        public static void JsonWithValidCommasWithComments(string jsonString)
+        public static void JsonWithTrailingCommasAndComments_Valid(string jsonString)
         {
             byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
 
@@ -2257,7 +2257,7 @@ namespace System.Text.Json.Tests
         [InlineData("[/*comment*/,/*comment*/]")]
         [InlineData("[1/*comment*/,/*comment*/,/*comment*/]")]
         [InlineData("[1,/*comment*/,2,]")]
-        public static void JsonWithInvalidCommasWithComments(string jsonString)
+        public static void JsonWithTrailingCommasAndComments_Invalid(string jsonString)
         {
             byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
 

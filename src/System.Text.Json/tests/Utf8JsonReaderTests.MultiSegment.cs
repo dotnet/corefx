@@ -744,5 +744,185 @@ namespace System.Text.Json.Tests
                 }
             });
         }
+
+        [Theory]
+        [InlineData("{\"name\": \"value\",}")]
+        [InlineData("{\"name\": [],}")]
+        [InlineData("{\"name\": 1,}")]
+        [InlineData("{\"name\": true,}")]
+        [InlineData("{\"name\": false,}")]
+        [InlineData("{\"name\": null,}")]
+        [InlineData("{\"name\": [{},],}")]
+        [InlineData("{\"first\" : \"value\", \"name\": [{},], \"last\":2 ,}")]
+        [InlineData("{\"prop\":{\"name\": 1,\"last\":2,},}")]
+        [InlineData("{\"prop\":[1,2,],}")]
+        [InlineData("[\"value\",]")]
+        [InlineData("[1,]")]
+        [InlineData("[true,]")]
+        [InlineData("[false,]")]
+        [InlineData("[null,]")]
+        [InlineData("[{},]")]
+        [InlineData("[{\"name\": [],},]")]
+        [InlineData("[1, {\"name\": [],},2 , ]")]
+        [InlineData("[[1,2,],]")]
+        [InlineData("[{\"name\": 1,\"last\":2,},]")]
+        public static void JsonWithTrailingCommasMultiSegment_Valid(string jsonString)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+
+            {
+                JsonReaderState state = default;
+                TrailingCommasHelper(sequence, state, allow: false, expectThrow: true);
+            }
+
+            {
+                var state = new JsonReaderState(options: default);
+                TrailingCommasHelper(sequence, state, allow: false, expectThrow: true);
+            }
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                TrailingCommasHelper(sequence, state, allow: false, expectThrow: true);
+            }
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                bool allowTrailingCommas = true;
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = allowTrailingCommas });
+                TrailingCommasHelper(sequence, state, allowTrailingCommas, expectThrow: false);
+            }
+        }
+
+        [Theory]
+        [InlineData(",")]
+        [InlineData("   ,   ")]
+        [InlineData("{},")]
+        [InlineData("[],")]
+        [InlineData("1,")]
+        [InlineData("true,")]
+        [InlineData("false,")]
+        [InlineData("null,")]
+        [InlineData("{,}")]
+        [InlineData("{\"name\": 1,,}")]
+        [InlineData("{\"name\": 1,,\"last\":2,}")]
+        [InlineData("[,]")]
+        [InlineData("[1,,]")]
+        [InlineData("[1,,2,]")]
+        public static void JsonWithTrailingCommasMultiSegment_Invalid(string jsonString)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                TrailingCommasHelper(sequence, state, allow: false, expectThrow: true);
+            }
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                bool allowTrailingCommas = true;
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling, AllowTrailingCommas = allowTrailingCommas });
+                TrailingCommasHelper(sequence, state, allowTrailingCommas, expectThrow: true);
+            }
+        }
+
+        [Theory]
+        [InlineData("{\"name\": \"value\"/*comment*/,/*comment*/}")]
+        [InlineData("{\"name\": []/*comment*/,/*comment*/}")]
+        [InlineData("{\"name\": 1/*comment*/,/*comment*/}")]
+        [InlineData("{\"name\": true/*comment*/,/*comment*/}")]
+        [InlineData("{\"name\": false/*comment*/,/*comment*/}")]
+        [InlineData("{\"name\": null/*comment*/,/*comment*/}")]
+        [InlineData("{\"name\": [{},]/*comment*/,/*comment*/}")]
+        [InlineData("{\"first\" : \"value\", \"name\": [{},], \"last\":2 /*comment*/,/*comment*/}")]
+        [InlineData("{\"prop\":{\"name\": 1,\"last\":2,}/*comment*/,}")]
+        [InlineData("{\"prop\":[1,2,]/*comment*/,}")]
+        [InlineData("[\"value\"/*comment*/,/*comment*/]")]
+        [InlineData("[1/*comment*/,/*comment*/]")]
+        [InlineData("[true/*comment*/,/*comment*/]")]
+        [InlineData("[false/*comment*/,/*comment*/]")]
+        [InlineData("[null/*comment*/,/*comment*/]")]
+        [InlineData("[{}/*comment*/,/*comment*/]")]
+        [InlineData("[{\"name\": [],}/*comment*/,/*comment*/]")]
+        [InlineData("[1, {\"name\": [],},2 /*comment*/,/*comment*/ ]")]
+        [InlineData("[[1,2,]/*comment*/,]")]
+        [InlineData("[{\"name\": 1,\"last\":2,}/*comment*/,]")]
+        public static void JsonWithTrailingCommasAndCommentsMultiSegment_Valid(string jsonString)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            TrailingCommasHelper(sequence, state, allow: false, expectThrow: true);
+
+            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
+            TrailingCommasHelper(sequence, state, allow: false, expectThrow: true);
+
+            bool allowTrailingCommas = true;
+            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow, AllowTrailingCommas = allowTrailingCommas });
+            TrailingCommasHelper(sequence, state, allowTrailingCommas, expectThrow: false);
+
+            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = allowTrailingCommas });
+            TrailingCommasHelper(sequence, state, allowTrailingCommas, expectThrow: false);
+        }
+
+        [Theory]
+        [InlineData("/*comment*/ ,/*comment*/")]
+        [InlineData("   /*comment*/ ,  /*comment*/ ")]
+        [InlineData("{}/*comment*/,/*comment*/")]
+        [InlineData("[]/*comment*/,/*comment*/")]
+        [InlineData("1/*comment*/,/*comment*/")]
+        [InlineData("true/*comment*/,/*comment*/")]
+        [InlineData("false/*comment*/,/*comment*/")]
+        [InlineData("null/*comment*/,/*comment*/")]
+        [InlineData("{/*comment*/,/*comment*/}")]
+        [InlineData("{\"name\": 1/*comment*/,/*comment*/,/*comment*/}")]
+        [InlineData("{\"name\": 1,/*comment*/,\"last\":2,}")]
+        [InlineData("[/*comment*/,/*comment*/]")]
+        [InlineData("[1/*comment*/,/*comment*/,/*comment*/]")]
+        [InlineData("[1,/*comment*/,2,]")]
+        public static void JsonWithTrailingCommasAndCommentsMultiSegment_Invalid(string jsonString)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(jsonString);
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            TrailingCommasHelper(sequence, state, allow: false, expectThrow: true);
+
+            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
+            TrailingCommasHelper(sequence, state, allow: false, expectThrow: true);
+
+            bool allowTrailingCommas = true;
+            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow, AllowTrailingCommas = allowTrailingCommas });
+            TrailingCommasHelper(sequence, state, allowTrailingCommas, expectThrow: true);
+
+            state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = allowTrailingCommas });
+            TrailingCommasHelper(sequence, state, allowTrailingCommas, expectThrow: true);
+        }
+
+        private static void TrailingCommasHelper(ReadOnlySequence<byte> utf8, JsonReaderState state, bool allow, bool expectThrow)
+        {
+            var reader = new Utf8JsonReader(utf8, isFinalBlock: true, state);
+
+            Assert.Equal(allow, state.Options.AllowTrailingCommas);
+            Assert.Equal(allow, reader.CurrentState.Options.AllowTrailingCommas);
+
+            if (expectThrow)
+            {
+                JsonTestHelper.AssertThrows<JsonReaderException>(reader, (jsonReader) =>
+                {
+                    while (jsonReader.Read())
+                        ;
+                });
+            }
+            else
+            {
+                while (reader.Read())
+                    ;
+            }
+        }
     }
 }
