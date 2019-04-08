@@ -531,4 +531,18 @@ void local_SSL_CTX_set_security_level(SSL_CTX* ctx, int32_t level)
     (void)ctx;
     (void)level;
 }
+
+int local_SSL_CTX_set_ciphersuites(SSL_CTX *ctx, const char *str)
+{
+    (void)ctx;
+    (void)str;
+    return 0;
+}
+
+const SSL_CIPHER* local_SSL_CIPHER_find(SSL *ssl, const unsigned char *ptr)
+{
+    (void)ssl;
+    (void)ptr;
+    return NULL;
+}
 #endif

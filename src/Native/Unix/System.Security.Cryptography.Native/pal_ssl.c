@@ -402,7 +402,11 @@ const char* CryptoNative_GetOpenSslCipherSuiteName(SSL* ssl, int32_t cipherSuite
 
 int32_t CryptoNative_Tls13Supported()
 {
+#ifdef HAVE_OPENSSL_SET_CIPHERSUITES
     return API_EXISTS(SSL_CTX_set_ciphersuites);
+#else
+    return false;
+#endif
 }
 
 void CryptoNative_SslCtxSetClientCertCallback(SSL_CTX* ctx, SslClientCertCallback callback)

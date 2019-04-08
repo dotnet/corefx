@@ -36,6 +36,7 @@
 #include <openssl/x509v3.h>
 
 #include "pal_crypto_config.h"
+#define OPENSSL_VERSION_1_1_1_RTM 0x10101000L
 #define OPENSSL_VERSION_1_1_0_RTM 0x10100000L
 #define OPENSSL_VERSION_1_0_2_RTM 0x10002000L
 
@@ -979,6 +980,12 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #else // FEATURE_DISTRO_AGNOSTIC_SSL
 
 #define API_EXISTS(fn) true
+
+#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_1_RTM
+
+#define SSL_CTX_set_ciphersuites local_SSL_CTX_set_ciphersuites
+
+#endif
 
 #if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0_RTM
 
