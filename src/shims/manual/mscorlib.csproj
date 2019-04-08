@@ -10,13 +10,13 @@
   <ItemGroup>
     <Compile Include="mscorlib.forwards.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
-    <ReferencePath Include="$(RuntimePath)System.Reflection.Emit.dll" Aliases="System_Reflection_Emit" />
-    <ReferencePath Include="$(RuntimePath)System.Reflection.Emit.Lightweight.dll" Aliases="System_Reflection_Emit_Lightweight" />
-    <ReferencePath Include="$(RuntimePath)System.Reflection.Emit.ILGeneration.dll" Aliases="System_Reflection_Emit_ILGeneration" />
+  <ItemGroup Condition="'$(TargetsAot)' == 'true'">
+    <ReferencePath Include="$(RefPath)System.Reflection.Emit.dll" Aliases="System_Reflection_Emit" />
+    <ReferencePath Include="$(RefPath)System.Reflection.Emit.Lightweight.dll" Aliases="System_Reflection_Emit_Lightweight" />
+    <ReferencePath Include="$(RefPath)System.Reflection.Emit.ILGeneration.dll" Aliases="System_Reflection_Emit_ILGeneration" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot'">
+  <ItemGroup Condition="'$(TargetsAot)' == 'true'">
     <SeedTypePreference Include="System.Reflection.Emit.AssemblyBuilder" Aliases="System_Reflection_Emit" />
     <SeedTypePreference Include="System.Reflection.Emit.AssemblyBuilderAccess" Aliases="System_Reflection_Emit" />
     <SeedTypePreference Include="System.Reflection.Emit.ConstructorBuilder" Aliases="System_Reflection_Emit" />
