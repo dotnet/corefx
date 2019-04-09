@@ -216,6 +216,9 @@ block_state deflate_medium(deflate_state *s, int flush)
             if (s->lookahead >= MIN_MATCH) {
                 INSERT_STRING(s, s->strstart, hash_head);
             }
+
+            if (hash_head && hash_head == s->strstart)
+                hash_head--;
         
             /* set up the initial match to be a 1 byte literal */
             current_match.match_start = 0;
@@ -249,6 +252,9 @@ block_state deflate_medium(deflate_state *s, int flush)
         if (s->lookahead > MIN_LOOKAHEAD) {
             s->strstart = current_match.strstart + current_match.match_length;
             INSERT_STRING(s, s->strstart, hash_head);
+
+            if (hash_head && hash_head == s->strstart)
+                hash_head--;
         
             /* set up the initial match to be a 1 byte literal */
             next_match.match_start = 0;
