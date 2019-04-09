@@ -23,8 +23,6 @@ namespace System.Drawing.Printing
         /// </summary>
         public override void OnStartPrint(PrintDocument document, PrintEventArgs e)
         {
-            Debug.Assert(_dc == null && _graphics == null, "PrintController methods called in the wrong order?");
-
             base.OnStartPrint(document, e);
 
             if (!document.PrinterSettings.IsValid)
@@ -42,7 +40,14 @@ namespace System.Drawing.Printing
         /// </summary>
         public override Graphics OnStartPage(PrintDocument document, PrintPageEventArgs e)
         {
-            Debug.Assert(_dc != null && _graphics == null, "PrintController methods called in the wrong order?");
+            if (document == null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+            if (e == null)
+            {
+                throw new ArgumentNullException(nameof(e));
+            }
 
             base.OnStartPage(document, e);
 
@@ -103,10 +108,11 @@ namespace System.Drawing.Printing
         /// </summary>
         public override void OnEndPage(PrintDocument document, PrintPageEventArgs e)
         {
-            Debug.Assert(_dc != null && _graphics != null, "PrintController methods called in the wrong order?");
-
-            _graphics.Dispose();
-            _graphics = null;
+            if (_graphics != null)
+            {
+                _graphics.Dispose();
+                _graphics = null;
+            }
 
             base.OnEndPage(document, e);
         }
@@ -116,10 +122,11 @@ namespace System.Drawing.Printing
         /// </summary>
         public override void OnEndPrint(PrintDocument document, PrintEventArgs e)
         {
-            Debug.Assert(_dc != null && _graphics == null, "PrintController methods called in the wrong order?");
-
-            _dc.Dispose();
-            _dc = null;
+            if (_dc != null)
+            {
+                _dc.Dispose();
+                _dc = null;
+            }
 
             base.OnEndPrint(document, e);
         }

@@ -42,6 +42,10 @@ namespace System.Drawing.Printing
 
         public override void OnStartPrint(PrintDocument document, PrintEventArgs e)
         {
+            if (document == null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
             if (!document.PrinterSettings.IsValid)
             {
                 throw new InvalidPrinterException(document.PrinterSettings);
@@ -61,6 +65,15 @@ namespace System.Drawing.Printing
 
         public override Graphics OnStartPage(PrintDocument document, PrintPageEventArgs e)
         {
+            if (document == null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+            if (e == null)
+            {
+                throw new ArgumentNullException(nameof(e));
+            }
+
             Image image = new Bitmap(e.PageSettings.PaperSize.Width, e.PageSettings.PaperSize.Height);
 
             PreviewPageInfo info = new PreviewPageInfo(image, new Size(e.PageSettings.PaperSize.Width,

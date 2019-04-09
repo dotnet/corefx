@@ -1,5 +1,4 @@
 // Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 //
 // System.Drawing.PrintController.cs
@@ -36,6 +35,10 @@ namespace System.Drawing.Printing
     {
         public virtual void OnStartPrint(PrintDocument document, PrintEventArgs e)
         {
+            if (document == null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
         }
 
         public virtual void OnEndPrint(PrintDocument document, PrintEventArgs e)

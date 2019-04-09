@@ -251,6 +251,11 @@ namespace System.Drawing.Printing
         /// </summary>
         public virtual void OnStartPrint(PrintDocument document, PrintEventArgs e)
         {
+            if (document == null)
+            {
+                throw new ArgumentNullException(nameof(document));
+            }
+
             _modeHandle = (SafeDeviceModeHandle)document.PrinterSettings.GetHdevmode(document.DefaultPageSettings);
         }
 
@@ -259,7 +264,6 @@ namespace System.Drawing.Printing
         /// </summary>
         public virtual void OnEndPrint(PrintDocument document, PrintEventArgs e)
         {
-            Debug.Assert((_modeHandle != null), "modeHandle is null.  Someone must have forgot to call base.StartPrint");
             _modeHandle?.Close();
         }
     }
