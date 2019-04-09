@@ -32,13 +32,6 @@ namespace System.Text.Json
         private JsonTokenType TokenType => _parent?.GetJsonTokenType(_idx) ?? JsonTokenType.None;
 
         /// <summary>
-        ///   Whether or not this JsonElement is part from a <see cref="JsonDocument"/> that has
-        ///   been detached from the input memory.
-        /// </summary>
-        // Boolean reduction of (_parent == null ? true : _parent.IsDetached && !_parent.IsDisposable)
-        public bool IsDetached => _parent == null || _parent.IsDetached && !_parent.IsDisposable;
-
-        /// <summary>
         ///   The <see cref="JsonValueType"/> that the value is.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
@@ -1105,29 +1098,27 @@ namespace System.Text.Json
 
         /// <summary>
         ///   Get a JsonElement which can be safely stored beyond the lifetime of the
-        ///   original JsonDocument.
+        ///   original <see cref="JsonDocument"/>.
         /// </summary>
         /// <returns>
         ///   A JsonElement which can be safely stored beyond the lifetime of the
-        ///   original JsonDocument.
+        ///   original <see cref="JsonDocument"/>.
         /// </returns>
         /// <remarks>
-        ///   If this JsonElement is already detached (<see cref="IsDetached"/> ==
-        ///   <see langword="true"/>) and it is the root element of the
-        ///   <see cref="JsonDocument"/>, no work is done. Otherwise, a copy of
-        ///   the JSON value is made into a new <see cref="JsonDocument"/> and the
-        ///   resulting <see cref="JsonDocument.RootElement"/> value is returned.
+        ///   If this JsonElement is itself the output of a previous call to Clone, or
+        ///   a value contained within another JsonElement which was the output of a previous
+        ///   call to Clone, this method results in no additional memory allocation.
         /// </remarks>
-        public JsonElement Detach()
+        public JsonElement Clone()
         {
             CheckValidInstance();
 
-            if (IsDetached && _idx == 0)
+            if (!_parent.IsDisposable)
             {
                 return this;
             }
 
-            return _parent.DetachElement(_idx);
+            return _parent.CloneElement(_idx);
         }
 
         private void CheckValidInstance()
