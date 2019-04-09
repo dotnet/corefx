@@ -31,6 +31,11 @@ namespace System.Net.Security
         [CLSCompliant(false)]
         public CipherSuitesPolicy(IEnumerable<TlsCipherSuite> allowedCipherSuites)
         {
+            if (!Interop.Ssl.Tls13Supported)
+            {
+                throw new PlatformNotSupportedException(SR.net_ssl_ciphersuites_policy_not_supported);
+            }
+
             using (SafeSslContextHandle innerContext = Ssl.SslCtxCreate(Ssl.SslMethods.SSLv23_method))
             {
                 if (innerContext.IsInvalid)
@@ -101,7 +106,7 @@ namespace System.Net.Security
 
             if (policy == null)
             {
-                // null means default, by default TLS 1.3 is enabled
+                // null means default, by default OpenSSL will choose if it wants to opt-out or not
                 return false;
             }
 
@@ -114,8 +119,25 @@ namespace System.Net.Security
             return policy._tls13CipherSuites.Length == 1;
         }
 
+        internal static bool ShouldOptOutOfLowerThanTls13(CipherSuitesPolicy policy, EncryptionPolicy encryptionPolicy)
+        {
+            if (policy == null)
+            {
+                // null means default, by default OpenSSL will choose if it wants to opt-out or not
+                return false;
+            }
+
+            Debug.Assert(
+                policy._cipherSuites.Length != 0 &&
+                    policy._cipherSuites[policy._cipherSuites.Length - 1] == 0,
+                "null terminated string expected");
+
+            // we should opt out only when policy is empty
+            return policy._cipherSuites.Length == 1;
+        }
+
         private static bool IsOnlyTls13(SslProtocols protocols)
-            => protocols != SslProtocols.None && (protocols & ~SslProtocols.Tls13) == 0;
+            => protocols == SslProtocols.Tls13;
 
         internal static bool WantsTls13(SslProtocols protocols)
             => protocols == SslProtocols.None || (protocols & SslProtocols.Tls13) != 0;
@@ -125,9 +147,14 @@ namespace System.Net.Security
             SslProtocols protocols,
             EncryptionPolicy encryptionPolicy)
         {
-            if (IsOnlyTls13(protocols) || policy == null)
+            if (IsOnlyTls13(protocols))
             {
-                // OpenSSL requires to call non TLS 1.3 related API even when only TLS 1.3 is requested
+                // older cipher suites will be disabled through protocols
+                return null;
+            }
+
+            if (policy == null)
+            {
                 return CipherListFromEncryptionPolicy(encryptionPolicy);
             }
 

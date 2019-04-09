@@ -90,6 +90,18 @@ internal static partial class Interop
                     }
                 }
 
+                if (CipherSuitesPolicy.ShouldOptOutOfLowerThanTls13(sslAuthenticationOptions.CipherSuitesPolicy, policy))
+                {
+                    if (!CipherSuitesPolicy.WantsTls13(protocols))
+                    {
+                        // We cannot provide neither TLS 1.3 or non TLS 1.3, user disabled all cipher suites
+                        throw new SslException(
+                            SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
+                    }
+
+                    protocols = SslProtocols.Tls13;
+                }
+
                 // Configure allowed protocols. It's ok to use DangerousGetHandle here without AddRef/Release as we just
                 // create the handle, it's rooted by the using, no one else has a reference to it, etc.
                 Ssl.SetProtocolOptions(innerContext.DangerousGetHandle(), protocols);

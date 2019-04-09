@@ -336,12 +336,16 @@ void CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
 
 int32_t CryptoNative_SetCiphers(SSL_CTX* ctx, const char* cipherList, const char* cipherSuites)
 {
-    int32_t ret = cipherList != NULL || (CryptoNative_Tls13Supported() && cipherSuites != NULL);
+    int32_t ret = true;
 
     // for < TLS 1.3
     if (cipherList != NULL)
     {
         ret &= SSL_CTX_set_cipher_list(ctx, cipherList);
+        if (!ret)
+        {
+            return ret;
+        }
     }
 
     // for TLS 1.3
