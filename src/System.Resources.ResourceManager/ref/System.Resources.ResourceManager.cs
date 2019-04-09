@@ -66,11 +66,13 @@ namespace System.Resources
         protected virtual System.Resources.ResourceSet InternalGetResourceSet(System.Globalization.CultureInfo culture, bool createIfNotExists, bool tryParents) { throw null; }
         public virtual void ReleaseAllResources() { }
     }
-    public sealed partial class ResourceReader : System.Collections.IEnumerable, System.IDisposable, System.Resources.IResourceReader
+    public partial class ResourceReader : System.Collections.IEnumerable, System.IDisposable, System.Resources.IResourceReader
     {
         public ResourceReader(System.IO.Stream stream) { }
         public ResourceReader(string fileName) { }
+        protected virtual int Version { get { throw null; } }
         public void Close() { }
+        protected virtual object DeserializeObject(System.IO.BinaryReader reader, Type type) { throw null; }
         public void Dispose() { }
         public System.Collections.IDictionaryEnumerator GetEnumerator() { throw null; }
         public void GetResourceData(string resourceName, out string resourceType, out byte[] resourceData) { throw null; }

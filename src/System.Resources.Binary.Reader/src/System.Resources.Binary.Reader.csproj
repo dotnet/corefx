@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>System.Resources.Binary.Reader</AssemblyName>
+    <RootNamespace>System.Resources.Binary</RootNamespace>
+    <Configurations>netstandard-Debug;netstandard-Release;netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+    <NoWarn>$(NoWarn);436</NoWarn>
+    <!-- Condition="'$(TargetsNETStandard)' == 'true'" -->
+    <DefineConstants>$(DefineConstants);RESOURCES_STANDALONE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ProjectGuid>{C021516F-6A1F-4053-8FD8-C148AA7B29F7}</ProjectGuid>
+  </PropertyGroup>
+  <!-- ItemGroup Condition="'$(TargetsNETStandard)' == 'true'" -->
+  <ItemGroup>
+    <Compile Include="$(CommonPath)\CoreLib\System\IO\PinnedBufferMemoryStream.cs" Link="System\IO\PinnedBufferMemoryStream.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Resources\FastResourceComparer.cs" Link="System\Resources\FastResourceComparer.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Resources\ResourceReader.cs" Link="System\Resources\ResourceReader.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Resources\ResourceTypeCode.cs" Link="System\Resources\ResourceTypeCode.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BinaryReaderExtensions.cs" />
+    <Compile Include="System\Resources\Binary\BinaryResourceReader.cs" />
+    <Compile Include="$(CommonPath)\System\Resources\Binary\SerializationFormat.cs" Link="System\Resources\Binary\SerializationFormat.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Collections" />
+    <Reference Include="System.ComponentModel.TypeConverter" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Memory" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Runtime.Serialization.Formatters" />
+    <Reference Include="System.Threading" />
+  </ItemGroup>
+</Project>

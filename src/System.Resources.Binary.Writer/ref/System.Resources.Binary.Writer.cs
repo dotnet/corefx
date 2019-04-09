@@ -5,20 +5,12 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-namespace System.Resources
+namespace System.Resources.Binary
 {
-    public partial interface IResourceWriter : System.IDisposable
+    public partial class BinaryResourceWriter : System.Resources.IResourceWriter
     {
-        void AddResource(string name, byte[] value);
-        void AddResource(string name, object value);
-        void AddResource(string name, string value);
-        void Close();
-        void Generate();
-    }
-    public partial class ResourceWriter : System.IDisposable, System.Resources.IResourceWriter
-    {
-        public ResourceWriter(System.IO.Stream stream) { }
-        public ResourceWriter(string fileName) { }
+        public BinaryResourceWriter(System.IO.Stream stream) { }
+        public BinaryResourceWriter(string fileName) { }
         protected virtual string ResourceReaderTypeName { get { throw null; } }
         protected virtual string ResourceSetTypeName { get { throw null; } }
         public System.Func<System.Type, string> TypeNameConverter { get { throw null; } set { } }
@@ -33,5 +25,12 @@ namespace System.Resources
         public void Dispose() { }
         public void Generate() { }
         protected virtual void WriteData(System.IO.BinaryWriter writer, object dataContext) { }
+
+        public void AddBinaryFormattedResource(string name, string typeName, byte[] value) { }
+        public void AddStreamResource(string name, string typeName, byte[] value) { }
+        public void AddStreamResource(string name, string typeName, System.IO.Stream value, bool closeAfterWrite) { }
+        public void AddTypeConverterResource(string name, string typeName, byte[] value) { }
+        public void AddTypeConverterResource(string name, string typeName, string value) { }
+        
     }
 }

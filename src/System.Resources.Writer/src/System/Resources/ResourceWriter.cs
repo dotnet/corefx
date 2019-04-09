@@ -37,7 +37,7 @@ namespace System.Resources
     // See the RuntimeResourceSet overview for details on the system 
     // default file format.
     // 
-    public sealed class ResourceWriter : IResourceWriter
+    public class ResourceWriter : IResourceWriter
     {
         // An initial size for our internal sorted list, to avoid extra resizes.
         private const int AverageNameSize = 20 * 2;  // chars in little endian Unicode
@@ -69,7 +69,7 @@ namespace System.Resources
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
             if (!stream.CanWrite)
-                throw new ArgumentException(SR.Argument_StreamNotWritable);
+                throw new ArgumentException(SR.Argument_StreamNotWritable, nameof(stream));
 
             _output = stream;
             _resourceList = new SortedDictionary<string, object>(FastResourceComparer.Default);
@@ -184,23 +184,36 @@ namespace System.Resources
         
         public void AddResourceData(string name, string typeName, byte[] serializedData)
         {
+            AddSerializedData(name, typeName, serializedData, nameof(serializedData));
+        }
+
+        protected void AddResourceData(string name, string typeName, object dataContext)
+        {
+            AddSerializedData(name, typeName, dataContext, nameof(dataContext));
+        }
+
+        private void AddSerializedData(string name, string typeName, object data, string dataParameterName)
+        {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
             if (typeName == null)
                 throw new ArgumentNullException(nameof(typeName));
-            if (serializedData == null)
-                throw new ArgumentNullException(nameof(serializedData));
+            if (data == null)
+                throw new ArgumentNullException(dataParameterName);
 
             if (_resourceList == null)
                 throw new InvalidOperationException(SR.InvalidOperation_ResourceWriterSaved);
- 
+
             // Check for duplicate resources whose names vary only by case.
             _caseInsensitiveDups.Add(name, null);
             if (_preserializedData == null)
                 _preserializedData = new Dictionary<string, PrecannedResource>(FastResourceComparer.Default);
- 
-            _preserializedData.Add(name, new PrecannedResource(typeName, serializedData));
+
+            _preserializedData.Add(name, new PrecannedResource(typeName, data));
         }
+
+        protected virtual string ResourceReaderTypeName { get => ResourceReaderFullyQualifiedName; }
+        protected virtual string ResourceSetTypeName { get => ResSetTypeName; }
 
         // For cases where users can't create an instance of the deserialized 
         // type in memory, and need to pass us serialized blobs instead.
@@ -208,15 +221,15 @@ namespace System.Resources
         private class PrecannedResource
         {
             internal readonly string TypeName;
-            internal readonly byte[] Data;
+            internal readonly object Data;
  
-            internal PrecannedResource(string typeName, byte[] data)
+            internal PrecannedResource(string typeName, object data)
             {
                 TypeName = typeName;
                 Data = data;
             }
         }
- 
+
         private class StreamWrapper
         {
             internal readonly Stream Stream;
@@ -282,13 +295,13 @@ namespace System.Resources
 
             // Write out class name of IResourceReader capable of handling 
             // this file.
-            resMgrHeaderPart.Write(ResourceReaderFullyQualifiedName);
+            resMgrHeaderPart.Write(ResourceReaderTypeName);
 
             // Write out class name of the ResourceSet class best suited to
             // handling this file.
             // This needs to be the same even with multi-targeting. It's the 
             // full name -- not the assembly qualified name.
-            resMgrHeaderPart.Write(ResSetTypeName);
+            resMgrHeaderPart.Write(ResourceSetTypeName);
             resMgrHeaderPart.Flush();
 
             // Write number of bytes to skip over to get past ResMgr header
@@ -350,7 +363,7 @@ namespace System.Resources
                     var userProvidedResource = value as PrecannedResource;
                     if (userProvidedResource != null)
                     {
-                        data.Write(userProvidedResource.Data);
+                        WriteData(data, userProvidedResource.Data);
                     }
                     else
                     {
@@ -435,6 +448,25 @@ namespace System.Resources
 
             // Indicate we've called Generate
             _resourceList = null;
+        }
+
+        protected virtual void WriteData(BinaryWriter writer, object dataContext)
+        {
+            // this method should only ever be called by Generate, but guard against derived classes calling with bad data.
+            
+            if (writer == null)
+                throw new ArgumentNullException(nameof(writer));
+            if (dataContext == null)
+                throw new ArgumentNullException(nameof(dataContext));
+
+            byte[] data = dataContext as byte[];
+
+            if (data == null)
+            {
+                throw new InvalidOperationException(SR.Format(SR.InvalidOperation_CannotWriteType, GetType(), dataContext.GetType(), nameof(WriteData)));
+            }
+
+            writer.Write(data);
         }
 
         private static void Write7BitEncodedInt(BinaryWriter store, int value)

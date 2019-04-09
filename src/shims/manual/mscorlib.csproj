@@ -10,6 +10,10 @@
   <ItemGroup>
     <Compile Include="mscorlib.forwards.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ReferencePath Include="$(RefPath)System.Private.CoreLib.dll" Aliases="System_Private_CoreLib" />
+    <SeedTypePreference Include="System.Resources.ResourceReader" Aliases="System_Private_CoreLib" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetsAot)' == 'true'">
     <ReferencePath Include="$(RefPath)System.Reflection.Emit.dll" Aliases="System_Reflection_Emit" />
     <ReferencePath Include="$(RefPath)System.Reflection.Emit.Lightweight.dll" Aliases="System_Reflection_Emit_Lightweight" />

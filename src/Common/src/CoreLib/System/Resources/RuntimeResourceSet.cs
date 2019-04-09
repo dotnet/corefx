@@ -168,8 +168,6 @@ namespace System.Resources
 #endif
     sealed class RuntimeResourceSet : ResourceSet, IEnumerable
     {
-        internal const int Version = 2;            // File format version number
-
         // Cache for resources.  Key is the resource name, which can be cached
         // for arbitrarily long times, since the object is usually a string
         // literal that will live for the lifetime of the appdomain.  The

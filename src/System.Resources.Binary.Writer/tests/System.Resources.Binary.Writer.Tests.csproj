@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Configurations>netstandard-Debug;netstandard-Release;netcoreapp-Debug;netcoreapp-Release</Configurations>
+    <TestDataPackageVersion>1.0.7</TestDataPackageVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="BinaryResourceWriterUnitTest.cs" />
+    <SupplementalTestData Include="$(PackagesDir)system.drawing.common.testdata\$(TestDataPackageVersion)\content\**\*.*"
+                          Link="%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

@@ -72,7 +72,7 @@ namespace System.Resources
         }
     }
 
-    public sealed class ResourceReader : IResourceReader
+    public partial class ResourceReader : IResourceReader
     {
         // A reasonable default buffer size for reading from files, especially
         // when we will likely be seeking frequently.  Could be smaller, but does
@@ -201,6 +201,8 @@ namespace System.Resources
                 _nameHashesPtr = null;
             }
         }
+
+        protected virtual int Version { get => 2; } // File format version number
 
         internal static unsafe int ReadUnalignedI4(int* p)
         {
@@ -772,25 +774,37 @@ namespace System.Resources
 
         private object DeserializeObject(int typeIndex)
         {
-            if (!_permitDeserialization)
+            if (!_permitDeserialization & GetType() == typeof(ResourceReader))
             {
                 throw new NotSupportedException(SR.NotSupported_ResourceObjectSerialization);
             }
 
-            if (_binaryFormatter == null)
-            {
-                InitializeBinaryFormatter();
-            }
-
             Type type = FindType(typeIndex);
-  
-            object graph = s_deserializeMethod(_binaryFormatter, _store.BaseStream);
+
+            object graph = DeserializeObject(_store, type);
             
             // guard against corrupted resources
             if (graph.GetType() != type)
                 throw new BadImageFormatException(SR.Format(SR.BadImageFormat_ResType_SerBlobMismatch, type.FullName, graph.GetType().FullName));
  
             return graph;
+        }
+
+        protected virtual object DeserializeObject(BinaryReader reader, Type type)
+        {
+            if (!_permitDeserialization)
+                throw new NotSupportedException(SR.NotSupported_ResourceObjectSerialization);
+            if (reader == null)
+                throw new ArgumentNullException(nameof(reader));
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            if (_binaryFormatter == null)
+            {
+                InitializeBinaryFormatter();
+            }
+
+            return s_deserializeMethod(_binaryFormatter, reader.BaseStream);
         }
 
         private void InitializeBinaryFormatter()
@@ -874,8 +888,9 @@ namespace System.Resources
                 // Read in type name for a suitable ResourceReader
                 // Note ResourceWriter & InternalResGen use different Strings.
                 string readerType = _store.ReadString();
+                string thisType = GetType().AssemblyQualifiedName;
 
-                if (!ResourceManager.IsDefaultType(readerType, ResourceManager.ResReaderTypeName))
+                if (!CompareNames(readerType, thisType))
                     throw new NotSupportedException(SR.Format(SR.NotSupported_WrongResourceReader_Type, readerType));
 
                 // Skip over type name for a suitable ResourceSet
@@ -885,8 +900,8 @@ namespace System.Resources
             // Read RuntimeResourceSet header
             // Do file version check
             int version = _store.ReadInt32();
-            if (version != RuntimeResourceSet.Version && version != 1)
-                throw new ArgumentException(SR.Format(SR.Arg_ResourceFileUnsupportedVersion, RuntimeResourceSet.Version, version));
+            if (version != Version && version != 1)
+                throw new ArgumentException(SR.Format(SR.Arg_ResourceFileUnsupportedVersion, Version, version));
             _version = version;
 
             _numResources = _store.ReadInt32();
@@ -1133,6 +1148,57 @@ namespace System.Resources
                     _store.BaseStream.Position = oldPos;
                 }
             }
+        }
+
+        private static bool CompareNames(string typeName1, string typeName2)
+        {
+            // First, compare type names
+            int comma1 = typeName1.IndexOf(',');
+            int comma2 = typeName2.IndexOf(',');
+            if (comma1 != comma2)
+                return false;
+
+            // case sensitive
+            if (String.Compare(typeName1, 0, typeName2, 0, typeName2.Length, StringComparison.Ordinal) != 0)
+                return false;
+            if (comma1 == -1)
+                return true;
+
+            // Now, compare assembly display names (IGNORES VERSION AND PROCESSORARCHITECTURE)
+            // also, for  mscorlib ignores everything, since that's what the binder is going to do
+            while (Char.IsWhiteSpace(typeName1[++comma1]));
+            while (Char.IsWhiteSpace(typeName2[++comma2]));
+
+            // case insensitive
+            AssemblyName an1 = new AssemblyName(typeName1.Substring(comma1));
+            AssemblyName an2 = new AssemblyName(typeName1.Substring(comma2));
+            if (String.Compare(an1.Name, an2.Name, StringComparison.OrdinalIgnoreCase) != 0)
+                return false;
+
+            // to match IsMscorlib() in VM
+            if (String.Compare(an1.Name, "mscorlib", StringComparison.OrdinalIgnoreCase) == 0)
+                return true;
+
+
+            if ((an1.CultureInfo != null) && (an2.CultureInfo != null) &&
+                (an1.CultureInfo.Name != an2.CultureInfo.Name))
+                return false;
+
+            byte[] pkt1 = an1.GetPublicKeyToken();
+            byte[] pkt2 = an2.GetPublicKeyToken();
+            if ((pkt1 != null) && (pkt2 != null))
+            {
+                if (pkt1.Length != pkt2.Length)
+                    return false;
+
+                for (int i = 0; i < pkt1.Length; i++)
+                {
+                    if (pkt1[i] != pkt2[i])
+                        return false;
+                }
+            }
+
+            return true;
         }
 
         internal sealed class ResourceEnumerator : IDictionaryEnumerator
