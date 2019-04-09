@@ -29,7 +29,7 @@ namespace System.Net.Http
 
         public Version Version
         {
-            get { return _version; }
+            get { return _version ?? HttpUtilities.DefaultHttpsRequestVersion; }
             set
             {
                 if (value == null)
@@ -95,6 +95,14 @@ namespace System.Net.Http
                 // It's OK to set 'null'. HttpClient will add the 'BaseAddress'. If there is no 'BaseAddress'
                 // sending this message will throw.
                 _requestUri = value;
+                if (value == null)
+                {
+                    _version = null;
+                }
+                else if (_version == null && value.IsAbsoluteUri)
+                {
+                    _version = HttpUtilities.IsSupportedSecureScheme(value.Scheme) ? HttpUtilities.DefaultHttpsRequestVersion : HttpUtilities.DefaultHttpRequestVersion;
+                }
             }
         }
 
@@ -168,7 +176,7 @@ namespace System.Net.Http
             sb.Append(_requestUri == null ? "<null>" : _requestUri.ToString());
 
             sb.Append("', Version: ");
-            sb.Append(_version);
+            sb.Append(_version ?? HttpUtilities.DefaultHttpsRequestVersion);
 
             sb.Append(", Content: ");
             sb.Append(_content == null ? "<null>" : _content.GetType().ToString());
@@ -192,7 +200,10 @@ namespace System.Net.Http
 
             _method = method;
             _requestUri = requestUri;
-            _version = HttpUtilities.DefaultRequestVersion;
+            if (requestUri != null && requestUri.IsAbsoluteUri)
+            {
+                _version = HttpUtilities.IsSupportedSecureScheme(requestUri.Scheme) ? HttpUtilities.DefaultHttpsRequestVersion : HttpUtilities.DefaultHttpRequestVersion;
+            }
         }
 
         internal bool MarkAsSent()

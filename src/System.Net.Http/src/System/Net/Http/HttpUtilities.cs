@@ -14,7 +14,9 @@ namespace System.Net.Http
 {
     internal static class HttpUtilities
     {
-        internal static Version DefaultRequestVersion => HttpVersion.Version20;
+        internal static Version DefaultHttpsRequestVersion => HttpVersion.Version20;
+
+        internal static Version DefaultHttpRequestVersion =>  HttpVersion.Version11;
 
         internal static Version DefaultResponseVersion => HttpVersion.Version11;
 

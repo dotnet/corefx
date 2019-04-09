@@ -11,18 +11,18 @@ namespace System.Net.Http.Functional.Tests
 {
     public abstract class HttpClientHandlerTest_Http2 : HttpClientHandlerTestBase
     {
+        private Version _version20 = new Version(2,0);
         protected override bool UseSocketsHttpHandler => true;
         protected override bool UseHttp2LoopbackServer => true;
 
         public static bool SupportsAlpn => PlatformDetection.SupportsAlpn;
 
-        [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2_ClientPreface_Sent()
         {
             using (var server = Http2LoopbackServer.CreateServer())
             using (var client = CreateHttpClient())
             {
-                Task sendTask = client.GetAsync(server.Address);
+                Task sendTask = client.SendAsync(new HttpRequestMessage(HttpMethod.Get, server.Address){ Version = _version20 });
 
                 string connectionPreface = await server.AcceptConnectionAsync();
 
@@ -30,13 +30,12 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2_InitialSettings_SentAndAcked()
         {
             using (var server = Http2LoopbackServer.CreateServer())
             using (var client = CreateHttpClient())
             {
-                Task sendTask = client.GetAsync(server.Address);
+                Task sendTask = client.SendAsync(new HttpRequestMessage(HttpMethod.Get, server.Address){ Version = _version20 });
 
                 await server.AcceptConnectionAsync();
 
@@ -62,13 +61,12 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2_DataSentBeforeServerPreface_ProtocolError()
         {
             using (var server = Http2LoopbackServer.CreateServer())
             using (var client = CreateHttpClient())
             {
-                Task sendTask = client.GetAsync(server.Address);
+                Task sendTask = client.SendAsync(new HttpRequestMessage(HttpMethod.Get, server.Address){ Version = _version20 });
 
                 await server.AcceptConnectionAsync();
 
@@ -80,13 +78,12 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2_NoResponseBody_Success()
         {
             using (var server = Http2LoopbackServer.CreateServer())
             using (var client = CreateHttpClient())
             {
-                Task<HttpResponseMessage> sendTask = client.GetAsync(server.Address);
+                Task<HttpResponseMessage> sendTask = client.SendAsync(new HttpRequestMessage(HttpMethod.Get, server.Address){ Version = _version20 });
 
                 await server.EstablishConnectionAsync();
 

@@ -19,7 +19,7 @@ namespace System.Net.Http
     internal sealed partial class Http2Connection : HttpConnectionBase, IDisposable
     {
         private readonly HttpConnectionPool _pool;
-        private readonly SslStream _stream;
+        private readonly Stream _stream;
 
         // NOTE: These are mutable structs; do not make these readonly.
         private ArrayBuffer _incomingBuffer;
@@ -65,7 +65,7 @@ namespace System.Net.Http
         // rather than just increase the threshold.
         private const int ConnectionWindowThreshold = ConnectionWindowSize / 8;
 
-        public Http2Connection(HttpConnectionPool pool, SslStream stream)
+        public Http2Connection(HttpConnectionPool pool, Stream stream)
         {
             _pool = pool;
             _stream = stream;
@@ -849,7 +849,14 @@ namespace System.Net.Http
                 WriteIndexedHeader(StaticTable.MethodGet, normalizedMethod.Method);
             }
 
-            WriteIndexedHeader(StaticTable.SchemeHttps);
+            if (_stream is SslStream)
+            {
+                WriteIndexedHeader(StaticTable.SchemeHttps);
+            }
+            else
+            {
+                WriteIndexedHeader(StaticTable.SchemeHttp);
+            }
 
             if (request.HasHeaders && request.Headers.Host != null)
             {

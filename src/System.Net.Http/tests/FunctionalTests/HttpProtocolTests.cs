@@ -102,7 +102,6 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData(1, 2)]
         [InlineData(1, 6)]
-        [InlineData(2, 0)]  // Note, this is plain HTTP (not HTTPS), so 2.0 is not supported and should degrade to 1.1
         [InlineData(2, 1)]
         [InlineData(2, 7)]
         [InlineData(3, 0)]

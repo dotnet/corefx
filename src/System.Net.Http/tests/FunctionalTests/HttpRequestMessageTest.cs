@@ -16,7 +16,10 @@ namespace System.Net.Http.Functional.Tests
 {
     public class HttpRequestMessageTest : HttpClientHandlerTestBase
     {
-        Version _expectedRequestMessageVersion = !PlatformDetection.IsFullFramework ? new Version(2,0) : new Version(1, 1);
+        private static Version _version20 = new Version(2, 0);
+        private static Version _version11 = new Version(1, 1);
+        private Version _expectedRequestMessageVersion = !PlatformDetection.IsFullFramework ? _version20 : _version11;
+
 
         [Fact]
         public void Ctor_Default_CorrectDefaults()
@@ -41,14 +44,25 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public void Ctor_AbsoluteStringUri_CorrectValues()
+        public void Ctor_AbsoluteStringHttpUri_CorrectValues()
         {
             var rm = new HttpRequestMessage(HttpMethod.Post, "http://host/absolute/");
 
             Assert.Equal(HttpMethod.Post, rm.Method);
-            Assert.Equal(_expectedRequestMessageVersion, rm.Version);
+            Assert.Equal(_version11, rm.Version);
             Assert.Equal(null, rm.Content);
             Assert.Equal(new Uri("http://host/absolute/"), rm.RequestUri);
+        }
+
+        [Fact]
+        public void Ctor_AbsoluteStringHttpsUri_CorrectValues()
+        {
+            var rm = new HttpRequestMessage(HttpMethod.Post, "https://host/absolute/");
+
+            Assert.Equal(HttpMethod.Post, rm.Method);
+            Assert.Equal(_expectedRequestMessageVersion, rm.Version);
+            Assert.Equal(null, rm.Content);
+            Assert.Equal(new Uri("https://host/absolute/"), rm.RequestUri);
         }
 
         [Fact]
@@ -77,7 +91,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void Ctor_AbsoluteUri_CorrectValues()
         {
-            var uri = new Uri("http://host/absolute/");
+            var uri = new Uri("https://host/absolute/");
             var rm = new HttpRequestMessage(HttpMethod.Post, uri);
 
             Assert.Equal(HttpMethod.Post, rm.Method);
@@ -109,10 +123,12 @@ namespace System.Net.Http.Functional.Tests
             AssertExtensions.Throws<ArgumentException>("requestUri", () => new HttpRequestMessage(HttpMethod.Put, "ftp://example.com"));
         }
 
-        [Fact]
-        public void Dispose_DisposeObject_ContentGetsDisposedAndSettersWillThrowButGettersStillWork()
+        [Theory]
+        [InlineData("https://example.com", true)]
+        [InlineData("http://example.com", false)]
+        public void Dispose_DisposeObject_ContentGetsDisposedAndSettersWillThrowButGettersStillWork(string uri, bool expect20)
         {
-            var rm = new HttpRequestMessage(HttpMethod.Get, "http://example.com");
+            var rm = new HttpRequestMessage(HttpMethod.Get, uri);
             var content = new MockContent();
             rm.Content = content;
             Assert.False(content.IsDisposed);
@@ -128,8 +144,8 @@ namespace System.Net.Http.Functional.Tests
 
             // Property getters should still work after disposing.
             Assert.Equal(HttpMethod.Get, rm.Method);
-            Assert.Equal(new Uri("http://example.com"), rm.RequestUri);
-            Assert.Equal(_expectedRequestMessageVersion, rm.Version);
+            Assert.Equal(new Uri(uri), rm.RequestUri);
+            Assert.Equal(expect20 ? _version20 : _version11, rm.Version);
             Assert.Equal(content, rm.Content);
         }
 

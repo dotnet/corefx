@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Net.Test.Common;
 using System.Threading.Tasks;
 using Xunit;
@@ -12,6 +13,8 @@ namespace System.Net.Http.Functional.Tests
 
     public class PlatformHandler_HttpClientHandler : HttpClientHandlerTestBase
     {
+        protected override bool UseSocketsHttpHandler => false;
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -53,6 +56,24 @@ namespace System.Net.Http.Functional.Tests
                         Assert.DoesNotContain("amazingtrailer", data);
                     }
                 }
+            });
+        }
+
+
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
+        [Fact]
+        public async Task SendAsync_RequestVersion20_HttpNotHttps_NoUpgradeRequest()
+        {
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    (await client.SendAsync(new HttpRequestMessage(HttpMethod.Get, uri) { Version = new Version(2, 0) })).Dispose();
+                }
+            }, async server =>
+            {
+                List<string> headers = await server.AcceptConnectionSendResponseAndCloseAsync();
+                Assert.All(headers, header => Assert.DoesNotContain("Upgrade", header, StringComparison.OrdinalIgnoreCase));
             });
         }
     }
