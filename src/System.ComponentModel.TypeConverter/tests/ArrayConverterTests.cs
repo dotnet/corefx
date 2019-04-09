@@ -25,6 +25,7 @@ namespace System.ComponentModel.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Throws NullReferenceException in .NET Framework.")]
         public void GetProperties_NullValue_ReturnsNull()
         {
             Assert.Null(Converter.GetProperties(null));
