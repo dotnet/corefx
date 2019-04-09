@@ -14,7 +14,7 @@ namespace System.Reflection.Metadata.Ecma335
         private readonly MetadataReader _metadataReader;
         private readonly object _namespaceTableAndListLock = new object();
         private Dictionary<NamespaceDefinitionHandle, NamespaceData> _namespaceTable;
-        private NamespaceData _rootNamespace;
+        private volatile NamespaceData _rootNamespace;
         private uint _virtualNamespaceCounter;
 
         internal NamespaceCache(MetadataReader reader)
