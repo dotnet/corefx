@@ -86,17 +86,17 @@ namespace System.Drawing.Printing
 
             // Check that user has permission to print to this particular printer
             PrintEventArgs printEvent = new PrintEventArgs(printAction);
-            document._OnBeginPrint(printEvent);
+            document.OnBeginPrint(printEvent);
             if (printEvent.Cancel)
             {
-                document._OnEndPrint(printEvent);
+                document.OnEndPrint(printEvent);
                 return;
             }
 
             OnStartPrint(document, printEvent);
             if (printEvent.Cancel)
             {
-                document._OnEndPrint(printEvent);
+                document.OnEndPrint(printEvent);
                 OnEndPrint(document, printEvent);
                 return;
             }
@@ -116,7 +116,7 @@ namespace System.Drawing.Printing
             {
                 try
                 {
-                    document._OnEndPrint(printEvent);
+                    document.OnEndPrint(printEvent);
                     printEvent.Cancel = canceled | printEvent.Cancel;
                 }
                 finally
@@ -138,7 +138,7 @@ namespace System.Drawing.Printing
             QueryPageSettingsEventArgs queryEvent = new QueryPageSettingsEventArgs((PageSettings)document.DefaultPageSettings.Clone());
             while (true)
             {
-                document._OnQueryPageSettings(queryEvent);
+                document.OnQueryPageSettings(queryEvent);
                 if (queryEvent.Cancel)
                 {
                     return true;
@@ -150,7 +150,7 @@ namespace System.Drawing.Printing
 
                 try
                 {
-                    document._OnPrintPage(pageEvent);
+                    document.OnPrintPage(pageEvent);
                     OnEndPage(document, pageEvent);
                 }
                 finally
@@ -177,7 +177,7 @@ namespace System.Drawing.Printing
             while (true)
             {
                 queryEvent.PageSettingsChanged = false;
-                document._OnQueryPageSettings(queryEvent);
+                document.OnQueryPageSettings(queryEvent);
                 if (queryEvent.Cancel)
                 {
                     return true;
@@ -211,7 +211,7 @@ namespace System.Drawing.Printing
 
                 try
                 {
-                    document._OnPrintPage(pageEvent);
+                    document.OnPrintPage(pageEvent);
                     OnEndPage(document, pageEvent);
                 }
                 finally
