@@ -34,11 +34,11 @@ namespace System
         {
         }
 
-        // Returns a String which represents the object instance.  The default
+        // Might return a String which represents the object instance.  The default
         // for an object is to return the fully qualified name of the class.
-        public virtual string? ToString()
+        public virtual string? MaybeToAString()
         {
-            return GetType().ToString();
+            return GetType().MaybeToAString();
         }
 
         // Returns a boolean indicating if the passed in object obj is 
