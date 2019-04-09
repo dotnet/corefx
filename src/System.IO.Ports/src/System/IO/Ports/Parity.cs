@@ -6,11 +6,11 @@ namespace System.IO.Ports
 {
     public enum Parity
     {
-        None = Interop.Kernel32.DCBParity.NOPARITY,
-        Odd = Interop.Kernel32.DCBParity.ODDPARITY,
-        Even = Interop.Kernel32.DCBParity.EVENPARITY,
-        Mark = Interop.Kernel32.DCBParity.MARKPARITY,
-        Space = Interop.Kernel32.DCBParity.SPACEPARITY
+        None = 0,
+        Odd = 1,
+        Even = 2,
+        Mark = 3,
+        Space = 4
     };
 }
 

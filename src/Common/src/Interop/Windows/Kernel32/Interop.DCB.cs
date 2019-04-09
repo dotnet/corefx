@@ -43,15 +43,6 @@ internal partial class Interop
             internal const int RTS_CONTROL_TOGGLE = 0x03;
         }
 
-        internal static class DCBParity
-        {
-            internal const int NOPARITY = 0;
-            internal const int ODDPARITY = 1;
-            internal const int EVENPARITY = 2;
-            internal const int MARKPARITY = 3;
-            internal const int SPACEPARITY = 4;
-        }
-
         internal static class DCBStopBits
         {
             internal const byte ONESTOPBIT = 0;
