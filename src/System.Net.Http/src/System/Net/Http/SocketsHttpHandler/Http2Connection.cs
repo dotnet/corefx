@@ -650,7 +650,7 @@ namespace System.Net.Http
                     _inProgressWrite = null;
                 }
 
-                int totalBufferLength = _outgoingBuffer.TotalLength;
+                int totalBufferLength = _outgoingBuffer.Capacity;
                 int activeBufferLength = _outgoingBuffer.ActiveSpan.Length;
 
                 if (totalBufferLength >= UnflushedOutgoingBufferSize &&
@@ -961,11 +961,13 @@ namespace System.Net.Http
             // write lock
             await _headerSerializationLock.WaitAsync(cancellationToken).ConfigureAwait(false);
 
-            Http2Stream http2Stream = AddStream(request);
-            int streamId = http2Stream.StreamId;
+            Http2Stream http2Stream = null;
 
             try
             {
+                http2Stream = AddStream(request);
+                int streamId = http2Stream.StreamId;
+
                 http2Stream = AddStream(request);
                 streamId = http2Stream.StreamId;
 
@@ -1011,7 +1013,7 @@ namespace System.Net.Http
             }
             catch
             {
-                http2Stream.Dispose();
+                http2Stream?.Dispose();
                 throw;
             }
             finally
@@ -1366,7 +1368,7 @@ namespace System.Net.Http
                     // ISSUE 31315: Determine if/how to expose HTTP2 error codes
                     throw new HttpRequestException(SR.net_http_client_execution_error, e);
                 }
-                else if (e is OperationCanceledException)
+                else if (e is OperationCanceledException oce)
                 {
                     // If the operation has been canceled after the stream was allocated an ID, send a RST_STREAM.
                     if (http2Stream != null && http2Stream.StreamId != 0)
@@ -1374,7 +1376,6 @@ namespace System.Net.Http
                         http2Stream.Cancel();
                     }
 
-                    OperationCanceledException oce = e as OperationCanceledException;
                     if (oce.CancellationToken == cancellationToken)
                     {
                         throw;

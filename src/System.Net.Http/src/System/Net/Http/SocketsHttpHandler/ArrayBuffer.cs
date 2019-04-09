@@ -59,7 +59,7 @@ namespace System.Net.Http
         public Memory<byte> ActiveMemory => new Memory<byte>(_bytes, _activeStart, _availableStart - _activeStart);
         public Memory<byte> AvailableMemory => new Memory<byte>(_bytes, _availableStart, _bytes.Length - _availableStart);
 
-        public int TotalLength => _bytes.Length;
+        public int Capacity => _bytes.Length;
 
         public void Discard(int byteCount)
         {
