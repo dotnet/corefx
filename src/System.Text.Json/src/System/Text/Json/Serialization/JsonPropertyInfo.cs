@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Text.Json.Serialization.Converters;
 using System.Text.Json.Serialization.Policies;
@@ -10,9 +12,6 @@ namespace System.Text.Json.Serialization
 {
     internal abstract class JsonPropertyInfo
     {
-        // For now, just a global converter.
-        private static JsonEnumerableConverter s_jsonEnumerableConverter = new DefaultArrayConverter();
-
         internal ClassType ClassType;
 
         internal byte[] _name = default;
@@ -70,7 +69,37 @@ namespace System.Text.Json.Serialization
         {
             if (RuntimePropertyType.IsArray)
             {
-                EnumerableConverter = s_jsonEnumerableConverter;
+                EnumerableConverter = new DefaultArrayConverter();
+            }
+            else if (typeof(IEnumerable).IsAssignableFrom(RuntimePropertyType))
+            {
+                Type elementType = JsonClassInfo.GetElementType(RuntimePropertyType);
+
+                if (elementType == null)
+                {
+                    return;
+                }
+
+                if (RuntimePropertyType == typeof(IEnumerable<>).MakeGenericType(elementType))
+                {
+                    EnumerableConverter = new DefaultIEnumerableTConverter();
+                }
+                else if (RuntimePropertyType == typeof(IList<>).MakeGenericType(elementType))
+                {
+                    EnumerableConverter = new DefaultIListTConverter();
+                }
+                else if (RuntimePropertyType == typeof(ICollection<>).MakeGenericType(elementType))
+                {
+                    EnumerableConverter = new DefaultICollectionTConverter();
+                }
+                else if (RuntimePropertyType == typeof(IReadOnlyCollection<>).MakeGenericType(elementType))
+                {
+                    EnumerableConverter = new DefaultIReadOnlyCollectionTConverter();
+                }
+                else if (RuntimePropertyType == typeof(IReadOnlyList<>).MakeGenericType(elementType))
+                {
+                    EnumerableConverter = new DefaultIReadOnlyListTConverter();
+                }
             }
         }
 
