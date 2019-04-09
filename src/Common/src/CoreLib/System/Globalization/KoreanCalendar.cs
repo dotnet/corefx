@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 namespace System.Globalization
 {
     /// <summary>
@@ -62,7 +63,6 @@ namespace System.Globalization
         {
             return _helper.AddMonths(time, months);
         }
-
 
         public override DateTime AddYears(DateTime time, int years)
         {
@@ -139,12 +139,10 @@ namespace System.Globalization
             return _helper.IsLeapMonth(year, month, era);
         }
 
-
         public override DateTime ToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int era)
         {
             return _helper.ToDateTime(year, month, day, hour, minute, second, millisecond, era);
         }
-
 
         public override int[] Eras => _helper.Eras;
 

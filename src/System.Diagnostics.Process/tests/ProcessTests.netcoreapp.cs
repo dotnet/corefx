@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -62,8 +63,7 @@ namespace System.Diagnostics.Tests
             }
             finally
             {
-                if (!testProcess.HasExited)
-                    testProcess.Kill();
+                testProcess.Kill();
 
                 Assert.True(testProcess.WaitForExit(WaitInMS));
             }
@@ -91,13 +91,11 @@ namespace System.Diagnostics.Tests
             }
             finally
             {
-                if (!testProcess.HasExited)
-                    testProcess.Kill();
+                testProcess.Kill();
 
                 Assert.True(testProcess.WaitForExit(WaitInMS));
 
-                if (!secondTestProcess.HasExited)
-                    secondTestProcess.Kill();
+                secondTestProcess.Kill();
 
                 Assert.True(testProcess.WaitForExit(WaitInMS));
             }
@@ -224,15 +222,18 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
-        public void Kill_EntireProcessTree_True_CalledOnExitedProcess_ThrowsInvalidOperationException()
+        public void Kill_ExitedChildProcess_DoesNotThrow(bool killTree)
         {
             Process process = CreateProcess();
             process.Start();
+
             process.WaitForExit();
 
-            Assert.Throws<InvalidOperationException>(() => process.Kill(entireProcessTree: true));
+            process.Kill(killTree);
         }
 
         [Fact]
@@ -352,7 +353,7 @@ namespace System.Diagnostics.Tests
                 Thread.Sleep(Timeout.Infinite);
 
                 // never reaches here -- but necessary to satisfy method's signature
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }
 
             void SendMessage(string message, string handleAsString)
@@ -362,7 +363,6 @@ namespace System.Diagnostics.Tests
                     using (var sw = new StreamWriter(client))
                     {
                         sw.WriteLine(message);
-                        client.WaitForPipeDrain();
                     }
                 }
             }

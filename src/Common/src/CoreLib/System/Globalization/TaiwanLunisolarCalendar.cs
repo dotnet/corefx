@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 namespace System.Globalization
 {
     /// <remarks>
@@ -20,7 +21,7 @@ namespace System.Globalization
         //  So yearOffset = 1911
         private static readonly EraInfo[] s_taiwanLunisolarEraInfo = new EraInfo[]
         {
-            new EraInfo( 1, 1912, 1, 1, 1911, 1, GregorianCalendar.MaxYear - 1911)    // era #, start year/month/day, yearOffset, minEraYear 
+            new EraInfo( 1, 1912, 1, 1, 1911, 1, GregorianCalendar.MaxYear - 1911)    // era #, start year/month/day, yearOffset, minEraYear
         };
 
         private readonly GregorianCalendarHelper _helper;
@@ -198,7 +199,7 @@ namespace System.Globalization
 
         internal override DateTime MaxDate => s_maxDate;
 
-        internal override EraInfo[] CalEraInfo => s_taiwanLunisolarEraInfo;
+        internal override EraInfo[]? CalEraInfo => s_taiwanLunisolarEraInfo;
 
         internal override int GetYearInfo(int lunarYear, int index)
         {

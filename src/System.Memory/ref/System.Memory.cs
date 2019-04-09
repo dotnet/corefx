@@ -142,13 +142,6 @@ namespace System.Buffers
         protected abstract void Dispose(bool disposing);
         public abstract System.Buffers.IMemoryOwner<T> Rent(int minBufferSize = -1);
     }
-    public enum OperationStatus
-    {
-        DestinationTooSmall = 1,
-        Done = 0,
-        InvalidData = 3,
-        NeedMoreData = 2,
-    }
     public abstract partial class ReadOnlySequenceSegment<T>
     {
         protected ReadOnlySequenceSegment() { }
@@ -167,6 +160,7 @@ namespace System.Buffers
         public ReadOnlySequence(T[] array, int start, int length) { throw null; }
         public System.SequencePosition End { get { throw null; } }
         public System.ReadOnlyMemory<T> First { get { throw null; } }
+        public System.ReadOnlySpan<T> FirstSpan { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public bool IsSingleSegment { get { throw null; } }
         public long Length { get { throw null; } }

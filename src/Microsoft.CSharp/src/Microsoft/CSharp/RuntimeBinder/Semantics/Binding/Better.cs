@@ -139,7 +139,7 @@ LAgain:
                     switch (type1.TypeKind)
                     {
                         default:
-                            Debug.Assert(false, "Bad kind in CompareTypes");
+                            Debug.Fail("Bad kind in CompareTypes");
                             break;
                         case TypeKind.TK_TypeParameterType:
                             break;
@@ -188,7 +188,7 @@ LAgain:
         }
 
         ////////////////////////////////////////////////////////////////////////////////
-        // We need to rearange the method parameters so that the type of any specified named argument
+        // We need to rearrange the method parameters so that the type of any specified named argument
         // appears in the same place as the named argument. Consider the example below:
         //    Foo(int x = 4, string y = "", long l = 4)
         //    Foo(string y = "", string x="", long l = 5)

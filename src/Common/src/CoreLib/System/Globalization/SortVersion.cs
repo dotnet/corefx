@@ -2,32 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Runtime.CompilerServices;
 
 namespace System.Globalization
 {
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public sealed class SortVersion : IEquatable<SortVersion>
+    public sealed class SortVersion : IEquatable<SortVersion?>
     {
         private int m_NlsVersion; // Do not rename (binary serialization)
         private Guid m_SortId; // Do not rename (binary serialization)
 
-        public int FullVersion
-        {
-            get
-            {
-                return m_NlsVersion;
-            }
-        }
+        public int FullVersion => m_NlsVersion;
 
-        public Guid SortId
-        {
-            get
-            {
-                return m_SortId;
-            }
-        }
+        public Guid SortId => m_SortId;
 
         public SortVersion(int fullVersion, Guid sortId)
         {
@@ -51,18 +40,12 @@ namespace System.Globalization
             m_SortId = customVersion;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            SortVersion n = obj as SortVersion;
-            if (n != null)
-            {
-                return this.Equals(n);
-            }
-
-            return false;
+            return obj is SortVersion otherVersion && Equals(otherVersion);
         }
 
-        public bool Equals(SortVersion other)
+        public bool Equals(SortVersion? other)
         {
             if (other == null)
             {
@@ -79,7 +62,7 @@ namespace System.Globalization
 
         // Force inline as the true/false ternary takes it above ALWAYS_INLINE size even though the asm ends up smaller
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(SortVersion left, SortVersion right)
+        public static bool operator ==(SortVersion? left, SortVersion? right)
         {
             // Test "right" first to allow branch elimination when inlined for null checks (== null)
             // so it can become a simple test
@@ -92,7 +75,7 @@ namespace System.Globalization
             return right.Equals(left);
         }
 
-        public static bool operator !=(SortVersion left, SortVersion right)
+        public static bool operator !=(SortVersion? left, SortVersion? right)
         {
             return !(left == right);
         }

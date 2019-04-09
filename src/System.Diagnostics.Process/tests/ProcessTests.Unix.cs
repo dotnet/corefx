@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Security;
 using Xunit;
+using Microsoft.DotNet.RemoteExecutor;
 using Microsoft.DotNet.XUnitExtensions;
 
 namespace System.Diagnostics.Tests
@@ -173,7 +174,7 @@ namespace System.Diagnostics.Tests
 
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.StartInfo.EnvironmentVariables["PATH"] = path;
-            RemoteInvoke(fileToOpen =>
+            RemoteExecutor.Invoke(fileToOpen =>
             {
                 using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
                 {
@@ -244,7 +245,7 @@ namespace System.Diagnostics.Tests
 
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.StartInfo.EnvironmentVariables["PATH"] = path;
-            RemoteInvoke((argVerb, argValid) =>
+            RemoteExecutor.Invoke((argVerb, argValid) =>
             {
                 if (argVerb == "<null>")
                 {
@@ -519,10 +520,11 @@ namespace System.Diagnostics.Tests
                 Assert.Subset(expectedGroups, GetGroups());
             }
 
-            return SuccessExitCode;
+            return RemoteExecutor.SuccessExitCode;
         }
 
         [Fact]
+        [ActiveIssue(35933, TestPlatforms.AnyUnix)]
         public unsafe void TestCheckChildProcessUserAndGroupIds()
         {
             string userName = GetCurrentRealUserName();
@@ -537,7 +539,7 @@ namespace System.Diagnostics.Tests
             // Start as username
             var invokeOptions = new RemoteInvokeOptions();
             invokeOptions.StartInfo.UserName = userName;
-            using (RemoteInvokeHandle handle = RemoteInvoke(CheckUserAndGroupIds, userId, userGroupId, userGroupIds, checkGroupsExact.ToString(),
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(CheckUserAndGroupIds, userId, userGroupId, userGroupIds, checkGroupsExact.ToString(),
                                                             invokeOptions))
             { }
         }
@@ -579,15 +581,15 @@ namespace System.Diagnostics.Tests
                 // Start as username
                 var invokeOptions = new RemoteInvokeOptions();
                 invokeOptions.StartInfo.UserName = username;
-                using (RemoteInvokeHandle handle = RemoteInvoke(CheckUserAndGroupIds, userId, userGroupId, userGroupIds, checkGroupsExact.ToString(), invokeOptions))
+                using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(CheckUserAndGroupIds, userId, userGroupId, userGroupIds, checkGroupsExact.ToString(), invokeOptions))
                 { }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             };
 
             // Start as root
             string userName = GetCurrentRealUserName();
-            using (RemoteInvokeHandle handle = RemoteInvoke(runsAsRoot, userName, useRootGroups.ToString(),
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(runsAsRoot, userName, useRootGroups.ToString(),
                                                             new RemoteInvokeOptions { RunAsSudo = true }))
             { }
         }
@@ -782,6 +784,63 @@ namespace System.Diagnostics.Tests
             Assert.True(foundRecycled);
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Kill_ExitedNonChildProcess_DoesNotThrow(bool killTree)
+        {
+            // In this test, we kill a process in a way the Process instance
+            // is not aware the process has terminated when we invoke Process.Kill.
+
+            using (Process nonChildProcess = CreateNonChildProcess())
+            {
+                // Kill the process.
+                int rv = kill(nonChildProcess.Id, SIGKILL);
+                Assert.Equal(0, rv);
+
+                // Wait until the process is reaped.
+                while (rv == 0)
+                {
+                    rv = kill(nonChildProcess.Id, 0);
+                    if (rv == 0)
+                    {
+                        // process still exists, wait some time.
+                        await Task.Delay(100);
+                    }
+                }
+
+                // Call Process.Kill.
+                nonChildProcess.Kill(killTree);
+            }
+
+            Process CreateNonChildProcess()
+            {
+                // Create a process that isn't a direct child.
+                int nonChildPid = -1;
+                RemoteInvokeHandle createNonChildProcess = RemoteExecutor.Invoke(arg =>
+                {
+                    RemoteInvokeHandle nonChildProcess = RemoteExecutor.Invoke(
+                        // Process that lives as long as the test process.
+                        testProcessPid => Process.GetProcessById(int.Parse(testProcessPid)).WaitForExit(), arg,
+                        // Don't pass our standard out to the sleepProcess or the ReadToEnd below won't return.
+                        new RemoteInvokeOptions { StartInfo = new ProcessStartInfo() { RedirectStandardOutput = true } });
+
+                    using (nonChildProcess)
+                    {
+                        Console.WriteLine(nonChildProcess.Process.Id);
+
+                        // Don't wait for the process to exit.
+                        nonChildProcess.Process = null;
+                    }
+                }, Process.GetCurrentProcess().Id.ToString(), new RemoteInvokeOptions { StartInfo = new ProcessStartInfo() { RedirectStandardOutput = true } });
+                using (createNonChildProcess)
+                {
+                    nonChildPid = int.Parse(createNonChildProcess.Process.StandardOutput.ReadToEnd());
+                }
+                return Process.GetProcessById(nonChildPid);
+            }
+        }
+
         private static IDictionary GetWaitStateDictionary(bool childDictionary)
         {
             Assembly assembly = typeof(Process).Assembly;
@@ -808,7 +867,7 @@ namespace System.Diagnostics.Tests
             {
                 RunAsSudo = true
             };
-            using (RemoteInvokeHandle handle = RemoteInvoke(testMethod, arg, options))
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(testMethod, arg, options))
             { }
         }
 
@@ -850,6 +909,11 @@ namespace System.Diagnostics.Tests
 
         [DllImport("libc")]
         private static unsafe extern int setgroups(int length, uint* groups);
+
+        private const int SIGKILL = 9;
+
+        [DllImport("libc", SetLastError = true)]
+        private static extern int kill(int pid, int sig);
 
         private static readonly string[] s_allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
 

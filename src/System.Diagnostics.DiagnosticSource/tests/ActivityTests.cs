@@ -263,7 +263,6 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void RootId()
         {
-
             var parentIds = new[]{
                 "123",   //Parent does not start with '|' and does not contain '.'
                 "123.1", //Parent does not start with '|' but contains '.'
@@ -288,7 +287,7 @@ namespace System.Diagnostics.Tests
                 return false;
             if (id[52] != '-')
                 return false;
-            return Regex.IsMatch(id, "^[0-9a-f][0-9a-f]-[0-9a-f]*-[0-9a-f]*-[0-9a-f][0-9a-f]$");
+            return Regex.IsMatch(id, "^[0-9a-f]{2}-[0-9a-f]{32}-[0-9a-f]{16}-[0-9a-f]{2}$");
         }
 
         public static bool IsLowerCaseHex(string s)
@@ -306,7 +305,7 @@ namespace System.Diagnostics.Tests
             // Empty Constructor 
             string zeros = "00000000000000000000000000000000";
             ActivityTraceId emptyId = new ActivityTraceId();
-            Assert.Equal(zeros, emptyId.AsHexString);
+            Assert.Equal(zeros, emptyId.ToHexString());
             emptyId.CopyTo(idBytes1);
             Assert.Equal(new byte[16], idBytes1.ToArray());
 
@@ -317,13 +316,13 @@ namespace System.Diagnostics.Tests
             Assert.Equal(new ActivityTraceId().GetHashCode(), emptyId.GetHashCode());
 
             // NewActivityTraceId
-            ActivityTraceId newId1 = ActivityTraceId.NewTraceId();
-            Assert.True(IsLowerCaseHex(newId1.AsHexString));
-            Assert.Equal(32, newId1.AsHexString.Length);
+            ActivityTraceId newId1 = ActivityTraceId.CreateRandom();
+            Assert.True(IsLowerCaseHex(newId1.ToHexString()));
+            Assert.Equal(32, newId1.ToHexString().Length);
 
-            ActivityTraceId newId2 = ActivityTraceId.NewTraceId();
-            Assert.Equal(32, newId1.AsHexString.Length);
-            Assert.NotEqual(newId1.AsHexString, newId2.AsHexString);
+            ActivityTraceId newId2 = ActivityTraceId.CreateRandom();
+            Assert.Equal(32, newId1.ToHexString().Length);
+            Assert.NotEqual(newId1.ToHexString(), newId2.ToHexString());
 
             // Test equality
             Assert.True(newId1 != newId2);
@@ -332,7 +331,7 @@ namespace System.Diagnostics.Tests
             Assert.True(!(newId1.Equals((object)newId2)));
             Assert.NotEqual(newId1.GetHashCode(), newId2.GetHashCode());
 
-            ActivityTraceId newId3 = new ActivityTraceId("00000000000000000000000000000001".AsSpan());
+            ActivityTraceId newId3 = ActivityTraceId.CreateFromString("00000000000000000000000000000001".AsSpan());
             Assert.True(newId3 != emptyId);
             Assert.True(!(newId3 == emptyId));
             Assert.True(!(newId3.Equals(emptyId)));
@@ -341,16 +340,16 @@ namespace System.Diagnostics.Tests
 
             // Use in Dictionary (this does assume we have no collisions in IDs over 100 tries (very good).  
             var dict = new Dictionary<ActivityTraceId, string>();
-            for(int i = 0; i < 100; i++)
+            for (int i = 0; i < 100; i++)
             {
-                var newId7 = ActivityTraceId.NewTraceId();
-                dict[newId7] = newId7.AsHexString;
+                var newId7 = ActivityTraceId.CreateRandom();
+                dict[newId7] = newId7.ToHexString();
             }
             int ctr = 0;
-            foreach(string value in dict.Values)
+            foreach (string value in dict.Values)
             {
                 string valueInDict;
-                Assert.True(dict.TryGetValue(new ActivityTraceId(value.AsSpan()), out valueInDict));
+                Assert.True(dict.TryGetValue(ActivityTraceId.CreateFromString(value.AsSpan()), out valueInDict));
                 Assert.Equal(value, valueInDict);
                 ctr++;
             }
@@ -358,8 +357,8 @@ namespace System.Diagnostics.Tests
 
             // AsBytes and Byte constructor.  
             newId2.CopyTo(idBytes2);
-            ActivityTraceId newId2Clone = new ActivityTraceId(idBytes2);
-            Assert.Equal(newId2.AsHexString, newId2Clone.AsHexString);
+            ActivityTraceId newId2Clone = ActivityTraceId.CreateFromBytes(idBytes2);
+            Assert.Equal(newId2.ToHexString(), newId2Clone.ToHexString());
             newId2Clone.CopyTo(idBytes1);
             Assert.Equal(idBytes2.ToArray(), idBytes1.ToArray());
 
@@ -368,15 +367,15 @@ namespace System.Diagnostics.Tests
             Assert.True(newId2.Equals((object)newId2Clone));
             Assert.Equal(newId2.GetHashCode(), newId2Clone.GetHashCode());
 
-            // String constructor and AsHexString.  
+            // String constructor and ToHexString().  
             string idStr = "0123456789abcdef0123456789abcdef";
-            ActivityTraceId id = new ActivityTraceId(idStr.AsSpan());
-            Assert.Equal(idStr, id.AsHexString);
+            ActivityTraceId id = ActivityTraceId.CreateFromString(idStr.AsSpan());
+            Assert.Equal(idStr, id.ToHexString());
 
             // Utf8 Constructor. 
             byte[] idUtf8 = Encoding.UTF8.GetBytes(idStr);
-            ActivityTraceId id1 = new ActivityTraceId(idUtf8, true);
-            Assert.Equal(idStr, id1.AsHexString);
+            ActivityTraceId id1 = ActivityTraceId.CreateFromUtf8String(idUtf8);
+            Assert.Equal(idStr, id1.ToHexString());
 
             // ToString
             Assert.Equal(idStr, id.ToString());
@@ -392,7 +391,7 @@ namespace System.Diagnostics.Tests
             // Empty Constructor 
             string zeros = "0000000000000000";
             ActivitySpanId emptyId = new ActivitySpanId();
-            Assert.Equal(zeros, emptyId.AsHexString);
+            Assert.Equal(zeros, emptyId.ToHexString());
             emptyId.CopyTo(idBytes1);
             Assert.Equal(new byte[8], idBytes1.ToArray());
 
@@ -403,13 +402,13 @@ namespace System.Diagnostics.Tests
             Assert.Equal(new ActivitySpanId().GetHashCode(), emptyId.GetHashCode());
 
             // NewActivitySpanId
-            ActivitySpanId newId1 = ActivitySpanId.NewSpanId();
-            Assert.True(IsLowerCaseHex(newId1.AsHexString));
-            Assert.Equal(16, newId1.AsHexString.Length);
+            ActivitySpanId newId1 = ActivitySpanId.CreateRandom();
+            Assert.True(IsLowerCaseHex(newId1.ToHexString()));
+            Assert.Equal(16, newId1.ToHexString().Length);
 
-            ActivitySpanId newId2 = ActivitySpanId.NewSpanId();
-            Assert.Equal(16, newId1.AsHexString.Length);
-            Assert.NotEqual(newId1.AsHexString, newId2.AsHexString);
+            ActivitySpanId newId2 = ActivitySpanId.CreateRandom();
+            Assert.Equal(16, newId1.ToHexString().Length);
+            Assert.NotEqual(newId1.ToHexString(), newId2.ToHexString());
 
             // Test equality
             Assert.True(newId1 != newId2);
@@ -418,7 +417,7 @@ namespace System.Diagnostics.Tests
             Assert.True(!(newId1.Equals((object)newId2)));
             Assert.NotEqual(newId1.GetHashCode(), newId2.GetHashCode());
 
-            ActivitySpanId newId3 = new ActivitySpanId("0000000000000001".AsSpan());
+            ActivitySpanId newId3 = ActivitySpanId.CreateFromString("0000000000000001".AsSpan());
             Assert.True(newId3 != emptyId);
             Assert.True(!(newId3 == emptyId));
             Assert.True(!(newId3.Equals(emptyId)));
@@ -429,14 +428,14 @@ namespace System.Diagnostics.Tests
             var dict = new Dictionary<ActivitySpanId, string>();
             for (int i = 0; i < 100; i++)
             {
-                var newId7 = ActivitySpanId.NewSpanId();
-                dict[newId7] = newId7.AsHexString;
+                var newId7 = ActivitySpanId.CreateRandom();
+                dict[newId7] = newId7.ToHexString();
             }
             int ctr = 0;
             foreach (string value in dict.Values)
             {
                 string valueInDict;
-                Assert.True(dict.TryGetValue(new ActivitySpanId(value.AsSpan()), out valueInDict));
+                Assert.True(dict.TryGetValue(ActivitySpanId.CreateFromString(value.AsSpan()), out valueInDict));
                 Assert.Equal(value, valueInDict);
                 ctr++;
             }
@@ -444,8 +443,8 @@ namespace System.Diagnostics.Tests
 
             // AsBytes and Byte constructor.  
             newId2.CopyTo(idBytes2);
-            ActivitySpanId newId2Clone = new ActivitySpanId(idBytes2);
-            Assert.Equal(newId2.AsHexString, newId2Clone.AsHexString);
+            ActivitySpanId newId2Clone = ActivitySpanId.CreateFromBytes(idBytes2);
+            Assert.Equal(newId2.ToHexString(), newId2Clone.ToHexString());
             newId2Clone.CopyTo(idBytes1);
             Assert.Equal(idBytes2.ToArray(), idBytes1.ToArray());
 
@@ -454,15 +453,15 @@ namespace System.Diagnostics.Tests
             Assert.True(newId2.Equals((object)newId2Clone));
             Assert.Equal(newId2.GetHashCode(), newId2Clone.GetHashCode());
 
-            // String constructor and AsHexString.  
+            // String constructor and ToHexString().  
             string idStr = "0123456789abcdef";
-            ActivitySpanId id = new ActivitySpanId(idStr.AsSpan());
-            Assert.Equal(idStr, id.AsHexString);
+            ActivitySpanId id = ActivitySpanId.CreateFromString(idStr.AsSpan());
+            Assert.Equal(idStr, id.ToHexString());
 
             // Utf8 Constructor. 
             byte[] idUtf8 = Encoding.UTF8.GetBytes(idStr);
-            ActivitySpanId id1 = new ActivitySpanId(idUtf8, true);
-            Assert.Equal(idStr, id1.AsHexString);
+            ActivitySpanId id1 = ActivitySpanId.CreateFromUtf8String(idUtf8);
+            Assert.Equal(idStr, id1.ToHexString());
 
             // ToString
             Assert.Equal(idStr, id.ToString());
@@ -484,21 +483,25 @@ namespace System.Diagnostics.Tests
 
                 // Set the parent to something that is W3C by string
                 activity = new Activity("activity2");
-                activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-01");
+                activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-00");
                 activity.Start();
                 Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
-                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.AsHexString);
-                Assert.Equal("0123456789abcdef", activity.ParentSpanId.AsHexString);
+                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+                Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
+                Assert.Equal(ActivityTraceFlags.None, activity.ActivityTraceFlags);
+                Assert.False(activity.Recorded);
                 Assert.True(IdIsW3CFormat(activity.Id));
                 activity.Stop();
 
                 // Set the parent to something that is W3C but using ActivityTraceId,ActivitySpanId version of SetParentId.  
                 activity = new Activity("activity3");
-                ActivityTraceId activityTraceId = ActivityTraceId.NewTraceId();
-                activity.SetParentId(activityTraceId, ActivitySpanId.NewSpanId());
+                ActivityTraceId activityTraceId = ActivityTraceId.CreateRandom();
+                activity.SetParentId(activityTraceId, ActivitySpanId.CreateRandom());
                 activity.Start();
                 Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
-                Assert.Equal(activityTraceId.AsHexString, activity.TraceId.AsHexString);
+                Assert.Equal(activityTraceId.ToHexString(), activity.TraceId.ToHexString());
+                Assert.Equal(ActivityTraceFlags.None, activity.ActivityTraceFlags);
+                Assert.False(activity.Recorded);
                 Assert.True(IdIsW3CFormat(activity.Id));
                 activity.Stop();
 
@@ -519,8 +522,8 @@ namespace System.Diagnostics.Tests
                 Assert.True(activity.Id.StartsWith(parentId));
 
                 // Heirarchical Ids return null ActivityTraceId and ActivitySpanIds
-                Assert.Equal("00000000000000000000000000000000", activity.TraceId.AsHexString);
-                Assert.Equal("0000000000000000", activity.SpanId.AsHexString);
+                Assert.Equal("00000000000000000000000000000000", activity.TraceId.ToHexString());
+                Assert.Equal("0000000000000000", activity.SpanId.ToHexString());
                 activity.Stop();
 
                 // But if I set ForceDefaultFormat I get what I asked for (W3C format)
@@ -530,8 +533,8 @@ namespace System.Diagnostics.Tests
                 activity.Start();
                 Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
                 Assert.True(IdIsW3CFormat(activity.Id));
-                Assert.NotEqual("00000000000000000000000000000000", activity.TraceId.AsHexString);
-                Assert.NotEqual("0000000000000000", activity.SpanId.AsHexString);
+                Assert.NotEqual("00000000000000000000000000000000", activity.TraceId.ToHexString());
+                Assert.NotEqual("0000000000000000", activity.SpanId.ToHexString());
 
                 /* TraceStateString testing */
                 // Test TraceStateString (that it inherits from parent)
@@ -588,8 +591,8 @@ namespace System.Diagnostics.Tests
                 activity.Start();
                 Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
                 Assert.True(IdIsW3CFormat(activity.Id));
-                Assert.Equal("0000000000000000", activity.ParentSpanId.AsHexString);
-                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.AsHexString);
+                Assert.Equal("0000000000000000", activity.ParentSpanId.ToHexString());
+                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
                 activity.Stop();
 
                 // ParentSpanId from parent Activity
@@ -598,7 +601,7 @@ namespace System.Diagnostics.Tests
 
                 parent = new Activity("parent").Start();
                 activity = new Activity("parent").Start();
-                Assert.Equal(parent.SpanId.AsHexString, activity.ParentSpanId.AsHexString);
+                Assert.Equal(parent.SpanId.ToHexString(), activity.ParentSpanId.ToHexString());
 
                 activity.Stop();
                 parent.Stop();
@@ -610,6 +613,139 @@ namespace System.Diagnostics.Tests
                 Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
                 Activity.Current = null;
             }
+        }
+
+        [Fact]
+        public void TraceIdBeforeStartTests()
+        {
+            try
+            {
+                Activity activity;
+
+                // from traceparent header
+                activity = new Activity("activity1");
+                activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-01");
+                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+
+                // from explicit TraceId and SpanId
+                activity = new Activity("activity2");
+                activity.SetParentId(
+                    ActivityTraceId.CreateFromString("0123456789abcdef0123456789abcdef".AsSpan()),
+                    ActivitySpanId.CreateFromString("0123456789abcdef".AsSpan()));
+
+                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+
+                // from in-proc parent
+                Activity parent = new Activity("parent");
+                parent.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-01");
+                parent.Start();
+
+                activity = new Activity("child");
+                activity.Start();
+                Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+                parent.Stop();
+                activity.Stop();
+
+                // no parent
+                Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+                Activity.ForceDefaultIdFormat = true;
+
+                activity = new Activity("activity3");
+                Assert.Equal("00000000000000000000000000000000", activity.TraceId.ToHexString());
+
+                // from invalid traceparent header
+                activity.SetParentId("123");
+                Assert.Equal("00000000000000000000000000000000", activity.TraceId.ToHexString());
+            }
+            finally
+            {
+                Activity.ForceDefaultIdFormat = false;
+                Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
+                Activity.Current = null;
+            }
+        }
+
+        [Fact]
+        public void RootIdBeforeStartTests()
+        {
+            Activity activity = new Activity("activity1");
+            Assert.Null(activity.RootId);
+            activity.SetParentId("|0123456789abcdef0123456789abcdef.0123456789abcdef.");
+            Assert.Equal("0123456789abcdef0123456789abcdef", activity.RootId);
+        }
+
+        [Fact]
+        public void ActivityTraceFlagsTests()
+        {
+            Activity activity;
+
+            // Set the 'Recorded' bit by using SetParentId with a -01 flags.  
+            activity = new Activity("activity1");
+            activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-01");
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+            Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
+            Assert.True(IdIsW3CFormat(activity.Id));
+            Assert.Equal(ActivityTraceFlags.Recorded, activity.ActivityTraceFlags);
+            Assert.True(activity.Recorded);
+            activity.Stop();
+
+            // Set the 'Recorded' bit by using SetParentId by using the TraceId, SpanId, ActivityTraceFlags overload 
+            activity = new Activity("activity2");
+            ActivityTraceId activityTraceId = ActivityTraceId.CreateRandom();
+            activity.SetParentId(activityTraceId, ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded);
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.Equal(activityTraceId.ToHexString(), activity.TraceId.ToHexString());
+            Assert.True(IdIsW3CFormat(activity.Id));
+            Assert.Equal(ActivityTraceFlags.Recorded, activity.ActivityTraceFlags);
+            Assert.True(activity.Recorded);
+            activity.Stop();
+
+            /****************************************************/
+            // Set the 'Recorded' bit explicitly after the fact.   
+            activity = new Activity("activity3");
+            activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-00");
+            activity.Start();
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+            Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
+            Assert.True(IdIsW3CFormat(activity.Id));
+            Assert.Equal(ActivityTraceFlags.None, activity.ActivityTraceFlags);
+            Assert.False(activity.Recorded);
+
+            activity.ActivityTraceFlags = ActivityTraceFlags.Recorded;
+            Assert.Equal(ActivityTraceFlags.Recorded, activity.ActivityTraceFlags);
+            Assert.True(activity.Recorded);
+            activity.Stop();
+
+            /****************************************************/
+            // Confirm that that flags are propagated to children.  
+            activity = new Activity("activity4");
+            activity.SetParentId("00-0123456789abcdef0123456789abcdef-0123456789abcdef-01");
+            activity.Start();
+            Assert.Equal(activity, Activity.Current);
+            Assert.Equal(ActivityIdFormat.W3C, activity.IdFormat);
+            Assert.Equal("0123456789abcdef0123456789abcdef", activity.TraceId.ToHexString());
+            Assert.Equal("0123456789abcdef", activity.ParentSpanId.ToHexString());
+            Assert.True(IdIsW3CFormat(activity.Id));
+            Assert.Equal(ActivityTraceFlags.Recorded, activity.ActivityTraceFlags);
+            Assert.True(activity.Recorded);
+
+            // create a child
+            var childActivity = new Activity("activity4Child");
+            childActivity.Start();
+            Assert.Equal(childActivity, Activity.Current);
+
+            Assert.Equal("0123456789abcdef0123456789abcdef", childActivity.TraceId.ToHexString());
+            Assert.NotEqual(activity.SpanId.ToHexString(), childActivity.SpanId.ToHexString());
+            Assert.True(IdIsW3CFormat(childActivity.Id));
+            Assert.Equal(ActivityTraceFlags.Recorded, childActivity.ActivityTraceFlags);
+            Assert.True(childActivity.Recorded);
+
+            childActivity.Stop();
+            activity.Stop();
         }
 
         /// <summary>

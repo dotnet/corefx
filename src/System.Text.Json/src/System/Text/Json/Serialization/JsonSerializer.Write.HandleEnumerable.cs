@@ -25,20 +25,20 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(state.Current.JsonPropertyInfo.ClassType == ClassType.Enumerable);
 
-            JsonPropertyInfo propertyInfo = state.Current.JsonPropertyInfo;
+            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
             if (state.Current.Enumerator == null)
             {
-                if (propertyInfo._name == null)
+                if (jsonPropertyInfo._name == null)
                 {
                     writer.WriteStartArray();
                 }
                 else
                 {
-                    writer.WriteStartArray(propertyInfo._name);
+                    writer.WriteStartArray(jsonPropertyInfo._name);
                 }
 
-                IEnumerable enumerable = (IEnumerable)propertyInfo.GetValueAsObject(state.Current.CurrentValue, options);
+                IEnumerable enumerable = (IEnumerable)jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue, options);
 
                 if (enumerable != null)
                 {
@@ -48,16 +48,27 @@ namespace System.Text.Json.Serialization
 
             if (state.Current.Enumerator != null && state.Current.Enumerator.MoveNext())
             {
+                // Check for polymorphism.
+                if (elementClassInfo.ClassType == ClassType.Unknown)
+                {
+                    object currentValue = state.Current.Enumerator.Current;
+                    GetRuntimeClassInfo(currentValue, ref elementClassInfo, options);
+                }
+
                 if (elementClassInfo.ClassType == ClassType.Value)
                 {
                     elementClassInfo.GetPolicyProperty().WriteEnumerable(options, ref state.Current, ref writer);
                 }
+                else if (state.Current.Enumerator.Current == null)
+                {
+                    // Write a null object or enumerable.
+                    writer.WriteNullValue();
+                }
                 else
                 {
-                    // An object or another enumerator requires a new stack frame
-                    JsonClassInfo nextClassInfo = propertyInfo.ElementClassInfo;
+                    // An object or another enumerator requires a new stack frame.
                     object nextValue = state.Current.Enumerator.Current;
-                    state.Push(nextClassInfo, nextValue);
+                    state.Push(elementClassInfo, nextValue);
                 }
 
                 return false;

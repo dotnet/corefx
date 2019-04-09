@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 #if FEATURE_APPX
 using System.Resources;
 using Internal.Resources;
@@ -24,14 +25,10 @@ namespace System.Globalization
             if (GlobalizationMode.Invariant)
                 return CultureInfo.InvariantCulture;
 
-            const uint LOCALE_SNAME = 0x0000005c;
-            const string LOCALE_NAME_USER_DEFAULT = null;
-            const string LOCALE_NAME_SYSTEM_DEFAULT = "!x-sys-default-locale";
-
-            string strDefault = CultureData.GetLocaleInfoEx(LOCALE_NAME_USER_DEFAULT, LOCALE_SNAME);
+            string? strDefault = CultureData.GetLocaleInfoEx(Interop.Kernel32.LOCALE_NAME_USER_DEFAULT, Interop.Kernel32.LOCALE_SNAME);
             if (strDefault == null)
             {
-                strDefault = CultureData.GetLocaleInfoEx(LOCALE_NAME_SYSTEM_DEFAULT, LOCALE_SNAME);
+                strDefault = CultureData.GetLocaleInfoEx(Interop.Kernel32.LOCALE_NAME_SYSTEM_DEFAULT, Interop.Kernel32.LOCALE_SNAME);
 
                 if (strDefault == null)
                 {
@@ -73,7 +70,7 @@ namespace System.Globalization
         }
 
 #if FEATURE_APPX
-        internal static CultureInfo GetCultureInfoForUserPreferredLanguageInAppX()
+        internal static CultureInfo? GetCultureInfoForUserPreferredLanguageInAppX()
         {
             // If a call to GetCultureInfoForUserPreferredLanguageInAppX() generated a recursive
             // call to itself, return null, since we don't want to stack overflow.  For example,
@@ -85,7 +82,7 @@ namespace System.Globalization
                 return null;
             }
 
-            CultureInfo toReturn = null;
+            CultureInfo toReturn;
 
             try
             {

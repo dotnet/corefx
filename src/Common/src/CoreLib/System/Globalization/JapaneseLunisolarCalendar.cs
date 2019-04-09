@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 namespace System.Globalization
 {
     /// <remarks>
@@ -26,7 +27,7 @@ namespace System.Globalization
         public override DateTime MinSupportedDateTime => s_minDate;
 
         public override DateTime MaxSupportedDateTime => s_maxDate;
-        
+
         protected override int DaysInYearBeforeMinSupportedYear
         {
             get
@@ -142,7 +143,7 @@ namespace System.Globalization
 
         internal override DateTime MaxDate => s_maxDate;
 
-        internal override EraInfo[] CalEraInfo => JapaneseCalendar.GetEraInfo();
+        internal override EraInfo[]? CalEraInfo => JapaneseCalendar.GetEraInfo();
 
         internal override int GetYearInfo(int lunarYear, int index)
         {

@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 
 namespace System.Buffers.Text
 {
@@ -107,14 +109,16 @@ namespace System.Buffers.Text
                 return false;
             }
 
-            for (int i = 0; i < utf16Text.Length; i++)
+            try
             {
-                Debug.Assert(utf16Text[i] < 128, "A culture-invariant ToString() of a floating point expected to produce ASCII characters only.");
-                destination[i] = (byte)utf16Text[i];
+                bytesWritten = Encoding.UTF8.GetBytes(utf16Text, destination);
+                return true;
             }
-
-            bytesWritten = utf16Text.Length;
-            return true;
+            catch
+            {
+                bytesWritten = 0;
+                return false;
+            }
         }
     }
 }

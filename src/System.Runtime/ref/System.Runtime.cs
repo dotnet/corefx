@@ -2344,6 +2344,8 @@ namespace System
         public bool Contains(char value, System.StringComparison comparisonType) { throw null; }
         public bool Contains(System.String value) { throw null; }
         public bool Contains(System.String value, System.StringComparison comparisonType) { throw null; }
+        [System.ObsoleteAttribute("This API should not be used to create mutable strings. See https://go.microsoft.com/fwlink/?linkid=2084035 for alternatives.")]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public static System.String Copy(System.String str) { throw null; }
         public void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count) { }
         public static System.String Create<TState>(int length, TState state, System.Buffers.SpanAction<char, TState> action) { throw null; }
@@ -3164,6 +3166,7 @@ namespace System
     [System.CLSCompliantAttribute(false)]
     public ref partial struct TypedReference
     {
+        private object _dummy;
         private int _dummyPrimitive;
         public override bool Equals(object o) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -3833,6 +3836,13 @@ namespace System.Buffers
         void System.IDisposable.Dispose() { }
         protected internal virtual bool TryGetArray(out System.ArraySegment<T> segment) { throw null; }
         public abstract void Unpin();
+    }
+    public enum OperationStatus
+    {
+        DestinationTooSmall = 1,
+        Done = 0,
+        InvalidData = 3,
+        NeedMoreData = 2,
     }
     public delegate void ReadOnlySpanAction<T, in TArg>(System.ReadOnlySpan<T> span, TArg arg);
     public delegate void SpanAction<T, in TArg>(System.Span<T> span, TArg arg);
@@ -5161,6 +5171,7 @@ namespace System.IO
         public override bool CanRead { get { throw null; } }
         public override bool CanSeek { get { throw null; } }
         public override bool CanWrite { get { throw null; } }
+        public override System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize, System.Threading.CancellationToken cancellationToken) { throw null; }
         [System.ObsoleteAttribute("This property has been deprecated.  Please use FileStream's SafeFileHandle property instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public virtual System.IntPtr Handle { get { throw null; } }
         public virtual bool IsAsync { get { throw null; } }
@@ -6411,6 +6422,12 @@ namespace System.Reflection
 }
 namespace System.Runtime
 {
+    public sealed class AmbiguousImplementationException : System.Exception
+    {
+        public AmbiguousImplementationException() { }
+        public AmbiguousImplementationException(string message) { }
+        public AmbiguousImplementationException(string message, System.Exception innerException) { }
+    }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly, Inherited=false)]
     public sealed partial class AssemblyTargetedPatchBandAttribute : System.Attribute
     {
@@ -6782,9 +6799,7 @@ namespace System.Runtime.CompilerServices
     }
     public static partial class RuntimeFeature
     {
-#if FEATURE_DEFAULT_INTERFACES
         public const string DefaultImplementationsOfInterfaces = "DefaultImplementationsOfInterfaces";
-#endif
         public const string PortablePdb = "PortablePdb";
         public static bool IsDynamicCodeCompiled { get { throw null; } }
         public static bool IsDynamicCodeSupported { get { throw null; } }
@@ -7096,6 +7111,12 @@ namespace System.Runtime.Remoting
 }
 namespace System.Runtime.Serialization
 {
+    public sealed partial class DeserializationBlockedException : System.Exception
+    {
+        public DeserializationBlockedException() { }
+        public DeserializationBlockedException(String message) { }
+        public DeserializationBlockedException(Exception innerException) { }
+    }
     public partial interface IDeserializationCallback
     {
         void OnDeserialization(object sender);
@@ -7674,6 +7695,12 @@ namespace System.Text
         public int Utf8SequenceLength { get { throw null; } }
         public int Value { get { throw null; } }
         public int CompareTo(System.Text.Rune other) { throw null; }
+        public static System.Buffers.OperationStatus DecodeFromUtf16(System.ReadOnlySpan<char> source, out System.Text.Rune result, out int charsConsumed) { throw null; }
+        public static System.Buffers.OperationStatus DecodeFromUtf8(System.ReadOnlySpan<byte> source, out System.Text.Rune result, out int bytesConsumed) { throw null; }
+        public static System.Buffers.OperationStatus DecodeLastFromUtf16(System.ReadOnlySpan<char> source, out System.Text.Rune result, out int charsConsumed) { throw null; }
+        public static System.Buffers.OperationStatus DecodeLastFromUtf8(System.ReadOnlySpan<byte> source, out System.Text.Rune value, out int bytesConsumed) { throw null; }
+        public int EncodeToUtf16(System.Span<char> destination) { throw null; }
+        public int EncodeToUtf8(System.Span<byte> destination) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Text.Rune other) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -7714,8 +7741,8 @@ namespace System.Text
         public static bool TryCreate(int value, out System.Text.Rune result) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static bool TryCreate(uint value, out System.Text.Rune result) { throw null; }
-        public bool TryEncode(System.Span<char> destination, out int charsWritten) { throw null; }
-        public bool TryEncodeToUtf8Bytes(System.Span<byte> destination, out int bytesWritten) { throw null; }
+        public bool TryEncodeToUtf16(System.Span<char> destination, out int charsWritten) { throw null; }
+        public bool TryEncodeToUtf8(System.Span<byte> destination, out int bytesWritten) { throw null; }
         public static bool TryGetRuneAt(string input, int index, out System.Text.Rune value) { throw null; }
     }
     public sealed partial class StringBuilder : System.Runtime.Serialization.ISerializable
@@ -7833,6 +7860,14 @@ namespace System.Text
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         void System.Collections.IEnumerator.Reset() { }
         void System.IDisposable.Dispose() { }
+    }
+}
+namespace System.Text.Unicode
+{
+    public static partial class Utf8
+    {
+        public static System.Buffers.OperationStatus FromUtf16(ReadOnlySpan<char> source, Span<byte> destination, out int charsRead, out int bytesWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
+        public static System.Buffers.OperationStatus ToUtf16(ReadOnlySpan<byte> source, Span<char> destination, out int bytesRead, out int charsWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
     }
 }
 namespace System.Threading

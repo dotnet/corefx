@@ -9,10 +9,9 @@
        These ref versions are pulled from https://github.com/dotnet/versions.
   -->
   <PropertyGroup>
-    <ProjectNTfsCurrentRef>5c4b04430e5fbcf4e380fb2c588dce595bae9895</ProjectNTfsCurrentRef>
-    <ProjectNTfsTestILCCurrentRef>5c4b04430e5fbcf4e380fb2c588dce595bae9895</ProjectNTfsTestILCCurrentRef>
+    <ProjectNTfsCurrentRef>1ec5055956dc17901d269b582a9af9fa82475387</ProjectNTfsCurrentRef>
+    <ProjectNTfsTestILCCurrentRef>1ec5055956dc17901d269b582a9af9fa82475387</ProjectNTfsTestILCCurrentRef>
     <SniCurrentRef>8bd1ec5fac9f0eec34ff6b34b1d878b4359e02dd</SniCurrentRef>
-    <BuildToolsCurrentRef>d8379e3f82c0b3b917d76828e064bd74ba718bfd</BuildToolsCurrentRef>
   </PropertyGroup>
 
   <!-- Product dependency versions. -->
@@ -23,15 +22,15 @@
 
   <!-- Tests/infrastructure dependency versions. -->
   <PropertyGroup>
-    <ProjectNTfsExpectedPrerelease>beta-27421-00</ProjectNTfsExpectedPrerelease>
-    <ProjectNTfsTestILCExpectedPrerelease>beta-27421-00</ProjectNTfsTestILCExpectedPrerelease>
-    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-27421-00</ProjectNTfsTestILCPackageVersion>
+    <ProjectNTfsExpectedPrerelease>beta-27527-00</ProjectNTfsExpectedPrerelease>
+    <ProjectNTfsTestILCExpectedPrerelease>beta-27527-00</ProjectNTfsTestILCExpectedPrerelease>
+    <ProjectNTfsTestILCPackageVersion>1.0.0-beta-27527-00</ProjectNTfsTestILCPackageVersion>
 
     <!-- CoreFX-built SNI identity package -->
     <RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeNativeSystemDataSqlClientSniPackageVersion>
 
     <!-- xunit test dependency version  -->
-    <MicrosoftNetTestSdkPackageVersion>16.0.0-preview-20181205-02</MicrosoftNetTestSdkPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>16.0.1</MicrosoftNETTestSdkPackageVersion>
     <XUnitPackageVersion>2.4.1-pre.build.4059</XUnitPackageVersion>
     <XUnitPerformancePackageVersion>1.0.0-beta-build0020</XUnitPerformancePackageVersion>
     <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
@@ -45,12 +44,6 @@
     <TestILCAmd64retPackageVersion>$(ProjectNTfsTestILCPackageVersion)</TestILCAmd64retPackageVersion>
     <TestILCArmretPackageVersion>$(ProjectNTfsTestILCPackageVersion)</TestILCArmretPackageVersion>
     <TestILCX86retPackageVersion>$(ProjectNTfsTestILCPackageVersion)</TestILCX86retPackageVersion>
-  </PropertyGroup>
-
-  <!-- Package versions used as toolsets -->
-  <PropertyGroup>
-    <BuildToolsPackage>Microsoft.DotNet.BuildTools</BuildToolsPackage>
-    <BuildToolsPackageVersion>3.0.0-preview1-03715-01</BuildToolsPackageVersion>
   </PropertyGroup>
 
   <!-- Publish symbol build task package -->
@@ -79,10 +72,6 @@
       <BuildInfoPath>$(BaseDotNetBuildInfo)projectn-tfs-testilc/$(DependencyBranch)</BuildInfoPath>
       <CurrentRef>$(ProjectNTfsTestILCCurrentRef)</CurrentRef>
     </RemoteDependencyBuildInfo>
-    <RemoteDependencyBuildInfo Include="BuildTools">
-      <BuildInfoPath>$(BaseDotNetBuildInfo)buildtools/$(DependencyBranch)</BuildInfoPath>
-      <CurrentRef>$(BuildToolsCurrentRef)</CurrentRef>
-    </RemoteDependencyBuildInfo>
 
     <DependencyBuildInfo Include="@(RemoteDependencyBuildInfo)">
       <RawVersionsBaseUrl>https://raw.githubusercontent.com/dotnet/versions</RawVersionsBaseUrl>
@@ -108,16 +97,7 @@
       <ElementName>RuntimeWinX64RuntimeNativeSystemDataSqlClientSniPackageVersion</ElementName>
       <PackageId>runtime.win-x64.runtime.native.System.Data.SqlClient.sni</PackageId>
     </XmlUpdateStep>
-    <XmlUpdateStep Include="BuildTools">
-      <Path>$(MSBuildThisFileFullPath)</Path>
-      <ElementName>BuildToolsPackageVersion</ElementName>
-      <PackageId>Microsoft.DotNet.BuildTools</PackageId>
-    </XmlUpdateStep>
   </ItemGroup>
-
-  <PropertyGroup>
-    <CompatibilityShimsPackageVersion>2.1.0</CompatibilityShimsPackageVersion>
-  </PropertyGroup>
 
   <!-- Set up dependencies on packages that aren't found in a BuildInfo. -->
   <ItemGroup>
@@ -140,10 +120,6 @@
     <XUnitDependency Include="xunit.runner.console"/>
     <StaticDependency Include="@(XUnitDependency)">
       <Version>$(XUnitPackageVersion)</Version>
-    </StaticDependency>
-
-    <StaticDependency Include="Microsoft.NET.Test.Sdk">
-      <Version>$(MicrosoftNetTestSdkPackageVersion)</Version>
     </StaticDependency>
 
     <PerformancePackDependency Include="xunit.performance.core" />

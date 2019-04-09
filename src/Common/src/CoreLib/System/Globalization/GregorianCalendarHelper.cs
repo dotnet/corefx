@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System;
 using System.Threading;
 
@@ -19,9 +20,9 @@ namespace System.Globalization
                                    // be affected by the DateTime.MinValue;
         internal int maxEraYear;   // Max year value in this era. (== the year length of the era + 1)
 
-        internal string eraName;    // The era name
-        internal string abbrevEraName;  // Abbreviated Era Name
-        internal string englishEraName; // English era name
+        internal string? eraName;    // The era name
+        internal string? abbrevEraName;  // Abbreviated Era Name
+        internal string? englishEraName; // English era name
 
         internal EraInfo(int era, int startYear, int startMonth, int startDay, int yearOffset, int minEraYear, int maxEraYear)
         {
@@ -111,7 +112,7 @@ namespace System.Globalization
         internal Calendar m_Cal;
 
         internal EraInfo[] m_EraInfo;
-        internal int[] m_eras = null;
+        internal int[]? m_eras = null;
 
 
         // Construct an instance of gregorian calendar.
@@ -182,8 +183,7 @@ namespace System.Globalization
                     {
                         throw new ArgumentOutOfRangeException(
                                     nameof(year),
-                                    string.Format(
-                                        CultureInfo.CurrentCulture,
+                                    SR.Format(
                                         SR.ArgumentOutOfRange_Range,
                                         m_EraInfo[i].minEraYear,
                                         m_EraInfo[i].maxEraYear));
@@ -324,8 +324,7 @@ namespace System.Globalization
                 {
                     throw new ArgumentOutOfRangeException(
                                 nameof(millisecond),
-                                string.Format(
-                                    CultureInfo.CurrentCulture,
+                                SR.Format(
                                     SR.ArgumentOutOfRange_Range,
                                     0,
                                     MillisPerSecond - 1));
@@ -342,7 +341,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             "time",
-                            string.Format(
+                            SR.Format(
                                 CultureInfo.InvariantCulture,
                                 SR.ArgumentOutOfRange_CalendarRange,
                                 m_Cal.MinSupportedDateTime,
@@ -373,8 +372,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             nameof(months),
-                            string.Format(
-                                CultureInfo.CurrentCulture,
+                            SR.Format(
                                 SR.ArgumentOutOfRange_Range,
                                 -120000,
                                 120000));
@@ -571,8 +569,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             nameof(day),
-                            string.Format(
-                                CultureInfo.CurrentCulture,
+                            SR.Format(
                                 SR.ArgumentOutOfRange_Range,
                                 1,
                                 GetDaysInMonth(year, month, era)));
@@ -610,8 +607,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             nameof(month),
-                            string.Format(
-                                CultureInfo.CurrentCulture,
+                            SR.Format(
                                 SR.ArgumentOutOfRange_Range,
                                 1,
                                 12));
@@ -665,9 +661,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(
                             nameof(year),
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                SR.ArgumentOutOfRange_Range, m_minYear, m_maxYear));
+                            SR.Format(SR.ArgumentOutOfRange_Range, m_minYear, m_maxYear));
             }
             // If the year value is above 100, just return the year value.  Don't have to do
             // the TwoDigitYearMax comparison.
@@ -675,4 +669,3 @@ namespace System.Globalization
         }
     }
 }
-
