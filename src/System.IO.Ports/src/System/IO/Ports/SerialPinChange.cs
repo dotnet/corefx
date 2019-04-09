@@ -6,10 +6,10 @@ namespace System.IO.Ports
 {
     public enum SerialPinChange
     {
-        CtsChanged = NativeMethods.EV_CTS,
-        DsrChanged = NativeMethods.EV_DSR,
-        CDChanged = NativeMethods.EV_RLSD,
-        Ring = NativeMethods.EV_RING,
-        Break = NativeMethods.EV_BREAK
+        CtsChanged = Interop.Kernel32.CommEvents.EV_CTS,
+        DsrChanged = Interop.Kernel32.CommEvents.EV_DSR,
+        CDChanged = Interop.Kernel32.CommEvents.EV_RLSD,
+        Ring = Interop.Kernel32.CommEvents.EV_RING,
+        Break = Interop.Kernel32.CommEvents.EV_BREAK
     }
 }

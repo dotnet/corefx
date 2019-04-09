@@ -6,10 +6,10 @@ namespace System.IO.Ports
 {
     public enum SerialError
     {
-        TXFull = NativeMethods.CE_TXFULL,
-        RXOver = NativeMethods.CE_RXOVER,
-        Overrun = NativeMethods.CE_OVERRUN,
-        RXParity = NativeMethods.CE_PARITY,
-        Frame = NativeMethods.CE_FRAME,
+        TXFull = Interop.Kernel32.CommErrors.CE_TXFULL,
+        RXOver = Interop.Kernel32.CommErrors.CE_RXOVER,
+        Overrun = Interop.Kernel32.CommErrors.CE_OVERRUN,
+        RXParity = Interop.Kernel32.CommErrors.CE_PARITY,
+        Frame = Interop.Kernel32.CommErrors.CE_FRAME,
     }
 }
