@@ -11,10 +11,10 @@ internal partial class Interop
     {
         internal static class PurgeFlags
         {
-            internal const int PURGE_TXABORT = 0x0001;  // Kill the pending/current writes to the comm port.
-            internal const int PURGE_RXABORT = 0x0002;  // Kill the pending/current reads to the comm port.
-            internal const int PURGE_TXCLEAR = 0x0004;  // Kill the transmit queue if there.
-            internal const int PURGE_RXCLEAR = 0x0008;  // Kill the typeahead buffer if there.
+            internal const uint PURGE_TXABORT = 0x0001;  // Kill the pending/current writes to the comm port.
+            internal const uint PURGE_RXABORT = 0x0002;  // Kill the pending/current reads to the comm port.
+            internal const uint PURGE_TXCLEAR = 0x0004;  // Kill the transmit queue if there.
+            internal const uint PURGE_RXCLEAR = 0x0008;  // Kill the typeahead buffer if there.
         }
 
         [DllImport(Libraries.Kernel32, SetLastError=true, CharSet=CharSet.Auto)]
