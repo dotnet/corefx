@@ -29,6 +29,8 @@ namespace System.Net
 
             try
             {
+                int osStatus;
+
                 unsafe
                 {
                     _readCallback = ReadFromConnection;
@@ -37,7 +39,7 @@ namespace System.Net
 
                 _sslContext = CreateSslContext(credential, sslAuthenticationOptions.IsServer);
 
-                int osStatus = Interop.AppleCrypto.SslSetIoCallbacks(
+                osStatus = Interop.AppleCrypto.SslSetIoCallbacks(
                     _sslContext,
                     _readCallback,
                     _writeCallback);
@@ -54,7 +56,7 @@ namespace System.Net
                     {
                         fixed (uint* cipherSuites = tlsCipherSuites)
                         {
-                            int osStatus = Interop.AppleCrypto.SslSetEnabledCipherSuites(
+                            osStatus = Interop.AppleCrypto.SslSetEnabledCipherSuites(
                                 _sslContext,
                                 cipherSuites,
                                 tlsCipherSuites.Length);
