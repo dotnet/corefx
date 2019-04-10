@@ -363,6 +363,7 @@ const char* CryptoNative_GetOpenSslCipherSuiteName(SSL* ssl, int32_t cipherSuite
     const SSL_CIPHER* cipher;
     const char* ret;
 
+    *isTls12OrLower = 0;
     cs[0] = (cipherSuite >> 8) & 0xFF;
     cs[1] = cipherSuite & 0xFF;
     cipher = SSL_CIPHER_find(ssl, cs);
@@ -382,6 +383,12 @@ const char* CryptoNative_GetOpenSslCipherSuiteName(SSL* ssl, int32_t cipherSuite
     assert(version != NULL);
     assert(strcmp(version, "unknown") != 0);
 
+    // same rules apply for DTLS as for TLS so just shortcut
+    if (version[0] == 'D')
+    {
+        version++;
+    }
+
     // check if tls1.2 or lower
     // check most common case first
     if (strncmp("TLSv1", version, 5) == 0)
@@ -397,7 +404,6 @@ const char* CryptoNative_GetOpenSslCipherSuiteName(SSL* ssl, int32_t cipherSuite
         // if we don't know it assume it is new
         // worst case scenario OpenSSL will ignore it
         *isTls12OrLower =
-            strncmp("DTLSv", version, 5) == 0 ||
             strncmp("SSLv", version, 4) == 0;
     }
 
@@ -406,7 +412,7 @@ const char* CryptoNative_GetOpenSslCipherSuiteName(SSL* ssl, int32_t cipherSuite
 
 int32_t CryptoNative_Tls13Supported()
 {
-#ifdef HAVE_OPENSSL_SET_CIPHERSUITES
+#if HAVE_OPENSSL_SET_CIPHERSUITES
     return API_EXISTS(SSL_CTX_set_ciphersuites);
 #else
     return false;

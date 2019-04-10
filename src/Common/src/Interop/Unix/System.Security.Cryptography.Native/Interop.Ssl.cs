@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Net.Security;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
@@ -138,7 +139,7 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_GetOpenSslCipherSuiteName")]
         private static extern IntPtr GetOpenSslCipherSuiteName(SafeSslHandle ssl, int cipherSuite, out int isTls12OrLower);
 
-        internal static string GetOpenSslCipherSuiteName(SafeSslHandle ssl, ushort cipherSuite, out bool isTls12OrLower)
+        internal static string GetOpenSslCipherSuiteName(SafeSslHandle ssl, TlsCipherSuite cipherSuite, out bool isTls12OrLower)
         {
             string ret = Marshal.PtrToStringAnsi(GetOpenSslCipherSuiteName(ssl, (int)cipherSuite, out int isTls12OrLowerInt));
             isTls12OrLower = isTls12OrLowerInt != 0;

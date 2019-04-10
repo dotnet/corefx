@@ -12,10 +12,6 @@ check_function_exists(
 	SSL_get0_alpn_selected
 	HAVE_OPENSSL_ALPN)
 
-check_function_exists(
-	SSL_CTX_set_ciphersuites
-	HAVE_OPENSSL_SET_CIPHERSUITES)
-
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/pal_crypto_config.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/pal_crypto_config.h)

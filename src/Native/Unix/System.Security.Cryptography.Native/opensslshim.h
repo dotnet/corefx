@@ -40,6 +40,12 @@
 #define OPENSSL_VERSION_1_1_0_RTM 0x10100000L
 #define OPENSSL_VERSION_1_0_2_RTM 0x10002000L
 
+#if OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_1_1_1_RTM
+#define HAVE_OPENSSL_SET_CIPHERSUITES 1
+#else
+#define HAVE_OPENSSL_SET_CIPHERSUITES 0
+#endif
+
 #if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0_RTM
 
 // Remove problematic #defines
@@ -78,15 +84,14 @@ int EC_POINT_get_affine_coordinates_GF2m(const EC_GROUP* group, const EC_POINT* 
 int EC_POINT_set_affine_coordinates_GF2m(
     const EC_GROUP* group, EC_POINT* p, const BIGNUM* x, const BIGNUM* y, BN_CTX* ctx);
 #endif
-#ifndef HAVE_OPENSSL_SET_CIPHERSUITES
-#define HAVE_OPENSSL_SET_CIPHERSUITES 0
-#endif
+
 #if !HAVE_OPENSSL_SET_CIPHERSUITES
 #undef HAVE_OPENSSL_SET_CIPHERSUITES
 #define HAVE_OPENSSL_SET_CIPHERSUITES 1
 int SSL_CTX_set_ciphersuites(SSL_CTX *ctx, const char *str);
 const SSL_CIPHER* SSL_CIPHER_find(SSL *ssl, const unsigned char *ptr);
 #endif
+
 #if OPENSSL_VERSION_NUMBER >= OPENSSL_VERSION_1_1_0_RTM
 typedef struct stack_st _STACK;
 int CRYPTO_add_lock(int* pointer, int amount, int type, const char* file, int line);

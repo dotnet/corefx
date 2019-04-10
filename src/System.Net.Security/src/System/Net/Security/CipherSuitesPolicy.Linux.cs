@@ -13,7 +13,7 @@ using OpenSsl = Interop.OpenSsl;
 
 namespace System.Net.Security
 {
-    public sealed class CipherSuitesPolicy
+    public sealed partial class CipherSuitesPolicy
     {
         private static readonly byte[] RequireEncryptionDefault =
             Encoding.ASCII.GetBytes("DEFAULT\0");
@@ -28,8 +28,9 @@ namespace System.Net.Security
         private byte[] _tls13CipherSuites;
         private List<TlsCipherSuite> _tlsCipherSuites = new List<TlsCipherSuite>();
 
-        [CLSCompliant(false)]
-        public CipherSuitesPolicy(IEnumerable<TlsCipherSuite> allowedCipherSuites)
+        private IEnumerable<TlsCipherSuite> GetCipherSuites() => _tlsCipherSuites;
+
+        private void Initialize(IEnumerable<TlsCipherSuite> allowedCipherSuites)
         {
             if (!Interop.Ssl.Tls13Supported)
             {
@@ -55,7 +56,7 @@ namespace System.Net.Security
                     {
                         foreach (TlsCipherSuite cs in allowedCipherSuites)
                         {
-                            string name = TlsCipherSuiteData.GetOpenSslName(
+                            string name = Interop.Ssl.GetOpenSslCipherSuiteName(
                                 ssl,
                                 cs,
                                 out bool isTls12OrLower);
@@ -74,20 +75,6 @@ namespace System.Net.Security
                         _cipherSuites = cipherSuites.GetOpenSslString();
                         _tls13CipherSuites = tls13CipherSuites.GetOpenSslString();
                     }
-                }
-            }
-        }
-
-        [CLSCompliant(false)]
-        public IEnumerable<TlsCipherSuite> AllowedCipherSuites
-        {
-            get
-            {
-                // This method is only useful for diagnostic purposes so perf is not important
-                // We do not want users to be able to cast result to something they can modify
-                foreach (TlsCipherSuite cs in _tlsCipherSuites)
-                {
-                    yield return cs;
                 }
             }
         }

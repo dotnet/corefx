@@ -6,11 +6,9 @@ using System.Collections.Generic;
 
 namespace System.Net.Security
 {
-    public sealed class CipherSuitesPolicy
+    public sealed partial class CipherSuitesPolicy
     {
-        [CLSCompliant(false)]
-        public CipherSuitesPolicy(IEnumerable<TlsCipherSuite> allowedCipherSuites) => throw new PlatformNotSupportedException(SR.net_ssl_ciphersuites_policy_not_supported);
-        [CLSCompliant(false)]
-        public IEnumerable<TlsCipherSuite> AllowedCipherSuites => throw new PlatformNotSupportedException(SR.net_ssl_ciphersuites_policy_not_supported);
+        private void Initialize(IEnumerable<TlsCipherSuite> allowedCipherSuites) => throw new PlatformNotSupportedException(SR.net_ssl_ciphersuites_policy_not_supported);
+        private IEnumerable<TlsCipherSuite> GetCipherSuites() => null;
     }
 }
